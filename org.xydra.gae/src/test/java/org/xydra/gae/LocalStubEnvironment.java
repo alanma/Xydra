@@ -48,7 +48,6 @@ public class LocalStubEnvironment implements ApiProxy.Environment {
 	 * @see com.google.apphosting.api.ApiProxy.Environment#getRequestNamespace()
 	 */
 	@Override
-    @SuppressWarnings("deprecation")
 	@Deprecated
 	public String getRequestNamespace() {
 		return "";

@@ -26,9 +26,9 @@ import org.xydra.core.serialize.xml.XmlOut;
 import org.xydra.core.serialize.xml.XmlParser;
 import org.xydra.index.query.Pair;
 import org.xydra.store.impl.gae.AsyncDatastore;
+import org.xydra.store.impl.gae.AsyncDatastore.AsyncEntity;
 import org.xydra.store.impl.gae.GaeAssert;
 import org.xydra.store.impl.gae.GaeUtils2;
-import org.xydra.store.impl.gae.AsyncDatastore.AsyncEntity;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
@@ -550,7 +550,7 @@ public class GaeEvents {
 				events[i] = new GaeFieldEvent(actor, target, value, type.getChangeType(), modelRev,
 				        objectRev, fieldRev, inTrans, isImplied);
 			}
-				
+			
 			}
 		}
 		

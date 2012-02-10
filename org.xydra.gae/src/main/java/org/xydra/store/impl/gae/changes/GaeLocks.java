@@ -30,7 +30,7 @@ import org.xydra.store.impl.gae.GaeOperation;
  */
 public class GaeLocks implements Iterable<XAddress> {
 	
-	private static final long serialVersionUID = 4334940263327007176L;
+	public static final long serialVersionUID = 4334940263327007176L;
 	
 	private final Set<XAddress> locks;
 	

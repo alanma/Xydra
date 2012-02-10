@@ -9,7 +9,6 @@
 		<version>2011.12.05</version>
 	</parent>
 
-	<groupId>org.xydra</groupId>
 	<artifactId>gae</artifactId>
 	<version>${xydra.version}</version>
 	<!-- /!\ Needs to be 'jar' for 'mvn deploy' but 'war' for 'gae:deploy' -->

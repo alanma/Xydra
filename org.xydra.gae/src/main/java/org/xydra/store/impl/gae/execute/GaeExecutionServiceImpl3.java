@@ -370,6 +370,9 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 		
 		List<XAtomicEvent> events = DeltaUtils.createEvents(this.modelAddr, c, actorId, change.rev);
 		log.debug("[r" + change.rev + "] DeltaUtils generated " + events.size() + " events");
+		if(events.size() > 1000) {
+			log.warn("Created over 1000 events");
+		}
 		assert events != null;
 		try {
 			if(events.isEmpty()) {

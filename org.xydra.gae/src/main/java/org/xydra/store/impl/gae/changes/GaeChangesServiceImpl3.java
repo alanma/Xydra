@@ -98,7 +98,7 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 	
 	private static final Logger log = LoggerFactory.getLogger(GaeChangesServiceImpl3.class);
 	
-	private static final long serialVersionUID = -2080744796962188941L;
+	public static final long serialVersionUID = -2080744796962188941L;
 	
 	// Implementation.
 	

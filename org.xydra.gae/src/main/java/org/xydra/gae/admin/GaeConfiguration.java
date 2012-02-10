@@ -31,18 +31,21 @@ import com.google.appengine.api.datastore.KeyFactory;
  */
 public class GaeConfiguration {
 	
-	static {
-		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		KEY_CONF = KeyFactory.createKey("XCONF", "GaeConfig");
-	}
-	
 	private static final Logger log = LoggerFactory.getLogger(GaeConfiguration.class);
 	
 	public static final String PROP_VALID_UTC = "validUntilUTC";
 	
-	private static final long serialVersionUID = 1L;
+	public static final long serialVersionUID = 1L;
 	
-	private static final Key KEY_CONF;
+	private static final Key getConfKey() {
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		if(KEY_CFG == null) {
+			KEY_CFG = KeyFactory.createKey("XCONF", "GaeConfig");
+		}
+		return KEY_CFG;
+	}
+	
+	private static Key KEY_CFG;
 	
 	/** Internal state */
 	private Map<String,String> map = new HashMap<String,String>();
@@ -99,7 +102,7 @@ public class GaeConfiguration {
 	}
 	
 	private Entity toEntity() {
-		Entity entity = new Entity(KEY_CONF);
+		Entity entity = new Entity(getConfKey());
 		for(String key : this.map.keySet()) {
 			String value = this.map.get(key);
 			entity.setUnindexedProperty(key, value);
@@ -113,7 +116,7 @@ public class GaeConfiguration {
 	 */
 	public static GaeConfiguration load() {
 		log.info("Load conf from data store. It might be out of date.");
-		Entity entity = SyncDatastore.getEntity(KEY_CONF);
+		Entity entity = SyncDatastore.getEntity(getConfKey());
 		if(entity == null) {
 			log.warn("No gaeConfiguration in datastore.");
 			return null;

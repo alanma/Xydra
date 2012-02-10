@@ -37,6 +37,8 @@
  extension-element-prefixes="exsl"
  xmlns="http://www.w3.org/1999/xhtml"
  exclude-result-prefixes="xsl wadl xs html ns"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.w3.org/1999/XSL/Transform http://www.w3.org/2007/schema-for-xslt20.xsd"
 >
 
     <xsl:output 

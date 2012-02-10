@@ -78,7 +78,10 @@ public class GaeTestfixer {
 			
 			/* second check: can we load this class: 'LocalServiceTestHelper' ? */
 			try {
-				Class.forName("com.google.appengine.tools.development.testing.LocalServiceTestHelper");
+				ClassLoader cl = Thread.currentThread().getContextClassLoader();
+				Class.forName(
+				        "com.google.appengine.tools.development.testing.LocalServiceTestHelper",
+				        false, cl);
 				log.debug("We can load the test classes.");
 			} catch(ClassNotFoundException e) {
 				/* ah, we are in production */
