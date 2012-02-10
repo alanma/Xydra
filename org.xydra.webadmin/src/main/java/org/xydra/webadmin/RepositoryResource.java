@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -12,13 +14,17 @@ import java.util.zip.ZipOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
+import org.xydra.base.change.XCommand;
 import org.xydra.base.rmof.XReadableModel;
+import org.xydra.base.rmof.XWritableModel;
 import org.xydra.core.util.Clock;
 import org.xydra.core.util.ConfigUtils;
 import org.xydra.gae.UniversalUrlFetch;
+import org.xydra.index.impl.IteratorUtils;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.restless.Restless;
@@ -29,6 +35,7 @@ import org.xydra.restless.utils.SharedHtmlUtils.METHOD;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.gae.GaeTestfixer;
 import org.xydra.store.impl.gae.UniCache.StorageOptions;
+import org.xydra.store.rmof.impl.delegate.WritableModelOnPersistence;
 import org.xydra.webadmin.ModelResource.MStyle;
 import org.xydra.webadmin.ModelResource.SetStateResult;
 
@@ -41,39 +48,53 @@ import org.xydra.webadmin.ModelResource.SetStateResult;
 public class RepositoryResource {
 	
 	public static final Logger log = LoggerFactory.getLogger(RepositoryResource.class);
+	private static XID actorId = XX.toId("_RepositoryResource");
 	
 	public static void restless(Restless restless, String prefix) {
 		
+		restless.addMethod(prefix + "/{repoId}", "GET", RepositoryResource.class,
+		        "deleteAllModels", true,
+		        
+		        new RestlessParameter("repoId"),
+		        
+		        new RestlessParameter("command"),
+		        
+		        new RestlessParameter("sure", "no"));
+		
 		restless.addMethod(prefix + "/{repoId}/", "GET", RepositoryResource.class, "index", true,
 		        new RestlessParameter("repoId"),
-
+		        
 		        new RestlessParameter("style", RStyle.html.name()),
-
+		        
 		        new RestlessParameter("useTaskQueue", "false"),
-
+		        
 		        new RestlessParameter("cacheInInstance", "true"),
-
+		        
 		        new RestlessParameter("cacheInMemcache", "false"),
-
+		        
 		        new RestlessParameter("cacheInDatastore", "false")
-
+		
 		);
 		
 		restless.addMethod(prefix + "/{repoId}/", "GET", RepositoryResource.class, "foreach", true,
-
+		
 		new RestlessParameter("repoId"),
-
+		
 		new RestlessParameter("foreachmodel"),
-
+		
 		new RestlessParameter("username", null),
-
+		
 		new RestlessParameter("password", "")
-
+		
 		);
 		// cacheInInstance=true&cacheInMemcache=false&cacheInDatastore=true
 		
 		restless.addMethod(prefix + "/{repoId}/", "POST", RepositoryResource.class, "update", true,
-		        new RestlessParameter("repoId"));
+		        new RestlessParameter("repoId"),
+		        
+		        new RestlessParameter("replace", "false")
+		
+		);
 		
 	}
 	
@@ -191,7 +212,7 @@ public class RepositoryResource {
 			// style HTML
 			Writer w = Utils.writeHeader(res, "Repo", repoAddress);
 			w.write(
-
+			
 			HtmlUtils.link(link(repoId) + "?style=" + RStyle.htmlrevs.name(), "With Revs")
 			        
 			        + " | "
@@ -201,12 +222,18 @@ public class RepositoryResource {
 			        + " | "
 			        + HtmlUtils.link(link(repoId) + "?style=" + RStyle.xmldump.name(),
 			                "Dump as xml")
-
+			        
 			        + "<br/>\n");
 			
 			// upload form
+			w.write(HtmlUtils.form(METHOD.POST, link(repoId) + "?replace=true")
+			        .withInputFile("backupfile")
+			        .withInputSubmit("Upload and force set as current state").toString());
 			w.write(HtmlUtils.form(METHOD.POST, link(repoId)).withInputFile("backupfile")
-			        .withInputSubmit("Upload and set as current state").toString());
+			        .withInputSubmit("Upload and update to this as current state").toString());
+			
+			// killer
+			w.write(HtmlUtils.link(link(repoId) + "?command=deleteAllModels", "Delete all models"));
 			
 			List<XID> modelIdList = new ArrayList<XID>(p.getManagedModelIds());
 			Collections.sort(modelIdList);
@@ -231,21 +258,74 @@ public class RepositoryResource {
 		log.info(c.stop("index").getStats());
 	}
 	
-	public static void update(String repoIdStr, HttpServletRequest req, HttpServletResponse res)
-	        throws IOException {
+	public static void deleteAllModels(String repoIdStr, String commandStr, String sure,
+	        HttpServletRequest req, HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		
 		Clock c = new Clock().start();
+		Writer w = HtmlUtils.startHtmlPage(res, "Xydra Webadmin :: Delete all models",
+		        new HeadLinkStyle("/s/xyadmin.css"));
+		w.write("Found sure='" + sure + "'");
+		w.flush();
+		
+		if(sure != null && sure.equalsIgnoreCase("yes")) {
+			XID repoId = XX.toId(repoIdStr);
+			XydraPersistence p = Utils.getPersistence(repoId);
+			for(XID modelId : p.getManagedModelIds()) {
+				w.write("Deleting model " + modelId);
+				w.flush();
+				XWritableModel model = new WritableModelOnPersistence(p, actorId, modelId);
+				Collection<XID> objectIds = IteratorUtils.addAll(model.iterator(),
+				        new HashSet<XID>());
+				for(XID objectId : objectIds) {
+					XCommand command = X.getCommandFactory().createForcedRemoveObjectCommand(
+					        repoId, modelId, objectId);
+					long l = p.executeCommand(actorId, command);
+					w.write(" ... result = " + l + "<br/>\n");
+				}
+				w.flush();
+			}
+			w.write("Done<br/>\n");
+		} else {
+			w.write("Add ?sure=yes to url if you really mean it<br/>\n");
+		}
+		w.write("Stats: " + c.getStats() + "<br/>\n");
+		w.flush();
+		w.close();
+	}
+	
+	/**
+	 * @param repoIdStr
+	 * @param req
+	 * @param res
+	 * @param replaceModelsStr if "true", existing models are completely
+	 *            replaced, NON-transactional. Scales well for huge models.
+	 * @throws IOException
+	 */
+	public static void update(String repoIdStr, String replaceModelsStr, HttpServletRequest req,
+	        HttpServletResponse res) throws IOException {
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		
 		XID repoId = XX.toId(repoIdStr);
+		boolean replaceModels = replaceModelsStr != null
+		        && replaceModelsStr.equalsIgnoreCase("true");
 		
 		Writer w = HtmlUtils.startHtmlPage(res, "Xydra Webadmin :: Restore Repository",
 		        new HeadLinkStyle("/s/xyadmin.css"));
-		w.write("Processing upload...</br>");
+		w.write("Processing upload... replace=" + replaceModelsStr + "</br>");
 		w.flush();
 		
 		InputStream fis = Utils.getMultiPartContentFileAsInputStream(w, req);
 		assert fis != null;
 		
+		updateFromZippedInputStream(fis, repoId, w, replaceModels);
+		
+		w.close();
+	}
+	
+	public static void updateFromZippedInputStream(InputStream fis, XID repoId, Writer w,
+	        boolean replaceModels) throws IOException {
+		Clock c = new Clock().start();
 		ZipInputStream zis = new ZipInputStream(fis);
 		w.write("... open zip stream ...</br>");
 		w.flush();
@@ -260,7 +340,12 @@ public class RepositoryResource {
 			        + "] ...</br>");
 			w.flush();
 			
-			SetStateResult result = ModelResource.setStateFrom(repoId, model, false);
+			SetStateResult result;
+			if(replaceModels) {
+				result = ModelResource.setStateTo(repoId, model);
+			} else {
+				result = ModelResource.updateStateTo(repoId, model, false);
+			}
 			log.info("" + result);
 			c.stopAndStart("applied-" + model.getID());
 			modelExisted += result.modelExisted ? 1 : 0;
@@ -276,9 +361,12 @@ public class RepositoryResource {
 		log.debug("Stats: " + stats + " " + c.getStats());
 		w.write("... Done</br>");
 		w.flush();
-		w.close();
 	}
 	
+	/**
+	 * @param repoId
+	 * @return relative admin link with no slash at the end
+	 */
 	public static String link(XID repoId) {
 		return "/admin" + WebadminResource.XYADMIN + "/" + repoId;
 	}

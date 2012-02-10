@@ -8,8 +8,11 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
@@ -23,10 +26,12 @@ import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XRepositoryCommand;
+import org.xydra.base.change.XTransaction;
 import org.xydra.base.change.impl.memory.MemoryRepositoryCommand;
 import org.xydra.base.minio.MiniStreamWriter;
 import org.xydra.base.minio.MiniWriter;
 import org.xydra.base.rmof.XReadableModel;
+import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.core.XFile;
@@ -40,6 +45,7 @@ import org.xydra.core.serialize.json.JsonSerializer;
 import org.xydra.core.serialize.xml.XmlParser;
 import org.xydra.core.serialize.xml.XmlSerializer;
 import org.xydra.core.util.Clock;
+import org.xydra.index.impl.IteratorUtils;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.restless.Restless;
@@ -53,6 +59,7 @@ import org.xydra.store.ModelRevision;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.gae.GaeTestfixer;
 import org.xydra.store.impl.gae.changes.GaeChangesServiceImpl3;
+import org.xydra.store.rmof.impl.delegate.WritableRepositoryOnPersistence;
 
 
 public class ModelResource {
@@ -72,26 +79,26 @@ public class ModelResource {
 		
 		restless.addMethod(prefix + "/{repoId}/{modelId}/", "GET", ModelResource.class, "index",
 		        true,
-
+		        
 		        new RestlessParameter("repoId"), new RestlessParameter("modelId"),
 		        new RestlessParameter("style", MStyle.link.name()), new RestlessParameter(
 		                "download", "false")
-
+		
 		);
 		
 		restless.addMethod(prefix + "/{repoId}/{modelId}/command", "POST", ModelResource.class,
 		        "command", true,
-
+		        
 		        new RestlessParameter("repoId"), new RestlessParameter("modelId"),
 		        new RestlessParameter("cmd")
-
+		
 		);
 		
 		restless.addMethod(prefix + "/{repoId}/{modelId}/", "POST", ModelResource.class, "update",
 		        true,
-
+		        
 		        new RestlessParameter("repoId"), new RestlessParameter("modelId")
-
+		
 		);
 		
 	}
@@ -114,7 +121,7 @@ public class ModelResource {
 			 * SELECT __key__ FROM XCHANGE WHERE __key__ <
 			 * KEY('XCHANGE','0/gae-data/'+ modelId ...)
 			 */
-
+			
 			// FIXME delete models completely!
 		}
 	}
@@ -219,7 +226,7 @@ public class ModelResource {
 			        + "] ...</br>");
 			w.flush();
 			
-			SetStateResult result = ModelResource.setStateFrom(repoId, model, false);
+			SetStateResult result = ModelResource.updateStateTo(repoId, model, false);
 			log.info("" + result);
 			c.stopAndStart("applied-" + model.getID());
 			w.write("... applied to server repository " + result + ".</br>");
@@ -301,12 +308,12 @@ public class ModelResource {
 	
 	public static void render(Writer w, XAddress modelAddress, MStyle style) throws IOException {
 		w.write(
-
+		
 		HtmlUtils.link("/admin" + WebadminResource.XYADMIN + "/"
 		        + modelAddress.getRepository().toString())
 		        + " | "
 		        +
-
+		        
 		        HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.html,
 		                modelAddress.toString())
 		        
@@ -333,7 +340,7 @@ public class ModelResource {
 		        
 		        + HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.json + "&download=true",
 		                ".zip")
-
+		        
 		        + "<br/>\n");
 		
 		if(style == MStyle.htmlevents || style == MStyle.htmlrev || style == MStyle.html) {
@@ -384,7 +391,7 @@ public class ModelResource {
 	 *            even if the same revNr is found
 	 * @return some statistical information
 	 */
-	public static SetStateResult setStateFrom(XID repoId, XReadableModel model,
+	public static SetStateResult updateStateTo(XID repoId, XReadableModel model,
 	        boolean overwriteIfSameRevPresent) {
 		log.debug("Set state from " + model.getAddress() + " to " + repoId);
 		XydraPersistence p = Utils.getPersistence(repoId);
@@ -443,6 +450,44 @@ public class ModelResource {
 		return result;
 	}
 	
+	public static SetStateResult setStateTo(XID repoId, XReadableModel model) {
+		log.debug("Set state non-transactionally from " + model.getAddress() + " to " + repoId);
+		XydraPersistence p = Utils.getPersistence(repoId);
+		SetStateResult result = new SetStateResult();
+		
+		XID actor = XX.toId("ModelResource");
+		XID modelId = model.getID();
+		XAddress modelAddress = XX.resolveModel(repoId, modelId);
+		
+		WritableRepositoryOnPersistence repo = new WritableRepositoryOnPersistence(p, actor);
+		if(repo.hasModel(modelId)) {
+			// avoid creating too large events
+			XWritableModel oldModel = repo.getModel(modelId);
+			Collection<XID> oldObjectsIds = IteratorUtils.addAll(oldModel.iterator(),
+			        new HashSet<XID>());
+			for(XID oldObjectID : oldObjectsIds) {
+				oldModel.removeObject(oldObjectID);
+			}
+			repo.removeModel(modelId);
+		}
+		repo.createModel(modelId);
+		for(XID o : model) {
+			XReadableObject xo = model.getObject(o);
+			
+			XTransactionBuilder tb = new XTransactionBuilder(modelAddress);
+			tb.addObject(modelAddress, xo);
+			XTransaction txn = tb.build();
+			long cmdResult = p.executeCommand(actor, txn);
+			if(cmdResult == XCommand.FAILED) {
+				throw new RuntimeException("error restoring model \"" + modelAddress
+				        + "\", object-transaction failed");
+			} else {
+				result.changes = true;
+			}
+		}
+		return result;
+	}
+	
 	static XReadableModel readZippedModel(ZipInputStream zis) throws IOException {
 		ZipEntry ze = zis.getNextEntry();
 		if(ze == null) {
@@ -451,22 +496,26 @@ public class ModelResource {
 		
 		// ignore the directory part of the name
 		String name = new File(ze.getName()).getName();
-		assert name.endsWith(XFile.MODEL_SUFFIX);
+		assert name.endsWith(XFile.MODEL_SUFFIX) : "name should end with " + XFile.MODEL_SUFFIX
+		        + " but is " + name;
 		
 		// Read the file into a string.
 		Reader r = new InputStreamReader(zis, UTF8);
-		String xml = IOUtils.toString(r);
-		
-		// Parse the model.
-		XModel model;
 		try {
-			XydraElement e = new XmlParser().parse(xml);
-			model = SerializedModel.toModel(WebadminResource.ACTOR, null, e);
-		} catch(Exception e) {
-			throw new RuntimeException("error parsing model file \"" + name + "\"", e);
+			String xml = IOUtils.toString(r);
+			// Parse the model.
+			XModel model;
+			try {
+				XydraElement e = new XmlParser().parse(xml);
+				model = SerializedModel.toModel(WebadminResource.ACTOR, null, e);
+				return model;
+			} catch(Exception e) {
+				throw new RuntimeException("error parsing model file \"" + name + "\"", e);
+			}
+		} catch(ZipException e) {
+			throw new RuntimeException("Error uncompressing", e);
 		}
 		
-		return model;
 	}
 	
 }

@@ -247,7 +247,6 @@ public class CsvValueReader {
 	 * 
 	 * @return the parsed strings
 	 */
-	@SuppressWarnings("null")
 	public static List<String> toStringList(String in) {
 		List<String> result = new LinkedList<String>();
 		if(in == null) {
