@@ -2,6 +2,8 @@ package org.xydra.valueindex;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.xydra.base.X;
@@ -30,10 +32,6 @@ public class ValueIndexEntryParsingTest {
 	
 	@Test
 	public void testParsingEntries() {
-		/*
-		 * The model was already indexed during the setup() method
-		 */
-
 		for(XID objectId : this.model) {
 			XObject object = this.model.getObject(objectId);
 			
@@ -41,16 +39,52 @@ public class ValueIndexEntryParsingTest {
 				XField field = object.getField(fieldId);
 				XValue value = field.getValue();
 				
-				ValueIndexEntry entry = new ValueIndexEntry(object.getAddress(), value, 42);
+				double d = Math.random() * 100;
+				int i = (int)d;
 				
-				String s = entry.serializeAsString(false);
+				ValueIndexEntry entry = new ValueIndexEntry(object.getAddress(), value, i);
 				
-				ValueIndexEntry parsedEntry = ValueIndexEntry.fromString(s);
+				String s = ValueIndexEntryUtils.serializeAsString(entry);
+				
+				ValueIndexEntry parsedEntry = ValueIndexEntryUtils.fromString(s);
 				
 				assertEquals(entry.getAddress(), parsedEntry.getAddress());
 				assertEquals(entry.getValue(), parsedEntry.getValue());
 				assertEquals(entry.getCounter(), parsedEntry.getCounter());
 			}
+		}
+	}
+	
+	@Test
+	public void testParstingEntryArrays() {
+		ArrayList<ValueIndexEntry> list = new ArrayList<ValueIndexEntry>();
+		
+		for(XID objectId : this.model) {
+			XObject object = this.model.getObject(objectId);
+			
+			for(XID fieldId : object) {
+				XField field = object.getField(fieldId);
+				XValue value = field.getValue();
+				
+				double d = Math.random() * 100;
+				int i = (int)d;
+				ValueIndexEntry entry = new ValueIndexEntry(object.getAddress(), value, i);
+				
+				list.add(entry);
+			}
+		}
+		
+		ValueIndexEntry[] array = new ValueIndexEntry[list.size()];
+		String asString = ValueIndexEntryUtils.serializeAsString(list.toArray(array));
+		
+		ValueIndexEntry[] parsedArray = ValueIndexEntryUtils.getArrayFromString(asString);
+		
+		assertEquals(array.length, parsedArray.length);
+		
+		for(int i = 0; i < array.length; i++) {
+			assertEquals(array[i].getAddress(), parsedArray[i].getAddress());
+			assertEquals(array[i].getValue(), parsedArray[i].getValue());
+			assertEquals(array[i].getCounter(), parsedArray[i].getCounter());
 		}
 	}
 }
