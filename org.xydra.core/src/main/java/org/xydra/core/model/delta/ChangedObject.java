@@ -82,7 +82,8 @@ public class ChangedObject implements XWritableObject {
 		
 		for(XID id : this.added.keySet()) {
 			assert !this.removed.contains(id) && !this.changed.containsKey(id);
-			assert !this.base.hasField(id);
+			assert !this.base.hasField(id) : "base " + this.base.getAddress()
+			        + " cannot have field " + id;
 			assert id.equals(this.added.get(id).getID());
 		}
 		
@@ -193,7 +194,7 @@ public class ChangedObject implements XWritableObject {
 	}
 	
 	@Override
-    public XWritableField createField(XID fieldId) {
+	public XWritableField createField(XID fieldId) {
 		
 		XWritableField oldField = getField(fieldId);
 		if(oldField != null) {
@@ -231,7 +232,7 @@ public class ChangedObject implements XWritableObject {
 	}
 	
 	@Override
-    public XAddress getAddress() {
+	public XAddress getAddress() {
 		return this.base.getAddress();
 	}
 	
@@ -247,9 +248,10 @@ public class ChangedObject implements XWritableObject {
 	}
 	
 	@Override
-    public XWritableField getField(XID fieldId) {
+	public XWritableField getField(XID fieldId) {
 		assert fieldId != null;
 		assert this.base != null;
+		assert checkSetInvariants();
 		
 		SimpleField newField = this.added.get(fieldId);
 		if(newField != null) {
@@ -279,7 +281,7 @@ public class ChangedObject implements XWritableObject {
 	}
 	
 	@Override
-    public XID getID() {
+	public XID getID() {
 		return this.base.getID();
 	}
 	
@@ -317,18 +319,18 @@ public class ChangedObject implements XWritableObject {
 	 * @return the revision number of the original {@link XReadableObject}
 	 */
 	@Override
-    public long getRevisionNumber() {
+	public long getRevisionNumber() {
 		return this.base.getRevisionNumber();
 	}
 	
 	@Override
-    public boolean hasField(XID fieldId) {
+	public boolean hasField(XID fieldId) {
 		return this.added.containsKey(fieldId)
 		        || (!this.removed.contains(fieldId) && this.base.hasField(fieldId));
 	}
 	
 	@Override
-    public boolean isEmpty() {
+	public boolean isEmpty() {
 		
 		if(!this.added.isEmpty()) {
 			return false;
@@ -352,7 +354,7 @@ public class ChangedObject implements XWritableObject {
 	}
 	
 	@Override
-    public Iterator<XID> iterator() {
+	public Iterator<XID> iterator() {
 		
 		Iterator<XID> filtered = new AbstractFilteringIterator<XID>(this.base.iterator()) {
 			@Override
@@ -365,7 +367,7 @@ public class ChangedObject implements XWritableObject {
 	}
 	
 	@Override
-    public boolean removeField(XID fieldId) {
+	public boolean removeField(XID fieldId) {
 		
 		if(this.added.containsKey(fieldId)) {
 			
@@ -408,5 +410,40 @@ public class ChangedObject implements XWritableObject {
 	@Override
 	public XType getType() {
 		return XType.XOBJECT;
+	}
+	
+	/**
+	 * @return false if there are no changes. True if there are changes.
+	 */
+	public boolean hasChanges() {
+		return !this.added.isEmpty() || !this.removed.isEmpty() || this.countCommandsNeeded(1) > 0;
+	}
+	
+	/**
+	 * Apply the changes represented by the changedObject to the given
+	 * baseObject.
+	 * 
+	 * @param changedObject of which the changes are applied to the given
+	 *            baseObject
+	 * @param baseObject should be a writable version of the object used to
+	 *            create the changedObject
+	 */
+	public static void commitTo(ChangedObject changedObject, XWritableObject baseObject) {
+		assert changedObject != null;
+		assert baseObject != null;
+		assert changedObject.getID().equals(baseObject.getID());
+		for(SimpleField field : changedObject.getNewFields()) {
+			XWritableField baseField = baseObject.createField(field.getID());
+			baseField.setValue(field.getValue());
+		}
+		for(ChangedField field : changedObject.getChangedFields()) {
+			if(field.isChanged()) {
+				XWritableField baseField = baseObject.createField(field.getID());
+				baseField.setValue(field.getValue());
+			}
+		}
+		for(XID removed : changedObject.getRemovedFields()) {
+			baseObject.removeField(removed);
+		}
 	}
 }
