@@ -26,6 +26,7 @@ import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.rmof.impl.memory.SimpleObject;
+import org.xydra.core.XCopyUtils;
 import org.xydra.index.iterator.AbstractFilteringIterator;
 import org.xydra.index.iterator.BagUnionIterator;
 import org.xydra.log.Logger;
@@ -186,7 +187,7 @@ public class ChangedModel implements XWritableModel {
 	 * @return true there are changes compared to the initially supplied model
 	 */
 	public boolean hasChanges() {
-		return countCommandsNeeded(1) > 0;
+		return !this.added.isEmpty() || !this.removed.isEmpty() || countCommandsNeeded(1) > 0;
 	}
 	
 	/**
@@ -270,7 +271,7 @@ public class ChangedModel implements XWritableModel {
 			
 		} else {
 			
-			// Otherwise, the field is completely new.
+			// Otherwise, the object is completely new.
 			XAddress fieldAddr = XX.resolveObject(getAddress(), objectId);
 			SimpleObject newObject = new SimpleObject(fieldAddr);
 			this.added.put(objectId, newObject);
@@ -521,7 +522,7 @@ public class ChangedModel implements XWritableModel {
 		return this.added.values();
 	}
 	
-	private <T> boolean containsAllDifferentElements(Collection<T> c) {
+	private static <T> boolean containsAllDifferentElements(Collection<T> c) {
 		Set<T> set = new HashSet<T>();
 		set.addAll(c);
 		return set.size() == c.size();
@@ -667,6 +668,30 @@ public class ChangedModel implements XWritableModel {
 	@Override
 	public XType getType() {
 		return XType.XMODEL;
+	}
+	
+	/**
+	 * Apply the changes encoded in changedModel to the given model. Both should
+	 * have the same Id.
+	 * 
+	 * @param changedModel never null
+	 * @param model never null, should be a writable version of the baseModel
+	 *            used to created the changedModel
+	 */
+	public static void commitTo(ChangedModel changedModel, XWritableModel model) {
+		for(SimpleObject changedObject : changedModel.getNewObjects()) {
+			XWritableObject baseObject = model.createObject(changedObject.getID());
+			XCopyUtils.copyData(changedObject, baseObject);
+		}
+		for(ChangedObject changedObject : changedModel.getChangedObjects()) {
+			if(changedObject.isChanged()) {
+				XWritableObject baseObject = model.getObject(changedObject.getID());
+				ChangedObject.commitTo(changedObject, baseObject);
+			}
+		}
+		for(XID removed : changedModel.getRemovedObjects()) {
+			model.removeObject(removed);
+		}
 	}
 	
 }
