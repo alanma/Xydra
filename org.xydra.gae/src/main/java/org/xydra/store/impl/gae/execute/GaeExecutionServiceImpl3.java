@@ -309,7 +309,7 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 	 * @param locks
 	 * @return
 	 */
-	private XRevWritableModel invalidateObjectRevisions(XReadableModel referenceModel,
+	private static XRevWritableModel invalidateObjectRevisions(XReadableModel referenceModel,
 	        XRevWritableModel model, GaeLocks locks) {
 		
 		if(model == null) {
@@ -371,7 +371,9 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 		List<XAtomicEvent> events = DeltaUtils.createEvents(this.modelAddr, c, actorId, change.rev);
 		log.debug("[r" + change.rev + "] DeltaUtils generated " + events.size() + " events");
 		if(events.size() > 1000) {
-			log.warn("Created over 1000 events");
+			log.warn("Created over 1000 events (" + events.size()
+			        + ") GA?category=xydra&action=saveManyEvents&label=events&value="
+			        + events.size());
 		}
 		assert events != null;
 		try {
