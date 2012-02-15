@@ -8,11 +8,12 @@ public class IteratorUtils {
 	
 	/**
 	 * @param <T> type of both
+	 * @param <C> a collection type of T
 	 * @param it never null
 	 * @param collection to which elements are added
 	 * @return as a convenience, the supplied collection
 	 */
-	public static <T> Collection<T> addAll(Iterator<T> it, Collection<T> collection) {
+	public static <C extends Collection<T>, T> C addAll(Iterator<T> it, C collection) {
 		while(it.hasNext()) {
 			T t = it.next();
 			collection.add(t);

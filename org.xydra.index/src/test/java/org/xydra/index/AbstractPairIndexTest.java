@@ -124,7 +124,7 @@ public abstract class AbstractPairIndexTest extends TestCase {
 				this.index.index(pair.getFirst(), pair.getSecond());
 				
 			}
-
+			
 			// remove
 			else {
 				
@@ -148,7 +148,7 @@ public abstract class AbstractPairIndexTest extends TestCase {
 		
 	}
 	
-	@SuppressWarnings({ "boxing", "static-method" })
+	@SuppressWarnings({ "boxing" })
 	protected Pair<Integer,Integer> makePair(Random rnd, int nKeys) {
 		int na = rnd.nextInt(nKeys);
 		int nb = rnd.nextInt(nKeys);
