@@ -9,6 +9,7 @@ import java.io.Serializable;
 import java.io.StringReader;
 import java.io.StringWriter;
 
+import org.xydra.annotations.RunsInGWT;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 
@@ -74,7 +75,7 @@ public class ReflectionUtils {
 	
 	/**
 	 * @param t the {@link Throwable} to inspect
-	 * @param n number of lines
+	 * @param n number of lines, if larger than available input: no problem
 	 * @return the first n lines of the given {@link Throwable} t, separated by
 	 *         new line characters + br tags
 	 */
@@ -101,7 +102,14 @@ public class ReflectionUtils {
 		}
 	}
 	
-	private static BufferedReader toBufferedReader(Throwable t) {
+	/**
+	 * Not even emulated in GWT!
+	 * 
+	 * @param t
+	 * @return
+	 */
+	@RunsInGWT(false)
+	public static BufferedReader toBufferedReader(Throwable t) {
 		StringWriter sw = new StringWriter();
 		t.printStackTrace(new PrintWriter(sw));
 		StringReader sr = new StringReader(sw.getBuffer().toString());
