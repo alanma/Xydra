@@ -4,6 +4,7 @@ import java.util.Iterator;
 
 import org.xydra.index.IMapSetIndex;
 import org.xydra.index.query.Constraint;
+import org.xydra.index.query.EqualsConstraint;
 import org.xydra.index.query.KeyEntryTuple;
 
 
@@ -14,7 +15,6 @@ import org.xydra.index.query.KeyEntryTuple;
 public class StringValueIndex implements IMapSetIndex<String,ValueIndexEntry> {
 	private static final long serialVersionUID = -5366154192053454730L;
 	
-	@SuppressWarnings("unused")
 	private StringMap map;
 	
 	public StringValueIndex(StringMap map) {
@@ -23,20 +23,28 @@ public class StringValueIndex implements IMapSetIndex<String,ValueIndexEntry> {
 	
 	@Override
 	public void clear() {
-		// TODO Auto-generated method stub
-		
+		throw new UnsupportedOperationException("clear() is not supported by StringValueIndex");
 	}
 	
 	@Override
 	public boolean isEmpty() {
-		// TODO Auto-generated method stub
-		return false;
+		throw new UnsupportedOperationException("empty() is not supported by StringValueIndex");
 	}
 	
 	@Override
-	public Iterator<ValueIndexEntry> constraintIterator(Constraint<String> c1) {
-		// TODO Auto-generated method stub
-		return null;
+	public Iterator<ValueIndexEntry> constraintIterator(Constraint<String> c) {
+		if(!(c instanceof EqualsConstraint)) {
+			throw new UnsupportedOperationException(
+			        "StringValueIndex only supports EqualsConstraints");
+		}
+		EqualsConstraint<String> eq = (EqualsConstraint<String>)c;
+		
+		String key = eq.getKey();
+		String result = this.map.get(key);
+		
+		ValueIndexEntry[] entries = ValueIndexEntryUtils.getArrayFromString(result);
+		SimpleArrayIterator<ValueIndexEntry> it = new SimpleArrayIterator<ValueIndexEntry>(entries);
+		return it;
 	}
 	
 	@Override
@@ -47,8 +55,9 @@ public class StringValueIndex implements IMapSetIndex<String,ValueIndexEntry> {
 	
 	@Override
 	public boolean containsKey(String key) {
-		// TODO Auto-generated method stub
-		return false;
+		String result = this.map.get(key);
+		
+		return result != null;
 	}
 	
 	@Override
@@ -58,15 +67,15 @@ public class StringValueIndex implements IMapSetIndex<String,ValueIndexEntry> {
 	}
 	
 	@Override
-	public void deIndex(String key1) {
-		// TODO Auto-generated method stub
+	public void deIndex(String key) {
+		this.map.remove(key);
 		
 	}
 	
 	@Override
-	public void index(String key1, ValueIndexEntry entry) {
-		// TODO Auto-generated method stub
-		
+	public void index(String key, ValueIndexEntry entry) {
+		// String result = this.map.get(key);
+		// String entryString =
 	}
 	
 	@Override
