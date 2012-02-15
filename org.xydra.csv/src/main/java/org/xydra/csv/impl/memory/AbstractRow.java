@@ -7,6 +7,8 @@ import org.xydra.csv.IRow;
 
 public abstract class AbstractRow extends AbstractReadableRow implements IRow {
 	
+	private static final long serialVersionUID = -2543133872138623905L;
+	
 	AbstractRow(String key) {
 		super(key);
 	}

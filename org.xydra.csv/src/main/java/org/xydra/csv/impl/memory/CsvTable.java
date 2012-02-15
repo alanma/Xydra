@@ -170,18 +170,23 @@ public class CsvTable extends CsvCoreTable implements ICsvTable, ICsvTableFactor
 	 */
 	@Override
 	public void writeTo(File f) throws FileNotFoundException {
+		writeTo(f, false);
+	}
+	
+	public void writeTo(File f, boolean append) throws FileNotFoundException {
 		log.info("Writing CSV table to " + f.getAbsolutePath());
 		FileOutputStream fos;
 		try {
-			fos = new FileOutputStream(f);
+			fos = new FileOutputStream(f, append);
 		} catch(FileNotFoundException e) {
 			// Java's way of saying, Windows locked the file
-			File f2 = new File(f.getAbsolutePath() + "-COULD-NOT-OVERWRITE");
+			File f2 = new File(f.getAbsolutePath() + "-COULD-NOT-"
+			        + (append ? "APPEND" : "OVERWRITE"));
 			fos = new FileOutputStream(f2);
 		}
 		Writer writer = new OutputStreamWriter(fos, Charset.forName(this.defaultEncoding));
 		try {
-			if(this.splitWhenWritingLargeFiles) {
+			if(!append && this.splitWhenWritingLargeFiles) {
 				log.info("Will write as " + ((this.table.size() / EXCEL_MAX_ROWS) + 1) + " file(s)");
 				int startRow = 0;
 				int endRow = Math.min(EXCEL_MAX_ROWS, this.table.size());

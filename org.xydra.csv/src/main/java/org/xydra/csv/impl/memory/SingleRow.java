@@ -13,6 +13,8 @@ import org.xydra.csv.IReadableRow;
 
 public class SingleRow extends AbstractReadableRow implements IReadableRow {
 	
+	private static final long serialVersionUID = -7970004628196813272L;
+	
 	private Map<String,ICell> map = new HashMap<String,ICell>();
 	
 	/**

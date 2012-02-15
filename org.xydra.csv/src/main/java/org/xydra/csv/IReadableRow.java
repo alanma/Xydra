@@ -1,5 +1,6 @@
 package org.xydra.csv;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map.Entry;
@@ -11,7 +12,7 @@ import java.util.Set;
  * 
  * @author voelkel
  */
-public interface IReadableRow extends Iterable<ICell> {
+public interface IReadableRow extends Iterable<ICell>, Serializable {
 	
 	/**
 	 * @return the row key (= the row name)

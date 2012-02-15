@@ -8,7 +8,7 @@ public abstract class AbstractReadableRow implements IReadableRow {
 	
 	protected static final String ROW_KEY = "ROW";
 	
-	private static final long serialVersionUID = -1859613946021005526L;
+	public static final long serialVersionUID = -1859613946021005526L;
 	
 	private final String key;
 	

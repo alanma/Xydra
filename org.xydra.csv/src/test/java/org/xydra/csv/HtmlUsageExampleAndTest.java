@@ -11,7 +11,6 @@ import org.xydra.csv.impl.memory.CsvTable;
 
 public class HtmlUsageExampleAndTest {
 	
-	@SuppressWarnings("unchecked")
 	public void testOutputAsHtml() throws IOException {
 		/* Create a new in-memory table */
 		CsvTable table = new CsvTable(true);

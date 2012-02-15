@@ -11,7 +11,6 @@ import org.xydra.csv.impl.memory.CsvTable;
 
 public class GroupByTest {
 	
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testRightHandDigit() {
 		CsvTable dataTable = new CsvTable();
