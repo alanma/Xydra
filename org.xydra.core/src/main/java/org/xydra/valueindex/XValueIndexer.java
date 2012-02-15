@@ -1,7 +1,6 @@
 package org.xydra.valueindex;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.xydra.base.XAddress;
@@ -26,7 +25,6 @@ import org.xydra.base.value.XStringSetValue;
 import org.xydra.base.value.XStringValue;
 import org.xydra.base.value.XValue;
 import org.xydra.index.IMapSetIndex;
-import org.xydra.index.query.EqualsConstraint;
 
 
 /*
@@ -38,9 +36,9 @@ import org.xydra.index.query.EqualsConstraint;
  */
 
 public abstract class XValueIndexer {
-	private IMapSetIndex<String,ValueIndexEntry> index;
+	private ValueIndex index;
 	
-	public XValueIndexer(IMapSetIndex<String,ValueIndexEntry> index) {
+	public XValueIndexer(ValueIndex index) {
 		this.index = index;
 	}
 	
@@ -339,11 +337,15 @@ public abstract class XValueIndexer {
 	}
 	
 	public void indexLong(XAddress address, XValue value, Long l) {
-		this.incrementIndexEntry(getLongIndexString(l), address, value);
+		String key = getLongIndexString(l);
+		ValueIndexEntry entry = new ValueIndexEntry(address, value, 0);
+		this.index.index(key, entry);
 	}
 	
 	public void deIndexLong(XAddress address, XValue value, Long l) {
-		this.decrementIndexEntry(getLongIndexString(l), address, value);
+		String key = getLongIndexString(l);
+		ValueIndexEntry entry = new ValueIndexEntry(address, value, 0);
+		this.index.deIndex(key, entry);
 	}
 	
 	public void indexIntegerArray(XAddress address, XValue value, int[] integers) {
@@ -359,11 +361,15 @@ public abstract class XValueIndexer {
 	}
 	
 	public void indexInteger(XAddress address, XValue value, int integer) {
-		this.incrementIndexEntry(getIntegerIndexString(integer), address, value);
+		String key = getIntegerIndexString(integer);
+		ValueIndexEntry entry = new ValueIndexEntry(address, value, 0);
+		this.index.index(key, entry);
 	}
 	
 	public void deIndexInteger(XAddress address, XValue value, int integer) {
-		this.decrementIndexEntry(getIntegerIndexString(integer), address, value);
+		String key = getIntegerIndexString(integer);
+		ValueIndexEntry entry = new ValueIndexEntry(address, value, 0);
+		this.index.deIndex(key, entry);
 	}
 	
 	public void indexIdArray(XAddress address, XValue value, XID[] ids) {
@@ -391,11 +397,15 @@ public abstract class XValueIndexer {
 	}
 	
 	public void indexDouble(XAddress address, XValue value, double d) {
-		this.incrementIndexEntry(getDoubleIndexString(d), address, value);
+		String key = getDoubleIndexString(d);
+		ValueIndexEntry entry = new ValueIndexEntry(address, value, 0);
+		this.index.index(key, entry);
 	}
 	
 	public void deIndexDouble(XAddress address, XValue value, double d) {
-		this.decrementIndexEntry(getDoubleIndexString(d), address, value);
+		String key = getDoubleIndexString(d);
+		ValueIndexEntry entry = new ValueIndexEntry(address, value, 0);
+		this.index.deIndex(key, entry);
 	}
 	
 	public void indexByteArray(XAddress address, XValue value, byte[] bytes) {
@@ -411,11 +421,15 @@ public abstract class XValueIndexer {
 	}
 	
 	public void indexByte(XAddress address, XValue value, byte b) {
-		this.incrementIndexEntry(getByteIndexString(b), address, value);
+		String key = getByteIndexString(b);
+		ValueIndexEntry entry = new ValueIndexEntry(address, value, 0);
+		this.index.index(key, entry);
 	}
 	
 	public void deIndexByte(XAddress address, XValue value, byte b) {
-		this.decrementIndexEntry(getByteIndexString(b), address, value);
+		String key = getByteIndexString(b);
+		ValueIndexEntry entry = new ValueIndexEntry(address, value, 0);
+		this.index.deIndex(key, entry);
 	}
 	
 	public void indexBooleanArray(XAddress address, XValue value, boolean[] bools) {
@@ -431,31 +445,41 @@ public abstract class XValueIndexer {
 	}
 	
 	public void indexBoolean(XAddress address, XValue value, boolean bool) {
-		this.incrementIndexEntry(getBooleanIndexString(bool), address, value);
+		String key = getBooleanIndexString(bool);
+		ValueIndexEntry entry = new ValueIndexEntry(address, value, 0);
+		this.index.index(key, entry);
 	}
 	
 	public void deIndexBoolean(XAddress address, XValue value, boolean bool) {
-		this.decrementIndexEntry(getBooleanIndexString(bool), address, value);
+		String key = getBooleanIndexString(bool);
+		ValueIndexEntry entry = new ValueIndexEntry(address, value, 0);
+		this.index.deIndex(key, entry);
 	}
 	
 	public void indexString(XAddress address, XValue value, String string) {
-		for(String word : getStringIndexStrings(string)) {
-			this.incrementIndexEntry(word, address, value);
+		for(String key : getStringIndexStrings(string)) {
+			ValueIndexEntry entry = new ValueIndexEntry(address, value, 0);
+			this.index.index(key, entry);
 		}
 	}
 	
 	public void deIndexString(XAddress address, XValue value, String s) {
-		for(String word : getStringIndexStrings(s)) {
-			this.decrementIndexEntry(word, address, value);
+		for(String key : getStringIndexStrings(s)) {
+			ValueIndexEntry entry = new ValueIndexEntry(address, value, 0);
+			this.index.deIndex(key, entry);
 		}
 	}
 	
 	public void indexId(XAddress address, XValue value, XID id) {
-		this.incrementIndexEntry(getIdIndexString(id), address, value);
+		String key = getIdIndexString(id);
+		ValueIndexEntry entry = new ValueIndexEntry(address, value, 0);
+		this.index.index(key, entry);
 	}
 	
 	public void deIndexId(XAddress address, XValue value, XID id) {
-		this.decrementIndexEntry(getIdIndexString(id), address, value);
+		String key = getIdIndexString(id);
+		ValueIndexEntry entry = new ValueIndexEntry(address, value, 0);
+		this.index.deIndex(key, entry);
 	}
 	
 	public void indexAddressArray(XAddress objectAddress, XValue value, XAddress[] addresses) {
@@ -472,55 +496,64 @@ public abstract class XValueIndexer {
 	
 	public void indexAddress(XAddress objectAddress, XValue value, XAddress address) {
 		String key = getAddressIndexString(address);
-		
-		this.incrementIndexEntry(key, objectAddress, value);
+		ValueIndexEntry entry = new ValueIndexEntry(objectAddress, value, 0);
+		this.index.index(key, entry);
 	}
 	
 	public void deIndexAddress(XAddress objectAddress, XValue value, XAddress address) {
 		String key = getAddressIndexString(address);
-		
-		this.decrementIndexEntry(key, objectAddress, value);
+		ValueIndexEntry entry = new ValueIndexEntry(objectAddress, value, 0);
+		this.index.deIndex(key, entry);
 	}
 	
-	private void incrementIndexEntry(String key, XAddress address, XValue value) {
-		EqualsConstraint<String> constraint = new EqualsConstraint<String>(key);
-		Iterator<ValueIndexEntry> iterator = this.index.constraintIterator(constraint);
-		
-		boolean found = false;
-		while(!found && iterator.hasNext()) {
-			ValueIndexEntry triple = iterator.next();
-			
-			if(triple.equalAddressAndValue(address, value)) {
-				found = true;
-				triple.incrementCounter();
-			}
-		}
-		
-		if(!found) {
-			// no entry found -> add one
-			ValueIndexEntry entry = new ValueIndexEntry(address, value, 1);
-			this.index.index(key, entry);
-		}
-	}
-	
-	private void decrementIndexEntry(String key, XAddress address, XValue value) {
-		EqualsConstraint<String> constraint = new EqualsConstraint<String>(key);
-		Iterator<ValueIndexEntry> iterator = this.index.constraintIterator(constraint);
-		
-		boolean found = false;
-		while(!found && iterator.hasNext()) {
-			ValueIndexEntry triple = iterator.next();
-			
-			if(triple.equalAddressAndValue(address, value)) {
-				found = true;
-				triple.decrementCounter();
-				
-				if(triple.getCounter() == 0) {
-					this.index.deIndex(key, triple);
-				}
-			}
-		}
-	}
+	/*
+	 * the following code is no longer in use. I didn't delete it just yet,
+	 * because the code itself could come in handy somewhere else.
+	 */
+
+	// private void incrementIndexEntry(String key, XAddress address, XValue
+	// value) {
+	// EqualsConstraint<String> constraint = new EqualsConstraint<String>(key);
+	// Iterator<ValueIndexEntry> iterator =
+	// this.index.constraintIterator(constraint);
+	//
+	// boolean found = false;
+	// while(!found && iterator.hasNext()) {
+	// ValueIndexEntry triple = iterator.next();
+	//
+	// if(triple.equalAddressAndValue(address, value)) {
+	// found = true;
+	// triple.incrementCounter();
+	// }
+	// }
+	//
+	// if(!found) {
+	// // no entry found -> add one
+	// ValueIndexEntry entry = new ValueIndexEntry(address, value, 1);
+	// this.index.index(key, entry);
+	// }
+	// }
+	//
+	// private void decrementIndexEntry(String key, XAddress address, XValue
+	// value) {
+	// EqualsConstraint<String> constraint = new EqualsConstraint<String>(key);
+	// Iterator<ValueIndexEntry> iterator =
+	// this.index.constraintIterator(constraint);
+	//
+	// boolean found = false;
+	// while(!found && iterator.hasNext()) {
+	// ValueIndexEntry triple = iterator.next();
+	//
+	// if(triple.equalAddressAndValue(address, value)) {
+	// found = true;
+	// triple.decrementCounter();
+	//
+	// if(triple.getCounter() == 0) {
+	// this.index.deIndex(key, triple);
+	// }
+	// }
+	// }
+	// }
 	
 	// ---- Methods returning the index strings ----
 	

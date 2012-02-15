@@ -4,13 +4,15 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.value.XValue;
 import org.xydra.index.IMapSetIndex;
 import org.xydra.index.query.Constraint;
 import org.xydra.index.query.EqualsConstraint;
 import org.xydra.index.query.KeyEntryTuple;
 
 
-public class MemoryMapSetIndex implements IMapSetIndex<String,ValueIndexEntry> {
+public class MemoryMapSetIndex implements ValueIndex {
 	/**
      * 
      */
@@ -65,7 +67,31 @@ public class MemoryMapSetIndex implements IMapSetIndex<String,ValueIndexEntry> {
 	@Override
 	public void deIndex(String key1, ValueIndexEntry entry) {
 		HashSet<ValueIndexEntry> set = this.map.get(key1);
-		set.remove(entry);
+		
+		XAddress address = entry.getAddress();
+		XValue value = entry.getValue();
+		// counter is ignored!
+		
+		Iterator<ValueIndexEntry> iterator = set.iterator();
+		
+		boolean found = false;
+		while(!found && iterator.hasNext()) {
+			ValueIndexEntry triple = iterator.next();
+			
+			if(triple.equalAddressAndValue(address, value)) {
+				found = true;
+				triple.decrementCounter();
+				
+				if(triple.getCounter() == 0) {
+					set.remove(triple);
+				}
+			}
+		}
+		
+		if(set.size() == 0) {
+			deIndex(key1);
+		}
+		
 	}
 	
 	@Override
@@ -82,7 +108,27 @@ public class MemoryMapSetIndex implements IMapSetIndex<String,ValueIndexEntry> {
 		HashSet<ValueIndexEntry> set = this.map.get(key1);
 		assert set != null;
 		
-		set.add(entry);
+		XAddress address = entry.getAddress();
+		XValue value = entry.getValue();
+		// counter is ignored!
+		
+		Iterator<ValueIndexEntry> iterator = set.iterator();
+		
+		boolean found = false;
+		while(!found && iterator.hasNext()) {
+			ValueIndexEntry triple = iterator.next();
+			
+			if(triple.equalAddressAndValue(address, value)) {
+				found = true;
+				triple.incrementCounter();
+			}
+		}
+		
+		if(!found) {
+			// no entry found -> add one
+			ValueIndexEntry newEntry = new ValueIndexEntry(address, value, 1);
+			set.add(newEntry);
+		}
 	}
 	
 	@Override

@@ -34,11 +34,7 @@ public class XModelObjectLevelIndex {
 	
 	public XModelObjectLevelIndex(XModel model) {
 		// TODO change it to our own implementation as soon as it's ready
-		this.index = new MapSetIndex<String,ValueIndexEntry>(
-		        new FastEntrySetFactory<ValueIndexEntry>());
-		this.indexer = new SimpleValueIndexer(this.index);
-		
-		this.index(model);
+		throw new UnsupportedOperationException("Not yet implemented");
 	}
 	
 	public XModelObjectLevelIndex(XModel model, XValueIndexer indexer) {

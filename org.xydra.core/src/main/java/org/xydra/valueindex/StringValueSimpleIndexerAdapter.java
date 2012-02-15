@@ -2,13 +2,12 @@ package org.xydra.valueindex;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
-import org.xydra.index.IMapSetIndex;
 
 
 // TODO Document
 
 public abstract class StringValueSimpleIndexerAdapter extends XValueIndexer {
-	public StringValueSimpleIndexerAdapter(IMapSetIndex<String,ValueIndexEntry> index) {
+	public StringValueSimpleIndexerAdapter(ValueIndex index) {
 		super(index);
 	}
 	

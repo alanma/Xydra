@@ -1,12 +1,11 @@
 package org.xydra.valueindex;
 
-import org.xydra.index.IMapSetIndex;
 
 
 // TODO Document
 
 public class SimpleValueIndexer extends StringValueSimpleIndexerAdapter {
-	public SimpleValueIndexer(IMapSetIndex<String,ValueIndexEntry> index) {
+	public SimpleValueIndexer(ValueIndex index) {
 		super(index);
 	}
 	
