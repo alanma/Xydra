@@ -80,6 +80,9 @@ public class CsvTable extends CsvCoreTable implements ICsvTable, ICsvTableFactor
 		Reader reader = new InputStreamReader(fos, Charset.forName(this.defaultEncoding));
 		readFrom(reader, true);
 		reader.close();
+		// remove "NULL" and "ROW"-columns
+		this.columnNames.remove("NULL");
+		this.columnNames.remove("ROW");
 	}
 	
 	/*
@@ -173,6 +176,12 @@ public class CsvTable extends CsvCoreTable implements ICsvTable, ICsvTableFactor
 		writeTo(f, false);
 	}
 	
+	/**
+	 * @param f
+	 * @param append if append is true, the new records must match exactly the
+	 *            format of the old ones. Otherwise just a big mess is produced.
+	 * @throws FileNotFoundException
+	 */
 	public void writeTo(File f, boolean append) throws FileNotFoundException {
 		log.info("Writing CSV table to " + f.getAbsolutePath());
 		FileOutputStream fos;

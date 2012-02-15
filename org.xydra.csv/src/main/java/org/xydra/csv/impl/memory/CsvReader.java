@@ -39,17 +39,17 @@ public class CsvReader {
 	        IllegalArgumentException {
 		String line = this.br.readLine();
 		if(line == null) {
-			throw new IllegalArgumentException("CVS file has no content, not even headers");
+			throw new IllegalArgumentException("CSV file has no content, not even headers");
 		}
 		// read header
 		String[] headers = CsvCodec.splitAtUnquotedSemicolon(line);
 		if(headers.length < 1) {
 			throw new IllegalArgumentException("Found no first column");
 		}
-		this.colNames = new ArrayList<String>(headers.length);
+		this.colNames = new ArrayList<String>();
 		for(String s : headers) {
 			String decoded = CsvCodec.excelDecode(s);
-			this.colNames.add(decoded == null ? "" : decoded);
+			this.colNames.add(decoded == null ? "NULL" : decoded);
 		}
 		this.lineNumber = 1;
 		return this.colNames;
