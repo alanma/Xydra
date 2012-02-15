@@ -10,6 +10,11 @@ import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XReadableRepository;
+import org.xydra.base.rmof.impl.memory.SimpleField;
+import org.xydra.base.rmof.impl.memory.SimpleObject;
+import org.xydra.core.model.delta.ChangedField;
+import org.xydra.core.model.delta.ChangedModel;
+import org.xydra.core.model.delta.ChangedObject;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 
@@ -131,4 +136,42 @@ public class DumpUtils {
 		        + field.getRevisionNumber() + "]\n");
 		return buf;
 	}
+	
+	public static StringBuffer changesToString(final ChangedModel changedModel) {
+		StringBuffer buf = new StringBuffer();
+		for(SimpleObject object : changedModel.getNewObjects()) {
+			buf.append("=== ADDED Object '" + object.getID() + "' ===<br/>\n");
+			buf.append(DumpUtils.toStringBuffer(object));
+		}
+		for(XID objectId : changedModel.getRemovedObjects()) {
+			buf.append("=== REMOVED Object '" + objectId + "' ===<br/>\n");
+		}
+		for(ChangedObject changedObject : changedModel.getChangedObjects()) {
+			if(changedObject.hasChanges()) {
+				buf.append("=== CHANGED Object '" + changedObject.getID() + "' === <br/>\n");
+				buf.append(changesToString(changedObject));
+			}
+		}
+		return buf;
+	}
+	
+	public static StringBuffer changesToString(final ChangedObject changedObject) {
+		StringBuffer buf = new StringBuffer();
+		for(SimpleField field : changedObject.getNewFields()) {
+			buf.append("--- ADDED Field '" + field.getID() + "' ---<br/>\n");
+			buf.append(DumpUtils.toStringBuffer(field));
+		}
+		for(XID objectId : changedObject.getRemovedFields()) {
+			buf.append("--- REMOVED Field '" + objectId + "' ---<br/>\n");
+		}
+		for(ChangedField changedField : changedObject.getChangedFields()) {
+			if(changedField.isChanged()) {
+				buf.append("--- CHANGED Field '" + changedField.getID() + "' ---<br/>\n");
+				buf.append("'" + changedField.getOldValue() + "' ==> '" + changedField.getValue()
+				        + "' <br/>\n");
+			}
+		}
+		return buf;
+	}
+	
 }
