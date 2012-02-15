@@ -3,6 +3,7 @@ package org.xydra.store.impl.delegate;
 import java.util.List;
 import java.util.Set;
 
+import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.change.XAtomicEvent;
@@ -40,7 +41,7 @@ import org.xydra.store.XydraStore;
  * 
  * @author voelkel
  */
-
+@RunsInGWT(true)
 public interface XydraPersistence {
 	
 	/**
