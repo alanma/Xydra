@@ -122,7 +122,7 @@ public class ModelResource {
 			 * KEY('XCHANGE','0/gae-data/'+ modelId ...)
 			 */
 			
-			// FIXME delete models completely!
+			// FIXME implement: delete models completely!
 		}
 	}
 	
