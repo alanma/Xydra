@@ -41,7 +41,7 @@ public class ChangedRepository extends AbstractDelegatingWritableRepository {
 	protected Map<XID,ChangedModel> potentiallyChanged = new HashMap<XID,ChangedModel>();
 	protected Set<XID> removed = new HashSet<XID>();
 	
-	/* make sure to return always the same Booooo references */
+	/* make sure to return always the same references */
 	@Override
 	public XWritableModel createModel(XID modelId) {
 		if(this.added.containsKey(modelId)) {

@@ -18,7 +18,7 @@ public interface XWritableModel extends XReadableModel {
 	 * it to this {@link XWritableModel} or returns the already existing
 	 * {@link XWritableObject} if the given {@link XID} was already taken.
 	 * 
-	 * @param id The {@link XID} for the {@link XWritableObject} which is to be
+	 * @param objectId The {@link XID} for the {@link XWritableObject} which is to be
 	 *            created
 	 * 
 	 * @return the newly created {@link XWritableObject} or the already existing
@@ -27,7 +27,7 @@ public interface XWritableModel extends XReadableModel {
 	 * @throws IllegalStateException if this model has already been removed
 	 */
 	@ModificationOperation
-	XWritableObject createObject(XID id);
+	XWritableObject createObject(XID objectId);
 	
 	/* More specific return type */
 	@Override

@@ -24,22 +24,16 @@ import org.xydra.log.LoggerFactory;
  */
 public abstract class AbstractDelegatingWritableModel implements XWritableModel {
 	
-	@SuppressWarnings("unused")
-	private static final Logger log = LoggerFactory
-	        .getLogger(AbstractDelegatingWritableModel.class);
-	
-	public static final long UNDEFINED = -2;
-	
 	/**
 	 * State-less wrapper pulling all state from the cache index or base model
 	 * of the {@link AbstractDelegatingWritableModel}.
 	 */
 	class WrappedField implements XWritableField {
 		
-		private XID fieldId;
-		private XID objectId;
+		private final XID fieldId;
+		private final XID objectId;
 		
-		public WrappedField(XID objectId, XID fieldId) {
+		public WrappedField(final XID objectId, final XID fieldId) {
 			assert objectId != null;
 			assert fieldId != null;
 			this.objectId = objectId;
@@ -59,7 +53,8 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 		
 		@Override
 		public long getRevisionNumber() {
-			return field_getRevisionNumber(this.objectId, this.fieldId);
+			return AbstractDelegatingWritableModel.this.field_getRevisionNumber(this.objectId,
+			        this.fieldId);
 		}
 		
 		@Override
@@ -78,7 +73,7 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 		}
 		
 		@Override
-		public boolean setValue(XValue value) {
+		public boolean setValue(final XValue value) {
 			assert this.objectId != null;
 			return AbstractDelegatingWritableModel.this.field_setValue(this.objectId, this.fieldId,
 			        value);
@@ -92,15 +87,15 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 	 */
 	class WrappedObject implements XWritableObject {
 		
-		private XID objectId;
+		private final XID objectId;
 		
-		public WrappedObject(XID objectId) {
+		public WrappedObject(final XID objectId) {
 			assert objectId != null;
 			this.objectId = objectId;
 		}
 		
 		@Override
-		public XWritableField createField(XID fieldId) {
+		public XWritableField createField(final XID fieldId) {
 			assert fieldId != null;
 			return AbstractDelegatingWritableModel.this.object_createField(this.objectId, fieldId);
 		}
@@ -112,7 +107,7 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 		}
 		
 		@Override
-		public XWritableField getField(XID fieldId) {
+		public XWritableField getField(final XID fieldId) {
 			return AbstractDelegatingWritableModel.this.object_getField(this.objectId, fieldId);
 		}
 		
@@ -122,12 +117,17 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 		}
 		
 		@Override
+		public long getRevisionNumber() {
+			return object_getRevisionNumber(this.objectId);
+		}
+		
+		@Override
 		public XType getType() {
 			return XType.XOBJECT;
 		}
 		
 		@Override
-		public boolean hasField(XID fieldId) {
+		public boolean hasField(final XID fieldId) {
 			return AbstractDelegatingWritableModel.this.object_hasField(this.objectId, fieldId);
 		}
 		
@@ -142,7 +142,7 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 		}
 		
 		@Override
-		public boolean removeField(XID fieldId) {
+		public boolean removeField(final XID fieldId) {
 			return AbstractDelegatingWritableModel.this.object_removeField(this.objectId, fieldId);
 		}
 		
@@ -166,30 +166,30 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 			}
 			return buf.toString();
 		}
-		
-		@Override
-		public long getRevisionNumber() {
-			return object_getRevisionNumber(this.objectId);
-		}
 	}
 	
-	protected abstract long object_getRevisionNumber(XID objectId);
+	@SuppressWarnings("unused")
+	private static final Logger log = LoggerFactory
+	        .getLogger(AbstractDelegatingWritableModel.class);
+	
+	public static final long UNDEFINED = -2;
 	
 	@Override
-	public abstract XWritableObject createObject(XID objectId);
+	public abstract XWritableObject createObject(final XID objectId);
 	
-	protected abstract XValue field_getValue(XID objectId, XID fieldId);
+	protected abstract long field_getRevisionNumber(final XID objectId, final XID fieldId);
 	
-	protected abstract long field_getRevisionNumber(XID objectId, XID fieldId);
+	protected abstract XValue field_getValue(final XID objectId, final XID fieldId);
 	
-	protected boolean field_isEmpty(XID objectId, XID fieldId) {
+	protected boolean field_isEmpty(final XID objectId, final XID fieldId) {
 		assert hasObject(objectId);
 		assert getObject(objectId).hasField(fieldId);
 		
 		return getObject(objectId).getField(fieldId).isEmpty();
 	}
 	
-	protected abstract boolean field_setValue(XID objectId, XID fieldId, XValue value);
+	protected abstract boolean field_setValue(final XID objectId, final XID fieldId,
+	        final XValue value);
 	
 	@Override
 	public abstract XAddress getAddress();
@@ -198,7 +198,7 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 	public abstract XID getID();
 	
 	@Override
-	public XWritableObject getObject(XID objectId) {
+	public XWritableObject getObject(final XID objectId) {
 		if(hasObject(objectId)) {
 			return new WrappedObject(objectId);
 		} else {
@@ -212,14 +212,14 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 	}
 	
 	@Override
-	public abstract boolean hasObject(XID objectId);
+	public abstract boolean hasObject(final XID objectId);
 	
 	@Override
 	public abstract Iterator<XID> iterator();
 	
-	protected abstract XWritableField object_createField(XID objectId, XID fieldId);
+	protected abstract XWritableField object_createField(final XID objectId, final XID fieldId);
 	
-	protected XWritableField object_getField(XID objectId, XID fieldId) {
+	protected XWritableField object_getField(final XID objectId, final XID fieldId) {
 		assert objectId != null;
 		assert fieldId != null;
 		if(object_hasField(objectId, fieldId)) {
@@ -229,24 +229,26 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 		}
 	}
 	
-	protected abstract boolean object_hasField(XID objectId, XID fieldId);
+	protected abstract long object_getRevisionNumber(final XID objectId);
 	
-	protected abstract boolean object_isEmpty(XID objectId);
+	protected abstract boolean object_hasField(final XID objectId, final XID fieldId);
 	
-	protected abstract Iterator<XID> object_iterator(XID objectId);
+	protected abstract boolean object_isEmpty(final XID objectId);
 	
-	protected abstract boolean object_removeField(XID objectId, XID fieldId);
+	protected abstract Iterator<XID> object_iterator(final XID objectId);
+	
+	protected abstract boolean object_removeField(final XID objectId, final XID fieldId);
 	
 	@Override
-	public abstract boolean removeObject(XID objectId);
+	public abstract boolean removeObject(final XID objectId);
 	
-	protected XAddress resolveField(XID objectId, XID fieldId) {
+	protected XAddress resolveField(final XID objectId, final XID fieldId) {
 		assert objectId != null;
 		assert fieldId != null;
 		return XX.toAddress(this.getAddress().getRepository(), this.getID(), objectId, fieldId);
 	}
 	
-	protected XAddress resolveObject(XID objectId) {
+	protected XAddress resolveObject(final XID objectId) {
 		assert objectId != null;
 		return XX.toAddress(this.getAddress().getRepository(), this.getID(), objectId, null);
 	}

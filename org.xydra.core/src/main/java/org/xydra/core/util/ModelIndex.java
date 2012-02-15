@@ -63,7 +63,7 @@ public class ModelIndex {
 		// }
 	}
 	
-	private Constraint<XID> toConstraint(XidOrVariable xidOrVariable) {
+	private static Constraint<XID> toConstraint(XidOrVariable xidOrVariable) {
 		if(xidOrVariable == Variable.ANY) {
 			return new Wildcard<XID>();
 		} else {
@@ -71,7 +71,7 @@ public class ModelIndex {
 		}
 	}
 	
-	private Constraint<XValue> toConstraint(XvalueOrVariable xvalueOrVariable) {
+	private static Constraint<XValue> toConstraint(XvalueOrVariable xvalueOrVariable) {
 		if(xvalueOrVariable == Variable.ANY) {
 			return new Wildcard<XValue>();
 		} else {
