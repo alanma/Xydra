@@ -200,7 +200,7 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 	
 	@Override
 	protected boolean field_setValue(XID objectId, XID fieldId, XValue value) {
-		throw new IllegalAccessError("a read cache cannot set values");
+		throw new RuntimeException("a read cache cannot set values");
 		// assert objectId != null;
 		// assert fieldId != null;
 		// assert hasObject(objectId) : "Expected " + objectId;
@@ -299,7 +299,7 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 	
 	@Override
 	protected XWritableField object_createField(XID objectId, XID fieldId) {
-		throw new IllegalAccessError("a read cache cannot access create");
+		throw new RuntimeException("a read cache cannot access create");
 		//
 		// assert objectId != null;
 		// assert fieldId != null;
@@ -347,7 +347,7 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 	
 	@Override
 	protected boolean object_removeField(XID objectId, XID fieldId) {
-		throw new IllegalAccessError("a read cache cannot access remove");
+		throw new RuntimeException("a read cache cannot access remove");
 		// assert objectId != null;
 		// assert fieldId != null;
 		// boolean b = object_hasField(objectId, fieldId);
