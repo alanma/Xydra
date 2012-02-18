@@ -3,7 +3,15 @@ package org.xydra.valueindex;
 import org.xydra.core.model.XModel;
 
 
-public class StringMapObjectLevelIndexTest extends XModelObjectLevelIndexTest {
+/**
+ * Test for {@link MemoryMapSetIndex}.
+ * 
+ * @author Kaidel
+ * 
+ */
+
+public class InMemoryValueIndexTest extends XModelObjectLevelIndexTest {
+	
 	@Override
 	public void initializeIndexes(XModel oldModel, XModel newModel, XValueIndexer oldIndexer,
 	        XValueIndexer newIndexer) {
@@ -13,13 +21,7 @@ public class StringMapObjectLevelIndexTest extends XModelObjectLevelIndexTest {
 	
 	@Override
 	public void initializeIndexers() {
-		StringMap oldMap = new MockStringMap();
-		StringMap newMap = new MockStringMap();
-		
-		StringValueIndex oldIndex = new StringValueIndex(oldMap);
-		StringValueIndex newIndex = new StringValueIndex(newMap);
-		
-		this.oldIndexer = new SimpleValueIndexer(oldIndex);
-		this.newIndexer = new SimpleValueIndexer(newIndex);
+		this.oldIndexer = new SimpleValueIndexer(new MemoryMapSetIndex());
+		this.newIndexer = new SimpleValueIndexer(new MemoryMapSetIndex());
 	}
 }
