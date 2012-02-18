@@ -16,9 +16,6 @@ import org.xydra.base.value.XValue;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
-import org.xydra.index.IMapSetIndex;
-import org.xydra.index.impl.FastEntrySetFactory;
-import org.xydra.index.impl.MapSetIndex;
 import org.xydra.index.query.EqualsConstraint;
 
 
@@ -30,12 +27,7 @@ import org.xydra.index.query.EqualsConstraint;
 
 public class XModelObjectLevelIndex {
 	private XValueIndexer indexer;
-	private IMapSetIndex<String,ValueIndexEntry> index;
-	
-	public XModelObjectLevelIndex(XModel model) {
-		// TODO change it to our own implementation as soon as it's ready
-		throw new UnsupportedOperationException("Not yet implemented");
-	}
+	private ValueIndex index;
 	
 	public XModelObjectLevelIndex(XModel model, XValueIndexer indexer) {
 		this.indexer = indexer;
@@ -158,18 +150,17 @@ public class XModelObjectLevelIndex {
 		index(objectAddress, field);
 	}
 	
-	// TODO why is there an xaddress parameter here and in the next method?
-	public void updateIndex(XAddress objectAddress, XReadableField oldField, XReadableField newField) {
-		XAddress address = oldField.getAddress();
+	public void updateIndex(XReadableField oldField, XReadableField newField) {
+		XAddress oldAddress = oldField.getAddress();
+		XAddress newAddress = newField.getAddress();
 		
-		if(objectAddress.getAddressedType() != XType.XOBJECT) {
-			throw new RuntimeException("objectAddress is no valid Object-XAddress, but an "
-			        + objectAddress.getAddressedType() + "-Address.");
+		if(!oldAddress.equals(newAddress)) {
+			throw new RuntimeException(
+			        "oldField and newField do not have the same address and therefore aren't different versions of the same field.");
 		}
 		
-		if(!address.equals(newField.getAddress())) {
-			throw new RuntimeException("oldField and newField do not have the same address.");
-		}
+		XAddress objectAddress = XX.resolveObject(oldAddress.getRepository(),
+		        oldAddress.getModel(), oldAddress.getObject());
 		
 		updateIndexWithoutCheck(objectAddress, oldField, newField);
 	}
