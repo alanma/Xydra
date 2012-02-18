@@ -25,6 +25,10 @@ import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
 
 
+/*
+ * TODO Document
+ */
+
 public abstract class XModelObjectLevelIndexTest {
 	
 	private enum TestType {
@@ -39,9 +43,6 @@ public abstract class XModelObjectLevelIndexTest {
 	
 	private XModel newModel;
 	
-	/*
-	 * TODO initialize the index and indexer!
-	 */
 	protected XModelObjectLevelIndex oldIndex;
 	protected XModelObjectLevelIndex newIndex;
 	protected XValueIndexer oldIndexer;
@@ -163,7 +164,7 @@ public abstract class XModelObjectLevelIndexTest {
 			this.newIndex.updateIndex(oldJohn, newJohn);
 			break;
 		case XFIELD:
-			this.newIndex.updateIndex(newJohn.getAddress(), oldField, newField);
+			this.newIndex.updateIndex(oldField, newField);
 			break;
 		case XEVENT:
 			XEvent event = listener.event;
@@ -228,7 +229,7 @@ public abstract class XModelObjectLevelIndexTest {
 			this.newIndex.updateIndex(oldJohn, newJohn);
 			break;
 		case XFIELD:
-			this.newIndex.updateIndex(newJohn.getAddress(), oldField, newField);
+			this.newIndex.updateIndex(oldField, newField);
 			break;
 		case XEVENT:
 			XEvent event = listener.event;
@@ -305,7 +306,7 @@ public abstract class XModelObjectLevelIndexTest {
 			this.newIndex.updateIndex(oldJohn, newJohn);
 			break;
 		case XFIELD:
-			this.newIndex.updateIndex(newJohn.getAddress(), oldField1, newField1);
+			this.newIndex.updateIndex(oldField1, newField1);
 			break;
 		case XEVENT:
 			XEvent event = listener.event;
@@ -338,7 +339,7 @@ public abstract class XModelObjectLevelIndexTest {
 			this.newIndex.updateIndex(oldJohn, newJohn);
 			break;
 		case XFIELD:
-			this.newIndex.updateIndex(newJohn.getAddress(), oldField2, newField2);
+			this.newIndex.updateIndex(oldField2, newField2);
 			break;
 		case XEVENT:
 			XEvent event = listener.event;
@@ -405,7 +406,7 @@ public abstract class XModelObjectLevelIndexTest {
 			this.newIndex.updateIndex(oldJohn, newJohn);
 			break;
 		case XFIELD:
-			this.newIndex.updateIndex(newJohn.getAddress(), oldField, newField);
+			this.newIndex.updateIndex(oldField, newField);
 			break;
 		case XEVENT:
 			XEvent event = listener.event;
