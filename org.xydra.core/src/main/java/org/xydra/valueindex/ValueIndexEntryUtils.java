@@ -51,10 +51,33 @@ public class ValueIndexEntryUtils {
 		String result = "";
 		
 		for(ValueIndexEntry entry : entries) {
-			result += '\n' + "<entry>";
-			result += serializeAsString(entry);
+			if(entry != null) {
+				result += '\n' + "<entry>";
+				result += serializeAsString(entry);
+			}
+			/*
+			 * Null entries of the array will not appear in the string
+			 * 
+			 * TODO Document this
+			 */
 		}
 		
+		return result;
+	}
+	
+	public static String serializeAsString(ValueIndexEntry[] oldEntries, ValueIndexEntry newEntry) {
+		String result = serializeAsString(oldEntries);
+		
+		if(newEntry != null) {
+			result += '\n' + "<entry>";
+			result += serializeAsString(newEntry);
+		}
+		/*
+		 * Null entries of the array will not appear in the string
+		 * 
+		 * TODO Document this
+		 */
+
 		return result;
 	}
 	
@@ -103,17 +126,21 @@ public class ValueIndexEntryUtils {
 		// TODO document that this only works with strings returned by the
 		// serializeAsString method
 		// Strings entries = s.split(arg0)
-		String[] strings = s.split('\n' + "(<entry>)");
-		
-		// strings[0] will be the empty string, so don't use it!
-		
-		ValueIndexEntry[] entries = new ValueIndexEntry[strings.length - 1];
-		
-		for(int i = 1; i < strings.length; i++) {
-			System.out.println(i + " = " + strings[i]);
-			entries[i - 1] = fromString(strings[i]);
+		if(s != null) {
+			String[] strings = s.split('\n' + "(<entry>)");
+			
+			// strings[0] will be the empty string, so don't use it!
+			
+			ValueIndexEntry[] entries = new ValueIndexEntry[strings.length - 1];
+			
+			for(int i = 1; i < strings.length; i++) {
+				entries[i - 1] = fromString(strings[i]);
+			}
+			
+			return entries;
+		} else {
+			ValueIndexEntry[] emptyArray = new ValueIndexEntry[0];
+			return emptyArray;
 		}
-		
-		return entries;
 	}
 }
