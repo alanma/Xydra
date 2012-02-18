@@ -18,8 +18,8 @@ public class MockStringMap implements StringMap {
 	}
 	
 	@Override
-	public void put(String key, String value) {
-		this.map.put(key, value);
+	public String put(String key, String value) {
+		return this.map.put(key, value);
 	}
 	
 	@Override
