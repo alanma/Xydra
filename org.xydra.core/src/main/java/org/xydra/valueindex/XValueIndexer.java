@@ -24,7 +24,6 @@ import org.xydra.base.value.XStringListValue;
 import org.xydra.base.value.XStringSetValue;
 import org.xydra.base.value.XStringValue;
 import org.xydra.base.value.XValue;
-import org.xydra.index.IMapSetIndex;
 
 
 /*
@@ -42,7 +41,7 @@ public abstract class XValueIndexer {
 		this.index = index;
 	}
 	
-	public IMapSetIndex<String,ValueIndexEntry> getIndex() {
+	public ValueIndex getIndex() {
 		return this.index;
 	}
 	
