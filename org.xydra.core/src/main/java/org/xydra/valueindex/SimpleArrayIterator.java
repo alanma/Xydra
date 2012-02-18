@@ -3,7 +3,9 @@ package org.xydra.valueindex;
 import java.util.Iterator;
 
 
-// TODO write docu
+/**
+ * Simple implementation of the {@link java.util.Iterator} interface for arrays.
+ */
 public class SimpleArrayIterator<E> implements Iterator<E> {
 	private E[] array;
 	private int index;
@@ -24,6 +26,9 @@ public class SimpleArrayIterator<E> implements Iterator<E> {
 		return element;
 	}
 	
+	/**
+	 * not supported by this implementation.
+	 */
 	@Override
 	public void remove() {
 		throw new UnsupportedOperationException("remove() is not supported");
