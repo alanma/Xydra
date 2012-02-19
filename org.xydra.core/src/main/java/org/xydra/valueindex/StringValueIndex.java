@@ -10,10 +10,26 @@ import org.xydra.index.query.EqualsConstraint;
 import org.xydra.index.query.KeyEntryTuple;
 
 
-/*
- * TODO Implement & Document
+/**
+ * Implementation of {@link ValueIndex} which does not store maps of
+ * {@link ValueIndexEntry ValueIndexEntries}, but represents and stores them as
+ * Strings.
+ * 
+ * Warning: Many methods are not supported in this implementation!
+ * 
+ * @author Kaidel
+ * 
  */
 
+/*
+ * TODO Maybe rewrite the whole interface and don't use IMapSetIndex, since
+ * almost all methods don't work anyway?
+ */
+
+/*
+ * TODO implement methods that check the size of the value first and only add it
+ * if its small enough and null otherwise
+ */
 public class StringValueIndex implements ValueIndex {
 	private static final long serialVersionUID = -5366154192053454730L;
 	
@@ -23,11 +39,19 @@ public class StringValueIndex implements ValueIndex {
 		this.map = map;
 	}
 	
+	/**
+	 * @throws UnsupportedOperationException this method is not supported by
+	 *             this implementation
+	 */
 	@Override
 	public void clear() {
 		throw new UnsupportedOperationException("clear() is not supported by StringValueIndex");
 	}
 	
+	/**
+	 * @throws UnsupportedOperationException this method is not supported by
+	 *             this implementation
+	 */
 	@Override
 	public boolean isEmpty() {
 		throw new UnsupportedOperationException("empty() is not supported by StringValueIndex");
@@ -67,9 +91,6 @@ public class StringValueIndex implements ValueIndex {
 			ValueIndexEntry e = it.next();
 			
 			if(e.equalAddressAndValue(address, value)) {
-				/*
-				 * TODO check counter too?
-				 */
 				return true;
 			}
 		}
@@ -85,14 +106,11 @@ public class StringValueIndex implements ValueIndex {
 	}
 	
 	@Override
-	public void deIndex(String key, ValueIndexEntry entry) {
+	public void deIndex(String key, XAddress objectAddress, XValue value) {
 		if(!(this.containsKey(key))) {
 			// do nothing
 			return;
 		}
-		
-		XAddress address = entry.getAddress();
-		XValue value = entry.getValue();
 		
 		String entriesString = this.map.get(key);
 		ValueIndexEntry[] entryArray = ValueIndexEntryUtils.getArrayFromString(entriesString);
@@ -101,10 +119,11 @@ public class StringValueIndex implements ValueIndex {
 		for(int i = 0; i < entryArray.length && !found; i++) {
 			/*
 			 * TODO make this faster, for example by implementing an order on
-			 * ValueIndexEntries and using binary search
+			 * ValueIndexEntries and using binary search (which makes adding new
+			 * entries slower... what's more important?)
 			 */
 
-			if(entryArray[i].equalAddressAndValue(address, value)) {
+			if(entryArray[i].equalAddressAndValue(objectAddress, value)) {
 				found = true;
 				
 				entryArray[i].decrementCounter();
@@ -134,18 +153,23 @@ public class StringValueIndex implements ValueIndex {
 	}
 	
 	@Override
+	public void deIndex(String key, ValueIndexEntry entry) {
+		XAddress address = entry.getAddress();
+		XValue value = entry.getValue();
+		
+		deIndex(key, address, value);
+	}
+	
+	@Override
 	public void deIndex(String key) {
 		this.map.remove(key);
 	}
 	
 	@Override
-	public void index(String key, ValueIndexEntry entry) {
-		XAddress address = entry.getAddress();
-		XValue value = entry.getValue();
-		
+	public void index(String key, XAddress objectAddress, XValue value) {
 		if(!(this.containsKey(key))) {
 			ValueIndexEntry[] newEntries = new ValueIndexEntry[1];
-			newEntries[0] = new ValueIndexEntry(address, value, 1);
+			newEntries[0] = new ValueIndexEntry(objectAddress, value, 1);
 			
 			String entriesString = ValueIndexEntryUtils.serializeAsString(newEntries);
 			
@@ -159,10 +183,11 @@ public class StringValueIndex implements ValueIndex {
 			for(int i = 0; i < entryArray.length && !found; i++) {
 				/*
 				 * TODO make this faster, for example by implementing an order
-				 * on ValueIndexEntries and using binary search
+				 * on ValueIndexEntries and using binary search (which makes
+				 * adding new entries slower... what's more important?)
 				 */
 
-				if(entryArray[i].equalAddressAndValue(address, value)) {
+				if(entryArray[i].equalAddressAndValue(objectAddress, value)) {
 					found = true;
 					
 					entryArray[i].incrementCounter();
@@ -181,7 +206,7 @@ public class StringValueIndex implements ValueIndex {
 				/*
 				 * no entry was found, so we'll have to add it
 				 */
-				ValueIndexEntry newEntry = new ValueIndexEntry(address, value, 1);
+				ValueIndexEntry newEntry = new ValueIndexEntry(objectAddress, value, 1);
 				
 				String newEntriesString = ValueIndexEntryUtils.serializeAsString(entryArray,
 				        newEntry);
@@ -192,16 +217,36 @@ public class StringValueIndex implements ValueIndex {
 	}
 	
 	@Override
+	public void index(String key, ValueIndexEntry entry) {
+		XAddress address = entry.getAddress();
+		XValue value = entry.getValue();
+		
+		index(key, address, value);
+	}
+	
+	/**
+	 * @throws UnsupportedOperationException this method is not supported by
+	 *             this implementation
+	 */
+	@Override
 	public Iterator<KeyEntryTuple<String,ValueIndexEntry>> tupleIterator(Constraint<String> c1,
 	        Constraint<ValueIndexEntry> entryConstraint) {
 		throw new UnsupportedOperationException("StringValueIndex does not support tupleIterator()");
 	}
 	
+	/**
+	 * @throws UnsupportedOperationException this method is not supported by
+	 *             this implementation
+	 */
 	@Override
 	public Iterator<String> keyIterator() {
 		throw new UnsupportedOperationException("StringValueIndex does not support keyIterator()");
 	}
 	
+	/**
+	 * @throws UnsupportedOperationException this method is not supported by
+	 *             this implementation
+	 */
 	@Override
 	public org.xydra.index.IMapSetIndex.IMapSetDiff<String,ValueIndexEntry> computeDiff(
 	        IMapSetIndex<String,ValueIndexEntry> otherFuture) {

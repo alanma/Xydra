@@ -12,6 +12,16 @@ import org.xydra.index.query.EqualsConstraint;
 import org.xydra.index.query.KeyEntryTuple;
 
 
+/**
+ * A simple in-memory implementation of {@link ValueIndex}, for testing
+ * purposes.
+ * 
+ * Warning: Some methods are not supported.
+ * 
+ * @author Kaidel
+ * 
+ */
+
 public class MemoryMapSetIndex implements ValueIndex {
 	/**
      * 
@@ -65,20 +75,15 @@ public class MemoryMapSetIndex implements ValueIndex {
 	}
 	
 	@Override
-	public void deIndex(String key1, ValueIndexEntry entry) {
-		HashSet<ValueIndexEntry> set = this.map.get(key1);
-		
-		XAddress address = entry.getAddress();
-		XValue value = entry.getValue();
-		// counter is ignored!
-		
+	public void deIndex(String key, XAddress objectAddress, XValue value) {
+		HashSet<ValueIndexEntry> set = this.map.get(key);
 		Iterator<ValueIndexEntry> iterator = set.iterator();
 		
 		boolean found = false;
 		while(!found && iterator.hasNext()) {
 			ValueIndexEntry triple = iterator.next();
 			
-			if(triple.equalAddressAndValue(address, value)) {
+			if(triple.equalAddressAndValue(objectAddress, value)) {
 				found = true;
 				triple.decrementCounter();
 				
@@ -89,28 +94,33 @@ public class MemoryMapSetIndex implements ValueIndex {
 		}
 		
 		if(set.size() == 0) {
-			deIndex(key1);
+			deIndex(key);
 		}
 		
 	}
 	
 	@Override
-	public void deIndex(String key1) {
-		this.map.remove(key1);
-	}
-	
-	@Override
-	public void index(String key1, ValueIndexEntry entry) {
-		if(!this.map.containsKey(key1)) {
-			this.map.put(key1, new HashSet<ValueIndexEntry>());
-		}
-		
-		HashSet<ValueIndexEntry> set = this.map.get(key1);
-		assert set != null;
-		
+	public void deIndex(String key, ValueIndexEntry entry) {
 		XAddress address = entry.getAddress();
 		XValue value = entry.getValue();
 		// counter is ignored!
+		
+		deIndex(key, address, value);
+	}
+	
+	@Override
+	public void deIndex(String key) {
+		this.map.remove(key);
+	}
+	
+	@Override
+	public void index(String key, XAddress objectAddress, XValue value) {
+		if(!this.map.containsKey(key)) {
+			this.map.put(key, new HashSet<ValueIndexEntry>());
+		}
+		
+		HashSet<ValueIndexEntry> set = this.map.get(key);
+		assert set != null;
 		
 		Iterator<ValueIndexEntry> iterator = set.iterator();
 		
@@ -118,7 +128,7 @@ public class MemoryMapSetIndex implements ValueIndex {
 		while(!found && iterator.hasNext()) {
 			ValueIndexEntry triple = iterator.next();
 			
-			if(triple.equalAddressAndValue(address, value)) {
+			if(triple.equalAddressAndValue(objectAddress, value)) {
 				found = true;
 				triple.incrementCounter();
 			}
@@ -126,11 +136,24 @@ public class MemoryMapSetIndex implements ValueIndex {
 		
 		if(!found) {
 			// no entry found -> add one
-			ValueIndexEntry newEntry = new ValueIndexEntry(address, value, 1);
+			ValueIndexEntry newEntry = new ValueIndexEntry(objectAddress, value, 1);
 			set.add(newEntry);
 		}
 	}
 	
+	@Override
+	public void index(String key, ValueIndexEntry entry) {
+		XAddress address = entry.getAddress();
+		XValue value = entry.getValue();
+		// counter is ignored!
+		
+		index(key, address, value);
+	}
+	
+	/**
+	 * @throws UnsupportedOperationException this method is not supported by
+	 *             this implementation
+	 */
 	@Override
 	public Iterator<KeyEntryTuple<String,ValueIndexEntry>> tupleIterator(Constraint<String> c1,
 	        Constraint<ValueIndexEntry> entryConstraint) {
@@ -139,9 +162,13 @@ public class MemoryMapSetIndex implements ValueIndex {
 	
 	@Override
 	public Iterator<String> keyIterator() {
-		throw new UnsupportedOperationException();
+		return this.map.keySet().iterator();
 	}
 	
+	/**
+	 * @throws UnsupportedOperationException this method is not supported by
+	 *             this implementation
+	 */
 	@Override
 	public org.xydra.index.IMapSetIndex.IMapSetDiff<String,ValueIndexEntry> computeDiff(
 	        IMapSetIndex<String,ValueIndexEntry> otherFuture) {
