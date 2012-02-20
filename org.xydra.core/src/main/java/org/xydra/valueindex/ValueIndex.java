@@ -19,17 +19,7 @@ import org.xydra.index.query.EqualsConstraint;
  */
 
 public interface ValueIndex extends IMapSetIndex<String,ValueIndexEntry> {
-	/*
-	 * TODO Document how these methods differ from the former
-	 * (increment/decrement the counter before finally (de)indexing etc.)
-	 * 
-	 * TODO Don't forget to document that the counter variable in the given
-	 * entry-Object is ignored!
-	 * 
-	 * TODO Document that changes to returned ValueIndexEntries will NOT changed
-	 * the stored entries
-	 */
-
+	
 	/**
 	 * Associates the given {@link ValueIndexEntry} with the given key. The
 	 * counter-variable of the ValueIndexEntry will be ignored, two

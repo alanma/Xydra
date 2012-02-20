@@ -9,7 +9,22 @@ import org.xydra.core.serialize.json.JsonParser;
 import org.xydra.core.serialize.json.JsonSerializer;
 
 
+/**
+ * Provides methods for serializing {@link ValueIndexEntry ValueIndexEntries} as
+ * Strings and for deserializing Strings to {@link ValueIndexEntry
+ * ValueIndexEntries}.
+ * 
+ * @author Kaidel
+ * 
+ */
 public class ValueIndexEntryUtils {
+	
+	/**
+	 * Serializes the given {@link ValueIndexEntry} as a String.
+	 * 
+	 * @param entry the {@link ValueIndexEntry} which is to be serialized
+	 * @return a String representation of the given {@link ValueIndexEntry}.
+	 */
 	public static String serializeAsString(ValueIndexEntry entry) {
 		/*
 		 * TODO The implementation assumes that the JSON strings contain no new
@@ -43,6 +58,14 @@ public class ValueIndexEntryUtils {
 		return result;
 	}
 	
+	/**
+	 * Serializes the given {@link ValueIndexEntry} array as a single String.
+	 * 
+	 * @param entries the {@link ValueIndexEntry} array which is to be
+	 *            serialized
+	 * @return a String representation of the given {@link ValueIndexEntry}
+	 *         array.
+	 */
 	public static String serializeAsString(ValueIndexEntry[] entries) {
 		/*
 		 * TODO The implementation assumes that the JSON strings contain no new
@@ -65,6 +88,18 @@ public class ValueIndexEntryUtils {
 		return result;
 	}
 	
+	/**
+	 * Serializes the given {@link ValueIndexEntry} array as a single String,
+	 * together with the given new entry appended to the array.
+	 * 
+	 * @param oldEntries the {@link ValueIndexEntry} array which is to be
+	 *            serialized
+	 * @param newEntry another {@link ValueIndexEntry} which also is to be
+	 *            serialized, essentially "adds" the entry to the given array in
+	 *            the String representation.
+	 * @return a String representation of the given {@link ValueIndexEntry}
+	 *         array with "added" newElement.
+	 */
 	public static String serializeAsString(ValueIndexEntry[] oldEntries, ValueIndexEntry newEntry) {
 		String result = serializeAsString(oldEntries);
 		
@@ -80,6 +115,8 @@ public class ValueIndexEntryUtils {
 
 		return result;
 	}
+	
+	// TODO continue documentation
 	
 	public static ValueIndexEntry fromString(String s) {
 		// TODO document that this only works with strings returned by the
