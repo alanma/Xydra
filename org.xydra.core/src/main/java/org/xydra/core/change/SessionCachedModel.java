@@ -50,6 +50,8 @@ import org.xydra.log.LoggerFactory;
  */
 public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff {
 	
+	private long rev = UNDEFINED;
+	
 	private static class CachedEntity {
 		private XAddress address;
 		protected EntityState state;
@@ -65,8 +67,10 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 			return this.address;
 		}
 		
+		protected long rev = UNDEFINED;
+		
 		public long getRevisionNumber() {
-			return UNDEFINED;
+			return this.rev;
 		}
 		
 		public boolean isAdded() {
@@ -255,15 +259,17 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 		public void indexFieldsFrom(XReadableObject baseObject) {
 			for(XID fieldId : baseObject) {
 				CachedField cf = this.cachedFields.get(fieldId);
-				XValue baseValue = baseObject.getField(fieldId).getValue();
+				XReadableField baseField = baseObject.getField(fieldId);
+				XValue baseValue = baseField.getValue();
 				if(cf == null) {
-					setFieldState(fieldId, EntityState.Present, baseValue);
+					cf = setFieldState(fieldId, EntityState.Present, baseValue);
 				} else {
 					if(!cf.isChanged()) {
 						cf.state = EntityState.Present;
 						cf.setValue(baseValue);
 					}
 				}
+				cf.rev = baseField.getRevisionNumber();
 			}
 		}
 		
@@ -569,7 +575,7 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 	
 	@Override
 	public long getRevisionNumber() {
-		return UNDEFINED;
+		return this.rev;
 	}
 	
 	@Override
@@ -615,6 +621,7 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 				setObjectState(id, EntityState.Present);
 			}
 		}
+		this.rev = baseModel.getRevisionNumber();
 		this.knowsAllObjectIds = true;
 	}
 	
@@ -624,6 +631,7 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 			co = setObjectState(baseObject.getID(), EntityState.Present);
 		}
 		co.indexFieldsFrom(baseObject);
+		co.rev = baseObject.getRevisionNumber();
 	}
 	
 	@Override
