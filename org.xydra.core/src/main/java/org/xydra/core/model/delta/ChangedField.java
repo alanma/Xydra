@@ -24,7 +24,7 @@ import org.xydra.index.XI;
  * @author dscharrer
  * 
  */
-public class ChangedField implements XWritableField {
+public class ChangedField implements XWritableField, DeltaUtils.IFieldDiff {
 	
 	private final XReadableField base;
 	boolean changed = false;
@@ -49,12 +49,12 @@ public class ChangedField implements XWritableField {
 	}
 	
 	@Override
-    public XAddress getAddress() {
+	public XAddress getAddress() {
 		return this.base.getAddress();
 	}
 	
 	@Override
-    public XID getID() {
+	public XID getID() {
 		return this.base.getID();
 	}
 	
@@ -74,12 +74,12 @@ public class ChangedField implements XWritableField {
 	 * @return the revision number of the original {@link XReadableField}
 	 */
 	@Override
-    public long getRevisionNumber() {
+	public long getRevisionNumber() {
 		return this.base.getRevisionNumber();
 	}
 	
 	@Override
-    public XValue getValue() {
+	public XValue getValue() {
 		return this.value;
 	}
 	
@@ -92,12 +92,12 @@ public class ChangedField implements XWritableField {
 	}
 	
 	@Override
-    public boolean isEmpty() {
+	public boolean isEmpty() {
 		return this.value == null;
 	}
 	
 	@Override
-    public boolean setValue(XValue value) {
+	public boolean setValue(XValue value) {
 		// reset changed flag if the value is reset to the base field's value
 		boolean changes = !XI.equals(getValue(), value);
 		this.changed = !XI.equals(value, this.base.getValue());
@@ -108,6 +108,11 @@ public class ChangedField implements XWritableField {
 	@Override
 	public XType getType() {
 		return XType.XFIELD;
+	}
+	
+	@Override
+	public XValue getInitialValue() {
+		return this.getOldValue();
 	}
 	
 }

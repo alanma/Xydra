@@ -27,6 +27,8 @@ import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.rmof.impl.memory.SimpleObject;
 import org.xydra.core.XCopyUtils;
+import org.xydra.core.model.delta.DeltaUtils.IModelDiff;
+import org.xydra.core.model.delta.DeltaUtils.IObjectDiff;
 import org.xydra.index.iterator.AbstractFilteringIterator;
 import org.xydra.index.iterator.BagUnionIterator;
 import org.xydra.log.Logger;
@@ -50,7 +52,7 @@ import org.xydra.log.LoggerFactory;
  * @author dscharrer
  * 
  */
-public class ChangedModel implements XWritableModel {
+public class ChangedModel implements XWritableModel, IModelDiff {
 	
 	private static final Logger log = LoggerFactory.getLogger(ChangedModel.class);
 	
@@ -323,7 +325,7 @@ public class ChangedModel implements XWritableModel {
 		
 		XWritableField field = object.getField(command.getFieldId());
 		if(field == null) {
-			log.warn("{ " + command + "} is invalid - field '" + command.getFieldId()
+			log.warn("Command { " + command + "} is invalid. Field '" + command.getFieldId()
 			        + "' not found in object '" + command.getObjectId() + "'");
 			return false;
 		}
@@ -336,8 +338,9 @@ public class ChangedModel implements XWritableModel {
 			}
 			// empty fields require an ADD command
 			if((command.getChangeType() == ChangeType.ADD) != field.isEmpty()) {
-				log.warn("command {" + command
-				        + "} is invalid (wrong type) command=ADD, field!=emtpy");
+				log.warn("command {" + command + "} is invalid (wrong type) command is "
+				        + command.getChangeType() + ", but field is "
+				        + (field.isEmpty() ? "empty" : "not emtpy"));
 				return false;
 			}
 		}
@@ -423,8 +426,10 @@ public class ChangedModel implements XWritableModel {
 		
 		case ADD:
 			if(object.hasField(fieldId)) {
-				log.warn(command + " object has already field '" + fieldId + "' and foced="
-				        + command.isForced());
+				if(!command.isForced()) {
+					log.warn(command + " object has already field '" + fieldId + "' and foced="
+					        + command.isForced());
+				}
 				return command.isForced();
 			}
 			// command is OK and adds a new field
@@ -692,6 +697,21 @@ public class ChangedModel implements XWritableModel {
 		for(XID removed : changedModel.getRemovedObjects()) {
 			model.removeObject(removed);
 		}
+	}
+	
+	@Override
+	public Collection<? extends XReadableObject> getAdded() {
+		return this.added.values();
+	}
+	
+	@Override
+	public Collection<? extends IObjectDiff> getPotentiallyChanged() {
+		return this.changed.values();
+	}
+	
+	@Override
+	public Collection<XID> getRemoved() {
+		return this.removed;
 	}
 	
 }

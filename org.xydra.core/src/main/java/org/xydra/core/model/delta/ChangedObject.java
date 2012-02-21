@@ -1,5 +1,6 @@
 package org.xydra.core.model.delta;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -18,6 +19,7 @@ import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.rmof.impl.memory.SimpleField;
+import org.xydra.core.model.delta.DeltaUtils.IFieldDiff;
 import org.xydra.index.iterator.AbstractFilteringIterator;
 import org.xydra.index.iterator.BagUnionIterator;
 
@@ -37,7 +39,7 @@ import org.xydra.index.iterator.BagUnionIterator;
  * @author dscharrer
  * 
  */
-public class ChangedObject implements XWritableObject {
+public class ChangedObject implements XWritableObject, DeltaUtils.IObjectDiff {
 	
 	// Fields that are not in base and have been added.
 	// Contains no XIDs that are in removed or changed.
@@ -83,7 +85,7 @@ public class ChangedObject implements XWritableObject {
 		for(XID id : this.added.keySet()) {
 			assert !this.removed.contains(id) && !this.changed.containsKey(id);
 			assert !this.base.hasField(id) : "base " + this.base.getAddress()
-			        + " cannot have field " + id;
+			        + " cannot have field " + id + " which also appers in ADDED";
 			assert id.equals(this.added.get(id).getID());
 		}
 		
@@ -445,5 +447,20 @@ public class ChangedObject implements XWritableObject {
 		for(XID removed : changedObject.getRemovedFields()) {
 			baseObject.removeField(removed);
 		}
+	}
+	
+	@Override
+	public Collection<? extends XReadableField> getAdded() {
+		return this.added.values();
+	}
+	
+	@Override
+	public Collection<? extends IFieldDiff> getPotentiallyChanged() {
+		return this.changed.values();
+	}
+	
+	@Override
+	public Collection<XID> getRemoved() {
+		return this.removed;
 	}
 }

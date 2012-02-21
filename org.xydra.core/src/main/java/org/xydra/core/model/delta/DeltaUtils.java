@@ -1,8 +1,10 @@
 package org.xydra.core.model.delta;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
+import org.xydra.base.IHasXID;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.change.XAtomicEvent;
@@ -366,4 +368,36 @@ public abstract class DeltaUtils {
 		}
 		
 	}
+	
+	public static interface IModelDiff {
+		Collection<? extends XReadableObject> getAdded();
+		
+		Collection<? extends IObjectDiff> getPotentiallyChanged();
+		
+		Collection<XID> getRemoved();
+	}
+	
+	public static interface IObjectDiff extends IHasXID {
+		Collection<? extends XReadableField> getAdded();
+		
+		Collection<? extends IFieldDiff> getPotentiallyChanged();
+		
+		Collection<XID> getRemoved();
+		
+		boolean hasChanges();
+		
+		XID getID();
+	}
+	
+	public static interface IFieldDiff extends IHasXID {
+		XValue getInitialValue();
+		
+		// same signature as XReadableField
+		XValue getValue();
+		
+		boolean isChanged();
+		
+		XID getID();
+	}
+	
 }
