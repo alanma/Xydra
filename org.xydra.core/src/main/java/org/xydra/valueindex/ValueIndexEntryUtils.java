@@ -24,6 +24,8 @@ public class ValueIndexEntryUtils {
 	 * 
 	 * @param entry the {@link ValueIndexEntry} which is to be serialized
 	 * @return a String representation of the given {@link ValueIndexEntry}.
+	 * @throws NullPointerException if the given {@link ValueIndexEntry} was
+	 *             null
 	 */
 	public static String serializeAsString(ValueIndexEntry entry) {
 		/*
@@ -60,6 +62,7 @@ public class ValueIndexEntryUtils {
 	
 	/**
 	 * Serializes the given {@link ValueIndexEntry} array as a single String.
+	 * Null entries in the array will not be represented in the String.
 	 * 
 	 * @param entries the {@link ValueIndexEntry} array which is to be
 	 *            serialized
@@ -78,11 +81,6 @@ public class ValueIndexEntryUtils {
 				result += '\n' + "<entry>";
 				result += serializeAsString(entry);
 			}
-			/*
-			 * Null entries of the array will not appear in the string
-			 * 
-			 * TODO Document this
-			 */
 		}
 		
 		return result;
@@ -90,7 +88,8 @@ public class ValueIndexEntryUtils {
 	
 	/**
 	 * Serializes the given {@link ValueIndexEntry} array as a single String,
-	 * together with the given new entry appended to the array.
+	 * together with the given new entry appended to the array. Null entries in
+	 * the array will not be represented in the String.
 	 * 
 	 * @param oldEntries the {@link ValueIndexEntry} array which is to be
 	 *            serialized
@@ -107,26 +106,26 @@ public class ValueIndexEntryUtils {
 			result += '\n' + "<entry>";
 			result += serializeAsString(newEntry);
 		}
-		/*
-		 * Null entries of the array will not appear in the string
-		 * 
-		 * TODO Document this
-		 */
-
 		return result;
 	}
 	
-	// TODO continue documentation
-	
+	/**
+	 * Parses the given String as a {@link ValueIndexEntry}.
+	 * 
+	 * Warning: Only Strings returned by
+	 * {@link ValueIndexEntryUtils#serializeAsString(ValueIndexEntry)} can be
+	 * parsed by this method. The behavior of this method is undefined for other
+	 * types of Strings.
+	 * 
+	 * @param s The String which is to be parsed as an {@link ValueIndexEntry}.
+	 * @return The {@link ValueIndexEntry} which was encoded in the given
+	 *         String.
+	 */
 	public static ValueIndexEntry fromString(String s) {
-		// TODO document that this only works with strings returned by the
-		// serializeAsString method
-		
 		XAddress address = null;
 		XValue value = null;
 		Integer counter = 0;
 		
-		// TODO does this work?
 		String[] strings = s.split("" + '\n');
 		
 		assert strings.length == 3;
@@ -159,10 +158,20 @@ public class ValueIndexEntryUtils {
 		return entry;
 	}
 	
+	/**
+	 * Parses the given String as a an array of {@link ValueIndexEntry
+	 * ValueIndexEntries}.
+	 * 
+	 * Warning: Only Strings returned by
+	 * {@link ValueIndexEntryUtils#serializeAsString(ValueIndexEntry[])} can be
+	 * parsed by this method. The behavior of this method is undefined for other
+	 * types of Strings.
+	 * 
+	 * @param s The String which is to be parsed as an {@link ValueIndexEntry}.
+	 * @return The {@link ValueIndexEntry} which was encoded in the given
+	 *         String.
+	 */
 	public static ValueIndexEntry[] getArrayFromString(String s) {
-		// TODO document that this only works with strings returned by the
-		// serializeAsString method
-		// Strings entries = s.split(arg0)
 		if(s != null) {
 			String[] strings = s.split('\n' + "(<entry>)");
 			

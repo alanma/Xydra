@@ -19,6 +19,18 @@ import org.xydra.core.model.XObject;
 import org.xydra.index.query.EqualsConstraint;
 
 
+/**
+ * An index for {@link XModel XModels}. Indexes the contents of the
+ * {@link XValue XValues} and stores them together with the {@link XAddress} of
+ * the {@link XObject} containing the {@link XField} which holds the value.
+ * 
+ * The index entries are "String -> XAddress & XValue". An {@link XValueIndexer}
+ * is needed to get the String representations used for indexing.
+ * 
+ * @author Kaidel
+ * 
+ */
+
 /*
  * TODO Keep in mind that it will NOT be possible to iterate over all existing
  * keys in the planned implementation, so do not use keyIterator etc. on the
@@ -29,6 +41,14 @@ public class XModelObjectLevelIndex {
 	private XValueIndexer indexer;
 	private ValueIndex index;
 	
+	/**
+	 * Creates a new index for the given {@link XModel} using the given
+	 * {@link XValueIndexer}.
+	 * 
+	 * @param model The {@link XModel} which will be indexed.
+	 * @param indexer The {@link XValueIndexer} which is to be used to get the
+	 *            Strings used for indexing.
+	 */
 	public XModelObjectLevelIndex(XModel model, XValueIndexer indexer) {
 		this.indexer = indexer;
 		this.index = indexer.getIndex();
