@@ -63,9 +63,13 @@ public class XCopyUtils {
 		for(XID fieldId : sourceObject) {
 			XReadableField sourceField = sourceObject.getField(fieldId);
 			XWritableField targetField = targetObject.createField(fieldId);
-			XValue sourceValue = sourceField.getValue();
-			targetField.setValue(sourceValue);
+			copyData(sourceField, targetField);
 		}
+	}
+	
+	public static void copyData(XReadableField sourceField, XWritableField targetField) {
+		XValue sourceValue = sourceField.getValue();
+		targetField.setValue(sourceValue);
 	}
 	
 	/**
