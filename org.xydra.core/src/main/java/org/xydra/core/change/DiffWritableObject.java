@@ -31,6 +31,7 @@ import org.xydra.log.LoggerFactory;
  * 
  * @author xamde
  */
+@Deprecated
 public class DiffWritableObject implements XWritableObject {
 	
 	private static final Logger log = LoggerFactory.getLogger(DiffWritableObject.class);
@@ -276,7 +277,7 @@ public class DiffWritableObject implements XWritableObject {
 			XWritableField f = getField(fId);
 			assert f != null;
 			// add field
-			// FIXME !!! handle 'forced'
+			// TODO Deprecated !!! handle 'forced'
 			if(this.base.hasField(fId)) {
 				log.warn("No need to create '" + fId + "', field already in base.");
 			} else {
@@ -288,7 +289,7 @@ public class DiffWritableObject implements XWritableObject {
 				XValue currentValue = baseGetValue(fId);
 				if(currentValue == null) {
 					// add value
-					// FIXME !!! handle 'forced'
+					// TODO Deprecated: handle 'forced'
 					list.add(X.getCommandFactory().createForcedAddValueCommand(f.getAddress(),
 					        f.getValue()));
 				} else {
@@ -341,9 +342,9 @@ public class DiffWritableObject implements XWritableObject {
 	@Override
 	public String toString() {
 		return "base: " + this.base.toString()
-
+		
 		+ "\n added: " + this.added.toString()
-
+		
 		+ "\n removed: " + this.removed.toString();
 	}
 	

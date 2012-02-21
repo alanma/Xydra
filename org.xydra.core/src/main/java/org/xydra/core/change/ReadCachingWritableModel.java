@@ -147,7 +147,7 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 	public XWritableObject createObject(XID objectId) {
 		assert objectId != null;
 		if(!hasObject(objectId)) {
-			this.cache.index(objectId, NOFIELD, NOVALUE);
+			this.antiCache.index(objectId, NOFIELD, NOVALUE);
 		}
 		return new WrappedObject(objectId);
 	}
@@ -318,19 +318,26 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 		if(this.cache.tupleIterator(new EqualsConstraint<XID>(objectId),
 		        new EqualsConstraint<XID>(fieldId)).hasNext()) {
 			return true;
-		} else {
-			if(this.objectIdsOfWhichAllFieldIdsAreKnown.contains(objectId)) {
-				return false;
-			}
-			// else
-			boolean baseHasField = this.base.hasObject(objectId)
-			        && this.base.getObject(objectId).hasField(fieldId);
-			// index
-			if(baseHasField) {
-				this.cache.index(objectId, fieldId, NOVALUE);
-			}
-			return baseHasField;
 		}
+		// else
+		if(this.objectIdsOfWhichAllFieldIdsAreKnown.contains(objectId)) {
+			return false;
+		}
+		// else
+		if(this.antiCache.tupleIterator(new EqualsConstraint<XID>(objectId),
+		        new EqualsConstraint<XID>(fieldId)).hasNext()) {
+			return false;
+		}
+		// else
+		boolean baseHasField = this.base.hasObject(objectId)
+		        && this.base.getObject(objectId).hasField(fieldId);
+		// index
+		if(baseHasField) {
+			this.cache.index(objectId, fieldId, NOVALUE);
+		} else {
+			this.antiCache.index(objectId, fieldId, NOVALUE);
+		}
+		return baseHasField;
 	}
 	
 	@Override
@@ -392,11 +399,13 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 	
 	@Override
 	public boolean removeObject(XID objectId) {
-		assert objectId != null;
-		// deIndex
-		IndexUtils.deIndex(this.cache, new EqualsConstraint<XID>(objectId), new Wildcard<XID>());
-		
-		return this.base.removeObject(objectId);
+		throw new RuntimeException("A read-cache cannot be changed");
+		// assert objectId != null;
+		// // deIndex
+		// IndexUtils.deIndex(this.cache, new EqualsConstraint<XID>(objectId),
+		// new Wildcard<XID>());
+		//
+		// return this.base.removeObject(objectId);
 	}
 	
 	@Override

@@ -200,10 +200,14 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 	@Override
 	public XWritableObject getObject(final XID objectId) {
 		if(hasObject(objectId)) {
-			return new WrappedObject(objectId);
+			return getObject_internal(objectId);
 		} else {
 			return null;
 		}
+	}
+	
+	protected XWritableObject getObject_internal(XID objectId) {
+		return new WrappedObject(objectId);
 	}
 	
 	@Override
@@ -223,12 +227,20 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 		assert objectId != null;
 		assert fieldId != null;
 		if(object_hasField(objectId, fieldId)) {
-			return new WrappedField(objectId, fieldId);
+			return object_getField_internal(objectId, fieldId);
 		} else {
 			return null;
 		}
 	}
 	
+	protected XWritableField object_getField_internal(XID objectId, XID fieldId) {
+		return new WrappedField(objectId, fieldId);
+	}
+	
+	/**
+	 * @param objectId
+	 * @return the revision number of the object with the given ID
+	 */
 	protected abstract long object_getRevisionNumber(final XID objectId);
 	
 	protected abstract boolean object_hasField(final XID objectId, final XID fieldId);

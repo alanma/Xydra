@@ -219,13 +219,22 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 *             {@link XModel}.
 	 */
 	public void addField(XAddress objectAddr, XReadableField newField) {
+		addField(objectAddr, newField, false);
+	}
+	
+	public void addFieldForced(XAddress objectAddr, XReadableField newField) {
+		addField(objectAddr, newField, true);
+	}
+	
+	public void addField(XAddress objectAddr, XReadableField newField, boolean forced) {
 		assert createsNoTargetAddressTwice(newField.getAddress()) : newField.getAddress();
-		addField(objectAddr, XCommand.SAFE, newField.getID());
+		addField(objectAddr, forced ? XCommand.FORCED : XCommand.SAFE, newField.getID());
 		assert createsNoTargetAddressTwice(newField.getAddress()) : newField.getAddress() + ""
 		        + this.commands;
 		if(newField.getValue() != null) {
 			XAddress fieldAddr = XX.resolveField(objectAddr, newField.getID());
-			addValue(fieldAddr, XCommand.NEW, newField.getValue());
+			// TODO why XCommand.NEW, why not SAFE?
+			addValue(fieldAddr, forced ? XCommand.FORCED : XCommand.NEW, newField.getValue());
 		}
 		assert createsNoTargetAddressTwice(newField.getAddress()) : newField.getAddress();
 	}
@@ -280,11 +289,19 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 *             modelAddr.
 	 */
 	public void addObject(XAddress modelAddr, XReadableObject newObject) {
+		addObject(modelAddr, newObject, false);
+	}
+	
+	public void addObjectForced(XAddress modelAddr, XReadableObject newObject) {
+		addObject(modelAddr, newObject, true);
+	}
+	
+	public void addObject(XAddress modelAddr, XReadableObject newObject, boolean forced) {
 		XAddress objectAddr = XX.resolveObject(modelAddr, newObject.getID());
-		addObject(modelAddr, XCommand.SAFE, newObject.getID());
+		addObject(modelAddr, forced ? XCommand.FORCED : XCommand.SAFE, newObject.getID());
 		assert createsNoTargetAddressTwice(newObject.getAddress()) : newObject.getAddress();
 		for(XID newFieldId : newObject) {
-			addField(objectAddr, newObject.getField(newFieldId));
+			addField(objectAddr, newObject.getField(newFieldId), forced);
 			assert createsNoTargetAddressTwice(newObject.getAddress()) : newObject.getAddress();
 		}
 	}
@@ -400,7 +417,6 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 		assert model.checkSetInvariants();
 		assert createsNoTargetAddressTwice(model.getAddress()) : model.getID();
 		
-		// FIXME bug is here
 		for(ChangedObject object : model.getChangedObjects()) {
 			applyChanges(object);
 		}
@@ -420,7 +436,7 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 */
 	public XTransaction build() {
 		
-		// FIXME remove duplicate commands
+		// FIXME 2012-02 remove duplicate commands
 		
 		return MemoryTransaction.createTransaction(this.target, this.commands);
 	}
@@ -492,7 +508,7 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 * @throws IllegalArgumentException if this builders target is not oldModel
 	 */
 	/*
-	 * FIXME All of the change... Methods here have the same problem: It is
+	 * FIXME 2012-02 All of the change-Methods here have the same problem: It is
 	 * possible that someone will change the state of the given
 	 * model/object/etc. while the method is being executed, which may result in
 	 * incoherent transformations. We'll probably need a way to lock the

@@ -10,6 +10,7 @@ import org.xydra.base.XID;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
+import org.xydra.base.change.XSessionModel;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
@@ -24,7 +25,7 @@ import org.xydra.core.XCompareUtils;
  * 
  * @author voelkel
  */
-public class SimpleModel implements Serializable, XRevWritableModel {
+public class SimpleModel implements Serializable, XRevWritableModel, XSessionModel {
 	
 	private static final long serialVersionUID = 5593443685935758227L;
 	
@@ -171,6 +172,18 @@ public class SimpleModel implements Serializable, XRevWritableModel {
 		}
 		
 		return result;
+	}
+	
+	@Override
+	public XSessionModel loadObject(XID objectId) {
+		/* A simpleModel neither can not needs to load anything after creation */
+		return this;
+	}
+	
+	@Override
+	public XSessionModel loadAllObjects() {
+		/* A simpleModel neither can not needs to load anything after creation */
+		return this;
 	}
 	
 }

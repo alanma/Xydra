@@ -2,19 +2,19 @@ package org.xydra.core.util;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
+import org.xydra.base.IHasXID;
 import org.xydra.base.XID;
 import org.xydra.base.XType;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XReadableRepository;
-import org.xydra.base.rmof.impl.memory.SimpleField;
-import org.xydra.base.rmof.impl.memory.SimpleObject;
-import org.xydra.core.model.delta.ChangedField;
-import org.xydra.core.model.delta.ChangedModel;
-import org.xydra.core.model.delta.ChangedObject;
+import org.xydra.core.model.delta.DeltaUtils;
+import org.xydra.core.model.delta.DeltaUtils.IFieldDiff;
+import org.xydra.core.model.delta.DeltaUtils.IObjectDiff;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 
@@ -137,41 +137,71 @@ public class DumpUtils {
 		return buf;
 	}
 	
-	public static StringBuffer changesToString(final ChangedModel changedModel) {
-		StringBuffer buf = new StringBuffer();
-		for(SimpleObject object : changedModel.getNewObjects()) {
-			buf.append("=== ADDED Object '" + object.getID() + "' ===<br/>\n");
-			buf.append(DumpUtils.toStringBuffer(object));
+	public static class XidComparator implements Comparator<IHasXID> {
+		
+		@Override
+		public int compare(IHasXID a, IHasXID b) {
+			return a.getID().compareTo(b.getID());
 		}
-		for(XID objectId : changedModel.getRemovedObjects()) {
-			buf.append("=== REMOVED Object '" + objectId + "' ===<br/>\n");
+		
+		public static XidComparator INSTANCE = new XidComparator();
+		
+	}
+	
+	public static StringBuilder changesToString(final DeltaUtils.IModelDiff changedModel) {
+		StringBuilder sb = new StringBuilder();
+		List<XReadableObject> addedList = new ArrayList<XReadableObject>(changedModel.getAdded());
+		Collections.sort(addedList, XidComparator.INSTANCE);
+		for(XReadableObject addedObject : addedList) {
+			sb.append("=== ADDED   Object '" + addedObject.getID() + "' ===<br/>\n");
+			sb.append(DumpUtils.toStringBuffer(addedObject));
 		}
-		for(ChangedObject changedObject : changedModel.getChangedObjects()) {
+		List<XID> removedList = new ArrayList<XID>(changedModel.getRemoved());
+		Collections.sort(removedList, XidComparator.INSTANCE);
+		for(XID removedObjectId : removedList) {
+			sb.append("=== REMOVED Object '" + removedObjectId + "' ===<br/>\n");
+		}
+		List<IObjectDiff> potentiallyChangedList = new ArrayList<IObjectDiff>(
+		        changedModel.getPotentiallyChanged());
+		Collections.sort(potentiallyChangedList, XidComparator.INSTANCE);
+		for(IObjectDiff changedObject : potentiallyChangedList) {
 			if(changedObject.hasChanges()) {
-				buf.append("=== CHANGED Object '" + changedObject.getID() + "' === <br/>\n");
-				buf.append(changesToString(changedObject));
+				sb.append("=== CHANGED Object '" + changedObject.getID() + "' === <br/>\n");
+				sb.append(changesToString(changedObject));
 			}
 		}
-		return buf;
+		return sb;
 	}
 	
-	public static StringBuffer changesToString(final ChangedObject changedObject) {
-		StringBuffer buf = new StringBuffer();
-		for(SimpleField field : changedObject.getNewFields()) {
-			buf.append("--- ADDED Field '" + field.getID() + "' ---<br/>\n");
-			buf.append(DumpUtils.toStringBuffer(field));
+	public static StringBuilder changesToString(final DeltaUtils.IObjectDiff changedObject) {
+		StringBuilder sb = new StringBuilder();
+		List<XReadableField> addedList = new ArrayList<XReadableField>(changedObject.getAdded());
+		Collections.sort(addedList, XidComparator.INSTANCE);
+		for(XReadableField field : addedList) {
+			sb.append("--- ADDED Field '" + field.getID() + "' ---<br/>\n");
+			sb.append(DumpUtils.toStringBuffer(field));
 		}
-		for(XID objectId : changedObject.getRemovedFields()) {
-			buf.append("--- REMOVED Field '" + objectId + "' ---<br/>\n");
+		List<XID> removedList = new ArrayList<XID>(changedObject.getRemoved());
+		Collections.sort(removedList, XidComparator.INSTANCE);
+		for(XID objectId : changedObject.getRemoved()) {
+			sb.append("--- REMOVED Field '" + objectId + "' ---<br/>\n");
 		}
-		for(ChangedField changedField : changedObject.getChangedFields()) {
+		List<IFieldDiff> potentiallyChangedList = new ArrayList<IFieldDiff>(
+		        changedObject.getPotentiallyChanged());
+		Collections.sort(potentiallyChangedList, XidComparator.INSTANCE);
+		for(IFieldDiff changedField : potentiallyChangedList) {
 			if(changedField.isChanged()) {
-				buf.append("--- CHANGED Field '" + changedField.getID() + "' ---<br/>\n");
-				buf.append("'" + changedField.getOldValue() + "' ==> '" + changedField.getValue()
-				        + "' <br/>\n");
+				sb.append("--- CHANGED Field '" + changedField.getID() + "' ---<br/>\n");
+				sb.append(changesToString(changedField));
 			}
 		}
-		return buf;
+		return sb;
 	}
 	
+	public static StringBuilder changesToString(final DeltaUtils.IFieldDiff changedField) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("'" + changedField.getInitialValue() + "' ==> '" + changedField.getValue()
+		        + "' <br/>\n");
+		return sb;
+	}
 }
