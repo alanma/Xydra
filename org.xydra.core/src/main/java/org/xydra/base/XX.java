@@ -151,6 +151,9 @@ public class XX {
 		if(modelAddress == null) {
 			return toAddress(null, null, objectId, null);
 		}
+		if(objectId == null) {
+			throw new IllegalArgumentException("ObjectId is null");
+		}
 		if(modelAddress.getAddressedType() != XType.XMODEL) {
 			throw new IllegalArgumentException(modelAddress + " is not a model address");
 		}
