@@ -1,6 +1,5 @@
 package org.xydra.store;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
@@ -66,10 +65,6 @@ public class TestSetup {
 		log.debug("logtest 1-2-3");
 		XydraRuntime.init();
 		
-		// FIXME ...
-		// InstanceContext.clear();
-		// SyncDatastore.deleteAllEntitiesOneByOne();
-		
 		XID actorId = XX.toId("actor1");
 		XID repoId = XX.toId("repo1");
 		XID modelId1 = XX.toId("TestModel1");
@@ -94,8 +89,6 @@ public class TestSetup {
 	}
 	
 	@Test
-	@Ignore
-	// FIXME reenable
 	public void testSetupPersistenceModelCommand() throws Exception {
 		GaeTestfixer.enable();
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();

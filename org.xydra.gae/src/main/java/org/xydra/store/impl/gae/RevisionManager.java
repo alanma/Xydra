@@ -9,14 +9,12 @@ import org.xydra.log.LoggerFactory;
 import org.xydra.store.ModelRevision;
 import org.xydra.store.impl.gae.changes.GaeModelRevision;
 import org.xydra.store.impl.gae.changes.RevisionInfo;
-import org.xydra.store.impl.gae.changes.ThreadLocalGaeModelRevision;
 
 
 /**
  * The {@link RevisionManager} is
  * <ol>
- * <li>a facade and manager for the two revision caches: Instance-wide and
- * Thread-local.</li>
+ * <li>a facade and manager for the Instance-wide cache</li>
  * <li>passive, it does not trigger any kind of recalculation.</li>
  * <li>one instance per {@link XModel}.</li>
  * </ol>
@@ -24,8 +22,6 @@ import org.xydra.store.impl.gae.changes.ThreadLocalGaeModelRevision;
  * The instance revision cache is shared among all objects within one Java
  * Virtual Machine via the {@link InstanceContext}. Instance-wide shared state
  * is managed as a {@link RevisionInfo}.
- * 
- * Thread-local state is a {@link ThreadLocalGaeModelRevision}.
  * 
  * ----
  * 
@@ -114,9 +110,6 @@ public class RevisionManager {
 	
 	private static final String REVMANAGER_NAME = "[.rev]";
 	
-	/** pointer to shared value, never null */
-	private transient RevisionInfo instanceRevInfo;
-	
 	private final XAddress modelAddress;
 	
 	private boolean isInitialized = false;
@@ -128,83 +121,27 @@ public class RevisionManager {
 	public RevisionManager(XAddress modelAddress) {
 		log.debug(DebugFormatter.init(REVMANAGER_NAME));
 		this.modelAddress = modelAddress;
-		String key = modelAddress + "/revisions";
-		Map<String,Object> instanceContext = InstanceContext.getInstanceCache();
-		synchronized(instanceContext) {
-			this.instanceRevInfo = (RevisionInfo)instanceContext.get(key);
-			if(this.instanceRevInfo == null) {
-				this.instanceRevInfo = new RevisionInfo(".instance-rev" + modelAddress);
-				instanceContext.put(key, this.instanceRevInfo);
-			}
-		}
 		assert this.getInstanceRevisionInfo() != null;
 		assert this.getInstanceRevisionInfo().getGaeModelRevision() != null;
 		assert this.getInstanceRevisionInfo().getGaeModelRevision().getModelRevision() != null;
 	}
 	
-	/**
-	 * Does not calculate a new revision. Just returns thread-locally cached
-	 * revision. If not defined, thread-local cache is initialised from instance
-	 * cache, which can never be null
-	 * 
-	 * @return thread-local {@link ModelRevision}, never null
-	 */
-	public GaeModelRevision getThreadLocalGaeModelRev() {
-		ThreadLocalGaeModelRevision tlgmr = getThreadLocalGaeModelRevision_internal();
-		if(tlgmr == null) {
-			// init
-			ModelRevision modelRev = this.getInstanceRevisionInfo().getGaeModelRevision()
-			        .getModelRevision();
-			long silent = this.getInstanceRevisionInfo().getGaeModelRevision()
-			        .getLastSilentCommitted();
-			if(modelRev == null) {
-				modelRev = ModelRevision.MODEL_DOES_NOT_EXIST_YET;
-			}
-			assert modelRev != null;
-			GaeModelRevision gaeModelRev = new GaeModelRevision(silent, modelRev);
-			tlgmr = new ThreadLocalGaeModelRevision(this.modelAddress);
-			tlgmr.setGaeModelRev(gaeModelRev);
-			setThreadRevState(tlgmr);
-		}
-		assert tlgmr.getGaeModelRev() != null;
-		return tlgmr.getGaeModelRev();
-	}
-	
-	/**
-	 * @return ThreadRevisionState or null
-	 */
-	private ThreadLocalGaeModelRevision getThreadLocalGaeModelRevision_internal() {
-		return InstanceContext.getThreadContext().get(this.modelAddress.toString());
-	}
-	
-	boolean isThreadLocallyDefined() {
-		return getThreadLocalGaeModelRevision_internal() != null;
-	}
-	
-	public void resetThreadLocalRevisionNumber() {
-		ThreadLocalGaeModelRevision trs = getThreadLocalGaeModelRevision_internal();
-		if(trs == null) {
-			// fine, keep it that way
-		} else {
-			setThreadRevState(null);
-		}
-	}
-	
 	public RevisionInfo getInstanceRevisionInfo() {
-		return this.instanceRevInfo;
-	}
-	
-	/**
-	 * @param threadRevisionState can be null (to reset the tread local cache)
-	 */
-	private void setThreadRevState(ThreadLocalGaeModelRevision threadRevisionState) {
-		InstanceContext.getThreadContext().put(this.modelAddress.toString(), threadRevisionState);
+		Map<String,Object> instanceContext = InstanceContext.getInstanceCache();
+		String key = this.modelAddress + "/revisions";
+		synchronized(instanceContext) {
+			RevisionInfo instanceRevInfo = (RevisionInfo)instanceContext.get(key);
+			if(instanceRevInfo == null) {
+				instanceRevInfo = new RevisionInfo(".instance-rev" + this.modelAddress);
+				instanceContext.put(key, instanceRevInfo);
+			}
+			return instanceRevInfo;
+		}
 	}
 	
 	@Override
 	public String toString() {
-		return this.modelAddress + ":: instance:" + this.instanceRevInfo + "\nthreadLocal:"
-		        + this.getThreadLocalGaeModelRevision_internal();
+		return this.modelAddress + ":: instance:" + getInstanceRevisionInfo();
 	}
 	
 	public boolean isInstanceModelRevisionInitialised() {

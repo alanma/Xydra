@@ -184,8 +184,9 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 	 * found in memcache). Puts intermediary version in the respective caches.
 	 * 
 	 * @param requestedRevNr which is required but has no direct match in the
-	 *            datastore or memcache FIXME !!! make sure too high numbers are
-	 *            handled well
+	 *            datastore or memcache FIXME 2012-02 make sure too high numbers
+	 *            are handled well. This allows callers to retrieve a new
+	 *            version which has still uncommited versions below it.
 	 * @return a computed model snapshot
 	 */
 	private XRevWritableModel computeSnapshot(long requestedRevNr) {
@@ -306,11 +307,12 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 		List<XEvent> events = this.changesService.getEventsBetween(this.modelAddress, start,
 		        requestedRevNr);
 		
-		// FIXME
+		// This should not happen and should be fixed somewhere else
 		if(events == null) {
 			log.warn("There are no events for " + this.modelAddress + " in range [" + start + ","
 			        + requestedRevNr + "]");
 		}
+		assert events != null;
 		
 		// apply events to base
 		for(XEvent event : events) {
@@ -408,7 +410,7 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 	 * 
 	 * @param requestedRevNr for which to retrieve a snapshot.
 	 * 
-	 *            FIXME !!! make sure too high numbers are handled
+	 *            FIXME FIXME 2012-02 make sure too high numbers are handled
 	 * @return a snapshot with the requested revisionNumber or null if model was
 	 *         null at that revision.
 	 */

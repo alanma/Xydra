@@ -1,13 +1,10 @@
 package org.xydra.store.impl.gae;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.xydra.gae.AboutAppEngine;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.store.impl.gae.changes.ThreadLocalGaeModelRevision;
 
 
 /**
@@ -19,6 +16,7 @@ import org.xydra.store.impl.gae.changes.ThreadLocalGaeModelRevision;
  */
 public class InstanceContext {
 	
+	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(InstanceContext.class);
 	
 	private static Map<String,Object> sharedCache;
@@ -28,69 +26,22 @@ public class InstanceContext {
 	 */
 	public static synchronized Map<String,Object> getInstanceCache() {
 		if(sharedCache == null) {
-			// FIXME !!! use Guava limited cache here
+			// FIXME 2012-02 use Guava limited cache here to avoid memory leak
 			sharedCache = new ConcurrentHashMap<String,Object>();
 		}
 		return sharedCache;
 	}
 	
+	/**
+	 * Clears instance context
+	 */
 	public static void clear() {
 		clearInstanceContext();
-		clearThreadContext();
 	}
 	
 	public static void clearInstanceContext() {
 		if(sharedCache != null) {
 			sharedCache.clear();
-		}
-	}
-	
-	/**
-	 * A map from modelAddress to {@link ThreadLocalGaeModelRevision} for each
-	 * {@link Thread}
-	 */
-	private static ThreadLocal<Map<String,ThreadLocalGaeModelRevision>> threadContext;
-	
-	/**
-	 * @return a map unique for each thread. Never null.
-	 */
-	public static Map<String,ThreadLocalGaeModelRevision> getThreadContext() {
-		synchronized(InstanceContext.class) {
-			if(threadContext == null) {
-				threadContext = new ThreadLocal<Map<String,ThreadLocalGaeModelRevision>>();
-			}
-		}
-		Map<String,ThreadLocalGaeModelRevision> map = threadContext.get();
-		if(map == null) {
-			map = new HashMap<String,ThreadLocalGaeModelRevision>();
-			threadContext.set(map);
-		}
-		return map;
-	}
-	
-	/**
-	 * Make sure thread context is empty for calling thread.
-	 */
-	public static synchronized void clearThreadContext() {
-		if(threadContext == null) {
-			log.info("ThreadLocal context is null, no clear necessary");
-			// done, cannot contain content
-		} else {
-			log.info("Clear ThreadLocal context of " + AboutAppEngine.getThreadInfo());
-			
-			/*
-			 * For those threads that have already access to this object we need
-			 * to null out the content
-			 */
-			Map<String,ThreadLocalGaeModelRevision> tcMap = getThreadContext();
-			for(String key : tcMap.keySet()) {
-				ThreadLocalGaeModelRevision threadRevInfo = tcMap.get(key);
-				if(threadRevInfo != null) {
-					threadRevInfo.clear();
-				}
-			}
-			
-			threadContext.set(null);
 		}
 	}
 	

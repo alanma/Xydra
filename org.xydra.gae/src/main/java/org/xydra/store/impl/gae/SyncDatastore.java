@@ -175,6 +175,8 @@ public class SyncDatastore {
 		log.info("Datastore clear");
 		makeSureDatestoreServiceIsInitialised();
 		deleteAllDataOnLiveDatastore();
+		// FIXME for local usage
+		deleteAllEntitiesOneByOne();
 	}
 	
 	public static void deleteAllEntitiesOneByOne() {

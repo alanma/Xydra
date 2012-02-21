@@ -222,8 +222,6 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 			        change.rev, modelExists));
 			this.revManager.getInstanceRevisionInfo().setCurrentGaeModelRevIfRevisionIsHigher(
 			        gaeModelRev);
-			// invalidate thread local cache
-			this.revManager.resetThreadLocalRevisionNumber();
 		}
 		cacheCommittedChange(change);
 	}
@@ -607,7 +605,8 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 		 */
 		long begin = beginRevision < 0 ? 0 : beginRevision;
 		// FIXME concept: better use real current number here?
-		long currentRev = this.revManager.getThreadLocalGaeModelRev().getModelRevision().revision();
+		long currentRev = this.revManager.getInstanceRevisionInfo().getGaeModelRevision()
+		        .getModelRevision().revision();
 		if(currentRev == -1) {
 			log.info("Current rev==-1, return null from " + currentRev);
 			return null;
@@ -673,7 +672,7 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 		 * TODO(Complete Impl) filter events (objectevents, fieldevents) if
 		 * address is not a model address?
 		 */
-
+		
 		return events;
 	}
 	
@@ -729,7 +728,6 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 	public void clear() {
 		log.info("Cleared. Make to sure to also clear memcache.");
 		this.getCommittedChangeCache().clear();
-		this.revManager.resetThreadLocalRevisionNumber();
 		this.revManager.getInstanceRevisionInfo().clear();
 	}
 	

@@ -56,16 +56,8 @@ public class GaeModelPersistence {
 	}
 	
 	public List<XEvent> getEventsBetween(XAddress address, long beginRevision, long endRevision) {
-		assertThreadLocalRevisionNumberIsUpToDate();
+		assertInstanceRevisionNumberHasBeenInitialized();
 		return this.changesService.getEventsBetween(address, beginRevision, endRevision);
-	}
-	
-	private void assertThreadLocalRevisionNumberIsUpToDate() {
-		if(this.revisionManager.isThreadLocallyDefined()) {
-			// fine
-		} else {
-			this.changesService.calculateCurrentModelRevision();
-		}
 	}
 	
 	private void assertInstanceRevisionNumberHasBeenInitialized() {
@@ -83,9 +75,9 @@ public class GaeModelPersistence {
 	}
 	
 	synchronized public XWritableModel getSnapshot() {
-		assertThreadLocalRevisionNumberIsUpToDate();
-		ModelRevision currentRevision = this.revisionManager.getThreadLocalGaeModelRev()
-		        .getModelRevision();
+		assertInstanceRevisionNumberHasBeenInitialized();
+		ModelRevision currentRevision = this.revisionManager.getInstanceRevisionInfo()
+		        .getGaeModelRevision().getModelRevision();
 		if(!currentRevision.modelExists()) {
 			return null;
 		}
@@ -96,9 +88,9 @@ public class GaeModelPersistence {
 	}
 	
 	public XWritableObject getObjectSnapshot(XID objectId) {
-		assertThreadLocalRevisionNumberIsUpToDate();
-		ModelRevision currentRevision = this.revisionManager.getThreadLocalGaeModelRev()
-		        .getModelRevision();
+		assertInstanceRevisionNumberHasBeenInitialized();
+		ModelRevision currentRevision = this.revisionManager.getInstanceRevisionInfo()
+		        .getGaeModelRevision().getModelRevision();
 		boolean modelExists = currentRevision.modelExists();
 		if(!modelExists) {
 			return null;
@@ -115,8 +107,9 @@ public class GaeModelPersistence {
 	 * @return the current {@link ModelRevision} or null
 	 */
 	public ModelRevision getModelRevision() {
-		assertThreadLocalRevisionNumberIsUpToDate();
-		return this.revisionManager.getThreadLocalGaeModelRev().getModelRevision();
+		assertInstanceRevisionNumberHasBeenInitialized();
+		return this.revisionManager.getInstanceRevisionInfo().getGaeModelRevision()
+		        .getModelRevision();
 	}
 	
 	@Override

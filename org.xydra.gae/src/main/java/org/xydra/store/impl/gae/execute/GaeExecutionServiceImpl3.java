@@ -114,8 +114,6 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 		log.debug("[r" + change.rev + "] Phase 2: getPartialSnapshot at {" + snapshotRev + "/"
 		        + this.revisionManager.getInstanceRevisionInfo().getLastCommitted() + "}");
 		
-		// FIXME !!!
-		
 		XRevWritableModel snapshot = null;
 		if(gaeModelRev.getModelRevision().modelExists()) {
 			snapshot = this.snapshots.getPartialSnapshot(snapshotRev, change.getLocks());
@@ -191,7 +189,7 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 		
 		// IMPROVE use the last committed rev to skip failed / empty changes
 		
-		// FIXME use silentLastCommited + 1
+		// TODO 2012-02 use silentLastCommited + 1
 		
 		for(long otherRev = snapshotRev + 1; otherRev < change.rev; otherRev++) {
 			

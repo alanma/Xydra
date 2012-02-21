@@ -158,7 +158,6 @@ public class GaePlatformRuntime implements XydraPlatformRuntime {
 	@Override
 	public void startRequest() {
 		log.info("Request started.");
-		InstanceContext.clearThreadContext();
 	}
 	
 	@Override
