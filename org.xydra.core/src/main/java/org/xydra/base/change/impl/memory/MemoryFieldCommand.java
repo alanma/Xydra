@@ -148,7 +148,7 @@ public class MemoryFieldCommand extends MemoryAtomicCommand implements XFieldCom
 		suffix += " @" + getTarget();
 		switch(getChangeType()) {
 		case ADD:
-			return "\nFieldCommand: ADD '" + this.newValue + suffix;
+			return "\nFieldCommand: ADD value '" + this.newValue + suffix;
 		case REMOVE:
 			return "\nFieldCommand: REMOVE value '" + suffix;
 		case CHANGE:
