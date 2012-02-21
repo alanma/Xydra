@@ -73,4 +73,9 @@ public class MemoryStringID implements XID, Serializable {
 		return this;
 	}
 	
+	@Override
+	public XID getID() {
+		return this;
+	}
+	
 }

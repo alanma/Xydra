@@ -13,7 +13,7 @@ import org.xydra.base.value.XSingleValue;
  * 
  * @author voelkel
  */
-public interface XID extends XSingleValue<XID>, Serializable, Comparable<XID> {
+public interface XID extends XSingleValue<XID>, Serializable, Comparable<XID>, IHasXID {
 	
 	/**
 	 * To convert this XID to a byte[] representation use the ByteUtils (TBD).
@@ -24,6 +24,6 @@ public interface XID extends XSingleValue<XID>, Serializable, Comparable<XID> {
 	 *         AppEngine. {@link XIDProvider#fromString(String)}
 	 */
 	@Override
-    String toString();
+	String toString();
 	
 }
