@@ -150,7 +150,8 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 		
 		@Override
 		public String toString() {
-			return "F:" + this.getID() + " {" + DumpUtils.changesToString(this).toString() + "}";
+			return "F:" + this.getID() + " {\n" + DumpUtils.toStringBuffer(this) + "Changes: \n"
+			        + DumpUtils.changesToString(this).toString() + "}";
 		}
 		
 	}
@@ -330,7 +331,8 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 		
 		@Override
 		public String toString() {
-			return "O:" + this.getID() + " {" + DumpUtils.changesToString(this).toString() + "}";
+			return "O:" + this.getID() + " {\n" + DumpUtils.toStringBuffer(this) + "Changes: \n"
+			        + DumpUtils.changesToString(this).toString() + "}";
 		}
 	}
 	
@@ -738,7 +740,8 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 	
 	@Override
 	public String toString() {
-		return "M:" + this.getID() + " {" + DumpUtils.changesToString(this).toString() + "}";
+		return "M:" + this.getID() + " {\n" + DumpUtils.toStringBuffer(this) + "Changes: \n"
+		        + DumpUtils.changesToString(this).toString() + "}";
 	}
 	
 	public boolean isKnownObject(XID objectId) {
