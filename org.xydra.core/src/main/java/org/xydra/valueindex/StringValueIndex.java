@@ -34,9 +34,18 @@ public class StringValueIndex implements ValueIndex {
 	private static final long serialVersionUID = -5366154192053454730L;
 	
 	private StringMap map;
+	private boolean checkEntrySize;
+	private int maxEntrySize;
 	
 	public StringValueIndex(StringMap map) {
 		this.map = map;
+	}
+	
+	public StringValueIndex(StringMap map, int maxEntrySize) {
+		this(map);
+		
+		this.maxEntrySize = maxEntrySize;
+		this.checkEntrySize = true;
 	}
 	
 	/**
@@ -105,12 +114,51 @@ public class StringValueIndex implements ValueIndex {
 		return result != null;
 	}
 	
+	private XValue getValueForIndex(XAddress address, XValue value) {
+		if(!this.checkEntrySize) {
+			return value;
+		}
+		
+		ValueIndexEntry entry = new ValueIndexEntry(address, value, 1);
+		String entryString = ValueIndexEntryUtils.serializeAsString(entry);
+		
+		int entrySize = this.estimateStringSize(entryString);
+		
+		if(entrySize > this.maxEntrySize) {
+			// check if using the address of the value would be ok
+			
+			/*
+			 * TODO the address of the field holding the value is not avaiable
+			 * in the current api
+			 */
+
+			/*
+			 * entry = new ValueIndexEntry(address, value., 1); entryString =
+			 * ValueIndexEntryUtils.serializeAsString(entry);
+			 * 
+			 * entrySize = this.estimateStringSize(entryString);
+			 */
+			return null;
+		} else {
+			// using the given value in the entry is ok
+			
+			return value;
+		}
+	}
+	
+	private int estimateStringSize(String s) {
+		int size = s.length();
+		return size * 24; // document why "*24"
+	}
+	
 	@Override
 	public void deIndex(String key, XAddress objectAddress, XValue value) {
 		if(!(this.containsKey(key))) {
 			// do nothing
 			return;
 		}
+		
+		XValue usedValue = this.getValueForIndex(objectAddress, value);
 		
 		String entriesString = this.map.get(key);
 		ValueIndexEntry[] entryArray = ValueIndexEntryUtils.getArrayFromString(entriesString);
@@ -122,8 +170,18 @@ public class StringValueIndex implements ValueIndex {
 			 * ValueIndexEntries and using binary search (which makes adding new
 			 * entries slower... what's more important?)
 			 */
-
-			if(entryArray[i].equalAddressAndValue(objectAddress, value)) {
+			XAddress entryAddress = entryArray[i].getAddress();
+			XValue entryValue = entryArray[i].getValue();
+			
+			boolean sameValue = false;
+			if(entryValue == null) {
+				sameValue = (usedValue == null);
+			} else {
+				sameValue = entryValue.equals(usedValue);
+			}
+			
+			if(sameValue && entryAddress.equals(objectAddress)) {
+				
 				found = true;
 				
 				entryArray[i].decrementCounter();
@@ -167,9 +225,11 @@ public class StringValueIndex implements ValueIndex {
 	
 	@Override
 	public void index(String key, XAddress objectAddress, XValue value) {
+		XValue usedValue = this.getValueForIndex(objectAddress, value);
+		
 		if(!(this.containsKey(key))) {
 			ValueIndexEntry[] newEntries = new ValueIndexEntry[1];
-			newEntries[0] = new ValueIndexEntry(objectAddress, value, 1);
+			newEntries[0] = new ValueIndexEntry(objectAddress, usedValue, 1);
 			
 			String entriesString = ValueIndexEntryUtils.serializeAsString(newEntries);
 			
@@ -187,7 +247,7 @@ public class StringValueIndex implements ValueIndex {
 				 * adding new entries slower... what's more important?)
 				 */
 
-				if(entryArray[i].equalAddressAndValue(objectAddress, value)) {
+				if(entryArray[i].equalAddressAndValue(objectAddress, usedValue)) {
 					found = true;
 					
 					entryArray[i].incrementCounter();
@@ -206,7 +266,7 @@ public class StringValueIndex implements ValueIndex {
 				/*
 				 * no entry was found, so we'll have to add it
 				 */
-				ValueIndexEntry newEntry = new ValueIndexEntry(objectAddress, value, 1);
+				ValueIndexEntry newEntry = new ValueIndexEntry(objectAddress, usedValue, 1);
 				
 				String newEntriesString = ValueIndexEntryUtils.serializeAsString(entryArray,
 				        newEntry);
