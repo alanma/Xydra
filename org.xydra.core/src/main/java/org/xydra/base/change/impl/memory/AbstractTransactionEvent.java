@@ -26,13 +26,17 @@ public abstract class AbstractTransactionEvent implements XTransactionEvent {
 	
 	private static final long serialVersionUID = -3997550048059538237L;
 	
-	private final XID actor;
+	private XID actor;
 	
 	// the revision numbers before the event happened
-	private final long modelRevision, objectRevision;
+	private long modelRevision, objectRevision;
 	
 	/** The XAddress of the model or object this transaction applies to */
-	private final XAddress target;
+	private XAddress target;
+	
+	/** For GWT only */
+	protected AbstractTransactionEvent() {
+	}
 	
 	protected AbstractTransactionEvent(XID actor, XAddress target, long modelRevision,
 	        long objectRevision) {

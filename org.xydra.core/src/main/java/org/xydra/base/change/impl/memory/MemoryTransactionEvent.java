@@ -125,7 +125,12 @@ public class MemoryTransactionEvent extends AbstractTransactionEvent {
 		return new MemoryTransactionEvent(actor, target, eventsCopy, modelRevision, objectRevision);
 	}
 	
-	private final XAtomicEvent[] events;
+	private XAtomicEvent[] events;
+	
+	/** For GWT only! */
+	private MemoryTransactionEvent() {
+		super();
+	}
 	
 	private MemoryTransactionEvent(XID actor, XAddress target, XAtomicEvent[] events,
 	        long modelRevision, long objectRevision) {
@@ -179,17 +184,17 @@ public class MemoryTransactionEvent extends AbstractTransactionEvent {
 	}
 	
 	@Override
-    public XAtomicEvent getEvent(int index) {
+	public XAtomicEvent getEvent(int index) {
 		return this.events[index];
 	}
 	
 	@Override
-    public Iterator<XAtomicEvent> iterator() {
+	public Iterator<XAtomicEvent> iterator() {
 		return Arrays.asList(this.events).iterator();
 	}
 	
 	@Override
-    public int size() {
+	public int size() {
 		return this.events.length;
 	}
 	
