@@ -77,6 +77,13 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
 	}
 	
 	/**
+	 * GWT only
+	 */
+	protected MemoryObjectEvent() {
+		
+	}
+	
+	/**
 	 * Creates a new {@link XObjectEvent} of the remove-type (an {@link XField}
 	 * was removed from the {@link XObject} this event refers to)
 	 * 
@@ -146,10 +153,10 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
 	}
 	
 	// The XID of field that was created/deleted
-	private final XID fieldId;
+	private XID fieldId;
 	
 	// the revision numbers before the event happened
-	private final long fieldRevision, objectRevision, modelRevision;
+	private long fieldRevision, objectRevision, modelRevision;
 	
 	// private constructor, use the createEvent methods for instantiating a
 	// MemObjectEvent
@@ -219,7 +226,7 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
 	}
 	
 	@Override
-    public XAddress getChangedEntity() {
+	public XAddress getChangedEntity() {
 		return XX.resolveField(getTarget(), getFieldId());
 	}
 	

@@ -83,6 +83,13 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 	}
 	
 	/**
+	 * for GWT only
+	 */
+	protected MemoryFieldEvent() {
+		super();
+	}
+	
+	/**
 	 * Creates an {@link XFieldEvent} of the change-type (the {@link XValue} of
 	 * the {@link XField} this event refers to was changed)
 	 * 
@@ -201,10 +208,10 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 	}
 	
 	// the revision numbers before the event happened
-	private final long modelRevision, objectRevision, fieldRevision;
+	private long modelRevision, objectRevision, fieldRevision;
 	
 	// the new value, after the event happened (null for "delete" events)
-	private final XValue newValue;
+	private XValue newValue;
 	
 	// private constructor, use the createEvent-methods for instantiating a
 	// MemoryFieldEvent.

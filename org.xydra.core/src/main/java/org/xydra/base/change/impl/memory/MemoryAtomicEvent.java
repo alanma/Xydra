@@ -17,18 +17,18 @@ abstract public class MemoryAtomicEvent implements XEvent {
 	private static final long serialVersionUID = 4051446642240477244L;
 	
 	// The XID of the actor of this event.
-	private final XID actor;
+	private XID actor;
 	
 	// The ChangeType
-	private final ChangeType changeType;
+	private ChangeType changeType;
 	
 	// is this remove event implied by another event in the same transaction
-	private final boolean implied;
+	private boolean implied;
 	
 	// was this event part of a transaction or not?
-	private final boolean inTransaction;
+	private boolean inTransaction;
 	
-	private final XAddress target;
+	private XAddress target;
 	
 	protected MemoryAtomicEvent(XAddress target, ChangeType changeType, XID actor, boolean inTrans,
 	        boolean implied) {
@@ -46,6 +46,13 @@ abstract public class MemoryAtomicEvent implements XEvent {
 		this.actor = actor;
 		this.inTransaction = inTrans;
 		this.implied = implied;
+	}
+	
+	/**
+	 * GWT only
+	 */
+	protected MemoryAtomicEvent() {
+		
 	}
 	
 	@Override
@@ -73,12 +80,12 @@ abstract public class MemoryAtomicEvent implements XEvent {
 	}
 	
 	@Override
-    public XID getActor() {
+	public XID getActor() {
 		return this.actor;
 	}
 	
 	@Override
-    public ChangeType getChangeType() {
+	public ChangeType getChangeType() {
 		return this.changeType;
 	}
 	
@@ -107,17 +114,17 @@ abstract public class MemoryAtomicEvent implements XEvent {
 	}
 	
 	@Override
-    public long getOldFieldRevision() {
+	public long getOldFieldRevision() {
 		return XEvent.RevisionOfEntityNotSet;
 	}
 	
 	@Override
-    public long getOldModelRevision() {
+	public long getOldModelRevision() {
 		return XEvent.RevisionOfEntityNotSet;
 	}
 	
 	@Override
-    public long getOldObjectRevision() {
+	public long getOldObjectRevision() {
 		return XEvent.RevisionOfEntityNotSet;
 	}
 	
@@ -151,7 +158,7 @@ abstract public class MemoryAtomicEvent implements XEvent {
 	}
 	
 	@Override
-    public XAddress getTarget() {
+	public XAddress getTarget() {
 		return this.target;
 	}
 	
@@ -173,12 +180,12 @@ abstract public class MemoryAtomicEvent implements XEvent {
 	}
 	
 	@Override
-    public boolean inTransaction() {
+	public boolean inTransaction() {
 		return this.inTransaction;
 	}
 	
 	@Override
-    public boolean isImplied() {
+	public boolean isImplied() {
 		return this.implied;
 	}
 	

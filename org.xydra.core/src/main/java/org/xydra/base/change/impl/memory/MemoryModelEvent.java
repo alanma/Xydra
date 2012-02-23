@@ -80,10 +80,10 @@ public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {
 	}
 	
 	// the revision numbers before the event happened
-	private final long modelRevision, objectRevision;
+	private long modelRevision, objectRevision;
 	
 	// The XID of the object that was created/deleted
-	private final XID objectId;
+	private XID objectId;
 	
 	// private constructor, use the createEvent for instantiating MemModelEvents
 	private MemoryModelEvent(XID actor, XAddress target, XID objectId, ChangeType changeType,
@@ -108,6 +108,13 @@ public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {
 		this.objectId = objectId;
 		this.objectRevision = objectRevision;
 		this.modelRevision = modelRevision;
+	}
+	
+	/**
+	 * GWT only
+	 */
+	protected MemoryModelEvent() {
+		
 	}
 	
 	@Override
@@ -138,7 +145,7 @@ public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {
 	}
 	
 	@Override
-    public XAddress getChangedEntity() {
+	public XAddress getChangedEntity() {
 		return XX.resolveObject(getTarget(), getObjectId());
 	}
 	
