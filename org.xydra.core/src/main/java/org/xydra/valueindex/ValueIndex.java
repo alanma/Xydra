@@ -4,6 +4,7 @@ import java.util.Iterator;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.value.XValue;
+import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.index.IMapSetIndex;
@@ -12,10 +13,21 @@ import org.xydra.index.query.EqualsConstraint;
 
 
 /**
- * A data structure used for indexing the contents of an {@link XModel}
+ * A data structure used for indexing the contents of an {@link XModel}, i.e.
+ * the {@link XValue XValues} contained in its {@link XField XFields}.
+ * 
+ * Even though this interface extends {@link IMapSetIndex}, implementations of
+ * this interface do not have to implement all methods of {@link IMapSetIndex}.
+ * Please check whether the implementation you are using provides the methods
+ * you need.
  * 
  * @author Kaidel
  * 
+ */
+
+/*
+ * TODO is the "special inheritance" here a good idea? It sounds like it is
+ * against the principles of inheritance...
  */
 
 public interface ValueIndex extends IMapSetIndex<String,ValueIndexEntry> {
