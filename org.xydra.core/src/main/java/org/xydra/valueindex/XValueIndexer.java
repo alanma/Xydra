@@ -505,55 +505,6 @@ public abstract class XValueIndexer {
 		this.index.deIndex(key, entry);
 	}
 	
-	/*
-	 * the following code is no longer in use. I didn't delete it just yet,
-	 * because the code itself could come in handy somewhere else.
-	 */
-
-	// private void incrementIndexEntry(String key, XAddress address, XValue
-	// value) {
-	// EqualsConstraint<String> constraint = new EqualsConstraint<String>(key);
-	// Iterator<ValueIndexEntry> iterator =
-	// this.index.constraintIterator(constraint);
-	//
-	// boolean found = false;
-	// while(!found && iterator.hasNext()) {
-	// ValueIndexEntry triple = iterator.next();
-	//
-	// if(triple.equalAddressAndValue(address, value)) {
-	// found = true;
-	// triple.incrementCounter();
-	// }
-	// }
-	//
-	// if(!found) {
-	// // no entry found -> add one
-	// ValueIndexEntry entry = new ValueIndexEntry(address, value, 1);
-	// this.index.index(key, entry);
-	// }
-	// }
-	//
-	// private void decrementIndexEntry(String key, XAddress address, XValue
-	// value) {
-	// EqualsConstraint<String> constraint = new EqualsConstraint<String>(key);
-	// Iterator<ValueIndexEntry> iterator =
-	// this.index.constraintIterator(constraint);
-	//
-	// boolean found = false;
-	// while(!found && iterator.hasNext()) {
-	// ValueIndexEntry triple = iterator.next();
-	//
-	// if(triple.equalAddressAndValue(address, value)) {
-	// found = true;
-	// triple.decrementCounter();
-	//
-	// if(triple.getCounter() == 0) {
-	// this.index.deIndex(key, triple);
-	// }
-	// }
-	// }
-	// }
-	
 	// ---- Methods returning the index strings ----
 	
 	public abstract String getLongIndexString(Long value);
