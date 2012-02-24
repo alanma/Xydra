@@ -91,10 +91,10 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
 	}
 	
 	// The XID of the model that was added/deleted
-	private final XID modelId;
+	private XID modelId;
 	
 	// the model revision before this event happened
-	private final long modelRevision;
+	private long modelRevision;
 	
 	// private constructor, use the createEvent methods for instantiating a
 	// MemoryRepositoryEvent
@@ -116,6 +116,13 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
 		
 		this.modelId = modelId;
 		this.modelRevision = modelRevision;
+	}
+	
+	/**
+	 * GWT only
+	 */
+	protected MemoryRepositoryEvent() {
+		
 	}
 	
 	@Override
@@ -142,7 +149,7 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
 	}
 	
 	@Override
-    public XAddress getChangedEntity() {
+	public XAddress getChangedEntity() {
 		return XX.resolveModel(getTarget(), getModelId());
 	}
 	
