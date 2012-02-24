@@ -38,15 +38,15 @@ abstract public class AbstractAuthorisationManagerTest {
 	private XAddress rA0;
 	private XAddress rB;
 	
-	private void assertAllowed(XAccessRightValue a) {
+	private static void assertAllowed(XAccessRightValue a) {
 		assertEquals(XAccessRightValue.ALLOWED, a);
 	}
 	
-	private void assertDenied(XAccessRightValue a) {
+	private static void assertDenied(XAccessRightValue a) {
 		assertEquals(XAccessRightValue.DENIED, a);
 	}
 	
-	private void assertUndefined(XAccessRightValue a) {
+	private static void assertUndefined(XAccessRightValue a) {
 		assertEquals(XAccessRightValue.UNDEFINED, a);
 	}
 	

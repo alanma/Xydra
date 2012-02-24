@@ -27,8 +27,8 @@ import org.xydra.store.AuthorisationException;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.Callback;
 import org.xydra.store.GetEventsRequest;
-import org.xydra.store.RequestException;
 import org.xydra.store.ModelRevision;
+import org.xydra.store.RequestException;
 import org.xydra.store.StoreException;
 import org.xydra.store.WaitingCallback;
 import org.xydra.store.XydraStore;
@@ -207,7 +207,7 @@ public class DelegateToSingleOperationStore implements XydraStore {
 		return multi;
 	}
 	
-	private XCommand fixCommand(SingleOpCallback<Long>[] soc, XCommand command, int idx) {
+	private static XCommand fixCommand(SingleOpCallback<Long>[] soc, XCommand command, int idx) {
 		
 		if(command == null) {
 			throw new RequestException("command was null");
@@ -243,7 +243,8 @@ public class DelegateToSingleOperationStore implements XydraStore {
 		return MemoryTransaction.createTransaction(trans.getTarget(), fixedCommands);
 	}
 	
-	private XAtomicCommand fixAtomicCommand(SingleOpCallback<Long>[] soc, int i, XAtomicCommand ac) {
+	private static XAtomicCommand fixAtomicCommand(SingleOpCallback<Long>[] soc, int i,
+	        XAtomicCommand ac) {
 		
 		if(ac.isForced() || ac.getRevisionNumber() < XCommand.RELATIVE_REV) {
 			// not relative
