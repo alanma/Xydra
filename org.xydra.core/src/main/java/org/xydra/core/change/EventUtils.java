@@ -37,7 +37,8 @@ public class EventUtils {
 	
 	private static final long MODEL_DOES_NOT_EXIST = -1;
 	
-	private static void applyAtomicEventIgnoreRev(XModel model, XAtomicEvent atomicEvent, boolean inTxn) {
+	private static void applyAtomicEventIgnoreRev(XModel model, XAtomicEvent atomicEvent,
+	        boolean inTxn) {
 		assert model != null;
 		assert atomicEvent != null;
 		assert atomicEvent.getChangedEntity() != null;
@@ -90,7 +91,8 @@ public class EventUtils {
 			assert object != null : "object null for event " + atomicEvent;
 			object.setRevisionNumber(atomicEvent.getRevisionNumber());
 			if(atomicEvent instanceof XObjectEvent) {
-				assert atomicEvent.getTarget().getParent().equals(model.getAddress());
+				assert atomicEvent.getTarget().getParent().equals(model.getAddress()) : "targetParent="
+				        + atomicEvent.getTarget().getParent() + " vs. model=" + model.getAddress();
 				applyObjectEvent(object, (XObjectEvent)atomicEvent);
 			} else {
 				assert atomicEvent instanceof XFieldEvent;
