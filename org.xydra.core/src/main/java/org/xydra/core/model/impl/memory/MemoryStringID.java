@@ -24,8 +24,9 @@ public class MemoryStringID implements XID, Serializable {
 	/** Impl Note: field is not final to allow GWT-Serialisation to work on it */
 	private String string;
 	
-	/** Seems to be required for GWT */
-	public MemoryStringID() {
+	/** Required for GWT */
+	@SuppressWarnings("unused")
+	private MemoryStringID() {
 	}
 	
 	/**
