@@ -191,8 +191,10 @@ public class StringValueIndex implements ValueIndex {
 					
 					/*
 					 * setting the entry to null will result in deleting it from
-					 * the stored set, since {@link ValueIndexEntryUtils} only
-					 * writes entries which are not null into the string
+					 * the stored set, since {@link
+					 * ValueIndexEntryUtils#serializeAsString
+					 * (ValueIndexEntry[])} only writes entries which are not
+					 * null into the string
 					 */
 				}
 			}
