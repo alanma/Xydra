@@ -14,19 +14,25 @@ import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.value.XValue;
-import org.xydra.core.model.XField;
-import org.xydra.core.model.XModel;
-import org.xydra.core.model.XObject;
 import org.xydra.index.query.EqualsConstraint;
 
 
 /**
- * An index for {@link XModel XModels}. Indexes the contents of the
- * {@link XValue XValues} and stores them together with the {@link XAddress} of
- * the {@link XObject} containing the {@link XField} which holds the value.
+ * An index for {@link XReadableModel XReadableModels}. Indexes the contents of
+ * the {@link XValue XValues} and stores them together with the {@link XAddress}
+ * of the {@link XReadableObject} containing the {@link XReadableField} which
+ * holds the value.
  * 
  * The index entries are "String -> XAddress & XValue". An {@link XValueIndexer}
- * is needed to get the String representations used for indexing.
+ * is needed to get the String representations used for indexing. This index
+ * works on the Object-level, which means that {@link XValue XValues} are
+ * associated with the {@link XAddress} of the {@link XReadableObject}
+ * containing the {@link XReadableField} which holds the value. Since different
+ * {@link XReadableField} might contain the same {@link XValue}, it is possible
+ * that there are multiple entries for it in the index. Therefore deindexing
+ * will not always directly result in completely deindexing the {@link XValue}.
+ * To completely deindex an entry, it needs to be deindexed as many times as the
+ * represented {@link XValue} was indexed.
  * 
  * @author Kaidel
  * 
@@ -45,8 +51,8 @@ public class XModelObjectLevelIndex {
 	
 	/**
 	 * Creates a new index for the given {@link XReadableModel} using the given
-	 * {@link XValueIndexer}. The given {@link XModel} will be completely
-	 * indexed during the creation.
+	 * {@link XValueIndexer}. The given {@link XReadableModel} will be
+	 * completely indexed during the creation.
 	 * 
 	 * @param model The {@link XReadableModel} which will be indexed.
 	 * @param indexer The {@link XValueIndexer} which is to be used to get the
@@ -64,16 +70,16 @@ public class XModelObjectLevelIndex {
 	// is dangerous
 	
 	/**
-	 * Completely indexes the given {@link XModel}. Since this method does not
-	 * check for changes, updates etc. this should only be called once at the
-	 * time the Index is created, hence it is private (declaring it as public
-	 * would actually be dangerous, since no checks are done and values might be
-	 * indexed multiple times, leading to an inconsistent state). It is only
-	 * used during the indexing procedure of the constructor.
+	 * Completely indexes the given {@link XReadableModel}. Since this method
+	 * does not check for changes, updates etc. this should only be called once
+	 * at the time the Index is created, hence it is private (declaring it as
+	 * public would actually be dangerous, since no checks are done and values
+	 * might be indexed multiple times, leading to an inconsistent state). It is
+	 * only used during the indexing procedure of the constructor.
 	 * 
 	 * @param model The {@link XReadableModel} which is to be indexed (i.e. the
 	 *            {@link XReadableModel} given to the constructor
-	 *            {@link XModelObjectLevelIndex#XModelObjectLevelIndex(XModel, XValueIndexer)}
+	 *            {@link XModelObjectLevelIndex#XModelObjectLevelIndex(XReadableModel, XValueIndexer)}
 	 *            ).
 	 */
 	private void index(XReadableModel model) {
@@ -87,12 +93,13 @@ public class XModelObjectLevelIndex {
 	/**
 	 * Completely indexes the given {@link XReadableObject}. Since this method
 	 * does not check for changes, updates etc. and calling this method on a
-	 * completely new {@link XReadableObject} without any {@link XField XFields}
-	 * (and therefore without any {@link XValue XValues}) makes no sense, this
-	 * method should only be called once, hence it is private (declaring it as
-	 * public would actually be dangerous, since no checks are done and values
-	 * might be indexed multiple times, leading to an inconsistent state). It is
-	 * only used during the indexing procedure of the constructor.
+	 * completely new {@link XReadableObject} without any {@link XReadableField
+	 * XReadableFields} (and therefore without any {@link XValue XValues}) makes
+	 * no sense, this method should only be called once, hence it is private
+	 * (declaring it as public would actually be dangerous, since no checks are
+	 * done and values might be indexed multiple times, leading to an
+	 * inconsistent state). It is only used during the indexing procedure of the
+	 * constructor.
 	 * 
 	 * @param object The {@link XReadableObject} which is to be indexed
 	 */
@@ -176,7 +183,7 @@ public class XModelObjectLevelIndex {
 		 * if the revision numbers are equal, nothing has changed and therefore
 		 * there's nothing to update.
 		 */
-
+		
 		if(newObject.getRevisionNumber() > oldObject.getRevisionNumber()) {
 			// objects changed
 			
@@ -210,7 +217,8 @@ public class XModelObjectLevelIndex {
 				 * TODO is there a faster way to calculate to calculate the
 				 * difference between the newObject and the intersection than
 				 * calling contains again and again? Is there a fast difference
-				 * algorithm, maybe already implemented in the Java API?
+				 * algorithm, maybe already implemented in the Java API? Is
+				 * removeAll faster?
 				 */
 				if(!intersection.contains(id)) {
 					// field is new
@@ -227,7 +235,7 @@ public class XModelObjectLevelIndex {
 	 * XModelEvents: Only the REMOVE-Case is interesting here. We would need to
 	 * remove a complete object only by it's address, which is not possible,
 	 * because we do not have the possibility to iterate over all keys (to look
-	 * up the entry which contain the object address) nor do we have the
+	 * up the entries which contain the object address) nor do we have the
 	 * possibility to look up the values which were stored in the XObject.
 	 * 
 	 * XObjectEvents: Only the REMOVE-Case is interesting here. We would need to
@@ -239,7 +247,7 @@ public class XModelObjectLevelIndex {
 	 * cannot be handled, since the Transaction contains no information over the
 	 * removed values etc., which is needed for deindexing.
 	 */
-
+	
 	/**
 	 * Updates the index according to the given {@link XFieldEvent}.
 	 * 
@@ -250,18 +258,15 @@ public class XModelObjectLevelIndex {
 	 * state of the {@link XReadableModel} which is indexed by this Index.
 	 * 
 	 * @param event The {@link XFieldEvent} which specifies what was changed in
-	 *            the {@link XModel} and what needs to be updated in the index.
-	 * @param oldValue the old {@link XValue} of the {@link XField} which was
-	 *            changed.
+	 *            the {@link XReadableModel} and what needs to be updated in the
+	 *            index.
+	 * @param oldValue the old {@link XValue} of the {@link XReadableField}
+	 *            which was changed.
 	 * @throws RuntimeException if the given {@link XFieldEvent} refers to an
 	 *             {@link XReadableField} which is not a field of an object of
 	 *             the {@link XReadableModel} indexed by this index.
 	 */
 	public void updateIndex(XFieldEvent event, XValue oldValue) {
-		/*
-		 * TODO is it a good idea to put the removed value as a parameter?
-		 */
-
 		XAddress objectAddress = XX.resolveObject(event.getRepositoryId(), event.getModelId(),
 		        event.getObjectId());
 		
@@ -341,8 +346,22 @@ public class XModelObjectLevelIndex {
 		}
 	}
 	
-	/*
-	 * is this method okay or dangerous? How is its behavior specified?
+	/**
+	 * Deindexes the given oldValue and indexes the newValue for the specified
+	 * object.
+	 * 
+	 * This method assumes that the given newValue is actually newer then the
+	 * given oldValue. If this is not the case, the index will be left in a
+	 * state inconsistent to the state of the {@link XReadableModel} indexed by
+	 * this index.
+	 * 
+	 * @param objectAddress The {@link XAddress} of the {@link XReadableObject}
+	 *            containing the {@link XReadableField} in which stores the
+	 *            newValue and in which the oldValue was stored.
+	 * @param oldValue The old {@link XValue}.
+	 * @param newValue The new {@link XValue}.
+	 * @throws RuntimeException if the given objectAddress is no address of an
+	 *             {@link XReadableObject}.
 	 */
 	public void updateIndex(XAddress objectAddress, XValue oldValue, XValue newValue) {
 		if(objectAddress.getAddressedType() != XType.XOBJECT) {
@@ -350,13 +369,20 @@ public class XModelObjectLevelIndex {
 			        + objectAddress.getAddressedType() + "-Address.");
 		}
 		
+		/*
+		 * nothing needs to be done if oldValue and newValue are equal
+		 */
 		if(!oldValue.equals(newValue)) {
 			this.indexer.deIndexValue(objectAddress, oldValue);
 			this.indexer.indexValue(objectAddress, newValue);
 		}
 	}
 	
-	// TODO find better name
+	/**
+	 * Convenience method used in other update methods for updating the entries
+	 * of two fields without checking again if the given objectAddress is an
+	 * address of an object.
+	 */
 	private void updateIndexWithoutAddressCheck(XAddress objectAddress, XReadableField oldField,
 	        XReadableField newField) {
 		if(newField.getRevisionNumber() > oldField.getRevisionNumber()) {
@@ -366,27 +392,80 @@ public class XModelObjectLevelIndex {
 		}
 	}
 	
+	/**
+	 * Deindexes the content of the given {@link XReadableObject}. Should only
+	 * be called on {@link XReadableObject XReadableObjects} which were
+	 * completely removed from the {@link XReadableModel} indexed by this index.
+	 * 
+	 * @param object The {@link XReadableObject} which is to be deindexed.
+	 * @throws RuntimeException if the given {@link XReadableObject} was no
+	 *             object of the {@link XReadableModel} indexed by this Index.
+	 */
 	public void deIndex(XReadableObject object) {
 		XAddress objectAddress = object.getAddress();
+		
+		XAddress modelAddress = XX.resolveModel(objectAddress.getRepository(),
+		        objectAddress.getModel());
+		if(!this.modelAddress.equals(modelAddress)) {
+			throw new RuntimeException(
+			        "the given XReadableObject was no object of the XReadableModel indexed by this index.");
+		}
+		
 		for(XID fieldId : object) {
 			XReadableField field = object.getField(fieldId);
 			deIndex(objectAddress, field);
 		}
 	}
 	
+	/**
+	 * Deindexes the content of the given {@link XReadableField}. Should only be
+	 * called on {@link XReadableField XReadableFields} which were completely
+	 * removed from the {@link XReadableModel} indexed by this index.
+	 * 
+	 * @param field The {@link XReadableField} which is to be deindexed.
+	 * @throws RuntimeException if the given {@link XReadableField} was no field
+	 *             of an object of the {@link XReadableModel} indexed by this
+	 *             Index.
+	 */
 	public void deIndex(XReadableField field) {
 		XAddress fieldAddress = field.getAddress();
 		XAddress objectAddress = XX.resolveObject(fieldAddress.getRepository(),
 		        fieldAddress.getModel(), fieldAddress.getObject());
 		
+		XAddress modelAddress = XX.resolveModel(objectAddress.getRepository(),
+		        objectAddress.getModel());
+		if(!this.modelAddress.equals(modelAddress)) {
+			throw new RuntimeException(
+			        "the given XReadableField was no field of an object of the XReadableModel indexed by this index.");
+		}
+		
 		deIndex(objectAddress, field);
 	}
 	
-	public void deIndex(XAddress objectAddress, XReadableField field) {
+	/**
+	 * Convenience method for deindexing a field without calculating the
+	 * objectAddress
+	 */
+	private void deIndex(XAddress objectAddress, XReadableField field) {
 		XValue value = field.getValue();
 		this.indexer.deIndexValue(objectAddress, value);
 	}
 	
+	/**
+	 * Returns a list of {@link XAddress XAddresses} of objects containing
+	 * fields which hold {@link XValue XValues} corresponding to the given key.
+	 * 
+	 * Which {@link XValue XValues} correspond to a given key is determined by
+	 * the used {@link XValueIndexer} which was set in the constructor
+	 * (XValueIndexer in
+	 * {@link XModelObjectLevelIndex#XModelObjectLevelIndex(XReadableModel, XValueIndexer)}
+	 * )
+	 * 
+	 * @param key The key for which corresponding will be searched
+	 * @return a list of {@link XAddress XAddresses} of objects containing
+	 *         fields which hold {@link XValue XValues} corresponding to the
+	 *         given key.
+	 */
 	public List<XAddress> search(String key) {
 		// IMPROVE rather simple search algorithm at the moment...
 		

@@ -128,10 +128,10 @@ public class StringValueIndex implements ValueIndex {
 			// check if using the address of the value would be ok
 			
 			/*
-			 * TODO the address of the field holding the value is not avaiable
-			 * in the current api
+			 * TODO the address of the field holding the value is not available
+			 * for use here in the current API
 			 */
-
+			
 			/*
 			 * entry = new ValueIndexEntry(address, value., 1); entryString =
 			 * ValueIndexEntryUtils.serializeAsString(entry);
@@ -140,7 +140,7 @@ public class StringValueIndex implements ValueIndex {
 			 */
 			return null;
 		} else {
-			// using the given value in the entry is ok
+			// using the given value in the entry is okay
 			
 			return value;
 		}
@@ -148,7 +148,7 @@ public class StringValueIndex implements ValueIndex {
 	
 	private int estimateStringSize(String s) {
 		int size = s.length();
-		return size * 24; // document why "*24"
+		return size * 16;
 	}
 	
 	@Override
@@ -169,6 +169,9 @@ public class StringValueIndex implements ValueIndex {
 			 * TODO make this faster, for example by implementing an order on
 			 * ValueIndexEntries and using binary search (which makes adding new
 			 * entries slower... what's more important?)
+			 * 
+			 * Problem: there's no real "obvious" relation between
+			 * ValueIndexEntries which could be used for ordering
 			 */
 			XAddress entryAddress = entryArray[i].getAddress();
 			XValue entryValue = entryArray[i].getValue();
@@ -247,8 +250,11 @@ public class StringValueIndex implements ValueIndex {
 				 * TODO make this faster, for example by implementing an order
 				 * on ValueIndexEntries and using binary search (which makes
 				 * adding new entries slower... what's more important?)
+				 * 
+				 * Problem: there's no real "obvious" relation between
+				 * ValueIndexEntries which could be used for ordering
 				 */
-
+				
 				if(entryArray[i].equalAddressAndValue(objectAddress, usedValue)) {
 					found = true;
 					

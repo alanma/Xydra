@@ -77,7 +77,7 @@ public abstract class XModelObjectLevelIndexTest {
 		/*
 		 * The model was already indexed during the setup() method
 		 */
-
+		
 		for(XID objectId : this.oldModel) {
 			XObject object = this.oldModel.getObject(objectId);
 			
@@ -323,7 +323,7 @@ public abstract class XModelObjectLevelIndexTest {
 			 * The value should still be indexed, since it existed multiple
 			 * times
 			 */
-
+			
 			assertEquals(1, addresses.size());
 			assertTrue(addresses.contains(newJohn.getAddress()));
 		}
@@ -355,7 +355,7 @@ public abstract class XModelObjectLevelIndexTest {
 			/*
 			 * The value should be completely deindexed now
 			 */
-
+			
 			assertTrue(addresses.isEmpty());
 		}
 	}
@@ -483,7 +483,7 @@ public abstract class XModelObjectLevelIndexTest {
 		
 		for(XID fieldId : newJohn) {
 			XReadableField field = newJohn.getField(fieldId);
-			this.newIndex.deIndex(johnAddress, field);
+			this.newIndex.deIndex(field);
 		}
 		
 		// deindexing all fields equals deindexing the whole object
