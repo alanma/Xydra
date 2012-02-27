@@ -44,6 +44,10 @@ import org.xydra.index.query.EqualsConstraint;
  * index
  */
 
+/*
+ * TODO check modelAddress in every method!
+ */
+
 public class XModelObjectLevelIndex {
 	private XValueIndexer indexer;
 	private ValueIndex index;
@@ -104,10 +108,9 @@ public class XModelObjectLevelIndex {
 	 * @param object The {@link XReadableObject} which is to be indexed
 	 */
 	private void index(XReadableObject object) {
-		XAddress objectAddress = object.getAddress();
 		for(XID fieldId : object) {
 			XReadableField field = object.getField(fieldId);
-			index(objectAddress, field);
+			index(field);
 		}
 	}
 	
@@ -120,18 +123,11 @@ public class XModelObjectLevelIndex {
 	 * called on {@link XReadableField XReadableFields} which were not yet
 	 * indexed.
 	 * 
-	 * @param objectAddress the {@link XAddress} of the object containing the
-	 *            given field.
+	 * 
 	 * @param field The {@link XReadableField} which is to be indexed
 	 */
-	private void index(XAddress objectAddress, XReadableField field) {
-		/*
-		 * The object address is a parameter here since all methods calling this
-		 * method know the objectAddress, which makes computing the
-		 * objectAddress from the fieldAddress unnecessary.
-		 */
-		XValue value = field.getValue();
-		this.indexer.indexValue(objectAddress, value);
+	private void index(XReadableField field) {
+		this.indexer.indexValue(field.getAddress(), field.getValue());
 	}
 	
 	/**
@@ -205,10 +201,10 @@ public class XModelObjectLevelIndex {
 					
 					XReadableField newField = newObject.getField(id);
 					
-					updateIndexWithoutAddressCheck(address, oldField, newField);
+					updateIndexWithoutAddressCheck(oldField, newField);
 				} else {
 					// field was completely removed
-					deIndex(address, oldField);
+					deIndex(oldField);
 				}
 			}
 			
@@ -222,7 +218,7 @@ public class XModelObjectLevelIndex {
 				 */
 				if(!intersection.contains(id)) {
 					// field is new
-					index(address, newObject.getField(id));
+					index(newObject.getField(id));
 				}
 			}
 		}
@@ -267,8 +263,7 @@ public class XModelObjectLevelIndex {
 	 *             the {@link XReadableModel} indexed by this index.
 	 */
 	public void updateIndex(XFieldEvent event, XValue oldValue) {
-		XAddress objectAddress = XX.resolveObject(event.getRepositoryId(), event.getModelId(),
-		        event.getObjectId());
+		XAddress fieldAddress = event.getChangedEntity();
 		
 		XAddress modelAddress = XX.resolveModel(event.getRepositoryId(), event.getModelId());
 		if(!this.modelAddress.equals(modelAddress)) {
@@ -279,15 +274,15 @@ public class XModelObjectLevelIndex {
 		switch(event.getChangeType()) {
 		case ADD:
 			XValue addedValue = event.getNewValue();
-			this.indexer.indexValue(objectAddress, addedValue);
+			this.indexer.indexValue(fieldAddress, addedValue);
 			break;
 		case REMOVE:
-			this.indexer.deIndexValue(objectAddress, oldValue);
+			this.indexer.deIndexValue(fieldAddress, oldValue);
 			break;
 		case CHANGE:
-			this.indexer.deIndexValue(objectAddress, oldValue);
+			this.indexer.deIndexValue(fieldAddress, oldValue);
 			addedValue = event.getNewValue();
-			this.indexer.indexValue(objectAddress, addedValue);
+			this.indexer.indexValue(fieldAddress, addedValue);
 			break;
 		case TRANSACTION: // TRANSACTION is not possible for XFieldEvents
 			break;
@@ -339,10 +334,7 @@ public class XModelObjectLevelIndex {
 				        "oldField and newField do not have the same address and therefore aren't different versions of the same field.");
 			}
 			
-			XAddress objectAddress = XX.resolveObject(oldAddress.getRepository(),
-			        oldAddress.getModel(), oldAddress.getObject());
-			
-			updateIndexWithoutAddressCheck(objectAddress, oldField, newField);
+			updateIndexWithoutAddressCheck(oldField, newField);
 		}
 	}
 	
@@ -355,40 +347,35 @@ public class XModelObjectLevelIndex {
 	 * state inconsistent to the state of the {@link XReadableModel} indexed by
 	 * this index.
 	 * 
-	 * @param objectAddress The {@link XAddress} of the {@link XReadableObject}
-	 *            containing the {@link XReadableField} in which stores the
-	 *            newValue and in which the oldValue was stored.
+	 * @param fieldAddress The {@link XAddress} of the {@link XReadableField}
+	 *            which stores the newValue and in which the oldValue was
+	 *            stored.
 	 * @param oldValue The old {@link XValue}.
 	 * @param newValue The new {@link XValue}.
-	 * @throws RuntimeException if the given objectAddress is no address of an
-	 *             {@link XReadableObject}.
+	 * @throws RuntimeException if the given fieldAddress is no address of an
+	 *             {@link XReadableField}.
 	 */
-	public void updateIndex(XAddress objectAddress, XValue oldValue, XValue newValue) {
-		if(objectAddress.getAddressedType() != XType.XOBJECT) {
-			throw new RuntimeException("objectAddress is no valid Object-XAddress, but an "
-			        + objectAddress.getAddressedType() + "-Address.");
+	public void updateIndex(XAddress fieldAddress, XValue oldValue, XValue newValue) {
+		if(fieldAddress.getAddressedType() != XType.XFIELD) {
+			throw new RuntimeException("fieldAddress is no valid Field-XAddress, but an "
+			        + fieldAddress.getAddressedType() + "-Address.");
 		}
 		
 		/*
 		 * nothing needs to be done if oldValue and newValue are equal
 		 */
 		if(!oldValue.equals(newValue)) {
-			this.indexer.deIndexValue(objectAddress, oldValue);
-			this.indexer.indexValue(objectAddress, newValue);
+			this.indexer.deIndexValue(fieldAddress, oldValue);
+			this.indexer.indexValue(fieldAddress, newValue);
 		}
 	}
 	
-	/**
-	 * Convenience method used in other update methods for updating the entries
-	 * of two fields without checking again if the given objectAddress is an
-	 * address of an object.
-	 */
-	private void updateIndexWithoutAddressCheck(XAddress objectAddress, XReadableField oldField,
-	        XReadableField newField) {
+	// TODO document and find better name
+	private void updateIndexWithoutAddressCheck(XReadableField oldField, XReadableField newField) {
 		if(newField.getRevisionNumber() > oldField.getRevisionNumber()) {
 			// value of field was changed
-			deIndex(objectAddress, oldField);
-			index(objectAddress, newField);
+			deIndex(oldField);
+			index(newField);
 		}
 	}
 	
@@ -413,7 +400,7 @@ public class XModelObjectLevelIndex {
 		
 		for(XID fieldId : object) {
 			XReadableField field = object.getField(fieldId);
-			deIndex(objectAddress, field);
+			this.indexer.deIndexValue(field.getAddress(), field.getValue());
 		}
 	}
 	
@@ -439,16 +426,7 @@ public class XModelObjectLevelIndex {
 			        "the given XReadableField was no field of an object of the XReadableModel indexed by this index.");
 		}
 		
-		deIndex(objectAddress, field);
-	}
-	
-	/**
-	 * Convenience method for deindexing a field without calculating the
-	 * objectAddress
-	 */
-	private void deIndex(XAddress objectAddress, XReadableField field) {
-		XValue value = field.getValue();
-		this.indexer.deIndexValue(objectAddress, value);
+		this.indexer.deIndexValue(field.getAddress(), field.getValue());
 	}
 	
 	/**

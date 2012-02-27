@@ -476,20 +476,6 @@ public abstract class XModelObjectLevelIndexTest {
 		testIfObjectWasDeIndexed(newJohn);
 	}
 	
-	@Test
-	public void testDeIndexFieldWithAddress() {
-		XReadableObject newJohn = this.newModel.getObject(DemoModelUtil.JOHN_ID);
-		XAddress johnAddress = newJohn.getAddress();
-		
-		for(XID fieldId : newJohn) {
-			XReadableField field = newJohn.getField(fieldId);
-			this.newIndex.deIndex(field);
-		}
-		
-		// deindexing all fields equals deindexing the whole object
-		testIfObjectWasDeIndexed(newJohn);
-	}
-	
 	private void testIfObjectWasDeIndexed(XReadableObject object) {
 		XAddress objectAddress = object.getAddress();
 		

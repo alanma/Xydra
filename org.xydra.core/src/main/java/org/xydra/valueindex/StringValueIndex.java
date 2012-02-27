@@ -3,11 +3,9 @@ package org.xydra.valueindex;
 import java.util.Iterator;
 
 import org.xydra.base.XAddress;
+import org.xydra.base.XX;
 import org.xydra.base.value.XValue;
-import org.xydra.index.IMapSetIndex;
-import org.xydra.index.query.Constraint;
 import org.xydra.index.query.EqualsConstraint;
-import org.xydra.index.query.KeyEntryTuple;
 
 
 /**
@@ -31,7 +29,6 @@ import org.xydra.index.query.KeyEntryTuple;
  * if its small enough and null otherwise
  */
 public class StringValueIndex implements ValueIndex {
-	private static final long serialVersionUID = -5366154192053454730L;
 	
 	private StringMap map;
 	private boolean checkEntrySize;
@@ -48,33 +45,9 @@ public class StringValueIndex implements ValueIndex {
 		this.checkEntrySize = true;
 	}
 	
-	/**
-	 * @throws UnsupportedOperationException this method is not supported by
-	 *             this implementation
-	 */
 	@Override
-	public void clear() {
-		throw new UnsupportedOperationException("clear() is not supported by StringValueIndex");
-	}
-	
-	/**
-	 * @throws UnsupportedOperationException this method is not supported by
-	 *             this implementation
-	 */
-	@Override
-	public boolean isEmpty() {
-		throw new UnsupportedOperationException("empty() is not supported by StringValueIndex");
-	}
-	
-	@Override
-	public Iterator<ValueIndexEntry> constraintIterator(Constraint<String> c) {
-		if(!(c instanceof EqualsConstraint)) {
-			throw new UnsupportedOperationException(
-			        "StringValueIndex only supports EqualsConstraints");
-		}
-		EqualsConstraint<String> eq = (EqualsConstraint<String>)c;
-		
-		String key = eq.getKey();
+	public Iterator<ValueIndexEntry> constraintIterator(EqualsConstraint<String> c) {
+		String key = c.getKey();
 		String result = this.map.get(key);
 		
 		ValueIndexEntry[] entries = ValueIndexEntryUtils.getArrayFromString(result);
@@ -83,14 +56,9 @@ public class StringValueIndex implements ValueIndex {
 	}
 	
 	@Override
-	public boolean contains(Constraint<String> c, Constraint<ValueIndexEntry> entryConstraint) {
-		if(!(entryConstraint instanceof EqualsConstraint)) {
-			throw new UnsupportedOperationException(
-			        "StringValueIndex only supports EqualsConstraints");
-		}
-		
-		EqualsConstraint<ValueIndexEntry> entryEq = (EqualsConstraint<ValueIndexEntry>)entryConstraint;
-		ValueIndexEntry entry = entryEq.getKey();
+	public boolean contains(EqualsConstraint<String> c,
+	        EqualsConstraint<ValueIndexEntry> entryConstraint) {
+		ValueIndexEntry entry = entryConstraint.getKey();
 		XAddress address = entry.getAddress();
 		XValue value = entry.getValue();
 		
@@ -114,31 +82,20 @@ public class StringValueIndex implements ValueIndex {
 		return result != null;
 	}
 	
-	private XValue getValueForIndex(XAddress address, XValue value) {
+	private XValue getValueForIndex(XAddress fieldAddress, XValue value) {
 		if(!this.checkEntrySize) {
 			return value;
 		}
 		
-		ValueIndexEntry entry = new ValueIndexEntry(address, value, 1);
+		ValueIndexEntry entry = new ValueIndexEntry(fieldAddress, value, 1);
 		String entryString = ValueIndexEntryUtils.serializeAsString(entry);
 		
 		int entrySize = this.estimateStringSize(entryString);
 		
 		if(entrySize > this.maxEntrySize) {
-			// check if using the address of the value would be ok
+			// use the fieldAddress as the value
 			
-			/*
-			 * TODO the address of the field holding the value is not available
-			 * for use here in the current API
-			 */
-			
-			/*
-			 * entry = new ValueIndexEntry(address, value., 1); entryString =
-			 * ValueIndexEntryUtils.serializeAsString(entry);
-			 * 
-			 * entrySize = this.estimateStringSize(entryString);
-			 */
-			return null;
+			return fieldAddress;
 		} else {
 			// using the given value in the entry is okay
 			
@@ -152,13 +109,17 @@ public class StringValueIndex implements ValueIndex {
 	}
 	
 	@Override
-	public void deIndex(String key, XAddress objectAddress, XValue value) {
+	public void deIndex(String key, XAddress fieldAddress, XValue value) {
+		
 		if(!(this.containsKey(key))) {
 			// do nothing
 			return;
 		}
 		
-		XValue usedValue = this.getValueForIndex(objectAddress, value);
+		XValue usedValue = this.getValueForIndex(fieldAddress, value);
+		
+		XAddress objectAddress = XX.resolveObject(fieldAddress.getRepository(),
+		        fieldAddress.getModel(), fieldAddress.getObject());
 		
 		String entriesString = this.map.get(key);
 		ValueIndexEntry[] entryArray = ValueIndexEntryUtils.getArrayFromString(entriesString);
@@ -216,21 +177,16 @@ public class StringValueIndex implements ValueIndex {
 	}
 	
 	@Override
-	public void deIndex(String key, ValueIndexEntry entry) {
-		XAddress address = entry.getAddress();
-		XValue value = entry.getValue();
-		
-		deIndex(key, address, value);
-	}
-	
-	@Override
 	public void deIndex(String key) {
 		this.map.remove(key);
 	}
 	
 	@Override
-	public void index(String key, XAddress objectAddress, XValue value) {
-		XValue usedValue = this.getValueForIndex(objectAddress, value);
+	public void index(String key, XAddress fieldAddress, XValue value) {
+		XValue usedValue = this.getValueForIndex(fieldAddress, value);
+		
+		XAddress objectAddress = XX.resolveObject(fieldAddress.getRepository(),
+		        fieldAddress.getModel(), fieldAddress.getObject());
 		
 		if(!(this.containsKey(key))) {
 			ValueIndexEntry[] newEntries = new ValueIndexEntry[1];
@@ -283,42 +239,4 @@ public class StringValueIndex implements ValueIndex {
 			
 		}
 	}
-	
-	@Override
-	public void index(String key, ValueIndexEntry entry) {
-		XAddress address = entry.getAddress();
-		XValue value = entry.getValue();
-		
-		index(key, address, value);
-	}
-	
-	/**
-	 * @throws UnsupportedOperationException this method is not supported by
-	 *             this implementation
-	 */
-	@Override
-	public Iterator<KeyEntryTuple<String,ValueIndexEntry>> tupleIterator(Constraint<String> c1,
-	        Constraint<ValueIndexEntry> entryConstraint) {
-		throw new UnsupportedOperationException("StringValueIndex does not support tupleIterator()");
-	}
-	
-	/**
-	 * @throws UnsupportedOperationException this method is not supported by
-	 *             this implementation
-	 */
-	@Override
-	public Iterator<String> keyIterator() {
-		throw new UnsupportedOperationException("StringValueIndex does not support keyIterator()");
-	}
-	
-	/**
-	 * @throws UnsupportedOperationException this method is not supported by
-	 *             this implementation
-	 */
-	@Override
-	public org.xydra.index.IMapSetIndex.IMapSetDiff<String,ValueIndexEntry> computeDiff(
-	        IMapSetIndex<String,ValueIndexEntry> otherFuture) {
-		throw new UnsupportedOperationException("StringValueIndex does not support computeDiff");
-	}
-	
 }

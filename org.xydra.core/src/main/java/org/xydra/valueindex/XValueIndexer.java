@@ -32,6 +32,8 @@ import org.xydra.base.value.XValue;
 
 /*
  * FIXME Deal with "null" values!! (make it consistent)
+ * 
+ * TODO Check that given addresses are field-addresses!
  */
 
 public abstract class XValueIndexer {
@@ -45,72 +47,72 @@ public abstract class XValueIndexer {
 		return this.index;
 	}
 	
-	public void indexValue(XAddress objectAddress, XValue value) {
+	public void indexValue(XAddress fieldAddress, XValue value) {
 		if(value == null) {
 			// TODO handle null values (consistently in the whole indexer)
-			indexString(objectAddress, value, "null");
+			indexString(fieldAddress, value, "null");
 		} else {
 			switch(value.getType()) {
 			case Address:
-				indexAddress(objectAddress, value, (XAddress)value);
+				indexAddress(fieldAddress, value, (XAddress)value);
 				break;
 			case AddressList:
-				indexAddressArray(objectAddress, value, ((XAddressListValue)value).contents());
+				indexAddressArray(fieldAddress, value, ((XAddressListValue)value).contents());
 				break;
 			
 			case AddressSet:
-				indexAddressArray(objectAddress, value, ((XAddressSetValue)value).contents());
+				indexAddressArray(fieldAddress, value, ((XAddressSetValue)value).contents());
 				break;
 			case AddressSortedSet:
-				indexAddressArray(objectAddress, value, ((XAddressSortedSetValue)value).contents());
+				indexAddressArray(fieldAddress, value, ((XAddressSortedSetValue)value).contents());
 				break;
 			case Boolean:
-				indexBoolean(objectAddress, value, ((XBooleanValue)value).contents());
+				indexBoolean(fieldAddress, value, ((XBooleanValue)value).contents());
 				break;
 			case BooleanList:
-				indexBooleanArray(objectAddress, value, ((XBooleanListValue)value).contents());
+				indexBooleanArray(fieldAddress, value, ((XBooleanListValue)value).contents());
 				break;
 			case ByteList:
-				indexByteArray(objectAddress, value, ((XByteListValue)value).contents());
+				indexByteArray(fieldAddress, value, ((XByteListValue)value).contents());
 				break;
 			case Double:
-				indexDouble(objectAddress, value, ((XDoubleValue)value).contents());
+				indexDouble(fieldAddress, value, ((XDoubleValue)value).contents());
 				break;
 			case DoubleList:
-				indexDoubleArray(objectAddress, value, ((XDoubleListValue)value).contents());
+				indexDoubleArray(fieldAddress, value, ((XDoubleListValue)value).contents());
 				break;
 			case Id:
-				indexId(objectAddress, value, (XID)value);
+				indexId(fieldAddress, value, (XID)value);
 				break;
 			case IdList:
-				indexIdArray(objectAddress, value, ((XIDListValue)value).contents());
+				indexIdArray(fieldAddress, value, ((XIDListValue)value).contents());
 				break;
 			case IdSet:
-				indexIdArray(objectAddress, value, ((XIDSetValue)value).contents());
+				indexIdArray(fieldAddress, value, ((XIDSetValue)value).contents());
 				break;
 			case IdSortedSet:
-				indexIdArray(objectAddress, value, ((XIDSortedSetValue)value).contents());
+				indexIdArray(fieldAddress, value, ((XIDSortedSetValue)value).contents());
 				break;
 			case Integer:
-				indexInteger(objectAddress, value, ((XIntegerValue)value).contents());
+				indexInteger(fieldAddress, value, ((XIntegerValue)value).contents());
 				break;
 			case IntegerList:
-				indexIntegerArray(objectAddress, value, ((XIntegerListValue)value).contents());
+				indexIntegerArray(fieldAddress, value, ((XIntegerListValue)value).contents());
 				break;
 			case Long:
-				indexLong(objectAddress, value, ((XLongValue)value).contents());
+				indexLong(fieldAddress, value, ((XLongValue)value).contents());
 				break;
 			case LongList:
-				indexLongArray(objectAddress, value, ((XLongListValue)value).contents());
+				indexLongArray(fieldAddress, value, ((XLongListValue)value).contents());
 				break;
 			case String:
-				indexString(objectAddress, value, ((XStringValue)value).contents());
+				indexString(fieldAddress, value, ((XStringValue)value).contents());
 				break;
 			case StringList:
-				indexStringArray(objectAddress, value, ((XStringListValue)value).contents());
+				indexStringArray(fieldAddress, value, ((XStringListValue)value).contents());
 				break;
 			case StringSet:
-				indexStringArray(objectAddress, value, ((XStringSetValue)value).contents());
+				indexStringArray(fieldAddress, value, ((XStringSetValue)value).contents());
 				break;
 			}
 		}
@@ -241,268 +243,253 @@ public abstract class XValueIndexer {
 		return list;
 	}
 	
-	public void deIndexValue(XAddress address, XValue value) {
+	public void deIndexValue(XAddress fieldAddress, XValue value) {
 		if(value == null) {
 			// TODO handle null values
-			deIndexString(address, value, "null");
+			deIndexString(fieldAddress, value, "null");
 		} else {
 			switch(value.getType()) {
 			case Address:
-				deIndexAddress(address, value, (XAddress)value);
+				deIndexAddress(fieldAddress, value, (XAddress)value);
 				break;
 			case AddressList:
-				deIndexAddressArray(address, value, ((XAddressListValue)value).contents());
+				deIndexAddressArray(fieldAddress, value, ((XAddressListValue)value).contents());
 				break;
 			case AddressSet:
-				deIndexAddressArray(address, value, ((XAddressSetValue)value).contents());
+				deIndexAddressArray(fieldAddress, value, ((XAddressSetValue)value).contents());
 				break;
 			case AddressSortedSet:
-				deIndexAddressArray(address, value, ((XAddressSortedSetValue)value).contents());
+				deIndexAddressArray(fieldAddress, value, ((XAddressSortedSetValue)value).contents());
 				break;
 			case Boolean:
-				deIndexBoolean(address, value, ((XBooleanValue)value).contents());
+				deIndexBoolean(fieldAddress, value, ((XBooleanValue)value).contents());
 				break;
 			case BooleanList:
-				deIndexBooleanArray(address, value, ((XBooleanListValue)value).contents());
+				deIndexBooleanArray(fieldAddress, value, ((XBooleanListValue)value).contents());
 				break;
 			case ByteList:
-				deIndexByteArray(address, value, ((XByteListValue)value).contents());
+				deIndexByteArray(fieldAddress, value, ((XByteListValue)value).contents());
 				break;
 			case Double:
-				deIndexDouble(address, value, ((XDoubleValue)value).contents());
+				deIndexDouble(fieldAddress, value, ((XDoubleValue)value).contents());
 				break;
 			case DoubleList:
-				deIndexDoubleArray(address, value, ((XDoubleListValue)value).contents());
+				deIndexDoubleArray(fieldAddress, value, ((XDoubleListValue)value).contents());
 				break;
 			case Id:
-				deIndexId(address, value, (XID)value);
+				deIndexId(fieldAddress, value, (XID)value);
 				break;
 			case IdList:
-				deIndexIdArray(address, value, ((XIDListValue)value).contents());
+				deIndexIdArray(fieldAddress, value, ((XIDListValue)value).contents());
 				break;
 			case IdSet:
-				deIndexIdArray(address, value, ((XIDSetValue)value).contents());
+				deIndexIdArray(fieldAddress, value, ((XIDSetValue)value).contents());
 				break;
 			case IdSortedSet:
-				deIndexIdArray(address, value, ((XIDSortedSetValue)value).contents());
+				deIndexIdArray(fieldAddress, value, ((XIDSortedSetValue)value).contents());
 				break;
 			case Integer:
-				deIndexInteger(address, value, ((XIntegerValue)value).contents());
+				deIndexInteger(fieldAddress, value, ((XIntegerValue)value).contents());
 				break;
 			case IntegerList:
-				deIndexIntegerArray(address, value, ((XIntegerListValue)value).contents());
+				deIndexIntegerArray(fieldAddress, value, ((XIntegerListValue)value).contents());
 				break;
 			case Long:
-				deIndexLong(address, value, ((XLongValue)value).contents());
+				deIndexLong(fieldAddress, value, ((XLongValue)value).contents());
 				break;
 			case LongList:
-				deIndexLongArray(address, value, ((XLongListValue)value).contents());
+				deIndexLongArray(fieldAddress, value, ((XLongListValue)value).contents());
 				break;
 			case String:
-				deIndexString(address, value, ((XStringValue)value).contents());
+				deIndexString(fieldAddress, value, ((XStringValue)value).contents());
 				break;
 			case StringList:
-				deIndexStringArray(address, value, ((XStringListValue)value).contents());
+				deIndexStringArray(fieldAddress, value, ((XStringListValue)value).contents());
 				break;
 			case StringSet:
-				deIndexStringArray(address, value, ((XStringSetValue)value).contents());
+				deIndexStringArray(fieldAddress, value, ((XStringSetValue)value).contents());
 				break;
 			}
 		}
 	}
 	
-	public void indexStringArray(XAddress address, XValue value, String[] strings) {
+	public void indexStringArray(XAddress fieldAddress, XValue value, String[] strings) {
 		for(String str : strings) {
-			indexString(address, value, str);
+			indexString(fieldAddress, value, str);
 		}
 	}
 	
-	public void deIndexStringArray(XAddress address, XValue value, String[] strings) {
+	public void deIndexStringArray(XAddress fieldAddress, XValue value, String[] strings) {
 		for(String str : strings) {
-			deIndexString(address, value, str);
+			deIndexString(fieldAddress, value, str);
 		}
 	}
 	
-	public void indexLongArray(XAddress address, XValue value, long[] longs) {
+	public void indexLongArray(XAddress fieldAddress, XValue value, long[] longs) {
 		for(long l : longs) {
-			indexLong(address, value, l);
+			indexLong(fieldAddress, value, l);
 		}
 	}
 	
-	public void deIndexLongArray(XAddress address, XValue value, long[] longs) {
+	public void deIndexLongArray(XAddress fieldAddress, XValue value, long[] longs) {
 		for(long l : longs) {
-			deIndexLong(address, value, l);
+			deIndexLong(fieldAddress, value, l);
 		}
 	}
 	
-	public void indexLong(XAddress address, XValue value, Long l) {
+	public void indexLong(XAddress fieldAddress, XValue value, Long l) {
 		String key = getLongIndexString(l);
-		ValueIndexEntry entry = new ValueIndexEntry(address, value, 0);
-		this.index.index(key, entry);
+		this.index.index(key, fieldAddress, value);
 	}
 	
-	public void deIndexLong(XAddress address, XValue value, Long l) {
+	public void deIndexLong(XAddress fieldAddress, XValue value, Long l) {
 		String key = getLongIndexString(l);
-		ValueIndexEntry entry = new ValueIndexEntry(address, value, 0);
-		this.index.deIndex(key, entry);
+		this.index.deIndex(key, fieldAddress, value);
 	}
 	
-	public void indexIntegerArray(XAddress address, XValue value, int[] integers) {
+	public void indexIntegerArray(XAddress fieldAddress, XValue value, int[] integers) {
 		for(Integer i : integers) {
-			indexInteger(address, value, i);
+			indexInteger(fieldAddress, value, i);
 		}
 	}
 	
-	public void deIndexIntegerArray(XAddress address, XValue value, int[] integers) {
+	public void deIndexIntegerArray(XAddress fieldAddress, XValue value, int[] integers) {
 		for(Integer i : integers) {
-			deIndexInteger(address, value, i);
+			deIndexInteger(fieldAddress, value, i);
 		}
 	}
 	
-	public void indexInteger(XAddress address, XValue value, int integer) {
+	public void indexInteger(XAddress fieldAddress, XValue value, int integer) {
 		String key = getIntegerIndexString(integer);
-		ValueIndexEntry entry = new ValueIndexEntry(address, value, 0);
-		this.index.index(key, entry);
+		this.index.index(key, fieldAddress, value);
 	}
 	
-	public void deIndexInteger(XAddress address, XValue value, int integer) {
+	public void deIndexInteger(XAddress fieldAddress, XValue value, int integer) {
 		String key = getIntegerIndexString(integer);
-		ValueIndexEntry entry = new ValueIndexEntry(address, value, 0);
-		this.index.deIndex(key, entry);
+		this.index.deIndex(key, fieldAddress, value);
 	}
 	
-	public void indexIdArray(XAddress address, XValue value, XID[] ids) {
+	public void indexIdArray(XAddress fieldAddress, XValue value, XID[] ids) {
 		for(XID id : ids) {
-			indexId(address, value, id);
+			indexId(fieldAddress, value, id);
 		}
 	}
 	
-	public void deIndexIdArray(XAddress address, XValue value, XID[] ids) {
+	public void deIndexIdArray(XAddress fieldAddress, XValue value, XID[] ids) {
 		for(XID id : ids) {
-			deIndexId(address, value, id);
+			deIndexId(fieldAddress, value, id);
 		}
 	}
 	
-	public void indexDoubleArray(XAddress address, XValue value, double[] doubles) {
+	public void indexDoubleArray(XAddress fieldAddress, XValue value, double[] doubles) {
 		for(Double d : doubles) {
-			indexDouble(address, value, d);
+			indexDouble(fieldAddress, value, d);
 		}
 	}
 	
-	public void deIndexDoubleArray(XAddress address, XValue value, double[] doubles) {
+	public void deIndexDoubleArray(XAddress fieldAddress, XValue value, double[] doubles) {
 		for(Double d : doubles) {
-			deIndexDouble(address, value, d);
+			deIndexDouble(fieldAddress, value, d);
 		}
 	}
 	
-	public void indexDouble(XAddress address, XValue value, double d) {
+	public void indexDouble(XAddress fieldAddress, XValue value, double d) {
 		String key = getDoubleIndexString(d);
-		ValueIndexEntry entry = new ValueIndexEntry(address, value, 0);
-		this.index.index(key, entry);
+		
+		this.index.index(key, fieldAddress, value);
 	}
 	
-	public void deIndexDouble(XAddress address, XValue value, double d) {
+	public void deIndexDouble(XAddress fieldAddress, XValue value, double d) {
 		String key = getDoubleIndexString(d);
-		ValueIndexEntry entry = new ValueIndexEntry(address, value, 0);
-		this.index.deIndex(key, entry);
+		this.index.deIndex(key, fieldAddress, value);
 	}
 	
-	public void indexByteArray(XAddress address, XValue value, byte[] bytes) {
+	public void indexByteArray(XAddress fieldAddress, XValue value, byte[] bytes) {
 		for(Byte b : bytes) {
-			indexByte(address, value, b);
+			indexByte(fieldAddress, value, b);
 		}
 	}
 	
-	public void deIndexByteArray(XAddress address, XValue value, byte[] bytes) {
+	public void deIndexByteArray(XAddress fieldAddress, XValue value, byte[] bytes) {
 		for(Byte b : bytes) {
-			deIndexByte(address, value, b);
+			deIndexByte(fieldAddress, value, b);
 		}
 	}
 	
-	public void indexByte(XAddress address, XValue value, byte b) {
+	public void indexByte(XAddress fieldAddress, XValue value, byte b) {
 		String key = getByteIndexString(b);
-		ValueIndexEntry entry = new ValueIndexEntry(address, value, 0);
-		this.index.index(key, entry);
+		this.index.index(key, fieldAddress, value);
 	}
 	
-	public void deIndexByte(XAddress address, XValue value, byte b) {
+	public void deIndexByte(XAddress fieldAddress, XValue value, byte b) {
 		String key = getByteIndexString(b);
-		ValueIndexEntry entry = new ValueIndexEntry(address, value, 0);
-		this.index.deIndex(key, entry);
+		this.index.deIndex(key, fieldAddress, value);
 	}
 	
-	public void indexBooleanArray(XAddress address, XValue value, boolean[] bools) {
+	public void indexBooleanArray(XAddress fieldAddress, XValue value, boolean[] bools) {
 		for(Boolean b : bools) {
-			indexBoolean(address, value, b);
+			indexBoolean(fieldAddress, value, b);
 		}
 	}
 	
-	public void deIndexBooleanArray(XAddress address, XValue value, boolean[] bools) {
+	public void deIndexBooleanArray(XAddress fieldAddress, XValue value, boolean[] bools) {
 		for(Boolean b : bools) {
-			deIndexBoolean(address, value, b);
+			deIndexBoolean(fieldAddress, value, b);
 		}
 	}
 	
-	public void indexBoolean(XAddress address, XValue value, boolean bool) {
+	public void indexBoolean(XAddress fieldAddress, XValue value, boolean bool) {
 		String key = getBooleanIndexString(bool);
-		ValueIndexEntry entry = new ValueIndexEntry(address, value, 0);
-		this.index.index(key, entry);
+		this.index.index(key, fieldAddress, value);
 	}
 	
-	public void deIndexBoolean(XAddress address, XValue value, boolean bool) {
+	public void deIndexBoolean(XAddress fieldAddress, XValue value, boolean bool) {
 		String key = getBooleanIndexString(bool);
-		ValueIndexEntry entry = new ValueIndexEntry(address, value, 0);
-		this.index.deIndex(key, entry);
+		this.index.deIndex(key, fieldAddress, value);
 	}
 	
-	public void indexString(XAddress address, XValue value, String string) {
+	public void indexString(XAddress fieldAddress, XValue value, String string) {
 		for(String key : getStringIndexStrings(string)) {
-			ValueIndexEntry entry = new ValueIndexEntry(address, value, 0);
-			this.index.index(key, entry);
+			this.index.index(key, fieldAddress, value);
 		}
 	}
 	
-	public void deIndexString(XAddress address, XValue value, String s) {
+	public void deIndexString(XAddress fieldAddress, XValue value, String s) {
 		for(String key : getStringIndexStrings(s)) {
-			ValueIndexEntry entry = new ValueIndexEntry(address, value, 0);
-			this.index.deIndex(key, entry);
+			this.index.deIndex(key, fieldAddress, value);
 		}
 	}
 	
-	public void indexId(XAddress address, XValue value, XID id) {
+	public void indexId(XAddress fieldAddress, XValue value, XID id) {
 		String key = getIdIndexString(id);
-		ValueIndexEntry entry = new ValueIndexEntry(address, value, 0);
-		this.index.index(key, entry);
+		this.index.index(key, fieldAddress, value);
 	}
 	
-	public void deIndexId(XAddress address, XValue value, XID id) {
+	public void deIndexId(XAddress fieldAddress, XValue value, XID id) {
 		String key = getIdIndexString(id);
-		ValueIndexEntry entry = new ValueIndexEntry(address, value, 0);
-		this.index.deIndex(key, entry);
+		this.index.deIndex(key, fieldAddress, value);
 	}
 	
-	public void indexAddressArray(XAddress objectAddress, XValue value, XAddress[] addresses) {
+	public void indexAddressArray(XAddress fieldAddress, XValue value, XAddress[] addresses) {
 		for(XAddress adr : addresses) {
-			indexAddress(objectAddress, value, adr);
+			indexAddress(fieldAddress, value, adr);
 		}
 	}
 	
-	public void deIndexAddressArray(XAddress address, XValue value, XAddress[] addresses) {
+	public void deIndexAddressArray(XAddress fieldAddress, XValue value, XAddress[] addresses) {
 		for(XAddress adr : addresses) {
-			deIndexAddress(address, value, adr);
+			deIndexAddress(fieldAddress, value, adr);
 		}
 	}
 	
-	public void indexAddress(XAddress objectAddress, XValue value, XAddress address) {
+	public void indexAddress(XAddress fieldAddress, XValue value, XAddress address) {
 		String key = getAddressIndexString(address);
-		ValueIndexEntry entry = new ValueIndexEntry(objectAddress, value, 0);
-		this.index.index(key, entry);
+		this.index.index(key, fieldAddress, value);
 	}
 	
-	public void deIndexAddress(XAddress objectAddress, XValue value, XAddress address) {
+	public void deIndexAddress(XAddress fieldAddress, XValue value, XAddress address) {
 		String key = getAddressIndexString(address);
-		ValueIndexEntry entry = new ValueIndexEntry(objectAddress, value, 0);
-		this.index.deIndex(key, entry);
+		this.index.deIndex(key, fieldAddress, value);
 	}
 	
 	// ---- Methods returning the index strings ----
