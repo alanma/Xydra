@@ -364,7 +364,7 @@ public class RestlessMethod {
 		return true;
 	}
 	
-	private boolean notSet(Object value) {
+	private static boolean notSet(Object value) {
 		return value == null || value.equals("");
 	}
 	
@@ -410,7 +410,7 @@ public class RestlessMethod {
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 */
-	private boolean callLocalExceptionHandler(Throwable cause, Object instanceOrClass,
+	private static boolean callLocalExceptionHandler(Throwable cause, Object instanceOrClass,
 	        IRestlessContext context) throws InvocationTargetException, IllegalArgumentException,
 	        IllegalAccessException {
 		
@@ -454,7 +454,7 @@ public class RestlessMethod {
 	 * @param context
 	 * @return
 	 */
-	private boolean callGlobalExceptionHandlers(Throwable cause, IRestlessContext context) {
+	private static boolean callGlobalExceptionHandlers(Throwable cause, IRestlessContext context) {
 		for(RestlessExceptionHandler handler : context.getRestless().exceptionHandlers) {
 			if(handler.handleException(cause, context)) {
 				return true;
@@ -548,7 +548,7 @@ public class RestlessMethod {
 	 * @param cookieMap
 	 * @return an existing request id found in URL parameters or cookies.
 	 */
-	private String reuseOrCeateUniqueRequestIdentifier(Map<String,String> urlParameter,
+	private static String reuseOrCeateUniqueRequestIdentifier(Map<String,String> urlParameter,
 	        Map<String,String> cookieMap) {
 		String requestId = urlParameter.get(IRestlessContext.PARAM_REQUEST_ID);
 		if(requestId == null) {

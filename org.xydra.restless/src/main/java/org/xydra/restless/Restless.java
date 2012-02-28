@@ -293,20 +293,20 @@ public class Restless extends HttpServlet {
 			w.write(XHTML_DOCTYPE);
 			
 			w.write("<html " + XHTML_NS + ">\n" +
-
+			
 			"<head>\n" +
-
+			
 			"<title>Restless Configuration</title>\n" +
-
+			
 			"<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n" +
-
+			
 			/* styling */
 			"<style type='text/css'> \n" +
-
+			
 			"body { font-family: Verdana,sans-serif; }" + "\n"
-
+			
 			+ "</style>\n" +
-
+			
 			"</head><body><div>");
 			w.write("<h3>Restless configuration</h3>\n");
 			w.write("<ol>");
@@ -492,7 +492,7 @@ public class Restless extends HttpServlet {
 		log.info(">>> Done Restless init at context path '"
 		        + this.initParams.get("context:contextPath") + "'. Admin interface at '"
 		        + this.initParams.get("context:contextPath") + "/admin/restless'. "
-
+		        
 		        + "Init performance " + clock.getStats());
 	}
 	
@@ -618,7 +618,7 @@ public class Restless extends HttpServlet {
 	 * @param commaSeparatedClassnames
 	 * @return a list of classnames in order of appearance
 	 */
-	private List<String> parseToList(String commaSeparatedClassnames) {
+	private static List<String> parseToList(String commaSeparatedClassnames) {
 		
 		List<String> list = new ArrayList<String>();
 		if(commaSeparatedClassnames == null) {
@@ -753,7 +753,7 @@ public class Restless extends HttpServlet {
 		}
 	}
 	
-	private boolean requestIsViaAdminUrl(HttpServletRequest req) {
+	private static boolean requestIsViaAdminUrl(HttpServletRequest req) {
 		return req.getRequestURI().startsWith(ADMIN_ONLY_URL_PREFIX);
 	}
 	

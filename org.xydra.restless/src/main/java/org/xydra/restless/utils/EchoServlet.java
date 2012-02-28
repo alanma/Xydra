@@ -31,8 +31,7 @@ public class EchoServlet extends HttpServlet {
 		echo(req, resp);
 	}
 	
-	@SuppressWarnings("unchecked")
-	private void echo(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+	private static void echo(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		resp.setStatus(200);
 		resp.setContentType("text/plain");
 		
@@ -51,11 +50,11 @@ public class EchoServlet extends HttpServlet {
 			w.println("=== Cookies ===");
 			for(Cookie cookie : req.getCookies()) {
 				w.println(cookie.getName());
-				w.println(" * comment: " + cookie.getVersion());
-				w.println(" * comment: " + cookie.getDomain());
-				w.println(" * comment: " + cookie.getPath());
-				w.println(" * comment: " + cookie.getMaxAge());
-				w.println(" * comment: " + cookie.getValue());
+				w.println(" * version: " + cookie.getVersion());
+				w.println(" * domain: " + cookie.getDomain());
+				w.println(" * path: " + cookie.getPath());
+				w.println(" * maxAge: " + cookie.getMaxAge());
+				w.println(" * value: " + cookie.getValue());
 				w.println(" * comment: " + cookie.getComment());
 			}
 		}
