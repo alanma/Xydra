@@ -2,8 +2,7 @@ package org.xydra.valueindex;
 
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Set;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
@@ -430,8 +429,8 @@ public class XModelObjectLevelIndex {
 	}
 	
 	/**
-	 * Returns a list of {@link XAddress XAddresses} of objects containing
-	 * fields which hold {@link XValue XValues} corresponding to the given key.
+	 * Returns a set of {@link XAddress XAddresses} of objects containing fields
+	 * which hold {@link XValue XValues} corresponding to the given key.
 	 * 
 	 * Which {@link XValue XValues} correspond to a given key is determined by
 	 * the used {@link XValueIndexer} which was set in the constructor
@@ -440,11 +439,10 @@ public class XModelObjectLevelIndex {
 	 * )
 	 * 
 	 * @param key The key for which corresponding will be searched
-	 * @return a list of {@link XAddress XAddresses} of objects containing
-	 *         fields which hold {@link XValue XValues} corresponding to the
-	 *         given key.
+	 * @return a set of {@link XAddress XAddresses} of objects containing fields
+	 *         which hold {@link XValue XValues} corresponding to the given key.
 	 */
-	public List<XAddress> search(String key) {
+	public Set<XAddress> search(String key) {
 		// IMPROVE rather simple search algorithm at the moment...
 		
 		/*
@@ -452,15 +450,15 @@ public class XModelObjectLevelIndex {
 		 * given key appropriately
 		 */
 		String indexKey = key.toLowerCase();
-		LinkedList<XAddress> list = new LinkedList<XAddress>();
+		HashSet<XAddress> set = new HashSet<XAddress>();
 		
 		EqualsConstraint<String> constraint = new EqualsConstraint<String>(indexKey);
 		Iterator<ValueIndexEntry> iterator = this.index.constraintIterator(constraint);
 		
 		while(iterator.hasNext()) {
-			list.add(iterator.next().getAddress());
+			set.add(iterator.next().getAddress());
 		}
 		
-		return list;
+		return set;
 	}
 }
