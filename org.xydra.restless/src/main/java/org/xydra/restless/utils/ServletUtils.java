@@ -24,76 +24,17 @@ import org.xydra.log.LoggerFactory;
  */
 public class ServletUtils {
 	
-	private static Logger log = LoggerFactory.getLogger(ServletUtils.class);
+	public static final String CONTENTTYPE_APPLICATION_XHTML_XML = "application/xhtml+xml";
+	
+	public static final String CONTENTTYPE_STAR_STAR = "*/*";
+	
+	public static final String CONTENTTYPE_TEXT_HTML = "text/html";
 	
 	public static final String HEADER_ACCEPT = "Accept";
 	
 	private static final String HEADER_REFERER = "Referer";
 	
-	public static final String CONTENTTYPE_APPLICATION_XHTML_XML = "application/xhtml+xml";
-	
-	public static final String CONTENTTYPE_TEXT_HTML = "text/html";
-	
-	public static final String CONTENTTYPE_STAR_STAR = "*/*";
-	
-	/**
-	 * Set UTF8, given contentType, No caching. Send '200 OK'.
-	 * 
-	 * See
-	 * {@link #headersXhtmlViaConneg(HttpServletRequest, HttpServletResponse, int, long)}
-	 * for a variant with content-negotiation.
-	 * 
-	 * @param res where to send to
-	 * @param contentType to be sent
-	 */
-	public static void headers(HttpServletResponse res, String contentType) {
-		res.setCharacterEncoding("utf-8");
-		res.setContentType(contentType);
-		res.setStatus(200);
-		res.setHeader("Pragma", "no-cache");
-		res.setHeader("Expires", "Fri, 01 Jan 1990 00:00:00 GMT");
-	}
-	
-	/**
-	 * Compute best header to send for XHTML content.
-	 * 
-	 * @param req ..
-	 * @param res ..
-	 * @param status if 0 no header is set.
-	 * @param cachingInMinutes if 0 no header is set. If -1, caching is
-	 *            explicitly disabled via headers. Positive numbers are the time
-	 *            to cache the response in minutes.
-	 */
-	public static void headersXhtmlViaConneg(HttpServletRequest req, HttpServletResponse res,
-	        int status, long cachingInMinutes) {
-		String chosenContentType = conneg(req);
-		headers(res, status, cachingInMinutes, chosenContentType);
-	}
-	
-	/**
-	 * @param res ..
-	 * @param status if 0 no header is set.
-	 * @param cachingInMinutes if 0 no header is set. If -1, caching is
-	 *            explicitly disabled via headers. Positive numbers are the time
-	 *            to cache the response in minutes.
-	 */
-	public static void headers(HttpServletResponse res, int status, long cachingInMinutes,
-	        String contentType) {
-		res.setCharacterEncoding("utf-8");
-		res.setContentType(contentType);
-		if(status > 0) {
-			res.setStatus(status);
-		}
-		if(cachingInMinutes == -1) {
-			res.setHeader("Cache-Control", "no-cache");
-			/* "Fri, 01 Jan 1990 00:00:00 GMT" */
-			res.setDateHeader("Expires", 0);
-		} else if(cachingInMinutes > 0) {
-			long millisSinceEpoch = System.currentTimeMillis() + (cachingInMinutes * 60 * 1000);
-			// TODO test header set correctly
-			res.setDateHeader("Expires", millisSinceEpoch);
-		}
-	}
+	private static Logger log = LoggerFactory.getLogger(ServletUtils.class);
 	
 	/**
 	 * If the Accept header explicitly contains application/xhtml+xml (with
@@ -113,7 +54,6 @@ public class ServletUtils {
 	 */
 	public static String conneg(HttpServletRequest req) {
 		// parse
-		@SuppressWarnings("unchecked")
 		Enumeration<String> enu = req.getHeaders(HEADER_ACCEPT);
 		assert enu != null : "Container allows no header access";
 		Map<String,Double> contentType2q = new HashMap<String,Double>();
@@ -148,41 +88,6 @@ public class ServletUtils {
 		return CONTENTTYPE_TEXT_HTML;
 	}
 	
-	private static void parseAcceptHeaderPart(String headerValue, Map<String,Double> contentType2q) {
-		String[] parts = headerValue.split(";");
-		String contentDef = parts[0];
-		if(parts.length > 1) {
-			String qs = parts[1].trim();
-			if(!qs.startsWith("q=")) {
-				log.warn("q-value '" + qs + "' wrong in Accept header '" + headerValue + "'");
-			} else {
-				qs = qs.substring(2);
-				try {
-					double q = Double.parseDouble(qs);
-					contentType2q.put(contentDef, q);
-				} catch(NumberFormatException e) {
-					log.warn("q-value '" + qs + "' not parsable as double in Accept header '"
-					        + headerValue + "'");
-				}
-			}
-		} else {
-			contentType2q.put(contentDef, null);
-		}
-	}
-	
-	/**
-	 * @param req ...
-	 * @return the full request URI from http up to the page name. Does not
-	 *         contain any query parameters or hash fragments.
-	 */
-	public static final String getPageUri(HttpServletRequest req) {
-		return req.getProtocol() + req.getRemoteHost() + req.getRequestURI();
-	}
-	
-	public static final String getServerUri(HttpServletRequest req) {
-		return req.getProtocol() + req.getRemoteHost();
-	}
-	
 	/**
 	 * Turn all cookies that the request contains into a map, cookie name as
 	 * key, cookie value as map value.
@@ -213,6 +118,35 @@ public class ServletUtils {
 			}
 		}
 		return cookieMap;
+	}
+	
+	/**
+	 * @param req ..
+	 * @return all headers of the given request as map headerName -&gt; values
+	 *         (as a list).
+	 */
+	public static Map<String,List<String>> getHeadersAsMap(HttpServletRequest req) {
+		Map<String,List<String>> map = new HashMap<String,List<String>>();
+		Enumeration<?> en = req.getHeaderNames();
+		while(en.hasMoreElements()) {
+			String name = (String)en.nextElement();
+			Enumeration<?> valueEn = req.getHeaders(name);
+			List<String> valueList = new LinkedList<String>();
+			while(valueEn.hasMoreElements()) {
+				valueList.add((String)valueEn.nextElement());
+			}
+			map.put(name, valueList);
+		}
+		return map;
+	}
+	
+	/**
+	 * @param req ...
+	 * @return the full request URI from http up to the page name. Does not
+	 *         contain any query parameters or hash fragments.
+	 */
+	public static final String getPageUri(HttpServletRequest req) {
+		return req.getProtocol() + req.getRemoteHost() + req.getRequestURI();
 	}
 	
 	/**
@@ -266,6 +200,14 @@ public class ServletUtils {
 	}
 	
 	/**
+	 * @param req ..
+	 * @return the referrer header url or null
+	 */
+	public static String getReferrerUrl(HttpServletRequest req) {
+		return req.getHeader(HEADER_REFERER);
+	}
+	
+	/**
 	 * @return all get and post parameters as delivered in the servlet API - but
 	 *         additionally URL-decoded
 	 * @throws IllegalStateException if one of the parameters has more than one
@@ -292,40 +234,132 @@ public class ServletUtils {
 		return map;
 	}
 	
-	public static String urldecode(String encoded) {
-		try {
-			return URLDecoder.decode(encoded, "utf-8");
-		} catch(UnsupportedEncodingException e) {
-			throw new AssertionError(e);
+	public static final String getServerUri(HttpServletRequest req) {
+		return req.getProtocol() + req.getRemoteHost();
+	}
+	
+	public static boolean hasParameter(HttpServletRequest req, String paramName) {
+		return req.getParameter(paramName) != null;
+	}
+	
+	/**
+	 * Sets encoding always to utf-8.
+	 * 
+	 * @param res ..
+	 * @param status if 0 no status code is set.
+	 * @param cachingInMinutes if 0 no header is set. If -1, caching is
+	 *            explicitly disabled via headers (Cache-Control=no-cache;
+	 *            Expires=0). Positive numbers are the time to cache the
+	 *            response in minutes from now on.
+	 */
+	public static void headers(HttpServletResponse res, int status, long cachingInMinutes,
+	        String contentType) {
+		res.setCharacterEncoding("utf-8");
+		res.setContentType(contentType);
+		if(status > 0) {
+			res.setStatus(status);
+		}
+		if(cachingInMinutes == -1) {
+			// TODO What is this? res.setHeader("Pragma", "no-cache");
+			res.setHeader("Cache-Control", "no-cache");
+			/* "Fri, 01 Jan 1990 00:00:00 GMT" */
+			res.setDateHeader("Expires", 0);
+		} else if(cachingInMinutes > 0) {
+			long millisSinceEpoch = System.currentTimeMillis() + (cachingInMinutes * 60 * 1000);
+			// TODO test header set correctly
+			res.setDateHeader("Expires", millisSinceEpoch);
 		}
 	}
 	
 	/**
-	 * @param req ..
-	 * @return all headers of the given request as map headerName -&gt; values
-	 *         (as a list).
+	 * Set UTF8, given contentType, No caching. Send '200 OK'.
+	 * 
+	 * See
+	 * {@link #headersXhtmlViaConneg(HttpServletRequest, HttpServletResponse, int, long)}
+	 * for a variant with content-negotiation.
+	 * 
+	 * @param res where to send to
+	 * @param contentType to be sent
 	 */
-	public static Map<String,List<String>> getHeadersAsMap(HttpServletRequest req) {
-		Map<String,List<String>> map = new HashMap<String,List<String>>();
-		Enumeration<?> en = req.getHeaderNames();
-		while(en.hasMoreElements()) {
-			String name = (String)en.nextElement();
-			Enumeration<?> valueEn = req.getHeaders(name);
-			List<String> valueList = new LinkedList<String>();
-			while(valueEn.hasMoreElements()) {
-				valueList.add((String)valueEn.nextElement());
+	public static void headers(HttpServletResponse res, String contentType) {
+		res.setCharacterEncoding("utf-8");
+		res.setContentType(contentType);
+		res.setStatus(200);
+		res.setHeader("Pragma", "no-cache");
+		res.setHeader("Expires", "Fri, 01 Jan 1990 00:00:00 GMT");
+	}
+	
+	/**
+	 * Compute best header to send for XHTML content.
+	 * 
+	 * @param req ..
+	 * @param res ..
+	 * @param status if 0 no header is set.
+	 * @param cachingInMinutes if 0 no header is set. If -1, caching is
+	 *            explicitly disabled via headers. Positive numbers are the time
+	 *            to cache the response in minutes.
+	 */
+	public static void headersXhtmlViaConneg(HttpServletRequest req, HttpServletResponse res,
+	        int status, long cachingInMinutes) {
+		String chosenContentType = conneg(req);
+		headers(res, status, cachingInMinutes, chosenContentType);
+	}
+	
+	/**
+	 * @param request
+	 * @return true if request is just an http://-request and not an https://
+	 *         request.
+	 */
+	public static boolean isInsecureHttpRequest(HttpServletRequest req) {
+		return req.getScheme().equals("http");
+	}
+	
+	/**
+	 * @param request
+	 * @return true if request is to root URL '/', may also have query
+	 *         parameters
+	 */
+	public static boolean isRequestToRoot(HttpServletRequest req) {
+		String path = req.getPathInfo();
+		return path == null || path.equals("") || path.equals("/");
+	}
+	
+	/**
+	 * @param req
+	 * @return true if request is a secure https://-request
+	 */
+	public static boolean isSecureHttpsRequest(HttpServletRequest req) {
+		return req.getScheme().equals("https");
+	}
+	
+	/**
+	 * @param paramValue can be null
+	 * @return true if value is neither null nor an empty string
+	 */
+	public static boolean isSet(String paramValue) {
+		return paramValue != null && !paramValue.equals("");
+	}
+	
+	private static void parseAcceptHeaderPart(String headerValue, Map<String,Double> contentType2q) {
+		String[] parts = headerValue.split(";");
+		String contentDef = parts[0];
+		if(parts.length > 1) {
+			String qs = parts[1].trim();
+			if(!qs.startsWith("q=")) {
+				log.warn("q-value '" + qs + "' wrong in Accept header '" + headerValue + "'");
+			} else {
+				qs = qs.substring(2);
+				try {
+					double q = Double.parseDouble(qs);
+					contentType2q.put(contentDef, q);
+				} catch(NumberFormatException e) {
+					log.warn("q-value '" + qs + "' not parsable as double in Accept header '"
+					        + headerValue + "'");
+				}
 			}
-			map.put(name, valueList);
+		} else {
+			contentType2q.put(contentDef, null);
 		}
-		return map;
-	}
-	
-	/**
-	 * @param req ..
-	 * @return the referrer header url or null
-	 */
-	public static String getReferrerUrl(HttpServletRequest req) {
-		return req.getHeader(HEADER_REFERER);
 	}
 	
 	public static Map<String,String> parseQueryString(String q) {
@@ -339,6 +373,14 @@ public class ServletUtils {
 			map.put(key, value);
 		}
 		return map;
+	}
+	
+	public static String urldecode(String encoded) {
+		try {
+			return URLDecoder.decode(encoded, "utf-8");
+		} catch(UnsupportedEncodingException e) {
+			throw new AssertionError(e);
+		}
 	}
 	
 }
