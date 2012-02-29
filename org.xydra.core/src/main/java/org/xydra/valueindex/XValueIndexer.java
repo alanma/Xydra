@@ -49,8 +49,7 @@ public abstract class XValueIndexer {
 	
 	public void indexValue(XAddress fieldAddress, XValue value) {
 		if(value == null) {
-			// TODO handle null values (consistently in the whole indexer)
-			indexString(fieldAddress, value, "null");
+			indexString(fieldAddress, value, getIndexStringForNull());
 		} else {
 			switch(value.getType()) {
 			case Address:
@@ -245,8 +244,7 @@ public abstract class XValueIndexer {
 	
 	public void deIndexValue(XAddress fieldAddress, XValue value) {
 		if(value == null) {
-			// TODO handle null values
-			deIndexString(fieldAddress, value, "null");
+			deIndexString(fieldAddress, value, getIndexStringForNull());
 		} else {
 			switch(value.getType()) {
 			case Address:
@@ -509,4 +507,6 @@ public abstract class XValueIndexer {
 	public abstract String getIdIndexString(XID value);
 	
 	public abstract String getAddressIndexString(XAddress value);
+	
+	public abstract String getIndexStringForNull();
 }

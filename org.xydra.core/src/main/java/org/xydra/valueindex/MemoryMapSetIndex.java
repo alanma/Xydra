@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 import org.xydra.base.XAddress;
+import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.value.XValue;
 import org.xydra.index.query.EqualsConstraint;
@@ -56,6 +57,11 @@ public class MemoryMapSetIndex implements ValueIndex {
 	
 	@Override
 	public void deIndex(String key, XAddress fieldAddress, XValue value) {
+		if(fieldAddress.getAddressedType() != XType.XFIELD) {
+			throw new RuntimeException("The given fieldAddress was no address of a field, but an "
+			        + fieldAddress.getAddressedType() + "type address!");
+		}
+		
 		XAddress objectAddress = XX.resolveObject(fieldAddress.getRepository(),
 		        fieldAddress.getModel(), fieldAddress.getObject());
 		
@@ -92,6 +98,11 @@ public class MemoryMapSetIndex implements ValueIndex {
 	
 	@Override
 	public void index(String key, XAddress fieldAddress, XValue value) {
+		if(fieldAddress.getAddressedType() != XType.XFIELD) {
+			throw new RuntimeException("The given fieldAddress was no address of a field, but an "
+			        + fieldAddress.getAddressedType() + "type address!");
+		}
+		
 		if(!this.map.containsKey(key)) {
 			this.map.put(key, new HashSet<ValueIndexEntry>());
 		}

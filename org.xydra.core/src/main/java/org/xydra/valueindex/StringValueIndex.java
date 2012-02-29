@@ -3,7 +3,9 @@ package org.xydra.valueindex;
 import java.util.Iterator;
 
 import org.xydra.base.XAddress;
+import org.xydra.base.XType;
 import org.xydra.base.XX;
+import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.value.XValue;
 import org.xydra.index.query.EqualsConstraint;
 
@@ -13,31 +15,50 @@ import org.xydra.index.query.EqualsConstraint;
  * {@link ValueIndexEntry ValueIndexEntries}, but represents and stores them as
  * Strings.
  * 
- * Warning: Many methods are not supported in this implementation!
+ * Since {@link XValue XValues} can become pretty big, this implementation
+ * offers the possibility to set a maximum size for the index entries. If an
+ * {@link XValue} is bigger than the given maximum size, the {@link XAddress} of
+ * the {@link XReadableField} holding the value will be stored instead of the
+ * value itself.
+ * 
+ * 
  * 
  * @author Kaidel
  * 
  */
 
-/*
- * TODO Maybe rewrite the whole interface and don't use IMapSetIndex, since
- * almost all methods don't work anyway?
- */
-
-/*
- * TODO implement methods that check the size of the value first and only add it
- * if its small enough and null otherwise
- */
 public class StringValueIndex implements ValueIndex {
 	
 	private StringMap map;
 	private boolean checkEntrySize;
 	private int maxEntrySize;
 	
+	/**
+	 * Creates a new StringValueIndex, which does not check the size of its
+	 * entries.
+	 * 
+	 * @param map the {@link StringMap} which will be used for indexing.
+	 */
 	public StringValueIndex(StringMap map) {
 		this.map = map;
 	}
 	
+	/**
+	 * Creates a new StringValueIndex, which does check the size of its entries
+	 * against the given maximum size. Since the size of most types of
+	 * {@link XValue XValues} can only be estimated, this is not exact, but
+	 * should usually work. If an entry with the given {@link XValue} is bigger
+	 * than the given maximum size, the {@link XAddress} of the
+	 * {@link XReadableField} holding the value will be stored instead of the
+	 * value itself. The size of the entry with the {@link XAddress} will not be
+	 * checked again, so you need to make sure that the {@link XAddress
+	 * XAddresses} actually are not bigger than the {@link XValue XValues} you
+	 * are using to save memory space.
+	 * 
+	 * @param map the {@link StringMap} which will be used for indexing.
+	 * @param maxEntrySize The maximum size of an {@link ValueIndexEntry} in
+	 *            this index storing an {@link XValue}.
+	 */
 	public StringValueIndex(StringMap map, int maxEntrySize) {
 		this(map);
 		
@@ -83,6 +104,8 @@ public class StringValueIndex implements ValueIndex {
 	}
 	
 	private XValue getValueForIndex(XAddress fieldAddress, XValue value) {
+		assert fieldAddress.getAddressedType() == XType.XFIELD;
+		
 		if(!this.checkEntrySize) {
 			return value;
 		}
@@ -110,6 +133,10 @@ public class StringValueIndex implements ValueIndex {
 	
 	@Override
 	public void deIndex(String key, XAddress fieldAddress, XValue value) {
+		if(fieldAddress.getAddressedType() != XType.XFIELD) {
+			throw new RuntimeException("The given fieldAddress was no address of a field, but an "
+			        + fieldAddress.getAddressedType() + "type address!");
+		}
 		
 		if(!(this.containsKey(key))) {
 			// do nothing
@@ -183,6 +210,11 @@ public class StringValueIndex implements ValueIndex {
 	
 	@Override
 	public void index(String key, XAddress fieldAddress, XValue value) {
+		if(fieldAddress.getAddressedType() != XType.XFIELD) {
+			throw new RuntimeException("The given fieldAddress was no address of a field, but an "
+			        + fieldAddress.getAddressedType() + "type address!");
+		}
+		
 		XValue usedValue = this.getValueForIndex(fieldAddress, value);
 		
 		XAddress objectAddress = XX.resolveObject(fieldAddress.getRepository(),

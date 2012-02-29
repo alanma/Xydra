@@ -30,7 +30,7 @@ public class ValueIndexEntry {
 	 * @param value The {@link XValue} which is to be indexed.
 	 * @param counter The number of occurrences of the given value in the
 	 *            {@link XObject} with the given address. Must not be null.
-	 * @throws RuntimeException if address or counter were null
+	 * @throws RuntimeException if address or counter are null
 	 */
 	public ValueIndexEntry(XAddress address, XValue value, Integer counter) {
 		if(address == null || counter == null) {
@@ -72,7 +72,7 @@ public class ValueIndexEntry {
 	/**
 	 * Increments the counter.
 	 * 
-	 * @return the counter after the incrementation.
+	 * @return the counter after it was incremented.
 	 */
 	public Integer incrementCounter() {
 		this.counter++;
@@ -83,7 +83,7 @@ public class ValueIndexEntry {
 	/**
 	 * Decrements the counter.
 	 * 
-	 * @return the counter after the decrementation.
+	 * @return the counter after it was decremented.
 	 */
 	public Integer decrementCounter() {
 		this.counter--;

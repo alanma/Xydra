@@ -18,10 +18,6 @@ import org.xydra.index.query.EqualsConstraint;
  * 
  */
 
-/*
- * TODO add exception documentation and other missing documentation
- */
-
 public interface ValueIndex {
 	
 	/**
@@ -38,6 +34,8 @@ public interface ValueIndex {
 	 * @param fieldAddress the address of the {@link XReadableField} in which
 	 *            the given value exists
 	 * @param value the value which is to be associated with the given key
+	 * @throws RuntimeException if the given {@link XAddress} is not a field
+	 *             address.
 	 */
 	public void index(String key, XAddress fieldAddress, XValue value);
 	
@@ -56,6 +54,8 @@ public interface ValueIndex {
 	 *            the given value exists
 	 * @param value the value which is to be removed from the set of values
 	 *            associated with the given key
+	 * @throws RuntimeException if the given {@link XAddress} is not a field
+	 *             address.
 	 */
 	public void deIndex(String key, XAddress fieldAddress, XValue value);
 	
@@ -76,11 +76,37 @@ public interface ValueIndex {
 	 */
 	Iterator<ValueIndexEntry> constraintIterator(EqualsConstraint<String> c1);
 	
+	/**
+	 * Deindexes the given key, i.e. removes the set of entries which are
+	 * associated with this key. This does not completely remove these entries
+	 * from the Index, since they might be associated with other keys.
+	 * 
+	 * @param key The key which is to be completely deindexed.
+	 */
 	public void deIndex(String key);
 	
+	/**
+	 * Checks if there are entries associated with the given key.
+	 * 
+	 * @param key The key which is to be checked.
+	 * @return true, if there are entries associated with the given key, false
+	 *         otherwise.
+	 */
 	public boolean containsKey(String key);
 	
-	public boolean contains(EqualsConstraint<String> c,
+	/**
+	 * Checks if under the given entryConstraint there are entries associated
+	 * with key under the given constraint.
+	 * 
+	 * The counter-variable of the {@link ValueIndexEntry} in the constraint
+	 * will not be used for checking!
+	 * 
+	 * @param keyConstraint The constraint for the keys.
+	 * @param entryConstraint The constraint for the entries
+	 * @return true, if under the given entryConstraint there are entries
+	 *         associated with key under the given constraint, false otherwise.
+	 */
+	public boolean contains(EqualsConstraint<String> keyConstraint,
 	        EqualsConstraint<ValueIndexEntry> entryConstraint);
 	
 }

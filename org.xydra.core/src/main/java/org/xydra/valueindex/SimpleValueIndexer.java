@@ -44,4 +44,12 @@ public class SimpleValueIndexer extends StringValueSimpleIndexerAdapter {
 		String[] array = new String[indexStrings.size()];
 		return indexStrings.toArray(array);
 	}
+	
+	/**
+	 * Simply returns the String "null".
+	 */
+	@Override
+	public String getIndexStringForNull() {
+		return "null";
+	}
 }

@@ -38,13 +38,8 @@ import org.xydra.index.query.EqualsConstraint;
  */
 
 /*
- * TODO Keep in mind that it will NOT be possible to iterate over all existing
- * keys in the planned implementation, so do not use keyIterator etc. on the
- * index
- */
-
-/*
- * TODO check modelAddress in every method!
+ * Keep in mind that it is NOT possible to iterate over all existing keys in the
+ * planned implementation (see {@link StringValueIndex} and {@link StringMap}).
  */
 
 public class XModelObjectLevelIndex {
@@ -358,6 +353,13 @@ public class XModelObjectLevelIndex {
 		if(fieldAddress.getAddressedType() != XType.XFIELD) {
 			throw new RuntimeException("fieldAddress is no valid Field-XAddress, but an "
 			        + fieldAddress.getAddressedType() + "-Address.");
+		}
+		
+		XAddress modelAddress = XX.resolveModel(fieldAddress.getRepository(),
+		        fieldAddress.getModel());
+		if(!this.modelAddress.equals(modelAddress)) {
+			throw new RuntimeException(
+			        "the given field address was not an address of a field of the model indexed by this index.");
 		}
 		
 		/*
