@@ -383,4 +383,20 @@ public class ServletUtils {
 		}
 	}
 	
+	/**
+	 * @param b
+	 * @return true if b is (after trim and lowecasing) one of 'true','yes' or
+	 *         'on'
+	 */
+	public static boolean toBoolean(String b) {
+		if(!isSet(b)) {
+			return false;
+		}
+		String c = b.trim().toLowerCase();
+		if(c.equals("true") || c.equals("yes") || c.equals("on")) {
+			return true;
+		}
+		return false;
+	}
+	
 }
