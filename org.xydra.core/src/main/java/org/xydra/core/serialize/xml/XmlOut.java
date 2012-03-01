@@ -162,7 +162,7 @@ public class XmlOut extends AbstractXydraOut {
 		
 	}
 	
-	private boolean isInlined(Frame container) {
+	private static boolean isInlined(Frame container) {
 		return container.type == Type.Child && !container.hasChildType();
 	}
 	

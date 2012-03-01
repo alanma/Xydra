@@ -49,6 +49,14 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 		        fieldRevision, inTransaction);
 	}
 	
+	public static XFieldEvent createFrom(XFieldEvent fe) {
+		MemoryFieldEvent event = new MemoryFieldEvent(fe.getActor(), fe.getTarget(),
+		        fe.getObjectId(), fe.getChangeType(), fe.getOldModelRevision(),
+		        fe.getOldObjectRevision(), fe.getOldFieldRevision(), fe.inTransaction(),
+		        fe.isImplied());
+		return event;
+	}
+	
 	/**
 	 * Creates an {@link XFieldEvent} of the add-type (an {@link XValue} was
 	 * added to the {@link XField} this event refers to)

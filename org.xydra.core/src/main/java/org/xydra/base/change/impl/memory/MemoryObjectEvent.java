@@ -49,6 +49,14 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
 		        inTransaction);
 	}
 	
+	public static XObjectEvent createFrom(XObjectEvent oe) {
+		MemoryObjectEvent event = new MemoryObjectEvent(oe.getActor(), oe.getTarget(),
+		        oe.getObjectId(), oe.getChangeType(), oe.getOldModelRevision(),
+		        oe.getOldObjectRevision(), oe.getOldFieldRevision(), oe.inTransaction(),
+		        oe.isImplied());
+		return event;
+	}
+	
 	/**
 	 * Creates a new {@link XObjectEvent} of the add-type (an {@link XField} was
 	 * added to the {@link XObject} this event refers to)

@@ -47,6 +47,13 @@ public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {
 		        RevisionOfEntityNotSet, inTransaction, false);
 	}
 	
+	public static XModelEvent createFrom(XModelEvent me) {
+		MemoryModelEvent event = new MemoryModelEvent(me.getActor(), me.getTarget(),
+		        me.getObjectId(), me.getChangeType(), me.getOldModelRevision(),
+		        me.getOldObjectRevision(), me.inTransaction(), me.isImplied());
+		return event;
+	}
+	
 	/**
 	 * Creates a new {@link XModelEvent} of the remove-type (an {@link XObject}
 	 * was removed from the {@link XModel} this event refers to)

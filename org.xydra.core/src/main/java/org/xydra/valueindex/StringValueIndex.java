@@ -113,7 +113,7 @@ public class StringValueIndex implements ValueIndex {
 		ValueIndexEntry entry = new ValueIndexEntry(fieldAddress, value, 1);
 		String entryString = ValueIndexEntryUtils.serializeAsString(entry);
 		
-		int entrySize = this.estimateStringSize(entryString);
+		int entrySize = StringValueIndex.estimateStringSize(entryString);
 		
 		if(entrySize > this.maxEntrySize) {
 			// use the fieldAddress as the value
@@ -126,7 +126,7 @@ public class StringValueIndex implements ValueIndex {
 		}
 	}
 	
-	private int estimateStringSize(String s) {
+	private static int estimateStringSize(String s) {
 		int size = s.length();
 		return size * 16;
 	}

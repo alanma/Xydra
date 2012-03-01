@@ -39,7 +39,14 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
 	 */
 	public static XRepositoryEvent createAddEvent(XID actor, XAddress target, XID modelId) {
 		return new MemoryRepositoryEvent(actor, target, modelId, ChangeType.ADD,
-		        RevisionOfEntityNotSet, false);
+		        RevisionOfEntityNotSet, false, false);
+	}
+	
+	public static XRepositoryEvent createFrom(XRepositoryEvent re) {
+		MemoryRepositoryEvent event = new MemoryRepositoryEvent(re.getActor(), re.getTarget(),
+		        re.getModelId(), re.getChangeType(), re.getOldModelRevision(), re.inTransaction(),
+		        re.isImplied());
+		return event;
 	}
 	
 	/**
@@ -59,7 +66,8 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
 	 */
 	public static XRepositoryEvent createAddEvent(XID actor, XAddress target, XID modelId,
 	        long modelRev, boolean inTrans) {
-		return new MemoryRepositoryEvent(actor, target, modelId, ChangeType.ADD, modelRev, inTrans);
+		return new MemoryRepositoryEvent(actor, target, modelId, ChangeType.ADD, modelRev, inTrans,
+		        false);
 	}
 	
 	/**
@@ -88,7 +96,7 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
 		}
 		
 		return new MemoryRepositoryEvent(actor, target, modelId, ChangeType.REMOVE, modelRevison,
-		        inTrans);
+		        inTrans, false);
 	}
 	
 	// The XID of the model that was added/deleted
@@ -100,8 +108,8 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
 	// private constructor, use the createEvent methods for instantiating a
 	// MemoryRepositoryEvent
 	private MemoryRepositoryEvent(XID actor, XAddress target, XID modelId, ChangeType changeType,
-	        long modelRevision, boolean inTrans) {
-		super(target, changeType, actor, inTrans, false);
+	        long modelRevision, boolean inTrans, boolean implied) {
+		super(target, changeType, actor, inTrans, implied);
 		
 		if(target.getRepository() == null || target.getModel() != null) {
 			throw new IllegalArgumentException("target must refer to a repository, was: " + target);

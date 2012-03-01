@@ -26,7 +26,7 @@ public class XmlParser implements XydraParser {
 	
 	private static DocumentBuilder parser = null;
 	
-	private synchronized DocumentBuilder getParser() throws ParserConfigurationException {
+	private synchronized static DocumentBuilder getParser() throws ParserConfigurationException {
 		if(parser == null) {
 			parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 		}
@@ -34,7 +34,7 @@ public class XmlParser implements XydraParser {
 	}
 	
 	@Override
-    public synchronized XydraElement parse(String string) {
+	public synchronized XydraElement parse(String string) {
 		InputSource is = new InputSource(new StringReader(string));
 		Document document;
 		try {
@@ -44,10 +44,10 @@ public class XmlParser implements XydraParser {
 		}
 		return XmlElement.wrap(document.getDocumentElement());
 	}
-
+	
 	@Override
-    public String getContentType() {
-	    return "application/xml";
-    }
+	public String getContentType() {
+		return "application/xml";
+	}
 	
 }

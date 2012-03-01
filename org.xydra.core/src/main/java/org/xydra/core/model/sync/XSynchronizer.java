@@ -292,7 +292,7 @@ public class XSynchronizer {
 		
 	}
 	
-	private XCommand fixCommand(long syncRev, XCommand command, int idx) {
+	private static XCommand fixCommand(long syncRev, XCommand command, int idx) {
 		
 		if(command == null) {
 			throw new RequestException("command was null");
@@ -329,7 +329,7 @@ public class XSynchronizer {
 		return MemoryTransaction.createTransaction(trans.getTarget(), fixedCommands);
 	}
 	
-	private XAtomicCommand fixAtomicCommand(long syncRev, int i, XAtomicCommand ac) {
+	private static XAtomicCommand fixAtomicCommand(long syncRev, int i, XAtomicCommand ac) {
 		
 		if(ac.isForced() || ac.getRevisionNumber() <= syncRev) {
 			// not relative

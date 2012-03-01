@@ -39,7 +39,7 @@ public class XmlElement extends AbstractXmlElement {
 		}
 	}
 	
-	private Iterator<XydraElement> nodeListToIterator(NodeList nodes) {
+	private static Iterator<XydraElement> nodeListToIterator(NodeList nodes) {
 		List<XydraElement> list = new ArrayList<XydraElement>();
 		for(int i = 0; i < nodes.getLength(); ++i) {
 			Node node = nodes.item(i);
@@ -146,7 +146,7 @@ public class XmlElement extends AbstractXmlElement {
 		return nodeListToValues(nodes);
 	}
 	
-	private Iterator<Object> nodeListToValues(final NodeList nodes) {
+	private static Iterator<Object> nodeListToValues(final NodeList nodes) {
 		
 		List<Object> objects = new ArrayList<Object>();
 		for(int i = 0; i < nodes.getLength(); ++i) {
@@ -190,7 +190,7 @@ public class XmlElement extends AbstractXmlElement {
 		return nodeListToMapIterator(nodes, attribute);
 	}
 	
-	private Iterator<Pair<String,XydraElement>> nodeListToMapIterator(NodeList nodes,
+	private static Iterator<Pair<String,XydraElement>> nodeListToMapIterator(NodeList nodes,
 	        String attribute) {
 		List<Pair<String,XydraElement>> list = new ArrayList<Pair<String,XydraElement>>();
 		for(int i = 0; i < nodes.getLength(); ++i) {
