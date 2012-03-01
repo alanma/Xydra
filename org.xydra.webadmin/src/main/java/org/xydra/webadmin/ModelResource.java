@@ -386,7 +386,7 @@ public class ModelResource {
 	
 	/**
 	 * @param repoId where to add
-	 * @param model which has a weird address with NO repositoryId
+	 * @param model which can have an address with NO repositoryId
 	 * @param overwriteIfSameRevPresent if true, content in repo is overwritten
 	 *            even if the same revNr is found
 	 * @return some statistical information
@@ -402,7 +402,7 @@ public class ModelResource {
 		
 		ModelRevision modelRev = p.getModelRevision(modelAddress);
 		if(modelRev != null) {
-			if(!overwriteIfSameRevPresent && model.getRevisionNumber() == modelRev.revision()) {
+			if(!overwriteIfSameRevPresent && (model.getRevisionNumber() == modelRev.revision())) {
 				log.debug("Model already stored.");
 				result.changes = false;
 				result.modelExisted = true;
@@ -410,24 +410,22 @@ public class ModelResource {
 				return result;
 			}
 		}
-		// else
+		// else: overwrite
 		XReadableModel oldModel = p.getModelSnapshot(modelAddress);
+		XTransactionBuilder tb = new XTransactionBuilder(modelAddress);
+		
 		if(oldModel != null) {
 			result.modelExisted = true;
 		} else {
 			result.modelExisted = false;
-			// FIXME concurrency: move createCommand into transaction
-			XRepositoryCommand createCommand = MemoryRepositoryCommand.createAddCommand(
+			XRepositoryCommand createModelCommand = MemoryRepositoryCommand.createAddCommand(
 			        XX.resolveRepository(repoId), XCommand.FORCED, model.getID());
-			long cmdResult = p.executeCommand(actor, createCommand);
-			assert cmdResult >= 0;
+			tb.addCommand(createModelCommand);
 			oldModel = new SimpleModel(modelAddress, 0);
 		}
 		assert oldModel != null;
-		
-		XTransactionBuilder tb = new XTransactionBuilder(modelAddress);
 		tb.changeModel(oldModel, model);
-		// TODO or use the change log if the model has one?
+		// IMPROVE or use the change log if the model has one?
 		if(tb.isEmpty()) {
 			if(result.modelExisted) {
 				result.changes = false;

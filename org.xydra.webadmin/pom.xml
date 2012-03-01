@@ -9,6 +9,7 @@
 		<version>2011.12.05</version>
 	</parent>
 
+
 	<artifactId>webadmin</artifactId>
 	<version>${xydra.version}</version>
 	<!-- 'war' for web deployment, 'jar' for maven deploy -->

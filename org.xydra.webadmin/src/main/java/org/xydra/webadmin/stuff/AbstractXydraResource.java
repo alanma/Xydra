@@ -59,23 +59,23 @@ public abstract class AbstractXydraResource {
 		restless.addMethod("/xydra/repository", "GET", subClass, "getRepository", true);
 		
 		restless.addMethod("/xydra/model", "GET", subClass, "getModel", true,
-
+		
 		new RestlessParameter("model", null)
-
+		
 		);
 		
 		restless.addMethod("/xydra/object", "GET", subClass, "getObject", true,
-
+		
 		new RestlessParameter("model", null),
-
+		
 		new RestlessParameter("object", null)
-
+		
 		);
 		
 		restless.addMethod("/xydra/objectByAddress", "GET", subClass, "getObjectByAddress", true,
-
+		
 		new RestlessParameter("objectAddress", null)
-
+		
 		);
 		
 	}
@@ -144,7 +144,7 @@ public abstract class AbstractXydraResource {
 		w.close();
 	}
 	
-	private void generalInfo(Writer w) throws IOException {
+	private static void generalInfo(Writer w) throws IOException {
 		w.write("Instance: " + XydraRuntime.getInstanceId() + "; Thread: "
 		        + AboutAppEngine.getThreadInfo() + "<br />\n");
 	}

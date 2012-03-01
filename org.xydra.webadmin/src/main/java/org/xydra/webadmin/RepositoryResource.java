@@ -323,6 +323,15 @@ public class RepositoryResource {
 		w.close();
 	}
 	
+	/**
+	 * @param fis input stream which contains zipped content
+	 * @param repoId for new models
+	 * @param w for debug output
+	 * @param replaceModels if true existing content is ignored and just
+	 *            replaced with conent of stream. If false, existing content is
+	 *            updated. TODO =?
+	 * @throws IOException
+	 */
 	public static void updateFromZippedInputStream(InputStream fis, XID repoId, Writer w,
 	        boolean replaceModels) throws IOException {
 		Clock c = new Clock().start();
@@ -331,6 +340,7 @@ public class RepositoryResource {
 		w.flush();
 		
 		XReadableModel model;
+		// stats
 		int modelExisted = 0;
 		int modelsWithChanges = 0;
 		int restored = 0;
