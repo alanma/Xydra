@@ -122,16 +122,16 @@ public class GaeChange {
 		 * anything OR if too old: Mark as FailedTimeout
 		 */
 		Creating(0),
-
+		
 		/** changes made, locks freed. Current revision is now bigger. */
 		SuccessExecuted(3),
-
+		
 		/** there was nothing to change, locks freed */
 		SuccessNochange(4),
-
+		
 		/** could not execute command because of preconditions, locks freed */
 		FailedPreconditions(100),
-
+		
 		/**
 		 * timed out before saving events (status was STATUS_CREATING), locks
 		 * freed.
@@ -367,7 +367,6 @@ public class GaeChange {
 	/**
 	 * @return the locks associated with this change.
 	 */
-	@SuppressWarnings("unchecked")
 	synchronized public GaeLocks getLocks() {
 		
 		assert !getStatus().isCommitted();

@@ -1,5 +1,6 @@
 package org.xydra.store.impl.gae.changes;
 
+import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.change.ChangeType;
@@ -19,18 +20,24 @@ import org.xydra.store.impl.gae.changes.GaeEvents.AsyncValue;
  * @author voelkel
  * @author kaidel
  */
+// TODO should it?
+@RunsInGWT(true)
 class GaeFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 	
 	private static final long serialVersionUID = -4274165693986851623L;
 	
 	// the revision numbers before the event happened
-	private final long modelRevision, objectRevision, fieldRevision;
+	private long modelRevision, objectRevision, fieldRevision;
 	
 	/*
 	 * the new value, after the event happened (never null, newValue.get()
 	 * returns null for "delete" events)
 	 */
-	private final AsyncValue newValue;
+	private AsyncValue newValue;
+	
+	/** Only for GWT */
+	protected GaeFieldEvent() {
+	}
 	
 	protected GaeFieldEvent(XID actor, XAddress target, AsyncValue newValue, ChangeType changeType,
 	        long modelRevision, long objectRevision, long fieldRevision, boolean inTransaction,

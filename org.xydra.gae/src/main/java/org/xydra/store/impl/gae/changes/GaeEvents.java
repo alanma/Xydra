@@ -262,7 +262,6 @@ public class GaeEvents {
 				Text eventXml;
 				if(this.transIndex < 0) {
 					int realindex = getInternalValueId(this.transIndex);
-					@SuppressWarnings("unchecked")
 					List<Text> eventValues = (List<Text>)eventEntity.getProperty(PROP_EVENT_VALUES);
 					if(eventValues == null || realindex >= eventValues.size()) {
 						return null;
@@ -437,17 +436,11 @@ public class GaeEvents {
 		 * Be careful with types, as GAE might not return the exact same type
 		 * that was set.
 		 */
-		@SuppressWarnings("unchecked")
 		List<Number> types = (List<Number>)changeEntity.getProperty(PROP_EVENT_TYPES);
-		@SuppressWarnings("unchecked")
 		List<String> targets = (List<String>)changeEntity.getProperty(PROP_EVENT_TARGETS);
-		@SuppressWarnings("unchecked")
 		List<Text> values = (List<Text>)changeEntity.getProperty(PROP_EVENT_VALUES);
-		@SuppressWarnings("unchecked")
 		List<Number> objectRevs = (List<Number>)changeEntity.getProperty(PROP_EVENT_REVS_OBJECT);
-		@SuppressWarnings("unchecked")
 		List<Number> fieldRevs = (List<Number>)changeEntity.getProperty(PROP_EVENT_REVS_FIELD);
-		@SuppressWarnings("unchecked")
 		List<Boolean> implied = (List<Boolean>)changeEntity.getProperty(PROP_EVENT_IMPLIED);
 		
 		GaeAssert.gaeAssert(types != null, "changeEntity.PROP_EVENT_TYPES was null");

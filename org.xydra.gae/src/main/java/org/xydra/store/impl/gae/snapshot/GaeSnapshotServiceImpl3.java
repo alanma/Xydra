@@ -340,7 +340,6 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 	 * 
 	 * TODO SCALE avoid growing large, keep only most recent version?
 	 */
-	@SuppressWarnings("unchecked")
 	private SortedMap<Long,XRevWritableModel> getModelSnapshotsCache() {
 		String key = "snapshots:" + this.changesService.getModelAddress();
 		Map<String,Object> instanceCache = InstanceContext.getInstanceCache();
@@ -458,7 +457,7 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 		return snapshot;
 	}
 	
-	private boolean revCanBeMemcached(long requestedRevNr) {
+	private static boolean revCanBeMemcached(long requestedRevNr) {
 		return requestedRevNr % SNAPSHOT_PERSISTENCE_THRESHOLD == 0;
 	}
 	

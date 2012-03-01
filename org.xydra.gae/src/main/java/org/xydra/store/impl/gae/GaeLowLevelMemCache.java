@@ -46,15 +46,15 @@ public class GaeLowLevelMemCache implements IMemCache {
 	public String stats() {
 		Stats stats = this.memcacheService.getStatistics();
 		return "In-memory, size: " + size()
-
+		
 		+ " maxTimeWithoutAccess: " + stats.getBytesReturnedForHits()
-
+		
 		+ " hits: " + stats.getHitCount()
-
+		
 		+ " misses: " + stats.getMissCount()
-
+		
 		+ " TotalItemBytes: " + stats.getTotalItemBytes()
-
+		
 		+ " BytesReturnedForHits: " + stats.getBytesReturnedForHits();
 	}
 	
@@ -79,13 +79,13 @@ public class GaeLowLevelMemCache implements IMemCache {
 	}
 	
 	@GaeOperation()
-	private String keyUniqueForCurrentAppVersion(String key) {
+	private static String keyUniqueForCurrentAppVersion(String key) {
 		return key;
 		/*
 		 * TODO(stability) @Daniel: use a memcache key that is specific for a
 		 * certain app-version to avoid conflicts
 		 */
-
+		
 		// if(key instanceof String) {
 		// return this.appVersion + key;
 		// } else {

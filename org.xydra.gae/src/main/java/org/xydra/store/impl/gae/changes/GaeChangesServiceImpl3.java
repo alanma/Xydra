@@ -413,7 +413,7 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 		}
 	}
 	
-	private int windowsSizeForRound(int round) {
+	private static int windowsSizeForRound(int round) {
 		assert round >= 0;
 		assert WINDOW_SIZES.length > 0;
 		if(round < WINDOW_SIZES.length) {
@@ -676,7 +676,7 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 		return events;
 	}
 	
-	private boolean eventsAreWithinRange(List<XEvent> events, long begin, long endRev) {
+	private static boolean eventsAreWithinRange(List<XEvent> events, long begin, long endRev) {
 		for(XEvent e : events) {
 			GaeAssert.gaeAssert(e.getRevisionNumber() >= begin);
 			GaeAssert.gaeAssert(e.getRevisionNumber() <= endRev);
@@ -709,7 +709,6 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 	/**
 	 * @return the instance-level cache of committed change objects
 	 */
-	@SuppressWarnings("unchecked")
 	private Map<Long,GaeChange> getCommittedChangeCache() {
 		String key = "changes:" + this.modelAddr;
 		Map<String,Object> instanceCache = InstanceContext.getInstanceCache();
@@ -735,7 +734,7 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 	 * @param e atomic or txn event, never null
 	 * @return true if model must exist after this event
 	 */
-	private boolean eventIndicatesModelExists(final XEvent e) {
+	private static boolean eventIndicatesModelExists(final XEvent e) {
 		XEvent event = e;
 		if(event.getChangeType() == ChangeType.TRANSACTION) {
 			// check only last event
@@ -804,6 +803,7 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 				// should never happen again
 				log.warn("entity weird: " + DebugFormatter.format(e));
 			}
+			assert oLastTaken != null;
 			long lastTaken = (Long)oLastTaken;
 			ri.setLastTakenIfHigher(lastTaken);
 			ModelRevision modelRev = null;
