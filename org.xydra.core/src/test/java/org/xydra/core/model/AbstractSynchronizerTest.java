@@ -86,7 +86,7 @@ abstract public class AbstractSynchronizerTest {
 		LoggerTestHelper.init();
 	}
 	
-	private void checkEvents(XModel model) {
+	private static void checkEvents(XModel model) {
 		
 		XChangeLog cl = model.getChangeLog();
 		
@@ -114,7 +114,7 @@ abstract public class AbstractSynchronizerTest {
 	/**
 	 * Wait for the given callback and check that there were no errors.
 	 */
-	private void checkSyncCallback(ForTestSynchronizationCallback sc) {
+	private static void checkSyncCallback(ForTestSynchronizationCallback sc) {
 		if(sc.getRequestError() != null) {
 			throw new RuntimeException(sc.getRequestError());
 		}
@@ -149,7 +149,7 @@ abstract public class AbstractSynchronizerTest {
 	 * Execute the given command on the store and check that there were no
 	 * errors.
 	 */
-	private void executeCommand(XCommand command) {
+	private static void executeCommand(XCommand command) {
 		SynchronousTestCallback<BatchedResult<Long>[]> tc;
 		tc = new SynchronousTestCallback<BatchedResult<Long>[]>();
 		
@@ -215,7 +215,7 @@ abstract public class AbstractSynchronizerTest {
 	/**
 	 * Synchronize and check that there were no errors.
 	 */
-	private void synchronize(XSynchronizer sync) {
+	private static void synchronize(XSynchronizer sync) {
 		ForTestSynchronizationCallback sc = new ForTestSynchronizationCallback();
 		sync.synchronize(sc);
 		checkSyncCallback(sc);
@@ -759,7 +759,7 @@ abstract public class AbstractSynchronizerTest {
 	 * 
 	 * @return the result passed to the callback.
 	 */
-	private <T> T waitForSuccess(SynchronousTestCallback<T> tc) {
+	private static <T> T waitForSuccess(SynchronousTestCallback<T> tc) {
 		
 		assertEquals(SynchronousTestCallback.SUCCESS, tc.waitOnCallback(0));
 		
@@ -775,7 +775,7 @@ abstract public class AbstractSynchronizerTest {
 	 * 
 	 * @return the result passed to the callback.
 	 */
-	private <T> T waitForSuccessBatched(SynchronousTestCallback<BatchedResult<T>[]> tc) {
+	private static <T> T waitForSuccessBatched(SynchronousTestCallback<BatchedResult<T>[]> tc) {
 		
 		BatchedResult<T>[] results = waitForSuccess(tc);
 		assertNotNull(results);

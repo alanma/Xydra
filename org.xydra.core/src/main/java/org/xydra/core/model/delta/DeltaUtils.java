@@ -386,7 +386,8 @@ public abstract class DeltaUtils {
 		
 		boolean hasChanges();
 		
-		XID getID();
+		@Override
+        XID getID();
 	}
 	
 	public static interface IFieldDiff extends IHasXID {
@@ -397,7 +398,8 @@ public abstract class DeltaUtils {
 		
 		boolean isChanged();
 		
-		XID getID();
+		@Override
+        XID getID();
 	}
 	
 }

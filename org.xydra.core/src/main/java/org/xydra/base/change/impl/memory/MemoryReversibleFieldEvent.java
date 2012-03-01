@@ -1,5 +1,6 @@
 package org.xydra.base.change.impl.memory;
 
+import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.change.ChangeType;
@@ -19,13 +20,15 @@ import org.xydra.core.model.XObject;
  * @author voelkel
  * @author kaidel
  */
+@RunsInGWT(true)
 public class MemoryReversibleFieldEvent extends MemoryFieldEvent implements XReversibleFieldEvent {
 	
-	/**
-     * 
-     */
-    private static final long serialVersionUID = -2461624822886642985L;
-
+	/** For GWT only */
+	protected MemoryReversibleFieldEvent() {
+	}
+	
+	private static final long serialVersionUID = -2461624822886642985L;
+	
 	/**
 	 * Creates an {@link XReversibleFieldEvent} of the add-type (an
 	 * {@link XValue} was added to the {@link XField} this event refers to)
@@ -219,7 +222,7 @@ public class MemoryReversibleFieldEvent extends MemoryFieldEvent implements XRev
 	}
 	
 	// the old value, before the event happened (null for "add" events)
-	private final XValue oldValue;
+	private XValue oldValue;
 	
 	// private constructor, use the createEvent-methods for instantiating a
 	// MemoryFieldEvent.
@@ -233,7 +236,7 @@ public class MemoryReversibleFieldEvent extends MemoryFieldEvent implements XRev
 	}
 	
 	@Override
-    public XValue getOldValue() {
+	public XValue getOldValue() {
 		return this.oldValue;
 	}
 	

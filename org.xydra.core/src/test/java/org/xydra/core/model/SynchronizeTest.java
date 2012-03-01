@@ -138,7 +138,7 @@ public class SynchronizeTest {
 		
 	}
 	
-	private void makeAdditionalChanges(XModel model) {
+	private static void makeAdditionalChanges(XModel model) {
 		
 		assertNotNull(model.createObject(XX.createUniqueId()));
 		

@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.change.ChangeType;
@@ -22,6 +23,7 @@ import org.xydra.index.XI;
  * @author Kaidel
  * @author dscharrer
  */
+@RunsInGWT(true)
 public abstract class AbstractTransactionEvent implements XTransactionEvent {
 	
 	private static final long serialVersionUID = -3997550048059538237L;

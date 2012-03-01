@@ -393,7 +393,7 @@ public class LoggingJavaCodePersistence implements XydraPersistence {
 		}
 	}
 	
-	private Object toJavaArray(byte[] values) {
+	private static Object toJavaArray(byte[] values) {
 		StringBuffer buf = new StringBuffer();
 		boolean first = true;
 		for(byte value : values) {
@@ -407,7 +407,7 @@ public class LoggingJavaCodePersistence implements XydraPersistence {
 		return buf.toString();
 	}
 	
-	private String toJavaArray(String[] values) {
+	private static String toJavaArray(String[] values) {
 		StringBuffer buf = new StringBuffer();
 		boolean first = true;
 		for(String value : values) {
@@ -422,12 +422,12 @@ public class LoggingJavaCodePersistence implements XydraPersistence {
 		
 	}
 	
-	private String toJava(String raw) {
+	private static String toJava(String raw) {
 		String escaped = raw.replace("\"", "\\\"");
 		return "\"" + escaped + "\"";
 	}
 	
-	private String toJavaArray(long[] values) {
+	private static String toJavaArray(long[] values) {
 		StringBuffer buf = new StringBuffer();
 		boolean first = true;
 		for(long value : values) {
@@ -442,7 +442,7 @@ public class LoggingJavaCodePersistence implements XydraPersistence {
 		
 	}
 	
-	private String toJavaArray(int[] values) {
+	private static String toJavaArray(int[] values) {
 		StringBuffer buf = new StringBuffer();
 		boolean first = true;
 		for(int value : values) {
@@ -471,7 +471,7 @@ public class LoggingJavaCodePersistence implements XydraPersistence {
 		return buf.toString();
 	}
 	
-	private String toJavaArray(boolean[] values) {
+	private static String toJavaArray(boolean[] values) {
 		StringBuffer buf = new StringBuffer();
 		boolean first = true;
 		for(boolean value : values) {

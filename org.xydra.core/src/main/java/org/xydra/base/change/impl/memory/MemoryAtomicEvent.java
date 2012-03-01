@@ -1,5 +1,6 @@
 package org.xydra.base.change.impl.memory;
 
+import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.change.ChangeType;
@@ -12,6 +13,7 @@ import org.xydra.core.model.XRepository;
 import org.xydra.index.XI;
 
 
+@RunsInGWT(true)
 abstract public class MemoryAtomicEvent implements XEvent {
 	
 	private static final long serialVersionUID = 4051446642240477244L;

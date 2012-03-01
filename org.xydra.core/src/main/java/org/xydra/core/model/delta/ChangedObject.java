@@ -417,7 +417,8 @@ public class ChangedObject implements XWritableObject, DeltaUtils.IObjectDiff {
 	/**
 	 * @return false if there are no changes. True if there are changes.
 	 */
-	public boolean hasChanges() {
+	@Override
+    public boolean hasChanges() {
 		return !this.added.isEmpty() || !this.removed.isEmpty() || this.countCommandsNeeded(1) > 0;
 	}
 	

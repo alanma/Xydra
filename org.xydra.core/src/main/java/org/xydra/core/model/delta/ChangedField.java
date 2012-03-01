@@ -87,7 +87,8 @@ public class ChangedField implements XWritableField, DeltaUtils.IFieldDiff {
 	 * @return true, if the current {@link XValue} of this ChangedField is
 	 *         different from the value of the underlying {@link XReadableField}
 	 */
-	public boolean isChanged() {
+	@Override
+    public boolean isChanged() {
 		return this.changed;
 	}
 	

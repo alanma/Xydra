@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.change.ChangeType;
@@ -26,6 +27,7 @@ import org.xydra.index.XI;
  * @author Kaidel
  * @author dscharrer
  */
+@RunsInGWT(true)
 public class MemoryTransactionEvent extends AbstractTransactionEvent {
 	
 	private static final long serialVersionUID = 6281227584641817166L;

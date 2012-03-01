@@ -35,9 +35,9 @@ import org.xydra.store.BatchedResult;
 import org.xydra.store.ConnectionException;
 import org.xydra.store.GetEventsRequest;
 import org.xydra.store.InternalStoreException;
+import org.xydra.store.ModelRevision;
 import org.xydra.store.QuotaException;
 import org.xydra.store.RequestException;
-import org.xydra.store.ModelRevision;
 import org.xydra.store.StoreException;
 import org.xydra.store.TimeoutException;
 
@@ -281,7 +281,7 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 		}
 	}
 	
-	private GetEventsRequest[] preparePostRequests(BatchedResult<XEvent[]>[] eventRes) {
+	private static GetEventsRequest[] preparePostRequests(BatchedResult<XEvent[]>[] eventRes) {
 		
 		if(eventRes == null) {
 			return null;
@@ -295,11 +295,11 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 		return res;
 	}
 	
-	private static final GetEventsRequest dummyReq = new GetEventsRequest(XX
-	        .toAddress("/hello/world"), 0, Long.MAX_VALUE);
+	private static final GetEventsRequest dummyReq = new GetEventsRequest(
+	        XX.toAddress("/hello/world"), 0, Long.MAX_VALUE);
 	
 	@SuppressWarnings("unchecked")
-	private BatchedResult<XEvent[]>[] preparePreResults(BatchedResult<XEvent[]>[] eventRes) {
+	private static BatchedResult<XEvent[]>[] preparePreResults(BatchedResult<XEvent[]>[] eventRes) {
 		
 		if(eventRes == null) {
 			return null;
@@ -320,7 +320,7 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 		return events.toArray(new BatchedResult[events.size()]);
 	}
 	
-	private EventsRequest preparePreRequests(BatchedResult<XEvent[]>[] eventRes) {
+	private static EventsRequest preparePreRequests(BatchedResult<XEvent[]>[] eventRes) {
 		
 		if(eventRes == null) {
 			return null;
@@ -346,11 +346,11 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 			
 		}
 		
-		return new EventsRequest(except.toArray(new StoreException[except.size()]), ger
-		        .toArray(new GetEventsRequest[ger.size()]));
+		return new EventsRequest(except.toArray(new StoreException[except.size()]),
+		        ger.toArray(new GetEventsRequest[ger.size()]));
 	}
 	
-	private GetEventsRequest makeRequest(BatchedResult<XEvent[]> res) {
+	private static GetEventsRequest makeRequest(BatchedResult<XEvent[]> res) {
 		
 		if(res.getResult() == null) {
 			return dummyReq;
@@ -389,14 +389,15 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 		return addr == null ? dummyReq : new GetEventsRequest(addr, min, max);
 	}
 	
-	private <T> void checkBatchedResult(BatchedResult<T>[] expected, BatchedResult<T>[] actual) {
+	private static <T> void checkBatchedResult(BatchedResult<T>[] expected,
+	        BatchedResult<T>[] actual) {
 		assert expected.length == actual.length;
 		for(int i = 0; i < expected.length; i++) {
 			checkBatchedResult(expected[i], actual[i]);
 		}
 	}
 	
-	private <T> void checkBatchedResult(BatchedResult<T> expected, BatchedResult<T> actual) {
+	private static <T> void checkBatchedResult(BatchedResult<T> expected, BatchedResult<T> actual) {
 		
 		assert expected != null;
 		assertNotNull(actual);
@@ -412,8 +413,8 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 			assertNotNull(actual.getResult());
 			if(expected.getResult().getClass().isArray()) {
 				assertTrue(expected.getResult().getClass().isArray());
-				assertTrue(Arrays.equals((Object[])actual.getResult(), (Object[])expected
-				        .getResult()));
+				assertTrue(Arrays.equals((Object[])actual.getResult(),
+				        (Object[])expected.getResult()));
 			} else {
 				assertFalse(expected.getResult().getClass().isArray());
 				assertEquals(expected.getResult(), actual.getResult());
@@ -424,7 +425,7 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 		
 	}
 	
-	private void checkException(Throwable expected, Throwable actual) {
+	private static void checkException(Throwable expected, Throwable actual) {
 		
 		if(expected instanceof AccessException) {
 			assertTrue(actual instanceof AccessException);
@@ -551,7 +552,7 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 	}
 	
 	@SuppressWarnings("unchecked")
-	private <T> BatchedResult<T>[] preparePost(BatchedResult<T>[] revs) {
+	private static <T> BatchedResult<T>[] preparePost(BatchedResult<T>[] revs) {
 		
 		if(revs == null) {
 			return null;
@@ -567,8 +568,7 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 		return res;
 	}
 	
-	@SuppressWarnings("unchecked")
-	private <T> BatchedResult<T>[] preparePre(BatchedResult<T>[] revs) {
+	private static <T> BatchedResult<T>[] preparePre(BatchedResult<T>[] revs) {
 		
 		if(revs == null) {
 			return null;
@@ -682,8 +682,8 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 		}
 		
 		XydraOut out = create();
-		SerializedStore.serializeSnapshots(parseErrors, isModel, models
-		        .toArray(new BatchedResult[1]), objects.toArray(new BatchedResult[1]), out);
+		SerializedStore.serializeSnapshots(parseErrors, isModel,
+		        models.toArray(new BatchedResult[1]), objects.toArray(new BatchedResult[1]), out);
 		
 		XydraElement element = parse(out.getData());
 		assertNotNull(element);
