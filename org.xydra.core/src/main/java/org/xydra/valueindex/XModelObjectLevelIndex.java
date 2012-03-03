@@ -195,7 +195,7 @@ public class XModelObjectLevelIndex {
 					
 					XReadableField newField = newObject.getField(id);
 					
-					updateIndexWithoutAddressCheck(oldField, newField);
+					updateFieldEntry(oldField, newField);
 				} else {
 					// field was completely removed
 					deIndex(oldField);
@@ -321,15 +321,13 @@ public class XModelObjectLevelIndex {
 			throw new RuntimeException("newField is an older revision than oldField.");
 			// TODO how about just swapping the objects?
 		}
-		// nothing needs to be updated if the revision numbers are equal
-		if(newField.getRevisionNumber() > oldField.getRevisionNumber()) {
-			if(!oldAddress.equals(newAddress)) {
-				throw new RuntimeException(
-				        "oldField and newField do not have the same address and therefore aren't different versions of the same field.");
-			}
-			
-			updateIndexWithoutAddressCheck(oldField, newField);
+		
+		if(!oldAddress.equals(newAddress)) {
+			throw new RuntimeException(
+			        "oldField and newField do not have the same address and therefore aren't different versions of the same field.");
 		}
+		
+		updateFieldEntry(oldField, newField);
 	}
 	
 	/**
@@ -371,8 +369,17 @@ public class XModelObjectLevelIndex {
 		}
 	}
 	
-	// TODO document and find better name
-	private void updateIndexWithoutAddressCheck(XReadableField oldField, XReadableField newField) {
+	/**
+	 * A convenience method for updating the entries of two fields. Checks
+	 * whether the given newField revision is higher than the revision number of
+	 * the oldField and does nothing if this is not the case.
+	 * 
+	 * @param oldField
+	 * @param newField
+	 */
+	private void updateFieldEntry(XReadableField oldField, XReadableField newField) {
+		// nothing needs to be updated if the revision numbers are equal or
+		// newField is not "newer" than oldField
 		if(newField.getRevisionNumber() > oldField.getRevisionNumber()) {
 			// value of field was changed
 			deIndex(oldField);
