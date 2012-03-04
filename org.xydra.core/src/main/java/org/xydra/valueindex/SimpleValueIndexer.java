@@ -45,11 +45,4 @@ public class SimpleValueIndexer extends StringValueSimpleIndexerAdapter {
 		return indexStrings.toArray(array);
 	}
 	
-	/**
-	 * Simply returns the String "null".
-	 */
-	@Override
-	public String getIndexStringForNull() {
-		return "null";
-	}
 }
