@@ -1,11 +1,9 @@
 package org.xydra.valueindex;
 
-import org.xydra.core.model.XModel;
-
-
 /**
- * Test for {@link StringValueIndex} with the "maxSize" variable set to 1 (=
- * every value will be stored as null).
+ * Implementation of {@link XModelObjectLevelIndexTest} for testing
+ * {@link StringValueIndex} with the "maxSize" variable set to 1 (= no value
+ * will be stored, only the field address).
  * 
  * @author Kaidel
  * 
@@ -17,10 +15,9 @@ import org.xydra.core.model.XModel;
 
 public class StringValueIndexWithMaxSizeTest extends XModelObjectLevelIndexTest {
 	@Override
-	public void initializeIndexes(XModel oldModel, XModel newModel, XValueIndexer oldIndexer,
-	        XValueIndexer newIndexer) {
-		this.oldIndex = new XModelObjectLevelIndex(oldModel, oldIndexer);
-		this.newIndex = new XModelObjectLevelIndex(newModel, newIndexer);
+	public void initializeIndexes() {
+		this.oldIndex = new XModelObjectLevelIndex(this.oldModel, this.oldIndexer);
+		this.newIndex = new XModelObjectLevelIndex(this.newModel, this.newIndexer);
 	}
 	
 	@Override

@@ -1,10 +1,8 @@
 package org.xydra.valueindex;
 
-import org.xydra.core.model.XModel;
-
-
 /**
- * Test for {@link MemoryMapSetIndex}.
+ * Implementation of {@link XModelObjectLevelIndexTest} for testing
+ * {@link MemoryMapSetIndex}.
  * 
  * @author Kaidel
  * 
@@ -13,10 +11,9 @@ import org.xydra.core.model.XModel;
 public class InMemoryValueIndexTest extends XModelObjectLevelIndexTest {
 	
 	@Override
-	public void initializeIndexes(XModel oldModel, XModel newModel, XValueIndexer oldIndexer,
-	        XValueIndexer newIndexer) {
-		this.oldIndex = new XModelObjectLevelIndex(oldModel, oldIndexer);
-		this.newIndex = new XModelObjectLevelIndex(newModel, newIndexer);
+	public void initializeIndexes() {
+		this.oldIndex = new XModelObjectLevelIndex(this.oldModel, this.oldIndexer);
+		this.newIndex = new XModelObjectLevelIndex(this.newModel, this.newIndexer);
 	}
 	
 	@Override

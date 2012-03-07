@@ -26,8 +26,12 @@ import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
 
 
-/*
- * TODO Document
+/**
+ * An abstract test for testing {@link XModelObjectLevelIndex}. The phonebook
+ * model from {@link DemoModelUtil} is used as the basic source of data.
+ * 
+ * @author Kaidel
+ * 
  */
 
 public abstract class XModelObjectLevelIndexTest {
@@ -37,21 +41,53 @@ public abstract class XModelObjectLevelIndexTest {
 	}
 	
 	/**
-	 * The basic model, can be used to get the "old" objects etc. to test
-	 * updateIndex methods
+	 * The basic model. Most updateIndex methods need an old instance of a model
+	 * or object and the newest instance to compute what exactly needs to be
+	 * updated. This "oldModel" can be used to get the "old" objects etc. to
+	 * test updateIndex methods.
+	 * 
+	 * Both oldModel and newModel will contain the same data during the tests,
+	 * but newModel will be used to change values etc., whereas oldModel will
+	 * remain in the old state, so that it can be used in the
+	 * updateIndex-methods as described above.
 	 */
-	private XModel oldModel;
+	public XModel oldModel;
+	public XModel newModel;
 	
-	private XModel newModel;
+	/**
+	 * oldIndex is the index used for indexing the oldModel, newIndex the index
+	 * used for indexing the newModel.
+	 */
+	public XModelObjectLevelIndex oldIndex;
+	public XModelObjectLevelIndex newIndex;
 	
-	protected XModelObjectLevelIndex oldIndex;
-	protected XModelObjectLevelIndex newIndex;
-	protected XValueIndexer oldIndexer;
-	protected XValueIndexer newIndexer;
+	/**
+	 * oldIndexer is used by oldIndex, newIndexer by newIndex
+	 */
+	public XValueIndexer oldIndexer;
+	public XValueIndexer newIndexer;
 	
-	public abstract void initializeIndexes(XModel oldModel, XModel newModel,
-	        XValueIndexer oldIndexer, XValueIndexer newIndexer);
+	/**
+	 * Abstract method which initializes the indexes in the setup-method.
+	 * 
+	 * Needs to be overwritten! {@link XModelObjectLevelIndexTest#oldIndex}
+	 * needs to be parameterized with
+	 * {@link XModelObjectLevelIndexTest#oldModel} (as the model which it
+	 * indexes, index(oldModel) needs to be executed!) and
+	 * {@link XModelObjectLevelIndexTest#oldIndexer} (as the used indexer),
+	 * {@link XModelObjectLevelIndexTest#newIndex} (as the model which it
+	 * indexes, index(newModel) needs to be executed!) needs to be parameterized
+	 * with {@link XModelObjectLevelIndexTest#newModel} (as the used indexer)
+	 * and {@link XModelObjectLevelIndexTest#newIndexer}, otherwise the test
+	 * won't work correctly.
+	 */
+	public abstract void initializeIndexes();
 	
+	/**
+	 * Abstract method which initializes the indexers in the setup-method.
+	 * 
+	 * Needs to be overwritten, otherwise the test won't work correctly.
+	 */
 	public abstract void initializeIndexers();
 	
 	@Before
@@ -70,14 +106,17 @@ public abstract class XModelObjectLevelIndexTest {
 		
 		initializeIndexers();
 		
-		initializeIndexes(this.oldModel, this.newModel, this.oldIndexer, this.newIndexer);
+		initializeIndexes();
 	}
 	
+	/**
+	 * Tests whether indexing an XModel works correctly.
+	 * 
+	 * Note: index(oldModel) and index(newModel) were already called in the
+	 * setup() by initializing the indexes.
+	 */
 	@Test
 	public void testIndexingXModel() {
-		/*
-		 * The model was already indexed during the setup() method
-		 */
 		
 		for(XID objectId : this.oldModel) {
 			XObject object = this.oldModel.getObject(objectId);
@@ -97,6 +136,12 @@ public abstract class XModelObjectLevelIndexTest {
 		}
 	}
 	
+	/**
+	 * Tests if
+	 * {@link XModelObjectLevelIndex#updateIndex(XReadableObject, XReadableObject)}
+	 * works correctly when a new field with a new value gets added to the
+	 * object.
+	 */
 	@Test
 	public void testUpdateIndexObjectAddNewFieldWithValue() {
 		String valueString = "Firstvaluestringwhichshoudlntexistinbothmodels";
@@ -122,16 +167,33 @@ public abstract class XModelObjectLevelIndexTest {
 		assertEquals(newJohn.getAddress(), newList.iterator().next());
 	}
 	
+	/**
+	 * Tests if
+	 * {@link XModelObjectLevelIndex#updateIndex(XReadableObject, XReadableObject)}
+	 * works correctly when a new value gets added to a field of an object,
+	 * which already existed in the old state.
+	 */
 	@Test
 	public void testUpdateIndexObjectAddValue() {
 		testUpdateIndexAddValue(TestType.XOBJECT);
 	}
 	
+	/**
+	 * Tests if
+	 * {@link XModelObjectLevelIndex#updateIndex(XReadableField, XReadableField)}
+	 * works correctly when a new value gets added to a field of an object,
+	 * which already existed in the old state.
+	 */
 	@Test
 	public void testUpdateIndexFieldAddValue() {
 		testUpdateIndexAddValue(TestType.XFIELD);
 	}
 	
+	/**
+	 * Tests if {@link XModelObjectLevelIndex#updateIndex(XFieldEvent, XValue)}
+	 * works correctly when a new value gets added to a field of an object,
+	 * which already existed in the old state.
+	 */
 	@Test
 	public void testUpdateIndexEventAddValue() {
 		testUpdateIndexAddValue(TestType.XEVENT);
@@ -183,16 +245,33 @@ public abstract class XModelObjectLevelIndexTest {
 		assertEquals(newJohn.getAddress(), newList.iterator().next());
 	}
 	
+	/**
+	 * Tests if
+	 * {@link XModelObjectLevelIndex#updateIndex(XReadableObject, XReadableObject)}
+	 * works correctly when a value, which only existed once, gets removed from
+	 * a field of an object, which already existed in the old state.
+	 */
 	@Test
 	public void testUpdateIndexObjectDeleteValue() {
 		testUpdateIndexDeleteValue(TestType.XOBJECT);
 	}
 	
+	/**
+	 * Tests if
+	 * {@link XModelObjectLevelIndex#updateIndex(XReadableField, XReadableField)}
+	 * works correctly when a value, which only existed once, gets removed from
+	 * a field of an object, which already existed in the old state.
+	 */
 	@Test
 	public void testUpdateIndexFieldDeleteValue() {
 		testUpdateIndexDeleteValue(TestType.XFIELD);
 	}
 	
+	/**
+	 * Tests if {@link XModelObjectLevelIndex#updateIndex(XFieldEvent, XValue)}
+	 * works correctly when a value, which only existed once, gets removed from
+	 * a field of an object, which already existed in the old state.
+	 */
 	@Test
 	public void testUpdateIndexEventDeleteValue() {
 		testUpdateIndexDeleteValue(TestType.XEVENT);
@@ -249,16 +328,33 @@ public abstract class XModelObjectLevelIndexTest {
 		}
 	}
 	
+	/**
+	 * Tests if
+	 * {@link XModelObjectLevelIndex#updateIndex(XReadableObject, XReadableObject)}
+	 * works correctly when a value, which existed multiple times, gets removed
+	 * from a field of an object, which already existed in the old state.
+	 */
 	@Test
 	public void testUpdateIndexObjectDeleteMultipleExistingValue() {
 		testUpdateIndexDeleteMultipleExistingValue(TestType.XOBJECT);
 	}
 	
+	/**
+	 * Tests if
+	 * {@link XModelObjectLevelIndex#updateIndex(XReadableField, XReadableField)}
+	 * works correctly when a value, which existed multiple times, gets removed
+	 * from a field of an object, which already existed in the old state.
+	 */
 	@Test
 	public void testUpdateIndexFieldDeleteMultipleExistingValue() {
 		testUpdateIndexDeleteMultipleExistingValue(TestType.XFIELD);
 	}
 	
+	/**
+	 * Tests if {@link XModelObjectLevelIndex#updateIndex(XFieldEvent, XValue)}
+	 * works correctly when a value, which existed multiple times, gets removed
+	 * from a field of an object, which already existed in the old state.
+	 */
 	@Test
 	public void testUpdateIndexEventDeleteMultiplyExistingValue() {
 		testUpdateIndexDeleteMultipleExistingValue(TestType.XEVENT);
@@ -361,16 +457,33 @@ public abstract class XModelObjectLevelIndexTest {
 		}
 	}
 	
+	/**
+	 * Tests if
+	 * {@link XModelObjectLevelIndex#updateIndex(XReadableObject, XReadableObject)}
+	 * works correctly when a value of a field of an object gets changed, which
+	 * already existed in the old state.
+	 */
 	@Test
 	public void testUpdateIndexObjectChangeValue() {
 		testUpdateIndexChangeValue(TestType.XOBJECT);
 	}
 	
+	/**
+	 * Tests if
+	 * {@link XModelObjectLevelIndex#updateIndex(XReadableField, XReadableField)}
+	 * works correctly when a value of a field of an object gets changed, which
+	 * already existed in the old state.
+	 */
 	@Test
 	public void testUpdateIndexFieldChangeValue() {
 		testUpdateIndexChangeValue(TestType.XFIELD);
 	}
 	
+	/**
+	 * Tests if {@link XModelObjectLevelIndex#updateIndex(XFieldEvent, XValue)}
+	 * works correctly when a value of a field of an object gets changed, which
+	 * already existed in the old state.
+	 */
 	@Test
 	public void testUpdateIndexEventChangeValue() {
 		testUpdateIndexChangeValue(TestType.XEVENT);
@@ -432,6 +545,12 @@ public abstract class XModelObjectLevelIndexTest {
 		}
 	}
 	
+	/**
+	 * Tests if
+	 * {@link XModelObjectLevelIndex#updateIndex(XReadableObject, XReadableObject)}
+	 * works correctly when a field an object gets remove, which already existed
+	 * in the old state.
+	 */
 	@Test
 	public void testUpdateIndexObjectRemoveField() {
 		String valueString = "Firstvaluestringwhichshoudlntexistinbothmodels";
@@ -456,6 +575,10 @@ public abstract class XModelObjectLevelIndexTest {
 		}
 	}
 	
+	/**
+	 * Tests if {@link XModelObjectLevelIndex#deIndex(XReadableObject)} works
+	 * correctly.
+	 */
 	@Test
 	public void testDeIndexObject() {
 		XReadableObject newJohn = this.newModel.getObject(DemoModelUtil.JOHN_ID);
@@ -464,6 +587,10 @@ public abstract class XModelObjectLevelIndexTest {
 		testIfObjectWasDeIndexed(newJohn);
 	}
 	
+	/**
+	 * Tests if {@link XModelObjectLevelIndex#deIndex(XReadableField)} works
+	 * correctly.
+	 */
 	@Test
 	public void testDeIndexField() {
 		XReadableObject newJohn = this.newModel.getObject(DemoModelUtil.JOHN_ID);

@@ -23,6 +23,16 @@ import org.xydra.core.serialize.json.JsonParser;
 import org.xydra.core.serialize.json.JsonSerializer;
 
 
+/**
+ * This test checks whether the methods for parsing {@link ValueIndexEntry
+ * ValueIndexEntries} provided by {@link ValueIndexEntryUtils} work correctly or
+ * not. The phonebook model from {@link DemoModelUtil} is used as the basic
+ * source of data.
+ * 
+ * @author Kaidel
+ * 
+ */
+
 public class ValueIndexEntryParsingTest {
 	private XModel model;
 	
@@ -36,6 +46,10 @@ public class ValueIndexEntryParsingTest {
 		this.model = repo.getModel(DemoModelUtil.PHONEBOOK_ID);
 	}
 	
+	/**
+	 * Tests whether parsing an {@link ValueIndexEntry} as a String works
+	 * correctly.
+	 */
 	@Test
 	public void testParsingEntries() {
 		for(XID objectId : this.model) {
@@ -61,6 +75,10 @@ public class ValueIndexEntryParsingTest {
 		}
 	}
 	
+	/**
+	 * Tests whether parsing an array of {@link ValueIndexEntry
+	 * ValueIndexEntries} as a String works correctly.
+	 */
 	@Test
 	public void testParstingEntryArrays() {
 		ArrayList<ValueIndexEntry> list = new ArrayList<ValueIndexEntry>();
@@ -106,7 +124,7 @@ public class ValueIndexEntryParsingTest {
 		 * it fails, it is a sure sign that there's something wrong with this
 		 * assumption for your implementation.
 		 */
-
+		
 		JsonSerializer serializer = new JsonSerializer();
 		
 		XValue value = X.getValueFactory().createStringValue("test" + '\n' + "test");
