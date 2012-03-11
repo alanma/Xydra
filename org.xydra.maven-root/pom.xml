@@ -614,6 +614,9 @@
 						<version>0.9.2</version>
 						<configuration>
 							<splitJars>true</splitJars>
+							<jvmFlags>
+								<jvmFlag>-ea</jvmFlag>
+							</jvmFlags>
 						</configuration>
 						<!-- <dependencies> <dependency> <groupId>net.kindleit</groupId> <artifactId>gae-runtime</artifactId> 
 							<version>${gae.version}</version> <type>pom</type> </dependency> </dependencies> -->
@@ -852,7 +855,7 @@
 							<xmlOutput>false</xmlOutput>
 							<xmlOutputDirectory>
 								target/findbugs
-					</xmlOutputDirectory>
+							</xmlOutputDirectory>
 							<!-- High|Normal|Low|Exp|Ignore -->
 							<threshold>Normal</threshold>
 							<!-- Min|Default|Max -->
@@ -910,65 +913,65 @@
 							<additionalparam>
 								-sourceclasspath
 								${project.build.outputDirectory}
-          			</additionalparam>
+							</additionalparam>
 							<!-- provide links to several famous projects see: Better builds with 
 								maven, p.185 -->
 							<!-- do not aggregate javadocs from child elements -->
 							<links>
 								<link>
 									http://java.sun.com/j2se/1.5.0/docs/api/
-						</link>
+								</link>
 								<link>
 									http://jakarta.apache.org/commons/collections/apidocs-COLLECTIONS_3_0/
-						</link>
+								</link>
 								<link>http://www.junit.org/junit/javadoc/</link>
 								<link>
 									http://jakarta.apache.org/velocity/api/
-						</link>
+								</link>
 								<!-- aggregate java doc of sub-projects and provide links to several 
 									famous projects see: Better builds with maven, p.185 -->
 								<link>
 									http://site.xydra.org/core/apidocs/
-						</link>
+								</link>
 								<link>
 									http://site.xydra.org/dev/apidocs/
-						</link>
+								</link>
 								<link>
 									http://site.xydra.org/gae/apidocs/
-						</link>
+								</link>
 								<link>
 									http://site.xydra.org/gwt/apidocs/
-						</link>
+								</link>
 								<link>
 									http://site.xydra.org/gaemyadmin/apidocs/
-						</link>
+								</link>
 								<link>
 									http://site.xydra.org/index/apidocs/
-						</link>
+								</link>
 								<link>
 									http://site.xydra.org/log/apidocs/
-						</link>
+								</link>
 								<link>
 									http://site.xydra.org/log.howto/apidocs/
-						</link>
+								</link>
 								<link>
 									http://site.xydra.org/restless/apidocs/
-						</link>
+								</link>
 								<link>
 									http://site.xydra.org/schema/apidocs/
-						</link>
+								</link>
 								<link>
 									http://site.xydra.org/server/apidocs/
-						</link>
+								</link>
 								<link>
 									http://site.xydra.org/server/apidocs/
-						</link>
+								</link>
 								<link>
 									http://site.xydra.org/textsearch/apidocs/
-						</link>
+								</link>
 								<link>
 									http://site.xydra.org/webadmin/apidocs/
-						</link>
+								</link>
 							</links>
 						</configuration>
 					</plugin>
