@@ -45,7 +45,7 @@ public class AboutAppEngine {
 	 * @return true if running without GAE mode; technically: !onAppEngine()
 	 */
 	public static boolean notOnAppengine() {
-		return !inProduction() || !inDevelopment();
+		return !onAppEngine();
 	}
 	
 	/**

@@ -140,8 +140,9 @@ public class GaeLowLevelMemCache implements IMemCache {
 		log.debug(DebugFormatter.dataPut(MEMCACHE_NAME, key.toString(), value, Timing.Now));
 		this.memcacheService.put(keyUniqueForCurrentAppVersion(key), value);
 		// does not hold in concurrent environment
-		assert this.memcacheService.get(keyUniqueForCurrentAppVersion(key)).equals(value);
-		assert this.memcacheService.get(key).equals(value);
+		// assert
+		// this.memcacheService.get(keyUniqueForCurrentAppVersion(key)).equals(value);
+		// assert this.memcacheService.get(key).equals(value);
 		return null;
 	}
 	
