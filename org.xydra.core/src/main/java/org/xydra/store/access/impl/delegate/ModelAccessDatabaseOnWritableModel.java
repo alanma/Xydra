@@ -106,7 +106,7 @@ public class ModelAccessDatabaseOnWritableModel {
 		        .createBooleanValue(allowed));
 	}
 	
-	private XAccessRightValue valueToAccessValue(XValue value) {
+	private static XAccessRightValue valueToAccessValue(XValue value) {
 		if(value == null) {
 			return XAccessRightValue.UNDEFINED;
 		}

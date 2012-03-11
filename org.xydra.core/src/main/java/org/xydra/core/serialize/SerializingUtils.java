@@ -64,6 +64,7 @@ class SerializingUtils {
 		return XX.toId(toString(getRequiredAttribute(element, XID_ATTRIBUTE)));
 	}
 	
+	@SuppressWarnings("null")
 	protected static XAddress getAddress(XydraElement element, XAddress context) {
 		
 		boolean match = (context != null);
@@ -87,6 +88,7 @@ class SerializingUtils {
 		return XX.toAddress(repoId, modelId, objectId, fieldId);
 	}
 	
+	@SuppressWarnings("null")
 	protected static void setAddress(XAddress target, XydraOut out, XAddress context) {
 		
 		boolean match = (context != null);
@@ -95,7 +97,7 @@ class SerializingUtils {
 		 * NullPointerExceptions cannot happen here because "context" is only
 		 * accessed, when match is true
 		 */
-
+		
 		XID repoId = target.getRepository();
 		match = match && XI.equals(repoId, context.getRepository());
 		if(repoId != null && !match) {

@@ -361,7 +361,7 @@ public abstract class XValueIndexer {
 	 * 
 	 * @param fieldAddress The {@link XAddress} which is to be checked.
 	 */
-	private void checkAddress(XAddress fieldAddress) {
+	private static void checkAddress(XAddress fieldAddress) {
 		if(fieldAddress.getAddressedType() != XType.XFIELD) {
 			throw new RuntimeException("The given address was no field address");
 		}

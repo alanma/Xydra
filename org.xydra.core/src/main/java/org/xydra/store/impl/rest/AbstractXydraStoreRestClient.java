@@ -28,8 +28,8 @@ import org.xydra.store.Callback;
 import org.xydra.store.ConnectionException;
 import org.xydra.store.GetEventsRequest;
 import org.xydra.store.InternalStoreException;
-import org.xydra.store.RequestException;
 import org.xydra.store.ModelRevision;
+import org.xydra.store.RequestException;
 import org.xydra.store.XydraStore;
 import org.xydra.store.XydraStoreAdmin;
 
@@ -267,7 +267,8 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
 		return URLUtils.encode(string);
 	}
 	
-	private <T> void toBatchedResults(List<Object> snapshots, BatchedResult<T>[] result, XType type) {
+	private static <T> void toBatchedResults(List<Object> snapshots, BatchedResult<T>[] result,
+	        XType type) {
 		
 		int i = 0;
 		for(Object o : snapshots) {

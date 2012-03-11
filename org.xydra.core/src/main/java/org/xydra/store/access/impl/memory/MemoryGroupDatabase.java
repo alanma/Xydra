@@ -54,7 +54,7 @@ public class MemoryGroupDatabase implements XGroupDatabaseWithListeners, ISendHo
 		        new Factory<IPairIndex<XID,XID>>() {
 			        
 			        @Override
-                    public IPairIndex<XID,XID> createInstance() {
+			        public IPairIndex<XID,XID> createInstance() {
 				        return new MapPairIndex<XID,XID>();
 			        }
 			        
@@ -69,12 +69,12 @@ public class MemoryGroupDatabase implements XGroupDatabaseWithListeners, ISendHo
 	}
 	
 	@Override
-    synchronized public void addListener(XGroupListener listener) {
+	synchronized public void addListener(XGroupListener listener) {
 		this.listeners.add(listener);
 	}
 	
 	@Override
-    synchronized public void addToGroup(XID actor, XID group) {
+	synchronized public void addToGroup(XID actor, XID group) {
 		hookBeforeWrite();
 		if(XI.equals(actor, XA.GROUP_ALL) || hasGroup(actor, group)) {
 			// nothing to do
@@ -123,13 +123,13 @@ public class MemoryGroupDatabase implements XGroupDatabaseWithListeners, ISendHo
 	}
 	
 	@Override
-    public Set<XID> getGroups() {
+	public Set<XID> getGroups() {
 		hookBeforeRead();
 		return toSet(this.index.key2Iterator());
 	}
 	
 	@Override
-    synchronized public Set<XID> getGroupsOf(XID actor) {
+	synchronized public Set<XID> getGroupsOf(XID actor) {
 		return toSet(new AbstractTransformingIterator<Pair<XID,XID>,XID>(
 		        this.index
 		                .transitiveIterator(new EqualsConstraint<XID>(actor), new Wildcard<XID>())) {
@@ -143,7 +143,7 @@ public class MemoryGroupDatabase implements XGroupDatabaseWithListeners, ISendHo
 	}
 	
 	@Override
-    synchronized public Set<XID> getMembersOf(XID group) {
+	synchronized public Set<XID> getMembersOf(XID group) {
 		return toSet(new AbstractTransformingIterator<Pair<XID,XID>,XID>(
 		        this.index
 		                .transitiveIterator(new Wildcard<XID>(), new EqualsConstraint<XID>(group))) {
@@ -163,7 +163,7 @@ public class MemoryGroupDatabase implements XGroupDatabaseWithListeners, ISendHo
 	}
 	
 	@Override
-    synchronized public boolean hasGroup(XID actor, XID group) {
+	synchronized public boolean hasGroup(XID actor, XID group) {
 		hookBeforeRead();
 		if(XI.equals(group, XA.GROUP_ALL)) {
 			return true;
@@ -188,7 +188,7 @@ public class MemoryGroupDatabase implements XGroupDatabaseWithListeners, ISendHo
 	}
 	
 	@Override
-    synchronized public void removeFromGroup(XID actor, XID group) {
+	synchronized public void removeFromGroup(XID actor, XID group) {
 		hookBeforeWrite();
 		/* don't remove from built-in ALL-group */
 		if(XI.equals(group, XA.GROUP_ALL) || !hasGroup(actor, group)) {
@@ -217,7 +217,7 @@ public class MemoryGroupDatabase implements XGroupDatabaseWithListeners, ISendHo
 	}
 	
 	@Override
-    synchronized public void removeListener(XGroupListener listener) {
+	synchronized public void removeListener(XGroupListener listener) {
 		this.listeners.remove(listener);
 	}
 	
@@ -225,7 +225,7 @@ public class MemoryGroupDatabase implements XGroupDatabaseWithListeners, ISendHo
 	 * @param it
 	 * @return a new Set instance with all items from 'it'
 	 */
-	private Set<XID> toSet(Iterator<XID> it) {
+	private static Set<XID> toSet(Iterator<XID> it) {
 		Set<XID> set = new HashSet<XID>();
 		while(it.hasNext()) {
 			set.add(it.next());

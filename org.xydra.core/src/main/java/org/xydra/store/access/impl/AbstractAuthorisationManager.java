@@ -96,7 +96,7 @@ public abstract class AbstractAuthorisationManager implements XAuthorisationMana
 		return !isInternal(fieldId)
 		        && (hasAccess(actor, objectAddr, XA.ACCESS_READ).isAllowed()
 		                || hasAccess(actor, fieldAddr, XA.ACCESS_READ).isAllowed() || hasAccess(
-		                actor, fieldAddr, XA.ACCESS_WRITE).isAllowed());
+		                    actor, fieldAddr, XA.ACCESS_WRITE).isAllowed());
 	}
 	
 	@Override
@@ -105,11 +105,11 @@ public abstract class AbstractAuthorisationManager implements XAuthorisationMana
 		boolean result = !isInternal(modelId)
 		        && (hasAccess(actor, repoAddr, XA.ACCESS_READ).isAllowed()
 		                || hasAccessToSubresource(actor, modelAddr, XA.ACCESS_READ).isAllowed() || hasAccessToSubresource(
-		                actor, modelAddr, XA.ACCESS_WRITE).isAllowed());
+		                    actor, modelAddr, XA.ACCESS_WRITE).isAllowed());
 		return result;
 	}
 	
-	private boolean isInternal(XID id) {
+	private static boolean isInternal(XID id) {
 		boolean result = id.toString().startsWith("internal--");
 		return result;
 	}
@@ -120,7 +120,7 @@ public abstract class AbstractAuthorisationManager implements XAuthorisationMana
 		return !isInternal(objectId)
 		        && (hasAccess(actor, modelAddr, XA.ACCESS_READ).isAllowed()
 		                || hasAccessToSubresource(actor, objectAddr, XA.ACCESS_READ).isAllowed() || hasAccessToSubresource(
-		                actor, objectAddr, XA.ACCESS_WRITE).isAllowed());
+		                    actor, objectAddr, XA.ACCESS_WRITE).isAllowed());
 	}
 	
 	@Override

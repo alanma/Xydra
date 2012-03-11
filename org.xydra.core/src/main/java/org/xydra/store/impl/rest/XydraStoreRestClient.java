@@ -69,7 +69,7 @@ public class XydraStoreRestClient extends AbstractXydraStoreRestClient {
 		return con;
 	}
 	
-	private void request(HttpURLConnection con, Request<?> req) throws IOException {
+	private static void request(HttpURLConnection con, Request<?> req) throws IOException {
 		
 		con.connect();
 		

@@ -46,7 +46,7 @@ public class NTriplesWriter {
 		}
 	}
 	
-	private boolean resultsInJustOneTriple(XValue v) {
+	private static boolean resultsInJustOneTriple(XValue v) {
 		return v.getType().isSingle() || v.getType() == ValueType.ByteList;
 	}
 	
@@ -60,7 +60,7 @@ public class NTriplesWriter {
 		
 	}
 	
-	private String toLiteral(XValue v) {
+	private static String toLiteral(XValue v) {
 		assert resultsInJustOneTriple(v);
 		switch(v.getType()) {
 		case Address:

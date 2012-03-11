@@ -437,7 +437,7 @@ public class MemoryEventManager implements Serializable {
 	 * @return The merged {@link XFieldEvent} (which may be 'last') or null if
 	 *         the given {@link XFieldEvent XFieldEvents} cancel each other out.
 	 */
-	private XReversibleFieldEvent mergeFieldEvents(XReversibleFieldEvent first,
+	private static XReversibleFieldEvent mergeFieldEvents(XReversibleFieldEvent first,
 	        XReversibleFieldEvent last) {
 		
 		assert first.getTarget().equals(last.getTarget());
@@ -456,8 +456,8 @@ public class MemoryEventManager implements Serializable {
 			assert first.getChangeType() == ChangeType.REMOVE;
 			// non matching REMOVE -> ADD => merge to CHANGE
 			return MemoryReversibleFieldEvent.createChangeEvent(last.getActor(), last.getTarget(),
-			        first.getOldValue(), last.getNewValue(), last.getOldModelRevision(), last
-			                .getOldObjectRevision(), last.getOldFieldRevision(), false);
+			        first.getOldValue(), last.getNewValue(), last.getOldModelRevision(),
+			        last.getOldObjectRevision(), last.getOldFieldRevision(), false);
 		case REMOVE:
 			if(first.getChangeType() == ChangeType.REMOVE) {
 				return last;
@@ -471,10 +471,10 @@ public class MemoryEventManager implements Serializable {
 			assert first.getChangeType() != ChangeType.REMOVE;
 			if(first.getChangeType() == ChangeType.CHANGE) {
 				// non-matching CHANGE->CHANGE => merge to CHANGE
-				return MemoryReversibleFieldEvent.createChangeEvent(last.getActor(), last
-				        .getTarget(), first.getOldValue(), last.getNewValue(), last
-				        .getOldModelRevision(), last.getOldObjectRevision(), last
-				        .getOldFieldRevision(), false);
+				return MemoryReversibleFieldEvent.createChangeEvent(last.getActor(),
+				        last.getTarget(), first.getOldValue(), last.getNewValue(),
+				        last.getOldModelRevision(), last.getOldObjectRevision(),
+				        last.getOldFieldRevision(), false);
 			} else {
 				assert first.getChangeType() == ChangeType.ADD;
 				// non-matching ADD->CHANGE => merge to ADD
