@@ -51,7 +51,7 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 	
 	public static XFieldEvent createFrom(XFieldEvent fe) {
 		MemoryFieldEvent event = new MemoryFieldEvent(fe.getActor(), fe.getTarget(),
-		        fe.getObjectId(), fe.getChangeType(), fe.getOldModelRevision(),
+		        fe.getNewValue(), fe.getChangeType(), fe.getOldModelRevision(),
 		        fe.getOldObjectRevision(), fe.getOldFieldRevision(), fe.inTransaction(),
 		        fe.isImplied());
 		return event;
@@ -327,16 +327,16 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 	
 	@Override
 	public String toString() {
-		String prefix = "MemoryFieldEvent by " + getActor() + ": ";
+		String prefix = "MemoryFieldEvent by actor:" + getActor() + " ";
 		String suffix = " @" + getTarget() + " r" + rev2str(this.modelRevision) + "/"
 		        + rev2str(this.objectRevision) + "/" + rev2str(this.fieldRevision);
 		switch(getChangeType()) {
 		case ADD:
-			return prefix + "ADD " + this.newValue + suffix;
+			return prefix + "ADD value:" + this.newValue + suffix;
 		case REMOVE:
 			return prefix + "REMOVE " + suffix + (isImplied() ? " [implied]" : "");
 		case CHANGE:
-			return prefix + "CHANGE " + " to " + this.newValue + suffix;
+			return prefix + "CHANGE " + " to value:" + this.newValue + suffix;
 		default:
 			throw new RuntimeException("this field event should have never been created");
 		}

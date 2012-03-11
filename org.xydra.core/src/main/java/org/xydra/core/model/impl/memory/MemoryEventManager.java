@@ -286,7 +286,8 @@ public class MemoryEventManager implements Serializable {
 		
 		assert model != null || object != null : "either model or object must not be null";
 		
-		XAddress target = object != null ? object.getAddress() : model.getAddress();
+		@SuppressWarnings("null")
+		XAddress target = object == null ? model.getAddress() : object.getAddress();
 		
 		XAtomicEvent[] events = new XAtomicEvent[this.eventQueue.size() - since];
 		for(int i = since; i < this.eventQueue.size(); ++i) {

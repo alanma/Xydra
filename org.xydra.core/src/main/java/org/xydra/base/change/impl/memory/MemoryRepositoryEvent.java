@@ -188,7 +188,7 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
 	
 	@Override
 	public String toString() {
-		String str = "RepositoryEvent by " + getActor() + ": " + getChangeType() + " "
+		String str = "RepositoryEvent by actor:" + getActor() + " " + getChangeType() + " modelId:"
 		        + this.modelId;
 		if(this.modelRevision >= 0) {
 			str += " r" + rev2str(this.modelRevision);

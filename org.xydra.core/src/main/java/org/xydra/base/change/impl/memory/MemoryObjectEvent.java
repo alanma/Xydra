@@ -51,7 +51,7 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
 	
 	public static XObjectEvent createFrom(XObjectEvent oe) {
 		MemoryObjectEvent event = new MemoryObjectEvent(oe.getActor(), oe.getTarget(),
-		        oe.getObjectId(), oe.getChangeType(), oe.getOldModelRevision(),
+		        oe.getFieldId(), oe.getChangeType(), oe.getOldModelRevision(),
 		        oe.getOldObjectRevision(), oe.getOldFieldRevision(), oe.inTransaction(),
 		        oe.isImplied());
 		return event;
@@ -279,7 +279,8 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
 	
 	@Override
 	public String toString() {
-		String str = "ObjectEvent by " + getActor() + ": " + getChangeType() + " " + this.fieldId;
+		String str = "ObjectEvent by actor:" + getActor() + " " + getChangeType() + " field:"
+		        + this.fieldId;
 		if(this.fieldRevision >= 0)
 			str += " r" + rev2str(this.fieldRevision);
 		str += " @" + getTarget();

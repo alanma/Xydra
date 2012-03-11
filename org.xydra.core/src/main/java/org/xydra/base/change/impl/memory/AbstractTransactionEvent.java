@@ -137,7 +137,7 @@ public abstract class AbstractTransactionEvent implements XTransactionEvent {
 			} else {
 				XAddress addr = event.getChangedEntity();
 				assert !entities.contains(addr) : "added and removed entity in same transaction "
-				        + "or added / removed entity twice";
+				        + "or added / removed entity twice. Second event: " + event;
 				entities.add(addr);
 			}
 			

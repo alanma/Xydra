@@ -189,7 +189,8 @@ public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {
 	
 	@Override
 	public String toString() {
-		String str = "ModelEvent by " + getActor() + ": " + getChangeType() + " " + this.objectId;
+		String str = "ModelEvent by actor:" + getActor() + " " + getChangeType() + " object:"
+		        + this.objectId;
 		if(this.objectRevision >= 0)
 			str += " r" + rev2str(this.objectRevision);
 		str += " @" + getTarget();
