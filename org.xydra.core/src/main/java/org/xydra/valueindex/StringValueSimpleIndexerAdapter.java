@@ -79,7 +79,7 @@ public abstract class StringValueSimpleIndexerAdapter extends XValueIndexer {
 	 */
 	@Override
 	public String getIdIndexString(XID value) {
-		return "" + value.toString();
+		return "" + value.toString().toLowerCase();
 	}
 	
 	/**
@@ -97,7 +97,7 @@ public abstract class StringValueSimpleIndexerAdapter extends XValueIndexer {
 		if(value == null) {
 			return "null";
 		}
-		return "" + value.toString();
+		return "" + value.toString().toLowerCase();
 	}
 	
 	/**

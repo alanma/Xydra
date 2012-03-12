@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -24,6 +25,7 @@ import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
+import org.xydra.index.query.Pair;
 
 
 /**
@@ -109,6 +111,16 @@ public abstract class XModelObjectLevelIndexTest {
 		initializeIndexes();
 	}
 	
+	private static Set<XAddress> getAddressesFromSetOfPairs(Set<Pair<XAddress,XValue>> pairs) {
+		HashSet<XAddress> addresses = new HashSet<XAddress>();
+		
+		for(Pair<XAddress,XValue> pair : pairs) {
+			addresses.add(pair.getFirst());
+		}
+		
+		return addresses;
+	}
+	
 	/**
 	 * Tests whether indexing an XModel works correctly.
 	 * 
@@ -128,9 +140,10 @@ public abstract class XModelObjectLevelIndexTest {
 				List<String> list = this.oldIndexer.getIndexStrings(value);
 				
 				for(String s : list) {
-					Set<XAddress> adrList = this.oldIndex.search(s);
+					Set<Pair<XAddress,XValue>> pairs = this.oldIndex.search(s);
+					Set<XAddress> addresses = getAddressesFromSetOfPairs(pairs);
 					
-					assertTrue(adrList.contains(object.getAddress()));
+					assertTrue(addresses.contains(object.getAddress()));
 				}
 			}
 		}
@@ -148,8 +161,8 @@ public abstract class XModelObjectLevelIndexTest {
 		XValue value = X.getValueFactory().createStringValue(valueString);
 		
 		// check that no entry for valueString exists in the old index
-		Set<XAddress> oldList = this.oldIndex.search(valueString);
-		assertTrue(oldList.isEmpty());
+		Set<Pair<XAddress,XValue>> oldSet = this.oldIndex.search(valueString);
+		assertTrue(oldSet.isEmpty());
 		
 		XObject oldJohn = this.oldModel.getObject(DemoModelUtil.JOHN_ID);
 		XObject newJohn = this.newModel.getObject(DemoModelUtil.JOHN_ID);
@@ -162,9 +175,9 @@ public abstract class XModelObjectLevelIndexTest {
 		
 		this.newIndex.updateIndex(oldJohn, newJohn);
 		
-		Set<XAddress> newList = this.newIndex.search(valueString);
+		Set<Pair<XAddress,XValue>> newList = this.newIndex.search(valueString);
 		assertEquals(1, newList.size());
-		assertEquals(newJohn.getAddress(), newList.iterator().next());
+		assertEquals(newJohn.getAddress(), newList.iterator().next().getFirst());
 	}
 	
 	/**
@@ -204,8 +217,8 @@ public abstract class XModelObjectLevelIndexTest {
 		XValue value = X.getValueFactory().createStringValue(valueString);
 		
 		// check that no entry for valueString exists in the old index
-		Set<XAddress> oldList = this.oldIndex.search(valueString);
-		assertTrue(oldList.isEmpty());
+		Set<Pair<XAddress,XValue>> oldSet = this.oldIndex.search(valueString);
+		assertTrue(oldSet.isEmpty());
 		
 		XObject oldJohn = this.oldModel.getObject(DemoModelUtil.JOHN_ID);
 		XObject newJohn = this.newModel.getObject(DemoModelUtil.JOHN_ID);
@@ -240,9 +253,9 @@ public abstract class XModelObjectLevelIndexTest {
 			break;
 		}
 		
-		Set<XAddress> newList = this.newIndex.search(valueString);
-		assertEquals(1, newList.size());
-		assertEquals(newJohn.getAddress(), newList.iterator().next());
+		Set<Pair<XAddress,XValue>> newSet = this.newIndex.search(valueString);
+		assertEquals(1, newSet.size());
+		assertEquals(newJohn.getAddress(), newSet.iterator().next().getFirst());
 	}
 	
 	/**
@@ -323,7 +336,7 @@ public abstract class XModelObjectLevelIndexTest {
 		}
 		
 		for(String s : indexStrings) {
-			Set<XAddress> found = this.newIndex.search(s);
+			Set<Pair<XAddress,XValue>> found = this.newIndex.search(s);
 			assertTrue(found.isEmpty());
 		}
 	}
@@ -381,7 +394,9 @@ public abstract class XModelObjectLevelIndexTest {
 		this.newIndex.updateIndex(oldJohn, newJohn);
 		
 		for(String s : indexStrings) {
-			Set<XAddress> addresses = this.newIndex.search(s);
+			Set<Pair<XAddress,XValue>> pairs = this.newIndex.search(s);
+			
+			Set<XAddress> addresses = getAddressesFromSetOfPairs(pairs);
 			assertEquals(1, addresses.size());
 			assertTrue(addresses.contains(newJohn.getAddress()));
 		}
@@ -415,7 +430,8 @@ public abstract class XModelObjectLevelIndexTest {
 		}
 		
 		for(String s : indexStrings) {
-			Set<XAddress> addresses = this.newIndex.search(s);
+			Set<Pair<XAddress,XValue>> pairs = this.newIndex.search(s);
+			Set<XAddress> addresses = getAddressesFromSetOfPairs(pairs);
 			/*
 			 * The value should still be indexed, since it existed multiple
 			 * times
@@ -448,7 +464,8 @@ public abstract class XModelObjectLevelIndexTest {
 		}
 		
 		for(String s : indexStrings) {
-			Set<XAddress> addresses = this.newIndex.search(s);
+			Set<Pair<XAddress,XValue>> pairs = this.newIndex.search(s);
+			Set<XAddress> addresses = getAddressesFromSetOfPairs(pairs);
 			/*
 			 * The value should be completely deindexed now
 			 */
@@ -533,15 +550,15 @@ public abstract class XModelObjectLevelIndexTest {
 		
 		// make sure the old value was deindexed
 		for(String s : indexStrings1) {
-			Set<XAddress> found = this.newIndex.search(s);
+			Set<Pair<XAddress,XValue>> found = this.newIndex.search(s);
 			assertTrue(found.isEmpty());
 		}
 		
 		// make sure the new value was indexed
 		for(String s : indexStrings2) {
-			Set<XAddress> found = this.newIndex.search(s);
+			Set<Pair<XAddress,XValue>> found = this.newIndex.search(s);
 			assertEquals(1, found.size());
-			assertEquals(newJohn.getAddress(), found.iterator().next());
+			assertEquals(newJohn.getAddress(), found.iterator().next().getFirst());
 		}
 	}
 	
@@ -570,7 +587,7 @@ public abstract class XModelObjectLevelIndexTest {
 		this.newIndex.updateIndex(oldJohn, newJohn);
 		
 		for(String s : indexStrings) {
-			Set<XAddress> found = this.newIndex.search(s);
+			Set<Pair<XAddress,XValue>> found = this.newIndex.search(s);
 			assertTrue(found.isEmpty());
 		}
 	}
@@ -612,7 +629,8 @@ public abstract class XModelObjectLevelIndexTest {
 			List<String> indexStrings = this.newIndexer.getIndexStrings(value);
 			
 			for(String s : indexStrings) {
-				Set<XAddress> addresses = this.newIndex.search(s);
+				Set<Pair<XAddress,XValue>> pairs = this.newIndex.search(s);
+				Set<XAddress> addresses = getAddressesFromSetOfPairs(pairs);
 				
 				assertFalse(addresses.contains(objectAddress));
 			}

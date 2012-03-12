@@ -14,6 +14,7 @@ import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.value.XValue;
 import org.xydra.index.query.EqualsConstraint;
+import org.xydra.index.query.Pair;
 
 
 /**
@@ -438,20 +439,35 @@ public class XModelObjectLevelIndex {
 	}
 	
 	/**
-	 * Returns a set of {@link XAddress XAddresses} of objects containing fields
-	 * which hold {@link XValue XValues} corresponding to the given key.
+	 * Returns a set of pairs of {@link XAddress XAddresses} and {@link XValue
+	 * XValues}. The {@link XAddress XAddresses} are addresses of objects
+	 * containing fields which hold {@link XValue XValues} corresponding to the
+	 * given key. The {@link XValue XValues} in the pair are exactly this
+	 * corresponding {@link XValue}, as long as they are not {@link XAddress
+	 * XAddresses}.
 	 * 
-	 * Which {@link XValue XValues} correspond to a given key is determined by
+	 * Warning: If an {@link XValue} in a pair is an instance of
+	 * {@link XAddress}, it either is the corresponding {@link XValue} or the
+	 * {@link XAddress} holding the corresponding {@link XValue}. The second
+	 * case can only occur if the index stores the {@link XAddress} of the field
+	 * if an {@link XValue} is too large. If your index is not configured in
+	 * this manner, this will never occur.
+	 * 
+	 * Which {@link XValue XValues} corresponds to a given key is determined by
 	 * the used {@link XValueIndexer} which was set in the constructor
 	 * (XValueIndexer in
 	 * {@link XModelObjectLevelIndex#XModelObjectLevelIndex(XReadableModel, XValueIndexer)}
 	 * )
 	 * 
 	 * @param key The key for which corresponding will be searched
-	 * @return a set of {@link XAddress XAddresses} of objects containing fields
-	 *         which hold {@link XValue XValues} corresponding to the given key.
+	 * @return a set of {@link Pair Pairs} of {@link XAddress XAddresses} and
+	 *         {@link XValue XValues}. The {@link XAddress XAddresses} of
+	 *         objects containing fields which hold {@link XValue XValues}
+	 *         corresponding to the given key. Please see the description above
+	 *         for a warning concerning the {@link XValue XValues} in the
+	 *         {@link Pair Pairs}.
 	 */
-	public Set<XAddress> search(String key) {
+	public Set<Pair<XAddress,XValue>> search(String key) {
 		// IMPROVE rather simple search algorithm at the moment...
 		
 		/*
@@ -459,13 +475,17 @@ public class XModelObjectLevelIndex {
 		 * given key appropriately
 		 */
 		String indexKey = key.toLowerCase();
-		HashSet<XAddress> set = new HashSet<XAddress>();
+		HashSet<Pair<XAddress,XValue>> set = new HashSet<Pair<XAddress,XValue>>();
 		
 		EqualsConstraint<String> constraint = new EqualsConstraint<String>(indexKey);
 		Iterator<ValueIndexEntry> iterator = this.index.constraintIterator(constraint);
 		
 		while(iterator.hasNext()) {
-			set.add(iterator.next().getAddress());
+			ValueIndexEntry entry = iterator.next();
+			Pair<XAddress,XValue> pair = new Pair<XAddress,XValue>(entry.getAddress(),
+			        entry.getValue());
+			
+			set.add(pair);
 		}
 		
 		return set;
