@@ -255,7 +255,7 @@ public class CsvValueReader {
 		
 		int pos = 0;
 		boolean inString = false;
-		StringBuffer token = null;
+		StringBuffer token = new StringBuffer();
 		while(pos < in.length()) {
 			// eval current char
 			char c = in.charAt(pos);

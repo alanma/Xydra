@@ -23,7 +23,6 @@
 	com.google.apphosting.utils.config.AppEngineConfigException: Could not locate ...\webadmin-0.1.5-SNAPSHOT\WEB-INF\appengine-web.xml
 	Bad configuration: Could not locate ... Please see the logs
 	-->
-	<packaging>jar</packaging>
 	<name>Xydra Webadmin</name>
 
 
