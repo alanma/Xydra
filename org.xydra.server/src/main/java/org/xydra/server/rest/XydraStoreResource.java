@@ -24,10 +24,10 @@ import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.core.serialize.SerializedCommand;
 import org.xydra.core.serialize.SerializedStore;
+import org.xydra.core.serialize.SerializedStore.EventsRequest;
 import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.XydraOut;
 import org.xydra.core.serialize.XydraParser;
-import org.xydra.core.serialize.SerializedStore.EventsRequest;
 import org.xydra.core.serialize.json.JsonOut;
 import org.xydra.core.serialize.json.JsonParser;
 import org.xydra.core.serialize.xml.XmlOut;
@@ -38,8 +38,8 @@ import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.GetEventsRequest;
-import org.xydra.store.RequestException;
 import org.xydra.store.ModelRevision;
+import org.xydra.store.RequestException;
 import org.xydra.store.StoreException;
 import org.xydra.store.WaitingCallback;
 import org.xydra.store.XydraRuntime;
@@ -155,7 +155,7 @@ public class XydraStoreResource {
 		return true;
 	}
 	
-	private XID getActorId(String actorIdString) {
+	private static XID getActorId(String actorIdString) {
 		
 		try {
 			return XX.toId(actorIdString);
@@ -182,7 +182,6 @@ public class XydraStoreResource {
 		String best = def;
 		float bestScore = Float.MIN_VALUE;
 		
-		@SuppressWarnings("unchecked")
 		Enumeration<String> headers = req.getHeaders("Accept");
 		
 		while(headers.hasMoreElements()) {
@@ -361,7 +360,7 @@ public class XydraStoreResource {
 		XydraRuntime.finishRequest();
 	}
 	
-	private EventsRequest parseEventsRequest(String[] addresses, String[] from, String[] to) {
+	private static EventsRequest parseEventsRequest(String[] addresses, String[] from, String[] to) {
 		
 		if(addresses.length < from.length || addresses.length < to.length) {
 			throw new RequestException("illegal parameter combination: "

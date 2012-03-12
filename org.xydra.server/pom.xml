@@ -29,6 +29,33 @@
 				<checksumPolicy>fail</checksumPolicy>
 			</releases>
 		</repository>
+		<!-- nxparser -->
+		<repository>
+			<id>nxparser-repo</id>
+			<url>
+                https://nxparser.googlecode.com/svn/repository
+            </url>
+			<releases>
+				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+				<checksumPolicy>fail</checksumPolicy>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>nxparser-snapshots</id>
+			<url>
+                https://nxparser.googlecode.com/svn/snapshots
+            </url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
 	</repositories>
 
 	<dependencies>
@@ -77,6 +104,13 @@
 			<artifactId>geronimo-servlet_2.5_spec</artifactId>
 			<version>1.2</version>
 			<scope>provided</scope>
+		</dependency>
+
+		<!-- nxparser -->
+		<dependency>
+			<groupId>org.semanticweb.yars</groupId>
+			<artifactId>nxparser</artifactId>
+			<version>1.2.2</version>
 		</dependency>
 
 	</dependencies>
