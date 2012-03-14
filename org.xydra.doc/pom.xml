@@ -9,7 +9,6 @@
 		<version>2011.12.05</version>
 	</parent>
 
-	<groupId>org.xydra</groupId>
 	<artifactId>doc</artifactId>
 	<version>${xydra.version}</version>
 	<!--
