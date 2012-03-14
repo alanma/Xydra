@@ -43,10 +43,17 @@ import org.xydra.index.query.Pair;
  * planned implementation (see {@link StringValueIndex} and {@link StringMap}).
  */
 
+/*
+ * TODO Update documentation (include/exclude) and test the new features
+ */
+
 public class XModelObjectLevelIndex {
 	private XValueIndexer indexer;
 	private ValueIndex index;
 	private XAddress modelAddress;
+	private boolean defaultIncludeAll;
+	private Set<XID> includeFieldIds;
+	private Set<XID> excludeFieldIds;
 	
 	/**
 	 * Creates a new index for the given {@link XReadableModel} using the given
@@ -57,9 +64,14 @@ public class XModelObjectLevelIndex {
 	 * @param indexer The {@link XValueIndexer} which is to be used to get the
 	 *            Strings used for indexing.
 	 */
-	public XModelObjectLevelIndex(XReadableModel model, XValueIndexer indexer) {
+	public XModelObjectLevelIndex(XReadableModel model, XValueIndexer indexer,
+	        boolean defaultIncludeAll, Set<XID> includeFieldIds, Set<XID> excludeFieldIds) {
 		this.indexer = indexer;
 		this.index = indexer.getIndex();
+		
+		this.defaultIncludeAll = defaultIncludeAll;
+		this.includeFieldIds = includeFieldIds;
+		this.excludeFieldIds = excludeFieldIds;
 		
 		this.index(model);
 		this.modelAddress = model.getAddress();
@@ -104,9 +116,28 @@ public class XModelObjectLevelIndex {
 	 */
 	private void index(XReadableObject object) {
 		for(XID fieldId : object) {
-			XReadableField field = object.getField(fieldId);
-			index(field);
+			
+			if(this.isToBeIndexed(fieldId)) {
+				XReadableField field = object.getField(fieldId);
+				index(field);
+			}
 		}
+	}
+	
+	private boolean isToBeIndexed(XID fieldId) {
+		boolean indexField = false;
+		
+		if(this.defaultIncludeAll) {
+			if(!this.excludeFieldIds.contains(fieldId)) {
+				indexField = true;
+			}
+		} else {
+			if(this.includeFieldIds.contains(fieldId)) {
+				indexField = true;
+			}
+		}
+		
+		return indexField;
 	}
 	
 	/**
@@ -122,7 +153,11 @@ public class XModelObjectLevelIndex {
 	 * @param field The {@link XReadableField} which is to be indexed
 	 */
 	private void index(XReadableField field) {
-		this.indexer.indexValue(field.getAddress(), field.getValue());
+		XID fieldId = field.getID();
+		
+		if(this.isToBeIndexed(fieldId)) {
+			this.indexer.indexValue(field.getAddress(), field.getValue());
+		}
 	}
 	
 	/**
@@ -184,26 +219,31 @@ public class XModelObjectLevelIndex {
 			 */
 			HashSet<XID> intersection = new HashSet<XID>();
 			
-			for(XID id : oldObject) {
-				XReadableField oldField = oldObject.getField(id);
+			for(XID fieldId : oldObject) {
+				XReadableField oldField = oldObject.getField(fieldId);
+				boolean isToBeIndexed = this.isToBeIndexed(fieldId);
 				
-				if(newObject.hasField(id)) {
+				if(newObject.hasField(fieldId)) {
 					/*
 					 * add the field to the intersection, since both objects
 					 * contain it
 					 */
-					intersection.add(id);
+					intersection.add(fieldId);
 					
-					XReadableField newField = newObject.getField(id);
-					
-					updateFieldEntry(oldField, newField);
+					if(isToBeIndexed) {
+						XReadableField newField = newObject.getField(fieldId);
+						
+						updateFieldEntry(oldField, newField);
+					}
 				} else {
 					// field was completely removed
-					deIndex(oldField);
+					if(isToBeIndexed) {
+						deIndex(oldField);
+					}
 				}
 			}
 			
-			for(XID id : newObject) {
+			for(XID fieldId : newObject) {
 				/*
 				 * TODO is there a faster way to calculate to calculate the
 				 * difference between the newObject and the intersection than
@@ -211,9 +251,9 @@ public class XModelObjectLevelIndex {
 				 * algorithm, maybe already implemented in the Java API? Is
 				 * removeAll faster?
 				 */
-				if(!intersection.contains(id)) {
+				if(!intersection.contains(fieldId) && this.isToBeIndexed(fieldId)) {
 					// field is new
-					index(newObject.getField(id));
+					index(newObject.getField(fieldId));
 				}
 			}
 		}
@@ -259,11 +299,16 @@ public class XModelObjectLevelIndex {
 	 */
 	public void updateIndex(XFieldEvent event, XValue oldValue) {
 		XAddress fieldAddress = event.getChangedEntity();
+		XID fieldId = fieldAddress.getField();
 		
 		XAddress modelAddress = XX.resolveModel(event.getRepositoryId(), event.getModelId());
 		if(!this.modelAddress.equals(modelAddress)) {
 			throw new RuntimeException(
 			        "the changed field was no field of an object of the XReadableModel indexed by this index.");
+		}
+		
+		if(!this.isToBeIndexed(fieldId)) {
+			return;
 		}
 		
 		switch(event.getChangeType()) {
@@ -328,6 +373,10 @@ public class XModelObjectLevelIndex {
 			        "oldField and newField do not have the same address and therefore aren't different versions of the same field.");
 		}
 		
+		if(!this.isToBeIndexed(oldField.getID())) {
+			return;
+		}
+		
 		updateFieldEntry(oldField, newField);
 	}
 	
@@ -359,6 +408,10 @@ public class XModelObjectLevelIndex {
 		if(!this.modelAddress.equals(modelAddress)) {
 			throw new RuntimeException(
 			        "the given field address was not an address of a field of the model indexed by this index.");
+		}
+		
+		if(!this.isToBeIndexed(fieldAddress.getField())) {
+			return;
 		}
 		
 		/*
@@ -408,8 +461,10 @@ public class XModelObjectLevelIndex {
 		}
 		
 		for(XID fieldId : object) {
-			XReadableField field = object.getField(fieldId);
-			this.indexer.deIndexValue(field.getAddress(), field.getValue());
+			if(this.isToBeIndexed(fieldId)) {
+				XReadableField field = object.getField(fieldId);
+				this.indexer.deIndexValue(field.getAddress(), field.getValue());
+			}
 		}
 	}
 	
@@ -435,7 +490,9 @@ public class XModelObjectLevelIndex {
 			        "the given XReadableField was no field of an object of the XReadableModel indexed by this index.");
 		}
 		
-		this.indexer.deIndexValue(field.getAddress(), field.getValue());
+		if(this.isToBeIndexed(fieldAddress.getField())) {
+			this.indexer.deIndexValue(fieldAddress, field.getValue());
+		}
 	}
 	
 	/**
@@ -456,8 +513,8 @@ public class XModelObjectLevelIndex {
 	 * Which {@link XValue XValues} corresponds to a given key is determined by
 	 * the used {@link XValueIndexer} which was set in the constructor
 	 * (XValueIndexer in
-	 * {@link XModelObjectLevelIndex#XModelObjectLevelIndex(XReadableModel, XValueIndexer)}
-	 * )
+	 * {@link XModelObjectLevelIndex#XModelObjectLevelIndex(XReadableModel, XValueIndexer, boolean, Set, Set)
+	 * )} )
 	 * 
 	 * @param key The key for which corresponding will be searched
 	 * @return a set of {@link Pair Pairs} of {@link XAddress XAddresses} and
