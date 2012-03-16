@@ -1,7 +1,11 @@
 package org.xydra.webadmin;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,8 +36,11 @@ import org.xydra.restless.RestlessParameter;
 import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.restless.utils.SharedHtmlUtils.HeadLinkStyle;
 import org.xydra.restless.utils.SharedHtmlUtils.METHOD;
+import org.xydra.store.XydraRuntime;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.gae.GaeTestfixer;
+import org.xydra.store.impl.gae.InstanceContext;
+import org.xydra.store.impl.gae.SyncDatastore;
 import org.xydra.store.impl.gae.UniCache.StorageOptions;
 import org.xydra.store.rmof.impl.delegate.WritableModelOnPersistence;
 import org.xydra.webadmin.ModelResource.MStyle;
@@ -379,6 +386,50 @@ public class RepositoryResource {
 	 */
 	public static String link(XID repoId) {
 		return "/admin" + WebadminResource.XYADMIN + "/" + repoId;
+	}
+	
+	/**
+	 * @param p
+	 * @param zipFile should be in a directory that exists already
+	 * @throws IOException
+	 */
+	public static void saveRepositoryToZipFile(XydraPersistence p, File zipFile) throws IOException {
+		FileOutputStream fos = new FileOutputStream(zipFile);
+		List<XID> modelIdList = new ArrayList<XID>(p.getManagedModelIds());
+		ZipOutputStream zos = new ZipOutputStream(fos);
+		for(XID modelId : modelIdList) {
+			XAddress modelAddress = XX.resolveModel(p.getRepositoryId(), modelId);
+			XWritableModel model = p.getModelSnapshot(modelAddress);
+			if(model == null) {
+				log.warn("Could not find model " + modelAddress);
+			} else {
+				String serialisation = ModelResource.computeSerialisation(model, MStyle.xml);
+				ModelResource.writeToZipstreamDirectly(modelId, MStyle.xml, serialisation, zos);
+			}
+		}
+		zos.close();
+		fos.close();
+	}
+	
+	/**
+	 * First completely wipes out the current repository, then loads from file
+	 * 
+	 * @param zipFile from where to load
+	 * @param repoId to load, should match the file. Default is often
+	 *            'gae-data-'
+	 * @param w where debug infos are written. In a standalone app, use an
+	 *            {@link OutputStreamWriter} wrapped around System.out.
+	 * @throws IOException
+	 */
+	public static void loadRepositoryFromZipFile(File zipFile, XID repoId, Writer w)
+	        throws IOException {
+		SyncDatastore.deleteAllEntitiesOneByOne();
+		assert SyncDatastore.getAllKinds().size() == 0;
+		XydraRuntime.getMemcache().clear();
+		InstanceContext.clearInstanceContext();
+		
+		FileInputStream fis = new FileInputStream(zipFile);
+		RepositoryResource.updateFromZippedInputStream(fis, repoId, w, true);
 	}
 	
 }
