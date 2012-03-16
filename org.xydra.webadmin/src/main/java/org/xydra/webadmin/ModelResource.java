@@ -246,8 +246,8 @@ public class ModelResource {
 		return modelId + ".xmodel." + style;
 	}
 	
-	static void writeToZipstreamDirectly(XWritableModel model, ZipOutputStream zos, MStyle style)
-	        throws IOException {
+	public static void writeToZipstreamDirectly(XWritableModel model, ZipOutputStream zos,
+	        MStyle style) throws IOException {
 		ZipEntry e = new ZipEntry(getStorageName(model.getID(), style));
 		zos.putNextEntry(e);
 		OutputStreamWriter w = new OutputStreamWriter(zos, UTF8);
@@ -261,7 +261,7 @@ public class ModelResource {
 		zos.closeEntry();
 	}
 	
-	static void writeToZipstreamDirectly(XID modelId, MStyle style, String serialisation,
+	public static void writeToZipstreamDirectly(XID modelId, MStyle style, String serialisation,
 	        ZipOutputStream zos) throws IOException {
 		ZipEntry e = new ZipEntry(getStorageName(modelId, style));
 		zos.putNextEntry(e);
@@ -279,7 +279,7 @@ public class ModelResource {
 	 * @return serialisation in given style
 	 * @throws IOException
 	 */
-	static String computeSerialisation(XWritableModel model, MStyle style) {
+	public static String computeSerialisation(XWritableModel model, MStyle style) {
 		StringWriter sw = new StringWriter();
 		XydraSerializer serializer = null;
 		if(style == MStyle.xml) {
@@ -297,7 +297,7 @@ public class ModelResource {
 		return serialised;
 	}
 	
-	private static void serializeToWriter(XReadableModel model, XydraSerializer serializer, Writer w) {
+	static void serializeToWriter(XReadableModel model, XydraSerializer serializer, Writer w) {
 		MiniWriter miniwriter = new MiniStreamWriter(w);
 		XydraOut out = serializer.create(miniwriter);
 		out.enableWhitespace(true, true);
