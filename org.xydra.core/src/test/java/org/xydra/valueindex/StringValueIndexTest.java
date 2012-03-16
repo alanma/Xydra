@@ -3,6 +3,7 @@ package org.xydra.valueindex;
 import java.util.HashSet;
 
 import org.xydra.base.XID;
+import org.xydra.base.XX;
 
 
 /**
@@ -14,14 +15,20 @@ import org.xydra.base.XID;
  */
 
 public class StringValueIndexTest extends XModelObjectLevelIndexTest {
-	private HashSet<XID> emptySet = new HashSet<XID>();
 	
 	@Override
 	public void initializeIndexes() {
-		this.oldIndex = new XModelObjectLevelIndex(this.oldModel, this.oldIndexer, true,
-		        this.emptySet, this.emptySet);
-		this.newIndex = new XModelObjectLevelIndex(this.newModel, this.newIndexer, true,
-		        this.emptySet, this.emptySet);
+		this.excludedIds = new HashSet<XID>();
+		for(int i = 0; i < 13; i++) {
+			this.excludedIds.add(XX.createUniqueId());
+		}
+		
+		HashSet<XID> emptySet = new HashSet<XID>();
+		
+		this.oldIndex = new XModelObjectLevelIndex(this.oldModel, this.oldIndexer, true, emptySet,
+		        this.excludedIds);
+		this.newIndex = new XModelObjectLevelIndex(this.newModel, this.newIndexer, true, emptySet,
+		        this.excludedIds);
 	}
 	
 	@Override

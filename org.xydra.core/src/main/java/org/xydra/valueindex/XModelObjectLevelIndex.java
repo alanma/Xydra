@@ -44,7 +44,7 @@ import org.xydra.index.query.Pair;
  */
 
 /*
- * TODO Update documentation (include/exclude) and test the new features
+ * TODO test the new include/exclude features
  */
 
 public class XModelObjectLevelIndex {
@@ -60,9 +60,25 @@ public class XModelObjectLevelIndex {
 	 * {@link XValueIndexer}. The given {@link XReadableModel} will be
 	 * completely indexed during the creation.
 	 * 
+	 * It is possible to specify which {@link XReadableField XReadableFields}
+	 * will be indexed by adding their {@link XID XIDs} to a white-/blacklist.
+	 * See explanation of the parameters for instructions.
+	 * 
+	 * 
 	 * @param model The {@link XReadableModel} which will be indexed.
 	 * @param indexer The {@link XValueIndexer} which is to be used to get the
 	 *            Strings used for indexing.
+	 * @param defaultIncludeAll if set to true, all {@link XReadableField
+	 *            XReadableFields} which {@link XID} is not it excludeFieldIds
+	 *            will be indexed, if set to false, only the
+	 *            {@link XReadableField XReadableFields} which {@link XID XIDs}
+	 *            are in includeFieldIds will be indexed.
+	 * @param includeFieldIds set of {@link XID XIDs}, which determines which
+	 *            {@link XReadableField XReadableFields} will always be indexed,
+	 *            independent of how defaultIncludeAll is set.
+	 * @param excludeFieldIds set of {@link XID XIDs}, which determines which
+	 *            {@link XReadableField XReadableFields} will never be indexed,
+	 *            independent of how defaultIncludeAll is set.
 	 */
 	public XModelObjectLevelIndex(XReadableModel model, XValueIndexer indexer,
 	        boolean defaultIncludeAll, Set<XID> includeFieldIds, Set<XID> excludeFieldIds) {
@@ -77,8 +93,29 @@ public class XModelObjectLevelIndex {
 		this.modelAddress = model.getAddress();
 	}
 	
-	// should only be executed once (document this!) - executing more than once
-	// is dangerous
+	/**
+	 * Checks for the given {@link XID} if fields with this {@link XID} are to
+	 * be indexed or not.
+	 * 
+	 * @param fieldId The {@link XID} which is to be checked.
+	 * @return true, if fields with the given {@link XID} are to be indexed,
+	 *         false otherwise.
+	 */
+	private boolean isToBeIndexed(XID fieldId) {
+		boolean indexField = false;
+		
+		if(this.defaultIncludeAll) {
+			if(!this.excludeFieldIds.contains(fieldId)) {
+				indexField = true;
+			}
+		} else {
+			if(this.includeFieldIds.contains(fieldId)) {
+				indexField = true;
+			}
+		}
+		
+		return indexField;
+	}
 	
 	/**
 	 * Completely indexes the given {@link XReadableModel}. Since this method
@@ -122,22 +159,6 @@ public class XModelObjectLevelIndex {
 				index(field);
 			}
 		}
-	}
-	
-	private boolean isToBeIndexed(XID fieldId) {
-		boolean indexField = false;
-		
-		if(this.defaultIncludeAll) {
-			if(!this.excludeFieldIds.contains(fieldId)) {
-				indexField = true;
-			}
-		} else {
-			if(this.includeFieldIds.contains(fieldId)) {
-				indexField = true;
-			}
-		}
-		
-		return indexField;
 	}
 	
 	/**
