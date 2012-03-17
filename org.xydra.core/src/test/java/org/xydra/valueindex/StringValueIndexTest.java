@@ -3,7 +3,6 @@ package org.xydra.valueindex;
 import java.util.HashSet;
 
 import org.xydra.base.XID;
-import org.xydra.base.XX;
 
 
 /**
@@ -18,17 +17,22 @@ public class StringValueIndexTest extends XModelObjectLevelIndexTest {
 	
 	@Override
 	public void initializeIndexes() {
-		this.excludedIds = new HashSet<XID>();
-		for(int i = 0; i < 13; i++) {
-			this.excludedIds.add(XX.createUniqueId());
-		}
+		// TODO this could be moved into the general test itself, its the same
+		// for both tests...
 		
 		HashSet<XID> emptySet = new HashSet<XID>();
 		
+		// oldModel, oldIndexer, newModel, newIndexer, excludedIds and
+		// includedIds need to be set before calling all this!
 		this.oldIndex = new XModelObjectLevelIndex(this.oldModel, this.oldIndexer, true, emptySet,
 		        this.excludedIds);
 		this.newIndex = new XModelObjectLevelIndex(this.newModel, this.newIndexer, true, emptySet,
 		        this.excludedIds);
+		
+		this.oldExcludeAllIndex = new XModelObjectLevelIndex(this.oldExcludeAllModel,
+		        this.oldExcludeAllIndexer, false, this.includedIds, emptySet);
+		this.newExcludeAllIndex = new XModelObjectLevelIndex(this.newExcludeAllModel,
+		        this.newExcludeAllIndexer, false, this.includedIds, emptySet);
 	}
 	
 	@Override
@@ -41,5 +45,14 @@ public class StringValueIndexTest extends XModelObjectLevelIndexTest {
 		
 		this.oldIndexer = new SimpleValueIndexer(oldIndex);
 		this.newIndexer = new SimpleValueIndexer(newIndex);
+		
+		StringMap oldExcludeAllMap = new MockStringMap();
+		StringMap newExcludeAllMap = new MockStringMap();
+		
+		StringValueIndex oldExcludeAllIndex = new StringValueIndex(oldExcludeAllMap);
+		StringValueIndex newExcludeAllIndex = new StringValueIndex(newExcludeAllMap);
+		
+		this.oldExcludeAllIndexer = new SimpleValueIndexer(oldExcludeAllIndex);
+		this.newExcludeAllIndexer = new SimpleValueIndexer(newExcludeAllIndex);
 	}
 }
