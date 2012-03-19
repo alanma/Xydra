@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -177,7 +178,7 @@ public abstract class XModelObjectLevelIndexTest {
 		this.includedValueString = "thisvalueisincludedeventhoughweexcludealmosteverything";
 		
 		assertNotNull("includedIds must not be null", this.includedIds);
-		assertFalse("includedIds needs to contain at least one Id!", this.includedIds.isEmpty());
+		assertFalse("includedIds needs to contain at least two Ids!", this.includedIds.size() < 2);
 		
 		for(XID id : this.includedIds) {
 			XField oldField = oldIncludedObject.createField(id);
@@ -365,8 +366,6 @@ public abstract class XModelObjectLevelIndexTest {
 		assertEquals(newObject.getAddress(), set.iterator().next().getFirst());
 	}
 	
-	// TODO continue writing tests for "excludeAll"-model
-	
 	/**
 	 * Tests if
 	 * {@link XModelObjectLevelIndex#updateIndex(XReadableObject, XReadableObject)}
@@ -450,17 +449,17 @@ public abstract class XModelObjectLevelIndexTest {
 	 */
 	
 	@Test
-	public void testUpdateIndexObjectAddValueToExcludeField() {
+	public void testUpdateIndexObjectAddValueToExcludedField() {
 		this.testUpdateIndexAddValueToExcludedField(TestType.XOBJECT);
 	}
 	
 	@Test
-	public void testUpdateIndexFieldAddValueToExcludeField() {
+	public void testUpdateIndexFieldAddValueToExcludedField() {
 		this.testUpdateIndexAddValueToExcludedField(TestType.XFIELD);
 	}
 	
 	@Test
-	public void testUpdateIndexEventAddValueToExcludeField() {
+	public void testUpdateIndexEventAddValueToExcludedField() {
 		this.testUpdateIndexAddValueToExcludedField(TestType.XEVENT);
 	}
 	
@@ -503,6 +502,96 @@ public abstract class XModelObjectLevelIndexTest {
 			assertTrue(found.isEmpty());
 		}
 		
+	}
+	
+	@Test
+	public void testUpdateIndexObjectAddValueToFieldOfExcludeAllModel() {
+		this.testUpdateIndexAddValueToFieldOfExcludeAllModel(TestType.XOBJECT);
+	}
+	
+	@Test
+	public void testUpdateIndexFieldAddValueToFieldOfExcludeAllModel() {
+		this.testUpdateIndexAddValueToFieldOfExcludeAllModel(TestType.XFIELD);
+	}
+	
+	@Test
+	public void testUpdateIndexEventAddValueToFieldOfExcludeAllModel() {
+		this.testUpdateIndexAddValueToFieldOfExcludeAllModel(TestType.XEVENT);
+	}
+	
+	private void testUpdateIndexAddValueToFieldOfExcludeAllModel(TestType type) {
+		XID id = XX.createUniqueId();
+		XID fieldId = XX.createUniqueId();
+		
+		XObject oldExcludedObject = this.oldExcludeAllModel.createObject(id);
+		XField oldExcludedField = oldExcludedObject.createField(fieldId);
+		
+		XObject newExcludedObject = this.newExcludeAllModel.createObject(id);
+		XField newExcludedField = newExcludedObject.createField(fieldId);
+		
+		XValue value = X.getValueFactory().createStringValue(this.excludedValueString);
+		List<String> newIndexStrings = this.newIndexer.getIndexStrings(value);
+		
+		DummyFieldEventListener listener = new DummyFieldEventListener();
+		newExcludedObject.addListenerForFieldEvents(listener);
+		
+		newExcludedField.setValue(value);
+		
+		switch(type) {
+		case XOBJECT:
+			this.newExcludeAllIndex.updateIndex(oldExcludedObject, newExcludedObject);
+			break;
+		case XFIELD:
+			this.newExcludeAllIndex.updateIndex(oldExcludedField, newExcludedField);
+			break;
+		case XEVENT:
+			XEvent event = listener.event;
+			assertTrue(event instanceof XFieldEvent);
+			assertEquals(ChangeType.ADD, event.getChangeType());
+			assertEquals(newExcludedField.getAddress(), event.getChangedEntity());
+			
+			this.newExcludeAllIndex.updateIndex((XFieldEvent)event, null);
+		}
+		
+		for(String s : newIndexStrings) {
+			Set<Pair<XAddress,XValue>> found = this.newExcludeAllIndex.search(s);
+			assertTrue(found.isEmpty());
+		}
+		
+		// add value to field which is not exlude (i.e. which id is in
+		// includedIds)
+		XID includedId = this.includedIds.iterator().next();
+		
+		XField oldIncludedField = oldExcludedObject.createField(includedId);
+		XField newIncludedField = newExcludedObject.createField(includedId);
+		
+		DummyFieldEventListener listener2 = new DummyFieldEventListener();
+		newExcludedObject.addListenerForFieldEvents(listener2);
+		
+		newIncludedField.setValue(value);
+		
+		switch(type) {
+		case XOBJECT:
+			this.newExcludeAllIndex.updateIndex(oldExcludedObject, newExcludedObject);
+			break;
+		case XFIELD:
+			this.newExcludeAllIndex.updateIndex(oldIncludedField, newIncludedField);
+			break;
+		case XEVENT:
+			XEvent event = listener2.event;
+			assertTrue(event instanceof XFieldEvent);
+			assertEquals(ChangeType.ADD, event.getChangeType());
+			assertEquals(newIncludedField.getAddress(), event.getChangedEntity());
+			
+			this.newExcludeAllIndex.updateIndex((XFieldEvent)event, null);
+		}
+		
+		for(String s : newIndexStrings) {
+			Set<Pair<XAddress,XValue>> found = this.newExcludeAllIndex.search(s);
+			assertFalse(found.isEmpty());
+			assertEquals(1, found.size());
+			assertEquals(newExcludedObject.getAddress(), found.iterator().next().getFirst());
+		}
 	}
 	
 	/**
@@ -579,6 +668,73 @@ public abstract class XModelObjectLevelIndexTest {
 			assertEquals(newField.getAddress(), event.getChangedEntity());
 			
 			this.newIndex.updateIndex((XFieldEvent)event, value);
+			break;
+		}
+		
+		for(String s : indexStrings) {
+			Set<Pair<XAddress,XValue>> found = this.newIndex.search(s);
+			assertTrue(found.isEmpty());
+		}
+	}
+	
+	@Test
+	public void testUpdateIndexObjectDeleteValueFromExcludeAllModel() {
+		testUpdateIndexDeleteValueFromExcludeAllModel(TestType.XOBJECT);
+	}
+	
+	@Test
+	public void testUpdateIndexFieldDeleteValueFromExcludeAllModel() {
+		testUpdateIndexDeleteValueFromExcludeAllModel(TestType.XFIELD);
+	}
+	
+	@Test
+	public void testUpdateIndexEventDeleteValueFromExcludeAllModel() {
+		testUpdateIndexDeleteValueFromExcludeAllModel(TestType.XEVENT);
+	}
+	
+	private void testUpdateIndexDeleteValueFromExcludeAllModel(TestType type) {
+		XID objectId = XX.createUniqueId();
+		XObject oldObject = this.oldExcludeAllModel.createObject(objectId);
+		XObject newObject = this.newExcludeAllModel.createObject(objectId);
+		
+		// Add not yet existing value, update index, remove it again, update
+		// index and check whether no entry for this value exists anymore or
+		// not
+		
+		XID includedId = this.includedIds.iterator().next();
+		String valueString = "Firstvaluestringwhichshoudlntexistinbothmodels";
+		XValue value = X.getValueFactory().createStringValue(valueString);
+		List<String> indexStrings = this.newIndexer.getIndexStrings(value);
+		
+		XField oldField = oldObject.createField(includedId);
+		XField newField = newObject.createField(includedId);
+		
+		newField.setValue(value);
+		
+		this.newExcludeAllIndex.updateIndex(oldObject, newObject);
+		
+		oldField.setValue(value);
+		
+		DummyFieldEventListener listener = new DummyFieldEventListener();
+		newObject.addListenerForFieldEvents(listener);
+		
+		newField.setValue(null);
+		
+		switch(type) {
+		case XOBJECT:
+			this.newExcludeAllIndex.updateIndex(oldObject, newObject);
+			break;
+		case XFIELD:
+			this.newExcludeAllIndex.updateIndex(oldField, newField);
+			break;
+		case XEVENT:
+			XEvent event = listener.event;
+			
+			assertTrue(event instanceof XFieldEvent);
+			assertEquals(ChangeType.REMOVE, event.getChangeType());
+			assertEquals(newField.getAddress(), event.getChangedEntity());
+			
+			this.newExcludeAllIndex.updateIndex((XFieldEvent)event, value);
 			break;
 		}
 		
@@ -712,6 +868,124 @@ public abstract class XModelObjectLevelIndexTest {
 		
 		for(String s : indexStrings) {
 			Set<Pair<XAddress,XValue>> pairs = this.newIndex.search(s);
+			Set<XAddress> addresses = getAddressesFromSetOfPairs(pairs);
+			/*
+			 * The value should be completely deindexed now
+			 */
+			
+			assertTrue(addresses.isEmpty());
+		}
+	}
+	
+	@Test
+	public void testUpdateIndexObjectDeleteMultipleExistingValueFromExcludeAllModel() {
+		testUpdateIndexDeleteMultipleExistingValueFromExcludeAllModel(TestType.XOBJECT);
+	}
+	
+	@Test
+	public void testUpdateIndexFieldDeleteMultipleExistingValueFromExcludeAllModel() {
+		testUpdateIndexDeleteMultipleExistingValueFromExcludeAllModel(TestType.XFIELD);
+	}
+	
+	@Test
+	public void testUpdateIndexEventDeleteMultipleExistingValueFromExcludeAllModel() {
+		testUpdateIndexDeleteMultipleExistingValueFromExcludeAllModel(TestType.XEVENT);
+	}
+	
+	private void testUpdateIndexDeleteMultipleExistingValueFromExcludeAllModel(TestType type) {
+		String valueString = "Firstvaluestringwhichshoudlntexistinbothmodels";
+		XValue value = X.getValueFactory().createStringValue(valueString);
+		List<String> indexStrings = this.newIndexer.getIndexStrings(value);
+		
+		XID objectId = XX.createUniqueId();
+		XObject oldObject = this.oldModel.createObject(objectId);
+		XObject newObject = this.newModel.createObject(objectId);
+		
+		Iterator<XID> iterator = this.includedIds.iterator();
+		XID id1 = iterator.next();
+		XID id2 = iterator.next();
+		
+		XField newField1 = newObject.createField(id1);
+		XField newField2 = newObject.createField(id2);
+		
+		newField1.setValue(value);
+		newField2.setValue(value);
+		
+		// update index and update the old model, so that it can be used again
+		this.newExcludeAllIndex.updateIndex(oldObject, newObject);
+		
+		for(String s : indexStrings) {
+			Set<Pair<XAddress,XValue>> pairs = this.newExcludeAllIndex.search(s);
+			
+			Set<XAddress> addresses = getAddressesFromSetOfPairs(pairs);
+			assertEquals(1, addresses.size());
+			assertTrue(addresses.contains(newObject.getAddress()));
+		}
+		
+		XField oldField1 = oldObject.createField(id1);
+		XField oldField2 = oldObject.createField(id2);
+		
+		oldField1.setValue(value);
+		oldField2.setValue(value);
+		
+		// Remove value once, update, and check again
+		DummyFieldEventListener listener = new DummyFieldEventListener();
+		newObject.addListenerForFieldEvents(listener);
+		
+		newField1.setValue(null);
+		
+		switch(type) {
+		case XOBJECT:
+			this.newExcludeAllIndex.updateIndex(oldObject, newObject);
+			break;
+		case XFIELD:
+			this.newExcludeAllIndex.updateIndex(oldField1, newField1);
+			break;
+		case XEVENT:
+			XEvent event = listener.event;
+			assertTrue(event instanceof XFieldEvent);
+			assertEquals(ChangeType.REMOVE, event.getChangeType());
+			assertEquals(newField1.getAddress(), event.getChangedEntity());
+			
+			this.newExcludeAllIndex.updateIndex((XFieldEvent)event, value);
+		}
+		
+		for(String s : indexStrings) {
+			Set<Pair<XAddress,XValue>> pairs = this.newExcludeAllIndex.search(s);
+			Set<XAddress> addresses = getAddressesFromSetOfPairs(pairs);
+			/*
+			 * The value should still be indexed, since it existed multiple
+			 * times
+			 */
+			
+			assertEquals(1, addresses.size());
+			assertTrue(addresses.contains(newObject.getAddress()));
+		}
+		
+		oldField1.setValue(null);
+		
+		// Remove value completely
+		
+		newField2.setValue(null);
+		
+		switch(type) {
+		case XOBJECT:
+			this.newExcludeAllIndex.updateIndex(oldObject, newObject);
+			break;
+		case XFIELD:
+			this.newExcludeAllIndex.updateIndex(oldField2, newField2);
+			break;
+		case XEVENT:
+			XEvent event = listener.event;
+			assertTrue(event instanceof XFieldEvent);
+			assertEquals(ChangeType.REMOVE, event.getChangeType());
+			assertEquals(newField2.getAddress(), event.getChangedEntity());
+			
+			this.newExcludeAllIndex.updateIndex((XFieldEvent)event, value);
+		}
+		
+		for(String s : indexStrings) {
+			Set<Pair<XAddress,XValue>> pairs = this.newExcludeAllIndex.search(s);
 			Set<XAddress> addresses = getAddressesFromSetOfPairs(pairs);
 			/*
 			 * The value should be completely deindexed now
