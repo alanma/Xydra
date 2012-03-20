@@ -66,6 +66,11 @@ public class MemoryMapSetIndex implements ValueIndex {
 		        fieldAddress.getModel(), fieldAddress.getObject());
 		
 		HashSet<ValueIndexEntry> set = this.map.get(key);
+		
+		if(set == null) {
+			return;
+		}
+		
 		Iterator<ValueIndexEntry> iterator = set.iterator();
 		
 		boolean found = false;

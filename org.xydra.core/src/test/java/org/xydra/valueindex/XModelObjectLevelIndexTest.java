@@ -1143,6 +1143,121 @@ public abstract class XModelObjectLevelIndexTest {
 		
 	}
 	
+	@Test
+	public void testUpdateIndexObjectChangeValueInExcludeAllModel() {
+		testUpdateIndexChangeValueInExcludeAllModel(TestType.XOBJECT);
+	}
+	
+	@Test
+	public void testUpdateIndexFieldChangeValueInExcludeAllModel() {
+		testUpdateIndexChangeValueInExcludeAllModel(TestType.XFIELD);
+	}
+	
+	@Test
+	public void testUpdateIndexEventChangeValueInExcludeAllModel() {
+		testUpdateIndexChangeValueInExcludeAllModel(TestType.XEVENT);
+	}
+	
+	private void testUpdateIndexChangeValueInExcludeAllModel(TestType type) {
+		// change value of field which is excluded from indexing
+		
+		String valueString1 = "Firstvaluestringwhichshoudlntexistinbothmodels";
+		XValue oldValue = X.getValueFactory().createStringValue(valueString1);
+		List<String> oldIndexStrings = this.newIndexer.getIndexStrings(oldValue);
+		
+		String valueString2 = "Anothervaluestringwhichshouldntexistanywhere";
+		XValue newValue = X.getValueFactory().createStringValue(valueString2);
+		List<String> newIndexStrings = this.newIndexer.getIndexStrings(newValue);
+		
+		XObject oldJohn = this.oldExcludeAllModel.getObject(DemoModelUtil.JOHN_ID);
+		XObject newJohn = this.newExcludeAllModel.getObject(DemoModelUtil.JOHN_ID);
+		
+		XID id = X.getIDProvider().createUniqueId();
+		XField oldField = oldJohn.createField(id);
+		XField newField = newJohn.createField(id);
+		
+		newField.setValue(oldValue);
+		this.newExcludeAllIndex.updateIndex(oldJohn, newJohn);
+		
+		oldField.setValue(oldValue);
+		
+		DummyFieldEventListener listener = new DummyFieldEventListener();
+		newJohn.addListenerForFieldEvents(listener);
+		
+		newField.setValue(newValue);
+		
+		switch(type) {
+		case XOBJECT:
+			this.newExcludeAllIndex.updateIndex(oldJohn, newJohn);
+			break;
+		case XFIELD:
+			this.newExcludeAllIndex.updateIndex(oldField, newField);
+			break;
+		case XEVENT:
+			XEvent event = listener.event;
+			assertTrue(event instanceof XFieldEvent);
+			assertEquals(ChangeType.CHANGE, event.getChangeType());
+			assertEquals(newField.getAddress(), event.getChangedEntity());
+			
+			this.newExcludeAllIndex.updateIndex((XFieldEvent)event, oldValue);
+		}
+		
+		// make sure that nothing happened
+		for(String s : newIndexStrings) {
+			Set<Pair<XAddress,XValue>> found = this.newExcludeAllIndex.search(s);
+			assertTrue(found.isEmpty());
+		}
+		
+		// change value of field which is indexed
+		
+		XID objectId = XX.createUniqueId();
+		XObject oldObject = this.oldExcludeAllModel.createObject(objectId);
+		XObject newObject = this.newExcludeAllModel.createObject(objectId);
+		
+		id = this.includedIds.iterator().next();
+		oldField = oldObject.createField(id);
+		newField = newObject.createField(id);
+		
+		newField.setValue(oldValue);
+		this.newExcludeAllIndex.updateIndex(oldObject, newObject);
+		
+		oldField.setValue(oldValue);
+		
+		listener = new DummyFieldEventListener();
+		newObject.addListenerForFieldEvents(listener);
+		
+		newField.setValue(newValue);
+		
+		switch(type) {
+		case XOBJECT:
+			this.newExcludeAllIndex.updateIndex(oldObject, newObject);
+			break;
+		case XFIELD:
+			this.newExcludeAllIndex.updateIndex(oldField, newField);
+			break;
+		case XEVENT:
+			XEvent event = listener.event;
+			assertTrue(event instanceof XFieldEvent);
+			assertEquals(ChangeType.CHANGE, event.getChangeType());
+			assertEquals(newField.getAddress(), event.getChangedEntity());
+			
+			this.newExcludeAllIndex.updateIndex((XFieldEvent)event, oldValue);
+		}
+		
+		// make sure the old value was deindexed
+		for(String s : oldIndexStrings) {
+			Set<Pair<XAddress,XValue>> found = this.newExcludeAllIndex.search(s);
+			assertTrue(found.isEmpty());
+		}
+		
+		// make sure the new value was indexed
+		for(String s : newIndexStrings) {
+			Set<Pair<XAddress,XValue>> found = this.newExcludeAllIndex.search(s);
+			assertEquals(1, found.size());
+			assertEquals(newObject.getAddress(), found.iterator().next().getFirst());
+		}
+	}
+	
 	/**
 	 * Tests if
 	 * {@link XModelObjectLevelIndex#updateIndex(XReadableObject, XReadableObject)}
