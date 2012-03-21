@@ -125,7 +125,7 @@ public class ConsistencyTestClient extends Thread {
 		return listPage;
 	}
 	
-	private void info(Page listPage, Page createPage) {
+	private static void info(Page listPage, Page createPage) {
 		log.info("Url was: " + listPage.getUrl());
 		log.info("Load time was:" + listPage.getWebResponse().getLoadTime());
 		log.info("Verify Content was: " + listPage.getWebResponse().getContentAsString());
@@ -134,7 +134,7 @@ public class ConsistencyTestClient extends Thread {
 		}
 	}
 	
-	private String getInstance(Page page) throws IOException {
+	private static String getInstance(Page page) throws IOException {
 		String s = page.getWebResponse().getContentAsString();
 		BufferedReader br = new BufferedReader(new StringReader(s));
 		String line = br.readLine();
@@ -150,7 +150,7 @@ public class ConsistencyTestClient extends Thread {
 		return instance;
 	}
 	
-	private List<String> getIds(Page list) throws IOException {
+	private static List<String> getIds(Page list) throws IOException {
 		List<String> result = new ArrayList<String>();
 		String s = list.getWebResponse().getContentAsString();
 		BufferedReader br = new BufferedReader(new StringReader(s));

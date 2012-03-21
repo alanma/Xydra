@@ -14,8 +14,8 @@ import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.value.XV;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.restless.utils.NanoClock;
 import org.xydra.restless.utils.HtmlUtils;
+import org.xydra.restless.utils.NanoClock;
 
 
 /**
@@ -37,6 +37,7 @@ public class WishList implements Iterable<XID> {
 		
 	}
 	
+	@SuppressWarnings("unused")
 	public XID addWish(String title, int price, String url) {
 		XID id = X.getIDProvider().createUniqueId();
 		XWritableObject xo = this.model.createObject(id);
@@ -98,9 +99,7 @@ public class WishList implements Iterable<XID> {
 		StringBuffer buf = new StringBuffer();
 		buf.append("<b>Wishlist " + this.model.getID() + "</b>");
 		buf.append("<ol>\n");
-		int count = 0;
 		for(XID wishId : this.model) {
-			count++;
 			Wish wish = getWish(wishId);
 			buf.append("  <li>");
 			buf.append(wish.toHtml());

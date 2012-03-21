@@ -75,7 +75,7 @@ public class PerformanceDataAnalyzer {
 		 * 
 		 * Last label: "gae20111105-20";
 		 */
-
+		
 	}
 	
 	/**
@@ -156,7 +156,6 @@ public class PerformanceDataAnalyzer {
 		evaluateSingleOperationWithInitialWishesBenchmarks(versions, Operations.EDIT, range);
 	}
 	
-	@SuppressWarnings("unchecked")
 	public static void evaluateSingleOperationBenchmark(String[] versions, Operations op) {
 		CsvTable results = new CsvTable(true);
 		
@@ -268,7 +267,7 @@ public class PerformanceDataAnalyzer {
 				 * rows and dividing it by the amount of data (which was
 				 * measured in the previous block)
 				 */
-
+				
 				String currentLine = in.readLine();
 				
 				int count = 0;
@@ -294,7 +293,7 @@ public class PerformanceDataAnalyzer {
 					 * happens, therefore if no such file exists, no critical
 					 * error happened
 					 */
-
+					
 					critEr.setValue(i + "-" + versions[i], "0", true);
 				}
 			}
@@ -557,7 +556,7 @@ public class PerformanceDataAnalyzer {
 					 * later will see this and write "N/A" in the output to tell
 					 * this to the user.
 					 */
-
+					
 					testNotExecuted = true;
 					
 					IRow dataRow = dataTables[i].getOrCreateRow(X + " " + 0, true);
@@ -588,7 +587,7 @@ public class PerformanceDataAnalyzer {
 					 * its number of rows and dividing it by the amount of data
 					 * (which was measured in the previous block)
 					 */
-
+					
 					String currentLine = in.readLine();
 					
 					int count = 0;
@@ -639,7 +638,7 @@ public class PerformanceDataAnalyzer {
 							 * when a critical error happens, therefore if no
 							 * such file exists, no critical error happened
 							 */
-
+							
 							critEr.setValue((i + 1) + "-" + versions[i], "0", true);
 						}
 					}

@@ -27,7 +27,6 @@ import org.xydra.store.XydraRuntime;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.gae.GaeAssert;
 import org.xydra.store.impl.gae.GaeTestfixer;
-import org.xydra.store.impl.gae.InstanceContext;
 import org.xydra.store.rmof.impl.delegate.WritableRepositoryOnPersistence;
 
 
@@ -96,11 +95,11 @@ public class ConsistencyTestResource {
 		log.info("instanceId=" + instance);
 		c.stopAndStart("headers,getInstanceId");
 		w.write("<div style='"
-
+		
 		+ "font-family: \"Courier New\", Courier, monospace;"
-
+		
 		+ "font-size: 13px;"
-
+		
 		+ "'>\n");
 		w.write("instanceId=" + instance + "<br/>\n");
 		w.flush();
@@ -108,8 +107,8 @@ public class ConsistencyTestResource {
 		XydraPersistence persistence = XydraRuntime.getPersistence(repoId);
 		WritableRepositoryOnPersistence nakedRepo = new WritableRepositoryOnPersistence(
 		        persistence, actorId);
-		// TODO should be done in another way
-		InstanceContext.clearThreadContext();
+		// should be done in another way
+		// InstanceContext.clearThreadContext();
 		c.stopAndStart("init");
 		// FIXME next 3 lines takes 98% of CPU time
 		RWCachingRepository repo = new RWCachingRepository(nakedRepo, persistence, true);

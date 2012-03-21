@@ -72,6 +72,8 @@ public class SimulatedUser extends Thread {
 	 * 
 	 * @param serverUrl should not include repository. May not have a trailing
 	 *            slash at the end.
+	 * @param repo
+	 * @param exchanger
 	 */
 	public SimulatedUser(String serverUrl, String repo, Exchanger<Exception> exchanger) {
 		super();
@@ -249,7 +251,7 @@ public class SimulatedUser extends Thread {
 		return randomEntry(listUrls);
 	}
 	
-	private String randomEntry(List<String> entries) {
+	private static String randomEntry(List<String> entries) {
 		if(entries.size() == 0) {
 			return null;
 		}
@@ -257,7 +259,7 @@ public class SimulatedUser extends Thread {
 		return entries.get(rnd);
 	}
 	
-	private String chooseWish(String listUrl) {
+	private static String chooseWish(String listUrl) {
 		/* retrieve list of wish urls */
 		List<String> wishUrls = listAllWishesInList(listUrl);
 		log.info("Choosing one of " + wishUrls.size() + " wishes");
@@ -274,7 +276,7 @@ public class SimulatedUser extends Thread {
 		return stringParsedByLinebreaks(content);
 	}
 	
-	private List<String> stringParsedByLinebreaks(String content) {
+	private static List<String> stringParsedByLinebreaks(String content) {
 		String[] lines = content.split("\\n");
 		List<String> list = new ArrayList<String>();
 		for(String line : lines) {
@@ -290,7 +292,7 @@ public class SimulatedUser extends Thread {
 	 * @param absoluteUrl should inclide the repository but not end with a slash
 	 * @return a list of all wish URLs in given wish list
 	 */
-	private List<String> listAllWishesInList(String listUrl) {
+	private static List<String> listAllWishesInList(String listUrl) {
 		assert listUrl.startsWith("http");
 		String content = HttpUtils.getRequestAsStringResponse(listUrl + "?format=urls");
 		return stringParsedByLinebreaks(content);
@@ -306,7 +308,8 @@ public class SimulatedUser extends Thread {
 	public static void main(String[] args) {
 		// TODO fix the SimulatedUser creation
 		SimulatedUser su = new SimulatedUser("http://localhost:8787", "repo1", null);
-		System.out.println(su.listAllWishesInList(su.listAllListsInRepository("repo1").get(0)));
+		System.out.println(SimulatedUser.listAllWishesInList(su.listAllListsInRepository("repo1")
+		        .get(0)));
 		su.pleaseStopSoon();
 		System.out.println("Performed " + su.getActions() + " actions");
 	}

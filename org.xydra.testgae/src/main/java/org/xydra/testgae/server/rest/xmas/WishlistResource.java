@@ -140,6 +140,7 @@ public class WishlistResource {
 	}
 	
 	/**
+	 * @param repoId
 	 * @param modelId ~ wish list id
 	 * @return a URL relative to the server root
 	 */

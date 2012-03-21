@@ -223,7 +223,6 @@ public abstract class RemoteBenchmark {
 		}
 		
 		int addExceptions = 0;
-		int counter = 0;
 		
 		double avgTime = 0;
 		for(int i = 0; i < operations; i++) {
@@ -248,7 +247,6 @@ public abstract class RemoteBenchmark {
 				}
 				
 				avgTime += time;
-				counter++;
 			} catch(Exception e) {
 				addExceptions++;
 			}
@@ -276,8 +274,6 @@ public abstract class RemoteBenchmark {
 		}
 		
 		int addExceptions = 0;
-		int counter = 0;
-		
 		double avgTime = 0;
 		for(int i = 0; i < operations; i++) {
 			try {
@@ -309,7 +305,6 @@ public abstract class RemoteBenchmark {
 				}
 				
 				avgTime += time;
-				counter++;
 			} catch(Exception e) {
 				addExceptions++;
 			}
@@ -338,7 +333,6 @@ public abstract class RemoteBenchmark {
 		double avgTime;
 		
 		int addExceptions = 0;
-		int counter = 0;
 		
 		avgTime = 0;
 		for(int i = 0; i < operations; i++) {
@@ -373,7 +367,6 @@ public abstract class RemoteBenchmark {
 				}
 				
 				avgTime += time;
-				counter++;
 			} catch(Exception e) {
 				addExceptions++;
 			}
@@ -548,7 +541,7 @@ public abstract class RemoteBenchmark {
 	 *         already contained some wishes the returned url may be the url of
 	 *         another wish) Returns null if operations fails.
 	 */
-	private String addWishToEmptyList(String listUrlStr) {
+	private static String addWishToEmptyList(String listUrlStr) {
 		boolean succ = HttpUtils.makeGetRequest(listUrlStr + "/add?wishes=1");
 		if(!succ) {
 			return null;
@@ -564,7 +557,7 @@ public abstract class RemoteBenchmark {
 		return lines[0];
 	}
 	
-	private String addWish(String listUrlStr) {
+	private static String addWish(String listUrlStr) {
 		boolean succ = HttpUtils.makeGetRequest(listUrlStr + "/add?wishes=1");
 		if(!succ) {
 			return null;
