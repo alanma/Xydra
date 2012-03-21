@@ -1,8 +1,5 @@
 package org.xydra.testgae.shared;
 
-import org.xydra.testgae.client.RemoteBenchmark;
-
-
 /**
  * Simple enumeration for the different methods of this application.
  * 
@@ -12,7 +9,8 @@ import org.xydra.testgae.client.RemoteBenchmark;
  * 
  * EDIT = Editing a wish
  * 
- * It's for example being used in {@link RemoteBenchmark}.
+ * It's for example being used in
+ * {@link org.xydra.testgae.client.RemoteBenchmark}.
  * 
  * @author Kaidel
  * 
