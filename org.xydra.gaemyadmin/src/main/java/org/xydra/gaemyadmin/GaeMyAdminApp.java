@@ -56,9 +56,9 @@ public class GaeMyAdminApp {
 	public static void restless(Restless restless, String prefix) {
 		restless.addMethod(prefix + "/", "GET", GaeMyAdminApp.class, "index", true);
 		restless.addMethod(prefix + "/stats", "GET", GaeMyAdminApp.class, "stats", true,
-
+		
 		new RestlessParameter("resultFormat", "text")
-
+		
 		);
 		restless.addMethod(prefix + "/backup", "GET", GaeMyAdminApp.class, "backup", true);
 		restless.addMethod(prefix + "/deleteAll", "GET", GaeMyAdminApp.class, "deleteAll", true,
@@ -71,16 +71,16 @@ public class GaeMyAdminApp {
 	public void index(HttpServletResponse res) throws IOException {
 		Writer w = HtmlUtils.startHtmlPage(res, "GaeMyAdmin");
 		w.write(HtmlUtils.toOrderedList(Arrays.asList(
-
+		
 		HtmlUtils.link("/admin/stats/", "Statistics"),
-
+		
 		HtmlUtils.link("/admin/deleteAll",
 		        "Page to delete all data - clicking this link just lists all data"),
-
+		
 		HtmlUtils.link("/admin/memcache/", "Memcache admin"),
-
+		
 		HtmlUtils.link("/admin/logconf/", "Logger config")
-
+		
 		)));
 		HtmlUtils.writeCloseBodyHtml(w);
 		w.flush();
@@ -99,6 +99,9 @@ public class GaeMyAdminApp {
 	
 	/**
 	 * Delete all data in the data store
+	 * 
+	 * @param res
+	 * @param sure must be "yes" if you are sure to delete all
 	 * 
 	 * @throws IOException from underlying http streams or datastore
 	 */
@@ -177,14 +180,14 @@ public class GaeMyAdminApp {
 		
 		DatastoreServiceConfig defaultConfig = DatastoreServiceConfig.Builder.withDefaults();
 		new OutputStreamWriter(res.getOutputStream(), "utf-8").write("Default datastore config\n"
-
+		
 		+ "* deadline: " + defaultConfig.getDeadline() + "\n"
-
+		
 		+ "* implicitTransactionManagementPolicy: "
 		        + defaultConfig.getImplicitTransactionManagementPolicy().name() + "\n"
-
+		        
 		        + "* readPolicy: " + defaultConfig.getReadPolicy().getConsistency() + "\n"
-
+		
 		);
 		
 		// put dummy entity to test datastore health
@@ -218,15 +221,15 @@ public class GaeMyAdminApp {
 		
 		FetchOptions defaultFetchOptions = FetchOptions.Builder.withDefaults();
 		new OutputStreamWriter(res.getOutputStream(), "utf-8").write("Default fetchOptions\n"
-
+		
 		+ "* chunkSize: " + defaultFetchOptions.getChunkSize() + "\n"
-
+		
 		+ "* limit: " + defaultFetchOptions.getLimit() + "\n"
-
+		
 		+ "* offset: " + defaultFetchOptions.getOffset() + "\n"
-
+		
 		+ "* prefetchSize: " + defaultFetchOptions.getPrefetchSize() + "\n"
-
+		
 		);
 		
 		// Each statistic entity has the following properties:
