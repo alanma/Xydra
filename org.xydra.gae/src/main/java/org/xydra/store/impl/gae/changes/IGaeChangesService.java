@@ -50,6 +50,8 @@ public interface IGaeChangesService {
 	 * current revision number (from {@link RevisionManager} The result is
 	 * stored in {@link RevisionManager} and returned for convenience.
 	 * 
+	 * @return ...
+	 * 
 	 * @see XydraStore#getModelRevisions(XID, String, XAddress[], Callback)
 	 */
 	GaeModelRevision calculateCurrentModelRevision();
@@ -57,6 +59,8 @@ public interface IGaeChangesService {
 	/**
 	 * Grabs the lowest available revision number and registers a change for
 	 * that revision number with the provided locks.
+	 * 
+	 * @param lastTaken
 	 * 
 	 * @param locks which locks to get
 	 * @param actorId The actor to record in the change {@link Entity}.
@@ -79,6 +83,8 @@ public interface IGaeChangesService {
 	
 	/**
 	 * Mark the given change as committed.
+	 * 
+	 * @param change
 	 * 
 	 * @param status The new (and final) status.
 	 */

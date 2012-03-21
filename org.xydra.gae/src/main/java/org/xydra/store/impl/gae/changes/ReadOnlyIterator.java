@@ -2,6 +2,7 @@ package org.xydra.store.impl.gae.changes;
 
 import java.util.Iterator;
 
+
 /**
  * Read only iterator wrapper that forbids {@link #remove()}.
  * 
@@ -21,6 +22,8 @@ public class ReadOnlyIterator<T> implements Iterator<T> {
 	
 	/**
 	 * Convenience constructor.
+	 * 
+	 * @param base
 	 */
 	public ReadOnlyIterator(Iterable<T> base) {
 		this(base.iterator());

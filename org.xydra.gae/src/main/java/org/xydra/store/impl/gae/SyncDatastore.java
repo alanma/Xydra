@@ -65,6 +65,7 @@ public class SyncDatastore {
 	 * Stores a GAE {@link Entity} asynchronously in the GAE back-end
 	 * 
 	 * @param entity The entity to write to the datastore.
+	 * @param txn
 	 */
 	@GaeOperation(datastoreWrite = true)
 	public static void putEntity(Entity entity, Transaction txn) {
@@ -92,6 +93,7 @@ public class SyncDatastore {
 	 * Commit the given GAE Transaction.
 	 * 
 	 * @param txn The Transaction to commit.
+	 * @throws ConcurrentModificationException
 	 */
 	@GaeOperation(datastoreWrite = true)
 	public static void endTransaction(Transaction txn) throws ConcurrentModificationException {
@@ -115,6 +117,7 @@ public class SyncDatastore {
 	 * GAE
 	 * 
 	 * @param key The entity to remove from the datastore.
+	 * @param txn
 	 */
 	@GaeOperation(datastoreWrite = true)
 	public static void deleteEntity(Key key, Transaction txn) {
@@ -147,6 +150,7 @@ public class SyncDatastore {
 	 * Prepares the given GAE query.
 	 * 
 	 * @param query The query to prepare.
+	 * @param txn
 	 * @return a GAE prepared query
 	 * 
 	 * @see DatastoreService#prepare(Transaction, Query)
@@ -237,6 +241,7 @@ public class SyncDatastore {
 	 * DatastoreServiceConfig.
 	 * 
 	 * @param keys never null
+	 * @param txn
 	 * @return a mapping for all keys that could be found
 	 */
 	@GaeOperation(datastoreRead = true)

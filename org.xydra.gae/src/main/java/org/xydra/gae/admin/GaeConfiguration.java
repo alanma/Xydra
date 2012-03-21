@@ -162,6 +162,7 @@ public class GaeConfiguration {
 	 * A null is interpreted as false.
 	 * 
 	 * @param propName ..
+	 * @return the property value as boolean value
 	 */
 	public boolean getAsBoolean(String propName) {
 		String value = this.map.get(propName);

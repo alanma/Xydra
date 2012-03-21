@@ -35,6 +35,7 @@ public interface IGaeSnapshotService {
 	 * @param precise True if we need the snapshot for exactly the requested
 	 *            revision number or false if the snapshot of a higher revision
 	 *            number can also be returned.
+	 * @param objectId
 	 * @return an {@link XReadableObject} by applying all events in the
 	 *         {@link XChangeLog} or null if the model was not present at the
 	 *         requested revisionNumber
@@ -49,6 +50,8 @@ public interface IGaeSnapshotService {
 	 * @param precise True if we need the snapshot for exactly the requested
 	 *            revision number or false if the snapshot of a higher revision
 	 *            number can also be returned.
+	 * @param objectId
+	 * @param fieldId
 	 * @return an {@link XWritableField} by applying all events in the
 	 *         {@link XChangeLog} or null if the model was not present at the
 	 *         requested revisionNumber

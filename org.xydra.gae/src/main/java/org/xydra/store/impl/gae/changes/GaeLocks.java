@@ -42,6 +42,7 @@ public class GaeLocks implements Iterable<XAddress> {
 	 * Also, a read lock on the ancestors of that entity is implied.
 	 * 
 	 * @param command The command to calculate the locks for.
+	 * @return never null
 	 */
 	@GaeOperation()
 	public static GaeLocks createLocks(XCommand command) {
@@ -103,6 +104,7 @@ public class GaeLocks implements Iterable<XAddress> {
 	}
 	
 	/**
+	 * @param addr
 	 * @return true if the specified locks are sufficient to write to the entity
 	 *         at the given address.
 	 */
@@ -116,6 +118,7 @@ public class GaeLocks implements Iterable<XAddress> {
 	}
 	
 	/**
+	 * @param addr
 	 * @return true if the specified locks are sufficient to read from the
 	 *         entity at the given address.
 	 */
@@ -129,6 +132,7 @@ public class GaeLocks implements Iterable<XAddress> {
 	}
 	
 	/**
+	 * @param other
 	 * @return if the two sets of locks conflict, i.e. one of them requires a
 	 *         lock that is implied by the other set (wild-card locks are
 	 *         respected).
@@ -165,6 +169,7 @@ public class GaeLocks implements Iterable<XAddress> {
 	}
 	
 	/**
+	 * @param addr
 	 * @return true if the specified locks are sufficient to delete the entity
 	 *         at the given address.
 	 */

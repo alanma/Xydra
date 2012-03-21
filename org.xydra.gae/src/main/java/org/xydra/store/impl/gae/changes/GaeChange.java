@@ -357,6 +357,8 @@ public class GaeChange {
 	
 	/**
 	 * Update the status of this change.
+	 * 
+	 * @param status
 	 */
 	public void setStatus(Status status) {
 		assert !getStatus().isCommitted();
@@ -457,6 +459,8 @@ public class GaeChange {
 	/**
 	 * Asynchronously put this change entity into datastore within the given
 	 * transaction.
+	 * 
+	 * @param trans
 	 */
 	@GaeOperation(datastoreWrite = true ,memcacheWrite = true)
 	public void save(Transaction trans) {

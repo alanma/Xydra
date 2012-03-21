@@ -11,8 +11,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.restless.Restless;
-import org.xydra.restless.utils.NanoClock;
 import org.xydra.restless.utils.HtmlUtils;
+import org.xydra.restless.utils.NanoClock;
 import org.xydra.restless.utils.ServletUtils;
 import org.xydra.store.XydraConfigUtils;
 import org.xydra.store.XydraRuntime;
@@ -38,9 +38,9 @@ public class GaeConfigurationResource {
 	
 	private static void addCommonStyle(Writer w) throws IOException {
 		w.write("<style type='text/css'>\n"
-
+		
 		+ "form { display:inline; } \n"
-
+		
 		+ ".cpodebug h1, .cpodebug h2, .cpodebug h3, .cpodebug h4{\r\n" + "   color: #1E93F6;\r\n"
 		        + "   font-size: 120%;\r\n" + "}   \r\n" + ".cpodebug div, \r\n"
 		        + ".cpodebug span, \r\n" + ".cpodebug h1, \r\n" + ".cpodebug h2, \r\n"
@@ -60,7 +60,7 @@ public class GaeConfigurationResource {
 		        + ".cpodebug .comment {\r\n" + "		  width: 25%;\r\n"
 		        + "		  white-space: normal;\r\n" + "}\r\n" + "\r\n"
 		        + ".cpodebug th, .cpodebug td {\r\n" + "  border: 1px solid #ccc;\r\n" + "}"
-
+		        
 		        + "</style>");
 	}
 	
@@ -171,35 +171,35 @@ public class GaeConfigurationResource {
 		keys.add(GaeConfigSettings.CLEAR_LOCAL_VM_CACHE);
 		
 		w.write("<form method='get' action='/admin/gaeconf' onSubmit='"
-
+		
 		+ "document.forms[0].__protoValue.name=document.forms[0].__protoKey.value;"
-
+		
 		+ "document.forms[0].removeChild(document.forms[0].__protoKey);"
-
+		
 		+ "'>");
 		w.write("<table class='cpodebug'>");
 		w.write("<tr>" +
-
+		
 		"<th scope='col'>Key</th>" +
-
+		
 		"<th scope='col'>Request</th>" +
-
+		
 		"<th scope='col'>GaeConf</th>" +
-
+		
 		"<th scope='col'>This instance</th>" +
-
+		
 		"</tr>");
 		for(String key : keys) {
 			String gaeConfValue = normalize(gaeConf.map().get(key));
 			
 			w.write("<tr><td>" + key + "</td>" +
-
+			
 			"<td>" + normalize(params.get(key)) + "</td>" +
-
+			
 			"<td>'" + gaeConfValue + "' => " + formField(key, gaeConfValue) + "</td>" +
-
+			
 			"<td>" + normalize(XydraRuntime.getConfigMap().get(key)) + "</td>" +
-
+			
 			"</tr>");
 		}
 		w.write("</table>");
@@ -212,13 +212,13 @@ public class GaeConfigurationResource {
 		long in1Hour = now + (60 * 60 * 1000);
 		long in1Day = now + (24 * 60 * 60 * 1000);
 		w.write("Valid for "
-
+		
 		+ "<input type='radio' name='" + GaeConfiguration.PROP_VALID_UTC + "' value='" + in1Minute
 		        + "'  checked='checked' />1 minute"
-
+		        
 		        + "<input type='radio' name='" + GaeConfiguration.PROP_VALID_UTC + "' value='"
 		        + in1Hour + "'/>1 hour"
-
+		        
 		        + "<input type='radio' name='" + GaeConfiguration.PROP_VALID_UTC + "' value='"
 		        + in1Day + "'/>1 day (careful)");
 		
@@ -327,6 +327,9 @@ public class GaeConfigurationResource {
 	 * Set some parameters just for a specific instance.
 	 * 
 	 * Currently, there are no instance specific parameters.
+	 * 
+	 * @param instanceId
+	 * @param res
 	 * 
 	 * @throws IOException ...
 	 */

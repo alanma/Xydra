@@ -68,6 +68,7 @@ public class AsyncDatastore {
 	 * Stores a GAE {@link Entity} asynchronously in the GAE back-end
 	 * 
 	 * @param entity The entity to write to the datastore.
+	 * @param txn
 	 * @return a future that returns the key of the putted entity on success
 	 */
 	@GaeOperation(datastoreWrite = true)
@@ -100,6 +101,7 @@ public class AsyncDatastore {
 	 * Commit the given GAE Transaction.
 	 * 
 	 * @param txn The Transaction to commit.
+	 * @throws ConcurrentModificationException
 	 */
 	@GaeOperation(datastoreWrite = true)
 	public static void endTransaction(Transaction txn) throws ConcurrentModificationException {
@@ -124,6 +126,7 @@ public class AsyncDatastore {
 	 * GAE
 	 * 
 	 * @param key The entity to remove from the datastore.
+	 * @param txn
 	 * @return a Future to be aware when the delete actually happens
 	 */
 	@GaeOperation(datastoreWrite = true)
@@ -157,6 +160,7 @@ public class AsyncDatastore {
 	 * Prepares the given GAE query.
 	 * 
 	 * @param query The query to prepare.
+	 * @param txn
 	 * @return a GAE prepared query
 	 * 
 	 * @see DatastoreService#prepare(Transaction, Query)
@@ -191,6 +195,7 @@ public class AsyncDatastore {
 	 * DatastoreServiceConfig.
 	 * 
 	 * @param keys never null
+	 * @param txn
 	 * @return a mapping for all keys that could be found
 	 */
 	@GaeOperation(datastoreRead = true)

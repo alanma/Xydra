@@ -42,7 +42,11 @@ public class UniversalTaskQueue {
 	}
 	
 	public static interface NamedDeferredTask extends DeferredTask {
-		/** Some name to be used within url-query strings to identify the task */
+		/**
+		 * Some name to be used within url-query strings to identify the task
+		 * 
+		 * @return the name used to debug this task
+		 */
 		String getId();
 	}
 }

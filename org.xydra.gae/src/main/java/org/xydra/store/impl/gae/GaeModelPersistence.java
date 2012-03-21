@@ -100,10 +100,6 @@ public class GaeModelPersistence {
 	}
 	
 	/**
-	 * use thread-local caches to return the same revision number to the same
-	 * asking thread, until that thread terminates or does a change. Or
-	 * {@link InstanceContext#clearThreadContext()} is called.
-	 * 
 	 * @return the current {@link ModelRevision} or null
 	 */
 	public ModelRevision getModelRevision() {
