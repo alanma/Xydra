@@ -54,6 +54,7 @@ public abstract class AbstractXydraResource {
 	 * 
 	 * @param restless ..
 	 * @param prefix ..
+	 * @param subClass
 	 */
 	public static void configureRestless(Restless restless, String prefix, Class<?> subClass) {
 		restless.addMethod("/xydra/repository", "GET", subClass, "getRepository", true);

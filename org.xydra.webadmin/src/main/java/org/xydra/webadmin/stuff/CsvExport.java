@@ -95,6 +95,8 @@ public class CsvExport {
 	/**
 	 * Each object, even if empty, results at least in one row.
 	 * 
+	 * @param model
+	 * 
 	 * @param object to be exported
 	 * @param rowHandler export target
 	 * @throws IOException from underlying I/O
@@ -105,11 +107,11 @@ public class CsvExport {
 		String rowName = object.getAddress().toString();
 		if(object.isEmpty()) {
 			rowHandler.handleRow(rowName, new SingleRow(rowName, new String[][] {
-
+			
 			new String[] { "modelRev", "" + model.getRevisionNumber() },
-
+			
 			new String[] { "objectRev", "" + object.getRevisionNumber() }
-
+			
 			}));
 		} else {
 			for(XID fieldId : object) {

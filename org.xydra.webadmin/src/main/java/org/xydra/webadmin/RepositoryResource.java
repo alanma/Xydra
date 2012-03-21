@@ -150,6 +150,10 @@ public class RepositoryResource {
 	/**
 	 * @param repoIdStr never null
 	 * @param styleStr see {@link RStyle}
+	 * @param useTaskQueueStr
+	 * @param cacheInInstanceStr
+	 * @param cacheInMemcacheStr
+	 * @param cacheInDatastoreStr
 	 * @param res ..
 	 * @throws IOException ...
 	 */

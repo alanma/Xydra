@@ -277,7 +277,6 @@ public class ModelResource {
 	 * @param model
 	 * @param style
 	 * @return serialisation in given style
-	 * @throws IOException
 	 */
 	public static String computeSerialisation(XWritableModel model, MStyle style) {
 		StringWriter sw = new StringWriter();

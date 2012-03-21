@@ -31,6 +31,7 @@ public class CsvValueReader {
 	
 	/**
 	 * @param valueString may not contain whitespace
+	 * @param type
 	 * @return the parsed XValue
 	 */
 	public static XValue parseValue(String valueString, ValueType type) {

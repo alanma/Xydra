@@ -44,6 +44,7 @@ public class ShareXydraPersistenceApp {
 	
 	/**
 	 * @param restless The current Restless instance.
+	 * @param repositoryId
 	 * @return an instance of {@link XydraPersistence} from the current servlet
 	 *         context that has hopefully been put there by a previous call of
 	 *         restless().
@@ -103,6 +104,9 @@ public class ShareXydraPersistenceApp {
 	
 	/**
 	 * Setup
+	 * 
+	 * @param restless
+	 * @param prefix
 	 */
 	public void restless(Restless restless, String prefix) {
 		// nothing to do at init time
