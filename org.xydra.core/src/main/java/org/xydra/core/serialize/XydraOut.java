@@ -59,7 +59,7 @@ import org.xydra.base.minio.MiniWriter;
 public interface XydraOut {
 	
 	/* Element */
-
+	
 	/**
 	 * Start a new element of the give type. Elements roughly resemble XML
 	 * elements and can have attributes and children. While elements are
@@ -329,7 +329,7 @@ public interface XydraOut {
 	void close(String type);
 	
 	/* Array */
-
+	
 	/**
 	 * Start a new array. Arrays are ordered lists of arbitrary entities
 	 * (elements, arrays, maps or values).
@@ -419,7 +419,7 @@ public interface XydraOut {
 	void endArray();
 	
 	/* Map */
-
+	
 	/**
 	 * Start a new map. Maps are an associative array with a unique key for each
 	 * entry.
@@ -569,7 +569,7 @@ public interface XydraOut {
 	void endMap();
 	
 	/* Value */
-
+	
 	/**
 	 * Adds a value. Values are atomic types and can be stored differently
 	 * depending on their class.
@@ -687,7 +687,7 @@ public interface XydraOut {
 	void nullElement();
 	
 	/* Child type */
-
+	
 	/**
 	 * Set a forced child type for the current context.
 	 * 
@@ -760,7 +760,7 @@ public interface XydraOut {
 	void setDefaultType(String defaultType);
 	
 	/* Output */
-
+	
 	/**
 	 * Output whitespace to make the result more readable.
 	 * 
@@ -799,7 +799,7 @@ public interface XydraOut {
 	String getData();
 	
 	/* Convenience */
-
+	
 	/**
 	 * Convenience method to start typed maps:
 	 * 
@@ -807,6 +807,9 @@ public interface XydraOut {
 	 * beginMap(attribute);
 	 * setChildType(type);
 	 * </pre>
+	 * 
+	 * @param attribute
+	 * @param type
 	 */
 	void beginMap(String attribute, String type);
 	
@@ -817,6 +820,8 @@ public interface XydraOut {
 	 * beginArray();
 	 * setChildType(type);
 	 * </pre>
+	 * 
+	 * @param type
 	 */
 	void beginArray(String type);
 	
@@ -827,6 +832,9 @@ public interface XydraOut {
 	 * child(name);
 	 * setChildType(type);
 	 * </pre>
+	 * 
+	 * @param name
+	 * @param type
 	 * 
 	 * @see #child(String)
 	 * @see #setChildType(String)
@@ -840,6 +848,9 @@ public interface XydraOut {
 	 * child(name);
 	 * value(content);
 	 * </pre>
+	 * 
+	 * @param name
+	 * @param content
 	 */
 	<T> void content(String name, T content);
 	
@@ -854,6 +865,10 @@ public interface XydraOut {
 	 * }
 	 * endArray();
 	 * </pre>
+	 * 
+	 * @param name
+	 * @param type
+	 * @param values
 	 * 
 	 * @see #child(String)
 	 * @see #beginArray()
@@ -874,6 +889,10 @@ public interface XydraOut {
 	 * 
 	 * </p>
 	 * 
+	 * @param name
+	 * @param type
+	 * @param value
+	 * 
 	 * @see #child(String, String)
 	 * @see #value(Object)
 	 */
@@ -893,6 +912,10 @@ public interface XydraOut {
 	 * 
 	 * </p>
 	 * 
+	 * @param type
+	 * @param name
+	 * @param content
+	 * 
 	 * @see #open(String)
 	 * @see #content(String, Object)
 	 * @see #close(String)
@@ -911,6 +934,8 @@ public interface XydraOut {
 	 * </pre>
 	 * 
 	 * </p>
+	 * 
+	 * @param type
 	 * 
 	 * @see #open(String)
 	 * @see #close(String)

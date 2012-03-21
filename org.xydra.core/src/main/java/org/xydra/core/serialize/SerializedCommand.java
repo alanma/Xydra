@@ -143,6 +143,8 @@ public class SerializedCommand {
 	/**
 	 * Get the {@link XCommand} represented by the given XML/JSON element.
 	 * 
+	 * @param element
+	 * 
 	 * @param context The {@link XID XIDs} of the repository, model, object and
 	 *            field to fill in if not specified in the XML/JSON. If the
 	 *            given element represents a transaction, the context for the
@@ -328,6 +330,7 @@ public class SerializedCommand {
 	 * @param out The XML/JSON encoder to write to.
 	 * @param context The part of this command's target address that doesn't
 	 *            need to be encoded in the element.
+	 * @throws IllegalArgumentException
 	 */
 	public static void serialize(XCommand command, XydraOut out, XAddress context)
 	        throws IllegalArgumentException {
@@ -431,6 +434,7 @@ public class SerializedCommand {
 	 * @param out The XML/JSON encoder to write to.
 	 * @param context The part of this event's target address that doesn't need
 	 *            to be encoded in the element.
+	 * @throws IllegalArgumentException
 	 */
 	public static void serialize(Iterator<? extends XCommand> commands, XydraOut out,
 	        XAddress context) throws IllegalArgumentException {
@@ -449,6 +453,8 @@ public class SerializedCommand {
 	
 	/**
 	 * Get the {@link XCommand} list represented by the given XML/JSON element.
+	 * 
+	 * @param element
 	 * 
 	 * @param context The {@link XID XIDs} of the repository, model, object and
 	 *            field to fill in if not specified in the XML/JSON. The context

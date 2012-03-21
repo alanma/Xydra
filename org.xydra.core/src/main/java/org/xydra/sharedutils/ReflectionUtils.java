@@ -19,9 +19,11 @@ import org.xydra.log.LoggerFactory;
  * corresponding GWT version in org.xydra.gwt project simply does nothing, but
  * provides the same method signatures.
  * 
- * @author xamde
+ * Runs in GWT via supersource
  * 
+ * @author xamde
  */
+@RunsInGWT(false)
 public class ReflectionUtils {
 	
 	private static final Logger log = LoggerFactory.getLogger(ReflectionUtils.class);
@@ -92,6 +94,7 @@ public class ReflectionUtils {
 			lines += append(br, buf, n);
 			Throwable cause = t.getCause();
 			while(lines < n && cause != null) {
+				buf.append("Caused by\n");
 				br = toBufferedReader(cause);
 				lines += append(br, buf, n - lines);
 				cause = t.getCause();
@@ -106,7 +109,7 @@ public class ReflectionUtils {
 	 * Not even emulated in GWT!
 	 * 
 	 * @param t
-	 * @return
+	 * @return ...
 	 */
 	@RunsInGWT(false)
 	public static BufferedReader toBufferedReader(Throwable t) {

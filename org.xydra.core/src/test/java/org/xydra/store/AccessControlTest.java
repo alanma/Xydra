@@ -74,7 +74,7 @@ public class AccessControlTest {
 		assertNotNull(authenticationDb.getPasswordHash(user1));
 		assertTrue(groupDb.getMembersOf(groupA).contains(user1));
 		
-		SynchronousTestCallback<Boolean> callback = new SynchronousTestCallback<Boolean>();
+		SynchronousCallbackWithOneResult<Boolean> callback = new SynchronousCallbackWithOneResult<Boolean>();
 		this.store.checkLogin(user1, HashUtils.getXydraPasswordHash("secret1"), callback);
 		callback.waitOnCallback(100);
 		if(!callback.getEffect()) {

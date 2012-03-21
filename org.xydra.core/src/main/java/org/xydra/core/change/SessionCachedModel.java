@@ -345,8 +345,7 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 		 * Added. Not present in base model; added later.
 		 * 
 		 * Object: Implies: knows all fields. All fields can only be: Added, Not
-		 * present. Object has a number of fields, each known as a
-		 * {@link FieldState}.
+		 * present. Object has a number of fields.
 		 * 
 		 * Field: Value can be: Added, Not present
 		 */
@@ -366,7 +365,7 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 		 * 
 		 * Object: (IMPROVE Distinguish: knows all fields or not). This state
 		 * includes changed objects, in which only fields or values changed. Has
-		 * a number of fields, each known as a {@link FieldState}.
+		 * a number of fields.
 		 * 
 		 * Field: Value can be: Present, Added, Changed, Removed, Not present
 		 */

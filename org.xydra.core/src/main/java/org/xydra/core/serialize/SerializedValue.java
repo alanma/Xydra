@@ -94,6 +94,7 @@ public class SerializedValue {
 	}
 	
 	/**
+	 * @param element
 	 * @return The {@link XAddress} represented by the given XML/JSON element.
 	 * @throws IllegalArgumentException if the given XML/JSON element is not a
 	 *             valid representation of an {@link XAddress}
@@ -152,6 +153,7 @@ public class SerializedValue {
 	}
 	
 	/**
+	 * @param element
 	 * @return The {@link XID} represented by the given XML/JSON element.
 	 * @throws IllegalArgumentException if the given XML/JSON element is not a
 	 *             valid representation of an {@link XID}
@@ -199,6 +201,7 @@ public class SerializedValue {
 	}
 	
 	/**
+	 * @param element
 	 * @return The {@link XValue} (can be null) represented by the given
 	 *         XML/JSON element.
 	 * @throws IllegalArgumentException if the given XML/JSON element is not a
@@ -344,6 +347,7 @@ public class SerializedValue {
 	 * Emit the XML/JSON representation of the given {@link XValue}.
 	 * 
 	 * @param xvalue The value to serialize. This may be null.
+	 * @param out
 	 * @throws IllegalArgumentException if given {@link XValue} is an
 	 *             unrecognized type.
 	 */

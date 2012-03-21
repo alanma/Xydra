@@ -43,7 +43,7 @@ import org.xydra.core.model.impl.memory.SynchronizesChangesImpl;
 import org.xydra.core.model.sync.XSynchronizer;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.GetEventsRequest;
-import org.xydra.store.SynchronousTestCallback;
+import org.xydra.store.SynchronousCallbackWithOneResult;
 import org.xydra.store.XydraStore;
 
 
@@ -93,8 +93,8 @@ abstract public class AbstractSynchronizerTest {
 		long startRev = cl.getFirstRevisionNumber();
 		Iterator<XEvent> localEvents = cl.getEventsBetween(startRev, Long.MAX_VALUE);
 		
-		SynchronousTestCallback<BatchedResult<XEvent[]>[]> callback;
-		callback = new SynchronousTestCallback<BatchedResult<XEvent[]>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<XEvent[]>[]> callback;
+		callback = new SynchronousCallbackWithOneResult<BatchedResult<XEvent[]>[]>();
 		store.getEvents(actorId, passwordHash,
 		        new GetEventsRequest[] { new GetEventsRequest(model.getAddress(), startRev,
 		                Long.MAX_VALUE) }, callback);
@@ -150,8 +150,8 @@ abstract public class AbstractSynchronizerTest {
 	 * errors.
 	 */
 	private static void executeCommand(XCommand command) {
-		SynchronousTestCallback<BatchedResult<Long>[]> tc;
-		tc = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<Long>[]> tc;
+		tc = new SynchronousCallbackWithOneResult<BatchedResult<Long>[]>();
 		
 		store.executeCommands(actorId, passwordHash, new XCommand[] { command }, tc);
 		
@@ -171,8 +171,8 @@ abstract public class AbstractSynchronizerTest {
 	private XReadableModel loadModelSnapshot(XID modelId) {
 		XAddress modelAddr = XX.resolveModel(this.repoAddr, modelId);
 		
-		SynchronousTestCallback<BatchedResult<XReadableModel>[]> tc;
-		tc = new SynchronousTestCallback<BatchedResult<XReadableModel>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<XReadableModel>[]> tc;
+		tc = new SynchronousCallbackWithOneResult<BatchedResult<XReadableModel>[]>();
 		
 		store.getModelSnapshots(actorId, passwordHash, new XAddress[] { modelAddr }, tc);
 		
@@ -193,12 +193,12 @@ abstract public class AbstractSynchronizerTest {
 		assertNotNull(store);
 		
 		// check login
-		SynchronousTestCallback<Boolean> loginCallback = new SynchronousTestCallback<Boolean>();
+		SynchronousCallbackWithOneResult<Boolean> loginCallback = new SynchronousCallbackWithOneResult<Boolean>();
 		store.checkLogin(actorId, passwordHash, loginCallback);
 		assertTrue(waitForSuccess(loginCallback));
 		
 		// get repository address
-		SynchronousTestCallback<XID> repoIdCallback = new SynchronousTestCallback<XID>();
+		SynchronousCallbackWithOneResult<XID> repoIdCallback = new SynchronousCallbackWithOneResult<XID>();
 		store.getRepositoryId(actorId, passwordHash, repoIdCallback);
 		XID repoId = waitForSuccess(repoIdCallback);
 		assertNotNull(repoId);
@@ -759,9 +759,9 @@ abstract public class AbstractSynchronizerTest {
 	 * 
 	 * @return the result passed to the callback.
 	 */
-	private static <T> T waitForSuccess(SynchronousTestCallback<T> tc) {
+	private static <T> T waitForSuccess(SynchronousCallbackWithOneResult<T> tc) {
 		
-		assertEquals(SynchronousTestCallback.SUCCESS, tc.waitOnCallback(0));
+		assertEquals(SynchronousCallbackWithOneResult.SUCCESS, tc.waitOnCallback(0));
 		
 		assertNull(tc.getException());
 		return tc.getEffect();
@@ -775,7 +775,7 @@ abstract public class AbstractSynchronizerTest {
 	 * 
 	 * @return the result passed to the callback.
 	 */
-	private static <T> T waitForSuccessBatched(SynchronousTestCallback<BatchedResult<T>[]> tc) {
+	private static <T> T waitForSuccessBatched(SynchronousCallbackWithOneResult<BatchedResult<T>[]> tc) {
 		
 		BatchedResult<T>[] results = waitForSuccess(tc);
 		assertNotNull(results);

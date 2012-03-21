@@ -85,7 +85,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		XID modelId2 = XX.toId("TestModel2");
 		XID modelId3 = XX.toId("TestModel3");
 		
-		SynchronousTestCallback<Set<XID>> callback = new SynchronousTestCallback<Set<XID>>();
+		SynchronousCallbackWithOneResult<Set<XID>> callback = new SynchronousCallbackWithOneResult<Set<XID>>();
 		this.store.getModelIds(this.correctUser, this.correctUserPass, callback);
 		waitOnCallback(callback);
 		assert callback != null;
@@ -122,7 +122,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		
 		XCommand[] commands = { modelCommand1, modelCommand2, modelCommand3, objectCommand1,
 		        objectCommand2, objectCommand3 };
-		SynchronousTestCallback<BatchedResult<Long>[]> commandCallback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<Long>[]> commandCallback = new SynchronousCallbackWithOneResult<BatchedResult<Long>[]>();
 		
 		this.store.executeCommands(this.correctUser, this.correctUserPass, commands,
 		        commandCallback);
@@ -190,7 +190,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	
 	@Test
 	public void getRevs() {
-		SynchronousTestCallback<BatchedResult<ModelRevision>[]> revisionCallback = new SynchronousTestCallback<BatchedResult<ModelRevision>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<ModelRevision>[]> revisionCallback = new SynchronousCallbackWithOneResult<BatchedResult<ModelRevision>[]>();
 		this.store.getModelRevisions(this.correctUser, this.correctUserPass, this.modelAddresses,
 		        revisionCallback);
 		assertTrue(this.waitOnCallback(revisionCallback));
@@ -207,8 +207,8 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	@Test
 	public void testGetModelRevisions() {
 		log.info("testGetModelRevisions");
-		SynchronousTestCallback<BatchedResult<XReadableModel>[]> snapshotCallback = new SynchronousTestCallback<BatchedResult<XReadableModel>[]>();
-		SynchronousTestCallback<BatchedResult<ModelRevision>[]> revisionCallback = new SynchronousTestCallback<BatchedResult<ModelRevision>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<XReadableModel>[]> snapshotCallback = new SynchronousCallbackWithOneResult<BatchedResult<XReadableModel>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<ModelRevision>[]> revisionCallback = new SynchronousCallbackWithOneResult<BatchedResult<ModelRevision>[]>();
 		
 		// Get revisions
 		this.store.getModelRevisions(this.correctUser, this.correctUserPass, this.modelAddresses,
@@ -256,7 +256,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	// Testing a login that should succeed
 	@Test
 	public void testCheckLoginSuccess() {
-		SynchronousTestCallback<Boolean> callback = new SynchronousTestCallback<Boolean>();
+		SynchronousCallbackWithOneResult<Boolean> callback = new SynchronousCallbackWithOneResult<Boolean>();
 		assert this.store != null;
 		this.store.checkLogin(this.correctUser, this.correctUserPass, callback);
 		
@@ -278,7 +278,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 			return;
 		}
 		
-		SynchronousTestCallback<Boolean> callback = new SynchronousTestCallback<Boolean>();
+		SynchronousCallbackWithOneResult<Boolean> callback = new SynchronousCallbackWithOneResult<Boolean>();
 		
 		this.store.checkLogin(this.incorrectUser, this.incorrectUserPass, callback);
 		
@@ -295,7 +295,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 			return;
 		}
 		
-		SynchronousTestCallback<Boolean> callback = new SynchronousTestCallback<Boolean>();
+		SynchronousCallbackWithOneResult<Boolean> callback = new SynchronousCallbackWithOneResult<Boolean>();
 		
 		this.store.checkLogin(this.correctUser, XX.createUniqueId().toString(), callback);
 		
@@ -303,7 +303,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		assertNull(callback.getException());
 		assertEquals(false, callback.getEffect());
 		
-		SynchronousTestCallback<Boolean> callback2 = new SynchronousTestCallback<Boolean>();
+		SynchronousCallbackWithOneResult<Boolean> callback2 = new SynchronousCallbackWithOneResult<Boolean>();
 		
 		this.store.checkLogin(this.correctUser, this.correctUserPass, callback2);
 		
@@ -318,7 +318,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	public void testCheckLoginPassingNull() {
 		// check IllegalArgumentException
 		// first parameter equals null
-		SynchronousTestCallback<Boolean> callback = new SynchronousTestCallback<Boolean>();
+		SynchronousCallbackWithOneResult<Boolean> callback = new SynchronousCallbackWithOneResult<Boolean>();
 		
 		try {
 			this.store.checkLogin(null, this.correctUserPass, callback);
@@ -328,7 +328,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		}
 		
 		// second parameter equals null
-		callback = new SynchronousTestCallback<Boolean>();
+		callback = new SynchronousCallbackWithOneResult<Boolean>();
 		
 		try {
 			this.store.checkLogin(this.correctUser, null, callback);
@@ -338,7 +338,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		}
 		
 		// both parameters equal null
-		callback = new SynchronousTestCallback<Boolean>();
+		callback = new SynchronousCallbackWithOneResult<Boolean>();
 		
 		try {
 			this.store.checkLogin(null, null, callback);
@@ -356,7 +356,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		}
 		
 		// all parameters equal null
-		callback = new SynchronousTestCallback<Boolean>();
+		callback = new SynchronousCallbackWithOneResult<Boolean>();
 		
 		try {
 			this.store.checkLogin(null, null, null);
@@ -380,7 +380,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	 */
 	@Test
 	public void testGetModelIds() {
-		SynchronousTestCallback<Set<XID>> callback = new SynchronousTestCallback<Set<XID>>();
+		SynchronousCallbackWithOneResult<Set<XID>> callback = new SynchronousCallbackWithOneResult<Set<XID>>();
 		
 		this.store.getModelIds(this.correctUser, this.correctUserPass, callback);
 		
@@ -417,11 +417,11 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 			return;
 		}
 		
-		SynchronousTestCallback<Set<XID>> callback;
+		SynchronousCallbackWithOneResult<Set<XID>> callback;
 		
 		// Test if it behaves correctly for wrong account + password
 		// combinations
-		callback = new SynchronousTestCallback<Set<XID>>();
+		callback = new SynchronousCallbackWithOneResult<Set<XID>>();
 		
 		this.store.getModelIds(this.incorrectUser, this.incorrectUserPass, callback);
 		
@@ -435,7 +435,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	// Test IllegalArgumentException
 	@Test
 	public void testGetModelIdsPassingNull() {
-		SynchronousTestCallback<Set<XID>> callback = new SynchronousTestCallback<Set<XID>>();
+		SynchronousCallbackWithOneResult<Set<XID>> callback = new SynchronousCallbackWithOneResult<Set<XID>>();
 		
 		// first parameter equals null
 		try {
@@ -446,7 +446,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		}
 		
 		// second parameter equals null
-		callback = new SynchronousTestCallback<Set<XID>>();
+		callback = new SynchronousCallbackWithOneResult<Set<XID>>();
 		
 		try {
 			this.store.getModelIds(this.correctUser, null, callback);
@@ -456,7 +456,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		}
 		
 		// all parameters equal null
-		callback = new SynchronousTestCallback<Set<XID>>();
+		callback = new SynchronousCallbackWithOneResult<Set<XID>>();
 		
 		try {
 			this.store.getModelIds(null, null, callback);
@@ -485,7 +485,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	// Test IllegalArgumentException
 	@Test
 	public void testGetModelRevisionPassingNull() {
-		SynchronousTestCallback<BatchedResult<ModelRevision>[]> revisionCallback = new SynchronousTestCallback<BatchedResult<ModelRevision>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<ModelRevision>[]> revisionCallback = new SynchronousCallbackWithOneResult<BatchedResult<ModelRevision>[]>();
 		
 		// first parameter equals null
 		try {
@@ -497,7 +497,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		}
 		
 		// second parameter equals null
-		revisionCallback = new SynchronousTestCallback<BatchedResult<ModelRevision>[]>();
+		revisionCallback = new SynchronousCallbackWithOneResult<BatchedResult<ModelRevision>[]>();
 		
 		try {
 			this.store.getModelRevisions(this.correctUser, null, this.modelAddresses,
@@ -508,7 +508,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		}
 		
 		// third parameter equals null
-		revisionCallback = new SynchronousTestCallback<BatchedResult<ModelRevision>[]>();
+		revisionCallback = new SynchronousCallbackWithOneResult<BatchedResult<ModelRevision>[]>();
 		
 		try {
 			this.store.getModelRevisions(this.correctUser, this.correctUserPass, null,
@@ -519,7 +519,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		}
 		
 		// all parameters equal null
-		revisionCallback = new SynchronousTestCallback<BatchedResult<ModelRevision>[]>();
+		revisionCallback = new SynchronousCallbackWithOneResult<BatchedResult<ModelRevision>[]>();
 		
 		try {
 			this.store.getModelRevisions(null, null, null, revisionCallback);
@@ -560,9 +560,9 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 			return;
 		}
 		
-		SynchronousTestCallback<BatchedResult<ModelRevision>[]> revisionCallback;
+		SynchronousCallbackWithOneResult<BatchedResult<ModelRevision>[]> revisionCallback;
 		
-		revisionCallback = new SynchronousTestCallback<BatchedResult<ModelRevision>[]>();
+		revisionCallback = new SynchronousCallbackWithOneResult<BatchedResult<ModelRevision>[]>();
 		
 		this.store.getModelRevisions(this.incorrectUser, this.incorrectUserPass,
 		        this.modelAddresses, revisionCallback);
@@ -575,8 +575,8 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	// Test if it behaves correctly for mixes of the cases above
 	@Test
 	public void testGetModelRevisionsMixedAddresses() {
-		SynchronousTestCallback<BatchedResult<XReadableModel>[]> snapshotCallback = new SynchronousTestCallback<BatchedResult<XReadableModel>[]>();
-		SynchronousTestCallback<BatchedResult<ModelRevision>[]> revisionCallback = new SynchronousTestCallback<BatchedResult<ModelRevision>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<XReadableModel>[]> snapshotCallback = new SynchronousCallbackWithOneResult<BatchedResult<XReadableModel>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<ModelRevision>[]> revisionCallback = new SynchronousCallbackWithOneResult<BatchedResult<ModelRevision>[]>();
 		
 		XAddress[] tempArray = new XAddress[this.modelAddresses.length + 1];
 		System.arraycopy(this.modelAddresses, 0, tempArray, 0, this.modelAddresses.length);
@@ -626,7 +626,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	// exist
 	@Test
 	public void testGetModelRevisionsNotExistingModel() {
-		SynchronousTestCallback<BatchedResult<ModelRevision>[]> callback = new SynchronousTestCallback<BatchedResult<ModelRevision>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<ModelRevision>[]> callback = new SynchronousCallbackWithOneResult<BatchedResult<ModelRevision>[]>();
 		XAddress[] tempArray = new XAddress[] { this.notExistingModel };
 		
 		this.store.getModelRevisions(this.correctUser, this.correctUserPass, tempArray, callback);
@@ -644,7 +644,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	// Test if it behaves correctly for addresses that do not address an XModel
 	@Test
 	public void testGetModelRevisionsWrongAddress() {
-		SynchronousTestCallback<BatchedResult<ModelRevision>[]> callback = new SynchronousTestCallback<BatchedResult<ModelRevision>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<ModelRevision>[]> callback = new SynchronousCallbackWithOneResult<BatchedResult<ModelRevision>[]>();
 		log.warn("Expect three warnings because we ask with objectAdresses for modelRevisions");
 		this.store.getModelRevisions(this.correctUser, this.correctUserPass, this.objectAddresses,
 		        callback);
@@ -667,7 +667,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	@Test
 	public void testGetModelSnapshots() {
 		log.info("testGetModelSnapshots");
-		SynchronousTestCallback<BatchedResult<XReadableModel>[]> callback = new SynchronousTestCallback<BatchedResult<XReadableModel>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<XReadableModel>[]> callback = new SynchronousCallbackWithOneResult<BatchedResult<XReadableModel>[]>();
 		
 		this.store.getModelSnapshots(this.correctUser, this.correctUserPass, this.modelAddresses,
 		        callback);
@@ -699,9 +699,9 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 			return;
 		}
 		
-		SynchronousTestCallback<BatchedResult<XReadableModel>[]> callback;
+		SynchronousCallbackWithOneResult<BatchedResult<XReadableModel>[]> callback;
 		
-		callback = new SynchronousTestCallback<BatchedResult<XReadableModel>[]>();
+		callback = new SynchronousCallbackWithOneResult<BatchedResult<XReadableModel>[]>();
 		
 		this.store.getModelSnapshots(this.incorrectUser, this.incorrectUserPass,
 		        this.modelAddresses, callback);
@@ -715,7 +715,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	// Test if it behaves correctly for mixes of the cases above
 	@Test
 	public void testGetModelSnapshotsMixedAddressTypes() {
-		SynchronousTestCallback<BatchedResult<XReadableModel>[]> callback = new SynchronousTestCallback<BatchedResult<XReadableModel>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<XReadableModel>[]> callback = new SynchronousCallbackWithOneResult<BatchedResult<XReadableModel>[]>();
 		XAddress[] tempArray = new XAddress[this.modelAddresses.length + 1];
 		System.arraycopy(this.modelAddresses, 0, tempArray, 0, this.modelAddresses.length);
 		tempArray[this.modelAddresses.length] = this.notExistingModel;
@@ -749,7 +749,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	// exist
 	@Test
 	public void testGetModelSnapshotsNotExistingModel() {
-		SynchronousTestCallback<BatchedResult<XReadableModel>[]> callback = new SynchronousTestCallback<BatchedResult<XReadableModel>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<XReadableModel>[]> callback = new SynchronousCallbackWithOneResult<BatchedResult<XReadableModel>[]>();
 		XAddress[] tempArray = new XAddress[] { this.notExistingModel };
 		
 		this.store.getModelSnapshots(this.correctUser, this.correctUserPass, tempArray, callback);
@@ -766,7 +766,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	// Test if IllegalArgumentException are thrown when null values are passed
 	@Test
 	public void testGetModelSnapshotsPassingNull() {
-		SynchronousTestCallback<BatchedResult<XReadableModel>[]> callback = new SynchronousTestCallback<BatchedResult<XReadableModel>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<XReadableModel>[]> callback = new SynchronousCallbackWithOneResult<BatchedResult<XReadableModel>[]>();
 		
 		// first parameter equals null
 		try {
@@ -777,7 +777,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		}
 		
 		// second parameter equals null
-		callback = new SynchronousTestCallback<BatchedResult<XReadableModel>[]>();
+		callback = new SynchronousCallbackWithOneResult<BatchedResult<XReadableModel>[]>();
 		
 		try {
 			this.store.getModelSnapshots(this.correctUser, null, this.modelAddresses, callback);
@@ -787,7 +787,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		}
 		
 		// third parameter equals null
-		callback = new SynchronousTestCallback<BatchedResult<XReadableModel>[]>();
+		callback = new SynchronousCallbackWithOneResult<BatchedResult<XReadableModel>[]>();
 		
 		try {
 			this.store.getModelSnapshots(this.correctUser, this.correctUserPass, null, callback);
@@ -797,7 +797,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		}
 		
 		// all parameters equal null
-		callback = new SynchronousTestCallback<BatchedResult<XReadableModel>[]>();
+		callback = new SynchronousCallbackWithOneResult<BatchedResult<XReadableModel>[]>();
 		
 		try {
 			this.store.getModelSnapshots(null, null, null, callback);
@@ -827,7 +827,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	// Test if it behaves correctly for addresses that do not address an XModel
 	@Test
 	public void testGetModelSnapshotsWrongAddress() {
-		SynchronousTestCallback<BatchedResult<XReadableModel>[]> callback = new SynchronousTestCallback<BatchedResult<XReadableModel>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<XReadableModel>[]> callback = new SynchronousCallbackWithOneResult<BatchedResult<XReadableModel>[]>();
 		
 		this.store.getModelSnapshots(this.correctUser, this.correctUserPass, this.objectAddresses,
 		        callback);
@@ -848,7 +848,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	// access to
 	@Test
 	public void testGetObjectSnapshots() {
-		SynchronousTestCallback<BatchedResult<XReadableObject>[]> callback = new SynchronousTestCallback<BatchedResult<XReadableObject>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<XReadableObject>[]> callback = new SynchronousCallbackWithOneResult<BatchedResult<XReadableObject>[]>();
 		
 		this.store.getObjectSnapshots(this.correctUser, this.correctUserPass, this.objectAddresses,
 		        callback);
@@ -882,11 +882,11 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 			return;
 		}
 		
-		SynchronousTestCallback<BatchedResult<XReadableObject>[]> callback;
+		SynchronousCallbackWithOneResult<BatchedResult<XReadableObject>[]> callback;
 		
 		// Test if it behaves correctly for wrong account + password
 		// combinations
-		callback = new SynchronousTestCallback<BatchedResult<XReadableObject>[]>();
+		callback = new SynchronousCallbackWithOneResult<BatchedResult<XReadableObject>[]>();
 		
 		this.store.getObjectSnapshots(this.incorrectUser, this.incorrectUserPass,
 		        this.objectAddresses, callback);
@@ -900,7 +900,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	// Test if it behaves correctly for mixes of the cases above
 	@Test
 	public void testGetObjectSnapshotsMixedAddresses() {
-		SynchronousTestCallback<BatchedResult<XReadableObject>[]> callback = new SynchronousTestCallback<BatchedResult<XReadableObject>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<XReadableObject>[]> callback = new SynchronousCallbackWithOneResult<BatchedResult<XReadableObject>[]>();
 		XAddress[] tempArray = new XAddress[this.objectAddresses.length + 1];
 		System.arraycopy(this.objectAddresses, 0, tempArray, 0, this.objectAddresses.length);
 		tempArray[this.objectAddresses.length] = this.notExistingObject;
@@ -935,7 +935,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	// exist
 	@Test
 	public void testGetObjectSnapshotsNotExistingObject() {
-		SynchronousTestCallback<BatchedResult<XReadableObject>[]> callback = new SynchronousTestCallback<BatchedResult<XReadableObject>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<XReadableObject>[]> callback = new SynchronousCallbackWithOneResult<BatchedResult<XReadableObject>[]>();
 		XAddress[] tempArray = new XAddress[] { this.notExistingObject };
 		
 		this.store.getObjectSnapshots(this.correctUser, this.correctUserPass, tempArray, callback);
@@ -952,7 +952,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	// Test IllegalArgumentException
 	@Test
 	public void testGetObjectSnapshotsPassingNull() {
-		SynchronousTestCallback<BatchedResult<XReadableObject>[]> callback = new SynchronousTestCallback<BatchedResult<XReadableObject>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<XReadableObject>[]> callback = new SynchronousCallbackWithOneResult<BatchedResult<XReadableObject>[]>();
 		
 		// first parameter equals null
 		try {
@@ -964,7 +964,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		}
 		
 		// second parameter equals null
-		callback = new SynchronousTestCallback<BatchedResult<XReadableObject>[]>();
+		callback = new SynchronousCallbackWithOneResult<BatchedResult<XReadableObject>[]>();
 		
 		try {
 			this.store.getObjectSnapshots(this.correctUser, null, this.objectAddresses, callback);
@@ -974,7 +974,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		}
 		
 		// third parameter equals null
-		callback = new SynchronousTestCallback<BatchedResult<XReadableObject>[]>();
+		callback = new SynchronousCallbackWithOneResult<BatchedResult<XReadableObject>[]>();
 		
 		try {
 			this.store.getObjectSnapshots(this.correctUser, this.correctUserPass, null, callback);
@@ -984,7 +984,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		}
 		
 		// all parameters equal null
-		callback = new SynchronousTestCallback<BatchedResult<XReadableObject>[]>();
+		callback = new SynchronousCallbackWithOneResult<BatchedResult<XReadableObject>[]>();
 		
 		try {
 			this.store.getObjectSnapshots(null, null, null, callback);
@@ -1014,7 +1014,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	// Test if it behaves correctly for addresses that do not address an XObject
 	@Test
 	public void testGetObjectSnapshotsWrongAddress() {
-		SynchronousTestCallback<BatchedResult<XReadableObject>[]> callback = new SynchronousTestCallback<BatchedResult<XReadableObject>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<XReadableObject>[]> callback = new SynchronousCallbackWithOneResult<BatchedResult<XReadableObject>[]>();
 		
 		this.store.getObjectSnapshots(this.correctUser, this.correctUserPass, this.modelAddresses,
 		        callback);
@@ -1043,7 +1043,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		XID correctUser = this.getCorrectUser();
 		String correctUserPass = this.getCorrectUserPasswordHash();
 		
-		SynchronousTestCallback<XID> callback = new SynchronousTestCallback<XID>();
+		SynchronousCallbackWithOneResult<XID> callback = new SynchronousCallbackWithOneResult<XID>();
 		
 		this.store.getRepositoryId(correctUser, correctUserPass, callback);
 		
@@ -1063,7 +1063,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 			return;
 		}
 		
-		SynchronousTestCallback<XID> callback = new SynchronousTestCallback<XID>();
+		SynchronousCallbackWithOneResult<XID> callback = new SynchronousCallbackWithOneResult<XID>();
 		
 		this.store.getRepositoryId(this.incorrectUser, this.incorrectUserPass, callback);
 		
@@ -1076,7 +1076,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	// Test IllegalArgumentException
 	@Test
 	public void testGetRepositoryIdPassingNull() {
-		SynchronousTestCallback<XID> callback = new SynchronousTestCallback<XID>();
+		SynchronousCallbackWithOneResult<XID> callback = new SynchronousCallbackWithOneResult<XID>();
 		
 		// first parameter equals null
 		try {
@@ -1087,7 +1087,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		}
 		
 		// second parameter equals null
-		callback = new SynchronousTestCallback<XID>();
+		callback = new SynchronousCallbackWithOneResult<XID>();
 		
 		try {
 			this.store.getRepositoryId(this.correctUser, null, callback);
@@ -1097,7 +1097,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		}
 		
 		// all parameters equal null
-		callback = new SynchronousTestCallback<XID>();
+		callback = new SynchronousCallbackWithOneResult<XID>();
 		
 		try {
 			this.store.getRepositoryId(null, null, callback);

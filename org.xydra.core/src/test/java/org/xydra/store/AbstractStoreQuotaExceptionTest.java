@@ -123,12 +123,12 @@ public abstract class AbstractStoreQuotaExceptionTest {
 	 * @return True, if the method which the callback was passed to succeeded,
 	 *         false if it failed or some kind of error occurred
 	 */
-	protected boolean waitOnCallback(SynchronousTestCallback<?> callback) {
+	protected boolean waitOnCallback(SynchronousCallbackWithOneResult<?> callback) {
 		int value = callback.waitOnCallback(this.getCallbackTimeout());
-		if(value == SynchronousTestCallback.UNKNOWN_ERROR) {
+		if(value == SynchronousCallbackWithOneResult.UNKNOWN_ERROR) {
 			throw new RuntimeException("Unknown Error occurred");
 		}
-		if(value == SynchronousTestCallback.TIMEOUT) {
+		if(value == SynchronousCallbackWithOneResult.TIMEOUT) {
 			throw new RuntimeException("Timeout occurred");
 		}
 		if(callback.failure == callback.success) {
@@ -136,7 +136,7 @@ public abstract class AbstractStoreQuotaExceptionTest {
 			        "Either both onSuccess and onFailure or neither of these two methods were called");
 		}
 		
-		return value == SynchronousTestCallback.SUCCESS;
+		return value == SynchronousCallbackWithOneResult.SUCCESS;
 	}
 	
 	@Before
@@ -156,12 +156,12 @@ public abstract class AbstractStoreQuotaExceptionTest {
 	// Test for checking if the QuoateException works for checkLogin
 	@Test
 	public void testCheckLoginQuotaException() {
-		SynchronousTestCallback<Boolean> callback = null;
+		SynchronousCallbackWithOneResult<Boolean> callback = null;
 		
 		assert this.bfQuota > 0;
 		// Testing the quota exception
 		for(long l = 0; l < this.bfQuota + 1; l++) {
-			callback = new SynchronousTestCallback<Boolean>();
+			callback = new SynchronousCallbackWithOneResult<Boolean>();
 			
 			this.store.checkLogin(this.incorrectUser, this.incorrectUserPass, callback);
 			
@@ -186,12 +186,12 @@ public abstract class AbstractStoreQuotaExceptionTest {
 	// Testing the quota exception for getModelIds
 	@Test
 	public void testGetModelIdsQuotaException() {
-		SynchronousTestCallback<Set<XID>> callback = null;
+		SynchronousCallbackWithOneResult<Set<XID>> callback = null;
 		
 		assert this.bfQuota > 0;
 		boolean foundQuotaException = false;
 		for(long l = 0; l < this.bfQuota + 1; l++) {
-			callback = new SynchronousTestCallback<Set<XID>>();
+			callback = new SynchronousCallbackWithOneResult<Set<XID>>();
 			
 			log.info("logging in with wrong credentials " + l + " ...");
 			this.store.getModelIds(this.incorrectUser, this.incorrectUserPass, callback);
@@ -219,12 +219,12 @@ public abstract class AbstractStoreQuotaExceptionTest {
 	// Testing the quota exception for getModelRevisions
 	@Test
 	public void testGetModelRevisionsQuotaException() {
-		SynchronousTestCallback<BatchedResult<ModelRevision>[]> callback = null;
+		SynchronousCallbackWithOneResult<BatchedResult<ModelRevision>[]> callback = null;
 		XAddress[] tempArray = { XX.toAddress(XX.createUniqueId(), XX.createUniqueId(), null, null) };
 		
 		assert this.bfQuota > 0;
 		for(long l = 0; l < this.bfQuota + 1; l++) {
-			callback = new SynchronousTestCallback<BatchedResult<ModelRevision>[]>();
+			callback = new SynchronousCallbackWithOneResult<BatchedResult<ModelRevision>[]>();
 			
 			this.store.getModelRevisions(this.incorrectUser, this.incorrectUserPass, tempArray,
 			        callback);
@@ -250,13 +250,13 @@ public abstract class AbstractStoreQuotaExceptionTest {
 	// Testing the quota exception for getModelSnapshots
 	@Test
 	public void testGetModelSnapshotsQuotaExcpetion() {
-		SynchronousTestCallback<BatchedResult<XReadableModel>[]> callback = null;
+		SynchronousCallbackWithOneResult<BatchedResult<XReadableModel>[]> callback = null;
 		XAddress[] tempArray = new XAddress[] { XX.toAddress(XX.createUniqueId(),
 		        XX.createUniqueId(), null, null) };
 		
 		assert this.bfQuota > 0;
 		for(long l = 0; l < this.bfQuota + 1; l++) {
-			callback = new SynchronousTestCallback<BatchedResult<XReadableModel>[]>();
+			callback = new SynchronousCallbackWithOneResult<BatchedResult<XReadableModel>[]>();
 			
 			this.store.getModelSnapshots(this.incorrectUser, this.incorrectUserPass, tempArray,
 			        callback);
@@ -282,13 +282,13 @@ public abstract class AbstractStoreQuotaExceptionTest {
 	// Testing the quota exception for getObjectSnapshots
 	@Test
 	public void testGetObjectSnapshotsQuotaException() {
-		SynchronousTestCallback<BatchedResult<XReadableObject>[]> callback = null;
+		SynchronousCallbackWithOneResult<BatchedResult<XReadableObject>[]> callback = null;
 		XAddress[] tempArray = new XAddress[] { XX.toAddress(XX.createUniqueId(),
 		        XX.createUniqueId(), XX.createUniqueId(), null) };
 		
 		assert this.bfQuota > 0;
 		for(long l = 0; l < this.bfQuota + 1; l++) {
-			callback = new SynchronousTestCallback<BatchedResult<XReadableObject>[]>();
+			callback = new SynchronousCallbackWithOneResult<BatchedResult<XReadableObject>[]>();
 			
 			this.store.getObjectSnapshots(this.incorrectUser, this.incorrectUserPass, tempArray,
 			        callback);
@@ -315,11 +315,11 @@ public abstract class AbstractStoreQuotaExceptionTest {
 	// Testing the quota exception for getRepositoryId
 	@Test
 	public void testGetRepositoryIdQuotaException() {
-		SynchronousTestCallback<XID> callback = null;
+		SynchronousCallbackWithOneResult<XID> callback = null;
 		
 		assert this.bfQuota > 0;
 		for(long l = 0; l < this.bfQuota + 1; l++) {
-			callback = new SynchronousTestCallback<XID>();
+			callback = new SynchronousCallbackWithOneResult<XID>();
 			
 			this.store.getRepositoryId(this.incorrectUser, this.incorrectUserPass, callback);
 			
@@ -344,11 +344,11 @@ public abstract class AbstractStoreQuotaExceptionTest {
 	// Testing the quota exception for executeCommands
 	@Test
 	public void testExecuteCommandsQuotaException() {
-		SynchronousTestCallback<BatchedResult<Long>[]> callback = null;
+		SynchronousCallbackWithOneResult<BatchedResult<Long>[]> callback = null;
 		
 		assert this.bfQuota > 0;
 		for(long l = 0; l < this.bfQuota + 1; l++) {
-			callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+			callback = new SynchronousCallbackWithOneResult<BatchedResult<Long>[]>();
 			XCommand[] commands = new XCommand[] { this.getCommandFactory().createAddModelCommand(
 			        XX.toId("data"), XX.createUniqueId(), true) };
 			
@@ -379,11 +379,11 @@ public abstract class AbstractStoreQuotaExceptionTest {
 	// Testing the quota exception for executeCommandsAndGetEvents
 	@Test
 	public void testExecuteCommandsAndGetEventsQuotaException() {
-		SynchronousTestCallback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> callback = null;
+		SynchronousCallbackWithOneResult<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> callback = null;
 		
 		assert this.bfQuota > 0;
 		for(long l = 0; l < this.bfQuota + 1; l++) {
-			callback = new SynchronousTestCallback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>>();
+			callback = new SynchronousCallbackWithOneResult<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>>();
 			XCommand[] commands = new XCommand[] { this.getCommandFactory().createAddModelCommand(
 			        XX.toId("data"), XX.createUniqueId(), true) };
 			GetEventsRequest[] requests = new GetEventsRequest[1];
@@ -412,11 +412,11 @@ public abstract class AbstractStoreQuotaExceptionTest {
 	// Testing the quota exception for executeCommandsAndGetEvents
 	@Test
 	public void testGetEventsQuotaException() {
-		SynchronousTestCallback<BatchedResult<XEvent[]>[]> callback = null;
+		SynchronousCallbackWithOneResult<BatchedResult<XEvent[]>[]> callback = null;
 		
 		assert this.bfQuota > 0;
 		for(long l = 0; l < this.bfQuota + 1; l++) {
-			callback = new SynchronousTestCallback<BatchedResult<XEvent[]>[]>();
+			callback = new SynchronousCallbackWithOneResult<BatchedResult<XEvent[]>[]>();
 			GetEventsRequest[] requests = new GetEventsRequest[1];
 			
 			this.store.getEvents(this.incorrectUser, this.incorrectUserPass, requests, callback);

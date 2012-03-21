@@ -148,6 +148,8 @@ public class SerializedEvent {
 	/**
 	 * Get the {@link XEvent} represented by the given XML/JSON element.
 	 * 
+	 * @param element
+	 * 
 	 * @param context The {@link XID XIDs} of the repository, model, object and
 	 *            field to fill in if not specified in the XML/JSON. If the
 	 *            given element represents a transaction, the context for the
@@ -169,6 +171,8 @@ public class SerializedEvent {
 	
 	/**
 	 * Get the {@link XEvent} list represented by the given XML/JSON element.
+	 * 
+	 * @param element
 	 * 
 	 * @param context The {@link XID XIDs} of the repository, model, object and
 	 *            field to fill in if not specified in the XML/JSON. The context
@@ -455,6 +459,7 @@ public class SerializedEvent {
 	 * @param out The XML/JSON encoder to write to.
 	 * @param context The part of this event's target address that doesn't need
 	 *            to be encoded in the element.
+	 * @throws IllegalArgumentException
 	 */
 	public static void serialize(Iterator<XEvent> events, XydraOut out, XAddress context)
 	        throws IllegalArgumentException {
@@ -479,6 +484,7 @@ public class SerializedEvent {
 	 * @param out The XML/JSON encoder to write to.
 	 * @param context The part of this event's target address that doesn't need
 	 *            to be encoded in the element.
+	 * @throws IllegalArgumentException
 	 */
 	public static void serialize(XEvent event, XydraOut out, XAddress context)
 	        throws IllegalArgumentException {

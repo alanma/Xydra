@@ -75,6 +75,8 @@ public class JsonParserSAJ {
 	 * Back up one character. This provides a sort of lookahead capability, so
 	 * that you can test for a digit or letter before attempting to parse the
 	 * next number or identifier.
+	 * 
+	 * @throws JSONException
 	 */
 	public void back() throws JSONException {
 		if(this.useLastChar || this.index <= 0) {
@@ -109,6 +111,7 @@ public class JsonParserSAJ {
 	 * consume.
 	 * 
 	 * @return true if not yet at the end of the source.
+	 * @throws JSONException
 	 */
 	public boolean more() throws JSONException {
 		char nextChar = next();
@@ -287,6 +290,7 @@ public class JsonParserSAJ {
 	 * 
 	 * @param d A delimiter character.
 	 * @return A string.
+	 * @throws JSONException
 	 */
 	public String nextTo(char d) throws JSONException {
 		StringBuffer sb = new StringBuffer();
@@ -308,6 +312,7 @@ public class JsonParserSAJ {
 	 * 
 	 * @param delimiters A set of delimiter characters.
 	 * @return A string, trimmed.
+	 * @throws JSONException
 	 */
 	public String nextTo(String delimiters) throws JSONException {
 		char c;
@@ -396,7 +401,7 @@ public class JsonParserSAJ {
 			/*
 			 * The key is followed by ':'. We will also tolerate '=' or '=>'.
 			 */
-
+			
 			c = nextClean();
 			if(c == '=') {
 				if(next() != '>') {
@@ -410,7 +415,7 @@ public class JsonParserSAJ {
 			/*
 			 * Pairs are separated by ','. We will also tolerate ';'.
 			 */
-
+			
 			switch(nextClean()) {
 			case ';':
 			case ',':
@@ -478,7 +483,7 @@ public class JsonParserSAJ {
 		 * Accumulate characters until we reach the end of the text or a
 		 * formatting character.
 		 */
-
+		
 		StringBuffer sb = new StringBuffer();
 		while(c >= ' ' && ",:]}/\\\"[{;=#".indexOf(c) < 0) {
 			sb.append(c);
@@ -519,7 +524,7 @@ public class JsonParserSAJ {
 			 * accept non-JSON forms as long as it accepts all correct JSON
 			 * forms.
 			 */
-
+			
 			char b = s.charAt(0);
 			if((b >= '0' && b <= '9') || b == '.' || b == '-' || b == '+') {
 				if(b == '0') {
@@ -571,6 +576,7 @@ public class JsonParserSAJ {
 	 * @param to A character to skip to.
 	 * @return The requested character, or zero if the requested character is
 	 *         not found.
+	 * @throws JSONException
 	 */
 	public char skipTo(char to) throws JSONException {
 		char c;

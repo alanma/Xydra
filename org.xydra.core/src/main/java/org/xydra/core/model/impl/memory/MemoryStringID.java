@@ -55,13 +55,8 @@ public class MemoryStringID implements XID, Serializable {
 	}
 	
 	@Override
-	public int hashCode() {
-		return this.string.hashCode();
-	}
-	
-	@Override
-	public String toString() {
-		return this.string;
+	public XID getID() {
+		return this;
 	}
 	
 	@Override
@@ -75,8 +70,13 @@ public class MemoryStringID implements XID, Serializable {
 	}
 	
 	@Override
-	public XID getID() {
-		return this;
+	public int hashCode() {
+		return this.string.hashCode();
+	}
+	
+	@Override
+	public String toString() {
+		return this.string;
 	}
 	
 }

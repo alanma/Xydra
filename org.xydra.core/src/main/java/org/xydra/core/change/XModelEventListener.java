@@ -15,6 +15,8 @@ public interface XModelEventListener {
 	/**
 	 * Invoked when an {@link XModelEvent} occurs on the entity this listener is
 	 * registered on.
+	 * 
+	 * @param event
 	 */
 	void onChangeEvent(XModelEvent event);
 }

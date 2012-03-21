@@ -32,6 +32,7 @@ public interface SAJ {
 	 * Only legal within 'objectStart' and 'objectEnd'
 	 * 
 	 * @param key
+	 * @throws JSONException
 	 */
 	void onKey(String key) throws JSONException;
 }

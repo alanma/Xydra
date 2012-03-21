@@ -24,9 +24,9 @@ import org.xydra.store.Callback;
 import org.xydra.store.ConnectionException;
 import org.xydra.store.GetEventsRequest;
 import org.xydra.store.InternalStoreException;
+import org.xydra.store.ModelRevision;
 import org.xydra.store.QuotaException;
 import org.xydra.store.RequestException;
-import org.xydra.store.ModelRevision;
 import org.xydra.store.TimeoutException;
 import org.xydra.store.XydraStore;
 import org.xydra.store.XydraStoreAdmin;
@@ -113,6 +113,7 @@ public interface XydraBlockingStore {
 	 *             might also be thrown if there is in fact a
 	 *             {@link ConnectionException}. They are not easy to
 	 *             distinguish.
+	 * @throws RequestException
 	 * @throws InternalStoreException if the implementation encounters another
 	 *             problem, typically caused by the hosting platform, i.e. an
 	 *             I/O error.

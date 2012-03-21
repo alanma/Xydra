@@ -132,12 +132,12 @@ public abstract class AbstractStoreTest {
 	 * @return True, if the method which the callback was passed to succeeded,
 	 *         false if it failed or some kind of error occurred
 	 */
-	protected boolean waitOnCallback(SynchronousTestCallback<?> callback) {
+	protected boolean waitOnCallback(SynchronousCallbackWithOneResult<?> callback) {
 		int value = callback.waitOnCallback(this.getCallbackTimeout());
-		if(value == SynchronousTestCallback.UNKNOWN_ERROR) {
+		if(value == SynchronousCallbackWithOneResult.UNKNOWN_ERROR) {
 			throw new RuntimeException("Unknown Error occurred");
 		}
-		if(value == SynchronousTestCallback.TIMEOUT) {
+		if(value == SynchronousCallbackWithOneResult.TIMEOUT) {
 			throw new RuntimeException("Timeout occurred");
 		}
 		if(callback.failure == callback.success) {
@@ -145,7 +145,7 @@ public abstract class AbstractStoreTest {
 			        "Either both onSuccess and onFailure or neither of these two methods were called");
 		}
 		
-		return value == SynchronousTestCallback.SUCCESS;
+		return value == SynchronousCallbackWithOneResult.SUCCESS;
 	}
 	
 }

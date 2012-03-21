@@ -19,6 +19,8 @@ public interface XFieldEventListener {
 	/**
 	 * Invoked when an {@link XFieldEvent} occurs on the entity this listener is
 	 * registered on.
+	 * 
+	 * @param event
 	 */
 	void onChangeEvent(XFieldEvent event);
 }

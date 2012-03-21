@@ -26,6 +26,9 @@ import org.xydra.store.impl.delegate.XydraPersistence;
  */
 public class PersistenceOnStore implements XydraPersistence {
 	
+	/** Default wait time for callback */
+	private static final int WAIT_TIMEOUT = 2000;
+	
 	public PersistenceOnStore(XID actorId, String passwordHash, XydraStore store) {
 		super();
 		this.actorId = actorId;
@@ -56,79 +59,96 @@ public class PersistenceOnStore implements XydraPersistence {
 	
 	@Override
 	public long executeCommand(XID actorId, XCommand command) {
-		SynchronousTestCallback<BatchedResult<Long>[]> callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<Long>[]> callback = new SynchronousCallbackWithOneResult<BatchedResult<Long>[]>();
 		this.store
 		        .executeCommands(actorId, this.passwordHash, new XCommand[] { command }, callback);
-		Throwable e = callback.getException();
-		if(e != null) {
-			throw new RuntimeException(e);
-		}
-		assert callback.getEffect().length == 1;
-		e = callback.getEffect()[0].getException();
-		if(e != null) {
-			throw new RuntimeException(e);
+		callback.waitOnCallbackAndThrowExceptionForProblems(WAIT_TIMEOUT);
+		{
+			Throwable e = callback.getException();
+			if(e != null) {
+				throw new StoreException("Callback returned an error", e);
+			}
+			assert callback.getEffect().length == 1;
+			e = callback.getEffect()[0].getException();
+			if(e != null) {
+				throw new StoreException("Callback effect[0] returned an error", e);
+			}
 		}
 		return callback.getEffect()[0].getResult();
 	}
 	
 	@Override
 	public List<XEvent> getEvents(XAddress address, long beginRevision, long endRevision) {
-		SynchronousTestCallback<BatchedResult<XEvent[]>[]> callback = new SynchronousTestCallback<BatchedResult<XEvent[]>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<XEvent[]>[]> callback = new SynchronousCallbackWithOneResult<BatchedResult<XEvent[]>[]>();
 		GetEventsRequest ger = new GetEventsRequest(address, beginRevision, endRevision);
 		this.store.getEvents(this.actorId, this.passwordHash, new GetEventsRequest[] { ger },
 		        callback);
-		Throwable e = callback.getException();
-		if(e != null) {
-			throw new RuntimeException(e);
+		callback.waitOnCallbackAndThrowExceptionForProblems(WAIT_TIMEOUT);
+		{
+			Throwable e = callback.getException();
+			if(e != null) {
+				throw new StoreException("Callback returned an error", e);
+			}
+			assert callback.getEffect().length == 1;
+			e = callback.getEffect()[0].getException();
+			if(e != null) {
+				throw new StoreException("Callback effect[0] returned an error", e);
+			}
 		}
-		assert callback.getEffect().length == 1;
-		e = callback.getEffect()[0].getException();
-		if(e != null) {
-			throw new RuntimeException(e);
-		}
+		
 		return Arrays.asList(callback.getEffect()[0].getResult());
 	}
 	
 	@Override
 	public Set<XID> getManagedModelIds() {
-		SynchronousTestCallback<Set<XID>> callback = new SynchronousTestCallback<Set<XID>>();
+		SynchronousCallbackWithOneResult<Set<XID>> callback = new SynchronousCallbackWithOneResult<Set<XID>>();
 		this.store.getModelIds(this.actorId, this.passwordHash, callback);
-		if(callback.getException() != null) {
-			throw new RuntimeException(callback.getException());
+		callback.waitOnCallbackAndThrowExceptionForProblems(WAIT_TIMEOUT);
+		{
+			Throwable e = callback.getException();
+			if(e != null) {
+				throw new StoreException("Callback returned an error", e);
+			}
 		}
 		return callback.getEffect();
 	}
 	
 	@Override
 	public ModelRevision getModelRevision(XAddress address) {
-		SynchronousTestCallback<BatchedResult<ModelRevision>[]> callback = new SynchronousTestCallback<BatchedResult<ModelRevision>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<ModelRevision>[]> callback = new SynchronousCallbackWithOneResult<BatchedResult<ModelRevision>[]>();
 		this.store.getModelRevisions(this.actorId, this.passwordHash, new XAddress[] { address },
 		        callback);
-		Throwable e = callback.getException();
-		if(e != null) {
-			throw new RuntimeException(e);
-		}
-		assert callback.getEffect().length == 1;
-		e = callback.getEffect()[0].getException();
-		if(e != null) {
-			throw new RuntimeException(e);
+		callback.waitOnCallbackAndThrowExceptionForProblems(WAIT_TIMEOUT);
+		{
+			Throwable e = callback.getException();
+			if(e != null) {
+				throw new StoreException("Callback returned an error", e);
+			}
+			assert callback.getEffect().length == 1;
+			e = callback.getEffect()[0].getException();
+			if(e != null) {
+				throw new StoreException("Callback effect[0] returned an error", e);
+			}
 		}
 		return callback.getEffect()[0].getResult();
 	}
 	
 	@Override
 	public XWritableModel getModelSnapshot(XAddress address) {
-		SynchronousTestCallback<BatchedResult<XReadableModel>[]> callback = new SynchronousTestCallback<BatchedResult<XReadableModel>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<XReadableModel>[]> callback = new SynchronousCallbackWithOneResult<BatchedResult<XReadableModel>[]>();
 		this.store.getModelSnapshots(this.actorId, this.passwordHash, new XAddress[] { address },
 		        callback);
-		Throwable e = callback.getException();
-		if(e != null) {
-			throw new RuntimeException(e);
-		}
-		assert callback.getEffect().length == 1;
-		e = callback.getEffect()[0].getException();
-		if(e != null) {
-			throw new RuntimeException(e);
+		callback.waitOnCallbackAndThrowExceptionForProblems(WAIT_TIMEOUT);
+		{
+			Throwable e = callback.getException();
+			if(e != null) {
+				throw new StoreException("Callback returned an error", e);
+			}
+			assert callback.getEffect().length == 1;
+			e = callback.getEffect()[0].getException();
+			if(e != null) {
+				throw new StoreException("Callback effect[0] returned an error", e);
+			}
 		}
 		XReadableModel readableModel = callback.getEffect()[0].getResult();
 		return XCopyUtils.createSnapshot(readableModel);
@@ -136,17 +156,20 @@ public class PersistenceOnStore implements XydraPersistence {
 	
 	@Override
 	public XWritableObject getObjectSnapshot(XAddress address) {
-		SynchronousTestCallback<BatchedResult<XReadableObject>[]> callback = new SynchronousTestCallback<BatchedResult<XReadableObject>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<XReadableObject>[]> callback = new SynchronousCallbackWithOneResult<BatchedResult<XReadableObject>[]>();
 		this.store.getObjectSnapshots(this.actorId, this.passwordHash, new XAddress[] { address },
 		        callback);
-		Throwable e = callback.getException();
-		if(e != null) {
-			throw new RuntimeException(e);
-		}
-		assert callback.getEffect().length == 1;
-		e = callback.getEffect()[0].getException();
-		if(e != null) {
-			throw new RuntimeException(e);
+		callback.waitOnCallbackAndThrowExceptionForProblems(WAIT_TIMEOUT);
+		{
+			Throwable e = callback.getException();
+			if(e != null) {
+				throw new StoreException("Callback returned an error", e);
+			}
+			assert callback.getEffect().length == 1;
+			e = callback.getEffect()[0].getException();
+			if(e != null) {
+				throw new StoreException("Callback effect[0] returned an error", e);
+			}
 		}
 		XReadableObject readableObject = callback.getEffect()[0].getResult();
 		return XCopyUtils.createSnapshot(readableObject);
@@ -155,13 +178,16 @@ public class PersistenceOnStore implements XydraPersistence {
 	@Override
 	public XID getRepositoryId() {
 		if(this.repositoryId == null) {
-			SynchronousTestCallback<XID> callback = new SynchronousTestCallback<XID>();
+			SynchronousCallbackWithOneResult<XID> callback = new SynchronousCallbackWithOneResult<XID>();
 			this.store.getRepositoryId(this.actorId, this.passwordHash, callback);
-			if(callback.getException() != null) {
-				throw new RuntimeException(callback.getException());
+			callback.waitOnCallbackAndThrowExceptionForProblems(WAIT_TIMEOUT);
+			{
+				Throwable e = callback.getException();
+				if(e != null) {
+					throw new StoreException("Callback returned an error", e);
+				}
 			}
 			this.repositoryId = callback.getEffect();
-			
 		}
 		return this.repositoryId;
 	}

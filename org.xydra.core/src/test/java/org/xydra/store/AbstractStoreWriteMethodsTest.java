@@ -116,9 +116,9 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 			return;
 		}
 		
-		SynchronousTestCallback<BatchedResult<Long>[]> callback;
+		SynchronousCallbackWithOneResult<BatchedResult<Long>[]> callback;
 		
-		callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		callback = new SynchronousCallbackWithOneResult<BatchedResult<Long>[]>();
 		
 		XCommand[] commands = new XCommand[] { X.getCommandFactory().createAddModelCommand(
 		        this.repoId, XX.createUniqueId(), true) };
@@ -146,7 +146,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		// FIXME check that the returned revision matches getModelRevisions
 		
 		// check if the model was created
-		SynchronousTestCallback<BatchedResult<XReadableModel>[]> callback2 = new SynchronousTestCallback<BatchedResult<XReadableModel>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<XReadableModel>[]> callback2 = new SynchronousCallbackWithOneResult<BatchedResult<XReadableModel>[]>();
 		XAddress[] modelAddress = new XAddress[] { XX.toAddress(this.repoId, modelId, null, null) };
 		
 		this.store.getModelSnapshots(this.correctUser, this.correctUserPass, modelAddress,
@@ -164,7 +164,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		        modelId, modelRev, true));
 		
 		// check if the model was removed
-		callback2 = new SynchronousTestCallback<BatchedResult<XReadableModel>[]>();
+		callback2 = new SynchronousCallbackWithOneResult<BatchedResult<XReadableModel>[]>();
 		modelAddress = new XAddress[] { XX.toAddress(this.repoId, modelId, null, null) };
 		
 		this.store.getModelSnapshots(this.correctUser, this.correctUserPass, modelAddress,
@@ -218,7 +218,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		long[] modelRevs = this.executeSucceedingCommands(commands);
 		
 		// check if the models were created
-		SynchronousTestCallback<BatchedResult<XReadableModel>[]> callback2 = new SynchronousTestCallback<BatchedResult<XReadableModel>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<XReadableModel>[]> callback2 = new SynchronousCallbackWithOneResult<BatchedResult<XReadableModel>[]>();
 		
 		XAddress[] modelAddresses = new XAddress[modelCount];
 		for(int i = 0; i < modelCount; i++) {
@@ -247,7 +247,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		this.executeSucceedingCommands(commands);
 		
 		// check if the models were removed
-		callback2 = new SynchronousTestCallback<BatchedResult<XReadableModel>[]>();
+		callback2 = new SynchronousCallbackWithOneResult<BatchedResult<XReadableModel>[]>();
 		
 		this.store.getModelSnapshots(this.correctUser, this.correctUserPass, modelAddresses,
 		        callback2);
@@ -313,7 +313,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		        objectId, true));
 		
 		// check if the object was created
-		SynchronousTestCallback<BatchedResult<XReadableObject>[]> callback3 = new SynchronousTestCallback<BatchedResult<XReadableObject>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<XReadableObject>[]> callback3 = new SynchronousCallbackWithOneResult<BatchedResult<XReadableObject>[]>();
 		XAddress[] objectAddress = new XAddress[] { XX.toAddress(this.repoId, modelId, objectId,
 		        null) };
 		
@@ -332,7 +332,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		        modelId, objectId, XCommand.FORCED, true));
 		
 		// check if the object was removed
-		callback3 = new SynchronousTestCallback<BatchedResult<XReadableObject>[]>();
+		callback3 = new SynchronousCallbackWithOneResult<BatchedResult<XReadableObject>[]>();
 		objectAddress = new XAddress[] { XX.toAddress(this.repoId, modelId, objectId, null) };
 		
 		this.store.getObjectSnapshots(this.correctUser, this.correctUserPass, objectAddress,
@@ -367,7 +367,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		long[] revs = this.executeSucceedingCommands(commands);
 		
 		// check if the objects were created
-		SynchronousTestCallback<BatchedResult<XReadableObject>[]> callback2 = new SynchronousTestCallback<BatchedResult<XReadableObject>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<XReadableObject>[]> callback2 = new SynchronousCallbackWithOneResult<BatchedResult<XReadableObject>[]>();
 		
 		XAddress[] objectAddresses = new XAddress[objectCount];
 		for(int i = 0; i < objectCount; i++) {
@@ -397,7 +397,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		this.executeSucceedingCommands(commands);
 		
 		// check if the object were removed
-		callback2 = new SynchronousTestCallback<BatchedResult<XReadableObject>[]>();
+		callback2 = new SynchronousCallbackWithOneResult<BatchedResult<XReadableObject>[]>();
 		
 		this.store.getObjectSnapshots(this.correctUser, this.correctUserPass, objectAddresses,
 		        callback2);
@@ -436,7 +436,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		        this.repoId, modelId, objectId, fieldId, true));
 		
 		// check if the field was created
-		SynchronousTestCallback<BatchedResult<XReadableObject>[]> callback2 = new SynchronousTestCallback<BatchedResult<XReadableObject>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<XReadableObject>[]> callback2 = new SynchronousCallbackWithOneResult<BatchedResult<XReadableObject>[]>();
 		XAddress[] objectAddress = new XAddress[] { XX.toAddress(this.repoId, modelId, objectId,
 		        null) };
 		
@@ -456,7 +456,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		        modelId, objectId, fieldId, revNr, true));
 		
 		// check if the field was removed
-		callback2 = new SynchronousTestCallback<BatchedResult<XReadableObject>[]>();
+		callback2 = new SynchronousCallbackWithOneResult<BatchedResult<XReadableObject>[]>();
 		objectAddress = new XAddress[] { XX.toAddress(this.repoId, modelId, objectId, null) };
 		
 		this.store.getObjectSnapshots(this.correctUser, this.correctUserPass, objectAddress,
@@ -532,7 +532,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		long[] revs = this.executeSucceedingCommands(commands);
 		
 		// check if the fields were created
-		SynchronousTestCallback<BatchedResult<XReadableObject>[]> callback2 = new SynchronousTestCallback<BatchedResult<XReadableObject>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<XReadableObject>[]> callback2 = new SynchronousCallbackWithOneResult<BatchedResult<XReadableObject>[]>();
 		
 		XAddress[] objectAddress = new XAddress[] { XX.toAddress(this.repoId, modelId, objectId,
 		        null) };
@@ -559,7 +559,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		this.executeSucceedingCommands(commands);
 		
 		// check if the fields were removed
-		callback2 = new SynchronousTestCallback<BatchedResult<XReadableObject>[]>();
+		callback2 = new SynchronousCallbackWithOneResult<BatchedResult<XReadableObject>[]>();
 		
 		this.store.getObjectSnapshots(this.correctUser, this.correctUserPass, objectAddress,
 		        callback2);
@@ -607,7 +607,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		revNr++;
 		
 		// check if the field was created
-		SynchronousTestCallback<BatchedResult<XReadableObject>[]> callback2 = new SynchronousTestCallback<BatchedResult<XReadableObject>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<XReadableObject>[]> callback2 = new SynchronousCallbackWithOneResult<BatchedResult<XReadableObject>[]>();
 		XAddress[] objectAddress = new XAddress[] { XX.toAddress(this.repoId, modelId, objectId,
 		        null) };
 		
@@ -633,7 +633,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		revNr++;
 		
 		// check if the value was changed
-		callback2 = new SynchronousTestCallback<BatchedResult<XReadableObject>[]>();
+		callback2 = new SynchronousCallbackWithOneResult<BatchedResult<XReadableObject>[]>();
 		objectAddress = new XAddress[] { XX.toAddress(this.repoId, modelId, objectId, null) };
 		
 		this.store.getObjectSnapshots(this.correctUser, this.correctUserPass, objectAddress,
@@ -657,7 +657,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		revNr++;
 		
 		// check if the value was removed
-		callback2 = new SynchronousTestCallback<BatchedResult<XReadableObject>[]>();
+		callback2 = new SynchronousCallbackWithOneResult<BatchedResult<XReadableObject>[]>();
 		objectAddress = new XAddress[] { XX.toAddress(this.repoId, modelId, objectId, null) };
 		
 		this.store.getObjectSnapshots(this.correctUser, this.correctUserPass, objectAddress,
@@ -727,9 +727,9 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 			return;
 		}
 		
-		SynchronousTestCallback<BatchedResult<XEvent[]>[]> callback;
+		SynchronousCallbackWithOneResult<BatchedResult<XEvent[]>[]> callback;
 		
-		callback = new SynchronousTestCallback<BatchedResult<XEvent[]>[]>();
+		callback = new SynchronousCallbackWithOneResult<BatchedResult<XEvent[]>[]>();
 		
 		GetEventsRequest[] requests = new GetEventsRequest[1];
 		
@@ -769,7 +769,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		 */
 		GetEventsRequest[] request = new GetEventsRequest[] { new GetEventsRequest(modelAddress,
 		        modelRev + 1, modelRev) };
-		SynchronousTestCallback<BatchedResult<XEvent[]>[]> callback = new SynchronousTestCallback<BatchedResult<XEvent[]>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<XEvent[]>[]> callback = new SynchronousCallbackWithOneResult<BatchedResult<XEvent[]>[]>();
 		this.store.getEvents(this.correctUser, this.correctUserPass, request, callback);
 		
 		assertTrue(this.waitOnCallback(callback));
@@ -787,7 +787,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		
 		GetEventsRequest[] request = new GetEventsRequest[] { new GetEventsRequest(randomAddress,
 		        0, 1) };
-		SynchronousTestCallback<BatchedResult<XEvent[]>[]> callback = new SynchronousTestCallback<BatchedResult<XEvent[]>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<XEvent[]>[]> callback = new SynchronousCallbackWithOneResult<BatchedResult<XEvent[]>[]>();
 		this.store.getEvents(this.correctUser, this.correctUserPass, request, callback);
 		
 		assertTrue(this.waitOnCallback(callback));
@@ -825,7 +825,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		
 		GetEventsRequest[] request = new GetEventsRequest[] { new GetEventsRequest(modelAddress,
 		        modelRev, modelRev) };
-		SynchronousTestCallback<BatchedResult<XEvent[]>[]> callback = new SynchronousTestCallback<BatchedResult<XEvent[]>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<XEvent[]>[]> callback = new SynchronousCallbackWithOneResult<BatchedResult<XEvent[]>[]>();
 		this.store.getEvents(this.correctUser, this.correctUserPass, request, callback);
 		
 		assertTrue(this.waitOnCallback(callback));
@@ -864,7 +864,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		// check if event was thrown
 		GetEventsRequest[] request = new GetEventsRequest[] { new GetEventsRequest(modelAddress,
 		        modelRev, modelRev) };
-		SynchronousTestCallback<BatchedResult<XEvent[]>[]> callback = new SynchronousTestCallback<BatchedResult<XEvent[]>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<XEvent[]>[]> callback = new SynchronousCallbackWithOneResult<BatchedResult<XEvent[]>[]>();
 		this.store.getEvents(this.correctUser, this.correctUserPass, request, callback);
 		
 		assertTrue(this.waitOnCallback(callback));
@@ -908,7 +908,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		// get the event
 		GetEventsRequest[] request = new GetEventsRequest[] { new GetEventsRequest(modelAddress,
 		        modelRev, modelRev) };
-		SynchronousTestCallback<BatchedResult<XEvent[]>[]> callback = new SynchronousTestCallback<BatchedResult<XEvent[]>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<XEvent[]>[]> callback = new SynchronousCallbackWithOneResult<BatchedResult<XEvent[]>[]>();
 		this.store.getEvents(this.correctUser, this.correctUserPass, request, callback);
 		
 		assertTrue(this.waitOnCallback(callback));
@@ -922,7 +922,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		
 		// get event from object
 		request = new GetEventsRequest[] { new GetEventsRequest(objectAddress, objectRev, objectRev) };
-		callback = new SynchronousTestCallback<BatchedResult<XEvent[]>[]>();
+		callback = new SynchronousCallbackWithOneResult<BatchedResult<XEvent[]>[]>();
 		this.store.getEvents(this.correctUser, this.correctUserPass, request, callback);
 		
 		assertTrue(this.waitOnCallback(callback));
@@ -967,7 +967,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		// get event from model first
 		GetEventsRequest[] request = new GetEventsRequest[] { new GetEventsRequest(modelAddress,
 		        modelRev, modelRev) };
-		SynchronousTestCallback<BatchedResult<XEvent[]>[]> callback = new SynchronousTestCallback<BatchedResult<XEvent[]>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<XEvent[]>[]> callback = new SynchronousCallbackWithOneResult<BatchedResult<XEvent[]>[]>();
 		this.store.getEvents(this.correctUser, this.correctUserPass, request, callback);
 		
 		assertTrue(this.waitOnCallback(callback));
@@ -981,7 +981,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		
 		// get event from object
 		request = new GetEventsRequest[] { new GetEventsRequest(objectAddress, objectRev, objectRev) };
-		callback = new SynchronousTestCallback<BatchedResult<XEvent[]>[]>();
+		callback = new SynchronousCallbackWithOneResult<BatchedResult<XEvent[]>[]>();
 		this.store.getEvents(this.correctUser, this.correctUserPass, request, callback);
 		
 		assertTrue(this.waitOnCallback(callback));
@@ -1031,7 +1031,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		// get event from model first
 		GetEventsRequest[] request = new GetEventsRequest[] { new GetEventsRequest(modelAddress,
 		        modelRev, modelRev) };
-		SynchronousTestCallback<BatchedResult<XEvent[]>[]> callback = new SynchronousTestCallback<BatchedResult<XEvent[]>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<XEvent[]>[]> callback = new SynchronousCallbackWithOneResult<BatchedResult<XEvent[]>[]>();
 		this.store.getEvents(this.correctUser, this.correctUserPass, request, callback);
 		
 		assertTrue(this.waitOnCallback(callback));
@@ -1047,7 +1047,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		
 		// get event from object
 		request = new GetEventsRequest[] { new GetEventsRequest(objectAddress, objectRev, objectRev) };
-		callback = new SynchronousTestCallback<BatchedResult<XEvent[]>[]>();
+		callback = new SynchronousCallbackWithOneResult<BatchedResult<XEvent[]>[]>();
 		this.store.getEvents(this.correctUser, this.correctUserPass, request, callback);
 		
 		assertTrue(this.waitOnCallback(callback));
@@ -1061,7 +1061,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		
 		// get event from field
 		request = new GetEventsRequest[] { new GetEventsRequest(fieldAddress, fieldRev, fieldRev) };
-		callback = new SynchronousTestCallback<BatchedResult<XEvent[]>[]>();
+		callback = new SynchronousCallbackWithOneResult<BatchedResult<XEvent[]>[]>();
 		this.store.getEvents(this.correctUser, this.correctUserPass, request, callback);
 		
 		assertTrue(this.waitOnCallback(callback));
@@ -1115,7 +1115,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		// get event from model first
 		GetEventsRequest[] request = new GetEventsRequest[] { new GetEventsRequest(modelAddress,
 		        modelRev, modelRev) };
-		SynchronousTestCallback<BatchedResult<XEvent[]>[]> callback = new SynchronousTestCallback<BatchedResult<XEvent[]>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<XEvent[]>[]> callback = new SynchronousCallbackWithOneResult<BatchedResult<XEvent[]>[]>();
 		this.store.getEvents(this.correctUser, this.correctUserPass, request, callback);
 		
 		assertTrue(this.waitOnCallback(callback));
@@ -1131,7 +1131,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		
 		// get event from object
 		request = new GetEventsRequest[] { new GetEventsRequest(objectAddress, objectRev, objectRev) };
-		callback = new SynchronousTestCallback<BatchedResult<XEvent[]>[]>();
+		callback = new SynchronousCallbackWithOneResult<BatchedResult<XEvent[]>[]>();
 		this.store.getEvents(this.correctUser, this.correctUserPass, request, callback);
 		
 		assertTrue(this.waitOnCallback(callback));
@@ -1145,7 +1145,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		
 		// get event from field
 		request = new GetEventsRequest[] { new GetEventsRequest(fieldAddress, fieldRev, fieldRev) };
-		callback = new SynchronousTestCallback<BatchedResult<XEvent[]>[]>();
+		callback = new SynchronousCallbackWithOneResult<BatchedResult<XEvent[]>[]>();
 		this.store.getEvents(this.correctUser, this.correctUserPass, request, callback);
 		
 		assertTrue(this.waitOnCallback(callback));
@@ -1199,7 +1199,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		// get event from model first
 		GetEventsRequest[] request = new GetEventsRequest[] { new GetEventsRequest(modelAddress,
 		        modelRev, modelRev) };
-		SynchronousTestCallback<BatchedResult<XEvent[]>[]> callback = new SynchronousTestCallback<BatchedResult<XEvent[]>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<XEvent[]>[]> callback = new SynchronousCallbackWithOneResult<BatchedResult<XEvent[]>[]>();
 		this.store.getEvents(this.correctUser, this.correctUserPass, request, callback);
 		
 		assertTrue(this.waitOnCallback(callback));
@@ -1215,7 +1215,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		
 		// get event from object
 		request = new GetEventsRequest[] { new GetEventsRequest(objectAddress, objectRev, objectRev) };
-		callback = new SynchronousTestCallback<BatchedResult<XEvent[]>[]>();
+		callback = new SynchronousCallbackWithOneResult<BatchedResult<XEvent[]>[]>();
 		this.store.getEvents(this.correctUser, this.correctUserPass, request, callback);
 		
 		assertTrue(this.waitOnCallback(callback));
@@ -1229,7 +1229,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		
 		// get event from field
 		request = new GetEventsRequest[] { new GetEventsRequest(fieldAddress, fieldRev, fieldRev) };
-		callback = new SynchronousTestCallback<BatchedResult<XEvent[]>[]>();
+		callback = new SynchronousCallbackWithOneResult<BatchedResult<XEvent[]>[]>();
 		this.store.getEvents(this.correctUser, this.correctUserPass, request, callback);
 		
 		assertTrue(this.waitOnCallback(callback));
@@ -1272,7 +1272,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		GetEventsRequest[] request = new GetEventsRequest[] { new GetEventsRequest(modelAddress,
 		        modelRev + 1, modelRev + 1) };
 		
-		SynchronousTestCallback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> callback = new SynchronousTestCallback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>>();
+		SynchronousCallbackWithOneResult<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> callback = new SynchronousCallbackWithOneResult<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>>();
 		
 		this.store.executeCommandsAndGetEvents(this.correctUser, this.correctUserPass, commands,
 		        request, callback);
@@ -1329,7 +1329,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		GetEventsRequest[] request = new GetEventsRequest[] { new GetEventsRequest(modelAddress,
 		        modelRev + 1, modelRev + 1) };
 		
-		SynchronousTestCallback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> callback = new SynchronousTestCallback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>>();
+		SynchronousCallbackWithOneResult<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> callback = new SynchronousCallbackWithOneResult<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>>();
 		
 		this.store.executeCommandsAndGetEvents(this.correctUser, this.correctUserPass, commands,
 		        request, callback);
@@ -1391,7 +1391,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		        new GetEventsRequest(modelAddress, modelRev + 1, modelRev + 1),
 		        new GetEventsRequest(objectAddress, objectRev + 1, objectRev + 1) };
 		
-		SynchronousTestCallback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> callback = new SynchronousTestCallback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>>();
+		SynchronousCallbackWithOneResult<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> callback = new SynchronousCallbackWithOneResult<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>>();
 		
 		this.store.executeCommandsAndGetEvents(this.correctUser, this.correctUserPass, commands,
 		        request, callback);
@@ -1460,7 +1460,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		        new GetEventsRequest(modelAddress, modelRev + 1, modelRev + 1),
 		        new GetEventsRequest(objectAddress, objectRev + 1, objectRev + 1) };
 		
-		SynchronousTestCallback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> callback = new SynchronousTestCallback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>>();
+		SynchronousCallbackWithOneResult<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> callback = new SynchronousCallbackWithOneResult<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>>();
 		
 		this.store.executeCommandsAndGetEvents(this.correctUser, this.correctUserPass, commands,
 		        request, callback);
@@ -1505,7 +1505,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	 */
 	protected long[] executeSucceedingCommands(XCommand[] commands) {
 		
-		SynchronousTestCallback<BatchedResult<Long>[]> callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<Long>[]> callback = new SynchronousCallbackWithOneResult<BatchedResult<Long>[]>();
 		
 		this.store.executeCommands(this.correctUser, this.correctUserPass, commands, callback);
 		
@@ -1537,7 +1537,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	 */
 	protected void executeFailingCommand(XCommand command) {
 		
-		SynchronousTestCallback<BatchedResult<Long>[]> callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<Long>[]> callback = new SynchronousCallbackWithOneResult<BatchedResult<Long>[]>();
 		
 		this.store.executeCommands(this.correctUser, this.correctUserPass,
 		        new XCommand[] { command }, callback);
@@ -1560,7 +1560,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	 */
 	protected void executeNochangeCommand(XCommand command) {
 		
-		SynchronousTestCallback<BatchedResult<Long>[]> callback = new SynchronousTestCallback<BatchedResult<Long>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<Long>[]> callback = new SynchronousCallbackWithOneResult<BatchedResult<Long>[]>();
 		
 		this.store.executeCommands(this.correctUser, this.correctUserPass,
 		        new XCommand[] { command }, callback);
@@ -1646,7 +1646,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		XType type = address.getAddressedType();
 		
 		if(type == XType.XMODEL) {
-			SynchronousTestCallback<BatchedResult<ModelRevision>[]> revCallback = new SynchronousTestCallback<BatchedResult<ModelRevision>[]>();
+			SynchronousCallbackWithOneResult<BatchedResult<ModelRevision>[]> revCallback = new SynchronousCallbackWithOneResult<BatchedResult<ModelRevision>[]>();
 			addresses = new XAddress[] { address };
 			this.store.getModelRevisions(this.correctUser, this.correctUserPass, addresses,
 			        revCallback);
@@ -1654,7 +1654,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 			
 			return revCallback.getEffect()[0].getResult().revision();
 		} else {
-			SynchronousTestCallback<BatchedResult<XReadableObject>[]> objectCallback = new SynchronousTestCallback<BatchedResult<XReadableObject>[]>();
+			SynchronousCallbackWithOneResult<BatchedResult<XReadableObject>[]> objectCallback = new SynchronousCallbackWithOneResult<BatchedResult<XReadableObject>[]>();
 			
 			addresses = new XAddress[] { XX.toAddress(address.getRepository(), address.getModel(),
 			        address.getObject(), null) };
@@ -1698,7 +1698,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		        XX.toId("B")));
 		
 		// check if we can get a snapshot
-		SynchronousTestCallback<BatchedResult<XReadableModel>[]> callback2 = new SynchronousTestCallback<BatchedResult<XReadableModel>[]>();
+		SynchronousCallbackWithOneResult<BatchedResult<XReadableModel>[]> callback2 = new SynchronousCallbackWithOneResult<BatchedResult<XReadableModel>[]>();
 		XAddress[] modelAddress = new XAddress[] { modelAddr };
 		
 		this.store.getModelSnapshots(this.correctUser, this.correctUserPass, modelAddress,

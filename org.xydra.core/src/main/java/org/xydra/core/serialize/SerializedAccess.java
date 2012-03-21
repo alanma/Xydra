@@ -39,6 +39,7 @@ public class SerializedAccess {
 	
 	/**
 	 * 
+	 * @param xml
 	 * @return The access definition represented by the given XML element.
 	 * @throws IllegalArgumentException if the XML element does not represent a
 	 *             valid access definition.
@@ -63,6 +64,7 @@ public class SerializedAccess {
 	
 	/**
 	 * 
+	 * @param xml
 	 * @return The list of access definition represented by the given XML
 	 *         element.
 	 * @throws IllegalArgumentException if the XML element does not represent a
@@ -87,6 +89,8 @@ public class SerializedAccess {
 	
 	/**
 	 * 
+	 * @param xml
+	 * @param groups
 	 * @return The access manager represented by the given XML element.
 	 * @throws IllegalArgumentException if the XML element does not represent a
 	 *             valid access manager.
@@ -113,7 +117,10 @@ public class SerializedAccess {
 	/**
 	 * Encode the given {@link XAccessRightDefinition} list as an XML element.
 	 * 
+	 * @param defs
+	 * 
 	 * @param out The XML encoder to write to.
+	 * @throws IllegalArgumentException
 	 */
 	public static void toXml(Set<XAccessRightDefinition> defs, XydraOut out)
 	        throws IllegalArgumentException {
@@ -134,7 +141,10 @@ public class SerializedAccess {
 	/**
 	 * Encode the given {@link XAccessRightDefinition} as an XML element.
 	 * 
+	 * @param def
+	 * 
 	 * @param out The XML encoder to write to.
+	 * @throws IllegalArgumentException
 	 */
 	public static void toXml(XAccessRightDefinition def, XydraOut out)
 	        throws IllegalArgumentException {
@@ -156,7 +166,10 @@ public class SerializedAccess {
 	 * Encode the given {@link XAuthorisationManager}'s
 	 * {@link XAccessRightDefinition XAccessDefinitions} as an XML element.
 	 * 
+	 * @param arm
+	 * 
 	 * @param out The XML encoder to write to.
+	 * @throws IllegalArgumentException
 	 */
 	public static void toXml(XAuthorisationManager arm, XydraOut out)
 	        throws IllegalArgumentException {

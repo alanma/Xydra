@@ -262,6 +262,7 @@ public interface XydraStore {
 	 *            This callback may not be null, because with a null callback
 	 *            this method provides no advantage over
 	 *            {@link #executeCommands(XID, String, XCommand[], Callback)}
+	 * @throws IllegalArgumentException
 	 */
 	void executeCommandsAndGetEvents(XID actorId, String passwordHash, XCommand[] commands,
 	        GetEventsRequest[] getEventRequests,

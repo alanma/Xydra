@@ -1,12 +1,12 @@
 package org.xydra.store;
 
 /**
- * A simple {@link Callback} implementation for tests of {@link XydraStore}
+ * A simple {@link Callback} implementation that supports waiting for results
  * 
  * @author Kaidel
+ * @param <T> callback response type
  */
-
-public class SynchronousTestCallback<T> implements Callback<T> {
+public class SynchronousCallbackWithOneResult<T> implements Callback<T> {
 	public static int FAILURE = 3;
 	public static int SUCCESS = 2;
 	
@@ -37,10 +37,14 @@ public class SynchronousTestCallback<T> implements Callback<T> {
 	public synchronized void onSuccess(T object) {
 		this.success = true;
 		this.effect = object;
-		
 		notifyAll();
 	}
 	
+	/**
+	 * @param timeout
+	 * @return {@link #TIMEOUT}, {@link #SUCCESS}, {@link #FAILURE} or
+	 *         {@link #UNKNOWN_ERROR}
+	 */
 	public synchronized int waitOnCallback(long timeout) {
 		
 		if(!this.success && !this.failure) {
@@ -65,6 +69,16 @@ public class SynchronousTestCallback<T> implements Callback<T> {
 		}
 		
 		return UNKNOWN_ERROR;
+	}
+	
+	public void waitOnCallbackAndThrowExceptionForProblems(int waitTimeout) {
+		int result = waitOnCallback(waitTimeout);
+		if(result == TIMEOUT) {
+			throw new StoreException("Timeout waiting for callback to be called");
+		}
+		if(result == UNKNOWN_ERROR) {
+			throw new StoreException("Unknown error waiting for callback to be called");
+		}
 	}
 	
 }

@@ -94,6 +94,8 @@ public class SerializedModel {
 	 * Load the change log represented by the given XML/JSON element into an
 	 * {@link XChangeLogState}.
 	 * 
+	 * @param element
+	 * 
 	 * @param state The change log state to load into.
 	 */
 	public static void loadChangeLogState(XydraElement element, XChangeLogState state) {
@@ -120,6 +122,9 @@ public class SerializedModel {
 	/**
 	 * Get the {@link XField} represented by the given XML/JSON element.
 	 * 
+	 * @param actorId
+	 * @param element
+	 * 
 	 * @return an {@link XField}
 	 * @throws IllegalArgumentException if the given element is not a valid
 	 *             XField element.
@@ -131,6 +136,8 @@ public class SerializedModel {
 	/**
 	 * Load the field represented by the given XML/JSON element into an
 	 * {@link XRevWritableField}.
+	 * 
+	 * @param element
 	 * 
 	 * @param parent If parent is null, the field is loaded into a
 	 *            {@link SimpleField}, otherwise it is loaded into a child state
@@ -177,6 +184,10 @@ public class SerializedModel {
 	/**
 	 * Get the {@link XModel} represented by the given XML/JSON element.
 	 * 
+	 * @param actorId
+	 * @param passwordHash
+	 * @param element
+	 * 
 	 * @return an {@link XModel}
 	 * @throws IllegalArgumentException if the given element is not a valid
 	 *             XModel element.
@@ -194,6 +205,8 @@ public class SerializedModel {
 	/**
 	 * Load the model represented by the given XML/JSON element into an
 	 * {@link XRevWritableModel}.
+	 * 
+	 * @param element
 	 * 
 	 * @param parent If parent is null, the field is loaded into a
 	 *            {@link SimpleModel}, otherwise it is loaded into a child state
@@ -256,6 +269,10 @@ public class SerializedModel {
 	/**
 	 * Get the {@link XObject} represented by the given XML/JSON element.
 	 * 
+	 * @param actorId
+	 * @param passwordHash
+	 * @param element
+	 * 
 	 * @return an {@link XObject}
 	 * @throws IllegalArgumentException if the given element is not a valid
 	 *             XObject element.
@@ -273,6 +290,8 @@ public class SerializedModel {
 	/**
 	 * Load the object represented by the given XML/JSON element into an
 	 * {@link XRevWritableObject}.
+	 * 
+	 * @param element
 	 * 
 	 * @param parent If parent is null, the field is loaded into a
 	 *            {@link SimpleObject}, otherwise it is loaded into a child
@@ -336,6 +355,10 @@ public class SerializedModel {
 	/**
 	 * Get the {@link XRepository} represented by the given XML/JSON element.
 	 * 
+	 * @param actorId
+	 * @param passwordHash
+	 * @param element
+	 * 
 	 * @return an {@link XRepository}
 	 * @throws IllegalArgumentException if the given element is not a valid
 	 *             XRepository element.
@@ -347,6 +370,8 @@ public class SerializedModel {
 	/**
 	 * Load the repository represented by the given XML/JSON element into an
 	 * {@link XRevWritableRepository}.
+	 * 
+	 * @param element
 	 * 
 	 * @return the created {@link XRevWritableRepository}
 	 */
