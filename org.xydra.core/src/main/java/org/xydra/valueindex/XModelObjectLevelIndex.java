@@ -51,6 +51,12 @@ public class XModelObjectLevelIndex {
 	private XValueIndexer indexer;
 	private ValueIndex index;
 	private XAddress modelAddress;
+	
+	/*
+	 * TODO It might be necessary to store defaultIncludeAll, includeFieldIds
+	 * and excludeFieldIds somehow, since using the data constructed by a given
+	 * index with wrong parameters might result in wrong behavior.
+	 */
 	private boolean defaultIncludeAll;
 	private Set<XID> includeFieldIds;
 	private Set<XID> excludeFieldIds;

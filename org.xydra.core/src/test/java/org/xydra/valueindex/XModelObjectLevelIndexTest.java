@@ -56,18 +56,46 @@ public abstract class XModelObjectLevelIndexTest {
 	 * updateIndex-methods as described above.
 	 */
 	public XModel oldModel;
+	
+	/**
+	 * see description of oldModel
+	 */
 	public XModel newModel;
 	
+	/**
+	 * Has almost the same role as oldModel, but will be used to test an Index
+	 * which excludes almost all fields from indexing. See description of
+	 * oldModel for more information.
+	 * 
+	 * newExcludeAllModel has the same role for oldExcludeAllModel as newModel
+	 * for oldModel.
+	 */
 	public XModel oldExcludeAllModel;
+	
+	/**
+	 * see description of oldExcludeAllModel.
+	 */
 	public XModel newExcludeAllModel;
 	
 	/**
 	 * oldIndex is the index used for indexing the oldModel, newIndex the index
 	 * used for indexing the newModel.
+	 * 
+	 * defaultIncludeAll needs to be set to true and at least one ID in
+	 * excludedFieldIds must be provided. includeFieldIds should be an empty
+	 * set.
 	 */
 	public XModelObjectLevelIndex oldIndex;
 	public XModelObjectLevelIndex newIndex;
 	
+	/**
+	 * oldExcludeallIndex is the index used for indexing the oldExcludeAllModel,
+	 * newExcludeAllIndex the index used for indexing the newExcludeAllModel.
+	 * 
+	 * defaultIncludeAll needs to be set to true and at least one ID in
+	 * excludedFieldIds must be provided. includeFieldIds should be an empty
+	 * set.
+	 */
 	public XModelObjectLevelIndex oldExcludeAllIndex;
 	public XModelObjectLevelIndex newExcludeAllIndex;
 	
@@ -77,38 +105,100 @@ public abstract class XModelObjectLevelIndexTest {
 	public XValueIndexer oldIndexer;
 	public XValueIndexer newIndexer;
 	
+	/**
+	 * oldExcludeAllIndexer is used by oldExcludeAllIndex, newExcludeAllIndexer
+	 * by newExcludeAllIndex
+	 */
 	public XValueIndexer oldExcludeAllIndexer;
 	public XValueIndexer newExcludeAllIndexer;
 	
+	/**
+	 * a set of Ids which are excluded from being indexed by oldIndex/newIndex
+	 */
 	public Set<XID> excludedIds;
+	
+	/**
+	 * Id of an object holding fields with ids in excludedIds.
+	 */
 	public XID excludedObjectId;
+	
+	/**
+	 * String which only exists as a value in fields which Id is in excludedIds.
+	 */
 	public String excludedValueString;
 	
+	/**
+	 * a set of Ids which will be indexed by
+	 * oldExcludedAllIndex/newExcludeAllIndex. Only fields which Id are in this
+	 * set will be indexed by theses indexes.
+	 */
 	public Set<XID> includedIds;
+	
+	/**
+	 * the id of an object holding fields with ids in includedIds.
+	 */
 	public XID includedObjectId;
+	
+	/**
+	 * String which only exists as a value in fields which Id is in includedIds.
+	 */
 	public String includedValueString;
 	
 	/**
-	 * Abstract method which initializes the indexes in the setup-method.
+	 * Method which initializes the indexes in the setup-method.
 	 * 
-	 * Needs to be overwritten! {@link XModelObjectLevelIndexTest#oldIndex}
-	 * needs to be parameterized with
-	 * {@link XModelObjectLevelIndexTest#oldModel} (as the model which it
+	 * You need to adhere to the following guidelines if you want to overwrite
+	 * this method, otherwise the tests won't work correctly.
+	 * 
+	 * {@link XModelObjectLevelIndexTest#oldIndex} needs to be parameterized
+	 * with {@link XModelObjectLevelIndexTest#oldModel} (as the model which it
 	 * indexes, index(oldModel) needs to be executed!) and
-	 * {@link XModelObjectLevelIndexTest#oldIndexer} (as the used indexer),
-	 * {@link XModelObjectLevelIndexTest#newIndex} (as the model which it
-	 * indexes, index(newModel) needs to be executed!) needs to be parameterized
-	 * with {@link XModelObjectLevelIndexTest#newModel} (as the used indexer)
-	 * and {@link XModelObjectLevelIndexTest#newIndexer}, otherwise the test
-	 * won't work correctly. defaultIncludeAll needs to be set to true,
-	 * includeFieldIds should be an empty set. excludeFieldIds should include
-	 * {@link XID XIDs} which are NOT used in the phonebook model of
-	 * {@link DemoModelUtil} (if you include such {@link XID XIDs}, the test
-	 * will not work correctly). Furthermore, {@lin
-	 * XModelObjectLevelIndexTest#excludedIds} needs to include the same
+	 * {@link XModelObjectLevelIndexTest#oldIndexer} (as the used indexer).
+	 * {@link XModelObjectLevelIndexTest#newIndex} needs to be parameterized
+	 * with {@link XModelObjectLevelIndexTest#newModel} (as the model which it
+	 * indexes, index(newModel) needs to be executed!) and with
+	 * {@link XModelObjectLevelIndexTest#newIndexer} (as the used indexer).
+	 * defaultIncludeAll needs to be set to true, includeFieldIds should be an
+	 * empty set. excludeFieldIds has to only include {@link XID XIDs} which are
+	 * NOT used in the phonebook model of {@link DemoModelUtil} (if you include
+	 * such {@link XID XIDs}, the test will not work correctly), it must not be
+	 * empty, at least one such Id must be provided. Furthermore,
+	 * {@link XModelObjectLevelIndexTest#excludedIds} needs to include the same
 	 * {@link XID XIDs} as excludeFieldIds.
+	 * 
+	 * {@link XModelObjectLevelIndexTest#oldExcludeAllIndex} needs to be
+	 * parameterized with {@link XModelObjectLevelIndexTest#oldExcludeAllModel}
+	 * (as the model which it indexes, index(oldExcludeAllModel) needs to be
+	 * executed!) and {@link XModelObjectLevelIndexTest#oldExcludeAllIndexer}
+	 * (as the used indexer).
+	 * {@link XModelObjectLevelIndexTest#newExcludeAllIndex} needs to be
+	 * parameterized with {@link XModelObjectLevelIndexTest#newExcludeAllModel}
+	 * (as the model which it indexes, index(newExcludeAllModel) needs to be
+	 * executed!) and with {@link XModelObjectLevelIndexTest#newIndexer} (as the
+	 * used indexer). defaultIncludeAll needs to be set to false,
+	 * excludeFieldIds should be an empty set. includeFieldIds has to only
+	 * include {@link XID XIDs} which are NOT used in the phonebook model of
+	 * {@link DemoModelUtil} (if you include such {@link XID XIDs}, the test
+	 * will not work correctly), it must not be empty, at least two such Ids
+	 * must be provided. Furthermore,
+	 * {@link XModelObjectLevelIndexTest#includedIds} needs to include the same
+	 * {@link XID XIDs} as includeFieldIds.
 	 */
-	public abstract void initializeIndexes();
+	public void initializeIndexes() {
+		HashSet<XID> emptySet = new HashSet<XID>();
+		
+		// oldModel, oldIndexer, newModel, newIndexer, excludedIds and
+		// includedIds need to be set before calling all this!
+		this.oldIndex = new XModelObjectLevelIndex(this.oldModel, this.oldIndexer, true, emptySet,
+		        this.excludedIds);
+		this.newIndex = new XModelObjectLevelIndex(this.newModel, this.newIndexer, true, emptySet,
+		        this.excludedIds);
+		
+		this.oldExcludeAllIndex = new XModelObjectLevelIndex(this.oldExcludeAllModel,
+		        this.oldExcludeAllIndexer, false, this.includedIds, emptySet);
+		this.newExcludeAllIndex = new XModelObjectLevelIndex(this.newExcludeAllModel,
+		        this.newExcludeAllIndexer, false, this.includedIds, emptySet);
+	}
 	
 	/**
 	 * Abstract method which initializes the indexers in the setup-method.
@@ -1288,6 +1378,33 @@ public abstract class XModelObjectLevelIndexTest {
 		}
 	}
 	
+	/*
+	 * TODO Document
+	 */
+	@Test
+	public void testUpdateIndexObjectRemoveFieldOfExcludeAllModel() {
+		String valueString = "Firstvaluestringwhichshoudlntexistinbothmodels";
+		XValue value = X.getValueFactory().createStringValue(valueString);
+		List<String> indexStrings = this.newExcludeAllIndexer.getIndexStrings(value);
+		
+		XObject oldJohn = this.oldExcludeAllModel.getObject(DemoModelUtil.JOHN_ID);
+		XObject newJohn = this.newExcludeAllModel.getObject(DemoModelUtil.JOHN_ID);
+		
+		XID id = this.includedIds.iterator().next();
+		newJohn.createField(id).setValue(value);
+		
+		this.newExcludeAllIndex.updateIndex(oldJohn, newJohn);
+		oldJohn.createField(id).setValue(value);
+		
+		newJohn.removeField(id);
+		this.newExcludeAllIndex.updateIndex(oldJohn, newJohn);
+		
+		for(String s : indexStrings) {
+			Set<Pair<XAddress,XValue>> found = this.newExcludeAllIndex.search(s);
+			assertTrue(found.isEmpty());
+		}
+	}
+	
 	/**
 	 * Tests if {@link XModelObjectLevelIndex#deIndex(XReadableObject)} works
 	 * correctly.
@@ -1297,7 +1414,18 @@ public abstract class XModelObjectLevelIndexTest {
 		XReadableObject newJohn = this.newModel.getObject(DemoModelUtil.JOHN_ID);
 		this.newIndex.deIndex(newJohn);
 		
-		testIfObjectWasDeIndexed(newJohn);
+		testIfObjectWasDeIndexed(newJohn, this.newIndex, this.newIndexer);
+	}
+	
+	/*
+	 * TODO Document
+	 */
+	@Test
+	public void testDeIndexObjectOfExcludeAllModel() {
+		XReadableObject includedObject = this.newExcludeAllModel.getObject(this.includedObjectId);
+		this.newExcludeAllIndex.deIndex(includedObject);
+		
+		testIfObjectWasDeIndexed(includedObject, this.newExcludeAllIndex, this.newExcludeAllIndexer);
 	}
 	
 	/**
@@ -1314,18 +1442,35 @@ public abstract class XModelObjectLevelIndexTest {
 		}
 		
 		// deindexing all fields equals deindexing the whole object
-		testIfObjectWasDeIndexed(newJohn);
+		testIfObjectWasDeIndexed(newJohn, this.newIndex, this.newIndexer);
 	}
 	
-	private void testIfObjectWasDeIndexed(XReadableObject object) {
+	/*
+	 * TODO Document
+	 */
+	@Test
+	public void testDeIndexFieldOfExcludeAllModel() {
+		XReadableObject newJohn = this.newExcludeAllModel.getObject(DemoModelUtil.JOHN_ID);
+		
+		for(XID fieldId : newJohn) {
+			XReadableField field = newJohn.getField(fieldId);
+			this.newExcludeAllIndex.deIndex(field);
+		}
+		
+		// deindexing all fields equals deindexing the whole object
+		testIfObjectWasDeIndexed(newJohn, this.newExcludeAllIndex, this.newExcludeAllIndexer);
+	}
+	
+	private void testIfObjectWasDeIndexed(XReadableObject object, XModelObjectLevelIndex index,
+	        XValueIndexer indexer) {
 		XAddress objectAddress = object.getAddress();
 		
 		for(XID fieldId : object) {
 			XValue value = object.getField(fieldId).getValue();
-			List<String> indexStrings = this.newIndexer.getIndexStrings(value);
+			List<String> indexStrings = indexer.getIndexStrings(value);
 			
 			for(String s : indexStrings) {
-				Set<Pair<XAddress,XValue>> pairs = this.newIndex.search(s);
+				Set<Pair<XAddress,XValue>> pairs = index.search(s);
 				Set<XAddress> addresses = getAddressesFromSetOfPairs(pairs);
 				
 				assertFalse(addresses.contains(objectAddress));
