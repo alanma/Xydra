@@ -73,7 +73,7 @@ public class GwtXydraStoreRestClient extends AbstractXydraStoreRestClient {
 		send(rb, req);
 	}
 	
-	private void send(RequestBuilder rb, Request<?> req) {
+	private static void send(RequestBuilder rb, Request<?> req) {
 		rb.setCallback(new RestCallback(req));
 		try {
 			rb.send();

@@ -40,7 +40,6 @@ public class ProxyServlet extends HttpServlet {
 	
 	private static final long serialVersionUID = -5107058075707773775L;
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	protected void service(HttpServletRequest req, HttpServletResponse resp) {
 		
