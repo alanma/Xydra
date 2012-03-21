@@ -208,6 +208,7 @@ public class ServletUtils {
 	}
 	
 	/**
+	 * @param req
 	 * @return all get and post parameters as delivered in the servlet API - but
 	 *         additionally URL-decoded
 	 * @throws IllegalStateException if one of the parameters has more than one
@@ -251,6 +252,7 @@ public class ServletUtils {
 	 *            explicitly disabled via headers (Cache-Control=no-cache;
 	 *            Expires=0). Positive numbers are the time to cache the
 	 *            response in minutes from now on.
+	 * @param contentType
 	 */
 	public static void headers(HttpServletResponse res, int status, long cachingInMinutes,
 	        String contentType) {
@@ -306,7 +308,7 @@ public class ServletUtils {
 	}
 	
 	/**
-	 * @param request
+	 * @param req
 	 * @return true if request is just an http://-request and not an https://
 	 *         request.
 	 */
@@ -315,7 +317,7 @@ public class ServletUtils {
 	}
 	
 	/**
-	 * @param request
+	 * @param req
 	 * @return true if request is to root URL '/', may also have query
 	 *         parameters
 	 */

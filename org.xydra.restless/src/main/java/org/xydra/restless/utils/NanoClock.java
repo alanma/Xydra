@@ -32,6 +32,7 @@ public class NanoClock {
 	
 	/**
 	 * @param name for the statistics
+	 * @return this instance for API chaining
 	 */
 	public NanoClock stop(String name) {
 		stopAndGetDuration(name);
@@ -79,6 +80,7 @@ public class NanoClock {
 		this.stats.append(s);
 		return this;
 	}
+	
 	/**
 	 * @return milliseconds elapsed since first start of this clock. -1 = clock
 	 *         was not started ever.

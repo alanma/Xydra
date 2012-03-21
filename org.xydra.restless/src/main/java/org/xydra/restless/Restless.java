@@ -211,6 +211,7 @@ public class Restless extends HttpServlet {
 	 * @param javaMethodName a method name like 'getName', see
 	 *            {@link #addMethod(String, String, Object, String, boolean, RestlessParameter...)}
 	 *            for handling of this parameter
+	 * @param parameter
 	 */
 	public void addGet(String pathTemplate, Object instanceOrClass, String javaMethodName,
 	        RestlessParameter ... parameter) {
@@ -230,6 +231,7 @@ public class Restless extends HttpServlet {
 	 *            first access and cached in memory from there on.
 	 * @param javaMethodName to be called on the Java instance. This method may
 	 *            not have several signatures.
+	 * @param adminOnly
 	 * @param parameter in the order in which they are used in the Java method.
 	 *            The Java method may additionally use
 	 *            {@link HttpServletRequest} and {@link HttpServletResponse} at
@@ -783,11 +785,11 @@ public class Restless extends HttpServlet {
 	/**
 	 * Helper method to make writing JUnit tests easier.
 	 * 
-	 * When run in a servlet container, this method is simply a short-cut for
-	 * getServletContext().getAttribute(key,value). Otherwise a local hash-map
-	 * is used.
-	 * 
 	 * @param key attribute name
+	 * @return when run in a servlet container, this method is simply a
+	 *         short-cut for getServletContext().getAttribute(key,value).
+	 *         Otherwise a local hash-map is used that can be set via
+	 *         {@link #setServletContextAttribute(String, Object)}
 	 */
 	public Object getServletContextAttribute(String key) {
 		try {

@@ -25,26 +25,28 @@ public class ExampleResource {
 	
 	/**
 	 * Naming this method 'restless()' is just a convention
+	 * 
+	 * @param restless never null
 	 */
 	public static void restless(Restless restless) {
 		ExampleResource exampleResource = new ExampleResource();
 		/** Optional: Initialization and configuration of exampleResource */
 		// add dynamic
 		restless.addMethod("/foo", "GET", exampleResource, "getName", false,
-
+		
 		new RestlessParameter("name", null),
-
+		
 		new RestlessParameter("age", "23")
-
+		
 		);
 		
 		// add static, slightly faster startup times for large apps
 		restless.addMethod("/bar", "GET", ExampleResource.class, "getName", false,
-
+		
 		new RestlessParameter("name", null),
-
+		
 		new RestlessParameter("age", "23")
-
+		
 		);
 		
 		// add static, slightly faster startup times for large apps

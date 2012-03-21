@@ -73,8 +73,10 @@ public class Page {
 		}
 		
 		/**
+		 * @param label
 		 * @param name form name
 		 * @param value current value, can be null
+		 * @return this element for fluid API chaining
 		 */
 		public BlockElement inputText(String label, String name, String value) {
 			TextInput input = new TextInput(this, name, value);
@@ -233,6 +235,7 @@ public class Page {
 		/**
 		 * @param tag never null
 		 * @param parent may be null
+		 * @param first
 		 * @param attributes optional
 		 */
 		public ElementWithChildren(String tag, ToHtml parent, boolean first,
@@ -391,10 +394,10 @@ public class Page {
 		
 		/** No whitespace added */
 		Inline,
-
+		
 		/** Starts on a new line */
 		InlineBlock,
-
+		
 		/** Starts on a new line */
 		Block
 	}

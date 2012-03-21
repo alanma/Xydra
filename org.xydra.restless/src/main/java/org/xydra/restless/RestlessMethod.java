@@ -91,6 +91,8 @@ public class RestlessMethod {
 	 * TODO IMPROVE distinguish query params from POST params to define a
 	 * clearer precedence
 	 * 
+	 * @param restless never null
+	 * 
 	 * @param req never null
 	 * @param res never null
 	 * @return true if method launched succesfully, i.e. parameters matched
