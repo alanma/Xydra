@@ -29,6 +29,10 @@ public interface XAuthorisationDatabase {
 	 * {@link #resetAccess(XID, XAddress, XID)}. In this case the value set with
 	 * setAccess() is returned.
 	 * 
+	 * @param actor
+	 * @param resource
+	 * @param access
+	 * 
 	 * @return the access right defined for this (actor,resource,access)
 	 *         combination or null if there is no such definition
 	 * @throws IllegalArgumentException if there is no access right defined for

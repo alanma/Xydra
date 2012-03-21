@@ -30,6 +30,9 @@ public class ChangeRecorder implements XRepositoryEventListener, XModelEventList
 	
 	/**
 	 * Record all non-transaction events to the given model.
+	 * 
+	 * @param model
+	 * @return ...
 	 */
 	static public List<XEvent> record(XModel model) {
 		List<XEvent> eventList = new ArrayList<XEvent>();
@@ -42,6 +45,9 @@ public class ChangeRecorder implements XRepositoryEventListener, XModelEventList
 	
 	/**
 	 * Record all non-transaction events to the given object.
+	 * 
+	 * @param object
+	 * @return ...
 	 */
 	static public List<XEvent> record(XObject object) {
 		List<XEvent> eventList = new ArrayList<XEvent>();
@@ -53,6 +59,9 @@ public class ChangeRecorder implements XRepositoryEventListener, XModelEventList
 	
 	/**
 	 * Record all events to the given model/object.
+	 * 
+	 * @param entity
+	 * @return ...
 	 */
 	static public List<XEvent> recordTransactions(XSendsTransactionEvents entity) {
 		List<XEvent> eventList = new ArrayList<XEvent>();
@@ -64,6 +73,9 @@ public class ChangeRecorder implements XRepositoryEventListener, XModelEventList
 	/**
 	 * Record all events (including transactions) except those that also occur
 	 * in a transaction event.
+	 * 
+	 * @param model
+	 * @return ...
 	 */
 	static public List<XEvent> recordWhole(XModel model) {
 		List<XEvent> eventList = new ArrayList<XEvent>();
@@ -89,7 +101,7 @@ public class ChangeRecorder implements XRepositoryEventListener, XModelEventList
 	}
 	
 	@Override
-    public void onChangeEvent(XFieldEvent event) {
+	public void onChangeEvent(XFieldEvent event) {
 		if(this.filter && event.inTransaction()) {
 			// ignore
 			return;
@@ -98,7 +110,7 @@ public class ChangeRecorder implements XRepositoryEventListener, XModelEventList
 	}
 	
 	@Override
-    public void onChangeEvent(XModelEvent event) {
+	public void onChangeEvent(XModelEvent event) {
 		if(this.filter && event.inTransaction()) {
 			// ignore
 			return;
@@ -107,7 +119,7 @@ public class ChangeRecorder implements XRepositoryEventListener, XModelEventList
 	}
 	
 	@Override
-    public void onChangeEvent(XObjectEvent event) {
+	public void onChangeEvent(XObjectEvent event) {
 		if(this.filter && event.inTransaction()) {
 			// ignore
 			return;
@@ -116,12 +128,12 @@ public class ChangeRecorder implements XRepositoryEventListener, XModelEventList
 	}
 	
 	@Override
-    public void onChangeEvent(XRepositoryEvent event) {
+	public void onChangeEvent(XRepositoryEvent event) {
 		this.eventList.add(event);
 	}
 	
 	@Override
-    public void onChangeEvent(XTransactionEvent event) {
+	public void onChangeEvent(XTransactionEvent event) {
 		this.eventList.add(event);
 	}
 }

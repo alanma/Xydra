@@ -143,6 +143,9 @@ public class XCompareUtils {
 	 * 
 	 * Parent-{@link XReadableModel}s, if they exist, are not compared
 	 * 
+	 * @param objectA
+	 * @param objectB
+	 * 
 	 * @return true if the two {@link XReadableObject}s have the same state.
 	 */
 	public static boolean equalState(XReadableObject objectA, XReadableObject objectB) {
