@@ -120,4 +120,14 @@ public abstract class AbstractRow extends AbstractReadableRow implements IRow {
 			setValue(columnName, germanValueString, initial);
 		}
 	}
+	
+	@Override
+	public boolean equals(Object other) {
+		return other instanceof IRow && ((IRow)other).getKey().equals(getKey());
+	}
+	
+	@Override
+	public int hashCode() {
+		return getKey().hashCode();
+	}
 }

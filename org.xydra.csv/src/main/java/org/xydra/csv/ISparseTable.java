@@ -109,7 +109,7 @@ public interface ISparseTable extends Iterable<Row>, IRowHandler {
 	/**
 	 * Create a sub-table
 	 * 
-	 * @param key never null
+	 * @param columnName to be filtered
 	 * @param value may be null
 	 * @return a sub-table with dropped rows. The resulting table has no row in
 	 *         which column 'columnName' has the given 'value'.

@@ -18,6 +18,7 @@ public interface IRow extends IReadableRow {
 	 * Aggregate given row into this row
 	 * 
 	 * @param row never null
+	 * @param keyColumnNames
 	 */
 	void aggregate(IReadableRow row, String[] keyColumnNames);
 	

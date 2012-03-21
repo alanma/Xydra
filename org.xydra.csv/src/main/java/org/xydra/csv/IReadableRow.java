@@ -38,6 +38,7 @@ public interface IReadableRow extends Iterable<ICell>, Serializable {
 	/**
 	 * @param columnName
 	 * @return getValue(columnName).getValueAsDouble()
+	 * @throws WrongDatatypeException if data cannot be parsed as double
 	 */
 	double getValueAsDouble(String columnName) throws WrongDatatypeException;
 	

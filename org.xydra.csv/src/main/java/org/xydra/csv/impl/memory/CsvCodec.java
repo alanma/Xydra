@@ -34,6 +34,7 @@ public class CsvCodec {
 	 * open an CSV file with default settings without mangling e.g. dates.
 	 * 
 	 * @param value to be encoded
+	 * @return a string that excel accepts
 	 */
 	public static String excelEncode(String value) {
 		if(value == null) {
