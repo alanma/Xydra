@@ -3,6 +3,7 @@ package org.xydra.store.impl.gae;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -125,6 +126,23 @@ public class SyncDatastore {
 		log.debug(DebugFormatter.dataPut(DATASTORE_NAME, key.toString(), null, Timing.Now));
 		makeSureDatestoreServiceIsInitialised();
 		syncDatastore.delete(txn, key);
+	}
+	
+	/**
+	 * @param it never null
+	 */
+	@GaeOperation(datastoreWrite = true)
+	public static void deleteEntities(Iterable<Key> it) {
+		assert it != null;
+		if(log.isDebugEnabled()) {
+			Map<Key,Object> map = new HashMap<Key,Object>();
+			for(Key k : it) {
+				map.put(k, null);
+			}
+			log.debug(DebugFormatter.dataPut(DATASTORE_NAME, map, Timing.Now));
+		}
+		makeSureDatestoreServiceIsInitialised();
+		syncDatastore.delete(it);
 	}
 	
 	/**

@@ -100,9 +100,8 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 	
 	public static final long serialVersionUID = -2080744796962188941L;
 	
-	// Implementation.
-	
 	private final XAddress modelAddr;
+	
 	private final RevisionManager revManager;
 	
 	private UniCache<RevisionInfo> unicache;
@@ -834,8 +833,13 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 		
 	}
 	
+	public static final boolean USE_INSTANCE_CACHE_FOR_REVISIONS = false;
+	public static final boolean USE_MEMCACHE_FOR_REVISIONS = false;
+	
 	@Override
+	/* While calculating, fetch all events not yet known on this instance. */
 	public GaeModelRevision calculateCurrentModelRevision() {
+		/* === Using data from our instance === */
 		GaeModelRevision lastCurrentRev = this.revManager.getInstanceRevisionInfo()
 		        .getGaeModelRevision();
 		assert lastCurrentRev.getModelRevision() != null;
@@ -856,8 +860,10 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 			if(!askedMemcacheOrDatastore && isolatedAttempts > 0) {
 				log.info("Asking cache after " + isolatedAttempts + " attempts");
 				
-				RevisionInfo cachedRevInfo = getRevCache().get(getRevisionCacheName(),
-				        StorageOptions.create(false, true, true));
+				RevisionInfo cachedRevInfo = getRevCache().get(
+				        getRevisionCacheName(),
+				        StorageOptions.create(USE_INSTANCE_CACHE_FOR_REVISIONS,
+				                USE_MEMCACHE_FOR_REVISIONS, true));
 				if(cachedRevInfo != null) {
 					this.backendCached = cachedRevInfo;
 					ModelRevision cachedModelRev = cachedRevInfo.getGaeModelRevision()
@@ -891,7 +897,7 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 			
 			/**
 			 * Uses batch fetches in memcache and datastore to load missing
-			 * changes.
+			 * change events.
 			 */
 			
 			/*
