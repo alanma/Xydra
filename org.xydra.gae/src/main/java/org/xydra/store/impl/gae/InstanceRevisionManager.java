@@ -12,11 +12,11 @@ import org.xydra.store.impl.gae.changes.RevisionInfo;
 
 
 /**
- * The {@link RevisionManager} is
+ * The {@link InstanceRevisionManager} is
  * <ol>
+ * <li>one instance per {@link XModel}.</li>
  * <li>a facade and manager for the Instance-wide cache</li>
  * <li>passive, it does not trigger any kind of recalculation.</li>
- * <li>one instance per {@link XModel}.</li>
  * </ol>
  * 
  * The instance revision cache is shared among all objects within one Java
@@ -29,8 +29,7 @@ import org.xydra.store.impl.gae.changes.RevisionInfo;
  * <ul>
  * <li>LastTaken (shared on instance)</li>
  * <li>LastCommitted (shared on instance)</li>
- * <li>GaeModelRevision (shared on instance + each thread can have its own
- * copy). {@link GaeModelRevision} has
+ * <li>GaeModelRevision (shared on instance). {@link GaeModelRevision} has
  * <ul>
  * <li>LastSilentCommited</li>
  * <li> {@link ModelRevision} (currentRevision + modelExists)</li>
@@ -49,9 +48,14 @@ import org.xydra.store.impl.gae.changes.RevisionInfo;
  * a read-your-own-writes behaviour within one instance.
  * 
  * These invariants are true (lowercase = estimated values, uppercase = real
- * values): currentRev <= CURRENT_REV; lastCommited <= LAST_COMMITED; lastTaken
- * <= LAST_TAKEN; currentRev <= lastSilentCommitted <= lastCommited <=
- * lastTaken; CURRENT_REV <= LAST_COMMITED <= LAST_TAKEN;
+ * values):
+ * 
+ * Estimates are less or equal to the real value: currentRev <= CURRENT_REV;
+ * lastCommited <= LAST_COMMITED; lastTaken <= LAST_TAKEN;
+ * 
+ * currentRev <= lastSilentCommitted <= lastCommited <= lastTaken;
+ * 
+ * CURRENT_REV <= LAST_COMMITED <= LAST_TAKEN;
  * 
  * The following diagram shows an example:
  * 
@@ -69,14 +73,14 @@ import org.xydra.store.impl.gae.changes.RevisionInfo;
  * r95              |   ????????????????????????????????????????????????     |
  * r94              |   xxx?????????????????????????????????????????????     |
  * 
- * COMMITTED (C) = 93 (the highest commit with no creating under it)
+ * COMMITTED (C) = 93 (the highest commit with no creating below it)
  * 
  * r93              |   ---    |   ?????????????????????????????????????     |
  * r92              |   ---    |   ?????????????????????????????????????     |
  *  
  * r91              |   ---    |   ---??????????????????????????????????     |
  * 
- * CURRENT_REV (R) = 90 (the highest successful commit with no creating under it)
+ * CURRENT_REV (R) = 90 (the highest successful commit with no creating below it)
  * 
  * r90              |   ---    |   xxx   |    --------------------------     |
  * r89              |   ---    |   ?????????????????????????????????????     |
@@ -102,23 +106,24 @@ import org.xydra.store.impl.gae.changes.RevisionInfo;
  * -----------------+----------+---------+-----------+---------+-------------+
  * </pre>
  * 
+ * TODO must be thread-safe
+ * 
  * @author xamde
  */
-public class RevisionManager {
+public class InstanceRevisionManager {
 	
-	private static final Logger log = LoggerFactory.getLogger(RevisionManager.class);
+	private static final Logger log = LoggerFactory.getLogger(InstanceRevisionManager.class);
 	
+	/** For debug strings */
 	private static final String REVMANAGER_NAME = "[.rev]";
 	
 	private final XAddress modelAddress;
-	
-	private boolean isInitialized = false;
 	
 	/**
 	 * @param modelAddress ..
 	 */
 	@GaeOperation()
-	public RevisionManager(XAddress modelAddress) {
+	public InstanceRevisionManager(XAddress modelAddress) {
 		log.debug(DebugFormatter.init(REVMANAGER_NAME));
 		this.modelAddress = modelAddress;
 		assert this.getInstanceRevisionInfo() != null;
@@ -126,6 +131,12 @@ public class RevisionManager {
 		assert this.getInstanceRevisionInfo().getGaeModelRevision().getModelRevision() != null;
 	}
 	
+	/**
+	 * @return the instance-wide cache {@link RevisionInfo} for the modelAddress
+	 *         of this {@link InstanceRevisionManager}. Never null. If no cached
+	 *         info was found, a "know nothing"-entry is created, locally
+	 *         cached, and returned.
+	 */
 	public RevisionInfo getInstanceRevisionInfo() {
 		Map<String,Object> instanceContext = InstanceContext.getInstanceCache();
 		String key = this.modelAddress + "/revisions";
@@ -142,14 +153,6 @@ public class RevisionManager {
 	@Override
 	public String toString() {
 		return this.modelAddress + ":: instance:" + getInstanceRevisionInfo();
-	}
-	
-	public boolean isInstanceModelRevisionInitialised() {
-		return this.isInitialized;
-	}
-	
-	public void markAsInitialised() {
-		this.isInitialized = true;
 	}
 	
 }

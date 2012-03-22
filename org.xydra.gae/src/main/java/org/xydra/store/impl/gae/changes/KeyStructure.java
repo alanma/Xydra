@@ -12,6 +12,9 @@ import com.google.appengine.api.datastore.KeyFactory;
 /**
  * Translates {@link XAddress} to GAE {@link Key Keys}.
  * 
+ * Changes are persisted as {@link #KIND_XCHANGE} and {@link #KIND_XVALUE}
+ * types.
+ * 
  * @author scharrer
  * 
  */

@@ -41,9 +41,9 @@ public class GaeStoreReadMethodsTest extends AbstractSecureStoreReadMethodsTest 
 	
 	@After
 	public void after() {
-		SynchronousTestCallback<Set<XID>> mids = new SynchronousTestCallback<Set<XID>>();
+		SynchronousCallbackWithOneResult<Set<XID>> mids = new SynchronousCallbackWithOneResult<Set<XID>>();
 		this.store.getModelIds(getCorrectUser(), getCorrectUserPasswordHash(), mids);
-		assertEquals(SynchronousTestCallback.SUCCESS, mids.waitOnCallback(Long.MAX_VALUE));
+		assertEquals(SynchronousCallbackWithOneResult.SUCCESS, mids.waitOnCallback(Long.MAX_VALUE));
 		XAddress repoAddr = XX.toAddress(getRepositoryId(), null, null, null);
 		for(XID modelId : mids.effect) {
 			if(modelId.toString().startsWith("internal--")) {
@@ -54,9 +54,9 @@ public class GaeStoreReadMethodsTest extends AbstractSecureStoreReadMethodsTest 
 			this.store.executeCommands(getCorrectUser(), getCorrectUserPasswordHash(),
 			        new XCommand[] { removeCommand }, null);
 		}
-		mids = new SynchronousTestCallback<Set<XID>>();
+		mids = new SynchronousCallbackWithOneResult<Set<XID>>();
 		this.store.getModelIds(getCorrectUser(), getCorrectUserPasswordHash(), mids);
-		assertEquals(SynchronousTestCallback.SUCCESS, mids.waitOnCallback(Long.MAX_VALUE));
+		assertEquals(SynchronousCallbackWithOneResult.SUCCESS, mids.waitOnCallback(Long.MAX_VALUE));
 		assert mids.effect.size() == 0 : mids.effect.size();
 	}
 	

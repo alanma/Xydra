@@ -8,7 +8,7 @@ import org.xydra.base.change.XEvent;
 import org.xydra.store.Callback;
 import org.xydra.store.GetEventsRequest;
 import org.xydra.store.XydraStore;
-import org.xydra.store.impl.gae.RevisionManager;
+import org.xydra.store.impl.gae.InstanceRevisionManager;
 import org.xydra.store.impl.gae.changes.GaeChange.Status;
 import org.xydra.store.impl.gae.changes.GaeEvents.AsyncValue;
 
@@ -47,8 +47,8 @@ public interface IGaeChangesService {
 	
 	/**
 	 * Calculate with model change log and try to progress the currently known
-	 * current revision number (from {@link RevisionManager} The result is
-	 * stored in {@link RevisionManager} and returned for convenience.
+	 * current revision number (from {@link InstanceRevisionManager} The result is
+	 * stored in {@link InstanceRevisionManager} and returned for convenience.
 	 * 
 	 * @return ...
 	 * 

@@ -14,6 +14,7 @@ import org.xydra.base.change.XTransaction;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
+import org.xydra.index.iterator.ReadOnlyIterator;
 import org.xydra.store.impl.gae.GaeOperation;
 
 

@@ -22,7 +22,7 @@ import org.xydra.log.LoggerFactory;
 import org.xydra.restless.utils.NanoClock;
 import org.xydra.store.impl.gae.DebugFormatter;
 import org.xydra.store.impl.gae.FutureUtils;
-import org.xydra.store.impl.gae.RevisionManager;
+import org.xydra.store.impl.gae.InstanceRevisionManager;
 import org.xydra.store.impl.gae.changes.GaeChange;
 import org.xydra.store.impl.gae.changes.GaeChange.Status;
 import org.xydra.store.impl.gae.changes.GaeLocks;
@@ -65,7 +65,7 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 	
 	private static final Logger log = LoggerFactory.getLogger(GaeExecutionServiceImpl3.class);
 	
-	private final RevisionManager revisionManager;
+	private final InstanceRevisionManager revisionManager;
 	private final IGaeChangesService changes;
 	private final IGaeSnapshotService snapshots;
 	private final XAddress modelAddr;
@@ -75,8 +75,8 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 	 * @param changes The change log used for the model to execute changes on.
 	 * @param snapshots A snapshot service for the model service
 	 */
-	public GaeExecutionServiceImpl3(RevisionManager revisionManager, IGaeChangesService changes,
-	        IGaeSnapshotService snapshots) {
+	public GaeExecutionServiceImpl3(InstanceRevisionManager revisionManager,
+	        IGaeChangesService changes, IGaeSnapshotService snapshots) {
 		this.revisionManager = revisionManager;
 		this.changes = changes;
 		this.modelAddr = changes.getModelAddress();
@@ -84,14 +84,12 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 		this.snapshots = snapshots;
 	}
 	
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see IGaeExecutionService#executeCommand(XCommand, XID)
-	 */
 	@Override
 	public long executeCommand(XCommand command, XID actorId) {
-		assert this.revisionManager.isInstanceModelRevisionInitialised();
+		/**
+		 * InstanceRevisionManager should have been updated before. This is
+		 * checked in GaeModelPersistence
+		 */
 		
 		log.debug("Execute " + DebugFormatter.format(command));
 		NanoClock c = new NanoClock().start();

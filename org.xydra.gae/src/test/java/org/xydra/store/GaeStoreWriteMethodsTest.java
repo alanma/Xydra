@@ -44,9 +44,9 @@ public class GaeStoreWriteMethodsTest extends AbstractSecureStoreWriteMethodsTes
 	
 	@After
 	public void tearDown() {
-		SynchronousTestCallback<Set<XID>> mids = new SynchronousTestCallback<Set<XID>>();
+		SynchronousCallbackWithOneResult<Set<XID>> mids = new SynchronousCallbackWithOneResult<Set<XID>>();
 		this.store.getModelIds(getCorrectUser(), getCorrectUserPasswordHash(), mids);
-		assertEquals(SynchronousTestCallback.SUCCESS, mids.waitOnCallback(Long.MAX_VALUE));
+		assertEquals(SynchronousCallbackWithOneResult.SUCCESS, mids.waitOnCallback(Long.MAX_VALUE));
 		XAddress repoAddr = XX.toAddress(getRepositoryId(), null, null, null);
 		for(XID modelId : mids.effect) {
 			if(modelId.toString().startsWith("internal--")) {

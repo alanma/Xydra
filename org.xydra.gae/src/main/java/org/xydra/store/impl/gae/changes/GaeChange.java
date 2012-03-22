@@ -53,7 +53,7 @@ public class GaeChange {
 	
 	private static final Logger log = LoggerFactory.getLogger(GaeChange.class);
 	
-	// GAE Entity (type=XCHANGE) property keys.
+	/* GAE Entity (type=XCHANGE) property keys. */
 	
 	/**
 	 * GAE Property key for the timestamp (in milliseconds) when the last thread
@@ -361,7 +361,8 @@ public class GaeChange {
 	 * @param status
 	 */
 	public void setStatus(Status status) {
-		assert !getStatus().isCommitted();
+		GaeAssert.gaeAssert(!getStatus().isCommitted());
+		assert !getStatus().isCommitted() : "A commited change cannot change its status";
 		this.status = status;
 		this.entity.setUnindexedProperty(PROP_STATUS, status.value);
 	}
@@ -440,6 +441,7 @@ public class GaeChange {
 		}
 		assert !getStatus().isCommitted();
 		long now = now();
+		// IMPROVE Use new API since AppEngine 1.6.5 to get time left
 		if(now - this.lastActivity > TIME_CRITICAL) {
 			// IMPROVE use a better exception type?
 			throw new VoluntaryTimeoutException("voluntarily timing out to prevent"

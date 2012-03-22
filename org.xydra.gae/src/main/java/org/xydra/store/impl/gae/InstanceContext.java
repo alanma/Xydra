@@ -8,9 +8,13 @@ import org.xydra.log.LoggerFactory;
 
 
 /**
- * A context object that can be passed around during a single web request.
- * Within one request, it is considered OK to retrieve fresh data only once from
- * the back-end store.
+ * A cache shared by the whole JVM. On GAE thats ca. 128 MB on a small instance
+ * minus application code (ca. 64 MB). So storing more than 64 MB here will
+ * result in a forced reboot.
+ * 
+ * TODO Needs better usage of space. Some items are almost must-cache, others
+ * are nice-to-cache. Add different importance levels & expire dates within each
+ * layer.
  * 
  * @author xamde
  */

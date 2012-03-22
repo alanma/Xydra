@@ -28,8 +28,8 @@ public class RevisionInfo implements Serializable {
 	private static final Logger log = LoggerFactory.getLogger(RevisionInfo.class);
 	
 	/**
-	 * Returned if a value is not set. For non-existing models or no known value
-	 * it's -1.
+	 * Returned if a value is not set. For non-existing models or if there is no
+	 * known value, the value is -1.
 	 */
 	public static final long NOT_SET = -1;
 	

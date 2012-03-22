@@ -1,6 +1,7 @@
 package org.xydra.store.impl.gae;
 
 import java.io.Serializable;
+import java.util.Map;
 
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -12,7 +13,7 @@ import com.google.appengine.api.datastore.KeyFactory;
 
 
 /**
- * A universal cache system for instanceCache, memcache and datastore.
+ * A universal <em>cache</em> system for instanceCache, memcache and datastore.
  * 
  * Datastore entries are stored as kind "XCACHE".
  * 
@@ -66,7 +67,10 @@ public class UniCache<T> {
 	 */
 	public void put(String key, T value, StorageOptions storeOpts) {
 		if(storeOpts.instance) {
-			InstanceContext.getInstanceCache().put(key, value);
+			Map<String,Object> instanceCache = InstanceContext.getInstanceCache();
+			synchronized(instanceCache) {
+				instanceCache.put(key, value);
+			}
 		}
 		if(storeOpts.memcache) {
 			Serializable memcacheValue = this.entryHandler.toSerializable(value);
@@ -81,23 +85,28 @@ public class UniCache<T> {
 	}
 	
 	/**
-	 * @param key ..
+	 * @param key must be unique for {@link InstanceContext}, Memcache AND
+	 *            datastore. Choose your keys wisely.
 	 * @param storeOpts where to look
 	 * @return null or stored entity
 	 */
 	@SuppressWarnings("unchecked")
 	public T get(String key, StorageOptions storeOpts) {
 		if(storeOpts.instance) {
-			Object o = InstanceContext.getInstanceCache().get(key);
+			Map<String,Object> instanceCache = InstanceContext.getInstanceCache();
+			Object o = null;
+			synchronized(instanceCache) {
+				o = instanceCache.get(key);
+			}
 			if(o != null) {
-				log.debug("Return " + key + " from instance cache");
+				log.debug("Return '" + key + "' from instance cache");
 				return (T)o;
 			}
 		}
 		if(storeOpts.memcache) {
 			Object o = XydraRuntime.getMemcache().get(key);
 			if(o != null) {
-				log.debug("Return " + key + " from memcache");
+				log.debug("Return '" + key + "' from memcache");
 				return this.entryHandler.fromSerializable((Serializable)o);
 			}
 		}
@@ -105,7 +114,7 @@ public class UniCache<T> {
 			Key datastoreKey = createCacheKey(key);
 			Entity entity = SyncDatastore.getEntity(datastoreKey);
 			if(entity != null) {
-				log.debug("Return " + key + " from datastore XCACHE entity");
+				log.debug("Return '" + key + "' from datastore XCACHE entity");
 				return this.entryHandler.fromEntity(entity);
 			}
 		}
