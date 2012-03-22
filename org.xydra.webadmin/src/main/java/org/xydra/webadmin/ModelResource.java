@@ -58,7 +58,7 @@ import org.xydra.server.util.XydraHtmlUtils;
 import org.xydra.store.ModelRevision;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.gae.GaeTestfixer;
-import org.xydra.store.impl.gae.changes.GaeChangesServiceImpl3;
+import org.xydra.store.impl.gae.changes.ChangesUtils;
 import org.xydra.store.rmof.impl.delegate.WritableRepositoryOnPersistence;
 
 
@@ -359,7 +359,7 @@ public class ModelResource {
 				List<XEvent> events = p.getEvents(modelAddress, 0, rev.revision());
 				XydraHtmlUtils.writeEvents(events, w);
 			} else if(style == MStyle.htmlchanges) {
-				GaeChangesServiceImpl3.renderChangeLog(modelAddress, w);
+				ChangesUtils.renderChangeLog(modelAddress, w);
 				w.flush();
 			}
 		}
