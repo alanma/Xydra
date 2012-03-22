@@ -14,7 +14,6 @@ import org.xydra.index.query.Pair;
 import org.xydra.index.query.Wildcard;
 
 
-
 /**
  * Implementation of {@link ITransitivePairIndex} that calculates all implied
  * pairs and stores them internally.
@@ -35,6 +34,7 @@ import org.xydra.index.query.Wildcard;
  * that StoredTransitivePairIndex
  * 
  * @author dscharrer
+ * @param <K> key type
  */
 public class FastStoredTransitivePairIndex<K> extends AbstractStoredTransitivePairIndex<K> {
 	
@@ -94,6 +94,8 @@ public class FastStoredTransitivePairIndex<K> extends AbstractStoredTransitivePa
 	/**
 	 * Recursively add implied pairs for all defined pairs left of k1.
 	 * 
+	 * @param k1
+	 * @param added
 	 * @param write added set may be modified.
 	 */
 	public void maybeAddedToGroups(K k1, Set<K> added, boolean write) {
@@ -201,6 +203,9 @@ public class FastStoredTransitivePairIndex<K> extends AbstractStoredTransitivePa
 	 * Recursively remove obsolete implied pairs for all defined pairs left of
 	 * k1.
 	 * 
+	 * @param k1
+	 * @param prev
+	 * @param removed
 	 * @param write removed set may be modified.
 	 */
 	public void maybeRemovedFromGroups(K k1, K prev, Set<K> removed, boolean write) {

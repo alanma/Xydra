@@ -4,6 +4,8 @@ package org.xydra.index.query;
  * A tuple storing two objects.
  * 
  * @author dscharrer
+ * @param <K>
+ * @param <L>
  */
 public class Pair<K, L> {
 	

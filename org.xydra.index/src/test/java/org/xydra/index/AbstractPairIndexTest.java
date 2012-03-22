@@ -85,9 +85,6 @@ public abstract class AbstractPairIndexTest extends TestCase {
 		
 	}
 	
-	/**
-	 * TODO this test is slow and not documented well enough to improve it
-	 */
 	@Test
 	public void testRandomOperations() {
 		

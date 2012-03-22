@@ -21,7 +21,7 @@ public class IndexUtils {
 	/**
 	 * DeIndex all entries matching the given query.
 	 * 
-	 * TODO IMPROVE consider removing while iterating
+	 * IMPROVE consider removing while iterating
 	 * 
 	 * @param mapMapIndex where to deIndex from
 	 * @param c1 constraint for first tuple position

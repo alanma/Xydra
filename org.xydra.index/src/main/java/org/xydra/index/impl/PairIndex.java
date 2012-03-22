@@ -11,12 +11,13 @@ import org.xydra.index.query.Pair;
 import org.xydra.index.query.Wildcard;
 
 
-
 /**
  * An implementation of IPairIndex that uses two separate indices to allow
  * efficient queries on both keys.
  * 
  * @author dscharrer
+ * @param <K>
+ * @param <L>
  */
 public class PairIndex<K, L> implements IPairIndex<K,L> {
 	
@@ -38,29 +39,29 @@ public class PairIndex<K, L> implements IPairIndex<K,L> {
 	}
 	
 	@Override
-    public void clear() {
+	public void clear() {
 		this.index_k1_k2.clear();
 		this.index_k2_k1.clear();
 	}
 	
 	@Override
-    public void index(K k1, L k2) {
+	public void index(K k1, L k2) {
 		this.index_k1_k2.index(k1, k2);
 		this.index_k2_k1.index(k2, k1);
 	}
 	
 	@Override
-    public void deIndex(K k1, L k2) {
+	public void deIndex(K k1, L k2) {
 		this.index_k1_k2.deIndex(k1, k2);
 		this.index_k2_k1.deIndex(k2, k1);
 	}
 	
 	@Override
-    public Iterator<Pair<K,L>> constraintIterator(Constraint<K> c1, Constraint<L> c2) {
+	public Iterator<Pair<K,L>> constraintIterator(Constraint<K> c1, Constraint<L> c2) {
 		
 		if(!c1.isStar() || c2.isStar()) {
-			return new AbstractTransformingIterator<KeyEntryTuple<K,L>,Pair<K,L>>(this.index_k1_k2
-			        .tupleIterator(c1, c2)) {
+			return new AbstractTransformingIterator<KeyEntryTuple<K,L>,Pair<K,L>>(
+			        this.index_k1_k2.tupleIterator(c1, c2)) {
 				
 				@Override
 				public Pair<K,L> transform(KeyEntryTuple<K,L> in) {
@@ -70,8 +71,8 @@ public class PairIndex<K, L> implements IPairIndex<K,L> {
 			};
 		}
 		
-		return new AbstractTransformingIterator<KeyEntryTuple<L,K>,Pair<K,L>>(this.index_k2_k1
-		        .tupleIterator(c2, c1)) {
+		return new AbstractTransformingIterator<KeyEntryTuple<L,K>,Pair<K,L>>(
+		        this.index_k2_k1.tupleIterator(c2, c1)) {
 			
 			@Override
 			public Pair<K,L> transform(KeyEntryTuple<L,K> in) {
@@ -82,7 +83,7 @@ public class PairIndex<K, L> implements IPairIndex<K,L> {
 	}
 	
 	@Override
-    public boolean contains(Constraint<K> c1, Constraint<L> c2) {
+	public boolean contains(Constraint<K> c1, Constraint<L> c2) {
 		
 		if(!c1.isStar())
 			return this.index_k1_k2.contains(c1, c2);
@@ -92,7 +93,7 @@ public class PairIndex<K, L> implements IPairIndex<K,L> {
 	}
 	
 	@Override
-    public boolean isEmpty() {
+	public boolean isEmpty() {
 		return this.index_k1_k2.isEmpty();
 	}
 	
@@ -118,17 +119,17 @@ public class PairIndex<K, L> implements IPairIndex<K,L> {
 	}
 	
 	@Override
-    public Iterator<Pair<K,L>> iterator() {
+	public Iterator<Pair<K,L>> iterator() {
 		return constraintIterator(new Wildcard<K>(), new Wildcard<L>());
 	}
 	
 	@Override
-    public Iterator<K> key1Iterator() {
+	public Iterator<K> key1Iterator() {
 		return this.index_k1_k2.keyIterator();
 	}
 	
 	@Override
-    public Iterator<L> key2Iterator() {
+	public Iterator<L> key2Iterator() {
 		return this.index_k2_k1.keyIterator();
 	}
 	

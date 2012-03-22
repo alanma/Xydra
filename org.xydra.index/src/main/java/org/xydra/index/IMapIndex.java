@@ -17,6 +17,7 @@ import org.xydra.index.query.KeyEntryTuple;
 public interface IMapIndex<K, E> extends IIndex {
 	
 	/**
+	 * @param key
 	 * @param name
 	 * @return true if the index contains an entry for the key
 	 */

@@ -16,6 +16,11 @@ public class XI {
 	/**
 	 * Check if the two objects are equal. The given objects can be null. Two
 	 * null objects are equals and any non-null object is not equal to null.
+	 * 
+	 * @param a
+	 * @param b
+	 * @return true if a and b are the same reference (can be both null) or if
+	 *         they are not null and equal.
 	 */
 	public static boolean equals(Object a, Object b) {
 		return a == b || (a != null && a.equals(b));
@@ -23,6 +28,9 @@ public class XI {
 	
 	/**
 	 * Checks if two iterators have the same elements in the same order.
+	 * 
+	 * @param a
+	 * @param b
 	 * 
 	 * @return true if both iterators have the same number of elements and each
 	 *         pair of elements is equal.

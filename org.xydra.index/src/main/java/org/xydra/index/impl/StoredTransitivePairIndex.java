@@ -12,7 +12,6 @@ import org.xydra.index.query.Pair;
 import org.xydra.index.query.Wildcard;
 
 
-
 /**
  * Implementation of {@link ITransitivePairIndex} that calculates all implied
  * pairs and stores them internally.
@@ -27,6 +26,7 @@ import org.xydra.index.query.Wildcard;
  * number of defined pairs (k3,*) | (k3,k1) is implied }
  * 
  * @author dscharrer
+ * @param <K>
  */
 public class StoredTransitivePairIndex<K> extends AbstractStoredTransitivePairIndex<K> {
 	

@@ -5,12 +5,15 @@ import java.util.Iterator;
 import org.xydra.index.query.Constraint;
 
 
-
 /**
  * An implementation that uses several indexes internally and chooses among
  * them.
  * 
  * @author voelkel
+ * @param <K>
+ * @param <L>
+ * @param <M>
+ * @param <E>
  */
 public interface TripleSetIndex<K, L, M, E> {
 	

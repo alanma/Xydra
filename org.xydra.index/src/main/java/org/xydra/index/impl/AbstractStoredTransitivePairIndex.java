@@ -12,7 +12,6 @@ import org.xydra.index.query.Pair;
 import org.xydra.index.query.Wildcard;
 
 
-
 /**
  * Implementation of {@link ITransitivePairIndex} that calculates all implied
  * pairs and stores them internally.
@@ -27,6 +26,7 @@ import org.xydra.index.query.Wildcard;
  * number of defined pairs (k3,*) | (k3,k1) is implied }
  * 
  * @author dscharrer
+ * @param <K> key type
  */
 abstract public class AbstractStoredTransitivePairIndex<K> implements ITransitivePairIndex<K> {
 	
@@ -47,38 +47,38 @@ abstract public class AbstractStoredTransitivePairIndex<K> implements ITransitiv
 	}
 	
 	@Override
-    public boolean implies(Constraint<K> c1, Constraint<K> c2) {
+	public boolean implies(Constraint<K> c1, Constraint<K> c2) {
 		return this.implied.contains(c1, c2);
 	}
 	
 	@Override
-    public Iterator<Pair<K,K>> transitiveIterator(Constraint<K> c1, Constraint<K> c2) {
+	public Iterator<Pair<K,K>> transitiveIterator(Constraint<K> c1, Constraint<K> c2) {
 		return this.implied.constraintIterator(c1, c2);
 	}
 	
 	@Override
-    public Iterator<Pair<K,K>> constraintIterator(Constraint<K> c1, Constraint<K> c2) {
+	public Iterator<Pair<K,K>> constraintIterator(Constraint<K> c1, Constraint<K> c2) {
 		return this.direct.constraintIterator(c1, c2);
 	}
 	
 	@Override
-    public boolean contains(Constraint<K> c1, Constraint<K> c2) {
+	public boolean contains(Constraint<K> c1, Constraint<K> c2) {
 		return this.direct.contains(c1, c2);
 	}
 	
 	@Override
-    public void clear() {
+	public void clear() {
 		this.direct.clear();
 		this.implied.clear();
 	}
 	
 	@Override
-    public boolean isEmpty() {
+	public boolean isEmpty() {
 		return this.direct.isEmpty();
 	}
 	
 	@Override
-    public void index(K k1, K k2) {
+	public void index(K k1, K k2) {
 		
 		if(completesCycle(k1, k2))
 			throw new CycleException();
@@ -96,11 +96,14 @@ abstract public class AbstractStoredTransitivePairIndex<K> implements ITransitiv
 	
 	/**
 	 * Add all new pairs implied after the pair (k1,k2) has been added.
+	 * 
+	 * @param k1
+	 * @param k2
 	 */
 	abstract public void addImplied(K k1, K k2);
 	
 	@Override
-    public void deIndex(K k1, K k2) {
+	public void deIndex(K k1, K k2) {
 		
 		this.direct.deIndex(k1, k2);
 		
@@ -110,6 +113,9 @@ abstract public class AbstractStoredTransitivePairIndex<K> implements ITransitiv
 	
 	/**
 	 * Remove all obsolete implied pairs after pair (k1,k2) has been removed.
+	 * 
+	 * @param k1
+	 * @param k2
 	 */
 	abstract public void removeImplied(K k1, K k2);
 	
@@ -149,17 +155,17 @@ abstract public class AbstractStoredTransitivePairIndex<K> implements ITransitiv
 	}
 	
 	@Override
-    public Iterator<Pair<K,K>> iterator() {
+	public Iterator<Pair<K,K>> iterator() {
 		return constraintIterator(new Wildcard<K>(), new Wildcard<K>());
 	}
 	
 	@Override
-    public Iterator<K> key1Iterator() {
+	public Iterator<K> key1Iterator() {
 		return this.direct.key1Iterator();
 	}
 	
 	@Override
-    public Iterator<K> key2Iterator() {
+	public Iterator<K> key2Iterator() {
 		return this.direct.key2Iterator();
 	}
 	

@@ -13,10 +13,15 @@ import org.xydra.index.query.KeyKeyEntryTuple;
  * 
  * 
  * @param <K> key type
+ * @param <L> key type
+ * @param <M> key type
  */
 public interface ITripleIndex<K, L, M> extends IIndex {
 	
 	/**
+	 * @param c1
+	 * @param c2
+	 * @param c3
 	 * @return true if there is a triple in the index where s matches c1, p
 	 *         matches c2 and o matches c2
 	 */

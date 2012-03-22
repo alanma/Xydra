@@ -12,6 +12,7 @@ import org.xydra.index.query.KeyKeyEntryTuple;
  * Exactly one entry can be indexed for a certain key-combination.
  * 
  * @param <K> key type
+ * @param <L> key2 type
  * @param <E> entity type
  * 
  * @author dscharrer

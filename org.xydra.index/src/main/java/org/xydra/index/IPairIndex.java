@@ -6,11 +6,12 @@ import org.xydra.index.query.Constraint;
 import org.xydra.index.query.Pair;
 
 
-
 /**
  * An index for pairs of keys that supports queries on both keys.
  * 
  * @author dscharrer
+ * @param <K>
+ * @param <L>
  */
 public interface IPairIndex<K, L> extends IIndex, Iterable<Pair<K,L>> {
 	
@@ -24,11 +25,17 @@ public interface IPairIndex<K, L> extends IIndex, Iterable<Pair<K,L>> {
 	/**
 	 * Add a new pair (k1,k2) to the index. If the pair was already in the
 	 * index, nothing is changed.
+	 * 
+	 * @param k1
+	 * @param k2
 	 */
 	void index(K k1, L k2);
 	
 	/**
 	 * Remove the pair (k1,k2) from the index.
+	 * 
+	 * @param k1
+	 * @param k2
 	 */
 	void deIndex(K k1, L k2);
 	

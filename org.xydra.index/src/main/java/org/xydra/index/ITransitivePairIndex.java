@@ -6,7 +6,6 @@ import org.xydra.index.query.Constraint;
 import org.xydra.index.query.Pair;
 
 
-
 /**
  * An index for pairs of keys that supports queries on both keys. Additionally
  * queries for pairs that are implied by a transitive property on the pairs are
@@ -15,6 +14,7 @@ import org.xydra.index.query.Pair;
  * pairs (s,e), (s,k) and (k,e)).
  * 
  * @author dscharrer
+ * @param <K> type for both parts of the pair
  */
 public interface ITransitivePairIndex<K> extends IPairIndex<K,K> {
 	
@@ -52,7 +52,7 @@ public interface ITransitivePairIndex<K> extends IPairIndex<K,K> {
 	 * @throws CycleException if adding the pair would close a cycle
 	 */
 	@Override
-    void index(K k1, K k2) throws CycleException;
+	void index(K k1, K k2) throws CycleException;
 	
 	/**
 	 * This iterates over the defined pairs, not the implied ones.
@@ -60,6 +60,6 @@ public interface ITransitivePairIndex<K> extends IPairIndex<K,K> {
 	 * @return an Iterator.
 	 */
 	@Override
-    Iterator<Pair<K,K>> iterator();
+	Iterator<Pair<K,K>> iterator();
 	
 }

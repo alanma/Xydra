@@ -17,6 +17,7 @@ import java.util.Iterator;
  * Enumeration in the Java collections framework.
  * 
  * @author Max Voelkel
+ * @param <E> entry type
  * @see Iterator
  */
 public interface ClosableIterator<E> extends Iterator<E> {

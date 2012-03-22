@@ -11,7 +11,9 @@ import org.xydra.index.query.KeyKeyKeyEntryTuple;
  * 
  *         Multiple entries can be indexed for a certain key-combination.
  * 
- * @param <K> key type
+ * @param <K> key1 type
+ * @param <L> key2 type
+ * @param <M> key3 type
  * @param <E> entity type
  */
 public interface IMapMapMapSetIndex<K, L, M, E> extends IIndex {

@@ -41,8 +41,6 @@ public class TripleIndex<K, L, M> implements ITripleIndex<K,L,M> {
 	 * 
 	 * Note: This index is not transient. This index suffices to reconstruct the
 	 * state of this object.
-	 * 
-	 * FIXME restore transient indices when deserializing
 	 */
 	protected IMapMapSetIndex<K,L,M> index_s_p_o_stmt;
 	
@@ -53,14 +51,14 @@ public class TripleIndex<K, L, M> implements ITripleIndex<K,L,M> {
 	}
 	
 	@Override
-    public void clear() {
+	public void clear() {
 		this.index_o_s_stmt.clear();
 		this.index_p_o_stmt.clear();
 		this.index_s_p_o_stmt.clear();
 	}
 	
 	@Override
-    public boolean contains(Constraint<K> c1, Constraint<L> c2, Constraint<M> c3) {
+	public boolean contains(Constraint<K> c1, Constraint<L> c2, Constraint<M> c3) {
 		// deal with the eight patterns
 		if(
 		// spo -> s_p_o
@@ -71,7 +69,7 @@ public class TripleIndex<K, L, M> implements ITripleIndex<K,L,M> {
 		        (!c1.isStar() && c2.isStar() && c3.isStar()) ||
 		        // *** -> s_p_o
 		        (c1.isStar() && c2.isStar() && c3.isStar())
-
+		
 		) {
 			return this.index_s_p_o_stmt.contains(c1, c2, c3);
 		} else if(
@@ -79,7 +77,7 @@ public class TripleIndex<K, L, M> implements ITripleIndex<K,L,M> {
 		(c1.isStar() && !c2.isStar() && !c3.isStar()) ||
 		// *p* -> p_o
 		        (c1.isStar() && !c2.isStar() && c3.isStar())
-
+		
 		) {
 			return this.index_p_o_stmt.contains(c2, c3);
 		} else if(
@@ -87,7 +85,7 @@ public class TripleIndex<K, L, M> implements ITripleIndex<K,L,M> {
 		(!c1.isStar() && c2.isStar() && !c3.isStar()) ||
 		// **o -> o_s
 		        (c1.isStar() && c2.isStar() && !c3.isStar())
-
+		
 		) {
 			return this.index_o_s_stmt.contains(c3, c1);
 		}
@@ -103,14 +101,14 @@ public class TripleIndex<K, L, M> implements ITripleIndex<K,L,M> {
 	}
 	
 	@Override
-    public void deIndex(K s, L p, M o) {
+	public void deIndex(K s, L p, M o) {
 		this.index_s_p_o_stmt.deIndex(s, p, o);
 		this.index_o_s_stmt.deIndex(o, s);
 		this.index_p_o_stmt.deIndex(p, o);
 	}
 	
 	@Override
-    public void dump() {
+	public void dump() {
 		System.out.println("Dumping s-p-o-index (there are others)");
 		Iterator<KeyKeyEntryTuple<K,L,M>> it = this.index_s_p_o_stmt.tupleIterator(
 		        new Wildcard<K>(), new Wildcard<L>(), new Wildcard<M>());
@@ -128,7 +126,7 @@ public class TripleIndex<K, L, M> implements ITripleIndex<K,L,M> {
 	 *         the given constraints
 	 */
 	@Override
-    public Iterator<KeyKeyEntryTuple<K,L,M>> getTriples(Constraint<K> c1, Constraint<L> c2,
+	public Iterator<KeyKeyEntryTuple<K,L,M>> getTriples(Constraint<K> c1, Constraint<L> c2,
 	        Constraint<M> c3) {
 		if(c1 == null)
 			throw new IllegalArgumentException("c1 was null");
@@ -142,14 +140,18 @@ public class TripleIndex<K, L, M> implements ITripleIndex<K,L,M> {
 	}
 	
 	@Override
-    public void index(K s, L p, M o) {
+	public void index(K s, L p, M o) {
 		this.index_s_p_o_stmt.index(s, p, o);
+		transientIndex(s, p, o);
+	}
+	
+	private void transientIndex(K s, L p, M o) {
 		this.index_o_s_stmt.index(o, s);
 		this.index_p_o_stmt.index(p, o);
 	}
 	
 	@Override
-    public IMapMapSetDiff<K,L,M> computeDiff(ITripleIndex<K,L,M> other) {
+	public IMapMapSetDiff<K,L,M> computeDiff(ITripleIndex<K,L,M> other) {
 		TripleIndex<K,L,M> otherIndex = (TripleIndex<K,L,M>)other;
 		IMapMapSetDiff<K,L,M> spoDiff = this.index_s_p_o_stmt
 		        .computeDiff(otherIndex.index_s_p_o_stmt);
@@ -157,8 +159,25 @@ public class TripleIndex<K, L, M> implements ITripleIndex<K,L,M> {
 	}
 	
 	@Override
-    public boolean isEmpty() {
+	public boolean isEmpty() {
 		return this.index_s_p_o_stmt.isEmpty();
+	}
+	
+	/**
+	 * This method should be called after deserialisation to rebuild the
+	 * transient indexes. Deserialisation in GWT and plain Java is quite
+	 * different and incompatible, so this is not called automatically. For
+	 * plain Java see
+	 * http://java.sun.com/developer/technicalArticles/Programming
+	 * /serialization/
+	 */
+	public void rebuildAfterDeserialize() {
+		Iterator<KeyKeyEntryTuple<K,L,M>> it = this.index_s_p_o_stmt.tupleIterator(
+		        new Wildcard<K>(), new Wildcard<L>(), new Wildcard<M>());
+		while(it.hasNext()) {
+			KeyKeyEntryTuple<K,L,M> t = it.next();
+			transientIndex(t.getKey1(), t.getKey2(), t.getEntry());
+		}
 	}
 	
 }
