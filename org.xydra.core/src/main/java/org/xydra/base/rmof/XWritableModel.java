@@ -18,8 +18,8 @@ public interface XWritableModel extends XReadableModel {
 	 * it to this {@link XWritableModel} or returns the already existing
 	 * {@link XWritableObject} if the given {@link XID} was already taken.
 	 * 
-	 * @param objectId The {@link XID} for the {@link XWritableObject} which is to be
-	 *            created
+	 * @param objectId The {@link XID} for the {@link XWritableObject} which is
+	 *            to be created
 	 * 
 	 * @return the newly created {@link XWritableObject} or the already existing
 	 *         {@link XWritableObject} if the given {@link XID} was already
@@ -38,8 +38,8 @@ public interface XWritableModel extends XReadableModel {
 	 * Removes the {@link XWritableObject} with the given {@link XID} from this
 	 * {@link XWritableModel}.
 	 * 
-	 * @param object The {@link XID} of the {@link XWritableObject} which is to
-	 *            be removed
+	 * @param objectId The {@link XID} of the {@link XWritableObject} which is
+	 *            to be removed
 	 * 
 	 * @return true, if an {@link XWritableObject} with the given {@link XID}
 	 *         did exist in this {@link XWritableModel} and could be removed

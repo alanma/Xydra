@@ -59,6 +59,8 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
 	 *            be null
 	 * @param modelId The {@link XID} of the added {@link XModel} - must not be
 	 *            null
+	 * @param modelRev
+	 * @param inTrans
 	 * @return An {@link XRepositoryEvent} of the add-type
 	 * @throws IllegalArgumentException if the given {@link XAddress} doesn't
 	 *             refer to an {@link XRepository} or if the given modelId is
@@ -81,7 +83,8 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
 	 *            not be null
 	 * @param modelId The {@link XID} of the removed {@link XModel} - must not
 	 *            be null
-	 * @param modelRevison TODO document
+	 * @param modelRevison of the remove event
+	 * @param inTrans if in transaction
 	 * @return An {@link XRepositoryEvent} of the add-type
 	 * @throws IllegalArgumentException if the given {@link XAddress} doesn't
 	 *             refer to an {@link XRepository}, if the given modelId is null

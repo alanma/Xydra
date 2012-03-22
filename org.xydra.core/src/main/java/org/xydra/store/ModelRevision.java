@@ -10,11 +10,11 @@ import org.xydra.base.change.XCommand;
  * model can be in. The revision number is always getting bigger, although not
  * necessarily in increments of one. However, even if the model does not exist
  * -- because it has been deleted -- it still has a revision number. This makes
- * synchronising models much easier to implement an causes few confusion for
+ * synchronising models much easier to implement. And causes few confusion for
  * users, we hope.
  * 
  * Contains a {@link #revision()}, which is the model's current revision number.
- * Non-existing models are signalled as {@link XCommand#FAILED}, i.e. those that
+ * Non-existing models are signaled as {@link XCommand#FAILED}, i.e. those that
  * have just been removed from the repository.
  * 
  * Contains also a {@link #modelExists()} flag which is true if the model has

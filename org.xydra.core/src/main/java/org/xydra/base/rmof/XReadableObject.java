@@ -40,7 +40,7 @@ public interface XReadableObject extends XEntity, Iterable<XID> {
 	 * Checks whether this {@link XReadableObject} contains an
 	 * {@link XReadableField} with the given {@link XID}
 	 * 
-	 * @param id The {@link XID} which is to be checked
+	 * @param fieldId The {@link XID} which is to be checked
 	 * @return true, if this {@link XReadableObject} contains an
 	 *         {@link XReadableField} with the given {@link XID}, false
 	 *         otherwise
@@ -64,7 +64,7 @@ public interface XReadableObject extends XEntity, Iterable<XID> {
 	 * @throws IllegalStateException if this object has already been removed
 	 */
 	@Override
-    @ReadOperation
+	@ReadOperation
 	Iterator<XID> iterator();
 	
 }

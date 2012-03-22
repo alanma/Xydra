@@ -36,6 +36,9 @@ public class XCompareUtils {
 	 * 
 	 * Parent-{@link XReadableObject}s, if they exist, are not compared
 	 * 
+	 * @param fieldA
+	 * @param fieldB
+	 * 
 	 * @return true if the two {@link XReadableField}s have the same state.
 	 */
 	// 2010-10-27: used here + in several different functionality tests
@@ -78,6 +81,9 @@ public class XCompareUtils {
 	 * checks the revision number.
 	 * 
 	 * Parent-{@link XRepository}s, if they exist, are not compared.
+	 * 
+	 * @param modelA
+	 * @param modelB
 	 * 
 	 * @return true if the two {@link XReadableModel}s have the same state.
 	 */
@@ -205,6 +211,9 @@ public class XCompareUtils {
 	 * {@link XCompareUtils#equalTree(XReadableRepository, XReadableRepository)}
 	 * but also checks the revision number.
 	 * 
+	 * @param repoA
+	 * @param repoB
+	 * 
 	 * @return true if the two {@link XReadableRepository}s have the same state.
 	 */
 	public static boolean equalState(XReadableRepository repoA, XReadableRepository repoB) {
@@ -261,6 +270,9 @@ public class XCompareUtils {
 	 * 
 	 * Parent-{@link XReadableObject}s, if they exist, are not compared.
 	 * 
+	 * @param fieldA
+	 * @param fieldB
+	 * 
 	 * @return true if the two {@link XReadableField}s represent the same
 	 *         subtree.
 	 */
@@ -295,6 +307,9 @@ public class XCompareUtils {
 	 * ignores the revision number.
 	 * 
 	 * Parent-{@link XReadableRepository}s, if they exist, are not compared.
+	 * 
+	 * @param modelA
+	 * @param modelB
 	 * 
 	 * @return true if the two {@link XReadableModel}s represent the same tree.
 	 */
@@ -348,6 +363,9 @@ public class XCompareUtils {
 	 * but ignores the revision number.
 	 * 
 	 * Parent-{@link XReadableModel}s, if they exist, are not compared.
+	 * 
+	 * @param objectA
+	 * @param objectB
 	 * 
 	 * @return true if the two {@link XReadableObject}s represent the same
 	 *         subtree.
@@ -403,6 +421,9 @@ public class XCompareUtils {
 	 * the revision number.
 	 * 
 	 * Parent-{@link XReadableModel}s, if they exist, are not compared.
+	 * 
+	 * @param repoA
+	 * @param repoB
 	 * 
 	 * @return true if the two {@link XReadableRepository}s represent the same
 	 *         tree.

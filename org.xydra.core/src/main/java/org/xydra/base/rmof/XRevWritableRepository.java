@@ -27,6 +27,8 @@ public interface XRevWritableRepository extends XWritableRepository {
 	 * 
 	 * This overwrites any existing model in this repository with the same
 	 * {@link XID}.
+	 * 
+	 * @param model
 	 */
 	@ModificationOperation
 	void addModel(XRevWritableModel model);

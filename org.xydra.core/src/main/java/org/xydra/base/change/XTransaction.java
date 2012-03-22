@@ -72,6 +72,7 @@ import org.xydra.core.model.XSynchronizesChanges;
 public interface XTransaction extends XCommand, Iterable<XAtomicCommand> {
 	
 	/**
+	 * @param index
 	 * @return The {@link XCommand} at the given index in this transaction.
 	 */
 	XAtomicCommand getCommand(int index);

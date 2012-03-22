@@ -46,9 +46,10 @@ public abstract class AbstractAllowAllStoreReadMethodsTest extends AbstractStore
 	}
 	
 	/**
-	 * Returns a new instance of AllowAllStore initialized with the given
-	 * {@link DelegatingAllowAllStore}. This makes it possible to reuse this
-	 * test with different instantiations.
+	 * @param xydraPersistence
+	 * @return a new instance of AllowAllStore initialized with the given
+	 *         {@link DelegatingAllowAllStore}. This makes it possible to reuse
+	 *         this test with different instantiations.
 	 */
 	public DelegatingAllowAllStore getNewStore(XydraPersistence xydraPersistence) {
 		return new DelegatingAllowAllStore(xydraPersistence);

@@ -262,6 +262,7 @@ public interface XCommandFactory {
 	 *            {@link XValue} shall be added to.
 	 * @param objectId The {@link XID} of the {@link XObject} containing the
 	 *            {@link XField} that the {@link XValue} is to be added to.
+	 * @param fieldId
 	 * @param fieldRevision The revision number of the {@link XField} that the
 	 *            {@link XValue} is to be added to.
 	 * 
@@ -292,6 +293,7 @@ public interface XCommandFactory {
 	 *            {@link XValue} shall be added to.
 	 * @param objectId The {@link XID} of the {@link XObject} containing the
 	 *            {@link XField} that the {@link XValue} is to be added to.
+	 * @param fieldId
 	 * @param fieldRevision The revision number of the {@link XField} that the
 	 *            {@link XValue} is to be added to. Since this method is used to
 	 *            create safe commands, passing XCommand.FORCED as the revision
@@ -318,6 +320,7 @@ public interface XCommandFactory {
 	 *            {@link XValue} shall be added to.
 	 * @param objectId The {@link XID} of the {@link XObject} containing the
 	 *            {@link XField} that the {@link XValue} is to be added to.
+	 * @param fieldId
 	 * @param value The {@link XValue} which is to be added.
 	 * @return an {@link XFieldCommand} with the specified settings
 	 */
@@ -398,6 +401,7 @@ public interface XCommandFactory {
 	 *            {@link XValue} shall be changed.
 	 * @param objectId The {@link XID} of the {@link XObject} containing the
 	 *            {@link XField} which {@link XValue} is to be changed.
+	 * @param fieldId
 	 * @param fieldRevision The revision number of the {@link XField} which
 	 *            {@link XValue} is to be changed.
 	 * 
@@ -429,6 +433,7 @@ public interface XCommandFactory {
 	 *            {@link XValue} shall be changed.
 	 * @param objectId The {@link XID} of the {@link XObject} containing the
 	 *            {@link XField} which {@link XValue} is to be changed.
+	 * @param fieldId
 	 * @param fieldRevision The revision number of the {@link XField} which
 	 *            {@link XValue} is to be changed. Since this method is used to
 	 *            create safe commands, passing XCommand.FORCED as the revision
@@ -455,6 +460,7 @@ public interface XCommandFactory {
 	 *            {@link XValue} shall be changed.
 	 * @param objectId The {@link XID} of the {@link XObject} containing the
 	 *            {@link XField} which {@link XValue} is to be changed.
+	 * @param fieldId
 	 * @param value The {@link XValue} to which the current {@link XValue} of
 	 *            the {@link XField} is to be changed to.
 	 * @return an {@link XFieldCommand} with the specified settings
@@ -536,6 +542,7 @@ public interface XCommandFactory {
 	 *            {@link XObject} that the {@link XField} shall be added to.
 	 * @param objectId The {@link XID} of the {@link XObject} that the
 	 *            {@link XField} is to be added to.
+	 * @param fieldId
 	 * @param fieldRevision The revision number of the {@link XField} that is to
 	 *            be removed.
 	 * 
@@ -563,6 +570,7 @@ public interface XCommandFactory {
 	 *            {@link XObject} that the {@link XField} shall be added to.
 	 * @param objectId The {@link XID} of the {@link XObject} that the
 	 *            {@link XField} is to be added to.
+	 * @param fieldId
 	 * @param fieldRevision The revision number of the {@link XField} that is to
 	 *            be removed. Since this method is used to create safe commands,
 	 *            passing XCommand.FORCED as the revision number will throw a
@@ -586,6 +594,7 @@ public interface XCommandFactory {
 	 *            {@link XObject} that the {@link XField} shall be added to.
 	 * @param objectId The {@link XID} of the {@link XObject} that the
 	 *            {@link XField} is to be added to.
+	 * @param fieldId
 	 * @return an {@link XObjectCommand} with the specified settings
 	 */
 	public XObjectCommand createForcedRemoveFieldCommand(XID repositoryId, XID modelId,
@@ -893,6 +902,7 @@ public interface XCommandFactory {
 	 *            {@link XValue} shall be removed from.
 	 * @param objectId The {@link XID} of the {@link XObject} containing the
 	 *            {@link XField} that the {@link XValue} is to be removed from.
+	 * @param fieldId
 	 * @param fieldRevision The revision number of the {@link XField} that the
 	 *            {@link XValue} is to be removed from.
 	 * 
@@ -922,6 +932,7 @@ public interface XCommandFactory {
 	 *            {@link XValue} shall be removed from.
 	 * @param objectId The {@link XID} of the {@link XObject} containing the
 	 *            {@link XField} that the {@link XValue} is to be removed from.
+	 * @param fieldId
 	 * @param fieldRevision The revision number of the {@link XField} that the
 	 *            {@link XValue} is to be removed from. Since this method is
 	 *            used to create safe commands, passing XCommand.FORCED as the
@@ -946,6 +957,7 @@ public interface XCommandFactory {
 	 *            {@link XValue} shall be removed from.
 	 * @param objectId The {@link XID} of the {@link XObject} containing the
 	 *            {@link XField} that the {@link XValue} is to be removed from.
+	 * @param fieldId
 	 * @return an {@link XFieldCommand} with the specified settings
 	 */
 	public XFieldCommand createForcedRemoveValueCommand(XID repositoryId, XID modelId,

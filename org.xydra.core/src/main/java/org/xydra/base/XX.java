@@ -32,11 +32,12 @@ public class XX {
 	}
 	
 	/**
-	 * Constructs an {@link XAddress} that refers to the {@link XField} with the
-	 * given fieldId in the {@link XObject} referred to by objectAddress.
-	 * 
 	 * @param objectAddress An address of an {@link XObject}. If this is null an
 	 *            address for a field without a parent is constructed.
+	 * @param fieldId
+	 * @return an {@link XAddress} that refers to the {@link XField} with the
+	 *         given fieldId in the {@link XObject} referred to by
+	 *         objectAddress.
 	 * @throws IllegalArgumentException if objectAddress doesn't refer to an
 	 *             {@link XObject}
 	 */
@@ -52,12 +53,13 @@ public class XX {
 	}
 	
 	/**
-	 * Constructs an {@link XAddress} that refers to the {@link XField} with the
-	 * given fieldId in the {link XObject} with the given objectId in the
-	 * {@link XModel} referred to by modelAddress.
-	 * 
 	 * @param modelAddress An address of an {@link XModel}. If this is null an
 	 *            address for a field without a model is constructed.
+	 * @param objectId
+	 * @param fieldId
+	 * @return an {@link XAddress} that refers to the {@link XField} with the
+	 *         given fieldId in the {link XObject} with the given objectId in
+	 *         the {@link XModel} referred to by modelAddress.
 	 * @throws IllegalArgumentException if modelAddress doesn't refer to an
 	 *             {@link XModel}
 	 */
@@ -72,14 +74,16 @@ public class XX {
 	}
 	
 	/**
-	 * Constructs an {@link XAddress} that refers to the {@link XField} with the
-	 * given fieldId in the {@link XObject} with the given objectId in the
-	 * {@link XModel} with the given modelId in the {@link XRepository} referred
-	 * to by repositoryAddress.
-	 * 
 	 * @param repositoryAddress An address of an {@link XRepository}. If this is
 	 *            null an address for a field without a repository is
 	 *            constructed.
+	 * @param modelId
+	 * @param objectId
+	 * @param fieldId
+	 * @return an {@link XAddress} that refers to the {@link XField} with the
+	 *         given fieldId in the {@link XObject} with the given objectId in
+	 *         the {@link XModel} with the given modelId in the
+	 *         {@link XRepository} referred to by repositoryAddress.
 	 * @throws IllegalArgumentException if repositoryAddress doesn't refer to an
 	 *             {@link XRepository}
 	 */
@@ -96,6 +100,7 @@ public class XX {
 	
 	/**
 	 * @param mofAddress XAddress of a model, object or field.
+	 * @return a model address
 	 * @throws IllegalArgumentException if the given address addresses a
 	 *             repository
 	 */
@@ -109,12 +114,12 @@ public class XX {
 	}
 	
 	/**
-	 * Constructs an {@link XAddress} that refers to the {@link XModel} with the
-	 * given modelId in the {@link XRepository} referred to by
-	 * repositoryAddress.
-	 * 
 	 * @param repositoryAddress An address of an {@link XRepository}. If this is
 	 *            null an address for a model without a parent is constructed.
+	 * @param modelId
+	 * @return an {@link XAddress} that refers to the {@link XModel} with the
+	 *         given modelId in the {@link XRepository} referred to by
+	 *         repositoryAddress.
 	 * @throws IllegalArgumentException if repositoryAddress doesn't refer to an
 	 *             {@link XRepository}
 	 */
@@ -139,11 +144,11 @@ public class XX {
 	}
 	
 	/**
-	 * Constructs an {@link XAddress} that refers to the {@link XObject} with
-	 * the given objectId in the {@link XModel} referred to by modelAddress.
-	 * 
 	 * @param modelAddress An address of an {@link XModel}. If this is null an
 	 *            address for an object without a parent is constructed.
+	 * @param objectId
+	 * @return an {@link XAddress} that refers to the {@link XObject} with the
+	 *         given objectId in the {@link XModel} referred to by modelAddress.
 	 * @throws IllegalArgumentException if modelAddress doesn't refer to an
 	 *             {@link XModel}
 	 */
@@ -161,13 +166,14 @@ public class XX {
 	}
 	
 	/**
-	 * Constructs an {@link XAddress} that refers to the {@link XObject} width
-	 * the given objectId in the {@link XModel} with the given modelId in the
-	 * {@link XRepository} referred to by repositoryAddress.
-	 * 
 	 * @param repositoryAddress An address of an {@link XRepository}. If this is
 	 *            null an address for an object without a repository is
 	 *            constructed.
+	 * @param modelId
+	 * @param objectId
+	 * @return an {@link XAddress} that refers to the {@link XObject} width the
+	 *         given objectId in the {@link XModel} with the given modelId in
+	 *         the {@link XRepository} referred to by repositoryAddress.
 	 * @throws IllegalArgumentException if repositoryAddress doesn't refer to an
 	 *             {@link XRepository}
 	 */
@@ -256,16 +262,16 @@ public class XX {
 	}
 	
 	/**
-	 * Create a {@link XModel} with the same initial state as the given model
-	 * snapshot. The returned model may be backed by the provided XReadableModel
-	 * instance, so it should no longer be modified directly or the behavior of
-	 * the model is undefined.
-	 * 
 	 * Use {@link XCopyUtils#copyModel(XID, String, XReadableModel)} if the
 	 * resulting model should not be backed by the XReadableModel.
 	 * 
 	 * @param actor The session actor to use for the returned model.
 	 * @param password The password corresponding to the given actor.
+	 * @param modelSnapshot
+	 * @return a {@link XModel} with the same initial state as the given model
+	 *         snapshot. The returned model may be backed by the provided
+	 *         XReadableModel instance, so it should no longer be modified
+	 *         directly or the behavior of the model is undefined.
 	 */
 	public static XModel wrap(XID actor, String password, XReadableModel modelSnapshot) {
 		if(modelSnapshot instanceof XRevWritableModel) {
@@ -276,16 +282,16 @@ public class XX {
 	}
 	
 	/**
-	 * Create an {@link XObject} with the same initial state as the given object
-	 * snapshot. The returned object may be backed by the provided
-	 * XReadableObject instance, so it should no longer be modified directly or
-	 * the behavior of the model is undefined.
-	 * 
 	 * Use {@link XCopyUtils#copyObject(XID, String, XReadableObject)} if the
 	 * resulting object should not be backed by the XReadableObject.
 	 * 
 	 * @param actor The session actor to use for the returned object.
 	 * @param password The password corresponding to the given actor.
+	 * @param objectSnapshot
+	 * @return an {@link XObject} with the same initial state as the given
+	 *         object snapshot. The returned object may be backed by the
+	 *         provided XReadableObject instance, so it should no longer be
+	 *         modified directly or the behavior of the model is undefined.
 	 */
 	public static XObject wrap(XID actor, String password, XReadableObject objectSnapshot) {
 		if(objectSnapshot instanceof XRevWritableObject) {

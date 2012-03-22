@@ -29,8 +29,10 @@ public class HasChanged implements XRepositoryEventListener, XModelEventListener
         XObjectEventListener, XFieldEventListener, XTransactionEventListener {
 	
 	/**
-	 * Listen for any fired change events sent by any object or field in the
-	 * model or the model itself.
+	 * @param model
+	 * @return a new {@link HasChanged} instanced that listens to any fired
+	 *         change events sent by any object or field in the model or the
+	 *         model itself.
 	 */
 	static public HasChanged listen(XModel model) {
 		HasChanged hc = new HasChanged();
@@ -56,27 +58,27 @@ public class HasChanged implements XRepositoryEventListener, XModelEventListener
 	public boolean eventsReceived = false;
 	
 	@Override
-    public void onChangeEvent(XFieldEvent event) {
+	public void onChangeEvent(XFieldEvent event) {
 		this.eventsReceived = true;
 	}
 	
 	@Override
-    public void onChangeEvent(XModelEvent event) {
+	public void onChangeEvent(XModelEvent event) {
 		this.eventsReceived = true;
 	}
 	
 	@Override
-    public void onChangeEvent(XObjectEvent event) {
+	public void onChangeEvent(XObjectEvent event) {
 		this.eventsReceived = true;
 	}
 	
 	@Override
-    public void onChangeEvent(XRepositoryEvent event) {
+	public void onChangeEvent(XRepositoryEvent event) {
 		this.eventsReceived = true;
 	}
 	
 	@Override
-    public void onChangeEvent(XTransactionEvent event) {
+	public void onChangeEvent(XTransactionEvent event) {
 		this.eventsReceived = true;
 	}
 	

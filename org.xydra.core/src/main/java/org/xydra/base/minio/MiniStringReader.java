@@ -36,7 +36,7 @@ public class MiniStringReader extends AbstractMiniReader implements MiniReader {
 	 * @throws MiniIOException If an I/O error occurs
 	 */
 	@Override
-    public int read() throws MiniIOException {
+	public int read() throws MiniIOException {
 		synchronized(this.lock) {
 			ensureOpen();
 			if(this.next >= this.length)
@@ -58,7 +58,7 @@ public class MiniStringReader extends AbstractMiniReader implements MiniReader {
 	 * @exception MiniIOException If an I/O error occurs
 	 */
 	@Override
-    public int read(char cbuf[], int off, int len) throws MiniIOException {
+	public int read(char cbuf[], int off, int len) throws MiniIOException {
 		synchronized(this.lock) {
 			ensureOpen();
 			if((off < 0) || (off > cbuf.length) || (len < 0) || ((off + len) > cbuf.length)
@@ -77,20 +77,17 @@ public class MiniStringReader extends AbstractMiniReader implements MiniReader {
 	}
 	
 	/**
-	 * Skips the specified number of characters in the stream. Returns the
-	 * number of characters that were skipped.
+	 * Skips the specified number of characters in the stream.
 	 * 
-	 * <p>
-	 * The <code>ns</code> parameter may be negative, even though the
-	 * <code>skip</code> method of the {@link Reader} superclass throws an
-	 * exception in this case. Negative values of <code>ns</code> cause the
-	 * stream to skip backwards. Negative return values indicate a skip
-	 * backwards. It is not possible to skip backwards past the beginning of the
-	 * string.
-	 * 
-	 * <p>
-	 * If the entire string has been read or skipped, then this method has no
-	 * effect and always returns 0.
+	 * @param ns may be negative, even though the <code>skip</code> method of
+	 *            the {@link Reader} superclass throws an exception in this
+	 *            case. Negative values of <code>ns</code> cause the stream to
+	 *            skip backwards. Negative return values indicate a skip
+	 *            backwards. It is not possible to skip backwards past the
+	 *            beginning of the string.
+	 * @return the number of characters that were skipped. If the entire string
+	 *         has been read or skipped, then this method has no effect and
+	 *         always returns 0.
 	 * 
 	 * @exception MiniIOException If an I/O error occurs
 	 */
@@ -115,7 +112,7 @@ public class MiniStringReader extends AbstractMiniReader implements MiniReader {
 	 * @exception MiniIOException If the stream is closed
 	 */
 	@Override
-    public boolean ready() throws MiniIOException {
+	public boolean ready() throws MiniIOException {
 		synchronized(this.lock) {
 			ensureOpen();
 			return true;
@@ -126,7 +123,7 @@ public class MiniStringReader extends AbstractMiniReader implements MiniReader {
 	 * Tell whether this stream supports the mark() operation, which it does.
 	 */
 	@Override
-    public boolean markSupported() {
+	public boolean markSupported() {
 		return true;
 	}
 	
@@ -143,7 +140,7 @@ public class MiniStringReader extends AbstractMiniReader implements MiniReader {
 	 * @exception MiniIOException If an I/O error occurs
 	 */
 	@Override
-    public void mark(int readAheadLimit) throws MiniIOException {
+	public void mark(int readAheadLimit) throws MiniIOException {
 		if(readAheadLimit < 0) {
 			throw new IllegalArgumentException("Read-ahead limit < 0");
 		}
@@ -160,7 +157,7 @@ public class MiniStringReader extends AbstractMiniReader implements MiniReader {
 	 * @exception MiniIOException If an I/O error occurs
 	 */
 	@Override
-    public void reset() throws MiniIOException {
+	public void reset() throws MiniIOException {
 		synchronized(this.lock) {
 			ensureOpen();
 			this.next = this.mark;
@@ -171,7 +168,7 @@ public class MiniStringReader extends AbstractMiniReader implements MiniReader {
 	 * Close the stream.
 	 */
 	@Override
-    public void close() {
+	public void close() {
 		this.str = null;
 	}
 	

@@ -11,6 +11,9 @@ public interface XydraParser {
 	/**
 	 * Parse the given String as a document and return the root element.
 	 * 
+	 * @param data
+	 * @return the parsed result or throws an Exception
+	 * 
 	 * @throws IllegalArgumentException if the given string is not a valid
 	 *             document.
 	 */

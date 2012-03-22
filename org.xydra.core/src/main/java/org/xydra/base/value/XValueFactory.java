@@ -318,8 +318,8 @@ public interface XValueFactory {
 	 * The returned {@link XStringListValue} will contain the given Strings in
 	 * the order of their occurrence in the given {@link Collection}.
 	 * 
-	 * @param xids The {@link Collection} containing the Strings which are to be
-	 *            stored by the {@link XStringListValue} this method will
+	 * @param strings The {@link Collection} containing the Strings which are to
+	 *            be stored by the {@link XStringListValue} this method will
 	 *            create.
 	 * @return an {@link XStringListValue} storing the given Strings.
 	 */

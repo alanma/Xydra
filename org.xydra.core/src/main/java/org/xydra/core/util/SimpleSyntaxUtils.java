@@ -101,11 +101,13 @@ public class SimpleSyntaxUtils {
 		}
 		
 	}
+	
 	private static final XID ACTOR_THIS = XX.toId("SimpleSyntaxUtils");
 	
 	private static final String PSW_THIS = null;
 	
 	/**
+	 * @param modelId
 	 * @param simpleSyntax a String in a restricted syntax, inspired from Java
 	 *            java.util.Properties} syntax.
 	 * @return an {@link XModel}
@@ -236,7 +238,7 @@ public class SimpleSyntaxUtils {
 		}
 		Collections.sort(sortedObjectIdS, new Comparator<XID>() {
 			@Override
-            public int compare(XID o1, XID o2) {
+			public int compare(XID o1, XID o2) {
 				return o1.toString().compareTo(o2.toString());
 			}
 		});
@@ -254,7 +256,7 @@ public class SimpleSyntaxUtils {
 				}
 				Collections.sort(sortedFieldIdS, new Comparator<XID>() {
 					@Override
-                    public int compare(XID o1, XID o2) {
+					public int compare(XID o1, XID o2) {
 						return o1.toString().compareTo(o2.toString());
 					}
 				});

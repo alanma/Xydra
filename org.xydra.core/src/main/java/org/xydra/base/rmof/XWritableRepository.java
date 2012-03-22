@@ -17,8 +17,8 @@ public interface XWritableRepository extends XReadableRepository {
 	 * it to this XRevWritableRepository or returns the already existing model
 	 * if the given {@link XID} was already taken.
 	 * 
-	 * @param id The {@link XID} for the {@link XWritableModel} which is to be
-	 *            created
+	 * @param modelId The {@link XID} for the {@link XWritableModel} which is to
+	 *            be created
 	 * 
 	 * @return the newly created {@link XWritableModel} or the already existing
 	 *         {@link XWritableModel} if the given {@link XID} was already taken
@@ -35,8 +35,8 @@ public interface XWritableRepository extends XReadableRepository {
 	 * Removes the specified {@link XWritableModel} from this
 	 * XRevWritableRepository.
 	 * 
-	 * @param baseRepository The {@link XID} of the {@link XWritableModel} which
-	 *            is to be removed
+	 * @param modelId The {@link XID} of the {@link XWritableModel} which is to
+	 *            be removed
 	 * 
 	 * @return true, if the specified {@link XWritableModel} could be removed,
 	 *         false otherwise

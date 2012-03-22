@@ -63,6 +63,8 @@ public interface XChangeLogState extends Serializable {
 	/**
 	 * Set the first revision number. This can only be done if the change log is
 	 * empty.
+	 * 
+	 * @param rev
 	 */
 	void setFirstRevisionNumber(long rev);
 	

@@ -60,6 +60,7 @@ public class XFile {
 	 * Loads the given XModel.
 	 * 
 	 * @param actorId actorId The initial session actor for the loaded mode.
+	 * @param passwordHash
 	 * @param file The file containing the model to be loaded.
 	 * 
 	 * @return The model. null if the given filename doesn't exist or doesn't
@@ -80,6 +81,7 @@ public class XFile {
 	 * Loads the given XModel.
 	 * 
 	 * @param actorId actorId The initial session actor for the loaded mode.
+	 * @param passwordHash
 	 * @param filename The filename of the model to be loaded.
 	 * 
 	 * @return The model. null if the given filename doesn't exist or doesn't
@@ -95,6 +97,7 @@ public class XFile {
 	 * Loads the given XModel.
 	 * 
 	 * @param actorId actorId The initial session actor for the loaded mode.
+	 * @param passwordHash
 	 * @param path The path of the file to be loaded.
 	 * @param name The filename of the model to be loaded.
 	 * 
@@ -111,6 +114,7 @@ public class XFile {
 	 * Loads the given XRepository.
 	 * 
 	 * @param actorId actorId The initial session actor for the loaded mode.
+	 * @param passwordHash
 	 * @param file The file containing the repository to be loaded.
 	 * 
 	 * @return The repository. null if the given file doesn't exist or doesn't
@@ -132,6 +136,7 @@ public class XFile {
 	 * Loads the given XRepository.
 	 * 
 	 * @param actorId actorId The initial session actor for the loaded mode.
+	 * @param passwordHash
 	 * @param filename The filename of the repository to be loaded.
 	 * 
 	 * @return The repository. null if the given filename doesn't exist or
@@ -147,6 +152,7 @@ public class XFile {
 	 * Loads the given XRepository.
 	 * 
 	 * @param actorId The initial session actor for the loaded mode.
+	 * @param passwordHash
 	 * @param path The path of the file to be loaded.
 	 * @param filename The filename of the repository to be loaded.
 	 * 

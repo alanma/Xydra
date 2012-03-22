@@ -335,6 +335,7 @@ public class XV {
 	}
 	
 	/**
+	 * @param value
 	 * @return the boolean wrapped in an {@link XBooleanValue}
 	 */
 	public static XBooleanValue toValue(boolean value) {
@@ -389,6 +390,7 @@ public class XV {
 	}
 	
 	/**
+	 * @param value
 	 * @return the double wrapped in an {@link XDoubleValue}
 	 */
 	public static XDoubleValue toValue(double value) {
@@ -420,6 +422,7 @@ public class XV {
 	}
 	
 	/**
+	 * @param value
 	 * @return the int wrapped in an {@link XIntegerValue}
 	 */
 	public static XIntegerValue toValue(int value) {
@@ -451,6 +454,7 @@ public class XV {
 	}
 	
 	/**
+	 * @param value
 	 * @return the long wrapped in an {@link XLongValue}
 	 */
 	public static XLongValue toValue(long value) {
@@ -481,6 +485,7 @@ public class XV {
 	}
 	
 	/**
+	 * @param value
 	 * @return the {@link String} wrapped in an {@link XStringValue}
 	 */
 	public static XStringValue toValue(String value) {

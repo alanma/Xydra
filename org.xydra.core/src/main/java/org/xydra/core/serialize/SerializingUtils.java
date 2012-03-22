@@ -178,9 +178,11 @@ class SerializingUtils {
 	protected static String toString(Object object) {
 		if(object instanceof String) {
 			/*
-			 * FIXME workaround for GWT bug
+			 * TODO workaround for GWT bug
 			 * http://code.google.com/p/google-web-toolkit
 			 * /issues/detail?id=4301: avoid using String#toString()
+			 * 
+			 * Can be removed when bug is fixed. Not yet as of 2012-03-20.
 			 */
 			return (String)object;
 		}

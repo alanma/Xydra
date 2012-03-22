@@ -4,6 +4,7 @@ package org.xydra.base.value;
  * An {@link XValue} for storing a list of Java Number values.
  * 
  * @author Kaidel
+ * @param <T>
  * 
  */
 public interface XNumberListValue<T extends Number> extends XListValue<T> {
@@ -22,7 +23,7 @@ public interface XNumberListValue<T extends Number> extends XListValue<T> {
 	 *             size()
 	 */
 	@Override
-    XNumberListValue<T> add(int index, T entry);
+	XNumberListValue<T> add(int index, T entry);
 	
 	/**
 	 * Creates a new {@link XNumberListValue} containing all entries from this
@@ -35,7 +36,7 @@ public interface XNumberListValue<T extends Number> extends XListValue<T> {
 	 *         value as well as the specified entry.
 	 */
 	@Override
-    XNumberListValue<T> add(T entry);
+	XNumberListValue<T> add(T entry);
 	
 	/**
 	 * Creates a new {@link XNumberListValue} containing all entries from this
@@ -50,7 +51,7 @@ public interface XNumberListValue<T extends Number> extends XListValue<T> {
 	 *             equal to size()
 	 */
 	@Override
-    XNumberListValue<T> remove(int index);
+	XNumberListValue<T> remove(int index);
 	
 	/**
 	 * Creates a new {@link XNumberListValue} containing all entries from this
@@ -63,7 +64,7 @@ public interface XNumberListValue<T extends Number> extends XListValue<T> {
 	 *         value except the given entry
 	 */
 	@Override
-    XNumberListValue<T> remove(T entry);
+	XNumberListValue<T> remove(T entry);
 	
 	/**
 	 * Returns the Number values as an array in the order they were added to the

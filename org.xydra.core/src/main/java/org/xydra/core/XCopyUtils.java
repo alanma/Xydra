@@ -148,6 +148,11 @@ public class XCopyUtils {
 	/**
 	 * Create a {@link XModel} with the same initial state as the given model
 	 * snapshot.
+	 * 
+	 * @param actor
+	 * @param password
+	 * @param modelSnapshot
+	 * @return a copy based on a {@link MemoryModel} instance
 	 */
 	public static XModel copyModel(XID actor, String password, XReadableModel modelSnapshot) {
 		XRevWritableModel modelState = createSnapshot(modelSnapshot);
@@ -156,6 +161,11 @@ public class XCopyUtils {
 	
 	/**
 	 * Create a XObject with the same initial state as the given model snapshot.
+	 * 
+	 * @param actor
+	 * @param password
+	 * @param objectSnapshot
+	 * @return a copy based on a {@link MemoryObject}
 	 */
 	public static XObject copyObject(XID actor, String password, XReadableObject objectSnapshot) {
 		XRevWritableObject objectState = createSnapshot(objectSnapshot);
@@ -182,6 +192,7 @@ public class XCopyUtils {
 	 * Copy all state information from sourceObject.
 	 * 
 	 * @param sourceObject The {@link XReadableObject} which is to be copied
+	 * @return a copy based on a new {@link SimpleObject} instance
 	 */
 	public static XRevWritableObject createSnapshot(XReadableObject sourceObject) {
 		if(sourceObject == null) {
@@ -196,6 +207,7 @@ public class XCopyUtils {
 	 * Copy all state information from sourceField.
 	 * 
 	 * @param sourceField The {@link XReadableField} which is to be copied
+	 * @return a copy based on a {@link SimpleField} instance
 	 */
 	public static XRevWritableField createSnapshot(XReadableField sourceField) {
 		if(sourceField == null) {

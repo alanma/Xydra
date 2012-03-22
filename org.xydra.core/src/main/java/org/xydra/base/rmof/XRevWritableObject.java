@@ -17,6 +17,8 @@ public interface XRevWritableObject extends XWritableObject {
 	 * 
 	 * This overwrites any existing field in this object with the same
 	 * {@link XID}.
+	 * 
+	 * @param field
 	 */
 	@ModificationOperation
 	void addField(XRevWritableField field);

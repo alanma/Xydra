@@ -24,6 +24,8 @@ public class MemoryTransaction implements XTransaction {
 	private static final long serialVersionUID = 2638954432914484202L;
 	
 	/**
+	 * @param target
+	 * @param commands
 	 * @return a new transaction with the specified target and commands. Changes
 	 *         to the passed {@link List} will not affect the transaction.
 	 */
@@ -34,6 +36,8 @@ public class MemoryTransaction implements XTransaction {
 	}
 	
 	/**
+	 * @param target
+	 * @param commands
 	 * @return a new transaction with the specified target and commands. Changes
 	 *         to the passed array will not affect the transaction.
 	 */
@@ -103,22 +107,22 @@ public class MemoryTransaction implements XTransaction {
 	}
 	
 	@Override
-    public XAddress getChangedEntity() {
+	public XAddress getChangedEntity() {
 		return this.target;
 	}
 	
 	@Override
-    public ChangeType getChangeType() {
+	public ChangeType getChangeType() {
 		return ChangeType.TRANSACTION;
 	}
 	
 	@Override
-    public XAtomicCommand getCommand(int index) {
+	public XAtomicCommand getCommand(int index) {
 		return this.commands[index];
 	}
 	
 	@Override
-    public XAddress getTarget() {
+	public XAddress getTarget() {
 		return this.target;
 	}
 	
@@ -136,12 +140,12 @@ public class MemoryTransaction implements XTransaction {
 	}
 	
 	@Override
-    public Iterator<XAtomicCommand> iterator() {
+	public Iterator<XAtomicCommand> iterator() {
 		return Arrays.asList(this.commands).iterator();
 	}
 	
 	@Override
-    public int size() {
+	public int size() {
 		return this.commands.length;
 	}
 	

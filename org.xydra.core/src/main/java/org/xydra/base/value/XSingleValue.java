@@ -4,6 +4,7 @@ package org.xydra.base.value;
  * An XValue that contains a single value.
  * 
  * @author dscharrer
+ * @param <T> value type
  * 
  */
 public interface XSingleValue<T> extends XValue {

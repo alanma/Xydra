@@ -1,7 +1,5 @@
 package org.xydra.base.value;
 
-
-
 /**
  * An {@link XValue} for storing a collections of values.
  * 
@@ -23,6 +21,8 @@ public interface XCollectionValue<E> extends XValue, Iterable<E> {
 	
 	/**
 	 * Checks whether this XCollectionValue contains the given element or not
+	 * 
+	 * @param elem
 	 * 
 	 * @return true, if this XCollectionValue contains the given element, false
 	 *         otherwise.

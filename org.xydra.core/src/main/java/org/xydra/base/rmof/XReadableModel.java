@@ -21,8 +21,8 @@ public interface XReadableModel extends XEntity, Iterable<XID> {
 	 * Returns the {@link XReadableObject} contained in this model with the
 	 * given {@link XID}
 	 * 
-	 * @param id The {@link XID} of the {@link XReadableObject} which is to be
-	 *            returned
+	 * @param objectId The {@link XID} of the {@link XReadableObject} which is
+	 *            to be returned
 	 * @return The {@link XReadableObject} with the given {@link XID} or null,
 	 *         if no corresponding {@link XReadableObject} exists
 	 * @throws IllegalStateException if this model has already been removed
@@ -43,7 +43,7 @@ public interface XReadableModel extends XEntity, Iterable<XID> {
 	 * Checks whether this {@link XReadableModel} already contains an
 	 * {@link XReadableObject} with the given {@link XID}.
 	 * 
-	 * @param id The {@link XID} which is to be checked
+	 * @param objectId The {@link XID} which is to be checked
 	 * @return true, if this {@link XReadableModel} already contains an
 	 *         {@link XReadableObject} with the given {@link XID}, false
 	 *         otherwise

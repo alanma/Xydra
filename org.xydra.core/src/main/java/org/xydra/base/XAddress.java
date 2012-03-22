@@ -19,6 +19,8 @@ public interface XAddress extends Serializable, XSingleValue<XAddress>, Comparab
 	 * Checks whether the entity referred to by {@link XAddress} descendant is a
 	 * descendant of the entity referred to by this address.
 	 * 
+	 * @param descendant
+	 * 
 	 * @return true if 'descendant' refers to an entity contained in the entity
 	 *         referred to by this address.
 	 */
@@ -28,6 +30,8 @@ public interface XAddress extends Serializable, XSingleValue<XAddress>, Comparab
 	 * Checks whether the entity referred to by {@link XAddress} descendant is a
 	 * child of the entity referred to by this address or if both
 	 * {@link XAddress}es refer to the same entity.
+	 * 
+	 * @param descendant
 	 * 
 	 * @return true if 'descendant' refers to an entity contained in the entity
 	 *         referred to by this address or if 'descendant' refers to the same
@@ -79,6 +83,8 @@ public interface XAddress extends Serializable, XSingleValue<XAddress>, Comparab
 	/**
 	 * Checks whether the entity referred to by the {@link XAddress} child is a
 	 * direct child of the entity referred to by this address.
+	 * 
+	 * @param child
 	 * 
 	 * @return true if 'child' refers to an entity directly contained in the
 	 *         entity referred to by this address.

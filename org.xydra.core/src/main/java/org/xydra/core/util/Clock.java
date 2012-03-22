@@ -35,6 +35,7 @@ public class Clock {
 	
 	/**
 	 * @param name for the statistics
+	 * @return this instance for fluent API usage
 	 */
 	public Clock stop(String name) {
 		stopAndGetDuration(name);

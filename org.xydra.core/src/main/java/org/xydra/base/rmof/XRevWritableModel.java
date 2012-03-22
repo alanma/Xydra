@@ -17,6 +17,8 @@ public interface XRevWritableModel extends XWritableModel {
 	 * 
 	 * This overwrites any existing object in this model with the same
 	 * {@link XID}.
+	 * 
+	 * @param object
 	 */
 	@ModificationOperation
 	void addObject(XRevWritableObject object);
