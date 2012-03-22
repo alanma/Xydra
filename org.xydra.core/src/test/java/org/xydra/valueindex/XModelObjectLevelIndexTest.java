@@ -286,6 +286,15 @@ public abstract class XModelObjectLevelIndexTest {
 		
 	}
 	
+	/**
+	 * Returns the set of {@link XAddress XAddresses} implicitly stored in the
+	 * given set of {@link Pair Pairs} of {@link XAddress} and {@link XValue}
+	 * 
+	 * @param pairs
+	 * @return the set of {@link XAddress XAddresses} implicitly stored in the
+	 *         given set of {@link Pair Pairs} of {@link XAddress} and
+	 *         {@link XValue}
+	 */
 	private static Set<XAddress> getAddressesFromSetOfPairs(Set<Pair<XAddress,XValue>> pairs) {
 		HashSet<XAddress> addresses = new HashSet<XAddress>();
 		
@@ -297,7 +306,8 @@ public abstract class XModelObjectLevelIndexTest {
 	}
 	
 	/**
-	 * Tests whether indexing an XModel works correctly.
+	 * Tests whether indexing an XModel works correctly when defaultIncludeAll
+	 * is set to true.
 	 * 
 	 * Note: index(oldModel) and index(newModel) were already called in the
 	 * setup() by initializing the indexes.
@@ -334,6 +344,13 @@ public abstract class XModelObjectLevelIndexTest {
 		}
 	}
 	
+	/**
+	 * Tests whether indexing an XModel works correctly when defaultIncludeAll
+	 * is set to false.
+	 * 
+	 * Note: index(oldExcludeAllModel) and index(newExcludeAllModel) were
+	 * already called in the setup() by initializing the indexes.
+	 */
 	@Test
 	public void testIndexingExcludeAllModel() {
 		
@@ -394,6 +411,13 @@ public abstract class XModelObjectLevelIndexTest {
 		assertEquals(newJohn.getAddress(), set.iterator().next().getFirst());
 	}
 	
+	/**
+	 * Tests if
+	 * {@link XModelObjectLevelIndex#updateIndex(XReadableObject, XReadableObject)}
+	 * works correctly when a new field with a new value and gets added to the
+	 * object, where the {@link XID} of the field is one of the Ids of fields
+	 * the index will not index (i.e. the field is excluded from being indexed).
+	 */
 	@Test
 	public void testUpdateIndexObjectAddNewFieldWithValueAndExcludedId() {
 		// Tests adding a field with an ID in excludedIds (should not be
@@ -412,6 +436,13 @@ public abstract class XModelObjectLevelIndexTest {
 		assertTrue(set.isEmpty());
 	}
 	
+	/**
+	 * Tests if
+	 * {@link XModelObjectLevelIndex#updateIndex(XReadableObject, XReadableObject)}
+	 * works correctly when a new field with a new value gets added to the
+	 * object, where the index excludes almost all fields from being indexed
+	 * (i.e. defaultIncludeAll is set to false).
+	 */
 	@Test
 	public void testUpdateIndexObjectAddNewFieldWithValueInExcludeAllModel() {
 		String valueString = "Firstvaluestringwhichshoudlntexistinbothmodels";
@@ -461,6 +492,8 @@ public abstract class XModelObjectLevelIndexTest {
 	 * {@link XModelObjectLevelIndex#updateIndex(XReadableObject, XReadableObject)}
 	 * works correctly when a new value gets added to a field of an object,
 	 * which already existed in the old state.
+	 * 
+	 * This tests an index which defaultIncludeAll parameter is set to true.
 	 */
 	@Test
 	public void testUpdateIndexObjectAddValue() {
@@ -472,6 +505,8 @@ public abstract class XModelObjectLevelIndexTest {
 	 * {@link XModelObjectLevelIndex#updateIndex(XReadableField, XReadableField)}
 	 * works correctly when a new value gets added to a field of an object,
 	 * which already existed in the old state.
+	 * 
+	 * This tests an index which defaultIncludeAll parameter is set to true.
 	 */
 	@Test
 	public void testUpdateIndexFieldAddValue() {
@@ -482,6 +517,8 @@ public abstract class XModelObjectLevelIndexTest {
 	 * Tests if {@link XModelObjectLevelIndex#updateIndex(XFieldEvent, XValue)}
 	 * works correctly when a new value gets added to a field of an object,
 	 * which already existed in the old state.
+	 * 
+	 * This tests an index which defaultIncludeAll parameter is set to true.
 	 */
 	@Test
 	public void testUpdateIndexEventAddValue() {
@@ -534,20 +571,45 @@ public abstract class XModelObjectLevelIndexTest {
 		assertEquals(newJohn.getAddress(), newSet.iterator().next().getFirst());
 	}
 	
-	/*
-	 * TODO document
+	/**
+	 * Tests if
+	 * {@link XModelObjectLevelIndex#updateIndex(XReadableObject, XReadableObject)}
+	 * works correctly when a new value gets added to a field of an object,
+	 * which already existed in the old state and which is excluded from being
+	 * indexed.
+	 * 
+	 * This tests an index which defaultIncludeAll parameter is set to true, but
+	 * has some fields which are excluded from being indexed.
 	 */
-	
 	@Test
 	public void testUpdateIndexObjectAddValueToExcludedField() {
 		this.testUpdateIndexAddValueToExcludedField(TestType.XOBJECT);
 	}
 	
+	/**
+	 * Tests if
+	 * {@link XModelObjectLevelIndex#updateIndex(XReadableField, XReadableField)}
+	 * works correctly when a new value gets added to a field of an object,
+	 * which already existed in the old state and which is excluded from being
+	 * indexed.
+	 * 
+	 * This tests an index which defaultIncludeAll parameter is set to true, but
+	 * has some fields which are excluded from being indexed.
+	 */
 	@Test
 	public void testUpdateIndexFieldAddValueToExcludedField() {
 		this.testUpdateIndexAddValueToExcludedField(TestType.XFIELD);
 	}
 	
+	/**
+	 * Tests if {@link XModelObjectLevelIndex#updateIndex(XFieldEvent, XValue)}
+	 * works correctly when a new value gets added to a field of an object,
+	 * which already existed in the old state and which is excluded from being
+	 * indexed.
+	 * 
+	 * This tests an index which defaultIncludeAll parameter is set to true, but
+	 * has some fields which are excluded from being indexed.
+	 */
 	@Test
 	public void testUpdateIndexEventAddValueToExcludedField() {
 		this.testUpdateIndexAddValueToExcludedField(TestType.XEVENT);
@@ -594,16 +656,51 @@ public abstract class XModelObjectLevelIndexTest {
 		
 	}
 	
+	/**
+	 * Tests if
+	 * {@link XModelObjectLevelIndex#updateIndex(XReadableObject, XReadableObject)}
+	 * works correctly when a new value gets added to a field of an object,
+	 * which already existed in the old state.
+	 * 
+	 * This tests an index which defaultIncludeAll parameter is set to false,
+	 * but has some fields which are still being indexed (i.e. the
+	 * includedFieldIds set is not empty). Tests both the cases when a value of
+	 * a field, which is not being indexed, is added and when a value of field
+	 * which IS being index is added.
+	 */
 	@Test
 	public void testUpdateIndexObjectAddValueToFieldOfExcludeAllModel() {
 		this.testUpdateIndexAddValueToFieldOfExcludeAllModel(TestType.XOBJECT);
 	}
 	
+	/**
+	 * Tests if
+	 * {@link XModelObjectLevelIndex#updateIndex(XReadableField, XReadableField)}
+	 * works correctly when a new value gets added to a field of an object,
+	 * which already existed in the old state.
+	 * 
+	 * This tests an index which defaultIncludeAll parameter is set to false,
+	 * but has some fields which are still being indexed (i.e. the
+	 * includedFieldIds set is not empty). Tests both the cases when a value of
+	 * a field, which is not being indexed, is added and when a value of field
+	 * which IS being index is added.
+	 */
 	@Test
 	public void testUpdateIndexFieldAddValueToFieldOfExcludeAllModel() {
 		this.testUpdateIndexAddValueToFieldOfExcludeAllModel(TestType.XFIELD);
 	}
 	
+	/**
+	 * Tests if {@link XModelObjectLevelIndex#updateIndex(XFieldEvent, XValue)}
+	 * works correctly when a new value gets added to a field of an object,
+	 * which already existed in the old state.
+	 * 
+	 * This tests an index which defaultIncludeAll parameter is set to false,
+	 * but has some fields which are still being indexed (i.e. the
+	 * includedFieldIds set is not empty). Tests both the cases when a value of
+	 * a field, which is not being indexed, is added and when a value of field
+	 * which IS being index is added.
+	 */
 	@Test
 	public void testUpdateIndexEventAddValueToFieldOfExcludeAllModel() {
 		this.testUpdateIndexAddValueToFieldOfExcludeAllModel(TestType.XEVENT);
@@ -689,6 +786,8 @@ public abstract class XModelObjectLevelIndexTest {
 	 * {@link XModelObjectLevelIndex#updateIndex(XReadableObject, XReadableObject)}
 	 * works correctly when a value, which only existed once, gets removed from
 	 * a field of an object, which already existed in the old state.
+	 * 
+	 * This tests an index which defaultIncludeAll parameter is set to true.
 	 */
 	@Test
 	public void testUpdateIndexObjectDeleteValue() {
@@ -700,6 +799,8 @@ public abstract class XModelObjectLevelIndexTest {
 	 * {@link XModelObjectLevelIndex#updateIndex(XReadableField, XReadableField)}
 	 * works correctly when a value, which only existed once, gets removed from
 	 * a field of an object, which already existed in the old state.
+	 * 
+	 * This tests an index which defaultIncludeAll parameter is set to true.
 	 */
 	@Test
 	public void testUpdateIndexFieldDeleteValue() {
@@ -710,6 +811,8 @@ public abstract class XModelObjectLevelIndexTest {
 	 * Tests if {@link XModelObjectLevelIndex#updateIndex(XFieldEvent, XValue)}
 	 * works correctly when a value, which only existed once, gets removed from
 	 * a field of an object, which already existed in the old state.
+	 * 
+	 * This tests an index which defaultIncludeAll parameter is set to true.
 	 */
 	@Test
 	public void testUpdateIndexEventDeleteValue() {
@@ -767,16 +870,39 @@ public abstract class XModelObjectLevelIndexTest {
 		}
 	}
 	
+	/**
+	 * Tests if
+	 * {@link XModelObjectLevelIndex#updateIndex(XReadableObject, XReadableObject)}
+	 * works correctly when a value, which only existed once, gets removed from
+	 * a field of an object, which already existed in the old state.
+	 * 
+	 * This tests an index which defaultIncludeAll parameter is set to false.
+	 */
 	@Test
 	public void testUpdateIndexObjectDeleteValueFromExcludeAllModel() {
 		testUpdateIndexDeleteValueFromExcludeAllModel(TestType.XOBJECT);
 	}
 	
+	/**
+	 * Tests if
+	 * {@link XModelObjectLevelIndex#updateIndex(XReadableField, XReadableField)}
+	 * works correctly when a value, which only existed once, gets removed from
+	 * a field of an object, which already existed in the old state.
+	 * 
+	 * This tests an index which defaultIncludeAll parameter is set to false.
+	 */
 	@Test
 	public void testUpdateIndexFieldDeleteValueFromExcludeAllModel() {
 		testUpdateIndexDeleteValueFromExcludeAllModel(TestType.XFIELD);
 	}
 	
+	/**
+	 * Tests if {@link XModelObjectLevelIndex#updateIndex(XFieldEvent, XValue)}
+	 * works correctly when a value, which only existed once, gets removed from
+	 * a field of an object, which already existed in the old state.
+	 * 
+	 * This tests an index which defaultIncludeAll parameter is set to false.
+	 */
 	@Test
 	public void testUpdateIndexEventDeleteValueFromExcludeAllModel() {
 		testUpdateIndexDeleteValueFromExcludeAllModel(TestType.XEVENT);
@@ -839,6 +965,8 @@ public abstract class XModelObjectLevelIndexTest {
 	 * {@link XModelObjectLevelIndex#updateIndex(XReadableObject, XReadableObject)}
 	 * works correctly when a value, which existed multiple times, gets removed
 	 * from a field of an object, which already existed in the old state.
+	 * 
+	 * This tests an index which defaultIncludeAll parameter is set to true.
 	 */
 	@Test
 	public void testUpdateIndexObjectDeleteMultipleExistingValue() {
@@ -850,6 +978,8 @@ public abstract class XModelObjectLevelIndexTest {
 	 * {@link XModelObjectLevelIndex#updateIndex(XReadableField, XReadableField)}
 	 * works correctly when a value, which existed multiple times, gets removed
 	 * from a field of an object, which already existed in the old state.
+	 * 
+	 * This tests an index which defaultIncludeAll parameter is set to true.
 	 */
 	@Test
 	public void testUpdateIndexFieldDeleteMultipleExistingValue() {
@@ -860,6 +990,8 @@ public abstract class XModelObjectLevelIndexTest {
 	 * Tests if {@link XModelObjectLevelIndex#updateIndex(XFieldEvent, XValue)}
 	 * works correctly when a value, which existed multiple times, gets removed
 	 * from a field of an object, which already existed in the old state.
+	 * 
+	 * This tests an index which defaultIncludeAll parameter is set to true.
 	 */
 	@Test
 	public void testUpdateIndexEventDeleteMultiplyExistingValue() {
@@ -967,16 +1099,39 @@ public abstract class XModelObjectLevelIndexTest {
 		}
 	}
 	
+	/**
+	 * Tests if
+	 * {@link XModelObjectLevelIndex#updateIndex(XReadableObject, XReadableObject)}
+	 * works correctly when a value, which existed multiple times, gets removed
+	 * from a field of an object, which already existed in the old state.
+	 * 
+	 * This tests an index which defaultIncludeAll parameter is set to false.
+	 */
 	@Test
 	public void testUpdateIndexObjectDeleteMultipleExistingValueFromExcludeAllModel() {
 		testUpdateIndexDeleteMultipleExistingValueFromExcludeAllModel(TestType.XOBJECT);
 	}
 	
+	/**
+	 * Tests if
+	 * {@link XModelObjectLevelIndex#updateIndex(XReadableField, XReadableField)}
+	 * works correctly when a value, which existed multiple times, gets removed
+	 * from a field of an object, which already existed in the old state.
+	 * 
+	 * This tests an index which defaultIncludeAll parameter is set to false.
+	 */
 	@Test
 	public void testUpdateIndexFieldDeleteMultipleExistingValueFromExcludeAllModel() {
 		testUpdateIndexDeleteMultipleExistingValueFromExcludeAllModel(TestType.XFIELD);
 	}
 	
+	/**
+	 * Tests if {@link XModelObjectLevelIndex#updateIndex(XFieldEvent, XValue)}
+	 * works correctly when a value, which existed multiple times, gets removed
+	 * from a field of an object, which already existed in the old state.
+	 * 
+	 * This tests an index which defaultIncludeAll parameter is set to false.
+	 */
 	@Test
 	public void testUpdateIndexEventDeleteMultipleExistingValueFromExcludeAllModel() {
 		testUpdateIndexDeleteMultipleExistingValueFromExcludeAllModel(TestType.XEVENT);
@@ -1090,6 +1245,8 @@ public abstract class XModelObjectLevelIndexTest {
 	 * {@link XModelObjectLevelIndex#updateIndex(XReadableObject, XReadableObject)}
 	 * works correctly when a value of a field of an object gets changed, which
 	 * already existed in the old state.
+	 * 
+	 * This tests an index which defaultIncludeAll parameter is set to true.
 	 */
 	@Test
 	public void testUpdateIndexObjectChangeValue() {
@@ -1101,6 +1258,8 @@ public abstract class XModelObjectLevelIndexTest {
 	 * {@link XModelObjectLevelIndex#updateIndex(XReadableField, XReadableField)}
 	 * works correctly when a value of a field of an object gets changed, which
 	 * already existed in the old state.
+	 * 
+	 * This tests an index which defaultIncludeAll parameter is set to true.
 	 */
 	@Test
 	public void testUpdateIndexFieldChangeValue() {
@@ -1111,6 +1270,8 @@ public abstract class XModelObjectLevelIndexTest {
 	 * Tests if {@link XModelObjectLevelIndex#updateIndex(XFieldEvent, XValue)}
 	 * works correctly when a value of a field of an object gets changed, which
 	 * already existed in the old state.
+	 * 
+	 * This tests an index which defaultIncludeAll parameter is set to true.
 	 */
 	@Test
 	public void testUpdateIndexEventChangeValue() {
@@ -1173,19 +1334,48 @@ public abstract class XModelObjectLevelIndexTest {
 		}
 	}
 	
-	/*
-	 * TODO document!
+	/**
+	 * Tests if
+	 * {@link XModelObjectLevelIndex#updateIndex(XReadableObject, XReadableObject)}
+	 * works correctly when a value of a field of an object gets changed, which
+	 * already existed in the old state.
+	 * 
+	 * This tests an index which defaultIncludeAll parameter is set to true, but
+	 * contains fields which are being excluded from indexing. This tests
+	 * whether if the method behaves correctly if the value of such a field is
+	 * changed.
 	 */
 	@Test
 	public void testUpdateIndexObjectChangeValueOfExcludedField() {
 		testUpdateIndexChangeValueOfExcludedField(TestType.XOBJECT);
 	}
 	
+	/**
+	 * Tests if
+	 * {@link XModelObjectLevelIndex#updateIndex(XReadableField, XReadableField)}
+	 * works correctly when a value of a field of an object gets changed, which
+	 * already existed in the old state.
+	 * 
+	 * This tests an index which defaultIncludeAll parameter is set to true, but
+	 * contains fields which are being excluded from indexing. This tests
+	 * whether if the method behaves correctly if the value of such a field is
+	 * changed.
+	 */
 	@Test
 	public void testUpdateIndexFieldChangeValueOfExcludedField() {
 		testUpdateIndexChangeValueOfExcludedField(TestType.XFIELD);
 	}
 	
+	/**
+	 * Tests if {@link XModelObjectLevelIndex#updateIndex(XFieldEvent, XValue)}
+	 * works correctly when a value of a field of an object gets changed, which
+	 * already existed in the old state.
+	 * 
+	 * This tests an index which defaultIncludeAll parameter is set to true, but
+	 * contains fields which are being excluded from indexing. This tests
+	 * whether if the method behaves correctly if the value of such a field is
+	 * changed.
+	 */
 	@Test
 	public void testUpdateIndexEventChangeValueOfExcludedField() {
 		testUpdateIndexChangeValueOfExcludedField(TestType.XEVENT);
@@ -1233,16 +1423,51 @@ public abstract class XModelObjectLevelIndexTest {
 		
 	}
 	
+	/**
+	 * Tests if
+	 * {@link XModelObjectLevelIndex#updateIndex(XReadableObject, XReadableObject)}
+	 * works correctly when a value of a field of an object gets changed, which
+	 * already existed in the old state.
+	 * 
+	 * This tests an index which defaultIncludeAll parameter is set to false,
+	 * but has some fields which are still being indexed (i.e. the
+	 * includedFieldIds set is not empty). Tests both the cases when a value of
+	 * a field, which is not being indexed, is changed and when a value of field
+	 * which IS being index is changed.
+	 */
 	@Test
 	public void testUpdateIndexObjectChangeValueInExcludeAllModel() {
 		testUpdateIndexChangeValueInExcludeAllModel(TestType.XOBJECT);
 	}
 	
+	/**
+	 * Tests if
+	 * {@link XModelObjectLevelIndex#updateIndex(XReadableField, XReadableField)}
+	 * works correctly when a value of a field of an object gets changed, which
+	 * already existed in the old state.
+	 * 
+	 * This tests an index which defaultIncludeAll parameter is set to false,
+	 * but has some fields which are still being indexed (i.e. the
+	 * includedFieldIds set is not empty). Tests both the cases when a value of
+	 * a field, which is not being indexed, is changed and when a value of field
+	 * which IS being index is changed.
+	 */
 	@Test
 	public void testUpdateIndexFieldChangeValueInExcludeAllModel() {
 		testUpdateIndexChangeValueInExcludeAllModel(TestType.XFIELD);
 	}
 	
+	/**
+	 * Tests if {@link XModelObjectLevelIndex#updateIndex(XFieldEvent, XValue)}
+	 * works correctly when a value of a field of an object gets changed, which
+	 * already existed in the old state.
+	 * 
+	 * This tests an index which defaultIncludeAll parameter is set to false,
+	 * but has some fields which are still being indexed (i.e. the
+	 * includedFieldIds set is not empty). Tests both the cases when a value of
+	 * a field, which is not being indexed, is changed and when a value of field
+	 * which IS being index is changed.
+	 */
 	@Test
 	public void testUpdateIndexEventChangeValueInExcludeAllModel() {
 		testUpdateIndexChangeValueInExcludeAllModel(TestType.XEVENT);
@@ -1353,6 +1578,8 @@ public abstract class XModelObjectLevelIndexTest {
 	 * {@link XModelObjectLevelIndex#updateIndex(XReadableObject, XReadableObject)}
 	 * works correctly when a field an object gets remove, which already existed
 	 * in the old state.
+	 * 
+	 * This tests an index which defaultIncludeAll parameter is set to true.
 	 */
 	@Test
 	public void testUpdateIndexObjectRemoveField() {
@@ -1378,8 +1605,13 @@ public abstract class XModelObjectLevelIndexTest {
 		}
 	}
 	
-	/*
-	 * TODO Document
+	/**
+	 * Tests if
+	 * {@link XModelObjectLevelIndex#updateIndex(XReadableObject, XReadableObject)}
+	 * works correctly when a field an object gets remove, which already existed
+	 * in the old state.
+	 * 
+	 * This tests an index which defaultIncludeAll parameter is set to false.
 	 */
 	@Test
 	public void testUpdateIndexObjectRemoveFieldOfExcludeAllModel() {
@@ -1408,6 +1640,8 @@ public abstract class XModelObjectLevelIndexTest {
 	/**
 	 * Tests if {@link XModelObjectLevelIndex#deIndex(XReadableObject)} works
 	 * correctly.
+	 * 
+	 * This tests an index which defaultIncludeAll parameter is set to true.
 	 */
 	@Test
 	public void testDeIndexObject() {
@@ -1417,8 +1651,11 @@ public abstract class XModelObjectLevelIndexTest {
 		testIfObjectWasDeIndexed(newJohn, this.newIndex, this.newIndexer);
 	}
 	
-	/*
-	 * TODO Document
+	/**
+	 * Tests if {@link XModelObjectLevelIndex#deIndex(XReadableObject)} works
+	 * correctly.
+	 * 
+	 * This tests an index which defaultIncludeAll parameter is set to false.
 	 */
 	@Test
 	public void testDeIndexObjectOfExcludeAllModel() {
@@ -1431,6 +1668,8 @@ public abstract class XModelObjectLevelIndexTest {
 	/**
 	 * Tests if {@link XModelObjectLevelIndex#deIndex(XReadableField)} works
 	 * correctly.
+	 * 
+	 * This tests an index which defaultIncludeAll parameter is set to true.
 	 */
 	@Test
 	public void testDeIndexField() {
@@ -1445,8 +1684,11 @@ public abstract class XModelObjectLevelIndexTest {
 		testIfObjectWasDeIndexed(newJohn, this.newIndex, this.newIndexer);
 	}
 	
-	/*
-	 * TODO Document
+	/**
+	 * Tests if {@link XModelObjectLevelIndex#deIndex(XReadableField)} works
+	 * correctly.
+	 * 
+	 * This tests an index which defaultIncludeAll parameter is set to false.
 	 */
 	@Test
 	public void testDeIndexFieldOfExcludeAllModel() {
