@@ -124,7 +124,7 @@ public class ChangedObject implements XWritableObject, DeltaUtils.IObjectDiff {
 	 *            little may result in the return of an integer which does not
 	 *            actually represent the minimal amount of needed
 	 *            {@link XCommand XCommands} for the transformation.
-	 * @result the amount of needed {@link XCommand XCommands} for the
+	 * @return the amount of needed {@link XCommand XCommands} for the
 	 *         transformation
 	 */
 	public int countCommandsNeeded(int max) {
@@ -161,7 +161,7 @@ public class ChangedObject implements XWritableObject, DeltaUtils.IObjectDiff {
 	 *            may result in the return of an integer which does not actually
 	 *            represent the minimal amount of needed {@link XEvent XEvents}
 	 *            for the transformation.
-	 * @result the amount of needed {@link XEvent XEvents} for the
+	 * @return the amount of needed {@link XEvent XEvents} for the
 	 *         transformation
 	 */
 	public int countEventsNeeded(int max) {
@@ -297,6 +297,7 @@ public class ChangedObject implements XWritableObject, DeltaUtils.IObjectDiff {
 	}
 	
 	/**
+	 * @param fieldId
 	 * @return the {@link XReadableField} with the given {@link XID} as it
 	 *         exists in the original {@link XReadableField}.
 	 */
@@ -418,7 +419,7 @@ public class ChangedObject implements XWritableObject, DeltaUtils.IObjectDiff {
 	 * @return false if there are no changes. True if there are changes.
 	 */
 	@Override
-    public boolean hasChanges() {
+	public boolean hasChanges() {
 		return !this.added.isEmpty() || !this.removed.isEmpty() || this.countCommandsNeeded(1) > 0;
 	}
 	

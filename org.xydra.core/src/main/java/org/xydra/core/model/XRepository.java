@@ -41,7 +41,7 @@ public interface XRepository extends XWritableRepository, XSendsRepositoryEvents
 	 *         {@link XModel} if the given {@link XID} was already taken
 	 */
 	@Override
-    @ModificationOperation
+	@ModificationOperation
 	XModel createModel(XID id);
 	
 	/**
@@ -50,6 +50,7 @@ public interface XRepository extends XWritableRepository, XSendsRepositoryEvents
 	 * Not all implementations will be able to execute all commands.
 	 * 
 	 * @param command The {@link XCommand} which is to be executed
+	 * @param callback
 	 * 
 	 * @return {@link XCommand#FAILED} if the command failed,
 	 *         {@link XCommand#NOCHANGE} if the command didn't change anything
@@ -97,7 +98,7 @@ public interface XRepository extends XWritableRepository, XSendsRepositoryEvents
 	 *         {@link XModel} exists in this repository.
 	 */
 	@Override
-    @ReadOperation
+	@ReadOperation
 	XModel getModel(XID id);
 	
 	/**
@@ -119,13 +120,16 @@ public interface XRepository extends XWritableRepository, XSendsRepositoryEvents
 	 *         otherwise
 	 */
 	@Override
-    @ModificationOperation
+	@ModificationOperation
 	boolean removeModel(XID modelId);
 	
 	/**
 	 * Set a new actor to be used when building commands for changes to this
 	 * repository. Recursively sets the session actor for all child
 	 * {@link XModel}, {@link XObject}, and {@link XField}.
+	 * 
+	 * @param actorId
+	 * @param passwordHash
 	 * 
 	 * @param actor for this repository and its children, if any.
 	 */

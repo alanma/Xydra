@@ -16,6 +16,8 @@ public interface XTransactionEventListener {
 	/**
 	 * Invoked when an {@link XTransactionEvent} occurs on the entity this
 	 * listener is registered on.
+	 * 
+	 * @param event
 	 */
 	void onChangeEvent(XTransactionEvent event);
 }

@@ -28,6 +28,7 @@ public class HMAC_SHA256 {
 	/**
 	 * @param givenKey The secret key
 	 * @param message The message to be signed
+	 * @return a HMAC-SHA-256 message digest
 	 */
 	public static byte[] hmac_sha256(byte[] givenKey, byte[] message) {
 		/* hash key if too long */

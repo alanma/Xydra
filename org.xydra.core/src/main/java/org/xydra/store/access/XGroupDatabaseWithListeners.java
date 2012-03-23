@@ -11,11 +11,15 @@ public interface XGroupDatabaseWithListeners extends XGroupDatabase {
 	 * Add a listener for {@link XGroupEvent XGroupEvents}. The listener will
 	 * only receive events for defined group memberships, not for implied group
 	 * memberships.
+	 * 
+	 * @param listener
 	 */
 	void addListener(XGroupListener listener);
 	
 	/**
 	 * Remove a listener for {@link XGroupEvent}s.
+	 * 
+	 * @param listener
 	 */
 	void removeListener(XGroupListener listener);
 	

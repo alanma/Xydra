@@ -157,7 +157,7 @@ public interface XydraPersistence {
 	XID getRepositoryId();
 	
 	/**
-	 * @param id
+	 * @param modelId
 	 * @return true if this persistence has ever managed the given modelId. This
 	 *         does not imply that the model currently exists.
 	 */

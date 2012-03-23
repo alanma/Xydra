@@ -85,6 +85,8 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 * index+size of the transaction which is being built by this transaction
 	 * builder.
 	 * 
+	 * @param index
+	 * 
 	 * @param command The {@link XCommand} which is to be added.
 	 * @throws IllegalArgumentException if the command is not an
 	 *             {@link XTransaction}, {@link XFieldCommand},
@@ -212,6 +214,8 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 * if the field already existed and hasn't been removed before in the
 	 * transaction.
 	 * 
+	 * @param objectAddr
+	 * 
 	 * @param newField The new {@link XField} that is to be added.
 	 * 
 	 * @throws IllegalArgumentException if this builders target is not the
@@ -336,6 +340,8 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 * modifications made to the value in the {@link ChangedField}. Any changes
 	 * to parts of the model or object which are not touched by the given
 	 * {@link ChangedModel} will not impact the execution of this transaction.
+	 * 
+	 * @param field
 	 */
 	public void applyChanges(ChangedField field) {
 		XAddress target = field.getAddress();
@@ -357,6 +363,8 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 * the {@link ChangedObject}. Any changes to parts of the model or object
 	 * which are not touched by the given {@link ChangedObject} will not impact
 	 * the execution of this transaction.
+	 * 
+	 * @param object
 	 */
 	public void applyChanges(ChangedObject object) {
 		
@@ -397,6 +405,8 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 * modifications made to the {@link ChangedModel}. Any changes to parts of
 	 * the model or object which are not touched by the given
 	 * {@link ChangedModel} will not impact the execution of this transaction.
+	 * 
+	 * @param model
 	 */
 	public void applyChanges(ChangedModel model) {
 		assert model.checkSetInvariants();
@@ -454,9 +464,9 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	}
 	
 	/**
-	 * If there is only one {@link XCommand} in the {@link XTransaction} which
-	 * is being built, return that, otherwise return the built
-	 * {@link XTransaction}.
+	 * @return If there is only one {@link XCommand} in the {@link XTransaction}
+	 *         which is being built, return that, otherwise return the built
+	 *         {@link XTransaction}.
 	 */
 	public XCommand buildCommand() {
 		if(size() == 1) {
@@ -836,6 +846,9 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 * This is equivalent to {@link #addValue(XAddress, long, XValue)} or
 	 * {@link #changeValue(XAddress, long, XValue)} with a revision of
 	 * {@link XCommand#FORCED}.
+	 * 
+	 * @param fieldAddr
+	 * @param value
 	 */
 	public void setValue(XAddress fieldAddr, XValue value) {
 		changeValue(fieldAddr, XCommand.FORCED, value);
@@ -845,6 +858,9 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 * Ensures that there is a field with the state of newField in the object
 	 * addressed by objectAddr. Overwrites any existing field with the same ID
 	 * and only fails if the given object doesn't exist.
+	 * 
+	 * @param objectAddr
+	 * @param newField
 	 */
 	public void setField(XAddress objectAddr, XReadableField newField) {
 		removeField(objectAddr, XCommand.FORCED, newField.getID());
@@ -885,6 +901,9 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 * Ensures that there is an object with the state of newObject in the model
 	 * addressed by modelAddr. Overwrites any existing object with the same ID
 	 * and only fails if the given model doesn't exist.
+	 * 
+	 * @param modelAddr
+	 * @param newObject
 	 */
 	public void setObject(XAddress modelAddr, XReadableObject newObject) {
 		removeObject(modelAddr, XCommand.FORCED, newObject.getID());

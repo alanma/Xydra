@@ -11,6 +11,8 @@ public interface XAccessListener {
 	
 	/**
 	 * Invoked when an {@link XAuthorisationEvent} occurs.
+	 * 
+	 * @param event
 	 */
 	void onAccessEvent(XAuthorisationEvent event);
 	

@@ -52,6 +52,9 @@ public class XSynchronizer {
 	 * Wrap the given entity to be synchronized with the given store. Each
 	 * entity should only be wrapped once or commands may be sent multiple
 	 * times.
+	 * 
+	 * @param entity
+	 * @param store
 	 */
 	public XSynchronizer(XSynchronizesChanges entity, XydraStore store) {
 		log.info("sync: init with entity " + entity.getAddress() + " | " + entity.getAddress());

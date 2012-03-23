@@ -58,8 +58,8 @@ public class UUID {
 	private static final Random random = new Random();
 	
 	/**
-	 * Generate a RFC4122, version 4 ID. Example:
-	 * "92329D39-6F5C-4520-ABFC-AAB64544E172"
+	 * @return a generated RFC4122, version 4 ID. Example:
+	 *         "92329D39-6F5C-4520-ABFC-AAB64544E172"
 	 */
 	public static String uuid() {
 		char[] uuid = new char[36];
@@ -81,10 +81,9 @@ public class UUID {
 	}
 	
 	/**
-	 * Generate a random uuid of the specified length. Example: uuid(15) returns
-	 * "VcydxgltxrVZSTV"
-	 * 
 	 * @param len the desired number of characters
+	 * @return a random uuid of the specified length. Example: uuid(15) returns
+	 *         "VcydxgltxrVZSTV"
 	 */
 	public static String uuid(int len) {
 		return uuid(len, CHARS.length);
@@ -101,6 +100,7 @@ public class UUID {
 	 * @param len the desired number of characters
 	 * @param radix the number of allowable values for each character (must be
 	 *            <= 62)
+	 * @return a generated UUID
 	 */
 	public static String uuid(int len, int radix) {
 		if(radix > CHARS.length) {

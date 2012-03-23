@@ -99,6 +99,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	 * parent repository XID so it can be synchronized.
 	 * 
 	 * @param actorId TODO
+	 * @param passwordHash
 	 * @param modelAddr The {@link XAddress} for this MemoryModel.
 	 */
 	public MemoryModel(XID actorId, String passwordHash, XAddress modelAddr) {
@@ -109,6 +110,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	 * Creates a new MemoryModel without father-{@link XRepository}.
 	 * 
 	 * @param actorId TODO
+	 * @param passwordHash
 	 * @param modelId The {@link XID} for this MemoryModel.
 	 */
 	public MemoryModel(XID actorId, String passwordHash, XID modelId) {
@@ -119,6 +121,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	 * Creates a new MemoryModel without father-{@link XRepository}.
 	 * 
 	 * @param actorId TODO
+	 * @param passwordHash
 	 * @param modelState The initial {@link XRevWritableModel} state of this
 	 *            MemoryModel.
 	 */
@@ -130,8 +133,10 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	 * Creates a new MemoryModel without father-{@link XRepository}.
 	 * 
 	 * @param actorId TODO
+	 * @param passwordHash
 	 * @param modelState The initial {@link XRevWritableModel} state of this
 	 *            MemoryModel.
+	 * @param log
 	 */
 	public MemoryModel(XID actorId, String passwordHash, XRevWritableModel modelState,
 	        XChangeLogState log) {

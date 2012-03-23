@@ -5,6 +5,8 @@ import java.util.Iterator;
 
 /**
  * Simple implementation of the {@link java.util.Iterator} interface for arrays.
+ * 
+ * @param <E> entry type
  */
 public class SimpleArrayIterator<E> implements Iterator<E> {
 	private E[] array;

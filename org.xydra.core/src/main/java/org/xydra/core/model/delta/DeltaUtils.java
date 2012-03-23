@@ -301,6 +301,7 @@ public abstract class DeltaUtils {
 	 * 
 	 * @param model The model to modify. Null if the model currently doesn't
 	 *            exist. This instance is modified.
+	 * @param command
 	 * @return The changed model after executing the command (may be null if
 	 *         there are no other changes except creating/removing the model)
 	 *         (Pair#getFirst()) and if the model was added or removed by the
@@ -387,7 +388,7 @@ public abstract class DeltaUtils {
 		boolean hasChanges();
 		
 		@Override
-        XID getID();
+		XID getID();
 	}
 	
 	public static interface IFieldDiff extends IHasXID {
@@ -399,7 +400,7 @@ public abstract class DeltaUtils {
 		boolean isChanged();
 		
 		@Override
-        XID getID();
+		XID getID();
 	}
 	
 }

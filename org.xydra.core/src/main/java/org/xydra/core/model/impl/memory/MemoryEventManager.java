@@ -99,8 +99,12 @@ public class MemoryEventManager implements Serializable {
 	/**
 	 * Creates a new MemoryEventQueue
 	 * 
+	 * @param actorId
+	 * @param passwordHash
+	 * 
 	 * @param log The {@link XChangeLog} this MemoryEventQueue will use for
 	 *            logging (may be null)
+	 * @param syncRev
 	 */
 	public MemoryEventManager(XID actorId, String passwordHash, MemoryChangeLog log, long syncRev) {
 		assert actorId != null;

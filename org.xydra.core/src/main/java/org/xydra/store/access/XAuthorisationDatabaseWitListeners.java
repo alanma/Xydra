@@ -9,11 +9,15 @@ public interface XAuthorisationDatabaseWitListeners extends XAuthorisationDataba
 	
 	/**
 	 * Add a listener for access events.
+	 * 
+	 * @param listener
 	 */
 	void addListener(XAccessListener listener);
 	
 	/**
 	 * Remove a listener for access events.
+	 * 
+	 * @param listener
 	 */
 	void removeListener(XAccessListener listener);
 	

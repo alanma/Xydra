@@ -51,6 +51,9 @@ public interface XAuthorisationManager {
 	// TODO Why not have a generic canKnowAboutEntity(XID actor, XAddress
 	// entity) method instead?
 	/**
+	 * @param actor
+	 * @param objectAddr
+	 * @param fieldId
 	 * @return true if the actor is allowed to know about the existence of the
 	 *         specified {@link XField}
 	 */
@@ -66,12 +69,17 @@ public interface XAuthorisationManager {
 	public boolean canKnowAboutModel(XID actor, XAddress repoAddr, XID modelId);
 	
 	/**
+	 * @param actor
+	 * @param modelAddr
+	 * @param objectId
 	 * @return true if the actor is allowed to know about the existence of the
 	 *         specified {@link XObject}
 	 */
 	public boolean canKnowAboutObject(XID actor, XAddress modelAddr, XID objectId);
 	
 	/**
+	 * @param actor
+	 * @param resource
 	 * @return true if the actor is allowed to read from the specified resource
 	 */
 	boolean canRead(XID actor, XAddress resource);
@@ -81,10 +89,10 @@ public interface XAuthorisationManager {
 	 * {@link XField} from the specified {@link XObject}.
 	 * 
 	 * @param actor The {@link XID} of the actor
-	 * @param modelAddr The {@link XAddress} of the {@link XObject} for which
+	 * @param objectAddr The {@link XAddress} of the {@link XObject} for which
 	 *            the allowance of the remove-operation is to be checked.
-	 * @param objectId The {@link XID} of the {@link XField} the actor would
-	 *            like to remove
+	 * @param fieldId The {@link XID} of the {@link XField} the actor would like
+	 *            to remove
 	 * @return true if the actor is allowed to remove the {@link XField} with
 	 *         the given {@link XID} from the given {@link XObject}
 	 */
@@ -119,6 +127,8 @@ public interface XAuthorisationManager {
 	boolean canRemoveObject(XID actor, XAddress modelAddr, XID objectId);
 	
 	/**
+	 * @param actor
+	 * @param resource
 	 * @return true if the actor is allowed to write to the specified resource
 	 */
 	boolean canWrite(XID actor, XAddress resource);

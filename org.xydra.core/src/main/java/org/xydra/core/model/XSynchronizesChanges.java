@@ -26,6 +26,7 @@ public interface XSynchronizesChanges extends IHasChangeLog, XExecutesCommands, 
 	 * Not all implementations will be able to execute all commands.
 	 * 
 	 * @param command The {@link XCommand} which is to be executed
+	 * @param callback
 	 * 
 	 * @return {@link XCommand#FAILED} if the command failed,
 	 *         {@link XCommand#NOCHANGE} if the command didn't change anything
@@ -41,7 +42,7 @@ public interface XSynchronizesChanges extends IHasChangeLog, XExecutesCommands, 
 	 *         XEvents} which happen on this XSynchronizeChanges
 	 */
 	@Override
-    XChangeLog getChangeLog();
+	XChangeLog getChangeLog();
 	
 	// TODO document
 	XLocalChange[] getLocalChanges();
@@ -86,6 +87,7 @@ public interface XSynchronizesChanges extends IHasChangeLog, XExecutesCommands, 
 	 * @param remoteChanges The remote changes that happened since the last
 	 *            Synchronization, including local changes that have been saved
 	 *            remotely.
+	 * @return TODO
 	 */
 	boolean synchronize(XEvent[] remoteChanges);
 	

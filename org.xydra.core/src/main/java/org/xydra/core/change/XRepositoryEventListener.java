@@ -16,6 +16,8 @@ public interface XRepositoryEventListener {
 	/**
 	 * Invoked when an {@link XRepositoryEvent} occurs on the entity this
 	 * listener is registered on.
+	 * 
+	 * @param event
 	 */
 	void onChangeEvent(XRepositoryEvent event);
 }
