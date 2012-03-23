@@ -19,7 +19,7 @@ public class DefaultLogger extends Logger {
 		return formatLevel(level) + msg + " " + formatThrowable(t) + formatLoggername();
 	}
 	
-	private String formatLevel(Level level) {
+	private static String formatLevel(Level level) {
 		return level.name().toUpperCase() + ": ";
 	}
 	
@@ -27,11 +27,11 @@ public class DefaultLogger extends Logger {
 		return " [" + this.name + "]";
 	}
 	
-	private String formatThrowable(Throwable t) {
+	private static String formatThrowable(Throwable t) {
 		return " " + t.getMessage() + " " + t.getClass().getName();
 	}
 	
-	private String formatLocation(String className, String methodName, int lineNumber) {
+	private static String formatLocation(String className, String methodName, int lineNumber) {
 		String simpleClassName = className.substring(className.lastIndexOf('.') + 1);
 		return " at " + className + " (" + simpleClassName + ".java:" + lineNumber + ")";
 	}
@@ -111,7 +111,7 @@ public class DefaultLogger extends Logger {
 		}
 	}
 	
-	private void output(String formattedMessage) {
+	private static void output(String formattedMessage) {
 		System.out.println(formattedMessage);
 	}
 	

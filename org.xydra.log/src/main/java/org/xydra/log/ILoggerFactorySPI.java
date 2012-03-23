@@ -22,7 +22,8 @@ public interface ILoggerFactorySPI {
 	 * same logger instance regardless of the requested name.
 	 * 
 	 * @param name the name of the Logger to return
-	 * @param logListener if not null, send all log events also to listener
+	 * @param logListeners if not null, send all log events also to listeners
+	 * @return a logger instance with the given name
 	 */
 	Logger getLogger(String name, Collection<ILogListener> logListeners);
 	
