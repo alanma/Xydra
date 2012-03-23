@@ -1,5 +1,6 @@
 package org.xydra.testgae.server;
 
+import org.xydra.gae.datalogger.DataloggerResource;
 import org.xydra.restless.IRestlessContext;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessExceptionHandler;
@@ -30,6 +31,8 @@ public class XmasApp {
 		});
 		
 		AdminDashboardResource.restless(r, path);
+		
+		DataloggerResource.restless(r, "");
 		
 		XmasResource.restless(r, path);
 		

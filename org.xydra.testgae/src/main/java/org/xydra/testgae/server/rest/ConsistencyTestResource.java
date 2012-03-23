@@ -39,6 +39,13 @@ public class ConsistencyTestResource {
 	private static HtmlWriterLogListener logListener;
 	private static final XID ctId = XX.toId("__consistencyTest");
 	
+	/**
+	 * Expose /consistency for read/write access and /consitency/events to help
+	 * debugging
+	 * 
+	 * @param restless
+	 * @param prefix
+	 */
 	public static void restless(Restless restless, String prefix) {
 		LoggerFactory.addLogListener(getLogListener());
 		restless.addMethod("/consistency/", "GET", ConsistencyTestResource.class, "get", false,
@@ -105,6 +112,7 @@ public class ConsistencyTestResource {
 		w.flush();
 		
 		XydraPersistence persistence = XydraRuntime.getPersistence(repoId);
+		
 		WritableRepositoryOnPersistence nakedRepo = new WritableRepositoryOnPersistence(
 		        persistence, actorId);
 		// should be done in another way

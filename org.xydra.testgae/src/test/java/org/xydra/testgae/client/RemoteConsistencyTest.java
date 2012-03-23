@@ -10,7 +10,10 @@ public class RemoteConsistencyTest {
 	
 	private static final Logger log = LoggerFactory.getLogger(RemoteConsistencyTest.class);
 	
-	private static final String SERVER_ROOT = "http://testgae.latest.xydra-live.appspot.com";
+	// your url here
+	private static final String SERVER_ROOT = "http://testgae20120321.calpano-2.appspot.com/";
+	
+	// "testgae.latest.xydra-live.appspot.com";
 	
 	public static final int THREADS = 10;
 	
@@ -31,7 +34,9 @@ public class RemoteConsistencyTest {
 		long d = c.stopAndGetDuration("Threads: " + THREADS + " x Rounds: " + ROUNDS);
 		long runs = THREADS * ROUNDS;
 		System.out.println("==== " + c.getStats());
+		System.out.println("Ran " + THREADS + " for up to " + ROUNDS + " rounds");
 		System.out.println("Average: " + (d / runs) + " ms per run");
-		System.out.println("Errors: " + ConsistencyTestClient.failedWrites);
+		System.out.println("Read  errors: " + ConsistencyTestClient.failedReads);
+		System.out.println("Write errors: " + ConsistencyTestClient.failedWrites);
 	}
 }
