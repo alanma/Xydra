@@ -32,7 +32,7 @@ public interface IVersionedStore {
 	
 	/**
 	 * @param actor
-	 * @param xaddress
+	 * @param address
 	 * @param rev
 	 * @return all events that happened after rev on the XEntity with the given
 	 *         address
