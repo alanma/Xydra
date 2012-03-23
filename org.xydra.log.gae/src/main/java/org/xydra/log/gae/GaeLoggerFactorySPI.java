@@ -53,6 +53,7 @@ public class GaeLoggerFactorySPI implements ILoggerFactorySPI {
 		                SystemProperty.Environment.Value.Production);
 	}
 	
+	@SuppressWarnings("unused")
 	public static void init() {
 		if(factory == null) {
 			new GaeLoggerFactorySPI();
