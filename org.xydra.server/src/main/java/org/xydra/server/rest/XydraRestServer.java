@@ -68,6 +68,9 @@ public class XydraRestServer {
 	
 	/**
 	 * Setup the Xydra REST API.
+	 * 
+	 * @param restless
+	 * @param prefix
 	 */
 	public static void restless(Restless restless, String prefix) {
 		
