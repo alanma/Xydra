@@ -21,6 +21,7 @@ import org.xydra.base.change.XTransactionEvent;
 import org.xydra.base.value.XValue;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XModel;
+import org.xydra.gae.AboutAppEngine;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.ModelRevision;
@@ -298,7 +299,8 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 			if(candidate.finalModelRev) {
 				long rev = candidate.gaeModelRev.getModelRevision().revision();
 				log.info("Computed rev of " + this.modelAddr + " = " + rev
-				        + " DATA?i_type=rev&i_addr=" + this.modelAddr + "&rev=" + rev);
+				        + " DATA?i_type=rev&i_addr=" + this.modelAddr + "&rev=" + rev
+				        + "&instance=" + AboutAppEngine.getInstanceId());
 				return candidate.gaeModelRev;
 			} else {
 				lastCheckedRev = endRevInclusive;

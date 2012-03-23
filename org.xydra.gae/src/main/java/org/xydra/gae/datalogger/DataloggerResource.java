@@ -103,7 +103,7 @@ public class DataloggerResource {
 			ServletUtils.headers(res, "text/html");
 			w = HtmlUtils.startHtmlPage(res, "Datalogger", new SharedHtmlUtils.HeadLinkStyle(
 			        "/s/cpodebug.css"));
-			w.write("<div class='cpodebug'>");
+			w.write("<div class='xydebug'>");
 			
 			w.write("Log your data: " + SharedHtmlUtils.link("/admin/datalog/log")
 			        + "?key1=val1&key2=val2&...<br/>");
