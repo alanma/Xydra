@@ -85,6 +85,11 @@
 			<type>test-jar</type>
 		</dependency>
 
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>csv</artifactId>
+		</dependency>
+
 		<!-- devmode logging requires log4j libs! -->
 		<!-- compile dependencies -->
 		<dependency>
@@ -151,7 +156,8 @@
 	<build>
 		<pluginManagement>
 			<plugins>
-				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+				<!--This plugin's configuration is used to store Eclipse m2e settings 
+					only. It has no influence on the Maven build itself. -->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
 					<artifactId>lifecycle-mapping</artifactId>
