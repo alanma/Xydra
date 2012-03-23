@@ -77,6 +77,8 @@ public class TestServer {
 	 * @return absolute url of server + port + context
 	 */
 	public URI startServer(String contextPath, File docRoot) {
+		log.info("Starting server with docRoot=" + docRoot.getAbsolutePath() + " contextPaht="
+		        + contextPath);
 		
 		if(this.server != null)
 			throw new RuntimeException("server is already startet");
