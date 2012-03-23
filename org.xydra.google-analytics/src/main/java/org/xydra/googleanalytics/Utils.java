@@ -93,6 +93,7 @@ public class Utils {
 	}
 	
 	/**
+	 * @param domainName
 	 * @return hash of the domain name of the web site
 	 */
 	public static int getDomainhash(String domainName) {

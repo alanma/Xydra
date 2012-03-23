@@ -110,7 +110,7 @@ public class UrchinCookie {
 	 * 
 	 * @return
 	 */
-	@SuppressWarnings("unused")
+	@SuppressWarnings({ "unused", "static-method" })
 	private String getUtmx() {
 		return null;
 	}
@@ -139,6 +139,9 @@ public class UrchinCookie {
 		
 		/**
 		 * State must be set via {@link #setFromCookieString(String)}
+		 * 
+		 * @param domainName
+		 * @param domainHash
 		 */
 		public Utma(String domainName, String domainHash) {
 			super(domainName, domainHash);
@@ -411,6 +414,9 @@ public class UrchinCookie {
 		
 		/**
 		 * Make sure to set content via {@link #setFromCookieString(String)}
+		 * 
+		 * @param domainName
+		 * @param domainHash
 		 */
 		public Utmz(String domainName, String domainHash) {
 			super(domainName, domainHash);
@@ -474,23 +480,23 @@ public class UrchinCookie {
 		
 		public String toCookieString() {
 			return getDomainHash()
-
+			
 			+ "." + this.campaignCreationTime
-
+			
 			+ "." + this.campaignSessions
-
+			
 			+ "." + this.responseCount
-
+			
 			+ "." + "utmcsr=" + this.campaignSource
-
+			
 			+ "|utmccn=" + this.campaignName
-
+			
 			+ "|utmcmd=" + this.campaignMedium
-
+			
 			+ "|utmctr=" + this.campaignTerms
-
+			
 			+ "|utmcct=" + this.campaignContent
-
+			
 			;
 		}
 		

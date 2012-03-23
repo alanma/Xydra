@@ -40,7 +40,6 @@ public class HttpUserAgentUrlFetch implements HttpUserAgent {
 	private String userAgent;
 	
 	HttpUserAgentUrlFetch() {
-		new URLFetchServiceFactory();
 		this.urlfetch = URLFetchServiceFactory.getURLFetchService();
 	}
 	
