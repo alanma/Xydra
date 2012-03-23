@@ -33,6 +33,8 @@ import org.xydra.core.serialize.json.JsonParser;
 import org.xydra.core.serialize.xml.XmlOut;
 import org.xydra.core.serialize.xml.XmlParser;
 import org.xydra.index.query.Pair;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 import org.xydra.restless.IRestlessContext;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
@@ -56,6 +58,8 @@ import org.xydra.store.impl.rest.XydraStoreRestInterface;
  */
 public class XydraStoreResource {
 	
+	private static final Logger log = LoggerFactory.getLogger(XydraStoreResource.class);
+	
 	private static class InitException extends RuntimeException {
 		
 		private static final long serialVersionUID = -1357932793964520833L;
@@ -75,6 +79,7 @@ public class XydraStoreResource {
 	private static final Pattern callbackRegex = Pattern.compile("^[a-z0-9_]+$");
 	
 	public static void restless(Restless restless, String apiLocation) {
+		log.info("Init at apiLocation=" + apiLocation);
 		
 		jsonMimes.add("application/json");
 		jsonMimes.add("application/x-javascript");
@@ -128,6 +133,7 @@ public class XydraStoreResource {
 		
 		restless.addMethod(prefix + XydraStoreRestInterface.URL_PING, "GET",
 		        XydraStoreResource.class, "ping", false);
+		log.info("Exposing ping service at " + prefix + XydraStoreRestInterface.URL_PING);
 		
 	}
 	
