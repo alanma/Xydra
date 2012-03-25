@@ -56,7 +56,7 @@ public class SimpleRepository implements XRevWritableRepository, Serializable {
 	}
 	
 	@Override
-	public XID getID() {
+	public XID getId() {
 		return this.address.getRepository();
 	}
 	
@@ -90,7 +90,7 @@ public class SimpleRepository implements XRevWritableRepository, Serializable {
 	
 	@Override
 	public void addModel(XRevWritableModel model) {
-		this.models.put(model.getID(), model);
+		this.models.put(model.getId(), model);
 	}
 	
 	@Override

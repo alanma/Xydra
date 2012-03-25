@@ -72,8 +72,8 @@ public class ArmProtectedBaseObject implements XReadableObject {
 	}
 	
 	@Override
-    public XID getID() {
-		return this.object.getID();
+    public XID getId() {
+		return this.object.getId();
 	}
 	
 	@Override

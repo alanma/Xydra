@@ -50,7 +50,7 @@ public class SimpleObject implements Serializable, XRevWritableObject {
 	
 	@Override
 	public void addField(XRevWritableField field) {
-		this.fields.put(field.getID(), field);
+		this.fields.put(field.getId(), field);
 	}
 	
 	@Override
@@ -75,7 +75,7 @@ public class SimpleObject implements Serializable, XRevWritableObject {
 	}
 	
 	@Override
-	public XID getID() {
+	public XID getId() {
 		return this.address.getObject();
 	}
 	

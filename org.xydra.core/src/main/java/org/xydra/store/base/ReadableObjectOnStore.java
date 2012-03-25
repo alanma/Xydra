@@ -10,6 +10,7 @@ import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.Callback;
+import org.xydra.store.GetWithAddressRequest;
 import org.xydra.store.StoreException;
 import org.xydra.store.XydraStore;
 
@@ -52,7 +53,7 @@ public class ReadableObjectOnStore implements XReadableObject, Serializable {
 	}
 	
 	@Override
-	public XID getID() {
+	public XID getId() {
 		return this.address.getField();
 	}
 	
@@ -77,8 +78,9 @@ public class ReadableObjectOnStore implements XReadableObject, Serializable {
 	}
 	
 	protected void load() {
-		this.store.getObjectSnapshots(this.credentials.getActorId(), this.credentials
-		        .getPasswordHash(), new XAddress[] { this.address },
+		this.store.getObjectSnapshots(this.credentials.getActorId(),
+		        this.credentials.getPasswordHash(),
+		        new GetWithAddressRequest[] { new GetWithAddressRequest(this.address) },
 		        new Callback<BatchedResult<XReadableObject>[]>() {
 			        
 			        @Override

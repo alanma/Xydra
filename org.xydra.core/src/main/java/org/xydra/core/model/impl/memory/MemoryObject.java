@@ -200,10 +200,10 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		
 		assert field.getObject() == this;
 		
-		this.loadedFields.put(field.getID(), field);
+		this.loadedFields.put(field.getId(), field);
 		
 		XObjectEvent event = MemoryObjectEvent
-		        .createAddEvent(this.eventQueue.getActor(), getAddress(), field.getID(),
+		        .createAddEvent(this.eventQueue.getActor(), getAddress(), field.getId(),
 		                getModelRevisionNumber(), getRevisionNumber(), inTrans);
 		
 		this.eventQueue.enqueueObjectEvent(this, event);
@@ -274,7 +274,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		}
 		
 		XObjectEvent event = MemoryObjectEvent.createRemoveEvent(actor, getAddress(),
-		        field.getID(), modelRev, getRevisionNumber(), field.getRevisionNumber(), inTrans,
+		        field.getId(), modelRev, getRevisionNumber(), field.getRevisionNumber(), inTrans,
 		        implied);
 		this.eventQueue.enqueueObjectEvent(this, event);
 		
@@ -436,9 +436,9 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	}
 	
 	@Override
-	public XID getID() {
+	public XID getId() {
 		synchronized(this.eventQueue) {
-			return this.state.getID();
+			return this.state.getId();
 		}
 	}
 	
@@ -452,7 +452,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	 *         or null, if this object has no father.
 	 */
 	protected XID getModelId() {
-		return this.father == null ? null : this.father.getID();
+		return this.father == null ? null : this.father.getId();
 	}
 	
 	/**
@@ -474,7 +474,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	
 	@Override
 	protected MemoryObject getObject(XID objectId) {
-		if(getID().equals(objectId)) {
+		if(getId().equals(objectId)) {
 			return this;
 		}
 		return null;
@@ -529,7 +529,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	}
 	
 	protected boolean hasObject(XID objectId) {
-		return getID().equals(objectId);
+		return getId().equals(objectId);
 	}
 	
 	@Override
@@ -603,8 +603,8 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		enqueueFieldRemoveEvents(this.eventQueue.getActor(), field, makeTrans || inTrans, false);
 		
 		// actually remove the field
-		this.state.removeField(field.getID());
-		this.loadedFields.remove(field.getID());
+		this.state.removeField(field.getId());
+		this.loadedFields.remove(field.getId());
 		
 		Orphans orphans = this.eventQueue.orphans;
 		if(orphans != null) {
@@ -644,13 +644,13 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 			field.getState().setValue(null);
 			assert !this.eventQueue.orphans.fields.containsKey(field.getAddress());
 			this.eventQueue.orphans.fields.put(field.getAddress(), field);
-			this.state.removeField(field.getID());
+			this.state.removeField(field.getId());
 		}
 		
 		this.loadedFields.clear();
 		
-		assert !this.eventQueue.orphans.objects.containsKey(getID());
-		this.eventQueue.orphans.objects.put(getID(), this);
+		assert !this.eventQueue.orphans.objects.containsKey(getId());
+		this.eventQueue.orphans.objects.put(getId(), this);
 	}
 	
 	@Override
@@ -675,7 +675,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	@ReadOperation
 	@Override
 	public String toString() {
-		return this.getID() + " rev[" + this.getRevisionNumber() + "]" + " "
+		return this.getId() + " rev[" + this.getRevisionNumber() + "]" + " "
 		        + this.state.toString();
 	}
 	

@@ -57,7 +57,7 @@ public class DiffWritableRepository extends AbstractDelegatingWritableRepository
 		} else {
 			log.debug("model '" + modelId + "' did not exist yet");
 			DiffWritableModel diffModel = new DiffWritableModel(new SimpleModel(XX.toAddress(
-			        getID(), modelId, null, null)));
+			        getId(), modelId, null, null)));
 			this.added.put(modelId, diffModel);
 			this.removed.remove(modelId);
 			this.potentiallyChanged.remove(modelId);
@@ -153,7 +153,7 @@ public class DiffWritableRepository extends AbstractDelegatingWritableRepository
 		}
 		for(DiffWritableModel model : this.potentiallyChanged.values()) {
 			if(model.hasChanges()) {
-				buf.append("=== CHANGED " + model.getID() + " === <br/>\n");
+				buf.append("=== CHANGED " + model.getId() + " === <br/>\n");
 				for(XAtomicCommand command : model.toCommandList(true)) {
 					buf.append(" " + command + " <br/>\n");
 				}

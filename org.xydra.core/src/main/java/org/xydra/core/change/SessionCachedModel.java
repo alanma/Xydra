@@ -99,7 +99,7 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 		}
 		
 		@Override
-		public XID getID() {
+		public XID getId() {
 			return super.address.getField();
 		}
 		
@@ -150,7 +150,7 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 		
 		@Override
 		public String toString() {
-			return "F:" + this.getID() + " {\n" + DumpUtils.toStringBuffer(this) + "Changes: \n"
+			return "F:" + this.getId() + " {\n" + DumpUtils.toStringBuffer(this) + "Changes: \n"
 			        + DumpUtils.changesToString(this).toString() + "}";
 		}
 		
@@ -194,7 +194,7 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 		}
 		
 		@Override
-		public XID getID() {
+		public XID getId() {
 			return super.address.getObject();
 		}
 		
@@ -214,7 +214,7 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 			List<XID> list = new LinkedList<XID>();
 			for(CachedField cf : this.cachedFields.values()) {
 				if(cf.isRemoved()) {
-					list.add(cf.getID());
+					list.add(cf.getId());
 				}
 			}
 			return list;
@@ -331,7 +331,7 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 		
 		@Override
 		public String toString() {
-			return "O:" + this.getID() + " {\n" + DumpUtils.toStringBuffer(this) + "Changes: \n"
+			return "O:" + this.getId() + " {\n" + DumpUtils.toStringBuffer(this) + "Changes: \n"
 			        + DumpUtils.changesToString(this).toString() + "}";
 		}
 	}
@@ -445,14 +445,14 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 			if(co.state == EntityState.Added) {
 				txnBuilder.addObjectForced(getAddress(), co);
 			} else if(co.state == EntityState.Removed) {
-				txnBuilder.removeObject(getAddress(), XCommand.FORCED, co.getID());
+				txnBuilder.removeObject(getAddress(), XCommand.FORCED, co.getId());
 			} else {
 				// fields might have changed
 				for(CachedField cf : co.cachedFields.values()) {
 					if(cf.state == EntityState.Added) {
 						txnBuilder.addFieldForced(co.getAddress(), cf);
 					} else if(cf.state == EntityState.Removed) {
-						txnBuilder.removeField(co.getAddress(), XCommand.FORCED, cf.getID());
+						txnBuilder.removeField(co.getAddress(), XCommand.FORCED, cf.getId());
 					} else {
 						// value might have changed
 						if(cf.isValueAdded()) {
@@ -471,22 +471,22 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 	public void commitTo(XWritableModel writableModel) {
 		for(CachedObject co : this.cachedObjects.values()) {
 			if(co.state == EntityState.Added) {
-				XWritableObject writableObject = writableModel.createObject(co.getID());
+				XWritableObject writableObject = writableModel.createObject(co.getId());
 				XCopyUtils.copyData(co, writableObject);
 			} else if(co.state == EntityState.Removed) {
-				writableModel.removeObject(co.getID());
+				writableModel.removeObject(co.getId());
 			} else {
-				XWritableObject writableObject = writableModel.getObject(co.getID());
-				assert writableObject != null : "base model should know object " + co.getID();
+				XWritableObject writableObject = writableModel.getObject(co.getId());
+				assert writableObject != null : "base model should know object " + co.getId();
 				// fields might have changed
 				for(CachedField cf : co.cachedFields.values()) {
 					if(cf.state == EntityState.Added) {
-						XWritableField writableField = writableObject.createField(cf.getID());
+						XWritableField writableField = writableObject.createField(cf.getId());
 						XCopyUtils.copyData(cf, writableField);
 					} else if(cf.state == EntityState.Removed) {
-						writableObject.removeField(cf.getID());
+						writableObject.removeField(cf.getId());
 					} else {
-						XWritableField writableField = writableObject.getField(cf.getID());
+						XWritableField writableField = writableObject.getField(cf.getId());
 						// value might have changed
 						if(cf.isValueAdded()) {
 							writableField.setValue(cf.getValue());
@@ -537,7 +537,7 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 	}
 	
 	@Override
-	public XID getID() {
+	public XID getId() {
 		return this.address.getModel();
 	}
 	
@@ -568,7 +568,7 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 		List<XID> list = new LinkedList<XID>();
 		for(CachedObject co : this.cachedObjects.values()) {
 			if(co.isRemoved()) {
-				list.add(co.getID());
+				list.add(co.getId());
 			}
 		}
 		return list;
@@ -627,9 +627,9 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 	}
 	
 	public void indexObject(XReadableObject baseObject) {
-		CachedObject co = this.cachedObjects.get(baseObject.getID());
+		CachedObject co = this.cachedObjects.get(baseObject.getId());
 		if(co == null) {
-			co = setObjectState(baseObject.getID(), EntityState.Present);
+			co = setObjectState(baseObject.getId(), EntityState.Present);
 		}
 		co.indexFieldsFrom(baseObject);
 		co.rev = baseObject.getRevisionNumber();
@@ -733,13 +733,13 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 	private CachedObject setObjectState(XID id, EntityState objectState) {
 		CachedObject co = new CachedObject(XX.resolveObject(getAddress(), id), objectState);
 		this.cachedObjects.put(id, co);
-		assert co.getID().equals(id);
+		assert co.getId().equals(id);
 		return co;
 	}
 	
 	@Override
 	public String toString() {
-		return "M:" + this.getID() + " {\n" + DumpUtils.toStringBuffer(this) + "Changes: \n"
+		return "M:" + this.getId() + " {\n" + DumpUtils.toStringBuffer(this) + "Changes: \n"
 		        + DumpUtils.changesToString(this).toString() + "}";
 	}
 	

@@ -203,8 +203,8 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 	}
 	
 	@Override
-	public XID getID() {
-		return this.baseObject.getID();
+	public XID getId() {
+		return this.baseObject.getId();
 	}
 	
 	public long executeCommand(XCommand command) {
@@ -228,7 +228,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 		// Simulate the action the given command would actually execute
 		
 		// check whether the given command actually refers to the this object
-		if(!command.getTarget().getObject().equals(this.getID())
+		if(!command.getTarget().getObject().equals(this.getId())
 		        || !command.getTarget().getModel().equals(this.getAddress().getModel())) {
 			usedCallback.onFailure();
 			
@@ -560,7 +560,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 	 *            {@link #executeCommand(XCommand)})
 	 */
 	private void addFieldToTransactionObject(InObjectTransactionField field, boolean inTransaction) {
-		XID fieldId = field.getID();
+		XID fieldId = field.getId();
 		
 		if(!inTransaction) {
 			// remove from list of removed fields, if needed

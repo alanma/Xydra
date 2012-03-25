@@ -26,12 +26,12 @@ public abstract class AbstractDelegatingWritableRepository implements XWritableR
 	
 	@Override
 	public XAddress getAddress() {
-		return XX.toAddress(getID(), null, null, null);
+		return XX.toAddress(getId(), null, null, null);
 	}
 	
 	@Override
-	public XID getID() {
-		return this.baseRepository.getID();
+	public XID getId() {
+		return this.baseRepository.getId();
 	}
 	
 	@Override

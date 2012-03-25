@@ -22,6 +22,7 @@ import org.xydra.store.rmof.impl.delegate.WritableRepositoryOnPersistence;
  * @author xamde
  * 
  */
+@Deprecated
 public class RWCachingRepository extends AbstractDelegatingWritableRepository {
 	
 	private static final Logger log = LoggerFactory.getLogger(RWCachingRepository.class);
@@ -35,8 +36,8 @@ public class RWCachingRepository extends AbstractDelegatingWritableRepository {
 	}
 	
 	@Override
-	public XID getID() {
-		return this.diffRepo.getID();
+	public XID getId() {
+		return this.diffRepo.getId();
 	}
 	
 	@Override
@@ -93,7 +94,7 @@ public class RWCachingRepository extends AbstractDelegatingWritableRepository {
 	 * @return the command result. 200 = OK, 500-599 = error.
 	 */
 	public synchronized static int commit(RWCachingRepository rwcRepo, XID actorId) {
-		XID repositoryId = rwcRepo.getID();
+		XID repositoryId = rwcRepo.getId();
 		ChangedRepository diffRepo = rwcRepo.getDiffWritableRepository();
 		
 		XydraPersistence persistence = XydraRuntime.getPersistence(repositoryId);
@@ -109,7 +110,7 @@ public class RWCachingRepository extends AbstractDelegatingWritableRepository {
 			}
 		}
 		for(ChangedModel addedModel : diffRepo.getAdded()) {
-			baseRepo.createModel(addedModel.getID());
+			baseRepo.createModel(addedModel.getId());
 			if(addedModel.hasChanges()) {
 				XTransactionBuilder builder = new XTransactionBuilder(addedModel.getAddress());
 				builder.applyChanges(addedModel);
@@ -118,10 +119,10 @@ public class RWCachingRepository extends AbstractDelegatingWritableRepository {
 				// FIXME check txn that no object is created twice
 				
 				// XTransaction txn = addedModel.toTransaction();
-				int partialResult = executeModelTransacton(repositoryId, addedModel.getID(), txn,
+				int partialResult = executeModelTransacton(repositoryId, addedModel.getId(), txn,
 				        actorId);
 				if(partialResult != 200) {
-					log.warn("In model '" + addedModel.getID() + "' could not execute txn: "
+					log.warn("In model '" + addedModel.getId() + "' could not execute txn: "
 					        + txnToString(txn));
 					result = partialResult;
 				}
@@ -136,9 +137,9 @@ public class RWCachingRepository extends AbstractDelegatingWritableRepository {
 				
 				// XTransaction txn = potentiallyChangedModel.toTransaction();
 				int partialResult = executeModelTransacton(repositoryId,
-				        potentiallyChangedModel.getID(), txn, actorId);
+				        potentiallyChangedModel.getId(), txn, actorId);
 				if(partialResult != 200) {
-					log.warn("In model '" + potentiallyChangedModel.getID()
+					log.warn("In model '" + potentiallyChangedModel.getId()
 					        + "' could not execute txn: " + txnToString(txn));
 					result = partialResult;
 				}

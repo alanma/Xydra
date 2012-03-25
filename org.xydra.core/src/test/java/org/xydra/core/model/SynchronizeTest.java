@@ -236,9 +236,9 @@ public class SynchronizeTest {
 		
 		XObject john = this.localModel.getObject(DemoModelUtil.JOHN_ID);
 		XModelCommand removeJohnSafe = MemoryModelCommand.createRemoveCommand(
-		        this.localModel.getAddress(), john.getRevisionNumber(), john.getID());
+		        this.localModel.getAddress(), john.getRevisionNumber(), john.getId());
 		XModelCommand removeJohnForced = MemoryModelCommand.createRemoveCommand(
-		        this.localModel.getAddress(), XCommand.FORCED, john.getID());
+		        this.localModel.getAddress(), XCommand.FORCED, john.getId());
 		
 		List<XCommand> localChanges = new ArrayList<XCommand>();
 		localChanges.add(createObject); // 0

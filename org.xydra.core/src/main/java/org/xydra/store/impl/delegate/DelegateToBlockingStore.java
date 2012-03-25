@@ -2,7 +2,6 @@ package org.xydra.store.impl.delegate;
 
 import java.util.Set;
 
-import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
@@ -12,6 +11,7 @@ import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.Callback;
 import org.xydra.store.GetEventsRequest;
+import org.xydra.store.GetWithAddressRequest;
 import org.xydra.store.ModelRevision;
 import org.xydra.store.StoreException;
 import org.xydra.store.XydraStoreAdmin;
@@ -99,8 +99,9 @@ public class DelegateToBlockingStore implements XydraSingleOperationStore {
 	}
 	
 	@Override
-	public void getModelRevision(XID actorId, String passwordHash, XAddress modelAddress,
-	        Callback<ModelRevision> callback) throws IllegalArgumentException {
+	public void getModelRevision(XID actorId, String passwordHash,
+	        GetWithAddressRequest modelAddress, Callback<ModelRevision> callback)
+	        throws IllegalArgumentException {
 		assert actorId != null;
 		assert callback != null;
 		try {
@@ -114,7 +115,7 @@ public class DelegateToBlockingStore implements XydraSingleOperationStore {
 	}
 	
 	@Override
-	public void getModelSnapshot(XID actorId, String passwordHash, XAddress modelAddress,
+	public void getModelSnapshot(XID actorId, String passwordHash, GetWithAddressRequest modelAddress,
 	        Callback<XReadableModel> callback) throws IllegalArgumentException {
 		assert actorId != null;
 		assert callback != null;
@@ -129,13 +130,13 @@ public class DelegateToBlockingStore implements XydraSingleOperationStore {
 	}
 	
 	@Override
-	public void getObjectSnapshot(XID actorId, String passwordHash, XAddress objectAddress,
+	public void getObjectSnapshot(XID actorId, String passwordHash, GetWithAddressRequest objectAddressRequest,
 	        Callback<XReadableObject> callback) throws IllegalArgumentException {
 		assert actorId != null;
 		assert callback != null;
 		try {
 			XReadableObject result = this.blockingStore.getObjectSnapshot(actorId, passwordHash,
-			        objectAddress);
+			        objectAddressRequest);
 			callback.onSuccess(result);
 		} catch(StoreException e) {
 			log.warn("Telling callback: ", e);

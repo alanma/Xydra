@@ -260,7 +260,7 @@ public class SerializedModel {
 			XAddress objectAddr = XX.resolveObject(modelAddr, objectId);
 			XRevWritableObject objectState = toObjectState(objectElement.getSecond(), modelState,
 			        objectAddr);
-			assert modelState.getObject(objectState.getID()) == objectState;
+			assert modelState.getObject(objectState.getId()) == objectState;
 		}
 		
 		return modelState;
@@ -346,7 +346,7 @@ public class SerializedModel {
 			XAddress fieldAddr = XX.resolveField(objectAddr, fieldId);
 			XRevWritableField fieldState = toFieldState(fieldElement.getSecond(), objectState,
 			        fieldAddr);
-			assert objectState.getField(fieldState.getID()) == fieldState;
+			assert objectState.getField(fieldState.getId()) == fieldState;
 		}
 		
 		return objectState;
@@ -395,7 +395,7 @@ public class SerializedModel {
 			
 			XRevWritableModel modelState = toModelState(modelElement.getSecond(), repositoryState,
 			        modelAddr);
-			assert repositoryState.getModel(modelState.getID()) == modelState;
+			assert repositoryState.getModel(modelState.getId()) == modelState;
 		}
 		
 		return repositoryState;
@@ -470,7 +470,7 @@ public class SerializedModel {
 		
 		out.open(XFIELD_ELEMENT);
 		if(saveId) {
-			out.attribute(SerializingUtils.XID_ATTRIBUTE, xfield.getID());
+			out.attribute(SerializingUtils.XID_ATTRIBUTE, xfield.getId());
 		}
 		if(saveRevision) {
 			out.attribute(REVISION_ATTRIBUTE, rev);
@@ -531,7 +531,7 @@ public class SerializedModel {
 		
 		out.open(XMODEL_ELEMENT);
 		if(saveId) {
-			out.attribute(SerializingUtils.XID_ATTRIBUTE, xmodel.getID());
+			out.attribute(SerializingUtils.XID_ATTRIBUTE, xmodel.getId());
 		}
 		if(saveRevision) {
 			out.attribute(REVISION_ATTRIBUTE, rev);
@@ -612,7 +612,7 @@ public class SerializedModel {
 		
 		out.open(XOBJECT_ELEMENT);
 		if(saveId) {
-			out.attribute(SerializingUtils.XID_ATTRIBUTE, xobject.getID());
+			out.attribute(SerializingUtils.XID_ATTRIBUTE, xobject.getId());
 		}
 		if(saveRevision) {
 			out.attribute(REVISION_ATTRIBUTE, rev);
@@ -678,7 +678,7 @@ public class SerializedModel {
 	        boolean saveRevision, boolean ignoreInaccessible, boolean saveChangeLog) {
 		
 		out.open(XREPOSITORY_ELEMENT);
-		out.attribute(SerializingUtils.XID_ATTRIBUTE, xrepository.getID());
+		out.attribute(SerializingUtils.XID_ATTRIBUTE, xrepository.getId());
 		
 		out.child(NAME_MODELS);
 		out.beginMap(SerializingUtils.XID_ATTRIBUTE, XMODEL_ELEMENT);

@@ -41,7 +41,7 @@ public class WritableRepositoryOnStore extends ReadableRepositoryOnStore impleme
 	
 	@Override
 	public XWritableModel createModel(XID modelId) {
-		XCommand command = X.getCommandFactory().createAddModelCommand(this.getID(), modelId, true);
+		XCommand command = X.getCommandFactory().createAddModelCommand(this.getId(), modelId, true);
 		long result = ExecuteCommandsUtils.executeCommand(this.credentials, this.store, command);
 		if(result >= 0) {
 			this.modelIds = null;
@@ -79,7 +79,7 @@ public class WritableRepositoryOnStore extends ReadableRepositoryOnStore impleme
 	
 	@Override
 	public boolean removeModel(XID modelId) {
-		XCommand command = X.getCommandFactory().createRemoveModelCommand(this.getID(), modelId,
+		XCommand command = X.getCommandFactory().createRemoveModelCommand(this.getId(), modelId,
 		        this.getModel(modelId).getRevisionNumber(), true);
 		long result = ExecuteCommandsUtils.executeCommand(this.credentials, this.store, command);
 		if(result >= 0) {

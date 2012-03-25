@@ -15,6 +15,7 @@ import org.xydra.base.rmof.XWritableObject;
 import org.xydra.index.iterator.NoneIterator;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.store.GetWithAddressRequest;
 import org.xydra.store.ModelRevision;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
@@ -69,7 +70,7 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 	}
 	
 	@Override
-	public XID getID() {
+	public XID getId() {
 		return this.modelId;
 	}
 	
@@ -80,7 +81,8 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 	 */
 	public List<XEvent> getNewEvents() {
 		// get highestEvent
-		ModelRevision rs = this.persistence.getModelRevision(this.getAddress());
+		ModelRevision rs = this.persistence.getModelRevision(new GetWithAddressRequest(this
+		        .getAddress(), WritableRepositoryOnPersistence.USE_TENTATIVE_STATE));
 		long currentRev = rs.revision();
 		List<XEvent> events = null;
 		if(currentRev > this.lastRev) {
@@ -104,7 +106,8 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 	
 	@Override
 	public long getRevisionNumber() {
-		XWritableModel snapshot = this.persistence.getModelSnapshot(getAddress());
+		XWritableModel snapshot = this.persistence.getModelSnapshot(new GetWithAddressRequest(this
+		        .getAddress(), WritableRepositoryOnPersistence.USE_TENTATIVE_STATE));
 		if(snapshot == null) {
 			log.warn("Modelsnapshot for " + getAddress() + " is null");
 			return XCommand.NEW;
@@ -115,7 +118,9 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 	@Override
 	public boolean hasObject(XID objectId) {
 		XAddress objectAddress = XX.resolveObject(getAddress(), objectId);
-		XWritableObject objectSnapshot = this.persistence.getObjectSnapshot(objectAddress);
+		XWritableObject objectSnapshot = this.persistence
+		        .getObjectSnapshot(new GetWithAddressRequest(objectAddress,
+		                WritableRepositoryOnPersistence.USE_TENTATIVE_STATE));
 		if(objectSnapshot == null) {
 			return false;
 		}
@@ -126,17 +131,22 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 	 * Allows load() methods to init this model correctly.
 	 */
 	public void ignoreAllEventsUntilNow() {
-		this.lastRev = this.persistence.getModelRevision(this.getAddress()).revision();
+		this.lastRev = this.persistence.getModelRevision(
+		        new GetWithAddressRequest(this.getAddress(),
+		                WritableRepositoryOnPersistence.USE_TENTATIVE_STATE)).revision();
 	}
 	
 	@Override
 	public boolean isEmpty() {
-		return this.persistence.getModelSnapshot(getAddress()).isEmpty();
+		return this.persistence.getModelSnapshot(
+		        new GetWithAddressRequest(this.getAddress(),
+		                WritableRepositoryOnPersistence.USE_TENTATIVE_STATE)).isEmpty();
 	}
 	
 	@Override
 	public Iterator<XID> iterator() {
-		XWritableModel modelSnapshot = this.persistence.getModelSnapshot(getAddress());
+		XWritableModel modelSnapshot = this.persistence.getModelSnapshot(new GetWithAddressRequest(
+		        this.getAddress(), WritableRepositoryOnPersistence.USE_TENTATIVE_STATE));
 		if(modelSnapshot == null || modelSnapshot.isEmpty()) {
 			return new NoneIterator<XID>();
 		}

@@ -22,6 +22,7 @@ import org.xydra.index.query.Pair;
 import org.xydra.index.query.Wildcard;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.store.GetWithAddressRequest;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
 
@@ -37,6 +38,7 @@ import org.xydra.store.impl.delegate.XydraPersistence;
  * 
  * @author xamde
  */
+@Deprecated
 public class ReadCachingWritableModel extends AbstractDelegatingWritableModel implements
         XWritableModel {
 	
@@ -101,7 +103,7 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 		for(XID objectId : ids) {
 			prefetchObject(objectId);
 		}
-		log.info("Prefetching " + ids.size() + " objects in model '" + this.base.getID()
+		log.info("Prefetching " + ids.size() + " objects in model '" + this.base.getId()
 		        + "' took " + c.stopAndGetDuration("prefetech") + " ms");
 	}
 	
@@ -128,7 +130,8 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 		// prefetching
 		Clock c = new Clock().start();
 		
-		XWritableModel snapshot = persistence.getModelSnapshot(getAddress());
+		XWritableModel snapshot = persistence.getModelSnapshot(new GetWithAddressRequest(
+		        getAddress(), true));
 		for(XID objectId : snapshot) {
 			this.cache.index(objectId, NOFIELD, NOVALUE);
 			this.retrieveAllFieldIdsOfObjectFromSourceAndCache(snapshot, objectId);
@@ -139,7 +142,7 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 		this.knowsAllObjectIds = true;
 		
 		Set<XID> ids = this.idsAsSet();
-		log.info("Prefetching " + ids.size() + " objects in model '" + base.getID() + "' took "
+		log.info("Prefetching " + ids.size() + " objects in model '" + base.getId() + "' took "
 		        + c.stopAndGetDuration("prefetech") + " ms");
 	}
 	
@@ -186,8 +189,8 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 		}
 		XValue sourceValue = sourceField.getValue();
 		assert sourceValue == null || !sourceValue.equals(NOVALUE);
-		assert sourceObject.getID().equals(objectId);
-		assert sourceField.getID().equals(fieldId);
+		assert sourceObject.getId().equals(objectId);
+		assert sourceField.getId().equals(fieldId);
 		// index also if null
 		this.cache.index(objectId, fieldId, sourceValue);
 		this.fieldsOfWhichTheValueIsKnown.add(new Pair<XID,XID>(objectId, fieldId));
@@ -243,8 +246,8 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 	}
 	
 	@Override
-	public XID getID() {
-		return this.base.getID();
+	public XID getId() {
+		return this.base.getId();
 	}
 	
 	@Override

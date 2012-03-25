@@ -51,7 +51,7 @@ public class DiffWritableObject implements XWritableObject {
 		}
 		
 		@Override
-		public XID getID() {
+		public XID getId() {
 			return this.fieldId;
 		}
 		
@@ -124,7 +124,7 @@ public class DiffWritableObject implements XWritableObject {
 			f = this.added.createField(fieldId);
 			this.removed.removeField(fieldId);
 		}
-		return new WrappedField(f.getID());
+		return new WrappedField(f.getId());
 		
 	}
 	
@@ -164,7 +164,7 @@ public class DiffWritableObject implements XWritableObject {
 		if(f == null) {
 			return null;
 		}
-		return new WrappedField(f.getID());
+		return new WrappedField(f.getId());
 	}
 	
 	private XWritableField getFieldInternal(XID fieldId) {
@@ -187,8 +187,8 @@ public class DiffWritableObject implements XWritableObject {
 	}
 	
 	@Override
-	public XID getID() {
-		return this.base.getID();
+	public XID getId() {
+		return this.base.getId();
 	}
 	
 	@Override

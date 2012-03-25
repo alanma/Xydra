@@ -15,6 +15,7 @@ import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.rmof.XWritableRepository;
 import org.xydra.core.change.SessionCachedModel;
 import org.xydra.index.impl.IteratorUtils;
+import org.xydra.store.GetWithAddressRequest;
 
 
 /**
@@ -44,12 +45,12 @@ public class MemorySessionOnRepository implements ISessionPersistence {
 	
 	@Override
 	public XID getRepositoryId() {
-		return this.repo.getID();
+		return this.repo.getId();
 	}
 	
 	@Override
 	public long applyChangesAsTxn(SessionCachedModel changedModel, XID actorId) {
-		XWritableModel writableModel = this.repo.getModel(changedModel.getID());
+		XWritableModel writableModel = this.repo.getModel(changedModel.getId());
 		changedModel.commitTo(writableModel);
 		return 1;
 	}
@@ -87,19 +88,19 @@ public class MemorySessionOnRepository implements ISessionPersistence {
 	}
 	
 	@Override
-	public XReadableModel getModelSnapshot(XID modelId) {
-		assert modelId != null;
-		return this.repo.getModel(modelId);
+	public XReadableModel getModelSnapshot(GetWithAddressRequest modelRequest) {
+		assert modelRequest != null;
+		return this.repo.getModel(modelRequest.address.getModel());
 	}
 	
 	@Override
-	public XReadableObject getObjectSnapshot(XAddress objectAddress) {
-		assert objectAddress != null;
-		XWritableModel model = this.repo.getModel(objectAddress.getModel());
+	public XReadableObject getObjectSnapshot(GetWithAddressRequest objectAddressRequest) {
+		assert objectAddressRequest != null;
+		XWritableModel model = this.repo.getModel(objectAddressRequest.address.getModel());
 		if(model == null) {
 			return null;
 		}
-		return model.getObject(objectAddress.getObject());
+		return model.getObject(objectAddressRequest.address.getObject());
 	}
 	
 	@Override

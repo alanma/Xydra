@@ -118,7 +118,7 @@ public class CalendarManager {
 		this.accountModel = new MemoryModel(managerID, null, XX.createUniqueId());
 		
 		this.calendarRepo = X.createMemoryRepository(managerID);
-		this.calendarRepoID = this.calendarRepo.getID();
+		this.calendarRepoID = this.calendarRepo.getId();
 		
 		this.groups = new MemoryGroupDatabase();
 		this.arm = new MemoryAuthorisationManager(this.groups);

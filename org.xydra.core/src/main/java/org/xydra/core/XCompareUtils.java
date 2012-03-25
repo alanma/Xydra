@@ -58,7 +58,7 @@ public class XCompareUtils {
 			return false;
 		}
 		
-		if(!fieldA.getID().equals(fieldB.getID())) {
+		if(!fieldA.getId().equals(fieldB.getId())) {
 			log.debug("field ids differ");
 			return false;
 		}
@@ -98,7 +98,7 @@ public class XCompareUtils {
 			return false;
 		}
 		
-		if(!modelA.getID().equals(modelB.getID())) {
+		if(!modelA.getId().equals(modelB.getId())) {
 			log.debug("model id differs");
 			return false;
 		}
@@ -165,7 +165,7 @@ public class XCompareUtils {
 			return false;
 		}
 		
-		if(!objectA.getID().equals(objectB.getID())) {
+		if(!objectA.getId().equals(objectB.getId())) {
 			log.debug("object id differs");
 			return false;
 		}
@@ -227,7 +227,7 @@ public class XCompareUtils {
 			return false;
 		}
 		
-		if(!repoA.getID().equals(repoB.getID())) {
+		if(!repoA.getId().equals(repoB.getId())) {
 			log.debug("repo id differs");
 			return false;
 		}
@@ -291,7 +291,7 @@ public class XCompareUtils {
 			return false;
 		}
 		
-		if(!fieldA.getID().equals(fieldB.getID())) {
+		if(!fieldA.getId().equals(fieldB.getId())) {
 			return false;
 		}
 		
@@ -324,7 +324,7 @@ public class XCompareUtils {
 			return false;
 		}
 		
-		if(!modelA.getID().equals(modelB.getID())) {
+		if(!modelA.getId().equals(modelB.getId())) {
 			return false;
 		}
 		
@@ -381,7 +381,7 @@ public class XCompareUtils {
 			return false;
 		}
 		
-		if(!objectA.getID().equals(objectB.getID())) {
+		if(!objectA.getId().equals(objectB.getId())) {
 			return false;
 		}
 		
@@ -439,7 +439,7 @@ public class XCompareUtils {
 			return false;
 		}
 		
-		if(!repoA.getID().equals(repoB.getID())) {
+		if(!repoA.getId().equals(repoB.getId())) {
 			return false;
 		}
 		

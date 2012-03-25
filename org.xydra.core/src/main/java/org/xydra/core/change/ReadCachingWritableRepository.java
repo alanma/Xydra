@@ -20,6 +20,7 @@ import org.xydra.store.impl.delegate.XydraPersistence;
  * 
  * @author xamde
  */
+@Deprecated
 public class ReadCachingWritableRepository extends AbstractDelegatingWritableRepository {
 	
 	private static final Logger log = LoggerFactory.getLogger(ReadCachingWritableRepository.class);

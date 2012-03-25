@@ -48,8 +48,8 @@ public class ArmProtectedBaseField implements XReadableField {
 	}
 	
 	@Override
-    public XID getID() {
-		return this.field.getID();
+    public XID getId() {
+		return this.field.getId();
 	}
 	
 	@Override

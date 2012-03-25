@@ -1,9 +1,7 @@
 package org.xydra.core.change.session;
 
 import org.xydra.base.X;
-import org.xydra.base.XAddress;
 import org.xydra.base.XID;
-import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XCommandUtils;
 import org.xydra.base.change.XRepositoryCommand;
@@ -16,6 +14,7 @@ import org.xydra.core.change.SessionCachedModel;
 import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.store.GetWithAddressRequest;
 import org.xydra.store.ModelRevision;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
@@ -29,6 +28,8 @@ import org.xydra.store.impl.delegate.XydraPersistence;
 public class DelegatingSessionPersistence implements ISessionPersistence {
 	
 	private static final Logger log = LoggerFactory.getLogger(DelegatingSessionPersistence.class);
+	
+	private static final boolean INCLUDE_TENTATIVE = true;
 	
 	private XydraPersistence persistence;
 	private XID actorId;
@@ -51,10 +52,11 @@ public class DelegatingSessionPersistence implements ISessionPersistence {
 		}
 		
 		// TODO move model creation into txn
-		ModelRevision modelRev = this.persistence.getModelRevision(sessionCacheModel.getAddress());
+		ModelRevision modelRev = this.persistence.getModelRevision(new GetWithAddressRequest(
+		        sessionCacheModel.getAddress(), INCLUDE_TENTATIVE));
 		if(!modelRev.modelExists()) {
 			long l = this.persistence.executeCommand(this.actorId, X.getCommandFactory()
-			        .createForcedAddModelCommand(getRepositoryId(), sessionCacheModel.getID()));
+			        .createForcedAddModelCommand(getRepositoryId(), sessionCacheModel.getId()));
 			if(XCommandUtils.failed(l)) {
 				throw new SessionException("Could not create model '"
 				        + sessionCacheModel.getAddress() + "'. Got: " + l);
@@ -90,10 +92,9 @@ public class DelegatingSessionPersistence implements ISessionPersistence {
 	}
 	
 	@Override
-	public XReadableModel getModelSnapshot(XID modelId) {
-		assert modelId != null;
-		XAddress modelAddress = XX.resolveModel(getRepositoryId(), modelId);
-		XWritableModel baseModel = this.persistence.getModelSnapshot(modelAddress);
+	public XReadableModel getModelSnapshot(GetWithAddressRequest modelRequest) {
+		assert modelRequest != null;
+		XWritableModel baseModel = this.persistence.getModelSnapshot(modelRequest);
 		if(baseModel == null) {
 			return null;
 		}
@@ -101,9 +102,9 @@ public class DelegatingSessionPersistence implements ISessionPersistence {
 	}
 	
 	@Override
-	public XReadableObject getObjectSnapshot(XAddress objectAddress) {
-		assert objectAddress != null;
-		XWritableObject baseObject = this.persistence.getObjectSnapshot(objectAddress);
+	public XReadableObject getObjectSnapshot(GetWithAddressRequest objectAddressRequest) {
+		assert objectAddressRequest != null;
+		XWritableObject baseObject = this.persistence.getObjectSnapshot(objectAddressRequest);
 		if(baseObject == null) {
 			return null;
 		}

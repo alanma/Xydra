@@ -114,10 +114,10 @@ public class PersistenceOnStore implements XydraPersistence {
 	}
 	
 	@Override
-	public ModelRevision getModelRevision(XAddress address) {
+	public ModelRevision getModelRevision(GetWithAddressRequest addressRequest) {
 		SynchronousCallbackWithOneResult<BatchedResult<ModelRevision>[]> callback = new SynchronousCallbackWithOneResult<BatchedResult<ModelRevision>[]>();
-		this.store.getModelRevisions(this.actorId, this.passwordHash, new XAddress[] { address },
-		        callback);
+		this.store.getModelRevisions(this.actorId, this.passwordHash,
+		        new GetWithAddressRequest[] { addressRequest }, callback);
 		callback.waitOnCallbackAndThrowExceptionForProblems(WAIT_TIMEOUT);
 		{
 			Throwable e = callback.getException();
@@ -134,10 +134,10 @@ public class PersistenceOnStore implements XydraPersistence {
 	}
 	
 	@Override
-	public XWritableModel getModelSnapshot(XAddress address) {
+	public XWritableModel getModelSnapshot(GetWithAddressRequest addressRequest) {
 		SynchronousCallbackWithOneResult<BatchedResult<XReadableModel>[]> callback = new SynchronousCallbackWithOneResult<BatchedResult<XReadableModel>[]>();
-		this.store.getModelSnapshots(this.actorId, this.passwordHash, new XAddress[] { address },
-		        callback);
+		this.store.getModelSnapshots(this.actorId, this.passwordHash,
+		        new GetWithAddressRequest[] { addressRequest }, callback);
 		callback.waitOnCallbackAndThrowExceptionForProblems(WAIT_TIMEOUT);
 		{
 			Throwable e = callback.getException();
@@ -155,10 +155,10 @@ public class PersistenceOnStore implements XydraPersistence {
 	}
 	
 	@Override
-	public XWritableObject getObjectSnapshot(XAddress address) {
+	public XWritableObject getObjectSnapshot(GetWithAddressRequest addressRequest) {
 		SynchronousCallbackWithOneResult<BatchedResult<XReadableObject>[]> callback = new SynchronousCallbackWithOneResult<BatchedResult<XReadableObject>[]>();
-		this.store.getObjectSnapshots(this.actorId, this.passwordHash, new XAddress[] { address },
-		        callback);
+		this.store.getObjectSnapshots(this.actorId, this.passwordHash,
+		        new GetWithAddressRequest[] { addressRequest }, callback);
 		callback.waitOnCallbackAndThrowExceptionForProblems(WAIT_TIMEOUT);
 		{
 			Throwable e = callback.getException();
@@ -194,7 +194,7 @@ public class PersistenceOnStore implements XydraPersistence {
 	
 	@Override
 	public boolean hasManagedModel(XID modelId) {
-		return getModelRevision(modeladdress(modelId)).modelExists();
+		return getModelRevision(new GetWithAddressRequest(modeladdress(modelId), false)) != null;
 	}
 	
 	private XAddress modeladdress(XID modelId) {

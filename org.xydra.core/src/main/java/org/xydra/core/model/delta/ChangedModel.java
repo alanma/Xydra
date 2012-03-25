@@ -122,13 +122,13 @@ public class ChangedModel implements XWritableModel, IModelDiff {
 		for(XID id : this.added.keySet()) {
 			assert !this.removed.contains(id) && !this.changed.containsKey(id);
 			assert !this.base.hasObject(id) : "baseModel contains added object '" + id + "'";
-			assert id.equals(this.added.get(id).getID());
+			assert id.equals(this.added.get(id).getId());
 		}
 		
 		for(XID id : this.changed.keySet()) {
 			assert !this.removed.contains(id) && !this.added.containsKey(id);
 			assert this.base.hasObject(id);
-			assert id.equals(this.changed.get(id).getID());
+			assert id.equals(this.changed.get(id).getId());
 		}
 		
 		return true;
@@ -264,7 +264,7 @@ public class ChangedModel implements XWritableModel, IModelDiff {
 			this.removed.remove(objectId);
 			ChangedObject newObject = new ChangedObject(object);
 			newObject.clear();
-			assert newObject.getID().equals(object.getID());
+			assert newObject.getId().equals(object.getId());
 			this.changed.put(objectId, newObject);
 			
 			assert checkSetInvariants();
@@ -515,8 +515,8 @@ public class ChangedModel implements XWritableModel, IModelDiff {
 	}
 	
 	@Override
-	public XID getID() {
-		return this.base.getID();
+	public XID getId() {
+		return this.base.getId();
 	}
 	
 	/**
@@ -558,7 +558,7 @@ public class ChangedModel implements XWritableModel, IModelDiff {
 			return null;
 		}
 		changedObject = new ChangedObject(object);
-		assert changedObject.getID().equals(object.getID());
+		assert changedObject.getId().equals(object.getId());
 		this.changed.put(objectId, changedObject);
 		
 		assert checkSetInvariants();
@@ -688,12 +688,12 @@ public class ChangedModel implements XWritableModel, IModelDiff {
 	 */
 	public static void commitTo(ChangedModel changedModel, XWritableModel model) {
 		for(SimpleObject changedObject : changedModel.getNewObjects()) {
-			XWritableObject baseObject = model.createObject(changedObject.getID());
+			XWritableObject baseObject = model.createObject(changedObject.getId());
 			XCopyUtils.copyData(changedObject, baseObject);
 		}
 		for(ChangedObject changedObject : changedModel.getChangedObjects()) {
 			if(changedObject.isChanged()) {
-				XWritableObject baseObject = model.getObject(changedObject.getID());
+				XWritableObject baseObject = model.getObject(changedObject.getId());
 				ChangedObject.commitTo(changedObject, baseObject);
 			}
 		}

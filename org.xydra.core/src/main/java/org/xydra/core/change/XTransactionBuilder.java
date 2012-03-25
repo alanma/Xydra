@@ -232,11 +232,11 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	
 	public void addField(XAddress objectAddr, XReadableField newField, boolean forced) {
 		assert createsNoTargetAddressTwice(newField.getAddress()) : newField.getAddress();
-		addField(objectAddr, forced ? XCommand.FORCED : XCommand.SAFE, newField.getID());
+		addField(objectAddr, forced ? XCommand.FORCED : XCommand.SAFE, newField.getId());
 		assert createsNoTargetAddressTwice(newField.getAddress()) : newField.getAddress() + ""
 		        + this.commands;
 		if(newField.getValue() != null) {
-			XAddress fieldAddr = XX.resolveField(objectAddr, newField.getID());
+			XAddress fieldAddr = XX.resolveField(objectAddr, newField.getId());
 			// TODO why XCommand.NEW, why not SAFE?
 			addValue(fieldAddr, forced ? XCommand.FORCED : XCommand.NEW, newField.getValue());
 		}
@@ -301,8 +301,8 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	}
 	
 	public void addObject(XAddress modelAddr, XReadableObject newObject, boolean forced) {
-		XAddress objectAddr = XX.resolveObject(modelAddr, newObject.getID());
-		addObject(modelAddr, forced ? XCommand.FORCED : XCommand.SAFE, newObject.getID());
+		XAddress objectAddr = XX.resolveObject(modelAddr, newObject.getId());
+		addObject(modelAddr, forced ? XCommand.FORCED : XCommand.SAFE, newObject.getId());
 		assert createsNoTargetAddressTwice(newObject.getAddress()) : newObject.getAddress();
 		for(XID newFieldId : newObject) {
 			addField(objectAddr, newObject.getField(newFieldId), forced);
@@ -425,7 +425,7 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 		}
 		
 		assert model.checkSetInvariants();
-		assert createsNoTargetAddressTwice(model.getAddress()) : model.getID();
+		assert createsNoTargetAddressTwice(model.getAddress()) : model.getId();
 		
 		for(ChangedObject object : model.getChangedObjects()) {
 			applyChanges(object);
@@ -782,7 +782,7 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 */
 	public void removeField(XReadableField oldField) {
 		removeField(oldField.getAddress().getParent(), oldField.getRevisionNumber(),
-		        oldField.getID());
+		        oldField.getId());
 	}
 	
 	/**
@@ -819,7 +819,7 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 */
 	public void removeObject(XReadableObject oldObject) {
 		removeObject(oldObject.getAddress().getParent(), oldObject.getRevisionNumber(),
-		        oldObject.getID());
+		        oldObject.getId());
 	}
 	
 	/**
@@ -863,7 +863,7 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 * @param newField
 	 */
 	public void setField(XAddress objectAddr, XReadableField newField) {
-		removeField(objectAddr, XCommand.FORCED, newField.getID());
+		removeField(objectAddr, XCommand.FORCED, newField.getId());
 		addField(objectAddr, newField);
 	}
 	
@@ -889,7 +889,7 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 */
 	public void setField(XReadableObject oldObject, XReadableField newField)
 	        throws IllegalArgumentException {
-		XReadableField oldField = oldObject.getField(newField.getID());
+		XReadableField oldField = oldObject.getField(newField.getId());
 		if(oldField == null) {
 			addField(oldObject.getAddress(), newField);
 		} else {
@@ -906,7 +906,7 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 * @param newObject
 	 */
 	public void setObject(XAddress modelAddr, XReadableObject newObject) {
-		removeObject(modelAddr, XCommand.FORCED, newObject.getID());
+		removeObject(modelAddr, XCommand.FORCED, newObject.getId());
 		addObject(modelAddr, newObject);
 	}
 	
@@ -932,7 +932,7 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 */
 	public void setObject(XReadableModel oldModel, XReadableObject newObject)
 	        throws IllegalArgumentException {
-		XReadableObject oldObject = oldModel.getObject(newObject.getID());
+		XReadableObject oldObject = oldModel.getObject(newObject.getId());
 		if(oldObject == null) {
 			addObject(oldModel.getAddress(), newObject);
 		} else {

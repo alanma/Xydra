@@ -46,7 +46,7 @@ public class InModelTransactionObject extends AbstractEntity implements XWritabl
 	}
 	
 	@Override
-	public XID getID() {
+	public XID getId() {
 		isValid();
 		
 		return this.address.getObject();
@@ -157,14 +157,14 @@ public class InModelTransactionObject extends AbstractEntity implements XWritabl
 	public boolean isEmpty() {
 		isValid();
 		
-		return this.model.objectIsEmpty(this.getID());
+		return this.model.objectIsEmpty(this.getId());
 	}
 	
 	@Override
 	public Iterator<XID> iterator() {
 		isValid();
 		
-		return this.model.objectIterator(this.getID());
+		return this.model.objectIterator(this.getId());
 	}
 	
 	private void isValid() {

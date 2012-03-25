@@ -10,6 +10,7 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.index.iterator.NoneIterator;
+import org.xydra.store.GetWithAddressRequest;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
 
@@ -63,7 +64,7 @@ public class WritableObjectOnPersistence extends AbstractWritableOnPersistence i
 	}
 	
 	@Override
-	public XID getID() {
+	public XID getId() {
 		return this.objectId;
 	}
 	
@@ -72,7 +73,8 @@ public class WritableObjectOnPersistence extends AbstractWritableOnPersistence i
 	 */
 	private XWritableObject getObjectSnapshot() {
 		// TODO test and delete old impl
-		return this.persistence.getObjectSnapshot(this.getAddress());
+		return this.persistence.getObjectSnapshot(new GetWithAddressRequest(this.getAddress(),
+		        WritableRepositoryOnPersistence.USE_TENTATIVE_STATE));
 		
 		/* old, slower but working impl */
 		// return this.persistence.getModelSnapshot(

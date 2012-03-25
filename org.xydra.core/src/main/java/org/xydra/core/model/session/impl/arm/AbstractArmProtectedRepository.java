@@ -145,8 +145,8 @@ abstract public class AbstractArmProtectedRepository implements XProtectedReposi
 	abstract protected XAuthorisationManager getArmForModel(XID modelId);
 	
 	@Override
-    public XID getID() {
-		return this.repo.getID();
+    public XID getId() {
+		return this.repo.getId();
 	}
 	
 	@Override

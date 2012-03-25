@@ -153,8 +153,8 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 	}
 	
 	@Override
-	public XID getID() {
-		return this.base.getID();
+	public XID getId() {
+		return this.base.getId();
 	}
 	
 	@Override
@@ -386,12 +386,12 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 			builder.addCommand(command);
 		}
 		if(builder.isEmpty()) {
-			log.debug("No command in txn for model '" + this.getID() + "'");
+			log.debug("No command in txn for model '" + this.getId() + "'");
 			return null;
 		}
 		XTransaction txn = builder.build();
 		if(log.isTraceEnabled()) {
-			log.debug("Commands in txn for model '" + this.getID() + "'");
+			log.debug("Commands in txn for model '" + this.getId() + "'");
 			for(XAtomicCommand atomicCommand : txn) {
 				log.debug("  Command " + atomicCommand);
 			}

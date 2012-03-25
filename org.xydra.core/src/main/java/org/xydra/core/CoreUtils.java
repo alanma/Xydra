@@ -54,7 +54,7 @@ public class CoreUtils {
 		XField field = object.getField(fieldId);
 		if(field == null) {
 			throw new MissingPieceException("No field with ID '" + fieldId
-			        + "' found in object with ID " + object.getID());
+			        + "' found in object with ID " + object.getId());
 		}
 		return field;
 	}
@@ -99,7 +99,7 @@ public class CoreUtils {
 		XModel model = repository.getModel(modelId);
 		if(model == null) {
 			throw new MissingPieceException("No model with ID '" + modelId
-			        + "' found in repository with ID " + repository.getID());
+			        + "' found in repository with ID " + repository.getId());
 		}
 		return model;
 	}
@@ -121,7 +121,7 @@ public class CoreUtils {
 		XObject object = model.getObject(objectId);
 		if(object == null) {
 			throw new MissingPieceException("No object with ID '" + objectId
-			        + "' found in model with ID " + model.getID());
+			        + "' found in model with ID " + model.getId());
 		}
 		return object;
 	}
@@ -184,7 +184,7 @@ public class CoreUtils {
 		XValue value = field.getValue();
 		if(value == null) {
 			throw new MissingPieceException("Field with ID '" + fieldId + "' in object with ID "
-			        + object.getID() + " has no value");
+			        + object.getId() + " has no value");
 		}
 		return value;
 	}

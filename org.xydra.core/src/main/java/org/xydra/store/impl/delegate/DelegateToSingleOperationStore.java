@@ -2,7 +2,6 @@ package org.xydra.store.impl.delegate;
 
 import java.util.Set;
 
-import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XAtomicCommand;
@@ -27,6 +26,7 @@ import org.xydra.store.AuthorisationException;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.Callback;
 import org.xydra.store.GetEventsRequest;
+import org.xydra.store.GetWithAddressRequest;
 import org.xydra.store.ModelRevision;
 import org.xydra.store.RequestException;
 import org.xydra.store.StoreException;
@@ -376,7 +376,8 @@ public class DelegateToSingleOperationStore implements XydraStore {
 	}
 	
 	@Override
-	public void getModelRevisions(XID actorId, String passwordHash, XAddress[] modelAddresses,
+	public void getModelRevisions(XID actorId, String passwordHash,
+	        GetWithAddressRequest[] modelAddresses,
 	        Callback<BatchedResult<ModelRevision>[]> callback) throws IllegalArgumentException {
 		
 		DelegationUtils.assertNonNullActorAndPassword(actorId, passwordHash);
@@ -415,12 +416,12 @@ public class DelegateToSingleOperationStore implements XydraStore {
 	
 	@Override
 	public synchronized void getModelSnapshots(XID actorId, String passwordHash,
-	        XAddress[] modelAddresses, Callback<BatchedResult<XReadableModel>[]> callback)
-	        throws IllegalArgumentException {
+	        GetWithAddressRequest[] modelAddressRequests,
+	        Callback<BatchedResult<XReadableModel>[]> callback) throws IllegalArgumentException {
 		
 		DelegationUtils.assertNonNullActorAndPassword(actorId, passwordHash);
 		DelegationUtils.assertNonNullCallback(callback);
-		DelegationUtils.assertNonNull(modelAddresses);
+		DelegationUtils.assertNonNull(modelAddressRequests);
 		
 		try {
 			// authorise only once
@@ -429,14 +430,15 @@ public class DelegateToSingleOperationStore implements XydraStore {
 			}
 			
 			MultiOpCallback<XReadableModel> multi = new MultiOpCallback<XReadableModel>(
-			        modelAddresses.length, callback);
+			        modelAddressRequests.length, callback);
 			
 			// call n individual asynchronous single operations
-			for(int i = 0; i < modelAddresses.length; i++) {
+			for(int i = 0; i < modelAddressRequests.length; i++) {
 				SingleOpCallback<XReadableModel> soc = new SingleOpCallback<XReadableModel>(multi,
 				        i);
 				try {
-					this.singleOpStore.getModelSnapshot(actorId, null, modelAddresses[i], soc);
+					this.singleOpStore
+					        .getModelSnapshot(actorId, null, modelAddressRequests[i], soc);
 				} catch(StoreException e) {
 					log.warn("Telling callback: ", e);
 					soc.onFailure(e);
@@ -453,12 +455,12 @@ public class DelegateToSingleOperationStore implements XydraStore {
 	}
 	
 	@Override
-	public void getObjectSnapshots(XID actorId, String passwordHash, XAddress[] objectAddresses,
+	public void getObjectSnapshots(XID actorId, String passwordHash, GetWithAddressRequest[] objectAddressRequests,
 	        Callback<BatchedResult<XReadableObject>[]> callback) throws IllegalArgumentException {
 		
 		DelegationUtils.assertNonNullActorAndPassword(actorId, passwordHash);
 		DelegationUtils.assertNonNullCallback(callback);
-		DelegationUtils.assertNonNull(objectAddresses);
+		DelegationUtils.assertNonNull(objectAddressRequests);
 		
 		try {
 			// authorise only once
@@ -467,14 +469,14 @@ public class DelegateToSingleOperationStore implements XydraStore {
 			}
 			
 			MultiOpCallback<XReadableObject> multi = new MultiOpCallback<XReadableObject>(
-			        objectAddresses.length, callback);
+			        objectAddressRequests.length, callback);
 			
 			// call n individual asynchronous single operations
-			for(int i = 0; i < objectAddresses.length; i++) {
+			for(int i = 0; i < objectAddressRequests.length; i++) {
 				SingleOpCallback<XReadableObject> soc = new SingleOpCallback<XReadableObject>(
 				        multi, i);
 				try {
-					this.singleOpStore.getObjectSnapshot(actorId, null, objectAddresses[i], soc);
+					this.singleOpStore.getObjectSnapshot(actorId, null, objectAddressRequests[i], soc);
 				} catch(StoreException e) {
 					log.warn("Telling callback: ", e);
 					soc.onFailure(e);

@@ -269,7 +269,7 @@ public class APITest {
 							copyWrapper.setIsBorrowed(actorID, true); // borrow
 							// it
 							
-							return unborrowedCopy.getID();
+							return unborrowedCopy.getId();
 						}
 					}
 				}
@@ -526,7 +526,7 @@ public class APITest {
 		assertTrue(model.hasObject(objectId));
 		
 		// remove object again
-		model.removeObject(object.getID());
+		model.removeObject(object.getId());
 		
 		// check whether it was really removed
 		assertNull(model.getObject(objectId));
@@ -548,7 +548,7 @@ public class APITest {
 		assertTrue(model.hasObject(object2ID));
 		
 		// remove object again
-		model.removeObject(object2.getID());
+		model.removeObject(object2.getId());
 		
 		// check whether it was really removed
 		assertNull(model.getObject(object2ID));
@@ -571,7 +571,7 @@ public class APITest {
 		assertTrue(object.hasField(fieldId));
 		
 		// remove field again
-		object.removeField(field.getID());
+		object.removeField(field.getId());
 		
 		// check whether it was really removed
 		XField fieldAgain = object.getField(fieldId);
@@ -594,7 +594,7 @@ public class APITest {
 		assertTrue(object.hasField(field2ID));
 		
 		// remove field again
-		object.removeField(field2.getID());
+		object.removeField(field2.getId());
 		
 		// check whether it was really removed
 		assertNull(object.getField(field2ID));
@@ -622,7 +622,7 @@ public class APITest {
 		assertTrue(repo.hasModel(modelId));
 		
 		// remove model again
-		repo.removeModel(model.getID());
+		repo.removeModel(model.getId());
 		
 		// check whether it was really removed
 		assertNull(repo.getModel(modelId));
@@ -723,7 +723,7 @@ public class APITest {
 		XValue value1 = XV.toValue("Test value");
 		
 		// Add value to an existing field
-		XField field2 = CoreUtils.setValue(object, field1.getID(), value1);
+		XField field2 = CoreUtils.setValue(object, field1.getId(), value1);
 		
 		// check if the method works correctly
 		assertEquals("the value of field should be set", field1, field2);
@@ -732,12 +732,12 @@ public class APITest {
 		
 		// Change value of the existing field
 		XValue value2 = XV.toValue("Another test value");
-		field2 = CoreUtils.setValue(object, field1.getID(), value2);
+		field2 = CoreUtils.setValue(object, field1.getId(), value2);
 		assertEquals(field1, field2);
 		assertTrue(field1 == field2);
 		
 		// Remove value of the existing field
-		field2 = CoreUtils.setValue(object, field1.getID(), null);
+		field2 = CoreUtils.setValue(object, field1.getId(), null);
 		assertEquals(field1, field2);
 		assertTrue(field1 == field2);
 		assertNull(field1.getValue());
@@ -780,7 +780,7 @@ public class APITest {
 		model.createObject(XX.createUniqueId());
 		
 		// copy it!
-		XModel copyModel = new MemoryModel(this.actorId, this.password, model.getID());
+		XModel copyModel = new MemoryModel(this.actorId, this.password, model.getId());
 		
 		XCopyUtils.copyData(model, copyModel);
 		
@@ -804,7 +804,7 @@ public class APITest {
 		object.createField(XX.createUniqueId());
 		
 		// copy it!
-		XObject copyObject = new MemoryObject(this.actorId, this.password, object.getID());
+		XObject copyObject = new MemoryObject(this.actorId, this.password, object.getId());
 		
 		XCopyUtils.copyData(object, copyObject);
 		
@@ -898,7 +898,7 @@ public class APITest {
 		assertTrue(field1 == CoreUtils.safeGetField(object, fieldId));
 		
 		// remove the field and try to get it (should throw an exception)
-		object.removeField(field1.getID());
+		object.removeField(field1.getId());
 		
 		try {
 			CoreUtils.safeGetField(object, fieldId); // safeGetField should
@@ -932,7 +932,7 @@ public class APITest {
 		assertTrue(model == CoreUtils.safeGetModel(repo, modelId));
 		
 		// remove model and try to get it (should throw an exception)
-		repo.removeModel(model.getID());
+		repo.removeModel(model.getId());
 		
 		try {
 			CoreUtils.safeGetModel(repo, modelId); // safeGetModel should throw
@@ -965,7 +965,7 @@ public class APITest {
 		assertTrue(object == CoreUtils.safeGetObject(model, objectId));
 		
 		// remove object and try to get it (should throw an exception)
-		model.removeObject(object.getID());
+		model.removeObject(object.getId());
 		try {
 			CoreUtils.safeGetObject(model, objectId); // safeGetObject should
 			// throw a
@@ -1001,7 +1001,7 @@ public class APITest {
 		assertTrue(object == CoreUtils.safeGetObject(repo, modelId, objectId));
 		
 		// remove object and try to get it (should throw an exception)
-		model.removeObject(object.getID());
+		model.removeObject(object.getId());
 		try {
 			CoreUtils.safeGetObject(repo, modelId, objectId); // safeGetObject
 			// should

@@ -24,6 +24,7 @@ import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.store.GetEventsRequest;
+import org.xydra.store.GetWithAddressRequest;
 import org.xydra.store.ModelRevision;
 import org.xydra.store.XydraStore;
 
@@ -116,7 +117,8 @@ public interface XydraPersistence {
 	 * @return all events that occurred in the entity addressed with 'address'
 	 *         between beginRevision and endRevision. Contains
 	 *         {@link XRepositoryEvent}, {@link XModelEvent},
-	 *         {@link XObjectEvent} and {@link XFieldEvent}.
+	 *         {@link XObjectEvent} and {@link XFieldEvent}. FIXME API CHANGE
+	 *         contains nulls for in-progress events (if endRev > currentRev)
 	 */
 	List<XEvent> getEvents(XAddress address, long beginRevision, long endRevision);
 	
@@ -128,26 +130,50 @@ public interface XydraPersistence {
 	Set<XID> getManagedModelIds();
 	
 	/**
-	 * @param address of an {@link XModel}
-	 * @return Pair.first: the current revision number of the addressed
-	 *         {@link XModel}. Pair.second: If the model currently exists or
-	 *         not. Or return null if not known.
+	 * @param addressRequest of an {@link XModel} plus a flag whether to include
+	 *            the tentative revision. The tentative model revision number is
+	 *            the highest revision number for which an event exists. The
+	 *            state of the model (exists or not) is accurate.
+	 * 
+	 *            The result can change when this method is called multiple
+	 *            times. This method exists to allow read-your-own write access
+	 *            to data after a successful command execution.
+	 * 
+	 *            The result might be higher than the standard current rev but
+	 *            in the worst case its just the same.
+	 * 
+	 * @return The current revision number of the addressed {@link XModel}. And
+	 *         if the model currently exists or not. Or return null if not
+	 *         known.
 	 */
-	ModelRevision getModelRevision(XAddress address);
+	ModelRevision getModelRevision(GetWithAddressRequest addressRequest);
 	
 	/**
-	 * @param address of an {@link XModel}
+	 * @param addressRequest of an {@link XModel} plus a flag whether to return
+	 *            the tentative revision. The tentative model revision number is
+	 *            the highest revision number for which an event exists. The
+	 *            tentative snapshot includes all changes up to this point and
+	 *            may vary for subsequent requests. This for tentative
+	 *            snapshots, the same revision number can (and often is)
+	 *            returned for different states.
+	 * 
 	 * @return the current snapshot of the addressed {@link XModel} or null if
 	 *         none found.
 	 */
-	XWritableModel getModelSnapshot(XAddress address);
+	XWritableModel getModelSnapshot(GetWithAddressRequest addressRequest);
 	
 	/**
-	 * @param address of an {@link XObject}
+	 * @param addressRequest of an {@link XObject} plus a flag whether to return
+	 *            the tentative revision. The tentative object revision number
+	 *            is the highest revision number for which an event exists. The
+	 *            tentative snapshot includes all changes up to this point and
+	 *            may vary for subsequent requests. This for tentative
+	 *            snapshots, the same revision number can (and often is)
+	 *            returned for different states.
 	 * @return the current snapshot of the {@link XObject} addressed with
 	 *         'address' or null, if object does not exist.
 	 */
-	XWritableObject getObjectSnapshot(XAddress address);
+	XWritableObject getObjectSnapshot(GetWithAddressRequest addressRequest);
 	
 	/**
 	 * @return the XID of this {@link XydraPersistence}. This helps a client to

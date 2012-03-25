@@ -83,7 +83,7 @@ public class ChangeSession {
 		for(SessionModel sm : this.getSessionModels()) {
 			long l = sm.commitToSessionPersistence();
 			if(l < 0 && l != XCommand.NOCHANGE) {
-				log.warn("Error committing " + sm.getID() + " with " + l + " Changes:"
+				log.warn("Error committing " + sm.getId() + " with " + l + " Changes:"
 				        + sm.changesToString());
 				return false;
 			}
@@ -95,7 +95,7 @@ public class ChangeSession {
 		System.out.println("__/ Changes dump '" + s + "' for " + this);
 		for(SessionModel sm : this.sessionModels.values()) {
 			if(sm.hasChanges()) {
-				System.out.println(">>> Changes in Model '" + sm.getID() + "' trace = "
+				System.out.println(">>> Changes in Model '" + sm.getId() + "' trace = "
 				        + sm.traceid + "\n" + sm.changesToString());
 			}
 		}

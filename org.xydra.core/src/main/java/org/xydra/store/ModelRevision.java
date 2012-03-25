@@ -26,18 +26,43 @@ public class ModelRevision implements Serializable {
 	
 	private static final long serialVersionUID = 2428661786025001891L;
 	
+	public static final long TENTATIVE_REV_UNDEFINED = -2;
 	public static final ModelRevision MODEL_DOES_NOT_EXIST_YET = new ModelRevision(-1, false);
 	
+	/** model exists unknown for tentative */
+	private final long tentativeRevision;
+	/** About the standard revision */
 	private final boolean modelExists;
 	private final long revision;
+	
+	/**
+	 * @param revision
+	 * @param modelExists
+	 * @param tentativeRevision allows to create tentative revisions
+	 */
+	public ModelRevision(long revision, boolean modelExists, long tentativeRevision) {
+		this.revision = revision;
+		this.modelExists = modelExists;
+		this.tentativeRevision = tentativeRevision;
+	}
 	
 	public ModelRevision(long revision, boolean modelExists) {
 		this.revision = revision;
 		this.modelExists = modelExists;
+		this.tentativeRevision = TENTATIVE_REV_UNDEFINED;
 	}
 	
 	public long revision() {
 		return this.revision;
+	}
+	
+	/**
+	 * @return a tentative revision number which is defined as the highest
+	 *         successfully committed event. It is at least equal to the normal,
+	 *         stable model revision.
+	 */
+	public long tentativeRevision() {
+		return this.tentativeRevision;
 	}
 	
 	public boolean modelExists() {
@@ -65,6 +90,7 @@ public class ModelRevision implements Serializable {
 	
 	public boolean isBetterThan(ModelRevision other) {
 		assert other != null;
+		// TODO tentative rev here?
 		return this.revision > other.revision;
 	}
 	

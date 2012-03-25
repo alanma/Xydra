@@ -57,8 +57,8 @@ public class ArmProtectedBaseModel implements XReadableModel {
 	}
 	
 	@Override
-    public XID getID() {
-		return this.model.getID();
+    public XID getId() {
+		return this.model.getId();
 	}
 	
 	@Override

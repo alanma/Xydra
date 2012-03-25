@@ -32,13 +32,13 @@ public class ReadableModelWithOneObject implements XReadableModel {
 	}
 	
 	@Override
-    public XID getID() {
+    public XID getId() {
 		return this.address.getModel();
 	}
 	
 	@Override
     public XReadableObject getObject(XID objectId) {
-		if(!this.object.getID().equals(objectId)) {
+		if(!this.object.getId().equals(objectId)) {
 			return null;
 		}
 		return this.object;
@@ -51,7 +51,7 @@ public class ReadableModelWithOneObject implements XReadableModel {
 	
 	@Override
     public boolean hasObject(XID objectId) {
-		return this.object.getID().equals(objectId);
+		return this.object.getId().equals(objectId);
 	}
 	
 	@Override
@@ -61,7 +61,7 @@ public class ReadableModelWithOneObject implements XReadableModel {
 	
 	@Override
     public Iterator<XID> iterator() {
-		return new SingleValueIterator<XID>(this.object.getID());
+		return new SingleValueIterator<XID>(this.object.getId());
 	}
 	
 	@Override

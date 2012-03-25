@@ -295,9 +295,9 @@ public class MemoryField extends AbstractEntity implements XField, Serializable 
 	 */
 	@Override
 	@ReadOperation
-	public XID getID() {
+	public XID getId() {
 		synchronized(this.eventQueue) {
-			return this.state.getID();
+			return this.state.getId();
 		}
 	}
 	
@@ -522,7 +522,7 @@ public class MemoryField extends AbstractEntity implements XField, Serializable 
 	
 	@Override
 	public String toString() {
-		return this.getID() + " rev[" + this.getRevisionNumber() + "]";
+		return this.getId() + " rev[" + this.getRevisionNumber() + "]";
 	}
 	
 	@Override

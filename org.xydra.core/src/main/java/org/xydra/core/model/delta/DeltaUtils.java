@@ -54,8 +54,8 @@ public abstract class DeltaUtils {
 		}
 		
 		for(XReadableObject object : changedModel.getNewObjects()) {
-			assert !model.hasObject(object.getID());
-			XRevWritableObject newObject = model.createObject(object.getID());
+			assert !model.hasObject(object.getId());
+			XRevWritableObject newObject = model.createObject(object.getId());
 			for(XID fieldId : object) {
 				applyChanges(newObject, object.getField(fieldId), rev);
 			}
@@ -66,7 +66,7 @@ public abstract class DeltaUtils {
 			
 			boolean objectChanged = false;
 			
-			XRevWritableObject object = model.getObject(changedObject.getID());
+			XRevWritableObject object = model.getObject(changedObject.getId());
 			assert object != null;
 			
 			for(XID fieldId : changedObject.getRemovedFields()) {
@@ -82,7 +82,7 @@ public abstract class DeltaUtils {
 			
 			for(ChangedField changedField : changedObject.getChangedFields()) {
 				if(changedField.isChanged()) {
-					XRevWritableField field = object.getField(changedField.getID());
+					XRevWritableField field = object.getField(changedField.getId());
 					assert field != null;
 					boolean valueChanged = field.setValue(changedField.getValue());
 					assert valueChanged;
@@ -138,8 +138,8 @@ public abstract class DeltaUtils {
 	}
 	
 	private static void applyChanges(XRevWritableObject object, XReadableField field, long rev) {
-		assert !object.hasField(field.getID());
-		XRevWritableField newField = object.createField(field.getID());
+		assert !object.hasField(field.getId());
+		XRevWritableField newField = object.createField(field.getId());
 		newField.setValue(field.getValue());
 		newField.setRevisionNumber(rev);
 	}
@@ -214,7 +214,7 @@ public abstract class DeltaUtils {
 		
 		for(XReadableObject object : changedModel.getNewObjects()) {
 			events.add(MemoryModelEvent.createAddEvent(actorId, changedModel.getAddress(),
-			        object.getID(), rev, inTrans));
+			        object.getId(), rev, inTrans));
 			for(XID fieldId : object) {
 				DeltaUtils.createEventsForNewField(events, rev, actorId, object,
 				        object.getField(fieldId), inTrans);
@@ -264,7 +264,7 @@ public abstract class DeltaUtils {
 	private static void createEventsForNewField(List<XAtomicEvent> events, long rev, XID actorId,
 	        XReadableObject object, XReadableField field, boolean inTrans) {
 		long objectRev = object.getRevisionNumber();
-		events.add(MemoryObjectEvent.createAddEvent(actorId, object.getAddress(), field.getID(),
+		events.add(MemoryObjectEvent.createAddEvent(actorId, object.getAddress(), field.getId(),
 		        rev, objectRev, inTrans));
 		if(!field.isEmpty()) {
 			events.add(MemoryFieldEvent.createAddEvent(actorId, field.getAddress(),
@@ -281,7 +281,7 @@ public abstract class DeltaUtils {
 			events.add(MemoryFieldEvent.createRemoveEvent(actorId, field.getAddress(), modelRev,
 			        objectRev, fieldRev, inTrans, true));
 		}
-		events.add(MemoryObjectEvent.createRemoveEvent(actorId, object.getAddress(), field.getID(),
+		events.add(MemoryObjectEvent.createRemoveEvent(actorId, object.getAddress(), field.getId(),
 		        modelRev, objectRev, fieldRev, inTrans, implied));
 	}
 	
@@ -292,7 +292,7 @@ public abstract class DeltaUtils {
 			        object.getField(fieldId), inTrans, true);
 		}
 		events.add(MemoryModelEvent.createRemoveEvent(actorId, object.getAddress().getParent(),
-		        object.getID(), modelRev, object.getRevisionNumber(), inTrans, implied));
+		        object.getId(), modelRev, object.getRevisionNumber(), inTrans, implied));
 	}
 	
 	/**
@@ -388,7 +388,7 @@ public abstract class DeltaUtils {
 		boolean hasChanges();
 		
 		@Override
-		XID getID();
+		XID getId();
 	}
 	
 	public static interface IFieldDiff extends IHasXID {
@@ -400,7 +400,7 @@ public abstract class DeltaUtils {
 		boolean isChanged();
 		
 		@Override
-		XID getID();
+		XID getId();
 	}
 	
 }

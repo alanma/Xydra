@@ -114,7 +114,7 @@ public class ObjectIndexTest {
 		        .createStringValue("some@one.com"));
 		assertEquals(1, user3_again_set.size());
 		XWritableObject user3_again = user3_again_set.iterator().next();
-		assertEquals(this.user3.getID(), user3_again.getID());
+		assertEquals(this.user3.getId(), user3_again.getId());
 		assertEquals(this.user3, user3_again);
 	}
 	
@@ -127,7 +127,7 @@ public class ObjectIndexTest {
 		oi.index(this.user3);
 		XWritableObject user3_again = oi.lookup(this.model,
 		        X.getValueFactory().createStringValue("some@one.com"));
-		assertEquals(this.user3.getID(), user3_again.getID());
+		assertEquals(this.user3.getId(), user3_again.getId());
 		assertEquals(this.user3, user3_again);
 	}
 	

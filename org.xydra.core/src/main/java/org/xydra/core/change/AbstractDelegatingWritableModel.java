@@ -47,7 +47,7 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 		}
 		
 		@Override
-		public XID getID() {
+		public XID getId() {
 			return this.fieldId;
 		}
 		
@@ -112,7 +112,7 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 		}
 		
 		@Override
-		public XID getID() {
+		public XID getId() {
 			return this.objectId;
 		}
 		
@@ -195,7 +195,7 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 	public abstract XAddress getAddress();
 	
 	@Override
-	public abstract XID getID();
+	public abstract XID getId();
 	
 	@Override
 	public XWritableObject getObject(final XID objectId) {
@@ -257,17 +257,17 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 	protected XAddress resolveField(final XID objectId, final XID fieldId) {
 		assert objectId != null;
 		assert fieldId != null;
-		return XX.toAddress(this.getAddress().getRepository(), this.getID(), objectId, fieldId);
+		return XX.toAddress(this.getAddress().getRepository(), this.getId(), objectId, fieldId);
 	}
 	
 	protected XAddress resolveObject(final XID objectId) {
 		assert objectId != null;
-		return XX.toAddress(this.getAddress().getRepository(), this.getID(), objectId, null);
+		return XX.toAddress(this.getAddress().getRepository(), this.getId(), objectId, null);
 	}
 	
 	@Override
 	public String toString() {
-		return this.getID() + " (" + this.getClass().getName() + ") " + this.hashCode() + " "
+		return this.getId() + " (" + this.getClass().getName() + ") " + this.hashCode() + " "
 		        + DumpUtils.toStringBuffer(this);
 	}
 	

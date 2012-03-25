@@ -222,10 +222,10 @@ public class ChangeTest {
 		field.setValue(new MemoryStringValue("Test"));
 		assertTrue(fieldListener.hasFired());
 		assertTrue(fieldListener.getType() == ChangeType.ADD);
-		assertEquals(fieldListener.getFieldId(), field.getID());
-		assertEquals(fieldListener.getObjectId(), object.getID());
-		assertEquals(fieldListener.getModelId(), model.getID());
-		assertEquals(fieldListener.getRepositoryId(), repo.getID());
+		assertEquals(fieldListener.getFieldId(), field.getId());
+		assertEquals(fieldListener.getObjectId(), object.getId());
+		assertEquals(fieldListener.getModelId(), model.getId());
+		assertEquals(fieldListener.getRepositoryId(), repo.getId());
 		fieldListener.reset();
 		
 		// Test change-event
@@ -316,7 +316,7 @@ public class ChangeTest {
 		// event
 		// has the right
 		// type
-		assertEquals(model.getID(), modelListener.getModel()); // check if the
+		assertEquals(model.getId(), modelListener.getModel()); // check if the
 		// model of
 		// the event is the
 		// right one
@@ -329,7 +329,7 @@ public class ChangeTest {
 		modelListener.reset();
 		
 		// Test remove-event
-		model.removeObject(addObject.getID());
+		model.removeObject(addObject.getId());
 		assertTrue(modelListener.hasFired());
 		assertTrue(modelListener.getType() == ChangeType.REMOVE);
 		modelListener.reset();
@@ -363,7 +363,7 @@ public class ChangeTest {
 		modelListener.reset();
 		
 		// Test remove-event
-		model.removeObject(addObject.getID());
+		model.removeObject(addObject.getId());
 		assertTrue(repoListener.hasFired());
 		assertTrue(repoListener.getType() == ChangeType.REMOVE);
 		assertTrue(modelListener.hasFired());
@@ -384,7 +384,7 @@ public class ChangeTest {
 		
 		assertTrue("check if the listener has fired", listener1.hasFired());
 		assertEquals("check if the event has the right type", ChangeType.ADD, listener1.getType());
-		assertEquals("check if the object of the event is the right one", object1.getID(),
+		assertEquals("check if the object of the event is the right one", object1.getId(),
 		        listener1.getObject());
 		assertEquals("listener1.getModel() is not null but " + listener1.getModelId(),
 		        listener1.getModelId(), null);
@@ -397,7 +397,7 @@ public class ChangeTest {
 		listener1.reset();
 		
 		// Test remove-event
-		object1.removeField(field1.getID());
+		object1.removeField(field1.getId());
 		assertTrue(listener1.hasFired());
 		assertTrue(listener1.getType() == ChangeType.REMOVE);
 		
@@ -435,7 +435,7 @@ public class ChangeTest {
 		modelListener.reset();
 		objectListener.reset();
 		
-		object2.removeField(field3.getID());
+		object2.removeField(field3.getId());
 		assertTrue(repoListener.hasFired());
 		assertTrue(repoListener.getType() == ChangeType.REMOVE);
 		assertTrue(modelListener.hasFired());
@@ -459,7 +459,7 @@ public class ChangeTest {
 		// check if the event has the right type
 		assertTrue(repoListener.getType() == ChangeType.ADD);
 		// check if the repository of the event is the right one
-		assertTrue(repo.getID().equals(repoListener.getRepository()));
+		assertTrue(repo.getId().equals(repoListener.getRepository()));
 		repoListener.reset();
 		
 		repo.createModel(XX.createUniqueId());
@@ -468,7 +468,7 @@ public class ChangeTest {
 		repoListener.reset();
 		
 		// Test remove-event
-		repo.removeModel(addModel.getID());
+		repo.removeModel(addModel.getId());
 		assertTrue(repoListener.hasFired());
 		assertTrue(repoListener.getType() == ChangeType.REMOVE);
 		repoListener.reset();
@@ -484,7 +484,7 @@ public class ChangeTest {
 		repoListener.reset();
 		
 		// Test remove-event
-		repo.removeModel(addModel.getID());
+		repo.removeModel(addModel.getId());
 		assertTrue(repoListener.hasFired());
 		assertTrue(repoListener.getType() == ChangeType.REMOVE);
 	}

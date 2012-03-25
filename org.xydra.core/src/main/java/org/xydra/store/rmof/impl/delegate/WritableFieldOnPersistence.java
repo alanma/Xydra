@@ -9,6 +9,7 @@ import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.value.XValue;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.store.GetWithAddressRequest;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
 
@@ -68,13 +69,14 @@ public class WritableFieldOnPersistence extends AbstractWritableOnPersistence im
 	private XWritableField getFieldSnapshot() {
 		return this.persistence
 		        .getModelSnapshot(
-		                X.getIDProvider().fromComponents(this.persistence.getRepositoryId(),
-		                        this.modelId, null, null)).getObject(this.objectId)
-		        .getField(this.fieldId);
+		                new GetWithAddressRequest(X.getIDProvider().fromComponents(
+		                        this.persistence.getRepositoryId(), this.modelId, null, null),
+		                        WritableRepositoryOnPersistence.USE_TENTATIVE_STATE))
+		        .getObject(this.objectId).getField(this.fieldId);
 	}
 	
 	@Override
-	public XID getID() {
+	public XID getId() {
 		return this.fieldId;
 	}
 	

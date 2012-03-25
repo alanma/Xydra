@@ -49,7 +49,7 @@ public class InObjectTransactionField extends AbstractEntity implements XWritabl
 	public XValue getValue() {
 		isValid();
 		
-		return this.object.getValue(this.getID());
+		return this.object.getValue(this.getId());
 	}
 	
 	@Override
@@ -67,7 +67,7 @@ public class InObjectTransactionField extends AbstractEntity implements XWritabl
 	}
 	
 	@Override
-	public XID getID() {
+	public XID getId() {
 		isValid();
 		
 		return this.address.getField();

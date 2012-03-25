@@ -281,7 +281,7 @@ public class XModelBasics {
 		
 		// getting an XRepository
 		XRepository repository = X.createMemoryRepository(actorID);
-		XID repositoryId = repository.getID();
+		XID repositoryId = repository.getId();
 		
 		/*
 		 * We want to add a model to our repository. We could either achieve
@@ -513,7 +513,7 @@ public class XModelBasics {
 		
 		// getting an XRepository
 		XRepository repository = X.createMemoryRepository(actorID);
-		XID repositoryId = repository.getID();
+		XID repositoryId = repository.getId();
 		
 		// creating the XModel
 		XCommandFactory commandFactory = X.getCommandFactory();

@@ -24,6 +24,7 @@ import org.xydra.store.AccessException;
 import org.xydra.store.AuthorisationException;
 import org.xydra.store.ConnectionException;
 import org.xydra.store.GetEventsRequest;
+import org.xydra.store.GetWithAddressRequest;
 import org.xydra.store.InternalStoreException;
 import org.xydra.store.ModelRevision;
 import org.xydra.store.QuotaException;
@@ -196,7 +197,7 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 		// assert: authenticated & mayKnowAbout model
 		List<XEvent> events = this.persistence.getEvents(address, beginRevision, endRevision);
 		/* check access rights for model, each object and each field */
-
+		
 		if(events == null) {
 			return null;
 		}
@@ -258,8 +259,9 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 		Set<XID> modelIds = new HashSet<XID>();
 		synchronized(this.persistence) {
 			for(XID modelId : this.persistence.getManagedModelIds()) {
-				ModelRevision modelRev = this.persistence.getModelRevision(XX.resolveModel(
-				        this.getRepoId(), modelId));
+				ModelRevision modelRev = this.persistence
+				        .getModelRevision(new GetWithAddressRequest(XX.resolveModel(
+				                this.getRepoId(), modelId), false));
 				// TODO can see all models you can know about? Seems
 				// plausible.
 				// ~ max
@@ -276,8 +278,10 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 	}
 	
 	@Override
-	public ModelRevision getModelRevision(XID actorId, String passwordHash, XAddress address) {
+	public ModelRevision getModelRevision(XID actorId, String passwordHash,
+	        GetWithAddressRequest getWithAddressRequest) {
 		assert actorId != null;
+		XAddress address = getWithAddressRequest.address;
 		authorise(actorId, passwordHash);
 		if(address.getAddressedType() != XType.XMODEL) {
 			throw new RequestException("must use a model address to get a model revison, was "
@@ -286,16 +290,18 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 		checkRepoId(address);
 		if(triviallyAllowed(passwordHash)
 		        || this.acm.getAuthorisationManager().canRead(actorId, address)) {
-			return this.persistence.getModelRevision(address);
+			return this.persistence.getModelRevision(getWithAddressRequest);
 		} else {
 			return new ModelRevision(XCommand.FAILED, false);
 		}
 	}
 	
 	@Override
-	public XReadableModel getModelSnapshot(XID actorId, String passwordHash, XAddress address) {
+	public XReadableModel getModelSnapshot(XID actorId, String passwordHash,
+	        GetWithAddressRequest addressRequest) {
 		assert actorId != null;
 		authorise(actorId, passwordHash);
+		XAddress address = addressRequest.address;
 		if(address.getAddressedType() != XType.XMODEL) {
 			throw new RequestException("must use a model address to get a model snapshot, was "
 			        + address);
@@ -303,7 +309,7 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 		checkRepoId(address);
 		if(triviallyAllowed(passwordHash)
 		        || this.acm.getAuthorisationManager().canRead(actorId, address)) {
-			XWritableModel modelSnapshot = this.persistence.getModelSnapshot(address);
+			XWritableModel modelSnapshot = this.persistence.getModelSnapshot(addressRequest);
 			// filter out objects & fields which the actor may not see
 			if(!triviallyAllowed(passwordHash)) {
 				List<XID> objectIdsToBeRemoved = new LinkedList<XID>();
@@ -339,9 +345,11 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 	}
 	
 	@Override
-	public XReadableObject getObjectSnapshot(XID actorId, String passwordHash, XAddress address) {
+	public XReadableObject getObjectSnapshot(XID actorId, String passwordHash,
+	        GetWithAddressRequest addressRequest) {
 		assert actorId != null;
 		authorise(actorId, passwordHash);
+		XAddress address = addressRequest.address;
 		if(address.getAddressedType() != XType.XOBJECT) {
 			throw new RequestException("must use an object address to get an object snapshot, was "
 			        + address);
@@ -349,7 +357,7 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 		checkRepoId(address);
 		if(triviallyAllowed(passwordHash)
 		        || this.acm.getAuthorisationManager().canRead(actorId, address)) {
-			XWritableObject objectSnapshot = this.persistence.getObjectSnapshot(address);
+			XWritableObject objectSnapshot = this.persistence.getObjectSnapshot(addressRequest);
 			if(passwordHash != null) {
 				/* remove fields the actorId may not read */
 				List<XID> toBeRemoved = new LinkedList<XID>();

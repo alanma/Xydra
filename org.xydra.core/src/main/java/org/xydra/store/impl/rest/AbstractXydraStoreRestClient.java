@@ -27,6 +27,7 @@ import org.xydra.store.BatchedResult;
 import org.xydra.store.Callback;
 import org.xydra.store.ConnectionException;
 import org.xydra.store.GetEventsRequest;
+import org.xydra.store.GetWithAddressRequest;
 import org.xydra.store.InternalStoreException;
 import org.xydra.store.ModelRevision;
 import org.xydra.store.RequestException;
@@ -225,16 +226,18 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
 		return sb.toString();
 	}
 	
-	private <T> String encodeAddresses(XAddress[] addresses, BatchedResult<T>[] res, XType type) {
+	private <T> String encodeAddresses(GetWithAddressRequest[] getModelRevisionRequests,
+	        BatchedResult<T>[] res, XType type) {
 		
-		assert res.length == addresses.length;
+		assert res.length == getModelRevisionRequests.length;
 		
 		StringBuilder sb = new StringBuilder();
 		
 		boolean first = true;
 		
-		for(int i = 0; i < addresses.length; i++) {
-			XAddress address = addresses[i];
+		for(int i = 0; i < getModelRevisionRequests.length; i++) {
+			GetWithAddressRequest getModelRevisionRequest = getModelRevisionRequests[i];
+			XAddress address = getModelRevisionRequest.address;
 			
 			if(address == null) {
 				res[i] = new BatchedResult<T>(new RequestException("address must not be null"));
@@ -254,6 +257,10 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
 			sb.append(XydraStoreRestInterface.ARG_ADDRESS);
 			sb.append('=');
 			sb.append(urlencode(address.toString()));
+			if(getModelRevisionRequest.includeTentative) {
+				// FIXME !! make constant + add in parser + add in docu
+				sb.append("+tentative");
+			}
 		}
 		
 		if(first) {
@@ -509,11 +516,12 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
 	
 	private class RevisionsRequest extends Request<BatchedResult<ModelRevision>[]> {
 		
-		private final XAddress[] modelAddresses;
+		private final GetWithAddressRequest[] modelAddresses;
 		private final BatchedResult<ModelRevision>[] res;
 		
 		@SuppressWarnings("unchecked")
-		protected RevisionsRequest(XID actor, String password, XAddress[] modelAddresses,
+		protected RevisionsRequest(XID actor, String password,
+		        GetWithAddressRequest[] modelAddresses,
 		        Callback<BatchedResult<ModelRevision>[]> callback) {
 			super(actor, password, callback);
 			this.modelAddresses = modelAddresses;
@@ -545,32 +553,34 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
 	}
 	
 	@Override
-	public void getModelRevisions(XID actor, String password, XAddress[] modelAddresses,
+	public void getModelRevisions(XID actor, String password,
+	        GetWithAddressRequest[] modelRevisionRequests,
 	        Callback<BatchedResult<ModelRevision>[]> callback) {
-		new RevisionsRequest(actor, password, modelAddresses, callback).run();
+		new RevisionsRequest(actor, password, modelRevisionRequests, callback).run();
 	}
 	
 	private class SnapshotsRequest<T> extends Request<BatchedResult<T>[]> {
 		
-		private final XAddress[] addresses;
+		private final GetWithAddressRequest[] addressRequests;
 		private final BatchedResult<T>[] res;
 		private final XType type;
 		
 		@SuppressWarnings("unchecked")
-		protected SnapshotsRequest(XID actor, String password, XAddress[] modelAddresses,
+		protected SnapshotsRequest(XID actor, String password,
+		        GetWithAddressRequest[] modelAddressRequests,
 		        Callback<BatchedResult<T>[]> callback, XType type) {
 			super(actor, password, callback);
-			this.addresses = modelAddresses;
-			if(this.addresses == null) {
+			this.addressRequests = modelAddressRequests;
+			if(this.addressRequests == null) {
 				throw new IllegalArgumentException("addresses array must not be null");
 			}
-			this.res = new BatchedResult[this.addresses.length];
+			this.res = new BatchedResult[this.addressRequests.length];
 			this.type = type;
 		}
 		
 		protected void run() {
 			
-			String req = encodeAddresses(this.addresses, this.res, this.type);
+			String req = encodeAddresses(this.addressRequests, this.res, this.type);
 			if(req == null) {
 				onSuccess(this.res);
 				return;
@@ -582,7 +592,11 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
 		@Override
 		protected BatchedResult<T>[] parse(XydraElement element) {
 			
-			List<Object> snapshots = SerializedStore.toSnapshots(element, this.addresses);
+			XAddress[] addresses = new XAddress[this.addressRequests.length];
+			for(int i = 0; i < addresses.length; i++) {
+				addresses[i] = this.addressRequests[i].address;
+			}
+			List<Object> snapshots = SerializedStore.toSnapshots(element, addresses);
 			
 			toBatchedResults(snapshots, this.res, this.type);
 			
@@ -592,16 +606,18 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
 	}
 	
 	@Override
-	public void getModelSnapshots(XID actor, String password, XAddress[] modelAddresses,
+	public void getModelSnapshots(XID actor, String password,
+	        GetWithAddressRequest[] modelAddressRequests,
 	        Callback<BatchedResult<XReadableModel>[]> callback) {
-		new SnapshotsRequest<XReadableModel>(actor, password, modelAddresses, callback,
+		new SnapshotsRequest<XReadableModel>(actor, password, modelAddressRequests, callback,
 		        XType.XMODEL).run();
 	}
 	
 	@Override
-	public void getObjectSnapshots(XID actor, String password, XAddress[] objectAddresses,
+	public void getObjectSnapshots(XID actor, String password,
+	        GetWithAddressRequest[] objectAddressRequests,
 	        Callback<BatchedResult<XReadableObject>[]> callback) throws IllegalArgumentException {
-		new SnapshotsRequest<XReadableObject>(actor, password, objectAddresses, callback,
+		new SnapshotsRequest<XReadableObject>(actor, password, objectAddressRequests, callback,
 		        XType.XOBJECT).run();
 	}
 	

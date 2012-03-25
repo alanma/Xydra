@@ -10,6 +10,7 @@ import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.value.XValue;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.Callback;
+import org.xydra.store.GetWithAddressRequest;
 import org.xydra.store.StoreException;
 import org.xydra.store.XydraStore;
 
@@ -63,7 +64,7 @@ public class ReadableFieldOnStore implements XReadableField, Serializable {
 	}
 	
 	@Override
-	public XID getID() {
+	public XID getId() {
 		return this.address.getField();
 	}
 	
@@ -83,26 +84,30 @@ public class ReadableFieldOnStore implements XReadableField, Serializable {
 	}
 	
 	protected void load() {
-		this.store.getObjectSnapshots(this.credentials.getActorId(), this.credentials
-		        .getPasswordHash(), new XAddress[] { this.address.getParent() },
-		        new Callback<BatchedResult<XReadableObject>[]>() {
-			        
-			        @Override
-			        public void onFailure(Throwable error) {
-				        throw new StoreException("", error);
-			        }
-			        
-			        @Override
-			        public void onSuccess(BatchedResult<XReadableObject>[] object) {
-				        assert object.length == 1;
-				        /*
-						 * TODO better error handling if getResult is null
-						 * because getException has an AccessException
-						 */
-				        ReadableFieldOnStore.this.baseField = object[0].getResult().getField(
-				                getID());
-			        }
-		        });
+		this.store
+		        .getObjectSnapshots(
+		                this.credentials.getActorId(),
+		                this.credentials.getPasswordHash(),
+		                new GetWithAddressRequest[] { new GetWithAddressRequest(this.address
+		                        .getParent()) }, new Callback<BatchedResult<XReadableObject>[]>() {
+			                
+			                @Override
+			                public void onFailure(Throwable error) {
+				                throw new StoreException("", error);
+			                }
+			                
+			                @Override
+			                public void onSuccess(BatchedResult<XReadableObject>[] object) {
+				                assert object.length == 1;
+				                /*
+								 * TODO better error handling if getResult is
+								 * null because getException has an
+								 * AccessException
+								 */
+				                ReadableFieldOnStore.this.baseField = object[0].getResult()
+				                        .getField(getId());
+			                }
+		                });
 	}
 	
 	@Override

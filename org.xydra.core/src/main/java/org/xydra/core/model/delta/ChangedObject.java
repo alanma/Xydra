@@ -86,13 +86,13 @@ public class ChangedObject implements XWritableObject, DeltaUtils.IObjectDiff {
 			assert !this.removed.contains(id) && !this.changed.containsKey(id);
 			assert !this.base.hasField(id) : "base " + this.base.getAddress()
 			        + " cannot have field " + id + " which also appers in ADDED";
-			assert id.equals(this.added.get(id).getID());
+			assert id.equals(this.added.get(id).getId());
 		}
 		
 		for(XID id : this.changed.keySet()) {
 			assert !this.removed.contains(id) && !this.added.containsKey(id);
 			assert this.base.hasField(id);
-			assert id.equals(this.changed.get(id).getID());
+			assert id.equals(this.changed.get(id).getId());
 		}
 		
 		return true;
@@ -283,8 +283,8 @@ public class ChangedObject implements XWritableObject, DeltaUtils.IObjectDiff {
 	}
 	
 	@Override
-	public XID getID() {
-		return this.base.getID();
+	public XID getId() {
+		return this.base.getId();
 	}
 	
 	/**
@@ -435,14 +435,14 @@ public class ChangedObject implements XWritableObject, DeltaUtils.IObjectDiff {
 	public static void commitTo(ChangedObject changedObject, XWritableObject baseObject) {
 		assert changedObject != null;
 		assert baseObject != null;
-		assert changedObject.getID().equals(baseObject.getID());
+		assert changedObject.getId().equals(baseObject.getId());
 		for(SimpleField field : changedObject.getNewFields()) {
-			XWritableField baseField = baseObject.createField(field.getID());
+			XWritableField baseField = baseObject.createField(field.getId());
 			baseField.setValue(field.getValue());
 		}
 		for(ChangedField field : changedObject.getChangedFields()) {
 			if(field.isChanged()) {
-				XWritableField baseField = baseObject.createField(field.getID());
+				XWritableField baseField = baseObject.createField(field.getId());
 				baseField.setValue(field.getValue());
 			}
 		}

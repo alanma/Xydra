@@ -219,7 +219,7 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 			}
 			
 			for(XReadableObject object : model.getNewObjects()) {
-				MemoryObject newObject = createObjectInternal(object.getID());
+				MemoryObject newObject = createObjectInternal(object.getId());
 				for(XID fieldId : object) {
 					XReadableField field = object.getField(fieldId);
 					MemoryField newField = newObject.createFieldInternal(fieldId);
@@ -230,14 +230,14 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 			}
 			
 			for(ChangedObject object : model.getChangedObjects()) {
-				MemoryObject oldObject = getObject(object.getID());
+				MemoryObject oldObject = getObject(object.getId());
 				
 				for(XID fieldId : object.getRemovedFields()) {
 					oldObject.removeFieldInternal(fieldId);
 				}
 				
 				for(XReadableField field : object.getNewFields()) {
-					MemoryField newField = oldObject.createFieldInternal(field.getID());
+					MemoryField newField = oldObject.createFieldInternal(field.getId());
 					if(!field.isEmpty()) {
 						newField.setValueInternal(field.getValue());
 					}
@@ -245,7 +245,7 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 				
 				for(ChangedField field : object.getChangedFields()) {
 					if(field.isChanged()) {
-						MemoryField oldField = oldObject.getField(field.getID());
+						MemoryField oldField = oldObject.getField(field.getId());
 						oldField.setValueInternal(field.getValue());
 					}
 				}
@@ -263,7 +263,7 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 				
 				// new objects
 				for(XReadableObject object : model.getNewObjects()) {
-					MemoryObject newObject = getObject(object.getID());
+					MemoryObject newObject = getObject(object.getId());
 					assert newObject != null : "should have been created above";
 					for(XID fieldId : object) {
 						MemoryField newField = newObject.getField(fieldId);
@@ -275,14 +275,14 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 				
 				// changed objects
 				for(ChangedObject object : model.getChangedObjects()) {
-					MemoryObject oldObject = getObject(object.getID());
+					MemoryObject oldObject = getObject(object.getId());
 					assert oldObject != null : "should have existed already and not been removed";
 					
 					boolean changed = object.getRemovedFields().iterator().hasNext();
 					
 					// new fields in old objects
 					for(XReadableField field : object.getNewFields()) {
-						MemoryField newField = oldObject.getField(field.getID());
+						MemoryField newField = oldObject.getField(field.getId());
 						assert newField != null : "should have been created above";
 						newField.setRevisionNumber(newRevision);
 						changed = true;
@@ -291,7 +291,7 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 					// changed fields
 					for(ChangedField field : object.getChangedFields()) {
 						if(field.isChanged()) {
-							MemoryField oldField = oldObject.getField(field.getID());
+							MemoryField oldField = oldObject.getField(field.getId());
 							assert oldField != null : "should have existed already and not been removed";
 							oldField.setRevisionNumber(newRevision);
 							changed = true;
@@ -486,7 +486,7 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 				return XCommand.FAILED;
 			}
 			
-			if(!rc.getModelId().equals(getModel().getID())) {
+			if(!rc.getModelId().equals(getModel().getId())) {
 				return XCommand.FAILED;
 			}
 			
@@ -507,7 +507,7 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 				this.removed = false;
 				
 				XRepositoryEvent event = MemoryRepositoryEvent.createAddEvent(getSessionActor(),
-				        getAddress().getParent(), getModel().getID(), getCurrentRevisionNumber(),
+				        getAddress().getParent(), getModel().getId(), getCurrentRevisionNumber(),
 				        false);
 				this.eventQueue.enqueueRepositoryEvent(getModel().getFather(), event);
 				

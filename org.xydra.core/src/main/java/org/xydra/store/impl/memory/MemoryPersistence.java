@@ -14,14 +14,18 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
-import org.xydra.store.RequestException;
+import org.xydra.store.GetWithAddressRequest;
 import org.xydra.store.ModelRevision;
+import org.xydra.store.RequestException;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
 
 /**
  * Stores state in memory. Each model is managed as a
  * {@link MemoryModelPersistence}.
+ * 
+ * Tentative methods fall back to standard methods as there are no race
+ * conditions of any kind.
  * 
  * @author voelkel
  * @author dscharrer
@@ -65,7 +69,7 @@ public class MemoryPersistence implements XydraPersistence {
 		 * model gets re-created later the revision number must strictly
 		 * increase to serve users who synchronised with the previous model.
 		 */
-
+		
 		return result;
 	}
 	
@@ -106,7 +110,8 @@ public class MemoryPersistence implements XydraPersistence {
 	}
 	
 	@Override
-	public ModelRevision getModelRevision(XAddress address) {
+	public ModelRevision getModelRevision(GetWithAddressRequest addressRequest) {
+		XAddress address = addressRequest.address;
 		if(address.getAddressedType() != XType.XMODEL) {
 			throw new RequestException("must use a model address to get a model revison, was "
 			        + address);
@@ -116,7 +121,8 @@ public class MemoryPersistence implements XydraPersistence {
 	}
 	
 	@Override
-	public XRevWritableModel getModelSnapshot(XAddress address) {
+	public XRevWritableModel getModelSnapshot(GetWithAddressRequest addressRequest) {
+		XAddress address = addressRequest.address;
 		if(address.getAddressedType() != XType.XMODEL) {
 			throw new RequestException("must use a model address to get a model snapshot, was "
 			        + address);
@@ -126,7 +132,8 @@ public class MemoryPersistence implements XydraPersistence {
 	}
 	
 	@Override
-	public XRevWritableObject getObjectSnapshot(XAddress address) {
+	public XRevWritableObject getObjectSnapshot(GetWithAddressRequest addressRequest) {
+		XAddress address = addressRequest.address;
 		if(address.getAddressedType() != XType.XOBJECT) {
 			throw new RequestException("must use an object address to get an object snapshot, was "
 			        + address);

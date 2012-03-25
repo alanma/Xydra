@@ -9,7 +9,6 @@ import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
@@ -220,14 +219,12 @@ public abstract class AbstractStoreQuotaExceptionTest {
 	@Test
 	public void testGetModelRevisionsQuotaException() {
 		SynchronousCallbackWithOneResult<BatchedResult<ModelRevision>[]> callback = null;
-		XAddress[] tempArray = { XX.toAddress(XX.createUniqueId(), XX.createUniqueId(), null, null) };
-		
 		assert this.bfQuota > 0;
 		for(long l = 0; l < this.bfQuota + 1; l++) {
 			callback = new SynchronousCallbackWithOneResult<BatchedResult<ModelRevision>[]>();
 			
-			this.store.getModelRevisions(this.incorrectUser, this.incorrectUserPass, tempArray,
-			        callback);
+			this.store.getModelRevisions(this.incorrectUser, this.incorrectUserPass,
+			        requestsForRandomModel(), callback);
 			
 			assertFalse(waitOnCallback(callback));
 			assertNull(callback.getEffect());
@@ -251,15 +248,12 @@ public abstract class AbstractStoreQuotaExceptionTest {
 	@Test
 	public void testGetModelSnapshotsQuotaExcpetion() {
 		SynchronousCallbackWithOneResult<BatchedResult<XReadableModel>[]> callback = null;
-		XAddress[] tempArray = new XAddress[] { XX.toAddress(XX.createUniqueId(),
-		        XX.createUniqueId(), null, null) };
-		
 		assert this.bfQuota > 0;
 		for(long l = 0; l < this.bfQuota + 1; l++) {
 			callback = new SynchronousCallbackWithOneResult<BatchedResult<XReadableModel>[]>();
 			
-			this.store.getModelSnapshots(this.incorrectUser, this.incorrectUserPass, tempArray,
-			        callback);
+			this.store.getModelSnapshots(this.incorrectUser, this.incorrectUserPass,
+			        requestsForRandomModel(), callback);
 			
 			assertFalse(waitOnCallback(callback));
 			assertNull(callback.getEffect());
@@ -279,19 +273,21 @@ public abstract class AbstractStoreQuotaExceptionTest {
 		// was exceeded by one
 	}
 	
+	private static GetWithAddressRequest[] requestsForRandomModel() {
+		return new GetWithAddressRequest[] { new GetWithAddressRequest(XX.toAddress(
+		        XX.createUniqueId(), XX.createUniqueId(), XX.createUniqueId(), null)) };
+	}
+	
 	// Testing the quota exception for getObjectSnapshots
 	@Test
 	public void testGetObjectSnapshotsQuotaException() {
 		SynchronousCallbackWithOneResult<BatchedResult<XReadableObject>[]> callback = null;
-		XAddress[] tempArray = new XAddress[] { XX.toAddress(XX.createUniqueId(),
-		        XX.createUniqueId(), XX.createUniqueId(), null) };
-		
 		assert this.bfQuota > 0;
 		for(long l = 0; l < this.bfQuota + 1; l++) {
 			callback = new SynchronousCallbackWithOneResult<BatchedResult<XReadableObject>[]>();
 			
-			this.store.getObjectSnapshots(this.incorrectUser, this.incorrectUserPass, tempArray,
-			        callback);
+			this.store.getObjectSnapshots(this.incorrectUser, this.incorrectUserPass,
+			        requestsForRandomModel(), callback);
 			
 			assertFalse(waitOnCallback(callback));
 			assertNull(callback.getEffect());

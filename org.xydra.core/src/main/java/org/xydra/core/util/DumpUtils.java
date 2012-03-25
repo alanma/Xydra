@@ -37,7 +37,7 @@ public class DumpUtils {
 	public static String dump(String label, XReadableRepository repo) {
 		assert repo != null;
 		assert repo.getAddress().getAddressedType() == XType.XREPOSITORY;
-		log.info(label + " * Repo " + repo.getID() + " ...");
+		log.info(label + " * Repo " + repo.getId() + " ...");
 		for(XID modelId : repo) {
 			XReadableModel model = repo.getModel(modelId);
 			dump(label, model);
@@ -141,7 +141,7 @@ public class DumpUtils {
 		
 		@Override
 		public int compare(IHasXID a, IHasXID b) {
-			return a.getID().compareTo(b.getID());
+			return a.getId().compareTo(b.getId());
 		}
 		
 		public static XidComparator INSTANCE = new XidComparator();
@@ -153,7 +153,7 @@ public class DumpUtils {
 		List<XReadableObject> addedList = new ArrayList<XReadableObject>(changedModel.getAdded());
 		Collections.sort(addedList, XidComparator.INSTANCE);
 		for(XReadableObject addedObject : addedList) {
-			sb.append("=== ADDED   Object '" + addedObject.getID() + "' ===<br/>\n");
+			sb.append("=== ADDED   Object '" + addedObject.getId() + "' ===<br/>\n");
 			sb.append(DumpUtils.toStringBuffer(addedObject));
 		}
 		List<XID> removedList = new ArrayList<XID>(changedModel.getRemoved());
@@ -166,7 +166,7 @@ public class DumpUtils {
 		Collections.sort(potentiallyChangedList, XidComparator.INSTANCE);
 		for(IObjectDiff changedObject : potentiallyChangedList) {
 			if(changedObject.hasChanges()) {
-				sb.append("=== CHANGED Object '" + changedObject.getID() + "' === <br/>\n");
+				sb.append("=== CHANGED Object '" + changedObject.getId() + "' === <br/>\n");
 				sb.append(changesToString(changedObject));
 			}
 		}
@@ -178,7 +178,7 @@ public class DumpUtils {
 		List<XReadableField> addedList = new ArrayList<XReadableField>(changedObject.getAdded());
 		Collections.sort(addedList, XidComparator.INSTANCE);
 		for(XReadableField field : addedList) {
-			sb.append("--- ADDED Field '" + field.getID() + "' ---<br/>\n");
+			sb.append("--- ADDED Field '" + field.getId() + "' ---<br/>\n");
 			sb.append(DumpUtils.toStringBuffer(field));
 		}
 		List<XID> removedList = new ArrayList<XID>(changedObject.getRemoved());
@@ -191,7 +191,7 @@ public class DumpUtils {
 		Collections.sort(potentiallyChangedList, XidComparator.INSTANCE);
 		for(IFieldDiff changedField : potentiallyChangedList) {
 			if(changedField.isChanged()) {
-				sb.append("--- CHANGED Field '" + changedField.getID() + "' ---<br/>\n");
+				sb.append("--- CHANGED Field '" + changedField.getId() + "' ---<br/>\n");
 				sb.append(changesToString(changedField));
 			}
 		}

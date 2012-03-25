@@ -10,6 +10,7 @@ import org.xydra.base.XType;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.store.BatchedResult;
+import org.xydra.store.GetWithAddressRequest;
 import org.xydra.store.StoreException;
 import org.xydra.store.WaitingCallback;
 import org.xydra.store.XydraStore;
@@ -52,12 +53,12 @@ public class ReadableModelOnStore implements XReadableModel, Serializable {
 	}
 	
 	@Override
-	public XID getID() {
+	public XID getId() {
 		return this.address.getField();
 	}
 	
 	@Override
-    public XReadableObject getObject(XID objectId) {
+	public XReadableObject getObject(XID objectId) {
 		if(this.baseModel == null) {
 			return null;
 		}
@@ -71,25 +72,26 @@ public class ReadableModelOnStore implements XReadableModel, Serializable {
 	}
 	
 	@Override
-    public boolean hasObject(XID objectId) {
+	public boolean hasObject(XID objectId) {
 		return this.baseModel.hasObject(objectId);
 	}
 	
 	@Override
-    public boolean isEmpty() {
+	public boolean isEmpty() {
 		return this.baseModel.isEmpty();
 	}
 	
 	@Override
-    public Iterator<XID> iterator() {
+	public Iterator<XID> iterator() {
 		return this.baseModel.iterator();
 	}
 	
 	protected synchronized void load() {
 		
 		WaitingCallback<BatchedResult<XReadableModel>[]> callback = new WaitingCallback<BatchedResult<XReadableModel>[]>();
-		this.store.getModelSnapshots(this.credentials.getActorId(), this.credentials
-		        .getPasswordHash(), new XAddress[] { this.address }, callback);
+		this.store.getModelSnapshots(this.credentials.getActorId(),
+		        this.credentials.getPasswordHash(),
+		        new GetWithAddressRequest[] { new GetWithAddressRequest(this.address) }, callback);
 		
 		if(callback.getException() != null) {
 			throw new StoreException("re-throw", callback.getException());

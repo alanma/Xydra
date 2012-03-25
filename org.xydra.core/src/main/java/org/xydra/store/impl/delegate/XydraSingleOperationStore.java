@@ -23,10 +23,11 @@ import org.xydra.store.BatchedResult;
 import org.xydra.store.Callback;
 import org.xydra.store.ConnectionException;
 import org.xydra.store.GetEventsRequest;
+import org.xydra.store.GetWithAddressRequest;
 import org.xydra.store.InternalStoreException;
+import org.xydra.store.ModelRevision;
 import org.xydra.store.QuotaException;
 import org.xydra.store.RequestException;
-import org.xydra.store.ModelRevision;
 import org.xydra.store.TimeoutException;
 import org.xydra.store.XydraStore;
 import org.xydra.store.XydraStoreAdmin;
@@ -201,10 +202,11 @@ public interface XydraSingleOperationStore {
 	 *            Even after a the callback's {@link Callback#onSuccess(Object)}
 	 *            method has been called, the change may not actually be
 	 *            returned yet by
-	 *            {@link #getModelSnapshot(XID, String, XAddress, Callback)},
-	 *            {@link #getModelIds(XID, String, Callback)},
-	 *            {@link #getModelRevision(XID, String, XAddress, Callback)} and
-	 *            {@link #getObjectSnapshot(XID, String, XAddress, Callback)}
+	 *            {@link #getModelSnapshot(XID, String, GetWithAddressRequest, Callback)}
+	 *            , {@link #getModelIds(XID, String, Callback)},
+	 *            {@link #getModelRevision(XID, String, GetWithAddressRequest, Callback)}
+	 *            and
+	 *            {@link #getObjectSnapshot(XID, String, GetWithAddressRequest, Callback)}
 	 *            yet. The change will however eventually be returned by those
 	 *            methods, and will stay persistent once it does. Also, no
 	 *            changes with greater revision numbers will become visible
@@ -328,7 +330,7 @@ public interface XydraSingleOperationStore {
 	 *            exists. Callback must not be null.
 	 * @throws IllegalArgumentException if one of the given parameters is null.
 	 */
-	void getModelRevision(XID actorId, String passwordHash, XAddress modelAddress,
+	void getModelRevision(XID actorId, String passwordHash, GetWithAddressRequest modelAddress,
 	        Callback<ModelRevision> callback) throws IllegalArgumentException;
 	
 	/**
@@ -363,7 +365,7 @@ public interface XydraSingleOperationStore {
 	 *            with "Xydra" to avoid transmitting the same string over the
 	 *            network if the user uses the same password for multiple
 	 *            services. If null, all access is granted.
-	 * @param modelAddress the {@link XAddress} for which model to get a
+	 * @param modelAddressRequest the {@link XAddress} for which model to get a
 	 *            snapshot. The {@link XAddress} must address an {@link XModel}
 	 *            (repositoryId/modelId/-/-).
 	 * 
@@ -378,8 +380,9 @@ public interface XydraSingleOperationStore {
 	 *             Implementation note: Implementation may choose to supply a
 	 *             lazy-loading stub only.
 	 */
-	void getModelSnapshot(XID actorId, String passwordHash, XAddress modelAddress,
-	        Callback<XReadableModel> callback) throws IllegalArgumentException;
+	void getModelSnapshot(XID actorId, String passwordHash,
+	        GetWithAddressRequest modelAddressRequest, Callback<XReadableModel> callback)
+	        throws IllegalArgumentException;
 	
 	/**
 	 * Read current state.
@@ -411,9 +414,9 @@ public interface XydraSingleOperationStore {
 	 *            with "Xydra" to avoid transmitting the same string over the
 	 *            network if the user uses the same password for multiple
 	 *            services. If null, all access is granted.
-	 * @param objectAddress an array of {@link XAddress} for which objects to
-	 *            get snapshots. Each {@link XAddress} must address an
-	 *            {@link XObject} (repositoryId/modelId/objectId/-).
+	 * @param objectAddressRequest an array of {@link XAddress} for which
+	 *            objects to get snapshots. Each {@link XAddress} must address
+	 *            an {@link XObject} (repositoryId/modelId/objectId/-).
 	 * @param callback Asynchronous callback to signal success or failure. On
 	 *            success, an {@link XReadableObject} is returned. A null value
 	 *            signals that the requested object does not exist in the store
@@ -424,8 +427,9 @@ public interface XydraSingleOperationStore {
 	 *             Implementation note: Implementation may chose to supply a
 	 *             lazy-loading stub only.
 	 */
-	void getObjectSnapshot(XID actorId, String passwordHash, XAddress objectAddress,
-	        Callback<XReadableObject> callback) throws IllegalArgumentException;
+	void getObjectSnapshot(XID actorId, String passwordHash,
+	        GetWithAddressRequest objectAddressRequest, Callback<XReadableObject> callback)
+	        throws IllegalArgumentException;
 	
 	/**
 	 * Read current state.

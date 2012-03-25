@@ -164,7 +164,7 @@ public class MemoryRepository extends AbstractEntity implements XRepository, Ser
 		assert model.getRevisionNumber() == 0;
 		
 		// in memory
-		this.loadedModels.put(model.getID(), model);
+		this.loadedModels.put(model.getId(), model);
 		
 		boolean oldLogging = model.eventQueue.setLogging(false);
 		model.eventQueue.enqueueRepositoryEvent(this, event);
@@ -223,7 +223,7 @@ public class MemoryRepository extends AbstractEntity implements XRepository, Ser
 	private synchronized long executeRepositoryCommand(XRepositoryCommand command,
 	        XLocalChangeCallback callback) {
 		
-		if(!command.getRepositoryId().equals(getID())) {
+		if(!command.getRepositoryId().equals(getId())) {
 			// given given repository-id are not consistent
 			if(callback != null) {
 				callback.onFailure();
@@ -375,8 +375,8 @@ public class MemoryRepository extends AbstractEntity implements XRepository, Ser
 	}
 	
 	@Override
-	public synchronized XID getID() {
-		return this.state.getID();
+	public synchronized XID getId() {
+		return this.state.getId();
 	}
 	
 	@Override
@@ -480,7 +480,7 @@ public class MemoryRepository extends AbstractEntity implements XRepository, Ser
 	        XLocalChangeCallback callback) {
 		synchronized(model.eventQueue) {
 			
-			XID modelId = model.getID();
+			XID modelId = model.getId();
 			
 			long rev = model.getRevisionNumber() + 1;
 			
@@ -516,14 +516,14 @@ public class MemoryRepository extends AbstractEntity implements XRepository, Ser
 	protected synchronized void updateRemoved(MemoryModel model) {
 		assert model != null;
 		synchronized(model.eventQueue) {
-			XID modelId = model.getID();
+			XID modelId = model.getId();
 			boolean hasModel = hasModel(modelId);
 			if(model.removed && hasModel) {
 				this.state.removeModel(modelId);
 				this.loadedModels.remove(modelId);
 			} else if(!model.removed && !hasModel) {
 				this.state.addModel(model.getState());
-				this.loadedModels.put(model.getID(), model);
+				this.loadedModels.put(model.getId(), model);
 			}
 			model.eventQueue.sendEvents();
 		}

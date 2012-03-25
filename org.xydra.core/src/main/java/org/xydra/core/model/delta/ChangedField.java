@@ -54,8 +54,8 @@ public class ChangedField implements XWritableField, DeltaUtils.IFieldDiff {
 	}
 	
 	@Override
-	public XID getID() {
-		return this.base.getID();
+	public XID getId() {
+		return this.base.getId();
 	}
 	
 	/**

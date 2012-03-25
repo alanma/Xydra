@@ -69,7 +69,7 @@ public class SimpleModel implements Serializable, XRevWritableModel, XSessionMod
 	
 	@Override
 	public void addObject(XRevWritableObject object) {
-		this.objects.put(object.getID(), object);
+		this.objects.put(object.getId(), object);
 	}
 	
 	@Override
@@ -89,7 +89,7 @@ public class SimpleModel implements Serializable, XRevWritableModel, XSessionMod
 	}
 	
 	@Override
-	public XID getID() {
+	public XID getId() {
 		return this.address.getModel();
 	}
 	

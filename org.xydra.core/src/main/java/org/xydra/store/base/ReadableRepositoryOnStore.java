@@ -56,7 +56,7 @@ public class ReadableRepositoryOnStore implements XReadableRepository, Serializa
 	}
 	
 	@Override
-	public XID getID() {
+	public XID getId() {
 		return this.address.getRepository();
 	}
 	

@@ -21,6 +21,7 @@ import org.xydra.core.util.DumpUtils;
 import org.xydra.index.impl.IteratorUtils;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.store.GetWithAddressRequest;
 
 
 /**
@@ -35,6 +36,8 @@ import org.xydra.log.LoggerFactory;
  * 
  */
 public class SessionModel implements XSessionModel {
+	
+	private static final boolean INCLUDE_TENTATIVE_CHANGES = true;
 	
 	private static final Logger log = LoggerFactory.getLogger(SessionModel.class);
 	
@@ -71,7 +74,7 @@ public class SessionModel implements XSessionModel {
 	}
 	
 	public long commitToSessionPersistence() {
-		assert !isReadOnly() : "Called commit on model '" + this.getID() + "' that is readonly?"
+		assert !isReadOnly() : "Called commit on model '" + this.getId() + "' that is readonly?"
 		        + this.readonly;
 		log.debug("Committing SessionModel '" + this.traceid + "' ...");
 		synchronized(this.sessionCacheModel) {
@@ -88,7 +91,7 @@ public class SessionModel implements XSessionModel {
 			}
 			long durationInMs = this.clock.stopAndGetDuration("commited");
 			if(durationInMs > 10000) {
-				log.warn("SessionModel '" + this.traceid + "' ID '" + getID()
+				log.warn("SessionModel '" + this.traceid + "' ID '" + getId()
 				        + "' was open very long: " + durationInMs
 				        + " ms GA?category=stats&action=sessionOpenVeryLong&label=time&value="
 				        + durationInMs);
@@ -118,8 +121,8 @@ public class SessionModel implements XSessionModel {
 	}
 	
 	@Override
-	public XID getID() {
-		return this.sessionCacheModel.getID();
+	public XID getId() {
+		return this.sessionCacheModel.getId();
 	}
 	
 	@Override
@@ -192,7 +195,7 @@ public class SessionModel implements XSessionModel {
 		if(baseModel == null) {
 			return;
 		}
-		if(!this.sessionCacheModel.getID().equals(baseModel.getID())) {
+		if(!this.sessionCacheModel.getId().equals(baseModel.getId())) {
 			throw new IllegalArgumentException("Basemodel has a different id '"
 			        + baseModel.getAddress() + "' from sessionModel '"
 			        + this.sessionCacheModel.getAddress() + "'");
@@ -209,7 +212,7 @@ public class SessionModel implements XSessionModel {
 		if(baseObject == null) {
 			return;
 		}
-		if(!this.sessionCacheModel.getID().equals(baseObject.getAddress().getModel())) {
+		if(!this.sessionCacheModel.getId().equals(baseObject.getAddress().getModel())) {
 			throw new IllegalArgumentException("BaseObject has a different model id '"
 			        + baseObject.getAddress() + "' from sessionModel '"
 			        + this.sessionCacheModel.getAddress() + "'");
@@ -226,7 +229,7 @@ public class SessionModel implements XSessionModel {
 	
 	@Override
 	public String toString() {
-		return this.traceid + " " + this.getID();
+		return this.traceid + " " + this.getId();
 	}
 	
 	@Override
@@ -238,7 +241,8 @@ public class SessionModel implements XSessionModel {
 		}
 		
 		XReadableObject objectSnapshot = this.session.getSessionPersistence().getObjectSnapshot(
-		        XX.resolveObject(getAddress(), objectId));
+		        new GetWithAddressRequest(XX.resolveObject(getAddress(), objectId),
+		                INCLUDE_TENTATIVE_CHANGES));
 		indexObject(objectSnapshot);
 		return this;
 	}
@@ -250,7 +254,8 @@ public class SessionModel implements XSessionModel {
 			return this;
 		}
 		
-		XReadableModel baseModel = this.session.getSessionPersistence().getModelSnapshot(getID());
+		XReadableModel baseModel = this.session.getSessionPersistence().getModelSnapshot(
+		        new GetWithAddressRequest(getAddress(), INCLUDE_TENTATIVE_CHANGES));
 		indexModel(baseModel);
 		return this;
 	}

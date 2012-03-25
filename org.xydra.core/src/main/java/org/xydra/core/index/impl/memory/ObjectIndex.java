@@ -40,7 +40,7 @@ public class ObjectIndex extends AbstractObjectIndex implements IObjectIndex {
     public void deindex(XReadableObject xo) {
 		XReadableField field = xo.getField(this.fieldId);
 		XValue keyValue = field.getValue();
-		deindex(keyValue, xo.getID());
+		deindex(keyValue, xo.getId());
 	}
 	
 	public void deindex(XValue key, XID value) {
@@ -64,7 +64,7 @@ public class ObjectIndex extends AbstractObjectIndex implements IObjectIndex {
     public void index(XReadableObject xo) {
 		XReadableField field = xo.getField(this.fieldId);
 		XValue keyValue = field.getValue();
-		index(keyValue, xo.getID());
+		index(keyValue, xo.getId());
 	}
 	
 	public void index(XValue key, XID value) {

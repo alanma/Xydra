@@ -66,7 +66,7 @@ public class UniqueObjectIndex extends AbstractObjectIndex implements IUniqueObj
 			return null;
 		}
 		XID indexValue = (XID)indexField.getValue();
-		assert indexValue != null : "IndexField " + indexField.getID()
+		assert indexValue != null : "IndexField " + indexField.getId()
 		        + " has a null value. Key = " + key;
 		XID previous = indexValue;
 		this.indexObject.removeField(xid);
@@ -80,7 +80,7 @@ public class UniqueObjectIndex extends AbstractObjectIndex implements IUniqueObj
 		}
 		XReadableField field = xo.getField(this.fieldId);
 		XValue keyValue = field.getValue();
-		return index(keyValue, xo.getID());
+		return index(keyValue, xo.getId());
 	}
 	
 	public XID index(XValue key, XID value) {

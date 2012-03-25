@@ -1,11 +1,11 @@
 package org.xydra.core.change.session;
 
-import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.core.change.SessionCachedModel;
+import org.xydra.store.GetWithAddressRequest;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
 
@@ -50,9 +50,9 @@ public interface ISessionPersistence {
 	
 	XID getRepositoryId();
 	
-	XReadableModel getModelSnapshot(XID modelId);
+	XReadableModel getModelSnapshot(GetWithAddressRequest modelRequest);
 	
-	XReadableObject getObjectSnapshot(XAddress objectAddress);
+	XReadableObject getObjectSnapshot(GetWithAddressRequest objectAddressRequest);
 	
 	/**
 	 * Great for tests.

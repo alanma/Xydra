@@ -61,7 +61,7 @@ public class SimpleField implements Serializable, XRevWritableField {
 	}
 	
 	@Override
-	public XID getID() {
+	public XID getId() {
 		return this.address.getField();
 	}
 	

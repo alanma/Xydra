@@ -219,8 +219,8 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 	}
 	
 	@Override
-	public XID getID() {
-		return this.baseModel.getID();
+	public XID getId() {
+		return this.baseModel.getId();
 	}
 	
 	public long executeCommand(XCommand command) {
@@ -244,7 +244,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 		// Simulate the action the given command would actually execute
 		
 		// check whether the given command actually refers to this model
-		if(!command.getTarget().getModel().equals(this.getID())
+		if(!command.getTarget().getModel().equals(this.getId())
 		        || !command.getTarget().getRepository().equals(this.getAddress().getRepository())) {
 			usedCallback.onFailure();
 			return XCommand.FAILED;
@@ -745,7 +745,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 	 *            {@link #executeCommand(XCommand)})
 	 */
 	private void addObjectToTransactionModel(InModelTransactionObject object, boolean inTransaction) {
-		XID objectId = object.getID();
+		XID objectId = object.getId();
 		
 		if(!inTransaction) {
 			// remove from list of removed object, if needed
@@ -775,7 +775,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 	 *            {@link #executeCommand(XCommand)})
 	 */
 	private void removeObjectFromTransactionModel(XWritableObject object, boolean inTransaction) {
-		XID objectId = object.getID();
+		XID objectId = object.getId();
 		
 		// remove all fields of the object
 		for(XID fieldId : object) {

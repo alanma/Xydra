@@ -16,6 +16,7 @@ import org.xydra.base.rmof.XWritableObject;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.perf.Stats.Clock;
+import org.xydra.store.GetWithAddressRequest;
 import org.xydra.store.ModelRevision;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
@@ -23,6 +24,8 @@ import org.xydra.store.impl.delegate.XydraPersistence;
 /**
  * A wrapper around a {@link XydraPersistence} that monitors statistics on call
  * number and time spent.
+ * 
+ * IMPROVE Profile also tentative methods
  * 
  * @author xamde
  */
@@ -74,25 +77,25 @@ public class StatsGatheringPersistenceWrapper implements XydraPersistence {
 	}
 	
 	@Override
-	public ModelRevision getModelRevision(XAddress address) {
+	public ModelRevision getModelRevision(GetWithAddressRequest addressRequest) {
 		Clock c = this.stats.startClock("getModelRevision");
-		ModelRevision result = this.basePersistence.getModelRevision(address);
+		ModelRevision result = this.basePersistence.getModelRevision(addressRequest);
 		c.stop();
 		return result;
 	}
 	
 	@Override
-	public XWritableModel getModelSnapshot(XAddress address) {
+	public XWritableModel getModelSnapshot(GetWithAddressRequest addressRequest) {
 		Clock c = this.stats.startClock("getModelSnapshot");
-		XWritableModel result = this.basePersistence.getModelSnapshot(address);
+		XWritableModel result = this.basePersistence.getModelSnapshot(addressRequest);
 		c.stop();
 		return result;
 	}
 	
 	@Override
-	public XWritableObject getObjectSnapshot(XAddress address) {
+	public XWritableObject getObjectSnapshot(GetWithAddressRequest addressRequest) {
 		Clock c = this.stats.startClock("getObjectSnapshot");
-		XWritableObject result = this.basePersistence.getObjectSnapshot(address);
+		XWritableObject result = this.basePersistence.getObjectSnapshot(addressRequest);
 		c.stop();
 		return result;
 	}

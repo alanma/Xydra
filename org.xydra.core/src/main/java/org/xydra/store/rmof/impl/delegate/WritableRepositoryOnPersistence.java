@@ -14,6 +14,7 @@ import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableRepository;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.store.GetWithAddressRequest;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
 
@@ -25,6 +26,8 @@ import org.xydra.store.impl.delegate.XydraPersistence;
  */
 public class WritableRepositoryOnPersistence extends AbstractWritableOnPersistence implements
         XWritableRepository {
+	
+	public static final boolean USE_TENTATIVE_STATE = false;
 	
 	private static final Logger log = LoggerFactory
 	        .getLogger(WritableRepositoryOnPersistence.class);
@@ -38,8 +41,11 @@ public class WritableRepositoryOnPersistence extends AbstractWritableOnPersisten
 	public XWritableModel createModel(XID modelId) {
 		XWritableModel model = getModel(modelId);
 		if(model == null) {
-			assert this.persistence.getModelRevision(getModelAddress(modelId)) != null;
-			assert !this.persistence.getModelRevision(getModelAddress(modelId)).modelExists();
+			assert this.persistence.getModelRevision(new GetWithAddressRequest(
+			        getModelAddress(modelId), USE_TENTATIVE_STATE)) != null;
+			assert !this.persistence.getModelRevision(
+			        new GetWithAddressRequest(getModelAddress(modelId), USE_TENTATIVE_STATE))
+			        .modelExists();
 			
 			XCommand command = X.getCommandFactory().createAddModelCommand(
 			        this.persistence.getRepositoryId(), modelId, true);
@@ -47,8 +53,11 @@ public class WritableRepositoryOnPersistence extends AbstractWritableOnPersisten
 			if(l < 0) {
 				log.warn("creating model '" + modelId + "' failed with " + l);
 			}
-			assert this.persistence.getModelRevision(getModelAddress(modelId)).modelExists() : "model should exist "
-			        + this.persistence.getModelRevision(getModelAddress(modelId));
+			assert this.persistence.getModelRevision(
+			        new GetWithAddressRequest(getModelAddress(modelId), USE_TENTATIVE_STATE))
+			        .modelExists() : "model should exist "
+			        + this.persistence.getModelRevision(new GetWithAddressRequest(
+			                getModelAddress(modelId), USE_TENTATIVE_STATE));
 			
 			model = getModel(modelId);
 			assert model != null;
@@ -71,7 +80,7 @@ public class WritableRepositoryOnPersistence extends AbstractWritableOnPersisten
 	}
 	
 	@Override
-	public XID getID() {
+	public XID getId() {
 		return this.persistence.getRepositoryId();
 	}
 	
@@ -90,7 +99,9 @@ public class WritableRepositoryOnPersistence extends AbstractWritableOnPersisten
 		assert this.persistence != null;
 		return this.persistence.hasManagedModel(modelId)
 		        && this.persistence.getModelRevision(
-		                XX.resolveModel(this.persistence.getRepositoryId(), modelId)).modelExists();
+		                new GetWithAddressRequest(XX.resolveModel(
+		                        this.persistence.getRepositoryId(), modelId), USE_TENTATIVE_STATE))
+		                .modelExists();
 	}
 	
 	@Override
@@ -103,7 +114,8 @@ public class WritableRepositoryOnPersistence extends AbstractWritableOnPersisten
 		Set<XID> existingModelIds = new HashSet<XID>();
 		for(XID modelId : this.persistence.getManagedModelIds()) {
 			if(this.persistence.getModelRevision(
-			        XX.resolveModel(this.persistence.getRepositoryId(), modelId)).modelExists()) {
+			        new GetWithAddressRequest(XX.resolveModel(this.persistence.getRepositoryId(),
+			                modelId), USE_TENTATIVE_STATE)).modelExists()) {
 				existingModelIds.add(modelId);
 			}
 		}

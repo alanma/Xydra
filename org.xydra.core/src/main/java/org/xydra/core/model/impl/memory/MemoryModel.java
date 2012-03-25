@@ -81,10 +81,10 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 		        && this.eventQueue.getChangeLog().getCurrentRevisionNumber() == -1) {
 			XAddress repoAddr = getAddress().getParent();
 			XCommand createCommand = MemoryRepositoryCommand.createAddCommand(repoAddr, true,
-			        getID());
+			        getId());
 			this.eventQueue.newLocalChange(createCommand, null);
 			XRepositoryEvent createEvent = MemoryRepositoryEvent.createAddEvent(actorId, repoAddr,
-			        getID());
+			        getId());
 			this.eventQueue.enqueueRepositoryEvent(null, createEvent);
 			this.eventQueue.sendEvents();
 		}
@@ -213,7 +213,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 		}
 		assert object.getModel() == this;
 		
-		this.loadedObjects.put(object.getID(), object);
+		this.loadedObjects.put(object.getId(), object);
 		
 		XModelEvent event = MemoryModelEvent.createAddEvent(this.eventQueue.getActor(),
 		        getAddress(), objectId, getRevisionNumber(), inTrans);
@@ -263,7 +263,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 		
 		XAddress repoAdrr = hasFather() ? getFather().getAddress() : getAddress().getParent();
 		XRepositoryEvent event = MemoryRepositoryEvent.createRemoveEvent(actorId, repoAdrr,
-		        getID(), getCurrentRevisionNumber(), inTrans);
+		        getId(), getCurrentRevisionNumber(), inTrans);
 		this.eventQueue.enqueueRepositoryEvent(getFather(), event);
 		
 		return inTrans;
@@ -301,7 +301,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 		}
 		
 		// add event to remove the object
-		XModelEvent event = MemoryModelEvent.createRemoveEvent(actor, getAddress(), object.getID(),
+		XModelEvent event = MemoryModelEvent.createRemoveEvent(actor, getAddress(), object.getId(),
 		        getRevisionNumber(), object.getRevisionNumber(), inTrans, implied);
 		this.eventQueue.enqueueModelEvent(this, event);
 		
@@ -324,15 +324,15 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 				}
 				
 				return (getRevisionNumber() == model.getRevisionNumber())
-				        && (this.father.getID().equals(model.father.getID()))
-				        && (getID().equals(model.getID()));
+				        && (this.father.getId().equals(model.father.getId()))
+				        && (getId().equals(model.getId()));
 			} else {
 				if(model.father != null) {
 					return false;
 				}
 				
 				return (getRevisionNumber() == model.getRevisionNumber())
-				        && (getID().equals(model.getID()));
+				        && (getId().equals(model.getId()));
 			}
 		}
 	}
@@ -509,9 +509,9 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	}
 	
 	@Override
-	public XID getID() {
+	public XID getId() {
 		synchronized(this.eventQueue) {
-			return this.state.getID();
+			return this.state.getId();
 		}
 	}
 	
@@ -553,7 +553,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	 *         MemoryModel or null, if this object has no father.
 	 */
 	protected XID getRepositoryId() {
-		return this.father == null ? null : this.father.getID();
+		return this.father == null ? null : this.father.getId();
 	}
 	
 	@Override
@@ -587,10 +587,10 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	@ReadOperation
 	public int hashCode() {
 		synchronized(this.eventQueue) {
-			int hashCode = getID().hashCode() + (int)getRevisionNumber();
+			int hashCode = getId().hashCode() + (int)getRevisionNumber();
 			
 			if(this.father != null) {
-				hashCode += this.father.getID().hashCode();
+				hashCode += this.father.getId().hashCode();
 			}
 			
 			return hashCode;
@@ -637,7 +637,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 		
 		for(MemoryObject object : this.loadedObjects.values()) {
 			object.removeInternal();
-			this.state.removeObject(object.getID());
+			this.state.removeObject(object.getId());
 		}
 		
 		this.state.setRevisionNumber(this.state.getRevisionNumber() + 1);
@@ -680,8 +680,8 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 		enqueueObjectRemoveEvents(this.eventQueue.getActor(), object, makeTrans || inTrans, false);
 		
 		// remove the object
-		this.loadedObjects.remove(object.getID());
-		this.state.removeObject(object.getID());
+		this.loadedObjects.remove(object.getId());
+		this.state.removeObject(object.getId());
 		
 		Orphans orphans = this.eventQueue.orphans;
 		if(orphans != null) {
@@ -715,7 +715,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	
 	@Override
 	public String toString() {
-		return this.getID() + " rev[" + this.getRevisionNumber() + "]";
+		return this.getId() + " rev[" + this.getRevisionNumber() + "]";
 	}
 	
 	@Override

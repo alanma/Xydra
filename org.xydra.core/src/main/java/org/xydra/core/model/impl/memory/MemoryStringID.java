@@ -55,7 +55,7 @@ public class MemoryStringID implements XID, Serializable {
 	}
 	
 	@Override
-	public XID getID() {
+	public XID getId() {
 		return this;
 	}
 	

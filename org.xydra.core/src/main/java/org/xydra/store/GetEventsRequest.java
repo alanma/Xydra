@@ -48,10 +48,10 @@ public class GetEventsRequest {
 	 *            endRevision. A value greater than the current revision number
 	 *            is allowed, since the caller cannot know what revision the
 	 *            model will have when this request is executed. If
-	 *            beginRevision is greater than the models current revision, an
-	 *            empty list of events is returned.
+	 *            beginRevision is greater than the models current (or
+	 *            tentative) revision, an empty list of events is returned.
 	 * 
-	 *            TODO is there a point in allowing beginRevision < 0?
+	 *            This value must be at least 0.
 	 * 
 	 * @param endRevision the end revision number (inclusive) of the interval
 	 *            from which all {@link XEvent XEvents} are to be returned - can
@@ -59,10 +59,12 @@ public class GetEventsRequest {
 	 *            entity to get all {@link XEvent XEvents} since beginRevision.
 	 *            Must be greater than or equal to beginRevision.
 	 * 
-	 *            TODO is there a point in allowing endRevision < 0?
+	 *            This value must be at least 0.
 	 */
 	public GetEventsRequest(XAddress address, long beginRevision, long endRevision) {
 		super();
+		assert beginRevision >= 0;
+		assert endRevision >= 0;
 		this.address = address;
 		this.beginRevision = beginRevision;
 		this.endRevision = endRevision;

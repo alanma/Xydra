@@ -43,6 +43,7 @@ import org.xydra.core.model.impl.memory.SynchronizesChangesImpl;
 import org.xydra.core.model.sync.XSynchronizer;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.GetEventsRequest;
+import org.xydra.store.GetWithAddressRequest;
 import org.xydra.store.SynchronousCallbackWithOneResult;
 import org.xydra.store.XydraStore;
 
@@ -174,7 +175,8 @@ abstract public class AbstractSynchronizerTest {
 		SynchronousCallbackWithOneResult<BatchedResult<XReadableModel>[]> tc;
 		tc = new SynchronousCallbackWithOneResult<BatchedResult<XReadableModel>[]>();
 		
-		store.getModelSnapshots(actorId, passwordHash, new XAddress[] { modelAddr }, tc);
+		store.getModelSnapshots(actorId, passwordHash,
+		        new GetWithAddressRequest[] { new GetWithAddressRequest(modelAddr, false) }, tc);
 		
 		return waitForSuccessBatched(tc);
 	}
@@ -775,7 +777,8 @@ abstract public class AbstractSynchronizerTest {
 	 * 
 	 * @return the result passed to the callback.
 	 */
-	private static <T> T waitForSuccessBatched(SynchronousCallbackWithOneResult<BatchedResult<T>[]> tc) {
+	private static <T> T waitForSuccessBatched(
+	        SynchronousCallbackWithOneResult<BatchedResult<T>[]> tc) {
 		
 		BatchedResult<T>[] results = waitForSuccess(tc);
 		assertNotNull(results);

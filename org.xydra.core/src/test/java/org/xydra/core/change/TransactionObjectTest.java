@@ -109,7 +109,7 @@ public class TransactionObjectTest {
 		
 		// add a value
 		XValue value = X.getValueFactory().createStringValue("testValue");
-		XWritableField field = this.transObject.getField(this.field.getID());
+		XWritableField field = this.transObject.getField(this.field.getId());
 		
 		field.setValue(value);
 		
@@ -130,7 +130,7 @@ public class TransactionObjectTest {
 		
 		// change a value
 		value = X.getValueFactory().createStringValue("testValue2");
-		field = this.transObject.getField(this.field.getID());
+		field = this.transObject.getField(this.field.getId());
 		
 		field.setValue(value);
 		
@@ -150,7 +150,7 @@ public class TransactionObjectTest {
 		assertEquals(value, this.field.getValue());
 		
 		// remove a value
-		field = this.transObject.getField(this.field.getID());
+		field = this.transObject.getField(this.field.getId());
 		
 		field.setValue(null);
 		
@@ -182,7 +182,7 @@ public class TransactionObjectTest {
 		this.transObject.createField(fieldId3);
 		
 		// remove some fields
-		this.transObject.removeField(this.field.getID());
+		this.transObject.removeField(this.field.getId());
 		this.transObject.removeField(fieldId3);
 		
 		// add some values
@@ -197,7 +197,7 @@ public class TransactionObjectTest {
 		field2.setValue(null);
 		
 		// change a value
-		XWritableField temp = this.transObject.getField(this.fieldWithValue.getID());
+		XWritableField temp = this.transObject.getField(this.fieldWithValue.getId());
 		temp.setValue(value);
 		
 		// commit the transaction
@@ -217,7 +217,7 @@ public class TransactionObjectTest {
 		assertTrue(this.object.hasField(fieldId1));
 		assertTrue(this.object.hasField(fieldId2));
 		
-		assertFalse(this.object.hasField(this.field.getID()));
+		assertFalse(this.object.hasField(this.field.getId()));
 		assertFalse(this.object.hasField(fieldId3));
 		
 		field1 = this.object.getField(fieldId1);
@@ -238,7 +238,7 @@ public class TransactionObjectTest {
 		
 		field3.setValue(value);
 		
-		temp = this.transObject.getField(this.fieldWithValue.getID());
+		temp = this.transObject.getField(this.fieldWithValue.getId());
 		temp.setValue(null);
 		
 		this.transObject.removeField(fieldId1);
@@ -277,7 +277,7 @@ public class TransactionObjectTest {
 	// Tests for getId()
 	@Test
 	public void testGetId() {
-		assertEquals(this.object.getID(), this.transObject.getID());
+		assertEquals(this.object.getId(), this.transObject.getId());
 	}
 	
 	/*
@@ -349,7 +349,7 @@ public class TransactionObjectTest {
 		
 		// try to add a field that already exists
 		addCommand = factory.createAddFieldCommand(this.transObject.getAddress(),
-		        this.field.getID(), isForced);
+		        this.field.getId(), isForced);
 		callback = new TestCallback();
 		
 		sizeBefore = this.transObject.size();
@@ -453,8 +453,8 @@ public class TransactionObjectTest {
 		assertEquals(sizeBefore + 1, this.transObject.size());
 		
 		// check whether the field was removed correctly
-		assertFalse(this.transObject.hasField(this.field.getID()));
-		assertTrue(this.object.hasField(this.field.getID()));
+		assertFalse(this.transObject.hasField(this.field.getId()));
+		assertTrue(this.object.hasField(this.field.getId()));
 	}
 	
 	@Test
@@ -509,7 +509,7 @@ public class TransactionObjectTest {
 			
 			// value was set, remove it again or the following case won't test
 			// what it's supposed to test
-			this.transObject.getField(this.field.getID()).setValue(null);
+			this.transObject.getField(this.field.getId()).setValue(null);
 		} else {
 			assertEquals(XCommand.FAILED, result);
 			assertEquals(sizeBefore, this.transObject.size());
@@ -535,7 +535,7 @@ public class TransactionObjectTest {
 		
 		// check whether the simulated field was changed and the real field
 		// wasn't
-		XWritableField changedField = this.transObject.getField(this.field.getID());
+		XWritableField changedField = this.transObject.getField(this.field.getId());
 		
 		assertEquals(value, changedField.getValue());
 		assertFalse(value.equals(this.field.getValue()));
@@ -559,7 +559,7 @@ public class TransactionObjectTest {
 			
 			// check whether the simulated field was changed and the real field
 			// wasn't
-			changedField = this.transObject.getField(this.field.getID());
+			changedField = this.transObject.getField(this.field.getId());
 			
 			assertEquals(value2, changedField.getValue());
 			assertFalse(value2.equals(this.field.getValue()));
@@ -625,7 +625,7 @@ public class TransactionObjectTest {
 			
 			// check whether the simulated field was changed and the real field
 			// wasn't
-			XWritableField changedField = this.transObject.getField(this.field.getID());
+			XWritableField changedField = this.transObject.getField(this.field.getId());
 			
 			assertEquals(value, changedField.getValue());
 			assertFalse(value.equals(this.fieldWithValue.getValue()));
@@ -638,7 +638,7 @@ public class TransactionObjectTest {
 			assertNull(callback.revision);
 			
 			// check that nothing was changed
-			XWritableField simulatedField = this.transObject.getField(this.field.getID());
+			XWritableField simulatedField = this.transObject.getField(this.field.getId());
 			assertNull(simulatedField.getValue());
 			assertNull(this.field.getValue());
 		}
@@ -662,7 +662,7 @@ public class TransactionObjectTest {
 			
 			// check whether the simulated field was changed and the real field
 			// wasn't
-			XWritableField changedField = this.transObject.getField(this.fieldWithValue.getID());
+			XWritableField changedField = this.transObject.getField(this.fieldWithValue.getId());
 			
 			assertEquals(value, changedField.getValue());
 			assertFalse(value.equals(this.fieldWithValue.getValue()));
@@ -674,7 +674,7 @@ public class TransactionObjectTest {
 			assertNull(callback.revision);
 			
 			// check that nothing was changed
-			XWritableField changedField = this.transObject.getField(this.fieldWithValue.getID());
+			XWritableField changedField = this.transObject.getField(this.fieldWithValue.getId());
 			
 			assertFalse(value.equals(changedField.getValue()));
 			assertFalse(value.equals(this.fieldWithValue.getValue()));
@@ -698,7 +698,7 @@ public class TransactionObjectTest {
 		
 		// check whether the simulated field was changed and the real field
 		// wasn't
-		XWritableField changedField = this.transObject.getField(this.fieldWithValue.getID());
+		XWritableField changedField = this.transObject.getField(this.fieldWithValue.getId());
 		
 		assertEquals(value2, changedField.getValue());
 		assertFalse(value2.equals(this.fieldWithValue.getValue()));
@@ -778,7 +778,7 @@ public class TransactionObjectTest {
 			
 			// check whether the simulated field was changed and the real field
 			// wasn't
-			XWritableField changedField = this.transObject.getField(this.fieldWithValue.getID());
+			XWritableField changedField = this.transObject.getField(this.fieldWithValue.getId());
 			
 			assertNull(changedField.getValue());
 			assertNotNull(this.fieldWithValue.getValue());
@@ -811,7 +811,7 @@ public class TransactionObjectTest {
 		
 		// check whether the simulated field was changed and the real field
 		// wasn't
-		XWritableField changedField = this.transObject.getField(this.fieldWithValue.getID());
+		XWritableField changedField = this.transObject.getField(this.fieldWithValue.getId());
 		
 		assertNull(changedField.getValue());
 		assertNotNull(this.fieldWithValue.getValue());
@@ -846,7 +846,7 @@ public class TransactionObjectTest {
 		
 		// remove some fields
 		builder.removeField(this.object.getAddress(), this.field.getRevisionNumber(),
-		        this.field.getID());
+		        this.field.getId());
 		
 		// add some values
 		XValue value = X.getValueFactory().createStringValue("testValue");
@@ -901,7 +901,7 @@ public class TransactionObjectTest {
 		assertTrue(this.object.hasField(fieldId1));
 		assertTrue(this.object.hasField(fieldId2));
 		
-		assertFalse(this.object.hasField(this.field.getID()));
+		assertFalse(this.object.hasField(this.field.getId()));
 		assertFalse(this.object.hasField(temp));
 		
 		XField field1 = this.object.getField(fieldId1);
@@ -943,7 +943,7 @@ public class TransactionObjectTest {
 			switch(changeType) {
 			case ADD:
 				// try to add a field which already exists
-				builder.addField(this.object.getAddress(), XCommand.SAFE, this.field.getID());
+				builder.addField(this.object.getAddress(), XCommand.SAFE, this.field.getId());
 				break;
 			
 			case REMOVE:
@@ -1052,8 +1052,8 @@ public class TransactionObjectTest {
 		assertEquals(this.object.isEmpty(), this.transObject.isEmpty());
 		
 		// remove all fields from transObject
-		assertTrue(this.transObject.removeField(this.field.getID()));
-		assertTrue(this.transObject.removeField(this.fieldWithValue.getID()));
+		assertTrue(this.transObject.removeField(this.field.getId()));
+		assertTrue(this.transObject.removeField(this.fieldWithValue.getId()));
 		
 		assertTrue(this.transObject.isEmpty());
 		assertFalse(this.object.isEmpty());
@@ -1073,8 +1073,8 @@ public class TransactionObjectTest {
 	// Tests for hasField()
 	@Test
 	public void testHasField() {
-		assertTrue(this.transObject.hasField(this.field.getID()));
-		assertTrue(this.transObject.hasField(this.fieldWithValue.getID()));
+		assertTrue(this.transObject.hasField(this.field.getId()));
+		assertTrue(this.transObject.hasField(this.fieldWithValue.getId()));
 		
 		// add a field
 		XID newFieldId = XX.createUniqueId();
@@ -1132,12 +1132,12 @@ public class TransactionObjectTest {
 		assertFalse(this.transObject.removeField(fieldId));
 		
 		// try to remove an existing field
-		boolean removed = this.transObject.removeField(this.field.getID());
+		boolean removed = this.transObject.removeField(this.field.getId());
 		assertTrue(removed);
-		assertFalse(this.transObject.hasField(this.field.getID()));
+		assertFalse(this.transObject.hasField(this.field.getId()));
 		
 		// make sure it wasn't removed from the underlying object
-		assertTrue(this.object.hasField(this.field.getID()));
+		assertTrue(this.object.hasField(this.field.getId()));
 		
 		// add a field an remove it again
 		this.transObject.createField(fieldId);
@@ -1152,7 +1152,7 @@ public class TransactionObjectTest {
 	@Test
 	public void testGetField() {
 		// try to get an already existing field
-		XWritableField field2 = this.transObject.getField(this.field.getID());
+		XWritableField field2 = this.transObject.getField(this.field.getId());
 		
 		assertEquals(this.field, field2);
 		
@@ -1167,7 +1167,7 @@ public class TransactionObjectTest {
 		
 		this.transObject.executeCommand(command);
 		
-		field2 = this.transObject.getField(this.field.getID());
+		field2 = this.transObject.getField(this.field.getId());
 		
 		// revision numbers are not increased/managed by the TransactionObject,
 		// therefore this should succeed
@@ -1180,13 +1180,13 @@ public class TransactionObjectTest {
 
 	@Test
 	public void testInObjectTransactionField() {
-		XWritableField temp = this.transObject.getField(this.field.getID());
+		XWritableField temp = this.transObject.getField(this.field.getId());
 		assertTrue(temp instanceof InObjectTransactionField);
 		
 		InObjectTransactionField transField = (InObjectTransactionField)temp;
 		
 		assertEquals(this.field.getRevisionNumber(), transField.getRevisionNumber());
-		assertEquals(this.field.getID(), transField.getID());
+		assertEquals(this.field.getId(), transField.getId());
 		assertEquals(this.field.isEmpty(), transField.isEmpty());
 		assertEquals(this.field.getAddress(), transField.getAddress());
 		assertEquals(this.field.getValue(), transField.getValue());
@@ -1198,7 +1198,7 @@ public class TransactionObjectTest {
 		XValue value = X.getValueFactory().createStringValue("42");
 		XValue value2 = X.getValueFactory().createStringValue("test");
 		
-		XWritableField temp = this.transObject.getField(this.field.getID());
+		XWritableField temp = this.transObject.getField(this.field.getId());
 		assertTrue(temp instanceof InObjectTransactionField);
 		
 		InObjectTransactionField transField = (InObjectTransactionField)temp;
@@ -1223,7 +1223,7 @@ public class TransactionObjectTest {
 	
 	@Test
 	public void testInObjectTransactionFieldSetValueIncorrectUsage() {
-		XWritableField temp = this.transObject.getField(this.field.getID());
+		XWritableField temp = this.transObject.getField(this.field.getId());
 		assertTrue(temp instanceof InObjectTransactionField);
 		
 		InObjectTransactionField transField = (InObjectTransactionField)temp;

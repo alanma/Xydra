@@ -34,6 +34,7 @@ abstract public class AbstractSecureStoreWriteMethodsTest extends AbstractStoreW
 	
 	@Override
 	protected XID getCorrectUser() {
+		assert this.store != null;
 		if(this.authenticationDb == null) {
 			this.authenticationDb = this.store.getXydraStoreAdmin().getAccessControlManager()
 			        .getAuthenticationDatabase();

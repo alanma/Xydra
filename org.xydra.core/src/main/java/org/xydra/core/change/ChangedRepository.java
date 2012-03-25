@@ -58,7 +58,7 @@ public class ChangedRepository extends AbstractDelegatingWritableRepository {
 			return diffModel;
 		} else {
 			log.debug("model '" + modelId + "' did not exist yet");
-			ChangedModel diffModel = new ChangedModel(new SimpleModel(XX.toAddress(getID(),
+			ChangedModel diffModel = new ChangedModel(new SimpleModel(XX.toAddress(getId(),
 			        modelId, null, null)));
 			this.added.put(modelId, diffModel);
 			this.removed.remove(modelId);
@@ -160,7 +160,7 @@ public class ChangedRepository extends AbstractDelegatingWritableRepository {
 		}
 		for(ChangedModel model : this.potentiallyChanged.values()) {
 			if(model.hasChanges()) {
-				buf.append("=== CHANGED " + model.getID() + " === <br/>\n");
+				buf.append("=== CHANGED " + model.getId() + " === <br/>\n");
 				XTransactionBuilder xtb = new XTransactionBuilder(model.getAddress());
 				xtb.applyChanges(model);
 				XTransaction txn = xtb.build();

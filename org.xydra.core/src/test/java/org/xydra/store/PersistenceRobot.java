@@ -36,17 +36,20 @@ import org.xydra.store.rmof.impl.delegate.WritableRepositoryOnPersistence;
  * parts of the MOF-tree disappear from time to time on the remote server.
  * 
  * The technique to spot the error is this: Random commands are created and
- * executed remotely. If they succed, they are also executed locally. Thus local
- * and remote should be in the same tree-state (version numbers might differ).
+ * executed remotely. If they succeed, they are also executed locally. Thus
+ * local and remote should be in the same tree-state (version numbers might
+ * differ).
  * 
  * If this happens, the client-side robot shows a dump of local and remote
- * snapshot and exists the vm.
+ * snapshot and exists the JVM.
  * 
  * @author xamde
  */
 public class PersistenceRobot extends Thread {
 	
 	private static final Logger log = LoggerFactory.getLogger(PersistenceRobot.class);
+	
+	public static final boolean INCLUDE_TENTATIVE_STATE = true;
 	
 	private static final String MODELPREFIX = "a7";
 	
@@ -121,7 +124,8 @@ public class PersistenceRobot extends Thread {
 		// initially load all models to local repo and create if required
 		XWritableModel[] snapshots = new XWritableModel[this.modelAddresses.size()];
 		for(int i = 0; i < this.modelAddresses.size(); i++) {
-			snapshots[i] = this.remote.getModelSnapshot(this.modelAddresses.get(i));
+			snapshots[i] = this.remote.getModelSnapshot(new GetWithAddressRequest(
+			        this.modelAddresses.get(i), INCLUDE_TENTATIVE_STATE));
 			XID modelId = this.modelAddresses.get(i).getModel();
 			if(snapshots[i] == null) {
 				XRepositoryCommand cmd = X.getCommandFactory().createAddModelCommand(
@@ -193,8 +197,10 @@ public class PersistenceRobot extends Thread {
 	
 	private void compareSnapshotsFor(XAddress target) {
 		// get remote snapshot to compare state
-		XWritableModel remoteModel = this.remote.getModelSnapshot(XX.resolveModel(target));
-		XWritableModel localModel = this.local.getModelSnapshot(XX.resolveModel(target));
+		GetWithAddressRequest request = new GetWithAddressRequest(XX.resolveModel(target),
+		        INCLUDE_TENTATIVE_STATE);
+		XWritableModel remoteModel = this.remote.getModelSnapshot(request);
+		XWritableModel localModel = this.local.getModelSnapshot(request);
 		boolean compare;
 		if(ONLY_ADD) {
 			compare = XCompareUtils.containsTree(remoteModel, localModel);
@@ -278,7 +284,8 @@ public class PersistenceRobot extends Thread {
 	
 	private void tryToLoadObject(XAddress target) {
 		XAddress objectAddress = XX.resolveObject(target);
-		XWritableObject objectSnapshot = this.remote.getObjectSnapshot(objectAddress);
+		XWritableObject objectSnapshot = this.remote.getObjectSnapshot(new GetWithAddressRequest(
+		        objectAddress, INCLUDE_TENTATIVE_STATE));
 		if(objectSnapshot != null) {
 			// put in local repo
 			XWritableModel localModel = this.localRepo.getModel(target.getModel());
@@ -291,7 +298,8 @@ public class PersistenceRobot extends Thread {
 	}
 	
 	private void tryToLoadModel(XAddress target) {
-		XWritableModel snapshot = this.remote.getModelSnapshot(target);
+		XWritableModel snapshot = this.remote.getModelSnapshot(new GetWithAddressRequest(target,
+		        INCLUDE_TENTATIVE_STATE));
 		if(snapshot != null) {
 			// put in local repo
 			XWritableModel localModel = this.localRepo.getModel(target.getModel());

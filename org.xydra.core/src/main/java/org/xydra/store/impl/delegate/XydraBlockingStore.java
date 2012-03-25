@@ -23,6 +23,7 @@ import org.xydra.store.BatchedResult;
 import org.xydra.store.Callback;
 import org.xydra.store.ConnectionException;
 import org.xydra.store.GetEventsRequest;
+import org.xydra.store.GetWithAddressRequest;
 import org.xydra.store.InternalStoreException;
 import org.xydra.store.ModelRevision;
 import org.xydra.store.QuotaException;
@@ -166,15 +167,16 @@ public interface XydraBlockingStore {
 	 * 
 	 *         Even after a the callback's {@link Callback#onSuccess(Object)}
 	 *         method has been called, the change may not actually be returned
-	 *         yet by {@link #getModelSnapshot(XID, String, XAddress)},
+	 *         yet by
+	 *         {@link #getModelSnapshot(XID, String, GetWithAddressRequest)},
 	 *         {@link #getModelIds(XID, String)},
-	 *         {@link #getModelRevision(XID, String, XAddress)} and
-	 *         {@link #getObjectSnapshot(XID, String, XAddress)} yet. The change
-	 *         will however eventually be returned by those methods, and will
-	 *         stay persistent once it does. Also, no changes with greater
-	 *         revision numbers will become visible before this one, but their
-	 *         callbacks' {@link Callback#onSuccess(Object)} method might be
-	 *         called before this one.
+	 *         {@link #getModelRevision(XID, String, GetWithAddressRequest)} and
+	 *         {@link #getObjectSnapshot(XID, String, GetWithAddressRequest)}
+	 *         yet. The change will however eventually be returned by those
+	 *         methods, and will stay persistent once it does. Also, no changes
+	 *         with greater revision numbers will become visible before this
+	 *         one, but their callbacks' {@link Callback#onSuccess(Object)}
+	 *         method might be called before this one.
 	 * @throws IllegalArgumentException if one of the given parameters is null
 	 *             (except passwordHash, which may be null).
 	 * @throws QuotaException to prevent brute-force attacks when too many
@@ -313,9 +315,10 @@ public interface XydraBlockingStore {
 	 * @throws RequestException if the supplied arguments are considered
 	 *             syntactically or semantically invalid
 	 */
-	ModelRevision getModelRevision(XID actorId, String passwordHash, XAddress modelAddress)
-	        throws IllegalArgumentException, QuotaException, AuthorisationException,
-	        TimeoutException, ConnectionException, RequestException, InternalStoreException;
+	ModelRevision getModelRevision(XID actorId, String passwordHash,
+	        GetWithAddressRequest modelAddress) throws IllegalArgumentException, QuotaException,
+	        AuthorisationException, TimeoutException, ConnectionException, RequestException,
+	        InternalStoreException;
 	
 	/**
 	 * Read current state.
@@ -337,7 +340,7 @@ public interface XydraBlockingStore {
 	 *            with "Xydra" to avoid transmitting the same string over the
 	 *            network if the user uses the same password for multiple
 	 *            services. If null, all access is granted.
-	 * @param modelAddress the {@link XAddress} for which model to get a
+	 * @param modelAddressRequest the {@link XAddress} for which model to get a
 	 *            snapshot. The {@link XAddress} must address an {@link XModel}
 	 *            (repositoryId/modelId/-/-).
 	 * 
@@ -369,7 +372,7 @@ public interface XydraBlockingStore {
 	 *             Implementation note: Implementation may choose to supply a
 	 *             lazy-loading stub only.
 	 */
-	XReadableModel getModelSnapshot(XID actorId, String passwordHash, XAddress modelAddress)
+	XReadableModel getModelSnapshot(XID actorId, String passwordHash, GetWithAddressRequest modelAddressRequest)
 	        throws IllegalArgumentException, QuotaException, AuthorisationException,
 	        TimeoutException, ConnectionException, RequestException, InternalStoreException;
 	
@@ -384,7 +387,7 @@ public interface XydraBlockingStore {
 	 *            with "Xydra" to avoid transmitting the same string over the
 	 *            network if the user uses the same password for multiple
 	 *            services. If null, all access is granted.
-	 * @param objectAddress an array of {@link XAddress} for which objects to
+	 * @param objectAddressRequest an array of {@link XAddress} for which objects to
 	 *            get snapshots. Each {@link XAddress} must address an
 	 *            {@link XObject} (repositoryId/modelId/objectId/-).
 	 * @return a {@link XReadableObject}. A null value signals that the
@@ -412,7 +415,7 @@ public interface XydraBlockingStore {
 	 *             Implementation note: Implementation may chose to supply a
 	 *             lazy-loading stub only.
 	 */
-	XReadableObject getObjectSnapshot(XID actorId, String passwordHash, XAddress objectAddress)
+	XReadableObject getObjectSnapshot(XID actorId, String passwordHash, GetWithAddressRequest objectAddressRequest)
 	        throws IllegalArgumentException, QuotaException, AuthorisationException,
 	        TimeoutException, ConnectionException, RequestException, InternalStoreException;
 	

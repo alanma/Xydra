@@ -61,7 +61,7 @@ public class InModelTransactionField extends AbstractEntity implements XWritable
 	}
 	
 	@Override
-	public XID getID() {
+	public XID getId() {
 		isValid();
 		
 		return this.address.getField();

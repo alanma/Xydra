@@ -208,11 +208,11 @@ public interface XydraStore {
 	 *            Even after a the callback's {@link Callback#onSuccess(Object)}
 	 *            method has been called, the change may not actually be
 	 *            returned yet by
-	 *            {@link #getModelSnapshots(XID, String, XAddress[], Callback)},
-	 *            {@link #getModelIds(XID, String, Callback)},
-	 *            {@link #getModelRevisions(XID, String, XAddress[], Callback)}
+	 *            {@link #getModelSnapshots(XID, String, GetWithAddressRequest[], Callback)}
+	 *            , {@link #getModelIds(XID, String, Callback)},
+	 *            {@link #getModelRevisions(XID, String, GetWithAddressRequest[], Callback)}
 	 *            and
-	 *            {@link #getObjectSnapshots(XID, String, XAddress[], Callback)}
+	 *            {@link #getObjectSnapshots(XID, String, GetWithAddressRequest[], Callback)}
 	 *            yet. The change will however eventually be returned by those
 	 *            methods, and will stay persistent once it does. Also, no
 	 *            changes with greater revision numbers will become visible
@@ -370,9 +370,10 @@ public interface XydraStore {
 	 *            with "Xydra" to avoid transmitting the same string over the
 	 *            network if the user uses the same password for multiple
 	 *            services.
-	 * @param modelAddresses an array of {@link XAddress} for which the latest
-	 *            model revision should be retrieved. Each {@link XAddress} must
-	 *            address an {@link XModel} (repositoryId/modelId/-/-).
+	 * @param modelRevisionRequests an array of {@link GetWithAddressRequest}
+	 *            for which the latest model revision should be retrieved. Each
+	 *            {@link XAddress} must address an {@link XModel}
+	 *            (repositoryId/modelId/-/-).
 	 * @param callback Asynchronous callback to signal success or failure. On
 	 *            success, an array of Pairs is returned. It is in the same
 	 *            order as in the request array (modelAddresses).
@@ -395,7 +396,8 @@ public interface XydraStore {
 	 *            revision numbers.
 	 * @throws IllegalArgumentException if one of the given parameters is null.
 	 */
-	void getModelRevisions(XID actorId, String passwordHash, XAddress[] modelAddresses,
+	void getModelRevisions(XID actorId, String passwordHash,
+	        GetWithAddressRequest[] modelRevisionRequests,
 	        Callback<BatchedResult<ModelRevision>[]> callback) throws IllegalArgumentException;
 	
 	/**
@@ -429,8 +431,8 @@ public interface XydraStore {
 	 *            with "Xydra" to avoid transmitting the same string over the
 	 *            network if the user uses the same password for multiple
 	 *            services.
-	 * @param modelAddresses an array of {@link XAddress} for which models to
-	 *            get snapshots. Each {@link XAddress} must address an
+	 * @param modelAddressRequests an array of {@link XAddress} for which models
+	 *            to get snapshots. Each {@link XAddress} must address an
 	 *            {@link XModel} (repositoryId/modelId/-/-).
 	 * 
 	 *            TODO How can a client request a specific version of a
@@ -447,7 +449,8 @@ public interface XydraStore {
 	 *             Implementation note: Implementation may choose to supply a
 	 *             lazy-loading stub only.
 	 */
-	void getModelSnapshots(XID actorId, String passwordHash, XAddress[] modelAddresses,
+	void getModelSnapshots(XID actorId, String passwordHash,
+	        GetWithAddressRequest[] modelAddressRequests,
 	        Callback<BatchedResult<XReadableModel>[]> callback) throws IllegalArgumentException;
 	
 	/**
@@ -477,9 +480,9 @@ public interface XydraStore {
 	 *            with "Xydra" to avoid transmitting the same string over the
 	 *            network if the user uses the same password for multiple
 	 *            services.
-	 * @param objectAddresses an array of {@link XAddress} for which objects to
-	 *            get snapshots. Each {@link XAddress} must address an
-	 *            {@link XObject} (repositoryId/modelId/objectId/-).
+	 * @param objectAddressRequests an array of {@link GetWithAddressRequest}
+	 *            for which objects to get snapshots. Each {@link XAddress} must
+	 *            address an {@link XObject} (repositoryId/modelId/objectId/-).
 	 * @param callback Asynchronous callback to signal success or failure. On
 	 *            success, an array of {@link XReadableObject} is returned, in
 	 *            the same order of the objectAddresses given in the request. A
@@ -491,7 +494,8 @@ public interface XydraStore {
 	 *             Implementation note: Implementation may chose to supply a
 	 *             lazy-loading stub only.
 	 */
-	void getObjectSnapshots(XID actorId, String passwordHash, XAddress[] objectAddresses,
+	void getObjectSnapshots(XID actorId, String passwordHash,
+	        GetWithAddressRequest[] objectAddressRequests,
 	        Callback<BatchedResult<XReadableObject>[]> callback) throws IllegalArgumentException;
 	
 	// ------------------ documented until here
