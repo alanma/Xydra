@@ -40,6 +40,7 @@ import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.GetEventsRequest;
+import org.xydra.store.GetWithAddressRequest;
 import org.xydra.store.ModelRevision;
 import org.xydra.store.RequestException;
 import org.xydra.store.StoreException;
@@ -450,10 +451,10 @@ public class XydraStoreResource {
 		XID actorId = getActorId(actorIdStr);
 		
 		StoreException[] ex = new StoreException[addresses.length];
-		XAddress[] modelAddresses = new XAddress[addresses.length];
+		GetWithAddressRequest[] modelAddressRequests = new GetWithAddressRequest[addresses.length];
 		for(int i = 0; i < addresses.length; i++) {
 			try {
-				modelAddresses[i] = XX.toAddress(addresses[i]);
+				modelAddressRequests[i] = new GetWithAddressRequest(XX.toAddress(addresses[i]));
 			} catch(Exception e) {
 				ex[i] = new RequestException("invalid address: " + addresses[i]);
 				continue;
@@ -461,7 +462,7 @@ public class XydraStoreResource {
 		}
 		
 		WaitingCallback<BatchedResult<ModelRevision>[]> callback = new WaitingCallback<BatchedResult<ModelRevision>[]>();
-		store.getModelRevisions(actorId, passwordHash, modelAddresses, callback);
+		store.getModelRevisions(actorId, passwordHash, modelAddressRequests, callback);
 		
 		if(callback.getException() != null) {
 			throw callback.getException();
@@ -513,29 +514,36 @@ public class XydraStoreResource {
 			
 		}
 		
-		XAddress[] ma = modelAddrs.toArray(new XAddress[modelAddrs.size()]);
-		XAddress[] oa = objectAddrs.toArray(new XAddress[objectAddrs.size()]);
+		GetWithAddressRequest[] mreq = new GetWithAddressRequest[modelAddrs.size()];
+		for(int i = 0; i < mreq.length; i++) {
+			mreq[i] = new GetWithAddressRequest(modelAddrs.get(i));
+		}
+		
+		GetWithAddressRequest[] oreq = new GetWithAddressRequest[objectAddrs.size()];
+		for(int i = 0; i < oreq.length; i++) {
+			oreq[i] = new GetWithAddressRequest(objectAddrs.get(i));
+		}
 		
 		WaitingCallback<BatchedResult<XReadableModel>[]> mc = new WaitingCallback<BatchedResult<XReadableModel>[]>();
-		store.getModelSnapshots(actorId, passwordHash, ma, mc);
+		store.getModelSnapshots(actorId, passwordHash, mreq, mc);
 		if(mc.getException() != null) {
 			throw mc.getException();
 		}
-		assert mc.getResult() != null && mc.getResult().length == ma.length;
+		assert mc.getResult() != null && mc.getResult().length == mreq.length;
 		
 		WaitingCallback<BatchedResult<XReadableObject>[]> oc = new WaitingCallback<BatchedResult<XReadableObject>[]>();
-		store.getObjectSnapshots(actorId, passwordHash, oa, oc);
+		store.getObjectSnapshots(actorId, passwordHash, oreq, oc);
 		if(oc.getException() != null) {
 			throw oc.getException();
 		}
-		assert oc.getResult() != null && oc.getResult().length == oa.length;
+		assert oc.getResult() != null && oc.getResult().length == oreq.length;
 		
 		XydraOut out = startOutput(context, HttpServletResponse.SC_OK);
 		
-		BatchedResult<XReadableModel>[] mr = mc.getResult();
-		BatchedResult<XReadableObject>[] or = oc.getResult();
+		BatchedResult<XReadableModel>[] mres = mc.getResult();
+		BatchedResult<XReadableObject>[] ores = oc.getResult();
 		
-		SerializedStore.serializeSnapshots(ex, isModel, mr, or, out);
+		SerializedStore.serializeSnapshots(ex, isModel, mres, ores, out);
 		
 		out.flush();
 		
