@@ -153,7 +153,7 @@ public abstract class AbstractXydraResource {
 	public static void writeModel(Writer w, XWritableModel model) throws IOException {
 		assert w != null;
 		assert model != null;
-		w.write("<h3>Model " + model.getID() + " [" + model.getRevisionNumber() + "]</h3>");
+		w.write("<h3>Model " + model.getId() + " [" + model.getRevisionNumber() + "]</h3>");
 		w.flush();
 		for(XID objectId : model) {
 			writeObject(w, model.getObject(objectId));
@@ -172,7 +172,7 @@ public abstract class AbstractXydraResource {
 			return;
 		}
 		// else
-		w.write("<p>Object " + object.getID() + " [" + object.getRevisionNumber() + "]</p>");
+		w.write("<p>Object " + object.getId() + " [" + object.getRevisionNumber() + "]</p>");
 		w.write("<ol>");
 		for(XID fieldId : object) {
 			w.write("<li>");
@@ -184,7 +184,7 @@ public abstract class AbstractXydraResource {
 	
 	public static void writeField(Writer w, XWritableField field) throws IOException {
 		XValue v = field.getValue();
-		w.write("<span>Field " + field.getID() + " [" + field.getRevisionNumber() + "] = " + v);
+		w.write("<span>Field " + field.getId() + " [" + field.getRevisionNumber() + "] = " + v);
 		// linking
 		w.write(" " + HtmlUtils.link("/admin/xydra/model?model=" + v, "model ID"));
 		w.write(" "

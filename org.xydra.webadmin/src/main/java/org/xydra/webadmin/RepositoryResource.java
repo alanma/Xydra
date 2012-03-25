@@ -36,6 +36,7 @@ import org.xydra.restless.RestlessParameter;
 import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.restless.utils.SharedHtmlUtils.HeadLinkStyle;
 import org.xydra.restless.utils.SharedHtmlUtils.METHOD;
+import org.xydra.store.GetWithAddressRequest;
 import org.xydra.store.XydraRuntime;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.gae.GaeTestfixer;
@@ -356,7 +357,7 @@ public class RepositoryResource {
 		int modelsWithChanges = 0;
 		int restored = 0;
 		while((model = ModelResource.readZippedModel(zis)) != null) {
-			c.stopAndStart("parsed-" + model.getID());
+			c.stopAndStart("parsed-" + model.getId());
 			w.write("... parsed model '" + model.getAddress() + "' [" + model.getRevisionNumber()
 			        + "] ...</br>");
 			w.flush();
@@ -368,7 +369,7 @@ public class RepositoryResource {
 				result = ModelResource.updateStateTo(repoId, model, false);
 			}
 			log.info("" + result);
-			c.stopAndStart("applied-" + model.getID());
+			c.stopAndStart("applied-" + model.getId());
 			modelExisted += result.modelExisted ? 1 : 0;
 			modelsWithChanges += result.changes ? 1 : 0;
 			restored++;
@@ -403,7 +404,8 @@ public class RepositoryResource {
 		ZipOutputStream zos = new ZipOutputStream(fos);
 		for(XID modelId : modelIdList) {
 			XAddress modelAddress = XX.resolveModel(p.getRepositoryId(), modelId);
-			XWritableModel model = p.getModelSnapshot(modelAddress);
+			XWritableModel model = p.getModelSnapshot(new GetWithAddressRequest(modelAddress,
+			        ModelResource.INCLUDE_TENTATIVE));
 			if(model == null) {
 				log.warn("Could not find model " + modelAddress);
 			} else {

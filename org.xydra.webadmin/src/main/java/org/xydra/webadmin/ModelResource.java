@@ -55,6 +55,7 @@ import org.xydra.restless.utils.ServletUtils;
 import org.xydra.restless.utils.SharedHtmlUtils.HeadLinkStyle;
 import org.xydra.restless.utils.SharedHtmlUtils.METHOD;
 import org.xydra.server.util.XydraHtmlUtils;
+import org.xydra.store.GetWithAddressRequest;
 import org.xydra.store.ModelRevision;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.gae.GaeTestfixer;
@@ -66,6 +67,7 @@ public class ModelResource {
 	
 	public static final Logger log = LoggerFactory.getLogger(ModelResource.class);
 	private static final String UTF8 = "UTF-8";
+	public static final boolean INCLUDE_TENTATIVE = true;
 	
 	public static enum MStyle {
 		html, htmlrev, htmlevents, link, xml, json, xmlhtml, /**
@@ -137,11 +139,13 @@ public class ModelResource {
 		
 		if(style == MStyle.xml || style == MStyle.xmlhtml || style == MStyle.json) {
 			XydraPersistence p = Utils.getPersistence(modelAddress.getRepository());
-			ModelRevision rev = p.getModelRevision(modelAddress);
+			ModelRevision rev = p.getModelRevision(new GetWithAddressRequest(modelAddress,
+			        INCLUDE_TENTATIVE));
 			log.debug(modelAddress + " rev=" + rev.revision() + " exists:" + rev.modelExists());
 			
 			if(rev.modelExists()) {
-				XWritableModel model = p.getModelSnapshot(modelAddress);
+				XWritableModel model = p.getModelSnapshot(new GetWithAddressRequest(modelAddress,
+				        INCLUDE_TENTATIVE));
 				if(download) {
 					String name = modelAddress.getRepository() + "-" + modelAddress.getModel()
 					        + "-rev" + model.getRevisionNumber();
@@ -220,19 +224,19 @@ public class ModelResource {
 		if(model == null) {
 			throw new RuntimeException("Could not read model from ZIS");
 		}
-		c.stopAndStart("parsed-" + model.getID());
-		if(model.getID().equals(XX.toId(modelIdStr))) {
+		c.stopAndStart("parsed-" + model.getId());
+		if(model.getId().equals(XX.toId(modelIdStr))) {
 			w.write("... parsed model '" + model.getAddress() + "' [" + model.getRevisionNumber()
 			        + "] ...</br>");
 			w.flush();
 			
 			SetStateResult result = ModelResource.updateStateTo(repoId, model, false);
 			log.info("" + result);
-			c.stopAndStart("applied-" + model.getID());
+			c.stopAndStart("applied-" + model.getId());
 			w.write("... applied to server repository " + result + ".</br>");
 		} else {
 			w.write("ModelID of this resource (" + modelIdStr
-			        + ") does not match the model ID in the file (" + model.getID() + ")");
+			        + ") does not match the model ID in the file (" + model.getId() + ")");
 		}
 		
 		w.write("Stats:" + c.getStats());
@@ -248,7 +252,7 @@ public class ModelResource {
 	
 	public static void writeToZipstreamDirectly(XWritableModel model, ZipOutputStream zos,
 	        MStyle style) throws IOException {
-		ZipEntry e = new ZipEntry(getStorageName(model.getID(), style));
+		ZipEntry e = new ZipEntry(getStorageName(model.getId(), style));
 		zos.putNextEntry(e);
 		OutputStreamWriter w = new OutputStreamWriter(zos, UTF8);
 		XydraSerializer serializer = null;
@@ -352,7 +356,8 @@ public class ModelResource {
 		
 		if(style == MStyle.htmlrev || style == MStyle.htmlevents) {
 			XydraPersistence p = Utils.getPersistence(modelAddress.getRepository());
-			ModelRevision rev = p.getModelRevision(modelAddress);
+			ModelRevision rev = p.getModelRevision(new GetWithAddressRequest(modelAddress,
+			        INCLUDE_TENTATIVE));
 			w.write("rev=" + rev.revision() + " exists:" + rev.modelExists() + "<br/>\n");
 			w.flush();
 			if(style == MStyle.htmlevents) {
@@ -397,9 +402,10 @@ public class ModelResource {
 		SetStateResult result = new SetStateResult();
 		
 		XID actor = XX.toId("ModelResource");
-		XAddress modelAddress = XX.resolveModel(repoId, model.getID());
+		XAddress modelAddress = XX.resolveModel(repoId, model.getId());
 		
-		ModelRevision modelRev = p.getModelRevision(modelAddress);
+		ModelRevision modelRev = p.getModelRevision(new GetWithAddressRequest(modelAddress,
+		        INCLUDE_TENTATIVE));
 		if(modelRev != null) {
 			if(!overwriteIfSameRevPresent && (model.getRevisionNumber() == modelRev.revision())) {
 				log.debug("Model already stored.");
@@ -410,7 +416,8 @@ public class ModelResource {
 			}
 		}
 		// else: overwrite
-		XReadableModel oldModel = p.getModelSnapshot(modelAddress);
+		XReadableModel oldModel = p.getModelSnapshot(new GetWithAddressRequest(modelAddress,
+		        INCLUDE_TENTATIVE));
 		XTransactionBuilder tb = new XTransactionBuilder(modelAddress);
 		
 		if(oldModel != null) {
@@ -418,7 +425,7 @@ public class ModelResource {
 		} else {
 			result.modelExisted = false;
 			XRepositoryCommand createModelCommand = MemoryRepositoryCommand.createAddCommand(
-			        XX.resolveRepository(repoId), XCommand.FORCED, model.getID());
+			        XX.resolveRepository(repoId), XCommand.FORCED, model.getId());
 			tb.addCommand(createModelCommand);
 			oldModel = new SimpleModel(modelAddress, 0);
 		}
@@ -453,7 +460,7 @@ public class ModelResource {
 		SetStateResult result = new SetStateResult();
 		
 		XID actor = XX.toId("ModelResource");
-		XID modelId = model.getID();
+		XID modelId = model.getId();
 		XAddress modelAddress = XX.resolveModel(repoId, modelId);
 		
 		WritableRepositoryOnPersistence repo = new WritableRepositoryOnPersistence(p, actor);

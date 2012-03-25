@@ -13,6 +13,7 @@ import org.xydra.log.LoggerFactory;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
 import org.xydra.server.util.XydraHtmlUtils;
+import org.xydra.store.GetWithAddressRequest;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.gae.GaeTestfixer;
 
@@ -25,10 +26,10 @@ public class ObjectResource {
 		
 		restless.addMethod(prefix + "/{repoId}/{modelId}/{objectId}/", "GET", ObjectResource.class,
 		        "index", true,
-
+		        
 		        new RestlessParameter("repoId"), new RestlessParameter("modelId"),
 		        new RestlessParameter("objectId"), new RestlessParameter("style", "default")
-
+		
 		);
 		
 	}
@@ -46,7 +47,8 @@ public class ObjectResource {
 	
 	public static void render(Writer w, XAddress objectAddress, String style) throws IOException {
 		XydraPersistence p = Utils.getPersistence(objectAddress.getRepository());
-		XWritableObject obj = p.getObjectSnapshot(objectAddress);
+		XWritableObject obj = p.getObjectSnapshot(new GetWithAddressRequest(objectAddress,
+		        ModelResource.INCLUDE_TENTATIVE));
 		if(obj != null) {
 			w.write("rev=" + obj.getRevisionNumber() + "<br/>\n");
 			w.write(XydraHtmlUtils.toHtml(obj));

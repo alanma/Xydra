@@ -62,7 +62,7 @@ public class CsvImportExportResource {
 		 * type
 		 */
 		WritableRepositoryOnPersistence repo = XydraAdminApp.getRepository(restless, repository);
-		res.setHeader("Content-disposition", "attachment;filename=" + repo.getID() + ".csv");
+		res.setHeader("Content-disposition", "attachment;filename=" + repo.getId() + ".csv");
 		
 		Writer w = res.getWriter();
 		CsvExport.toWriter(repo, w);

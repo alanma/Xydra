@@ -10,6 +10,7 @@ import org.xydra.base.rmof.XWritableModel;
 import org.xydra.gae.UniversalTaskQueue;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.store.GetWithAddressRequest;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.gae.GaeConstants;
 import org.xydra.store.impl.gae.UniCache;
@@ -148,7 +149,10 @@ public class SerialisationCache {
 			XydraPersistence persistence = Utils.getPersistence(repoId);
 			ModelEntry cached = MODELS.get(key, storeOpts);
 			if(cached != null
-			        && cached.getRev() == persistence.getModelRevision(modelAddress).revision()) {
+			        && cached.getRev() == persistence
+			                .getModelRevision(
+			                        new GetWithAddressRequest(modelAddress,
+			                                ModelResource.INCLUDE_TENTATIVE)).revision()) {
 				// cache is up-to-date
 			} else {
 				// re-compute
@@ -165,7 +169,9 @@ public class SerialisationCache {
 						
 						log.info("Computing serialisation of " + modelAddress);
 						XydraPersistence persistence = Utils.getPersistence(repoId);
-						XWritableModel model = persistence.getModelSnapshot(modelAddress);
+						XWritableModel model = persistence
+						        .getModelSnapshot(new GetWithAddressRequest(modelAddress,
+						                ModelResource.INCLUDE_TENTATIVE));
 						long rev = model.getRevisionNumber();
 						String ser = ModelResource.computeSerialisation(model, style);
 						if(ser == null) {
