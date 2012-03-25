@@ -209,7 +209,7 @@ import org.xydra.store.impl.memory.MemoryPersistence;
  * already modelled as unchangeable value objects. The read-only variants are
  * implemented several times FIXME too many times, it seems.
  * 
- * XBase{RMO} offers e.g. {@link XReadableModel#getID()},
+ * XBase{RMO} offers e.g. {@link XReadableModel#getId()},
  * {@link XReadableModel#iterator()} ,
  * {@link XReadableModel#getRevisionNumber()}. {@link XReadableField} has
  * {@link XReadableField#getValue()}.
