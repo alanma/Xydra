@@ -45,7 +45,7 @@ public class XModelEditor extends Composite implements XModelEventListener {
 		
 		this.outer.add(this.inner);
 		
-		this.inner.add(new Label(this.model.getID().toString()));
+		this.inner.add(new Label(this.model.getId().toString()));
 		this.inner.add(this.add);
 		
 		this.add.addClickHandler(new ClickHandler() {

@@ -118,7 +118,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		
 		add(this.inner);
 		
-		this.inner.add(new Label(field.getID().toString()));
+		this.inner.add(new Label(field.getId().toString()));
 		this.inner.add(new Label("="));
 		this.innerIndex = this.inner.getWidgetCount();
 		this.inner.add(this.contents);
@@ -146,7 +146,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 	
 	protected void delete() {
 		this.object.executeCommand(MemoryObjectCommand.createRemoveCommand(this.field.getAddress()
-		        .getParent(), this.field.getRevisionNumber(), this.field.getID()));
+		        .getParent(), this.field.getRevisionNumber(), this.field.getId()));
 	}
 	
 	protected void changeValue(XValue value) {

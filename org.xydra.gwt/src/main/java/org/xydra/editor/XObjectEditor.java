@@ -50,7 +50,7 @@ public class XObjectEditor extends VerticalPanel implements XObjectEventListener
 		
 		add(this.inner);
 		
-		this.inner.add(new Label(object.getID().toString()));
+		this.inner.add(new Label(object.getId().toString()));
 		this.inner.add(this.add);
 		
 		if(this.model != null) {
@@ -156,7 +156,7 @@ public class XObjectEditor extends VerticalPanel implements XObjectEventListener
 	protected void delete() {
 		assert this.model != null;
 		this.model.executeCommand(MemoryModelCommand.createRemoveCommand(this.object.getAddress()
-		        .getParent(), this.object.getRevisionNumber(), this.object.getID()), null);
+		        .getParent(), this.object.getRevisionNumber(), this.object.getId()), null);
 	}
 	
 }

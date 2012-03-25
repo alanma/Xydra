@@ -16,6 +16,7 @@ import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.Callback;
+import org.xydra.store.GetWithAddressRequest;
 import org.xydra.store.StoreException;
 import org.xydra.store.XydraStore;
 
@@ -60,12 +61,12 @@ public class XydraEditor implements EntryPoint {
 	};
 	
 	@Override
-    public void onModuleLoad() {
+	public void onModuleLoad() {
 		
 		// set uncaught exception handler
 		GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler() {
 			@Override
-            public void onUncaughtException(Throwable throwable) {
+			public void onUncaughtException(Throwable throwable) {
 				
 				Throwable t = throwable;
 				
@@ -89,7 +90,7 @@ public class XydraEditor implements EntryPoint {
 		// use a deferred command so that the handler catches init() exceptions
 		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 			@Override
-            public void execute() {
+			public void execute() {
 				init();
 			}
 		});
@@ -117,7 +118,7 @@ public class XydraEditor implements EntryPoint {
 		load.addClickHandler(new ClickHandler() {
 			
 			@Override
-            public void onClick(ClickEvent arg0) {
+			public void onClick(ClickEvent arg0) {
 				loadData(address.getText());
 			}
 			
@@ -179,7 +180,8 @@ public class XydraEditor implements EntryPoint {
 					}
 					
 				};
-				store.getObjectSnapshots(ACTOR, PSW, new XAddress[] { this.addr }, cb);
+				store.getObjectSnapshots(ACTOR, PSW,
+				        new GetWithAddressRequest[] { new GetWithAddressRequest(this.addr) }, cb);
 				
 			} else {
 				Callback<BatchedResult<XReadableModel>[]> cb = new Callback<BatchedResult<XReadableModel>[]>() {
@@ -203,7 +205,8 @@ public class XydraEditor implements EntryPoint {
 					}
 					
 				};
-				store.getModelSnapshots(ACTOR, PSW, new XAddress[] { this.addr }, cb);
+				store.getModelSnapshots(ACTOR, PSW,
+				        new GetWithAddressRequest[] { new GetWithAddressRequest(this.addr) }, cb);
 			}
 			
 		} catch(Exception e) {
