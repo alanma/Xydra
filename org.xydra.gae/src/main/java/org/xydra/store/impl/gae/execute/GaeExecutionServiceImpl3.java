@@ -85,6 +85,10 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 	}
 	
 	@Override
+	/*
+	 * Requires a fresh revision number to find the right base snapshot from
+	 * which to work on
+	 */
 	public long executeCommand(XCommand command, XID actorId) {
 		/**
 		 * InstanceRevisionManager should have been updated before. This is
@@ -391,7 +395,7 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 			/*
 			 * Since we have not changed the status to EXEUTING, no thread will
 			 * be able to roll this change forward and we might as well clean it
-			 * /up to prevent unnecessary waits.
+			 * up to prevent unnecessary waits.
 			 */
 			this.changes.commit(change, Status.FailedTimeout);
 			throw vte;

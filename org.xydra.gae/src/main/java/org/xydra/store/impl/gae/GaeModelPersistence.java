@@ -41,8 +41,6 @@ public class GaeModelPersistence {
 	private final IGaeExecutionService executionService;
 	private final InstanceRevisionManager instanceRevisionManager;
 	
-	private boolean instanceModelRevisionInitialised = false;
-	
 	public GaeModelPersistence(XAddress modelAddress) {
 		this.instanceRevisionManager = new InstanceRevisionManager(modelAddress);
 		this.modelAddress = modelAddress;
@@ -54,31 +52,29 @@ public class GaeModelPersistence {
 	}
 	
 	public long executeCommand(XCommand command, XID actorId) {
-		assertInstanceRevisionNumberHasBeenInitialized();
+		// absolutely required
+		calculateModelRevAndCacheInInstance(false);
 		return this.executionService.executeCommand(command, actorId);
 	}
 	
 	public List<XEvent> getEventsBetween(XAddress address, long beginRevision, long endRevision) {
-		assertInstanceRevisionNumberHasBeenInitialized();
+		calculateModelRevAndCacheInInstance(true);
 		return this.changesService.getEventsBetween(address, beginRevision, endRevision);
 	}
 	
-	private void assertInstanceRevisionNumberHasBeenInitialized() {
-		if(!this.instanceModelRevisionInitialised) {
-			GaeModelRevision gaeModelRev = this.changesService.calculateCurrentModelRevision();
-			if(gaeModelRev.getModelRevision() == null) {
-				gaeModelRev = new GaeModelRevision(gaeModelRev.getLastSilentCommitted(),
-				        ModelRevision.MODEL_DOES_NOT_EXIST_YET);
-			}
-			this.instanceRevisionManager.getInstanceRevisionInfo()
-			        .setCurrentGaeModelRevIfRevisionIsHigher(gaeModelRev);
-			this.instanceModelRevisionInitialised = true;
+	private void calculateModelRevAndCacheInInstance(boolean includeTentative) {
+		GaeModelRevision gaeModelRev = this.changesService
+		        .calculateCurrentModelRevision(includeTentative);
+		if(gaeModelRev.getModelRevision() == null) {
+			gaeModelRev = new GaeModelRevision(gaeModelRev.getLastSilentCommitted(),
+			        ModelRevision.MODEL_DOES_NOT_EXIST_YET);
 		}
-		assert this.instanceModelRevisionInitialised;
+		this.instanceRevisionManager.getInstanceRevisionInfo()
+		        .setCurrentGaeModelRevIfRevisionIsHigher(gaeModelRev);
 	}
 	
-	synchronized public XWritableModel getSnapshot() {
-		assertInstanceRevisionNumberHasBeenInitialized();
+	synchronized public XWritableModel getSnapshot(boolean includeTentative) {
+		calculateModelRevAndCacheInInstance(false);
 		ModelRevision currentRevision = this.instanceRevisionManager.getInstanceRevisionInfo()
 		        .getGaeModelRevision().getModelRevision();
 		if(!currentRevision.modelExists()) {
@@ -90,8 +86,8 @@ public class GaeModelPersistence {
 		return snapshot;
 	}
 	
-	public XWritableObject getObjectSnapshot(XID objectId) {
-		assertInstanceRevisionNumberHasBeenInitialized();
+	public XWritableObject getObjectSnapshot(XID objectId, boolean includeTentative) {
+		calculateModelRevAndCacheInInstance(false);
 		ModelRevision currentRevision = this.instanceRevisionManager.getInstanceRevisionInfo()
 		        .getGaeModelRevision().getModelRevision();
 		boolean modelExists = currentRevision.modelExists();
@@ -103,10 +99,13 @@ public class GaeModelPersistence {
 	}
 	
 	/**
+	 * @param includeTentative if true, then in addition to the stable model
+	 *            revision number also the unstable tentative revision number is
+	 *            calculated.
 	 * @return the current {@link ModelRevision} or null
 	 */
-	public ModelRevision getModelRevision() {
-		assertInstanceRevisionNumberHasBeenInitialized();
+	public ModelRevision getModelRevision(boolean includeTentative) {
+		calculateModelRevAndCacheInInstance(includeTentative);
 		return this.instanceRevisionManager.getInstanceRevisionInfo().getGaeModelRevision()
 		        .getModelRevision();
 	}

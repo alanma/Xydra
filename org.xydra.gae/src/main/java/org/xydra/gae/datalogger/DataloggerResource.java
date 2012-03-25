@@ -102,7 +102,7 @@ public class DataloggerResource {
 		} else {
 			ServletUtils.headers(res, "text/html");
 			w = HtmlUtils.startHtmlPage(res, "Datalogger", new SharedHtmlUtils.HeadLinkStyle(
-			        "/s/cpodebug.css"));
+			        "/s/xydebug.css"));
 			w.write("<div class='xydebug'>");
 			
 			w.write("Log your data: " + SharedHtmlUtils.link("/admin/datalog/log")
@@ -116,7 +116,9 @@ public class DataloggerResource {
 			                .withInputText("filterKey", "").withInputText("filterValue", "")
 			                .withInputText("delete", "false").withInputSubmit("Go") + "<br/>");
 			w.write(HtmlUtils.link("/admin/datalog?start=" + start + "&end=" + end + "&filterKey="
-			        + filterKey + "&filterValue=" + filterValue + "&format=csv", "Download as CSV")
+			        + (filterKey == null ? "" : filterKey) + "&filterValue="
+			        + (filterValue == null ? "" : filterValue) + "&delete=false&format=csv",
+			        "Download as CSV")
 			        + "<br/>");
 		}
 		

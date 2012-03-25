@@ -42,7 +42,7 @@ public class CommitedChanges {
 	/**
 	 * @param rev
 	 * @return cached change for this revisions. Can be null if (1) is really
-	 *         null, (2) was just never indexed, (3) got removed from cache
+	 *         null, (2) was just never indexed
 	 */
 	GaeChange getCachedChange(long rev) {
 		GaeChange change = this.localMap.get(rev);

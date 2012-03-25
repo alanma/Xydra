@@ -45,7 +45,7 @@ public class GaeStoreSpecialTest {
 		 * "getCorrectUser" method, the test assumes that the user returned by
 		 * this method is allowed to execute the following commands ~Bjoern
 		 */
-
+		
 		XCommand modelCommand1 = X.getCommandFactory().createAddModelCommand(this.repoID,
 		        this.modelId1, true);
 		
@@ -83,7 +83,8 @@ public class GaeStoreSpecialTest {
 		        XCommand.FORCED, this.modelId1);
 		long l = this.pers.executeCommand(this.actorId, removeCommand);
 		assert l >= 0;
-		assert !this.pers.getModelRevision(this.modelAddress1).modelExists();
+		assert !this.pers.getModelRevision(new GetWithAddressRequest(this.modelAddress1))
+		        .modelExists();
 	}
 	
 	@Test
@@ -101,9 +102,11 @@ public class GaeStoreSpecialTest {
 		doStuff();
 		deleteModel1();
 		doStuff();
-		ModelRevision rev1 = this.pers.getModelRevision(this.modelAddress1);
+		ModelRevision rev1 = this.pers.getModelRevision(new GetWithAddressRequest(
+		        this.modelAddress1));
 		assertEquals(13, rev1.revision());
-		ModelRevision rev2 = this.pers.getModelRevision(this.modelAddress1);
+		ModelRevision rev2 = this.pers.getModelRevision(new GetWithAddressRequest(
+		        this.modelAddress1));
 		assertEquals(rev1.revision(), rev2.revision());
 	}
 	

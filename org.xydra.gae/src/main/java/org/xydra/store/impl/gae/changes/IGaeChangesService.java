@@ -7,6 +7,7 @@ import org.xydra.base.XID;
 import org.xydra.base.change.XEvent;
 import org.xydra.store.Callback;
 import org.xydra.store.GetEventsRequest;
+import org.xydra.store.GetWithAddressRequest;
 import org.xydra.store.XydraStore;
 import org.xydra.store.impl.gae.InstanceRevisionManager;
 import org.xydra.store.impl.gae.changes.GaeChange.Status;
@@ -28,15 +29,12 @@ public interface IGaeChangesService {
 	 * 
 	 * See also {@link GetEventsRequest}.
 	 * 
-	 * @param address TODO
+	 * @param address never null
 	 * @param beginRevision inclusive
 	 * @param endRevision inclusive
 	 * 
 	 * @see XydraStore#getEvents(XID, String, GetEventsRequest[],
 	 *      org.xydra.store.Callback)
-	 * 
-	 *      TODO localVm Implementation should cache retrieved events in a
-	 *      localVmCache and never ask for them again.
 	 * 
 	 * @return a list of events or null if this model was never created. The
 	 *         list might contain fewer elements than the range implies.
@@ -47,14 +45,18 @@ public interface IGaeChangesService {
 	
 	/**
 	 * Calculate with model change log and try to progress the currently known
-	 * current revision number (from {@link InstanceRevisionManager} The result is
-	 * stored in {@link InstanceRevisionManager} and returned for convenience.
+	 * current revision number (from {@link InstanceRevisionManager} The result
+	 * is stored in {@link InstanceRevisionManager} and returned for
+	 * convenience.
+	 * 
+	 * @param includeTentative TODO
 	 * 
 	 * @return ...
 	 * 
-	 * @see XydraStore#getModelRevisions(XID, String, XAddress[], Callback)
+	 * @see XydraStore#getModelRevisions(XID, String, GetWithAddressRequest[],
+	 *      Callback)
 	 */
-	GaeModelRevision calculateCurrentModelRevision();
+	GaeModelRevision calculateCurrentModelRevision(boolean includeTentative);
 	
 	/**
 	 * Grabs the lowest available revision number and registers a change for

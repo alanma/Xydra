@@ -21,9 +21,10 @@ import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.store.GetWithAddressRequest;
 import org.xydra.store.InternalStoreException;
-import org.xydra.store.RequestException;
 import org.xydra.store.ModelRevision;
+import org.xydra.store.RequestException;
 import org.xydra.store.XydraStore;
 import org.xydra.store.XydraStoreAdmin;
 import org.xydra.store.impl.delegate.DelegatingSecureStore;
@@ -224,11 +225,11 @@ public class GaePersistence implements XydraPersistence {
 		Key last = KeyFactory.createKey(KeyStructure.KIND_XCHANGE, first.getName() + "\uFFFF");
 		
 		Query q = new Query(KeyStructure.KIND_XCHANGE)
-
+		
 		.addFilter("__key__", FilterOperator.GREATER_THAN, first)
-
+		
 		.addFilter("__key__", FilterOperator.LESS_THAN, last)
-
+		
 		.setKeysOnly();
 		
 		Set<XID> managedModelIds = new HashSet<XID>();
@@ -243,37 +244,40 @@ public class GaePersistence implements XydraPersistence {
 	}
 	
 	@Override
-	public synchronized ModelRevision getModelRevision(XAddress address) {
-		checkAddress(address);
-		if(address.getAddressedType() != XType.XMODEL) {
-			throw new RequestException("address must refer to a model, was " + address);
+	public synchronized ModelRevision getModelRevision(GetWithAddressRequest addressRequest) {
+		checkAddress(addressRequest.address);
+		if(addressRequest.address.getAddressedType() != XType.XMODEL) {
+			throw new RequestException("address must refer to a model, was " + addressRequest);
 		}
-		log.debug("getModelRevision of " + address);
+		log.debug("getModelRevision of " + addressRequest);
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		return getModelPersistence(address.getModel()).getModelRevision();
+		return getModelPersistence(addressRequest.address.getModel()).getModelRevision(
+		        addressRequest.includeTentative);
 	}
 	
 	@Override
-	public synchronized XWritableModel getModelSnapshot(XAddress address) {
-		checkAddress(address);
-		if(address.getAddressedType() != XType.XMODEL) {
-			throw new RequestException("address must refer to a model, was " + address);
+	public synchronized XWritableModel getModelSnapshot(GetWithAddressRequest addressRequest) {
+		checkAddress(addressRequest.address);
+		if(addressRequest.address.getAddressedType() != XType.XMODEL) {
+			throw new RequestException("address must refer to a model, was " + addressRequest);
 		}
-		log.debug("get model snapshot of " + address);
+		log.debug("get model snapshot of " + addressRequest);
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		return getModelPersistence(address.getModel()).getSnapshot();
+		return getModelPersistence(addressRequest.address.getModel()).getSnapshot(
+		        addressRequest.includeTentative);
 	}
 	
 	@Override
-	public synchronized XWritableObject getObjectSnapshot(XAddress address) {
-		checkAddress(address);
-		if(address.getAddressedType() != XType.XOBJECT) {
-			throw new RequestException("address must refer to an object, was " + address);
+	public synchronized XWritableObject getObjectSnapshot(GetWithAddressRequest addressRequest) {
+		checkAddress(addressRequest.address);
+		if(addressRequest.address.getAddressedType() != XType.XOBJECT) {
+			throw new RequestException("address must refer to an object, was " + addressRequest);
 		}
-		log.debug("get object snapshot of " + address);
+		log.debug("get object snapshot of " + addressRequest);
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		// TODO getting object snapshots must be more performant
-		return getModelPersistence(address.getModel()).getObjectSnapshot(address.getObject());
+		return getModelPersistence(addressRequest.address.getModel()).getObjectSnapshot(
+		        addressRequest.address.getObject(), addressRequest.includeTentative);
 	}
 	
 	@Override

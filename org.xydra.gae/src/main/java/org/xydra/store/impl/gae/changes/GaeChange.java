@@ -328,14 +328,13 @@ public class GaeChange {
 	}
 	
 	/**
-	 * May only be called on change entities that have NOT been commited yet.
-	 * 
-	 * @return true if more than {@link #TIMEOUT} milliseconds elapsed since a
-	 *         thread started working with the given change entity
+	 * @return true status is Creating and if more than {@link #TIMEOUT}
+	 *         milliseconds elapsed since a thread started working with the
+	 *         given change entity
 	 */
 	public boolean isTimedOut() {
-		GaeAssert.gaeAssert(!getStatus().isCommitted());
-		assert !getStatus().isCommitted();
+		if(getStatus() != Status.Creating)
+			return false;
 		if(this.lastActivity < 0) {
 			this.lastActivity = (Long)this.entity.getProperty(PROP_LAST_ACTIVITY);
 		}

@@ -83,7 +83,7 @@ class InternalGaeField extends InternalGaeXEntity implements XReadableField {
 	}
 	
 	@Override
-	public XID getID() {
+	public XID getId() {
 		return this.fieldAddr.getField();
 	}
 	

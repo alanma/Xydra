@@ -2,7 +2,6 @@ package org.xydra.store;
 
 import org.junit.Test;
 import org.xydra.base.X;
-import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
@@ -69,7 +68,8 @@ public class TestSetup {
 		XID repoId = XX.toId("repo1");
 		XID modelId1 = XX.toId("TestModel1");
 		XID objectId1 = XX.toId("TestObject1");
-		XAddress modelAddress = XX.resolveModel(repoId, modelId1);
+		GetWithAddressRequest modelAddressRequest = new GetWithAddressRequest(XX.resolveModel(
+		        repoId, modelId1));
 		
 		this.factory = X.getCommandFactory();
 		XCommand modelCommand1 = this.factory.createAddModelCommand(repoId, modelId1, true);
@@ -77,14 +77,14 @@ public class TestSetup {
 		        true);
 		
 		XydraPersistence pers = new GaePersistence(repoId);
-		ModelRevision modelRev = pers.getModelRevision(modelAddress);
+		ModelRevision modelRev = pers.getModelRevision(modelAddressRequest);
 		log.debug("modelRev = " + modelRev);
 		// assertFalse("persistence has just been created",
 		// modelRev.modelExists());
 		pers.executeCommand(actorId, modelCommand1);
-		log.info("rev = " + pers.getModelRevision(modelAddress));
+		log.info("rev = " + pers.getModelRevision(modelAddressRequest));
 		pers.executeCommand(actorId, objectCommand1);
-		log.info("rev = " + pers.getModelRevision(modelAddress));
+		log.info("rev = " + pers.getModelRevision(modelAddressRequest));
 		XydraRuntime.finishRequest();
 	}
 	

@@ -1,12 +1,14 @@
 package org.xydra.store.impl.gae;
 
 import java.io.Serializable;
+import java.util.ConcurrentModificationException;
 import java.util.Map;
 
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.XydraRuntime;
 
+import com.google.appengine.api.datastore.DatastoreFailureException;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
@@ -78,8 +80,14 @@ public class UniCache<T> {
 		}
 		if(storeOpts.datastore) {
 			Key datastoreKey = createCacheKey(key);
-			Entity entity = this.entryHandler.toEntity(datastoreKey, value);
-			SyncDatastore.putEntity(entity);
+			try {
+				Entity entity = this.entryHandler.toEntity(datastoreKey, value);
+				SyncDatastore.putEntity(entity);
+			} catch(ConcurrentModificationException cme) {
+				// assume thats fine
+			} catch(DatastoreFailureException e) {
+				log.warn("Could not cache " + key, e);
+			}
 		}
 		
 	}

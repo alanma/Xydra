@@ -120,7 +120,13 @@ public class DataLogger {
 		if(msg != null && msg.contains("DATA?")) {
 			String dataQuery = msg.substring(msg.indexOf("DATA?") + "DATA?".length());
 			Map<String,String> map = ServletUtils.parseQueryString(dataQuery);
-			DataRecord dr = DataRecord.create().withParam("level", "" + level).withParams(map)
+			if(t != null) {
+				map.put("logExceptionClass", t.getClass().getName());
+			}
+			DataRecord dr = DataRecord.create() // .
+			        // built-ins
+			        .withParam("logLevel", "" + level) // .
+			        .withParams(map) // .
 			        .done();
 			log(dr);
 		}

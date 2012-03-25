@@ -110,7 +110,7 @@ class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeField> im
 	}
 	
 	@Override
-	public XID getID() {
+	public XID getId() {
 		return getAddress().getObject();
 	}
 	

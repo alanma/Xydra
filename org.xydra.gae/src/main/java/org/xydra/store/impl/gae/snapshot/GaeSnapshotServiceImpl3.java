@@ -77,7 +77,7 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 		}
 		
 		@Override
-		public XID getID() {
+		public XID getId() {
 			return XX.toId("_NonExistant");
 		}
 		

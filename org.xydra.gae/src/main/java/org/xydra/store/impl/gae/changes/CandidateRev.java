@@ -8,6 +8,7 @@ package org.xydra.store.impl.gae.changes;
  */
 class CandidateRev {
 	boolean finalModelRev = false;
+	boolean inTentativeRange = false;
 	GaeModelRevision gaeModelRev;
 	
 	/**

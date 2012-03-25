@@ -167,7 +167,8 @@ public class GaeLowLevelMemCache implements IMemCache {
 		for(java.util.Map.Entry<? extends String,? extends Object> mapEntry : m.entrySet()) {
 			GaeAssert.gaeAssert(mapEntry.getValue() != null, "mapEntry.getValue() is null");
 			assert mapEntry.getValue() != null;
-			// FIXME relaxed assert
+			// TODO memcache: relaxed assert to allow caching null-entities --
+			// good idea?
 			// !Memcache.NULL_ENTITY.equals(mapEntry.getValue());
 			keyTransformedMap.put(keyUniqueForCurrentAppVersion(mapEntry.getKey()),
 			        mapEntry.getValue());
@@ -203,7 +204,7 @@ public class GaeLowLevelMemCache implements IMemCache {
 	public void putIfValueIsNull(String key, Object value) {
 		GaeAssert.gaeAssert(value != null, "value is null");
 		assert value != null;
-		// FIXME reenable? assert
+		// TODO memcache: reenable? assert
 		// !(KeyStructure.toKey(key).getKind().equals("XCHANGE") &&
 		// Memcache.NULL_ENTITY
 		// .equals(value)) : KeyStructure.toKey(key);
