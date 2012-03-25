@@ -1,43 +1,43 @@
-.cpodebug {
+.xydebug {
 	font-family: sans-serif;
 	font-size: 16px;
 }
 
-.cpodebug .rev {
+.xydebug .rev {
 	background-color: #ddd;
 }
-.cpodebug .rev:BEFORE {
+.xydebug .rev:BEFORE {
 	content: 'rev ';
 	font-size: 9px;
 }
 
-.cpodebug.main {
+.xydebug.main {
 	border-top: 5px solid #1E93F6;
 	background-color: white;
 }
 
-.cpodebug h1,.cpodebug h2,.cpodebug h3,.cpodebug h4 {
+.xydebug h1,.xydebug h2,.xydebug h3,.xydebug h4 {
 	color: #1E93F6;
 	font-size: 18px;
 }
 
-.cpodebug div,.cpodebug span,.cpodebug h1,.cpodebug h2,.cpodebug h3,.cpodebug h4,.cpodebug h5,.cpodebug h6,.cpodebug p,.cpodebug blockquote,.cpodebug pre,.cpodebug a,.cpodebug code,.cpodebug img,.cpodebug dl,.cpodebug dt,.cpodebug dd,.cpodebug ol,.cpodebug ul,.cpodebug li,.cpodebug table,.cpodebug tbody,.cpodebug tfoot,.cpodebug thead,.cpodebug tr,.cpodebug th,.cpodebug td
+.xydebug div,.xydebug span,.xydebug h1,.xydebug h2,.xydebug h3,.xydebug h4,.xydebug h5,.xydebug h6,.xydebug p,.xydebug blockquote,.xydebug pre,.xydebug a,.xydebug code,.xydebug img,.xydebug dl,.xydebug dt,.xydebug dd,.xydebug ol,.xydebug ul,.xydebug li,.xydebug table,.xydebug tbody,.xydebug tfoot,.xydebug thead,.xydebug tr,.xydebug th,.xydebug td
 	{
 	margin: 4px;
 	padding: 2px;
 }
 
-.cpodebug dl {
+.xydebug dl {
 	border: 2px solid #CCCCCC;
 }
 
-.cpodebug  dl:after {
+.xydebug  dl:after {
 	clear: both;
 	display: block;
 	content: ''
 }
 
-.cpodebug dt {
+.xydebug dt {
 	color: white !important;
 	background-color: #1E93F6;
 	display: inline;
@@ -49,54 +49,54 @@
 	margin: 2px;
 }
 
-.cpodebug  dt:after {
+.xydebug  dt:after {
 	content: ":";
 }
 
-.cpodebug dd {
+.xydebug dd {
 	display: block;
 	float: left;
 	clear: right;
 	margin: 2px;
 }
 
-.cpodebug ol {
+.xydebug ol {
 	padding: 0 0 0 40px; /*--Distance between the order numbers--*/
 }
 
-.cpodebug li {
+.xydebug li {
 	margin: 0;
 }
 
-.cpodebug li div, .cpodebug li div * {
+.xydebug li div, .xydebug li div * {
 	color: black;
 }
 
-.cpodebug .key {
+.xydebug .key {
 	color: #1E93F6;
 	font-weight: bold;
 }
 
-.cpodebug .comment {
+.xydebug .comment {
 	width: 25%;
 	white-space: normal;
 }
 
-.cpodebug th,.cpodebug td {
+.xydebug th,.xydebug td {
 	border: 1px solid #ccc;
 }
 
-.cpodebug .email {
+.xydebug .email {
 	font-weight: bolder;
 }
 
-.cpodebug table {
+.xydebug table {
 	border: 1px solid black;
 }
 
-.cpodebug .info {
+.xydebug .info {
 	color: #999;
 }
-.cpodebug .warn {
+.xydebug .warn {
 	color: red;
 }

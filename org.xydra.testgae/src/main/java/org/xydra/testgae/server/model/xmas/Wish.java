@@ -61,7 +61,7 @@ public class Wish {
 	public String toHtml() {
 		return "<b>"
 		        + HtmlUtils.link("/xmas/" + this.xo.getAddress().getRepository() + "/"
-		                + this.xo.getAddress().getModel() + "/" + this.xo.getID(), getTitle())
+		                + this.xo.getAddress().getModel() + "/" + this.xo.getId(), getTitle())
 		        + "</b> "
 		        +
 
@@ -73,18 +73,18 @@ public class Wish {
 		        + " "
 		        
 		        + HtmlUtils.link("/xmas/" + this.xo.getAddress().getRepository() + "/"
-		                + this.xo.getAddress().getModel() + "/" + this.xo.getID() + "/delete",
+		                + this.xo.getAddress().getModel() + "/" + this.xo.getId() + "/delete",
 		                "[Delete this wish]")
 		        
 		        // TODO implement edit functionalities
 		        + HtmlUtils.link("/xmas/" + this.xo.getAddress().getRepository() + "/"
-		                + this.xo.getAddress().getModel() + "/" + this.xo.getID()
+		                + this.xo.getAddress().getModel() + "/" + this.xo.getId()
 		                + "/editName?name=test", "[Edit name]")
 		        + HtmlUtils.link("/xmas/" + this.xo.getAddress().getRepository() + "/"
-		                + this.xo.getAddress().getModel() + "/" + this.xo.getID()
+		                + this.xo.getAddress().getModel() + "/" + this.xo.getId()
 		                + "/editPrice?price=1", "[Edit price]")
 		        + HtmlUtils.link("/xmas/" + this.xo.getAddress().getRepository() + "/"
-		                + this.xo.getAddress().getModel() + "/" + this.xo.getID()
+		                + this.xo.getAddress().getModel() + "/" + this.xo.getId()
 		                + "/editUrl?url=www.test.test", "[Edit URL]")
 
 		        + "<br />\n";
@@ -116,6 +116,6 @@ public class Wish {
 		XID repoId = this.xo.getAddress().getRepository();
 		XWritableModel model = Xmas.getRepository(repoId.toString()).createModel(modelId);
 		WishList wishList = new WishList(model);
-		wishList.removeWish(this.xo.getID());
+		wishList.removeWish(this.xo.getId());
 	}
 }

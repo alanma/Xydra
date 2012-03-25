@@ -57,7 +57,7 @@ public class Xmas {
 	 */
 	public static XWritableRepository getRepository(String repoIdStr) {
 		/* if there is no repo or the wrong one: init */
-		if(repo == null || (repoIdStr != null && !repo.getID().toString().equals(repoIdStr))) {
+		if(repo == null || (repoIdStr != null && !repo.getId().toString().equals(repoIdStr))) {
 			XID repoId = repoIdStr == null ? timebasedUniqueId() : XX.toId(repoIdStr);
 			NanoClock c = new NanoClock().start();
 			
@@ -85,7 +85,7 @@ public class Xmas {
 	public static void addData(String repoStr, int listCount, int wishesCount, Writer writer)
 	        throws IOException {
 		XWritableRepository repo = getRepository(repoStr);
-		writer.write("Adding to repository '" + repo.getID() + "'<br />\n");
+		writer.write("Adding to repository '" + repo.getId() + "'<br />\n");
 		NanoClock s2 = new NanoClock();
 		s2.start();
 		for(int l = 0; l < listCount; l++) {
@@ -95,8 +95,8 @@ public class Xmas {
 			DiffWritableModel txnModel = new DiffWritableModel(model);
 			WishList wishList = new WishList(txnModel);
 			wishList.addDemoData(wishesCount, writer);
-			writer.write(HtmlUtils.link("/xmas/" + repoStr + "/" + model.getID(), "See list '"
-			        + model.getID() + "'")
+			writer.write(HtmlUtils.link("/xmas/" + repoStr + "/" + model.getId(), "See list '"
+			        + model.getId() + "'")
 			        + "<br />\n");
 			// commit txn
 			XTransaction txn = txnModel.toTransaction();
@@ -147,7 +147,7 @@ public class Xmas {
 	public static void get(String repoStr, String view, Writer writer) throws IOException {
 		NanoClock s1 = new NanoClock();
 		s1.start();
-		writer.write("<h2>All wishlists in repository '" + Xmas.getRepository(repoStr).getID()
+		writer.write("<h2>All wishlists in repository '" + Xmas.getRepository(repoStr).getId()
 		        + "'</h2>\n");
 		if(view.equals("expanded")) {
 			writer.write(HtmlUtils.link("/xmas/" + repoStr + "?view=collapsed", "collapse all")

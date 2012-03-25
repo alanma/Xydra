@@ -10,9 +10,12 @@ import javax.servlet.http.HttpServletResponse;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
+import org.xydra.base.change.XCommandUtils;
 import org.xydra.base.change.XEvent;
-import org.xydra.base.rmof.XWritableModel;
-import org.xydra.core.change.RWCachingRepository;
+import org.xydra.core.change.session.ChangeSession;
+import org.xydra.core.change.session.DelegatingSessionPersistence;
+import org.xydra.core.change.session.ISessionPersistence;
+import org.xydra.core.change.session.SessionModel;
 import org.xydra.gae.AboutAppEngine;
 import org.xydra.gae.admin.GaeConfigurationManager;
 import org.xydra.log.Logger;
@@ -23,11 +26,11 @@ import org.xydra.restless.RestlessParameter;
 import org.xydra.restless.utils.NanoClock;
 import org.xydra.restless.utils.ServletUtils;
 import org.xydra.server.util.XydraHtmlUtils;
+import org.xydra.store.GetWithAddressRequest;
 import org.xydra.store.XydraRuntime;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.gae.GaeAssert;
 import org.xydra.store.impl.gae.GaeTestfixer;
-import org.xydra.store.rmof.impl.delegate.WritableRepositoryOnPersistence;
 
 
 public class ConsistencyTestResource {
@@ -76,12 +79,13 @@ public class ConsistencyTestResource {
 		XydraPersistence pers = XydraRuntime.getPersistence(repoId);
 		XAddress modelAddress = XX.toAddress(repoId, ctId, null, null);
 		
-		long current = pers.getModelRevision(modelAddress).revision();
-		w.write("Current rev: " + current + "<br/>\n");
+		long tentativeRev = pers.getModelRevision(new GetWithAddressRequest(modelAddress, true))
+		        .tentativeRevision();
+		w.write("Current rev: " + tentativeRev + "<br/>\n");
 		w.flush();
 		c.stopAndStart("current");
 		
-		List<XEvent> events = pers.getEvents(modelAddress, 0, current);
+		List<XEvent> events = pers.getEvents(modelAddress, 0, tentativeRev);
 		
 		XydraHtmlUtils.writeEvents(events, w);
 		
@@ -89,18 +93,43 @@ public class ConsistencyTestResource {
 		w.close();
 	}
 	
-	public static void get(String create, HttpServletRequest req, HttpServletResponse res)
+	public static void get(String createStr, HttpServletRequest req, HttpServletResponse res)
 	        throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		NanoClock c = new NanoClock().start();
 		GaeAssert.enable();
 		GaeConfigurationManager.assertValidGaeConfiguration();
 		c.stopAndStart("config");
-		ServletUtils.headers(res, "text/html");
-		Writer w = res.getWriter();
+		
 		String instance = XydraRuntime.getInstanceId() + "+=" + AboutAppEngine.getThreadInfo();
 		log.info("instanceId=" + instance);
-		c.stopAndStart("headers,getInstanceId");
+		c.stopAndStart("getInstanceId");
+		
+		boolean create = ServletUtils.isSet(createStr);
+		XydraPersistence persistence = XydraRuntime.getPersistence(repoId);
+		ISessionPersistence sessionPersistence = new DelegatingSessionPersistence(persistence,
+		        actorId);
+		ChangeSession session = ChangeSession.createSession(sessionPersistence, create, actorId);
+		c.stopAndStart("init");
+		
+		SessionModel model = session.openModel(ctId, create).loadAllObjects();
+		log.debug("Loaded model DATA?rev=" + model.getRevisionNumber() + "&i_addr="
+		        + model.getAddress() + "&instance=" + AboutAppEngine.getInstanceId()
+		        + "&changesMethod=ConsTestRes.get");
+		c.stopAndStart("prefetch");
+		
+		// create
+		if(create) {
+			try {
+				model.createObject(XX.toId(createStr));
+			} catch(Exception e) {
+				throw new RuntimeException("Could not create", e);
+			}
+		}
+		c.stopAndStart("create-object");
+		
+		ServletUtils.headers(res, "text/html");
+		Writer w = res.getWriter();
 		w.write("<div style='"
 		
 		+ "font-family: \"Courier New\", Courier, monospace;"
@@ -110,24 +139,6 @@ public class ConsistencyTestResource {
 		+ "'>\n");
 		w.write("instanceId=" + instance + "<br/>\n");
 		w.flush();
-		
-		XydraPersistence persistence = XydraRuntime.getPersistence(repoId);
-		
-		WritableRepositoryOnPersistence nakedRepo = new WritableRepositoryOnPersistence(
-		        persistence, actorId);
-		// should be done in another way
-		// InstanceContext.clearThreadContext();
-		c.stopAndStart("init");
-		// FIXME next 3 lines takes 98% of CPU time
-		RWCachingRepository repo = new RWCachingRepository(nakedRepo, persistence, true);
-		c.stopAndStart("prefetch");
-		XWritableModel model = repo.createModel(ctId);
-		c.stopAndStart("create-model");
-		// create
-		if(create != null && !create.equals("")) {
-			model.createObject(XX.toId(create));
-		}
-		c.stopAndStart("create-object");
 		// list
 		w.write("version=" + model.getRevisionNumber() + "<br/>\n");
 		c.stopAndStart("getRevNr");
@@ -146,9 +157,9 @@ public class ConsistencyTestResource {
 		w.flush();
 		c.stopAndStart("logger-write");
 		
-		int result = RWCachingRepository.commit(repo, actorId);
+		long result = model.commitToSessionPersistence();
 		c.stopAndStart("commit");
-		if(result != 200) {
+		if(XCommandUtils.failed(result)) {
 			throw new RuntimeException("commit failed " + result);
 		}
 		w.write("COMMIT: " + result + "<br/>\n");

@@ -97,7 +97,7 @@ public class WishList implements Iterable<XID> {
 	public String toHtml() {
 		NanoClock s1 = new NanoClock().start();
 		StringBuffer buf = new StringBuffer();
-		buf.append("<b>Wishlist " + this.model.getID() + "</b>");
+		buf.append("<b>Wishlist " + this.model.getId() + "</b>");
 		buf.append("<ol>\n");
 		for(XID wishId : this.model) {
 			Wish wish = getWish(wishId);
@@ -108,7 +108,7 @@ public class WishList implements Iterable<XID> {
 		buf.append("</ol>\n");
 		s1.stop("read-wishes-and-properties");
 		buf.append(HtmlUtils.link("/xmas/" + this.model.getAddress().getRepository() + "/"
-		        + this.model.getID() + "/clear", "Delete all wishes")
+		        + this.model.getId() + "/clear", "Delete all wishes")
 		        + "<br />\n");
 		// add stats
 		buf.append(s1.getStats() + "<br />\n");
@@ -127,7 +127,7 @@ public class WishList implements Iterable<XID> {
 		s1.start();
 		List<XID> wishIds = new LinkedList<XID>();
 		for(int w = 1; w <= wishesCount; w++) {
-			writer.write("Creating wish " + w + " in list " + this.model.getID() + " at "
+			writer.write("Creating wish " + w + " in list " + this.model.getId() + " at "
 			        + System.currentTimeMillis() + "<br />\n");
 			String name = NameUtils.getProductName();
 			String nameInUrl = name.replace(" ", "+");

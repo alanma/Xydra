@@ -164,11 +164,12 @@ public class ConsistencyTestClient extends Thread {
 	 */
 	public Page create(String id, String traceId) throws Exception {
 		final Page page = getPage(this.serverRootUrl + "/consistency?create=" + id + "&traceId="
-		        + traceId + "~create", 1, true);
+		        + traceId + "~create", 5, true);
 		return page;
 	}
 	
 	public Page doGetAddIdVerifyRead() throws Exception {
+		log.info(this.getName() + " get-add-verify");
 		// read
 		Page pageList = getList("init");
 		String instanceCreate = getInstance(pageList);
@@ -192,7 +193,7 @@ public class ConsistencyTestClient extends Thread {
 	 */
 	public Page getList(String trace) throws Exception {
 		final Page page = getPage(this.serverRootUrl + "/consistency?trace=" + trace + "~getList",
-		        1, false);
+		        10, false);
 		return page;
 	}
 	
@@ -201,7 +202,7 @@ public class ConsistencyTestClient extends Thread {
 	 * 
 	 * @param url
 	 * @param tries retry count
-	 * @param writeAccess TODO
+	 * @param writeAccess to log read/write errors correctly
 	 * @return a Page obtained by HTTP GET
 	 * @throws FailingHttpStatusCodeException
 	 */
@@ -223,8 +224,8 @@ public class ConsistencyTestClient extends Thread {
 					failedReads++;
 				}
 			}
-		} while(page == null || (code == 500 && retries < tries));
-		if(retries == 10) {
+		} while(page == null || (code == 500 && retries <= tries));
+		if(retries == tries) {
 			throw new RuntimeException("Retried URL '" + url + "' for " + tries
 			        + " times, always got 500er");
 		}
@@ -233,21 +234,19 @@ public class ConsistencyTestClient extends Thread {
 	
 	@Override
 	public void run() {
-		
 		boolean run = true;
 		// each thread stops after first error
-		while(run && !error && this.rounds <= 100 && failedWrites == 0) {
+		while(run && !error && this.rounds > 0) {
 			try {
 				this.doGetAddIdVerifyRead();
 			} catch(Throwable e) {
 				error = true;
-				log.warn("", e);
 				run = false;
 				log.warn("------ERROR", e);
 				e.printStackTrace();
 				System.out.println("------");
 			}
-			this.rounds++;
+			this.rounds--;
 		}
 		done++;
 	}
