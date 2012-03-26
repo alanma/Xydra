@@ -17,6 +17,11 @@ import org.xydra.core.serialize.json.JsonSerializer;
  * @author Kaidel
  * 
  */
+
+/*
+ * TODO document espacing/parsing syntax!
+ */
+
 public class ValueIndexEntryUtils {
 	
 	/**
@@ -28,10 +33,6 @@ public class ValueIndexEntryUtils {
 	 *             null
 	 */
 	public static String serializeAsString(ValueIndexEntry entry) {
-		/*
-		 * TODO The implementation assumes that the JSON strings contain no new
-		 * line commands - is this okay?
-		 */
 		XValue value = entry.getValue();
 		XAddress address = entry.getAddress();
 		Integer counter = entry.getCounter();
@@ -43,7 +44,7 @@ public class ValueIndexEntryUtils {
 		adrOut.enableWhitespace(false, false);
 		SerializedValue.serialize(address, adrOut);
 		
-		String adrString = adrOut.getData();
+		String adrString = escapeSingleString(adrOut.getData());
 		
 		String valueString = null;
 		
@@ -52,12 +53,32 @@ public class ValueIndexEntryUtils {
 			valOut.enableWhitespace(false, false);
 			SerializedValue.serialize(value, valOut);
 			
-			valueString = valOut.getData();
+			valueString = escapeSingleString(valOut.getData());
 		}
 		
-		String result = "\"" + adrString + "\"" + '\n' + "\"" + valueString + "\"" + '\n' + counter;
+		// "" is used as the marker for splitting
+		String result = adrString + "\"\"" + valueString + "\"\"" + counter;
 		
 		return result;
+	}
+	
+	private static String escapeSingleString(String s) {
+		// escape \ with \\
+		String replace1 = s.replace("\\", "\\\\");
+		// escape " with \"
+		String replace2 = replace1.replace("\"", "\\\"");
+		
+		return replace2;
+	}
+	
+	private static String deescapeSingleString(String s) {
+		// deescape \" with "
+		String replace1 = s.replace("\\\"", "\"");
+		
+		// deescape \\ with \
+		String replace2 = replace1.replace("\\\\", "\\");
+		
+		return replace2;
 	}
 	
 	/**
@@ -70,20 +91,31 @@ public class ValueIndexEntryUtils {
 	 *         array.
 	 */
 	public static String serializeAsString(ValueIndexEntry[] entries) {
-		/*
-		 * TODO The implementation assumes that the JSON strings contain no new
-		 * line commands - is this okay?
-		 */
 		String result = "";
 		
-		for(ValueIndexEntry entry : entries) {
+		for(int i = 0; i < entries.length; i++) {
+			ValueIndexEntry entry = entries[i];
+			
 			if(entry != null) {
-				result += '\n' + "<entry>";
-				result += serializeAsString(entry);
+				result += escapeListString(serializeAsString(entry));
+			}
+			
+			if(i + 1 < entries.length) {
+				result += "<entry>";
 			}
 		}
 		
 		return result;
+	}
+	
+	private static String escapeListString(String s) {
+		String replace = s.replace("<entry>", "<\\entry>");
+		return replace;
+	}
+	
+	private static String deescapeListString(String s) {
+		String replace = s.replace("<\\entry>", "<entry>");
+		return replace;
 	}
 	
 	/**
@@ -103,8 +135,7 @@ public class ValueIndexEntryUtils {
 		String result = serializeAsString(oldEntries);
 		
 		if(newEntry != null) {
-			result += '\n' + "<entry>";
-			result += serializeAsString(newEntry);
+			result += "<entry>" + escapeListString(serializeAsString(newEntry));
 		}
 		return result;
 	}
@@ -126,15 +157,17 @@ public class ValueIndexEntryUtils {
 		XValue value = null;
 		Integer counter = 0;
 		
-		String[] strings = s.split("" + '\n');
+		String[] strings = s.split("\"\"");
 		
 		assert strings.length == 3;
 		
+		String adrString = deescapeSingleString(strings[0]);
+		String valString = deescapeSingleString(strings[1]);
+		
 		JsonParser parser = new JsonParser();
 		
-		// parse address (use substrings to get rid of beginning/trailing ")
-		XydraElement addressElement = parser
-		        .parse(strings[0].substring(1, strings[0].length() - 1));
+		// parse address
+		XydraElement addressElement = parser.parse(adrString);
 		
 		XValue addressVal = SerializedValue.toValue(addressElement);
 		assert addressVal instanceof XAddress;
@@ -143,8 +176,7 @@ public class ValueIndexEntryUtils {
 		
 		// parse value
 		if(!strings[1].equals("null")) {
-			XydraElement valueElement = parser.parse(strings[1].substring(1,
-			        strings[1].length() - 1));
+			XydraElement valueElement = parser.parse(valString);
 			
 			value = SerializedValue.toValue(valueElement);
 		}
@@ -173,14 +205,12 @@ public class ValueIndexEntryUtils {
 	 */
 	public static ValueIndexEntry[] getArrayFromString(String s) {
 		if(s != null) {
-			String[] strings = s.split('\n' + "(<entry>)");
+			String[] strings = s.split("<entry>");
 			
-			// strings[0] will be the empty string, so don't use it!
+			ValueIndexEntry[] entries = new ValueIndexEntry[strings.length];
 			
-			ValueIndexEntry[] entries = new ValueIndexEntry[strings.length - 1];
-			
-			for(int i = 1; i < strings.length; i++) {
-				entries[i - 1] = fromString(strings[i]);
+			for(int i = 0; i < strings.length; i++) {
+				entries[i] = fromString(deescapeListString(strings[i]));
 			}
 			
 			return entries;

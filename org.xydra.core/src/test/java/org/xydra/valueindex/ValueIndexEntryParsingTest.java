@@ -33,6 +33,11 @@ import org.xydra.core.serialize.json.JsonSerializer;
  * 
  */
 
+/*
+ * TODO add testvalues which explicitly contain the symbols that will be escaped
+ * to check whether the escaping works
+ */
+
 public class ValueIndexEntryParsingTest {
 	private XModel model;
 	
