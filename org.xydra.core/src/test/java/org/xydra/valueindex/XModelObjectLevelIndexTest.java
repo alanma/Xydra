@@ -1703,8 +1703,8 @@ public abstract class XModelObjectLevelIndexTest {
 		testIfObjectWasDeIndexed(newJohn, this.newExcludeAllIndex, this.newExcludeAllIndexer);
 	}
 	
-	private void testIfObjectWasDeIndexed(XReadableObject object, XModelObjectLevelIndex index,
-	        XValueIndexer indexer) {
+	private static void testIfObjectWasDeIndexed(XReadableObject object,
+	        XModelObjectLevelIndex index, XValueIndexer indexer) {
 		XAddress objectAddress = object.getAddress();
 		
 		for(XID fieldId : object) {

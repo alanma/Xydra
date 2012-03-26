@@ -11,11 +11,12 @@ public class RemoteConsistencyTest {
 	private static final Logger log = LoggerFactory.getLogger(RemoteConsistencyTest.class);
 	
 	// your url here
-	private static final String SERVER_ROOT = "testgae.latest.xydra-live.appspot.com";
+	private static final String SERVER_ROOT = "http://testgae20120321.calpano-2.appspot.com/";
+	// "testgae.latest.xydra-live.appspot.com";
 	
 	public static final int THREADS = 10;
 	
-	public static final int ROUNDS = 10;
+	public static final int ROUNDS = 100;
 	
 	public static void main(String[] args) {
 		NanoClock c = new NanoClock().start();

@@ -9,7 +9,6 @@
 		<version>2011.12.05</version>
 	</parent>
 
-	<groupId>org.xydra</groupId>
 	<artifactId>gaemyadmin</artifactId>
 	<version>${xydra.version}</version>
 	<!--

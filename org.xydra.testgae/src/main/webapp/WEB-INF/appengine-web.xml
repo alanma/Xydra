@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <appengine-web-app xmlns="http://appengine.google.com/ns/1.0">
-	<application>xydra-live</application>
-	<version>testgae20111219</version>
+	<application>calpano-2</application>
+	<version>testgae20120321</version>
 	
 	<!-- Configure java.util.logging -->
 	<system-properties>
 		<property name="java.util.logging.config.file" value="WEB-INF/java-util-logging.properties"/>
 	</system-properties>
 	
-	<threadsafe>true</threadsafe>
+	<!-- TODO test both -->
+	<threadsafe>false</threadsafe>
 	
 </appengine-web-app>

@@ -180,7 +180,7 @@ public class XModelObjectLevelIndex {
 	 * @param field The {@link XReadableField} which is to be indexed
 	 */
 	private void index(XReadableField field) {
-		XID fieldId = field.getID();
+		XID fieldId = field.getId();
 		
 		if(this.isToBeIndexed(fieldId)) {
 			this.indexer.indexValue(field.getAddress(), field.getValue());
@@ -400,7 +400,7 @@ public class XModelObjectLevelIndex {
 			        "oldField and newField do not have the same address and therefore aren't different versions of the same field.");
 		}
 		
-		if(!this.isToBeIndexed(oldField.getID())) {
+		if(!this.isToBeIndexed(oldField.getId())) {
 			return;
 		}
 		
