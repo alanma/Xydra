@@ -6,7 +6,6 @@ import java.util.Iterator;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XType;
-import org.xydra.base.XX;
 import org.xydra.base.value.XValue;
 import org.xydra.index.query.EqualsConstraint;
 
@@ -62,9 +61,6 @@ public class MemoryMapSetIndex implements ValueIndex {
 			        + fieldAddress.getAddressedType() + "type address!");
 		}
 		
-		XAddress objectAddress = XX.resolveObject(fieldAddress.getRepository(),
-		        fieldAddress.getModel(), fieldAddress.getObject());
-		
 		HashSet<ValueIndexEntry> set = this.map.get(key);
 		
 		if(set == null) {
@@ -75,18 +71,11 @@ public class MemoryMapSetIndex implements ValueIndex {
 		
 		boolean found = false;
 		while(!found && iterator.hasNext()) {
-			ValueIndexEntry triple = iterator.next();
+			ValueIndexEntry entry = iterator.next();
 			
-			if(triple.equalAddressAndValue(objectAddress, value)) {
+			if(entry.equalAddressAndValue(fieldAddress, value)) {
 				found = true;
-				triple.decrementCounter();
-				
-				if(triple.getCounter() == 0) {
-					// counter needs to be incremented or the triple will not be
-					// found in the set
-					triple.incrementCounter();
-					set.remove(triple);
-				}
+				set.remove(entry);
 			}
 		}
 		
@@ -112,9 +101,6 @@ public class MemoryMapSetIndex implements ValueIndex {
 			this.map.put(key, new HashSet<ValueIndexEntry>());
 		}
 		
-		XAddress objectAddress = XX.resolveObject(fieldAddress.getRepository(),
-		        fieldAddress.getModel(), fieldAddress.getObject());
-		
 		HashSet<ValueIndexEntry> set = this.map.get(key);
 		assert set != null;
 		
@@ -124,15 +110,14 @@ public class MemoryMapSetIndex implements ValueIndex {
 		while(!found && iterator.hasNext()) {
 			ValueIndexEntry triple = iterator.next();
 			
-			if(triple.equalAddressAndValue(objectAddress, value)) {
+			if(triple.equalAddressAndValue(fieldAddress, value)) {
 				found = true;
-				triple.incrementCounter();
 			}
 		}
 		
 		if(!found) {
 			// no entry found -> add one
-			ValueIndexEntry newEntry = new ValueIndexEntry(objectAddress, value, 1);
+			ValueIndexEntry newEntry = new ValueIndexEntry(fieldAddress, value);
 			set.add(newEntry);
 		}
 	}

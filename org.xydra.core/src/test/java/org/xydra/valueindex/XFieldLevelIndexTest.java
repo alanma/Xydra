@@ -15,6 +15,7 @@ import org.junit.Test;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
+import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XEvent;
@@ -31,14 +32,14 @@ import org.xydra.index.query.Pair;
 
 
 /**
- * An abstract test for testing {@link XModelObjectLevelIndex}. The phonebook
- * model from {@link DemoModelUtil} is used as the basic source of data.
+ * An abstract test for testing {@link XFieldLevelIndex}. The phonebook model
+ * from {@link DemoModelUtil} is used as the basic source of data.
  * 
  * @author Kaidel
  * 
  */
 
-public abstract class XModelObjectLevelIndexTest {
+public abstract class XFieldLevelIndexTest {
 	
 	private enum TestType {
 		XOBJECT, XFIELD, XEVENT;
@@ -85,8 +86,8 @@ public abstract class XModelObjectLevelIndexTest {
 	 * excludedFieldIds must be provided. includeFieldIds should be an empty
 	 * set.
 	 */
-	public XModelObjectLevelIndex oldIndex;
-	public XModelObjectLevelIndex newIndex;
+	public XFieldLevelIndex oldIndex;
+	public XFieldLevelIndex newIndex;
 	
 	/**
 	 * oldExcludeallIndex is the index used for indexing the oldExcludeAllModel,
@@ -96,8 +97,8 @@ public abstract class XModelObjectLevelIndexTest {
 	 * excludedFieldIds must be provided. includeFieldIds should be an empty
 	 * set.
 	 */
-	public XModelObjectLevelIndex oldExcludeAllIndex;
-	public XModelObjectLevelIndex newExcludeAllIndex;
+	public XFieldLevelIndex oldExcludeAllIndex;
+	public XFieldLevelIndex newExcludeAllIndex;
 	
 	/**
 	 * oldIndexer is used by oldIndex, newIndexer by newIndex
@@ -150,38 +151,36 @@ public abstract class XModelObjectLevelIndexTest {
 	 * You need to adhere to the following guidelines if you want to overwrite
 	 * this method, otherwise the tests won't work correctly.
 	 * 
-	 * {@link XModelObjectLevelIndexTest#oldIndex} needs to be parameterized
-	 * with {@link XModelObjectLevelIndexTest#oldModel} (as the model which it
-	 * indexes, index(oldModel) needs to be executed!) and
-	 * {@link XModelObjectLevelIndexTest#oldIndexer} (as the used indexer).
-	 * {@link XModelObjectLevelIndexTest#newIndex} needs to be parameterized
-	 * with {@link XModelObjectLevelIndexTest#newModel} (as the model which it
-	 * indexes, index(newModel) needs to be executed!) and with
-	 * {@link XModelObjectLevelIndexTest#newIndexer} (as the used indexer).
+	 * {@link XFieldLevelIndexTest#oldIndex} needs to be parameterized with
+	 * {@link XFieldLevelIndexTest#oldModel} (as the model which it indexes,
+	 * index(oldModel) needs to be executed!) and
+	 * {@link XFieldLevelIndexTest#oldIndexer} (as the used indexer).
+	 * {@link XFieldLevelIndexTest#newIndex} needs to be parameterized with
+	 * {@link XFieldLevelIndexTest#newModel} (as the model which it indexes,
+	 * index(newModel) needs to be executed!) and with
+	 * {@link XFieldLevelIndexTest#newIndexer} (as the used indexer).
 	 * defaultIncludeAll needs to be set to true, includeFieldIds should be an
 	 * empty set. excludeFieldIds has to only include {@link XID XIDs} which are
 	 * NOT used in the phonebook model of {@link DemoModelUtil} (if you include
 	 * such {@link XID XIDs}, the test will not work correctly), it must not be
 	 * empty, at least one such Id must be provided. Furthermore,
-	 * {@link XModelObjectLevelIndexTest#excludedIds} needs to include the same
+	 * {@link XFieldLevelIndexTest#excludedIds} needs to include the same
 	 * {@link XID XIDs} as excludeFieldIds.
 	 * 
-	 * {@link XModelObjectLevelIndexTest#oldExcludeAllIndex} needs to be
-	 * parameterized with {@link XModelObjectLevelIndexTest#oldExcludeAllModel}
-	 * (as the model which it indexes, index(oldExcludeAllModel) needs to be
-	 * executed!) and {@link XModelObjectLevelIndexTest#oldExcludeAllIndexer}
-	 * (as the used indexer).
-	 * {@link XModelObjectLevelIndexTest#newExcludeAllIndex} needs to be
-	 * parameterized with {@link XModelObjectLevelIndexTest#newExcludeAllModel}
-	 * (as the model which it indexes, index(newExcludeAllModel) needs to be
-	 * executed!) and with {@link XModelObjectLevelIndexTest#newIndexer} (as the
-	 * used indexer). defaultIncludeAll needs to be set to false,
-	 * excludeFieldIds should be an empty set. includeFieldIds has to only
-	 * include {@link XID XIDs} which are NOT used in the phonebook model of
-	 * {@link DemoModelUtil} (if you include such {@link XID XIDs}, the test
-	 * will not work correctly), it must not be empty, at least two such Ids
-	 * must be provided. Furthermore,
-	 * {@link XModelObjectLevelIndexTest#includedIds} needs to include the same
+	 * {@link XFieldLevelIndexTest#oldExcludeAllIndex} needs to be parameterized
+	 * with {@link XFieldLevelIndexTest#oldExcludeAllModel} (as the model which
+	 * it indexes, index(oldExcludeAllModel) needs to be executed!) and
+	 * {@link XFieldLevelIndexTest#oldExcludeAllIndexer} (as the used indexer).
+	 * {@link XFieldLevelIndexTest#newExcludeAllIndex} needs to be parameterized
+	 * with {@link XFieldLevelIndexTest#newExcludeAllModel} (as the model which
+	 * it indexes, index(newExcludeAllModel) needs to be executed!) and with
+	 * {@link XFieldLevelIndexTest#newIndexer} (as the used indexer).
+	 * defaultIncludeAll needs to be set to false, excludeFieldIds should be an
+	 * empty set. includeFieldIds has to only include {@link XID XIDs} which are
+	 * NOT used in the phonebook model of {@link DemoModelUtil} (if you include
+	 * such {@link XID XIDs}, the test will not work correctly), it must not be
+	 * empty, at least two such Ids must be provided. Furthermore,
+	 * {@link XFieldLevelIndexTest#includedIds} needs to include the same
 	 * {@link XID XIDs} as includeFieldIds.
 	 */
 	public void initializeIndexes() {
@@ -189,14 +188,14 @@ public abstract class XModelObjectLevelIndexTest {
 		
 		// oldModel, oldIndexer, newModel, newIndexer, excludedIds and
 		// includedIds need to be set before calling all this!
-		this.oldIndex = new XModelObjectLevelIndex(this.oldModel, this.oldIndexer, true, emptySet,
+		this.oldIndex = new XFieldLevelIndex(this.oldModel, this.oldIndexer, true, emptySet,
 		        this.excludedIds);
-		this.newIndex = new XModelObjectLevelIndex(this.newModel, this.newIndexer, true, emptySet,
+		this.newIndex = new XFieldLevelIndex(this.newModel, this.newIndexer, true, emptySet,
 		        this.excludedIds);
 		
-		this.oldExcludeAllIndex = new XModelObjectLevelIndex(this.oldExcludeAllModel,
+		this.oldExcludeAllIndex = new XFieldLevelIndex(this.oldExcludeAllModel,
 		        this.oldExcludeAllIndexer, false, this.includedIds, emptySet);
-		this.newExcludeAllIndex = new XModelObjectLevelIndex(this.newExcludeAllModel,
+		this.newExcludeAllIndex = new XFieldLevelIndex(this.newExcludeAllModel,
 		        this.newExcludeAllIndexer, false, this.includedIds, emptySet);
 	}
 	
@@ -295,11 +294,13 @@ public abstract class XModelObjectLevelIndexTest {
 	 *         given set of {@link Pair Pairs} of {@link XAddress} and
 	 *         {@link XValue}
 	 */
-	private static Set<XAddress> getAddressesFromSetOfPairs(Set<Pair<XAddress,XValue>> pairs) {
+	private static Set<XAddress> getAddressesFromSetOfPairs(Set<ValueIndexEntry> pairs) {
 		HashSet<XAddress> addresses = new HashSet<XAddress>();
 		
-		for(Pair<XAddress,XValue> pair : pairs) {
-			addresses.add(pair.getFirst());
+		for(ValueIndexEntry pair : pairs) {
+			XAddress address = pair.getAddress();
+			assertEquals(XType.XFIELD, address.getAddressedType());
+			addresses.add(address);
 		}
 		
 		return addresses;
@@ -325,7 +326,7 @@ public abstract class XModelObjectLevelIndexTest {
 				List<String> list = this.oldIndexer.getIndexStrings(value);
 				
 				for(String s : list) {
-					Set<Pair<XAddress,XValue>> pairs = this.oldIndex.search(s);
+					Set<ValueIndexEntry> entries = this.oldIndex.search(s);
 					
 					if(this.excludedIds.contains(fieldId)) {
 						/**
@@ -334,10 +335,10 @@ public abstract class XModelObjectLevelIndexTest {
 						 * value which should not exist anywhere else, the
 						 * returned set of pairs should be empty.
 						 */
-						assertTrue(pairs.isEmpty());
+						assertTrue(entries.isEmpty());
 					} else {
-						Set<XAddress> addresses = getAddressesFromSetOfPairs(pairs);
-						assertTrue(addresses.contains(object.getAddress()));
+						Set<XAddress> addresses = getAddressesFromSetOfPairs(entries);
+						assertTrue(addresses.contains(field.getAddress()));
 					}
 				}
 			}
@@ -364,16 +365,16 @@ public abstract class XModelObjectLevelIndexTest {
 				List<String> list = this.oldExcludeAllIndexer.getIndexStrings(value);
 				
 				for(String s : list) {
-					Set<Pair<XAddress,XValue>> pairs = this.oldExcludeAllIndex.search(s);
+					Set<ValueIndexEntry> entries = this.oldExcludeAllIndex.search(s);
 					
 					if(this.includedIds.contains(fieldId)) {
-						Set<XAddress> addresses = getAddressesFromSetOfPairs(pairs);
-						assertTrue(addresses.contains(object.getAddress()));
+						Set<XAddress> addresses = getAddressesFromSetOfPairs(entries);
+						assertTrue(addresses.contains(field.getAddress()));
 					} else {
 						/**
 						 * almost all fields were excluded from indexing.
 						 */
-						assertTrue(pairs.isEmpty());
+						assertTrue(entries.isEmpty());
 					}
 				}
 			}
@@ -382,7 +383,7 @@ public abstract class XModelObjectLevelIndexTest {
 	
 	/**
 	 * Tests if
-	 * {@link XModelObjectLevelIndex#updateIndex(XReadableObject, XReadableObject)}
+	 * {@link XFieldLevelIndex#updateIndex(XReadableObject, XReadableObject)}
 	 * works correctly when a new field with a new value gets added to the
 	 * object.
 	 */
@@ -392,7 +393,7 @@ public abstract class XModelObjectLevelIndexTest {
 		XValue value = X.getValueFactory().createStringValue(valueString);
 		
 		// check that no entry for valueString exists in the old index
-		Set<Pair<XAddress,XValue>> oldSet = this.oldIndex.search(valueString);
+		Set<ValueIndexEntry> oldSet = this.oldIndex.search(valueString);
 		assertTrue(oldSet.isEmpty());
 		
 		XObject oldJohn = this.oldModel.getObject(DemoModelUtil.JOHN_ID);
@@ -406,14 +407,14 @@ public abstract class XModelObjectLevelIndexTest {
 		
 		this.newIndex.updateIndex(oldJohn, newJohn);
 		
-		Set<Pair<XAddress,XValue>> set = this.newIndex.search(valueString);
+		Set<ValueIndexEntry> set = this.newIndex.search(valueString);
 		assertEquals(1, set.size());
-		assertEquals(newJohn.getAddress(), set.iterator().next().getFirst());
+		assertEquals(newField.getAddress(), set.iterator().next().getAddress());
 	}
 	
 	/**
 	 * Tests if
-	 * {@link XModelObjectLevelIndex#updateIndex(XReadableObject, XReadableObject)}
+	 * {@link XFieldLevelIndex#updateIndex(XReadableObject, XReadableObject)}
 	 * works correctly when a new field with a new value and gets added to the
 	 * object, where the {@link XID} of the field is one of the Ids of fields
 	 * the index will not index (i.e. the field is excluded from being indexed).
@@ -432,13 +433,13 @@ public abstract class XModelObjectLevelIndexTest {
 		
 		this.newIndex.updateIndex(oldJohn, newJohn);
 		
-		Set<Pair<XAddress,XValue>> set = this.newIndex.search(this.excludedValueString);
+		Set<ValueIndexEntry> set = this.newIndex.search(this.excludedValueString);
 		assertTrue(set.isEmpty());
 	}
 	
 	/**
 	 * Tests if
-	 * {@link XModelObjectLevelIndex#updateIndex(XReadableObject, XReadableObject)}
+	 * {@link XFieldLevelIndex#updateIndex(XReadableObject, XReadableObject)}
 	 * works correctly when a new field with a new value gets added to the
 	 * object, where the index excludes almost all fields from being indexed
 	 * (i.e. defaultIncludeAll is set to false).
@@ -449,7 +450,7 @@ public abstract class XModelObjectLevelIndexTest {
 		XValue value = X.getValueFactory().createStringValue(valueString);
 		
 		// check that no entry for valueString exists in the old index
-		Set<Pair<XAddress,XValue>> oldSet = this.oldExcludeAllIndex.search(valueString);
+		Set<ValueIndexEntry> oldSet = this.oldExcludeAllIndex.search(valueString);
 		assertTrue(oldSet.isEmpty());
 		
 		XObject oldJohn = this.oldExcludeAllModel.getObject(DemoModelUtil.JOHN_ID);
@@ -467,7 +468,7 @@ public abstract class XModelObjectLevelIndexTest {
 		
 		this.newExcludeAllIndex.updateIndex(oldJohn, newJohn);
 		
-		Set<Pair<XAddress,XValue>> set = this.newExcludeAllIndex.search(valueString);
+		Set<ValueIndexEntry> set = this.newExcludeAllIndex.search(valueString);
 		assertTrue(set.isEmpty());
 		
 		// Add a value to a field with ID in includedIds ( = should be indexed)
@@ -484,12 +485,12 @@ public abstract class XModelObjectLevelIndexTest {
 		
 		set = this.newExcludeAllIndex.search(valueString);
 		assertEquals(1, set.size());
-		assertEquals(newObject.getAddress(), set.iterator().next().getFirst());
+		assertEquals(newField.getAddress(), set.iterator().next().getAddress());
 	}
 	
 	/**
 	 * Tests if
-	 * {@link XModelObjectLevelIndex#updateIndex(XReadableObject, XReadableObject)}
+	 * {@link XFieldLevelIndex#updateIndex(XReadableObject, XReadableObject)}
 	 * works correctly when a new value gets added to a field of an object,
 	 * which already existed in the old state.
 	 * 
@@ -502,7 +503,7 @@ public abstract class XModelObjectLevelIndexTest {
 	
 	/**
 	 * Tests if
-	 * {@link XModelObjectLevelIndex#updateIndex(XReadableField, XReadableField)}
+	 * {@link XFieldLevelIndex#updateIndex(XReadableField, XReadableField)}
 	 * works correctly when a new value gets added to a field of an object,
 	 * which already existed in the old state.
 	 * 
@@ -514,9 +515,9 @@ public abstract class XModelObjectLevelIndexTest {
 	}
 	
 	/**
-	 * Tests if {@link XModelObjectLevelIndex#updateIndex(XFieldEvent, XValue)}
-	 * works correctly when a new value gets added to a field of an object,
-	 * which already existed in the old state.
+	 * Tests if {@link XFieldLevelIndex#updateIndex(XFieldEvent, XValue)} works
+	 * correctly when a new value gets added to a field of an object, which
+	 * already existed in the old state.
 	 * 
 	 * This tests an index which defaultIncludeAll parameter is set to true.
 	 */
@@ -530,7 +531,7 @@ public abstract class XModelObjectLevelIndexTest {
 		XValue value = X.getValueFactory().createStringValue(valueString);
 		
 		// check that no entry for valueString exists in the old index
-		Set<Pair<XAddress,XValue>> oldSet = this.oldIndex.search(valueString);
+		Set<ValueIndexEntry> oldSet = this.oldIndex.search(valueString);
 		assertTrue(oldSet.isEmpty());
 		
 		XObject oldJohn = this.oldModel.getObject(DemoModelUtil.JOHN_ID);
@@ -566,14 +567,14 @@ public abstract class XModelObjectLevelIndexTest {
 			break;
 		}
 		
-		Set<Pair<XAddress,XValue>> newSet = this.newIndex.search(valueString);
+		Set<ValueIndexEntry> newSet = this.newIndex.search(valueString);
 		assertEquals(1, newSet.size());
-		assertEquals(newJohn.getAddress(), newSet.iterator().next().getFirst());
+		assertEquals(newField.getAddress(), newSet.iterator().next().getAddress());
 	}
 	
 	/**
 	 * Tests if
-	 * {@link XModelObjectLevelIndex#updateIndex(XReadableObject, XReadableObject)}
+	 * {@link XFieldLevelIndex#updateIndex(XReadableObject, XReadableObject)}
 	 * works correctly when a new value gets added to a field of an object,
 	 * which already existed in the old state and which is excluded from being
 	 * indexed.
@@ -588,7 +589,7 @@ public abstract class XModelObjectLevelIndexTest {
 	
 	/**
 	 * Tests if
-	 * {@link XModelObjectLevelIndex#updateIndex(XReadableField, XReadableField)}
+	 * {@link XFieldLevelIndex#updateIndex(XReadableField, XReadableField)}
 	 * works correctly when a new value gets added to a field of an object,
 	 * which already existed in the old state and which is excluded from being
 	 * indexed.
@@ -602,9 +603,9 @@ public abstract class XModelObjectLevelIndexTest {
 	}
 	
 	/**
-	 * Tests if {@link XModelObjectLevelIndex#updateIndex(XFieldEvent, XValue)}
-	 * works correctly when a new value gets added to a field of an object,
-	 * which already existed in the old state and which is excluded from being
+	 * Tests if {@link XFieldLevelIndex#updateIndex(XFieldEvent, XValue)} works
+	 * correctly when a new value gets added to a field of an object, which
+	 * already existed in the old state and which is excluded from being
 	 * indexed.
 	 * 
 	 * This tests an index which defaultIncludeAll parameter is set to true, but
@@ -650,7 +651,7 @@ public abstract class XModelObjectLevelIndexTest {
 		}
 		
 		for(String s : newIndexStrings) {
-			Set<Pair<XAddress,XValue>> found = this.newIndex.search(s);
+			Set<ValueIndexEntry> found = this.newIndex.search(s);
 			assertTrue(found.isEmpty());
 		}
 		
@@ -658,7 +659,7 @@ public abstract class XModelObjectLevelIndexTest {
 	
 	/**
 	 * Tests if
-	 * {@link XModelObjectLevelIndex#updateIndex(XReadableObject, XReadableObject)}
+	 * {@link XFieldLevelIndex#updateIndex(XReadableObject, XReadableObject)}
 	 * works correctly when a new value gets added to a field of an object,
 	 * which already existed in the old state.
 	 * 
@@ -675,7 +676,7 @@ public abstract class XModelObjectLevelIndexTest {
 	
 	/**
 	 * Tests if
-	 * {@link XModelObjectLevelIndex#updateIndex(XReadableField, XReadableField)}
+	 * {@link XFieldLevelIndex#updateIndex(XReadableField, XReadableField)}
 	 * works correctly when a new value gets added to a field of an object,
 	 * which already existed in the old state.
 	 * 
@@ -691,9 +692,9 @@ public abstract class XModelObjectLevelIndexTest {
 	}
 	
 	/**
-	 * Tests if {@link XModelObjectLevelIndex#updateIndex(XFieldEvent, XValue)}
-	 * works correctly when a new value gets added to a field of an object,
-	 * which already existed in the old state.
+	 * Tests if {@link XFieldLevelIndex#updateIndex(XFieldEvent, XValue)} works
+	 * correctly when a new value gets added to a field of an object, which
+	 * already existed in the old state.
 	 * 
 	 * This tests an index which defaultIncludeAll parameter is set to false,
 	 * but has some fields which are still being indexed (i.e. the
@@ -741,7 +742,7 @@ public abstract class XModelObjectLevelIndexTest {
 		}
 		
 		for(String s : newIndexStrings) {
-			Set<Pair<XAddress,XValue>> found = this.newExcludeAllIndex.search(s);
+			Set<ValueIndexEntry> found = this.newExcludeAllIndex.search(s);
 			assertTrue(found.isEmpty());
 		}
 		
@@ -774,16 +775,16 @@ public abstract class XModelObjectLevelIndexTest {
 		}
 		
 		for(String s : newIndexStrings) {
-			Set<Pair<XAddress,XValue>> found = this.newExcludeAllIndex.search(s);
+			Set<ValueIndexEntry> found = this.newExcludeAllIndex.search(s);
 			assertFalse(found.isEmpty());
 			assertEquals(1, found.size());
-			assertEquals(newExcludedObject.getAddress(), found.iterator().next().getFirst());
+			assertEquals(newIncludedField.getAddress(), found.iterator().next().getAddress());
 		}
 	}
 	
 	/**
 	 * Tests if
-	 * {@link XModelObjectLevelIndex#updateIndex(XReadableObject, XReadableObject)}
+	 * {@link XFieldLevelIndex#updateIndex(XReadableObject, XReadableObject)}
 	 * works correctly when a value, which only existed once, gets removed from
 	 * a field of an object, which already existed in the old state.
 	 * 
@@ -796,7 +797,7 @@ public abstract class XModelObjectLevelIndexTest {
 	
 	/**
 	 * Tests if
-	 * {@link XModelObjectLevelIndex#updateIndex(XReadableField, XReadableField)}
+	 * {@link XFieldLevelIndex#updateIndex(XReadableField, XReadableField)}
 	 * works correctly when a value, which only existed once, gets removed from
 	 * a field of an object, which already existed in the old state.
 	 * 
@@ -808,9 +809,9 @@ public abstract class XModelObjectLevelIndexTest {
 	}
 	
 	/**
-	 * Tests if {@link XModelObjectLevelIndex#updateIndex(XFieldEvent, XValue)}
-	 * works correctly when a value, which only existed once, gets removed from
-	 * a field of an object, which already existed in the old state.
+	 * Tests if {@link XFieldLevelIndex#updateIndex(XFieldEvent, XValue)} works
+	 * correctly when a value, which only existed once, gets removed from a
+	 * field of an object, which already existed in the old state.
 	 * 
 	 * This tests an index which defaultIncludeAll parameter is set to true.
 	 */
@@ -865,14 +866,14 @@ public abstract class XModelObjectLevelIndexTest {
 		}
 		
 		for(String s : indexStrings) {
-			Set<Pair<XAddress,XValue>> found = this.newIndex.search(s);
+			Set<ValueIndexEntry> found = this.newIndex.search(s);
 			assertTrue(found.isEmpty());
 		}
 	}
 	
 	/**
 	 * Tests if
-	 * {@link XModelObjectLevelIndex#updateIndex(XReadableObject, XReadableObject)}
+	 * {@link XFieldLevelIndex#updateIndex(XReadableObject, XReadableObject)}
 	 * works correctly when a value, which only existed once, gets removed from
 	 * a field of an object, which already existed in the old state.
 	 * 
@@ -885,7 +886,7 @@ public abstract class XModelObjectLevelIndexTest {
 	
 	/**
 	 * Tests if
-	 * {@link XModelObjectLevelIndex#updateIndex(XReadableField, XReadableField)}
+	 * {@link XFieldLevelIndex#updateIndex(XReadableField, XReadableField)}
 	 * works correctly when a value, which only existed once, gets removed from
 	 * a field of an object, which already existed in the old state.
 	 * 
@@ -897,9 +898,9 @@ public abstract class XModelObjectLevelIndexTest {
 	}
 	
 	/**
-	 * Tests if {@link XModelObjectLevelIndex#updateIndex(XFieldEvent, XValue)}
-	 * works correctly when a value, which only existed once, gets removed from
-	 * a field of an object, which already existed in the old state.
+	 * Tests if {@link XFieldLevelIndex#updateIndex(XFieldEvent, XValue)} works
+	 * correctly when a value, which only existed once, gets removed from a
+	 * field of an object, which already existed in the old state.
 	 * 
 	 * This tests an index which defaultIncludeAll parameter is set to false.
 	 */
@@ -955,14 +956,14 @@ public abstract class XModelObjectLevelIndexTest {
 		}
 		
 		for(String s : indexStrings) {
-			Set<Pair<XAddress,XValue>> found = this.newIndex.search(s);
+			Set<ValueIndexEntry> found = this.newIndex.search(s);
 			assertTrue(found.isEmpty());
 		}
 	}
 	
 	/**
 	 * Tests if
-	 * {@link XModelObjectLevelIndex#updateIndex(XReadableObject, XReadableObject)}
+	 * {@link XFieldLevelIndex#updateIndex(XReadableObject, XReadableObject)}
 	 * works correctly when a value, which existed multiple times, gets removed
 	 * from a field of an object, which already existed in the old state.
 	 * 
@@ -975,7 +976,7 @@ public abstract class XModelObjectLevelIndexTest {
 	
 	/**
 	 * Tests if
-	 * {@link XModelObjectLevelIndex#updateIndex(XReadableField, XReadableField)}
+	 * {@link XFieldLevelIndex#updateIndex(XReadableField, XReadableField)}
 	 * works correctly when a value, which existed multiple times, gets removed
 	 * from a field of an object, which already existed in the old state.
 	 * 
@@ -987,9 +988,9 @@ public abstract class XModelObjectLevelIndexTest {
 	}
 	
 	/**
-	 * Tests if {@link XModelObjectLevelIndex#updateIndex(XFieldEvent, XValue)}
-	 * works correctly when a value, which existed multiple times, gets removed
-	 * from a field of an object, which already existed in the old state.
+	 * Tests if {@link XFieldLevelIndex#updateIndex(XFieldEvent, XValue)} works
+	 * correctly when a value, which existed multiple times, gets removed from a
+	 * field of an object, which already existed in the old state.
 	 * 
 	 * This tests an index which defaultIncludeAll parameter is set to true.
 	 */
@@ -1019,11 +1020,11 @@ public abstract class XModelObjectLevelIndexTest {
 		this.newIndex.updateIndex(oldJohn, newJohn);
 		
 		for(String s : indexStrings) {
-			Set<Pair<XAddress,XValue>> pairs = this.newIndex.search(s);
+			Set<ValueIndexEntry> entries = this.newIndex.search(s);
 			
-			Set<XAddress> addresses = getAddressesFromSetOfPairs(pairs);
+			Set<XAddress> addresses = getAddressesFromSetOfPairs(entries);
 			assertEquals(1, addresses.size());
-			assertTrue(addresses.contains(newJohn.getAddress()));
+			assertTrue(addresses.contains(newField2.getAddress()));
 		}
 		
 		XField oldField1 = oldJohn.createField(id1);
@@ -1055,15 +1056,15 @@ public abstract class XModelObjectLevelIndexTest {
 		}
 		
 		for(String s : indexStrings) {
-			Set<Pair<XAddress,XValue>> pairs = this.newIndex.search(s);
-			Set<XAddress> addresses = getAddressesFromSetOfPairs(pairs);
+			Set<ValueIndexEntry> entries = this.newIndex.search(s);
+			Set<XAddress> addresses = getAddressesFromSetOfPairs(entries);
 			/*
 			 * The value should still be indexed, since it existed multiple
 			 * times
 			 */
 			
 			assertEquals(1, addresses.size());
-			assertTrue(addresses.contains(newJohn.getAddress()));
+			assertTrue(addresses.contains(newField2.getAddress()));
 		}
 		
 		oldField1.setValue(null);
@@ -1089,8 +1090,8 @@ public abstract class XModelObjectLevelIndexTest {
 		}
 		
 		for(String s : indexStrings) {
-			Set<Pair<XAddress,XValue>> pairs = this.newIndex.search(s);
-			Set<XAddress> addresses = getAddressesFromSetOfPairs(pairs);
+			Set<ValueIndexEntry> entries = this.newIndex.search(s);
+			Set<XAddress> addresses = getAddressesFromSetOfPairs(entries);
 			/*
 			 * The value should be completely deindexed now
 			 */
@@ -1101,7 +1102,7 @@ public abstract class XModelObjectLevelIndexTest {
 	
 	/**
 	 * Tests if
-	 * {@link XModelObjectLevelIndex#updateIndex(XReadableObject, XReadableObject)}
+	 * {@link XFieldLevelIndex#updateIndex(XReadableObject, XReadableObject)}
 	 * works correctly when a value, which existed multiple times, gets removed
 	 * from a field of an object, which already existed in the old state.
 	 * 
@@ -1114,7 +1115,7 @@ public abstract class XModelObjectLevelIndexTest {
 	
 	/**
 	 * Tests if
-	 * {@link XModelObjectLevelIndex#updateIndex(XReadableField, XReadableField)}
+	 * {@link XFieldLevelIndex#updateIndex(XReadableField, XReadableField)}
 	 * works correctly when a value, which existed multiple times, gets removed
 	 * from a field of an object, which already existed in the old state.
 	 * 
@@ -1126,9 +1127,9 @@ public abstract class XModelObjectLevelIndexTest {
 	}
 	
 	/**
-	 * Tests if {@link XModelObjectLevelIndex#updateIndex(XFieldEvent, XValue)}
-	 * works correctly when a value, which existed multiple times, gets removed
-	 * from a field of an object, which already existed in the old state.
+	 * Tests if {@link XFieldLevelIndex#updateIndex(XFieldEvent, XValue)} works
+	 * correctly when a value, which existed multiple times, gets removed from a
+	 * field of an object, which already existed in the old state.
 	 * 
 	 * This tests an index which defaultIncludeAll parameter is set to false.
 	 */
@@ -1160,11 +1161,11 @@ public abstract class XModelObjectLevelIndexTest {
 		this.newExcludeAllIndex.updateIndex(oldObject, newObject);
 		
 		for(String s : indexStrings) {
-			Set<Pair<XAddress,XValue>> pairs = this.newExcludeAllIndex.search(s);
+			Set<ValueIndexEntry> pairs = this.newExcludeAllIndex.search(s);
 			
 			Set<XAddress> addresses = getAddressesFromSetOfPairs(pairs);
 			assertEquals(1, addresses.size());
-			assertTrue(addresses.contains(newObject.getAddress()));
+			assertTrue(addresses.contains(newField2.getAddress()));
 		}
 		
 		XField oldField1 = oldObject.createField(id1);
@@ -1196,15 +1197,15 @@ public abstract class XModelObjectLevelIndexTest {
 		}
 		
 		for(String s : indexStrings) {
-			Set<Pair<XAddress,XValue>> pairs = this.newExcludeAllIndex.search(s);
-			Set<XAddress> addresses = getAddressesFromSetOfPairs(pairs);
+			Set<ValueIndexEntry> entries = this.newExcludeAllIndex.search(s);
+			Set<XAddress> addresses = getAddressesFromSetOfPairs(entries);
 			/*
 			 * The value should still be indexed, since it existed multiple
 			 * times
 			 */
 			
 			assertEquals(1, addresses.size());
-			assertTrue(addresses.contains(newObject.getAddress()));
+			assertTrue(addresses.contains(newField1.getAddress()));
 		}
 		
 		oldField1.setValue(null);
@@ -1230,8 +1231,8 @@ public abstract class XModelObjectLevelIndexTest {
 		}
 		
 		for(String s : indexStrings) {
-			Set<Pair<XAddress,XValue>> pairs = this.newExcludeAllIndex.search(s);
-			Set<XAddress> addresses = getAddressesFromSetOfPairs(pairs);
+			Set<ValueIndexEntry> entries = this.newExcludeAllIndex.search(s);
+			Set<XAddress> addresses = getAddressesFromSetOfPairs(entries);
 			/*
 			 * The value should be completely deindexed now
 			 */
@@ -1242,7 +1243,7 @@ public abstract class XModelObjectLevelIndexTest {
 	
 	/**
 	 * Tests if
-	 * {@link XModelObjectLevelIndex#updateIndex(XReadableObject, XReadableObject)}
+	 * {@link XFieldLevelIndex#updateIndex(XReadableObject, XReadableObject)}
 	 * works correctly when a value of a field of an object gets changed, which
 	 * already existed in the old state.
 	 * 
@@ -1255,7 +1256,7 @@ public abstract class XModelObjectLevelIndexTest {
 	
 	/**
 	 * Tests if
-	 * {@link XModelObjectLevelIndex#updateIndex(XReadableField, XReadableField)}
+	 * {@link XFieldLevelIndex#updateIndex(XReadableField, XReadableField)}
 	 * works correctly when a value of a field of an object gets changed, which
 	 * already existed in the old state.
 	 * 
@@ -1267,8 +1268,8 @@ public abstract class XModelObjectLevelIndexTest {
 	}
 	
 	/**
-	 * Tests if {@link XModelObjectLevelIndex#updateIndex(XFieldEvent, XValue)}
-	 * works correctly when a value of a field of an object gets changed, which
+	 * Tests if {@link XFieldLevelIndex#updateIndex(XFieldEvent, XValue)} works
+	 * correctly when a value of a field of an object gets changed, which
 	 * already existed in the old state.
 	 * 
 	 * This tests an index which defaultIncludeAll parameter is set to true.
@@ -1322,21 +1323,21 @@ public abstract class XModelObjectLevelIndexTest {
 		
 		// make sure the old value was deindexed
 		for(String s : oldIndexStrings) {
-			Set<Pair<XAddress,XValue>> found = this.newIndex.search(s);
+			Set<ValueIndexEntry> found = this.newIndex.search(s);
 			assertTrue(found.isEmpty());
 		}
 		
 		// make sure the new value was indexed
 		for(String s : newIndexStrings) {
-			Set<Pair<XAddress,XValue>> found = this.newIndex.search(s);
+			Set<ValueIndexEntry> found = this.newIndex.search(s);
 			assertEquals(1, found.size());
-			assertEquals(newJohn.getAddress(), found.iterator().next().getFirst());
+			assertEquals(newField.getAddress(), found.iterator().next().getAddress());
 		}
 	}
 	
 	/**
 	 * Tests if
-	 * {@link XModelObjectLevelIndex#updateIndex(XReadableObject, XReadableObject)}
+	 * {@link XFieldLevelIndex#updateIndex(XReadableObject, XReadableObject)}
 	 * works correctly when a value of a field of an object gets changed, which
 	 * already existed in the old state.
 	 * 
@@ -1352,7 +1353,7 @@ public abstract class XModelObjectLevelIndexTest {
 	
 	/**
 	 * Tests if
-	 * {@link XModelObjectLevelIndex#updateIndex(XReadableField, XReadableField)}
+	 * {@link XFieldLevelIndex#updateIndex(XReadableField, XReadableField)}
 	 * works correctly when a value of a field of an object gets changed, which
 	 * already existed in the old state.
 	 * 
@@ -1367,8 +1368,8 @@ public abstract class XModelObjectLevelIndexTest {
 	}
 	
 	/**
-	 * Tests if {@link XModelObjectLevelIndex#updateIndex(XFieldEvent, XValue)}
-	 * works correctly when a value of a field of an object gets changed, which
+	 * Tests if {@link XFieldLevelIndex#updateIndex(XFieldEvent, XValue)} works
+	 * correctly when a value of a field of an object gets changed, which
 	 * already existed in the old state.
 	 * 
 	 * This tests an index which defaultIncludeAll parameter is set to true, but
@@ -1417,7 +1418,7 @@ public abstract class XModelObjectLevelIndexTest {
 		}
 		
 		for(String s : newIndexStrings) {
-			Set<Pair<XAddress,XValue>> found = this.newIndex.search(s);
+			Set<ValueIndexEntry> found = this.newIndex.search(s);
 			assertTrue(found.isEmpty());
 		}
 		
@@ -1425,7 +1426,7 @@ public abstract class XModelObjectLevelIndexTest {
 	
 	/**
 	 * Tests if
-	 * {@link XModelObjectLevelIndex#updateIndex(XReadableObject, XReadableObject)}
+	 * {@link XFieldLevelIndex#updateIndex(XReadableObject, XReadableObject)}
 	 * works correctly when a value of a field of an object gets changed, which
 	 * already existed in the old state.
 	 * 
@@ -1442,7 +1443,7 @@ public abstract class XModelObjectLevelIndexTest {
 	
 	/**
 	 * Tests if
-	 * {@link XModelObjectLevelIndex#updateIndex(XReadableField, XReadableField)}
+	 * {@link XFieldLevelIndex#updateIndex(XReadableField, XReadableField)}
 	 * works correctly when a value of a field of an object gets changed, which
 	 * already existed in the old state.
 	 * 
@@ -1458,8 +1459,8 @@ public abstract class XModelObjectLevelIndexTest {
 	}
 	
 	/**
-	 * Tests if {@link XModelObjectLevelIndex#updateIndex(XFieldEvent, XValue)}
-	 * works correctly when a value of a field of an object gets changed, which
+	 * Tests if {@link XFieldLevelIndex#updateIndex(XFieldEvent, XValue)} works
+	 * correctly when a value of a field of an object gets changed, which
 	 * already existed in the old state.
 	 * 
 	 * This tests an index which defaultIncludeAll parameter is set to false,
@@ -1519,7 +1520,7 @@ public abstract class XModelObjectLevelIndexTest {
 		
 		// make sure that nothing happened
 		for(String s : newIndexStrings) {
-			Set<Pair<XAddress,XValue>> found = this.newExcludeAllIndex.search(s);
+			Set<ValueIndexEntry> found = this.newExcludeAllIndex.search(s);
 			assertTrue(found.isEmpty());
 		}
 		
@@ -1561,21 +1562,21 @@ public abstract class XModelObjectLevelIndexTest {
 		
 		// make sure the old value was deindexed
 		for(String s : oldIndexStrings) {
-			Set<Pair<XAddress,XValue>> found = this.newExcludeAllIndex.search(s);
+			Set<ValueIndexEntry> found = this.newExcludeAllIndex.search(s);
 			assertTrue(found.isEmpty());
 		}
 		
 		// make sure the new value was indexed
 		for(String s : newIndexStrings) {
-			Set<Pair<XAddress,XValue>> found = this.newExcludeAllIndex.search(s);
+			Set<ValueIndexEntry> found = this.newExcludeAllIndex.search(s);
 			assertEquals(1, found.size());
-			assertEquals(newObject.getAddress(), found.iterator().next().getFirst());
+			assertEquals(newField.getAddress(), found.iterator().next().getAddress());
 		}
 	}
 	
 	/**
 	 * Tests if
-	 * {@link XModelObjectLevelIndex#updateIndex(XReadableObject, XReadableObject)}
+	 * {@link XFieldLevelIndex#updateIndex(XReadableObject, XReadableObject)}
 	 * works correctly when a field an object gets remove, which already existed
 	 * in the old state.
 	 * 
@@ -1600,14 +1601,14 @@ public abstract class XModelObjectLevelIndexTest {
 		this.newIndex.updateIndex(oldJohn, newJohn);
 		
 		for(String s : indexStrings) {
-			Set<Pair<XAddress,XValue>> found = this.newIndex.search(s);
+			Set<ValueIndexEntry> found = this.newIndex.search(s);
 			assertTrue(found.isEmpty());
 		}
 	}
 	
 	/**
 	 * Tests if
-	 * {@link XModelObjectLevelIndex#updateIndex(XReadableObject, XReadableObject)}
+	 * {@link XFieldLevelIndex#updateIndex(XReadableObject, XReadableObject)}
 	 * works correctly when a field an object gets remove, which already existed
 	 * in the old state.
 	 * 
@@ -1632,13 +1633,13 @@ public abstract class XModelObjectLevelIndexTest {
 		this.newExcludeAllIndex.updateIndex(oldJohn, newJohn);
 		
 		for(String s : indexStrings) {
-			Set<Pair<XAddress,XValue>> found = this.newExcludeAllIndex.search(s);
+			Set<ValueIndexEntry> found = this.newExcludeAllIndex.search(s);
 			assertTrue(found.isEmpty());
 		}
 	}
 	
 	/**
-	 * Tests if {@link XModelObjectLevelIndex#deIndex(XReadableObject)} works
+	 * Tests if {@link XFieldLevelIndex#deIndex(XReadableObject)} works
 	 * correctly.
 	 * 
 	 * This tests an index which defaultIncludeAll parameter is set to true.
@@ -1652,7 +1653,7 @@ public abstract class XModelObjectLevelIndexTest {
 	}
 	
 	/**
-	 * Tests if {@link XModelObjectLevelIndex#deIndex(XReadableObject)} works
+	 * Tests if {@link XFieldLevelIndex#deIndex(XReadableObject)} works
 	 * correctly.
 	 * 
 	 * This tests an index which defaultIncludeAll parameter is set to false.
@@ -1666,7 +1667,7 @@ public abstract class XModelObjectLevelIndexTest {
 	}
 	
 	/**
-	 * Tests if {@link XModelObjectLevelIndex#deIndex(XReadableField)} works
+	 * Tests if {@link XFieldLevelIndex#deIndex(XReadableField)} works
 	 * correctly.
 	 * 
 	 * This tests an index which defaultIncludeAll parameter is set to true.
@@ -1685,7 +1686,7 @@ public abstract class XModelObjectLevelIndexTest {
 	}
 	
 	/**
-	 * Tests if {@link XModelObjectLevelIndex#deIndex(XReadableField)} works
+	 * Tests if {@link XFieldLevelIndex#deIndex(XReadableField)} works
 	 * correctly.
 	 * 
 	 * This tests an index which defaultIncludeAll parameter is set to false.
@@ -1703,19 +1704,21 @@ public abstract class XModelObjectLevelIndexTest {
 		testIfObjectWasDeIndexed(newJohn, this.newExcludeAllIndex, this.newExcludeAllIndexer);
 	}
 	
-	private static void testIfObjectWasDeIndexed(XReadableObject object,
-	        XModelObjectLevelIndex index, XValueIndexer indexer) {
-		XAddress objectAddress = object.getAddress();
+	private static void testIfObjectWasDeIndexed(XReadableObject object, XFieldLevelIndex index,
+	        XValueIndexer indexer) {
 		
 		for(XID fieldId : object) {
-			XValue value = object.getField(fieldId).getValue();
+			XReadableField field = object.getField(fieldId);
+			XAddress fieldAddress = field.getAddress();
+			
+			XValue value = field.getValue();
 			List<String> indexStrings = indexer.getIndexStrings(value);
 			
 			for(String s : indexStrings) {
-				Set<Pair<XAddress,XValue>> pairs = index.search(s);
+				Set<ValueIndexEntry> pairs = index.search(s);
 				Set<XAddress> addresses = getAddressesFromSetOfPairs(pairs);
 				
-				assertFalse(addresses.contains(objectAddress));
+				assertFalse(addresses.contains(fieldAddress));
 			}
 		}
 	}

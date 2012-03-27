@@ -3,14 +3,14 @@ package org.xydra.valueindex;
 
 
 /**
- * Implementation of {@link XModelObjectLevelIndexTest} for testing
+ * Implementation of {@link XFieldLevelIndexTest} for testing
  * {@link MemoryMapSetIndex}.
  * 
  * @author Kaidel
  * 
  */
 
-public class InMemoryValueIndexTest extends XModelObjectLevelIndexTest {
+public class InMemoryValueIndexTest extends XFieldLevelIndexTest {
 	
 	@Override
 	public void initializeIndexers() {

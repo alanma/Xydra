@@ -35,7 +35,6 @@ public class ValueIndexEntryUtils {
 	public static String serializeAsString(ValueIndexEntry entry) {
 		XValue value = entry.getValue();
 		XAddress address = entry.getAddress();
-		Integer counter = entry.getCounter();
 		
 		// use existing JSON serializers
 		JsonSerializer serializer = new JsonSerializer();
@@ -57,7 +56,9 @@ public class ValueIndexEntryUtils {
 		}
 		
 		// "" is used as the marker for splitting
-		String result = adrString + "\"\"" + valueString + "\"\"" + counter;
+		String result = adrString + "\"\"" + valueString;
+		
+		assert !result.equals("");
 		
 		return result;
 	}
@@ -110,11 +111,17 @@ public class ValueIndexEntryUtils {
 	
 	private static String escapeListString(String s) {
 		String replace = s.replace("<entry>", "<\\entry>");
+		
+		assert !replace.equals("");
+		
 		return replace;
 	}
 	
 	private static String deescapeListString(String s) {
 		String replace = s.replace("<\\entry>", "<entry>");
+		
+		assert !replace.equals("");
+		
 		return replace;
 	}
 	
@@ -155,11 +162,10 @@ public class ValueIndexEntryUtils {
 	public static ValueIndexEntry fromString(String s) {
 		XAddress address = null;
 		XValue value = null;
-		Integer counter = 0;
 		
 		String[] strings = s.split("\"\"");
 		
-		assert strings.length == 3;
+		assert strings.length == 2;
 		
 		String adrString = deescapeSingleString(strings[0]);
 		String valString = deescapeSingleString(strings[1]);
@@ -181,11 +187,7 @@ public class ValueIndexEntryUtils {
 			value = SerializedValue.toValue(valueElement);
 		}
 		
-		// parser counter
-		
-		counter = Integer.parseInt(strings[2]);
-		
-		ValueIndexEntry entry = new ValueIndexEntry(address, value, counter);
+		ValueIndexEntry entry = new ValueIndexEntry(address, value);
 		
 		return entry;
 	}

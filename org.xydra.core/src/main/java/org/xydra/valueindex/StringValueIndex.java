@@ -4,7 +4,6 @@ import java.util.Iterator;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XType;
-import org.xydra.base.XX;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.value.XValue;
 import org.xydra.index.query.EqualsConstraint;
@@ -110,7 +109,7 @@ public class StringValueIndex implements ValueIndex {
 			return value;
 		}
 		
-		ValueIndexEntry entry = new ValueIndexEntry(fieldAddress, value, 1);
+		ValueIndexEntry entry = new ValueIndexEntry(fieldAddress, value);
 		String entryString = ValueIndexEntryUtils.serializeAsString(entry);
 		
 		int entrySize = StringValueIndex.estimateStringSize(entryString);
@@ -145,10 +144,8 @@ public class StringValueIndex implements ValueIndex {
 		
 		XValue usedValue = this.getValueForIndex(fieldAddress, value);
 		
-		XAddress objectAddress = XX.resolveObject(fieldAddress.getRepository(),
-		        fieldAddress.getModel(), fieldAddress.getObject());
-		
 		String entriesString = this.map.get(key);
+		
 		ValueIndexEntry[] entryArray = ValueIndexEntryUtils.getArrayFromString(entriesString);
 		
 		boolean found = false;
@@ -171,34 +168,37 @@ public class StringValueIndex implements ValueIndex {
 				sameValue = entryValue.equals(usedValue);
 			}
 			
-			if(sameValue && entryAddress.equals(objectAddress)) {
+			if(sameValue && entryAddress.equals(fieldAddress)) {
 				
 				found = true;
 				
-				entryArray[i].decrementCounter();
+				entryArray[i] = null;
 				
-				if(entryArray[i].getCounter() == 0) {
-					entryArray[i] = null;
-					
-					/*
-					 * setting the entry to null will result in deleting it from
-					 * the stored set, since {@link
-					 * ValueIndexEntryUtils#serializeAsString
-					 * (ValueIndexEntry[])} only writes entries which are not
-					 * null into the string
-					 */
-				}
+				/*
+				 * setting the entry to null will result in deleting it from the
+				 * stored set, since {@link
+				 * ValueIndexEntryUtils#serializeAsString (ValueIndexEntry[])}
+				 * only writes entries which are not null into the string
+				 */
 			}
 		}
 		
 		if(found) {
 			/*
-			 * counter of one entry was decremented -> rewrite the stored string
-			 * to represent the change
+			 * at least one entry was changed -> rewrite the stored string to
+			 * represent the change
 			 */
 			String newEntriesString = ValueIndexEntryUtils.serializeAsString(entryArray);
-			this.map.put(key, newEntriesString);
 			
+			if(newEntriesString.equals("")) {
+				
+				// parsing returned an empty string, which implies that the list
+				// is empty and we can remove the key completely
+				
+				this.map.remove(key);
+			} else {
+				this.map.put(key, newEntriesString);
+			}
 		}
 		// else: do nothing, since nothing was changed
 	}
@@ -217,12 +217,9 @@ public class StringValueIndex implements ValueIndex {
 		
 		XValue usedValue = this.getValueForIndex(fieldAddress, value);
 		
-		XAddress objectAddress = XX.resolveObject(fieldAddress.getRepository(),
-		        fieldAddress.getModel(), fieldAddress.getObject());
-		
 		if(!(this.containsKey(key))) {
 			ValueIndexEntry[] newEntries = new ValueIndexEntry[1];
-			newEntries[0] = new ValueIndexEntry(objectAddress, usedValue, 1);
+			newEntries[0] = new ValueIndexEntry(fieldAddress, usedValue);
 			
 			String entriesString = ValueIndexEntryUtils.serializeAsString(newEntries);
 			
@@ -230,6 +227,7 @@ public class StringValueIndex implements ValueIndex {
 		} else {
 			
 			String entriesString = this.map.get(key);
+			
 			ValueIndexEntry[] entryArray = ValueIndexEntryUtils.getArrayFromString(entriesString);
 			
 			boolean found = false;
@@ -243,26 +241,17 @@ public class StringValueIndex implements ValueIndex {
 				 * ValueIndexEntries which could be used for ordering
 				 */
 				
-				if(entryArray[i].equalAddressAndValue(objectAddress, usedValue)) {
+				if(entryArray[i].equalAddressAndValue(fieldAddress, usedValue)) {
 					found = true;
 					
-					entryArray[i].incrementCounter();
 				}
 			}
 			
-			if(found) {
-				/*
-				 * counter of one entry was decremented -> rewrite the stored
-				 * string to represent the change
-				 */
-				String newEntriesString = ValueIndexEntryUtils.serializeAsString(entryArray);
-				this.map.put(key, newEntriesString);
-				
-			} else {
+			if(!found) {
 				/*
 				 * no entry was found, so we'll have to add it
 				 */
-				ValueIndexEntry newEntry = new ValueIndexEntry(objectAddress, usedValue, 1);
+				ValueIndexEntry newEntry = new ValueIndexEntry(fieldAddress, usedValue);
 				
 				String newEntriesString = ValueIndexEntryUtils.serializeAsString(entryArray,
 				        newEntry);

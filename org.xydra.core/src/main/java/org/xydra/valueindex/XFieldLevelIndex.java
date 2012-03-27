@@ -44,10 +44,11 @@ import org.xydra.index.query.Pair;
  */
 
 /*
- * TODO test the new include/exclude features
+ * TODO rewrite/update documentation (we now store the field address, not the
+ * object address)
  */
 
-public class XModelObjectLevelIndex {
+public class XFieldLevelIndex {
 	private XValueIndexer indexer;
 	private ValueIndex index;
 	private XAddress modelAddress;
@@ -86,8 +87,8 @@ public class XModelObjectLevelIndex {
 	 *            {@link XReadableField XReadableFields} will never be indexed,
 	 *            independent of how defaultIncludeAll is set.
 	 */
-	public XModelObjectLevelIndex(XReadableModel model, XValueIndexer indexer,
-	        boolean defaultIncludeAll, Set<XID> includeFieldIds, Set<XID> excludeFieldIds) {
+	public XFieldLevelIndex(XReadableModel model, XValueIndexer indexer, boolean defaultIncludeAll,
+	        Set<XID> includeFieldIds, Set<XID> excludeFieldIds) {
 		this.indexer = indexer;
 		this.index = indexer.getIndex();
 		
@@ -133,7 +134,7 @@ public class XModelObjectLevelIndex {
 	 * 
 	 * @param model The {@link XReadableModel} which is to be indexed (i.e. the
 	 *            {@link XReadableModel} given to the constructor
-	 *            {@link XModelObjectLevelIndex#XModelObjectLevelIndex(XReadableModel, XValueIndexer)}
+	 *            {@link XFieldLevelIndex#XModelObjectLevelIndex(XReadableModel, XValueIndexer)}
 	 *            ).
 	 */
 	private void index(XReadableModel model) {
@@ -540,7 +541,7 @@ public class XModelObjectLevelIndex {
 	 * Which {@link XValue XValues} corresponds to a given key is determined by
 	 * the used {@link XValueIndexer} which was set in the constructor
 	 * (XValueIndexer in
-	 * {@link XModelObjectLevelIndex#XModelObjectLevelIndex(XReadableModel, XValueIndexer, boolean, Set, Set)
+	 * {@link XFieldLevelIndex#XFieldLevelIndex(XReadableModel, XValueIndexer, boolean, Set, Set)
 	 * )} )
 	 * 
 	 * @param key The key for which corresponding will be searched
@@ -551,7 +552,7 @@ public class XModelObjectLevelIndex {
 	 *         for a warning concerning the {@link XValue XValues} in the
 	 *         {@link Pair Pairs}.
 	 */
-	public Set<Pair<XAddress,XValue>> search(String key) {
+	public Set<ValueIndexEntry> search(String key) {
 		// IMPROVE rather simple search algorithm at the moment...
 		
 		/*
@@ -559,17 +560,14 @@ public class XModelObjectLevelIndex {
 		 * given key appropriately
 		 */
 		String indexKey = key.toLowerCase();
-		HashSet<Pair<XAddress,XValue>> set = new HashSet<Pair<XAddress,XValue>>();
+		HashSet<ValueIndexEntry> set = new HashSet<ValueIndexEntry>();
 		
 		EqualsConstraint<String> constraint = new EqualsConstraint<String>(indexKey);
 		Iterator<ValueIndexEntry> iterator = this.index.constraintIterator(constraint);
 		
 		while(iterator.hasNext()) {
 			ValueIndexEntry entry = iterator.next();
-			Pair<XAddress,XValue> pair = new Pair<XAddress,XValue>(entry.getAddress(),
-			        entry.getValue());
-			
-			set.add(pair);
+			set.add(entry);
 		}
 		
 		return set;

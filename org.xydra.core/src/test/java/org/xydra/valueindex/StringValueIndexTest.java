@@ -3,14 +3,14 @@ package org.xydra.valueindex;
 
 
 /**
- * Implementation of {@link XModelObjectLevelIndexTest} for testing
+ * Implementation of {@link XFieldLevelIndexTest} for testing
  * {@link StringValueIndex}.
  * 
  * @author Kaidel
  * 
  */
 
-public class StringValueIndexTest extends XModelObjectLevelIndexTest {
+public class StringValueIndexTest extends XFieldLevelIndexTest {
 	
 	@Override
 	public void initializeIndexers() {
