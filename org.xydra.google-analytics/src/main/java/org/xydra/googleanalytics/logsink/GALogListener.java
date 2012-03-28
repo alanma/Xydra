@@ -64,12 +64,16 @@ public class GALogListener implements ILogListener, UserInfo {
 	
 	@Override
 	public void error(Logger log, String msg) {
-		track(log, "error", msg);
+		if(hasGaData(msg)) {
+			trackData(log, "error", msg);
+		}
 	}
 	
 	@Override
 	public void error(Logger log, String msg, Throwable t) {
-		track(log, "error", msg, t);
+		if(hasGaData(msg)) {
+			trackData(log, "error", msg);
+		}
 	}
 	
 	@Override
@@ -157,22 +161,9 @@ public class GALogListener implements ILogListener, UserInfo {
 	/**
 	 * @param log
 	 * @param gaEvent
-	 * @deprecated use explicit logging syntax GAE?... (see class comment)
 	 */
-	@Deprecated
 	private void track(Logger log, GaEvent gaEvent) {
 		this.tracker.track(new FocusPoint(log.toString()), "-", this, gaEvent);
-	}
-	
-	/**
-	 * @param log
-	 * @param logLevel
-	 * @param msg
-	 * @deprecated use explicit logging syntax GAE?... (see class comment)
-	 */
-	@Deprecated
-	private void track(Logger log, String logLevel, String msg) {
-		track(log, new GaEvent(logLevel, msg));
 	}
 	
 	/**
@@ -208,18 +199,18 @@ public class GALogListener implements ILogListener, UserInfo {
 		track(log, gaEvent);
 	}
 	
-	private void track(Logger log, String logLevel, String msg, Throwable t) {
-		track(log, new GaEvent(logLevel, t.getClass().getCanonicalName(), t.getMessage()));
-	}
-	
 	@Override
 	public void warn(Logger log, String msg) {
-		track(log, "warn", msg);
+		if(hasGaData(msg)) {
+			trackData(log, "warn", msg);
+		}
 	}
 	
 	@Override
 	public void warn(Logger log, String msg, Throwable t) {
-		trace(log, "info", t);
+		if(hasGaData(msg)) {
+			trackData(log, "warn", msg);
+		}
 	}
 	
 	public static final String GA_URI = "GA?";
