@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Collection;
 
+import org.xydra.annotations.RunsInGWT;
 import org.xydra.csv.impl.memory.CsvTable;
 
 
+@RunsInGWT(false)
 public class CsvRowHandler implements IRowHandler {
 	
 	private Writer writer;

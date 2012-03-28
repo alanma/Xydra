@@ -6,9 +6,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.xydra.annotations.RunsInGWT;
 import org.xydra.csv.impl.memory.Row;
 
 
+@RunsInGWT(false)
 public class HtmlTool {
 	
 	/**
