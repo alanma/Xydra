@@ -98,31 +98,44 @@ public class ValueIndexEntryUtils {
 			ValueIndexEntry entry = entries[i];
 			
 			if(entry != null) {
-				result += escapeListString(serializeAsString(entry));
-			}
-			
-			if(i + 1 < entries.length) {
-				result += "<entry>";
+				String resultString = serializeAsString(entry);
+				
+				if(result.equals("")) {
+					/*
+					 * don't add <entry> if this is the first string
+					 */
+					result += escapeListString(resultString);
+				} else {
+					result += "<entry>" + escapeListString(resultString);
+				}
 			}
 		}
 		
+		/**
+		 * "<entry>" should only occur as a marker between the different strings
+		 * which are encoding ValueIndexEntries
+		 */
+		assert !result.startsWith("<entry>") && !result.endsWith("<entry>");
 		return result;
 	}
 	
 	private static String escapeListString(String s) {
-		String replace = s.replace("<entry>", "<\\entry>");
+		String replace1 = s.replace("\\", "\\\\");
 		
-		assert !replace.equals("");
+		String replace2 = replace1.replace("<entry>", "<\\entry>");
 		
-		return replace;
+		assert !replace2.equals("");
+		
+		return replace2;
 	}
 	
 	private static String deescapeListString(String s) {
-		String replace = s.replace("<\\entry>", "<entry>");
+		String replace1 = s.replace("<\\entry>", "<entry>");
+		String replace2 = replace1.replace("\\\\", "\\");
 		
-		assert !replace.equals("");
+		assert !replace2.equals("");
 		
-		return replace;
+		return replace2;
 	}
 	
 	/**
@@ -142,7 +155,11 @@ public class ValueIndexEntryUtils {
 		String result = serializeAsString(oldEntries);
 		
 		if(newEntry != null) {
-			result += "<entry>" + escapeListString(serializeAsString(newEntry));
+			if(result.equals("")) {
+				result = escapeListString(serializeAsString(newEntry));
+			} else {
+				result += "<entry>" + escapeListString(serializeAsString(newEntry));
+			}
 		}
 		return result;
 	}

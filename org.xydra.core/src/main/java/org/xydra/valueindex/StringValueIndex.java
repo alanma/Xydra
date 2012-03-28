@@ -14,8 +14,8 @@ import org.xydra.index.query.EqualsConstraint;
  * {@link ValueIndexEntry ValueIndexEntries}, but represents and stores them as
  * Strings.
  * 
- * Since {@link XValue XValues} can become pretty big, this implementation
- * offers the possibility to set a maximum size for the index entries. If an
+ * Since {@link XValue XValues} can be pretty big, this implementation offers
+ * the possibility to set a maximum size for the index entries. If an
  * {@link XValue} is bigger than the given maximum size, the {@link XAddress} of
  * the {@link XReadableField} holding the value will be stored instead of the
  * value itself.

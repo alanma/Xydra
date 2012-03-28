@@ -210,8 +210,11 @@ public abstract class XFieldLevelIndexTest {
 		this.excludedIds = new HashSet<XID>();
 		this.includedIds = new HashSet<XID>();
 		for(int i = 0; i < 13; i++) {
-			this.excludedIds.add(XX.createUniqueId());
-			this.includedIds.add(XX.createUniqueId());
+			XID excludedId = XX.toId("ToBeExcluded" + i);
+			XID includedId = XX.toId("ToBeIncluded" + i);
+			
+			this.excludedIds.add(excludedId);
+			this.includedIds.add(includedId);
 		}
 	}
 	
@@ -1023,7 +1026,12 @@ public abstract class XFieldLevelIndexTest {
 			Set<ValueIndexEntry> entries = this.newIndex.search(s);
 			
 			Set<XAddress> addresses = getAddressesFromSetOfPairs(entries);
-			assertEquals(1, addresses.size());
+			
+			/*
+			 * Only two fields should hold this value, newField1 & newField2
+			 */
+			assertEquals(2, addresses.size());
+			assertTrue(addresses.contains(newField1.getAddress()));
 			assertTrue(addresses.contains(newField2.getAddress()));
 		}
 		
@@ -1164,7 +1172,11 @@ public abstract class XFieldLevelIndexTest {
 			Set<ValueIndexEntry> pairs = this.newExcludeAllIndex.search(s);
 			
 			Set<XAddress> addresses = getAddressesFromSetOfPairs(pairs);
-			assertEquals(1, addresses.size());
+			
+			/*
+			 * Only two fields should hold this value, newField1 & newField2
+			 */
+			assertEquals(2, addresses.size());
 			assertTrue(addresses.contains(newField2.getAddress()));
 		}
 		
@@ -1205,7 +1217,7 @@ public abstract class XFieldLevelIndexTest {
 			 */
 			
 			assertEquals(1, addresses.size());
-			assertTrue(addresses.contains(newField1.getAddress()));
+			assertTrue(addresses.contains(newField2.getAddress()));
 		}
 		
 		oldField1.setValue(null);
