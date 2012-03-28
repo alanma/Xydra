@@ -1,8 +1,5 @@
 package org.xydra.valueindex;
 
-import java.util.HashSet;
-
-import org.xydra.base.XID;
 
 
 /**
@@ -19,15 +16,6 @@ import org.xydra.base.XID;
  */
 
 public class StringValueIndexWithMaxSizeTest extends XFieldLevelIndexTest {
-	private HashSet<XID> emptySet = new HashSet<XID>();
-	
-	@Override
-	public void initializeIndexes() {
-		this.oldIndex = new XFieldLevelIndex(this.oldModel, this.oldIndexer, true,
-		        this.emptySet, this.emptySet);
-		this.newIndex = new XFieldLevelIndex(this.newModel, this.newIndexer, true,
-		        this.emptySet, this.emptySet);
-	}
 	
 	@Override
 	public void initializeIndexers() {
@@ -39,5 +27,14 @@ public class StringValueIndexWithMaxSizeTest extends XFieldLevelIndexTest {
 		
 		this.oldIndexer = new SimpleValueIndexer(oldIndex);
 		this.newIndexer = new SimpleValueIndexer(newIndex);
+		
+		StringMap oldExcludeAllMap = new MockStringMap();
+		StringMap newExcludeAllMap = new MockStringMap();
+		
+		StringValueIndex oldExcludeAllIndex = new StringValueIndex(oldExcludeAllMap, 1);
+		StringValueIndex newExcludeAllIndex = new StringValueIndex(newExcludeAllMap, 1);
+		
+		this.oldExcludeAllIndexer = new SimpleValueIndexer(oldExcludeAllIndex);
+		this.newExcludeAllIndexer = new SimpleValueIndexer(newExcludeAllIndex);
 	}
 }
