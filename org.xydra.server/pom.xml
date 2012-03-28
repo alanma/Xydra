@@ -113,6 +113,13 @@
 			<version>1.2.2</version>
 		</dependency>
 
+		<!-- CSV -->
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>csv</artifactId>
+		</dependency>
+
+
 	</dependencies>
 
 	<build>
