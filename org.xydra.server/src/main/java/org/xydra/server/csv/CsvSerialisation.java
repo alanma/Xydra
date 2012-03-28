@@ -23,6 +23,7 @@ import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
 import org.xydra.core.DemoModelUtil;
+import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.impl.memory.MemoryRepository;
@@ -36,11 +37,30 @@ import org.xydra.csv.IRow;
 import org.xydra.csv.impl.memory.CsvTable;
 import org.xydra.csv.impl.memory.Row;
 
+import com.sun.org.apache.xpath.internal.objects.XObject;
 
+
+/**
+ * Write any {@link XReadableModel} into a CSV file. One row per {@link XObject}
+ * , one column per {@link XField}. Values are serialised as JSON fragments.
+ * Looks messy, but works with round-trip, i.e. the CSV can be parsed back
+ * correctly to an XModel. This can be a handy debugging tool.
+ * 
+ * @author xamde
+ * 
+ */
 @RunsInGWT(false)
 public class CsvSerialisation {
 	
-	public static void writeToCsv(XReadableModel model, Writer w) throws IOException {
+	/**
+	 * @param model
+	 * @param w
+	 * @param prettyExportOnly if true, result looks more pretty but cannot be
+	 *            re-imported (because the type information is missing)
+	 * @throws IOException
+	 */
+	public static void writeToCsv(XReadableModel model, Writer w, boolean prettyExportOnly)
+	        throws IOException {
 		CsvTable table = new CsvTable();
 		for(XID oid : model) {
 			Row row = table.getOrCreateRow(oid.toString(), true);
@@ -48,8 +68,15 @@ public class CsvSerialisation {
 			for(XID fid : xo) {
 				XReadableField xf = xo.getField(fid);
 				XValue value = xf.getValue();
-				String s = serialize(value);
-				row.setValue(fid.toString(), s, true);
+				if(prettyExportOnly) {
+					if(value != null) {
+						String s = value.toString();
+						row.setValue(fid.toString(), s, true);
+					}
+				} else {
+					String s = serialize(value);
+					row.setValue(fid.toString(), s, true);
+				}
 			}
 		}
 		table.writeTo(w);
@@ -109,8 +136,14 @@ public class CsvSerialisation {
 		File f = new File("./phonebook.csv");
 		FileOutputStream fout = new FileOutputStream(f);
 		Writer w = new OutputStreamWriter(fout, "utf-8");
-		writeToCsv(model, w);
+		writeToCsv(model, w, false);
 		w.close();
+		
+		File f2 = new File("./phonebook-pretty.csv");
+		FileOutputStream fout2 = new FileOutputStream(f2);
+		Writer w2 = new OutputStreamWriter(fout2, "utf-8");
+		writeToCsv(model, w2, true);
+		w2.close();
 		
 		FileInputStream fin = new FileInputStream(f);
 		InputStreamReader in = new InputStreamReader(fin, "utf-8");
