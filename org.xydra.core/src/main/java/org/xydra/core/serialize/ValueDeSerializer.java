@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Assert;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
@@ -13,12 +12,6 @@ import org.xydra.base.value.ValueType;
 import org.xydra.base.value.XBinaryValue;
 import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
-import org.xydra.core.DemoModelUtil;
-import org.xydra.core.model.XField;
-import org.xydra.core.model.XModel;
-import org.xydra.core.model.XObject;
-import org.xydra.core.model.XRepository;
-import org.xydra.core.model.impl.memory.MemoryRepository;
 import org.xydra.index.query.Pair;
 
 
@@ -217,21 +210,4 @@ public class ValueDeSerializer {
 		}
 	}
 	
-	public static void main(String[] args) {
-		XRepository repo = new MemoryRepository(XX.toId("actor"), "secret", XX.toId("repo"));
-		DemoModelUtil.addPhonebookModel(repo);
-		XModel model = repo.getModel(DemoModelUtil.PHONEBOOK_ID);
-		XObject xo = model.getObject(DemoModelUtil.JOHN_ID);
-		for(XID fid : xo) {
-			XField field = xo.getField(fid);
-			XValue value = field.getValue();
-			if(value != null) {
-				Pair<String,String> pair = toStringPair(value);
-				System.out.println(pair);
-				XValue value2 = fromStringPair(pair);
-				Assert.assertEquals(value, value2);
-			}
-		}
-		
-	}
 }
