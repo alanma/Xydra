@@ -59,9 +59,10 @@ public class CsvSerialisation {
 	/**
 	 * @param model
 	 * @param w
+	 * @return number of table rows written
 	 * @throws IOException
 	 */
-	public static void writeToCsv(XReadableModel model, Writer w) throws IOException {
+	public static int writeToCsv(XReadableModel model, Writer w) throws IOException {
 		CsvTable table = new CsvTable(true);
 		for(XID oid : model) {
 			Row row = table.getOrCreateRow(oid.toString(), true);
@@ -77,9 +78,16 @@ public class CsvSerialisation {
 			}
 		}
 		table.writeTo(w);
+		return table.rowCount();
 	}
 	
-	public static void readFromCsv(Reader r, XWritableModel model) throws IOException {
+	/**
+	 * @param r
+	 * @param model
+	 * @return number of rows in resulting table
+	 * @throws IOException
+	 */
+	public static int readFromCsv(Reader r, XWritableModel model) throws IOException {
 		CsvTable table = new CsvTable();
 		table.readFrom(r, true);
 		for(IRow row : table) {
@@ -99,6 +107,7 @@ public class CsvSerialisation {
 				field.setValue(value);
 			}
 		}
+		return table.rowCount();
 	}
 	
 	protected static String serialize(XValue value) {
