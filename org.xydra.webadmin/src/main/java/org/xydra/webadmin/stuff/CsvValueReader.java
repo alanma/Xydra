@@ -11,10 +11,11 @@ import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
 import org.xydra.base.value.ValueType;
-import org.xydra.base.value.XByteListValue;
+import org.xydra.base.value.XBinaryValue;
 import org.xydra.base.value.XCollectionValue;
 import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
+import org.xydra.core.serialize.SerializedValue;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 
@@ -53,13 +54,9 @@ public class CsvValueReader {
 			return X.getIDProvider().fromAddress(valueString.trim());
 		case Boolean:
 			return XV.toValue(Boolean.parseBoolean(valueString.trim()));
-		case ByteList: {
-			try {
-				return X.getValueFactory()
-				        .createByteListValue(valueString.trim().getBytes("utf-8"));
-			} catch(UnsupportedEncodingException e) {
-				throw new RuntimeException("No utf8 on this platform?", e);
-			}
+		case Binary: {
+			byte[] bytes = SerializedValue.deserializeBinaryContent(valueString.trim());
+			return XV.toValue(bytes);
 		}
 		case Double:
 			return X.getValueFactory().createDoubleValue(Double.parseDouble(valueString.trim()));
@@ -335,8 +332,8 @@ public class CsvValueReader {
 		case Long:
 		case Id:
 			return value.toString();
-		case ByteList: {
-			byte[] bytes = ((XByteListValue)value).contents();
+		case Binary: {
+			byte[] bytes = ((XBinaryValue)value).contents();
 			try {
 				String s = new String(bytes, "utf-8");
 				return s;
