@@ -15,8 +15,6 @@ public class CsvCoreTable extends SparseTable implements Iterable<Row> {
 	
 	protected static final String COLUMNNAME_ROW = "ROW";
 	
-	protected static final String SEMICOLON = ";";
-	
 	// TODO make setParam-able
 	protected String defaultEncoding = "ISO-8859-1";
 	

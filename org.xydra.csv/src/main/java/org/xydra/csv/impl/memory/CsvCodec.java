@@ -12,14 +12,31 @@ import java.util.List;
  */
 public class CsvCodec {
 	
+	public static final byte[] BOM_UTF8 = new byte[] { (byte)0xEF, (byte)0xBB, (byte)0xBF };
+	
+	public static final byte[] BOM_UTF16LE = new byte[] { (byte)0xFF, (byte)0xFE, (byte)0x00,
+	        (byte)0x00 };
+	
+	public static final Object CELL_DELIMITER = "\t";
+	
+	/**
+	 * Decode a single cell
+	 * 
+	 * @param encoded
+	 * @return the pure value string
+	 */
 	public static String excelDecode(String encoded) {
-		if(encoded.equals("") || encoded.equals("\"\"")) {
+		if(encoded.equals("") || encoded.equals("\"\"") || encoded.equals("=\"\"")) {
 			return null;
 		}
 		
 		String decoded = encoded;
-		if(encoded.startsWith("\"") && encoded.endsWith("\"")) {
-			decoded = decoded.substring(1, encoded.length() - 1);
+		/* Excel formula mode */
+		if(decoded.startsWith("=")) {
+			decoded = decoded.substring(1);
+		}
+		if(decoded.startsWith("\"") && decoded.endsWith("\"")) {
+			decoded = decoded.substring(1, decoded.length() - 1);
 		}
 		// unescape
 		decoded = decoded.replace("\"\"", "\"");
@@ -52,7 +69,8 @@ public class CsvCodec {
 		escaped = escaped.replace("\n", "§N");
 		escaped = escaped.replace("\r", "§R");
 		
-		return "\"" + escaped + "\"";
+		/* Adding the '=' sign makes it more robust to open on Mac Office */
+		return "=\"" + escaped + "\"";
 	}
 	
 	public static String[] splitAtUnquotedSemicolon(String line) {
@@ -72,7 +90,8 @@ public class CsvCodec {
 				currentString.append(c);
 			}
 				break;
-			case ';': {
+			case ';':
+			case '\t': {
 				if(inQuote) {
 					// just copy over
 					currentString.append(c);
@@ -122,7 +141,7 @@ public class CsvCodec {
 		for(int i = 0; i < values.size(); i++) {
 			sb.append(CsvCodec.excelEncode(values.get(i)));
 			if(i + 1 < values.size()) {
-				sb.append(";");
+				sb.append(CELL_DELIMITER);
 			}
 		}
 		return sb.toString();

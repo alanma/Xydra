@@ -320,13 +320,13 @@ public class CsvTable extends CsvCoreTable implements ICsvTable, ICsvTableFactor
 		int writtenCols = 0;
 		while(colIt.hasNext() && writtenCols < EXCEL_MAX_COLS) {
 			String columnName = colIt.next();
-			w.write(SEMICOLON + CsvCodec.excelEncode(columnName));
+			w.write(CsvCodec.CELL_DELIMITER + CsvCodec.excelEncode(columnName));
 			writtenCols++;
 			if(writtenCols == EXCEL_MAX_COLS) {
 				log.warn("Reached Excels limit of " + EXCEL_MAX_COLS + " columns");
 			}
 		}
-		w.write(SEMICOLON + "\n");
+		w.write(CsvCodec.CELL_DELIMITER + "\n");
 	}
 	
 	public static void writeRow(Writer w, Collection<String> columnNames, String rowName,
@@ -336,13 +336,13 @@ public class CsvTable extends CsvCoreTable implements ICsvTable, ICsvTableFactor
 		int writtenCols = 0;
 		while(colIt.hasNext() && writtenCols < EXCEL_MAX_COLS) {
 			String columnName = colIt.next();
-			w.write(SEMICOLON + CsvCodec.excelEncode(row.getValue(columnName)));
+			w.write(CsvCodec.CELL_DELIMITER + CsvCodec.excelEncode(row.getValue(columnName)));
 			writtenCols++;
 			if(writtenCols == EXCEL_MAX_COLS) {
 				log.warn("Reached Excels limit of " + EXCEL_MAX_COLS + " columns");
 			}
 		}
-		w.write(SEMICOLON + "\n");
+		w.write(CsvCodec.CELL_DELIMITER + "\n");
 	}
 	
 	@Override
