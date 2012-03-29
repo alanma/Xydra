@@ -43,7 +43,8 @@ public class ValueIndexEntryUtils {
 		adrOut.enableWhitespace(false, false);
 		SerializedValue.serialize(address, adrOut);
 		
-		String adrString = escapeSingleString(adrOut.getData());
+		String serializedAddress = adrOut.getData();
+		String adrString = escapeSingleString(serializedAddress);
 		
 		String valueString = null;
 		
@@ -52,7 +53,8 @@ public class ValueIndexEntryUtils {
 			valOut.enableWhitespace(false, false);
 			SerializedValue.serialize(value, valOut);
 			
-			valueString = escapeSingleString(valOut.getData());
+			String serializedValue = valOut.getData();
+			valueString = escapeSingleString(serializedValue);
 		}
 		
 		// "" is used as the marker for splitting
