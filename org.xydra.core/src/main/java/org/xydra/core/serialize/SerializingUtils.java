@@ -19,7 +19,7 @@ import org.xydra.index.XI;
 @RunsInGWT(true)
 @RunsInAppEngine(true)
 @RequiresAppEngine(false)
-class SerializingUtils {
+public class SerializingUtils {
 	
 	protected static final String FIELDID_ATTRIBUTE = "fieldId";
 	protected static final String MODELID_ATTRIBUTE = "modelId";
