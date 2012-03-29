@@ -1,16 +1,16 @@
 package org.xydra.editor.value;
 
-import org.xydra.base.value.XByteListValue;
+import org.xydra.base.value.XBinaryValue;
 import org.xydra.base.value.XV;
 
 import com.google.gwt.user.client.ui.Label;
 
 
-public class XByteListEditor extends XValueEditor {
+public class XBinaryValueEditor extends XValueEditor {
 	
 	byte[] value;
 	
-	public XByteListEditor(byte[] value, EditListener listener) {
+	public XBinaryValueEditor(byte[] value, EditListener listener) {
 		super();
 		this.value = value;
 		
@@ -20,7 +20,7 @@ public class XByteListEditor extends XValueEditor {
 	}
 	
 	@Override
-	public XByteListValue getValue() {
+	public XBinaryValue getValue() {
 		return XV.toValue(this.value);
 	}
 	

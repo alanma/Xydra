@@ -9,9 +9,9 @@ import org.xydra.base.change.impl.memory.MemoryObjectCommand;
 import org.xydra.base.value.XAddressListValue;
 import org.xydra.base.value.XAddressSetValue;
 import org.xydra.base.value.XAddressSortedSetValue;
+import org.xydra.base.value.XBinaryValue;
 import org.xydra.base.value.XBooleanListValue;
 import org.xydra.base.value.XBooleanValue;
-import org.xydra.base.value.XByteListValue;
 import org.xydra.base.value.XCollectionValue;
 import org.xydra.base.value.XDoubleListValue;
 import org.xydra.base.value.XDoubleValue;
@@ -35,9 +35,9 @@ import org.xydra.editor.value.XAddressEditor;
 import org.xydra.editor.value.XAddressListEditor;
 import org.xydra.editor.value.XAddressSetEditor;
 import org.xydra.editor.value.XAddressSortedSetEditor;
+import org.xydra.editor.value.XBinaryValueEditor;
 import org.xydra.editor.value.XBooleanEditor;
 import org.xydra.editor.value.XBooleanListEditor;
-import org.xydra.editor.value.XByteListEditor;
 import org.xydra.editor.value.XCollectionEditor;
 import org.xydra.editor.value.XDoubleEditor;
 import org.xydra.editor.value.XDoubleListEditor;
@@ -127,14 +127,14 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		
 		this.edit.addClickHandler(new ClickHandler() {
 			@Override
-            public void onClick(ClickEvent e) {
+			public void onClick(ClickEvent e) {
 				showEditor();
 			}
 		});
 		
 		this.delete.addClickHandler(new ClickHandler() {
 			@Override
-            public void onClick(ClickEvent e) {
+			public void onClick(ClickEvent e) {
 				delete();
 			}
 		});
@@ -170,8 +170,6 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 						str += " (long list)";
 					} else if(value instanceof XIntegerListValue) {
 						str += " (integer list)";
-					} else if(value instanceof XByteListValue) {
-						str += " (byte list)";
 					} else if(value instanceof XAddressListValue) {
 						str += " (address list)";
 					} else {
@@ -202,6 +200,8 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 					str += " (id)";
 				} else if(value instanceof XBooleanValue) {
 					str += " (boolean)";
+				} else if(value instanceof XBinaryValue) {
+					str += " (binary)";
 				} else if(value instanceof XDoubleValue) {
 					str += " (double)";
 				} else if(value instanceof XLongValue) {
@@ -222,7 +222,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 	}
 	
 	@Override
-    public void onChangeEvent(XFieldEvent event) {
+	public void onChangeEvent(XFieldEvent event) {
 		log.info("editor: got " + event);
 		XValue value = event.getNewValue();
 		changeValue(value);
@@ -267,7 +267,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		this.inner.insert(this.cancel, this.innerIndex);
 		this.cancel.addClickHandler(new ClickHandler() {
 			@Override
-            public void onClick(ClickEvent arg0) {
+			public void onClick(ClickEvent arg0) {
 				removeEditor();
 			}
 		});
@@ -276,7 +276,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		this.inner.insert(this.save, this.innerIndex);
 		this.save.addClickHandler(new ClickHandler() {
 			@Override
-            public void onClick(ClickEvent arg0) {
+			public void onClick(ClickEvent arg0) {
 				saveValue();
 			}
 		});
@@ -285,7 +285,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		this.inner.insert(this.add, this.innerIndex);
 		this.add.addClickHandler(new ClickHandler() {
 			@Override
-            public void onClick(ClickEvent e) {
+			public void onClick(ClickEvent e) {
 				((XCollectionEditor<?,?>)XFieldEditor.this.editor).add();
 			}
 		});
@@ -316,7 +316,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		this.inner.insert(this.type, this.innerIndex);
 		this.type.addChangeHandler(new ChangeHandler() {
 			@Override
-            public void onChange(ChangeEvent e) {
+			public void onChange(ChangeEvent e) {
 				typeChanged();
 			}
 		});
@@ -341,8 +341,6 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 						this.type.setSelectedIndex(IDX_LIST_LONG);
 					} else if(value instanceof XIntegerListValue) {
 						this.type.setSelectedIndex(IDX_LIST_INTEGER);
-					} else if(value instanceof XByteListValue) {
-						this.type.setSelectedIndex(IDX_LIST_BYTE);
 					} else if(value instanceof XAddressListValue) {
 						this.type.setSelectedIndex(IDX_LIST_ADDRESS);
 					} else {
@@ -372,6 +370,8 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 					this.type.setSelectedIndex(IDX_ID);
 				} else if(value instanceof XBooleanValue) {
 					this.type.setSelectedIndex(IDX_BOOLEAN);
+				} else if(value instanceof XBinaryValue) {
+					this.type.setSelectedIndex(IDX_LIST_BYTE);
 				} else if(value instanceof XDoubleValue) {
 					this.type.setSelectedIndex(IDX_DOUBLE);
 				} else if(value instanceof XLongValue) {
@@ -410,8 +410,8 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		
 		XFieldCommand command;
 		if(this.field.isEmpty()) {
-			command = MemoryFieldCommand.createAddCommand(this.field.getAddress(), this.field
-			        .getRevisionNumber(), newValue);
+			command = MemoryFieldCommand.createAddCommand(this.field.getAddress(),
+			        this.field.getRevisionNumber(), newValue);
 		} else {
 			if(newValue == null) {
 				command = MemoryFieldCommand.createRemoveCommand(this.field.getAddress(),
@@ -460,7 +460,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 			this.editor = new XIntegerListEditor(XValueUtils.asIntegerList(value), null);
 			break;
 		case IDX_LIST_BYTE:
-			this.editor = new XByteListEditor(XValueUtils.asByteList(value), null);
+			this.editor = new XBinaryValueEditor(XValueUtils.asByteList(value), null);
 			break;
 		
 		case IDX_STRING:

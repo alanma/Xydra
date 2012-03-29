@@ -1,9 +1,9 @@
 package org.xydra.editor.value;
 
 import org.xydra.base.XID;
+import org.xydra.base.value.XBinaryValue;
 import org.xydra.base.value.XBooleanListValue;
 import org.xydra.base.value.XBooleanValue;
-import org.xydra.base.value.XByteListValue;
 import org.xydra.base.value.XCollectionValue;
 import org.xydra.base.value.XDoubleListValue;
 import org.xydra.base.value.XDoubleValue;
@@ -48,8 +48,8 @@ public abstract class XValueEditor extends Composite {
 					return new XLongListEditor(((XLongListValue)value).iterator(), listener);
 				} else if(value instanceof XIntegerListValue) {
 					return new XIntegerListEditor(((XIntegerListValue)value).iterator(), listener);
-				} else if(value instanceof XByteListValue) {
-					return new XByteListEditor(((XByteListValue)value).contents(), listener);
+				} else if(value instanceof XBinaryValue) {
+					return new XBinaryValueEditor(((XBinaryValue)value).contents(), listener);
 				}
 				throw new RuntimeException("Unexpected XListValue type: " + value);
 			} else if(value instanceof XSetValue<?>) {

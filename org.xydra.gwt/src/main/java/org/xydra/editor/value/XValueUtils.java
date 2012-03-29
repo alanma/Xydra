@@ -6,9 +6,9 @@ import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
 import org.xydra.base.value.XAddressListValue;
+import org.xydra.base.value.XBinaryValue;
 import org.xydra.base.value.XBooleanListValue;
 import org.xydra.base.value.XBooleanValue;
-import org.xydra.base.value.XByteListValue;
 import org.xydra.base.value.XDoubleListValue;
 import org.xydra.base.value.XDoubleValue;
 import org.xydra.base.value.XIDListValue;
@@ -45,8 +45,8 @@ abstract public class XValueUtils {
 		if(value == null) {
 			return "";
 		}
-		if(value instanceof XByteListValue) {
-			return byteArrayToString(((XByteListValue)value).contents());
+		if(value instanceof XBinaryValue) {
+			return byteArrayToString(((XBinaryValue)value).contents());
 		} else if(value instanceof XListValue<?>) {
 			return listGetFirst((XListValue<?>)value).toString();
 		} else {
@@ -69,9 +69,9 @@ abstract public class XValueUtils {
 			return ((XStringListValue)value).iterator();
 		} else if(value instanceof XStringSetValue) {
 			return ((XStringSetValue)value).iterator();
-		} else if(value instanceof XByteListValue) {
-			return new SingleValueIterator<String>(byteArrayToString(((XByteListValue)value)
-			        .contents()));
+		} else if(value instanceof XBinaryValue) {
+			return new SingleValueIterator<String>(
+			        byteArrayToString(((XBinaryValue)value).contents()));
 		} else if(value instanceof XListValue<?>) {
 			return transform((XListValue<?>)value);
 		} else {
@@ -118,8 +118,8 @@ abstract public class XValueUtils {
 	static public XAddress asAddress(XValue value) {
 		
 		if(value == null) {
-			return XX.toAddress(XX.createUniqueId(), XX.createUniqueId(), XX.createUniqueId(), XX
-			        .createUniqueId());
+			return XX.toAddress(XX.createUniqueId(), XX.createUniqueId(), XX.createUniqueId(),
+			        XX.createUniqueId());
 		}
 		
 		if(value instanceof XAddress) {
@@ -472,8 +472,8 @@ abstract public class XValueUtils {
 			return new byte[0];
 		}
 		
-		if(value instanceof XByteListValue) {
-			return ((XByteListValue)value).contents();
+		if(value instanceof XBinaryValue) {
+			return ((XBinaryValue)value).contents();
 		} else {
 			char[] chars = value.toString().toCharArray();
 			byte[] bytes = new byte[chars.length];
