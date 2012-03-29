@@ -6,6 +6,7 @@ import java.net.URI;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.restless.Jetty;
+import org.xydra.restless.Restless;
 import org.xydra.store.impl.gae.GaeTestfixer;
 
 
@@ -22,13 +23,14 @@ public class RunXmasJetty {
 	private static final Logger log = LoggerFactory.getLogger(RunXmasJetty.class);
 	
 	public static void main(String[] args) throws Exception {
-		
 		/*
 		 * Enable tests with GAE (especially mail)
 		 */
 		GaeTestfixer.enable();
 		/* Make this thread GAE-test-ready */
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		
+		Restless.DELEGATE_UNHANDLED_TO_DEFAULT = true;
 		
 		CopyGwt.copyGwt();
 		

@@ -86,5 +86,33 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 		</auth-constraint>
 	</security-constraint>
 
+    <!-- *** Additional local Favr config *** -->
+    <mime-mapping>
+        <extension>html</extension>
+        <mime-type>text/html</mime-type>
+        <!-- <mime-type>application/xhtml+xml</mime-type> -->
+    </mime-mapping>
+    <mime-mapping>
+        <extension>ico</extension>
+        <mime-type>image/x-icon</mime-type>
+    </mime-mapping>
+    <!-- For serving SVG fonts -->
+    <mime-mapping>
+        <extension>svg</extension>
+        <mime-type>image/svg+xml</mime-type>
+    </mime-mapping>
+    <mime-mapping>
+        <extension>woff</extension>
+        <mime-type>application/x-font-woff</mime-type>
+    </mime-mapping>
+    <mime-mapping>
+        <extension>eot</extension>
+        <mime-type>application/vnd.ms-fontobject</mime-type>
+    </mime-mapping>
+    <!-- prevent weird appengine bug -->
+    <mime-mapping>
+        <extension>css</extension>
+        <mime-type>text/css</mime-type>
+    </mime-mapping>
 
 </web-app>
