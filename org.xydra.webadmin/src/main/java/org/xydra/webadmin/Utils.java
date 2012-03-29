@@ -2,6 +2,7 @@ package org.xydra.webadmin;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -49,6 +50,8 @@ public class Utils {
 	}
 	
 	/**
+	 * TODO move to restless
+	 * 
 	 * A ZOS is used like this
 	 * 
 	 * <pre>
@@ -80,6 +83,30 @@ public class Utils {
 		
 		ZipOutputStream zos = new ZipOutputStream(res.getOutputStream());
 		return zos;
+	}
+	
+	/**
+	 * TODO move to restless
+	 * 
+	 * @param res
+	 * @param archivename
+	 * @param extension
+	 * @param contentType e.g. 'application/zip' or 'text/csv'
+	 * @return an outputstream to which you can write
+	 * @throws IOException
+	 */
+	public static OutputStream toFileDownload(HttpServletResponse res, String archivename,
+	        String extension, String contentType) throws IOException {
+		String fullFileName = archivename + "." + extension;
+		
+		log.info("Wrapping in file named " + fullFileName);
+		
+		// Send the correct response headers.
+		res.setContentType(contentType);
+		res.addHeader("Content-Disposition", "attachment; filename=\"" + fullFileName + "\"");
+		
+		OutputStream os = res.getOutputStream();
+		return os;
 	}
 	
 	/**
