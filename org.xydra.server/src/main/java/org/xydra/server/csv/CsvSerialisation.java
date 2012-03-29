@@ -28,6 +28,7 @@ import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.impl.memory.MemoryRepository;
 import org.xydra.core.serialize.SerializedValue;
+import org.xydra.core.serialize.ValueDeSerializer;
 import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.XydraOut;
 import org.xydra.core.serialize.json.JsonParser;
@@ -36,6 +37,7 @@ import org.xydra.core.util.DumpUtils;
 import org.xydra.csv.IRow;
 import org.xydra.csv.impl.memory.CsvTable;
 import org.xydra.csv.impl.memory.Row;
+import org.xydra.index.query.Pair;
 
 import com.sun.org.apache.xpath.internal.objects.XObject;
 
@@ -52,30 +54,25 @@ import com.sun.org.apache.xpath.internal.objects.XObject;
 @RunsInGWT(false)
 public class CsvSerialisation {
 	
+	private static final String TYPE_SUFFIX = "__type";
+	
 	/**
 	 * @param model
 	 * @param w
-	 * @param prettyExportOnly if true, result looks more pretty but cannot be
-	 *            re-imported (because the type information is missing)
 	 * @throws IOException
 	 */
-	public static void writeToCsv(XReadableModel model, Writer w, boolean prettyExportOnly)
-	        throws IOException {
-		CsvTable table = new CsvTable();
+	public static void writeToCsv(XReadableModel model, Writer w) throws IOException {
+		CsvTable table = new CsvTable(true);
 		for(XID oid : model) {
 			Row row = table.getOrCreateRow(oid.toString(), true);
 			XReadableObject xo = model.getObject(oid);
 			for(XID fid : xo) {
 				XReadableField xf = xo.getField(fid);
 				XValue value = xf.getValue();
-				if(prettyExportOnly) {
-					if(value != null) {
-						String s = value.toString();
-						row.setValue(fid.toString(), s, true);
-					}
-				} else {
-					String s = serialize(value);
-					row.setValue(fid.toString(), s, true);
+				if(value != null) {
+					Pair<String,String> pair = ValueDeSerializer.toStringPair(value);
+					row.setValue(fid.toString() + TYPE_SUFFIX, pair.getFirst(), true);
+					row.setValue(fid.toString(), pair.getSecond(), true);
 				}
 			}
 		}
@@ -90,13 +87,16 @@ public class CsvSerialisation {
 			XID oid = XX.toId(oidStr);
 			XWritableObject xo = model.createObject(oid);
 			for(String col : row.getColumnNames()) {
-				String s = row.getValue(col);
-				if(s != null) {
-					XValue value = deserialize(s);
-					XID fid = XX.toId(col);
-					XWritableField field = xo.createField(fid);
-					field.setValue(value);
-				}
+				if(col.endsWith(TYPE_SUFFIX))
+					continue;
+				String valueStr = row.getValue(col);
+				if(valueStr == null)
+					continue;
+				String typeStr = row.getValue(col + TYPE_SUFFIX);
+				XValue value = ValueDeSerializer.fromStrings(typeStr, valueStr);
+				XID fid = XX.toId(col);
+				XWritableField field = xo.createField(fid);
+				field.setValue(value);
 			}
 		}
 	}
@@ -136,14 +136,8 @@ public class CsvSerialisation {
 		File f = new File("./phonebook.csv");
 		FileOutputStream fout = new FileOutputStream(f);
 		Writer w = new OutputStreamWriter(fout, "utf-8");
-		writeToCsv(model, w, false);
+		writeToCsv(model, w);
 		w.close();
-		
-		File f2 = new File("./phonebook-pretty.csv");
-		FileOutputStream fout2 = new FileOutputStream(f2);
-		Writer w2 = new OutputStreamWriter(fout2, "utf-8");
-		writeToCsv(model, w2, true);
-		w2.close();
 		
 		FileInputStream fin = new FileInputStream(f);
 		InputStreamReader in = new InputStreamReader(fin, "utf-8");
