@@ -30,6 +30,8 @@ public class RunXmasJetty {
 		/* Make this thread GAE-test-ready */
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		
+		CopyGwt.copyGwt();
+		
 		// start jetty
 		Jetty jetty = new Jetty(8787);
 		

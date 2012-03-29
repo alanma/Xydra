@@ -118,7 +118,6 @@
 		<dependency>
 			<groupId>org.mortbay.jetty</groupId>
 			<artifactId>jetty</artifactId>
-			<scope>provided</scope>
 		</dependency>
 
 	</dependencies>
