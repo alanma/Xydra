@@ -9,7 +9,7 @@ import org.xydra.base.value.XAddressSetValue;
 import org.xydra.base.value.XAddressSortedSetValue;
 import org.xydra.base.value.XBooleanListValue;
 import org.xydra.base.value.XBooleanValue;
-import org.xydra.base.value.XByteListValue;
+import org.xydra.base.value.XBinaryValue;
 import org.xydra.base.value.XDoubleListValue;
 import org.xydra.base.value.XDoubleValue;
 import org.xydra.base.value.XIDListValue;
@@ -81,13 +81,13 @@ public class MemoryValueFactory implements XValueFactory {
 	}
 	
 	@Override
-    public XByteListValue createByteListValue(byte[] values) {
-		return new MemoryByteListValue(values);
+    public XBinaryValue createBinaryValue(byte[] values) {
+		return new MemoryBinaryValue(values);
 	}
 	
 	@Override
-    public XByteListValue createByteListValue(Collection<Byte> values) {
-		return new MemoryByteListValue(values);
+    public XBinaryValue createBinaryValue(Collection<Byte> values) {
+		return new MemoryBinaryValue(values);
 	}
 	
 	@Override

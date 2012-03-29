@@ -118,29 +118,29 @@ public interface XValueFactory {
 	XBooleanValue createBooleanValue(boolean value);
 	
 	/**
-	 * Creates an {@link XByteListValue}.
+	 * Creates an {@link XBinaryValue}.
 	 * 
-	 * The returned {@link XByteListValue} will contain the given byte values in
+	 * The returned {@link XBinaryValue} will contain the given byte values in
 	 * the order of their occurrence in the given array.
 	 * 
 	 * @param values The array containing the byte values which are to be stored
-	 *            by the {@link XByteListValue} this method will create.
-	 * @return an {@link XByteListValue} storing the given long values.
+	 *            by the {@link XBinaryValue} this method will create.
+	 * @return an {@link XBinaryValue} storing the given long values.
 	 */
-	XByteListValue createByteListValue(byte[] values);
+	XBinaryValue createBinaryValue(byte[] values);
 	
 	/**
-	 * Creates an {@link XByteListValue}.
+	 * Creates an {@link XBinaryValue}.
 	 * 
-	 * The returned {@link XByteListValue} will contain the given byte values in
+	 * The returned {@link XBinaryValue} will contain the given byte values in
 	 * the order of their occurrence in the given {@link Collection}.
 	 * 
 	 * @param values The {@link Collection} containing the byte values which are
-	 *            to be stored by the {@link XByteListValue} this method will
+	 *            to be stored by the {@link XBinaryValue} this method will
 	 *            create.
-	 * @return an {@link XByteListValue} storing the given long values.
+	 * @return an {@link XBinaryValue} storing the given long values.
 	 */
-	XByteListValue createByteListValue(Collection<Byte> values);
+	XBinaryValue createBinaryValue(Collection<Byte> values);
 	
 	/**
 	 * Creates an {@link XDoubleListValue}.

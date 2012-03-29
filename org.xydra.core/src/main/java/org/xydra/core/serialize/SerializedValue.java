@@ -13,7 +13,7 @@ import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
 import org.xydra.base.value.ValueType;
-import org.xydra.base.value.XByteListValue;
+import org.xydra.base.value.XBinaryValue;
 import org.xydra.base.value.XCollectionValue;
 import org.xydra.base.value.XSingleValue;
 import org.xydra.base.value.XV;
@@ -41,7 +41,7 @@ public class SerializedValue {
 	private static final String XADDRESSSORTEDSET_ELEMENT = "xaddressSortedSet";
 	private static final String XBOOLEAN_ELEMENT = "xboolean";
 	private static final String XBOOLEANLIST_ELEMENT = "xbooleanList";
-	private static final String XBYTELIST_ELEMENT = "xbyteList";
+	private static final String XBINARY_ELEMENT = "xbinary";
 	private static final String XDOUBLE_ELEMENT = "xdouble";
 	private static final String XDOUBLELIST_ELEMENT = "xdoubleList";
 	private static final String XID_ELEMENT = "xid";
@@ -250,7 +250,7 @@ public class SerializedValue {
 			return XV.toIDSetValue(getIdListContents(element));
 		} else if(elementName.equals(XADDRESSSET_ELEMENT)) {
 			return XV.toAddressSetValue(getAddressListContents(element));
-		} else if(elementName.equals(XBYTELIST_ELEMENT)) {
+		} else if(elementName.equals(XBINARY_ELEMENT)) {
 			return XV.toValue(Base64.decode(getStringContent(element)));
 		} else if(elementName.equals(XIDSORTEDSET_ELEMENT)) {
 			return toIdSortedSetValue(element);
@@ -339,8 +339,16 @@ public class SerializedValue {
 		out.close(element);
 	}
 	
-	private static void serialize(XByteListValue xvalue, XydraOut out) {
-		out.element(XBYTELIST_ELEMENT, NAME_DATA, Base64.encode(xvalue.contents(), true));
+	private static void serialize(XBinaryValue xvalue, XydraOut out) {
+		out.element(XBINARY_ELEMENT, NAME_DATA, serializeBinaryContent(xvalue.contents()));
+	}
+	
+	public static String serializeBinaryContent(byte[] content) {
+		return Base64.encode(content, true);
+	}
+	
+	public static byte[] deserializeBinaryContent(String base64) {
+		return Base64.decode(base64);
 	}
 	
 	/**
@@ -355,8 +363,8 @@ public class SerializedValue {
 		
 		if(xvalue == null) {
 			out.nullElement();
-		} else if(xvalue instanceof XByteListValue) {
-			serialize((XByteListValue)xvalue, out);
+		} else if(xvalue instanceof XBinaryValue) {
+			serialize((XBinaryValue)xvalue, out);
 		} else if(xvalue instanceof XCollectionValue<?>) {
 			serialize((XCollectionValue<?>)xvalue, out);
 		} else if(xvalue instanceof XSingleValue<?>) {

@@ -112,14 +112,14 @@ public class XV {
 	
 	/**
 	 * Returns the content of the given {@link Collection} as an
-	 * {@link XByteListValue}
+	 * {@link XBinaryValue}
 	 * 
 	 * @param list The {@link Collection} which is to be converted into an
-	 *            {@link XByteListValue}
-	 * @return an {@link XByteListValue} with the content of the given list
+	 *            {@link XBinaryValue}
+	 * @return an {@link XBinaryValue} with the content of the given list
 	 */
-	public static XByteListValue toByteListValue(Collection<Byte> list) {
-		return vf.createByteListValue(list);
+	public static XBinaryValue toBinaryValue(Collection<Byte> list) {
+		return vf.createBinaryValue(list);
 	}
 	
 	/**
@@ -367,26 +367,26 @@ public class XV {
 	}
 	
 	/**
-	 * Returns the content of the given byte array as an {@link XByteListValue}
+	 * Returns the content of the given byte array as an {@link XBinaryValue}
 	 * 
 	 * @param list The byte array which is to be converted into an
-	 *            {@link XByteListValue}
-	 * @return an {@link XByteListValue} with the content of the given list
+	 *            {@link XBinaryValue}
+	 * @return an {@link XBinaryValue} with the content of the given list
 	 */
-	public static XByteListValue toValue(byte[] list) {
-		return vf.createByteListValue(list);
+	public static XBinaryValue toValue(byte[] list) {
+		return vf.createBinaryValue(list);
 	}
 	
 	/**
 	 * Returns the content of the given {@link Byte} array as an
-	 * {@link XByteListValue}
+	 * {@link XBinaryValue}
 	 * 
 	 * @param list The {@link Byte} array which is to be converted into an
-	 *            {@link XByteListValue}
-	 * @return an {@link XByteListValue} with the content of the given list
+	 *            {@link XBinaryValue}
+	 * @return an {@link XBinaryValue} with the content of the given list
 	 */
-	public static XByteListValue toValue(Byte[] list) {
-		return vf.createByteListValue(Arrays.asList(list));
+	public static XBinaryValue toValue(Byte[] list) {
+		return vf.createBinaryValue(Arrays.asList(list));
 	}
 	
 	/**

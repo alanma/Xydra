@@ -12,7 +12,7 @@ import org.xydra.base.value.XAddressSetValue;
 import org.xydra.base.value.XAddressSortedSetValue;
 import org.xydra.base.value.XBooleanListValue;
 import org.xydra.base.value.XBooleanValue;
-import org.xydra.base.value.XByteListValue;
+import org.xydra.base.value.XBinaryValue;
 import org.xydra.base.value.XDoubleListValue;
 import org.xydra.base.value.XDoubleValue;
 import org.xydra.base.value.XIDListValue;
@@ -94,8 +94,8 @@ public abstract class XValueIndexer {
 			case BooleanList:
 				indexBooleanArray(fieldAddress, value, ((XBooleanListValue)value).contents());
 				break;
-			case ByteList:
-				indexByteArray(fieldAddress, value, ((XByteListValue)value).contents());
+			case Binary:
+				indexByteArray(fieldAddress, value, ((XBinaryValue)value).contents());
 				break;
 			case Double:
 				indexDouble(fieldAddress, value, ((XDoubleValue)value).contents());
@@ -190,8 +190,8 @@ public abstract class XValueIndexer {
 			}
 			break;
 		
-		case ByteList:
-			for(Byte b : ((XByteListValue)value).contents()) {
+		case Binary:
+			for(Byte b : ((XBinaryValue)value).contents()) {
 				list.add(getByteIndexString(b));
 			}
 			break;
@@ -309,8 +309,8 @@ public abstract class XValueIndexer {
 			case BooleanList:
 				deIndexBooleanArray(fieldAddress, value, ((XBooleanListValue)value).contents());
 				break;
-			case ByteList:
-				deIndexByteArray(fieldAddress, value, ((XByteListValue)value).contents());
+			case Binary:
+				deIndexByteArray(fieldAddress, value, ((XBinaryValue)value).contents());
 				break;
 			case Double:
 				deIndexDouble(fieldAddress, value, ((XDoubleValue)value).contents());

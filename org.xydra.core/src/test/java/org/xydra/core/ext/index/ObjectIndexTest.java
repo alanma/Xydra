@@ -38,7 +38,7 @@ public class ObjectIndexTest {
 		LinkedList<XValue> list = new LinkedList<XValue>();
 		list.addAll(allSingleValueTypes());
 		list.add(X.getValueFactory().createBooleanListValue(new boolean[] { true, false, true }));
-		list.add(X.getValueFactory().createByteListValue(new byte[] { 42, 23, 15 }));
+		list.add(X.getValueFactory().createBinaryValue(new byte[] { 42, 23, 15 }));
 		list.add(X.getValueFactory().createDoubleListValue(new double[] { 2.3, 4.2, 1.5 }));
 		list.add(X.getValueFactory().createIDListValue(new XID[] { id1, id2, id3 }));
 		list.add(X.getValueFactory().createIDSetValue(new XID[] { id1, id2, id3 }));

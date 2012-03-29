@@ -10,7 +10,7 @@
 <!ATTLIST xobject xid NMTOKEN #REQUIRED >
 
 <!ELEMENT xfield ( xstring | xlong | xintegerList | xidList | xidSet | xinteger | 
-xbyteList | xdouble | xlongList | xboolean | xid | xstringSet | xbooleanList 
+xbinary | xdouble | xlongList | xboolean | xid | xstringSet | xbooleanList 
 | xstringList | xdoubleList ) >
 <!ATTLIST xfield revision NMTOKEN #REQUIRED >
 <!ATTLIST xfield xid ID #REQUIRED >
@@ -18,7 +18,7 @@ xbyteList | xdouble | xlongList | xboolean | xid | xstringSet | xbooleanList
 <!ELEMENT xboolean ( #PCDATA ) >
 <!ELEMENT xbooleanList ( xboolean* ) >
 
-<!ELEMENT xbyteList ( #PCDATA ) >
+<!ELEMENT xbinary ( #PCDATA ) >
 
 <!ELEMENT xdouble ( #PCDATA ) >
 <!ELEMENT xdoubleList ( xdouble* ) >

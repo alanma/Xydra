@@ -110,7 +110,7 @@ abstract public class AbstractSerializedValueTest extends AbstractSerializingTes
 	}
 	
 	@Test
-	public void testByteListValue() {
+	public void testBinaryValue() {
 		byte[] bytes = new byte[2 * 256];
 		for(int i = 0; i < 256; i++) {
 			bytes[i] = (byte)i;
@@ -120,7 +120,7 @@ abstract public class AbstractSerializedValueTest extends AbstractSerializingTes
 	}
 	
 	@Test
-	public void testByteListValueEmpty() {
+	public void testBinaryValueEmpty() {
 		testValue(XV.toValue(new byte[] {}));
 	}
 	

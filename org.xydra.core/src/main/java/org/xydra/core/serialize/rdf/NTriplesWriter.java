@@ -47,7 +47,7 @@ public class NTriplesWriter {
 	}
 	
 	private static boolean resultsInJustOneTriple(XValue v) {
-		return v.getType().isSingle() || v.getType() == ValueType.ByteList;
+		return v.getType().isSingle() || v.getType() == ValueType.Binary;
 	}
 	
 	public static String ntriplesEncode(String s) {
@@ -65,7 +65,7 @@ public class NTriplesWriter {
 		switch(v.getType()) {
 		case Address:
 		case Boolean:
-		case ByteList:
+		case Binary:
 		case Double:
 		case Id:
 		case Integer:

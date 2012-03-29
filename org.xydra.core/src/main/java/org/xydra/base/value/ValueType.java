@@ -12,22 +12,22 @@ import org.xydra.base.XID;
 public enum ValueType {
 	
 	/* in alphabetic order */
-
+	
 	Address(XAddress.class), AddressList(XAddressListValue.class), AddressSet(
 	        XAddressSetValue.class), AddressSortedSet(XAddressSortedSetValue.class),
-
+	
 	BooleanList(XBooleanListValue.class), Boolean(XBooleanValue.class),
-
-	ByteList(XByteListValue.class),
-
+	
+	Binary(XBinaryValue.class),
+	
 	DoubleList(XDoubleListValue.class), Double(XDoubleValue.class),
-
+	
 	Id(org.xydra.base.XID.class), IdList(XIDListValue.class), IdSet(XIDSetValue.class), IdSortedSet(
 	        XIDSortedSetValue.class),
-
+	
 	IntegerList(XIntegerListValue.class), Integer(XIntegerValue.class), LongList(
 	        XLongListValue.class), Long(XLongValue.class),
-
+	
 	StringList(XStringListValue.class), StringSet(XStringSetValue.class), String(XStringValue.class);
 	
 	private Class<?> xydraInterface;
@@ -47,7 +47,7 @@ public enum ValueType {
 	}
 	
 	public boolean isSingle() {
-		return this == Address || this == Boolean || this == Double || this == Id
+		return this == Address || this == Boolean || this == Binary || this == Double || this == Id
 		        || this == Integer || this == Long || this == String;
 	}
 	
@@ -65,10 +65,6 @@ public enum ValueType {
 	}
 	
 	/**
-	 * Note that {@link XByteListValue} is considered a non-collection type.
-	 * TODO this is inconsistent with {@link XByteListValue} extending
-	 * {@link XCollectionValue}
-	 * 
 	 * @param type must be a collection type
 	 * @return the Java class component type of the given collection type or
 	 *         null if type is not a collection type.
@@ -107,6 +103,8 @@ public enum ValueType {
 			return XAddress.class;
 		case Boolean:
 			return Boolean.class;
+		case Binary:
+			return byte[].class;
 		case Double:
 			return Double.class;
 		case Integer:

@@ -8,7 +8,7 @@ public class ReflectionUtilsTest {
 	@Test
 	public void testExceptionWithCause() {
 		try {
-			RuntimeException e = new RuntimeException("a");
+			RuntimeException e = new RuntimeException("a_test_exception");
 			throw e;
 		} catch(Exception e) {
 			RuntimeException e2 = new RuntimeException(e);

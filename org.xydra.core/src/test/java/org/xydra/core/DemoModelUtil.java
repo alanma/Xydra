@@ -9,7 +9,7 @@ import org.xydra.base.value.XAddressSetValue;
 import org.xydra.base.value.XAddressSortedSetValue;
 import org.xydra.base.value.XBooleanListValue;
 import org.xydra.base.value.XBooleanValue;
-import org.xydra.base.value.XByteListValue;
+import org.xydra.base.value.XBinaryValue;
 import org.xydra.base.value.XDoubleListValue;
 import org.xydra.base.value.XDoubleValue;
 import org.xydra.base.value.XIDListValue;
@@ -121,7 +121,7 @@ public class DemoModelUtil {
 	public static final XIntegerListValue SCORES_VALUE = XV.toValue(new int[] { 34, 234, 34 });
 	
 	public static final XID SIGNATURE_ID = XX.toId("signature");
-	public static final XByteListValue SIGNATURE_VALUE = XV.toValue(new byte[] { 0, 1, 2, 3, 4, 5,
+	public static final XBinaryValue SIGNATURE_VALUE = XV.toValue(new byte[] { 0, 1, 2, 3, 4, 5,
 	        6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, (byte)253, (byte)254, (byte)255 });
 	
 	public static final XID SPOUSE_ID = XX.toId("spouse");
