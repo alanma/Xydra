@@ -86,7 +86,7 @@ public class Utils {
 	}
 	
 	/**
-	 * TODO move to restless
+	 * This sets no "Content-Type" headers.
 	 * 
 	 * @param res
 	 * @param archivename
@@ -98,13 +98,8 @@ public class Utils {
 	public static OutputStream toFileDownload(HttpServletResponse res, String archivename,
 	        String extension, String contentType) throws IOException {
 		String fullFileName = archivename + "." + extension;
-		
 		log.info("Wrapping in file named " + fullFileName);
-		
-		// Send the correct response headers.
-		res.setContentType(contentType);
 		res.addHeader("Content-Disposition", "attachment; filename=\"" + fullFileName + "\"");
-		
 		OutputStream os = res.getOutputStream();
 		return os;
 	}
