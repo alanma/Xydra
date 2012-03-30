@@ -1,6 +1,5 @@
 package org.xydra.store.impl.gae;
 
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.dev.LocalDatastoreService;
 import com.google.appengine.tools.development.ApiProxyLocal;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
@@ -45,8 +44,6 @@ public class GaeTestFixer_LocalPart {
 			// hopeless attempt to get a clean datastore in JUnit tests
 			ApiProxyLocal proxy = (ApiProxyLocal)delegate;
 			proxy.setProperty(LocalDatastoreService.NO_STORAGE_PROPERTY, Boolean.TRUE.toString());
-			
-			GaeTestfixer.setMarkerEntity(DatastoreServiceFactory.getDatastoreService());
 			
 		} else if(ApiProxy.getCurrentEnvironment() == null) {
 			

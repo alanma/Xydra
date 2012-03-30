@@ -3,11 +3,6 @@ package org.xydra.store.impl.gae;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 
-import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.EntityNotFoundException;
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.utils.SystemProperty;
 
 
@@ -101,34 +96,6 @@ public class GaeTestfixer {
 		}
 		
 		GaeTestFixer_LocalPart.initialiseHelperAndAttachToCurrentThread();
-	}
-	
-	/**
-	 * @param datastore The datastore to check for a marker.
-	 * @return true if the given datastore contains a defined marker
-	 *         {@link Entity}
-	 */
-	public static boolean containsMarker(DatastoreService datastore) {
-		try {
-			Key key = KeyFactory.createKey("test", "marker");
-			@SuppressWarnings("unused")
-			Entity entity = datastore.get(key);
-			return true;
-		} catch(EntityNotFoundException e) {
-			return false;
-		}
-	}
-	
-	/**
-	 * Add marker Entity to GAE dataStore
-	 * 
-	 * @param datastore The datastore to set a marker in.
-	 */
-	public static void setMarkerEntity(DatastoreService datastore) {
-		Key key = KeyFactory.createKey("test", "marker");
-		Entity marker = new Entity(key);
-		datastore.put(marker);
-		assert GaeTestfixer.containsMarker(datastore);
 	}
 	
 	public static synchronized void tearDown() {
