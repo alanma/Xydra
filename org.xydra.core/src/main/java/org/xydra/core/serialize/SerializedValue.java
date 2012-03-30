@@ -252,6 +252,10 @@ public class SerializedValue {
 			return XV.toAddressSetValue(getAddressListContents(element));
 		} else if(elementName.equals(XBINARY_ELEMENT)) {
 			return XV.toValue(Base64.decode(getStringContent(element)));
+		} else
+		/* parse legacy data */
+		if(elementName.equals("xbyteList")) {
+			return XV.toValue(Base64.decode(getStringContent(element)));
 		} else if(elementName.equals(XIDSORTEDSET_ELEMENT)) {
 			return toIdSortedSetValue(element);
 		} else if(elementName.equals(XADDRESSSORTEDSET_ELEMENT)) {
