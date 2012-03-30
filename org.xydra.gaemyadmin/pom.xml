@@ -14,7 +14,6 @@
 	<!--
 		/!\ Needs to be 'jar' for 'mvn deploy' but 'war' for 'gae:deploy'
 	-->
-	<packaging>war</packaging>
 	<name>Xydra GaeMyAdmin</name>
 
 	<repositories>
@@ -39,6 +38,12 @@
 			<groupId>org.xydra</groupId>
 			<artifactId>restless</artifactId>
 		</dependency>
+        <dependency>
+            <groupId>org.xydra</groupId>
+            <artifactId>restless</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
 
 		<!-- test server -->
 		<dependency>

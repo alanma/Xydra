@@ -12,7 +12,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.xydra.restless.Restless;
-import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.restless.utils.Page.Form;
 import org.xydra.restless.utils.Page.METHOD;
 import org.xydra.restless.utils.Page.UnsortedList;
@@ -24,20 +23,22 @@ import org.xydra.restless.utils.ServletUtils;
  * 
  * @author xamde
  */
-public class LogConfResource {
+public class LogAdminResource {
 	
-	private static String URL;
+	public static final String PAGE_NAME = "Logging Configuration";
+	static String URL;
 	
 	public static void restless(Restless restless, String prefix) {
-		restless.addMethod(prefix + "/", "GET", LogConfResource.class, "index", true);
-		restless.addMethod(prefix + "/", "POST", LogConfResource.class, "post", true);
-		URL = "/admin" + prefix + "/";
+		URL = prefix + "/logs";
+		restless.addMethod(URL, "GET", LogAdminResource.class, "index", true);
+		restless.addMethod(URL, "POST", LogAdminResource.class, "post", true);
 	}
 	
 	public void index(HttpServletResponse res) throws IOException {
-		Writer w = HtmlUtils.startHtmlPage(res, "Logging Configuration");
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		Writer w = AppConstants.startPage(res, PAGE_NAME, "");
 		
-		Form form = new Form(null, METHOD.POST, URL);
+		Form form = new Form(null, METHOD.POST, "/admin/logconf");
 		UnsortedList ul = form.unsortedList();
 		
 		LogManager lm = LogManager.getLogManager();
@@ -52,10 +53,12 @@ public class LogConfResource {
 		ul.li().inputSubmit("Set");
 		
 		w.write(form.toHtml("  "));
-		HtmlUtils.endHtmlPage(w);
+		
+		AppConstants.endPage(w);
 	}
 	
 	public void post(HttpServletRequest req, HttpServletResponse res) throws IOException {
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		// set each logger to the given level, if different from before
 		
 		// TODO persist settings in datastore and load from there
@@ -81,7 +84,7 @@ public class LogConfResource {
 		}
 		
 		// redirect to self
-		res.sendRedirect(URL);
+		res.sendRedirect("/admin/logconf");
 	}
 	
 }

@@ -14,33 +14,44 @@ import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.appengine.api.memcache.Stats;
 
 
-public class MemcacheResource {
+public class MemcacheAdminResource {
+	
+	static final String PAGE_NAME = "Memcache Admin";
+	static String URL;
 	
 	public static void restless(Restless restless, String prefix) {
-		restless.addMethod(prefix + "/", "GET", MemcacheResource.class, "index", true);
-		restless.addMethod(prefix + "/stats", "GET", MemcacheResource.class, "stats", true);
-		restless.addMethod(prefix + "/clear", "GET", MemcacheResource.class, "clear", true);
+		URL = prefix + "/memcache";
+		restless.addMethod(URL, "GET", MemcacheAdminResource.class, "index", true);
+		restless.addMethod(URL + "/stats", "GET", MemcacheAdminResource.class, "stats", true);
+		restless.addMethod(URL + "/clear", "GET", MemcacheAdminResource.class, "clear", true);
 	}
 	
 	public void index(HttpServletResponse res) throws IOException {
-		Writer w = HtmlUtils.startHtmlPage(res, "GaeMyAdmin :: Memcache");
-		w.write(HtmlUtils.toOrderedList(Arrays.asList(
-
-		HtmlUtils.link("/admin/memcache/stats/", "Memcache Statistics"),
-
-		HtmlUtils.link("/admin/memcache/clear/", "Clear Memcache")
-
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		Writer w = AppConstants.startPage(res, PAGE_NAME, "");
+		
+		w.write(
+		
+		HtmlUtils.toOrderedList(
+		
+		Arrays.asList(
+		
+		HtmlUtils.link("/admin" + URL + "/stats/", "Memcache Statistics"),
+		
+		HtmlUtils.link("/admin" + URL + "/clear/", "Clear Memcache")
+		
 		)));
-		HtmlUtils.writeCloseBodyHtml(w);
-		w.flush();
+		AppConstants.endPage(w);
+		
 	}
 	
 	public void stats(HttpServletResponse res) throws IOException {
-		Writer w = HtmlUtils.startHtmlPage(res, "GaeMyAdmin :: Memcache stats");
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		Writer w = AppConstants.startPage(res, PAGE_NAME, "Stats");
+		
 		w.write("Loading stats...");
 		w.flush();
 		
-		// Get a handle on the service itself
 		MemcacheService mcs = MemcacheServiceFactory.getMemcacheService();
 		w.write("<h2>Namespace: " + mcs.getNamespace() + "</h2>");
 		
@@ -50,37 +61,36 @@ public class MemcacheResource {
 			w.write("No stats available.");
 		} else {
 			w.write(HtmlUtils.toOrderedList(Arrays.asList(
-
+			
 			"BytesReturnedForHits: " + stats.getBytesReturnedForHits(),
-
+			
 			"HitCount: " + stats.getHitCount(),
-
+			
 			"ItemCount: " + stats.getItemCount(),
-
+			
 			"MaxTimeWithoutAccess: " + stats.getMaxTimeWithoutAccess(),
-
+			
 			"MissCount: " + stats.getMissCount(),
-
+			
 			"TotalItemBytes: " + stats.getTotalItemBytes()
-
+			
 			)));
 		}
-		w.flush();
-		HtmlUtils.writeCloseBodyHtml(w);
+		AppConstants.endPage(w);
+		
 	}
 	
 	public void clear(HttpServletResponse res) throws IOException {
-		Writer w = HtmlUtils.startHtmlPage(res, "GaeMyAdmin :: Memcache clear");
-		w.write("Clearing...");
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		Writer w = AppConstants.startPage(res, PAGE_NAME, "Clear");
+		
+		w.write("Clearing memcache ...");
 		w.flush();
 		
-		// Get a handle on the service itself
 		MemcacheService mcs = MemcacheServiceFactory.getMemcacheService();
 		mcs.clearAll();
 		
 		w.write("Done.");
-		w.flush();
-		
-		HtmlUtils.writeCloseBodyHtml(w);
+		AppConstants.endPage(w);
 	}
 }
