@@ -3,7 +3,9 @@ package org.xydra.webadmin;
 import org.xydra.core.util.Clock;
 
 
+// IMPROVE Move somewhere
 public class Progress {
+	
 	private Clock clock = new Clock();
 	private long count = 0;
 	

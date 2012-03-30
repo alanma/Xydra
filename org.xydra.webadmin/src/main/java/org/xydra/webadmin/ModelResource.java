@@ -52,7 +52,6 @@ import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
 import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.restless.utils.ServletUtils;
-import org.xydra.restless.utils.SharedHtmlUtils.HeadLinkStyle;
 import org.xydra.restless.utils.SharedHtmlUtils.METHOD;
 import org.xydra.server.util.XydraHtmlUtils;
 import org.xydra.store.GetWithAddressRequest;
@@ -69,6 +68,8 @@ public class ModelResource {
 	private static final String UTF8 = "UTF-8";
 	public static final boolean INCLUDE_TENTATIVE = true;
 	
+	public static final String PAGE_NAME = "Model";
+	
 	public static enum MStyle {
 		html, htmlrev, htmlevents, link, xml, json, xmlhtml, /**
 		 * Direct output of
@@ -78,7 +79,6 @@ public class ModelResource {
 	}
 	
 	public static void restless(Restless restless, String prefix) {
-		
 		restless.addMethod(prefix + "/{repoId}/{modelId}/", "GET", ModelResource.class, "index",
 		        true,
 		        
@@ -107,25 +107,16 @@ public class ModelResource {
 	
 	@SuppressWarnings("unused")
 	public static void command(String repoIdStr, String modelIdStr, String cmdStr,
-	        HttpServletRequest req, HttpServletResponse res) {
+	        HttpServletRequest req, HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		Writer w = AppConstants.startPage(res, PAGE_NAME, "Deleting Model");
 		
-		Clock c = new Clock().start();
 		XAddress modelAddress = XX.toAddress(XX.toId(repoIdStr), XX.toId(modelIdStr), null, null);
 		if(cmdStr.equals("delete")) {
-			// to delete: XMODEL: name=/gae-data/phonebook/-/-
-			
-			// to delete: XCHANGE: name=0/gae-data/phonebook
-			
-			/*
-			 * There is no query to bind them all:
-			 * 
-			 * SELECT __key__ FROM XCHANGE WHERE __key__ <
-			 * KEY('XCHANGE','0/gae-data/'+ modelId ...)
-			 */
-			
-			// FIXME implement: delete models completely!
+			// FIXME use Repo on Persistence to delete model
 		}
+		
+		AppConstants.endPage(w);
 	}
 	
 	public static void index(String repoIdStr, String modelIdStr, String styleStr,
@@ -179,20 +170,18 @@ public class ModelResource {
 					}
 				}
 			} else {
-				Writer w = HtmlUtils.startHtmlPage(res, "Model does not exist", new HeadLinkStyle(
-				        "/s/xyadmin.css"));
+				Writer w = AppConstants.startPage(res, PAGE_NAME, "Model does not exist");
 				w.write("<p>Model '" + modelAddress + "' does (currently) not exist.</p>");
-				HtmlUtils.endHtmlPage(w);
+				AppConstants.endPage(w);
 			}
 		} else {
 			// html
-			Writer w = Utils.writeHeader(res, "Model", modelAddress);
+			Writer w = AppConstants.startPage(res, PAGE_NAME, "" + modelAddress);
 			w.write(HtmlUtils.link(RepositoryResource.link(modelAddress.getRepository()),
 			        "Back to repository '" + modelAddress.getRepository() + "'<br/>\n"));
 			w.write("<hr/>");
 			render(w, modelAddress, style);
-			w.flush();
-			w.close();
+			AppConstants.endPage(w);
 		}
 		
 		c.stop("index");
@@ -202,12 +191,11 @@ public class ModelResource {
 	public static void update(String repoIdStr, String modelIdStr, HttpServletRequest req,
 	        HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		Writer w = AppConstants.startPage(res, PAGE_NAME, "Restore Model");
 		
 		Clock c = new Clock().start();
 		XID repoId = XX.toId(repoIdStr);
 		
-		Writer w = HtmlUtils.startHtmlPage(res, "Xydra Webadmin :: Restore Model",
-		        new HeadLinkStyle("/s/xyadmin.css"));
 		w.write("Processing upload...</br>");
 		w.flush();
 		
@@ -241,8 +229,7 @@ public class ModelResource {
 		
 		w.write("Stats:" + c.getStats());
 		log.info("Stats: " + c.getStats());
-		w.flush();
-		w.close();
+		AppConstants.endPage(w);
 	}
 	
 	static final String getStorageName(XID modelId, MStyle style) {
@@ -312,39 +299,27 @@ public class ModelResource {
 	public static void render(Writer w, XAddress modelAddress, MStyle style) throws IOException {
 		w.write(
 		
-		HtmlUtils.link("/admin" + WebadminResource.XYADMIN + "/"
-		        + modelAddress.getRepository().toString())
-		        + " | "
-		        +
-		        
-		        HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.html,
-		                modelAddress.toString())
-		        
-		        + " | "
-		        + HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.htmlrev, "Rev")
-		        
-		        + " | "
-		        + HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.htmlevents, "Events")
-		        
-		        + " | "
-		        + HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.htmlchanges, "Change log")
-		        
-		        + " | "
-		        + HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.xmlhtml, "XML-as-HTML")
-		        
-		        + " | "
-		        + HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.xml, "XML")
-		        
-		        + HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.xml + "&download=true",
-		                ".zip")
-		        
-		        + " | "
-		        + HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.json, "JSON")
-		        
-		        + HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.json + "&download=true",
-		                ".zip")
-		        
-		        + "<br/>\n");
+		HtmlUtils.link(link(modelAddress)) + " | " +
+		
+		HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.html, modelAddress.toString())
+		
+		+ " | " + HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.htmlrev, "Rev")
+		
+		+ " | " + HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.htmlevents, "Events")
+		
+		+ " | " + HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.htmlchanges, "Change log")
+		
+		+ " | " + HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.xmlhtml, "XML-as-HTML")
+		
+		+ " | " + HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.xml, "XML")
+		
+		+ HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.xml + "&download=true", ".zip")
+		
+		+ " | " + HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.json, "JSON")
+		
+		+ HtmlUtils.link(link(modelAddress) + "?style=" + MStyle.json + "&download=true", ".zip")
+		
+		+ "<br/>\n");
 		
 		if(style == MStyle.htmlevents || style == MStyle.htmlrev || style == MStyle.html) {
 			
@@ -372,7 +347,7 @@ public class ModelResource {
 	}
 	
 	public static String link(XAddress modelAddress) {
-		return "/admin" + WebadminResource.XYADMIN + "/" + modelAddress.getRepository() + "/"
+		return "/admin" + RepositoryResource.URL + "/" + modelAddress.getRepository() + "/"
 		        + modelAddress.getModel();
 	}
 	
@@ -511,7 +486,7 @@ public class ModelResource {
 			XModel model;
 			try {
 				XydraElement e = new XmlParser().parse(xml);
-				model = SerializedModel.toModel(WebadminResource.ACTOR, null, e);
+				model = SerializedModel.toModel(XyAdminApp.ACTOR, null, e);
 				return model;
 			} catch(Exception e) {
 				throw new RuntimeException("error parsing model file \"" + name + "\"", e);

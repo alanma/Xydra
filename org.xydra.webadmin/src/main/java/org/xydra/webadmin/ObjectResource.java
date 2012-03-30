@@ -22,6 +22,8 @@ public class ObjectResource {
 	
 	public static final Logger log = LoggerFactory.getLogger(ObjectResource.class);
 	
+	public static final String PAGE_NAME = "Object";
+	
 	public static void restless(Restless restless, String prefix) {
 		
 		restless.addMethod(prefix + "/{repoId}/{modelId}/{objectId}/", "GET", ObjectResource.class,
@@ -39,10 +41,10 @@ public class ObjectResource {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		XAddress objectAddress = XX.toAddress(XX.toId(repoIdStr), XX.toId(modelIdStr),
 		        XX.toId(objectIdStr), null);
-		Writer w = Utils.writeHeader(res, "Object", objectAddress);
+		
+		Writer w = AppConstants.startPage(res, PAGE_NAME, objectAddress.toString());
 		render(w, objectAddress, style);
-		w.flush();
-		w.close();
+		AppConstants.endPage(w);
 	}
 	
 	public static void render(Writer w, XAddress objectAddress, String style) throws IOException {

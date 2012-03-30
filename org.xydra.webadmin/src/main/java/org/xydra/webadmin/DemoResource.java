@@ -13,8 +13,6 @@ import org.xydra.core.model.impl.memory.MemoryRepository;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.restless.Restless;
-import org.xydra.restless.utils.HtmlUtils;
-import org.xydra.restless.utils.SharedHtmlUtils.HeadLinkStyle;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.gae.GaeTestfixer;
 import org.xydra.store.rmof.impl.delegate.WritableRepositoryOnPersistence;
@@ -23,30 +21,33 @@ import org.xydra.store.rmof.impl.delegate.WritableRepositoryOnPersistence;
 public class DemoResource {
 	
 	public static final Logger log = LoggerFactory.getLogger(DemoResource.class);
+	public static final String PAGE_NAME = "Add Demo Data";
+	public static String URL;
 	
 	public static void restless(Restless restless, String prefix) {
-		
-		restless.addMethod(prefix + "/demo/", "GET", DemoResource.class, "demo", true);
-		
+		URL = prefix + "/demo";
+		restless.addMethod(URL, "GET", DemoResource.class, "demo", true);
 	}
 	
 	public static void demo(HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		Writer w = HtmlUtils.startHtmlPage(res, "Demo", new HeadLinkStyle("/s/xyadmin.css"));
-		w.write("Generating demodata...");
+		Writer w = AppConstants.startPage(res, PAGE_NAME, "");
+		
+		w.write("Generating phonebook demodata...");
 		w.flush();
 		XydraPersistence p = Utils.getPersistence(XX.toId("repo1"));
 		WritableRepositoryOnPersistence repository = new WritableRepositoryOnPersistence(p,
 		        XX.toId("DEMO"));
 		
-		XRepository xr = new MemoryRepository(WebadminResource.ACTOR, "pass", XX.toId("repo1"));
+		XRepository xr = new MemoryRepository(XyAdminApp.ACTOR, "pass", XX.toId("repo1"));
 		DemoModelUtil.addPhonebookModel(xr);
 		
 		w.write("  adding ...");
 		w.flush();
 		XCopyUtils.copyData(xr, repository);
 		w.write(" done");
-		w.flush();
+		
+		AppConstants.endPage(w);
 	}
 	
 }

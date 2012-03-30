@@ -34,7 +34,6 @@ import org.xydra.log.LoggerFactory;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
 import org.xydra.restless.utils.HtmlUtils;
-import org.xydra.restless.utils.SharedHtmlUtils.HeadLinkStyle;
 import org.xydra.restless.utils.SharedHtmlUtils.METHOD;
 import org.xydra.store.GetWithAddressRequest;
 import org.xydra.store.XydraRuntime;
@@ -56,12 +55,18 @@ import org.xydra.webadmin.ModelResource.SetStateResult;
 public class RepositoryResource {
 	
 	public static final Logger log = LoggerFactory.getLogger(RepositoryResource.class);
+	
+	public static final String PAGE_NAME = "Repository";
+	public static String URL;
+	
 	private static XID actorId = XX.toId("_RepositoryResource");
 	
 	public static void restless(Restless restless, String prefix) {
-		
-		restless.addMethod(prefix + "/{repoId}", "GET", RepositoryResource.class,
-		        "deleteAllModels", true,
+		URL = prefix + "/repo";
+		ObjectResource.restless(restless, URL);
+		ModelResource.restless(restless, URL);
+		restless.addMethod(URL + "/{repoId}", "GET", RepositoryResource.class, "deleteAllModels",
+		        true,
 		        
 		        new RestlessParameter("repoId"),
 		        
@@ -69,7 +74,7 @@ public class RepositoryResource {
 		        
 		        new RestlessParameter("sure", "no"));
 		
-		restless.addMethod(prefix + "/{repoId}/", "GET", RepositoryResource.class, "index", true,
+		restless.addMethod(URL + "/{repoId}/", "GET", RepositoryResource.class, "index", true,
 		        new RestlessParameter("repoId"),
 		        
 		        new RestlessParameter("style", RStyle.html.name()),
@@ -84,7 +89,7 @@ public class RepositoryResource {
 		
 		);
 		
-		restless.addMethod(prefix + "/{repoId}/", "GET", RepositoryResource.class, "foreach", true,
+		restless.addMethod(URL + "/{repoId}/", "GET", RepositoryResource.class, "foreach", true,
 		
 		new RestlessParameter("repoId"),
 		
@@ -97,7 +102,7 @@ public class RepositoryResource {
 		);
 		// cacheInInstance=true&cacheInMemcache=false&cacheInDatastore=true
 		
-		restless.addMethod(prefix + "/{repoId}/", "POST", RepositoryResource.class, "update", true,
+		restless.addMethod(URL + "/{repoId}/", "POST", RepositoryResource.class, "update", true,
 		        new RestlessParameter("repoId"),
 		        
 		        new RestlessParameter("replace", "false")
@@ -124,7 +129,9 @@ public class RepositoryResource {
 	public static void foreach(String repoId, String foreachmodel, String username,
 	        String password, HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		Writer w = HtmlUtils.startHtmlPage(res, "For-each model");
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		Writer w = AppConstants.startPage(res, PAGE_NAME, "For each model");
+		
 		w.write("For-each model in repo " + repoId + " use param " + foreachmodel + "<br/>\n");
 		w.flush();
 		XID repositoryId = XX.toId(repoId);
@@ -201,7 +208,8 @@ public class RepositoryResource {
 					}
 					zos.finish();
 				} else {
-					Writer w = HtmlUtils.startHtmlPage(res, "Xyadmin XML dump of repo " + repoId);
+					Writer w = AppConstants.startPage(res, PAGE_NAME, "Xyadmin XML dump of repo "
+					        + repoId);
 					for(XID modelId : modelIdList) {
 						XAddress modelAddress = XX.resolveModel(repoId, modelId);
 						String serialisation = SerialisationCache.getSerialisation(modelAddress,
@@ -210,7 +218,7 @@ public class RepositoryResource {
 					}
 				}
 			} else {
-				Writer w = HtmlUtils.startHtmlPage(res, "Xyadmin Repo " + repoId);
+				Writer w = AppConstants.startPage(res, PAGE_NAME, "Xyadmin Repo " + repoId);
 				w.write("Generating serialisations took too long. Watch task queue to finish and consider using different caching params.<br/>\n");
 				w.write(HtmlUtils.form(METHOD.GET, "").withHiddenInputText("", repoIdStr)
 				        .withHiddenInputText("style", styleStr)
@@ -222,7 +230,7 @@ public class RepositoryResource {
 			}
 		} else {
 			// style HTML
-			Writer w = Utils.writeHeader(res, "Repo", repoAddress);
+			Writer w = AppConstants.startPage(res, PAGE_NAME, "" + repoAddress);
 			w.write(
 			
 			HtmlUtils.link(link(repoId) + "?style=" + RStyle.htmlrevs.name(), "With Revs")
@@ -273,10 +281,9 @@ public class RepositoryResource {
 	public static void deleteAllModels(String repoIdStr, String commandStr, String sure,
 	        HttpServletRequest req, HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		Writer w = AppConstants.startPage(res, PAGE_NAME, "Delete All Models");
 		
 		Clock c = new Clock().start();
-		Writer w = HtmlUtils.startHtmlPage(res, "Xydra Webadmin :: Delete all models",
-		        new HeadLinkStyle("/s/xyadmin.css"));
 		w.write("Found sure='" + sure + "'");
 		w.flush();
 		
@@ -317,13 +324,12 @@ public class RepositoryResource {
 	public static void update(String repoIdStr, String replaceModelsStr, HttpServletRequest req,
 	        HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		Writer w = AppConstants.startPage(res, PAGE_NAME, "Restore Repository");
 		
 		XID repoId = XX.toId(repoIdStr);
 		boolean replaceModels = replaceModelsStr != null
 		        && replaceModelsStr.equalsIgnoreCase("true");
 		
-		Writer w = HtmlUtils.startHtmlPage(res, "Xydra Webadmin :: Restore Repository",
-		        new HeadLinkStyle("/s/xyadmin.css"));
 		w.write("Processing upload... replace=" + replaceModelsStr + "</br>");
 		w.flush();
 		
@@ -390,7 +396,7 @@ public class RepositoryResource {
 	 * @return relative admin link with no slash at the end
 	 */
 	public static String link(XID repoId) {
-		return "/admin" + WebadminResource.XYADMIN + "/" + repoId;
+		return "/admin" + URL + "/" + repoId;
 	}
 	
 	/**

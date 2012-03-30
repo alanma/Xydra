@@ -41,11 +41,11 @@
 	</security-constraint>
 
 	<servlet>
-		<servlet-name>XydraWebadmin</servlet-name>
+		<servlet-name>XyAdmin</servlet-name>
 		<servlet-class>org.xydra.restless.Restless</servlet-class>
 		<init-param>
 			<param-name>app</param-name>
-			<param-value>org.xydra.webadmin.WebadminApp</param-value>
+			<param-value>org.xydra.webadmin.XyAdminApp</param-value>
 		</init-param>
 		<init-param>
 			<param-name>loggerFactory</param-name>
@@ -60,7 +60,7 @@
 	</servlet>
 
 	<servlet-mapping>
-		<servlet-name>XydraWebadmin</servlet-name>
+		<servlet-name>XyAdmin</servlet-name>
 		<url-pattern>/admin/*</url-pattern>
 	</servlet-mapping>
 

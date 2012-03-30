@@ -15,13 +15,9 @@ import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.xydra.base.XAddress;
 import org.xydra.base.XID;
-import org.xydra.gae.AboutAppEngine;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.restless.utils.HtmlUtils;
-import org.xydra.restless.utils.SharedHtmlUtils.HeadLinkStyle;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.gae.GaePersistence;
 
@@ -30,23 +26,8 @@ public class Utils {
 	
 	private static final Logger log = LoggerFactory.getLogger(Utils.class);
 	
-	public static void writeDefaultInfos(Writer w) throws IOException {
-		String instance = AboutAppEngine.getInstanceId() + "---" + AboutAppEngine.getThreadInfo();
-		w.write(instance + "<br/>\n");
-	}
-	
 	public static XydraPersistence getPersistence(XID repoId) {
 		return new GaePersistence(repoId);
-	}
-	
-	public static Writer writeHeader(HttpServletResponse res, String xtype, XAddress xa)
-	        throws IOException {
-		String title = xtype + " " + xa;
-		Writer w = HtmlUtils.startHtmlPage(res, title, new HeadLinkStyle("/s/xyadmin.css"));
-		Utils.writeDefaultInfos(w);
-		w.write("<h3>" + title + "</h3>\n");
-		w.flush();
-		return w;
 	}
 	
 	/**
