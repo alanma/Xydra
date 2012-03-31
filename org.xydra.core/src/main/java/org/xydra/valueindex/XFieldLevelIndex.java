@@ -20,19 +20,15 @@ import org.xydra.index.query.Pair;
 /**
  * An index for {@link XReadableModel XReadableModels}. Indexes the contents of
  * the {@link XValue XValues} and stores them together with the {@link XAddress}
- * of the {@link XReadableObject} containing the {@link XReadableField} which
- * holds the value.
+ * of the {@link XReadableField} containing the value.
  * 
  * The index entries are "String -> XAddress & XValue". An {@link XValueIndexer}
  * is needed to get the String representations used for indexing. This index
- * works on the Object-level, which means that {@link XValue XValues} are
- * associated with the {@link XAddress} of the {@link XReadableObject}
- * containing the {@link XReadableField} which holds the value. Since different
- * {@link XReadableField} might contain the same {@link XValue}, it is possible
- * that there are multiple entries for it in the index. Therefore deindexing
- * will not always directly result in completely deindexing the {@link XValue}.
- * To completely deindex an entry, it needs to be deindexed as many times as the
- * represented {@link XValue} was indexed.
+ * works on the Field-level, which means that {@link XValue XValues} are
+ * associated with the {@link XAddress} of the {@link XReadableField} which
+ * holds the value. Since different {@link XReadableField XReadableFields} might
+ * contain the same {@link XValue}, it is possible that there are multiple
+ * entries for the same value in the index.
  * 
  * @author Kaidel
  * 
@@ -134,7 +130,7 @@ public class XFieldLevelIndex {
 	 * 
 	 * @param model The {@link XReadableModel} which is to be indexed (i.e. the
 	 *            {@link XReadableModel} given to the constructor
-	 *            {@link XFieldLevelIndex#XModelObjectLevelIndex(XReadableModel, XValueIndexer)}
+	 *            {@link XFieldLevelIndex#XFieldLevelIndex(XReadableModel, XValueIndexer)}
 	 *            ).
 	 */
 	private void index(XReadableModel model) {
@@ -524,19 +520,22 @@ public class XFieldLevelIndex {
 	}
 	
 	/**
-	 * Returns a set of pairs of {@link XAddress XAddresses} and {@link XValue
-	 * XValues}. The {@link XAddress XAddresses} are addresses of objects
-	 * containing fields which hold {@link XValue XValues} corresponding to the
-	 * given key. The {@link XValue XValues} in the pair are exactly this
-	 * corresponding {@link XValue}, as long as they are not {@link XAddress
-	 * XAddresses}.
+	 * Returns a set of {@link ValueIndexEntry ValueIndexEntries}. The
+	 * {@link XAddress XAddresses} are addresses of fields which hold
+	 * {@link XValue XValues} corresponding to the given key. The {@link XValue}
+	 * in the entry is exactly this corresponding {@link XValue}. Exception if
+	 * the contained value is an {@link XValue} it might not be the actual
+	 * value.
 	 * 
-	 * Warning: If an {@link XValue} in a pair is an instance of
+	 * TODO Since were now on the field level, why not use "null" instead of the
+	 * Field Address?
+	 * 
+	 * Warning: If an {@link XValue} in an entry is an instance of
 	 * {@link XAddress}, it either is the corresponding {@link XValue} or the
-	 * {@link XAddress} holding the corresponding {@link XValue}. The second
-	 * case can only occur if the index stores the {@link XAddress} of the field
-	 * if an {@link XValue} is too large. If your index is not configured in
-	 * this manner, this will never occur.
+	 * {@link XAddress} of the field holding the corresponding {@link XValue}.
+	 * The second case can only occur if the index stores the {@link XAddress}
+	 * of the field if an {@link XValue} is too large. If your index is not
+	 * configured in this manner, this will never occur.
 	 * 
 	 * Which {@link XValue XValues} corresponds to a given key is determined by
 	 * the used {@link XValueIndexer} which was set in the constructor

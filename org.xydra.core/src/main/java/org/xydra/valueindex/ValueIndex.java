@@ -26,9 +26,9 @@ public interface ValueIndex {
 	 * 
 	 * If there already exists a pair of {@link XAddress} and {@link XValue}
 	 * equal to the given address and value in the set of entries associated
-	 * with the given key, its counter will be incremented. If no such entry
-	 * exists, the given entry will be added to the set of entries associated
-	 * with the given key with its counter set to 1.
+	 * with the given key, nothing needs to be done. If no such entry exists,
+	 * the given entry will be added to the set of entries associated with the
+	 * given key.
 	 * 
 	 * @param key The key.
 	 * @param fieldAddress the address of the {@link XReadableField} in which
@@ -43,15 +43,13 @@ public interface ValueIndex {
 	 * Tries to remove the given pair of {@link XAddress} and {@link XValue}
 	 * from the set of entries for the given key.
 	 * 
-	 * If there already exists a pair of {@link XAddress} and {@link XValue} in
-	 * the set of entries associated with the given key equal to the given
-	 * address and value, it's counter will be decremented. If the counter is
-	 * set to 0 after if was decremented, the entry will be removed from the set
-	 * of entries associated to the given key.
+	 * The key will be removed from the set of keys, if the given
+	 * {@link XAddress} and {@link XValue} are the last values associated with
+	 * the given key.
 	 * 
 	 * @param key The key.
 	 * @param fieldAddress the address of the {@link XReadableField} in which
-	 *            the given value exists
+	 *            the given value is stored
 	 * @param value the value which is to be removed from the set of values
 	 *            associated with the given key
 	 * @throws RuntimeException if the given {@link XAddress} is not a field
@@ -78,8 +76,9 @@ public interface ValueIndex {
 	
 	/**
 	 * Deindexes the given key, i.e. removes the set of entries which are
-	 * associated with this key. This does not completely remove these entries
-	 * from the Index, since they might be associated with other keys.
+	 * associated with this key. This might not completely remove the contents
+	 * of the entries from the Index, since they might be associated with other
+	 * keys.
 	 * 
 	 * @param key The key which is to be completely deindexed.
 	 */

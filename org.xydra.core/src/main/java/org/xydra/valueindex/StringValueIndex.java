@@ -43,8 +43,8 @@ public class StringValueIndex implements ValueIndex {
 	}
 	
 	/**
-	 * Creates a new StringValueIndex, which does check the size of its entries
-	 * against the given maximum size. Since the size of most types of
+	 * Creates a new StringValueIndex, which will compare the size of its
+	 * entries to the given maximum size. Since the size of most types of
 	 * {@link XValue XValues} can only be estimated, this is not exact, but
 	 * should usually work. If an entry with the given {@link XValue} is bigger
 	 * than the given maximum size, the {@link XAddress} of the
@@ -52,11 +52,12 @@ public class StringValueIndex implements ValueIndex {
 	 * value itself. The size of the entry with the {@link XAddress} will not be
 	 * checked again, so you need to make sure that the {@link XAddress
 	 * XAddresses} actually are not bigger than the {@link XValue XValues} you
-	 * are using to save memory space.
+	 * are using to actually save memory.
 	 * 
 	 * @param map the {@link StringMap} which will be used for indexing.
-	 * @param maxEntrySize The maximum size of an {@link ValueIndexEntry} in
-	 *            this index storing an {@link XValue}.
+	 * @param maxEntrySize The approximate maximum size of an
+	 *            {@link ValueIndexEntry} in this index storing an
+	 *            {@link XValue}.
 	 */
 	public StringValueIndex(StringMap map, int maxEntrySize) {
 		this(map);

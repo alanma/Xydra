@@ -1,6 +1,7 @@
 package org.xydra.valueindex;
 
 import org.xydra.base.XAddress;
+import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.value.XValue;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XObject;
@@ -8,17 +9,10 @@ import org.xydra.core.model.XObject;
 
 /**
  * Entries used in {@link ValueIndex} to store an {@link XValue} together with
- * the {@link XAddress} of the {@link XObject} which contains the {@link XField}
- * holding the value. Also contains a counter variable to keep track of how
- * often the specific value exists in the {@link XObject}, since multiple
- * {@link XField XFields} might contain the same values.
+ * the {@link XAddress} of the {@link XReadableField} holding the value.
  * 
  * @author Kaidel
  * 
- */
-
-/*
- * TODO Update Documentation to reflect that we now store field addresses.
  */
 
 public class ValueIndexEntry {
