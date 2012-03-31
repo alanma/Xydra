@@ -21,6 +21,8 @@ public class AppConstants {
 		Writer w = HtmlUtils.startHtmlPage(res, AppConstants.NAME + ":: " + page + " " + part,
 		        new HeadLinkStyle(AppConstants.CSS_DEBUG_PATH));
 		w.write("<div class='xydebug' >");
+		w.write(HtmlUtils.link("..", "Up"));
+		w.write(" | ");
 		w.write(HtmlUtils.link(".", "Back"));
 		w.write("<h3>" + page + " " + part + "</h3>\n");
 		return w;

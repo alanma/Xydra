@@ -38,7 +38,7 @@ public class GaeMyAdminApp {
 	}
 	
 	public static void index(HttpServletResponse res, HttpServletRequest req) throws IOException {
-		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		GaeMyAdmin_GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		Writer w = AppConstants.startPage(res, PAGE_NAME, "");
 		
 		w.write(HtmlUtils.toOrderedList(Arrays.asList(

@@ -38,13 +38,13 @@ public class BlobAdminResource {
 	}
 	
 	public void index(HttpServletResponse res, HttpServletRequest req) throws IOException {
-		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		GaeMyAdmin_GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		
 		Writer w = AppConstants.startPage(res, PAGE_NAME, "");
 		
 		BlobstoreService blobStoreService = BlobstoreServiceFactory.getBlobstoreService();
 		
-		w.write("<b>Status</b><br/>Upload seems to work, download does not.");
+		w.write("<b>Status</b><br/>Upload seems to work, download does not.<br />\n");
 		
 		w.write("<b>Upload</b><br/>");
 		String url = blobStoreService.createUploadUrl("/admin" + URL,
@@ -60,7 +60,7 @@ public class BlobAdminResource {
 	}
 	
 	public void upload(HttpServletResponse res, HttpServletRequest req) throws IOException {
-		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		GaeMyAdmin_GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		
 		Writer w = AppConstants.startPage(res, PAGE_NAME, "");
 		
@@ -82,7 +82,7 @@ public class BlobAdminResource {
 	
 	public void download(String name, HttpServletResponse res, HttpServletRequest req)
 	        throws IOException {
-		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		GaeMyAdmin_GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		BlobstoreService blobStoreService = BlobstoreServiceFactory.getBlobstoreService();
 		BlobKey blobKey = new BlobKey(name);
 		blobStoreService.serve(blobKey, res);

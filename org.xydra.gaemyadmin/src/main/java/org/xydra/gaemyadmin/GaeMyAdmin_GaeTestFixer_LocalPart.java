@@ -12,13 +12,13 @@ import com.google.apphosting.api.ApiProxy.Environment;
 
 
 /**
- * The part of {@link GaeTestfixer} that requires stub classes only available
+ * The part of {@link GaeMyAdmin_GaeTestfixer} that requires stub classes only available
  * for local testing.
  * 
  * @author xamde
  * 
  */
-public class GaeTestFixer_LocalPart {
+public class GaeMyAdmin_GaeTestFixer_LocalPart {
 	
 	private static Environment env;
 	private static Delegate<?> delegate;

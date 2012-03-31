@@ -27,7 +27,7 @@ public class MemcacheAdminResource {
 	}
 	
 	public void index(HttpServletResponse res) throws IOException {
-		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		GaeMyAdmin_GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		Writer w = AppConstants.startPage(res, PAGE_NAME, "");
 		
 		w.write(
@@ -36,9 +36,9 @@ public class MemcacheAdminResource {
 		
 		Arrays.asList(
 		
-		HtmlUtils.link("/admin" + URL + "/stats/", "Memcache Statistics"),
+		HtmlUtils.link("/admin" + URL + "/stats", "Memcache Statistics"),
 		
-		HtmlUtils.link("/admin" + URL + "/clear/", "Clear Memcache")
+		HtmlUtils.link("/admin" + URL + "/clear", "Clear Memcache")
 		
 		)));
 		AppConstants.endPage(w);
@@ -46,7 +46,7 @@ public class MemcacheAdminResource {
 	}
 	
 	public void stats(HttpServletResponse res) throws IOException {
-		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		GaeMyAdmin_GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		Writer w = AppConstants.startPage(res, PAGE_NAME, "Stats");
 		
 		w.write("Loading stats...");
@@ -81,7 +81,7 @@ public class MemcacheAdminResource {
 	}
 	
 	public void clear(HttpServletResponse res) throws IOException {
-		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		GaeMyAdmin_GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		Writer w = AppConstants.startPage(res, PAGE_NAME, "Clear");
 		
 		w.write("Clearing memcache ...");

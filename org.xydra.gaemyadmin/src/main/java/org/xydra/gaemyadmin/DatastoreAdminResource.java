@@ -63,14 +63,14 @@ public class DatastoreAdminResource {
 	}
 	
 	public void index(HttpServletResponse res, HttpServletRequest req) throws IOException {
-		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		GaeMyAdmin_GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		Writer w = AppConstants.startPage(res, PAGE_NAME, "");
 		
 		w.write(HtmlUtils.toOrderedList(Arrays.asList(
 		
-		HtmlUtils.link("/admin/datastore/stats/", "Statistics"),
+		HtmlUtils.link("/admin" + URL + "/stats", "Statistics"),
 		
-		HtmlUtils.link("/admin/datastore/deleteAll",
+		HtmlUtils.link("/admin" + URL + "/deleteAll",
 		        "Page to delete all data - clicking this link just lists all data")
 		
 		)));
@@ -87,7 +87,7 @@ public class DatastoreAdminResource {
 	 * @throws IOException from underlying http streams or datastore
 	 */
 	public void deleteAll(HttpServletResponse res, String sure) throws IOException {
-		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		GaeMyAdmin_GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		Writer w = AppConstants.startPage(res, PAGE_NAME, "Delete All");
 		
 		// Get a handle on the datastore itself
@@ -129,7 +129,7 @@ public class DatastoreAdminResource {
 	
 	public void stats(HttpServletRequest req, String resultFormat, HttpServletResponse res)
 	        throws IOException {
-		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		GaeMyAdmin_GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		Writer w = AppConstants.startPage(res, PAGE_NAME, "Stats");
 		
 		long start = System.currentTimeMillis();

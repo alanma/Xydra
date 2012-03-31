@@ -27,7 +27,7 @@ public class RunGaeMyAdminJetty {
 	private static final Logger log = LoggerFactory.getLogger(RunGaeMyAdminJetty.class);
 	
 	public static void main(String[] args) throws Exception {
-		GaeTestfixer.enable();
+		GaeMyAdmin_GaeTestfixer.enable();
 		start();
 	}
 	

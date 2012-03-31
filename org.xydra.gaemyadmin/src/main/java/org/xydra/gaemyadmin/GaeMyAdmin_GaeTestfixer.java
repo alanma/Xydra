@@ -20,9 +20,9 @@ import com.google.appengine.api.utils.SystemProperty;
  * 
  * @author xamde
  */
-public class GaeTestfixer {
+public class GaeMyAdmin_GaeTestfixer {
 	
-	private static final Logger log = LoggerFactory.getLogger(GaeTestfixer.class);
+	private static final Logger log = LoggerFactory.getLogger(GaeMyAdmin_GaeTestfixer.class);
 	
 	private static boolean enabled = false;
 	/** checking for production env only once makes this run faster */
@@ -51,7 +51,7 @@ public class GaeTestfixer {
 	 * Fix testing in development mode which spawns multiple threads, which
 	 * cannot not happen on AppEngine in production mode.
 	 * 
-	 * This method just returns, doing nothing if {@link GaeTestfixer#enable()}
+	 * This method just returns, doing nothing if {@link GaeMyAdmin_GaeTestfixer#enable()}
 	 * is not called from main code.
 	 */
 	public static void initialiseHelperAndAttachToCurrentThread() {
@@ -95,11 +95,11 @@ public class GaeTestfixer {
 			}
 		}
 		
-		GaeTestFixer_LocalPart.initialiseHelperAndAttachToCurrentThread();
+		GaeMyAdmin_GaeTestFixer_LocalPart.initialiseHelperAndAttachToCurrentThread();
 	}
 	
 	public static synchronized void tearDown() {
-		GaeTestFixer_LocalPart.tearDown();
+		GaeMyAdmin_GaeTestFixer_LocalPart.tearDown();
 	}
 	
 }
