@@ -346,7 +346,7 @@ public class RepositoryResource {
 	 * @param repoId for new models
 	 * @param w for debug output
 	 * @param replaceModels if true existing content is ignored and just
-	 *            replaced with conent of stream. If false, existing content is
+	 *            replaced with content of stream. If false, existing content is
 	 *            updated. TODO =?
 	 * @throws IOException
 	 */
@@ -374,19 +374,19 @@ public class RepositoryResource {
 			} else {
 				result = ModelResource.updateStateTo(repoId, model, false);
 			}
-			log.info("" + result);
+			log.info(model.getAddress() + "" + result);
 			c.stopAndStart("applied-" + model.getId());
 			modelExisted += result.modelExisted ? 1 : 0;
 			modelsWithChanges += result.changes ? 1 : 0;
 			restored++;
-			log.debug(model.getAddress() + " " + c.getStats());
+			log.trace(model.getAddress() + " " + c.getStats());
 			w.write("... applied to server repository " + result + "</br>");
 			w.flush();
 		}
 		String stats = "Restored: " + restored + ", existed before: " + modelExisted
 		        + ", noChangesIn:" + modelsWithChanges;
 		w.write(stats + " " + c.getStats() + "</br>");
-		log.debug("Stats: " + stats + " " + c.getStats());
+		log.trace("Stats: " + stats + " " + c.getStats());
 		w.write("... Done</br>");
 		w.flush();
 	}
@@ -413,7 +413,7 @@ public class RepositoryResource {
 			XWritableModel model = p.getModelSnapshot(new GetWithAddressRequest(modelAddress,
 			        ModelResource.INCLUDE_TENTATIVE));
 			if(model == null) {
-				log.warn("Could not find model " + modelAddress);
+				log.warn("Could not find model " + modelAddress + " - it might have been deleted");
 			} else {
 				String serialisation = ModelResource.computeSerialisation(model, MStyle.xml);
 				ModelResource.writeToZipstreamDirectly(modelId, MStyle.xml, serialisation, zos);

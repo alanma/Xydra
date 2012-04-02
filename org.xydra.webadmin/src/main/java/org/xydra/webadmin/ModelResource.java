@@ -430,7 +430,8 @@ public class ModelResource {
 	}
 	
 	public static SetStateResult setStateTo(XID repoId, XReadableModel model) {
-		log.debug("Set state non-transactionally from " + model.getAddress() + " to " + repoId);
+		log.debug("Set state of model " + model.getAddress() + " non-transactionally in repo "
+		        + repoId);
 		XydraPersistence p = Utils.getPersistence(repoId);
 		SetStateResult result = new SetStateResult();
 		

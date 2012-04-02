@@ -77,7 +77,10 @@ public class XyAdminApp {
 		
 		HtmlUtils.link("/admin" + DemoResource.URL, DemoResource.PAGE_NAME),
 		
-		HtmlUtils.link("/admin" + URL + "/list", "List all Models")
+		HtmlUtils.link("/admin" + URL + "/list", "List all Models"),
+		
+		HtmlUtils.link("/admin" + RepositoryResource.URL + "/gae-data",
+		        "Default repository 'gae-data'")
 		
 		));
 		w.write("<p>Got to .." + RepositoryResource.URL + "/{repo-id}/</p>");
