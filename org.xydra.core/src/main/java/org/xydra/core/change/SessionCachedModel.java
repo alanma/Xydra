@@ -185,12 +185,15 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 		@SuppressWarnings("unused")
 		@Override
 		public XWritableField getField(XID fieldId) {
-			XWritableField f = this.cachedFields.get(fieldId);
-			if(WARN_ON_UNCACHED_ACCESS && WARN_ON_FIELDS && f == null) {
+			CachedField cf = this.cachedFields.get(fieldId);
+			if(WARN_ON_UNCACHED_ACCESS && WARN_ON_FIELDS && cf == null) {
 				log.warn("Field '" + fieldId + "' not prefetched in " + this.getAddress()
 				        + ". Return getField=null.");
 			}
-			return f;
+			if(cf != null && !cf.isPresent()) {
+				return null;
+			}
+			return cf;
 		}
 		
 		@Override
@@ -617,10 +620,6 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 	public void indexModel(XReadableModel baseModel) {
 		for(XID id : baseModel) {
 			indexObject(baseModel.getObject(id));
-			
-			if(!this.cachedObjects.containsKey(id)) {
-				setObjectState(id, EntityState.Present);
-			}
 		}
 		this.rev = baseModel.getRevisionNumber();
 		this.knowsAllObjectIds = true;
@@ -630,7 +629,10 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 		CachedObject co = this.cachedObjects.get(baseObject.getId());
 		if(co == null) {
 			co = setObjectState(baseObject.getId(), EntityState.Present);
+		} else {
+			log.trace("Avoid re-indexing object " + baseObject.getAddress());
 		}
+		
 		co.indexFieldsFrom(baseObject);
 		co.rev = baseObject.getRevisionNumber();
 	}

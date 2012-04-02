@@ -258,7 +258,7 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
 			sb.append('=');
 			sb.append(urlencode(address.toString()));
 			if(getModelRevisionRequest.includeTentative) {
-				// FIXME !! make constant + add in parser + add in docu
+				// FIXME ! make constant + add in parser + add in docu
 				sb.append("+tentative");
 			}
 		}

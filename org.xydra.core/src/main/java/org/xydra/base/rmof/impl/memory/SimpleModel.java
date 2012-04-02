@@ -182,7 +182,7 @@ public class SimpleModel implements Serializable, XRevWritableModel, XSessionMod
 	
 	@Override
 	public XSessionModel loadAllObjects() {
-		/* A simpleModel neither can not needs to load anything after creation */
+		/* A SimpleModel neither can nor needs to load anything after creation */
 		return this;
 	}
 	
