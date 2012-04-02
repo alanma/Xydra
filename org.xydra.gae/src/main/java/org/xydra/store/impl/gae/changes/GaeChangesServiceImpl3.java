@@ -376,7 +376,7 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 	 * @param beginRevInclusive
 	 * @param endRevInclusive
 	 * @param candidate never null, not final model rev
-	 * @param includeTentative TODO
+	 * @param includeTentative TODO docu tentative
 	 * @return a {@link CandidateRev} that is not necessarily a final model rev.
 	 */
 	private CandidateRev computeCurrenRevisionFromLocalChanges(long beginRevInclusive,

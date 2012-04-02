@@ -71,7 +71,7 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 	private final XAddress modelAddr;
 	
 	/**
-	 * @param revisionManager TODO
+	 * @param revisionManager TODO docu
 	 * @param changes The change log used for the model to execute changes on.
 	 * @param snapshots A snapshot service for the model service
 	 */
@@ -374,6 +374,11 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 			log.warn("Created over 1000 events (" + events.size()
 			        + ") GA?category=xydra&action=saveManyEvents&label=events&value="
 			        + events.size());
+			try {
+				throw new RuntimeException("Over 1000 events");
+			} catch(Exception e) {
+				log.warn("Over 1000 events", e);
+			}
 		}
 		assert events != null;
 		try {
