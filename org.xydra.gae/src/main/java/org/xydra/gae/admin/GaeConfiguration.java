@@ -3,6 +3,7 @@ package org.xydra.gae.admin;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.xydra.gae.AboutAppEngine;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.impl.gae.AsyncDatastore;
@@ -91,11 +92,15 @@ public class GaeConfiguration {
 	 * Persist this {@link GaeConfiguration} in data store
 	 */
 	public void store() {
-		assertConsistetState();
-		AsyncDatastore.putEntity(toEntity());
+		assertConsistentState();
+		if(AboutAppEngine.canWriteDataStore()) {
+			AsyncDatastore.putEntity(toEntity());
+		} else {
+			log.warn("Datastore offline, could not persist config.");
+		}
 	}
 	
-	public void assertConsistetState() {
+	public void assertConsistentState() {
 		if(!this.map.containsKey(PROP_VALID_UTC)) {
 			throw new IllegalStateException("Missing " + PROP_VALID_UTC);
 		}
@@ -127,7 +132,7 @@ public class GaeConfiguration {
 			String value = (String)entity.getProperty(key);
 			conf.map.put(key, value);
 		}
-		conf.assertConsistetState();
+		conf.assertConsistentState();
 		try {
 			conf.validUntilUTC = Long.parseLong(conf.map.get(PROP_VALID_UTC));
 		} catch(NumberFormatException e) {

@@ -2,6 +2,10 @@ package org.xydra.gae;
 
 import org.xydra.store.XydraRuntime;
 
+import com.google.appengine.api.capabilities.CapabilitiesService;
+import com.google.appengine.api.capabilities.CapabilitiesServiceFactory;
+import com.google.appengine.api.capabilities.Capability;
+import com.google.appengine.api.capabilities.CapabilityStatus;
 import com.google.appengine.api.utils.SystemProperty;
 
 
@@ -90,6 +94,21 @@ public class AboutAppEngine {
 			return "inDevelopment";
 		} else {
 			return "notOnAppengine";
+		}
+	}
+	
+	/**
+	 * @return true if GAE self-reports that the datastore works fine.
+	 */
+	public static boolean canWriteDataStore() {
+		CapabilitiesService service = CapabilitiesServiceFactory.getCapabilitiesService();
+		CapabilityStatus status = service.getStatus(Capability.DATASTORE_WRITE).getStatus();
+		
+		if(status == CapabilityStatus.ENABLED) {
+			return true;
+		} else {
+			// at least, we dont know for sure if it works
+			return false;
 		}
 	}
 	
