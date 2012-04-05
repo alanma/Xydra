@@ -28,14 +28,13 @@ public class StringValueIndexBenchmark {
 		
 		XydraRuntime.setPersistence(repoId, persistence);
 		
-		File zipFile = new File("/Users/xamde/Desktop/blabla.zip");
+		File zipFile = new File("../TestData/anonymized-emails.zip");
 		
 		Writer w;
 		try {
 			w = new OutputStreamWriter(System.out, "utf-8");
 			RepositoryResource.loadRepositoryFromZipFile(zipFile, XX.toId("gae-data"), w);
 		} catch(UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch(IOException e) {
 			e.printStackTrace();
