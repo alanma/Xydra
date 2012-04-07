@@ -8,6 +8,7 @@ import org.xydra.store.impl.gae.UniCache;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.Text;
 
 
 public class DataRecord {
@@ -77,7 +78,16 @@ public class DataRecord {
 				if(pair.getKey().startsWith(INDEXED_PREFIX)) {
 					e.setProperty(pair.getKey(), pair.getValue());
 				} else {
-					e.setUnindexedProperty(pair.getKey(), pair.getValue());
+					String s = pair.getValue();
+					if(s == null) {
+						continue;
+					}
+					if(s.length() > 400) {
+						Text value = new Text(s);
+						e.setUnindexedProperty(pair.getKey(), value);
+					} else {
+						e.setUnindexedProperty(pair.getKey(), s);
+					}
 				}
 			}
 			entry.key = datastoreKey.getName();

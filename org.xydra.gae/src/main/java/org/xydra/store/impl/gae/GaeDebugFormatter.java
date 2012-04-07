@@ -27,13 +27,13 @@ public class GaeDebugFormatter {
 	
 	public static boolean canHandle(Object o) {
 		return o instanceof Key
-
+		
 		|| o instanceof Entity
-
+		
 		|| o instanceof com.google.appengine.api.memcache.MemcacheService.IdentifiableValue
-
+		
 		|| o instanceof GaeModelRevision
-
+		
 		|| o instanceof GaeChange;
 	}
 	
@@ -52,7 +52,10 @@ public class GaeDebugFormatter {
 			StringBuffer buf = new StringBuffer();
 			buf.append("key:" + e.getKey() + " ");
 			for(Entry<String,Object> a : e.getProperties().entrySet()) {
-				buf.append(a.getKey() + ": " + DebugFormatter.formatString(a.getValue().toString())
+				String aKey = a.getKey();
+				Object aValue = a.getValue();
+				buf.append(aKey + ": "
+				        + DebugFormatter.formatString(aValue == null ? "null" : aValue.toString())
 				        + "; ");
 			}
 			return "Entity={" + buf.toString() + " }";
