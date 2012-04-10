@@ -1,5 +1,8 @@
 package org.xydra.store.impl.gae;
 
+import com.google.appengine.api.taskqueue.QueueConstants;
+
+
 /**
  * Limits defined by GAE infrastructure.
  * 
@@ -7,8 +10,8 @@ package org.xydra.store.impl.gae;
  */
 public interface GaeConstants {
 	
-	/** 10 kilobytes, see also QueueConstants.maxTaskSizeBytes(); */
-	public static final long MAX_GAE_TASk_PAYLOAD_SIZE = 10 * 1024;
+	/** 100 kilobytes, see also QueueConstants.maxTaskSizeBytes(); */
+	public static final long MAX_GAE_TASk_PAYLOAD_SIZE = QueueConstants.maxPushTaskSizeBytes();
 	
 	/** 60 seconds. Adapted to latest GAE release as of 2011-11-22 */
 	public static final long GAE_WEB_REQUEST_TIMEOUT = 60 * 1000;
