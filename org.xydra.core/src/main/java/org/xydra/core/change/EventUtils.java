@@ -329,7 +329,8 @@ public class EventUtils {
 		assert event.getTarget().equals(model.getAddress());
 		switch(event.getChangeType()) {
 		case ADD: {
-			assert !model.hasObject(event.getObjectId());
+			assert !model.hasObject(event.getObjectId()) : "Trying to add object '"
+			        + event.getObjectId() + "' bust is already present in model";
 			XRevWritableObject object = model.createObject(event.getObjectId());
 			object.setRevisionNumber(event.getRevisionNumber());
 			break;
