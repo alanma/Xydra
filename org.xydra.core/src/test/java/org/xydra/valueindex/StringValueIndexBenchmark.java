@@ -1,5 +1,8 @@
 package org.xydra.valueindex;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -10,11 +13,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.xydra.base.XAddress;
 import org.xydra.base.XID;
+import org.xydra.base.XType;
 import org.xydra.base.XX;
+import org.xydra.base.value.XValue;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
@@ -26,7 +33,7 @@ import org.xydra.core.serialize.xml.XmlParser;
 public class StringValueIndexBenchmark {
 	private List<XModel> models;
 	final static String lineSeparator = System.getProperty("line.separator");
-	final static String testDataPath = "../TestData/anonymized-emails/";
+	final String testDataPath = "../TestData/anonymized-emails/";
 	
 	@Before
 	public void setup() {
@@ -60,7 +67,7 @@ public class StringValueIndexBenchmark {
 		this.models = new ArrayList<XModel>();
 		XID actorId = XX.createUniqueId();
 		
-		File f = new File(testDataPath);
+		File f = new File(this.testDataPath);
 		File[] files = f.listFiles();
 		
 		for(int i = 0; i < files.length; i++) {
@@ -91,13 +98,61 @@ public class StringValueIndexBenchmark {
 		}
 	}
 	
-	@SuppressWarnings("unused")
+	private static Set<XAddress> getAddresses(Set<ValueIndexEntry> pairs) {
+		HashSet<XAddress> addresses = new HashSet<XAddress>();
+		
+		for(ValueIndexEntry pair : pairs) {
+			XAddress address = pair.getAddress();
+			assertEquals(XType.XFIELD, address.getAddressedType());
+			addresses.add(address);
+		}
+		
+		return addresses;
+	}
+	
 	@Test
-	public void benchmarkModelIndexing() {
+	public void testModelIndexing() {
 		HashSet<XID> emptySet = new HashSet<XID>();
 		
 		for(XModel model : this.models) {
-			writeDescription(model);
+			StringMap map = new MockStringMap();
+			StringValueIndex index = new StringValueIndex(map);
+			
+			SimpleValueIndexer indexer = new SimpleValueIndexer(index);
+			
+			XFieldLevelIndex fieldIndex = new XFieldLevelIndex(model, indexer, true, emptySet,
+			        emptySet);
+			
+			for(XID objectId : model) {
+				XObject object = model.getObject(objectId);
+				
+				for(XID fieldId : object) {
+					XField field = object.getField(fieldId);
+					XValue value = field.getValue();
+					
+					List<String> list = indexer.getIndexStrings(value);
+					
+					for(String s : list) {
+						Set<ValueIndexEntry> entries = fieldIndex.search(s);
+						
+						Set<XAddress> addresses = getAddresses(entries);
+						assertTrue(addresses.contains(field.getAddress()));
+						
+					}
+				}
+			}
+			
+		}
+	}
+	
+	@SuppressWarnings("unused")
+	@Test
+	public void benchmarkModelIndexing() {
+		String path = this.testDataPath + "CompleteModelIndexing/";
+		HashSet<XID> emptySet = new HashSet<XID>();
+		
+		for(XModel model : this.models) {
+			writeDescription(path, model);
 			
 			StringMap map = new MockStringMap();
 			StringValueIndex index = new StringValueIndex(map);
@@ -109,16 +164,54 @@ public class StringValueIndexBenchmark {
 			        emptySet);
 			long end = System.currentTimeMillis();
 			
-			System.out.println(end - start);
-			
-			writeData(model, end - start);
+			writeIndexBenchmarkData(path, model, end - start);
 		}
 	}
 	
-	private void writeDescription(XModel model) {
+	@SuppressWarnings("unused")
+	@Test
+	public void benchmarkSearch() {
+		String path = this.testDataPath + "Search/";
+		HashSet<XID> emptySet = new HashSet<XID>();
+		
+		for(XModel model : this.models) {
+			writeDescription(path, model);
+			
+			StringMap map = new MockStringMap();
+			StringValueIndex index = new StringValueIndex(map);
+			
+			SimpleValueIndexer indexer = new SimpleValueIndexer(index);
+			
+			XFieldLevelIndex fieldIndex = new XFieldLevelIndex(model, indexer, true, emptySet,
+			        emptySet);
+			
+			for(XID objectId : model) {
+				XObject object = model.getObject(objectId);
+				
+				for(XID fieldId : object) {
+					XField field = object.getField(fieldId);
+					XValue value = field.getValue();
+					
+					List<String> list = indexer.getIndexStrings(value);
+					
+					for(String s : list) {
+						long start = System.currentTimeMillis();
+						Set<ValueIndexEntry> entries = fieldIndex.search(s);
+						long end = System.currentTimeMillis();
+						
+						System.out.println(end - start);
+						writeSearchBenchmarkData(path, end - start);
+					}
+				}
+			}
+			
+		}
+	}
+	
+	private void writeDescription(String path, XModel model) {
 		String idString = model.getId().toString();
 		try {
-			File f = new File(testDataPath + idString + ".txt");
+			File f = new File(path + idString + ".txt");
 			if(f.exists()) {
 				return;
 			}
@@ -153,11 +246,25 @@ public class StringValueIndexBenchmark {
 		}
 	}
 	
-	private void writeData(XModel model, long data) {
+	private void writeIndexBenchmarkData(String path, XModel model, long data) {
 		String idString = model.getId().toString();
 		try {
-			File f = new File(testDataPath + idString + ".txt");
+			File f = new File(path + idString + ".txt");
 			assert f.exists();
+			
+			BufferedWriter out = new BufferedWriter(new FileWriter(f, true));
+			out.write("" + data);
+			out.write(lineSeparator);
+			
+			out.close();
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void writeSearchBenchmarkData(String path, long data) {
+		try {
+			File f = new File(path + "searchBenchmark.txt");
 			
 			BufferedWriter out = new BufferedWriter(new FileWriter(f, true));
 			out.write("" + data);
