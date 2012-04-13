@@ -284,6 +284,7 @@ public class ServletUtils {
 	 * @param contentType to be sent
 	 */
 	public static void headers(HttpServletResponse res, String contentType) {
+		// TODO this gives an error on GAE in context of URLFetch & GA
 		res.setCharacterEncoding("utf-8");
 		res.setContentType(contentType);
 		res.setStatus(200);
