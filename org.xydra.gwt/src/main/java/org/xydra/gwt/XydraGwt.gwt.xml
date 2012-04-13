@@ -12,11 +12,11 @@
 	<!-- Inherit the core GWT HTTP module. -->
 	<inherits name="com.google.gwt.http.HTTP"/>
 	
+    <!-- Inherit Xydra Logging -->
+    <inherits name='org.xydra.log.Xlog'/>
+
 	<!-- Inherit the Xydra Core -->
 	<inherits name='org.xydra.core.XydraCore'/>
-	
-	<!-- Inherit Xydra Logging -->
-	<inherits name='org.xydra.log.Xlog'/>
 	
 	<source path="">
 		<exclude name="**/*Test.java" />
