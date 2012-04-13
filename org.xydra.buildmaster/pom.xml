@@ -44,7 +44,7 @@
 		<!-- DONE -->
 
 		<!-- Depends on: .client, GWT -->
-		<module>../org.xydra.gwt/</module>
+<!-- 		<module>../org.xydra.gwt/</module> -->
 		<!-- DONE -->
 
 		<!-- No Xydra dependencies -->
@@ -77,8 +77,6 @@
 		
 
 		<module>../org.xydra.google-analytics/</module>
-		
-        <module>../org.xydra.testgae/</module>
 
 
 		<!-- Experimental. Depends on: .core -->
