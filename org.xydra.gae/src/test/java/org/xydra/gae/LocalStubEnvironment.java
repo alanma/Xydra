@@ -9,32 +9,32 @@ import com.google.apphosting.api.ApiProxy;
 public class LocalStubEnvironment implements ApiProxy.Environment {
 	
 	@Override
-    public String getAppId() {
-		return "cxmserver-test";
+	public String getAppId() {
+		return "local-stub";
 	}
 	
 	@Override
-    public String getVersionId() {
+	public String getVersionId() {
 		return "1.0";
 	}
 	
 	@Override
-    public String getEmail() {
+	public String getEmail() {
 		throw new UnsupportedOperationException();
 	}
 	
 	@Override
-    public boolean isLoggedIn() {
+	public boolean isLoggedIn() {
 		throw new UnsupportedOperationException();
 	}
 	
 	@Override
-    public boolean isAdmin() {
+	public boolean isAdmin() {
 		throw new UnsupportedOperationException();
 	}
 	
 	@Override
-    public String getAuthDomain() {
+	public String getAuthDomain() {
 		throw new UnsupportedOperationException();
 	}
 	
@@ -54,7 +54,12 @@ public class LocalStubEnvironment implements ApiProxy.Environment {
 	}
 	
 	@Override
-    public Map<String,Object> getAttributes() {
+	public Map<String,Object> getAttributes() {
 		return new HashMap<String,Object>();
+	}
+	
+	@Override
+	public long getRemainingMillis() {
+		return -1;
 	}
 }
