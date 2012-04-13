@@ -3,19 +3,25 @@
 <module>
 	<inherits name="com.google.gwt.user.User" />
 
+    <inherits name="com.google.gwt.logging.Logging"/>
+    
+    
 	<!-- How to use logging in GWT: -->
-	<!-- Add this snippet to your (modulename).gwt.xml: -->
-
-<!--      <inherits name="com.google.gwt.logging.Logging"/>    -->
-
+	<!-- See  https://developers.google.com/web-toolkit/doc/latest/DevGuideLogging -->
+	<!-- to learn about settings that you can do in your  (modulename).gwt.xml: -->
 
 	
+	<!-- OLD -->
 	<!-- Compile both `DEBUG` and `ERROR` log levels, with level selection via 
 		a `gwt:property` in your HTML page: <meta name="gwt:property" content="log_level=DEBUG"> 
 		</head> -->
 	<!-- Snippet: -->
 	<!-- <inherits name='com.allen_sauer.gwt.log.gwt-log-ERROR' /> <define-property 
 		values="log_level" name="DEBUG" /> -->
+	
+	
+	
+	
 	<source path="">
 		<exclude name="**/Log4jUtils.java" />
 		<exclude name="**/*Test.java" />

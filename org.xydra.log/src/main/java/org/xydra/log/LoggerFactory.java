@@ -3,7 +3,6 @@ package org.xydra.log;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.core.client.GWT;
 
 
@@ -90,7 +89,7 @@ public class LoggerFactory {
 	public static boolean gwtLogEnabled() {
 		try {
 			// any class access would do
-			if(Log.LOG_LEVEL_INFO != 0) {
+			if(com.google.gwt.logging.client.NullLogHandler.class != null) {
 				return true;
 			}
 		} catch(Exception e) {
