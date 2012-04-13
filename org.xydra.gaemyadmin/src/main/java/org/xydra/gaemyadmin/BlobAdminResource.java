@@ -2,6 +2,7 @@ package org.xydra.gaemyadmin;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -66,15 +67,16 @@ public class BlobAdminResource {
 		
 		BlobstoreService blobStoreService = BlobstoreServiceFactory.getBlobstoreService();
 		
-		Map<String,BlobKey> blobs = blobStoreService.getUploadedBlobs(req);
+		Map<String,List<BlobKey>> blobs = blobStoreService.getUploads(req);
 		w.write(HtmlUtils.toOrderedList(blobs.keySet()) + "<br/>\n");
 		
-		BlobKey key = blobs.get("tempfile");
-		if(key == null) {
-			w.write("No tempfile uploaded");
+		List<BlobKey> keys = blobs.get("tempfile");
+		if(keys.isEmpty()) {
+			w.write("No tempfiles uploaded");
 		} else {
-			w.write("Have a tempfile uploaded. Key is '" + key.getKeyString() + "'");
-			
+			for(BlobKey key : keys) {
+				w.write("Have a tempfile uploaded. Key is '" + key.getKeyString() + "'");
+			}
 		}
 		
 		AppConstants.endPage(w);
