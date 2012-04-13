@@ -1,94 +1,100 @@
 package org.xydra.log;
 
-import com.allen_sauer.gwt.log.client.Log;
-
-
-public class GwtLogger extends Logger {
+/**
+ * Delegate to an GWT 2.1 logger
+ * 
+ * @author xamde
+ */
+public class GwtLogger extends org.xydra.log.Logger {
 	
-	private String name;
+	private java.util.logging.Logger logger;
 	
 	public GwtLogger(String name) {
-		this.name = name;
+		this.logger = java.util.logging.Logger.getLogger(name);
+	}
+	
+	public GwtLogger(java.util.logging.Logger logger) {
+		this.logger = logger;
 	}
 	
 	@Override
 	public void debug(String msg) {
-		Log.debug(this.name + " " + msg);
+		this.logger.log(java.util.logging.Level.FINE, msg);
 	}
 	
 	@Override
 	public void debug(String msg, Throwable t) {
-		Log.debug(this.name + " " + msg, t);
+		this.logger.log(java.util.logging.Level.FINE, msg, t);
 	}
 	
 	@Override
 	public void error(String msg) {
-		Log.error(this.name + " " + msg);
+		this.logger.log(java.util.logging.Level.SEVERE, msg);
 	}
 	
 	@Override
 	public void error(String msg, Throwable t) {
-		Log.error(this.name + " " + msg, t);
+		this.logger.log(java.util.logging.Level.SEVERE, msg, t);
 	}
 	
 	@Override
 	public void info(String msg) {
-		Log.info(this.name + " " + msg);
+		this.logger.log(java.util.logging.Level.INFO, msg);
 	}
 	
 	@Override
 	public void info(String msg, Throwable t) {
-		Log.info(this.name + " " + msg, t);
+		this.logger.log(java.util.logging.Level.INFO, msg, t);
 	}
 	
 	@Override
 	public boolean isDebugEnabled() {
-		return Log.isDebugEnabled();
+		return this.logger.isLoggable(java.util.logging.Level.FINE);
 	}
 	
 	@Override
 	public boolean isErrorEnabled() {
-		return Log.isErrorEnabled();
+		return this.logger.isLoggable(java.util.logging.Level.SEVERE);
 	}
 	
 	@Override
 	public boolean isInfoEnabled() {
-		return Log.isInfoEnabled();
+		return this.logger.isLoggable(java.util.logging.Level.INFO);
 	}
 	
 	@Override
 	public boolean isTraceEnabled() {
-		return Log.isTraceEnabled();
+		return this.logger.isLoggable(java.util.logging.Level.FINEST);
 	}
 	
 	@Override
 	public boolean isWarnEnabled() {
-		return Log.isWarnEnabled();
+		return this.logger.isLoggable(java.util.logging.Level.WARNING);
 	}
 	
 	@Override
 	public void trace(String msg) {
-		Log.trace(this.name + " " + msg);
+		this.logger.log(java.util.logging.Level.FINEST, msg);
 	}
 	
 	@Override
 	public void trace(String msg, Throwable t) {
-		Log.trace(this.name + " " + msg, t);
+		this.logger.log(java.util.logging.Level.FINEST, msg, t);
 	}
 	
 	@Override
 	public void warn(String msg) {
-		Log.warn(this.name + " " + msg);
+		this.logger.log(java.util.logging.Level.WARNING, msg);
 	}
 	
 	@Override
 	public void warn(String msg, Throwable t) {
-		Log.warn(this.name + " " + msg, t);
+		this.logger.log(java.util.logging.Level.WARNING, msg, t);
 	}
 	
 	@Override
 	public String toString() {
-		return this.name;
+		return this.logger.getName();
 	}
 	
 }
