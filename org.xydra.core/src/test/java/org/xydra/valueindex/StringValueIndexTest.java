@@ -14,8 +14,8 @@ public class StringValueIndexTest extends XFieldLevelIndexTest {
 	
 	@Override
 	public void initializeIndexers() {
-		StringMap oldMap = new MockStringMap();
-		StringMap newMap = new MockStringMap();
+		StringMap oldMap = new MemoryStringMap();
+		StringMap newMap = new MemoryStringMap();
 		
 		StringValueIndex oldIndex = new StringValueIndex(oldMap);
 		StringValueIndex newIndex = new StringValueIndex(newMap);
@@ -23,8 +23,8 @@ public class StringValueIndexTest extends XFieldLevelIndexTest {
 		this.oldIndexer = new SimpleValueIndexer(oldIndex);
 		this.newIndexer = new SimpleValueIndexer(newIndex);
 		
-		StringMap oldExcludeAllMap = new MockStringMap();
-		StringMap newExcludeAllMap = new MockStringMap();
+		StringMap oldExcludeAllMap = new MemoryStringMap();
+		StringMap newExcludeAllMap = new MemoryStringMap();
 		
 		StringValueIndex oldExcludeAllIndex = new StringValueIndex(oldExcludeAllMap);
 		StringValueIndex newExcludeAllIndex = new StringValueIndex(newExcludeAllMap);

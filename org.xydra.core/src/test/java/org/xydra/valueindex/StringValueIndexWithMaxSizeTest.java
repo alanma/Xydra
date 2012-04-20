@@ -19,8 +19,8 @@ public class StringValueIndexWithMaxSizeTest extends XFieldLevelIndexTest {
 	
 	@Override
 	public void initializeIndexers() {
-		StringMap oldMap = new MockStringMap();
-		StringMap newMap = new MockStringMap();
+		StringMap oldMap = new MemoryStringMap();
+		StringMap newMap = new MemoryStringMap();
 		
 		StringValueIndex oldIndex = new StringValueIndex(oldMap, 1);
 		StringValueIndex newIndex = new StringValueIndex(newMap, 1);
@@ -28,8 +28,8 @@ public class StringValueIndexWithMaxSizeTest extends XFieldLevelIndexTest {
 		this.oldIndexer = new SimpleValueIndexer(oldIndex);
 		this.newIndexer = new SimpleValueIndexer(newIndex);
 		
-		StringMap oldExcludeAllMap = new MockStringMap();
-		StringMap newExcludeAllMap = new MockStringMap();
+		StringMap oldExcludeAllMap = new MemoryStringMap();
+		StringMap newExcludeAllMap = new MemoryStringMap();
 		
 		StringValueIndex oldExcludeAllIndex = new StringValueIndex(oldExcludeAllMap, 1);
 		StringValueIndex newExcludeAllIndex = new StringValueIndex(newExcludeAllMap, 1);

@@ -117,7 +117,7 @@ public class StringValueIndexBenchmark {
 		HashSet<XID> emptySet = new HashSet<XID>();
 		
 		for(XModel model : this.models) {
-			StringMap map = new MockStringMap();
+			StringMap map = new MemoryStringMap();
 			StringValueIndex index = new StringValueIndex(map);
 			
 			SimpleValueIndexer indexer = new SimpleValueIndexer(index);
@@ -157,7 +157,7 @@ public class StringValueIndexBenchmark {
 			for(XModel model : this.models) {
 				writeDescription(path, model);
 				
-				StringMap map = new MockStringMap();
+				StringMap map = new MemoryStringMap();
 				StringValueIndex index = new StringValueIndex(map);
 				
 				SimpleValueIndexer indexer = new SimpleValueIndexer(index);
@@ -183,7 +183,7 @@ public class StringValueIndexBenchmark {
 			for(XModel model : this.models) {
 				writeDescription(path, model);
 				
-				StringMap map = new MockStringMap();
+				StringMap map = new MemoryStringMap();
 				StringValueIndex index = new StringValueIndex(map);
 				
 				SimpleValueIndexer indexer = new SimpleValueIndexer(index);
@@ -251,7 +251,7 @@ public class StringValueIndexBenchmark {
 			writeDescription(indexPath, largeModel);
 			writeDescription(searchPath, largeModel);
 			
-			StringMap map = new MockStringMap();
+			StringMap map = new MemoryStringMap();
 			StringValueIndex index = new StringValueIndex(map);
 			SimpleValueIndexer indexer = new SimpleValueIndexer(index);
 			

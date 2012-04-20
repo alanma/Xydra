@@ -5,15 +5,15 @@ import java.util.HashMap;
 
 /**
  * This is just a mock-up of the StringMap interface using Javas HashMap, purely
- * for testing purposes
+ * for testing purposes. Not for use with GWT/GAE.
  * 
  * @author Kaidel
  * 
  */
-public class MockStringMap implements StringMap {
+public class MemoryStringMap implements StringMap {
 	private HashMap<String,String> map;
 	
-	public MockStringMap() {
+	public MemoryStringMap() {
 		this.map = new HashMap<String,String>();
 	}
 	
