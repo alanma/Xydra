@@ -184,19 +184,17 @@ public abstract class XFieldLevelIndexTest {
 	 * {@link XID XIDs} as includeFieldIds.
 	 */
 	public void initializeIndexes() {
-		HashSet<XID> emptySet = new HashSet<XID>();
-		
 		// oldModel, oldIndexer, newModel, newIndexer, excludedIds and
 		// includedIds need to be set before calling all this!
-		this.oldIndex = new XFieldLevelIndex(this.oldModel, this.oldIndexer, true, emptySet,
+		this.oldIndex = new XFieldLevelIndex(this.oldModel, this.oldIndexer, true, null,
 		        this.excludedIds);
-		this.newIndex = new XFieldLevelIndex(this.newModel, this.newIndexer, true, emptySet,
+		this.newIndex = new XFieldLevelIndex(this.newModel, this.newIndexer, true, null,
 		        this.excludedIds);
 		
 		this.oldExcludeAllIndex = new XFieldLevelIndex(this.oldExcludeAllModel,
-		        this.oldExcludeAllIndexer, false, this.includedIds, emptySet);
+		        this.oldExcludeAllIndexer, false, this.includedIds, null);
 		this.newExcludeAllIndex = new XFieldLevelIndex(this.newExcludeAllModel,
-		        this.newExcludeAllIndexer, false, this.includedIds, emptySet);
+		        this.newExcludeAllIndexer, false, this.includedIds, null);
 	}
 	
 	/**
