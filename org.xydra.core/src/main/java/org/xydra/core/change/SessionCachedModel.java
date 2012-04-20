@@ -443,6 +443,11 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 		this.cachedObjects = new HashMap<XID,SessionCachedModel.CachedObject>(2);
 	}
 	
+	/**
+	 * Does not change the sessionCachedModel itself.
+	 * 
+	 * @param txnBuilder
+	 */
 	public void commitTo(XTransactionBuilder txnBuilder) {
 		for(CachedObject co : this.cachedObjects.values()) {
 			if(co.state == EntityState.Added) {
@@ -741,7 +746,8 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 	
 	@Override
 	public String toString() {
-		return "M:" + this.getId() + " {\n" + DumpUtils.toStringBuffer(this) + "Changes: \n"
+		return "State including changes:\nM:" + this.getId() + " {\n"
+		        + DumpUtils.toStringBuffer(this) + "Changes: \n"
 		        + DumpUtils.changesToString(this).toString() + "}";
 	}
 	
