@@ -55,8 +55,8 @@ public class XFieldLevelIndex {
 	 * index with wrong parameters might result in wrong behavior.
 	 */
 	private boolean defaultIncludeAll;
-	private Set<XID> includeFieldIds;
-	private Set<XID> excludeFieldIds;
+	private Set<XID> includedFieldIds;
+	private Set<XID> excludedFieldIds;
 	
 	/**
 	 * Creates a new index for the given {@link XReadableModel} using the given
@@ -76,21 +76,21 @@ public class XFieldLevelIndex {
 	 *            will be indexed, if set to false, only the
 	 *            {@link XReadableField XReadableFields} which {@link XID XIDs}
 	 *            are in includeFieldIds will be indexed.
-	 * @param includeFieldIds set of {@link XID XIDs}, which determines which
+	 * @param includedFieldIds set of {@link XID XIDs}, which determines which
 	 *            {@link XReadableField XReadableFields} will always be indexed,
 	 *            independent of how defaultIncludeAll is set.
-	 * @param excludeFieldIds set of {@link XID XIDs}, which determines which
+	 * @param excludedFieldIds set of {@link XID XIDs}, which determines which
 	 *            {@link XReadableField XReadableFields} will never be indexed,
 	 *            independent of how defaultIncludeAll is set.
 	 */
 	public XFieldLevelIndex(XReadableModel model, XValueIndexer indexer, boolean defaultIncludeAll,
-	        Set<XID> includeFieldIds, Set<XID> excludeFieldIds) {
+	        Set<XID> includedFieldIds, Set<XID> excludedFieldIds) {
 		this.indexer = indexer;
 		this.index = indexer.getIndex();
 		
 		this.defaultIncludeAll = defaultIncludeAll;
-		this.includeFieldIds = includeFieldIds;
-		this.excludeFieldIds = excludeFieldIds;
+		this.includedFieldIds = includedFieldIds;
+		this.excludedFieldIds = excludedFieldIds;
 		
 		this.index(model);
 		this.modelAddress = model.getAddress();
@@ -105,19 +105,23 @@ public class XFieldLevelIndex {
 	 *         false otherwise.
 	 */
 	private boolean isToBeIndexed(XID fieldId) {
-		boolean indexField = false;
 		
 		if(this.defaultIncludeAll) {
-			if(!this.excludeFieldIds.contains(fieldId)) {
-				indexField = true;
+			if(this.excludedFieldIds == null) {
+				return true;
+			} else if(!this.excludedFieldIds.contains(fieldId)) {
+				return true;
 			}
 		} else {
-			if(this.includeFieldIds.contains(fieldId)) {
-				indexField = true;
+			if(this.includedFieldIds == null) {
+				return false;
+			}
+			if(this.includedFieldIds.contains(fieldId)) {
+				return true;
 			}
 		}
 		
-		return indexField;
+		return false;
 	}
 	
 	/**
