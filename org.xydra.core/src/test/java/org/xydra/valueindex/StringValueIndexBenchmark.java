@@ -17,6 +17,7 @@ import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XType;
@@ -25,6 +26,7 @@ import org.xydra.base.value.XValue;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
+import org.xydra.core.model.XRepository;
 import org.xydra.core.serialize.SerializedModel;
 import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.xml.XmlParser;
@@ -141,7 +143,6 @@ public class StringValueIndexBenchmark {
 					}
 				}
 			}
-			
 		}
 	}
 	
@@ -151,20 +152,23 @@ public class StringValueIndexBenchmark {
 		String path = this.testDataPath + "CompleteModelIndexing/";
 		HashSet<XID> emptySet = new HashSet<XID>();
 		
-		for(XModel model : this.models) {
-			writeDescription(path, model);
-			
-			StringMap map = new MockStringMap();
-			StringValueIndex index = new StringValueIndex(map);
-			
-			SimpleValueIndexer indexer = new SimpleValueIndexer(index);
-			
-			long start = System.currentTimeMillis();
-			XFieldLevelIndex fieldIndex = new XFieldLevelIndex(model, indexer, true, emptySet,
-			        emptySet);
-			long end = System.currentTimeMillis();
-			
-			writeIndexBenchmarkData(path, model, end - start);
+		for(int i = 0; i < 20; i++) {
+			System.out.println(i);
+			for(XModel model : this.models) {
+				writeDescription(path, model);
+				
+				StringMap map = new MockStringMap();
+				StringValueIndex index = new StringValueIndex(map);
+				
+				SimpleValueIndexer indexer = new SimpleValueIndexer(index);
+				
+				long start = System.currentTimeMillis();
+				XFieldLevelIndex fieldIndex = new XFieldLevelIndex(model, indexer, true, emptySet,
+				        emptySet);
+				long end = System.currentTimeMillis();
+				
+				writeIndexBenchmarkData(path, model, end - start);
+			}
 		}
 	}
 	
@@ -174,19 +178,91 @@ public class StringValueIndexBenchmark {
 		String path = this.testDataPath + "Search/";
 		HashSet<XID> emptySet = new HashSet<XID>();
 		
-		for(XModel model : this.models) {
-			writeDescription(path, model);
+		for(int i = 0; i < 20; i++) {
+			System.out.println(i);
+			for(XModel model : this.models) {
+				writeDescription(path, model);
+				
+				StringMap map = new MockStringMap();
+				StringValueIndex index = new StringValueIndex(map);
+				
+				SimpleValueIndexer indexer = new SimpleValueIndexer(index);
+				
+				XFieldLevelIndex fieldIndex = new XFieldLevelIndex(model, indexer, true, emptySet,
+				        emptySet);
+				
+				for(XID objectId : model) {
+					XObject object = model.getObject(objectId);
+					
+					for(XID fieldId : object) {
+						XField field = object.getField(fieldId);
+						XValue value = field.getValue();
+						
+						List<String> list = indexer.getIndexStrings(value);
+						
+						for(String s : list) {
+							long start = System.currentTimeMillis();
+							Set<ValueIndexEntry> entries = fieldIndex.search(s);
+							long end = System.currentTimeMillis();
+							
+							System.out.println(end - start);
+							writeSearchBenchmarkData(path, model, end - start);
+						}
+					}
+				}
+				
+			}
+		}
+	}
+	
+	@Test
+	@SuppressWarnings("unused")
+	public void benchmarkIndexAndSearchLargeModel() {
+		XID actorId = XX.createUniqueId();
+		XRepository repo = X.createMemoryRepository(actorId);
+		XID modelId = XX.createUniqueId();
+		XModel largeModel = repo.createModel(modelId);
+		
+		int modelCount = 0;
+		for(XModel m : this.models) {
+			modelCount++;
+			for(XID oId : m) {
+				XObject o = m.getObject(oId);
+				
+				XID objectId = XX.createUniqueId();
+				XObject object = largeModel.createObject(objectId);
+				
+				for(XID fId : o) {
+					XField f = o.getField(fId);
+					XField field = object.createField(fId);
+					
+					field.setValue(f.getValue());
+				}
+			}
+		}
+		System.out.println("Models: " + modelCount);
+		
+		String indexPath = this.testDataPath + "IndexLargeModel/";
+		String searchPath = this.testDataPath + "SearchInLargeModel/";
+		HashSet<XID> emptySet = new HashSet<XID>();
+		
+		for(int i = 0; i < 5; i++) {
+			System.out.println(i);
+			writeDescription(indexPath, largeModel);
+			writeDescription(searchPath, largeModel);
 			
 			StringMap map = new MockStringMap();
 			StringValueIndex index = new StringValueIndex(map);
-			
 			SimpleValueIndexer indexer = new SimpleValueIndexer(index);
 			
-			XFieldLevelIndex fieldIndex = new XFieldLevelIndex(model, indexer, true, emptySet,
+			long start = System.currentTimeMillis();
+			XFieldLevelIndex fieldIndex = new XFieldLevelIndex(largeModel, indexer, true, emptySet,
 			        emptySet);
+			long end = System.currentTimeMillis();
+			writeIndexBenchmarkData(indexPath, largeModel, end - start);
 			
-			for(XID objectId : model) {
-				XObject object = model.getObject(objectId);
+			for(XID objectId : largeModel) {
+				XObject object = largeModel.getObject(objectId);
 				
 				for(XID fieldId : object) {
 					XField field = object.getField(fieldId);
@@ -195,12 +271,11 @@ public class StringValueIndexBenchmark {
 					List<String> list = indexer.getIndexStrings(value);
 					
 					for(String s : list) {
-						long start = System.currentTimeMillis();
+						start = System.currentTimeMillis();
 						Set<ValueIndexEntry> entries = fieldIndex.search(s);
-						long end = System.currentTimeMillis();
+						end = System.currentTimeMillis();
 						
-						System.out.println(end - start);
-						writeSearchBenchmarkData(path, end - start);
+						writeSearchBenchmarkData(searchPath, largeModel, end - start);
 					}
 				}
 			}
@@ -262,9 +337,10 @@ public class StringValueIndexBenchmark {
 		}
 	}
 	
-	private void writeSearchBenchmarkData(String path, long data) {
+	private void writeSearchBenchmarkData(String path, XModel model, long data) {
+		String idString = model.getId().toString();
 		try {
-			File f = new File(path + "searchBenchmark.txt");
+			File f = new File(path + idString + ".txt");
 			
 			BufferedWriter out = new BufferedWriter(new FileWriter(f, true));
 			out.write("" + data);
