@@ -117,6 +117,7 @@ public class Restless extends HttpServlet {
 	private static Logger log;
 	
 	private static final long serialVersionUID = -1906300614203565189L;
+	public static final String X_FRAME_OPTIONS_HEADERNAME = "X-Frame-Options";
 	
 	/** =========== Utilities ================ */
 	
@@ -190,6 +191,13 @@ public class Restless extends HttpServlet {
 	 * Default is false.
 	 */
 	public static boolean DELEGATE_UNHANDLED_TO_DEFAULT = false;
+	
+	/**
+	 * See http://en.wikipedia.org/wiki/X-Frame-Options#Frame-Options
+	 * 
+	 * Legal values are: 'deny', 'sameorigin'
+	 */
+	public static String X_FRAME_OPTIONS_DEFAULT = "sameorigin";
 	
 	private Set<IRequestListener> requestListeners = new HashSet<IRequestListener>();
 	

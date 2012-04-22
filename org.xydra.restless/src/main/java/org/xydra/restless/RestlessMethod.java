@@ -100,6 +100,9 @@ public class RestlessMethod {
 	 */
 	public boolean run(final Restless restless, final HttpServletRequest req,
 	        final HttpServletResponse res) throws IOException {
+		// set standard headers
+		res.setHeader(Restless.X_FRAME_OPTIONS_HEADERNAME, Restless.X_FRAME_OPTIONS_DEFAULT);
+		
 		Method method = Restless.methodByName(this.instanceOrClass, this.methodName);
 		if(method == null) {
 			res.sendError(500, "Malconfigured server. Method '" + this.methodName
