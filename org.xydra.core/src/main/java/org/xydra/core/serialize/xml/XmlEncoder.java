@@ -33,6 +33,10 @@ public class XmlEncoder {
 	}
 	
 	public static String encode(String in) {
+		if(in == null) {
+			return null;
+		}
+		
 		String result = in;
 		result = result.replace("&", "&amp;");
 		result = result.replace("<", "&lt;");
