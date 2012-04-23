@@ -54,7 +54,7 @@ public class XFieldLevelIndexFactory {
 		}
 	}
 	
-	private XFieldLevelIndex createIndexWithMemoryStringMap(XModel model,
+	private static XFieldLevelIndex createIndexWithMemoryStringMap(XModel model,
 	        boolean defaultIncludeAll, Set<XID> includedFieldIds, Set<XID> excludedFieldIds) {
 		StringMap map = new MemoryStringMap();
 		StringValueIndex valueIndex = new StringValueIndex(map);
@@ -108,7 +108,7 @@ public class XFieldLevelIndexFactory {
 		}
 	}
 	
-	private XFieldLevelIndex createIndexWithMemoryMapSetIndex(XModel model,
+	private static XFieldLevelIndex createIndexWithMemoryMapSetIndex(XModel model,
 	        boolean defaultIncludeAll, Set<XID> includedFieldIds, Set<XID> excludedFieldIds) {
 		SimpleValueIndexer valueIndexer = new SimpleValueIndexer(new MemoryMapSetIndex());
 		

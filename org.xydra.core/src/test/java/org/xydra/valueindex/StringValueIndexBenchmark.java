@@ -283,7 +283,7 @@ public class StringValueIndexBenchmark {
 		}
 	}
 	
-	private void writeDescription(String path, XModel model) {
+	private static void writeDescription(String path, XModel model) {
 		String idString = model.getId().toString();
 		try {
 			File f = new File(path + idString + ".txt");
@@ -321,7 +321,7 @@ public class StringValueIndexBenchmark {
 		}
 	}
 	
-	private void writeIndexBenchmarkData(String path, XModel model, long data) {
+	private static void writeIndexBenchmarkData(String path, XModel model, long data) {
 		String idString = model.getId().toString();
 		try {
 			File f = new File(path + idString + ".txt");
@@ -337,7 +337,7 @@ public class StringValueIndexBenchmark {
 		}
 	}
 	
-	private void writeSearchBenchmarkData(String path, XModel model, long data) {
+	private static void writeSearchBenchmarkData(String path, XModel model, long data) {
 		String idString = model.getId().toString();
 		try {
 			File f = new File(path + idString + ".txt");
