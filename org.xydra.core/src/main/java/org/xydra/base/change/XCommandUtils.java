@@ -23,6 +23,11 @@ public class XCommandUtils {
 		return commandResult >= 0 || commandResult == XCommand.NOCHANGE;
 	}
 	
+	/**
+	 * @param result
+	 * @return true if the result indicates a failed Xydra command. Nothing
+	 *         else.
+	 */
 	public static boolean failed(long result) {
 		return result == XCommand.FAILED;
 	}
