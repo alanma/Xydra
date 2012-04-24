@@ -31,8 +31,10 @@ import org.xydra.gae.UniversalUrlFetch;
 import org.xydra.index.impl.IteratorUtils;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.restless.IRestlessContext;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
+import org.xydra.restless.utils.CookieUtils;
 import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.restless.utils.SharedHtmlUtils.METHOD;
 import org.xydra.store.GetWithAddressRequest;
@@ -57,6 +59,8 @@ public class RepositoryResource {
 	public static final Logger log = LoggerFactory.getLogger(RepositoryResource.class);
 	
 	public static final String PAGE_NAME = "Repository";
+	
+	private static final String LINEEND = "<br/>\n";
 	public static String URL;
 	
 	private static XID actorId = XX.toId("_RepositoryResource");
@@ -72,7 +76,7 @@ public class RepositoryResource {
 		        
 		        new RestlessParameter("command"),
 		        
-		        new RestlessParameter("sure", "no"));
+		        new RestlessParameter("confirm", null));
 		
 		restless.addMethod(URL + "/{repoId}/", "GET", RepositoryResource.class, "index", true,
 		        new RestlessParameter("repoId"),
@@ -278,39 +282,62 @@ public class RepositoryResource {
 		log.info(c.stop("index").getStats());
 	}
 	
-	public static void deleteAllModels(String repoIdStr, String commandStr, String sure,
-	        HttpServletRequest req, HttpServletResponse res) throws IOException {
+	public static void deleteAllModels(String repoIdStr, String commandStr, String confirm,
+	        HttpServletRequest req, HttpServletResponse res, IRestlessContext context)
+	        throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		Writer w = AppConstants.startPage(res, PAGE_NAME, "Delete All Models");
 		
+		String COOKIE_NAME = "confirmCookie";
+		String password = context.getRestless().getInitParameter(
+		        "org.xydra.webadmin.RepositoryResource.password");
+		CookieUtils.setCookie(res, COOKIE_NAME, password, null, null, 120);
+		Writer w = AppConstants.startPage(res, PAGE_NAME, "Delete All Models");
 		Clock c = new Clock().start();
-		w.write("Found sure='" + sure + "'");
+		
+		if(password == null) {
+			w.write("Password not set in web.xml as init-param of Restless. So this resource will not delete anything."
+			        + LINEEND);
+			w.flush();
+			return;
+		}
+		w.write("Password is '"
+		        + password
+		        + "' it must match the URL param 'confirm' and the cookie. Setting cookie for 120 seconds ..."
+		        + LINEEND);
+		
+		String gotCookie = CookieUtils.getCookie(req, COOKIE_NAME);
+		
+		w.write("Found confirm param='" + confirm + "'" + LINEEND);
+		w.write("Found cookie ='" + gotCookie + "'" + LINEEND);
 		w.flush();
 		
-		if(sure != null && sure.equalsIgnoreCase("yes")) {
-			XID repoId = XX.toId(repoIdStr);
-			XydraPersistence p = Utils.getPersistence(repoId);
-			for(XID modelId : p.getManagedModelIds()) {
-				w.write("Deleting model " + modelId);
-				w.flush();
-				XWritableModel model = new WritableModelOnPersistence(p, actorId, modelId);
-				Collection<XID> objectIds = IteratorUtils.addAll(model.iterator(),
-				        new HashSet<XID>());
-				for(XID objectId : objectIds) {
-					XCommand command = X.getCommandFactory().createForcedRemoveObjectCommand(
-					        repoId, modelId, objectId);
-					long l = p.executeCommand(actorId, command);
-					w.write(" ... result = " + l + "<br/>\n");
-				}
-				w.flush();
+		if(confirm != null && gotCookie != null) {
+			if(confirm.equals(gotCookie)) {
+				doDeleteAllData(w, repoIdStr);
 			}
-			w.write("Done<br/>\n");
-		} else {
-			w.write("Add ?sure=yes to url if you really mean it<br/>\n");
 		}
 		w.write("Stats: " + c.getStats() + "<br/>\n");
 		w.flush();
 		w.close();
+	}
+	
+	private static void doDeleteAllData(Writer w, String repoIdStr) throws IOException {
+		XID repoId = XX.toId(repoIdStr);
+		XydraPersistence p = Utils.getPersistence(repoId);
+		for(XID modelId : p.getManagedModelIds()) {
+			w.write("Deleting model " + modelId);
+			w.flush();
+			XWritableModel model = new WritableModelOnPersistence(p, actorId, modelId);
+			Collection<XID> objectIds = IteratorUtils.addAll(model.iterator(), new HashSet<XID>());
+			for(XID objectId : objectIds) {
+				XCommand command = X.getCommandFactory().createForcedRemoveObjectCommand(repoId,
+				        modelId, objectId);
+				long l = p.executeCommand(actorId, command);
+				w.write(" ... result = " + l + "<br/>\n");
+			}
+			w.flush();
+		}
+		w.write("Done<br/>\n");
 	}
 	
 	/**
