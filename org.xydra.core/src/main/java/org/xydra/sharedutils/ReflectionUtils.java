@@ -40,7 +40,7 @@ public class ReflectionUtils {
 	public static Object createInstanceOfClass(String className) throws Exception {
 		try {
 			Class<?> clazz = Class.forName(className);
-			log.info("Instantiated. Now casting...");
+			log.debug("Instantiated. Now casting...");
 			try {
 				Object instance = clazz.newInstance();
 				return instance;
