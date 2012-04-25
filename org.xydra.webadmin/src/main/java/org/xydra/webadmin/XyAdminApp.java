@@ -62,7 +62,10 @@ public class XyAdminApp {
 				XydraRuntime.finishRequest();
 			}
 		});
-		
+		restless_setupServices(restless);
+	}
+	
+	public static void restless_setupServices(Restless restless) {
 		restless.addMethod(URL, "GET", XyAdminApp.class, "index", true);
 		restless.addMethod(URL + "/list", "GET", XyAdminApp.class, "listRepos", true);
 		DemoResource.restless(restless, URL);
