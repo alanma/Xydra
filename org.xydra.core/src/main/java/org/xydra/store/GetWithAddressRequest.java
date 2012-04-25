@@ -30,4 +30,9 @@ public class GetWithAddressRequest {
 	
 	public final boolean includeTentative;
 	
+	@Override
+	public String toString() {
+		return this.address + " inclTentative?" + this.includeTentative;
+	}
+	
 }
