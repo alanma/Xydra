@@ -219,7 +219,8 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 		GaeModelRevision lastCurrentRev = this.instanceRevInfoManager.getInstanceRevisionInfo()
 		        .getGaeModelRevision();
 		assert lastCurrentRev.getModelRevision() != null;
-		log.info("Update currentRev from lastCurrentRev=" + lastCurrentRev);
+		log.info(this.getModelAddress() + " >> Update currentRev from lastCurrentRev="
+		        + lastCurrentRev);
 		/*
 		 * After this method it might turn out, that 'current' is in fact the
 		 * current revision.
@@ -277,7 +278,7 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 			 * revision update step
 			 */
 			long endRevInclusive = beginRevInclusive + windowSize - 1;
-			log.info(this.modelAddr + ":: Update rev step [" + beginRevInclusive + ","
+			log.debug(this.modelAddr + ":: Update rev step [" + beginRevInclusive + ","
 			        + endRevInclusive + "]");
 			
 			/**
@@ -285,7 +286,7 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 			 * datastore past the last known "current" revision and put them in
 			 * the CommitedChanges
 			 */
-			log.info("=== Phase 1: Determine revisions not yet locally cached; windowsize = "
+			log.debug("=== Phase 1: Determine revisions not yet locally cached; windowsize = "
 			        + windowSize);
 			Set<Long> locallyMissingRevs = computeLocallyMissingRevs(beginRevInclusive,
 			        endRevInclusive);
@@ -293,19 +294,18 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 			log.trace("locallyMissingRevs: " + missingRevs + " in this window of "
 			        + (endRevInclusive - beginRevInclusive + 1) + " revs in total");
 			
-			log.info("=== Phase 2+3: Ask Memcache + Datastore ===");
+			log.debug("=== Phase 2+3: Ask Memcache + Datastore ===");
 			long queryTime = fetchMissingRevisionsFromMemcacheAndDatastore(locallyMissingRevs);
 			int fetchedRevs = missingRevs - locallyMissingRevs.size();
 			log.trace("Number of missingRevs after asking DS&MC: " + locallyMissingRevs.size());
 			
-			log.info("=== Phase 4: Compute result from local cache ===");
+			log.debug("=== Phase 4: Compute result from local cache ===");
 			candidate = computeCurrenRevisionFromLocalChanges(beginRevInclusive, endRevInclusive,
 			        candidate, includeTentative);
 			if(candidate.finalModelRev) {
 				long rev = candidate.gaeModelRev.getModelRevision().revision();
-				log.info("Computed rev of "
-				        + this.modelAddr
-				        + " = "
+				log.info(this.modelAddr
+				        + ">> Computed rev = "
 				        + rev
 				        + " DATA?changesMethod=calculateCurrentModelRevision"
 				        + // .
@@ -385,7 +385,7 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 		assert candidate.gaeModelRev.getModelRevision() != null;
 		assert endRevInclusive - beginRevInclusive >= 0 : "begin:" + beginRevInclusive + ",end:"
 		        + endRevInclusive;
-		log.info(this.modelAddr + ":: computeFromCache candidate=" + candidate + " in range ["
+		log.debug(this.modelAddr + ":: computeFromCache candidate=" + candidate + " in range ["
 		        + beginRevInclusive + "," + endRevInclusive + "]");
 		
 		for(long i = beginRevInclusive; i <= endRevInclusive; i++) {
@@ -555,7 +555,7 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 				assert status == Status.Creating;
 				progressChange(change);
 				if(change.getStatus() != Status.FailedTimeout) {
-					log.info("Change " + change.rev
+					log.debug("Change " + change.rev
 					        + " is being worked on by another 'thread', left untouched");
 				}
 				if(change.rev > newLastTaken) {
