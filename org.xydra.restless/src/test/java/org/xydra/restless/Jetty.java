@@ -140,6 +140,50 @@ public class Jetty {
 		this.webapp.addFilter(filterHolder, "*.gif", Handler.ALL);
 		// this.webapp.addFilter(filterHolder, ".cache.*", Handler.ALL);
 		
+		// GWT caching
+		FilterHolder gwtFilterHolder = new FilterHolder();
+		gwtFilterHolder.setFilter(new Filter() {
+			
+			@Override
+			public void destroy() {
+				// do nothing
+			}
+			
+			@Override
+			public void doFilter(ServletRequest request, ServletResponse response,
+			        FilterChain filterChain) throws IOException, ServletException {
+				log.debug("Don't cache " + ((HttpServletRequest)request).getRequestURI());
+				HttpServletResponseWrapper responseWrapper = new HttpServletResponseWrapper(
+				        (HttpServletResponse)response);
+				
+				// Modify the servlet which serves png and gif files so that it
+				// explicitly sets the Pragma, Cache-Control, and Expires
+				// headers. The Pragma and Cache-Control headers should be
+				// removed. The Expires header should be set according to the
+				// caching recommendations mentioned in the previous section.
+				
+				Calendar cal = Calendar.getInstance();
+				// one year in the past
+				cal.set(Calendar.YEAR, cal.get(Calendar.YEAR) - 1);
+				
+				SimpleDateFormat dateFormatter = new SimpleDateFormat(
+				        "EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
+				TimeZone tz = TimeZone.getTimeZone("GMT");
+				dateFormatter.setTimeZone(tz);
+				String rfc1123 = dateFormatter.format(cal.getTime());
+				((HttpServletResponse)response).addHeader("Expires", rfc1123);
+				((HttpServletResponse)response).addHeader("Cache-Control",
+				        "no-cache, must-revalidate");
+				filterChain.doFilter(request, responseWrapper);
+			}
+			
+			@Override
+			public void init(FilterConfig filterConfig) {
+				// do nothing
+			}
+		});
+		this.webapp.addFilter(gwtFilterHolder, "*.nocache*", Handler.ALL);
+		
 		// count requests
 		FilterHolder filterHolderForCounting = new FilterHolder();
 		filterHolderForCounting.setFilter(new Filter() {
@@ -225,43 +269,44 @@ public class Jetty {
 			}
 		});
 		
-		// route requests to static content
-		FilterHolder filterHolderForStaticContent = new FilterHolder();
-		filterHolderForStaticContent.setFilter(new Filter() {
-			
-			@Override
-			public void destroy() {
-				// do nothing
-			}
-			
-			@Override
-			public void doFilter(ServletRequest req, ServletResponse response,
-			        FilterChain filterChain) throws IOException, ServletException {
-				if(req instanceof HttpServletRequest) {
-					HttpServletRequest hreq = (HttpServletRequest)req;
-					String path = hreq.getPathInfo();
-					if(path == null) {
-						path = "";
-					}
-					path = path.toLowerCase();
-					if(path.contains("favicon.ico")) {
-						// block
-						log.info("JETTY Blocked: " + hreq.getRequestURL());
-					} else {
-						// don't block
-						filterChain.doFilter(req, response);
-					}
-				} else {
-					filterChain.doFilter(req, response);
-				}
-			}
-			
-			@Override
-			public void init(FilterConfig filterConfig) {
-				// do nothing
-			}
-		});
-		this.webapp.addFilter(filterHolderForStaticContent, "*", Handler.ALL);
+		// // route requests to static content
+		// FilterHolder filterHolderForStaticContent = new FilterHolder();
+		// filterHolderForStaticContent.setFilter(new Filter() {
+		//
+		// @Override
+		// public void destroy() {
+		// // do nothing
+		// }
+		//
+		// @Override
+		// public void doFilter(ServletRequest req, ServletResponse response,
+		// FilterChain filterChain) throws IOException, ServletException {
+		// if(req instanceof HttpServletRequest) {
+		// HttpServletRequest hreq = (HttpServletRequest)req;
+		// String path = hreq.getPathInfo();
+		// if(path == null) {
+		// path = "";
+		// }
+		// path = path.toLowerCase();
+		// if(path.contains("favicon.ico")) {
+		// // block
+		// log.info("JETTY Blocked: " + hreq.getRequestURL());
+		// } else {
+		// // don't block
+		// filterChain.doFilter(req, response);
+		// }
+		// } else {
+		// filterChain.doFilter(req, response);
+		// }
+		// }
+		//
+		// @Override
+		// public void init(FilterConfig filterConfig) {
+		// // do nothing
+		// }
+		// });
+		// this.webapp.addFilter(filterHolderForStaticContent, "*",
+		// Handler.ALL);
 		
 		// Add the webapp to the server.
 		this.server.setHandler(this.webapp);
