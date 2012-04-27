@@ -15,6 +15,14 @@ public class HostUtils {
 	
 	private static String hostname = null, ipaddress = null;
 	
+	/**
+	 * @return the username of the user currently logged in on the local
+	 *         machine. Makes only sense for local testing.
+	 */
+	public static String getLocalUserName() {
+		return System.getProperty("user.name");
+	}
+	
 	public static String getLocalHostname() {
 		if(hostname == null) {
 			try {
