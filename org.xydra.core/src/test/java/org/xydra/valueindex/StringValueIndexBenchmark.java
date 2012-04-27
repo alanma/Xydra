@@ -35,7 +35,7 @@ import org.xydra.core.serialize.xml.XmlParser;
 public class StringValueIndexBenchmark {
 	private List<XModel> models;
 	final static String lineSeparator = System.getProperty("line.separator");
-	final String testDataPath = "../TestData/anonymized-emails/";
+	final String testDataPath = "../TestData/anonymized-emails-2/";
 	
 	@Before
 	public void setup() {
@@ -152,8 +152,8 @@ public class StringValueIndexBenchmark {
 		String path = this.testDataPath + "CompleteModelIndexing/";
 		HashSet<XID> emptySet = new HashSet<XID>();
 		
-		for(int i = 0; i < 20; i++) {
-			System.out.println(i);
+		for(int i = 0; i < 10; i++) {
+			System.out.println("ModelIndexing: " + i);
 			for(XModel model : this.models) {
 				writeDescription(path, model);
 				
@@ -178,8 +178,8 @@ public class StringValueIndexBenchmark {
 		String path = this.testDataPath + "Search/";
 		HashSet<XID> emptySet = new HashSet<XID>();
 		
-		for(int i = 0; i < 20; i++) {
-			System.out.println(i);
+		for(int i = 0; i < 5; i++) {
+			System.out.println("BenchmarkSearch: " + i);
 			for(XModel model : this.models) {
 				writeDescription(path, model);
 				
@@ -205,7 +205,6 @@ public class StringValueIndexBenchmark {
 							Set<ValueIndexEntry> entries = fieldIndex.search(s);
 							long end = System.currentTimeMillis();
 							
-							System.out.println(end - start);
 							writeSearchBenchmarkData(path, model, end - start);
 						}
 					}
@@ -247,7 +246,7 @@ public class StringValueIndexBenchmark {
 		HashSet<XID> emptySet = new HashSet<XID>();
 		
 		for(int i = 0; i < 5; i++) {
-			System.out.println(i);
+			System.out.println("BenchmarkIndexAndSearchLargeModel: " + i);
 			writeDescription(indexPath, largeModel);
 			writeDescription(searchPath, largeModel);
 			
@@ -280,6 +279,50 @@ public class StringValueIndexBenchmark {
 				}
 			}
 			
+		}
+	}
+	
+	@Test
+	@SuppressWarnings("unused")
+	public void benchmarkIndexLargeModel() {
+		XID actorId = XX.createUniqueId();
+		XRepository repo = X.createMemoryRepository(actorId);
+		XID modelId = XX.createUniqueId();
+		XModel largeModel = repo.createModel(modelId);
+		
+		int modelCount = 0;
+		for(XModel m : this.models) {
+			modelCount++;
+			for(XID oId : m) {
+				XObject o = m.getObject(oId);
+				
+				XID objectId = XX.createUniqueId();
+				XObject object = largeModel.createObject(objectId);
+				
+				for(XID fId : o) {
+					XField f = o.getField(fId);
+					XField field = object.createField(fId);
+					
+					field.setValue(f.getValue());
+				}
+			}
+		}
+		System.out.println("Models: " + modelCount);
+		
+		String indexPath = this.testDataPath + "IndexLargeModel/";
+		String searchPath = this.testDataPath + "SearchInLargeModel/";
+		HashSet<XID> emptySet = new HashSet<XID>();
+		
+		for(int i = 0; i < 50; i++) {
+			StringMap map = new MemoryStringMap();
+			StringValueIndex index = new StringValueIndex(map);
+			SimpleValueIndexer indexer = new SimpleValueIndexer(index);
+			
+			long start = System.currentTimeMillis();
+			XFieldLevelIndex fieldIndex = new XFieldLevelIndex(largeModel, indexer, true, emptySet,
+			        emptySet);
+			long end = System.currentTimeMillis();
+			System.out.println(end - start);
 		}
 	}
 	
