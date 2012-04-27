@@ -239,7 +239,7 @@ public class SessionModel implements XSessionModel {
 		if(this.sessionCacheModel.isKnownObject(objectId)) {
 			return this;
 		}
-		
+		log.info("Loading objects '" + objectId + "' in " + this.getAddress());
 		XReadableObject objectSnapshot = this.session.getSessionPersistence().getObjectSnapshot(
 		        new GetWithAddressRequest(XX.resolveObject(getAddress(), objectId),
 		                INCLUDE_TENTATIVE_CHANGES));
@@ -253,7 +253,7 @@ public class SessionModel implements XSessionModel {
 		if(this.sessionCacheModel.knowsAllObjects()) {
 			return this;
 		}
-		
+		log.info("Loading all objects in " + this.getAddress());
 		XReadableModel baseModel = this.session.getSessionPersistence().getModelSnapshot(
 		        new GetWithAddressRequest(getAddress(), INCLUDE_TENTATIVE_CHANGES));
 		indexModel(baseModel);
