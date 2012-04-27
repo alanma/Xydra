@@ -145,63 +145,23 @@ public class StringValueIndex implements ValueIndex {
 		
 		XValue usedValue = this.getValueForIndex(fieldAddress, value);
 		
-		String entriesString = this.map.get(key);
+		ValueIndexEntry entry = new ValueIndexEntry(fieldAddress, usedValue);
+		String arrayString = this.map.get(key);
 		
-		ValueIndexEntry[] entryArray = ValueIndexEntryUtils.getArrayFromString(entriesString);
+		String newArrayString = ValueIndexEntryUtils.removeEntryFromArrayString(arrayString, entry);
 		
-		boolean found = false;
-		for(int i = 0; i < entryArray.length && !found; i++) {
-			/*
-			 * TODO make this faster, for example by implementing an order on
-			 * ValueIndexEntries and using binary search (which makes adding new
-			 * entries slower... what's more important?)
-			 * 
-			 * Problem: there's no real "obvious" relation between
-			 * ValueIndexEntries which could be used for ordering
-			 */
-			XAddress entryAddress = entryArray[i].getAddress();
-			XValue entryValue = entryArray[i].getValue();
-			
-			boolean sameValue = false;
-			if(entryValue == null) {
-				sameValue = (usedValue == null);
-			} else {
-				sameValue = entryValue.equals(usedValue);
-			}
-			
-			if(sameValue && entryAddress.equals(fieldAddress)) {
-				
-				found = true;
-				
-				entryArray[i] = null;
-				
-				/*
-				 * setting the entry to null will result in deleting it from the
-				 * stored set, since {@link
-				 * ValueIndexEntryUtils#serializeAsString (ValueIndexEntry[])}
-				 * only writes entries which are not null into the string
-				 */
-			}
-		}
-		
-		if(found) {
-			/*
-			 * at least one entry was changed -> rewrite the stored string to
-			 * represent the change
-			 */
-			String newEntriesString = ValueIndexEntryUtils.serializeAsString(entryArray);
-			
-			if(newEntriesString.equals("")) {
-				
-				// parsing returned an empty string, which implies that the list
-				// is empty and we can remove the key completely
-				
+		if(newArrayString != null) {
+			if(newArrayString.equals("")) {
 				this.map.remove(key);
 			} else {
-				this.map.put(key, newEntriesString);
+				this.map.put(key, newArrayString);
 			}
 		}
-		// else: do nothing, since nothing was changed
+		/*
+		 * else: (newArrayString == null) indicates that nothing was changed, so
+		 * we need to do nothing
+		 */
+		
 	}
 	
 	@Override
@@ -227,37 +187,14 @@ public class StringValueIndex implements ValueIndex {
 			this.map.put(key, entriesString);
 		} else {
 			
-			String entriesString = this.map.get(key);
+			String arrayString = this.map.get(key);
+			ValueIndexEntry entry = new ValueIndexEntry(fieldAddress, value);
 			
-			ValueIndexEntry[] entryArray = ValueIndexEntryUtils.getArrayFromString(entriesString);
+			String newArrayString = ValueIndexEntryUtils.addEntryToArrayString(arrayString, entry);
 			
-			boolean found = false;
-			for(int i = 0; i < entryArray.length && !found; i++) {
-				/*
-				 * TODO make this faster, for example by implementing an order
-				 * on ValueIndexEntries and using binary search (which makes
-				 * adding new entries slower... what's more important?)
-				 * 
-				 * Problem: there's no real "obvious" relation between
-				 * ValueIndexEntries which could be used for ordering
-				 */
-				
-				if(entryArray[i].equalAddressAndValue(fieldAddress, usedValue)) {
-					found = true;
-					
-				}
-			}
+			assert newArrayString != null;
 			
-			if(!found) {
-				/*
-				 * no entry was found, so we'll have to add it
-				 */
-				ValueIndexEntry newEntry = new ValueIndexEntry(fieldAddress, usedValue);
-				
-				String newEntriesString = ValueIndexEntryUtils.serializeAsString(entryArray,
-				        newEntry);
-				this.map.put(key, newEntriesString);
-			}
+			this.map.put(key, newArrayString);
 			
 		}
 	}

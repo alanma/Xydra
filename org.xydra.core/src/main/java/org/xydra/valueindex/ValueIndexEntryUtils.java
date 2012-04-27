@@ -240,4 +240,66 @@ public class ValueIndexEntryUtils {
 			return emptyArray;
 		}
 	}
+	
+	public static String addEntryToArrayString(String s, ValueIndexEntry entry) {
+		String valueString = ValueIndexEntryUtils.serializeAsString(entry);
+		String escapedString = ValueIndexEntryUtils.escapeListString(valueString);
+		
+		if(s != null && !s.equals("")) {
+			if(!s.contains(escapedString)) {
+				return s + "<entry>" + escapedString;
+			} else {
+				return s;
+			}
+		} else {
+			return null;
+		}
+	}
+	
+	public static String removeEntryFromArrayString(String s, ValueIndexEntry entry) {
+		String valueString = ValueIndexEntryUtils.serializeAsString(entry);
+		String escapedString = ValueIndexEntryUtils.escapeListString(valueString);
+		
+		if(s != null && !s.equals("")) {
+			
+			if(s.equals(escapedString)) {
+				/*
+				 * the given entry is the only entry in the array encoded in the
+				 * string, so return the empty String.
+				 */
+				
+				return "";
+				
+			} else if(s.contains(escapedString + "<entry>")) {
+				/*
+				 * the given entry is at the beginning of the encoded array,
+				 * remove it and return the resulting string
+				 */
+				
+				return s.replace(escapedString + "<entry>", "");
+				
+			} else if(s.contains("<entry>" + escapedString)) {
+				/*
+				 * the given entry is somewhere in the middle of the encoded
+				 * array, remove it and return the resulting string
+				 */
+				
+				return s.replace("<entry>" + escapedString, "");
+				
+			}
+			
+			/*
+			 * the encoded array does not contain the given entry
+			 */
+			
+			return null;
+			
+		} else {
+			/*
+			 * the encoded array is empty or null, so it doesn't contain the
+			 * entry
+			 */
+			return null;
+		}
+	}
 }
