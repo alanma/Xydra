@@ -94,13 +94,6 @@
 			<artifactId>gae</artifactId>
 		</dependency>
 
-		<!-- FileUpload utilities from http://commons.apache.org/fileupload/ -->
-		<dependency>
-			<groupId>commons-fileupload</groupId>
-			<artifactId>commons-fileupload</artifactId>
-			<version>1.2</version>
-		</dependency>
-
 	</dependencies>
 
 	<distributionManagement>

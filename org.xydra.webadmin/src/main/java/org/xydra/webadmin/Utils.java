@@ -1,20 +1,13 @@
 package org.xydra.webadmin;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.zip.ZipOutputStream;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.fileupload.FileItemIterator;
-import org.apache.commons.fileupload.FileItemStream;
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.xydra.base.XID;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -96,39 +89,48 @@ public class Utils {
 		return name + "-" + sdf.format(now);
 	}
 	
-	public static InputStream getMultiPartContentFileAsInputStream(Writer w, HttpServletRequest req)
-	        throws IOException {
-		if(!ServletFileUpload.isMultipartContent(req)) {
-			log.debug("not a multipart content => ignored");
-			throw new RuntimeException("Expected File Upload");
-		}
-		
-		ServletFileUpload upload = new ServletFileUpload();
-		InputStream fis = null;
-		// Parse the request
-		try {
-			FileItemIterator iter = upload.getItemIterator(req);
-			while(iter.hasNext()) {
-				FileItemStream item = iter.next();
-				String name = item.getFieldName();
-				InputStream stream = item.openStream();
-				if(!item.isFormField()) {
-					fis = stream;
-					w.write("... found file '" + name + "'</br>");
-					w.flush();
-					break;
-				}
-			}
-		} catch(FileUploadException fue) {
-			log.error("Error handling file upload", fue);
-			throw new RuntimeException("Error handling file upload", fue);
-		}
-		
-		if(fis == null) {
-			log.debug("no file found");
-			throw new RuntimeException("No File Uploaded");
-		}
-		return fis;
-	}
+	// /**
+	// * @param w
+	// * @param req
+	// * @return ...
+	// * @throws IOException
+	// * @deprecated This is now done via restless _upload_ and type byte[]
+	// */
+	// @Deprecated
+	// public static InputStream getMultiPartContentFileAsInputStream(Writer w,
+	// HttpServletRequest req)
+	// throws IOException {
+	// if(!ServletFileUpload.isMultipartContent(req)) {
+	// log.debug("not a multipart content => ignored");
+	// throw new RuntimeException("Expected File Upload");
+	// }
+	//
+	// ServletFileUpload upload = new ServletFileUpload();
+	// InputStream fis = null;
+	// // Parse the request
+	// try {
+	// FileItemIterator iter = upload.getItemIterator(req);
+	// while(iter.hasNext()) {
+	// FileItemStream item = iter.next();
+	// String name = item.getFieldName();
+	// InputStream stream = item.openStream();
+	// if(!item.isFormField()) {
+	// fis = stream;
+	// w.write("... found file '" + name + "'</br>");
+	// w.flush();
+	// break;
+	// }
+	// }
+	// } catch(FileUploadException fue) {
+	// log.error("Error handling file upload", fue);
+	// throw new RuntimeException("Error handling file upload", fue);
+	// }
+	//
+	// if(fis == null) {
+	// log.debug("no file found");
+	// throw new RuntimeException("No File Uploaded");
+	// }
+	// return fis;
+	// }
 	
 }

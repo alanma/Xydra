@@ -1,5 +1,6 @@
 package org.xydra.webadmin;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -202,6 +203,10 @@ public class RepositoryResource {
 				log.info("All model serialisations are up-to-date, generating zip");
 				String archivename = Utils.filenameOfNow("repo-" + repoId);
 				if(style == RStyle.xmlzip) {
+					if(modelIdList.size() == 0) {
+						log.info("No models, no zip");
+						return;
+					}
 					ZipOutputStream zos = Utils.toZipFileDownload(res, archivename);
 					for(XID modelId : modelIdList) {
 						XAddress modelAddress = XX.resolveModel(repoId, modelId);
@@ -346,10 +351,12 @@ public class RepositoryResource {
 	 * @param res
 	 * @param replaceModelsStr if "true", existing models are completely
 	 *            replaced, NON-transactional. Scales well for huge models.
+	 * @param upload
 	 * @throws IOException
 	 */
-	public static void update(String repoIdStr, String replaceModelsStr, HttpServletRequest req,
-	        HttpServletResponse res) throws IOException {
+	public static void update(String repoIdStr, String replaceModelsStr, byte[] upload,
+	
+	HttpServletRequest req, HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		Writer w = AppConstants.startPage(res, PAGE_NAME, "Restore Repository");
 		
@@ -360,7 +367,9 @@ public class RepositoryResource {
 		w.write("Processing upload... replace=" + replaceModelsStr + "</br>");
 		w.flush();
 		
-		InputStream fis = Utils.getMultiPartContentFileAsInputStream(w, req);
+		assert upload != null;
+		InputStream fis = new ByteArrayInputStream(upload);
+		// InputStream fis = Utils.getMultiPartContentFileAsInputStream(w, req);
 		assert fis != null;
 		
 		updateFromZippedInputStream(fis, repoId, w, replaceModels);

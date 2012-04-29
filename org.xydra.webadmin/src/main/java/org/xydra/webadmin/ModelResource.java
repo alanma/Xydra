@@ -1,5 +1,6 @@
 package org.xydra.webadmin;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -188,8 +189,17 @@ public class ModelResource {
 		log.info(c.getStats());
 	}
 	
-	public static void update(String repoIdStr, String modelIdStr, HttpServletRequest req,
-	        HttpServletResponse res) throws IOException {
+	/**
+	 * @param repoIdStr
+	 * @param modelIdStr
+	 * @param upload
+	 * @param req
+	 * @param res
+	 * @throws IOException
+	 */
+	public static void update(String repoIdStr, String modelIdStr, byte[] upload,
+	
+	HttpServletRequest req, HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		Writer w = AppConstants.startPage(res, PAGE_NAME, "Restore Model");
 		
@@ -199,7 +209,9 @@ public class ModelResource {
 		w.write("Processing upload...</br>");
 		w.flush();
 		
-		InputStream fis = Utils.getMultiPartContentFileAsInputStream(w, req);
+		assert upload != null;
+		InputStream fis = new ByteArrayInputStream(upload);
+		// InputStream fis = Utils.getMultiPartContentFileAsInputStream(w, req);
 		assert fis != null;
 		
 		ZipInputStream zis = new ZipInputStream(fis);
