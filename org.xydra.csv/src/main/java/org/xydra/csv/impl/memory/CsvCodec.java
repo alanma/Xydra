@@ -54,7 +54,7 @@ public class CsvCodec {
 	 * @return a string that excel accepts
 	 */
 	public static String excelEncode(String value) {
-		if(value == null) {
+		if(value == null || value.equals("null")) {
 			return "\"\"";
 		}
 		
