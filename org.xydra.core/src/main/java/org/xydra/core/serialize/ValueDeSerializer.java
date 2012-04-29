@@ -38,18 +38,24 @@ public class ValueDeSerializer {
 	public static XValue fromStrings(String typeStr, String valueStr) {
 		if(typeStr == null)
 			throw new IllegalArgumentException("typeStr was null");
-		if(valueStr == null)
+		String val = valueStr;
+		if(val == null)
 			throw new IllegalArgumentException("valueStr was null");
-		if(valueStr.equals("null")) {
+		if(val.equals("null")) {
 			return null;
 		}
 		try {
 			ValueType type = ValueType.valueOf(typeStr);
-			XValue value = toValue(type, valueStr);
+			
+			if(val.startsWith("=")) {
+				/* remove encoding trick to represent '123' as '="123"' */
+				val = val.substring(2, val.length() - 1);
+			}
+			XValue value = toValue(type, val);
 			return value;
 		} catch(IllegalArgumentException e) {
 			throw new IllegalArgumentException("Could not parse type '" + typeStr + "' for value '"
-			        + valueStr + "'", e);
+			        + val + "'", e);
 		}
 	}
 	
