@@ -1,6 +1,7 @@
 package org.xydra.restless;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -19,6 +20,12 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.fileupload.FileItemIterator;
+import org.apache.commons.fileupload.FileItemStream;
+import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.fileupload.util.Streams;
+import org.apache.commons.io.IOUtils;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.restless.utils.NanoClock;
@@ -35,6 +42,8 @@ import org.xydra.restless.utils.ServletUtils;
  * @author voelkel
  */
 public class RestlessMethod {
+	
+	private static final String UPLOAD_PARAM = "_upload_";
 	
 	private static Map<Class<?>,Object> instanceCache = new HashMap<Class<?>,Object>();
 	
@@ -119,6 +128,9 @@ public class RestlessMethod {
 			// extract Cookie values
 			Map<String,String> cookieMap = ServletUtils.getCookiesAsMap(req);
 			
+			// extract multi-part-upload
+			Map<String,Object> multipartMap = getMultiPartPostAsMap(req);
+			
 			int boundNamedParameterNumber = 0;
 			boolean hasHttpServletResponseParameter = false;
 			final String uniqueRequestId = reuseOrCeateUniqueRequestIdentifier(urlParameter,
@@ -195,7 +207,6 @@ public class RestlessMethod {
 						                + ". I.e. your Java method wants more parameters than defined in your restless() method.");
 					}
 					RestlessParameter param = this.requiredNamedParameter[boundNamedParameterNumber];
-					
 					Object value = null;
 					
 					/* 1) look in urlParameters (not query params) */
@@ -253,7 +264,12 @@ public class RestlessMethod {
 						value = cookieMap.get(param.name);
 					}
 					
-					/* 4) use default */
+					/* 4) look in multipart-upload */
+					if(notSet(value) && !param.isArray) {
+						value = multipartMap.get(param.name);
+					}
+					
+					/* 5) use default */
 					if(notSet(value)) {
 						if(param.mustBeDefinedExplicitly()) {
 							log.debug("Parameter '" + param.name
@@ -367,6 +383,45 @@ public class RestlessMethod {
 			
 		}
 		return true;
+	}
+	
+	private static Map<String,Object> getMultiPartPostAsMap(HttpServletRequest req) {
+		Map<String,Object> map = new HashMap<String,Object>();
+		if(!ServletFileUpload.isMultipartContent(req)) {
+			return map;
+		}
+		ServletFileUpload upload = new ServletFileUpload();
+		FileItemIterator it;
+		try {
+			it = upload.getItemIterator(req);
+			while(it.hasNext()) {
+				FileItemStream item = it.next();
+				String fieldName = item.getFieldName();
+				InputStream stream = item.openStream();
+				if(item.isFormField()) {
+					String value = Streams.asString(stream);
+					map.put(fieldName, value);
+				} else {
+					// TODO no protection against gigantic uploads
+					byte[] bytes = IOUtils.toByteArray(stream);
+					if(fieldName.equals(UPLOAD_PARAM)) {
+						map.put(UPLOAD_PARAM, bytes);
+					} else {
+						// do the same, maybe do something smarter
+						map.put(fieldName, bytes);
+						map.put(UPLOAD_PARAM, bytes);
+					}
+				}
+			}
+		} catch(FileUploadException e) {
+			log.warn("", e);
+			throw new RestlessException(500, "Could not process file upload", e);
+		} catch(IOException e) {
+			log.warn("", e);
+			throw new RestlessException(500, "Could not process file upload", e);
+		}
+		return map;
+		
 	}
 	
 	private static boolean notSet(Object value) {
