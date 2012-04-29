@@ -100,7 +100,8 @@ public class ModelResource {
 		restless.addMethod(prefix + "/{repoId}/{modelId}/", "POST", ModelResource.class, "update",
 		        true,
 		        
-		        new RestlessParameter("repoId"), new RestlessParameter("modelId")
+		        new RestlessParameter("repoId"), new RestlessParameter("modelId"),
+		        new RestlessParameter("_upload_", null)
 		
 		);
 		
@@ -220,6 +221,11 @@ public class ModelResource {
 		
 		XReadableModel model;
 		model = readZippedModel(zis);
+		
+		if(model == null) {
+			fis = new ByteArrayInputStream(upload);
+			model = readNonZippedModel(fis);
+		}
 		
 		if(model == null) {
 			throw new RuntimeException("Could not read model from ZIS");
@@ -506,6 +512,23 @@ public class ModelResource {
 			}
 		} catch(ZipException e) {
 			throw new RuntimeException("Error uncompressing", e);
+		}
+		
+	}
+	
+	static XReadableModel readNonZippedModel(InputStream is) throws IOException {
+		
+		// Read the file into a string.
+		Reader r = new InputStreamReader(is, UTF8);
+		String xml = IOUtils.toString(r);
+		// Parse the model.
+		XModel model;
+		try {
+			XydraElement e = new XmlParser().parse(xml);
+			model = SerializedModel.toModel(XyAdminApp.ACTOR, null, e);
+			return model;
+		} catch(Exception e) {
+			throw new RuntimeException("error parsing model file \"" + "unknown name" + "\"", e);
 		}
 		
 	}

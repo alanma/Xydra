@@ -110,7 +110,9 @@ public class RepositoryResource {
 		restless.addMethod(URL + "/{repoId}/", "POST", RepositoryResource.class, "update", true,
 		        new RestlessParameter("repoId"),
 		        
-		        new RestlessParameter("replace", "false")
+		        new RestlessParameter("replace", "false"),
+		        
+		        new RestlessParameter("_upload_", null)
 		
 		);
 		
