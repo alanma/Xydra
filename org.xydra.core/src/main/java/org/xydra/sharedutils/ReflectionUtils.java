@@ -85,11 +85,6 @@ public class ReflectionUtils {
 		BufferedReader br = toBufferedReader(t);
 		int lines = 0;
 		try {
-			// skip first 4 lines which are only the loggers themselves
-			br.readLine();
-			br.readLine();
-			br.readLine();
-			br.readLine();
 			StringBuffer buf = new StringBuffer();
 			lines += append(br, buf, n);
 			Throwable cause = t.getCause();
