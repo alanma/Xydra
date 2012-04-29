@@ -20,6 +20,7 @@ import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
+import org.xydra.base.value.ValueType;
 import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
 import org.xydra.core.DemoModelUtil;
@@ -63,22 +64,41 @@ public class CsvSerialisation {
 	 * @throws IOException
 	 */
 	public static int writeToCsv(XReadableModel model, Writer w) throws IOException {
-		CsvTable table = new CsvTable(true);
+		CsvTable table = toCsvTable(model);
+		table.writeTo(w);
+		return table.rowCount();
+	}
+	
+	/**
+	 * @param model
+	 * @return the CsvTable
+	 * @throws IOException
+	 */
+	public static CsvTable toCsvTable(XReadableModel model) throws IOException {
+		CsvTable table = new CsvTable(false);
 		for(XID oid : model) {
 			Row row = table.getOrCreateRow(oid.toString(), true);
 			XReadableObject xo = model.getObject(oid);
 			for(XID fid : xo) {
 				XReadableField xf = xo.getField(fid);
-				XValue value = xf.getValue();
-				if(value != null) {
-					Pair<String,String> pair = ValueDeSerializer.toStringPair(value);
-					row.setValue(fid.toString() + TYPE_SUFFIX, pair.getFirst(), true);
-					row.setValue(fid.toString(), pair.getSecond(), true);
+				assert xf != null;
+				XValue xvalue = xf.getValue();
+				String csvTypeStr;
+				String csvValueStr;
+				if(xvalue == null) {
+					// a boolean field?
+					csvTypeStr = ValueType.Boolean.name();
+					csvValueStr = "fieldPresent";
+				} else {
+					Pair<String,String> pair = ValueDeSerializer.toStringPair(xvalue);
+					csvTypeStr = pair.getFirst();
+					csvValueStr = pair.getSecond();
 				}
+				row.setValue(fid.toString() + TYPE_SUFFIX, csvTypeStr, true);
+				row.setValue(fid.toString(), csvValueStr, true);
 			}
 		}
-		table.writeTo(w);
-		return table.rowCount();
+		return table;
 	}
 	
 	/**
