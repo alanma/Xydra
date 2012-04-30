@@ -331,6 +331,7 @@ public class CsvTable extends CsvCoreTable implements ICsvTable, ICsvTableFactor
 	
 	public static void writeRow(Writer w, Collection<String> columnNames, String rowName,
 	        IReadableRow row) throws IOException {
+		assert row != null;
 		w.write(CsvCodec.excelEncode(rowName));
 		Iterator<String> colIt = columnNames.iterator();
 		int writtenCols = 0;
