@@ -121,10 +121,14 @@ public class CsvSerialisation {
 				if(valueStr == null)
 					continue;
 				String typeStr = row.getValue(col + TYPE_SUFFIX);
-				XValue value = ValueDeSerializer.fromStrings(typeStr, valueStr);
-				XID fid = XX.toId(col);
-				XWritableField field = xo.createField(fid);
-				field.setValue(value);
+				try {
+					XValue value = ValueDeSerializer.fromStrings(typeStr, valueStr);
+					XID fid = XX.toId(col);
+					XWritableField field = xo.createField(fid);
+					field.setValue(value);
+				} catch(IllegalArgumentException e) {
+					throw new RuntimeException("Could not parse " + row + " as Xydra data", e);
+				}
 			}
 		}
 		return table.rowCount();
