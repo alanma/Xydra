@@ -2,6 +2,7 @@ package org.xydra.gae;
 
 import org.xydra.store.XydraRuntime;
 
+import com.google.appengine.api.backends.BackendServiceFactory;
 import com.google.appengine.api.capabilities.CapabilitiesService;
 import com.google.appengine.api.capabilities.CapabilitiesServiceFactory;
 import com.google.appengine.api.capabilities.Capability;
@@ -110,6 +111,14 @@ public class AboutAppEngine {
 			// at least, we dont know for sure if it works
 			return false;
 		}
+	}
+	
+	/**
+	 * @return true if the current request is handled by a backend
+	 */
+	public static boolean onBackend() {
+		String backend = BackendServiceFactory.getBackendService().getCurrentBackend();
+		return backend != null;
 	}
 	
 	// TODO get os.environ REQUEST HASH

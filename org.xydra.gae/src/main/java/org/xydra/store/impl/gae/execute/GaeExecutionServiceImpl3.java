@@ -122,24 +122,6 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 			c.stopAndStart("getPartialSnapshot");
 		}
 		
-		// long snapshotRev = this.changes.getCurrentRevisionNumber();
-		// boolean exists = this.changes.exists(); // TODO exists depends on the
-		// // revision number
-		//
-		// log.debug("[r" + change.rev + "] Phase 2: getPartialSnapshot at {" +
-		// snapshotRev + "/"
-		// + this.changes.getLastCommited() + "}");
-		// XRevWritableModel snapshot = null;
-		// if(exists) {
-		// snapshot = this.snapshots.getPartialSnapshot(snapshotRev,
-		// change.getLocks());
-		// c.stopAndStart("getPartialSnapshot");
-		//
-		// // TODO this should not be needed ~Daniel
-		// snapshot = XCopyUtils.createSnapshot(snapshot);
-		// c.stopAndStart("copy");
-		// }
-		
 		/*
 		 * IMPROVE we can ignore all changes in [currentRev + 1,
 		 * lastCommittedRev) as they either failed or didn't change anything,
@@ -183,7 +165,7 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 	 *            {@link IGaeSnapshotService#getPartialSnapshot(long, Iterable)}
 	 * @param snapshotRev the revision of the given snapshot.
 	 * @param change never null
-	 * @return the resulting snapshot of applying the event TODO ....
+	 * @return the resulting snapshot of applying the event
 	 */
 	private XRevWritableModel updateSnapshot(XRevWritableModel snapshot, long snapshotRev,
 	        GaeChange change) {
