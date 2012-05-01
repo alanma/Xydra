@@ -169,6 +169,8 @@ public abstract class RemoteBenchmark {
 			case EDIT:
 				editingWishesOneThreadInTransaction(1, 0, fileName, i);
 				break;
+			default:
+				break;
 			}
 		}
 	}
@@ -196,6 +198,8 @@ public abstract class RemoteBenchmark {
 					break; // no such benchmark implemented at this time
 				case EDIT:
 					editingWishesOneThreadInTransaction(1, X, fileName + X, i);
+					break;
+				default:
 					break;
 				}
 			}
@@ -472,6 +476,8 @@ public abstract class RemoteBenchmark {
 				count++;
 				currentLine = in.readLine();
 			}
+			
+			in.close();
 			
 			return count;
 			

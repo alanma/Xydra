@@ -454,6 +454,7 @@ public class PerformanceDataAnalyzer {
 				break;
 			case DELETE:
 				// at the moment no such benchmark exists
+				fw.close();
 				return;
 			case EDIT:
 				heading = "<h1> Editing one wish with inital wishes </h1>";
