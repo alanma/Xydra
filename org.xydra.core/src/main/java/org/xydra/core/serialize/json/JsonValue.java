@@ -2,6 +2,7 @@ package org.xydra.core.serialize.json;
 
 import java.util.Iterator;
 
+import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
@@ -25,7 +26,7 @@ public class JsonValue extends AbstractJsonElement {
 	}
 	
 	@Override
-	public String getType() {
+	public @NeverNull String getType() {
 		return this.type;
 	}
 	

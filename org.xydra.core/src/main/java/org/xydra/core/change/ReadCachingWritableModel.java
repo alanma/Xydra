@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.xydra.annotations.NeverNull;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
@@ -148,7 +149,7 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 	}
 	
 	@Override
-	public XWritableObject createObject(XID objectId) {
+	public XWritableObject createObject(@NeverNull XID objectId) {
 		XyAssert.xyAssert(objectId != null); assert objectId != null;
 		if(!hasObject(objectId)) {
 			this.antiCache.index(objectId, NOFIELD, NOVALUE);
@@ -252,7 +253,7 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 	}
 	
 	@Override
-	public boolean hasObject(XID objectId) {
+	public boolean hasObject(@NeverNull XID objectId) {
 		if(this.cache.containsKey(new EqualsConstraint<XID>(objectId), new Wildcard<XID>())) {
 			return true;
 		}
@@ -402,7 +403,7 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 	}
 	
 	@Override
-	public boolean removeObject(XID objectId) {
+	public boolean removeObject(@NeverNull XID objectId) {
 		throw new RuntimeException("A read-cache cannot be changed");
 		// XyAssert.xyAssert(objectId != null); assert objectId != null;
 		// // deIndex

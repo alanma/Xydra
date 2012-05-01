@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.ReadOperation;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
@@ -179,7 +180,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	}
 	
 	@Override
-	public MemoryObject createObject(XID objectId) {
+	public MemoryObject createObject(@NeverNull XID objectId) {
 		
 		XModelCommand command = MemoryModelCommand.createAddCommand(getAddress(), true, objectId);
 		
@@ -528,7 +529,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	}
 	
 	@Override
-	public MemoryObject getObject(XID objectId) {
+	public MemoryObject getObject(@NeverNull XID objectId) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			
@@ -599,7 +600,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	}
 	
 	@Override
-	public boolean hasObject(XID id) {
+	public boolean hasObject(@NeverNull XID id) {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			return this.loadedObjects.containsKey(id) || this.state.hasObject(id);
@@ -656,7 +657,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	}
 	
 	@Override
-	public boolean removeObject(XID objectId) {
+	public boolean removeObject(@NeverNull XID objectId) {
 		
 		// no synchronization necessary here (except that in
 		// executeModelCommand())

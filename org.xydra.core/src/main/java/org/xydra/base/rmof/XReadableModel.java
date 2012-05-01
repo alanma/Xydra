@@ -3,6 +3,7 @@ package org.xydra.base.rmof;
 import java.io.Serializable;
 import java.util.Iterator;
 
+import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.ReadOperation;
 import org.xydra.base.XID;
 
@@ -28,7 +29,7 @@ public interface XReadableModel extends XEntity, Iterable<XID> {
 	 * @throws IllegalStateException if this model has already been removed
 	 */
 	@ReadOperation
-	XReadableObject getObject(XID objectId);
+	XReadableObject getObject(@NeverNull XID objectId);
 	
 	/**
 	 * Returns the current revision number of this {@link XReadableModel}.
@@ -50,7 +51,7 @@ public interface XReadableModel extends XEntity, Iterable<XID> {
 	 * @throws IllegalStateException if this model has already been removed
 	 */
 	@ReadOperation
-	boolean hasObject(XID objectId);
+	boolean hasObject(@NeverNull XID objectId);
 	
 	/**
 	 * Returns true, if this model has no child-objects

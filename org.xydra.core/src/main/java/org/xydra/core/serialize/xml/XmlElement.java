@@ -7,6 +7,7 @@ import java.util.List;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.core.serialize.XydraElement;
@@ -130,7 +131,7 @@ public class XmlElement extends AbstractXmlElement {
 	}
 	
 	@Override
-	public String getType() {
+	public @NeverNull String getType() {
 		return this.element.getNodeName();
 	}
 	

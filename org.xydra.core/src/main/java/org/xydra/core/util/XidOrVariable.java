@@ -4,7 +4,7 @@ import org.xydra.base.XID;
 
 
 /**
- * A common supertype for {@link XID} and {@link Variable}.
+ * A common super-type for {@link XID} and {@link Variable}.
  */
 public interface XidOrVariable extends XID, Variable {
 	

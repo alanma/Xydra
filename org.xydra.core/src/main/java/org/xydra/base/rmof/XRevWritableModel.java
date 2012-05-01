@@ -1,6 +1,7 @@
 package org.xydra.base.rmof;
 
 import org.xydra.annotations.ModificationOperation;
+import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.ReadOperation;
 import org.xydra.base.XID;
 
@@ -21,17 +22,17 @@ public interface XRevWritableModel extends XWritableModel {
 	 * @param object
 	 */
 	@ModificationOperation
-	void addObject(XRevWritableObject object);
+	void addObject(@NeverNull XRevWritableObject object);
 	
 	/* More specific return type */
 	@Override
 	@ModificationOperation
-	XRevWritableObject createObject(XID id);
+	XRevWritableObject createObject(@NeverNull XID id);
 	
 	/* More specific return type */
 	@Override
 	@ReadOperation
-	XRevWritableObject getObject(XID objectId);
+	XRevWritableObject getObject(@NeverNull XID objectId);
 	
 	/**
 	 * Set the revision number of this model. Revision number of contained

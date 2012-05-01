@@ -1,6 +1,7 @@
 package org.xydra.base.rmof;
 
 import org.xydra.annotations.ModificationOperation;
+import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.ReadOperation;
 import org.xydra.base.XID;
 
@@ -27,12 +28,12 @@ public interface XWritableModel extends XReadableModel {
 	 * @throws IllegalStateException if this model has already been removed
 	 */
 	@ModificationOperation
-	XWritableObject createObject(XID objectId);
+	XWritableObject createObject(@NeverNull XID objectId);
 	
 	/* More specific return type */
 	@Override
 	@ReadOperation
-	XWritableObject getObject(XID objectId);
+	XWritableObject getObject(@NeverNull XID objectId);
 	
 	/**
 	 * Removes the {@link XWritableObject} with the given {@link XID} from this
@@ -46,6 +47,6 @@ public interface XWritableModel extends XReadableModel {
 	 * @throws IllegalStateException if this model has already been removed
 	 */
 	@ModificationOperation
-	boolean removeObject(XID objectId);
+	boolean removeObject(@NeverNull XID objectId);
 	
 }

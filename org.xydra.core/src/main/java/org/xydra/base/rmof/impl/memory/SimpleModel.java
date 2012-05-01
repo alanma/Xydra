@@ -77,7 +77,7 @@ public class SimpleModel implements Serializable, XRevWritableModel, XSessionMod
 	}
 	
 	@Override
-	public XRevWritableObject createObject(XID objectId) {
+	public XRevWritableObject createObject(@NeverNull XID objectId) {
 		XRevWritableObject object = this.objects.get(objectId);
 		if(object != null) {
 			return object;
@@ -98,7 +98,7 @@ public class SimpleModel implements Serializable, XRevWritableModel, XSessionMod
 	}
 	
 	@Override
-	public XRevWritableObject getObject(XID objectId) {
+	public XRevWritableObject getObject(@NeverNull XID objectId) {
 		return this.objects.get(objectId);
 	}
 	
@@ -108,7 +108,7 @@ public class SimpleModel implements Serializable, XRevWritableModel, XSessionMod
 	}
 	
 	@Override
-	public boolean hasObject(XID objectId) {
+	public boolean hasObject(@NeverNull XID objectId) {
 		return this.objects.containsKey(objectId);
 	}
 	
@@ -123,7 +123,7 @@ public class SimpleModel implements Serializable, XRevWritableModel, XSessionMod
 	}
 	
 	@Override
-	public boolean removeObject(XID objectId) {
+	public boolean removeObject(@NeverNull XID objectId) {
 		XRevWritableObject oldObject = this.objects.remove(objectId);
 		return oldObject != null;
 	}

@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import org.xydra.annotations.NeverNull;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XType;
@@ -105,7 +106,7 @@ public class SessionModel implements XSessionModel {
 	}
 	
 	@Override
-	public XWritableObject createObject(XID id) {
+	public XWritableObject createObject(@NeverNull XID id) {
 		synchronized(this.sessionCacheModel) {
 			return this.sessionCacheModel.createObject(id);
 		}
@@ -127,7 +128,7 @@ public class SessionModel implements XSessionModel {
 	}
 	
 	@Override
-	public XWritableObject getObject(XID objectId) {
+	public XWritableObject getObject(@NeverNull XID objectId) {
 		synchronized(this.sessionCacheModel) {
 			return this.sessionCacheModel.getObject(objectId);
 		}
@@ -165,7 +166,7 @@ public class SessionModel implements XSessionModel {
 	}
 	
 	@Override
-	public boolean hasObject(XID objectId) {
+	public boolean hasObject(@NeverNull XID objectId) {
 		return this.sessionCacheModel.hasObject(objectId);
 	}
 	
@@ -222,7 +223,7 @@ public class SessionModel implements XSessionModel {
 	}
 	
 	@Override
-	public boolean removeObject(XID objectId) {
+	public boolean removeObject(@NeverNull XID objectId) {
 		synchronized(this.sessionCacheModel) {
 			return this.sessionCacheModel.removeObject(objectId);
 		}

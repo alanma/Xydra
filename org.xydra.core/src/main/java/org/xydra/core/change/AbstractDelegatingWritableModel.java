@@ -2,6 +2,7 @@ package org.xydra.core.change;
 
 import java.util.Iterator;
 
+import org.xydra.annotations.NeverNull;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XType;
@@ -176,7 +177,7 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 	public static final long UNDEFINED = -2;
 	
 	@Override
-	public abstract XWritableObject createObject(final XID objectId);
+	public abstract XWritableObject createObject(@NeverNull final XID objectId);
 	
 	protected abstract long field_getRevisionNumber(final XID objectId, final XID fieldId);
 	
@@ -199,7 +200,7 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 	public abstract XID getId();
 	
 	@Override
-	public XWritableObject getObject(final XID objectId) {
+	public XWritableObject getObject(@NeverNull final XID objectId) {
 		if(hasObject(objectId)) {
 			return getObject_internal(objectId);
 		} else {
@@ -217,7 +218,7 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 	}
 	
 	@Override
-	public abstract boolean hasObject(final XID objectId);
+	public abstract boolean hasObject(@NeverNull final XID objectId);
 	
 	@Override
 	public abstract Iterator<XID> iterator();
@@ -253,7 +254,7 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 	protected abstract boolean object_removeField(final XID objectId, final XID fieldId);
 	
 	@Override
-	public abstract boolean removeObject(final XID objectId);
+	public abstract boolean removeObject(@NeverNull final XID objectId);
 	
 	protected XAddress resolveField(final XID objectId, final XID fieldId) {
 		XyAssert.xyAssert(objectId != null); assert objectId != null;

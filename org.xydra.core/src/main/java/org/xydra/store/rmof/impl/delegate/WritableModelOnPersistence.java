@@ -3,6 +3,7 @@ package org.xydra.store.rmof.impl.delegate;
 import java.util.Iterator;
 import java.util.List;
 
+import org.xydra.annotations.NeverNull;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
@@ -46,7 +47,7 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 	}
 	
 	@Override
-	public XWritableObject createObject(XID objectId) {
+	public XWritableObject createObject(@NeverNull XID objectId) {
 		XyAssert.xyAssert(this.persistence.hasManagedModel(this.modelId));
 		
 		XWritableObject object = this.getObject(objectId);
@@ -95,7 +96,7 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 	}
 	
 	@Override
-	public XWritableObject getObject(XID objectId) {
+	public XWritableObject getObject(@NeverNull XID objectId) {
 		if(hasObject(objectId)) {
 			// make sure changes to object are reflected in persistence
 			return new WritableObjectOnPersistence(this.persistence, this.executingActorId,
@@ -117,7 +118,7 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 	}
 	
 	@Override
-	public boolean hasObject(XID objectId) {
+	public boolean hasObject(@NeverNull XID objectId) {
 		XAddress objectAddress = XX.resolveObject(getAddress(), objectId);
 		XWritableObject objectSnapshot = this.persistence
 		        .getObjectSnapshot(new GetWithAddressRequest(objectAddress,
@@ -155,7 +156,7 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 	}
 	
 	@Override
-	public boolean removeObject(XID objectId) {
+	public boolean removeObject(@NeverNull XID objectId) {
 		boolean result = hasObject(objectId);
 		XCommand command = X.getCommandFactory().createRemoveObjectCommand(
 		        this.persistence.getRepositoryId(), this.modelId, objectId, XCommand.FORCED, true);

@@ -1,7 +1,9 @@
 package org.xydra.core.util;
 
-/*
- * FIXME what is this needed for? ~~bjoern
+/**
+ * The Variable {@link #ANY} denotes a wild-card in queries for XID or XValue.
+ * 
+ * Currently used in {@link ModelIndex} only.
  */
 public interface Variable {
 	

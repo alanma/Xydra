@@ -1,5 +1,6 @@
 package org.xydra.base;
 
+import org.xydra.annotations.NeverNull;
 import org.xydra.core.URIFormatException;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
@@ -35,7 +36,7 @@ public interface XIDProvider {
 	 * @throws URIFormatException if the given address contains too many
 	 *             components.
 	 */
-	XAddress fromAddress(String address) throws IllegalArgumentException, URIFormatException;
+	@NeverNull XAddress fromAddress(String address) throws IllegalArgumentException, URIFormatException;
 	
 	/**
 	 * Creates a new {@link XAddress} from the given components. The

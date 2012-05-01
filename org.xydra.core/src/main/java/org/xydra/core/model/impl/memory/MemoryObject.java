@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.ReadOperation;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
@@ -474,7 +475,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	}
 	
 	@Override
-	protected MemoryObject getObject(XID objectId) {
+	protected MemoryObject getObject(@NeverNull XID objectId) {
 		if(getId().equals(objectId)) {
 			return this;
 		}

@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.xydra.annotations.NeverNull;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XType;
@@ -58,8 +59,10 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 		protected EntityState state;
 		
 		public CachedEntity(XAddress address, EntityState state) {
-			XyAssert.xyAssert(address != null); assert address != null;
-			XyAssert.xyAssert(state != null); assert state != null;
+			XyAssert.xyAssert(address != null);
+			assert address != null;
+			XyAssert.xyAssert(state != null);
+			assert state != null;
 			this.address = address;
 			this.state = state;
 		}
@@ -428,7 +431,7 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 	
 	/**
 	 * Compile-time flag to help debugging. If on, all read-accesses to
-	 * non-prefetched entities results in a warning. FIXME set to false
+	 * non-pre-fetched entities results in a warning.
 	 */
 	private static final boolean WARN_ON_UNCACHED_ACCESS = false;
 	
@@ -511,7 +514,7 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 	}
 	
 	@Override
-	public XWritableObject createObject(XID objectId) {
+	public XWritableObject createObject(@NeverNull XID objectId) {
 		// first, consult caches
 		CachedObject co = this.cachedObjects.get(objectId);
 		if(co != null) {
@@ -552,7 +555,7 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 	
 	@SuppressWarnings("unused")
 	@Override
-	public XWritableObject getObject(XID objectId) {
+	public XWritableObject getObject(@NeverNull XID objectId) {
 		XWritableObject xo = this.cachedObjects.get(objectId);
 		if(WARN_ON_UNCACHED_ACCESS && xo == null) {
 			log.warn("Object '" + objectId + "' not prefetched in " + this.getAddress()
@@ -604,8 +607,9 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 	
 	@SuppressWarnings("unused")
 	@Override
-	public boolean hasObject(XID objectId) {
-		XyAssert.xyAssert(objectId != null); assert objectId != null;
+	public boolean hasObject(@NeverNull XID objectId) {
+		XyAssert.xyAssert(objectId != null);
+		assert objectId != null;
 		CachedObject co = this.cachedObjects.get(objectId);
 		if(co != null) {
 			return co.isPresent();
@@ -708,7 +712,7 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 	
 	@SuppressWarnings("unused")
 	@Override
-	public boolean removeObject(XID objectId) {
+	public boolean removeObject(@NeverNull XID objectId) {
 		CachedObject co = this.cachedObjects.get(objectId);
 		if(co == null) {
 			if(WARN_ON_UNCACHED_ACCESS && WARN_ON_REMOVES) {

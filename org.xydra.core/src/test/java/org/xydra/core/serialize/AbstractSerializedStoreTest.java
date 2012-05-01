@@ -229,7 +229,8 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 	
 	private void testEventsResults(BatchedResult<XEvent[]>[] eventRes) {
 		
-		XyAssert.xyAssert(eventRes != null); assert eventRes != null;
+		XyAssert.xyAssert(eventRes != null);
+		assert eventRes != null;
 		
 		EventsRequest er = preparePreRequests(eventRes);
 		BatchedResult<XEvent[]>[] events = preparePreResults(eventRes);
@@ -253,7 +254,8 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 	private void testCommandResults(BatchedResult<Long>[] commandRes,
 	        BatchedResult<XEvent[]>[] eventRes) {
 		
-		XyAssert.xyAssert(commandRes != null); assert commandRes != null;
+		XyAssert.xyAssert(commandRes != null);
+		assert commandRes != null;
 		
 		BatchedResult<Long>[] commands = preparePre(commandRes);
 		
@@ -308,7 +310,8 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 		
 		List<BatchedResult<XEvent[]>> events = new ArrayList<BatchedResult<XEvent[]>>();
 		for(BatchedResult<XEvent[]> res : eventRes) {
-			XyAssert.xyAssert(res != null); assert res != null;
+			XyAssert.xyAssert(res != null);
+			assert res != null;
 			if(!(res.getException() instanceof PreException)) {
 				if(res.getException() instanceof RequestException) {
 					events.add((BatchedResult<XEvent[]>)(Object)storeError());
@@ -331,7 +334,8 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 		List<StoreException> except = new ArrayList<StoreException>();
 		
 		for(BatchedResult<XEvent[]> res : eventRes) {
-			XyAssert.xyAssert(res != null); assert res != null;
+			XyAssert.xyAssert(res != null);
+			assert res != null;
 			
 			if(res.getException() instanceof PreException) {
 				continue;
@@ -375,7 +379,8 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 				while(addr != null && !addr.equalsOrContains(event.getTarget())) {
 					addr = addr.getParent();
 				}
-				XyAssert.xyAssert(addr != null); assert addr != null;
+				XyAssert.xyAssert(addr != null);
+				assert addr != null;
 			}
 			
 			if(event.getRevisionNumber() < min) {
@@ -400,7 +405,8 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 	
 	private static <T> void checkBatchedResult(BatchedResult<T> expected, BatchedResult<T> actual) {
 		
-		XyAssert.xyAssert(expected != null); assert expected != null;
+		XyAssert.xyAssert(expected != null);
+		assert expected != null;
 		assertNotNull(actual);
 		
 		if(expected.getException() != null) {
@@ -536,7 +542,8 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 	
 	private void testModelRevisions(BatchedResult<ModelRevision>[] revs) {
 		
-		XyAssert.xyAssert(revs != null); assert revs != null;
+		XyAssert.xyAssert(revs != null);
+		assert revs != null;
 		
 		BatchedResult<ModelRevision>[] results = preparePre(revs);
 		
@@ -561,7 +568,8 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 		
 		BatchedResult<T>[] res = new BatchedResult[revs.length];
 		for(int i = 0; i < revs.length; i++) {
-			XyAssert.xyAssert(revs[i] != null); assert revs[i] != null;
+			XyAssert.xyAssert(revs[i] != null);
+			assert revs[i] != null;
 			if(revs[i].getException() instanceof PreException) {
 				res[i] = revs[i];
 			}
@@ -577,7 +585,8 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 		
 		List<BatchedResult<T>> results = new ArrayList<BatchedResult<T>>();
 		for(BatchedResult<T> res : revs) {
-			XyAssert.xyAssert(res != null); assert res != null;
+			XyAssert.xyAssert(res != null);
+			assert res != null;
 			if(!(res.getException() instanceof PreException)) {
 				results.add(res);
 			}
@@ -636,7 +645,8 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 	@SuppressWarnings("unchecked")
 	private void testSnapshots(Object[] data) {
 		
-		XyAssert.xyAssert(data != null); assert data != null;
+		XyAssert.xyAssert(data != null);
+		assert data != null;
 		
 		StoreException[] parseErrors = new StoreException[data.length];
 		boolean[] isModel = new boolean[data.length];

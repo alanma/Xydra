@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.xydra.annotations.NeverNull;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
@@ -87,7 +88,7 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 	}
 	
 	@Override
-	public XWritableObject createObject(XID objectId) {
+	public XWritableObject createObject(@NeverNull XID objectId) {
 		if(hasObject(objectId)) {
 			return getObject(objectId);
 		}
@@ -159,7 +160,7 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 	}
 	
 	@Override
-	public boolean hasObject(XID objectId) {
+	public boolean hasObject(@NeverNull XID objectId) {
 		if(this.added.containsKey(new EqualsConstraint<XID>(objectId), new Wildcard<XID>())) {
 			XyAssert.xyAssert(!this.removed.containsKey(new EqualsConstraint<XID>(objectId),
 			        new EqualsConstraint<XID>(NONE)));
@@ -273,7 +274,7 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 	}
 	
 	@Override
-	public boolean removeObject(XID objectId) {
+	public boolean removeObject(@NeverNull XID objectId) {
 		XyAssert.xyAssert(objectId != null); assert objectId != null;
 		if(this.added.containsKey(new EqualsConstraint<XID>(objectId), new Wildcard<XID>())) {
 			// fine

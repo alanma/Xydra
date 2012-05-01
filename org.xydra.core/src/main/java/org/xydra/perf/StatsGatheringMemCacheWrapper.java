@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.xydra.annotations.CanBeNull;
+import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.minio.MiniIOException;
 import org.xydra.base.minio.MiniStreamWriter;
@@ -185,7 +187,7 @@ public class StatsGatheringMemCacheWrapper implements IMemCache {
 	}
 	
 	@Override
-	public boolean putIfUntouched(String key, IdentifiableValue oldValue, Object newValue) {
+	public boolean putIfUntouched(@NeverNull String key,@NeverNull IdentifiableValue oldValue, @CanBeNull Object newValue) {
 		count("putIfUntouched");
 		synchronized(this.base) {
 			Object current = get(key);

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.xydra.annotations.NeverNull;
 import org.xydra.base.IHasXAddress;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
@@ -407,7 +408,7 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 	 * 
 	 * @return true if there is an {@link XObject} with the given {@link XID}
 	 */
-	protected abstract MemoryObject getObject(XID objectId);
+	protected abstract MemoryObject getObject(@NeverNull XID objectId);
 	
 	@Override
 	public XID getSessionActor() {

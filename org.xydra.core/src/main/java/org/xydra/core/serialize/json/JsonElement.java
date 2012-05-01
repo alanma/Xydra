@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.xydra.annotations.NeverNull;
 import org.xydra.core.serialize.ParsingError;
 import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.xml.XmlEncoder;
@@ -85,7 +86,7 @@ public class JsonElement extends AbstractJsonElement {
 	}
 	
 	@Override
-	public String getType() {
+	public @NeverNull String getType() {
 		return this.type;
 	}
 	

@@ -110,7 +110,8 @@ public class MemoryEventManager implements Serializable {
 	 * @param syncRev
 	 */
 	public MemoryEventManager(XID actorId, String passwordHash, MemoryChangeLog log, long syncRev) {
-		XyAssert.xyAssert(actorId != null); assert actorId != null;
+		XyAssert.xyAssert(actorId != null);
+		assert actorId != null;
 		this.sessionActor = actorId;
 		this.sessionPasswordHash = passwordHash;
 		this.changeLog = log;
@@ -149,7 +150,8 @@ public class MemoryEventManager implements Serializable {
 			
 			XEvent event = this.eventQueue.get(i).event;
 			
-			XyAssert.xyAssert(event != null); assert event != null;
+			XyAssert.xyAssert(event != null);
+			assert event != null;
 			
 			if(event instanceof XTransactionEvent) {
 				this.eventQueue.set(i, null);
@@ -177,7 +179,8 @@ public class MemoryEventManager implements Serializable {
 		// Merge colliding field events.
 		for(EventCollision ec : fields.values()) {
 			
-			XyAssert.xyAssert(this.eventQueue.get(ec.first) != null); assert this.eventQueue.get(ec.first) != null;
+			XyAssert.xyAssert(this.eventQueue.get(ec.first) != null);
+			assert this.eventQueue.get(ec.first) != null;
 			if(ec.last < 0) {
 				// no collision
 				continue;
@@ -185,7 +188,8 @@ public class MemoryEventManager implements Serializable {
 			XEvent first = this.eventQueue.get(ec.first).event;
 			
 			EventQueueEntry e = this.eventQueue.get(ec.last);
-			XyAssert.xyAssert(e != null); assert e != null;
+			XyAssert.xyAssert(e != null);
+			assert e != null;
 			XEvent last = e.event;
 			
 			XyAssert.xyAssert(first instanceof XReversibleFieldEvent);
@@ -208,12 +212,14 @@ public class MemoryEventManager implements Serializable {
 		// Merge colliding non-field events.
 		for(EventCollision ec : coll.values()) {
 			
-			XyAssert.xyAssert(this.eventQueue.get(ec.first) != null); assert this.eventQueue.get(ec.first) != null;
+			XyAssert.xyAssert(this.eventQueue.get(ec.first) != null);
+			assert this.eventQueue.get(ec.first) != null;
 			if(ec.last < 0) {
 				// no collision
 				continue;
 			}
-			XyAssert.xyAssert(this.eventQueue.get(ec.last) != null); assert this.eventQueue.get(ec.last) != null;
+			XyAssert.xyAssert(this.eventQueue.get(ec.last) != null);
+			assert this.eventQueue.get(ec.last) != null;
 			XEvent first = this.eventQueue.get(ec.first).event;
 			XEvent last = this.eventQueue.get(ec.last).event;
 			
@@ -291,10 +297,16 @@ public class MemoryEventManager implements Serializable {
 		
 		assert since < this.eventQueue.size() - 1 : "Transactions should have more than one event.";
 		
-		assert model != null || object != null : "either model or object must not be null";
-		
-		@SuppressWarnings("null")
-		XAddress target = object == null ? model.getAddress() : object.getAddress();
+		XAddress target;
+		if(object == null && model == null) {
+			throw new IllegalArgumentException("either model or object must be non-null");
+		} else if(model == null) {
+			assert object != null;
+			target = object.getAddress();
+		} else {
+			assert model != null;
+			target = model.getAddress();
+		}
 		
 		XAtomicEvent[] events = new XAtomicEvent[this.eventQueue.size() - since];
 		for(int i = since; i < this.eventQueue.size(); ++i) {
@@ -517,8 +529,10 @@ public class MemoryEventManager implements Serializable {
 		while(!this.eventQueue.isEmpty()) {
 			EventQueueEntry entry = this.eventQueue.remove(0);
 			
-			XyAssert.xyAssert(entry != null); assert entry != null;
-			XyAssert.xyAssert(entry.event != null); assert entry.event != null;
+			XyAssert.xyAssert(entry != null);
+			assert entry != null;
+			XyAssert.xyAssert(entry.event != null);
+			assert entry.event != null;
 			
 			XyAssert.xyAssert(entry.event instanceof XRepositoryEvent
 			        || entry.event instanceof XModelEvent || entry.event instanceof XObjectEvent
@@ -534,7 +548,8 @@ public class MemoryEventManager implements Serializable {
 				}
 				
 			} else if(entry.event instanceof XModelEvent) {
-				XyAssert.xyAssert(entry.model != null); assert entry.model != null;
+				XyAssert.xyAssert(entry.model != null);
+				assert entry.model != null;
 				
 				// fire model event and propagate to fathers if necessary.
 				
@@ -545,7 +560,8 @@ public class MemoryEventManager implements Serializable {
 				}
 				
 			} else if(entry.event instanceof XObjectEvent) {
-				XyAssert.xyAssert(entry.object != null); assert entry.object != null;
+				XyAssert.xyAssert(entry.object != null);
+				assert entry.object != null;
 				
 				// fire object event and propagate to fathers if necessary.
 				
@@ -559,7 +575,8 @@ public class MemoryEventManager implements Serializable {
 					}
 				}
 			} else if(entry.event instanceof XFieldEvent) {
-				XyAssert.xyAssert(entry.field != null); assert entry.field != null;
+				XyAssert.xyAssert(entry.field != null);
+				assert entry.field != null;
 				
 				// fire field event and propagate to fathers if necessary.
 				
@@ -634,7 +651,8 @@ public class MemoryEventManager implements Serializable {
 	}
 	
 	protected void setSessionActor(XID actorId, String passwordHash) {
-		XyAssert.xyAssert(actorId != null); assert actorId != null;
+		XyAssert.xyAssert(actorId != null);
+		assert actorId != null;
 		this.sessionActor = actorId;
 		this.sessionPasswordHash = passwordHash;
 	}

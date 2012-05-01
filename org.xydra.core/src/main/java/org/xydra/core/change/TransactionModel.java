@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
+import org.xydra.annotations.NeverNull;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
@@ -978,7 +979,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 	}
 	
 	@Override
-	public boolean hasObject(XID objectId) {
+	public boolean hasObject(@NeverNull XID objectId) {
 		/*
 		 * only return true if the object is new or if it wasn't removed and it
 		 * part of the baseModel
@@ -989,7 +990,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 	}
 	
 	@Override
-	public XWritableObject createObject(XID id) {
+	public XWritableObject createObject(@NeverNull XID id) {
 		XCommand addCommand = X.getCommandFactory().createSafeAddObjectCommand(
 		        this.baseModel.getAddress(), id);
 		
@@ -1017,7 +1018,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 	}
 	
 	@Override
-	public XWritableObject getObject(XID objectId) {
+	public XWritableObject getObject(@NeverNull XID objectId) {
 		XWritableObject object = null;
 		
 		if(this.changedObjects.containsKey(objectId)) {
@@ -1040,7 +1041,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 	}
 	
 	@Override
-	public boolean removeObject(XID objectId) {
+	public boolean removeObject(@NeverNull XID objectId) {
 		XWritableObject object = this.getObject(objectId);
 		
 		if(object == null) {

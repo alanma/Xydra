@@ -33,7 +33,6 @@ import org.xydra.sharedutils.XyAssert;
  * Note: This is similar to {@link DeltaUtils}.
  * 
  * @author xamde
- * 
  */
 public class EventUtils {
 	
@@ -41,16 +40,14 @@ public class EventUtils {
 	
 	/**
 	 * @param model
-	 * @param atomicEvent never null
+	 * @param atomicEvent
 	 * @param inTxn
 	 */
 	private static void applyAtomicEventIgnoreRev(@NeverNull XModel model,
 	        @NeverNull XAtomicEvent atomicEvent, boolean inTxn) {
 		XyAssert.xyAssert(model != null);
 		assert model != null;
-		assert model != null;
 		XyAssert.xyAssert(atomicEvent != null);
-		assert atomicEvent != null;
 		assert atomicEvent != null;
 		XyAssert.xyAssert(atomicEvent.getChangedEntity() != null);
 		assert atomicEvent.getChangedEntity() != null;
@@ -135,9 +132,10 @@ public class EventUtils {
 			XyAssert.xyAssert(model != null);
 			assert model != null;
 			XRevWritableObject object = model.getObject(objectId);
-			XReadableObject srcObject = (reference == null) ? null : reference.getObject(objectId);
-			XyAssert.xyAssert(object != null);
+			XyAssert.xyAssert(object != null, "%s: applying event %s inTxn?%s", model.getAddress(),
+			        atomicEvent, inTxn);
 			assert object != null;
+			XReadableObject srcObject = (reference == null) ? null : reference.getObject(objectId);
 			if(object == srcObject) {
 				object = SimpleObject.shallowCopy(object);
 				model.addObject(object);
@@ -159,7 +157,11 @@ public class EventUtils {
 		assert reference != model : "just applied event " + atomicEvent + " inTxn?" + inTxn;
 	}
 	
-	public static void applyEventIgnoreRev(XModel model, XEvent event) {
+	/**
+	 * @param model
+	 * @param event
+	 */
+	public static void applyEventIgnoreRev(XModel model, @NeverNull XEvent event) {
 		XyAssert.xyAssert(event != null);
 		assert event != null;
 		if(event instanceof XTransactionEvent) {
@@ -198,7 +200,11 @@ public class EventUtils {
 			assert event instanceof XAtomicEvent : event.getClass().getName();
 			applyAtomicEvent(model, (XAtomicEvent)event, false);
 		}
-		// FIXME is this correct if the model was removed?
+		/*
+		 * As Model.ADD and REMOVE events are technically only managed within
+		 * the change log of the model itself, we must even then record the
+		 * changed revision number
+		 */
 		model.setRevisionNumber(event.getRevisionNumber());
 	}
 	
@@ -218,7 +224,7 @@ public class EventUtils {
 	 *         them will change both models.
 	 */
 	public static XRevWritableModel applyEventNonDestructive(XReadableModel reference,
-	        XRevWritableModel model, XEvent event) {
+	        @NeverNull XRevWritableModel model, @NeverNull XEvent event) {
 		XyAssert.xyAssert(event != null);
 		assert event != null;
 		XyAssert.xyAssert(model != null);

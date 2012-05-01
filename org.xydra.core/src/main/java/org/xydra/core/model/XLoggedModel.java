@@ -1,5 +1,6 @@
 package org.xydra.core.model;
 
+import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.ReadOperation;
 import org.xydra.base.XID;
 import org.xydra.base.change.XEvent;
@@ -35,6 +36,6 @@ public interface XLoggedModel extends XWritableModel, XSendsModelEvents, XSendsO
 	 */
 	@Override
     @ReadOperation
-	XLoggedObject getObject(XID objectId);
+	XLoggedObject getObject(@NeverNull XID objectId);
 	
 }

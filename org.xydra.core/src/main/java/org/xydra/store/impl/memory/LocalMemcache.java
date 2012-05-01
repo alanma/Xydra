@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.xydra.annotations.CanBeNull;
+import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
@@ -225,7 +227,7 @@ public class LocalMemcache implements IMemCache {
 	}
 	
 	@Override
-	public boolean putIfUntouched(String key, IdentifiableValue oldValue, Object newValue) {
+	public boolean putIfUntouched(@NeverNull String key, @NeverNull IdentifiableValue oldValue, @CanBeNull Object newValue) {
 		synchronized(this.internalMap) {
 			Object current = get(key);
 			if(oldValue.getValue() == null) {

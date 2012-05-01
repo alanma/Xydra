@@ -3,6 +3,7 @@ package org.xydra.core.model;
 import java.io.Serializable;
 
 import org.xydra.annotations.ModificationOperation;
+import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.ReadOperation;
 import org.xydra.base.XID;
 import org.xydra.base.change.XCommand;
@@ -46,7 +47,7 @@ public interface XModel extends XLoggedModel, XWritableModel, Serializable, XSyn
 	 */
 	@Override
     @ModificationOperation
-	XObject createObject(XID id);
+	XObject createObject(@NeverNull XID id);
 	
 	/**
 	 * Executes the given {@link XModelCommand} if possible.
@@ -89,7 +90,7 @@ public interface XModel extends XLoggedModel, XWritableModel, Serializable, XSyn
 	 */
 	@Override
     @ReadOperation
-	XObject getObject(XID objectId);
+	XObject getObject(@NeverNull XID objectId);
 	
 	/**
 	 * Removes the {@link XObject} with the given {@link XID} from this XModel.
@@ -103,7 +104,7 @@ public interface XModel extends XLoggedModel, XWritableModel, Serializable, XSyn
 	 */
 	@Override
     @ModificationOperation
-	boolean removeObject(XID objectId);
+	boolean removeObject(@NeverNull XID objectId);
 	
 	/**
 	 * Create a consistent snapshot of this model and all contained objects and
