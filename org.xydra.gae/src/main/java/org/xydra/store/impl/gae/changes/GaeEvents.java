@@ -25,9 +25,9 @@ import org.xydra.core.serialize.XydraOut;
 import org.xydra.core.serialize.xml.XmlOut;
 import org.xydra.core.serialize.xml.XmlParser;
 import org.xydra.index.query.Pair;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.impl.gae.AsyncDatastore;
 import org.xydra.store.impl.gae.AsyncDatastore.AsyncEntity;
-import org.xydra.store.impl.gae.GaeAssert;
 import org.xydra.store.impl.gae.GaeUtils2;
 
 import com.google.appengine.api.datastore.Entity;
@@ -443,7 +443,7 @@ public class GaeEvents {
 		List<Number> fieldRevs = (List<Number>)changeEntity.getProperty(PROP_EVENT_REVS_FIELD);
 		List<Boolean> implied = (List<Boolean>)changeEntity.getProperty(PROP_EVENT_IMPLIED);
 		
-		GaeAssert.gaeAssert(types != null, "changeEntity.PROP_EVENT_TYPES was null");
+		XyAssert.xyAssert(types != null, "changeEntity.PROP_EVENT_TYPES was null");
 		assert types != null && targets != null && values != null && implied != null;
 		
 		XAtomicEvent[] events = new XAtomicEvent[types.size()];

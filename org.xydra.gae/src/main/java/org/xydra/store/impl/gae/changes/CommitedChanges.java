@@ -6,9 +6,9 @@ import java.util.Map;
 import org.xydra.base.XAddress;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.impl.gae.DebugFormatter;
 import org.xydra.store.impl.gae.DebugFormatter.Timing;
-import org.xydra.store.impl.gae.GaeAssert;
 import org.xydra.store.impl.gae.InstanceContext;
 
 
@@ -115,9 +115,9 @@ public class CommitedChanges {
 	 * @param change to be cached; must have status == committed
 	 */
 	public void cacheCommittedChange(GaeChange change) {
-		GaeAssert.gaeAssert(change != null);
+		XyAssert.xyAssert(change != null);
 		assert change != null;
-		GaeAssert.gaeAssert(change.getStatus().isCommitted());
+		XyAssert.xyAssert(change.getStatus().isCommitted());
 		assert change.getStatus() != null;
 		assert change.getStatus().isCommitted();
 		log.trace(DebugFormatter.dataPut(LOCAL_COMMITED_CHANGES_CACHENAME + this.modelAddr, ""
@@ -134,9 +134,9 @@ public class CommitedChanges {
 	 */
 	@SuppressWarnings("unused")
 	private void cacheInstanceCommittedChange(GaeChange change) {
-		GaeAssert.gaeAssert(change != null);
+		XyAssert.xyAssert(change != null);
 		assert change != null;
-		GaeAssert.gaeAssert(change.getStatus().isCommitted());
+		XyAssert.xyAssert(change.getStatus().isCommitted());
 		assert change.getStatus() != null;
 		assert change.getStatus().isCommitted();
 		log.trace(DebugFormatter.dataPut(INSTANCE_COMMITED_CHANGES_CACHENAME + this.modelAddr, ""

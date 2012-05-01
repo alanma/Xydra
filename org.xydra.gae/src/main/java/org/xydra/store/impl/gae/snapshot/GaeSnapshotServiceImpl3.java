@@ -28,9 +28,9 @@ import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.xml.XmlParser;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.impl.gae.DebugFormatter;
 import org.xydra.store.impl.gae.DebugFormatter.Timing;
-import org.xydra.store.impl.gae.GaeAssert;
 import org.xydra.store.impl.gae.GaeOperation;
 import org.xydra.store.impl.gae.InstanceContext;
 import org.xydra.store.impl.gae.Memcache;
@@ -214,8 +214,8 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 			// execute
 			if(USE_MEMCACHE) {
 				batchResult = Memcache.getEntities(Collections.singleton(possiblyMemcachedKey));
-				GaeAssert.gaeAssert(batchResult.size() <= 1, "got 0 or 1 results");
-				GaeAssert.gaeAssert(cacheResultIsConsistent(batchResult),
+				XyAssert.xyAssert(batchResult.size() <= 1, "got 0 or 1 results");
+				XyAssert.xyAssert(cacheResultIsConsistent(batchResult),
 				        "cache inconsistent, see logs");
 				if(batchResult.isEmpty()) {
 					// memcache got flushed?
@@ -296,9 +296,9 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 	private XRevWritableModel computeSnapshotFromBase(XRevWritableModel base, long requestedRevNr) {
 		assert base != null;
 		assert base.getRevisionNumber() < requestedRevNr : "otherwise it makes no sense to compute it";
-		GaeAssert.gaeAssert(requestedRevNr > 0);
+		XyAssert.xyAssert(requestedRevNr > 0);
 		XRevWritableModel snapshot = base;
-		GaeAssert.gaeAssert(requestedRevNr > snapshot.getRevisionNumber());
+		XyAssert.xyAssert(requestedRevNr > snapshot.getRevisionNumber());
 		log.debug("Compute snapshot of model '" + this.modelAddress + "' from rev="
 		        + snapshot.getRevisionNumber() + " to rev=" + requestedRevNr);
 		

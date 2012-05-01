@@ -8,6 +8,7 @@ import java.util.Set;
 import org.xydra.gae.AboutAppEngine;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.IMemCache;
 import org.xydra.store.impl.gae.DebugFormatter.Timing;
 
@@ -135,7 +136,7 @@ public class GaeLowLevelMemCache implements IMemCache {
 	@Override
 	@GaeOperation(memcacheWrite = true)
 	public Object put(String key, Object value) {
-		GaeAssert.gaeAssert(value != null, "value is null");
+		XyAssert.xyAssert(value != null, "value is null");
 		assert value != null;
 		log.debug(DebugFormatter.dataPut(MEMCACHE_NAME, key.toString(), value, Timing.Now));
 		this.memcacheService.put(keyUniqueForCurrentAppVersion(key), value);
@@ -165,7 +166,7 @@ public class GaeLowLevelMemCache implements IMemCache {
 		// transform keys
 		Map<String,Object> keyTransformedMap = new HashMap<String,Object>();
 		for(java.util.Map.Entry<? extends String,? extends Object> mapEntry : m.entrySet()) {
-			GaeAssert.gaeAssert(mapEntry.getValue() != null, "mapEntry.getValue() is null");
+			XyAssert.xyAssert(mapEntry.getValue() != null, "mapEntry.getValue() is null");
 			assert mapEntry.getValue() != null;
 			// TODO memcache: relaxed assert to allow caching null-entities --
 			// good idea?
@@ -202,7 +203,7 @@ public class GaeLowLevelMemCache implements IMemCache {
 	@Override
 	// Expires in 10 days. There is no default.
 	public void putIfValueIsNull(String key, Object value) {
-		GaeAssert.gaeAssert(value != null, "value is null");
+		XyAssert.xyAssert(value != null, "value is null");
 		assert value != null;
 		// TODO memcache: reenable? assert
 		// !(KeyStructure.toKey(key).getKind().equals("XCHANGE") &&
@@ -248,7 +249,7 @@ public class GaeLowLevelMemCache implements IMemCache {
 	@Override
 	@GaeOperation(memcacheWrite = true)
 	public boolean putIfUntouched(String key, IdentifiableValue oldValue, Object newValue) {
-		GaeAssert.gaeAssert(newValue != null, "newValue is null");
+		XyAssert.xyAssert(newValue != null, "newValue is null");
 		assert newValue != null;
 		assert oldValue instanceof IdentifiableValueImpl : "this cache can only handly its own impls "
 		        + oldValue.getClass().getCanonicalName();

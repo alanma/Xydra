@@ -24,10 +24,10 @@ import org.xydra.core.model.XModel;
 import org.xydra.gae.AboutAppEngine;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.ModelRevision;
 import org.xydra.store.XydraRuntime;
 import org.xydra.store.XydraStore;
-import org.xydra.store.impl.gae.GaeAssert;
 import org.xydra.store.impl.gae.GaeOperation;
 import org.xydra.store.impl.gae.InstanceRevisionManager;
 import org.xydra.store.impl.gae.Memcache;
@@ -135,7 +135,7 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 			event = txnEvent.getEvent(txnEvent.size() - 1);
 			assert event != null;
 		}
-		GaeAssert.gaeAssert(event.getChangeType() != ChangeType.TRANSACTION);
+		XyAssert.xyAssert(event.getChangeType() != ChangeType.TRANSACTION);
 		if(event.getTarget().getAddressedType() == XType.XREPOSITORY) {
 			if(event.getChangeType() == ChangeType.REMOVE) {
 				return false;
@@ -155,8 +155,8 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 	 */
 	private static boolean eventsAreWithinRange(List<XEvent> events, long begin, long endRev) {
 		for(XEvent e : events) {
-			GaeAssert.gaeAssert(e.getRevisionNumber() >= begin);
-			GaeAssert.gaeAssert(e.getRevisionNumber() <= endRev);
+			XyAssert.xyAssert(e.getRevisionNumber() >= begin);
+			XyAssert.xyAssert(e.getRevisionNumber() <= endRev);
 		}
 		return true;
 	}
@@ -621,7 +621,7 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 		for(Entry<String,Object> entry : memcacheResult.entrySet()) {
 			Key key = KeyStructure.toKey(entry.getKey());
 			Object v = entry.getValue();
-			GaeAssert.gaeAssert(v != null, "v!=null");
+			XyAssert.xyAssert(v != null, "v!=null");
 			assert v != null;
 			assert v instanceof Entity : v.getClass();
 			Entity entity = (Entity)v;
@@ -768,7 +768,7 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 				// // + endRev + "]");
 			}
 		}
-		GaeAssert.gaeAssert(eventsAreWithinRange(events, begin, endRev));
+		XyAssert.xyAssert(eventsAreWithinRange(events, begin, endRev));
 		
 		/*
 		 * TODO(Complete Impl) filter events (objectevents, fieldevents) if

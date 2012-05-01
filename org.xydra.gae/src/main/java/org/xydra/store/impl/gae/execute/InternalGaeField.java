@@ -15,10 +15,10 @@ import org.xydra.base.value.XValue;
 import org.xydra.core.model.XField;
 import org.xydra.store.impl.gae.AsyncDatastore;
 import org.xydra.store.impl.gae.changes.GaeEvents;
+import org.xydra.store.impl.gae.changes.GaeEvents.AsyncValue;
 import org.xydra.store.impl.gae.changes.GaeLocks;
 import org.xydra.store.impl.gae.changes.IGaeChangesService;
 import org.xydra.store.impl.gae.changes.KeyStructure;
-import org.xydra.store.impl.gae.changes.GaeEvents.AsyncValue;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;

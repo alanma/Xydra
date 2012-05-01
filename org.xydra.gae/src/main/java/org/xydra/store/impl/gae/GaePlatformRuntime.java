@@ -9,6 +9,7 @@ import org.xydra.gae.admin.GaeConfiguration;
 import org.xydra.gae.admin.GaeConfigurationManager;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.IMemCache;
 import org.xydra.store.XydraConfigUtils;
 import org.xydra.store.XydraPlatformRuntime;
@@ -45,7 +46,7 @@ public class GaePlatformRuntime implements XydraPlatformRuntime {
 			public void onXydraRuntimeInit() {
 				// gae assertions
 				boolean gaeAssert = XydraRuntime.getConfigMap().get(GaeConfigSettings.PROP_ASSERT) != null;
-				GaeAssert.setEnabled(gaeAssert);
+				XyAssert.setEnabled(gaeAssert);
 				// memcache
 				boolean usememcache = XydraRuntime.getConfigMap().get(
 				        GaeConfigSettings.PROP_USEMEMCACHE) != null;

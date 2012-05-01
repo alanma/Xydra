@@ -6,7 +6,7 @@ import java.util.Map;
 import org.xydra.base.XAddress;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.store.impl.gae.GaeAssert;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -52,7 +52,7 @@ public class AllChanges {
 	 * @param change to be cached; never null
 	 */
 	public void cacheCommittedChange(GaeChange change) {
-		GaeAssert.gaeAssert(change != null);
+		XyAssert.xyAssert(change != null);
 		assert change != null;
 		if(change.getStatus().isCommitted()) {
 			this.commitedChanges.cacheCommittedChange(change);

@@ -10,6 +10,7 @@ import java.util.Map;
 
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.impl.gae.DebugFormatter.Timing;
 import org.xydra.store.impl.gae.changes.KeyStructure;
 
@@ -70,7 +71,7 @@ public class SyncDatastore {
 	 */
 	@GaeOperation(datastoreWrite = true)
 	public static void putEntity(Entity entity, Transaction txn) {
-		GaeAssert.gaeAssert(entity != null, "entity is null");
+		XyAssert.xyAssert(entity != null, "entity is null");
 		assert entity != null;
 		log.debug(DebugFormatter.dataPut(DATASTORE_NAME, KeyStructure.toString(entity.getKey()),
 		        entity, Timing.Now));

@@ -17,8 +17,8 @@ import org.xydra.gae.AboutAppEngine;
 import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.impl.gae.AsyncDatastore;
-import org.xydra.store.impl.gae.GaeAssert;
 import org.xydra.store.impl.gae.GaeConstants;
 import org.xydra.store.impl.gae.GaeOperation;
 import org.xydra.store.impl.gae.Memcache;
@@ -360,7 +360,7 @@ public class GaeChange {
 	 * @param status
 	 */
 	public void setStatus(Status status) {
-		GaeAssert.gaeAssert(!getStatus().isCommitted());
+		XyAssert.xyAssert(!getStatus().isCommitted());
 		assert !getStatus().isCommitted() : "A commited change cannot change its status";
 		this.status = status;
 		this.entity.setUnindexedProperty(PROP_STATUS, status.value);
@@ -481,8 +481,8 @@ public class GaeChange {
 		
 		registerActivity();
 		
-		GaeAssert.gaeAssert(!getStatus().isCommitted(), "!getStatus().isCommitted()");
-		GaeAssert.gaeAssert(this.entity.getProperty("eventTypes") != null,
+		XyAssert.xyAssert(!getStatus().isCommitted(), "!getStatus().isCommitted()");
+		XyAssert.xyAssert(this.entity.getProperty("eventTypes") != null,
 		        "Trying to save changeEntity with PROP_EVENT_TYPES==null");
 		AsyncDatastore.putEntity(this.entity);
 	}

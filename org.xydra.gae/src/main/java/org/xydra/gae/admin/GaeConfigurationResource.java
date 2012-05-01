@@ -14,9 +14,9 @@ import org.xydra.restless.Restless;
 import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.restless.utils.NanoClock;
 import org.xydra.restless.utils.ServletUtils;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.XydraConfigUtils;
 import org.xydra.store.XydraRuntime;
-import org.xydra.store.impl.gae.GaeAssert;
 import org.xydra.store.impl.gae.GaeTestfixer;
 
 
@@ -229,7 +229,7 @@ public class GaeConfigurationResource {
 		// more data
 		w.write("<hr />");
 		w.write("<h3>Direct data on this instance</h3>");
-		w.write("GaeAssert: <tt>" + GaeAssert.isEnabled() + "</tt><br />");
+		w.write("GaeAssert: <tt>" + XyAssert.isEnabled() + "</tt><br />");
 		w.write("Memcache Stats: <tt>" + XydraRuntime.getMemcache().stats() + "</tt><br />");
 		w.write("Memcache size: <tt>" + XydraRuntime.getMemcache().size() + "</tt><br />");
 		w.flush();
