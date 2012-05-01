@@ -5,6 +5,7 @@ import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.minio.MiniWriter;
 import org.xydra.core.serialize.AbstractXydraOut;
+import org.xydra.sharedutils.XyAssert;
 
 
 @RunsInGWT(true)
@@ -72,7 +73,7 @@ public class XmlOut extends AbstractXydraOut {
 		case Array:
 		case Map:
 			if(element.parent.type == Type.Child && !element.parent.hasChildType()) {
-				assert element.parent.parent.type == Type.Element;
+				XyAssert.xyAssert(element.parent.parent.type == Type.Element);
 				return element.parent.parent;
 			} else {
 				return element;
@@ -80,7 +81,7 @@ public class XmlOut extends AbstractXydraOut {
 		case Root:
 			return element;
 		case Text:
-			assert false;
+			XyAssert.xyAssert(false);
 		}
 		
 		return null;
@@ -122,7 +123,7 @@ public class XmlOut extends AbstractXydraOut {
 		
 		if(isInlined(container)) {
 			
-			assert !container.parent.hasContent;
+			XyAssert.xyAssert(!container.parent.hasContent);
 			
 			if(value == null) {
 				outputAttribute(container, XmlEncoder.NULL_CONTENT_ATTRIBUTE,
@@ -225,7 +226,7 @@ public class XmlOut extends AbstractXydraOut {
 		
 		if(isInlined(container.parent)) {
 			
-			assert !container.parent.parent.hasContent;
+			XyAssert.xyAssert(!container.parent.parent.hasContent);
 			container.depth = container.parent.depth;
 			
 		} else {

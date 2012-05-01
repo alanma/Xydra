@@ -21,6 +21,7 @@ import org.xydra.base.rmof.XReadableObject;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.log.gae.Log4jLoggerFactory;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -88,9 +89,9 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 		SynchronousCallbackWithOneResult<Set<XID>> callback = new SynchronousCallbackWithOneResult<Set<XID>>();
 		this.store.getModelIds(this.correctUser, this.correctUserPass, callback);
 		waitOnCallback(callback);
-		assert callback != null;
-		assert callback.effect != null;
-		assert !callback.effect.contains(modelId1);
+		XyAssert.xyAssert(callback != null); assert callback != null;
+		XyAssert.xyAssert(callback.effect != null); assert callback.effect != null;
+		XyAssert.xyAssert(!callback.effect.contains(modelId1));
 		
 		XID objectId1 = XX.toId("TestObject1");
 		XID objectId2 = XX.toId("TestObject2");
@@ -264,7 +265,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
 	@Test
 	public void testCheckLoginSuccess() {
 		SynchronousCallbackWithOneResult<Boolean> callback = new SynchronousCallbackWithOneResult<Boolean>();
-		assert this.store != null;
+		XyAssert.xyAssert(this.store != null); assert this.store != null;
 		this.store.checkLogin(this.correctUser, this.correctUserPass, callback);
 		
 		assertTrue(this.waitOnCallback(callback));

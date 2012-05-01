@@ -14,15 +14,16 @@ import org.xydra.base.XID;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.AccessException;
 import org.xydra.store.AuthorisationException;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.ConnectionException;
 import org.xydra.store.GetEventsRequest;
 import org.xydra.store.InternalStoreException;
+import org.xydra.store.ModelRevision;
 import org.xydra.store.QuotaException;
 import org.xydra.store.RequestException;
-import org.xydra.store.ModelRevision;
 import org.xydra.store.StoreException;
 import org.xydra.store.TimeoutException;
 import org.xydra.store.XydraStore;
@@ -217,7 +218,7 @@ public class SerializedStore {
 		
 		out.beginArray();
 		out.setDefaultType(TYPE_EVENTS);
-		assert results.length == ger.requests.length;
+		XyAssert.xyAssert(results.length == ger.requests.length);
 		for(int i = 0; i < results.length; i++) {
 			BatchedResult<XEvent[]> result = results[i];
 			
@@ -258,7 +259,7 @@ public class SerializedStore {
 	private static void toEventResultList(XydraElement element, GetEventsRequest[] context,
 	        BatchedResult<XEvent[]>[] results) {
 		
-		assert context.length == results.length;
+		XyAssert.xyAssert(context.length == results.length);
 		
 		int i = 0;
 		
@@ -269,7 +270,7 @@ public class SerializedStore {
 			while(results[i] != null) {
 				i++;
 			}
-			assert i < results.length;
+			XyAssert.xyAssert(i < results.length);
 			
 			Throwable t = toException(result);
 			if(t != null) {
@@ -300,7 +301,7 @@ public class SerializedStore {
 		}
 		
 		for(; i < results.length; i++) {
-			assert results[i] != null;
+			XyAssert.xyAssert(results[i] != null); assert results[i] != null;
 		}
 	}
 	
@@ -348,7 +349,7 @@ public class SerializedStore {
 			if(result.getException() != null) {
 				serializeException(result.getException(), out);
 			} else {
-				assert result.getResult() != null;
+				XyAssert.xyAssert(result.getResult() != null); assert result.getResult() != null;
 				ModelRevision revisionState = result.getResult();
 				long rev = revisionState.revision();
 				boolean modelExists = revisionState.modelExists();
@@ -379,7 +380,7 @@ public class SerializedStore {
 			if(result.getException() != null) {
 				serializeException(result.getException(), out);
 			} else {
-				assert result.getResult() != null;
+				XyAssert.xyAssert(result.getResult() != null); assert result.getResult() != null;
 				long rev = result.getResult();
 				out.value(rev);
 			}
@@ -400,7 +401,7 @@ public class SerializedStore {
 			while(results[i] != null) {
 				i++;
 			}
-			assert i < results.length;
+			XyAssert.xyAssert(i < results.length);
 			
 			Throwable t = toException(result);
 			if(t != null) {
@@ -426,7 +427,7 @@ public class SerializedStore {
 		}
 		
 		for(; i < results.length; i++) {
-			assert results[i] != null;
+			XyAssert.xyAssert(results[i] != null); assert results[i] != null;
 		}
 	}
 	
@@ -442,7 +443,7 @@ public class SerializedStore {
 			while(results[i] != null) {
 				i++;
 			}
-			assert i < results.length;
+			XyAssert.xyAssert(i < results.length);
 			
 			Throwable t = toException(result);
 			if(t != null) {
@@ -465,14 +466,14 @@ public class SerializedStore {
 		}
 		
 		for(; i < results.length; i++) {
-			assert results[i] != null;
+			XyAssert.xyAssert(results[i] != null); assert results[i] != null;
 		}
 	}
 	
 	public static void serializeSnapshots(StoreException[] ex, boolean[] isModel,
 	        BatchedResult<XReadableModel>[] mr, BatchedResult<XReadableObject>[] or, XydraOut out) {
 		
-		assert ex.length == isModel.length;
+		XyAssert.xyAssert(ex.length == isModel.length);
 		
 		out.open(ELEMENT_SNAPSHOTS);
 		

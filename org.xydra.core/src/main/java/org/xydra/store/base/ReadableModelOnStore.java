@@ -9,6 +9,7 @@ import org.xydra.base.XID;
 import org.xydra.base.XType;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.GetWithAddressRequest;
 import org.xydra.store.StoreException;
@@ -99,14 +100,14 @@ public class ReadableModelOnStore implements XReadableModel, Serializable {
 		
 		BatchedResult<XReadableModel>[] res = callback.getResult();
 		
-		assert res.length == 1;
-		assert res[0] != null;
+		XyAssert.xyAssert(res.length == 1);
+		XyAssert.xyAssert(res[0] != null); assert res[0] != null;
 		
 		if(res[0].getException() != null) {
 			throw new StoreException("re-throw", res[0].getException());
 		}
 		
-		assert res[0].getResult() != null;
+		XyAssert.xyAssert(res[0].getResult() != null); assert res[0].getResult() != null;
 		
 		this.baseModel = res[0].getResult();
 	}

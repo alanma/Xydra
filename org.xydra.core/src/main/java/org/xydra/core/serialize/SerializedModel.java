@@ -36,6 +36,7 @@ import org.xydra.core.model.impl.memory.MemoryModel;
 import org.xydra.core.model.impl.memory.MemoryObject;
 import org.xydra.core.model.impl.memory.MemoryRepository;
 import org.xydra.index.query.Pair;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.AccessException;
 
 
@@ -260,7 +261,7 @@ public class SerializedModel {
 			XAddress objectAddr = XX.resolveObject(modelAddr, objectId);
 			XRevWritableObject objectState = toObjectState(objectElement.getSecond(), modelState,
 			        objectAddr);
-			assert modelState.getObject(objectState.getId()) == objectState;
+			XyAssert.xyAssert(modelState.getObject(objectState.getId()) == objectState);
 		}
 		
 		return modelState;
@@ -346,7 +347,7 @@ public class SerializedModel {
 			XAddress fieldAddr = XX.resolveField(objectAddr, fieldId);
 			XRevWritableField fieldState = toFieldState(fieldElement.getSecond(), objectState,
 			        fieldAddr);
-			assert objectState.getField(fieldState.getId()) == fieldState;
+			XyAssert.xyAssert(objectState.getField(fieldState.getId()) == fieldState);
 		}
 		
 		return objectState;
@@ -395,7 +396,7 @@ public class SerializedModel {
 			
 			XRevWritableModel modelState = toModelState(modelElement.getSecond(), repositoryState,
 			        modelAddr);
-			assert repositoryState.getModel(modelState.getId()) == modelState;
+			XyAssert.xyAssert(repositoryState.getModel(modelState.getId()) == modelState);
 		}
 		
 		return repositoryState;
@@ -558,7 +559,7 @@ public class SerializedModel {
 				out.child(LOG_NAME);
 				out.setChildType(XCHANGELOG_ELEMENT);
 				serialize(log, out);
-				assert log.getCurrentRevisionNumber() == xmodel.getRevisionNumber();
+				XyAssert.xyAssert(log.getCurrentRevisionNumber() == xmodel.getRevisionNumber());
 			}
 		}
 		
@@ -638,7 +639,7 @@ public class SerializedModel {
 				out.child(LOG_NAME);
 				out.setChildType(XCHANGELOG_ELEMENT);
 				serialize(log, out);
-				assert log.getCurrentRevisionNumber() == xobject.getRevisionNumber();
+				XyAssert.xyAssert(log.getCurrentRevisionNumber() == xobject.getRevisionNumber());
 			}
 		}
 		

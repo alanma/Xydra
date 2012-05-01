@@ -41,6 +41,7 @@ import org.xydra.core.model.impl.memory.MemoryModel;
 import org.xydra.core.model.impl.memory.MemoryRepository;
 import org.xydra.core.model.impl.memory.SynchronizesChangesImpl;
 import org.xydra.core.model.sync.XSynchronizer;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.GetEventsRequest;
 import org.xydra.store.GetWithAddressRequest;
@@ -182,7 +183,7 @@ abstract public class AbstractSynchronizerTest {
 	}
 	
 	private void removeModel(XID modelId) {
-		assert this.repoAddr != null;
+		XyAssert.xyAssert(this.repoAddr != null); assert this.repoAddr != null;
 		executeCommand(MemoryRepositoryCommand.createRemoveCommand(this.repoAddr, XCommand.FORCED,
 		        modelId));
 	}
@@ -211,7 +212,7 @@ abstract public class AbstractSynchronizerTest {
 		this.model = loadModel(DemoModelUtil.PHONEBOOK_ID);
 		this.sync = new XSynchronizer(this.model, store);
 		
-		assert this.repoAddr != null;
+		XyAssert.xyAssert(this.repoAddr != null); assert this.repoAddr != null;
 	}
 	
 	/**

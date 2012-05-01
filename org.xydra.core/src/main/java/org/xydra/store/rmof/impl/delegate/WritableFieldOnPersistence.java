@@ -9,6 +9,7 @@ import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.value.XValue;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.GetWithAddressRequest;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
@@ -53,7 +54,7 @@ public class WritableFieldOnPersistence extends AbstractWritableOnPersistence im
 			log.info("Command made no change " + command);
 			return false;
 		}
-		assert result >= 0;
+		XyAssert.xyAssert(result >= 0);
 		return true;
 	}
 	
@@ -123,7 +124,7 @@ public class WritableFieldOnPersistence extends AbstractWritableOnPersistence im
 			throw new AssertionError(
 			        "How can the command to set a null value to something not work?");
 		}
-		assert result >= 0;
+		XyAssert.xyAssert(result >= 0);
 	}
 	
 	@Override

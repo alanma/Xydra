@@ -20,6 +20,7 @@ import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.AccessException;
 import org.xydra.store.AuthorisationException;
 import org.xydra.store.ConnectionException;
@@ -99,7 +100,7 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 		if(passwordHash == null) {
 			return true;
 		}
-		assert actorId != null;
+		XyAssert.xyAssert(actorId != null); assert actorId != null;
 		if(this.acm.getAuthenticationDatabase() == null) {
 			// we cannot log
 			return true;
@@ -149,7 +150,7 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 	@Override
 	public long executeCommand(XID actorId, String passwordHash, XCommand command)
 	        throws AccessException {
-		assert actorId != null;
+		XyAssert.xyAssert(actorId != null); assert actorId != null;
 		authorise(actorId, passwordHash);
 		XAddress address = command.getChangedEntity();
 		checkRepoId(address);
@@ -175,7 +176,7 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 			throw new RequestException("getEventsRequest must not be null");
 		}
 		
-		assert actorId != null;
+		XyAssert.xyAssert(actorId != null); assert actorId != null;
 		authorise(actorId, passwordHash);
 		XAddress address = getEventsRequest.address;
 		long beginRevision = getEventsRequest.beginRevision;
@@ -208,7 +209,7 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 		 * authenticated, not that he is authorized to view all requested info
 		 */
 		if(!triviallyAllowed(passwordHash)) {
-			assert this.acm.getAuthorisationManager() != null;
+			XyAssert.xyAssert(this.acm.getAuthorisationManager() != null); assert this.acm.getAuthorisationManager() != null;
 			Iterator<XEvent> it = events.iterator();
 			while(it.hasNext()) {
 				// TODO handle XTransactionEvents
@@ -254,7 +255,7 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 	
 	@Override
 	public Set<XID> getModelIds(XID actorId, String passwordHash) {
-		assert actorId != null;
+		XyAssert.xyAssert(actorId != null); assert actorId != null;
 		authorise(actorId, passwordHash);
 		Set<XID> modelIds = new HashSet<XID>();
 		synchronized(this.persistence) {
@@ -280,7 +281,7 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 	@Override
 	public ModelRevision getModelRevision(XID actorId, String passwordHash,
 	        GetWithAddressRequest getWithAddressRequest) {
-		assert actorId != null;
+		XyAssert.xyAssert(actorId != null); assert actorId != null;
 		XAddress address = getWithAddressRequest.address;
 		authorise(actorId, passwordHash);
 		if(address.getAddressedType() != XType.XMODEL) {
@@ -299,7 +300,7 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 	@Override
 	public XReadableModel getModelSnapshot(XID actorId, String passwordHash,
 	        GetWithAddressRequest addressRequest) {
-		assert actorId != null;
+		XyAssert.xyAssert(actorId != null); assert actorId != null;
 		authorise(actorId, passwordHash);
 		XAddress address = addressRequest.address;
 		if(address.getAddressedType() != XType.XMODEL) {
@@ -347,7 +348,7 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 	@Override
 	public XReadableObject getObjectSnapshot(XID actorId, String passwordHash,
 	        GetWithAddressRequest addressRequest) {
-		assert actorId != null;
+		XyAssert.xyAssert(actorId != null); assert actorId != null;
 		authorise(actorId, passwordHash);
 		XAddress address = addressRequest.address;
 		if(address.getAddressedType() != XType.XOBJECT) {
@@ -384,7 +385,7 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 	
 	@Override
 	public XID getRepositoryId(XID actorId, String passwordHash) {
-		assert actorId != null;
+		XyAssert.xyAssert(actorId != null); assert actorId != null;
 		authorise(actorId, passwordHash);
 		return this.getRepoId();
 	}

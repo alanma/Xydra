@@ -8,6 +8,7 @@ import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.rmof.XWritableRepository;
 import org.xydra.base.value.XValue;
+import org.xydra.sharedutils.XyAssert;
 
 
 public class WritableUtils {
@@ -104,7 +105,7 @@ public class WritableUtils {
 			field = object.createField(fieldId);
 			changed = true;
 		}
-		assert object.hasField(fieldId);
+		XyAssert.xyAssert(object.hasField(fieldId));
 		return changed | field.setValue(value);
 	}
 	
@@ -124,7 +125,7 @@ public class WritableUtils {
 			changed = true;
 			model = repository.createModel(modelId);
 		}
-		assert repository.hasModel(modelId);
+		XyAssert.xyAssert(repository.hasModel(modelId));
 		return changed | setValue(model, objectId, fieldId, value);
 	}
 }

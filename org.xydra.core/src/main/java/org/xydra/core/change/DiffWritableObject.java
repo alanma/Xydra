@@ -19,6 +19,7 @@ import org.xydra.base.rmof.impl.memory.SimpleObject;
 import org.xydra.base.value.XValue;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -142,7 +143,7 @@ public class DiffWritableObject implements XWritableObject {
 	}
 	
 	protected boolean fieldSetValue(XID fieldId, XValue value) {
-		assert hasField(fieldId);
+		XyAssert.xyAssert(hasField(fieldId));
 		
 		XWritableField f;
 		if(this.added.hasField(fieldId)) {
@@ -171,10 +172,10 @@ public class DiffWritableObject implements XWritableObject {
 		XWritableField f = this.added.getField(fieldId);
 		if(f != null) {
 			// fine
-			assert !this.removed.hasField(fieldId);
+			XyAssert.xyAssert(!this.removed.hasField(fieldId));
 		} else {
 			if(this.removed.hasField(fieldId)) {
-				assert !this.added.hasField(fieldId);
+				XyAssert.xyAssert(!this.added.hasField(fieldId));
 				return null;
 			} else {
 				f = this.base.getField(fieldId);
@@ -275,7 +276,7 @@ public class DiffWritableObject implements XWritableObject {
 		// add
 		for(XID fId : this.added) {
 			XWritableField f = getField(fId);
-			assert f != null;
+			XyAssert.xyAssert(f != null); assert f != null;
 			// add field
 			// TODO Deprecated !!! handle 'forced'
 			if(this.base.hasField(fId)) {

@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
@@ -12,6 +13,7 @@ import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableRepository;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.Callback;
 import org.xydra.store.StoreException;
 import org.xydra.store.XydraStore;
@@ -47,7 +49,7 @@ public class ReadableRepositoryOnStore implements XReadableRepository, Serializa
 		this.credentials = credentials;
 		this.store = store;
 		this.address = X.getIDProvider().fromComponents(getRepositoryId(store), null, null, null);
-		assert this.address.getAddressedType() == XType.XREPOSITORY;
+		XyAssert.xyAssert(this.address.getAddressedType() == XType.XREPOSITORY);
 	}
 	
 	@Override
@@ -62,15 +64,16 @@ public class ReadableRepositoryOnStore implements XReadableRepository, Serializa
 	
 	@Override
 	public XReadableModel getModel(XID id) {
-		ReadableModelOnStore model = new ReadableModelOnStore(this.credentials, this.store, XX
-		        .resolveModel(getAddress(), id));
+		ReadableModelOnStore model = new ReadableModelOnStore(this.credentials, this.store,
+		        XX.resolveModel(getAddress(), id));
 		if(model.baseModel == null) {
 			return null;
 		}
 		return model;
 	}
 	
-	private synchronized XID getRepositoryId(XydraStore store) {
+	private synchronized XID getRepositoryId(@NeverNull XydraStore store) {
+		XyAssert.xyAssert(store != null); assert store != null;
 		assert store != null;
 		this.repositoryId = null;
 		store.getRepositoryId(this.credentials.getActorId(), this.credentials.getPasswordHash(),

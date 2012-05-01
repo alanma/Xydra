@@ -35,6 +35,7 @@ import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -69,7 +70,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	        XRevWritableModel modelState, XChangeLogState log) {
 		super(new MemoryEventManager(actorId, passwordHash, new MemoryChangeLog(log),
 		        modelState.getRevisionNumber()));
-		assert log != null;
+		XyAssert.xyAssert(log != null); assert log != null;
 		
 		this.state = modelState;
 		this.father = father;
@@ -89,8 +90,8 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 			this.eventQueue.sendEvents();
 		}
 		
-		assert this.eventQueue.getChangeLog() == null
-		        || this.eventQueue.getChangeLog().getCurrentRevisionNumber() == getRevisionNumber();
+		XyAssert.xyAssert(this.eventQueue.getChangeLog() == null
+		        || this.eventQueue.getChangeLog().getCurrentRevisionNumber() == getRevisionNumber());
 		
 	}
 	
@@ -149,7 +150,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 			// Bump the log revision.
 			log.setFirstRevisionNumber(modelState.getRevisionNumber() + 1);
 		} else {
-			assert log.getCurrentRevisionNumber() == -1;
+			XyAssert.xyAssert(log.getCurrentRevisionNumber() == -1);
 		}
 		return log;
 	}
@@ -186,16 +187,16 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 		synchronized(this.eventQueue) {
 			long result = executeModelCommand(command);
 			MemoryObject object = getObject(objectId);
-			assert result == XCommand.FAILED || object != null;
+			XyAssert.xyAssert(result == XCommand.FAILED || object != null);
 			return object;
 		}
 	}
 	
 	@Override
 	protected MemoryObject createObjectInternal(XID objectId) {
-		assert getRevisionNumber() >= 0;
+		XyAssert.xyAssert(getRevisionNumber() >= 0);
 		
-		assert !hasObject(objectId);
+		XyAssert.xyAssert(!hasObject(objectId));
 		
 		boolean inTrans = this.eventQueue.transactionInProgess;
 		
@@ -206,12 +207,12 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 		}
 		if(object == null) {
 			XRevWritableObject objectState = this.state.createObject(objectId);
-			assert getAddress().contains(objectState.getAddress());
+			XyAssert.xyAssert(getAddress().contains(objectState.getAddress()));
 			object = new MemoryObject(this, this.eventQueue, objectState);
 		} else {
 			this.state.addObject(object.getState());
 		}
-		assert object.getModel() == this;
+		XyAssert.xyAssert(object.getModel() == this);
 		
 		this.loadedObjects.put(object.getId(), object);
 		
@@ -295,7 +296,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 		}
 		
 		for(XID fieldId : object) {
-			assert inTrans;
+			XyAssert.xyAssert(inTrans);
 			MemoryField field = object.getField(fieldId);
 			object.enqueueFieldRemoveEvents(actor, field, inTrans, true);
 		}
@@ -366,7 +367,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			
-			assert !this.eventQueue.transactionInProgess;
+			XyAssert.xyAssert(!this.eventQueue.transactionInProgess);
 			
 			if(!getAddress().equals(command.getTarget())) {
 				if(callback != null) {
@@ -607,7 +608,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	
 	@Override
 	protected void incrementRevision() {
-		assert !this.eventQueue.transactionInProgess;
+		XyAssert.xyAssert(!this.eventQueue.transactionInProgess);
 		long newRevision = getRevisionNumber() + 1;
 		this.state.setRevisionNumber(newRevision);
 	}
@@ -664,7 +665,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 		        XCommand.FORCED, objectId);
 		
 		long result = executeModelCommand(command);
-		assert result >= 0 || result == XCommand.NOCHANGE;
+		XyAssert.xyAssert(result >= 0 || result == XCommand.NOCHANGE);
 		return result != XCommand.NOCHANGE;
 	}
 	
@@ -672,7 +673,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
 	protected void removeObjectInternal(XID objectId) {
 		
 		MemoryObject object = getObject(objectId);
-		assert object != null;
+		XyAssert.xyAssert(object != null); assert object != null;
 		
 		boolean inTrans = this.eventQueue.transactionInProgess;
 		boolean makeTrans = !object.isEmpty();

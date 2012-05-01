@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.xydra.annotations.NeverNull;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XType;
@@ -33,6 +34,7 @@ import org.xydra.index.iterator.AbstractFilteringIterator;
 import org.xydra.index.iterator.BagUnionIterator;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -115,20 +117,20 @@ public class ChangedModel implements XWritableModel, IModelDiff {
 	public boolean checkSetInvariants() {
 		
 		for(XID id : this.removed) {
-			assert !this.added.containsKey(id) && !this.changed.containsKey(id);
-			assert this.base.hasObject(id);
+			XyAssert.xyAssert(!this.added.containsKey(id) && !this.changed.containsKey(id));
+			XyAssert.xyAssert(this.base.hasObject(id));
 		}
 		
 		for(XID id : this.added.keySet()) {
-			assert !this.removed.contains(id) && !this.changed.containsKey(id);
+			XyAssert.xyAssert(!this.removed.contains(id) && !this.changed.containsKey(id));
 			assert !this.base.hasObject(id) : "baseModel contains added object '" + id + "'";
-			assert id.equals(this.added.get(id).getId());
+			XyAssert.xyAssert(id.equals(this.added.get(id).getId()));
 		}
 		
 		for(XID id : this.changed.keySet()) {
-			assert !this.removed.contains(id) && !this.added.containsKey(id);
-			assert this.base.hasObject(id);
-			assert id.equals(this.changed.get(id).getId());
+			XyAssert.xyAssert(!this.removed.contains(id) && !this.added.containsKey(id));
+			XyAssert.xyAssert(this.base.hasObject(id));
+			XyAssert.xyAssert(id.equals(this.changed.get(id).getId()));
 		}
 		
 		return true;
@@ -147,7 +149,7 @@ public class ChangedModel implements XWritableModel, IModelDiff {
 			this.removed.add(id);
 		}
 		
-		assert checkSetInvariants();
+		XyAssert.xyAssert(checkSetInvariants());
 	}
 	
 	/**
@@ -259,15 +261,15 @@ public class ChangedModel implements XWritableModel, IModelDiff {
 			
 			// If the field previously existed it must have been removed
 			// previously and we can merge the remove and add changes.
-			assert this.removed.contains(objectId);
-			assert !this.changed.containsKey(objectId);
+			XyAssert.xyAssert(this.removed.contains(objectId));
+			XyAssert.xyAssert(!this.changed.containsKey(objectId));
 			this.removed.remove(objectId);
 			ChangedObject newObject = new ChangedObject(object);
 			newObject.clear();
-			assert newObject.getId().equals(object.getId());
+			XyAssert.xyAssert(newObject.getId().equals(object.getId()));
 			this.changed.put(objectId, newObject);
 			
-			assert checkSetInvariants();
+			XyAssert.xyAssert(checkSetInvariants());
 			
 			return newObject;
 			
@@ -278,7 +280,7 @@ public class ChangedModel implements XWritableModel, IModelDiff {
 			SimpleObject newObject = new SimpleObject(fieldAddr);
 			this.added.put(objectId, newObject);
 			
-			assert checkSetInvariants();
+			XyAssert.xyAssert(checkSetInvariants());
 			
 			return newObject;
 		}
@@ -558,10 +560,10 @@ public class ChangedModel implements XWritableModel, IModelDiff {
 			return null;
 		}
 		changedObject = new ChangedObject(object);
-		assert changedObject.getId().equals(object.getId());
+		XyAssert.xyAssert(changedObject.getId().equals(object.getId()));
 		this.changed.put(objectId, changedObject);
 		
-		assert checkSetInvariants();
+		XyAssert.xyAssert(checkSetInvariants());
 		
 		return changedObject;
 	}
@@ -648,24 +650,24 @@ public class ChangedModel implements XWritableModel, IModelDiff {
 		if(this.added.containsKey(objectId)) {
 			
 			// Never existed in base, so removing from added is sufficient.
-			assert !this.base.hasObject(objectId) && !this.changed.containsKey(objectId);
-			assert !this.removed.contains(objectId);
+			XyAssert.xyAssert(!this.base.hasObject(objectId) && !this.changed.containsKey(objectId));
+			XyAssert.xyAssert(!this.removed.contains(objectId));
 			
 			this.added.remove(objectId);
 			
-			assert checkSetInvariants();
+			XyAssert.xyAssert(checkSetInvariants());
 			
 			return true;
 			
 		} else if(!this.removed.contains(objectId) && this.base.hasObject(objectId)) {
 			
 			// Exists in base and not removed yet.
-			assert !this.added.containsKey(objectId);
+			XyAssert.xyAssert(!this.added.containsKey(objectId));
 			
 			this.removed.add(objectId);
 			this.changed.remove(objectId);
 			
-			assert checkSetInvariants();
+			XyAssert.xyAssert(checkSetInvariants());
 			
 			return true;
 		}
@@ -682,11 +684,11 @@ public class ChangedModel implements XWritableModel, IModelDiff {
 	 * Apply the changes encoded in changedModel to the given model. Both should
 	 * have the same Id.
 	 * 
-	 * @param changedModel never null
+	 * @param changedModel
 	 * @param model never null, should be a writable version of the baseModel
 	 *            used to created the changedModel
 	 */
-	public static void commitTo(ChangedModel changedModel, XWritableModel model) {
+	public static void commitTo(@NeverNull ChangedModel changedModel, XWritableModel model) {
 		for(SimpleObject changedObject : changedModel.getNewObjects()) {
 			XWritableObject baseObject = model.createObject(changedObject.getId());
 			XCopyUtils.copyData(changedObject, baseObject);

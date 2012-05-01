@@ -13,6 +13,7 @@ import org.xydra.base.change.impl.memory.MemoryObjectCommand;
 import org.xydra.base.change.impl.memory.MemoryRepositoryCommand;
 import org.xydra.core.model.XLocalChange;
 import org.xydra.core.model.XLocalChangeCallback;
+import org.xydra.sharedutils.XyAssert;
 
 
 public class MemoryLocalChange implements XLocalChange {
@@ -84,7 +85,7 @@ public class MemoryLocalChange implements XLocalChange {
 	
 	protected void updateCommand(long oldSyncRev, long newSyncRev) {
 		// Adapt the command if needed.
-		assert newSyncRev >= oldSyncRev;
+		XyAssert.xyAssert(newSyncRev >= oldSyncRev);
 		long nRemote = newSyncRev - oldSyncRev;
 		if(this.command instanceof XRepositoryCommand) {
 			XRepositoryCommand rc = (XRepositoryCommand)this.command;

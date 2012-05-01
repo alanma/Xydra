@@ -33,6 +33,7 @@ import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.delta.ReadableModelWithOneObject;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -68,7 +69,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	protected MemoryObject(MemoryModel parent, MemoryEventManager eventQueue,
 	        XRevWritableObject objectState) {
 		super(eventQueue);
-		assert eventQueue != null;
+		XyAssert.xyAssert(eventQueue != null); assert eventQueue != null;
 		
 		if(objectState == null) {
 			throw new IllegalArgumentException("objectState may not be null");
@@ -165,7 +166,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		synchronized(this.eventQueue) {
 			long result = executeObjectCommand(command);
 			MemoryField field = getField(fieldId);
-			assert result == XCommand.FAILED || field != null;
+			XyAssert.xyAssert(result == XCommand.FAILED || field != null);
 			return field;
 		}
 	}
@@ -180,7 +181,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	 */
 	protected MemoryField createFieldInternal(XID fieldId) {
 		
-		assert !hasField(fieldId);
+		XyAssert.xyAssert(!hasField(fieldId));
 		
 		boolean inTrans = this.eventQueue.transactionInProgess;
 		
@@ -192,13 +193,13 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		}
 		if(field == null) {
 			XRevWritableField fieldState = this.state.createField(fieldId);
-			assert getAddress().contains(fieldState.getAddress());
+			XyAssert.xyAssert(getAddress().contains(fieldState.getAddress()));
 			field = new MemoryField(this, this.eventQueue, fieldState);
 		} else {
 			this.state.addField(field.getState());
 		}
 		
-		assert field.getObject() == this;
+		XyAssert.xyAssert(field.getObject() == this);
 		
 		this.loadedFields.put(field.getId(), field);
 		
@@ -266,7 +267,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		long modelRev = getModelRevisionNumber();
 		
 		if(field.getValue() != null) {
-			assert inTrans;
+			XyAssert.xyAssert(inTrans);
 			XReversibleFieldEvent event = MemoryReversibleFieldEvent.createRemoveEvent(actor,
 			        field.getAddress(), field.getValue(), modelRev, getRevisionNumber(),
 			        field.getRevisionNumber(), inTrans, true);
@@ -321,7 +322,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			
-			assert !this.eventQueue.transactionInProgess;
+			XyAssert.xyAssert(!this.eventQueue.transactionInProgess);
 			
 			if(!getAddress().equals(command.getTarget())) {
 				if(callback != null) {
@@ -534,7 +535,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	
 	@Override
 	protected void incrementRevision() {
-		assert !this.eventQueue.transactionInProgess;
+		XyAssert.xyAssert(!this.eventQueue.transactionInProgess);
 		if(this.father != null) {
 			// this increments the revisionNumber of the father and sets
 			// this revNr to the revNr of the father
@@ -543,7 +544,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		} else {
 			XChangeLog log = this.eventQueue.getChangeLog();
 			if(log != null) {
-				assert log.getCurrentRevisionNumber() > getRevisionNumber();
+				XyAssert.xyAssert(log.getCurrentRevisionNumber() > getRevisionNumber());
 				setRevisionNumber(log.getCurrentRevisionNumber());
 			} else {
 				setRevisionNumber(getRevisionNumber() + 1);
@@ -577,7 +578,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		        XCommand.FORCED, fieldId);
 		
 		long result = executeObjectCommand(command);
-		assert result >= 0 || result == XCommand.NOCHANGE;
+		XyAssert.xyAssert(result >= 0 || result == XCommand.NOCHANGE);
 		return result != XCommand.NOCHANGE;
 	}
 	
@@ -591,7 +592,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 	 */
 	protected void removeFieldInternal(XID fieldId) {
 		
-		assert hasField(fieldId);
+		XyAssert.xyAssert(hasField(fieldId));
 		
 		MemoryField field = getField(fieldId);
 		assert field != null : "checked by caller";
@@ -608,7 +609,7 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		
 		Orphans orphans = this.eventQueue.orphans;
 		if(orphans != null) {
-			assert !orphans.fields.containsKey(field.getAddress());
+			XyAssert.xyAssert(!orphans.fields.containsKey(field.getAddress()));
 			field.getState().setValue(null);
 			orphans.fields.put(field.getAddress(), field);
 		} else {
@@ -642,14 +643,14 @@ public class MemoryObject extends SynchronizesChangesImpl implements XObject {
 		
 		for(MemoryField field : this.loadedFields.values()) {
 			field.getState().setValue(null);
-			assert !this.eventQueue.orphans.fields.containsKey(field.getAddress());
+			XyAssert.xyAssert(!this.eventQueue.orphans.fields.containsKey(field.getAddress()));
 			this.eventQueue.orphans.fields.put(field.getAddress(), field);
 			this.state.removeField(field.getId());
 		}
 		
 		this.loadedFields.clear();
 		
-		assert !this.eventQueue.orphans.objects.containsKey(getId());
+		XyAssert.xyAssert(!this.eventQueue.orphans.objects.containsKey(getId()));
 		this.eventQueue.orphans.objects.put(getId(), this);
 	}
 	

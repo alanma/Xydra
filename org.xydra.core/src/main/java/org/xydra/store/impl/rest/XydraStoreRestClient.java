@@ -15,6 +15,7 @@ import org.xydra.annotations.RunsInGWT;
 import org.xydra.core.serialize.XydraOut;
 import org.xydra.core.serialize.XydraParser;
 import org.xydra.core.serialize.XydraSerializer;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.XydraStore;
 
 
@@ -37,7 +38,7 @@ public class XydraStoreRestClient extends AbstractXydraStoreRestClient {
 	 */
 	public XydraStoreRestClient(URI apiLocation, XydraSerializer serializer, XydraParser parser) {
 		super(serializer, parser);
-		assert apiLocation != null;
+		XyAssert.xyAssert(apiLocation != null); assert apiLocation != null;
 		this.prefix = apiLocation;
 	}
 	

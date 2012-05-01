@@ -2,6 +2,7 @@ package org.xydra.core.serialize;
 
 import java.util.Iterator;
 
+import org.xydra.annotations.NeverNull;
 import org.xydra.index.query.Pair;
 
 
@@ -174,9 +175,10 @@ public interface XydraElement {
 	public XydraElement getChild(String name, String type);
 	
 	/**
-	 * @return The type of this element. This is never null.
+	 * @return The type of this element.
 	 */
-	public String getType();
+	public @NeverNull
+	String getType();
 	
 	public Iterator<Object> getValues();
 	

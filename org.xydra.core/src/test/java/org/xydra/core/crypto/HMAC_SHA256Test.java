@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 import org.xydra.core.serialize.Base64;
+import org.xydra.sharedutils.XyAssert;
 
 
 public class HMAC_SHA256Test {
@@ -17,8 +18,8 @@ public class HMAC_SHA256Test {
 		
 		/* expected decoding of fbBase64urlStr */
 		String fbDecMsgStr = "{\"algorithm\":\"HMAC-SHA256\",\"0\":\"payload\"}";
-		assert Base64.utf8(Base64.urlDecode(fbBase64UrlEncStr)).equals(fbDecMsgStr);
-		assert Base64.urlEncode(Base64.utf8(fbDecMsgStr)).equals(fbBase64UrlEncStr);
+		XyAssert.xyAssert(Base64.utf8(Base64.urlDecode(fbBase64UrlEncStr)).equals(fbDecMsgStr));
+		XyAssert.xyAssert(Base64.urlEncode(Base64.utf8(fbDecMsgStr)).equals(fbBase64UrlEncStr));
 		
 		/* known to developer */
 		String fpKeyStr = "secret";

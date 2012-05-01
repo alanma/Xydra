@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
@@ -236,9 +237,9 @@ public class XydraRuntime {
 	/**
 	 * Are notified only once.
 	 * 
-	 * @param listener never null
+	 * @param listener
 	 */
-	public static void addDynamicListener(Listener listener) {
+	public static void addDynamicListener(@NeverNull Listener listener) {
 		dynamicListeners.add(listener);
 	}
 	

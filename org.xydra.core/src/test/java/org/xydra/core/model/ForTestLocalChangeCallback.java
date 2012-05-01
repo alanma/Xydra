@@ -4,6 +4,7 @@
 package org.xydra.core.model;
 
 import org.xydra.base.change.XCommand;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -37,7 +38,7 @@ class ForTestLocalChangeCallback implements XLocalChangeCallback {
 		
 		assert !this.committed : "double fail/apply detected";
 		
-		assert revision >= 0 || revision == XCommand.NOCHANGE;
+		XyAssert.xyAssert(revision >= 0 || revision == XCommand.NOCHANGE);
 		
 		this.committed = true;
 		this.result = revision;

@@ -10,6 +10,7 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.index.iterator.NoneIterator;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.GetWithAddressRequest;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
@@ -113,7 +114,7 @@ public class WritableObjectOnPersistence extends AbstractWritableOnPersistence i
 		        this.persistence.getRepositoryId(), this.modelId, this.objectId, fieldId,
 		        XCommand.FORCED, true);
 		long commandResult = this.persistence.executeCommand(this.executingActorId, command);
-		assert commandResult >= 0;
+		XyAssert.xyAssert(commandResult >= 0);
 		return result;
 	}
 	

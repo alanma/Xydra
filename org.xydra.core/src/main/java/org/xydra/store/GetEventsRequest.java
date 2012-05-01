@@ -6,6 +6,7 @@ import org.xydra.base.change.XTransaction;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -63,8 +64,8 @@ public class GetEventsRequest {
 	 */
 	public GetEventsRequest(XAddress address, long beginRevision, long endRevision) {
 		super();
-		assert beginRevision >= 0;
-		assert endRevision >= 0;
+		XyAssert.xyAssert(beginRevision >= 0);
+		XyAssert.xyAssert(endRevision >= 0);
 		this.address = address;
 		this.beginRevision = beginRevision;
 		this.endRevision = endRevision;

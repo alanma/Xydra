@@ -27,6 +27,7 @@ import org.xydra.core.model.XField;
 import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.impl.memory.AbstractEntity;
 import org.xydra.core.model.impl.memory.MemoryObject;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -287,7 +288,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 	 *         or {@link XCommand#FAILED} if the execution failed
 	 */
 	private long handleObjectCommand(XObjectCommand objectCommand, XLocalChangeCallback callback) {
-		assert callback != null;
+		XyAssert.xyAssert(callback != null); assert callback != null;
 		
 		XID fieldId = objectCommand.getChangedEntity().getField();
 		
@@ -347,12 +348,12 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 			if(this.inTransaction && this.transChangedFields.containsKey(fieldId)) {
 				field = this.transChangedFields.get(fieldId);
 			} else {
-				assert field == null;
+				XyAssert.xyAssert(field == null);
 				field = this.getField(fieldId);
 			}
 			
 			// remember: this actually is an InModelTransactionField
-			assert field != null; // because "fieldExists" was true
+			XyAssert.xyAssert(field != null); assert field != null; // because "fieldExists" was true
 			assert field instanceof InObjectTransactionField : "field is instanceof "
 			        + field.getClass().getName();
 			
@@ -387,7 +388,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 	 *         or {@link XCommand#FAILED} if the execution failed
 	 */
 	private long handleFieldCommand(XFieldCommand fieldCommand, XLocalChangeCallback callback) {
-		assert callback != null;
+		XyAssert.xyAssert(callback != null); assert callback != null;
 		XID fieldId = fieldCommand.getChangedEntity().getField();
 		
 		if(!this.fieldExists(fieldId)) {
@@ -402,8 +403,8 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 		}
 		
 		// remember: this actually is an InObjectTransactionField
-		assert field != null;
-		assert field instanceof InObjectTransactionField;
+		XyAssert.xyAssert(field != null); assert field != null;
+		XyAssert.xyAssert(field instanceof InObjectTransactionField);
 		
 		// check revision number
 		if(fieldCommand.getRevisionNumber() != field.getRevisionNumber()
@@ -467,7 +468,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 	private long handleTransaction(XTransaction transaction, XLocalChangeCallback callback) {
 		this.inTransaction = true;
 		
-		assert callback != null;
+		XyAssert.xyAssert(callback != null); assert callback != null;
 		/*
 		 * assert: transaction holds no further XTransactions (can not happen,
 		 * since instances of XTransactions can never hold other XTransactions)
@@ -513,7 +514,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 						this.addFieldToTransactionObject(field, false);
 					}
 				} else {
-					assert objCmd.getChangeType() == ChangeType.REMOVE;
+					XyAssert.xyAssert(objCmd.getChangeType() == ChangeType.REMOVE);
 					
 					/*
 					 * forced commands to not have to be treated specially, if
@@ -525,7 +526,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 					this.removeFieldFromTransactionObject(fieldId, false);
 				}
 			} else {
-				assert command instanceof XFieldCommand;
+				XyAssert.xyAssert(command instanceof XFieldCommand);
 				XID fieldId = command.getChangedEntity().getField();
 				
 				/*

@@ -27,6 +27,7 @@ import org.xydra.base.value.XBooleanValue;
 import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.NamingUtils;
 import org.xydra.store.access.XA;
 import org.xydra.store.access.XAccessListener;
@@ -62,7 +63,7 @@ public class PartialAuthorisationDatabaseOnWritableRepository implements XAccess
 	        .getLogger(PartialAuthorisationDatabaseOnWritableRepository.class);
 	
 	private static boolean accessIdToBoolean(XID accessType) {
-		assert accessType != null;
+		XyAssert.xyAssert(accessType != null); assert accessType != null;
 		if(XA.ACCESS_ALLOW.equals(accessType)) {
 			return true;
 		}
@@ -102,7 +103,7 @@ public class PartialAuthorisationDatabaseOnWritableRepository implements XAccess
 			return;
 		}
 		
-		assert event instanceof XAtomicEvent;
+		XyAssert.xyAssert(event instanceof XAtomicEvent);
 		
 		/*
 		 * We care for object.field: {actorId}.{enc(address)+"_."+enc(rightId)}
@@ -112,7 +113,7 @@ public class PartialAuthorisationDatabaseOnWritableRepository implements XAccess
 		switch(target.getAddressedType()) {
 		case XMODEL:
 			// if REMOVE {model}.{actorId}: remove all rights for this actor
-			assert event instanceof XModelEvent;
+			XyAssert.xyAssert(event instanceof XModelEvent);
 			if(event.getChangeType() == ChangeType.REMOVE) {
 				log.warn("A better implementation would not remove all rights of actor '"
 				        + event.getChangedEntity().getObject() + "' but this one doesn't");
@@ -266,7 +267,7 @@ public class PartialAuthorisationDatabaseOnWritableRepository implements XAccess
 			XWritableModel rightsModel = this.authorisationRepository.getModel(modelId);
 			if(rightsModel == null) {
 				rightsModel = this.authorisationRepository.createModel(modelId);
-				assert rightsModel != null;
+				XyAssert.xyAssert(rightsModel != null); assert rightsModel != null;
 			}
 			modelAccessDb = new ModelAccessDatabaseOnWritableModel(rightsModel);
 			this.modelAccessDbs.put(modelId, modelAccessDb);

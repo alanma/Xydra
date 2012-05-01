@@ -19,6 +19,7 @@ import org.xydra.base.change.XTransactionEvent;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.index.XI;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -176,7 +177,7 @@ public class MemoryTransactionEvent extends AbstractTransactionEvent {
 				        + " to a transaction event, as it is not marked as inTransaction");
 			}
 			
-			assert events[i].getChangeType() != ChangeType.TRANSACTION;
+			XyAssert.xyAssert(events[i].getChangeType() != ChangeType.TRANSACTION);
 		}
 		
 		this.events = events;

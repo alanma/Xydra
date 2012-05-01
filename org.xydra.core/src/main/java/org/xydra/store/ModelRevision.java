@@ -3,6 +3,7 @@ package org.xydra.store;
 import java.io.Serializable;
 
 import org.xydra.base.change.XCommand;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -89,7 +90,7 @@ public class ModelRevision implements Serializable {
 	}
 	
 	public boolean isBetterThan(ModelRevision other) {
-		assert other != null;
+		XyAssert.xyAssert(other != null); assert other != null;
 		// TODO tentative rev here?
 		return this.revision > other.revision;
 	}

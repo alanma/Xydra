@@ -3,6 +3,8 @@ package org.xydra.store;
 import java.util.Collection;
 import java.util.Map;
 
+import org.xydra.annotations.CanBeNull;
+import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.RunsInGWT;
 
 
@@ -47,14 +49,14 @@ public interface IMemCache extends Map<String,Object> {
 	 * the cache for key has been stored, or if this cache entry has been
 	 * evicted, then nothing is stored by this call and false is returned.
 	 * 
-	 * @param key never null
-	 * @param oldIdentifiableValue never null, created via
-	 *            {@link #getIdentifiable(String)}
-	 * @param newValue can be null
+	 * @param key
+	 * @param oldIdentifiableValue created via {@link #getIdentifiable(String)}
+	 * @param newValue
 	 * @return true if changed something. Note that storing the same value again
 	 *         does count as a "change" for this purpose.
 	 */
-	boolean putIfUntouched(String key, IdentifiableValue oldIdentifiableValue, Object newValue);
+	boolean putIfUntouched(@NeverNull String key,
+	        @NeverNull IdentifiableValue oldIdentifiableValue, @CanBeNull Object newValue);
 	
 	IdentifiableValue getIdentifiable(String key);
 	

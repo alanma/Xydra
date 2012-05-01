@@ -3,6 +3,7 @@ package org.xydra.core.change;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.xydra.annotations.NeverNull;
 import org.xydra.base.XID;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XAtomicEvent;
@@ -25,6 +26,7 @@ import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.base.rmof.impl.memory.SimpleObject;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.delta.DeltaUtils;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -37,31 +39,42 @@ public class EventUtils {
 	
 	private static final long MODEL_DOES_NOT_EXIST = -1;
 	
-	private static void applyAtomicEventIgnoreRev(XModel model, XAtomicEvent atomicEvent,
-	        boolean inTxn) {
+	/**
+	 * @param model
+	 * @param atomicEvent never null
+	 * @param inTxn
+	 */
+	private static void applyAtomicEventIgnoreRev(@NeverNull XModel model,
+	        @NeverNull XAtomicEvent atomicEvent, boolean inTxn) {
+		XyAssert.xyAssert(model != null);
 		assert model != null;
+		assert model != null;
+		XyAssert.xyAssert(atomicEvent != null);
 		assert atomicEvent != null;
+		assert atomicEvent != null;
+		XyAssert.xyAssert(atomicEvent.getChangedEntity() != null);
 		assert atomicEvent.getChangedEntity() != null;
 		
 		if(atomicEvent instanceof XRepositoryEvent) {
-			assert atomicEvent.getChangedEntity().equals(model.getAddress());
+			XyAssert.xyAssert(atomicEvent.getChangedEntity().equals(model.getAddress()));
 			applyRepositoryEventIgnoreRev(model, (XRepositoryEvent)atomicEvent);
 			return;
 		}
 		assert model.getRevisionNumber() >= 0 : model.getRevisionNumber();
 		if(atomicEvent instanceof XModelEvent) {
-			assert atomicEvent.getTarget().equals(model.getAddress());
+			XyAssert.xyAssert(atomicEvent.getTarget().equals(model.getAddress()));
 			applyModelEventIgnoreRev(model, (XModelEvent)atomicEvent);
 		} else {
 			// object & field events
 			XWritableObject object = model.getObject(atomicEvent.getTarget().getObject());
 			assert object != null : "object null for event " + atomicEvent;
 			if(atomicEvent instanceof XObjectEvent) {
-				assert atomicEvent.getTarget().getParent().equals(model.getAddress());
+				XyAssert.xyAssert(atomicEvent.getTarget().getParent().equals(model.getAddress()));
 				applyObjectEventIgnoreRev(object, (XObjectEvent)atomicEvent);
 			} else {
-				assert atomicEvent instanceof XFieldEvent;
-				assert atomicEvent.getTarget().getParent().getParent().equals(model.getAddress());
+				XyAssert.xyAssert(atomicEvent instanceof XFieldEvent);
+				XyAssert.xyAssert(atomicEvent.getTarget().getParent().getParent()
+				        .equals(model.getAddress()));
 				XFieldEvent fieldEvent = (XFieldEvent)atomicEvent;
 				XWritableField field = object.getField(fieldEvent.getFieldId());
 				assert field != null : "field is null";
@@ -72,18 +85,21 @@ public class EventUtils {
 	
 	private static void applyAtomicEvent(XRevWritableModel model, XAtomicEvent atomicEvent,
 	        boolean inTxn) {
+		XyAssert.xyAssert(model != null);
 		assert model != null;
+		XyAssert.xyAssert(atomicEvent != null);
 		assert atomicEvent != null;
+		XyAssert.xyAssert(atomicEvent.getChangedEntity() != null);
 		assert atomicEvent.getChangedEntity() != null;
 		
 		if(atomicEvent instanceof XRepositoryEvent) {
-			assert atomicEvent.getChangedEntity().equals(model.getAddress());
+			XyAssert.xyAssert(atomicEvent.getChangedEntity().equals(model.getAddress()));
 			applyRepositoryEvent(model, (XRepositoryEvent)atomicEvent);
 			return;
 		}
 		assert model.getRevisionNumber() >= 0 : model.getRevisionNumber();
 		if(atomicEvent instanceof XModelEvent) {
-			assert atomicEvent.getTarget().equals(model.getAddress());
+			XyAssert.xyAssert(atomicEvent.getTarget().equals(model.getAddress()));
 			applyModelEvent(model, (XModelEvent)atomicEvent);
 		} else {
 			// object & field events
@@ -95,8 +111,9 @@ public class EventUtils {
 				        + atomicEvent.getTarget().getParent() + " vs. model=" + model.getAddress();
 				applyObjectEvent(object, (XObjectEvent)atomicEvent);
 			} else {
-				assert atomicEvent instanceof XFieldEvent;
-				assert atomicEvent.getTarget().getParent().getParent().equals(model.getAddress());
+				XyAssert.xyAssert(atomicEvent instanceof XFieldEvent);
+				XyAssert.xyAssert(atomicEvent.getTarget().getParent().getParent()
+				        .equals(model.getAddress()));
 				XFieldEvent fieldEvent = (XFieldEvent)atomicEvent;
 				XRevWritableField field = object.getField(fieldEvent.getFieldId());
 				assert field != null : "field is null";
@@ -108,14 +125,18 @@ public class EventUtils {
 	
 	private static void applyAtomicEventNonDestructive(XReadableModel reference,
 	        XRevWritableModel model, XAtomicEvent atomicEvent, boolean inTxn) {
+		XyAssert.xyAssert(atomicEvent != null);
 		assert atomicEvent != null;
+		XyAssert.xyAssert(model != null);
 		assert model != null;
 		
 		XID objectId = atomicEvent.getTarget().getObject();
 		if(objectId != null) {
+			XyAssert.xyAssert(model != null);
 			assert model != null;
 			XRevWritableObject object = model.getObject(objectId);
 			XReadableObject srcObject = (reference == null) ? null : reference.getObject(objectId);
+			XyAssert.xyAssert(object != null);
 			assert object != null;
 			if(object == srcObject) {
 				object = SimpleObject.shallowCopy(object);
@@ -125,6 +146,7 @@ public class EventUtils {
 			if(fieldId != null) {
 				XRevWritableField field = object.getField(fieldId);
 				XReadableField srcField = (srcObject == null) ? null : srcObject.getField(fieldId);
+				XyAssert.xyAssert(field != null);
 				assert field != null;
 				if(field == srcField) {
 					object.addField(new SimpleField(srcField.getAddress(), srcField
@@ -138,6 +160,7 @@ public class EventUtils {
 	}
 	
 	public static void applyEventIgnoreRev(XModel model, XEvent event) {
+		XyAssert.xyAssert(event != null);
 		assert event != null;
 		if(event instanceof XTransactionEvent) {
 			for(XEvent txnEvent : ((XTransactionEvent)event)) {
@@ -162,6 +185,7 @@ public class EventUtils {
 	 * @param event to be applied
 	 */
 	public static void applyEvent(XRevWritableModel model, XEvent event) {
+		XyAssert.xyAssert(event != null);
 		assert event != null;
 		if(event instanceof XTransactionEvent) {
 			for(XEvent txnEvent : ((XTransactionEvent)event)) {
@@ -185,7 +209,8 @@ public class EventUtils {
 	 * @param reference The original model. Nothing contained in this model will
 	 *            be changed, even if those parts are also contained in model.
 	 * @param model The model to be modified. Any parts that need to be modified
-	 *            but are also in the reference model are copied first.
+	 *            but are also in the reference model are copied first. Never
+	 *            null.
 	 * @param event The events to apply.
 	 * 
 	 * @return The result after applying the events. This model may share object
@@ -194,7 +219,9 @@ public class EventUtils {
 	 */
 	public static XRevWritableModel applyEventNonDestructive(XReadableModel reference,
 	        XRevWritableModel model, XEvent event) {
+		XyAssert.xyAssert(event != null);
 		assert event != null;
+		XyAssert.xyAssert(model != null);
 		assert model != null;
 		
 		XRevWritableModel result = model;
@@ -238,14 +265,16 @@ public class EventUtils {
 	 * Calculate the result of applying events to a model without changing the
 	 * original model but copying as little as possible.
 	 * 
-	 * @param model The original model. Never null.
+	 * @param model The original model.
 	 * @param event The events to apply.
 	 * 
 	 * @return The result after applying the events. This model may share object
 	 *         and/or fields with the original model, in which case modifying
 	 *         them will change both models.
 	 */
-	public static XRevWritableModel applyEventNonDestructive(XRevWritableModel model, XEvent event) {
+	public static XRevWritableModel applyEventNonDestructive(@NeverNull XRevWritableModel model,
+	        XEvent event) {
+		XyAssert.xyAssert(model != null);
 		assert model != null;
 		return applyEventNonDestructive(model, model, event);
 	}
@@ -255,6 +284,7 @@ public class EventUtils {
 	 * @param event to be applied
 	 */
 	private static void applyFieldEvent(XRevWritableField field, XFieldEvent event) {
+		XyAssert.xyAssert(field != null);
 		assert field != null;
 		switch(event.getChangeType()) {
 		case ADD:
@@ -262,7 +292,7 @@ public class EventUtils {
 			field.setValue(event.getNewValue());
 			break;
 		case CHANGE:
-			assert !field.isEmpty();
+			XyAssert.xyAssert(!field.isEmpty());
 			field.setValue(event.getNewValue());
 			break;
 		case REMOVE:
@@ -279,6 +309,7 @@ public class EventUtils {
 	 * @param event to be applied
 	 */
 	private static void applyFieldEventIgnoreRev(XWritableField field, XFieldEvent event) {
+		XyAssert.xyAssert(field != null);
 		assert field != null;
 		switch(event.getChangeType()) {
 		case ADD:
@@ -286,7 +317,7 @@ public class EventUtils {
 			field.setValue(event.getNewValue());
 			break;
 		case CHANGE:
-			assert !field.isEmpty();
+			XyAssert.xyAssert(!field.isEmpty());
 			field.setValue(event.getNewValue());
 			break;
 		case REMOVE:
@@ -303,15 +334,15 @@ public class EventUtils {
 	 * @param event to be applied
 	 */
 	private static void applyModelEventIgnoreRev(XModel model, XModelEvent event) {
-		assert event.getTarget().equals(model.getAddress());
+		XyAssert.xyAssert(event.getTarget().equals(model.getAddress()));
 		switch(event.getChangeType()) {
 		case ADD: {
-			assert !model.hasObject(event.getObjectId());
+			XyAssert.xyAssert(!model.hasObject(event.getObjectId()));
 			model.createObject(event.getObjectId());
 			break;
 		}
 		case REMOVE: {
-			assert model.hasObject(event.getObjectId());
+			XyAssert.xyAssert(model.hasObject(event.getObjectId()));
 			model.removeObject(event.getObjectId());
 			break;
 		}
@@ -326,7 +357,7 @@ public class EventUtils {
 	 * @param event to be applied
 	 */
 	private static void applyModelEvent(XRevWritableModel model, XModelEvent event) {
-		assert event.getTarget().equals(model.getAddress());
+		XyAssert.xyAssert(event.getTarget().equals(model.getAddress()));
 		switch(event.getChangeType()) {
 		case ADD: {
 			assert !model.hasObject(event.getObjectId()) : "Trying to add object '"
@@ -337,7 +368,7 @@ public class EventUtils {
 			break;
 		}
 		case REMOVE: {
-			assert model.hasObject(event.getObjectId());
+			XyAssert.xyAssert(model.hasObject(event.getObjectId()));
 			model.removeObject(event.getObjectId());
 			break;
 		}
@@ -352,10 +383,11 @@ public class EventUtils {
 	 * @param event to be applied
 	 */
 	private static void applyObjectEvent(XRevWritableObject object, XObjectEvent event) {
+		XyAssert.xyAssert(object != null);
 		assert object != null;
 		switch(event.getChangeType()) {
 		case ADD: {
-			assert !object.hasField(event.getFieldId());
+			XyAssert.xyAssert(!object.hasField(event.getFieldId()));
 			XRevWritableField field = object.createField(event.getFieldId());
 			field.setRevisionNumber(event.getRevisionNumber());
 			break;
@@ -377,10 +409,11 @@ public class EventUtils {
 	 * @param event to be applied
 	 */
 	private static void applyObjectEventIgnoreRev(XWritableObject object, XObjectEvent event) {
+		XyAssert.xyAssert(object != null);
 		assert object != null;
 		switch(event.getChangeType()) {
 		case ADD: {
-			assert !object.hasField(event.getFieldId());
+			XyAssert.xyAssert(!object.hasField(event.getFieldId()));
 			object.createField(event.getFieldId());
 			break;
 		}
@@ -403,7 +436,7 @@ public class EventUtils {
 	 * @param event to be applied
 	 */
 	private static void applyRepositoryEventIgnoreRev(XModel model, XRepositoryEvent event) {
-		assert event.getChangedEntity().equals(model.getAddress());
+		XyAssert.xyAssert(event.getChangedEntity().equals(model.getAddress()));
 		switch(event.getChangeType()) {
 		case ADD: {
 			/*
@@ -442,7 +475,7 @@ public class EventUtils {
 	 * @param event to be applied
 	 */
 	private static void applyRepositoryEvent(XRevWritableModel model, XRepositoryEvent event) {
-		assert event.getChangedEntity().equals(model.getAddress());
+		XyAssert.xyAssert(event.getChangedEntity().equals(model.getAddress()));
 		switch(event.getChangeType()) {
 		case ADD: {
 			/*

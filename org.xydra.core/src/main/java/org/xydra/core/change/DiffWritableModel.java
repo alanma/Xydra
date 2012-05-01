@@ -26,6 +26,7 @@ import org.xydra.index.query.KeyKeyEntryTuple;
 import org.xydra.index.query.Wildcard;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -69,7 +70,7 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 	 * @param base any model
 	 */
 	public DiffWritableModel(final XWritableModel base) {
-		assert base != null;
+		XyAssert.xyAssert(base != null); assert base != null;
 		this.base = base;
 		this.added = new MapMapIndex<XID,XID,XValue>();
 		this.removed = new MapMapIndex<XID,XID,XValue>();
@@ -100,7 +101,7 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 	protected XValue field_getValue(XID objectId, XID fieldId) {
 		assert hasObject(objectId) : "Object '" + resolveObject(objectId)
 		        + "' not found when looking for field '" + fieldId + "'";
-		assert getObject(objectId).hasField(fieldId);
+		XyAssert.xyAssert(getObject(objectId).hasField(fieldId));
 		
 		XValue value = this.added.lookup(objectId, fieldId);
 		if(value != null) {
@@ -120,12 +121,12 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 	
 	@Override
 	protected boolean field_setValue(XID objectId, XID fieldId, XValue value) {
-		assert objectId != null;
-		assert fieldId != null;
+		XyAssert.xyAssert(objectId != null); assert objectId != null;
+		XyAssert.xyAssert(fieldId != null); assert fieldId != null;
 		assert hasObject(objectId) : "Missing object with id " + objectId + " to set field "
 		        + fieldId;
-		assert this.removed.lookup(objectId, fieldId) == null;
-		assert getObject(objectId).hasField(fieldId);
+		XyAssert.xyAssert(this.removed.lookup(objectId, fieldId) == null);
+		XyAssert.xyAssert(getObject(objectId).hasField(fieldId));
 		
 		XValue v = field_getValue(objectId, fieldId);
 		if((v == null && value == null) || (v != null && v.equals(value))) {
@@ -160,13 +161,13 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 	@Override
 	public boolean hasObject(XID objectId) {
 		if(this.added.containsKey(new EqualsConstraint<XID>(objectId), new Wildcard<XID>())) {
-			assert !this.removed.containsKey(new EqualsConstraint<XID>(objectId),
-			        new EqualsConstraint<XID>(NONE));
+			XyAssert.xyAssert(!this.removed.containsKey(new EqualsConstraint<XID>(objectId),
+			        new EqualsConstraint<XID>(NONE)));
 			return true;
 		} else if(this.removed.containsKey(new EqualsConstraint<XID>(objectId),
 		        new EqualsConstraint<XID>(NONE))) {
-			assert !this.added
-			        .containsKey(new EqualsConstraint<XID>(objectId), new Wildcard<XID>());
+			XyAssert.xyAssert(!this.added
+			        .containsKey(new EqualsConstraint<XID>(objectId), new Wildcard<XID>()));
 			return false;
 		} else {
 			return this.base.hasObject(objectId);
@@ -192,9 +193,9 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 	
 	@Override
 	protected XWritableField object_createField(XID objectId, XID fieldId) {
-		assert objectId != null;
-		assert fieldId != null;
-		assert this.hasObject(objectId);
+		XyAssert.xyAssert(objectId != null); assert objectId != null;
+		XyAssert.xyAssert(fieldId != null); assert fieldId != null;
+		XyAssert.xyAssert(this.hasObject(objectId));
 		if(!object_hasField(objectId, fieldId)) {
 			this.removed.deIndex(objectId, fieldId);
 			this.added.index(objectId, fieldId, NOVALUE);
@@ -204,8 +205,8 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 	
 	@Override
 	protected boolean object_hasField(XID objectId, XID fieldId) {
-		assert objectId != null;
-		assert fieldId != null;
+		XyAssert.xyAssert(objectId != null); assert objectId != null;
+		XyAssert.xyAssert(fieldId != null); assert fieldId != null;
 		if(this.added.tupleIterator(new EqualsConstraint<XID>(objectId),
 		        new EqualsConstraint<XID>(fieldId)).hasNext()) {
 			return true;
@@ -220,20 +221,20 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 	
 	@Override
 	protected boolean object_isEmpty(XID objectId) {
-		assert objectId != null;
+		XyAssert.xyAssert(objectId != null); assert objectId != null;
 		return object_idsAsSet(objectId).isEmpty();
 	}
 	
 	@Override
 	protected Iterator<XID> object_iterator(XID objectId) {
-		assert objectId != null;
+		XyAssert.xyAssert(objectId != null); assert objectId != null;
 		return object_idsAsSet(objectId).iterator();
 	}
 	
 	@Override
 	protected boolean object_removeField(XID objectId, XID fieldId) {
-		assert objectId != null;
-		assert fieldId != null;
+		XyAssert.xyAssert(objectId != null); assert objectId != null;
+		XyAssert.xyAssert(fieldId != null); assert fieldId != null;
 		boolean hasField = object_hasField(objectId, fieldId);
 		if(hasField) {
 			if(this.added.containsKey(new EqualsConstraint<XID>(objectId),
@@ -247,7 +248,7 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 	}
 	
 	protected Set<XID> object_idsAsSet(XID objectId) {
-		assert objectId != null;
+		XyAssert.xyAssert(objectId != null); assert objectId != null;
 		// add all from base
 		Set<XID> set = new HashSet<XID>();
 		if(this.base.hasObject(objectId)) {
@@ -273,7 +274,7 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 	
 	@Override
 	public boolean removeObject(XID objectId) {
-		assert objectId != null;
+		XyAssert.xyAssert(objectId != null); assert objectId != null;
 		if(this.added.containsKey(new EqualsConstraint<XID>(objectId), new Wildcard<XID>())) {
 			// fine
 			IndexUtils
@@ -281,8 +282,8 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 			return true;
 		} else if(this.removed
 		        .containsKey(new EqualsConstraint<XID>(objectId), new Wildcard<XID>())) {
-			assert !this.added
-			        .containsKey(new EqualsConstraint<XID>(objectId), new Wildcard<XID>());
+			XyAssert.xyAssert(!this.added
+			        .containsKey(new EqualsConstraint<XID>(objectId), new Wildcard<XID>()));
 			return false;
 		} else {
 			// base

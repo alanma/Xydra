@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.xydra.annotations.NeverNull;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
@@ -11,6 +12,7 @@ import org.xydra.base.change.XCommand;
 import org.xydra.core.model.impl.memory.UUID;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -43,10 +45,13 @@ public class ChangeSession {
 	/**
 	 * @param sessionPersistence
 	 * @param readonly a flag marking an intent
-	 * @param actorId never null
+	 * @param actorId
 	 */
-	protected ChangeSession(ISessionPersistence sessionPersistence, boolean readonly, XID actorId) {
+	protected ChangeSession(ISessionPersistence sessionPersistence, boolean readonly,
+	        @NeverNull XID actorId) {
+		XyAssert.xyAssert(sessionPersistence != null);
 		assert sessionPersistence != null;
+		XyAssert.xyAssert(actorId != null);
 		assert actorId != null;
 		this.sessionPersistence = sessionPersistence;
 		this.readonly = readonly;

@@ -21,6 +21,7 @@ import org.xydra.core.util.DumpUtils;
 import org.xydra.index.impl.IteratorUtils;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.GetWithAddressRequest;
 
 
@@ -82,7 +83,7 @@ public class SessionModel implements XSessionModel {
 			        getActorId());
 			if(XCommandUtils.success(l)) {
 				this.sessionCacheModel.markAsCommitted();
-				assert !this.sessionCacheModel.hasChanges();
+				XyAssert.xyAssert(!this.sessionCacheModel.hasChanges());
 				// IMPROVE 2012-03 performance: put new snapshot right to
 				// memcache?
 			} else {
@@ -234,7 +235,7 @@ public class SessionModel implements XSessionModel {
 	
 	@Override
 	public SessionModel loadObject(XID objectId) {
-		assert objectId != null;
+		XyAssert.xyAssert(objectId != null); assert objectId != null;
 		// load only if not already present
 		if(this.sessionCacheModel.isKnownObject(objectId)) {
 			return this;

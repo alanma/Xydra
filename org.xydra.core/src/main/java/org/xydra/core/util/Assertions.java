@@ -1,5 +1,7 @@
 package org.xydra.core.util;
 
+import org.xydra.sharedutils.XyAssert;
+
 /**
  * Small helper to determine if java assertions are enabled.
  * 
@@ -12,7 +14,7 @@ public class Assertions {
 	private static boolean assertionsEnabled = false;
 	
 	static {
-		assert assertionsAreEnabled();
+		XyAssert.xyAssert(assertionsAreEnabled());
 	}
 	
 	private static boolean assertionsAreEnabled() {

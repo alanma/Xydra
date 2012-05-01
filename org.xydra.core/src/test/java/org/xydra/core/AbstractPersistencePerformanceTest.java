@@ -17,6 +17,7 @@ import org.xydra.base.rmof.XWritableObject;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.restless.utils.NanoClock;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.GetWithAddressRequest;
 import org.xydra.store.XydraRuntime;
 import org.xydra.store.impl.delegate.XydraPersistence;
@@ -90,8 +91,8 @@ public abstract class AbstractPersistencePerformanceTest {
 		for(int i = 0; i < ocount; i++) {
 			XID objectId = XX.toId("object" + i);
 			XWritableObject object = model.createObject(objectId);
-			assert objectId.equals(object.getId());
-			assert model.hasObject(objectId);
+			XyAssert.xyAssert(objectId.equals(object.getId()));
+			XyAssert.xyAssert(model.hasObject(objectId));
 		}
 	}
 	
@@ -135,7 +136,7 @@ public abstract class AbstractPersistencePerformanceTest {
 		// rev, 1, rev);
 		//
 		// XWritableModel snap = persistence.getModelSnapshot(modelAddress);
-		// assert snap != null;
+		// XyAssert.xyAssert(snap != null); assert snap != null;
 		// Set<XID> set = org.xydra.index.IndexUtils.toSet(snap.iterator());
 		// assertEquals(x, set.size());
 		//

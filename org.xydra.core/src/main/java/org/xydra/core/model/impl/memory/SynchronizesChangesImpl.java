@@ -48,6 +48,7 @@ import org.xydra.core.model.delta.ChangedObject;
 import org.xydra.index.XI;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -472,7 +473,7 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 	
 	private long replayCommand(XCommand command) {
 		
-		assert !this.eventQueue.transactionInProgess;
+		XyAssert.xyAssert(!this.eventQueue.transactionInProgess);
 		
 		if(command instanceof XRepositoryCommand) {
 			if(getAddress().getAddressedType() != XType.XMODEL) {
@@ -544,7 +545,7 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 				throw new AssertionError("unknown command type: " + rc);
 			}
 			
-			assert getModel().getRevisionNumber() == getCurrentRevisionNumber();
+			XyAssert.xyAssert(getModel().getRevisionNumber() == getCurrentRevisionNumber());
 			return getCurrentRevisionNumber();
 		}
 		
@@ -555,14 +556,14 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 	
 	private boolean replayEvent(XEvent event) {
 		
-		assert !event.inTransaction();
+		XyAssert.xyAssert(!event.inTransaction());
 		
 		while(getChangeLog().getCurrentRevisionNumber() < event.getOldModelRevision()) {
 			this.eventQueue.logNullEvent();
 		}
 		
 		long oldModelRev = getModel() == null ? -1 : getModel().getRevisionNumber();
-		assert oldModelRev <= event.getOldModelRevision();
+		XyAssert.xyAssert(oldModelRev <= event.getOldModelRevision());
 		setRevisionNumberIfModel(event.getOldModelRevision());
 		// TODO adjust object and field revisions? this is needed for
 		// synchronizing parent-less
@@ -579,15 +580,15 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 			return false;
 		}
 		XEvent newEvent = getChangeLog().getEventAt(result);
-		assert event.equals(newEvent);
+		XyAssert.xyAssert(event.equals(newEvent));
 		assert getModel() == null ? getObject().getRevisionNumber() == event.getRevisionNumber()
 		        : getModel().getRevisionNumber() == event.getRevisionNumber();
-		assert getCurrentRevisionNumber() == event.getRevisionNumber();
+		XyAssert.xyAssert(getCurrentRevisionNumber() == event.getRevisionNumber());
 		
-		assert event.getChangedEntity().getObject() == null
+		XyAssert.xyAssert(event.getChangedEntity().getObject() == null
 		        || getObject(event.getChangedEntity().getObject()) == null
 		        || getObject(event.getChangedEntity().getObject()).getRevisionNumber() == event
-		                .getRevisionNumber();
+		                .getRevisionNumber());
 		
 		return true;
 	}
@@ -632,7 +633,7 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 					if(event instanceof XAtomicEvent) {
 						rollbackEvent((XAtomicEvent)event);
 					} else {
-						assert event instanceof XTransactionEvent;
+						XyAssert.xyAssert(event instanceof XTransactionEvent);
 						XTransactionEvent trans = (XTransactionEvent)event;
 						for(int j = trans.size() - 1; j >= 0; j--) {
 							XAtomicEvent atomicEvent = trans.getEvent(j);
@@ -678,85 +679,85 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 	 */
 	private void rollbackEvent(XAtomicEvent event) {
 		
-		assert getModel() == null
+		XyAssert.xyAssert(getModel() == null
 		        || event.getRevisionNumber() == getModel().getRevisionNumber()
 		        || (event.inTransaction() && event.getOldModelRevision() == getModel()
-		                .getRevisionNumber());
+		                .getRevisionNumber()));
 		
 		if(event instanceof XRepositoryEvent) {
-			assert getModel() == this;
-			assert event.getTarget().equals(getAddress().getParent());
-			assert event.getChangedEntity().getModel().equals(getAddress().getModel());
+			XyAssert.xyAssert(getModel() == this);
+			XyAssert.xyAssert(event.getTarget().equals(getAddress().getParent()));
+			XyAssert.xyAssert(event.getChangedEntity().getModel().equals(getAddress().getModel()));
 			if(event.getChangeType() == ChangeType.REMOVE) {
-				assert this.removed == true;
+				XyAssert.xyAssert(this.removed == true);
 				this.removed = false;
 			} else {
-				assert event.getChangeType() == ChangeType.ADD;
-				assert this.removed == false;
-				assert getModel().isEmpty();
+				XyAssert.xyAssert(event.getChangeType() == ChangeType.ADD);
+				XyAssert.xyAssert(this.removed == false);
+				XyAssert.xyAssert(getModel().isEmpty());
 				this.removed = true;
 			}
 			
 		} else if(event instanceof XModelEvent) {
 			// TODO allow applying XModelEvents on a model-less object
-			assert getModel() == this;
-			assert event.getTarget().equals(getAddress());
+			XyAssert.xyAssert(getModel() == this);
+			XyAssert.xyAssert(event.getTarget().equals(getAddress()));
 			XID objectId = ((XModelEvent)event).getObjectId();
 			if(event.getChangeType() == ChangeType.REMOVE) {
-				assert !getModel().hasObject(objectId);
+				XyAssert.xyAssert(!getModel().hasObject(objectId));
 				MemoryObject object = createObjectInternal(objectId);
-				assert event.getOldObjectRevision() >= 0;
+				XyAssert.xyAssert(event.getOldObjectRevision() >= 0);
 				object.setRevisionNumber(event.getOldObjectRevision());
 			} else {
-				assert event.getChangeType() == ChangeType.ADD;
-				assert getModel().hasObject(objectId);
-				assert event.getRevisionNumber() == getModel().getObject(objectId)
+				XyAssert.xyAssert(event.getChangeType() == ChangeType.ADD);
+				XyAssert.xyAssert(getModel().hasObject(objectId));
+				XyAssert.xyAssert(event.getRevisionNumber() == getModel().getObject(objectId)
 				        .getRevisionNumber()
 				        || (event.inTransaction() && getModel().getObject(objectId)
-				                .getRevisionNumber() == XCommand.NEW);
+				                .getRevisionNumber() == XCommand.NEW));
 				removeObjectInternal(objectId);
 			}
 			
 		} else {
-			assert event instanceof XObjectEvent || event instanceof XFieldEvent;
+			XyAssert.xyAssert(event instanceof XObjectEvent || event instanceof XFieldEvent);
 			MemoryObject object = getObject(event.getTarget().getObject());
-			assert object != null;
-			assert event.getRevisionNumber() == object.getRevisionNumber()
+			XyAssert.xyAssert(object != null); assert object != null;
+			XyAssert.xyAssert(event.getRevisionNumber() == object.getRevisionNumber()
 			        || (event.inTransaction() && event.getOldObjectRevision() == object
-			                .getRevisionNumber());
+			                .getRevisionNumber()));
 			
 			if(event instanceof XObjectEvent) {
-				assert event.getTarget().equals(object.getAddress());
+				XyAssert.xyAssert(event.getTarget().equals(object.getAddress()));
 				XID fieldId = ((XObjectEvent)event).getFieldId();
 				if(event.getChangeType() == ChangeType.REMOVE) {
-					assert !object.hasField(fieldId);
+					XyAssert.xyAssert(!object.hasField(fieldId));
 					MemoryField field = object.createFieldInternal(fieldId);
-					assert event.getOldFieldRevision() >= 0;
+					XyAssert.xyAssert(event.getOldFieldRevision() >= 0);
 					field.setRevisionNumber(event.getOldFieldRevision());
 				} else {
-					assert event.getChangeType() == ChangeType.ADD;
-					assert object.hasField(fieldId);
-					assert event.getRevisionNumber() == object.getField(fieldId)
+					XyAssert.xyAssert(event.getChangeType() == ChangeType.ADD);
+					XyAssert.xyAssert(object.hasField(fieldId));
+					XyAssert.xyAssert(event.getRevisionNumber() == object.getField(fieldId)
 					        .getRevisionNumber()
 					        || (event.inTransaction() && object.getField(fieldId)
-					                .getRevisionNumber() == XCommand.NEW);
+					                .getRevisionNumber() == XCommand.NEW));
 					object.removeFieldInternal(fieldId);
 				}
 				
 			} else {
-				assert event instanceof XReversibleFieldEvent;
+				XyAssert.xyAssert(event instanceof XReversibleFieldEvent);
 				MemoryField field = object.getField(((XReversibleFieldEvent)event).getFieldId());
-				assert field != null;
-				assert event.getRevisionNumber() == field.getRevisionNumber()
+				XyAssert.xyAssert(field != null); assert field != null;
+				XyAssert.xyAssert(event.getRevisionNumber() == field.getRevisionNumber()
 				        || (event.inTransaction() && event.getOldFieldRevision() == field
-				                .getRevisionNumber());
-				assert XI.equals(field.getValue(), ((XReversibleFieldEvent)event).getNewValue());
+				                .getRevisionNumber()));
+				XyAssert.xyAssert(XI.equals(field.getValue(), ((XReversibleFieldEvent)event).getNewValue()));
 				field.setValueInternal(((XReversibleFieldEvent)event).getOldValue());
-				assert event.getOldFieldRevision() >= 0;
+				XyAssert.xyAssert(event.getOldFieldRevision() >= 0);
 				field.setRevisionNumber(event.getOldFieldRevision());
 			}
 			
-			assert event.getOldObjectRevision() >= 0;
+			XyAssert.xyAssert(event.getOldObjectRevision() >= 0);
 			object.setRevisionNumber(event.getOldObjectRevision());
 		}
 		
@@ -783,7 +784,7 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 		
 		synchronized(this.eventQueue) {
 			
-			assert !this.eventQueue.transactionInProgess;
+			XyAssert.xyAssert(!this.eventQueue.transactionInProgess);
 			
 			boolean oldRemoved = this.removed;
 			
@@ -799,7 +800,7 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 			
 			boolean oldBlock = this.eventQueue.setBlockSending(true);
 			
-			assert this.eventQueue.orphans == null;
+			XyAssert.xyAssert(this.eventQueue.orphans == null);
 			this.eventQueue.orphans = new Orphans();
 			
 			int pos = this.eventQueue.getNextPosition();
@@ -829,7 +830,7 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 			for(int i = localChanges.size() - 1; i >= 0; i--) {
 				MemoryLocalChange lc = localChanges.get(i);
 				if(lc.isApplied() && lc.getRemoteRevision() <= remoteRev) {
-					assert lc.getRemoteRevision() >= 0;
+					XyAssert.xyAssert(lc.getRemoteRevision() >= 0);
 					localChanges.remove(i);
 				}
 			}

@@ -2,6 +2,7 @@ package org.xydra.store;
 
 import org.xydra.base.change.XCommand;
 import org.xydra.index.query.Pair;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -25,7 +26,7 @@ public class BatchedResult<K> extends Pair<K,Throwable> {
 	
 	public BatchedResult(Throwable t) {
 		super(null, t);
-		assert t != null;
+		XyAssert.xyAssert(t != null); assert t != null;
 	}
 	
 	/**

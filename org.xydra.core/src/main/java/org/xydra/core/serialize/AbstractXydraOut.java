@@ -5,6 +5,7 @@ import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.minio.MiniStringWriter;
 import org.xydra.base.minio.MiniWriter;
+import org.xydra.sharedutils.XyAssert;
 
 
 @RunsInGWT(true)
@@ -183,7 +184,7 @@ abstract public class AbstractXydraOut implements XydraOut {
 		} else if(this.current.contentType == Type.Text) {
 			error("cannot add children once content has been set");
 		}
-		assert this.current.type == Type.Element;
+		XyAssert.xyAssert(this.current.type == Type.Element);
 		
 		this.current = new Frame(this.current, Type.Child, name);
 		
@@ -203,7 +204,7 @@ abstract public class AbstractXydraOut implements XydraOut {
 			error("must end children before closing element");
 		}
 		
-		if(this.current.name != type) {
+		if(!this.current.name.equals(type)) {
 			error("cannot close element " + type + " while element " + this.current.name
 			        + " is open");
 		}
@@ -271,13 +272,13 @@ abstract public class AbstractXydraOut implements XydraOut {
 					bt.append(this.current.name);
 					break;
 				case Text:
-					assert false;
+					XyAssert.xyAssert(false);
 					break;
 				case Root:
 					bt.append("(root)");
 					break;
 				case Array:
-					assert this.current.name == null;
+					XyAssert.xyAssert(this.current.name == null);
 					bt.append(".[]");
 					break;
 				case Map:

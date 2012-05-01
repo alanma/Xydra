@@ -15,6 +15,7 @@ import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.session.XProtectedModel;
 import org.xydra.core.model.session.XProtectedRepository;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.AccessException;
 import org.xydra.store.access.XAuthorisationManager;
 
@@ -38,8 +39,8 @@ abstract public class AbstractArmProtectedRepository implements XProtectedReposi
 		this.arm = arm;
 		this.actor = actor;
 		
-		assert repo != null;
-		assert arm != null;
+		XyAssert.xyAssert(repo != null); assert repo != null;
+		XyAssert.xyAssert(arm != null); assert arm != null;
 	}
 	
 	@Override
@@ -97,7 +98,7 @@ abstract public class AbstractArmProtectedRepository implements XProtectedReposi
 		
 		XModel model = this.repo.createModel(modelId);
 		
-		assert model != null;
+		XyAssert.xyAssert(model != null); assert model != null;
 		
 		return new ArmProtectedModel(model, getArmForModel(modelId), this.actor);
 	}
@@ -109,7 +110,7 @@ abstract public class AbstractArmProtectedRepository implements XProtectedReposi
 			return executeRepositoryCommand((XRepositoryCommand)command);
 		}
 		
-		assert command.getTarget().getModel() != null;
+		XyAssert.xyAssert(command.getTarget().getModel() != null); assert command.getTarget().getModel() != null;
 		
 		if(!getArmForModel(command.getTarget().getModel()).canExecute(this.actor, command)) {
 			throw new AccessException(this.actor + " cannot execute " + command);

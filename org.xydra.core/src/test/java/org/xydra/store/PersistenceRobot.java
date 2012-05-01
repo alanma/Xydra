@@ -19,6 +19,7 @@ import org.xydra.core.XCopyUtils;
 import org.xydra.core.util.DumpUtils;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.memory.MemoryPersistence;
 import org.xydra.store.rmof.impl.delegate.WritableRepositoryOnPersistence;
@@ -182,7 +183,7 @@ public class PersistenceRobot extends Thread {
 			// if success, do also in local persistence
 			if(result >= 0 || result == XCommand.NOCHANGE) {
 				long localResult = this.local.executeCommand(this.executingActorId, cmd);
-				assert localResult >= 0 || result == XCommand.NOCHANGE;
+				XyAssert.xyAssert(localResult >= 0 || result == XCommand.NOCHANGE);
 				log.debug(this.id + "> command executed with result remote=" + result + " local="
 				        + localResult);
 				// get snapshot and compare with local
@@ -235,7 +236,7 @@ public class PersistenceRobot extends Thread {
 	}
 	
 	private XCommand createCommandToChangeField(XAddress target) {
-		assert target.getAddressedType() == XType.XFIELD;
+		XyAssert.xyAssert(target.getAddressedType() == XType.XFIELD);
 		
 		XWritableField field = this.localRepo.getModel(target.getModel())
 		        .getObject(target.getObject()).getField(target.getField());
@@ -289,7 +290,7 @@ public class PersistenceRobot extends Thread {
 		if(objectSnapshot != null) {
 			// put in local repo
 			XWritableModel localModel = this.localRepo.getModel(target.getModel());
-			assert localModel != null;
+			XyAssert.xyAssert(localModel != null); assert localModel != null;
 			XWritableObject localObject = localModel.createObject(target.getObject());
 			assert localObject != null : "Remote has snapshot " + objectAddress
 			        + " but local is missing the object";
@@ -308,7 +309,7 @@ public class PersistenceRobot extends Thread {
 	}
 	
 	private boolean localHasAddress(XAddress target) {
-		assert target.getAddressedType() != XType.XREPOSITORY;
+		XyAssert.xyAssert(target.getAddressedType() != XType.XREPOSITORY);
 		XWritableModel model = this.localRepo.getModel(target.getModel());
 		if(model != null) {
 			if(target.getAddressedType() == XType.XMODEL)

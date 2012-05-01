@@ -4,6 +4,7 @@ import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -158,7 +159,7 @@ public class NamingUtils {
 	
 	/** now we can safely use "_." as a separator */
 	private static String encodeNonNullString(String s) {
-		assert s != null;
+		XyAssert.xyAssert(s != null); assert s != null;
 		return s.replace("_", "_U");
 	}
 	

@@ -17,6 +17,7 @@ import org.xydra.core.model.delta.DeltaUtils.IFieldDiff;
 import org.xydra.core.model.delta.DeltaUtils.IObjectDiff;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -35,8 +36,8 @@ public class DumpUtils {
 	 * </code>
 	 */
 	public static String dump(String label, XReadableRepository repo) {
-		assert repo != null;
-		assert repo.getAddress().getAddressedType() == XType.XREPOSITORY;
+		XyAssert.xyAssert(repo != null); assert repo != null;
+		XyAssert.xyAssert(repo.getAddress().getAddressedType() == XType.XREPOSITORY);
 		log.info(label + " * Repo " + repo.getId() + " ...");
 		for(XID modelId : repo) {
 			XReadableModel model = repo.getModel(modelId);
@@ -62,8 +63,8 @@ public class DumpUtils {
 	 * @return the model as a human-readable String
 	 */
 	public static StringBuffer toStringBuffer(XReadableModel model) {
-		assert model != null;
-		assert model.getAddress().getAddressedType() == XType.XMODEL;
+		XyAssert.xyAssert(model != null); assert model != null;
+		XyAssert.xyAssert(model.getAddress().getAddressedType() == XType.XMODEL);
 		StringBuffer buf = new StringBuffer();
 		buf.append("** Model   " + model.getAddress() + " [" + model.getRevisionNumber() + "]\n");
 		List<XID> ids = toSortedList(model);
@@ -100,8 +101,8 @@ public class DumpUtils {
 	 * @return given object as human-readable string
 	 */
 	public static StringBuffer toStringBuffer(XReadableObject object) {
-		assert object != null;
-		assert object.getAddress().getAddressedType() == XType.XOBJECT;
+		XyAssert.xyAssert(object != null); assert object != null;
+		XyAssert.xyAssert(object.getAddress().getAddressedType() == XType.XOBJECT);
 		StringBuffer buf = new StringBuffer();
 		buf.append("*** Object " + object.getAddress() + " [" + object.getRevisionNumber() + "]\n");
 		List<XID> ids = toSortedList(object);
@@ -129,8 +130,8 @@ public class DumpUtils {
 	 * @return the field as a human-readable String
 	 */
 	public static StringBuffer toStringBuffer(XReadableField field) {
-		assert field != null;
-		assert field.getAddress().getAddressedType() == XType.XFIELD;
+		XyAssert.xyAssert(field != null); assert field != null;
+		XyAssert.xyAssert(field.getAddress().getAddressedType() == XType.XFIELD);
 		StringBuffer buf = new StringBuffer();
 		buf.append("**** Field " + field.getAddress() + " = '" + field.getValue() + "' " + " ["
 		        + field.getRevisionNumber() + "]\n");

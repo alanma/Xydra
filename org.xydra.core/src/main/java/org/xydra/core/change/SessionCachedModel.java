@@ -28,6 +28,7 @@ import org.xydra.index.iterator.AbstractFilteringIterator;
 import org.xydra.index.iterator.TransformingIterator;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -57,8 +58,8 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 		protected EntityState state;
 		
 		public CachedEntity(XAddress address, EntityState state) {
-			assert address != null;
-			assert state != null;
+			XyAssert.xyAssert(address != null); assert address != null;
+			XyAssert.xyAssert(state != null); assert state != null;
 			this.address = address;
 			this.state = state;
 		}
@@ -393,7 +394,7 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 			case Removed:
 				return EntityState.NotPresent;
 			}
-			assert false;
+			XyAssert.xyAssert(false);
 			return null;
 		}
 		
@@ -604,7 +605,7 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 	@SuppressWarnings("unused")
 	@Override
 	public boolean hasObject(XID objectId) {
-		assert objectId != null;
+		XyAssert.xyAssert(objectId != null); assert objectId != null;
 		CachedObject co = this.cachedObjects.get(objectId);
 		if(co != null) {
 			return co.isPresent();
@@ -733,14 +734,14 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 	 * @param b
 	 */
 	public void setKnowsAllObjectIds(boolean b) {
-		assert b || !this.knowsAllObjectIds;
+		XyAssert.xyAssert(b || !this.knowsAllObjectIds);
 		this.knowsAllObjectIds = b;
 	}
 	
 	private CachedObject setObjectState(XID id, EntityState objectState) {
 		CachedObject co = new CachedObject(XX.resolveObject(getAddress(), id), objectState);
 		this.cachedObjects.put(id, co);
-		assert co.getId().equals(id);
+		XyAssert.xyAssert(co.getId().equals(id));
 		return co;
 	}
 	

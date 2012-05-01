@@ -32,6 +32,7 @@ import org.xydra.base.value.XValue;
 import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -1637,7 +1638,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	}
 	
 	protected long getRevisionNumber(XAddress address) {
-		assert address.getAddressedType() != XType.XREPOSITORY;
+		XyAssert.xyAssert(address.getAddressedType() != XType.XREPOSITORY);
 		GetWithAddressRequest[] addressRequests;
 		XType type = address.getAddressedType();
 		

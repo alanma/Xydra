@@ -1,5 +1,6 @@
 package org.xydra.base;
 
+import org.xydra.annotations.NeverNull;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XRevWritableModel;
@@ -204,7 +205,7 @@ public class XX {
 	 * valid string representations of {@link XID XIDs} (ie: allowed parameters
 	 * for the fromString() method).
 	 * 
-	 * @param addressString A string with the described format, never null
+	 * @param addressString A string with the described format
 	 * @return an new {@link XAddress} object representing the specified address
 	 * @throws IllegalArgumentException if one of the given URI components is
 	 *             not a valid {@link XID} string or if the given String equals
@@ -212,7 +213,8 @@ public class XX {
 	 * @throws URIFormatException if the given address contains too many
 	 *             components.
 	 */
-	public static XAddress toAddress(String addressString) {
+	public static @NeverNull
+	XAddress toAddress(@NeverNull String addressString) {
 		return X.getIDProvider().fromAddress(addressString);
 	}
 	

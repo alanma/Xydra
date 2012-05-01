@@ -23,6 +23,7 @@ import org.xydra.core.serialize.XydraParser;
 import org.xydra.core.serialize.XydraSerializer;
 import org.xydra.index.query.Pair;
 import org.xydra.sharedutils.URLUtils;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.Callback;
 import org.xydra.store.ConnectionException;
@@ -167,7 +168,7 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
 			throw new IllegalArgumentException("getEventsRequests array must not be null");
 		}
 		
-		assert getEventsRequests.length == res.length;
+		XyAssert.xyAssert(getEventsRequests.length == res.length);
 		
 		StringBuilder sb = new StringBuilder();
 		
@@ -229,7 +230,7 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
 	private <T> String encodeAddresses(GetWithAddressRequest[] getModelRevisionRequests,
 	        BatchedResult<T>[] res, XType type) {
 		
-		assert res.length == getModelRevisionRequests.length;
+		XyAssert.xyAssert(res.length == getModelRevisionRequests.length);
 		
 		StringBuilder sb = new StringBuilder();
 		
@@ -284,7 +285,7 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
 				i++;
 			}
 			
-			assert i < result.length;
+			XyAssert.xyAssert(i < result.length);
 			
 			if(o == null) {
 				result[i] = new BatchedResult<T>((T)null);
@@ -302,7 +303,7 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
 		}
 		
 		for(; i < result.length; i++) {
-			assert result[i] != null;
+			XyAssert.xyAssert(result[i] != null); assert result[i] != null;
 		}
 		
 	}

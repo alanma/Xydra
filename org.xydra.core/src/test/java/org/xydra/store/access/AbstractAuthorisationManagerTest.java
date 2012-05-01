@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.access.impl.memory.MemoryAuthorisationManager;
 import org.xydra.store.access.impl.memory.MemoryGroupDatabase;
 
@@ -121,10 +122,10 @@ abstract public class AbstractAuthorisationManagerTest {
 		this.rB = XX.toAddress("/repo/cookie/objectB");
 		this.rA0 = XX.toAddress("/repo/cookie/objectA/field0");
 		
-		assert this.r.contains(this.rA);
-		assert this.r.contains(this.rA0);
-		assert this.r.contains(this.rB);
-		assert this.rA.contains(this.rA0);
+		XyAssert.xyAssert(this.r.contains(this.rA));
+		XyAssert.xyAssert(this.r.contains(this.rA0));
+		XyAssert.xyAssert(this.r.contains(this.rB));
+		XyAssert.xyAssert(this.rA.contains(this.rA0));
 		
 		this.access = XX.toId("foo");
 		this.access2 = XX.toId("bar");

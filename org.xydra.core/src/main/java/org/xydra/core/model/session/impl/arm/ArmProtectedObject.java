@@ -12,6 +12,7 @@ import org.xydra.core.model.XField;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.session.XProtectedField;
 import org.xydra.core.model.session.XProtectedObject;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.AccessException;
 import org.xydra.store.access.XAuthorisationManager;
 
@@ -66,7 +67,7 @@ public class ArmProtectedObject extends ArmProtectedBaseObject implements XProte
 		
 		XField field = this.object.createField(fieldId);
 		
-		assert field != null;
+		XyAssert.xyAssert(field != null); assert field != null;
 		
 		return new ArmProtectedField(field, this.arm, this.actor);
 	}

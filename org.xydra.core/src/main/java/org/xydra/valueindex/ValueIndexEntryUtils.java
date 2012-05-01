@@ -7,6 +7,7 @@ import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.XydraOut;
 import org.xydra.core.serialize.json.JsonParser;
 import org.xydra.core.serialize.json.JsonSerializer;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -60,7 +61,7 @@ public class ValueIndexEntryUtils {
 		// "" is used as the marker for splitting
 		String result = adrString + "\"\"" + valueString;
 		
-		assert !result.equals("");
+		XyAssert.xyAssert(!result.equals(""));
 		
 		return result;
 	}
@@ -117,7 +118,7 @@ public class ValueIndexEntryUtils {
 		 * "<entry>" should only occur as a marker between the different strings
 		 * which are encoding ValueIndexEntries
 		 */
-		assert !result.startsWith("<entry>") && !result.endsWith("<entry>");
+		XyAssert.xyAssert(!result.startsWith("<entry>") && !result.endsWith("<entry>"));
 		return result;
 	}
 	
@@ -126,7 +127,7 @@ public class ValueIndexEntryUtils {
 		
 		String replace2 = replace1.replace("<entry>", "<\\entry>");
 		
-		assert !replace2.equals("");
+		XyAssert.xyAssert(!replace2.equals(""));
 		
 		return replace2;
 	}
@@ -135,7 +136,7 @@ public class ValueIndexEntryUtils {
 		String replace1 = s.replace("<\\entry>", "<entry>");
 		String replace2 = replace1.replace("\\\\", "\\");
 		
-		assert !replace2.equals("");
+		XyAssert.xyAssert(!replace2.equals(""));
 		
 		return replace2;
 	}
@@ -184,7 +185,7 @@ public class ValueIndexEntryUtils {
 		
 		String[] strings = s.split("\"\"");
 		
-		assert strings.length == 2;
+		XyAssert.xyAssert(strings.length == 2);
 		
 		String adrString = deescapeSingleString(strings[0]);
 		String valString = deescapeSingleString(strings[1]);
@@ -195,7 +196,7 @@ public class ValueIndexEntryUtils {
 		XydraElement addressElement = parser.parse(adrString);
 		
 		XValue addressVal = SerializedValue.toValue(addressElement);
-		assert addressVal instanceof XAddress;
+		XyAssert.xyAssert(addressVal instanceof XAddress);
 		
 		address = (XAddress)addressVal;
 		

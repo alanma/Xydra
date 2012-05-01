@@ -2,6 +2,7 @@ package org.xydra.base.change.impl.memory;
 
 import java.io.Serializable;
 
+import org.xydra.annotations.NeverNull;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.change.ChangeType;
@@ -15,7 +16,8 @@ import org.xydra.core.model.XRepository;
 abstract public class MemoryAtomicCommand implements XAtomicCommand, Serializable {
 	
 	private static final long serialVersionUID = -4547419646736034654L;
-	private final ChangeType changeType;
+	private final @NeverNull
+	ChangeType changeType;
 	private final long revision;
 	private XAddress target;
 	
@@ -48,7 +50,7 @@ abstract public class MemoryAtomicCommand implements XAtomicCommand, Serializabl
 	}
 	
 	@Override
-    public ChangeType getChangeType() {
+	public ChangeType getChangeType() {
 		return this.changeType;
 	}
 	
@@ -81,12 +83,12 @@ abstract public class MemoryAtomicCommand implements XAtomicCommand, Serializabl
 	}
 	
 	@Override
-    public long getRevisionNumber() {
+	public long getRevisionNumber() {
 		return this.revision;
 	}
 	
 	@Override
-    public XAddress getTarget() {
+	public XAddress getTarget() {
 		return this.target;
 	}
 	
@@ -95,7 +97,6 @@ abstract public class MemoryAtomicCommand implements XAtomicCommand, Serializabl
 		
 		int result = 0;
 		
-		// changeType is never null
 		result ^= this.changeType.hashCode();
 		
 		// revision
@@ -108,7 +109,7 @@ abstract public class MemoryAtomicCommand implements XAtomicCommand, Serializabl
 	}
 	
 	@Override
-    public boolean isForced() {
+	public boolean isForced() {
 		return this.revision == XCommand.FORCED;
 	}
 	

@@ -18,6 +18,7 @@ import org.xydra.base.value.XIDSetValue;
 import org.xydra.base.value.XValue;
 import org.xydra.core.index.IObjectIndex;
 import org.xydra.core.model.XObject;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -48,7 +49,7 @@ public class ObjectIndex extends AbstractObjectIndex implements IObjectIndex {
 		XWritableField indexField = this.indexObject.createField(xid);
 		XValue indexValue = indexField.getValue();
 		XIDSetValue indexedIds;
-		assert indexValue != null;
+		XyAssert.xyAssert(indexValue != null); assert indexValue != null;
 		XIDSetValue currentIndexedIds = (XIDSetValue)indexValue;
 		indexedIds = currentIndexedIds.remove(value);
 		if(indexedIds.size() == 0) {

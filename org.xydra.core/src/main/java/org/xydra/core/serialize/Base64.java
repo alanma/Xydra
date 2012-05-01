@@ -2,6 +2,8 @@ package org.xydra.core.serialize;
 
 import java.io.UnsupportedEncodingException;
 
+import org.xydra.sharedutils.XyAssert;
+
 
 /***
  * Methods to encode and decode binary data using the Base64 encoding scheme.
@@ -351,7 +353,7 @@ public class Base64 {
 	 *             or there is not enough room in the array.
 	 */
 	private static int decode4to3(char[] source, int srcOffset, byte[] destination, int destOffset) {
-		assert srcOffset + 3 < source.length;
+		XyAssert.xyAssert(srcOffset + 3 < source.length);
 		
 		// Example: Dk==
 		if(source[srcOffset + 2] == EQUALS_SIGN) {

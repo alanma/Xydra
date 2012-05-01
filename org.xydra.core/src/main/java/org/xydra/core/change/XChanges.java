@@ -35,6 +35,7 @@ import org.xydra.core.model.XRepository;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.index.XI;
 import org.xydra.index.iterator.SingleValueIterator;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -584,7 +585,7 @@ public class XChanges {
 			}
 		}
 		
-		assert result.size() > 0;
+		XyAssert.xyAssert(result.size() > 0);
 		
 		if(result.size() == 1) {
 			return result.get(0);
@@ -693,7 +694,7 @@ public class XChanges {
 		
 		XID modelId = event.getTarget().getModel();
 		
-		assert modelId != null;
+		XyAssert.xyAssert(modelId != null); assert modelId != null;
 		
 		XModel model = repo.getModel(modelId);
 		

@@ -1,5 +1,6 @@
 package org.xydra.store.access;
 
+import org.xydra.annotations.NeverNull;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 
@@ -15,18 +16,21 @@ import org.xydra.base.XID;
 public interface XAccessRightDefinition {
 	
 	/**
-	 * @return never null
+	 * @return ..
 	 */
+	@NeverNull
 	XID getAccess();
 	
 	/**
-	 * @return never null
+	 * @return ..
 	 */
+	@NeverNull
 	XID getActor();
 	
 	/**
-	 * @return never null
+	 * @return ..
 	 */
+	@NeverNull
 	XAddress getResource();
 	
 	/**

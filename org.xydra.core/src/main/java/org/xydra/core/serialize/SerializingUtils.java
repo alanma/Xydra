@@ -1,5 +1,6 @@
 package org.xydra.core.serialize;
 
+import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
@@ -28,7 +29,7 @@ class SerializingUtils {
 	protected static final String TYPE_ATTRIBUTE = "type";
 	protected static final String XID_ATTRIBUTE = "xid";
 	
-	protected static void checkElementType(XydraElement element, String expectedName) {
+	protected static void checkElementType(@NeverNull XydraElement element, String expectedName) {
 		if(element == null || !element.getType().equals(expectedName)) {
 			throw new ParsingError(element, "Expected <" + expectedName + "> element.");
 		}

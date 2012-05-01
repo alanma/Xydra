@@ -4,6 +4,7 @@
 package org.xydra.store;
 
 import org.xydra.annotations.RunsInGWT;
+import org.xydra.sharedutils.XyAssert;
 
 
 @RunsInGWT(false)
@@ -15,7 +16,7 @@ public class WaitingCallback<T> implements Callback<T> {
 	
 	@Override
 	public synchronized void onFailure(Throwable exception) {
-		assert !this.done;
+		XyAssert.xyAssert(!this.done);
 		this.exception = exception;
 		this.done = true;
 		notifyAll();
@@ -23,7 +24,7 @@ public class WaitingCallback<T> implements Callback<T> {
 	
 	@Override
 	public synchronized void onSuccess(T result) {
-		assert !this.done;
+		XyAssert.xyAssert(!this.done);
 		this.result = result;
 		this.done = true;
 		notifyAll();

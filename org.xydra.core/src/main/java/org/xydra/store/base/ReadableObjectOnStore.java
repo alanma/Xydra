@@ -8,6 +8,7 @@ import org.xydra.base.XID;
 import org.xydra.base.XType;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableObject;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.Callback;
 import org.xydra.store.GetWithAddressRequest;
@@ -90,7 +91,7 @@ public class ReadableObjectOnStore implements XReadableObject, Serializable {
 			        
 			        @Override
 			        public void onSuccess(BatchedResult<XReadableObject>[] object) {
-				        assert object.length == 1;
+				        XyAssert.xyAssert(object.length == 1);
 				        /*
 						 * TODO better error handling if getResult is null
 						 * because getException has an AccessException

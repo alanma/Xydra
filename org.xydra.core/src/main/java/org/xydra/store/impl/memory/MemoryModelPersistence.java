@@ -17,6 +17,7 @@ import org.xydra.core.model.delta.DeltaUtils;
 import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.ModelRevision;
 
 
@@ -61,7 +62,7 @@ public class MemoryModelPersistence {
 		// changing the model.
 		List<XAtomicEvent> events = DeltaUtils
 		        .createEvents(this.modelAddr, change, actorId, newRev);
-		assert events != null;
+		XyAssert.xyAssert(events != null); assert events != null;
 		
 		if(events.isEmpty()) {
 			// TODO take up a revision anyway with a null event to better test
@@ -78,13 +79,13 @@ public class MemoryModelPersistence {
 			event = events.get(0);
 		}
 		this.events.add(event);
-		assert this.events.get((int)newRev) == event;
+		XyAssert.xyAssert(this.events.get((int)newRev) == event);
 		
 		// Actually apply the changes.
 		this.model = DeltaUtils.applyChanges(this.modelAddr, this.model, change, newRev);
 		
-		assert getRevisionNumber() == newRev;
-		assert this.model == null || this.model.getRevisionNumber() == newRev;
+		XyAssert.xyAssert(getRevisionNumber() == newRev);
+		XyAssert.xyAssert(this.model == null || this.model.getRevisionNumber() == newRev);
 		
 		return newRev;
 	}

@@ -27,6 +27,7 @@ import org.xydra.core.model.XField;
 import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.XObject;
 import org.xydra.index.XI;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -76,7 +77,7 @@ public class MemoryField extends AbstractEntity implements XField, Serializable 
 	 */
 	protected MemoryField(MemoryObject parent, MemoryEventManager eventQueue,
 	        XRevWritableField fieldState) {
-		assert eventQueue != null;
+		XyAssert.xyAssert(eventQueue != null); assert eventQueue != null;
 		
 		this.eventQueue = eventQueue;
 		
@@ -178,7 +179,7 @@ public class MemoryField extends AbstractEntity implements XField, Serializable 
 		synchronized(this.eventQueue) {
 			checkRemoved();
 			
-			assert !this.eventQueue.transactionInProgess;
+			XyAssert.xyAssert(!this.eventQueue.transactionInProgess);
 			
 			// check whether the given event actually refers to this field
 			if(!getAddress().equals(command.getTarget())) {
@@ -230,7 +231,7 @@ public class MemoryField extends AbstractEntity implements XField, Serializable 
 					}
 				}
 				
-				assert command.getValue() == null;
+				XyAssert.xyAssert(command.getValue() == null);
 				
 			} else if(command.getChangeType() == ChangeType.CHANGE) {
 				if(getValue() == null) {
@@ -388,7 +389,7 @@ public class MemoryField extends AbstractEntity implements XField, Serializable 
 	}
 	
 	protected void incrementRevision() {
-		assert !this.eventQueue.transactionInProgess;
+		XyAssert.xyAssert(!this.eventQueue.transactionInProgess);
 		if(this.father != null) {
 			// this increments the revisionNumber of the father and sets
 			// this revNr to the
@@ -457,7 +458,7 @@ public class MemoryField extends AbstractEntity implements XField, Serializable 
 		}
 		
 		long result = executeFieldCommand(command);
-		assert result >= 0 || result == XCommand.NOCHANGE;
+		XyAssert.xyAssert(result >= 0 || result == XCommand.NOCHANGE);
 		return result != XCommand.NOCHANGE;
 	}
 	
@@ -473,7 +474,7 @@ public class MemoryField extends AbstractEntity implements XField, Serializable 
 		
 		XValue oldValue = getValue();
 		
-		assert !XI.equals(oldValue, newValue);
+		XyAssert.xyAssert(!XI.equals(oldValue, newValue));
 		
 		boolean inTrans = this.eventQueue.transactionInProgess;
 		
@@ -486,7 +487,7 @@ public class MemoryField extends AbstractEntity implements XField, Serializable 
 		XID actorId = this.eventQueue.getActor();
 		XReversibleFieldEvent event = null;
 		if((oldValue == null)) {
-			assert newValue != null;
+			XyAssert.xyAssert(newValue != null); assert newValue != null;
 			event = MemoryReversibleFieldEvent.createAddEvent(actorId, getAddress(), newValue,
 			        modelRev, objectRev, fieldRev, inTrans);
 		} else {
@@ -495,14 +496,14 @@ public class MemoryField extends AbstractEntity implements XField, Serializable 
 				event = MemoryReversibleFieldEvent.createRemoveEvent(actorId, getAddress(),
 				        oldValue, modelRev, objectRev, fieldRev, inTrans, false);
 			} else {
-				assert !newValue.equals(oldValue);
+				XyAssert.xyAssert(!newValue.equals(oldValue));
 				// implies change
 				event = MemoryReversibleFieldEvent.createChangeEvent(actorId, getAddress(),
 				        oldValue, newValue, modelRev, objectRev, fieldRev, inTrans);
 			}
 		}
 		
-		assert event != null;
+		XyAssert.xyAssert(event != null); assert event != null;
 		
 		this.eventQueue.enqueueFieldEvent(this, event);
 		

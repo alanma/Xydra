@@ -29,6 +29,7 @@ import org.xydra.core.XCompareUtils;
 import org.xydra.core.serialize.SerializedStore.EventsRequest;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.AccessException;
 import org.xydra.store.AuthorisationException;
 import org.xydra.store.BatchedResult;
@@ -228,7 +229,7 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 	
 	private void testEventsResults(BatchedResult<XEvent[]>[] eventRes) {
 		
-		assert eventRes != null;
+		XyAssert.xyAssert(eventRes != null); assert eventRes != null;
 		
 		EventsRequest er = preparePreRequests(eventRes);
 		BatchedResult<XEvent[]>[] events = preparePreResults(eventRes);
@@ -252,7 +253,7 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 	private void testCommandResults(BatchedResult<Long>[] commandRes,
 	        BatchedResult<XEvent[]>[] eventRes) {
 		
-		assert commandRes != null;
+		XyAssert.xyAssert(commandRes != null); assert commandRes != null;
 		
 		BatchedResult<Long>[] commands = preparePre(commandRes);
 		
@@ -307,7 +308,7 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 		
 		List<BatchedResult<XEvent[]>> events = new ArrayList<BatchedResult<XEvent[]>>();
 		for(BatchedResult<XEvent[]> res : eventRes) {
-			assert res != null;
+			XyAssert.xyAssert(res != null); assert res != null;
 			if(!(res.getException() instanceof PreException)) {
 				if(res.getException() instanceof RequestException) {
 					events.add((BatchedResult<XEvent[]>)(Object)storeError());
@@ -330,7 +331,7 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 		List<StoreException> except = new ArrayList<StoreException>();
 		
 		for(BatchedResult<XEvent[]> res : eventRes) {
-			assert res != null;
+			XyAssert.xyAssert(res != null); assert res != null;
 			
 			if(res.getException() instanceof PreException) {
 				continue;
@@ -374,7 +375,7 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 				while(addr != null && !addr.equalsOrContains(event.getTarget())) {
 					addr = addr.getParent();
 				}
-				assert addr != null;
+				XyAssert.xyAssert(addr != null); assert addr != null;
 			}
 			
 			if(event.getRevisionNumber() < min) {
@@ -391,7 +392,7 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 	
 	private static <T> void checkBatchedResult(BatchedResult<T>[] expected,
 	        BatchedResult<T>[] actual) {
-		assert expected.length == actual.length;
+		XyAssert.xyAssert(expected.length == actual.length);
 		for(int i = 0; i < expected.length; i++) {
 			checkBatchedResult(expected[i], actual[i]);
 		}
@@ -399,7 +400,7 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 	
 	private static <T> void checkBatchedResult(BatchedResult<T> expected, BatchedResult<T> actual) {
 		
-		assert expected != null;
+		XyAssert.xyAssert(expected != null); assert expected != null;
 		assertNotNull(actual);
 		
 		if(expected.getException() != null) {
@@ -535,7 +536,7 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 	
 	private void testModelRevisions(BatchedResult<ModelRevision>[] revs) {
 		
-		assert revs != null;
+		XyAssert.xyAssert(revs != null); assert revs != null;
 		
 		BatchedResult<ModelRevision>[] results = preparePre(revs);
 		
@@ -560,7 +561,7 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 		
 		BatchedResult<T>[] res = new BatchedResult[revs.length];
 		for(int i = 0; i < revs.length; i++) {
-			assert revs[i] != null;
+			XyAssert.xyAssert(revs[i] != null); assert revs[i] != null;
 			if(revs[i].getException() instanceof PreException) {
 				res[i] = revs[i];
 			}
@@ -576,7 +577,7 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 		
 		List<BatchedResult<T>> results = new ArrayList<BatchedResult<T>>();
 		for(BatchedResult<T> res : revs) {
-			assert res != null;
+			XyAssert.xyAssert(res != null); assert res != null;
 			if(!(res.getException() instanceof PreException)) {
 				results.add(res);
 			}
@@ -635,7 +636,7 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 	@SuppressWarnings("unchecked")
 	private void testSnapshots(Object[] data) {
 		
-		assert data != null;
+		XyAssert.xyAssert(data != null); assert data != null;
 		
 		StoreException[] parseErrors = new StoreException[data.length];
 		boolean[] isModel = new boolean[data.length];
@@ -676,7 +677,7 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 				}
 				context[i] = addr;
 			} else {
-				assert false;
+				XyAssert.xyAssert(false);
 			}
 			
 		}
@@ -709,7 +710,7 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 			} else if(expected instanceof XAddress) {
 				assertNull(actual);
 			} else {
-				assert false;
+				XyAssert.xyAssert(false);
 			}
 		}
 	}

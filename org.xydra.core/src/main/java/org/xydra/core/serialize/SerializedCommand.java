@@ -23,6 +23,7 @@ import org.xydra.base.change.impl.memory.MemoryObjectCommand;
 import org.xydra.base.change.impl.memory.MemoryRepositoryCommand;
 import org.xydra.base.change.impl.memory.MemoryTransaction;
 import org.xydra.base.value.XValue;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -84,7 +85,7 @@ public class SerializedCommand {
 		
 		Object relativeString = element.getAttribute(REVISION_RELATIVE_ATTRIBUTE);
 		if(relativeString != null) {
-			assert rev < XCommand.RELATIVE_REV;
+			XyAssert.xyAssert(rev < XCommand.RELATIVE_REV);
 			if(SerializingUtils.toBoolean(relativeString)) {
 				rev += XCommand.RELATIVE_REV;
 			}

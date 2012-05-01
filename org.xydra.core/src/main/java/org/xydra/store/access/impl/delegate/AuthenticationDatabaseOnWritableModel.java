@@ -15,6 +15,7 @@ import org.xydra.base.value.XIntegerValue;
 import org.xydra.base.value.XStringValue;
 import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.access.HashUtils;
 import org.xydra.store.access.XAuthenticationDatabase;
 
@@ -63,7 +64,7 @@ public class AuthenticationDatabaseOnWritableModel implements XAuthenticationDat
 	
 	@Override
 	public int getFailedLoginAttempts(XID actorId) {
-		assert actorId != null;
+		XyAssert.xyAssert(actorId != null); assert actorId != null;
 		XValue value = WritableUtils.getValue(this.authenticationModel, actorId,
 		        hasFailedLoginAttempts);
 		return XV.toInteger(value);
@@ -71,7 +72,7 @@ public class AuthenticationDatabaseOnWritableModel implements XAuthenticationDat
 	
 	@Override
 	public String getPasswordHash(XID actorId) {
-		assert actorId != null;
+		XyAssert.xyAssert(actorId != null); assert actorId != null;
 		XValue value = WritableUtils.getValue(this.authenticationModel, actorId, hasPasswordHash);
 		return XV.toString(value);
 	}

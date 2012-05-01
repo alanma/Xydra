@@ -7,6 +7,7 @@ import org.xydra.base.XID;
 import org.xydra.base.XType;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.AccessException;
 import org.xydra.store.access.XAuthorisationManager;
 
@@ -29,8 +30,8 @@ public class ArmProtectedBaseModel implements XReadableModel {
 		this.arm = arm;
 		this.actor = actor;
 		
-		assert model != null;
-		assert arm != null;
+		XyAssert.xyAssert(model != null); assert model != null;
+		XyAssert.xyAssert(arm != null); assert arm != null;
 	}
 	
 	protected void checkCanKnowAboutObject(XID objectId) {

@@ -22,6 +22,7 @@ import org.xydra.base.rmof.impl.memory.SimpleField;
 import org.xydra.core.model.delta.DeltaUtils.IFieldDiff;
 import org.xydra.index.iterator.AbstractFilteringIterator;
 import org.xydra.index.iterator.BagUnionIterator;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -71,28 +72,28 @@ public class ChangedObject implements XWritableObject, DeltaUtils.IObjectDiff {
 	 *            encapsulate and represent
 	 */
 	public ChangedObject(XReadableObject base) {
-		assert base != null;
+		XyAssert.xyAssert(base != null); assert base != null;
 		this.base = base;
 	}
 	
 	private boolean checkSetInvariants() {
 		
 		for(XID id : this.removed) {
-			assert !this.added.containsKey(id) && !this.changed.containsKey(id);
-			assert this.base.hasField(id);
+			XyAssert.xyAssert(!this.added.containsKey(id) && !this.changed.containsKey(id));
+			XyAssert.xyAssert(this.base.hasField(id));
 		}
 		
 		for(XID id : this.added.keySet()) {
-			assert !this.removed.contains(id) && !this.changed.containsKey(id);
+			XyAssert.xyAssert(!this.removed.contains(id) && !this.changed.containsKey(id));
 			assert !this.base.hasField(id) : "base " + this.base.getAddress()
 			        + " cannot have field " + id + " which also appers in ADDED";
-			assert id.equals(this.added.get(id).getId());
+			XyAssert.xyAssert(id.equals(this.added.get(id).getId()));
 		}
 		
 		for(XID id : this.changed.keySet()) {
-			assert !this.removed.contains(id) && !this.added.containsKey(id);
-			assert this.base.hasField(id);
-			assert id.equals(this.changed.get(id).getId());
+			XyAssert.xyAssert(!this.removed.contains(id) && !this.added.containsKey(id));
+			XyAssert.xyAssert(this.base.hasField(id));
+			XyAssert.xyAssert(id.equals(this.changed.get(id).getId()));
 		}
 		
 		return true;
@@ -111,7 +112,7 @@ public class ChangedObject implements XWritableObject, DeltaUtils.IObjectDiff {
 			this.removed.add(id);
 		}
 		
-		assert checkSetInvariants();
+		XyAssert.xyAssert(checkSetInvariants());
 	}
 	
 	/**
@@ -208,14 +209,14 @@ public class ChangedObject implements XWritableObject, DeltaUtils.IObjectDiff {
 			
 			// If the field previously existed it must have been removed
 			// previously and we can merge the remove and add changes.
-			assert this.removed.contains(fieldId);
-			assert !this.changed.containsKey(fieldId);
+			XyAssert.xyAssert(this.removed.contains(fieldId));
+			XyAssert.xyAssert(!this.changed.containsKey(fieldId));
 			this.removed.remove(fieldId);
 			ChangedField newField = new ChangedField(field);
 			newField.setValue(null);
 			this.changed.put(fieldId, newField);
 			
-			assert checkSetInvariants();
+			XyAssert.xyAssert(checkSetInvariants());
 			
 			return newField;
 			
@@ -226,7 +227,7 @@ public class ChangedObject implements XWritableObject, DeltaUtils.IObjectDiff {
 			SimpleField newField = new SimpleField(fieldAddr);
 			this.added.put(fieldId, newField);
 			
-			assert checkSetInvariants();
+			XyAssert.xyAssert(checkSetInvariants());
 			
 			return newField;
 		}
@@ -251,9 +252,9 @@ public class ChangedObject implements XWritableObject, DeltaUtils.IObjectDiff {
 	
 	@Override
 	public XWritableField getField(XID fieldId) {
-		assert fieldId != null;
-		assert this.base != null;
-		assert checkSetInvariants();
+		XyAssert.xyAssert(fieldId != null); assert fieldId != null;
+		XyAssert.xyAssert(this.base != null); assert this.base != null;
+		XyAssert.xyAssert(checkSetInvariants());
 		
 		SimpleField newField = this.added.get(fieldId);
 		if(newField != null) {
@@ -277,7 +278,7 @@ public class ChangedObject implements XWritableObject, DeltaUtils.IObjectDiff {
 		changedField = new ChangedField(field);
 		this.changed.put(fieldId, changedField);
 		
-		assert checkSetInvariants();
+		XyAssert.xyAssert(checkSetInvariants());
 		
 		return changedField;
 	}
@@ -375,24 +376,24 @@ public class ChangedObject implements XWritableObject, DeltaUtils.IObjectDiff {
 		if(this.added.containsKey(fieldId)) {
 			
 			// Never existed in base, so removing from added is sufficient.
-			assert !this.base.hasField(fieldId) && !this.changed.containsKey(fieldId);
-			assert !this.removed.contains(fieldId);
+			XyAssert.xyAssert(!this.base.hasField(fieldId) && !this.changed.containsKey(fieldId));
+			XyAssert.xyAssert(!this.removed.contains(fieldId));
 			
 			this.added.remove(fieldId);
 			
-			assert checkSetInvariants();
+			XyAssert.xyAssert(checkSetInvariants());
 			
 			return true;
 			
 		} else if(!this.removed.contains(fieldId) && this.base.hasField(fieldId)) {
 			
 			// Exists in base and not removed yet.
-			assert !this.added.containsKey(fieldId);
+			XyAssert.xyAssert(!this.added.containsKey(fieldId));
 			
 			this.removed.add(fieldId);
 			this.changed.remove(fieldId);
 			
-			assert checkSetInvariants();
+			XyAssert.xyAssert(checkSetInvariants());
 			
 			return true;
 			
@@ -433,9 +434,9 @@ public class ChangedObject implements XWritableObject, DeltaUtils.IObjectDiff {
 	 *            create the changedObject
 	 */
 	public static void commitTo(ChangedObject changedObject, XWritableObject baseObject) {
-		assert changedObject != null;
-		assert baseObject != null;
-		assert changedObject.getId().equals(baseObject.getId());
+		XyAssert.xyAssert(changedObject != null); assert changedObject != null;
+		XyAssert.xyAssert(baseObject != null); assert baseObject != null;
+		XyAssert.xyAssert(changedObject.getId().equals(baseObject.getId()));
 		for(SimpleField field : changedObject.getNewFields()) {
 			XWritableField baseField = baseObject.createField(field.getId());
 			baseField.setValue(field.getValue());

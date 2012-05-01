@@ -2,6 +2,7 @@ package org.xydra.base.value;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -70,7 +71,7 @@ public enum ValueType {
 	 *         null if type is not a collection type.
 	 */
 	public static Class<?> getComponentType(ValueType type) {
-		assert type.isCollection();
+		XyAssert.xyAssert(type.isCollection());
 		switch(type) {
 		case AddressList:
 		case AddressSet:
@@ -97,7 +98,7 @@ public enum ValueType {
 	}
 	
 	public static Class<?> getPrimitiveType(ValueType type) {
-		assert type.isSingle();
+		XyAssert.xyAssert(type.isSingle());
 		switch(type) {
 		case Address:
 			return XAddress.class;

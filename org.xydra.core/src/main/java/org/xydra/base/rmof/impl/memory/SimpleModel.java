@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.xydra.annotations.NeverNull;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XType;
@@ -16,6 +17,7 @@ import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.core.XCompareUtils;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -68,7 +70,9 @@ public class SimpleModel implements Serializable, XRevWritableModel, XSessionMod
 	}
 	
 	@Override
-	public void addObject(XRevWritableObject object) {
+	public void addObject(@NeverNull XRevWritableObject object) {
+		XyAssert.xyAssert(object != null);
+		assert object != null;
 		this.objects.put(object.getId(), object);
 	}
 	

@@ -1,5 +1,6 @@
 package org.xydra.base.change.impl.memory;
 
+import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
@@ -11,6 +12,7 @@ import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
 import org.xydra.index.XI;
+import org.xydra.sharedutils.XyAssert;
 
 
 @RunsInGWT(true)
@@ -22,7 +24,8 @@ abstract public class MemoryAtomicEvent implements XEvent {
 	private XID actor;
 	
 	// The ChangeType
-	private ChangeType changeType;
+	private @NeverNull
+	ChangeType changeType;
 	
 	// is this remove event implied by another event in the same transaction
 	private boolean implied;
@@ -39,9 +42,9 @@ abstract public class MemoryAtomicEvent implements XEvent {
 			throw new IllegalArgumentException("target must not be null");
 		}
 		
-		assert !implied
-		        || (inTrans && changeType == ChangeType.REMOVE && target.getParent() != null);
-		assert changeType != ChangeType.TRANSACTION;
+		XyAssert.xyAssert(!implied
+		        || (inTrans && changeType == ChangeType.REMOVE && target.getParent() != null));
+		XyAssert.xyAssert(changeType != ChangeType.TRANSACTION);
 		
 		this.target = target;
 		this.changeType = changeType;
@@ -169,7 +172,6 @@ abstract public class MemoryAtomicEvent implements XEvent {
 		
 		int result = 0;
 		
-		// changeType is never null
 		result ^= this.changeType.hashCode();
 		
 		// actor
@@ -197,7 +199,7 @@ abstract public class MemoryAtomicEvent implements XEvent {
 		} else if(rev == XEvent.RevisionNotAvailable) {
 			return "?";
 		} else {
-			assert rev >= 0;
+			XyAssert.xyAssert(rev >= 0);
 			return Long.toString(rev);
 		}
 	}

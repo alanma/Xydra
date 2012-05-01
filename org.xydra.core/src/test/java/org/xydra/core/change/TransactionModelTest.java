@@ -26,6 +26,7 @@ import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.impl.memory.MemoryModel;
 import org.xydra.core.model.impl.memory.MemoryRepository;
+import org.xydra.sharedutils.XyAssert;
 
 
 /*
@@ -592,7 +593,7 @@ public class TransactionModelTest {
 		        .getObject(this.object.getId());
 		
 		// make sure there is no field with this ID
-		assert !transObject.hasField(newFieldId);
+		XyAssert.xyAssert(!transObject.hasField(newFieldId));
 		
 		// add the field
 		XCommand addCommand = factory.createAddFieldCommand(transObject.getAddress(), newFieldId,
@@ -654,7 +655,7 @@ public class TransactionModelTest {
 		        .getObject(this.object.getId());
 		
 		// make sure there is no field with this ID
-		assert !transObject.hasField(newFieldId);
+		XyAssert.xyAssert(!transObject.hasField(newFieldId));
 		
 		// try to remove not existing field
 		XAddress temp = transObject.getAddress();
@@ -756,7 +757,7 @@ public class TransactionModelTest {
 		XValue value = X.getValueFactory().createStringValue("test");
 		
 		// add a value to a not existing field, should fail
-		assert !transObject.hasField(newFieldId);
+		XyAssert.xyAssert(!transObject.hasField(newFieldId));
 		
 		XAddress temp = transObject.getAddress();
 		XAddress address = XX.toAddress(temp.getRepository(), temp.getModel(), temp.getObject(),
@@ -875,7 +876,7 @@ public class TransactionModelTest {
 		XValue value = X.getValueFactory().createStringValue("test");
 		
 		// change a value of a not existing field, should fail
-		assert !transObject.hasField(newFieldId);
+		XyAssert.xyAssert(!transObject.hasField(newFieldId));
 		
 		XAddress temp = transObject.getAddress();
 		XAddress address = XX.toAddress(temp.getRepository(), temp.getModel(), temp.getObject(),
@@ -1000,7 +1001,7 @@ public class TransactionModelTest {
 		        .getObject(this.object.getId());
 		
 		// remove a value from a not existing field, should fail
-		assert !transObject.hasField(newFieldId);
+		XyAssert.xyAssert(!transObject.hasField(newFieldId));
 		
 		XAddress temp = transObject.getAddress();
 		XAddress address = XX.toAddress(temp.getRepository(), temp.getModel(), temp.getObject(),
@@ -1222,10 +1223,10 @@ public class TransactionModelTest {
 		builder.addValue(fieldAddress2, XCommand.NEW, value);
 		
 		// add failing command
-		assert type == XType.XMODEL || type == XType.XOBJECT || type == XType.XFIELD;
+		XyAssert.xyAssert(type == XType.XMODEL || type == XType.XOBJECT || type == XType.XFIELD);
 		
 		if(type == XType.XMODEL) {
-			assert changeType != ChangeType.CHANGE;
+			XyAssert.xyAssert(changeType != ChangeType.CHANGE);
 			
 			switch(changeType) {
 			case ADD:
@@ -1243,7 +1244,7 @@ public class TransactionModelTest {
 			}
 			
 		} else if(type == XType.XOBJECT) {
-			assert changeType != ChangeType.CHANGE;
+			XyAssert.xyAssert(changeType != ChangeType.CHANGE);
 			
 			switch(changeType) {
 			case ADD:

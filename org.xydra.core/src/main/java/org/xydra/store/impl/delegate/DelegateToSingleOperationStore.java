@@ -22,6 +22,7 @@ import org.xydra.base.rmof.XReadableObject;
 import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.AuthorisationException;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.Callback;
@@ -95,7 +96,7 @@ public class DelegateToSingleOperationStore implements XydraStore {
 		}
 		
 		synchronized protected void addResult(int index, BatchedResult<T> result) {
-			assert this.batchedResult[index] == null;
+			XyAssert.xyAssert(this.batchedResult[index] == null);
 			this.batchedResult[index] = result;
 			this.resultsRemaining--;
 			if(this.resultsRemaining == 0) {
@@ -217,7 +218,7 @@ public class DelegateToSingleOperationStore implements XydraStore {
 			return fixAtomicCommand(soc, idx, (XAtomicCommand)command);
 		}
 		
-		assert command instanceof XTransaction;
+		XyAssert.xyAssert(command instanceof XTransaction);
 		XTransaction trans = (XTransaction)command;
 		
 		boolean isRelative = false;
@@ -261,19 +262,19 @@ public class DelegateToSingleOperationStore implements XydraStore {
 		}
 		
 		// wait for the result of the command we depend on
-		assert soc[index] != null;
+		XyAssert.xyAssert(soc[index] != null); assert soc[index] != null;
 		long rev = soc[index].getResult();
 		
 		if(ac instanceof XRepositoryCommand) {
-			assert ac.getChangeType() == ChangeType.REMOVE;
+			XyAssert.xyAssert(ac.getChangeType() == ChangeType.REMOVE);
 			return MemoryRepositoryCommand.createRemoveCommand(ac.getTarget(), rev,
 			        ((XRepositoryCommand)ac).getModelId());
 		} else if(ac instanceof XModelCommand) {
-			assert ac.getChangeType() == ChangeType.REMOVE;
+			XyAssert.xyAssert(ac.getChangeType() == ChangeType.REMOVE);
 			return MemoryModelCommand.createRemoveCommand(ac.getTarget(), rev,
 			        ((XModelCommand)ac).getObjectId());
 		} else if(ac instanceof XObjectCommand) {
-			assert ac.getChangeType() == ChangeType.REMOVE;
+			XyAssert.xyAssert(ac.getChangeType() == ChangeType.REMOVE);
 			return MemoryObjectCommand.createRemoveCommand(ac.getTarget(), rev,
 			        ((XObjectCommand)ac).getFieldId());
 		} else if(ac instanceof XFieldCommand) {
@@ -533,7 +534,7 @@ public class DelegateToSingleOperationStore implements XydraStore {
 			}
 			return false;
 		}
-		assert loginCallback.getResult() != null && loginCallback.getResult() == Boolean.TRUE;
+		XyAssert.xyAssert(loginCallback.getResult() != null && loginCallback.getResult() == Boolean.TRUE);
 		return true;
 	}
 	

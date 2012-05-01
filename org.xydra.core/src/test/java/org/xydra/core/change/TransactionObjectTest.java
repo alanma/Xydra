@@ -25,6 +25,7 @@ import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.impl.memory.MemoryModel;
 import org.xydra.core.model.impl.memory.MemoryObject;
 import org.xydra.core.model.impl.memory.MemoryRepository;
+import org.xydra.sharedutils.XyAssert;
 
 
 /*
@@ -935,10 +936,10 @@ public class TransactionObjectTest {
 		builder.addValue(fieldAddress2, XCommand.NEW, value);
 		
 		// add failing command
-		assert type == XType.XOBJECT || type == XType.XFIELD;
+		XyAssert.xyAssert(type == XType.XOBJECT || type == XType.XFIELD);
 		
 		if(type == XType.XOBJECT) {
-			assert changeType != ChangeType.CHANGE;
+			XyAssert.xyAssert(changeType != ChangeType.CHANGE);
 			
 			switch(changeType) {
 			case ADD:

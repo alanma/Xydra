@@ -6,6 +6,7 @@ import java.util.List;
 import org.xydra.base.XAddress;
 import org.xydra.base.change.XEvent;
 import org.xydra.core.model.XChangeLogState;
+import org.xydra.sharedutils.XyAssert;
 
 
 // TODO merge this into memory change log?
@@ -44,9 +45,9 @@ public class MemoryChangeLogState implements XChangeLogState {
 			this.events.add(null);
 		} else {
 			
-			assert this.baseAddr.equalsOrContains(event.getChangedEntity());
-			assert event.getRevisionNumber() == getCurrentRevisionNumber() + 1;
-			assert !event.inTransaction();
+			XyAssert.xyAssert(this.baseAddr.equalsOrContains(event.getChangedEntity()));
+			XyAssert.xyAssert(event.getRevisionNumber() == getCurrentRevisionNumber() + 1);
+			XyAssert.xyAssert(!event.inTransaction());
 			
 			this.events.add(event);
 		}
@@ -65,7 +66,7 @@ public class MemoryChangeLogState implements XChangeLogState {
 	@Override
     public XEvent getEvent(long revisionNumber) {
 		XEvent event = this.events.get((int)(revisionNumber - this.revisionNumber));
-		assert event == null || event.getRevisionNumber() == revisionNumber;
+		XyAssert.xyAssert(event == null || event.getRevisionNumber() == revisionNumber);
 		return event;
 	}
 	
@@ -103,7 +104,7 @@ public class MemoryChangeLogState implements XChangeLogState {
 			this.events.remove(this.events.size() - 1); // remove last element
 		}
 		
-		assert revisionNumber == getCurrentRevisionNumber();
+		XyAssert.xyAssert(revisionNumber == getCurrentRevisionNumber());
 		
 		return true;
 	}

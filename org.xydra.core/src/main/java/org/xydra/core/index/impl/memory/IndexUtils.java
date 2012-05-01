@@ -1,5 +1,6 @@
 package org.xydra.core.index.impl.memory;
 
+import org.xydra.annotations.NeverNull;
 import org.xydra.base.X;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
@@ -10,6 +11,7 @@ import org.xydra.base.value.XIntegerValue;
 import org.xydra.base.value.XLongValue;
 import org.xydra.base.value.XStringValue;
 import org.xydra.base.value.XValue;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -28,11 +30,11 @@ public class IndexUtils {
 	 * {@link XIntegerValue}, {@link XBooleanValue}, {@link XLongValue},
 	 * {@link XID}.
 	 * 
-	 * @param value The value to transform into an {@link XID}. May never be
-	 *            null.
+	 * @param value The value to transform into an {@link XID}.
 	 * @return an XID parsed from an encoded XValue
 	 */
-	public static XID valueToXID(XValue value) {
+	public static XID valueToXID(@NeverNull XValue value) {
+		XyAssert.xyAssert(value != null);
 		assert value != null;
 		String key;
 		if(value instanceof XStringValue) {

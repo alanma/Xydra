@@ -15,6 +15,7 @@ import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.core.XCopyUtils;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
 
@@ -68,7 +69,7 @@ public class PersistenceOnStore implements XydraPersistence {
 			if(e != null) {
 				throw new StoreException("Callback returned an error", e);
 			}
-			assert callback.getEffect().length == 1;
+			XyAssert.xyAssert(callback.getEffect().length == 1);
 			e = callback.getEffect()[0].getException();
 			if(e != null) {
 				throw new StoreException("Callback effect[0] returned an error", e);
@@ -89,7 +90,7 @@ public class PersistenceOnStore implements XydraPersistence {
 			if(e != null) {
 				throw new StoreException("Callback returned an error", e);
 			}
-			assert callback.getEffect().length == 1;
+			XyAssert.xyAssert(callback.getEffect().length == 1);
 			e = callback.getEffect()[0].getException();
 			if(e != null) {
 				throw new StoreException("Callback effect[0] returned an error", e);
@@ -124,7 +125,7 @@ public class PersistenceOnStore implements XydraPersistence {
 			if(e != null) {
 				throw new StoreException("Callback returned an error", e);
 			}
-			assert callback.getEffect().length == 1;
+			XyAssert.xyAssert(callback.getEffect().length == 1);
 			e = callback.getEffect()[0].getException();
 			if(e != null) {
 				throw new StoreException("Callback effect[0] returned an error", e);
@@ -144,7 +145,7 @@ public class PersistenceOnStore implements XydraPersistence {
 			if(e != null) {
 				throw new StoreException("Callback returned an error", e);
 			}
-			assert callback.getEffect().length == 1;
+			XyAssert.xyAssert(callback.getEffect().length == 1);
 			e = callback.getEffect()[0].getException();
 			if(e != null) {
 				throw new StoreException("Callback effect[0] returned an error", e);
@@ -165,7 +166,7 @@ public class PersistenceOnStore implements XydraPersistence {
 			if(e != null) {
 				throw new StoreException("Callback returned an error", e);
 			}
-			assert callback.getEffect().length == 1;
+			XyAssert.xyAssert(callback.getEffect().length == 1);
 			e = callback.getEffect()[0].getException();
 			if(e != null) {
 				throw new StoreException("Callback effect[0] returned an error", e);

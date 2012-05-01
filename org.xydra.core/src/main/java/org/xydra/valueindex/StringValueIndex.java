@@ -7,6 +7,7 @@ import org.xydra.base.XType;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.value.XValue;
 import org.xydra.index.query.EqualsConstraint;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -104,7 +105,7 @@ public class StringValueIndex implements ValueIndex {
 	}
 	
 	private XValue getValueForIndex(XAddress fieldAddress, XValue value) {
-		assert fieldAddress.getAddressedType() == XType.XFIELD;
+		XyAssert.xyAssert(fieldAddress.getAddressedType() == XType.XFIELD);
 		
 		if(!this.checkEntrySize) {
 			return value;

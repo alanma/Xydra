@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import org.xydra.annotations.NeverNull;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
@@ -148,10 +149,11 @@ public class XV {
 	
 	/**
 	 * @param value may be null or {@link XIDSetValue}
-	 * @return always a Set<XID>, never null
+	 * @return always a Set<XID>
 	 * @throws IllegalArgumentException if value is not an {@link XIDSetValue}
 	 */
-	public static Set<XID> toIDSet(XValue value) {
+	public static @NeverNull
+	Set<XID> toIDSet(XValue value) {
 		if(value == null) {
 			return Collections.emptySet();
 		} else {

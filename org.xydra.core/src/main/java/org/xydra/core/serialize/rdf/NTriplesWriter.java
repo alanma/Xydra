@@ -4,6 +4,7 @@ import org.xydra.base.XAddress;
 import org.xydra.base.minio.MiniWriter;
 import org.xydra.base.value.ValueType;
 import org.xydra.base.value.XValue;
+import org.xydra.sharedutils.XyAssert;
 
 
 public class NTriplesWriter {
@@ -61,7 +62,7 @@ public class NTriplesWriter {
 	}
 	
 	private static String toLiteral(XValue v) {
-		assert resultsInJustOneTriple(v);
+		XyAssert.xyAssert(resultsInJustOneTriple(v));
 		switch(v.getType()) {
 		case Address:
 		case Boolean:

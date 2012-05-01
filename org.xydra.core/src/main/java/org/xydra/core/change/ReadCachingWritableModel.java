@@ -22,6 +22,7 @@ import org.xydra.index.query.Pair;
 import org.xydra.index.query.Wildcard;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.GetWithAddressRequest;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
@@ -86,8 +87,8 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 	 *            content at constructor call time
 	 */
 	public ReadCachingWritableModel(final XWritableModel base, boolean prefetchModel) {
-		assert base != null;
-		assert !(base instanceof ReadCachingWritableModel);
+		XyAssert.xyAssert(base != null); assert base != null;
+		XyAssert.xyAssert(!(base instanceof ReadCachingWritableModel));
 		this.base = base;
 		this.cache = new MapMapIndex<XID,XID,XValue>();
 		this.antiCache = new MapMapIndex<XID,XID,XValue>();
@@ -123,8 +124,8 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 	 * @param persistence for loading snapsnots
 	 */
 	public ReadCachingWritableModel(final XWritableModel base, XydraPersistence persistence) {
-		assert base != null;
-		assert !(base instanceof ReadCachingWritableModel);
+		XyAssert.xyAssert(base != null); assert base != null;
+		XyAssert.xyAssert(!(base instanceof ReadCachingWritableModel));
 		this.base = base;
 		this.cache = new MapMapIndex<XID,XID,XValue>();
 		// prefetching
@@ -148,7 +149,7 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 	
 	@Override
 	public XWritableObject createObject(XID objectId) {
-		assert objectId != null;
+		XyAssert.xyAssert(objectId != null); assert objectId != null;
 		if(!hasObject(objectId)) {
 			this.antiCache.index(objectId, NOFIELD, NOVALUE);
 		}
@@ -159,7 +160,7 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 	protected XValue field_getValue(XID objectId, XID fieldId) {
 		assert hasObject(objectId) : "Object '" + resolveObject(objectId)
 		        + "' not found when looking for field '" + fieldId + "'";
-		assert getObject(objectId).hasField(fieldId);
+		XyAssert.xyAssert(getObject(objectId).hasField(fieldId));
 		
 		Pair<XID,XID> p = new Pair<XID,XID>(objectId, fieldId);
 		XValue result;
@@ -177,7 +178,7 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 	
 	private XValue retrieveValueFromSourceAndCache(XWritableModel sourceModel, XID objectId,
 	        XID fieldId) {
-		assert sourceModel != null;
+		XyAssert.xyAssert(sourceModel != null); assert sourceModel != null;
 		/* base might never have seen object or field */
 		XWritableObject sourceObject = sourceModel.getObject(objectId);
 		if(sourceObject == null) {
@@ -188,15 +189,15 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 			return null;
 		}
 		XValue sourceValue = sourceField.getValue();
-		assert sourceValue == null || !sourceValue.equals(NOVALUE);
-		assert sourceObject.getId().equals(objectId);
-		assert sourceField.getId().equals(fieldId);
+		XyAssert.xyAssert(sourceValue == null || !sourceValue.equals(NOVALUE));
+		XyAssert.xyAssert(sourceObject.getId().equals(objectId));
+		XyAssert.xyAssert(sourceField.getId().equals(fieldId));
 		// index also if null
 		this.cache.index(objectId, fieldId, sourceValue);
 		this.fieldsOfWhichTheValueIsKnown.add(new Pair<XID,XID>(objectId, fieldId));
 		
-		assert field_getValue(objectId, fieldId) == null
-		        || !field_getValue(objectId, fieldId).equals(NOVALUE);
+		XyAssert.xyAssert(field_getValue(objectId, fieldId) == null
+		        || !field_getValue(objectId, fieldId).equals(NOVALUE));
 		
 		return sourceValue;
 	}
@@ -204,10 +205,10 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 	@Override
 	protected boolean field_setValue(XID objectId, XID fieldId, XValue value) {
 		throw new RuntimeException("a read cache cannot set values");
-		// assert objectId != null;
-		// assert fieldId != null;
+		// XyAssert.xyAssert(objectId != null); assert objectId != null;
+		// XyAssert.xyAssert(fieldId != null); assert fieldId != null;
 		// assert hasObject(objectId) : "Expected " + objectId;
-		// assert getObject(objectId).hasField(fieldId);
+		// XyAssert.xyAssert(getObject(objectId).hasField(fieldId));
 		//
 		// // NOP?
 		// XValue v = field_getValue(objectId, fieldId);
@@ -304,9 +305,9 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 	protected XWritableField object_createField(XID objectId, XID fieldId) {
 		throw new RuntimeException("a read cache cannot access create");
 		//
-		// assert objectId != null;
-		// assert fieldId != null;
-		// assert this.hasObject(objectId);
+		// XyAssert.xyAssert(objectId != null); assert objectId != null;
+		// XyAssert.xyAssert(fieldId != null); assert fieldId != null;
+		// XyAssert.xyAssert(this.hasObject(objectId));
 		// if(!object_hasField(objectId, fieldId)) {
 		// // index
 		// this.cache.index(objectId, fieldId, NOVALUE);
@@ -316,8 +317,8 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 	
 	@Override
 	protected boolean object_hasField(XID objectId, XID fieldId) {
-		assert objectId != null;
-		assert fieldId != null;
+		XyAssert.xyAssert(objectId != null); assert objectId != null;
+		XyAssert.xyAssert(fieldId != null); assert fieldId != null;
 		if(this.cache.tupleIterator(new EqualsConstraint<XID>(objectId),
 		        new EqualsConstraint<XID>(fieldId)).hasNext()) {
 			return true;
@@ -345,21 +346,21 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 	
 	@Override
 	protected boolean object_isEmpty(XID objectId) {
-		assert objectId != null;
+		XyAssert.xyAssert(objectId != null); assert objectId != null;
 		return object_idsAsSet(objectId).isEmpty();
 	}
 	
 	@Override
 	protected Iterator<XID> object_iterator(XID objectId) {
-		assert objectId != null;
+		XyAssert.xyAssert(objectId != null); assert objectId != null;
 		return object_idsAsSet(objectId).iterator();
 	}
 	
 	@Override
 	protected boolean object_removeField(XID objectId, XID fieldId) {
 		throw new RuntimeException("a read cache cannot access remove");
-		// assert objectId != null;
-		// assert fieldId != null;
+		// XyAssert.xyAssert(objectId != null); assert objectId != null;
+		// XyAssert.xyAssert(fieldId != null); assert fieldId != null;
 		// boolean b = object_hasField(objectId, fieldId);
 		// // deIndex
 		// this.cache.deIndex(objectId, fieldId);
@@ -367,7 +368,7 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 	}
 	
 	protected Set<XID> object_idsAsSet(XID objectId) {
-		assert objectId != null;
+		XyAssert.xyAssert(objectId != null); assert objectId != null;
 		if(this.objectIdsOfWhichAllFieldIdsAreKnown.contains(objectId)) {
 			// add all from cache
 			Set<XID> set = new HashSet<XID>();
@@ -403,7 +404,7 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 	@Override
 	public boolean removeObject(XID objectId) {
 		throw new RuntimeException("A read-cache cannot be changed");
-		// assert objectId != null;
+		// XyAssert.xyAssert(objectId != null); assert objectId != null;
 		// // deIndex
 		// IndexUtils.deIndex(this.cache, new EqualsConstraint<XID>(objectId),
 		// new Wildcard<XID>());

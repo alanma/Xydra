@@ -14,6 +14,7 @@ import org.xydra.base.rmof.XRevWritableField;
 import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.core.util.DumpUtils;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -42,7 +43,7 @@ public class SimpleObject implements Serializable, XRevWritableObject {
 	}
 	
 	public SimpleObject(XAddress address, long revisionNumber) {
-		assert address.getAddressedType() == XType.XOBJECT;
+		XyAssert.xyAssert(address.getAddressedType() == XType.XOBJECT);
 		this.address = address;
 		this.revisionNumber = revisionNumber;
 		this.fields = new HashMap<XID,XRevWritableField>(2);

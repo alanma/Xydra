@@ -24,6 +24,7 @@ import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.value.XIDSetValue;
 import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.access.XGroupDatabaseWithListeners;
 import org.xydra.store.access.XGroupEvent;
 import org.xydra.store.access.XGroupListener;
@@ -77,14 +78,14 @@ public class PartialGroupDatabaseOnWritableModel implements XGroupListener {
 			return;
 		}
 		
-		assert event instanceof XAtomicEvent;
+		XyAssert.xyAssert(event instanceof XAtomicEvent);
 		
 		/* We care for: {group}.hasMember = {actor, actor, ...} */
 		XAddress target = event.getTarget();
 		switch(target.getAddressedType()) {
 		case XMODEL:
 			// if REMOVE {model}.{group}: remove group in index
-			assert event instanceof XModelEvent;
+			XyAssert.xyAssert(event instanceof XModelEvent);
 			if(event.getChangeType() == ChangeType.REMOVE) {
 				fastDatabase.removeGroup(event.getChangedEntity().getObject());
 			}

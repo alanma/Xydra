@@ -10,6 +10,7 @@ import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
 import org.xydra.index.XI;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -214,7 +215,7 @@ public class MemoryAddress implements XAddress, Serializable {
 			return XType.XMODEL;
 		} else {
 			// R--- => repository
-			assert this.repository != null;
+			XyAssert.xyAssert(this.repository != null); assert this.repository != null;
 			return XType.XREPOSITORY;
 		}
 	}
@@ -241,7 +242,7 @@ public class MemoryAddress implements XAddress, Serializable {
 			// ???F
 			if(this.object == null) {
 				// ---F => no parent
-				assert this.model == null && this.repository == null;
+				XyAssert.xyAssert(this.model == null && this.repository == null);
 				return null;
 			}
 			// ??OF => ??O-
@@ -252,7 +253,7 @@ public class MemoryAddress implements XAddress, Serializable {
 			// ??O-
 			if(this.model == null) {
 				// --O- => no parent
-				assert this.repository == null;
+				XyAssert.xyAssert(this.repository == null);
 				return null;
 			}
 			// ?MO- => ?M--
@@ -270,7 +271,7 @@ public class MemoryAddress implements XAddress, Serializable {
 		}
 		
 		// R---
-		assert this.repository != null;
+		XyAssert.xyAssert(this.repository != null); assert this.repository != null;
 		return null;
 	}
 	

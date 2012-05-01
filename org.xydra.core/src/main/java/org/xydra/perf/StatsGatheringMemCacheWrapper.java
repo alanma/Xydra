@@ -9,6 +9,7 @@ import java.util.Set;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.minio.MiniIOException;
 import org.xydra.base.minio.MiniStreamWriter;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.IMemCache;
 import org.xydra.store.impl.memory.LocalMemcache.IdentifiableImpl;
 
@@ -48,7 +49,7 @@ public class StatsGatheringMemCacheWrapper implements IMemCache {
 	
 	@Override
 	public boolean containsKey(Object key) {
-		assert key instanceof String;
+		XyAssert.xyAssert(key instanceof String);
 		count("containsKey");
 		return this.base.containsKey(key instanceof String ? key : key.toString());
 	}
@@ -70,7 +71,7 @@ public class StatsGatheringMemCacheWrapper implements IMemCache {
 	
 	@Override
 	public Object get(Object key) {
-		assert key instanceof String;
+		XyAssert.xyAssert(key instanceof String);
 		count("get");
 		String usedKey;
 		if(key instanceof String) {

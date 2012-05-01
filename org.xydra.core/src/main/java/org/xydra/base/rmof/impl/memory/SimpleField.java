@@ -10,6 +10,7 @@ import org.xydra.base.rmof.XRevWritableField;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.value.XValue;
 import org.xydra.index.XI;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -49,7 +50,7 @@ public class SimpleField implements Serializable, XRevWritableField {
 	 * @param value can be null
 	 */
 	public SimpleField(XAddress address, long revisionNumber, XValue value) {
-		assert address.getAddressedType() == XType.XFIELD;
+		XyAssert.xyAssert(address.getAddressedType() == XType.XFIELD);
 		this.address = address;
 		this.revisionNumber = revisionNumber;
 		this.value = value;

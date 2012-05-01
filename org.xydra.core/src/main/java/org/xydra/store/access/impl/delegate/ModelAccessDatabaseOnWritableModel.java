@@ -20,6 +20,7 @@ import org.xydra.base.value.XValue;
 import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.access.XAccessRightDefinition;
 import org.xydra.store.access.XAccessRightValue;
 import org.xydra.store.access.impl.memory.MemoryAccessDefinition;
@@ -50,13 +51,13 @@ public class ModelAccessDatabaseOnWritableModel {
 	 * @param rightsModel which is decorated with a nice access DB API
 	 */
 	public ModelAccessDatabaseOnWritableModel(XWritableModel rightsModel) {
-		assert rightsModel != null;
+		XyAssert.xyAssert(rightsModel != null); assert rightsModel != null;
 		this.rightsModel = rightsModel;
 	}
 	
 	public XAccessRightValue getAccessDefinition(XID actor, XAddress resource, XID access)
 	        throws IllegalArgumentException {
-		assert resource.getAddressedType() != XType.XREPOSITORY;
+		XyAssert.xyAssert(resource.getAddressedType() != XType.XREPOSITORY);
 		return valueToAccessValue(WritableUtils.getValue(this.rightsModel, actor,
 		        PartialAuthorisationDatabaseOnWritableRepository.toFieldId(resource, access)));
 	}

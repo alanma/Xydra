@@ -12,6 +12,7 @@ import org.xydra.base.XX;
 import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableRepository;
 import org.xydra.base.rmof.XWritableRepository;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -35,7 +36,7 @@ public class SimpleRepository implements XRevWritableRepository, Serializable {
 	}
 	
 	public SimpleRepository(XAddress address) {
-		assert address.getAddressedType() == XType.XREPOSITORY;
+		XyAssert.xyAssert(address.getAddressedType() == XType.XREPOSITORY);
 		this.address = address;
 	}
 	

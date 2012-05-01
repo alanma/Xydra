@@ -30,6 +30,7 @@ import org.xydra.core.model.XObject;
 import org.xydra.core.model.impl.memory.AbstractEntity;
 import org.xydra.core.model.impl.memory.MemoryModel;
 import org.xydra.core.model.impl.memory.MemoryObject;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -338,7 +339,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 	 *         or {@link XCommand#FAILED} if the execution failed
 	 */
 	private long handleModelCommand(XModelCommand modelCommand, XLocalChangeCallback callback) {
-		assert callback != null;
+		XyAssert.xyAssert(callback != null); assert callback != null;
 		XID objectId = modelCommand.getChangedEntity().getObject();
 		
 		boolean objectExists = this.objectExists(objectId);
@@ -393,8 +394,8 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 			        .getObjectInTransaction(objectId);
 			
 			// remember: this actually is an InModelTransactionObject
-			assert object != null;
-			assert object instanceof InModelTransactionObject;
+			XyAssert.xyAssert(object != null); assert object != null;
+			XyAssert.xyAssert(object instanceof InModelTransactionObject);
 			
 			// check revision number
 			if(!modelCommand.isForced()
@@ -427,7 +428,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 	 *         or {@link XCommand#FAILED} if the execution failed
 	 */
 	private long handleObjectCommand(XObjectCommand objectCommand, XLocalChangeCallback callback) {
-		assert callback != null;
+		XyAssert.xyAssert(callback != null); assert callback != null;
 		
 		XID objectId = objectCommand.getChangedEntity().getObject();
 		boolean objectExists = this.objectExists(objectId);
@@ -440,8 +441,8 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 		XWritableObject object = (!this.inTransaction) ? this.getObject(objectId) : this
 		        .getObjectInTransaction(objectId);
 		// remember: this is actually an InModelTransactionObject
-		assert object != null;
-		assert object instanceof InModelTransactionObject;
+		XyAssert.xyAssert(object != null); assert object != null;
+		XyAssert.xyAssert(object instanceof InModelTransactionObject);
 		
 		XAddress fieldAddress = objectCommand.getChangedEntity();
 		boolean fieldExists = this.fieldExists(object, fieldAddress);
@@ -491,8 +492,8 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 			XWritableField field = (!this.inTransaction) ? this.getField(fieldAddress) : this
 			        .getFieldInTransaction(fieldAddress);
 			// remember: this actually is an InModelTransactionField
-			assert field != null;
-			assert field instanceof InModelTransactionField;
+			XyAssert.xyAssert(field != null); assert field != null;
+			XyAssert.xyAssert(field instanceof InModelTransactionField);
 			
 			// check revision number
 			if(!objectCommand.isForced()
@@ -525,7 +526,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 	 *         or {@link XCommand#FAILED} if the execution failed
 	 */
 	private long handleFieldCommand(XFieldCommand fieldCommand, XLocalChangeCallback callback) {
-		assert callback != null;
+		XyAssert.xyAssert(callback != null); assert callback != null;
 		
 		XID objectId = fieldCommand.getChangedEntity().getObject();
 		
@@ -537,8 +538,8 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 		XWritableObject object = (!this.inTransaction) ? this.getObject(objectId) : this
 		        .getObjectInTransaction(objectId);
 		// remember: this is actually an InModelTransactionObject
-		assert object != null;
-		assert object instanceof InModelTransactionObject;
+		XyAssert.xyAssert(object != null); assert object != null;
+		XyAssert.xyAssert(object instanceof InModelTransactionObject);
 		
 		// all commands concern fields -> check if it exists
 		XID fieldId = fieldCommand.getChangedEntity().getField();
@@ -556,8 +557,8 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 		}
 		
 		// remember: this actually is an InObjectTransactionField
-		assert field != null;
-		assert field instanceof InModelTransactionField;
+		XyAssert.xyAssert(field != null); assert field != null;
+		XyAssert.xyAssert(field instanceof InModelTransactionField);
 		
 		// check revision number
 		if(fieldCommand.getRevisionNumber() != field.getRevisionNumber()
@@ -622,7 +623,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 	private long handleTransaction(XTransaction transaction, XLocalChangeCallback callback) {
 		this.inTransaction = true;
 		
-		assert callback != null;
+		XyAssert.xyAssert(callback != null); assert callback != null;
 		/*
 		 * assert: transaction holds no further XTransactions (can not happen,
 		 * since instances of XTransactions can never hold other XTransactions)
@@ -651,7 +652,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 				
 				XID objectId = command.getChangedEntity().getObject();
 				XAddress objectAddress = command.getChangedEntity();
-				assert objectAddress.getAddressedType() == XType.XOBJECT;
+				XyAssert.xyAssert(objectAddress.getAddressedType() == XType.XOBJECT);
 				
 				if(mdlCmd.getChangeType() == ChangeType.ADD) {
 					if(!this.hasObject(objectId)) {
@@ -667,7 +668,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 						this.addObjectToTransactionModel(object, false);
 					}
 				} else {
-					assert mdlCmd.getChangeType() == ChangeType.REMOVE;
+					XyAssert.xyAssert(mdlCmd.getChangeType() == ChangeType.REMOVE);
 					
 					/*
 					 * forced commands to not have to be treated specially, if
@@ -682,7 +683,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 				XObjectCommand objCmd = (XObjectCommand)command;
 				
 				XAddress fieldAddress = command.getChangedEntity();
-				assert fieldAddress.getAddressedType() == XType.XFIELD;
+				XyAssert.xyAssert(fieldAddress.getAddressedType() == XType.XFIELD);
 				
 				if(objCmd.getChangeType() == ChangeType.ADD) {
 					if(!this.hasField(fieldAddress)) {
@@ -698,7 +699,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 						this.addFieldToTransactionModel(field, false);
 					}
 				} else {
-					assert objCmd.getChangeType() == ChangeType.REMOVE;
+					XyAssert.xyAssert(objCmd.getChangeType() == ChangeType.REMOVE);
 					
 					/*
 					 * forced commands to not have to be treated specially, if
@@ -710,9 +711,9 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 					this.removeFieldFromTransactionModel(fieldAddress, false);
 				}
 			} else {
-				assert command instanceof XFieldCommand;
+				XyAssert.xyAssert(command instanceof XFieldCommand);
 				XAddress fieldAddress = command.getChangedEntity();
-				assert fieldAddress.getAddressedType() == XType.XFIELD;
+				XyAssert.xyAssert(fieldAddress.getAddressedType() == XType.XFIELD);
 				
 				/*
 				 * the action that has to be executed for field commands is
@@ -930,7 +931,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 		if(this.inTransaction && this.transChangedObjects.containsKey(objectId)) {
 			object = this.transChangedObjects.get(objectId);
 		} else {
-			assert object == null;
+			XyAssert.xyAssert(object == null);
 			object = this.getObject(objectId);
 		}
 		
@@ -964,7 +965,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 		if(this.inTransaction && this.transChangedFields.containsKey(fieldAddress)) {
 			field = this.transChangedFields.get(fieldAddress);
 		} else {
-			assert field == null;
+			XyAssert.xyAssert(field == null);
 			field = this.getField(fieldAddress);
 		}
 		
@@ -1103,7 +1104,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 	 * @return the specified field or null if it doesn't exist
 	 */
 	protected XWritableField getField(XAddress address) {
-		assert address.getAddressedType() == XType.XFIELD;
+		XyAssert.xyAssert(address.getAddressedType() == XType.XFIELD);
 		XWritableField field = null;
 		
 		if(this.changedFields.containsKey(address)) {
@@ -1136,7 +1137,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 	 * @return true, if the field exists, false otherwise
 	 */
 	private boolean hasField(XAddress address) {
-		assert address.getAddressedType() == XType.XFIELD;
+		XyAssert.xyAssert(address.getAddressedType() == XType.XFIELD);
 		
 		if(this.changedFields.containsKey(address)) {
 			return true;
@@ -1165,7 +1166,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 	 *         exist)
 	 */
 	protected XValue getValue(XAddress address) {
-		assert address.getAddressedType() == XType.XFIELD;
+		XyAssert.xyAssert(address.getAddressedType() == XType.XFIELD);
 		
 		if(this.removedFields.contains(address)) {
 			return null;
@@ -1194,7 +1195,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 	 * @return true, if it is empty, false otherwise
 	 */
 	protected boolean objectIsEmpty(XID objectId) {
-		assert this.hasObject(objectId);
+		XyAssert.xyAssert(this.hasObject(objectId));
 		XWritableObject object = this.baseModel.getObject(objectId);
 		
 		// check whether really existing fields were "removed"
@@ -1233,7 +1234,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 	 *         specified object
 	 */
 	protected Iterator<XID> objectIterator(XID objectId) {
-		assert this.hasObject(objectId);
+		XyAssert.xyAssert(this.hasObject(objectId));
 		
 		XWritableObject object = this.baseModel.getObject(objectId);
 		HashSet<XID> set = new HashSet<XID>();

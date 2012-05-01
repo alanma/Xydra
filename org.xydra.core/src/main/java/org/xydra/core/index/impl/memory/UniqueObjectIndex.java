@@ -12,6 +12,7 @@ import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.value.XValue;
 import org.xydra.core.index.IUniqueObjectIndex;
 import org.xydra.core.model.XObject;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -118,7 +119,7 @@ public class UniqueObjectIndex extends AbstractObjectIndex implements IUniqueObj
 			return null;
 		}
 		XID indexValue = (XID)indexField.getValue();
-		assert indexValue != null;
+		XyAssert.xyAssert(indexValue != null); assert indexValue != null;
 		return indexValue;
 	}
 	

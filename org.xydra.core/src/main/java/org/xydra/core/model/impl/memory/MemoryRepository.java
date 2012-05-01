@@ -34,6 +34,7 @@ import org.xydra.core.model.XChangeLogState;
 import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -83,9 +84,9 @@ public class MemoryRepository extends AbstractEntity implements XRepository, Ser
 	 *            of this MemoryRepository.
 	 */
 	public MemoryRepository(XID actorId, String passwordHash, XRevWritableRepository repositoryState) {
-		assert repositoryState != null;
+		XyAssert.xyAssert(repositoryState != null); assert repositoryState != null;
 		
-		assert actorId != null;
+		XyAssert.xyAssert(actorId != null); assert actorId != null;
 		this.sessionActor = actorId;
 		this.sessionPasswordHash = passwordHash;
 		this.state = repositoryState;
@@ -142,7 +143,7 @@ public class MemoryRepository extends AbstractEntity implements XRepository, Ser
 		synchronized(this) {
 			long result = executeRepositoryCommand(command);
 			MemoryModel model = getModel(modelId);
-			assert result == XCommand.FAILED || model != null;
+			XyAssert.xyAssert(result == XCommand.FAILED || model != null);
 			return model;
 		}
 	}
@@ -161,7 +162,7 @@ public class MemoryRepository extends AbstractEntity implements XRepository, Ser
 		
 		MemoryModel model = new MemoryModel(this.sessionActor, this.sessionPasswordHash, this,
 		        modelState, ls);
-		assert model.getRevisionNumber() == 0;
+		XyAssert.xyAssert(model.getRevisionNumber() == 0);
 		
 		// in memory
 		this.loadedModels.put(model.getId(), model);
@@ -170,7 +171,7 @@ public class MemoryRepository extends AbstractEntity implements XRepository, Ser
 		model.eventQueue.enqueueRepositoryEvent(this, event);
 		model.eventQueue.setLogging(oldLogging);
 		
-		assert model.eventQueue.getLocalChanges().isEmpty();
+		XyAssert.xyAssert(model.eventQueue.getLocalChanges().isEmpty());
 		model.eventQueue.newLocalChange(command, callback);
 		
 		model.eventQueue.setSyncRevision(-1);
@@ -472,7 +473,7 @@ public class MemoryRepository extends AbstractEntity implements XRepository, Ser
 		        XCommand.FORCED, modelId);
 		
 		long result = executeRepositoryCommand(command);
-		assert result >= 0 || result == XCommand.NOCHANGE;
+		XyAssert.xyAssert(result >= 0 || result == XCommand.NOCHANGE);
 		return result != XCommand.NOCHANGE;
 	}
 	
@@ -505,7 +506,7 @@ public class MemoryRepository extends AbstractEntity implements XRepository, Ser
 	
 	@Override
 	public void setSessionActor(XID actorId, String passwordHash) {
-		assert actorId != null;
+		XyAssert.xyAssert(actorId != null); assert actorId != null;
 		this.sessionActor = actorId;
 		this.sessionPasswordHash = passwordHash;
 		for(XModel model : this.loadedModels.values()) {
@@ -514,7 +515,7 @@ public class MemoryRepository extends AbstractEntity implements XRepository, Ser
 	}
 	
 	protected synchronized void updateRemoved(MemoryModel model) {
-		assert model != null;
+		XyAssert.xyAssert(model != null); assert model != null;
 		synchronized(model.eventQueue) {
 			XID modelId = model.getId();
 			boolean hasModel = hasModel(modelId);

@@ -25,6 +25,7 @@ import org.xydra.index.XI;
 import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.Callback;
 import org.xydra.store.GetEventsRequest;
@@ -79,7 +80,7 @@ public class XSynchronizer {
 		if(!success) {
 			log.error("sync: error applying remote events");
 		}
-		assert success;
+		XyAssert.xyAssert(success);
 		
 	}
 	
@@ -102,7 +103,7 @@ public class XSynchronizer {
 		
 		protected void requestEnded(boolean noConnectionErrors) {
 			
-			assert XSynchronizer.this.requestRunning;
+			XyAssert.xyAssert(XSynchronizer.this.requestRunning);
 			
 			if(!noConnectionErrors) {
 				// Abort if there are connection errors.
@@ -149,8 +150,8 @@ public class XSynchronizer {
 		@Override
 		public void onSuccess(Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]> res) {
 			
-			assert res.getFirst().length == this.changes.size();
-			assert res.getSecond().length == 1;
+			XyAssert.xyAssert(res.getFirst().length == this.changes.size());
+			XyAssert.xyAssert(res.getSecond().length == 1);
 			
 			BatchedResult<Long>[] commandRess = res.getFirst();
 			BatchedResult<XEvent[]> eventsRes = res.getSecond()[0];
@@ -164,7 +165,7 @@ public class XSynchronizer {
 				BatchedResult<Long> commandRes = commandRess[i];
 				
 				if(commandRes.getException() != null) {
-					assert commandRes.getResult() == null;
+					XyAssert.xyAssert(commandRes.getResult() == null);
 					log.error("sync: error sending command", commandRes.getException());
 					success = false;
 					if(this.sc != null) {
@@ -173,7 +174,7 @@ public class XSynchronizer {
 					
 				} else {
 					
-					assert commandRes.getResult() != null;
+					XyAssert.xyAssert(commandRes.getResult() != null); assert commandRes.getResult() != null;
 					long commandRev = commandRes.getResult();
 					
 					// command successfully synchronized
@@ -209,7 +210,7 @@ public class XSynchronizer {
 						}
 						
 					} else {
-						assert commandRev == XCommand.FAILED;
+						XyAssert.xyAssert(commandRev == XCommand.FAILED);
 						if(!gotEvents) {
 							log.warn("sync: command failed but no new events, sync lost?");
 							// lost sync -> bad!!!
@@ -226,7 +227,7 @@ public class XSynchronizer {
 			}
 			
 			if(eventsRes.getException() != null) {
-				assert events == null;
+				XyAssert.xyAssert(events == null);
 				log.error("sync: error getting events while sending command",
 				        eventsRes.getException());
 				if(this.sc != null) {
@@ -236,7 +237,7 @@ public class XSynchronizer {
 				return;
 			}
 			
-			assert events != null;
+			XyAssert.xyAssert(events != null); assert events != null;
 			
 			applyEvents(events);
 			requestEnded(success);
@@ -252,11 +253,11 @@ public class XSynchronizer {
 		@Override
 		public void onSuccess(BatchedResult<XEvent[]>[] res) {
 			
-			assert res.length == 1;
+			XyAssert.xyAssert(res.length == 1);
 			BatchedResult<XEvent[]> eventsRes = res[0];
 			
 			if(eventsRes.getException() != null) {
-				assert eventsRes.getResult() == null;
+				XyAssert.xyAssert(eventsRes.getResult() == null);
 				log.error("sync: error getting events", eventsRes.getException());
 				if(this.sc != null) {
 					this.sc.onEventsError(eventsRes.getException());
@@ -265,7 +266,7 @@ public class XSynchronizer {
 				return;
 			}
 			
-			assert eventsRes.getResult() != null;
+			XyAssert.xyAssert(eventsRes.getResult() != null); assert eventsRes.getResult() != null;
 			
 			applyEvents(eventsRes.getResult());
 			requestEnded(true);
@@ -305,13 +306,13 @@ public class XSynchronizer {
 			return fixAtomicCommand(syncRev, idx, (XAtomicCommand)command);
 		}
 		
-		assert command instanceof XTransaction;
+		XyAssert.xyAssert(command instanceof XTransaction);
 		XTransaction trans = (XTransaction)command;
 		
 		boolean isRelative = false;
 		for(XAtomicCommand ac : trans) {
 			if(!ac.isForced() && ac.getRevisionNumber() > syncRev) {
-				assert ac.getRevisionNumber() < XCommand.RELATIVE_REV;
+				XyAssert.xyAssert(ac.getRevisionNumber() < XCommand.RELATIVE_REV);
 				isRelative = true;
 				break;
 			}
@@ -339,24 +340,24 @@ public class XSynchronizer {
 			return ac;
 		}
 		
-		assert ac.getRevisionNumber() < XCommand.RELATIVE_REV;
+		XyAssert.xyAssert(ac.getRevisionNumber() < XCommand.RELATIVE_REV);
 		
 		assert ac instanceof XFieldCommand || ac.getChangeType() != ChangeType.ADD : " add entity commands don't have real / relative revisions";
 		
 		long rev = ac.getRevisionNumber() - syncRev + XCommand.RELATIVE_REV;
 		
-		assert rev < XCommand.RELATIVE_REV + i;
+		XyAssert.xyAssert(rev < XCommand.RELATIVE_REV + i);
 		
 		if(ac instanceof XRepositoryCommand) {
-			assert ac.getChangeType() == ChangeType.REMOVE;
+			XyAssert.xyAssert(ac.getChangeType() == ChangeType.REMOVE);
 			return MemoryRepositoryCommand.createRemoveCommand(ac.getTarget(), rev,
 			        ((XRepositoryCommand)ac).getModelId());
 		} else if(ac instanceof XModelCommand) {
-			assert ac.getChangeType() == ChangeType.REMOVE;
+			XyAssert.xyAssert(ac.getChangeType() == ChangeType.REMOVE);
 			return MemoryModelCommand.createRemoveCommand(ac.getTarget(), rev,
 			        ((XModelCommand)ac).getObjectId());
 		} else if(ac instanceof XObjectCommand) {
-			assert ac.getChangeType() == ChangeType.REMOVE;
+			XyAssert.xyAssert(ac.getChangeType() == ChangeType.REMOVE);
 			return MemoryObjectCommand.createRemoveCommand(ac.getTarget(), rev,
 			        ((XObjectCommand)ac).getFieldId());
 		} else if(ac instanceof XFieldCommand) {
@@ -379,7 +380,7 @@ public class XSynchronizer {
 	
 	private void doSynchronize(XSynchronizationCallback sc, boolean isFirst) {
 		
-		assert XSynchronizer.this.requestRunning;
+		XyAssert.xyAssert(XSynchronizer.this.requestRunning);
 		
 		final List<XLocalChange> newChanges = new ArrayList<XLocalChange>();
 		boolean first = isFirst;
@@ -461,7 +462,7 @@ public class XSynchronizer {
 		if(sc != null) {
 			sc.onSuccess();
 		}
-		assert this.requestRunning;
+		XyAssert.xyAssert(this.requestRunning);
 		this.requestRunning = false;
 		
 	}

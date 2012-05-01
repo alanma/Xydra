@@ -8,6 +8,7 @@ import org.xydra.base.XAddress;
 import org.xydra.base.XType;
 import org.xydra.base.value.XValue;
 import org.xydra.index.query.EqualsConstraint;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -102,7 +103,7 @@ public class MemoryMapSetIndex implements ValueIndex {
 		}
 		
 		HashSet<ValueIndexEntry> set = this.map.get(key);
-		assert set != null;
+		XyAssert.xyAssert(set != null); assert set != null;
 		
 		Iterator<ValueIndexEntry> iterator = set.iterator();
 		

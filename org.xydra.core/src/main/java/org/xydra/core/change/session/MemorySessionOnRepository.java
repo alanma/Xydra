@@ -15,6 +15,7 @@ import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.rmof.XWritableRepository;
 import org.xydra.core.change.SessionCachedModel;
 import org.xydra.index.impl.IteratorUtils;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.GetWithAddressRequest;
 
 
@@ -89,13 +90,13 @@ public class MemorySessionOnRepository implements ISessionPersistence {
 	
 	@Override
 	public XReadableModel getModelSnapshot(GetWithAddressRequest modelRequest) {
-		assert modelRequest != null;
+		XyAssert.xyAssert(modelRequest != null); assert modelRequest != null;
 		return this.repo.getModel(modelRequest.address.getModel());
 	}
 	
 	@Override
 	public XReadableObject getObjectSnapshot(GetWithAddressRequest objectAddressRequest) {
-		assert objectAddressRequest != null;
+		XyAssert.xyAssert(objectAddressRequest != null); assert objectAddressRequest != null;
 		XWritableModel model = this.repo.getModel(objectAddressRequest.address.getModel());
 		if(model == null) {
 			return null;

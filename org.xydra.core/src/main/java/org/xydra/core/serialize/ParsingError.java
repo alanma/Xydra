@@ -1,5 +1,6 @@
 package org.xydra.core.serialize;
 
+import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
@@ -17,7 +18,11 @@ public class ParsingError extends IllegalArgumentException {
 		        cause);
 	}
 	
-	public ParsingError(XydraElement element, String message) {
+	/**
+	 * @param element
+	 * @param message
+	 */
+	public ParsingError(@NeverNull XydraElement element, String message) {
 		this(element, message, null);
 	}
 	

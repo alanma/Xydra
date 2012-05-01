@@ -5,6 +5,7 @@ import org.xydra.base.XID;
 import org.xydra.base.XType;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.value.XValue;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.AccessException;
 import org.xydra.store.access.XAuthorisationManager;
 
@@ -27,8 +28,8 @@ public class ArmProtectedBaseField implements XReadableField {
 		this.arm = arm;
 		this.actor = actor;
 		
-		assert field != null;
-		assert arm != null;
+		XyAssert.xyAssert(field != null); assert field != null;
+		XyAssert.xyAssert(arm != null); assert arm != null;
 	}
 	
 	protected void checkReadAccess() throws AccessException {

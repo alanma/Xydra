@@ -7,6 +7,7 @@ import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.core.serialize.Base64;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -163,7 +164,7 @@ public class SHA2 {
 		byte[] digestSha2 = SHA2.digest256(input);
 		String digestSha2Str = Base64.utf8(digestSha2);
 		
-		assert digestJavaxStr.equals(digestSha2Str);
+		XyAssert.xyAssert(digestJavaxStr.equals(digestSha2Str));
 	}
 	
 }

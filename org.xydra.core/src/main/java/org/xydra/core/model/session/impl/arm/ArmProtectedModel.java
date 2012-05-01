@@ -13,6 +13,7 @@ import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.session.XProtectedModel;
 import org.xydra.core.model.session.XProtectedObject;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.AccessException;
 import org.xydra.store.access.XAuthorisationManager;
 
@@ -75,7 +76,7 @@ public class ArmProtectedModel extends ArmProtectedBaseModel implements XProtect
 		
 		XObject object = this.model.createObject(objectId);
 		
-		assert object != null;
+		XyAssert.xyAssert(object != null); assert object != null;
 		
 		return new ArmProtectedObject(object, this.arm, this.actor);
 	}

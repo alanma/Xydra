@@ -15,6 +15,7 @@ import org.xydra.base.rmof.XWritableObject;
 import org.xydra.index.iterator.NoneIterator;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.GetWithAddressRequest;
 import org.xydra.store.ModelRevision;
 import org.xydra.store.impl.delegate.XydraPersistence;
@@ -46,7 +47,7 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 	
 	@Override
 	public XWritableObject createObject(XID objectId) {
-		assert this.persistence.hasManagedModel(this.modelId);
+		XyAssert.xyAssert(this.persistence.hasManagedModel(this.modelId));
 		
 		XWritableObject object = this.getObject(objectId);
 		if(object != null) {
@@ -159,7 +160,7 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 		XCommand command = X.getCommandFactory().createRemoveObjectCommand(
 		        this.persistence.getRepositoryId(), this.modelId, objectId, XCommand.FORCED, true);
 		long commandResult = this.persistence.executeCommand(this.executingActorId, command);
-		assert commandResult >= 0;
+		XyAssert.xyAssert(commandResult >= 0);
 		return result && commandResult >= 0;
 	}
 	

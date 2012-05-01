@@ -18,6 +18,7 @@ import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.IMemCache;
 
 
@@ -80,7 +81,7 @@ public class LocalMemcache implements IMemCache {
 	}
 	
 	private static final Object storedToValue(byte[] stored) {
-		assert stored != null;
+		XyAssert.xyAssert(stored != null); assert stored != null;
 		if(stored == NULL_VALUE) {
 			return null;
 		}
@@ -263,7 +264,7 @@ public class LocalMemcache implements IMemCache {
 					newValue = initialValue;
 				} else {
 					Object value = storedToValue(valueBytes);
-					assert value instanceof Long;
+					XyAssert.xyAssert(value instanceof Long);
 					long oldValue = (Long)value;
 					newValue = oldValue + entry.getValue();
 				}

@@ -18,6 +18,7 @@ import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.impl.memory.MemoryModel;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -170,7 +171,7 @@ public class SimpleSyntaxUtils {
 				}
 				
 				if(value != null) {
-					assert field != null;
+					XyAssert.xyAssert(field != null); assert field != null;
 					if(field.getValue() != null) {
 						throw new IllegalArgumentException("Line " + lineNo
 						        + ": Cannot redefine value for key " + key);

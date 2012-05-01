@@ -20,6 +20,7 @@ import org.xydra.index.query.Pair;
 import org.xydra.log.DefaultLoggerFactorySPI;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.sharedutils.XyAssert;
 
 
 public abstract class AbstractStoreQuotaExceptionTest {
@@ -157,7 +158,7 @@ public abstract class AbstractStoreQuotaExceptionTest {
 	public void testCheckLoginQuotaException() {
 		SynchronousCallbackWithOneResult<Boolean> callback = null;
 		
-		assert this.bfQuota > 0;
+		XyAssert.xyAssert(this.bfQuota > 0);
 		// Testing the quota exception
 		for(long l = 0; l < this.bfQuota + 1; l++) {
 			callback = new SynchronousCallbackWithOneResult<Boolean>();
@@ -187,7 +188,7 @@ public abstract class AbstractStoreQuotaExceptionTest {
 	public void testGetModelIdsQuotaException() {
 		SynchronousCallbackWithOneResult<Set<XID>> callback = null;
 		
-		assert this.bfQuota > 0;
+		XyAssert.xyAssert(this.bfQuota > 0);
 		boolean foundQuotaException = false;
 		for(long l = 0; l < this.bfQuota + 1; l++) {
 			callback = new SynchronousCallbackWithOneResult<Set<XID>>();
@@ -219,7 +220,7 @@ public abstract class AbstractStoreQuotaExceptionTest {
 	@Test
 	public void testGetModelRevisionsQuotaException() {
 		SynchronousCallbackWithOneResult<BatchedResult<ModelRevision>[]> callback = null;
-		assert this.bfQuota > 0;
+		XyAssert.xyAssert(this.bfQuota > 0);
 		for(long l = 0; l < this.bfQuota + 1; l++) {
 			callback = new SynchronousCallbackWithOneResult<BatchedResult<ModelRevision>[]>();
 			
@@ -248,7 +249,7 @@ public abstract class AbstractStoreQuotaExceptionTest {
 	@Test
 	public void testGetModelSnapshotsQuotaExcpetion() {
 		SynchronousCallbackWithOneResult<BatchedResult<XReadableModel>[]> callback = null;
-		assert this.bfQuota > 0;
+		XyAssert.xyAssert(this.bfQuota > 0);
 		for(long l = 0; l < this.bfQuota + 1; l++) {
 			callback = new SynchronousCallbackWithOneResult<BatchedResult<XReadableModel>[]>();
 			
@@ -282,7 +283,7 @@ public abstract class AbstractStoreQuotaExceptionTest {
 	@Test
 	public void testGetObjectSnapshotsQuotaException() {
 		SynchronousCallbackWithOneResult<BatchedResult<XReadableObject>[]> callback = null;
-		assert this.bfQuota > 0;
+		XyAssert.xyAssert(this.bfQuota > 0);
 		for(long l = 0; l < this.bfQuota + 1; l++) {
 			callback = new SynchronousCallbackWithOneResult<BatchedResult<XReadableObject>[]>();
 			
@@ -313,7 +314,7 @@ public abstract class AbstractStoreQuotaExceptionTest {
 	public void testGetRepositoryIdQuotaException() {
 		SynchronousCallbackWithOneResult<XID> callback = null;
 		
-		assert this.bfQuota > 0;
+		XyAssert.xyAssert(this.bfQuota > 0);
 		for(long l = 0; l < this.bfQuota + 1; l++) {
 			callback = new SynchronousCallbackWithOneResult<XID>();
 			
@@ -342,7 +343,7 @@ public abstract class AbstractStoreQuotaExceptionTest {
 	public void testExecuteCommandsQuotaException() {
 		SynchronousCallbackWithOneResult<BatchedResult<Long>[]> callback = null;
 		
-		assert this.bfQuota > 0;
+		XyAssert.xyAssert(this.bfQuota > 0);
 		for(long l = 0; l < this.bfQuota + 1; l++) {
 			callback = new SynchronousCallbackWithOneResult<BatchedResult<Long>[]>();
 			XCommand[] commands = new XCommand[] { this.getCommandFactory().createAddModelCommand(
@@ -377,7 +378,7 @@ public abstract class AbstractStoreQuotaExceptionTest {
 	public void testExecuteCommandsAndGetEventsQuotaException() {
 		SynchronousCallbackWithOneResult<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> callback = null;
 		
-		assert this.bfQuota > 0;
+		XyAssert.xyAssert(this.bfQuota > 0);
 		for(long l = 0; l < this.bfQuota + 1; l++) {
 			callback = new SynchronousCallbackWithOneResult<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>>();
 			XCommand[] commands = new XCommand[] { this.getCommandFactory().createAddModelCommand(
@@ -410,7 +411,7 @@ public abstract class AbstractStoreQuotaExceptionTest {
 	public void testGetEventsQuotaException() {
 		SynchronousCallbackWithOneResult<BatchedResult<XEvent[]>[]> callback = null;
 		
-		assert this.bfQuota > 0;
+		XyAssert.xyAssert(this.bfQuota > 0);
 		for(long l = 0; l < this.bfQuota + 1; l++) {
 			callback = new SynchronousCallbackWithOneResult<BatchedResult<XEvent[]>[]>();
 			GetEventsRequest[] requests = new GetEventsRequest[1];

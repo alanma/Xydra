@@ -14,6 +14,7 @@ import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableRepository;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.GetWithAddressRequest;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
@@ -41,11 +42,11 @@ public class WritableRepositoryOnPersistence extends AbstractWritableOnPersisten
 	public XWritableModel createModel(XID modelId) {
 		XWritableModel model = getModel(modelId);
 		if(model == null) {
-			assert this.persistence.getModelRevision(new GetWithAddressRequest(
-			        getModelAddress(modelId), USE_TENTATIVE_STATE)) != null;
-			assert !this.persistence.getModelRevision(
+			XyAssert.xyAssert(this.persistence.getModelRevision(new GetWithAddressRequest(
+			        getModelAddress(modelId), USE_TENTATIVE_STATE)) != null);
+			XyAssert.xyAssert(!this.persistence.getModelRevision(
 			        new GetWithAddressRequest(getModelAddress(modelId), USE_TENTATIVE_STATE))
-			        .modelExists();
+			        .modelExists());
 			
 			XCommand command = X.getCommandFactory().createAddModelCommand(
 			        this.persistence.getRepositoryId(), modelId, true);
@@ -60,7 +61,7 @@ public class WritableRepositoryOnPersistence extends AbstractWritableOnPersisten
 			                getModelAddress(modelId), USE_TENTATIVE_STATE));
 			
 			model = getModel(modelId);
-			assert model != null;
+			XyAssert.xyAssert(model != null); assert model != null;
 		}
 		return model;
 	}
@@ -96,7 +97,7 @@ public class WritableRepositoryOnPersistence extends AbstractWritableOnPersisten
 	
 	@Override
 	public boolean hasModel(XID modelId) {
-		assert this.persistence != null;
+		XyAssert.xyAssert(this.persistence != null); assert this.persistence != null;
 		return this.persistence.hasManagedModel(modelId)
 		        && this.persistence.getModelRevision(
 		                new GetWithAddressRequest(XX.resolveModel(

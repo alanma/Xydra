@@ -431,7 +431,7 @@ public class APITest {
 	 * not paying attention to that here. It's generally a good idea to use the
 	 * wrappers to catch possible errors like that
 	 */
-
+	
 	@Test
 	public void testLibrary() {
 		// Use the omnipotent X to get a repository
@@ -605,7 +605,7 @@ public class APITest {
 	 * Here is a little test showing a normal user would use the XModel API +
 	 * our wrappers to model a library
 	 */
-
+	
 	@Test
 	public void testRepository() {
 		

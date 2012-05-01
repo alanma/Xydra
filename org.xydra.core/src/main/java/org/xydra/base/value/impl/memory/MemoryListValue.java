@@ -6,6 +6,7 @@ import java.util.Iterator;
 import org.xydra.base.value.XListValue;
 import org.xydra.base.value.XListValueIterator;
 import org.xydra.index.XI;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -35,7 +36,7 @@ public abstract class MemoryListValue<E> implements XListValue<E>, Serializable 
 	}
 	
 	protected void fillArray(E[] array) {
-		assert array.length == size();
+		XyAssert.xyAssert(array.length == size());
 		int i = 0;
 		for(E e : this) {
 			array[i++] = e;

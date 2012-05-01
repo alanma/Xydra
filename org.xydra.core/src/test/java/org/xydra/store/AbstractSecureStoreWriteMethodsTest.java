@@ -7,6 +7,7 @@ import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommandFactory;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.access.HashUtils;
 import org.xydra.store.access.XA;
 import org.xydra.store.access.XAccessControlManager;
@@ -34,7 +35,7 @@ abstract public class AbstractSecureStoreWriteMethodsTest extends AbstractStoreW
 	
 	@Override
 	protected XID getCorrectUser() {
-		assert this.store != null;
+		XyAssert.xyAssert(this.store != null); assert this.store != null;
 		if(this.authenticationDb == null) {
 			this.authenticationDb = this.store.getXydraStoreAdmin().getAccessControlManager()
 			        .getAuthenticationDatabase();

@@ -30,6 +30,7 @@ import org.xydra.core.model.XRepository;
 import org.xydra.core.serialize.SerializedModel;
 import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.xml.XmlParser;
+import org.xydra.sharedutils.XyAssert;
 
 
 public class StringValueIndexBenchmark {
@@ -368,7 +369,7 @@ public class StringValueIndexBenchmark {
 		String idString = model.getId().toString();
 		try {
 			File f = new File(path + idString + ".txt");
-			assert f.exists();
+			XyAssert.xyAssert(f.exists());
 			
 			BufferedWriter out = new BufferedWriter(new FileWriter(f, true));
 			out.write("" + data);

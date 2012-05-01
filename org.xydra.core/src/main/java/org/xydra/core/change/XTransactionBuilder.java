@@ -31,6 +31,7 @@ import org.xydra.core.model.XRepository;
 import org.xydra.core.model.delta.ChangedField;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.delta.ChangedObject;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -368,26 +369,26 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 */
 	public void applyChanges(ChangedObject object) {
 		
-		assert createsNoTargetAddressTwice(object.getAddress());
+		XyAssert.xyAssert(createsNoTargetAddressTwice(object.getAddress()));
 		
 		for(XID fieldId : object.getRemovedFields()) {
 			XReadableField field = object.getOldField(fieldId);
 			removeField(field);
 		}
 		
-		assert createsNoTargetAddressTwice(object.getAddress());
+		XyAssert.xyAssert(createsNoTargetAddressTwice(object.getAddress()));
 		
 		for(XReadableField field : object.getNewFields()) {
 			addField(object.getAddress(), field);
 		}
 		
-		assert createsNoTargetAddressTwice(object.getAddress());
+		XyAssert.xyAssert(createsNoTargetAddressTwice(object.getAddress()));
 		
 		for(ChangedField field : object.getChangedFields()) {
 			applyChanges(field);
 		}
 		
-		assert createsNoTargetAddressTwice(object.getAddress());
+		XyAssert.xyAssert(createsNoTargetAddressTwice(object.getAddress()));
 		
 	}
 	
@@ -409,30 +410,30 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
 	 * @param model
 	 */
 	public void applyChanges(ChangedModel model) {
-		assert model.checkSetInvariants();
-		assert createsNoTargetAddressTwice(model.getAddress());
+		XyAssert.xyAssert(model.checkSetInvariants());
+		XyAssert.xyAssert(createsNoTargetAddressTwice(model.getAddress()));
 		
 		for(XID objectId : model.getRemovedObjects()) {
 			XReadableObject object = model.getOldObject(objectId);
 			removeObject(object);
 		}
 		
-		assert model.checkSetInvariants();
-		assert createsNoTargetAddressTwice(model.getAddress());
+		XyAssert.xyAssert(model.checkSetInvariants());
+		XyAssert.xyAssert(createsNoTargetAddressTwice(model.getAddress()));
 		
 		for(XReadableObject object : model.getNewObjects()) {
 			addObject(model.getAddress(), object);
 		}
 		
-		assert model.checkSetInvariants();
+		XyAssert.xyAssert(model.checkSetInvariants());
 		assert createsNoTargetAddressTwice(model.getAddress()) : model.getId();
 		
 		for(ChangedObject object : model.getChangedObjects()) {
 			applyChanges(object);
 		}
 		
-		assert model.checkSetInvariants();
-		assert createsNoTargetAddressTwice(model.getAddress());
+		XyAssert.xyAssert(model.checkSetInvariants());
+		XyAssert.xyAssert(createsNoTargetAddressTwice(model.getAddress()));
 		
 	}
 	

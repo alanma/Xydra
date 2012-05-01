@@ -4,6 +4,7 @@ import org.xydra.base.XAddress;
 import org.xydra.base.change.XEvent;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XChangeLogState;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -21,7 +22,7 @@ public class MemoryChangeLog extends AbstractChangeLog implements XChangeLog {
 	
 	public MemoryChangeLog(XChangeLogState state) {
 		
-		assert state != null;
+		XyAssert.xyAssert(state != null); assert state != null;
 		
 		this.state = state;
 		
@@ -39,7 +40,7 @@ public class MemoryChangeLog extends AbstractChangeLog implements XChangeLog {
 		        + " to model change log at event "
 		        + getCurrentRevisionNumber() + ": " + event;
 		
-		assert event == null || !event.inTransaction();
+		XyAssert.xyAssert(event == null || !event.inTransaction());
 		// "else": event is part of a transaction and will therefore only be
 		// recorded as part of the transaction
 		
@@ -73,7 +74,7 @@ public class MemoryChangeLog extends AbstractChangeLog implements XChangeLog {
 			                + "number of this log");
 		}
 		XEvent event = this.state.getEvent(revisionNumber);
-		assert event == null || event.getRevisionNumber() == revisionNumber;
+		XyAssert.xyAssert(event == null || event.getRevisionNumber() == revisionNumber);
 		return event;
 	}
 	

@@ -47,6 +47,7 @@ import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.XydraOut;
 import org.xydra.core.serialize.xml.XmlOut;
 import org.xydra.core.serialize.xml.XmlParser;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -279,7 +280,7 @@ public class SynchronizeTest {
 		// synchronize the remoteChanges into localModel
 		XEvent[] remoteEvents = remoteChanges.toArray(new XEvent[remoteChanges.size()]);
 		
-		assert lastRevision == this.localModel.getSynchronizedRevision();
+		XyAssert.xyAssert(lastRevision == this.localModel.getSynchronizedRevision());
 		boolean success = this.localModel.synchronize(remoteEvents);
 		assertTrue(success);
 		

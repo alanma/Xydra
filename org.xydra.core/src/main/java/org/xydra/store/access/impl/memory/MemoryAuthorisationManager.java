@@ -19,6 +19,7 @@ import org.xydra.index.query.EqualsConstraint;
 import org.xydra.index.query.KeyKeyKeyEntryTuple;
 import org.xydra.index.query.Pair;
 import org.xydra.index.query.Wildcard;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.access.XA;
 import org.xydra.store.access.XAccessListener;
 import org.xydra.store.access.XAccessRightDefinition;
@@ -261,7 +262,7 @@ public class MemoryAuthorisationManager extends AbstractAuthorisationManager imp
 		
 		// check the parent resource
 		XAddress parent = resource.getParent();
-		assert parent != resource && !resource.equals(parent);
+		XyAssert.xyAssert(parent != resource && !resource.equals(parent));
 		if(parent != null) {
 			return hasAccess(actor, parent, access);
 		}

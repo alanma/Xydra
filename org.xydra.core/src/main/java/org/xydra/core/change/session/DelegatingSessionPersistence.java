@@ -14,6 +14,7 @@ import org.xydra.core.change.SessionCachedModel;
 import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.GetWithAddressRequest;
 import org.xydra.store.ModelRevision;
 import org.xydra.store.impl.delegate.XydraPersistence;
@@ -43,7 +44,7 @@ public class DelegatingSessionPersistence implements ISessionPersistence {
 	@Override
 	public long applyChangesAsTxn(SessionCachedModel sessionCacheModel, XID actorId)
 	        throws SessionException {
-		assert actorId != null;
+		XyAssert.xyAssert(actorId != null); assert actorId != null;
 		log.debug("applyChangesAsTxn");
 		
 		if(!sessionCacheModel.hasChanges()) {
@@ -93,7 +94,7 @@ public class DelegatingSessionPersistence implements ISessionPersistence {
 	
 	@Override
 	public XReadableModel getModelSnapshot(GetWithAddressRequest modelRequest) {
-		assert modelRequest != null;
+		XyAssert.xyAssert(modelRequest != null); assert modelRequest != null;
 		XWritableModel baseModel = this.persistence.getModelSnapshot(modelRequest);
 		if(baseModel == null) {
 			return null;
@@ -103,7 +104,7 @@ public class DelegatingSessionPersistence implements ISessionPersistence {
 	
 	@Override
 	public XReadableObject getObjectSnapshot(GetWithAddressRequest objectAddressRequest) {
-		assert objectAddressRequest != null;
+		XyAssert.xyAssert(objectAddressRequest != null); assert objectAddressRequest != null;
 		XWritableObject baseObject = this.persistence.getObjectSnapshot(objectAddressRequest);
 		if(baseObject == null) {
 			return null;

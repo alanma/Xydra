@@ -1,6 +1,7 @@
 package org.xydra.store.base;
 
 import org.xydra.base.change.XCommand;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.StoreException;
 import org.xydra.store.WaitingCallback;
@@ -36,14 +37,14 @@ public class ExecuteCommandsUtils {
 		
 		BatchedResult<Long>[] res = callback.getResult();
 		
-		assert res.length == 1;
-		assert res[0] != null;
+		XyAssert.xyAssert(res.length == 1);
+		XyAssert.xyAssert(res[0] != null); assert res[0] != null;
 		
 		if(res[0].getException() != null) {
 			throw new StoreException("re-throw", res[0].getException());
 		}
 		
-		assert res[0].getResult() != null;
+		XyAssert.xyAssert(res[0].getResult() != null); assert res[0].getResult() != null;
 		
 		return res[0].getResult();
 		

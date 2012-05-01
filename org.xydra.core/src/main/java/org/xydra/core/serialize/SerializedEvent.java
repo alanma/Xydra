@@ -25,6 +25,7 @@ import org.xydra.base.change.impl.memory.MemoryRepositoryEvent;
 import org.xydra.base.change.impl.memory.MemoryReversibleFieldEvent;
 import org.xydra.base.change.impl.memory.MemoryTransactionEvent;
 import org.xydra.base.value.XValue;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -217,7 +218,7 @@ public class SerializedEvent {
 		XValue newValue = null;
 		if(type != ChangeType.REMOVE) {
 			newValue = SerializedValue.toValue(element.getElement(NAME_VALUE, 0));
-			assert newValue != null;
+			XyAssert.xyAssert(newValue != null); assert newValue != null;
 		}
 		
 		if(type == ChangeType.ADD) {
@@ -258,11 +259,11 @@ public class SerializedEvent {
 		if(type != ChangeType.ADD) {
 			oldValue = SerializedValue.toValue(element.getElement(NAME_OLD_VALUE, idx));
 			idx++;
-			assert oldValue != null;
+			XyAssert.xyAssert(oldValue != null); assert oldValue != null;
 		}
 		if(type != ChangeType.REMOVE) {
 			newValue = SerializedValue.toValue(element.getElement(NAME_VALUE, idx));
-			assert newValue != null;
+			XyAssert.xyAssert(newValue != null); assert newValue != null;
 		}
 		
 		if(type == ChangeType.ADD) {
@@ -602,7 +603,7 @@ public class SerializedEvent {
 		out.child(NAME_EVENTS);
 		out.beginArray();
 		for(XAtomicEvent event : trans) {
-			assert event != null;
+			XyAssert.xyAssert(event != null); assert event != null;
 			serialize(event, out, newContext, true);
 		}
 		out.endArray();

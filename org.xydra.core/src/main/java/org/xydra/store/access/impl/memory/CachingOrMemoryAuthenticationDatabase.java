@@ -9,6 +9,7 @@ import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XID;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.access.XAuthenticationDatabase;
 
 
@@ -75,7 +76,7 @@ public class CachingOrMemoryAuthenticationDatabase implements XAuthenticationDat
 	@Override
 	@ReadOperation
 	public int getFailedLoginAttempts(XID actorId) {
-		assert actorId != null;
+		XyAssert.xyAssert(actorId != null); assert actorId != null;
 		Actor actor = this.actors.get(actorId);
 		if(actor == null) {
 			// try to get from 2nd level
@@ -110,7 +111,7 @@ public class CachingOrMemoryAuthenticationDatabase implements XAuthenticationDat
 	@Override
 	@ReadOperation
 	public String getPasswordHash(XID actorId) {
-		assert actorId != null;
+		XyAssert.xyAssert(actorId != null); assert actorId != null;
 		Actor actor = this.actors.get(actorId);
 		if(actor == null) {
 			if(this.secondLevel != null) {
@@ -139,7 +140,7 @@ public class CachingOrMemoryAuthenticationDatabase implements XAuthenticationDat
 	@Override
 	@ModificationOperation
 	public void removePasswordHash(XID actorId) {
-		assert actorId != null;
+		XyAssert.xyAssert(actorId != null); assert actorId != null;
 		Actor actor = this.actors.get(actorId);
 		if(actor != null) {
 			actor.passwordHash = null;
