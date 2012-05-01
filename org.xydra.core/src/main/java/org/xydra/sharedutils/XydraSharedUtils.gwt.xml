@@ -9,8 +9,11 @@
 	<inherits name="com.google.gwt.http.HTTP" />
 
 	<source path="">
-		<!-- These are overwritten via super-source -->
+		<include name="XyAssert.java"/>
+
+		<!-- Some of these are overwritten via super-source -->
 		<exclude name="**/*.java" />
+		
 	</source>
 
 </module>
