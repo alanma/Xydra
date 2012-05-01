@@ -7,6 +7,7 @@ import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
 import org.xydra.base.rmof.XWritableModel;
+import org.xydra.gae.AboutAppEngine;
 import org.xydra.gae.UniversalTaskQueue;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -133,7 +134,8 @@ public class SerialisationCache {
 					        + totalTimeRequired + " ms. Giving up.");
 					return false;
 				}
-				if(msWeRanAlready + 2000 > GaeConstants.GAE_WEB_REQUEST_TIMEOUT) {
+				if(!AboutAppEngine.onBackend()
+				        && msWeRanAlready + 2000 > GaeConstants.GAE_WEB_REQUEST_TIMEOUT) {
 					log.warn("Only 2 seconds left. Total time required = " + totalTimeRequired
 					        + " ms. Giving up.");
 					return false;
