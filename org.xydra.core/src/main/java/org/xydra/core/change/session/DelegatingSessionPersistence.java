@@ -44,8 +44,9 @@ public class DelegatingSessionPersistence implements ISessionPersistence {
 	@Override
 	public long applyChangesAsTxn(SessionCachedModel sessionCacheModel, XID actorId)
 	        throws SessionException {
-		XyAssert.xyAssert(actorId != null); assert actorId != null;
 		log.debug("applyChangesAsTxn");
+		XyAssert.xyAssert(actorId != null);
+		assert actorId != null;
 		
 		if(!sessionCacheModel.hasChanges()) {
 			log.debug("Model has no changes.");
@@ -94,7 +95,8 @@ public class DelegatingSessionPersistence implements ISessionPersistence {
 	
 	@Override
 	public XReadableModel getModelSnapshot(GetWithAddressRequest modelRequest) {
-		XyAssert.xyAssert(modelRequest != null); assert modelRequest != null;
+		XyAssert.xyAssert(modelRequest != null);
+		assert modelRequest != null;
 		XWritableModel baseModel = this.persistence.getModelSnapshot(modelRequest);
 		if(baseModel == null) {
 			return null;
@@ -104,7 +106,8 @@ public class DelegatingSessionPersistence implements ISessionPersistence {
 	
 	@Override
 	public XReadableObject getObjectSnapshot(GetWithAddressRequest objectAddressRequest) {
-		XyAssert.xyAssert(objectAddressRequest != null); assert objectAddressRequest != null;
+		XyAssert.xyAssert(objectAddressRequest != null);
+		assert objectAddressRequest != null;
 		XWritableObject baseObject = this.persistence.getObjectSnapshot(objectAddressRequest);
 		if(baseObject == null) {
 			return null;

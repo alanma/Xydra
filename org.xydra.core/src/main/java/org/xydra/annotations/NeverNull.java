@@ -18,7 +18,7 @@ import java.lang.annotation.RetentionPolicy;
  * 
  */
 @Documented
-@Retention(RetentionPolicy.RUNTIME)
+@Retention(RetentionPolicy.SOURCE)
 public @interface NeverNull {
 	
 }
