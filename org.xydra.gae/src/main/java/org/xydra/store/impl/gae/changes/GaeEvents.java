@@ -55,6 +55,19 @@ import com.google.appengine.api.datastore.Text;
  * {@link #getInternalValueId(int)} to get an index into the values (
  * {@link #PROP_EVENT_VALUES}) stored in the XCHANGE entity.
  * 
+ * Encoding on AppEngine:
+ * 
+ * <pre>
+ * Int - types
+ * Str - targets
+ * Text value = value | marker -> value is stored as its own entity
+ * Long - object revision
+ * Long - field revision
+ * Bool - implied or not
+ * 
+ * revNr + index in List
+ * </pre>
+ * 
  * @author dscharrer
  * 
  */
