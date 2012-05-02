@@ -3,6 +3,7 @@ package org.xydra.core.change;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.xydra.annotations.CanBeNull;
 import org.xydra.annotations.NeverNull;
 import org.xydra.base.XID;
 import org.xydra.base.change.ChangeType;
@@ -134,12 +135,12 @@ public class EventUtils {
 	}
 	
 	/**
-	 * @param reference
-	 * @param model
-	 * @param atomicEvent
+	 * @param reference @CanBeNull
+	 * @param model @NeverNull
+	 * @param atomicEvent @NeverNull
 	 * @param inTxn
 	 */
-	private static void applyAtomicEventNonDestructive(XReadableModel reference,
+	private static void applyAtomicEventNonDestructive(@CanBeNull XReadableModel reference,
 	        @NeverNull XRevWritableModel model, @NeverNull XAtomicEvent atomicEvent, boolean inTxn) {
 		XyAssert.xyAssert(atomicEvent != null);
 		assert atomicEvent != null;
@@ -150,24 +151,29 @@ public class EventUtils {
 		if(objectId != null) {
 			XyAssert.xyAssert(model != null);
 			assert model != null;
+			
 			XRevWritableObject object = model.getObject(objectId);
 			XyAssert.xyAssert(object != null, "%s: applying event %s inTxn?%s", model.getAddress(),
 			        atomicEvent, inTxn);
 			assert object != null;
-			XReadableObject srcObject = (reference == null) ? null : reference.getObject(objectId);
-			if(object == srcObject) {
+			
+			XReadableObject referenceObject = (reference == null) ? null : reference
+			        .getObject(objectId);
+			if(object == referenceObject) {
 				object = SimpleObject.shallowCopy(object);
 				model.addObject(object);
 			}
 			XID fieldId = atomicEvent.getTarget().getField();
 			if(fieldId != null) {
 				XRevWritableField field = object.getField(fieldId);
-				XReadableField srcField = (srcObject == null) ? null : srcObject.getField(fieldId);
+				XReadableField referenceField = (referenceObject == null) ? null : referenceObject
+				        .getField(fieldId);
 				XyAssert.xyAssert(field != null);
 				assert field != null;
-				if(field == srcField) {
-					object.addField(new SimpleField(srcField.getAddress(), srcField
-					        .getRevisionNumber(), srcField.getValue()));
+				
+				if(field == referenceField) {
+					object.addField(new SimpleField(referenceField.getAddress(), referenceField
+					        .getRevisionNumber(), referenceField.getValue()));
 				}
 			}
 		}
