@@ -25,4 +25,6 @@ public interface GaeConstants {
 	
 	public static final long SimultaneousAsynchronousURLFetchCalls = 10;
 	
+	public static final long DATASTORE_MAX_ENTITY_SIZE_BYTES = 1024 * 1024;
+	
 }
