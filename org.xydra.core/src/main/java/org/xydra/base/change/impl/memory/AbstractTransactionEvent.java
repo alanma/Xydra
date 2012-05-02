@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.xydra.annotations.CanBeNull;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
@@ -303,6 +304,16 @@ public abstract class AbstractTransactionEvent implements XTransactionEvent {
 			str += event.toString();
 		}
 		return str + "]";
+	}
+	
+	@CanBeNull
+	public XAtomicEvent getLastEvent() {
+		int size = size();
+		if(size > 0) {
+			return getEvent(size - 1);
+		} else {
+			return null;
+		}
 	}
 	
 }
