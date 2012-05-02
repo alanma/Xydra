@@ -142,8 +142,6 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 	/** property name for storing serialised XML content of a snapshot */
 	private static final String PROP_XML = "xml";
 	
-	private static final long SNAPSHOT_PERSISTENCE_THRESHOLD = 10;
-	
 	private static final boolean USE_MEMCACHE = true;
 	
 	public static boolean USE_SNAPSHOT_CACHE = true;
@@ -184,14 +182,16 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 	 * found in memcache). Puts intermediary version in the respective caches.
 	 * 
 	 * @param requestedRevNr which is required but has no direct match in the
-	 *            datastore or memcache FIXME 2012-02 make sure too high numbers
-	 *            are handled well. This allows callers to retrieve a new
-	 *            version which has still uncommited versions below it.
+	 *            datastore or memcache
+	 * 
+	 *            FIXME 2012-02 make sure too high numbers are handled well.
+	 *            This allows callers to retrieve a new version which has still
+	 *            uncommitted versions below it.
 	 * @return a computed model snapshot
 	 */
 	private XRevWritableModel computeSnapshot(long requestedRevNr) {
-		assert requestedRevNr >= 0;
 		log.debug("compute snapshot " + requestedRevNr);
+		XyAssert.xyAssert(requestedRevNr >= 0);
 		
 		Map<String,Object> batchResult = Collections.emptyMap();
 		long askNr = requestedRevNr - 1;
@@ -199,7 +199,7 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 			// prepare a fetch in the mem-cache
 			String possiblyMemcachedKey = null;
 			int loops = 0;
-			while(askNr >= 0 && loops <= SNAPSHOT_PERSISTENCE_THRESHOLD) {
+			while(askNr >= 0 && loops <= 10) {
 				// TODO With Daniel: do we really allow null here?
 				XRevWritableModel modelOrNull = localVmCacheGet(askNr);
 				if(modelOrNull != null) {
@@ -275,12 +275,6 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 		assert base != null;
 		assert this.modelAddress.equals(base.getAddress());
 		XRevWritableModel requestedSnapshot = computeSnapshotFromBase(base, requestedRevNr);
-		localVmCachePut(requestedSnapshot);
-		// // cache it in memcache
-		// XydraRuntime.getMemcache().put(
-		// KeyStructure.toString(this.getSnapshotKey(requestedSnapshot.getRevisionNumber())),
-		// requestedSnapshot);
-		// return it
 		return requestedSnapshot;
 	}
 	
@@ -324,7 +318,7 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 			localVmCachePut(snapshot);
 			long rev = snapshot.getRevisionNumber();
 			if(USE_MEMCACHE && revCanBeMemcached(rev)) {
-				// cache every 10th snapshot in memcache
+				// cache some snapshots in memcache
 				Key key = getSnapshotKey(rev);
 				Memcache.put(key, snapshot);
 				// TODO SCALE put also in datastore (async)
@@ -457,8 +451,29 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 		return snapshot;
 	}
 	
+	/**
+	 * @param requestedRevNr
+	 * @return true if the given revision number is a candidate for memcache
+	 */
 	private static boolean revCanBeMemcached(long requestedRevNr) {
-		return requestedRevNr % SNAPSHOT_PERSISTENCE_THRESHOLD == 0;
+		/*
+		 * Strategy: Cache versions 0, 1, 2, ... 9, 10, 20, 30, ... 100, 200,
+		 * ..., 1000, 2000, ... 10000, ... = only those with one non-zero digit
+		 */
+		
+		return hasOneSignificantDigit(requestedRevNr);
+		
+		// return requestedRevNr % SNAPSHOT_PERSISTENCE_THRESHOLD == 0;
+	}
+	
+	private static boolean hasOneSignificantDigit(long d) {
+		long t = d;
+		long c = 1;
+		while(t >= 10) {
+			t = t / 10;
+			c = c * 10;
+		}
+		return (t * c == d);
 	}
 	
 	private synchronized Key getSnapshotKey(long revNr) {
@@ -620,4 +635,5 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 		
 		return model;
 	}
+	
 }
