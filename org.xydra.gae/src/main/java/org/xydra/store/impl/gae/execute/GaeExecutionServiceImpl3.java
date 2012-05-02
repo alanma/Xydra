@@ -3,6 +3,7 @@ package org.xydra.store.impl.gae.execute;
 import java.util.List;
 import java.util.concurrent.Future;
 
+import org.xydra.annotations.CanBeNull;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.change.XAtomicEvent;
@@ -167,8 +168,9 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 	 * @param change never null
 	 * @return the resulting snapshot of applying the event
 	 */
-	private XRevWritableModel updateSnapshot(XRevWritableModel snapshot, long snapshotRev,
-	        GaeChange change) {
+	private XRevWritableModel updateSnapshot(@CanBeNull XRevWritableModel snapshot,
+	        long snapshotRev, GaeChange change) {
+		@CanBeNull
 		XRevWritableModel workingModel = snapshot;
 		
 		// IMPROVE use the last committed rev to skip failed / empty changes
@@ -286,13 +288,14 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 	 * given locks as unknown. Any entities that are also in the reference model
 	 * are copied before being modified.
 	 * 
-	 * @param referenceModel
-	 * @param model
+	 * @param referenceModel @CanBeNull
+	 * @param model @CanBeNull
 	 * @param locks
 	 * @return
 	 */
-	private static XRevWritableModel invalidateObjectRevisions(XReadableModel referenceModel,
-	        XRevWritableModel model, GaeLocks locks) {
+	private static XRevWritableModel invalidateObjectRevisions(
+	        @CanBeNull XReadableModel referenceModel, @CanBeNull XRevWritableModel model,
+	        GaeLocks locks) {
 		
 		if(model == null) {
 			return null;
