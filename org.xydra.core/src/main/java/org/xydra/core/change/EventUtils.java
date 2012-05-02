@@ -32,6 +32,8 @@ import org.xydra.sharedutils.XyAssert;
 /**
  * Note: This is similar to {@link DeltaUtils}.
  * 
+ * FIXME heavily document this
+ * 
  * @author xamde
  */
 public class EventUtils {
