@@ -347,7 +347,7 @@ public class ModelResource {
 			                .withInputSubmit("Upload and set as current state"));
 		}
 		
-		if(style == MStyle.htmlrev || style == MStyle.htmlevents) {
+		if(style == MStyle.htmlrev || style == MStyle.htmlevents || style == MStyle.htmlchanges) {
 			XydraPersistence p = Utils.getPersistence(modelAddress.getRepository());
 			ModelRevision rev = p.getModelRevision(new GetWithAddressRequest(modelAddress,
 			        INCLUDE_TENTATIVE));
