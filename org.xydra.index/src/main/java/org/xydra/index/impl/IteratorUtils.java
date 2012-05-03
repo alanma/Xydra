@@ -21,4 +21,11 @@ public class IteratorUtils {
 		return collection;
 	}
 	
+	public static <T> boolean isEmpty(Iterable<T> iterable) {
+		return isEmpty(iterable.iterator());
+	}
+	
+	public static <T> boolean isEmpty(Iterator<T> it) {
+		return !it.hasNext();
+	}
 }
