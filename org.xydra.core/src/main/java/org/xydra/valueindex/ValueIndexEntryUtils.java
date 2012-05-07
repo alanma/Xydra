@@ -20,7 +20,40 @@ import org.xydra.sharedutils.XyAssert;
  */
 
 /*
- * TODO document espacing/parsing syntax!
+ * This class serializes ValueIndexEntries as strings, here is a documentation
+ * of the simple Serializing-Syntax:
+ * 
+ * 1) A single the ValueIndexEntry is serialized like this:
+ * 
+ * - the XAddress is serialized by using the {@link JsonSerizalizer} and {@link
+ * XydraOut} to get the JSON representation of the address. If this string
+ * contains \ they will be escaped as \\ and occurences of " will be escaped as
+ * \" .
+ * 
+ * - the XValue is serialized like the XAddress (e.g. using the JsonSerializer
+ * and escaping likek described).
+ * 
+ * Finally, the string representing the ValueIndexEntry is made up of both these
+ * strings like this:
+ * 
+ * adrString""valueString
+ * 
+ * "" is used as a marker to tell where the address ends and the value starts.
+ * 
+ * 2) An array of ValueIndexEntries is serialized like this:
+ * 
+ * - first, we'll create the strings representing the ValueIndexEntries as
+ * described in point 1).
+ * 
+ * - all these strings need to be escaped a second time, \ will be escaped with
+ * \\ and occurences of the String <entry> will be escaped with <\entry> .
+ * 
+ * Afterwards all these strings will be connected into a single string and
+ * <entry> will be used to mark where one string ends and another one starts.
+ * For example if we have an array containing 3 different ValueIndexEntries, the
+ * resulting string will look like this:
+ * 
+ * value1String<entry>value2String<entry>value3String
  */
 
 public class ValueIndexEntryUtils {
@@ -123,8 +156,10 @@ public class ValueIndexEntryUtils {
 	}
 	
 	private static String escapeListString(String s) {
+		// escape / with //
 		String replace1 = s.replace("\\", "\\\\");
 		
+		// escape <entry> with <\entry>
 		String replace2 = replace1.replace("<entry>", "<\\entry>");
 		
 		XyAssert.xyAssert(!replace2.equals(""));
@@ -242,6 +277,24 @@ public class ValueIndexEntryUtils {
 		}
 	}
 	
+	/**
+	 * Adds the given {@link ValueIndexEntry} to the given serialized list of
+	 * {@link ValueIndexEntry ValueIndexEntries}. If the given list already
+	 * contains a string which represents the given entry, nothing will be
+	 * changed.
+	 * 
+	 * This method will only work with strings returned by the serializing
+	 * methods of {@link ValueIndexEntryUtils}.
+	 * 
+	 * @param s A string representation of a list of {@link ValueIndexEntry
+	 *            ValueIndexEntries}.
+	 * @param entry The {@link ValueIndexEntry} which is to be added to the
+	 *            given list.
+	 * @return A string representing a list of {@link ValueIndexEntry
+	 *         ValueIndexEntries} containing the entries of the given list and
+	 *         the single given {@link ValueIndexEntry}. Returns null if the
+	 *         given string is null or the empty string.
+	 */
 	public static String addEntryToArrayString(String s, ValueIndexEntry entry) {
 		String valueString = ValueIndexEntryUtils.serializeAsString(entry);
 		String escapedString = ValueIndexEntryUtils.escapeListString(valueString);
@@ -257,6 +310,27 @@ public class ValueIndexEntryUtils {
 		}
 	}
 	
+	/**
+	 * Removes the given {@link ValueIndexEntry} from the given serialized list
+	 * of {@link ValueIndexEntry ValueIndexEntries}. If the given list does not
+	 * contain a string which represents the given entry, nothing will be
+	 * changed.
+	 * 
+	 * This method will only work with strings returned by the serializing
+	 * methods of {@link ValueIndexEntryUtils}.
+	 * 
+	 * @param s A string representation of a list of {@link ValueIndexEntry
+	 *            ValueIndexEntries}.
+	 * @param entry The {@link ValueIndexEntry} which is to be removed from the
+	 *            given list.
+	 * @return A string representing a list of {@link ValueIndexEntry
+	 *         ValueIndexEntries} containing the entries of the given list, but
+	 *         not containing a string representing the single given
+	 *         {@link ValueIndexEntry}. May return the empty string if the given
+	 *         list only contained the given {@link ValueIndexEntry} and no
+	 *         other entries. Returns null if the given string is null or the
+	 *         empty string.
+	 */
 	public static String removeEntryFromArrayString(String s, ValueIndexEntry entry) {
 		String valueString = ValueIndexEntryUtils.serializeAsString(entry);
 		String escapedString = ValueIndexEntryUtils.escapeListString(valueString);
@@ -293,7 +367,7 @@ public class ValueIndexEntryUtils {
 			 * the encoded array does not contain the given entry
 			 */
 			
-			return null;
+			return s;
 			
 		} else {
 			/*
