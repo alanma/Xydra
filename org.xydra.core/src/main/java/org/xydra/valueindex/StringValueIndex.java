@@ -189,7 +189,7 @@ public class StringValueIndex implements ValueIndex {
 		} else {
 			
 			String arrayString = this.map.get(key);
-			ValueIndexEntry entry = new ValueIndexEntry(fieldAddress, value);
+			ValueIndexEntry entry = new ValueIndexEntry(fieldAddress, usedValue);
 			
 			String newArrayString = ValueIndexEntryUtils.addEntryToArrayString(arrayString, entry);
 			
