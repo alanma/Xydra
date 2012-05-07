@@ -300,7 +300,7 @@ public class MemoryEventManager implements Serializable {
 		XAddress target;
 		if(object == null && model == null) {
 			throw new IllegalArgumentException("either model or object must be non-null");
-		} else if(model == null) {
+		} else if(object != null) {
 			assert object != null;
 			target = object.getAddress();
 		} else {
