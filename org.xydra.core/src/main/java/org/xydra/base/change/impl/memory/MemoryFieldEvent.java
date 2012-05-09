@@ -330,6 +330,9 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 		String prefix = "MemoryFieldEvent by actor:" + getActor() + " ";
 		String suffix = " @" + getTarget() + " r" + rev2str(this.modelRevision) + "/"
 		        + rev2str(this.objectRevision) + "/" + rev2str(this.fieldRevision);
+		if(inTransaction()) {
+			suffix += " [inTxn]";
+		}
 		switch(getChangeType()) {
 		case ADD:
 			return prefix + "ADD value:" + this.newValue + suffix;

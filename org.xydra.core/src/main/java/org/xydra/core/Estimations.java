@@ -1,5 +1,13 @@
 package org.xydra.core;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
+
+
 /**
  * Some estimated numbers for performance calculations and tests
  * 
@@ -8,9 +16,14 @@ package org.xydra.core;
  */
 public class Estimations {
 	
+	public static final Logger log = LoggerFactory.getLogger(Estimations.class);
+	
 	public static class LongValue {
-		long min, max, typicalMin, typicalMax;
-		long typical;
+		public long min;
+		public long max;
+		public long typicalMin;
+		public long typicalMax;
+		public long typical;
 		
 		public LongValue(long min, long typicalMin, long typical, long typicalMax, long max) {
 			this.min = min;
@@ -63,7 +76,7 @@ public class Estimations {
 			        + byteSize(this.max);
 		}
 		
-		private static String byteSize(long l) {
+		public static String byteSize(long l) {
 			long s = l;
 			if(s < 1024) {
 				return l + "bytes";
@@ -84,7 +97,7 @@ public class Estimations {
 			return s + "TB (!)";
 		}
 		
-		private static String nice(long l) {
+		public static String nice(long l) {
 			long s = l;
 			if(s < 1000) {
 				return s + "";
@@ -102,17 +115,16 @@ public class Estimations {
 		}
 	}
 	
-	private static final long ONE_MILLION = 1000000;
+	public static final long ONE_MILLION = 1000000;
 	
-	private static final long FACEBOOK_MAU = 900 * ONE_MILLION;
+	public static final long FACEBOOK_MAU = 900 * ONE_MILLION;
 	
-	@SuppressWarnings("unused")
-	private static final long FACEBOOK_DAU = (2 / 3) * FACEBOOK_MAU;
+	public static final long FACEBOOK_DAU = (2 / 3) * FACEBOOK_MAU;
 	
-	private static final long FACEBOOK_MAX_FRIENDS = 5000;
+	public static final long FACEBOOK_MAX_FRIENDS = 5000;
 	
 	/** Average number of Facebook contacts in 2011 */
-	private static final long FACEBOOK_AVERAGE_FRIENDS = 260;
+	public static final long FACEBOOK_AVERAGE_FRIENDS = 260;
 	
 	public static LongValue objectsPerModel = new LongValue(0l, 1l, 200, 10000l, Long.MAX_VALUE);
 	
@@ -141,6 +153,8 @@ public class Estimations {
 	/** people who are just allowed to read what some writer collective writes */
 	public static LongValue sharedReadersPerItem = new LongValue(1, 2, 5, FACEBOOK_MAX_FRIENDS,
 	        ONE_MILLION);
+	
+	public static final long localStorageSpaceInCharacters = 5 * 1024 * 1024 / 2;
 	
 	/**
 	 * i.e. several authors working on the same article. Only this set can
@@ -171,9 +185,96 @@ public class Estimations {
 	public static LongValue sizeOfModel_inCharacters = sizeOfObject_inCharacters
 	        .times(objectsPerModel);
 	
-	private static long bytesPerRevisionNumber = 8;
+	public static long bytesPerRevisionNumber = 8;
 	
-	private static long bytesPerValueAddress = lengthOfXid_inCharacters.typical;
+	public static long bytesPerValueAddress = lengthOfXid_inCharacters.typical;
+	
+	public static class UserSession {
+		int durationInMs = 30 * 60 * 1000;
+		List<UserAction> ops = new ArrayList<UserAction>();
+		
+		public UserSession(UserAction ... ops) {
+			for(int i = 0; i < ops.length; i++) {
+				this.ops.add(ops[i]);
+			}
+		}
+	}
+	
+	public static class UserAction {
+		List<Operation> ops = new ArrayList<Operation>();
+		
+		public UserAction(Operation ... ops) {
+			for(int i = 0; i < ops.length; i++) {
+				this.ops.add(ops[i]);
+			}
+		}
+	}
+	
+	/**
+	 * Such as write datastore, send email, put memcache, ...
+	 */
+	public static class Operation {
+		String name;
+		
+		public Operation(String name) {
+			this.name = name;
+		}
+	}
+	
+	public static class Collection {
+		
+	}
+	
+	public static class Item {
+		
+	}
+	
+	/**
+	 * @param timeslots
+	 * @param operations
+	 * @return the probability of at least two operations in the given timeslots
+	 *         to occur at the same time. Each operation takes one time slot.
+	 */
+	public static double p_conflict(int timeslots, int operations) {
+		if(operations < 2) {
+			return 0;
+		}
+		
+		int n = timeslots;
+		int k = operations;
+		double f = pi(numbersBetween(n - k, n));
+		double e = Math.pow(n, k);
+		double p = 1d - (f / e);
+		log.trace(p + "= 1 - (" + f + "/" + e + ")");
+		return p;
+	}
+	
+	public static double pi(int ... factors) {
+		double result = 1;
+		for(int i = 0; i < factors.length; i++) {
+			result *= factors[i];
+		}
+		return result;
+	}
+	
+	/**
+	 * @param first exclusive
+	 * @param last inclusive
+	 * @return an array that looks like this: [first+1, first+2, ... last]
+	 */
+	public static int[] numbersBetween(int first, int last) {
+		int size = last - first;
+		int[] result = new int[size];
+		for(int i = 0; i < result.length; i++) {
+			result[i] = first + i + 1;
+		}
+		log.trace("Between " + first + " and " + last + " = " + Arrays.toString(result));
+		return result;
+	}
+	
+	public static double p_appengineWrite(int writesPerMinute) {
+		return p_conflict(60, writesPerMinute);
+	}
 	
 	public static void main(String[] args) {
 		System.out.println("Typical object size in bytes = "
@@ -188,6 +289,10 @@ public class Estimations {
 		        + fieldsPerObject.times(lengthOfXid_inCharacters)
 		                .times(bytesPerCharacter + bytesPerRevisionNumber + bytesPerValueAddress)
 		                .toByteSizes());
+		
+		for(int i = 1; i < 30; i++) {
+			System.out.println("i=" + i + " : " + p_appengineWrite(i));
+		}
 	}
 	
 }

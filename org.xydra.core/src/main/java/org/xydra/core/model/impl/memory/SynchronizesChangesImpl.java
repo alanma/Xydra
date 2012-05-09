@@ -93,21 +93,21 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 	}
 	
 	@Override
-    public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
+	public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
 		synchronized(this.eventQueue) {
 			return this.fieldChangeListenerCollection.add(changeListener);
 		}
 	}
 	
 	@Override
-    public boolean addListenerForObjectEvents(XObjectEventListener changeListener) {
+	public boolean addListenerForObjectEvents(XObjectEventListener changeListener) {
 		synchronized(this.eventQueue) {
 			return this.objectChangeListenerCollection.add(changeListener);
 		}
 	}
 	
 	@Override
-    public boolean addListenerForTransactionEvents(XTransactionEventListener changeListener) {
+	public boolean addListenerForTransactionEvents(XTransactionEventListener changeListener) {
 		synchronized(this.eventQueue) {
 			return this.transactionListenerCollection.add(changeListener);
 		}
@@ -366,7 +366,7 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 	}
 	
 	@Override
-    public XChangeLog getChangeLog() {
+	public XChangeLog getChangeLog() {
 		return this.eventQueue.getChangeLog();
 	}
 	
@@ -442,21 +442,21 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 	protected abstract void incrementRevision();
 	
 	@Override
-    public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
+	public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
 		synchronized(this.eventQueue) {
 			return this.fieldChangeListenerCollection.remove(changeListener);
 		}
 	}
 	
 	@Override
-    public boolean removeListenerForObjectEvents(XObjectEventListener changeListener) {
+	public boolean removeListenerForObjectEvents(XObjectEventListener changeListener) {
 		synchronized(this.eventQueue) {
 			return this.objectChangeListenerCollection.remove(changeListener);
 		}
 	}
 	
 	@Override
-    public boolean removeListenerForTransactionEvents(XTransactionEventListener changeListener) {
+	public boolean removeListenerForTransactionEvents(XTransactionEventListener changeListener) {
 		synchronized(this.eventQueue) {
 			return this.transactionListenerCollection.remove(changeListener);
 		}
@@ -515,7 +515,7 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 				
 				incrementRevision();
 			}
-
+			
 			else if(command.getChangeType() == ChangeType.REMOVE) {
 				if(this.removed) {
 					// ID not taken
@@ -557,7 +557,7 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 	
 	private boolean replayEvent(XEvent event) {
 		
-		XyAssert.xyAssert(!event.inTransaction());
+		XyAssert.xyAssert(!event.inTransaction(), "event %s should not be in a txn", event);
 		
 		while(getChangeLog().getCurrentRevisionNumber() < event.getOldModelRevision()) {
 			this.eventQueue.logNullEvent();
@@ -595,7 +595,7 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 	}
 	
 	@Override
-    public void rollback(long revision) {
+	public void rollback(long revision) {
 		
 		checkSync();
 		
@@ -722,7 +722,8 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 		} else {
 			XyAssert.xyAssert(event instanceof XObjectEvent || event instanceof XFieldEvent);
 			MemoryObject object = getObject(event.getTarget().getObject());
-			XyAssert.xyAssert(object != null); assert object != null;
+			XyAssert.xyAssert(object != null);
+			assert object != null;
 			XyAssert.xyAssert(event.getRevisionNumber() == object.getRevisionNumber()
 			        || (event.inTransaction() && event.getOldObjectRevision() == object
 			                .getRevisionNumber()));
@@ -748,11 +749,13 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 			} else {
 				XyAssert.xyAssert(event instanceof XReversibleFieldEvent);
 				MemoryField field = object.getField(((XReversibleFieldEvent)event).getFieldId());
-				XyAssert.xyAssert(field != null); assert field != null;
+				XyAssert.xyAssert(field != null);
+				assert field != null;
 				XyAssert.xyAssert(event.getRevisionNumber() == field.getRevisionNumber()
 				        || (event.inTransaction() && event.getOldFieldRevision() == field
 				                .getRevisionNumber()));
-				XyAssert.xyAssert(XI.equals(field.getValue(), ((XReversibleFieldEvent)event).getNewValue()));
+				XyAssert.xyAssert(XI.equals(field.getValue(),
+				        ((XReversibleFieldEvent)event).getNewValue()));
 				field.setValueInternal(((XReversibleFieldEvent)event).getOldValue());
 				XyAssert.xyAssert(event.getOldFieldRevision() >= 0);
 				field.setRevisionNumber(event.getOldFieldRevision());
@@ -778,7 +781,7 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 	}
 	
 	@Override
-    public boolean synchronize(XEvent[] remoteChanges) {
+	public boolean synchronize(XEvent[] remoteChanges) {
 		
 		boolean success = true;
 		boolean removedChanged;

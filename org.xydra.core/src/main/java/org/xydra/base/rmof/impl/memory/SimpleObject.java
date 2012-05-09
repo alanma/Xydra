@@ -51,6 +51,8 @@ public class SimpleObject implements Serializable, XRevWritableObject {
 	
 	@Override
 	public void addField(XRevWritableField field) {
+		XyAssert.xyAssert(field != null);
+		assert field != null;
 		this.fields.put(field.getId(), field);
 	}
 	

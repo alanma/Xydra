@@ -197,6 +197,9 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
 			str += " r" + rev2str(this.modelRevision);
 		}
 		str += " @" + getTarget();
+		if(inTransaction()) {
+			str += " [inTxn]";
+		}
 		return str;
 	}
 	

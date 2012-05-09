@@ -1620,7 +1620,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		
 		/*
 		 * since the tests never do anything more than one change at a time, we
-		 * may use "revision -1" here for the old revisions
+		 * may use "revision - 1" here for the old revisions
 		 */
 		case XFIELD:
 			assertEquals(revision - 1, event.getOldFieldRevision());
@@ -1669,17 +1669,16 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	}
 	
 	/*
-	 * Test that getModelSnapshot works if there revision numbers in the change
-	 * log that don't have events associated with them.
+	 * Test that getModelSnapshot works, even if there are revision numbers in
+	 * the change log that don't have events associated with them.
 	 */
 	@Test
 	public void testGetModelSnapshotWithHolesInChangeLog() {
 		
+		/* create successful events */
 		XAddress repoAddr = XX.toAddress(getRepositoryId(), null, null, null);
 		XID modelId = XX.toId("model");
-		
 		executeSucceedingCommand(MemoryRepositoryCommand.createAddCommand(repoAddr, true, modelId));
-		
 		XAddress modelAddr = XX.resolveModel(repoAddr, modelId);
 		XID objectId = XX.toId("object");
 		executeSucceedingCommand(MemoryModelCommand.createAddCommand(modelAddr, true, objectId));
@@ -1689,6 +1688,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		XAddress fieldAddr = XX.resolveField(objectAddr, fieldA);
 		executeSucceedingCommand(MemoryFieldCommand.createAddCommand(fieldAddr, XCommand.FORCED,
 		        XV.toValue("test")));
+		/* create noChange events */
 		executeNochangeCommand(MemoryFieldCommand.createAddCommand(fieldAddr, XCommand.FORCED,
 		        XV.toValue("test")));
 		executeSucceedingCommand(MemoryObjectCommand.createAddCommand(objectAddr, true,

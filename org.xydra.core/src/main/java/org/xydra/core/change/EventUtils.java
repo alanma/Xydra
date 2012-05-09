@@ -27,6 +27,8 @@ import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.base.rmof.impl.memory.SimpleObject;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.delta.DeltaUtils;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 import org.xydra.sharedutils.XyAssert;
 
 
@@ -39,7 +41,75 @@ import org.xydra.sharedutils.XyAssert;
  */
 public class EventUtils {
 	
+	private static final Logger log = LoggerFactory.getLogger(EventUtils.class);
+	
 	private static final long MODEL_DOES_NOT_EXIST = -1;
+	
+	/**
+	 * FIXME impl
+	 * 
+	 * @param model @NeverNull
+	 * @param atomicEvent @NeverNull
+	 * @param inTxn
+	 * @param partialModel if true, the model can be a partial model. Events
+	 *            addressing missing parts are silently dropped, if this flag is
+	 *            true.
+	 */
+	private static void applyAtomicEvent(@NeverNull XRevWritableModel model,
+	        @NeverNull XAtomicEvent atomicEvent, boolean inTxn, boolean partialModel) {
+		XyAssert.xyAssert(model != null);
+		assert model != null;
+		XyAssert.xyAssert(atomicEvent != null);
+		assert atomicEvent != null;
+		XyAssert.xyAssert(atomicEvent.getChangedEntity() != null);
+		assert atomicEvent.getChangedEntity() != null;
+		
+		if(atomicEvent instanceof XRepositoryEvent) {
+			XyAssert.xyAssert(atomicEvent.getChangedEntity().equals(model.getAddress()));
+			applyRepositoryEvent(model, (XRepositoryEvent)atomicEvent);
+			return;
+		}
+		XyAssert.xyAssert(model.getRevisionNumber() >= 0, model.getRevisionNumber());
+		if(atomicEvent instanceof XModelEvent) {
+			XyAssert.xyAssert(atomicEvent.getTarget().equals(model.getAddress()));
+			applyModelEvent(model, (XModelEvent)atomicEvent);
+		} else {
+			// object & field events
+			XRevWritableObject object = model.getObject(atomicEvent.getTarget().getObject());
+			if(object == null) {
+				/*
+				 * we are working on a partial snapshot where this event is just
+				 * irrelevant.
+				 */
+				log.trace("Snapshot partial?" + partialModel + " and event " + atomicEvent
+				        + " found not the matching object in snapshot. event ignored.");
+			} else {
+				XyAssert.xyAssert(object != null, "object null for event " + atomicEvent);
+				assert object != null;
+				object.setRevisionNumber(atomicEvent.getRevisionNumber());
+				if(atomicEvent instanceof XObjectEvent) {
+					XyAssert.xyAssert(atomicEvent.getTarget().getParent()
+					        .equals(model.getAddress()),
+					        "targetParent=" + atomicEvent.getTarget().getParent() + " vs. model="
+					                + model.getAddress());
+					applyObjectEvent(object, (XObjectEvent)atomicEvent);
+				} else {
+					XyAssert.xyAssert(atomicEvent instanceof XFieldEvent);
+					XyAssert.xyAssert(atomicEvent.getTarget().getParent().getParent()
+					        .equals(model.getAddress()));
+					XFieldEvent fieldEvent = (XFieldEvent)atomicEvent;
+					XRevWritableField field = object.getField(fieldEvent.getFieldId());
+					if(field == null) {
+						/* working on a partial snapshot ... */
+					} else {
+						assert field != null : "field is null";
+						field.setRevisionNumber(atomicEvent.getRevisionNumber());
+						applyFieldEvent(field, fieldEvent);
+					}
+				}
+			}
+		}
+	}
 	
 	/**
 	 * Worker method.
@@ -88,60 +158,17 @@ public class EventUtils {
 	}
 	
 	/**
-	 * @param model @NeverNull
-	 * @param atomicEvent @NeverNull
-	 * @param inTxn
-	 */
-	private static void applyAtomicEvent(@NeverNull XRevWritableModel model,
-	        @NeverNull XAtomicEvent atomicEvent, boolean inTxn) {
-		XyAssert.xyAssert(model != null);
-		assert model != null;
-		XyAssert.xyAssert(atomicEvent != null);
-		assert atomicEvent != null;
-		XyAssert.xyAssert(atomicEvent.getChangedEntity() != null);
-		assert atomicEvent.getChangedEntity() != null;
-		
-		if(atomicEvent instanceof XRepositoryEvent) {
-			XyAssert.xyAssert(atomicEvent.getChangedEntity().equals(model.getAddress()));
-			applyRepositoryEvent(model, (XRepositoryEvent)atomicEvent);
-			return;
-		}
-		XyAssert.xyAssert(model.getRevisionNumber() >= 0, model.getRevisionNumber());
-		if(atomicEvent instanceof XModelEvent) {
-			XyAssert.xyAssert(atomicEvent.getTarget().equals(model.getAddress()));
-			applyModelEvent(model, (XModelEvent)atomicEvent);
-		} else {
-			// object & field events
-			XRevWritableObject object = model.getObject(atomicEvent.getTarget().getObject());
-			XyAssert.xyAssert(object != null, "object null for event " + atomicEvent);
-			assert object != null;
-			object.setRevisionNumber(atomicEvent.getRevisionNumber());
-			if(atomicEvent instanceof XObjectEvent) {
-				XyAssert.xyAssert(atomicEvent.getTarget().getParent().equals(model.getAddress()),
-				        "targetParent=" + atomicEvent.getTarget().getParent() + " vs. model="
-				                + model.getAddress());
-				applyObjectEvent(object, (XObjectEvent)atomicEvent);
-			} else {
-				XyAssert.xyAssert(atomicEvent instanceof XFieldEvent);
-				XyAssert.xyAssert(atomicEvent.getTarget().getParent().getParent()
-				        .equals(model.getAddress()));
-				XFieldEvent fieldEvent = (XFieldEvent)atomicEvent;
-				XRevWritableField field = object.getField(fieldEvent.getFieldId());
-				assert field != null : "field is null";
-				field.setRevisionNumber(atomicEvent.getRevisionNumber());
-				applyFieldEvent(field, fieldEvent);
-			}
-		}
-	}
-	
-	/**
 	 * @param reference @CanBeNull
-	 * @param model @NeverNull
+	 * @param model @NeverNull FIXME ### must contain the entities addressed in
+	 *            event
 	 * @param atomicEvent @NeverNull
 	 * @param inTxn
+	 * @param partialSnapshot if true, model can be a partial snapshot. Events
+	 *            addressing missing parts are silently ignored.
 	 */
 	private static void applyAtomicEventNonDestructive(@CanBeNull XReadableModel reference,
-	        @NeverNull XRevWritableModel model, @NeverNull XAtomicEvent atomicEvent, boolean inTxn) {
+	        @NeverNull XRevWritableModel model, @NeverNull XAtomicEvent atomicEvent, boolean inTxn,
+	        boolean partialSnapshot) {
 		XyAssert.xyAssert(atomicEvent != null);
 		assert atomicEvent != null;
 		XyAssert.xyAssert(model != null);
@@ -149,41 +176,82 @@ public class EventUtils {
 		
 		XID objectId = atomicEvent.getTarget().getObject();
 		if(objectId != null) {
-			XyAssert.xyAssert(model != null);
-			assert model != null;
-			
+			// => its a field or object event
 			XRevWritableObject object = model.getObject(objectId);
-			XyAssert.xyAssert(object != null, "%s: applying event %s inTxn?%s", model.getAddress(),
-			        atomicEvent, inTxn);
-			assert object != null;
-			
-			XReadableObject referenceObject = (reference == null) ? null : reference
-			        .getObject(objectId);
-			if(object == referenceObject) {
-				object = SimpleObject.shallowCopy(object);
-				model.addObject(object);
-			}
-			XID fieldId = atomicEvent.getTarget().getField();
-			if(fieldId != null) {
-				XRevWritableField field = object.getField(fieldId);
-				XReadableField referenceField = (referenceObject == null) ? null : referenceObject
-				        .getField(fieldId);
-				XyAssert.xyAssert(field != null);
-				assert field != null;
-				
-				if(field == referenceField) {
-					object.addField(new SimpleField(referenceField.getAddress(), referenceField
-					        .getRevisionNumber(), referenceField.getValue()));
+			if(object == null) {
+				XyAssert.xyAssert(
+				        partialSnapshot,
+				        "Must be a partial snapshot. "
+				                + "This is an attempt to execute an event on a non-existing (non-relevant) part of the model. We would just ignore it.");
+			} else {
+				XReadableObject referenceObject = (reference == null) ? null : reference
+				        .getObject(objectId);
+				if(object == referenceObject) {
+					object = SimpleObject.shallowCopy(object);
+					model.addObject(object);
+				}
+				XID fieldId = atomicEvent.getTarget().getField();
+				if(fieldId != null) {
+					// => its a field event
+					XRevWritableField field = object.getField(fieldId);
+					if(field == null) {
+						XyAssert.xyAssert(partialSnapshot, "field '" + atomicEvent.getTarget()
+						        + "' is null, but snapshot is not partial.");
+					} else {
+						XReadableField referenceField = (referenceObject == null) ? null
+						        : referenceObject.getField(fieldId);
+						XyAssert.xyAssert(field != null);
+						assert field != null;
+						if(field == referenceField) {
+							object.addField(new SimpleField(referenceField.getAddress(),
+							        referenceField.getRevisionNumber(), referenceField.getValue()));
+						}
+					}
 				}
 			}
 		}
 		
-		applyAtomicEvent(model, atomicEvent, inTxn);
+		applyAtomicEvent(model, atomicEvent, inTxn, partialSnapshot);
 		XyAssert.xyAssert(reference != model, "just applied event " + atomicEvent + " inTxn?"
 		        + inTxn);
 	}
 	
 	/**
+	 * Applies an event to a model. Event must be addressed to the model.
+	 * 
+	 * It is the responsibility of the caller to ensure that the provided model
+	 * is at a state where the given event applies.
+	 * 
+	 * @param model to which the event is applied. No copy is created. @NeverNull
+	 * @param event to be applied
+	 */
+	public static void applyEvent(@NeverNull XRevWritableModel model, @NeverNull XEvent event) {
+		XyAssert.xyAssert(model != null);
+		assert model != null;
+		XyAssert.xyAssert(event != null);
+		assert event != null;
+		
+		if(event instanceof XTransactionEvent) {
+			for(XEvent txnEvent : ((XTransactionEvent)event)) {
+				if(!txnEvent.isImplied()) {
+					applyAtomicEvent(model, (XAtomicEvent)txnEvent, true, false);
+				}
+			}
+		} else {
+			XyAssert.xyAssert(event instanceof XAtomicEvent, event.getClass().getName());
+			applyAtomicEvent(model, (XAtomicEvent)event, false, false);
+		}
+		/*
+		 * As Model.ADD and REMOVE events are technically only managed within
+		 * the change log of the model itself, we must even then record the
+		 * changed revision number
+		 */
+		model.setRevisionNumber(event.getRevisionNumber());
+	}
+	
+	/**
+	 * Note: Looks unused as of 2012-05
+	 * 
 	 * @param model
 	 * @param event
 	 */
@@ -206,39 +274,6 @@ public class EventUtils {
 	}
 	
 	/**
-	 * Applies an event to a model. Event must be addressed to the model.
-	 * 
-	 * It is the responsibility of the caller to ensure that the provided model
-	 * is at a state where the given event applies.
-	 * 
-	 * @param model to which the event is applied. No copy is created. @NeverNull
-	 * @param event to be applied
-	 */
-	public static void applyEvent(@NeverNull XRevWritableModel model, @NeverNull XEvent event) {
-		XyAssert.xyAssert(model != null);
-		assert model != null;
-		XyAssert.xyAssert(event != null);
-		assert event != null;
-		
-		if(event instanceof XTransactionEvent) {
-			for(XEvent txnEvent : ((XTransactionEvent)event)) {
-				if(!txnEvent.isImplied()) {
-					applyAtomicEvent(model, (XAtomicEvent)txnEvent, true);
-				}
-			}
-		} else {
-			XyAssert.xyAssert(event instanceof XAtomicEvent, event.getClass().getName());
-			applyAtomicEvent(model, (XAtomicEvent)event, false);
-		}
-		/*
-		 * As Model.ADD and REMOVE events are technically only managed within
-		 * the change log of the model itself, we must even then record the
-		 * changed revision number
-		 */
-		model.setRevisionNumber(event.getRevisionNumber());
-	}
-	
-	/**
 	 * Calculate the result of applying events to a model without changing the
 	 * original model but copying as little as possible.
 	 * 
@@ -248,17 +283,21 @@ public class EventUtils {
 	 *            but are also in the reference model are copied first. Never
 	 *            null.
 	 * @param event The events to apply.
-	 * 
+	 * @param partialSnapshot if true, either reference or model might be
+	 *            partial snapshots
 	 * @return The result after applying the events. This model may share object
 	 *         and/or fields with the original model, in which case modifying
 	 *         them will change both models.
 	 */
-	public static XRevWritableModel applyEventNonDestructive(XReadableModel reference,
-	        @NeverNull XRevWritableModel model, @NeverNull XEvent event) {
+	public static XRevWritableModel applyEventNonDestructive(@CanBeNull XReadableModel reference,
+	        @NeverNull XRevWritableModel model, @NeverNull XEvent event, boolean partialSnapshot) {
 		XyAssert.xyAssert(event != null);
 		assert event != null;
 		XyAssert.xyAssert(model != null);
 		assert model != null;
+		
+		// FIXME !!!
+		log.info("Apply event " + event);
 		
 		XRevWritableModel result = model;
 		if(event instanceof XTransactionEvent) {
@@ -277,7 +316,8 @@ public class EventUtils {
 				
 				for(XAtomicEvent atomicEvent : ((XTransactionEvent)event)) {
 					if(!atomicEvent.isImplied()) {
-						applyAtomicEventNonDestructive(reference, result, atomicEvent, true);
+						applyAtomicEventNonDestructive(reference, result, atomicEvent, true,
+						        partialSnapshot);
 					}
 				}
 			}
@@ -288,7 +328,8 @@ public class EventUtils {
 				result = SimpleModel.shallowCopy(result);
 			}
 			
-			applyAtomicEventNonDestructive(reference, result, (XAtomicEvent)event, false);
+			applyAtomicEventNonDestructive(reference, result, (XAtomicEvent)event, false,
+			        partialSnapshot);
 		}
 		
 		result.setRevisionNumber(event.getRevisionNumber());
@@ -311,7 +352,7 @@ public class EventUtils {
 		XyAssert.xyAssert(model != null);
 		XyAssert.xyAssert(event != null);
 		
-		return applyEventNonDestructive(model, model, event);
+		return applyEventNonDestructive(model, model, event, false);
 	}
 	
 	/**
@@ -370,12 +411,16 @@ public class EventUtils {
 	 * @param model to which the event is applied
 	 * @param event to be applied
 	 */
-	private static void applyModelEventIgnoreRev(XModel model, XModelEvent event) {
+	private static void applyModelEvent(XRevWritableModel model, XModelEvent event) {
 		XyAssert.xyAssert(event.getTarget().equals(model.getAddress()));
 		switch(event.getChangeType()) {
 		case ADD: {
-			XyAssert.xyAssert(!model.hasObject(event.getObjectId()));
-			model.createObject(event.getObjectId());
+			XyAssert.xyAssert(!model.hasObject(event.getObjectId()),
+			        "Trying to add object '" + event.getObjectId()
+			                + "' bust is already present in model " + model.getAddress() + " rev:"
+			                + model.getRevisionNumber());
+			XRevWritableObject object = model.createObject(event.getObjectId());
+			object.setRevisionNumber(event.getRevisionNumber());
 			break;
 		}
 		case REMOVE: {
@@ -393,16 +438,12 @@ public class EventUtils {
 	 * @param model to which the event is applied
 	 * @param event to be applied
 	 */
-	private static void applyModelEvent(XRevWritableModel model, XModelEvent event) {
+	private static void applyModelEventIgnoreRev(XModel model, XModelEvent event) {
 		XyAssert.xyAssert(event.getTarget().equals(model.getAddress()));
 		switch(event.getChangeType()) {
 		case ADD: {
-			XyAssert.xyAssert(!model.hasObject(event.getObjectId()),
-			        "Trying to add object '" + event.getObjectId()
-			                + "' bust is already present in model " + model.getAddress() + " rev:"
-			                + model.getRevisionNumber());
-			XRevWritableObject object = model.createObject(event.getObjectId());
-			object.setRevisionNumber(event.getRevisionNumber());
+			XyAssert.xyAssert(!model.hasObject(event.getObjectId()));
+			model.createObject(event.getObjectId());
 			break;
 		}
 		case REMOVE: {
@@ -432,8 +473,9 @@ public class EventUtils {
 			break;
 		}
 		case REMOVE: {
-			XyAssert.xyAssert(object.hasField(event.getFieldId()), "object " + object.getAddress()
-			        + " should have field " + event.getFieldId());
+			XyAssert.xyAssert(object.hasField(event.getFieldId()),
+			        "object '%s' should have field '%s' in rev %s", object.getAddress(),
+			        event.getFieldId(), object.getRevisionNumber());
 			object.removeField(event.getFieldId());
 			break;
 		}
@@ -476,23 +518,25 @@ public class EventUtils {
 	 * @param model to which the event is applied. No copy is created.
 	 * @param event to be applied
 	 */
-	private static void applyRepositoryEventIgnoreRev(XModel model, XRepositoryEvent event) {
+	private static void applyRepositoryEvent(XRevWritableModel model, XRepositoryEvent event) {
 		XyAssert.xyAssert(event.getChangedEntity().equals(model.getAddress()));
 		switch(event.getChangeType()) {
 		case ADD: {
 			/*
 			 * if this triggers a bug, repo.clear might have failed -- maybe a
-			 * test -only problem
+			 * test-only problem
 			 */
 			if(!model.isEmpty()) {
 				throw new IllegalStateException(
 				        "Cannot apply repository ADD event to non-empty model "
 				                + model.getAddress() + " " + model.getRevisionNumber());
 			}
+			model.setRevisionNumber(event.getRevisionNumber());
 			break;
 		}
 		case REMOVE: {
 			XyAssert.xyAssert(model.getRevisionNumber() >= 0, model.getRevisionNumber());
+			model.setRevisionNumber(MODEL_DOES_NOT_EXIST);
 			// clear model
 			List<XID> ids = new LinkedList<XID>();
 			for(XID id : model) {
@@ -515,7 +559,7 @@ public class EventUtils {
 	 * @param model to which the event is applied. No copy is created.
 	 * @param event to be applied
 	 */
-	private static void applyRepositoryEvent(XRevWritableModel model, XRepositoryEvent event) {
+	private static void applyRepositoryEventIgnoreRev(XModel model, XRepositoryEvent event) {
 		XyAssert.xyAssert(event.getChangedEntity().equals(model.getAddress()));
 		switch(event.getChangeType()) {
 		case ADD: {
@@ -528,12 +572,10 @@ public class EventUtils {
 				        "Cannot apply repository ADD event to non-empty model "
 				                + model.getAddress() + " " + model.getRevisionNumber());
 			}
-			model.setRevisionNumber(event.getRevisionNumber());
 			break;
 		}
 		case REMOVE: {
 			XyAssert.xyAssert(model.getRevisionNumber() >= 0, model.getRevisionNumber());
-			model.setRevisionNumber(MODEL_DOES_NOT_EXIST);
 			// clear model
 			List<XID> ids = new LinkedList<XID>();
 			for(XID id : model) {

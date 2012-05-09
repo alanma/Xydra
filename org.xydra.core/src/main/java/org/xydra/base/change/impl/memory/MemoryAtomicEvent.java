@@ -42,8 +42,11 @@ abstract public class MemoryAtomicEvent implements XEvent {
 			throw new IllegalArgumentException("target must not be null");
 		}
 		
-		XyAssert.xyAssert(!implied
-		        || (inTrans && changeType == ChangeType.REMOVE && target.getParent() != null));
+		XyAssert.xyAssert(
+		        !implied
+		                || (inTrans && changeType == ChangeType.REMOVE && target.getParent() != null),
+		        "implied = %s, inTrans = %s, changeType = %s, target = %s, target.parent = %s",
+		        implied, inTrans, changeType, target, target.getParent());
 		XyAssert.xyAssert(changeType != ChangeType.TRANSACTION);
 		
 		this.target = target;

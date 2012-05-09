@@ -288,6 +288,9 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
 		if(isImplied()) {
 			str += " [implied]";
 		}
+		if(inTransaction()) {
+			str += " [inTxn]";
+		}
 		return str;
 	}
 	

@@ -6,8 +6,10 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.xydra.base.IHasXID;
+import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XType;
+import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
@@ -18,6 +20,7 @@ import org.xydra.core.model.delta.DeltaUtils.IObjectDiff;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.sharedutils.XyAssert;
+import org.xydra.store.impl.delegate.XydraPersistence;
 
 
 /**
@@ -36,7 +39,8 @@ public class DumpUtils {
 	 * </code>
 	 */
 	public static String dump(String label, XReadableRepository repo) {
-		XyAssert.xyAssert(repo != null); assert repo != null;
+		XyAssert.xyAssert(repo != null);
+		assert repo != null;
 		XyAssert.xyAssert(repo.getAddress().getAddressedType() == XType.XREPOSITORY);
 		log.info(label + " * Repo " + repo.getId() + " ...");
 		for(XID modelId : repo) {
@@ -63,8 +67,10 @@ public class DumpUtils {
 	 * @return the model as a human-readable String
 	 */
 	public static StringBuffer toStringBuffer(XReadableModel model) {
-		XyAssert.xyAssert(model != null); assert model != null;
+		XyAssert.xyAssert(model != null);
+		assert model != null;
 		XyAssert.xyAssert(model.getAddress().getAddressedType() == XType.XMODEL);
+		
 		StringBuffer buf = new StringBuffer();
 		buf.append("** Model   " + model.getAddress() + " [" + model.getRevisionNumber() + "]\n");
 		List<XID> ids = toSortedList(model);
@@ -101,7 +107,8 @@ public class DumpUtils {
 	 * @return given object as human-readable string
 	 */
 	public static StringBuffer toStringBuffer(XReadableObject object) {
-		XyAssert.xyAssert(object != null); assert object != null;
+		XyAssert.xyAssert(object != null);
+		assert object != null;
 		XyAssert.xyAssert(object.getAddress().getAddressedType() == XType.XOBJECT);
 		StringBuffer buf = new StringBuffer();
 		buf.append("*** Object " + object.getAddress() + " [" + object.getRevisionNumber() + "]\n");
@@ -130,7 +137,8 @@ public class DumpUtils {
 	 * @return the field as a human-readable String
 	 */
 	public static StringBuffer toStringBuffer(XReadableField field) {
-		XyAssert.xyAssert(field != null); assert field != null;
+		XyAssert.xyAssert(field != null);
+		assert field != null;
 		XyAssert.xyAssert(field.getAddress().getAddressedType() == XType.XFIELD);
 		StringBuffer buf = new StringBuffer();
 		buf.append("**** Field " + field.getAddress() + " = '" + field.getValue() + "' " + " ["
@@ -204,5 +212,12 @@ public class DumpUtils {
 		sb.append("'" + changedField.getInitialValue() + "' ==> '" + changedField.getValue()
 		        + "' <br/>\n");
 		return sb;
+	}
+	
+	public static void dumpChangeLog(XydraPersistence pers, XAddress modelAddress) {
+		List<XEvent> events = pers.getEvents(modelAddress, 0, Long.MAX_VALUE);
+		for(XEvent event : events) {
+			log.info("Event " + event.getRevisionNumber() + ": " + event);
+		}
 	}
 }

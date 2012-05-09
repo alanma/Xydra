@@ -50,7 +50,7 @@ public class XyAssert {
 	}
 	
 	public static void setEnabled(boolean enabled_) {
-		log.debug("XyAssert is " + enabled_);
+		log.info("XyAssert is " + enabled_);
 		enabled = enabled_;
 	}
 	
@@ -124,13 +124,14 @@ public class XyAssert {
 	 * If there are more arguments than placeholders, the unmatched arguments
 	 * will be appended to the end of the formatted message in square braces.
 	 * 
-	 * @param template a non-null string containing 0 or more {@code %s}
+	 * @param templateStr a non-null string containing 0 or more {@code %s}
 	 *            placeholders.
 	 * @param args the arguments to be substituted into the message template.
 	 *            Arguments are converted to strings using
 	 *            {@link String#valueOf(Object)}. Arguments can be null.
+	 * @return A string with all '%s' replaced (if there are enough objects)
 	 */
-	static String format(String templateStr, @Nullable Object ... args) {
+	public static String format(String templateStr, @Nullable Object ... args) {
 		String template = String.valueOf(templateStr); // null -> "null"
 		
 		// start substituting the arguments into the '%s' placeholders

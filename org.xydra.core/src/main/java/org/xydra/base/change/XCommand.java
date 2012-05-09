@@ -93,8 +93,9 @@ public interface XCommand extends Serializable {
 	 * WHAT will be changed?
 	 * 
 	 * @return the {@link XAddress} of the {@link XModel}, {@link XObject} or
-	 *         {@link XField} that will be added, removed or the {@link XField}
-	 *         which value was changed; same as getTarget() for transactions
+	 *         {@link XField} that will be added or removed -- or the
+	 *         {@link XField} which value was changed; same as getTarget() for
+	 *         transactions
 	 */
 	XAddress getChangedEntity();
 	

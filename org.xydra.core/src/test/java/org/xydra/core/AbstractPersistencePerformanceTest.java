@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.xydra.base.X;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
+import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XRepositoryCommand;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
@@ -50,27 +51,39 @@ public abstract class AbstractPersistencePerformanceTest {
 		XydraPersistence persistence = createPersistence(repositoryId);
 		NanoClock c = new NanoClock().start();
 		XID modelId = XX.toId("model1");
+		/* Add model1 */
 		XRepositoryCommand addModelCmd = X.getCommandFactory().createForcedAddModelCommand(
 		        repositoryId, modelId);
 		c.stopAndStart("create-cmd");
-		
 		long l = persistence.executeCommand(actorId, addModelCmd);
-		assertTrue("" + l, l >= 0);
+		assertTrue("" + l, l == 0);
 		c.stopAndStart("add-model");
 		
+		/* Add same model again */
 		l = persistence.executeCommand(actorId, addModelCmd);
-		assertTrue("" + l, l < 0);
+		assertTrue("" + l, l == XCommand.NOCHANGE);
 		c.stopAndStart("add-model-again");
 		
+		/* Add objects */
 		createObjects(persistence, repositoryId, modelId, x);
 		c.stopAndStart("add-" + x + "-objects");
-		XWritableModel snap = persistence.getModelSnapshot(new GetWithAddressRequest(XX.toAddress(
-		        repositoryId, modelId, null, null)));
 		
+		GetWithAddressRequest getRequest = new GetWithAddressRequest(XX.toAddress(repositoryId,
+		        modelId, null, null));
+		
+		long modelRev = persistence.getModelRevision(getRequest).revision();
+		assertTrue("modelRev=" + modelRev + " x=" + x, modelRev >= x);
+		
+		/* Get snapshot */
+		XWritableModel snap = persistence.getModelSnapshot(getRequest);
 		c.stopAndStart("get-modelsnapshot");
-		snap = persistence.getModelSnapshot(new GetWithAddressRequest(XX.toAddress(repositoryId,
-		        modelId, null, null)));
+		assertEquals(modelRev, snap.getRevisionNumber());
+		
+		/* Get snapshot again */
+		snap = persistence.getModelSnapshot(getRequest);
 		c.stopAndStart("get-modelsnapshot2");
+		assertEquals(modelRev, snap.getRevisionNumber());
+		
 		Set<XID> set = org.xydra.index.IndexUtils.toSet(snap.iterator());
 		assertEquals(x, set.size());
 		log.info(c.getStats());

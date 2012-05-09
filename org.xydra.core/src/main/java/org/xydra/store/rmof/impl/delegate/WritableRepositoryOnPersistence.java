@@ -54,14 +54,18 @@ public class WritableRepositoryOnPersistence extends AbstractWritableOnPersisten
 			if(l < 0) {
 				log.warn("creating model '" + modelId + "' failed with " + l);
 			}
-			assert this.persistence.getModelRevision(
-			        new GetWithAddressRequest(getModelAddress(modelId), USE_TENTATIVE_STATE))
-			        .modelExists() : "model should exist "
-			        + this.persistence.getModelRevision(new GetWithAddressRequest(
-			                getModelAddress(modelId), USE_TENTATIVE_STATE));
+			XyAssert.xyAssert(
+			        this.persistence
+			                .getModelRevision(
+			                        new GetWithAddressRequest(getModelAddress(modelId),
+			                                USE_TENTATIVE_STATE)).modelExists(),
+			        "model should exist "
+			                + this.persistence.getModelRevision(new GetWithAddressRequest(
+			                        getModelAddress(modelId), USE_TENTATIVE_STATE)));
 			
 			model = getModel(modelId);
-			XyAssert.xyAssert(model != null); assert model != null;
+			XyAssert.xyAssert(model != null);
+			assert model != null;
 		}
 		return model;
 	}
@@ -97,7 +101,8 @@ public class WritableRepositoryOnPersistence extends AbstractWritableOnPersisten
 	
 	@Override
 	public boolean hasModel(XID modelId) {
-		XyAssert.xyAssert(this.persistence != null); assert this.persistence != null;
+		XyAssert.xyAssert(this.persistence != null);
+		assert this.persistence != null;
 		return this.persistence.hasManagedModel(modelId)
 		        && this.persistence.getModelRevision(
 		                new GetWithAddressRequest(XX.resolveModel(
