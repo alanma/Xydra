@@ -46,8 +46,6 @@ public class EventUtils {
 	private static final long MODEL_DOES_NOT_EXIST = -1;
 	
 	/**
-	 * FIXME impl
-	 * 
 	 * @param model @NeverNull
 	 * @param atomicEvent @NeverNull
 	 * @param inTxn
@@ -296,8 +294,7 @@ public class EventUtils {
 		XyAssert.xyAssert(model != null);
 		assert model != null;
 		
-		// FIXME !!!
-		log.info("Apply event " + event);
+		log.trace("Apply event " + event);
 		
 		XRevWritableModel result = model;
 		if(event instanceof XTransactionEvent) {
