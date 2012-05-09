@@ -54,17 +54,20 @@ public class GaeDebugFormatter {
 			for(Entry<String,Object> a : e.getProperties().entrySet()) {
 				String aKey = a.getKey();
 				Object aValue = a.getValue();
-				buf.append(aKey + ": "
-				        + DebugFormatter.formatString(aValue == null ? "null" : aValue.toString())
-				        + "; ");
+				buf.append("<br />"
+				        + aKey
+				        + ": "
+				        + DebugFormatter.formatString(aValue == null ? "null" : aValue.toString(),
+				                300, true) + "; ");
 			}
 			return "Entity={" + buf.toString() + " }";
 		} else if(value instanceof GaeChange) {
 			GaeChange c = (GaeChange)value;
-			return "GaeChange {" + DebugFormatter.formatString(c.toString(), 140) + "}";
+			return "GaeChange {" + DebugFormatter.formatString(c.toString(), 1000, false) + "}";
 		} else if(value instanceof GaeModelRevision) {
 			GaeModelRevision g = (GaeModelRevision)value;
-			return "GaeModelRevision {" + DebugFormatter.formatString(g.toString(), 140) + "}";
+			return "GaeModelRevision {" + DebugFormatter.formatString(g.toString(), 140, false)
+			        + "}";
 		}
 		
 		throw new IllegalAccessError("Cannot handle this, check via canHandle() before");

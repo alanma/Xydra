@@ -20,20 +20,9 @@ import org.xydra.store.impl.gae.snapshot.GaeSnapshotServiceImpl3;
 import org.xydra.store.impl.gae.snapshot.IGaeSnapshotService;
 
 
-/**
- * Xydra allows transaction only within one model. The GAE implementation
- * maintains one change log per model. This class keeps all access to a model
- * within the datastore and memcache in one place.
- * 
- * Goal: If the datastore or memcache is called to read or write a certain
- * model, that access is triggered only from here.
- * 
- * @author xamde
- * 
- */
-public class GaeModelPersistence {
+public class GaeModelPersistence3 implements IGaeModelPersistence {
 	
-	private static final Logger log = LoggerFactory.getLogger(GaeModelPersistence.class);
+	private static final Logger log = LoggerFactory.getLogger(GaeModelPersistence3.class);
 	
 	private final XAddress modelAddress;
 	private final IGaeChangesService changesService;
@@ -41,7 +30,7 @@ public class GaeModelPersistence {
 	private final IGaeExecutionService executionService;
 	private final InstanceRevisionManager instanceRevisionManager;
 	
-	public GaeModelPersistence(XAddress modelAddress) {
+	public GaeModelPersistence3(XAddress modelAddress) {
 		this.instanceRevisionManager = new InstanceRevisionManager(modelAddress);
 		this.modelAddress = modelAddress;
 		this.changesService = new GaeChangesServiceImpl3(this.modelAddress,
@@ -51,12 +40,28 @@ public class GaeModelPersistence {
 		        this.changesService, this.snapshotService);
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.xydra.store.impl.gae.IGaeModelPersistence#executeCommand(org.xydra
+	 * .base.change.XCommand, org.xydra.base.XID)
+	 */
+	@Override
 	public long executeCommand(XCommand command, XID actorId) {
 		// absolutely required
 		calculateModelRevAndCacheInInstance(false);
 		return this.executionService.executeCommand(command, actorId);
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.xydra.store.impl.gae.IGaeModelPersistence#getEventsBetween(org.xydra
+	 * .base.XAddress, long, long)
+	 */
+	@Override
 	public List<XEvent> getEventsBetween(XAddress address, long beginRevision, long endRevision) {
 		calculateModelRevAndCacheInInstance(true);
 		return this.changesService.getEventsBetween(address, beginRevision, endRevision);
@@ -73,6 +78,12 @@ public class GaeModelPersistence {
 		        .setCurrentGaeModelRevIfRevisionIsHigher(gaeModelRev);
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.xydra.store.impl.gae.IGaeModelPersistence#getSnapshot(boolean)
+	 */
+	@Override
 	synchronized public XWritableModel getSnapshot(boolean includeTentative) {
 		calculateModelRevAndCacheInInstance(false);
 		ModelRevision currentRevision = this.instanceRevisionManager.getInstanceRevisionInfo()
@@ -86,6 +97,14 @@ public class GaeModelPersistence {
 		return snapshot;
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.xydra.store.impl.gae.IGaeModelPersistence#getObjectSnapshot(org.xydra
+	 * .base.XID, boolean)
+	 */
+	@Override
 	public XWritableObject getObjectSnapshot(XID objectId, boolean includeTentative) {
 		calculateModelRevAndCacheInInstance(false);
 		ModelRevision currentRevision = this.instanceRevisionManager.getInstanceRevisionInfo()
@@ -98,12 +117,13 @@ public class GaeModelPersistence {
 		return this.snapshotService.getObjectSnapshot(currentRevNr, true, objectId);
 	}
 	
-	/**
-	 * @param includeTentative if true, then in addition to the stable model
-	 *            revision number also the unstable tentative revision number is
-	 *            calculated.
-	 * @return the current {@link ModelRevision} or null
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.xydra.store.impl.gae.IGaeModelPersistence#getModelRevision(boolean)
 	 */
+	@Override
 	public ModelRevision getModelRevision(boolean includeTentative) {
 		calculateModelRevAndCacheInInstance(includeTentative);
 		return this.instanceRevisionManager.getInstanceRevisionInfo().getGaeModelRevision()
@@ -118,12 +138,20 @@ public class GaeModelPersistence {
 	
 	@Override
 	public boolean equals(Object other) {
-		return other instanceof GaeModelPersistence
-		        && ((GaeModelPersistence)other).modelAddress.equals(this.modelAddress);
+		return other instanceof GaeModelPersistence3
+		        && ((GaeModelPersistence3)other).modelAddress.equals(this.modelAddress);
 		
 	}
 	
-	public boolean modelHasBeenManaged(XID modelId) {
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.xydra.store.impl.gae.IGaeModelPersistence#modelHasBeenManaged(org
+	 * .xydra.base.XID)
+	 */
+	@Override
+	public boolean modelHasBeenManaged() {
 		return this.changesService.modelHasBeenManaged();
 	}
 	

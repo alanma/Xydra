@@ -54,6 +54,7 @@ public class AllChanges {
 	public void cacheCommittedChange(GaeChange change) {
 		XyAssert.xyAssert(change != null);
 		assert change != null;
+		
 		if(change.getStatus().isCommitted()) {
 			this.commitedChanges.cacheCommittedChange(change);
 		} else {

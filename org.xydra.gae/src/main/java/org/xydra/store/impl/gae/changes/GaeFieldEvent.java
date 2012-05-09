@@ -134,16 +134,17 @@ class GaeFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 	
 	@Override
 	public String toString() {
-		String prefix = "GaeFieldEvent by " + getActor() + ": ";
-		String suffix = " @" + getTarget() + " r" + rev2str(this.modelRevision) + "/"
-		        + rev2str(this.objectRevision) + "/" + rev2str(this.fieldRevision);
+		String prefix = "GaeFieldEvent by " + getActor() + ": "
+		        + (this.inTransaction() ? "inTxn" : "atomic");
+		String suffix = " @" + getTarget() + " rev m" + rev2str(this.modelRevision) + "/o"
+		        + rev2str(this.objectRevision) + "/f" + rev2str(this.fieldRevision);
 		switch(getChangeType()) {
 		case ADD:
 			return prefix + "ADD " + getNewValue() + suffix;
 		case REMOVE:
 			return prefix + "REMOVE " + suffix + (isImplied() ? " [implied]" : "");
 		case CHANGE:
-			return prefix + "CHANGE " + " to " + getNewValue() + suffix;
+			return prefix + "CHANGE " + " to '" + getNewValue() + "'" + suffix;
 		default:
 			throw new RuntimeException("this field event should have never been created");
 		}

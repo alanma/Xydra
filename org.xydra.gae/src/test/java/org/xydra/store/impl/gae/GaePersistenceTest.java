@@ -6,16 +6,26 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Set;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
+import org.xydra.base.change.XFieldCommand;
+import org.xydra.base.change.XObjectCommand;
+import org.xydra.base.change.XRepositoryCommand;
+import org.xydra.base.change.impl.memory.MemoryFieldCommand;
 import org.xydra.base.change.impl.memory.MemoryModelCommand;
+import org.xydra.base.change.impl.memory.MemoryObjectCommand;
 import org.xydra.base.change.impl.memory.MemoryRepositoryCommand;
 import org.xydra.base.rmof.XWritableModel;
+import org.xydra.base.value.XStringValue;
+import org.xydra.base.value.XV;
 import org.xydra.core.util.DumpUtils;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -52,7 +62,6 @@ public class GaePersistenceTest {
 		XydraPersistence pers = new GaePersistence(XX.toId("test-repo-1"));
 		
 		XID modelId = XX.createUniqueId();
-		XID objectId = XX.createUniqueId();
 		XAddress repoAddr = XX.toAddress(pers.getRepositoryId(), null, null, null);
 		XAddress modelAddr = XX.resolveModel(repoAddr, modelId);
 		GetWithAddressRequest modelAddressRequest = new GetWithAddressRequest(modelAddr);
@@ -60,15 +69,19 @@ public class GaePersistenceTest {
 		assertFalse(pers.hasManagedModel(modelId));
 		assertEquals(new ModelRevision(-1L, false), pers.getModelRevision(modelAddressRequest));
 		
+		/* Create model */
 		pers.executeCommand(ACTOR,
 		        MemoryRepositoryCommand.createAddCommand(repoAddr, true, modelId));
 		assertEquals(new ModelRevision(0, true), pers.getModelRevision(modelAddressRequest));
 		assertTrue(pers.hasManagedModel(modelId));
 		
 		log.info("###   ADD object ");
+		XID objectId = XX.createUniqueId();
+		assertFalse(pers.getModelSnapshot(modelAddressRequest).hasObject(objectId));
+		/* Create object */
 		long l = pers.executeCommand(ACTOR,
 		        MemoryModelCommand.createAddCommand(modelAddr, true, objectId));
-		assert l >= 0;
+		assert l >= 0 : "" + l;
 		log.info("###   Verify revNr ");
 		assertEquals(1, pers.getModelRevision(modelAddressRequest).revision());
 		assertEquals(1, pers.getModelRevision(modelAddressRequest).revision());
@@ -82,6 +95,7 @@ public class GaePersistenceTest {
 		log.info("###   hasModel?");
 		assertTrue(pers.hasManagedModel(modelId));
 		log.info("###   getSnapshot");
+		assertEquals(1, pers.getModelRevision(modelAddressRequest).revision());
 		XWritableModel modelSnapshot = pers.getModelSnapshot(modelAddressRequest);
 		assertNotNull("snapshot " + modelAddressRequest + " was null", modelSnapshot);
 		log.info("###   dumping");
@@ -129,6 +143,135 @@ public class GaePersistenceTest {
 		assertEquals(new ModelRevision(1L, false), pers.getModelRevision(modelAddressRequest));
 		
 		assert !pers.getModelRevision(modelAddressRequest).modelExists();
+	}
+	
+	@Test
+	public void testAddFieldsValuesTwice() {
+		XydraPersistence p;
+		
+		// prepare commands
+		XStringValue value1 = XV.toValue("value1");
+		XStringValue value2 = XV.toValue("value2");
+		XFieldCommand addValue;
+		XFieldCommand chgValue;
+		XFieldCommand remValue;
+		
+		long result;
+		/* Scenarios to test: */
+		p = preparePersistenceWithModelAndObject("repo1", false);
+		addValue = MemoryFieldCommand.createAddCommand(
+		        XX.resolveField(p.getRepositoryId(), model1, object1, field1), XCommand.FORCED,
+		        value1);
+		result = p.executeCommand(ACTOR, addValue);
+		assertEquals("no field: addValue (fail)", XCommand.FAILED, result);
+		
+		p = preparePersistenceWithModelAndObject("repo2", false);
+		remValue = MemoryFieldCommand.createRemoveCommand(
+		        XX.resolveField(p.getRepositoryId(), model1, object1, field1), XCommand.FORCED);
+		result = p.executeCommand(ACTOR, remValue);
+		assertEquals("no field: remValue (fail)", XCommand.FAILED, result);
+		
+		p = preparePersistenceWithModelAndObject("repo3", false);
+		chgValue = MemoryFieldCommand.createChangeCommand(
+		        XX.resolveField(p.getRepositoryId(), model1, object1, field1), XCommand.FORCED,
+		        value2);
+		result = p.executeCommand(ACTOR, chgValue);
+		assertEquals("no field: chgValue (fail)", XCommand.FAILED, result);
+		
+		/* now with field */
+		
+		// FIXME 3???
+		p = preparePersistenceWithModelAndObject("repo4", true);
+		addValue = MemoryFieldCommand.createAddCommand(
+		        XX.resolveField(p.getRepositoryId(), model1, object1, field1), XCommand.FORCED,
+		        value1);
+		result = p.executeCommand(ACTOR, addValue);
+		assertEquals("field exists: addValue (succ)", 3, result);
+		
+		p = preparePersistenceWithModelAndObject("repo5", true);
+		remValue = MemoryFieldCommand.createRemoveCommand(
+		        XX.resolveField(p.getRepositoryId(), model1, object1, field1), XCommand.FORCED);
+		result = p.executeCommand(ACTOR, remValue);
+		assertEquals("field exists: remValue (fail)", XCommand.NOCHANGE, result);
+		
+		p = preparePersistenceWithModelAndObject("repo6", true);
+		chgValue = MemoryFieldCommand.createChangeCommand(
+		        XX.resolveField(p.getRepositoryId(), model1, object1, field1), XCommand.FORCED,
+		        value2);
+		result = p.executeCommand(ACTOR, chgValue);
+		assertEquals("field exists: chgValue (succ)", 3, result);
+		
+		p = preparePersistenceWithModelAndObject("repo7", true);
+		addValue = MemoryFieldCommand.createAddCommand(
+		        XX.resolveField(p.getRepositoryId(), model1, object1, field1), XCommand.FORCED,
+		        value1);
+		result = p.executeCommand(ACTOR, addValue);
+		assertEquals("field exists: addValue (succ)", 3, result);
+		result = p.executeCommand(ACTOR, addValue);
+		assertEquals("field exists: addValue (succ), addValue (nochg)", XCommand.NOCHANGE, result);
+		chgValue = MemoryFieldCommand.createChangeCommand(
+		        XX.resolveField(p.getRepositoryId(), model1, object1, field1), XCommand.FORCED,
+		        value2);
+		result = p.executeCommand(ACTOR, chgValue);
+		assertEquals("field exists: addValue (succ), addValue (nochg),chgValue (succ)", 5, result);
+		
+		p = preparePersistenceWithModelAndObject("repo8", true);
+		addValue = MemoryFieldCommand.createAddCommand(
+		        XX.resolveField(p.getRepositoryId(), model1, object1, field1), XCommand.FORCED,
+		        value1);
+		chgValue = MemoryFieldCommand.createChangeCommand(
+		        XX.resolveField(p.getRepositoryId(), model1, object1, field1), XCommand.FORCED,
+		        value2);
+		result = p.executeCommand(ACTOR, addValue);
+		assertEquals("field exists: addValue (succ)", 3, result);
+		result = p.executeCommand(ACTOR, chgValue);
+		assertEquals("field exists: addValue (succ), chgValue (succ)", 4, result);
+		result = p.executeCommand(ACTOR, chgValue);
+		assertEquals("field exists: addValue (succ), chgValue (succ), chgValue (nochg)",
+		        XCommand.NOCHANGE, result);
+		
+		p = preparePersistenceWithModelAndObject("repo9", true);
+		addValue = MemoryFieldCommand.createAddCommand(
+		        XX.resolveField(p.getRepositoryId(), model1, object1, field1), XCommand.FORCED,
+		        value1);
+		remValue = MemoryFieldCommand.createRemoveCommand(
+		        XX.resolveField(p.getRepositoryId(), model1, object1, field1), XCommand.FORCED);
+		result = p.executeCommand(ACTOR, addValue);
+		assertEquals("field exists: addValue (succ)", 3, result);
+		
+		assertFalse(
+		        "field cannot be empty",
+		        p.getObjectSnapshot(
+		                new GetWithAddressRequest(XX.resolveObject(p.getRepositoryId(), model1,
+		                        object1))).getField(field1).isEmpty());
+		assertEquals(
+		        "field has value",
+		        value1,
+		        p.getObjectSnapshot(
+		                new GetWithAddressRequest(XX.resolveObject(p.getRepositoryId(), model1,
+		                        object1))).getField(field1).getValue());
+		
+		result = p.executeCommand(ACTOR, remValue);
+		assertEquals("field exists: addValue (succ), remValue (succ)", 4, result);
+	}
+	
+	static final XID model1 = XX.toId("model1");
+	static final XID object1 = XX.toId("object1");
+	static final XID field1 = XX.toId("field1");
+	
+	private static XydraPersistence preparePersistenceWithModelAndObject(String id, boolean addField) {
+		XydraPersistence p = new GaePersistence(XX.toId(id));
+		WritableRepositoryOnPersistence repo = new WritableRepositoryOnPersistence(p, ACTOR);
+		XWritableModel model = repo.createModel(model1);
+		model.createObject(object1);
+		if(addField) {
+			/* create field */
+			XObjectCommand addFieldCommand = MemoryObjectCommand
+			        .createAddCommand(XX.resolveObject(p.getRepositoryId(), model1, object1),
+			                XCommand.FORCED, field1);
+			p.executeCommand(ACTOR, addFieldCommand);
+		}
+		return p;
 	}
 	
 	@Test
@@ -229,6 +372,63 @@ public class GaePersistenceTest {
 		// System.out.println(StatsGatheringMemCacheWrapper.INSTANCE.stats());
 	}
 	
+	public XydraPersistence createPersistence(XID repositoryId) {
+		LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory());
+		// configureLog4j();
+		GaeTestfixer.enable();
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		InstanceContext.clear();
+		XydraRuntime.init();
+		XydraPersistence p = new GaePersistence(repositoryId);
+		assert p.getManagedModelIds().isEmpty();
+		return p;
+	}
+	
+	@Test
+	public void testSimpleOperations() {
+		XID repositoryId = XX.toId("testSimpleOperations");
+		XydraPersistence persistence = createPersistence(repositoryId);
+		XID modelId = XX.toId("model1");
+		GetWithAddressRequest getRequest = new GetWithAddressRequest(XX.toAddress(repositoryId,
+		        modelId, null, null));
+		long modelRev;
+		
+		modelRev = persistence.getModelRevision(getRequest).revision();
+		assertEquals(-1, modelRev);
+		
+		/* Add model1 */
+		XRepositoryCommand addModelCmd = X.getCommandFactory().createForcedAddModelCommand(
+		        repositoryId, modelId);
+		long l = persistence.executeCommand(ACTOR, addModelCmd);
+		assertTrue("" + l, l == 0);
+		modelRev = persistence.getModelRevision(getRequest).revision();
+		assertEquals(0, modelRev);
+		
+		/* Add same model again */
+		l = persistence.executeCommand(ACTOR, addModelCmd);
+		assertTrue("" + l, l == XCommand.NOCHANGE);
+		modelRev = persistence.getModelRevision(getRequest).revision();
+		assertEquals(0, modelRev);
+		
+		/* Add object */
+		XID objectId = XX.toId("object1");
+		l = persistence
+		        .executeCommand(
+		                ACTOR,
+		                X.getCommandFactory().createForcedAddObjectCommand(repositoryId, modelId,
+		                        objectId));
+		assertEquals(2, l);
+		modelRev = persistence.getModelRevision(getRequest).revision();
+		assertEquals(2, modelRev);
+		
+		/* Get snapshot */
+		XWritableModel snap = persistence.getModelSnapshot(getRequest);
+		assertEquals(modelRev, snap.getRevisionNumber());
+		
+		Set<XID> set = org.xydra.index.IndexUtils.toSet(snap.iterator());
+		assertEquals(1, set.size());
+	}
+	
 	@Test
 	public void testAddAndRemoveModelWithObject() {
 		LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory());
@@ -237,8 +437,8 @@ public class GaePersistenceTest {
 		XID modelId = XX.toId("model1");
 		XID objectId = XX.toId("object1");
 		XAddress repoAddr = XX.toAddress(pers.getRepositoryId(), null, null, null);
-		XAddress modelAdd = XX.resolveModel(repoAddr, modelId);
-		GetWithAddressRequest modelAddressRequest = new GetWithAddressRequest(modelAdd);
+		XAddress modelAddress = XX.resolveModel(repoAddr, modelId);
+		GetWithAddressRequest modelAddressRequest = new GetWithAddressRequest(modelAddress);
 		
 		// assert absence
 		assert !pers.getManagedModelIds().contains(modelId);
@@ -250,7 +450,7 @@ public class GaePersistenceTest {
 		assert pers.getManagedModelIds().contains(modelId);
 		assertEquals(0, pers.getModelRevision(modelAddressRequest).revision());
 		l = pers.executeCommand(ACTOR,
-		        MemoryModelCommand.createAddCommand(modelAdd, true, objectId));
+		        MemoryModelCommand.createAddCommand(modelAddress, true, objectId));
 		assert l >= 0;
 		assertEquals(1, pers.getModelRevision(modelAddressRequest).revision());
 		
@@ -271,8 +471,12 @@ public class GaePersistenceTest {
 		assert pers.getModelRevision(modelAddressRequest).modelExists();
 		assertEquals(3, pers.getModelRevision(modelAddressRequest).revision());
 		l = pers.executeCommand(ACTOR,
-		        MemoryModelCommand.createAddCommand(modelAdd, true, objectId));
-		assert l >= 0;
+		        MemoryModelCommand.createAddCommand(modelAddress, true, objectId));
+		
+		// FIXME !!!
+		DumpUtils.dumpChangeLog(pers, modelAddress);
+		
+		assert l >= 0 : "" + l;
 		assertEquals(4, pers.getModelRevision(modelAddressRequest).revision());
 		
 		XWritableModel snap = pers.getModelSnapshot(modelAddressRequest);

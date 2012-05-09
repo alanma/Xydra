@@ -60,7 +60,7 @@ public class GaeStoreSpecialTest {
 		
 		for(XCommand command : commands) {
 			long result = this.pers.executeCommand(this.actorId, command);
-			assert result >= 0;
+			assert result >= 0 : result;
 			if(result == XCommand.FAILED) {
 				throw new RuntimeException(
 				        "ExecuteCommands did not work properly in setUp: command failed!");

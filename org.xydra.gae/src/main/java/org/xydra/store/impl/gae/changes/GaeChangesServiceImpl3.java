@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.xydra.annotations.NeverNull;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XType;
@@ -122,17 +123,19 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 	}
 	
 	/**
-	 * @param e atomic or transaction event, never null
+	 * @param e atomic or transaction event @NeverNull
 	 * @return true if model must exist after this event
 	 */
-	private static boolean eventIndicatesModelExists(final XEvent e) {
+	private static boolean eventIndicatesModelExists(@NeverNull final XEvent e) {
+		XyAssert.xyAssert(e != null);
 		assert e != null;
 		XEvent event = e;
 		if(event.getChangeType() == ChangeType.TRANSACTION) {
 			// check only last event
 			XTransactionEvent txnEvent = (XTransactionEvent)event;
-			assert txnEvent.size() >= 1;
+			XyAssert.xyAssert(txnEvent.size() >= 1);
 			event = txnEvent.getEvent(txnEvent.size() - 1);
+			XyAssert.xyAssert(event != null);
 			assert event != null;
 		}
 		XyAssert.xyAssert(event.getChangeType() != ChangeType.TRANSACTION);
@@ -166,8 +169,8 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 	 * @return the defined window size
 	 */
 	private static int windowsSizeForRound(int round) {
-		assert round >= 0;
-		assert WINDOW_SIZES.length > 0;
+		XyAssert.xyAssert(round >= 0);
+		XyAssert.xyAssert(WINDOW_SIZES.length > 0);
 		if(round < WINDOW_SIZES.length) {
 			return WINDOW_SIZES[round];
 		} else {
@@ -218,15 +221,15 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 		/* === Using data from our instance === */
 		GaeModelRevision lastCurrentRev = this.instanceRevInfoManager.getInstanceRevisionInfo()
 		        .getGaeModelRevision();
-		assert lastCurrentRev.getModelRevision() != null;
+		XyAssert.xyAssert(lastCurrentRev.getModelRevision() != null);
 		log.info(this.getModelAddress() + " >> Update currentRev from lastCurrentRev="
 		        + lastCurrentRev);
 		/*
-		 * After this method it might turn out, that 'current' is in fact the
+		 * After this method, it might turn out, that 'current' is in fact the
 		 * current revision.
 		 */
 		CandidateRev candidate = new CandidateRev(lastCurrentRev);
-		assert candidate.isFinalModelRev() == false : "we cannot know this yet";
+		XyAssert.xyAssert(candidate.isFinalModelRev() == false, "we cannot know this yet");
 		
 		/*
 		 * Find a good starting point for our search. Initially use local
@@ -257,17 +260,17 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 					                .revision()) {
 						candidate.gaeModelRev = revInfoFromMemcacheOrDatastore
 						        .getGaeModelRevision();
-						assert revInfoFromMemcacheOrDatastore.getLastCommitted() > lastCheckedRev;
+						XyAssert.xyAssert(revInfoFromMemcacheOrDatastore.getLastCommitted() > lastCheckedRev);
 						lastCheckedRev = revInfoFromMemcacheOrDatastore.getLastCommitted();
-						assert lastCheckedRev >= candidate.gaeModelRev.getModelRevision()
-						        .revision();
+						XyAssert.xyAssert(lastCheckedRev >= candidate.gaeModelRev
+						        .getModelRevision().revision());
 						round = 0;
 						log.debug("Cached value is a better start than what we had. Now using "
 						        + candidate.gaeModelRev);
 					}
 				}
 				askedMemcacheOrDatastore = true;
-				assert candidate.isFinalModelRev() == false;
+				XyAssert.xyAssert(candidate.isFinalModelRev() == false);
 			}
 			
 			int windowSize = windowsSizeForRound(round);
@@ -341,11 +344,11 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 	@Override
 	public void commit(GaeChange change, Status status) {
 		
-		assert status.isCommitted();
-		assert !change.getStatus().isCommitted();
+		XyAssert.xyAssert(status.isCommitted());
+		XyAssert.xyAssert(!change.getStatus().isCommitted());
 		
-		change.commit(status);
-		assert change.getStatus() == status;
+		change.commitAndClearLocks(status);
+		XyAssert.xyAssert(change.getStatus() == status);
 		
 		// if(status == Status.SuccessExecuted) {
 		// boolean modelExists = eventIndicatesModelExists(change.getEvent());
@@ -375,16 +378,16 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 	 * 
 	 * @param beginRevInclusive
 	 * @param endRevInclusive
-	 * @param candidate never null, not final model rev
+	 * @param candidate not final model rev @NeverNull
 	 * @param includeTentative TODO docu tentative
 	 * @return a {@link CandidateRev} that is not necessarily a final model rev.
 	 */
 	private CandidateRev computeCurrenRevisionFromLocalChanges(long beginRevInclusive,
-	        long endRevInclusive, CandidateRev candidate, boolean includeTentative) {
-		assert candidate.isFinalModelRev() == false;
-		assert candidate.gaeModelRev.getModelRevision() != null;
-		assert endRevInclusive - beginRevInclusive >= 0 : "begin:" + beginRevInclusive + ",end:"
-		        + endRevInclusive;
+	        long endRevInclusive, @NeverNull CandidateRev candidate, boolean includeTentative) {
+		XyAssert.xyAssert(candidate.isFinalModelRev() == false);
+		XyAssert.xyAssert(candidate.gaeModelRev.getModelRevision() != null);
+		XyAssert.xyAssert(endRevInclusive - beginRevInclusive >= 0, "begin:" + beginRevInclusive
+		        + ",end:" + endRevInclusive);
 		log.debug(this.modelAddr + ":: computeFromCache candidate=" + candidate + " in range ["
 		        + beginRevInclusive + "," + endRevInclusive + "]");
 		
@@ -433,7 +436,7 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 						log.debug(this.modelAddr + ":: New currentRev candidate " + candidate);
 					}
 				} else {
-					assert change != null && !change.getStatus().isCommitted();
+					XyAssert.xyAssert(change != null && !change.getStatus().isCommitted());
 					if(!includeTentative) {
 						// we just validated a stable candidate revision
 						log.debug("Found end at " + i + " return workingRev=" + candidate);
@@ -459,7 +462,10 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 					this.revInfoFromMemcacheAndDatastore = this.revInfoMemcacheAndDatastoreCache
 					        .get(this.revisionCacheName, storeOpts);
 				}
-				RevisionInfo toBeCached = new RevisionInfo("toBeCached", candidate.gaeModelRev,
+				RevisionInfo toBeCached = new RevisionInfo("toBeCached",
+				        // FIXME is this too low?
+				        candidate.gaeModelRev,
+				        // FIXME is this too high?
 				        this.instanceRevInfoManager.getInstanceRevisionInfo().getLastCommitted(),
 				        this.instanceRevInfoManager.getInstanceRevisionInfo().getLastTaken());
 				if(toBeCached.isBetterThan(this.revInfoFromMemcacheAndDatastore)) {
@@ -485,7 +491,7 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 			}
 		}
 		// default:
-		assert candidate.finalModelRev == false;
+		XyAssert.xyAssert(candidate.finalModelRev == false);
 		return candidate;
 	}
 	
@@ -504,7 +510,7 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 			if(change == null) {
 				locallyMissingRevs.add(i);
 			} else {
-				assert change != null && change.rev == i;
+				XyAssert.xyAssert(change != null && change.rev == i);
 				// re-request all pending changes
 				if(!change.getStatus().isCommitted()) {
 					locallyMissingRevs.add(i);
@@ -521,12 +527,13 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 	 * Datastore also returns uncommitted changes which we also cache in order
 	 * to be able to compute tentative versions
 	 * 
-	 * @param locallyMissingRevs never null; never empty
+	 * @param locallyMissingRevs never empty @NeverNull
 	 * @return timepoint in nanoseconds when query to datastore was issued
 	 */
-	private long fetchMissingRevisionsFromDatastore(Set<Long> locallyMissingRevs) {
+	private long fetchMissingRevisionsFromDatastore(@NeverNull Set<Long> locallyMissingRevs) {
+		XyAssert.xyAssert(locallyMissingRevs != null);
 		assert locallyMissingRevs != null;
-		assert !locallyMissingRevs.isEmpty();
+		XyAssert.xyAssert(!locallyMissingRevs.isEmpty());
 		
 		// prepare batch request
 		List<Key> datastoreBatchRequest = new ArrayList<Key>(locallyMissingRevs.size());
@@ -543,8 +550,8 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 		for(Entry<Key,Entity> entry : datastoreResult.entrySet()) {
 			Key key = entry.getKey();
 			Entity entity = entry.getValue();
-			assert entity != null;
-			assert entity != Memcache.NULL_ENTITY;
+			XyAssert.xyAssert(entity != null);
+			XyAssert.xyAssert(entity != Memcache.NULL_ENTITY);
 			long revFromKey = KeyStructure.getRevisionFromChangeKey(key);
 			
 			// process status of change
@@ -552,7 +559,7 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 			Status status = change.getStatus();
 			
 			if(!status.isCommitted()) {
-				assert status == Status.Creating;
+				XyAssert.xyAssert(status == Status.Creating);
 				progressChange(change);
 				if(change.getStatus() != Status.FailedTimeout) {
 					log.debug("Change " + change.rev
@@ -604,11 +611,12 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 	 * see here and the info here must be more recent, it advances potentially
 	 * our knowledge about the highest revision.
 	 * 
-	 * @param locallyMissingRevs never null, never empty
+	 * @param locallyMissingRevs never empty @NeverNull
 	 */
-	private void fetchMissingRevisionsFromMemcache(Set<Long> locallyMissingRevs) {
+	private void fetchMissingRevisionsFromMemcache(@NeverNull Set<Long> locallyMissingRevs) {
+		XyAssert.xyAssert(locallyMissingRevs != null);
 		assert locallyMissingRevs != null;
-		assert !locallyMissingRevs.isEmpty();
+		XyAssert.xyAssert(!locallyMissingRevs.isEmpty());
 		
 		// prepare batch request: Which keys to look-up?
 		List<String> memcacheBatchRequest = new ArrayList<String>(locallyMissingRevs.size());
@@ -625,11 +633,12 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 			assert v != null;
 			assert v instanceof Entity : v.getClass();
 			Entity entity = (Entity)v;
-			assert !entity.equals(Memcache.NULL_ENTITY) : "" + key;
+			XyAssert.xyAssert(!entity.equals(Memcache.NULL_ENTITY), "" + key);
 			long rev = KeyStructure.getRevisionFromChangeKey(key);
 			GaeChange change = new GaeChange(getModelAddress(), rev, entity);
-			assert change.getStatus() != null;
-			assert change.getStatus().isCommitted() : change.rev + " " + change.getStatus();
+			XyAssert.xyAssert(change.getStatus() != null);
+			XyAssert.xyAssert(change.getStatus().isCommitted(),
+			        change.rev + " " + change.getStatus());
 			// we cache only committed changes in memcache
 			cacheCommittedChange(change);
 			locallyMissingRevs.remove(change.rev);
@@ -643,13 +652,15 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 	 * Fetch all given revisions from memcache and those not found there from
 	 * datastore. New revisions are added to {@link CommitedChanges}.
 	 * 
-	 * @param locallyMissingRevs Never null. Caller is responsible not to ask
-	 *            for revisions already known locally.
+	 * @param locallyMissingRevs @NeverNull Caller is responsible not to ask for
+	 *            revisions already known locally.
 	 *            <em>Removes all revisions that have been
 	 *            found from this set.</em>
 	 * @return timepoint of datastore fetch in nanoseconds
 	 */
-	private long fetchMissingRevisionsFromMemcacheAndDatastore(Set<Long> locallyMissingRevs) {
+	private long fetchMissingRevisionsFromMemcacheAndDatastore(
+	        @NeverNull Set<Long> locallyMissingRevs) {
+		XyAssert.xyAssert(locallyMissingRevs != null);
 		assert locallyMissingRevs != null;
 		if(locallyMissingRevs.isEmpty()) {
 			log.debug("No revisions are missing, nothing to fetch from memcache/datastore");
@@ -736,10 +747,10 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 				if(change.getStatus() == Status.SuccessExecuted) {
 					log.debug("Change " + i + " rev=" + change.rev + " is successful");
 					XEvent event = change.getEvent();
-					assert event != null : change;
+					XyAssert.xyAssert(event != null, change);
 					events.add(event);
 				} else {
-					assert change.getStatus() != Status.Creating;
+					XyAssert.xyAssert(change.getStatus() != Status.Creating);
 					log.debug("Change " + i + " is " + change.getStatus().name());
 				}
 			} else {
@@ -788,12 +799,12 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 			if(realindex >= 0) {
 				XEvent event = change.getEvent();
 				if(event instanceof XTransactionEvent) {
-					assert ((XTransactionEvent)event).size() > realindex;
+					XyAssert.xyAssert(((XTransactionEvent)event).size() > realindex);
 					event = ((XTransactionEvent)event).getEvent(realindex);
 				} else {
-					assert realindex == 0;
+					XyAssert.xyAssert(realindex == 0);
 				}
-				assert event instanceof XFieldEvent;
+				XyAssert.xyAssert(event instanceof XFieldEvent);
 				return new AsyncValue(((XFieldEvent)event).getNewValue());
 			}
 		}
@@ -805,7 +816,7 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 	@Override
 	@GaeOperation(memcacheRead = true ,datastoreRead = true ,datastoreWrite = true ,memcacheWrite = true)
 	public GaeChange grabRevisionAndRegisterLocks(long lastTaken, GaeLocks locks, XID actorId) {
-		assert lastTaken >= -1;
+		XyAssert.xyAssert(lastTaken >= -1);
 		long start = lastTaken + 1;
 		for(long rev = start;; rev++) {
 			
@@ -926,7 +937,7 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 	/* Called also from GaeExecutionService */
 	@Override
 	public void cacheCommittedChange(GaeChange change) {
-		assert change.getStatus().isCommitted();
+		XyAssert.xyAssert(change.getStatus().isCommitted());
 		this.cachedChanges.cacheCommittedChange(change);
 		this.instanceRevInfoManager.getInstanceRevisionInfo().setLastCommittedIfHigher(change.rev);
 	}

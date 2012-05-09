@@ -82,10 +82,10 @@ public class DebugFormatter {
 				buf.append(format(o) + "; ");
 			}
 			buf.append("}");
-			return formatString(buf.toString(), 500);
+			return formatString(buf.toString(), 500, false);
 		} else if(value instanceof XCommand) {
 			XCommand c = (XCommand)value;
-			return "Command {" + formatString(c.toString(), 140) + "}";
+			return "Command {" + formatString(c.toString(), 140, false) + "}";
 		} else if(value instanceof Long) {
 			return "{" + value + "}";
 		} else if(GaeDebugFormatter.canHandle(value)) {
@@ -102,15 +102,22 @@ public class DebugFormatter {
 	}
 	
 	static String formatString(String s) {
-		return formatString(s, MAX_VALUE_STR_LEN);
+		return formatString(s, MAX_VALUE_STR_LEN, false);
 	}
 	
-	static String formatString(String s, int maxLen) {
+	static String formatString(String s, int maxLen, boolean encodeAngleBrackets) {
+		String res;
 		if(s.length() <= maxLen) {
-			return s;
-		} else
-			return s.substring(0, Math.min(maxLen, s.length())) + " ...[truncated]";
-		
+			res = s;
+		} else {
+			res = s.substring(0, Math.min(maxLen, s.length())) + " ...[truncated]";
+		}
+		if(encodeAngleBrackets) {
+			// fit better in html places AND in emails, too
+			return res.replace("<", "-[").replace(">", "]-");
+		} else {
+			return res;
+		}
 	}
 	
 	public static String dataPut(String dataSourceName, String key, Object value, Timing timing) {

@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.xydra.annotations.NeverNull;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.sharedutils.XyAssert;
@@ -42,7 +43,7 @@ public class SyncDatastore {
 	 * @return a non-null entity from the datastore.
 	 */
 	@GaeOperation(datastoreRead = true)
-	public static Entity getEntity(Key key) {
+	public static Entity getEntity(@NeverNull Key key) {
 		return getEntity(key, null);
 	}
 	

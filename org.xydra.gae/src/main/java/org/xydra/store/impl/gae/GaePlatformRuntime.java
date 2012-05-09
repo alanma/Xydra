@@ -2,6 +2,7 @@ package org.xydra.store.impl.gae;
 
 import java.util.Map;
 
+import org.xydra.annotations.Setting;
 import org.xydra.base.XID;
 import org.xydra.gae.AboutAppEngine;
 import org.xydra.gae.admin.GaeConfigSettings;
@@ -9,7 +10,6 @@ import org.xydra.gae.admin.GaeConfiguration;
 import org.xydra.gae.admin.GaeConfigurationManager;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.IMemCache;
 import org.xydra.store.XydraConfigUtils;
 import org.xydra.store.XydraPlatformRuntime;
@@ -33,8 +33,9 @@ public class GaePlatformRuntime implements XydraPlatformRuntime {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		
 		/* Set default values for GaeConf */
+		@Setting(value = "")
 		GaeConfiguration defaultConf = GaeConfigurationManager.getDefaultConfiguration();
-		defaultConf.map().put(GaeConfigSettings.PROP_ASSERT, "");
+		defaultConf.map().put(GaeConfigSettings.PROP_ASSERT, "true");
 		defaultConf.map().put(GaeConfigSettings.PROP_USEMEMCACHE, "true");
 		// no PROP_CLEARMEMCACHE_NOW
 		defaultConf.map().put(XydraRuntime.PROP_MEMCACHESTATS, "");
@@ -44,9 +45,14 @@ public class GaePlatformRuntime implements XydraPlatformRuntime {
 			
 			@Override
 			public void onXydraRuntimeInit() {
+				// FIXME config setup in test works not all, configMap is always
+				// empty
+				
 				// gae assertions
-				boolean gaeAssert = XydraRuntime.getConfigMap().get(GaeConfigSettings.PROP_ASSERT) != null;
-				XyAssert.setEnabled(gaeAssert);
+				// Map<String,String> configMap = XydraRuntime.getConfigMap();
+				// boolean gaeAssert =
+				// configMap.get(GaeConfigSettings.PROP_ASSERT) != null;
+				// FIXME ... XyAssert.setEnabled(gaeAssert);
 				// memcache
 				boolean usememcache = XydraRuntime.getConfigMap().get(
 				        GaeConfigSettings.PROP_USEMEMCACHE) != null;

@@ -1,12 +1,14 @@
 package org.xydra.store.impl.gae.changes;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import org.xydra.base.XAddress;
+import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.change.XAtomicCommand;
 import org.xydra.base.change.XCommand;
@@ -15,6 +17,7 @@ import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.index.iterator.ReadOnlyIterator;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.impl.gae.GaeOperation;
 
 
@@ -25,6 +28,9 @@ import org.xydra.store.impl.gae.GaeOperation;
  * 
  * A lock on a {@link XModel} or {@link XObject} implies locks on all contained
  * {@link XObject XObjects} and {@link XField XFields}.
+ * 
+ * Internally a set of mutually exclusive MOF addresses is used. None of the
+ * addresses lies within the address range of another one.
  * 
  * @author dscharrer
  * 
@@ -53,6 +59,10 @@ public class GaeLocks implements Iterable<XAddress> {
 			XTransaction transaction = (XTransaction)command;
 			Set<XAddress> tempLocks = new HashSet<XAddress>();
 			for(XAtomicCommand atomicCommand : transaction) {
+				XyAssert.xyAssert(
+				        atomicCommand.getTarget().getAddressedType() != XType.XREPOSITORY,
+				        "A transaction cannot contain repository events");
+				
 				XAddress lock = atomicCommand.getChangedEntity();
 				assert lock != null;
 				/*
@@ -192,7 +202,20 @@ public class GaeLocks implements Iterable<XAddress> {
 	
 	@Override
 	public String toString() {
-		return encode().toString();
+		return Arrays.toString(encode().toArray());
+	}
+	
+	/**
+	 * @return if a complete model lock is represented
+	 */
+	public boolean isLockingTheModel() {
+		if(this.locks.size() == 1) {
+			XAddress xa = this.locks.iterator().next();
+			if(xa.getAddressedType() == XType.XMODEL) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 }

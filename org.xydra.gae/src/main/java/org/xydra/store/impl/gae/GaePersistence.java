@@ -9,6 +9,7 @@ import java.util.Set;
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
+import org.xydra.annotations.Setting;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XType;
@@ -103,7 +104,7 @@ public class GaePersistence implements XydraPersistence {
 		return XX.toId("data");
 	}
 	
-	private Map<XID,GaeModelPersistence> modelPersistenceMap = new HashMap<XID,GaeModelPersistence>();
+	private Map<XID,IGaeModelPersistence> modelPersistenceMap = new HashMap<XID,IGaeModelPersistence>();
 	
 	private final XAddress repoAddr;
 	
@@ -176,18 +177,20 @@ public class GaePersistence implements XydraPersistence {
 	
 	/**
 	 * @param modelId ..
-	 * @return the {@link GaeModelPersistence} responsible for managing the
+	 * @return the {@link IGaeModelPersistence} responsible for managing the
 	 *         given modelId. Never null.
 	 */
 	@GaeOperation()
-	private GaeModelPersistence getModelPersistence(XID modelId) {
+	// FIXME should be private
+	@Setting("decides which GAE impl is used")
+	IGaeModelPersistence getModelPersistence(XID modelId) {
 		synchronized(this.modelPersistenceMap) {
-			GaeModelPersistence modelPersistence = null;
+			IGaeModelPersistence modelPersistence = null;
 			if(CACHE_MODEL_PERSISTENCES) {
 				modelPersistence = this.modelPersistenceMap.get(modelId);
 			}
 			if(modelPersistence == null) {
-				modelPersistence = new GaeModelPersistence(getModelAddress(modelId));
+				modelPersistence = new GaeModelPersistence3(getModelAddress(modelId));
 				this.modelPersistenceMap.put(modelId, modelPersistence);
 			}
 			return modelPersistence;
@@ -293,7 +296,7 @@ public class GaePersistence implements XydraPersistence {
 		}
 		log.debug("model '" + modelId + "' exists?");
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		return getModelPersistence(modelId).modelHasBeenManaged(modelId);
+		return getModelPersistence(modelId).modelHasBeenManaged();
 	}
 	
 }

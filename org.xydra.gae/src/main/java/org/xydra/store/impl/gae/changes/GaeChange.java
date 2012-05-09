@@ -13,13 +13,13 @@ import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XTransaction;
 import org.xydra.base.change.impl.memory.MemoryTransactionEvent;
 import org.xydra.core.model.XChangeLog;
-import org.xydra.gae.AboutAppEngine;
 import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.impl.gae.AsyncDatastore;
 import org.xydra.store.impl.gae.GaeConstants;
+import org.xydra.store.impl.gae.GaeDebugFormatter;
 import org.xydra.store.impl.gae.GaeOperation;
 import org.xydra.store.impl.gae.Memcache;
 import org.xydra.store.impl.gae.SyncDatastore;
@@ -154,7 +154,7 @@ public class GaeChange {
 		
 		/**
 		 * @return true if the given status indicates that the change has been
-		 *         successfully executed.
+		 *         successfully executed - even if that changed nothing.
 		 */
 		public boolean isSuccess() {
 			return (this == SuccessExecuted || this == SuccessNochange);
@@ -253,8 +253,13 @@ public class GaeChange {
 	/**
 	 * Construct a new change entity with the given properties. The entity is
 	 * created but not put into the datastore.
+	 * 
+	 * @param modelAddr
+	 * @param rev
+	 * @param locks
+	 * @param actorId
 	 */
-	protected GaeChange(XAddress modelAddr, long rev, GaeLocks locks, XID actorId) {
+	public GaeChange(XAddress modelAddr, long rev, GaeLocks locks, XID actorId) {
 		
 		this.rev = rev;
 		this.locks = locks;
@@ -287,8 +292,12 @@ public class GaeChange {
 	/**
 	 * Take over the given change entity. The entity is updated but the updated
 	 * version is not put back into the datastore.
+	 * 
+	 * @param modelAddr
+	 * @param rev
+	 * @param entity
 	 */
-	GaeChange(XAddress modelAddr, long rev, Entity entity) {
+	public GaeChange(XAddress modelAddr, long rev, Entity entity) {
 		if(entity == null) {
 			throw new IllegalArgumentException("entity is null");
 		}
@@ -346,7 +355,7 @@ public class GaeChange {
 	 * 
 	 * @param status The new status of the entity.
 	 */
-	protected void commit(Status status) {
+	public void commitAndClearLocks(Status status) {
 		assert !getStatus().isCommitted();
 		this.locks = null;
 		this.entity.removeProperty(PROP_LOCKS);
@@ -425,6 +434,9 @@ public class GaeChange {
 		return System.currentTimeMillis();
 	}
 	
+	@SuppressWarnings("unused")
+	private transient long timeoutCheckCount = 0;
+	
 	/**
 	 * Throw an exception if this change has been worked on for more than
 	 * {@link #TIME_CRITICAL} milliseconds. This is done before writing to
@@ -435,9 +447,13 @@ public class GaeChange {
 	 */
 	public void giveUpIfTimeoutCritical() throws VoluntaryTimeoutException {
 		/* Don't give up in development mode to let the debugger step through */
-		if(!AboutAppEngine.inProduction()) {
-			return;
-		}
+		// if(!AboutAppEngine.inProduction()) {
+		// this.timeoutCheckCount++;
+		// if(this.timeoutCheckCount > 10000) {
+		// throw new RuntimeException("Waiting to long");
+		// }
+		// return;
+		// }
 		assert !getStatus().isCommitted();
 		long now = now();
 		// IMPROVE Use new API since AppEngine 1.6.5 to get time left
@@ -549,7 +565,11 @@ public class GaeChange {
 	@Override
 	public String toString() {
 		return "rev:" + this.rev + " lastAct:" + this.lastActivity + " status:" + this.status + " "
-		        + this.entity;
+		        + GaeDebugFormatter.toString(this.entity);
+	}
+	
+	public XID getActorId() {
+		return this.actor;
 	}
 	
 }

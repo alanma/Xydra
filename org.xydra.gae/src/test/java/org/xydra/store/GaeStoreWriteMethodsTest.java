@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.Set;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
@@ -23,6 +24,12 @@ public class GaeStoreWriteMethodsTest extends AbstractSecureStoreWriteMethodsTes
 		GaeTestfixer.enable();
 		LoggerTestHelper.init();
 		XydraRuntime.init();
+	}
+	
+	@Before
+	public void before() {
+		this.store = null;
+		super.before();
 	}
 	
 	@After

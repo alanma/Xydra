@@ -24,6 +24,7 @@ class UniCacheRevisionInfoEntryHandler implements UniCache.CacheEntryHandler<Rev
 	
 	private static final String COMM = "comm";
 	private static final String CURR = "curr";
+	/** modelExists */
 	private static final String EXISTS = "exists";
 	private static final String SILENT = "silent";
 	private static final String TAKEN = "taken";
