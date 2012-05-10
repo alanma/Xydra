@@ -1,8 +1,11 @@
 package org.xydra.store.impl.gae.ng;
 
+import java.util.List;
+
 import org.xydra.annotations.NeverNull;
 import org.xydra.base.XType;
 import org.xydra.base.change.ChangeType;
+import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XTransactionEvent;
 import org.xydra.sharedutils.XyAssert;
@@ -38,11 +41,16 @@ public class Algorithms {
 	public static Effect effectOnModelExistsFlag(@NeverNull final GaeChange change) {
 		if(change.getStatus() == Status.SuccessExecuted) {
 			
-			XEvent event = change.getEvent();
-			if(event instanceof XTransactionEvent) {
-				event = ((XTransactionEvent)event).getLastEvent();
-			}
-			return eventIndicatesModelExists(event) ? Effect.Add : Effect.Remove;
+			List<XAtomicEvent> atomics = change.getAtomicEvents().getFirst();
+			XAtomicEvent last = atomics.get(atomics.size() - 1);
+			return eventIndicatesModelExists(last) ? Effect.Add : Effect.Remove;
+			
+			// XEvent event = change.getEvent();
+			// if(event instanceof XTransactionEvent) {
+			// event = ((XTransactionEvent)event).getLastEvent();
+			// }
+			// return eventIndicatesModelExists(event) ? Effect.Add :
+			// Effect.Remove;
 		}
 		return Effect.NoEffect;
 	}

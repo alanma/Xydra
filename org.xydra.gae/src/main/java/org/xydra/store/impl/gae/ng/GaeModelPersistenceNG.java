@@ -409,22 +409,19 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 		 * that writes the locks for this command into the change log. Our
 		 * status: Creating
 		 */
-		// FIXME !!! log less
-		log.info("Phase 1: grabRevisionAndRegister " + locks.size() + " locks = " + locks);
+		log.debug("Phase 1: grabRevisionAndRegister " + locks.size() + " locks = " + locks);
 		GaeChange change = grabRevisionAndRegisterLocks(locks, actorId);
 		XyAssert.xyAssert(change.rev >= 0);
 		c.stopAndStart("grabRevisionAndRegisterLocks");
 		
 		/* Phase 2: Entering synchronised code ... */
-		// FIXME log less
-		log.info("Phase 1: waitForLocks");
+		log.debug("Phase 1: waitForLocks");
 		execute_waitForLocks(change, this.revisionManager);
 		c.stopAndStart("waitForLocks");
 		
 		/* --- Code synchronised by Xydra locks in GAE datastore --- */
 		/* Phase 3 */
-		// FIXME log less
-		log.info("[r" + change.rev + "] Phase 3: check constraints, compute events = " + change
+		log.debug("[r" + change.rev + "] Phase 3: check constraints, compute events = " + change
 		        + ", command = " + command);
 		ExecutionResult executionResult = checkPreconditionsComputeEventsUpdateTOS(command, change);
 		/* --- End of code synchronised by Xydra locks in GAE datastore --- */

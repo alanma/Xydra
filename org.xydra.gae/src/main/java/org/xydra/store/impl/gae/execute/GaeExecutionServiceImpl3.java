@@ -106,8 +106,7 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 		GaeLocks locks = GaeLocks.createLocks(command);
 		c.stopAndStart("createlocks");
 		
-		// FIXME !!! log less
-		log.info("Phase 1: grabRevisionAndRegister " + locks.size() + " locks = " + locks);
+		log.debug("Phase 1: grabRevisionAndRegister " + locks.size() + " locks = " + locks);
 		GaeChange change = this.changesservice.grabRevisionAndRegisterLocks(this.revisionManager
 		        .getInstanceRevisionInfo().getLastTaken(), locks, actorId);
 		XyAssert.xyAssert(change.rev >= 0);
@@ -137,8 +136,7 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 		XRevWritableModel workingModel = updatePartialSnapshot(partialSnapshot, snapshotRev, change);
 		c.stopAndStart("updateSnapshot");
 		
-		// FIXME log less
-		log.info("[r" + change.rev + "] Phase 4: checkPreconditionsAndSaveEvents change = "
+		log.debug("[r" + change.rev + "] Phase 4: checkPreconditionsAndSaveEvents change = "
 		        + change + ", command = " + command);
 		long ret = checkPreconditionsAndSaveEvents(change, command, actorId, workingModel);
 		log.trace("result " + ret);
@@ -247,8 +245,7 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 			
 			XyAssert.xyAssert(checkChange.getStatus().isCommitted());
 			if(checkChange.getStatus().hasEvents()) {
-				// FIXME log less
-				log.info("checkRev=" + checkRev + " Applying " + checkChange.getEvent());
+				log.trace("checkRev=" + checkRev + " Applying " + checkChange.getEvent());
 				workingModel = EventUtils.applyEventNonDestructive(snapshot, workingModel,
 				        checkChange.getEvent(), true);
 			}

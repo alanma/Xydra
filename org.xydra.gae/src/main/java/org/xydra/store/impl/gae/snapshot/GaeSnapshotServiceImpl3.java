@@ -660,8 +660,7 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 			}
 		}
 		
-		// FIXME !!! DUMP
-		log.info("Partial snapshot: " + DumpUtils.toStringBuffer(partialModel));
+		log.debug("Partial snapshot: " + DumpUtils.toStringBuffer(partialModel));
 		
 		return partialModel;
 	}

@@ -12,7 +12,6 @@ import org.xydra.base.change.XObjectCommand;
 import org.xydra.base.change.XRepositoryCommand;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.value.XValue;
-import org.xydra.core.util.DumpUtils;
 import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.impl.gae.changes.GaeChange;
 
@@ -68,9 +67,6 @@ class ExecuteDecideAlgorithms {
 		
 		XyAssert.xyAssert(tos != null, "XObjectCommand is invalid: " + command + ", object is null");
 		assert tos != null;
-		
-		// FIXME !!!!!!!!!
-		DumpUtils.dump("tttos", tos);
 		
 		XReadableField field = tos.getField(command.getFieldId());
 		if(field == null) {
@@ -180,9 +176,6 @@ class ExecuteDecideAlgorithms {
 		
 		XyAssert.xyAssert(tos != null, "XObjectCommand is invalid: " + command + ", object is null");
 		assert tos != null;
-		
-		// FIXME !!!!!!!!!
-		DumpUtils.dump("otttos", tos);
 		
 		XID fieldId = command.getFieldId();
 		switch(command.getChangeType()) {

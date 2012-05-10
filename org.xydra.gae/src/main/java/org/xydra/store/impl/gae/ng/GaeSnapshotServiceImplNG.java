@@ -549,8 +549,7 @@ public class GaeSnapshotServiceImplNG extends AbstractGaeSnapshotServiceImpl {
 			}
 		}
 		
-		// FIXME log less
-		log.info("Partial snapshot: " + DumpUtils.toStringBuffer(partialModel));
+		log.trace("Partial snapshot: " + DumpUtils.toStringBuffer(partialModel));
 		
 		return partialModel;
 	}
