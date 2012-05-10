@@ -581,7 +581,7 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 			return false;
 		}
 		XEvent newEvent = getChangeLog().getEventAt(result);
-		XyAssert.xyAssert(event.equals(newEvent));
+		XyAssert.xyAssert(event.equals(newEvent), "should be equal", event, newEvent);
 		assert getModel() == null ? getObject().getRevisionNumber() == event.getRevisionNumber()
 		        : getModel().getRevisionNumber() == event.getRevisionNumber();
 		XyAssert.xyAssert(getCurrentRevisionNumber() == event.getRevisionNumber());

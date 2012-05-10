@@ -159,7 +159,7 @@ abstract public class AbstractSynchronizerTest {
 		
 		long res = waitForSuccessBatched(tc);
 		
-		assertTrue(res != XCommand.FAILED);
+		assertTrue("Failed " + command, res != XCommand.FAILED);
 	}
 	
 	private XModel loadModel(XID modelId) {
@@ -183,7 +183,8 @@ abstract public class AbstractSynchronizerTest {
 	}
 	
 	private void removeModel(XID modelId) {
-		XyAssert.xyAssert(this.repoAddr != null); assert this.repoAddr != null;
+		XyAssert.xyAssert(this.repoAddr != null);
+		assert this.repoAddr != null;
 		executeCommand(MemoryRepositoryCommand.createRemoveCommand(this.repoAddr, XCommand.FORCED,
 		        modelId));
 	}
@@ -212,7 +213,8 @@ abstract public class AbstractSynchronizerTest {
 		this.model = loadModel(DemoModelUtil.PHONEBOOK_ID);
 		this.sync = new XSynchronizer(this.model, store);
 		
-		XyAssert.xyAssert(this.repoAddr != null); assert this.repoAddr != null;
+		XyAssert.xyAssert(this.repoAddr != null);
+		assert this.repoAddr != null;
 	}
 	
 	/**

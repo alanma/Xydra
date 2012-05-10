@@ -144,7 +144,7 @@ public class MemoryFieldCommand extends MemoryAtomicCommand implements XFieldCom
 		if(isForced())
 			suffix += "' (forced)";
 		else
-			suffix += "' r" + getRevisionNumber();
+			suffix += "' safe-r" + getRevisionNumber();
 		suffix += " @" + getTarget();
 		switch(getChangeType()) {
 		case ADD:

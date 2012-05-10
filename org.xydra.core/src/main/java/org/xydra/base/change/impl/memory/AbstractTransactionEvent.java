@@ -16,6 +16,7 @@ import org.xydra.base.change.XFieldEvent;
 import org.xydra.base.change.XTransactionEvent;
 import org.xydra.core.model.XModel;
 import org.xydra.index.XI;
+import org.xydra.sharedutils.XyAssert;
 
 
 /**
@@ -43,6 +44,9 @@ public abstract class AbstractTransactionEvent implements XTransactionEvent {
 	
 	protected AbstractTransactionEvent(XID actor, XAddress target, long modelRevision,
 	        long objectRevision) {
+		XyAssert.xyAssert(actor != null);
+		XyAssert.xyAssert(target != null);
+		assert target != null;
 		
 		if((target.getModel() == null && target.getObject() == null) || target.getField() != null) {
 			throw new IllegalArgumentException("target must be a model or object, was:" + target);

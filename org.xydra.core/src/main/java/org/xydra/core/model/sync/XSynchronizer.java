@@ -174,7 +174,8 @@ public class XSynchronizer {
 					
 				} else {
 					
-					XyAssert.xyAssert(commandRes.getResult() != null); assert commandRes.getResult() != null;
+					XyAssert.xyAssert(commandRes.getResult() != null);
+					assert commandRes.getResult() != null;
 					long commandRev = commandRes.getResult();
 					
 					// command successfully synchronized
@@ -237,7 +238,8 @@ public class XSynchronizer {
 				return;
 			}
 			
-			XyAssert.xyAssert(events != null); assert events != null;
+			XyAssert.xyAssert(events != null);
+			assert events != null;
 			
 			applyEvents(events);
 			requestEnded(success);
@@ -266,7 +268,8 @@ public class XSynchronizer {
 				return;
 			}
 			
-			XyAssert.xyAssert(eventsRes.getResult() != null); assert eventsRes.getResult() != null;
+			XyAssert.xyAssert(eventsRes.getResult() != null);
+			assert eventsRes.getResult() != null;
 			
 			applyEvents(eventsRes.getResult());
 			requestEnded(true);
