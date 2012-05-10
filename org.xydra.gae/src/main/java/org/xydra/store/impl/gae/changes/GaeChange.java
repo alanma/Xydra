@@ -248,7 +248,7 @@ public class GaeChange {
 	private Status status;
 	private XID actor;
 	private Pair<List<XAtomicEvent>,int[]> events;
-	private XEvent event;
+	private transient XEvent event;
 	
 	/**
 	 * Construct a new change entity with the given properties. The entity is
@@ -466,7 +466,8 @@ public class GaeChange {
 	}
 	
 	public Pair<int[],List<Future<Key>>> setEvents(List<XAtomicEvent> events) {
-		assert !getStatus().isCommitted();
+		XyAssert.xyAssert(!getStatus().isCommitted());
+		XyAssert.xyAssert(events.size() >= 1);
 		Pair<int[],List<Future<Key>>> res = GaeEvents.saveEvents(this.modelAddr, this.entity,
 		        events);
 		this.events = new Pair<List<XAtomicEvent>,int[]>(events, res.getFirst());
@@ -546,7 +547,7 @@ public class GaeChange {
 			}
 			
 			List<XAtomicEvent> events = getAtomicEvents().getFirst();
-			assert events.size() > 0;
+			XyAssert.xyAssert(events.size() > 0);
 			
 			if(events.size() == 1) {
 				this.event = events.get(0);

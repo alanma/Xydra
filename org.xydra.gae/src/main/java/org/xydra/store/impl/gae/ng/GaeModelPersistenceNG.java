@@ -97,17 +97,13 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 	
 	private TentativeSnapshotManagerAtomic baseSnapshotManager;
 	
-	private TentativeSnapshotManagerInTransaction tentativeSnapshotManager;
-	
 	public GaeModelPersistenceNG(XAddress modelAddress) {
 		this.modelAddress = modelAddress;
 		this.revisionManager = new RevisionManager(this.modelAddress);
-		this.changelogManager = new ChangeLogManager(this.modelAddress, this.revisionManager);
+		this.changelogManager = new ChangeLogManager(this.modelAddress);
 		this.snapshotService = new GaeSnapshotServiceImplNG(this.changelogManager);
 		this.baseSnapshotManager = new TentativeSnapshotManagerAtomic(modelAddress,
 		        this.revisionManager, this.snapshotService);
-		this.tentativeSnapshotManager = new TentativeSnapshotManagerInTransaction(
-		        this.baseSnapshotManager);
 	}
 	
 	/**
@@ -127,21 +123,17 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 	private ExecutionResult checkPreconditionsComputeEventsUpdateTOS(XCommand command,
 	        GaeChange change) {
 		ExecutionResult result;
-		this.tentativeSnapshotManager.clearCaches();
 		if(command.getChangeType() == ChangeType.TRANSACTION) {
-			result = checkPreconditionsAndComputeEvents_txn((XTransaction)command, change);
+			result = checkPreconditionsAndComputeEvents_txn((XTransaction)command, change,
+			        this.revisionManager.fork());
 		} else {
 			if(command.getTarget().getAddressedType() == XType.XREPOSITORY) {
 				result = checkPreconditionsAndComputeEvents_repository((XRepositoryCommand)command,
 				        change);
 			} else {
 				result = ExecuteDecideAlgorithms.checkPreconditionsAndComputeEvents_atomic(
-				        (XAtomicCommand)command, change, false, this.tentativeSnapshotManager);
+				        (XAtomicCommand)command, change, false, this.baseSnapshotManager);
 			}
-		}
-		
-		if(result.getStatus() == Status.SuccessExecuted) {
-			this.tentativeSnapshotManager.saveTentativeObjectSnapshots();
 		}
 		
 		return result;
@@ -176,8 +168,7 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 				                + rc.getRevisionNumber() + " forced:" + rc.isForced()));
 			} else if(modelExists) {
 				log.debug("Removing model " + this.modelAddress + " " + modelRev);
-				return ExecutionResult.successRemovedModel(change, rc,
-				        this.tentativeSnapshotManager);
+				return ExecutionResult.successRemovedModel(change, rc, this.baseSnapshotManager);
 			} else {
 				return ExecutionResult.successNoChange("Model did not exist");
 			}
@@ -194,6 +185,7 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 	 * {@link XCommand XCommands} will not be rolled back.
 	 * 
 	 * @param transaction The {@link XTransaction} which is to be executed
+	 * @param txnLocalRevManager
 	 * @return the {@link ExecutionResult}
 	 * 
 	 *         TODO it might be a good idea to tell the caller of this method
@@ -201,10 +193,10 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 	 *         return false
 	 */
 	private ExecutionResult checkPreconditionsAndComputeEvents_txn(XTransaction transaction,
-	        GaeChange change) {
+	        GaeChange change, RevisionManager txnLocalRevManager) {
 		
-		ITentativeSnapshotManager tmsInTxn = new TentativeSnapshotManagerInTransaction(
-		        this.tentativeSnapshotManager);
+		TentativeSnapshotManagerInTransaction tmsInTxn = new TentativeSnapshotManagerInTransaction(
+		        this.baseSnapshotManager, txnLocalRevManager);
 		
 		List<ExecutionResult> results = new LinkedList<ExecutionResult>();
 		for(int i = 0; i < transaction.size(); i++) {
@@ -218,7 +210,10 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 			
 			results.add(atomicResult);
 		}
-		return ExecutionResult.successTransaction(transaction, change, results);
+		
+		tmsInTxn.saveTentativeObjectSnapshots();
+		
+		return ExecutionResult.successTransaction(transaction, change, results, tmsInTxn);
 	}
 	
 	@Override
@@ -246,26 +241,30 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 		}
 		XyAssert.xyAssert(executionResult.getStatus().isSuccess());
 		
-		List<XAtomicEvent> atomicEvents = executionResult.getAtomicEvents();
-		log.debug("[r" + change.rev + "] generated " + atomicEvents.size() + " events");
-		if(atomicEvents.size() > 1000) {
-			log.warn("Created over 1000 events (" + atomicEvents.size()
+		List<XAtomicEvent> events = executionResult.getEvents();
+		
+		long atomicEventCount = events.size();
+		log.debug("[r" + change.rev + "] generated " + events.size() + " events");
+		if(events.isEmpty()) {
+			change.giveUpIfTimeoutCritical();
+			this.changelogManager.commitAndClearLocks(change, Status.SuccessNochange);
+			log.debug("No change");
+			return;
+		}
+		XyAssert.xyAssert(!events.isEmpty());
+		
+		if(atomicEventCount > 1000) {
+			log.warn("Created over 1000 events (" + atomicEventCount
 			        + ") GA?category=xydra&action=saveManyEvents&label=events&value="
-			        + atomicEvents.size());
+			        + atomicEventCount);
 			try {
 				throw new RuntimeException("Over 1000 events");
 			} catch(Exception e) {
 				log.warn("Over 1000 events", e);
 			}
 		}
-		XyAssert.xyAssert(atomicEvents != null);
-		if(atomicEvents.isEmpty()) {
-			change.giveUpIfTimeoutCritical();
-			this.changelogManager.commitAndClearLocks(change, Status.SuccessNochange);
-			log.debug("No change");
-			return;
-		}
-		Pair<int[],List<Future<Key>>> res = change.setEvents(atomicEvents);
+		
+		Pair<int[],List<Future<Key>>> res = change.setEvents(events);
 		// Wait on all changes.
 		for(Future<Key> future : res.getSecond()) {
 			FutureUtils.waitFor(future);
@@ -293,7 +292,8 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 	 * @param ourChange waiting to be executed
 	 * @throws VoluntaryTimeoutException
 	 */
-	private void execute_waitForLocks(GaeChange ourChange) throws VoluntaryTimeoutException {
+	private void execute_waitForLocks(GaeChange ourChange, RevisionManager revisionManager)
+	        throws VoluntaryTimeoutException {
 		long lastCommited = this.revisionManager.getInfo().getLastCommitted();
 		XyAssert.xyAssert(lastCommited == -1 || ourChange.rev > lastCommited,
 		        "If a lastSilentCommitted is not undefiend (i.e. == -1), "
@@ -312,7 +312,7 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 		for(int i = 0; i < changes.size(); i++) {
 			GaeChange otherChange = changes.get(i);
 			/* Always check if a change is timed-out, and if so, progress it */
-			if(this.changelogManager.progressChangeIfTimedOut(otherChange)) {
+			if(this.changelogManager.progressChangeIfTimedOut(otherChange, revisionManager)) {
 				/* now it cannot have any locks */
 				continue;
 			}
@@ -418,7 +418,7 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 		/* Phase 2: Entering synchronised code ... */
 		// FIXME log less
 		log.info("Phase 1: waitForLocks");
-		execute_waitForLocks(change);
+		execute_waitForLocks(change, this.revisionManager);
 		c.stopAndStart("waitForLocks");
 		
 		/* --- Code synchronised by Xydra locks in GAE datastore --- */
@@ -453,11 +453,14 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 			        
 			        + " Stats: " + c.getStats();
 			if(executionResult.getStatus().isFailure()) {
-				log.warn("+++ " + msg);
+				log.warn("!!! " + msg);
 			} else {
 				log.info("+++ " + msg);
 			}
 		}
+		
+		// FIXME !! log less
+		log.info("RevInfo: " + this.revisionManager.getInfo());
 		
 		switch(executionResult.getStatus()) {
 		case FailedPreconditions:
@@ -549,7 +552,7 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 					return;
 				}
 				/* Always check if a change is timed-out, and if so, progress it */
-				if(this.changelogManager.progressChangeIfTimedOut(change)) {
+				if(this.changelogManager.progressChangeIfTimedOut(change, this.revisionManager)) {
 					// revision was incremented
 				} else if(change.getStatus().isCommitted()) {
 					this.revisionManager.foundNewHigherCommitedChange(change);
@@ -567,8 +570,8 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 	public XWritableObject getObjectSnapshot(XID objectId, boolean includeTentative) {
 		if(includeTentative) {
 			// short-cut
-			TentativeObjectSnapshot tos = this.tentativeSnapshotManager
-			        .getTentativeObjectSnapshot(XX.resolveObject(this.modelAddress, objectId));
+			TentativeObjectSnapshot tos = this.baseSnapshotManager.getTentativeObjectSnapshot(
+			        this.revisionManager.getInfo(), XX.resolveObject(this.modelAddress, objectId));
 			if(tos == null) {
 				return null;
 			}
@@ -622,8 +625,8 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 		XyAssert.xyAssert(lastTaken >= -1);
 		long start = lastTaken + 1;
 		
-		GaeChange change = this.changelogManager
-		        .grabRevisionAndRegisterLocks(locks, actorId, start);
+		GaeChange change = this.changelogManager.grabRevisionAndRegisterLocks(locks, actorId,
+		        start, this.revisionManager);
 		return change;
 	}
 	

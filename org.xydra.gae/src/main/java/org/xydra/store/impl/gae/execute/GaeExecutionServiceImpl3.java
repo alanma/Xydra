@@ -106,7 +106,7 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 		GaeLocks locks = GaeLocks.createLocks(command);
 		c.stopAndStart("createlocks");
 		
-		// FIXME !!!
+		// FIXME !!! log less
 		log.info("Phase 1: grabRevisionAndRegister " + locks.size() + " locks = " + locks);
 		GaeChange change = this.changesservice.grabRevisionAndRegisterLocks(this.revisionManager
 		        .getInstanceRevisionInfo().getLastTaken(), locks, actorId);
@@ -247,7 +247,7 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 			
 			XyAssert.xyAssert(checkChange.getStatus().isCommitted());
 			if(checkChange.getStatus().hasEvents()) {
-				// FIXME
+				// FIXME log less
 				log.info("checkRev=" + checkRev + " Applying " + checkChange.getEvent());
 				workingModel = EventUtils.applyEventNonDestructive(snapshot, workingModel,
 				        checkChange.getEvent(), true);

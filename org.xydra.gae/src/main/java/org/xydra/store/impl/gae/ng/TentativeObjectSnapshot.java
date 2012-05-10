@@ -11,6 +11,7 @@ import org.xydra.base.XType;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XRevWritableObject;
+import org.xydra.core.XCopyUtils;
 import org.xydra.sharedutils.XyAssert;
 
 
@@ -97,6 +98,11 @@ public class TentativeObjectSnapshot implements Serializable, XReadableObject {
 	
 	public void setModelRev(long modelRev) {
 		this.modelRevision = modelRev;
+	}
+	
+	public TentativeObjectSnapshot copy() {
+		return new TentativeObjectSnapshot(XCopyUtils.createSnapshot(this.object),
+		        this.objectAddress, this.modelRevision);
 	}
 	
 }

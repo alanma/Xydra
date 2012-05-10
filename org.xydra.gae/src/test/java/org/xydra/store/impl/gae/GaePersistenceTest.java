@@ -180,7 +180,6 @@ public class GaePersistenceTest {
 		
 		/* now with field */
 		
-		// FIXME 3???
 		p = preparePersistenceWithModelAndObject("repo4", true);
 		addValue = MemoryFieldCommand.createAddCommand(
 		        XX.resolveField(p.getRepositoryId(), model1, object1, field1), XCommand.FORCED,
@@ -208,12 +207,12 @@ public class GaePersistenceTest {
 		result = p.executeCommand(ACTOR, addValue);
 		assertEquals("field exists: addValue (succ)", 3, result);
 		result = p.executeCommand(ACTOR, addValue);
-		assertEquals("field exists: addValue (succ), addValue (nochg)", XCommand.NOCHANGE, result);
+		assertEquals("field exists: addValue (succ), addValue (noChg)", XCommand.NOCHANGE, result);
 		chgValue = MemoryFieldCommand.createChangeCommand(
 		        XX.resolveField(p.getRepositoryId(), model1, object1, field1), XCommand.FORCED,
 		        value2);
 		result = p.executeCommand(ACTOR, chgValue);
-		assertEquals("field exists: addValue (succ), addValue (nochg),chgValue (succ)", 5, result);
+		assertEquals("field exists: addValue (succ), addValue (noChg),chgValue (succ)", 5, result);
 		
 		p = preparePersistenceWithModelAndObject("repo8", true);
 		addValue = MemoryFieldCommand.createAddCommand(
@@ -227,7 +226,7 @@ public class GaePersistenceTest {
 		result = p.executeCommand(ACTOR, chgValue);
 		assertEquals("field exists: addValue (succ), chgValue (succ)", 4, result);
 		result = p.executeCommand(ACTOR, chgValue);
-		assertEquals("field exists: addValue (succ), chgValue (succ), chgValue (nochg)",
+		assertEquals("field exists: addValue (succ), chgValue (succ), chgValue (noChg)",
 		        XCommand.NOCHANGE, result);
 		
 		p = preparePersistenceWithModelAndObject("repo9", true);
@@ -473,7 +472,7 @@ public class GaePersistenceTest {
 		l = pers.executeCommand(ACTOR,
 		        MemoryModelCommand.createAddCommand(modelAddress, true, objectId));
 		
-		// FIXME !!!
+		// FIXME !!! DUMP
 		DumpUtils.dumpChangeLog(pers, modelAddress);
 		
 		assert l >= 0 : "" + l;

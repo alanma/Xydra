@@ -10,12 +10,15 @@ import org.xydra.base.rmof.XReadableModel;
  */
 public interface ITentativeSnapshotManager {
 	
-	public XReadableModel getModelSnapshot();
+	public GaeModelRevInfo getInfo();
 	
-	public TentativeObjectSnapshot getTentativeObjectSnapshot(XAddress objectAddress);
+	public XReadableModel getModelSnapshot(GaeModelRevInfo info);
+	
+	public TentativeObjectSnapshot getTentativeObjectSnapshot(GaeModelRevInfo info,
+	        XAddress objectAddress);
 	
 	public void saveTentativeObjectSnapshot(TentativeObjectSnapshot tentativeObjectSnapshot);
 	
-	public long getModelRevision();
+	public long getModelRevision(GaeModelRevInfo info);
 	
 }

@@ -37,17 +37,13 @@ public class ChangeLogManager {
 	private static final Logger log = LoggerFactory.getLogger(ChangeLogManager.class);
 	
 	private XAddress modelAddress;
-	private RevisionManager revisionManager;
 	
 	/**
 	 * @param modelAddress required to compute keys in datastore
-	 * @param revisionManager
 	 */
-	public ChangeLogManager(@NeverNull XAddress modelAddress,
-	        @NeverNull RevisionManager revisionManager) {
+	public ChangeLogManager(@NeverNull XAddress modelAddress) {
 		XyAssert.xyAssert(modelAddress != null);
 		this.modelAddress = modelAddress;
-		this.revisionManager = revisionManager;
 	}
 	
 	/**
@@ -93,7 +89,7 @@ public class ChangeLogManager {
 		List<GaeChange> changes = getChanges(new Interval(start, end));
 		for(GaeChange change : changes) {
 			if(change.getStatus() == Status.SuccessExecuted) {
-				events.addAll(change.getAtomicEvents().getFirst());
+				events.add(change.getEvent());
 			}
 		}
 		return events;
@@ -103,7 +99,8 @@ public class ChangeLogManager {
 		return this.modelAddress;
 	}
 	
-	public GaeChange grabRevisionAndRegisterLocks(GaeLocks locks, XID actorId, long start) {
+	public GaeChange grabRevisionAndRegisterLocks(GaeLocks locks, XID actorId, long start,
+	        @NeverNull RevisionManager revisionManager) {
 		for(long rev = start;; rev++) {
 			
 			// Try to grab this revision.
@@ -164,7 +161,7 @@ public class ChangeLogManager {
 					continue;
 				}
 				
-				this.revisionManager.foundNewLastTaken(rev);
+				revisionManager.foundNewLastTaken(rev);
 				
 				// transaction succeeded, we have a revision
 				return newChange;
@@ -174,10 +171,10 @@ public class ChangeLogManager {
 				
 				GaeChange change = new GaeChange(this.modelAddress, rev, changeEntity);
 				SyncDatastore.endTransaction(trans);
-				this.revisionManager.foundNewLastTaken(rev);
+				revisionManager.foundNewLastTaken(rev);
 				
 				/* Since we read the entity anyway, we use the information */
-				progressChangeIfTimedOut(change);
+				progressChangeIfTimedOut(change, revisionManager);
 			}
 		}
 		
@@ -188,9 +185,11 @@ public class ChangeLogManager {
 	 * Check is change is timed-out and then move to status to FailedTimeout
 	 * 
 	 * @param change @NeverNull
+	 * @param revisionManager @NeverNull
 	 * @return true if change was timed-out and hence progressed
 	 */
-	public boolean progressChangeIfTimedOut(@NeverNull GaeChange change) {
+	public boolean progressChangeIfTimedOut(@NeverNull GaeChange change,
+	        @NeverNull RevisionManager revisionManager) {
 		XyAssert.xyAssert(change != null);
 		assert change != null;
 		
@@ -200,7 +199,7 @@ public class ChangeLogManager {
 			if(change.isTimedOut()) {
 				log.debug("handleTimeout: " + change);
 				commitAndClearLocks(change, Status.FailedTimeout);
-				this.revisionManager.foundNewHigherCommitedChange(change);
+				revisionManager.foundNewHigherCommitedChange(change);
 				return true;
 			}
 		}

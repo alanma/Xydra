@@ -29,9 +29,9 @@ import com.google.appengine.api.datastore.Text;
 public class TentativeSnapshotManagerAtomic implements ITentativeSnapshotManager,
         CacheEntryHandler<TentativeObjectSnapshot> {
 	
-	private RevisionManager revisionManager;
-	
 	private IGaeSnapshotService snapshotService;
+	
+	private RevisionManager revisionManager;
 	
 	public TentativeSnapshotManagerAtomic(@NeverNull XAddress modelAddress,
 	        RevisionManager revisionManager, IGaeSnapshotService snapshotService) {
@@ -41,9 +41,9 @@ public class TentativeSnapshotManagerAtomic implements ITentativeSnapshotManager
 	}
 	
 	@Override
-	public XReadableModel getModelSnapshot() {
+	public XReadableModel getModelSnapshot(GaeModelRevInfo info) {
 		// TODO using tentative here - good idea?
-		long modelRev = this.revisionManager.getInfo().getLastSuccessChange();
+		long modelRev = info.getLastSuccessChange();
 		XRevWritableModel modelSnapshot = this.snapshotService.getModelSnapshot(modelRev, false);
 		return modelSnapshot;
 	}
@@ -99,14 +99,14 @@ public class TentativeSnapshotManagerAtomic implements ITentativeSnapshotManager
 	
 	@Override
 	public @CanBeNull
-	TentativeObjectSnapshot getTentativeObjectSnapshot(XAddress objectAddress) {
+	TentativeObjectSnapshot getTentativeObjectSnapshot(GaeModelRevInfo info, XAddress objectAddress) {
 		// look in datastore
 		String key = toKey(objectAddress);
 		TentativeObjectSnapshot tos = this.cache.get(key, this.storeOpts);
 		
 		// FIXME how to deal with legacy?
 		if(tos == null) {
-			long tentativeModelRev = this.revisionManager.getInfo().getLastSuccessChange();
+			long tentativeModelRev = info.getLastSuccessChange();
 			tos = new TentativeObjectSnapshot(null, objectAddress, tentativeModelRev);
 			
 			// // compute one & store it
@@ -165,8 +165,13 @@ public class TentativeSnapshotManagerAtomic implements ITentativeSnapshotManager
 	}
 	
 	@Override
-	public long getModelRevision() {
-		return this.revisionManager.getInfo().getLastSuccessChange();
+	public long getModelRevision(GaeModelRevInfo info) {
+		return info.getLastSuccessChange();
+	}
+	
+	@Override
+	public GaeModelRevInfo getInfo() {
+		return this.revisionManager.getInfo();
 	}
 	
 }

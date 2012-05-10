@@ -215,4 +215,9 @@ public class GaeModelRevInfo implements Serializable {
 		this.precision = precision;
 	}
 	
+	public GaeModelRevInfo copy() {
+		return new GaeModelRevInfo(this.timestamp, this.modelExists, this.lastStableSuccess,
+		        this.lastStableCommitted, this.lastSuccess, this.lastTaken, this.precision);
+	}
+	
 }

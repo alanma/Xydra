@@ -22,38 +22,37 @@ import org.xydra.sharedutils.XyAssert;
  */
 public class TentativeSnapshotManagerInTransaction implements ITentativeSnapshotManager {
 	
-	private XReadableModel cachedModel;
-	
 	/** also caches nulls when reading and there was no TOS */
 	private Map<XID,TentativeObjectSnapshot> cachedObjects = new HashMap<XID,TentativeObjectSnapshot>();
 	
 	private ITentativeSnapshotManager tsm;
 	
-	private long cachedModelRev;
+	private RevisionManager txnLocalRevManager;
 	
-	public TentativeSnapshotManagerInTransaction(ITentativeSnapshotManager baseManager) {
+	public TentativeSnapshotManagerInTransaction(ITentativeSnapshotManager baseManager,
+	        RevisionManager txnLocalRevManager) {
 		super();
 		this.tsm = baseManager;
+		this.txnLocalRevManager = txnLocalRevManager;
 	}
 	
 	public void clearCaches() {
-		this.cachedModel = null;
 		this.cachedObjects.clear();
 	}
 	
 	@Override
-	public XReadableModel getModelSnapshot() {
-		if(this.cachedModel == null) {
-			this.cachedModel = this.tsm.getModelSnapshot();
-		}
-		return this.cachedModel;
+	public XReadableModel getModelSnapshot(GaeModelRevInfo info) {
+		return this.tsm.getModelSnapshot(info);
 	}
 	
 	@Override
-	public TentativeObjectSnapshot getTentativeObjectSnapshot(XAddress objectAddress) {
+	public TentativeObjectSnapshot getTentativeObjectSnapshot(GaeModelRevInfo info,
+	        XAddress objectAddress) {
 		TentativeObjectSnapshot tos = this.cachedObjects.get(objectAddress.getObject());
 		if(tos == null) {
-			tos = this.tsm.getTentativeObjectSnapshot(objectAddress);
+			tos = this.tsm.getTentativeObjectSnapshot(info, objectAddress);
+			// unlink
+			tos = tos.copy();
 			this.cachedObjects.put(objectAddress.getObject(), tos);
 		}
 		return tos;
@@ -76,11 +75,13 @@ public class TentativeSnapshotManagerInTransaction implements ITentativeSnapshot
 	}
 	
 	@Override
-	public long getModelRevision() {
-		if(this.cachedModelRev == -3) {
-			this.cachedModelRev = this.tsm.getModelRevision();
-		}
-		return this.cachedModelRev;
+	public long getModelRevision(GaeModelRevInfo info) {
+		return this.tsm.getModelRevision(info);
+	}
+	
+	@Override
+	public GaeModelRevInfo getInfo() {
+		return this.txnLocalRevManager.getInfo();
 	}
 	
 }

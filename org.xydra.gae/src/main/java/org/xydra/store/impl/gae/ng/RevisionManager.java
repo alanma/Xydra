@@ -36,7 +36,7 @@ public class RevisionManager {
 	public void foundNewHigherCommitedChange(GaeChange change) {
 		XyAssert.xyAssert(change.getStatus().isCommitted());
 		long rev = change.rev;
-		Effect modelExistsEffect = Algorithms.effectOnModelExists(change);
+		Effect modelExistsEffect = Algorithms.effectOnModelExistsFlag(change);
 		
 		if(change.getStatus() == Status.SuccessExecuted) {
 			if(this.revision.getLastStableCommitted() + 1 == rev) {
@@ -97,6 +97,15 @@ public class RevisionManager {
 		boolean datastore = this.revision.getLastStableSuccessChange() % 32 == 0;
 		this.unicache.put(this.modelAddress + "/" + KEY_VERSION_ID, this.revision,
 		        UniCache.StorageOptions.create(instance, memcache, datastore));
+	}
+	
+	/**
+	 * @return a {@link RevisionManager} with a COPY of this state.
+	 */
+	public RevisionManager fork() {
+		RevisionManager fork = new RevisionManager(this.modelAddress);
+		fork.revision = this.revision.copy();
+		return fork;
 	}
 	
 }
