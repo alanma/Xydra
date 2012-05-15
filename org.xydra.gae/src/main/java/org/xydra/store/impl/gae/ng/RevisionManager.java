@@ -102,7 +102,7 @@ public class RevisionManager {
 	/**
 	 * @return a {@link RevisionManager} with a COPY of this state.
 	 */
-	public RevisionManager fork() {
+	public RevisionManager copy() {
 		RevisionManager fork = new RevisionManager(this.modelAddress);
 		fork.revision = this.revision.copy();
 		return fork;

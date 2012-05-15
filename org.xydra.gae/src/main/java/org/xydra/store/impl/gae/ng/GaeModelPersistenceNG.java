@@ -9,16 +9,18 @@ import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
-import org.xydra.base.change.ChangeType;
-import org.xydra.base.change.XAtomicCommand;
 import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
-import org.xydra.base.change.XRepositoryCommand;
-import org.xydra.base.change.XTransaction;
+import org.xydra.base.rmof.XReadableField;
+import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XRevWritableModel;
+import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
+import org.xydra.core.XCopyUtils;
+import org.xydra.core.model.delta.ChangedField;
+import org.xydra.core.model.delta.ChangedObject;
 import org.xydra.index.impl.IteratorUtils;
 import org.xydra.index.iterator.AbstractFilteringIterator;
 import org.xydra.index.query.Pair;
@@ -95,125 +97,16 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 	
 	private IGaeSnapshotService snapshotService;
 	
-	private TentativeSnapshotManagerAtomic baseSnapshotManager;
+	private ContextBeforeCommand executionContext;
 	
 	public GaeModelPersistenceNG(XAddress modelAddress) {
 		this.modelAddress = modelAddress;
 		this.revisionManager = new RevisionManager(this.modelAddress);
 		this.changelogManager = new ChangeLogManager(this.modelAddress);
 		this.snapshotService = new GaeSnapshotServiceImplNG(this.changelogManager);
-		this.baseSnapshotManager = new TentativeSnapshotManagerAtomic(modelAddress,
-		        this.revisionManager, this.snapshotService);
-	}
-	
-	/**
-	 * Phase 2: Depending on the command, fetch the required information to
-	 * compute if the command is legal -- and if so -- what events results from
-	 * executing it. I.e. there are implied events to be considered.
-	 * 
-	 * As the locks synchronised access, the currently locked parts are stable,
-	 * i.e. not being changed by other parts. They reflect the state before this
-	 * command and can be considered the current rev -- even if other command
-	 * are still working in parallel on irrelevant parts.
-	 * 
-	 * @param command
-	 * @param gaeLocks
-	 * @return
-	 */
-	private ExecutionResult checkPreconditionsComputeEventsUpdateTOS(XCommand command,
-	        GaeChange change) {
-		ExecutionResult result;
-		if(command.getChangeType() == ChangeType.TRANSACTION) {
-			result = checkPreconditionsAndComputeEvents_txn((XTransaction)command, change,
-			        this.revisionManager.fork());
-		} else {
-			if(command.getTarget().getAddressedType() == XType.XREPOSITORY) {
-				result = checkPreconditionsAndComputeEvents_repository((XRepositoryCommand)command,
-				        change);
-			} else {
-				result = ExecuteDecideAlgorithms.checkPreconditionsAndComputeEvents_atomic(
-				        (XAtomicCommand)command, change, false, this.baseSnapshotManager);
-			}
-		}
-		
-		return result;
-	}
-	
-	/**
-	 * @param rc
-	 * @return
-	 */
-	private ExecutionResult checkPreconditionsAndComputeEvents_repository(XRepositoryCommand rc,
-	        GaeChange change) {
-		
-		GaeModelRevInfo info = this.revisionManager.getInfo();
-		boolean modelExists = info.isModelExists();
-		
-		switch(rc.getChangeType()) {
-		case ADD:
-			if(!modelExists) {
-				return ExecutionResult.successCreatedModel(rc, change,
-				        info.getLastStableSuccessChange());
-			} else if(rc.isForced()) {
-				return ExecutionResult.successNoChange("Model exists");
-			} else {
-				return ExecutionResult.failed("Safe RepositoryCommand ADD failed; model!=null");
-			}
-			
-		case REMOVE:
-			long modelRev = this.revisionManager.getInfo().getLastStableSuccessChange();
-			if((!modelExists || modelRev != rc.getRevisionNumber()) && !rc.isForced()) {
-				return ExecutionResult.failed("Safe RepositoryCommand REMOVE failed. Reason: "
-				        + (!modelExists ? "model is null" : "modelRevNr:" + modelRev + " cmdRevNr:"
-				                + rc.getRevisionNumber() + " forced:" + rc.isForced()));
-			} else if(modelExists) {
-				log.debug("Removing model " + this.modelAddress + " " + modelRev);
-				return ExecutionResult.successRemovedModel(change, rc, this.baseSnapshotManager);
-			} else {
-				return ExecutionResult.successNoChange("Model did not exist");
-			}
-			
-		default:
-			throw new AssertionError("XRepositoryCommand with unexpected type: " + rc);
-		}
-	}
-	
-	/**
-	 * Apply the {@link XCommand XCommands} contained in the given
-	 * {@link XTransaction}. If one of the {@link XCommand XCommands} failed,
-	 * the {@link XTransaction} will remain partially applied, already executed
-	 * {@link XCommand XCommands} will not be rolled back.
-	 * 
-	 * @param transaction The {@link XTransaction} which is to be executed
-	 * @param txnLocalRevManager
-	 * @return the {@link ExecutionResult}
-	 * 
-	 *         TODO it might be a good idea to tell the caller of this method
-	 *         which commands of the transaction were executed and not only
-	 *         return false
-	 */
-	private ExecutionResult checkPreconditionsAndComputeEvents_txn(XTransaction transaction,
-	        GaeChange change, RevisionManager txnLocalRevManager) {
-		
-		TentativeSnapshotManagerInTransaction tmsInTxn = new TentativeSnapshotManagerInTransaction(
-		        this.baseSnapshotManager, txnLocalRevManager);
-		
-		List<ExecutionResult> results = new LinkedList<ExecutionResult>();
-		for(int i = 0; i < transaction.size(); i++) {
-			XAtomicCommand command = transaction.getCommand(i);
-			ExecutionResult atomicResult = ExecuteDecideAlgorithms
-			        .checkPreconditionsAndComputeEvents_atomic(command, change, true, tmsInTxn);
-			if(atomicResult.getStatus().isFailure()) {
-				return ExecutionResult.failed("txn failed at command " + command + " Reason: "
-				        + atomicResult.getDebugHint());
-			}
-			
-			results.add(atomicResult);
-		}
-		
-		tmsInTxn.saveTentativeObjectSnapshots();
-		
-		return ExecutionResult.successTransaction(transaction, change, results, tmsInTxn);
+		this.executionContext = new ContextBeforeCommand(modelAddress, this.revisionManager,
+		        this.snapshotService);
+		XyAssert.xyAssert(this.executionContext.getAddress() != null);
 	}
 	
 	@Override
@@ -299,7 +192,7 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 		        "If a lastSilentCommitted is not undefiend (i.e. == -1), "
 		                + "it must be before this change");
 		
-		Interval pendingChangesSearchRange = new Interval(lastCommited, ourChange.rev - 1);
+		Interval pendingChangesSearchRange = new Interval(lastCommited + 1, ourChange.rev - 1);
 		if(pendingChangesSearchRange.isEmpty()) {
 			/* working window is zero, there are no pending changes */
 			return;
@@ -409,21 +302,51 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 		 * that writes the locks for this command into the change log. Our
 		 * status: Creating
 		 */
-		log.debug("Phase 1: grabRevisionAndRegister " + locks.size() + " locks = " + locks);
+		log.debug("[???] Phase 1: grabRevisionAndRegister " + locks.size() + " locks = " + locks);
 		GaeChange change = grabRevisionAndRegisterLocks(locks, actorId);
 		XyAssert.xyAssert(change.rev >= 0);
 		c.stopAndStart("grabRevisionAndRegisterLocks");
 		
 		/* Phase 2: Entering synchronised code ... */
-		log.debug("Phase 1: waitForLocks");
+		log.debug("[r" + change.rev + "] Phase 2: waitForLocks");
 		execute_waitForLocks(change, this.revisionManager);
 		c.stopAndStart("waitForLocks");
 		
 		/* --- Code synchronised by Xydra locks in GAE datastore --- */
+		
+		// FIXME some serious do-all-or-nothing problems
+		
 		/* Phase 3 */
 		log.debug("[r" + change.rev + "] Phase 3: check constraints, compute events = " + change
 		        + ", command = " + command);
-		ExecutionResult executionResult = checkPreconditionsComputeEventsUpdateTOS(command, change);
+		CheckResult checkResult;
+		try {
+			checkResult = Executor.checkPreconditions(this.executionContext, command, change);
+		} catch(Throwable t) {
+			log.error("", t);
+			throw new RuntimeException(t);
+		}
+		
+		/*
+		 * implicitly this method also changes tentativeObjectStates from
+		 * implied events caused by remove-commands
+		 */
+		// FIXME log less
+		log.info("[r" + change.rev + "] Phase 3b: computeEvents '" + checkResult.getStatus().name()
+		        + "' change = " + change + ", command = " + command);
+		ExecutionResult executionResult = ExecutionResult.createEventsFrom(checkResult,
+		        this.executionContext);
+		
+		// updateTentativeState
+		// FIXME log less
+		log.info("[r" + change.rev + "] Phase 3c: updateTos '" + executionResult.getStatus().name()
+		        + "' change = " + change + ", command = " + command + " --> "
+		        + executionResult.getEvents().size() + " events");
+		if(checkResult.getStatus() == Status.SuccessExecuted) {
+			updateTentativeObjectStates(checkResult.getExecutionContextInTxn(),
+			        this.executionContext, change.rev);
+		}
+		
 		/* --- End of code synchronised by Xydra locks in GAE datastore --- */
 		
 		/* Phase 4: Write result in change-log, releasing the locks ... */
@@ -456,8 +379,8 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 			}
 		}
 		
-		// FIXME !! log less
-		log.info("RevInfo: " + this.revisionManager.getInfo());
+		// FIXME log less
+		log.info("Resulting revInfo: " + this.revisionManager.getInfo());
 		
 		switch(executionResult.getStatus()) {
 		case FailedPreconditions:
@@ -471,6 +394,41 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 		default:
 		case Creating:
 			throw new AssertionError("Cannot happen");
+		}
+	}
+	
+	private static void updateTentativeObjectStates(ContextInTxn sourceContext,
+	        ContextBeforeCommand targetContext, long changeRev) {
+		
+		for(XReadableObject added : sourceContext.getAdded()) {
+			TentativeObjectState tos = new TentativeObjectState(added, true, changeRev);
+			tos.setRevisionNumber(changeRev);
+			targetContext.saveTentativeObjectState(tos);
+		}
+		for(XID removed : sourceContext.getRemoved()) {
+			TentativeObjectState tos = targetContext.getTentativeObjectState(removed);
+			XyAssert.xyAssert(tos != null);
+			assert tos != null;
+			tos.setObjectExists(false);
+			tos.setModelRev(changeRev);
+			tos.setRevisionNumber(changeRev);
+			targetContext.saveTentativeObjectState(tos);
+		}
+		for(ChangedObject changed : sourceContext.getChanged()) {
+			if(changed.hasChanges()) {
+				XRevWritableObject object = XCopyUtils.createSnapshot(changed);
+				for(XReadableField addedField : changed.getAdded()) {
+					object.getField(addedField.getId()).setRevisionNumber(changeRev);
+				}
+				for(ChangedField changedField : changed.getChangedFields()) {
+					if(changedField.isChanged())
+						object.getField(changedField.getId()).setRevisionNumber(changeRev);
+				}
+				
+				TentativeObjectState tos = new TentativeObjectState(object, true, changeRev);
+				tos.setRevisionNumber(changeRev);
+				targetContext.saveTentativeObjectState(tos);
+			}
 		}
 	}
 	
@@ -567,16 +525,14 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 	public XWritableObject getObjectSnapshot(XID objectId, boolean includeTentative) {
 		if(includeTentative) {
 			// short-cut
-			TentativeObjectSnapshot tos = this.baseSnapshotManager.getTentativeObjectSnapshot(
-			        this.revisionManager.getInfo(), XX.resolveObject(this.modelAddress, objectId));
+			TentativeObjectState tos = this.executionContext.getObject(objectId);
 			if(tos == null) {
 				return null;
 			}
-			if(tos.isObjectExists()) {
-				return tos.asRevWritableObject();
-			} else {
+			if(!tos.exists()) {
 				return null;
 			}
+			return tos;
 		}
 		
 		// slow
