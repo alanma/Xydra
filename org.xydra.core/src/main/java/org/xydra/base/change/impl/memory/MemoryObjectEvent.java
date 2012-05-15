@@ -279,8 +279,8 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
 	
 	@Override
 	public String toString() {
-		String str = "ObjectEvent by actor:" + getActor() + " " + getChangeType() + " field:"
-		        + this.fieldId;
+		String str = "ObjectEvent by actor: '" + getActor() + "' " + getChangeType() + " '"
+		        + this.fieldId + "'";
 		if(this.fieldRevision >= 0)
 			str += " r" + rev2str(this.fieldRevision);
 		str += " @" + getTarget();

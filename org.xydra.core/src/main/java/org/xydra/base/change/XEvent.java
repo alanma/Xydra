@@ -17,7 +17,6 @@ import org.xydra.core.model.XRepository;
  * when this change happened etc.
  * 
  * @author voelkel
- * 
  */
 public interface XEvent extends Serializable {
 	
@@ -99,7 +98,8 @@ public interface XEvent extends Serializable {
 	 *         same transaction event; false for transactions or events where
 	 *         {@link #getChangeType()} is not {@link ChangeType#REMOVE}.
 	 * 
-	 *         TODO clarify: can this every be true for {@link XAtomicEvent}?
+	 *         An atomic event can be implies if it is part of a transaction. A
+	 *         stand-alone atomic event cannot be implied.
 	 * 
 	 *         Repository events are never implied, as the repository cannot be
 	 *         removed, only individual models.

@@ -12,7 +12,6 @@ import org.xydra.core.model.XRepository;
  * @author Kaidel
  * 
  */
-
 public interface XModelEvent extends XAtomicEvent {
 	
 	/**

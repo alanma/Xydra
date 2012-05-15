@@ -327,7 +327,7 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 	
 	@Override
 	public String toString() {
-		String prefix = "MemoryFieldEvent by actor:" + getActor() + " ";
+		String prefix = "MFieldEvent by actor: '" + getActor() + "' ";
 		String suffix = " @" + getTarget() + " r" + rev2str(this.modelRevision) + "/"
 		        + rev2str(this.objectRevision) + "/" + rev2str(this.fieldRevision);
 		if(inTransaction()) {
@@ -337,7 +337,7 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 		case ADD:
 			return prefix + "ADD value:" + this.newValue + suffix;
 		case REMOVE:
-			return prefix + "REMOVE " + suffix + (isImplied() ? " [implied]" : "");
+			return prefix + "REMOVE value " + suffix + (isImplied() ? " [implied]" : "");
 		case CHANGE:
 			return prefix + "CHANGE " + " to value:" + this.newValue + suffix;
 		default:
