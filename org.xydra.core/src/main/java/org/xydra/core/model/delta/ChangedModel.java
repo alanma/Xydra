@@ -39,12 +39,12 @@ import org.xydra.sharedutils.XyAssert;
 
 /**
  * An {@link XWritableModel} that represents changes to an
- * {@link XReadableField}.
+ * {@link XReadableModel}.
  * 
- * An {@link XReadableField} is passed as an argument of the constructor. This
- * ChangedField will than basically represent the given {@link XReadableField}
+ * An {@link XReadableModel} is passed as an argument of the constructor. This
+ * ChangedModel will then basically represent the given {@link XReadableModel}
  * and allow changes on its set of {@link XReadableObject XBaseObjects}. The
- * changes do not happen directly on the passed {@link XReadableField} but
+ * changes do not happen directly on the passed {@link XReadableModel} but
  * rather on a sort of copy that emulates the passed {@link XReadableModel}. A
  * ChangedModel provides methods to compare the current state to the state the
  * passed {@link XReadableModel} was in at creation time.
@@ -123,7 +123,8 @@ public class ChangedModel implements XWritableModel, IModelDiff {
 		
 		for(XID id : this.added.keySet()) {
 			XyAssert.xyAssert(!this.removed.contains(id) && !this.changed.containsKey(id));
-			assert !this.base.hasObject(id) : "baseModel contains added object '" + id + "'";
+			XyAssert.xyAssert(!this.base.hasObject(id), "baseModel contains added object '" + id
+			        + "'");
 			XyAssert.xyAssert(id.equals(this.added.get(id).getId()));
 		}
 		
@@ -258,6 +259,7 @@ public class ChangedModel implements XWritableModel, IModelDiff {
 		
 		XReadableObject object = this.base.getObject(objectId);
 		if(object != null) {
+			assert this.base.hasObject(objectId);
 			
 			// If the field previously existed it must have been removed
 			// previously and we can merge the remove and add changes.
@@ -274,6 +276,7 @@ public class ChangedModel implements XWritableModel, IModelDiff {
 			return newObject;
 			
 		} else {
+			assert !this.base.hasObject(objectId);
 			
 			// Otherwise, the object is completely new.
 			XAddress fieldAddr = XX.resolveObject(getAddress(), objectId);
