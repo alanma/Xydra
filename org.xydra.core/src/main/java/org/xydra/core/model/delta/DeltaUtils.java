@@ -68,7 +68,8 @@ public abstract class DeltaUtils {
 			boolean objectChanged = false;
 			
 			XRevWritableObject object = model.getObject(changedObject.getId());
-			XyAssert.xyAssert(object != null); assert object != null;
+			XyAssert.xyAssert(object != null);
+			assert object != null;
 			
 			for(XID fieldId : changedObject.getRemovedFields()) {
 				XyAssert.xyAssert(object.hasField(fieldId));
@@ -84,7 +85,8 @@ public abstract class DeltaUtils {
 			for(ChangedField changedField : changedObject.getChangedFields()) {
 				if(changedField.isChanged()) {
 					XRevWritableField field = object.getField(changedField.getId());
-					XyAssert.xyAssert(field != null); assert field != null;
+					XyAssert.xyAssert(field != null);
+					assert field != null;
 					boolean valueChanged = field.setValue(changedField.getValue());
 					XyAssert.xyAssert(valueChanged);
 					field.setRevisionNumber(rev);
@@ -131,7 +133,8 @@ public abstract class DeltaUtils {
 		}
 		
 		if(changedModel != null) {
-			XyAssert.xyAssert(model != null); assert model != null;
+			XyAssert.xyAssert(model != null);
+			assert model != null;
 			applyChanges(model, changedModel, rev);
 		}
 		
@@ -158,7 +161,8 @@ public abstract class DeltaUtils {
 	 */
 	public static List<XAtomicEvent> createEvents(XAddress modelAddr,
 	        Pair<ChangedModel,ModelChange> change, XID actorId, long rev) {
-		XyAssert.xyAssert(change != null); assert change != null;
+		XyAssert.xyAssert(change != null);
+		assert change != null;
 		
 		ChangedModel model = change.getFirst();
 		ModelChange mc = change.getSecond();
@@ -202,7 +206,7 @@ public abstract class DeltaUtils {
 		return events;
 	}
 	
-	private static void createEventsForChangedModel(List<XAtomicEvent> events, XID actorId,
+	public static void createEventsForChangedModel(List<XAtomicEvent> events, XID actorId,
 	        ChangedModel changedModel, boolean inTrans, boolean implied) {
 		
 		long rev = changedModel.getRevisionNumber();
@@ -244,7 +248,8 @@ public abstract class DeltaUtils {
 					long objectRev = object.getRevisionNumber();
 					long fieldRev = field.getRevisionNumber();
 					if(newValue == null) {
-						XyAssert.xyAssert(oldValue != null); assert oldValue != null;
+						XyAssert.xyAssert(oldValue != null);
+						assert oldValue != null;
 						events.add(MemoryFieldEvent.createRemoveEvent(actorId, target, rev,
 						        objectRev, fieldRev, inTrans, false));
 					} else if(oldValue == null) {
