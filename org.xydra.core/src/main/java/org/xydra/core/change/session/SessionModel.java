@@ -50,7 +50,7 @@ public class SessionModel implements XSessionModel {
 	
 	private ChangeSession session;
 	
-	/* where to buffer changes if not readonly */
+	/* where to buffer changes if not read-only */
 	private SessionCachedModel sessionCacheModel = null;
 	
 	/* for debugging */
@@ -236,7 +236,8 @@ public class SessionModel implements XSessionModel {
 	
 	@Override
 	public SessionModel loadObject(XID objectId) {
-		XyAssert.xyAssert(objectId != null); assert objectId != null;
+		XyAssert.xyAssert(objectId != null);
+		assert objectId != null;
 		// load only if not already present
 		if(this.sessionCacheModel.isKnownObject(objectId)) {
 			return this;
