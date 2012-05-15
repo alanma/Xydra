@@ -10,7 +10,7 @@ import org.xydra.base.XID;
  * 
  * @author voelkel
  */
-public interface XWritableObject extends XReadableObject {
+public interface XWritableObject extends XReadableObject, XStateWritableObject {
 	
 	/**
 	 * Creates a new {@link XWritableField} and adds it to this
@@ -31,19 +31,5 @@ public interface XWritableObject extends XReadableObject {
 	@Override
 	@ReadOperation
 	XWritableField getField(XID fieldId);
-	
-	/**
-	 * Removes the {@link XWritableField} with the given {@link XID} from this
-	 * XObject
-	 * 
-	 * @param fieldId The field which is to be removed
-	 * 
-	 * @return true, if the specified {@link XWritableField} did exist and could
-	 *         be removed
-	 * @throws IllegalStateException if this object has already been removed
-	 *             itself
-	 */
-	@ModificationOperation
-	boolean removeField(XID fieldId);
 	
 }

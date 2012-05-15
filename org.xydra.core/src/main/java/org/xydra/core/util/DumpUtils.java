@@ -14,6 +14,9 @@ import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XReadableRepository;
+import org.xydra.base.rmof.XStateReadableField;
+import org.xydra.base.rmof.XStateReadableModel;
+import org.xydra.base.rmof.XStateReadableObject;
 import org.xydra.core.model.delta.DeltaUtils;
 import org.xydra.core.model.delta.DeltaUtils.IFieldDiff;
 import org.xydra.core.model.delta.DeltaUtils.IObjectDiff;
@@ -60,6 +63,25 @@ public class DumpUtils {
 	public static String dump(String label, XReadableModel model) {
 		log.info(label + "\n" + toStringBuffer(model));
 		return "";
+	}
+	
+	/**
+	 * @param model to be dumped to a String
+	 * @return the model as a human-readable String
+	 */
+	public static StringBuffer toStringBuffer(XStateReadableModel model) {
+		XyAssert.xyAssert(model != null);
+		assert model != null;
+		XyAssert.xyAssert(model.getAddress().getAddressedType() == XType.XMODEL);
+		
+		StringBuffer buf = new StringBuffer();
+		buf.append("** Model   " + model.getAddress() + "\n");
+		List<XID> ids = toSortedList(model);
+		for(XID objectId : ids) {
+			XStateReadableObject object = model.getObject(objectId);
+			buf.append(toStringBuffer(object));
+		}
+		return buf;
 	}
 	
 	/**
@@ -121,6 +143,24 @@ public class DumpUtils {
 	}
 	
 	/**
+	 * @param object to be dumped
+	 * @return given object as human-readable string
+	 */
+	public static StringBuffer toStringBuffer(XStateReadableObject object) {
+		XyAssert.xyAssert(object != null);
+		assert object != null;
+		XyAssert.xyAssert(object.getAddress().getAddressedType() == XType.XOBJECT);
+		StringBuffer buf = new StringBuffer();
+		buf.append("*** Object " + object.getAddress() + "\n");
+		List<XID> ids = toSortedList(object);
+		for(XID fieldId : ids) {
+			XStateReadableField field = object.getField(fieldId);
+			buf.append(toStringBuffer(field));
+		}
+		return buf;
+	}
+	
+	/**
 	 * @param label to identify the log output
 	 * @param field to be dumped
 	 * @return an empty string, so that this method can be used in <code>
@@ -143,6 +183,19 @@ public class DumpUtils {
 		StringBuffer buf = new StringBuffer();
 		buf.append("**** Field " + field.getAddress() + " = '" + field.getValue() + "' " + " ["
 		        + field.getRevisionNumber() + "]\n");
+		return buf;
+	}
+	
+	/**
+	 * @param field to be dumped
+	 * @return the field as a human-readable String
+	 */
+	public static StringBuffer toStringBuffer(XStateReadableField field) {
+		XyAssert.xyAssert(field != null);
+		assert field != null;
+		XyAssert.xyAssert(field.getAddress().getAddressedType() == XType.XFIELD);
+		StringBuffer buf = new StringBuffer();
+		buf.append("**** Field " + field.getAddress() + " = '" + field.getValue() + "' " + "\n");
 		return buf;
 	}
 	

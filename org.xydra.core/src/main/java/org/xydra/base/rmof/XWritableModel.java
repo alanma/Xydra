@@ -10,9 +10,9 @@ import org.xydra.base.XID;
  * An {@link XReadableModel} which allows also simple changes, but not to the
  * revision number.
  * 
- * @author voelkel
+ * @author xamde
  */
-public interface XWritableModel extends XReadableModel {
+public interface XWritableModel extends XReadableModel, XStateWritableModel {
 	
 	/**
 	 * Creates a new {@link XWritableObject} with the given {@link XID} and adds
@@ -34,19 +34,5 @@ public interface XWritableModel extends XReadableModel {
 	@Override
 	@ReadOperation
 	XWritableObject getObject(@NeverNull XID objectId);
-	
-	/**
-	 * Removes the {@link XWritableObject} with the given {@link XID} from this
-	 * {@link XWritableModel}.
-	 * 
-	 * @param objectId The {@link XID} of the {@link XWritableObject} which is
-	 *            to be removed
-	 * 
-	 * @return true, if an {@link XWritableObject} with the given {@link XID}
-	 *         did exist in this {@link XWritableModel} and could be removed
-	 * @throws IllegalStateException if this model has already been removed
-	 */
-	@ModificationOperation
-	boolean removeObject(@NeverNull XID objectId);
 	
 }
