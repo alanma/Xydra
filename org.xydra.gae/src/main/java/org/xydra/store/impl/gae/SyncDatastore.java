@@ -23,6 +23,7 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Transaction;
+import com.google.appengine.api.datastore.TransactionOptions;
 
 
 /**
@@ -62,6 +63,27 @@ public class SyncDatastore {
 	 */
 	public static void putEntity(Entity entity) {
 		putEntity(entity, null);
+	}
+	
+	/**
+	 * @param entities must be 2 - 5
+	 */
+	@GaeOperation(datastoreWrite = true)
+	public static void putEntitiesInCrossGroupTransaction(Entity ... entities) {
+		log.debug("-- begin XG Transaction --");
+		makeSureDatestoreServiceIsInitialised();
+		XyAssert.xyAssert(entities.length >= 2);
+		XyAssert.xyAssert(entities.length <= 5);
+		
+		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+		TransactionOptions options = TransactionOptions.Builder.withXG(true);
+		Transaction txn = datastore.beginTransaction(options);
+		
+		for(Entity e : entities) {
+			datastore.put(txn, e);
+		}
+		
+		txn.commit();
 	}
 	
 	/**

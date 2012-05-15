@@ -359,9 +359,15 @@ public class GaeEvents {
 			XAtomicEvent ae = events.get(i);
 			
 			XyAssert.xyAssert(
-			        (events.size() == 1) ^ ae.inTransaction(),
+			        events.size() == 1 || ae.inTransaction(),
 			        "Multiple events should be in a txn. Events:" + events.size() + " inTxn?"
-			                + ae.inTransaction(), ae);
+			                + ae.inTransaction() + " event: %s", ae);
+			
+			// TODO enable stricter test? disallow txns with a single event?
+			// XyAssert.xyAssert((events.size() == 1) ^ ae.inTransaction(),
+			// "Multiple events should be in a txn and single events should not be in a txn. Events:"
+			// + events.size() + " inTxn?" + ae.inTransaction() + " event: %s",
+			// ae);
 			
 			types.add(EventType.get(ae.getTarget().getAddressedType(), ae.getChangeType()).id);
 			targets.add(ae.getTarget().toString());
