@@ -674,9 +674,9 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 	@Test
 	public void testExecuteCommandsIncorrectFieldCommands() {
 		// create model, object and field
-		XID modelId = XX.createUniqueId();
-		XID objectId = XX.createUniqueId();
-		XID fieldId = XX.createUniqueId();
+		XID modelId = XX.toId("model6");
+		XID objectId = XX.toId("object6");
+		XID fieldId = XX.toId("field6");
 		
 		executeSucceedingCommand(X.getCommandFactory().createAddModelCommand(this.repoId, modelId,
 		        true));
@@ -1513,7 +1513,10 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		
 		long[] revisions = new long[commands.length];
 		for(int i = 0; i < commands.length; i++) {
-			assertTrue((callback.getEffect())[i].getResult() >= 0);
+			assertTrue(
+			        "callback should have a positive result bus has "
+			                + callback.getEffect()[i].getResult(),
+			        (callback.getEffect())[i].getResult() >= 0);
 			assertNull((callback.getEffect())[i].getException());
 			revisions[i] = callback.getEffect()[i].getResult();
 		}
@@ -1543,7 +1546,8 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		assertNotNull(callback.getEffect());
 		assertTrue(callback.getEffect().length == 1);
 		assertNull(callback.getException());
-		assertTrue((callback.getEffect())[0].getResult() == XCommand.FAILED);
+		assertTrue("command " + command + " should fail",
+		        (callback.getEffect())[0].getResult() == XCommand.FAILED);
 		assertNull((callback.getEffect())[0].getException());
 	}
 	
@@ -1623,15 +1627,15 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		 * may use "revision - 1" here for the old revisions
 		 */
 		case XFIELD:
-			assertEquals(revision - 1, event.getOldFieldRevision());
+			assertEquals("event " + event, revision - 1, event.getOldFieldRevision());
 			//$FALL-THROUGH$
 		case XOBJECT:
 			if(event.getOldObjectRevision() != XEvent.RevisionNotAvailable) {
-				assertEquals(revision - 1, event.getOldObjectRevision());
+				assertEquals("event " + event, revision - 1, event.getOldObjectRevision());
 			}
 			//$FALL-THROUGH$
 		case XMODEL:
-			assertEquals(revision - 1, event.getOldModelRevision());
+			assertEquals("event " + event, revision - 1, event.getOldModelRevision());
 			//$FALL-THROUGH$
 		case XREPOSITORY:
 		}

@@ -159,7 +159,7 @@ abstract public class AbstractSynchronizerTest {
 		
 		long res = waitForSuccessBatched(tc);
 		
-		assertTrue("Failed " + command, res != XCommand.FAILED);
+		assertTrue("Should not have failed: " + command, res != XCommand.FAILED);
 	}
 	
 	private XModel loadModel(XID modelId) {
@@ -314,6 +314,28 @@ abstract public class AbstractSynchronizerTest {
 		
 	}
 	
+	static final XID bobId = XX.toId("Bob");
+	static final XID janeId = XX.toId("Jane");
+	static final XID cookiesId = XX.toId("cookies");
+	static final XValue cookiesValue = XV.toValue("gone");
+	
+	@Test
+	public void testDoSafeTxn() {
+		XCommand command = MemoryModelCommand.createAddCommand(this.model.getAddress(), false,
+		        bobId);
+		executeCommand(command);
+		
+		final XAddress janeAddr = XX.resolveObject(this.model.getAddress(), janeId);
+		final XAddress cookiesAddr = XX.resolveField(janeAddr, cookiesId);
+		
+		XTransactionBuilder tb = new XTransactionBuilder(this.model.getAddress());
+		tb.addObject(this.model.getAddress(), XCommand.SAFE, janeId);
+		tb.addField(janeAddr, XCommand.SAFE, cookiesId);
+		tb.addValue(cookiesAddr, XCommand.NEW, cookiesValue);
+		
+		executeCommand(tb.buildCommand());
+	}
+	
 	@Test
 	public void testLoadRemoteChanges() {
 		
@@ -322,22 +344,20 @@ abstract public class AbstractSynchronizerTest {
 		assertTrue(XCompareUtils.equalState(modelCopy, this.model));
 		
 		// make some remote changes
-		final XID bobId = XX.toId("Bob");
 		XCommand command = MemoryModelCommand.createAddCommand(this.model.getAddress(), false,
 		        bobId);
 		executeCommand(command);
 		
 		// make more remote changes
-		final XID janeId = XX.toId("Jane");
-		final XID cookiesId = XX.toId("cookies");
-		final XValue cookiesValue = XV.toValue("gone");
 		final XAddress janeAddr = XX.resolveObject(this.model.getAddress(), janeId);
 		final XAddress cookiesAddr = XX.resolveField(janeAddr, cookiesId);
 		XTransactionBuilder tb = new XTransactionBuilder(this.model.getAddress());
 		tb.addObject(this.model.getAddress(), XCommand.SAFE, janeId);
 		tb.addField(janeAddr, XCommand.SAFE, cookiesId);
 		tb.addValue(cookiesAddr, XCommand.NEW, cookiesValue);
-		executeCommand(tb.buildCommand());
+		
+		XCommand txn = tb.buildCommand();
+		executeCommand(txn);
 		
 		XReadableModel testModel = loadModelSnapshot(DemoModelUtil.PHONEBOOK_ID);
 		

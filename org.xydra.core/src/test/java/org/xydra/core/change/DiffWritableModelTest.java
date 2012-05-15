@@ -12,9 +12,10 @@ import org.xydra.base.XID;
 import org.xydra.base.XX;
 import org.xydra.base.change.XAtomicCommand;
 import org.xydra.base.change.XTransaction;
-import org.xydra.base.rmof.XWritableField;
+import org.xydra.base.rmof.XStateWritableField;
+import org.xydra.base.rmof.XStateWritableModel;
+import org.xydra.base.rmof.XStateWritableObject;
 import org.xydra.base.rmof.XWritableModel;
-import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.base.rmof.impl.memory.SimpleRepository;
 import org.xydra.base.value.XV;
@@ -44,12 +45,12 @@ public class DiffWritableModelTest {
 	
 	@Test
 	public void test1() {
-		XWritableObject adamObject = this.diffModel.createObject(adam);
+		XStateWritableObject adamObject = this.diffModel.createObject(adam);
 		assertTrue(this.diffModel.hasObject(adam));
-		XWritableField adamFon = adamObject.createField(fon);
+		XStateWritableField adamFon = adamObject.createField(fon);
 		adamFon.setValue(XV.toValue("123"));
 		adamObject.createField(mail).setValue(XV.toValue("a@ex.com"));
-		XWritableObject bertObject = this.diffModel.createObject(bert);
+		XStateWritableObject bertObject = this.diffModel.createObject(bert);
 		bertObject.createField(fon).setValue(XV.toValue("456"));
 		bertObject.createField(mail).setValue(XV.toValue("b@ex.com"));
 		
@@ -62,7 +63,7 @@ public class DiffWritableModelTest {
 	
 	@Test
 	public void test2() {
-		XWritableObject adamObject = this.diffModel.createObject(adam);
+		XStateWritableObject adamObject = this.diffModel.createObject(adam);
 		adamObject.createField(fon).setValue(XV.toValue("123"));
 		adamObject.createField(mail).setValue(XV.toValue("a@ex.com"));
 		this.diffModel.removeObject(adam);
@@ -73,7 +74,7 @@ public class DiffWritableModelTest {
 	
 	@Test
 	public void test3() {
-		XWritableObject adamObject = this.diffModel.createObject(adam);
+		XStateWritableObject adamObject = this.diffModel.createObject(adam);
 		adamObject.createField(fon).setValue(XV.toValue("123"));
 		adamObject.createField(fon).setValue(XV.toValue("1234"));
 		adamObject.createField(fon).setValue(XV.toValue("12345"));
@@ -84,7 +85,7 @@ public class DiffWritableModelTest {
 	
 	@Test
 	public void testDeleteNonexistingField() {
-		XWritableObject adamObject = this.diffModel.createObject(adam);
+		XStateWritableObject adamObject = this.diffModel.createObject(adam);
 		adamObject.removeField(fon);
 		List<XAtomicCommand> list = this.diffModel.toCommandList(true);
 		assertEquals(1, list.size());
@@ -101,14 +102,14 @@ public class DiffWritableModelTest {
 		
 		DiffWritableRepository drepo = new DiffWritableRepository(srepo);
 		// add some content here
-		XWritableModel dmodel = drepo.createModel(XX.toId("dmodel"));
+		XStateWritableModel dmodel = drepo.createModel(XX.toId("dmodel"));
 		dmodel.createObject(XX.toId("dobject")).createField(XX.toId("dfield"))
 		        .setValue(XV.toValue("dvalue"));
 		
 		// check txn & content
 		assertTrue(drepo.hasModel(XX.toId("smodel")));
 		assertTrue(drepo.hasModel(XX.toId("dmodel")));
-		XWritableModel smodel = drepo.getModel(XX.toId("smodel"));
+		XStateWritableModel smodel = drepo.getModel(XX.toId("smodel"));
 		assertTrue(smodel.hasObject(XX.toId("sobject")));
 		assertTrue(drepo.getModel(XX.toId("dmodel")).hasObject(XX.toId("dobject")));
 		assertTrue(drepo.getModel(XX.toId("smodel")).getObject(XX.toId("sobject"))

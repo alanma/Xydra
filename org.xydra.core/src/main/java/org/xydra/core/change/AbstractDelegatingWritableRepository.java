@@ -4,6 +4,7 @@ import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
+import org.xydra.base.rmof.XStateWritableRepository;
 import org.xydra.base.rmof.XWritableRepository;
 
 
@@ -16,7 +17,7 @@ import org.xydra.base.rmof.XWritableRepository;
  * @author xamde
  * 
  */
-public abstract class AbstractDelegatingWritableRepository implements XWritableRepository {
+public abstract class AbstractDelegatingWritableRepository implements XStateWritableRepository {
 	
 	public AbstractDelegatingWritableRepository(XWritableRepository baseRepository) {
 		this.baseRepository = baseRepository;

@@ -9,6 +9,7 @@ import org.xydra.annotations.NeverNull;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
+import org.xydra.base.rmof.XStateWritableModel;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
@@ -42,7 +43,7 @@ import org.xydra.store.impl.delegate.XydraPersistence;
  */
 @Deprecated
 public class ReadCachingWritableModel extends AbstractDelegatingWritableModel implements
-        XWritableModel {
+        XStateWritableModel {
 	
 	private static final Logger log = LoggerFactory.getLogger(ReadCachingWritableModel.class);
 	
@@ -88,7 +89,8 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 	 *            content at constructor call time
 	 */
 	public ReadCachingWritableModel(final XWritableModel base, boolean prefetchModel) {
-		XyAssert.xyAssert(base != null); assert base != null;
+		XyAssert.xyAssert(base != null);
+		assert base != null;
 		XyAssert.xyAssert(!(base instanceof ReadCachingWritableModel));
 		this.base = base;
 		this.cache = new MapMapIndex<XID,XID,XValue>();
@@ -125,7 +127,8 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 	 * @param persistence for loading snapsnots
 	 */
 	public ReadCachingWritableModel(final XWritableModel base, XydraPersistence persistence) {
-		XyAssert.xyAssert(base != null); assert base != null;
+		XyAssert.xyAssert(base != null);
+		assert base != null;
 		XyAssert.xyAssert(!(base instanceof ReadCachingWritableModel));
 		this.base = base;
 		this.cache = new MapMapIndex<XID,XID,XValue>();
@@ -150,7 +153,8 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 	
 	@Override
 	public XWritableObject createObject(@NeverNull XID objectId) {
-		XyAssert.xyAssert(objectId != null); assert objectId != null;
+		XyAssert.xyAssert(objectId != null);
+		assert objectId != null;
 		if(!hasObject(objectId)) {
 			this.antiCache.index(objectId, NOFIELD, NOVALUE);
 		}
@@ -179,7 +183,8 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 	
 	private XValue retrieveValueFromSourceAndCache(XWritableModel sourceModel, XID objectId,
 	        XID fieldId) {
-		XyAssert.xyAssert(sourceModel != null); assert sourceModel != null;
+		XyAssert.xyAssert(sourceModel != null);
+		assert sourceModel != null;
 		/* base might never have seen object or field */
 		XWritableObject sourceObject = sourceModel.getObject(objectId);
 		if(sourceObject == null) {
@@ -318,8 +323,10 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 	
 	@Override
 	protected boolean object_hasField(XID objectId, XID fieldId) {
-		XyAssert.xyAssert(objectId != null); assert objectId != null;
-		XyAssert.xyAssert(fieldId != null); assert fieldId != null;
+		XyAssert.xyAssert(objectId != null);
+		assert objectId != null;
+		XyAssert.xyAssert(fieldId != null);
+		assert fieldId != null;
 		if(this.cache.tupleIterator(new EqualsConstraint<XID>(objectId),
 		        new EqualsConstraint<XID>(fieldId)).hasNext()) {
 			return true;
@@ -347,13 +354,15 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 	
 	@Override
 	protected boolean object_isEmpty(XID objectId) {
-		XyAssert.xyAssert(objectId != null); assert objectId != null;
+		XyAssert.xyAssert(objectId != null);
+		assert objectId != null;
 		return object_idsAsSet(objectId).isEmpty();
 	}
 	
 	@Override
 	protected Iterator<XID> object_iterator(XID objectId) {
-		XyAssert.xyAssert(objectId != null); assert objectId != null;
+		XyAssert.xyAssert(objectId != null);
+		assert objectId != null;
 		return object_idsAsSet(objectId).iterator();
 	}
 	
@@ -369,7 +378,8 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 	}
 	
 	protected Set<XID> object_idsAsSet(XID objectId) {
-		XyAssert.xyAssert(objectId != null); assert objectId != null;
+		XyAssert.xyAssert(objectId != null);
+		assert objectId != null;
 		if(this.objectIdsOfWhichAllFieldIdsAreKnown.contains(objectId)) {
 			// add all from cache
 			Set<XID> set = new HashSet<XID>();
@@ -413,7 +423,6 @@ public class ReadCachingWritableModel extends AbstractDelegatingWritableModel im
 		// return this.base.removeObject(objectId);
 	}
 	
-	@Override
 	public long getRevisionNumber() {
 		log.debug("Returning outdated base-revision number");
 		return this.base.getRevisionNumber();
