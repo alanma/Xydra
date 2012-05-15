@@ -279,4 +279,8 @@ public class MapMapIndex<K, L, E> implements IMapMapIndex<K,L,E> {
 		}
 		return entry2.equals(entry);
 	}
+	
+	public Iterator<IMapIndex<L,E>> getIterator(K key1) {
+		return this.index.iterator();
+	}
 }
