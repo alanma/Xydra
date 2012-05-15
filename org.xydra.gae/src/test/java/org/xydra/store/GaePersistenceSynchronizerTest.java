@@ -22,10 +22,9 @@ public class GaePersistenceSynchronizerTest extends AbstractPersistenceSynchroni
 	
 	@Before
 	public void setUp() {
-		// FIXME hopeless attempts
 		InstanceContext.clear();
 		XydraRuntime.getMemcache().clear();
-		
+		//
 		persistence = new GaePersistence(XX.toId("repo"));
 		AbstractPersistenceSynchronizerTest.init();
 		super.setUp();

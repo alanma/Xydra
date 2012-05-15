@@ -5,7 +5,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.xydra.annotations.NeverNull;
-import org.xydra.base.XID;
 import org.xydra.base.change.XAtomicEvent;
 import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.impl.gae.changes.GaeChange.Status;
@@ -30,19 +29,13 @@ class ExecutionResult {
 			return new ExecutionResult(checkResult.getStatus(), Collections.EMPTY_LIST,
 			        checkResult.getDebugHint());
 		case SuccessExecuted:
-			List<XAtomicEvent> events = toEvents(checkResult.getActorId(), ctxBeforeCommand,
-			        checkResult.getExecutionContextInTxn(), checkResult.inTransaction());
+			List<XAtomicEvent> events = checkResult.getExecutionContextInTxn().toEvents(
+			        checkResult.getActorId(), ctxBeforeCommand, checkResult.inTransaction());
 			return new ExecutionResult(checkResult.getStatus(), events, null);
 		default:
 		case Creating:
 			throw new AssertionError();
 		}
-	}
-	
-	private static @NeverNull
-	List<XAtomicEvent> toEvents(XID actorId, ContextBeforeCommand ctxBeforeCommand,
-	        ContextInTxn ctxInTxn, boolean inTransaction) {
-		return ctxInTxn.toEvents(actorId, ctxBeforeCommand, inTransaction);
 	}
 	
 	// /**

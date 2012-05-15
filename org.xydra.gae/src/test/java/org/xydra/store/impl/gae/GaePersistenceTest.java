@@ -439,6 +439,9 @@ public class GaePersistenceTest {
 		XAddress modelAddress = XX.resolveModel(repoAddr, modelId);
 		GetWithAddressRequest modelAddressRequest = new GetWithAddressRequest(modelAddress);
 		
+		XCommand addObjectCommand = MemoryModelCommand.createAddCommand(modelAddress, true,
+		        objectId);
+		
 		// assert absence
 		assert !pers.getManagedModelIds().contains(modelId);
 		
@@ -448,8 +451,7 @@ public class GaePersistenceTest {
 		assert l >= 0;
 		assert pers.getManagedModelIds().contains(modelId);
 		assertEquals(0, pers.getModelRevision(modelAddressRequest).revision());
-		l = pers.executeCommand(ACTOR,
-		        MemoryModelCommand.createAddCommand(modelAddress, true, objectId));
+		l = pers.executeCommand(ACTOR, addObjectCommand);
 		assert l >= 0;
 		assertEquals(1, pers.getModelRevision(modelAddressRequest).revision());
 		
@@ -469,11 +471,8 @@ public class GaePersistenceTest {
 		assert pers.getManagedModelIds().contains(modelId);
 		assert pers.getModelRevision(modelAddressRequest).modelExists();
 		assertEquals(3, pers.getModelRevision(modelAddressRequest).revision());
-		l = pers.executeCommand(ACTOR,
-		        MemoryModelCommand.createAddCommand(modelAddress, true, objectId));
 		
-		// FIXME !!! DUMP
-		DumpUtils.dumpChangeLog(pers, modelAddress);
+		l = pers.executeCommand(ACTOR, addObjectCommand);
 		
 		assert l >= 0 : "" + l;
 		assertEquals(4, pers.getModelRevision(modelAddressRequest).revision());
@@ -481,7 +480,7 @@ public class GaePersistenceTest {
 		XWritableModel snap = pers.getModelSnapshot(modelAddressRequest);
 		assertEquals(4, snap.getRevisionNumber());
 		
-		// FIXME compare snapshot & revNr directly
+		// TODO compare snapshot & revNr directly
 		
 		// System.out.println(StatsGatheringMemCacheWrapper.INSTANCE.stats());
 	}

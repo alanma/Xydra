@@ -114,13 +114,16 @@ public class ContextInTxn implements XStateWritableModel {
 			// model remove - implied events
 			List<XAtomicEvent> events = new ArrayList<XAtomicEvent>();
 			XAddress target = this.getAddress().getParent();
+			boolean hadChildren = false;
 			for(XID objectId : ctxBeforeCommand) {
+				hadChildren = true;
 				addImpliedObjectRemoveEventsAndUpdateTos(events, ctxBeforeCommand, actorId,
 				        ctxBeforeCommand.getRevisionNumber(), ctxBeforeCommand.getAddress(),
 				        ctxBeforeCommand.getObject(objectId));
 			}
 			XRepositoryEvent repositoryEvent = MemoryRepositoryEvent.createRemoveEvent(actorId,
-			        target, getId(), ctxBeforeCommand.getRevisionNumber(), inTransaction);
+			        target, getId(), ctxBeforeCommand.getRevisionNumber(), inTransaction
+			                || hadChildren);
 			events.add(repositoryEvent);
 			return events;
 		} else if(!existedBefore && !existsNow) {

@@ -22,6 +22,7 @@ import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.GetWithAddressRequest;
 import org.xydra.store.InternalStoreException;
 import org.xydra.store.ModelRevision;
@@ -32,6 +33,7 @@ import org.xydra.store.impl.delegate.DelegatingSecureStore;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.gae.changes.KeyStructure;
 import org.xydra.store.impl.gae.changes.XIDLengthException;
+import org.xydra.store.impl.gae.ng.GaeModelPersistenceNG;
 
 import com.google.appengine.api.datastore.CommittedButStillApplyingException;
 import com.google.appengine.api.datastore.DatastoreFailureException;
@@ -149,7 +151,8 @@ public class GaePersistence implements XydraPersistence {
 	
 	@Override
 	public synchronized long executeCommand(XID actorId, XCommand command) {
-		log.debug(actorId + " executes command: " + DebugFormatter.format(command));
+		// FIXME log less
+		log.info(actorId + " executes command: " + DebugFormatter.format(command));
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		if(actorId == null) {
 			throw new IllegalArgumentException("actorId was null");
@@ -189,7 +192,9 @@ public class GaePersistence implements XydraPersistence {
 				modelPersistence = this.modelPersistenceMap.get(modelId);
 			}
 			if(modelPersistence == null) {
-				modelPersistence = new GaeModelPersistence3(getModelAddress(modelId));
+				XAddress modelAddress = getModelAddress(modelId);
+				XyAssert.xyAssert(modelAddress != null);
+				modelPersistence = new GaeModelPersistenceNG(modelAddress);
 				this.modelPersistenceMap.put(modelId, modelPersistence);
 			}
 			return modelPersistence;

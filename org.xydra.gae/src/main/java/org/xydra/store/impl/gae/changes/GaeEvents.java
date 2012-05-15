@@ -358,9 +358,10 @@ public class GaeEvents {
 		for(int i = 0; i < events.size(); i++) {
 			XAtomicEvent ae = events.get(i);
 			
-			// FIXME !!! should be checked?
-			// XyAssert.xyAssert((events.size() == 1) ^ ae.inTransaction(),
-			// "A single atomicEvent does not make a txn.", ae);
+			XyAssert.xyAssert(
+			        (events.size() == 1) ^ ae.inTransaction(),
+			        "Multiple events should be in a txn. Events:" + events.size() + " inTxn?"
+			                + ae.inTransaction(), ae);
 			
 			types.add(EventType.get(ae.getTarget().getAddressedType(), ae.getChangeType()).id);
 			targets.add(ae.getTarget().toString());

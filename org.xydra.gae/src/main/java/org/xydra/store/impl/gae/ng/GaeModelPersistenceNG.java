@@ -331,17 +331,16 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 		 * implicitly this method also changes tentativeObjectStates from
 		 * implied events caused by remove-commands
 		 */
-		// FIXME log less
-		log.info("[r" + change.rev + "] Phase 3b: computeEvents '" + checkResult.getStatus().name()
-		        + "' change = " + change + ", command = " + command);
+		log.debug("[r" + change.rev + "] Phase 3b: computeEvents '"
+		        + checkResult.getStatus().name() + "' change = " + change + ", command = "
+		        + command);
 		ExecutionResult executionResult = ExecutionResult.createEventsFrom(checkResult,
 		        this.executionContext);
 		
 		// updateTentativeState
-		// FIXME log less
-		log.info("[r" + change.rev + "] Phase 3c: updateTos '" + executionResult.getStatus().name()
-		        + "' change = " + change + ", command = " + command + " --> "
-		        + executionResult.getEvents().size() + " events");
+		log.debug("[r" + change.rev + "] Phase 3c: updateTos '"
+		        + executionResult.getStatus().name() + "' change = " + change + ", command = "
+		        + command + " --> " + executionResult.getEvents().size() + " events");
 		if(checkResult.getStatus() == Status.SuccessExecuted) {
 			updateTentativeObjectStates(checkResult.getExecutionContextInTxn(),
 			        this.executionContext, change.rev);
@@ -350,9 +349,9 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 		/* --- End of code synchronised by Xydra locks in GAE datastore --- */
 		
 		/* Phase 4: Write result in change-log, releasing the locks ... */
-		// FIXME log less
-		log.info("[r" + change.rev + "] Phase 4: saveEvents '" + executionResult.getStatus().name()
-		        + "' change = " + change + ", command = " + command);
+		log.debug("[r" + change.rev + "] Phase 4: saveEvents '"
+		        + executionResult.getStatus().name() + "' change = " + change + ", command = "
+		        + command);
 		execute_saveEventsReleaseLocks(executionResult, change);
 		c.stopAndStart("saveEvents");
 		XyAssert.xyAssert(change.getStatus().isCommitted(),
@@ -379,8 +378,7 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 			}
 		}
 		
-		// FIXME log less
-		log.info("Resulting revInfo: " + this.revisionManager.getInfo());
+		log.debug("Resulting revInfo: " + this.revisionManager.getInfo());
 		
 		switch(executionResult.getStatus()) {
 		case FailedPreconditions:
