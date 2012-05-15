@@ -668,7 +668,7 @@ public class Restless extends HttpServlet {
 		/* Determine HTTP method --------------------- */
 		// look in HTTP header
 		String httpMethod = reqHandedDown.getHeader(X_HTTP_Method_Override);
-		// look in query param
+		// look in query/post param
 		if(httpMethod == null) {
 			httpMethod = reqHandedDown.getParameter(X_HTTP_Method_Override);
 		}
