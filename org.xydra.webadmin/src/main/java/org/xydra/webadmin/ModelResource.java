@@ -355,7 +355,11 @@ public class ModelResource {
 			w.flush();
 			if(style == MStyle.htmlevents) {
 				List<XEvent> events = p.getEvents(modelAddress, 0, rev.revision());
-				XydraHtmlUtils.writeEvents(events, w);
+				if(events == null) {
+					w.write("No events.");
+				} else {
+					XydraHtmlUtils.writeEvents(events, w);
+				}
 			} else if(style == MStyle.htmlchanges) {
 				ChangesUtils.renderChangeLog(modelAddress, w);
 				w.flush();
