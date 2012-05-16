@@ -44,6 +44,7 @@ import com.google.appengine.api.datastore.DatastoreTimeoutException;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Transaction;
+import com.google.apphosting.api.ApiProxy.CapabilityDisabledException;
 
 
 /**
@@ -471,8 +472,12 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 				if(toBeCached.isBetterThan(this.revInfoFromMemcacheAndDatastore)) {
 					log.debug("this revInfo " + toBeCached + " is better than "
 					        + this.revInfoFromMemcacheAndDatastore + " and thus will be cached");
-					this.revInfoMemcacheAndDatastoreCache.put(this.revisionCacheName, toBeCached,
-					        storeOpts);
+					try {
+						this.revInfoMemcacheAndDatastoreCache.put(this.revisionCacheName,
+						        toBeCached, storeOpts);
+					} catch(CapabilityDisabledException err) {
+						log.warn("Could not write", err);
+					}
 				}
 			}
 			
@@ -560,7 +565,11 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 			
 			if(!status.isCommitted()) {
 				XyAssert.xyAssert(status == Status.Creating);
-				progressChange(change);
+				try {
+					progressChange(change);
+				} catch(CapabilityDisabledException err) {
+					log.warn("Could not progress change", err);
+				}
 				if(change.getStatus() != Status.FailedTimeout) {
 					log.debug("Change " + change.rev
 					        + " is being worked on by another 'thread', left untouched");

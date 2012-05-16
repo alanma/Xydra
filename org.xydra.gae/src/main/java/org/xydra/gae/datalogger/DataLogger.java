@@ -4,13 +4,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.mortbay.log.Log;
 import org.xydra.core.model.impl.memory.UUID;
 import org.xydra.index.impl.IteratorUtils;
 import org.xydra.index.iterator.TransformingIterator;
 import org.xydra.index.iterator.TransformingIterator.Transformer;
 import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 import org.xydra.restless.utils.ServletUtils;
 import org.xydra.store.impl.gae.AsyncDatastore;
 import org.xydra.store.impl.gae.SyncDatastore;
@@ -32,6 +32,8 @@ import com.google.apphosting.api.ApiProxy.CapabilityDisabledException;
  * 
  */
 public class DataLogger {
+	
+	private static final Logger log = LoggerFactory.getLogger(DataLogger.class);
 	
 	private static final DataRecord.DataRecordEntryHandler ENTRYHANDLER = new DataRecord.DataRecordEntryHandler();
 	private static final String KIND_DATARECORD = "DATA_RECORD";
@@ -59,7 +61,7 @@ public class DataLogger {
 		try {
 			AsyncDatastore.putEntity(e);
 		} catch(CapabilityDisabledException err) {
-			Log.warn("Could not write " + dataRecord.toString(), err);
+			log.warn("Could not write " + dataRecord.toString(), err);
 		}
 	}
 	
@@ -117,7 +119,7 @@ public class DataLogger {
 		try {
 			SyncDatastore.deleteEntities(keys);
 		} catch(CapabilityDisabledException err) {
-			Log.warn("Could not delete anything. ", err);
+			log.warn("Could not delete anything. ", err);
 		}
 	}
 	
