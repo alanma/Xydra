@@ -33,7 +33,6 @@ import org.xydra.store.impl.delegate.DelegatingSecureStore;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.gae.changes.KeyStructure;
 import org.xydra.store.impl.gae.changes.XIDLengthException;
-import org.xydra.store.impl.gae.ng.GaeModelPersistenceNG;
 
 import com.google.appengine.api.datastore.CommittedButStillApplyingException;
 import com.google.appengine.api.datastore.DatastoreFailureException;
@@ -194,7 +193,7 @@ public class GaePersistence implements XydraPersistence {
 			if(modelPersistence == null) {
 				XAddress modelAddress = getModelAddress(modelId);
 				XyAssert.xyAssert(modelAddress != null);
-				modelPersistence = new GaeModelPersistenceNG(modelAddress);
+				modelPersistence = new GaeModelPersistence3(modelAddress);
 				this.modelPersistenceMap.put(modelId, modelPersistence);
 			}
 			return modelPersistence;
