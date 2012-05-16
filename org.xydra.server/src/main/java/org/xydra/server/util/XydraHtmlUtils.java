@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import org.xydra.annotations.NeverNull;
 import org.xydra.base.XID;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XEvent;
@@ -15,6 +16,7 @@ import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.value.XValue;
 import org.xydra.restless.utils.HtmlUtils;
+import org.xydra.sharedutils.XyAssert;
 
 
 public class XydraHtmlUtils {
@@ -26,25 +28,28 @@ public class XydraHtmlUtils {
 	 * @param w never null
 	 * @throws IOException ...
 	 */
-	public static void writeEvents(List<XEvent> events, Writer w) throws IOException {
+	public static void writeEvents(@NeverNull List<XEvent> events, Writer w) throws IOException {
+		XyAssert.xyAssert(events != null);
+		assert events != null;
+		
 		w.write("<table border='1'>" +
-
+		
 		"<tr>"
-
+		
 		+ "<th>rev</th>"
-
+		
 		+ "<th>target</th>"
-
+		
 		+ "<th>type</th>"
-
+		
 		+ "<th>what</th>"
-
+		
 		+ "<th>oldRevs</th>"
-
+		
 		+ "<th>txn</th>"
-
+		
 		+ "<th>implied</th>"
-
+		
 		+ "</tr>");
 		for(XEvent e : events) {
 			writeEventRow(e, w);
@@ -63,22 +68,22 @@ public class XydraHtmlUtils {
 	
 	private static void writeEventRow(XEvent e, Writer w) throws IOException {
 		w.write("<tr>"
-
+		
 		+ "<td>" + e.getRevisionNumber() + "</td>"
-
+		
 		+ "<td>" + e.getTarget() + "</td> "
-
+		
 		+ "<td>" + e.getChangeType() + "</td>"
-
+		
 		+ "<td>" + e.getChangedEntity() + "</td>"
-
+		
 		+ "<td>" + e.getOldModelRevision() + "/" + e.getOldObjectRevision() + "/"
 		        + e.getOldFieldRevision() + "</td>"
-
+		        
 		        + "<td>" + e.inTransaction() + "</td>"
-
+		        
 		        + "<td>" + e.isImplied() + "</td>"
-
+		        
 		        + "</tr>\n");
 		
 	}
