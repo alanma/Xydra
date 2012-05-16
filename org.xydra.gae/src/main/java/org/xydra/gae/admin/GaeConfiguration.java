@@ -94,7 +94,11 @@ public class GaeConfiguration {
 	public void store() {
 		assertConsistentState();
 		if(AboutAppEngine.canWriteDataStore()) {
-			AsyncDatastore.putEntity(toEntity());
+			try {
+				AsyncDatastore.putEntity(toEntity());
+			} catch(Throwable t) {
+				log.warn("Could not store config", t);
+			}
 		} else {
 			log.warn("Datastore offline, could not persist config.");
 		}
