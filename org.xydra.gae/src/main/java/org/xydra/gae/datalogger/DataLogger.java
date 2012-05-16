@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.mortbay.log.Log;
 import org.xydra.core.model.impl.memory.UUID;
 import org.xydra.index.impl.IteratorUtils;
 import org.xydra.index.iterator.TransformingIterator;
@@ -20,6 +21,7 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.apphosting.api.ApiProxy.CapabilityDisabledException;
 
 
 /**
@@ -54,7 +56,11 @@ public class DataLogger {
 		String keyStr = dataRecord.getCreationDate() + "-" + UUID.uuid(8);
 		Key key = KeyFactory.createKey(KIND_DATARECORD, keyStr);
 		Entity e = ENTRYHANDLER.toEntity(key, dataRecord);
-		AsyncDatastore.putEntity(e);
+		try {
+			AsyncDatastore.putEntity(e);
+		} catch(CapabilityDisabledException err) {
+			Log.warn("Could not write " + dataRecord.toString(), err);
+		}
 	}
 	
 	public static DataRecord createDataRecord(Map<String,String> map) {
@@ -107,7 +113,12 @@ public class DataLogger {
 		});
 		
 		HashSet<Key> keys = IteratorUtils.addAll(keyIt, new HashSet<Key>());
-		SyncDatastore.deleteEntities(keys);
+		
+		try {
+			SyncDatastore.deleteEntities(keys);
+		} catch(CapabilityDisabledException err) {
+			Log.warn("Could not delete anything. ", err);
+		}
 	}
 	
 	/**
