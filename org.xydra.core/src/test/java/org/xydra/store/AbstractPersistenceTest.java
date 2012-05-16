@@ -1,5 +1,6 @@
 package org.xydra.store;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -12,6 +13,7 @@ import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XCommandFactory;
 import org.xydra.base.rmof.XWritableModel;
+import org.xydra.base.rmof.XWritableObject;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
 
@@ -20,7 +22,8 @@ public abstract class AbstractPersistenceTest {
 	 * the following variables need to be instantiated in the @Before methd by
 	 * implementations of this test
 	 * 
-	 * - persistence needs to be an empty XydraPersistence
+	 * - persistence needs to be an empty XydraPersistence with this.repoId as
+	 * its repository id.
 	 * 
 	 * - comFactory needs to be an implementation of XCommandFactory which
 	 * creates commands that can be executed by persistence.
@@ -28,7 +31,8 @@ public abstract class AbstractPersistenceTest {
 	public XydraPersistence persistence;
 	public XCommandFactory comFactory;
 	
-	public XID actorId = X.getIDProvider().fromString("actorId");
+	public XID repoId = X.getIDProvider().fromString("testRepo");
+	public XID actorId = X.getIDProvider().fromString("testActor");
 	
 	/*
 	 * TODO also test forced commands! (for example by adding a model, executing
@@ -43,17 +47,20 @@ public abstract class AbstractPersistenceTest {
 	@Test
 	public void testExecuteCommandRepositoryCommandAddType() {
 		/*
+		 * RepositoryCommands of add type add new models to the repository.
+		 */
+		
+		/*
 		 * add a new model, should succeed
 		 */
-		XID repoId = XX.createUniqueId();
 		XID modelId = XX.createUniqueId();
-		XAddress modelAddress = XX.resolveModel(repoId, modelId);
-		XCommand addModelCom = this.comFactory.createAddModelCommand(repoId, modelId, false);
+		XAddress modelAddress = XX.resolveModel(this.repoId, modelId);
+		XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId, false);
 		
 		long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
 		
 		assertTrue("Executing \"Adding a new model\"-command failed (should succeed), revNr was "
-		        + revNr, revNr > 0);
+		        + revNr, revNr >= 0);
 		
 		// check that the model actually exists
 		GetWithAddressRequest addressRequest = new GetWithAddressRequest(modelAddress);
@@ -61,6 +68,10 @@ public abstract class AbstractPersistenceTest {
 		assertNotNull(
 		        "The model we tried to create with an \"Adding a new model\"-command actually wasn't correctly added.",
 		        model);
+		assertEquals("Returned model snapshot did not have the correct XAddress.", modelAddress,
+		        model.getAddress());
+		assertEquals("Returned model did not have the correct revision number.", revNr,
+		        model.getRevisionNumber());
 		
 		/*
 		 * try to add the same model again (with an unforced command), should
@@ -73,19 +84,45 @@ public abstract class AbstractPersistenceTest {
 		        "Trying to add an already existing model with an unforced event succeeded (should fail), revNr was "
 		                + failRevNr, failRevNr == XCommand.FAILED);
 		
+	}
+	
+	@Test
+	public void testExecuteCommandRepositoryCommandRemoveType() {
+		/*
+		 * RepositoryCommands of the remove type remove models from the
+		 * repository
+		 */
+		
+		/*
+		 * add a model, we'll delete afterwards
+		 */
+		XID modelId = XX.createUniqueId();
+		XAddress modelAddress = XX.resolveModel(this.repoId, modelId);
+		XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId, false);
+		long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
+		
+		assertTrue("Adding a model failed, test cannot be executed.", revNr >= 0);
+		
+		GetWithAddressRequest addressRequest = new GetWithAddressRequest(modelAddress);
+		XWritableModel model = this.persistence.getModelSnapshot(addressRequest);
+		
+		assertNotNull("The model we tried to add doesn't exist, test cannot be executed.", model);
+		assertEquals(
+		        "The returned model has the wrong address, test cannot be executed, since it seems like adding models doesn't work correctly.",
+		        modelAddress, model.getAddress());
+		
 		/*
 		 * delete the model again
 		 */
-		XCommand deleteModelCom = this.comFactory.createRemoveModelCommand(repoId, modelId,
+		XCommand deleteModelCom = this.comFactory.createRemoveModelCommand(this.repoId, modelId,
 		        model.getRevisionNumber(), false);
 		
 		revNr = this.persistence.executeCommand(this.actorId, deleteModelCom);
 		
 		assertTrue(
 		        "Executing \"Deleting an existing model\"-command failed (should succeed), revNr was "
-		                + revNr, revNr > 0);
+		                + revNr, revNr >= 0);
 		// check that the model was actually removed
-		addressRequest = new GetWithAddressRequest(modelAddress);
 		model = this.persistence.getModelSnapshot(addressRequest);
 		assertNull(
 		        "The model we tried to remove with an \"Removing a model\"-command actually wasn't correctly removed.",
@@ -96,32 +133,166 @@ public abstract class AbstractPersistenceTest {
 		 * 
 		 * TODO check how forced & unforced commands behave in this case
 		 */
-		repoId = XX.createUniqueId();
+		
 		modelId = XX.createUniqueId();
-		XCommand deleteNotExistingModelCom = this.comFactory.createRemoveModelCommand(repoId,
+		XCommand deleteNotExistingModelCom = this.comFactory.createRemoveModelCommand(this.repoId,
 		        modelId, 0, false);
 		
 		revNr = this.persistence.executeCommand(this.actorId, deleteNotExistingModelCom);
 		
 		assertTrue(
-		        "Removing a not existing command with an unforced command succeeded (should fail), revNr was "
+		        "Removing a not existing model with an unforced command succeeded (should fail), revNr was "
 		                + revNr, revNr == XCommand.FAILED);
 		
-	}
-	
-	@Test
-	public void testExecuteCommandRepositoryCommandAddRemove() {
-		// TODO write this test
+		/*
+		 * TODO also test that removing a model also removes the object
+		 * (snapshots) and their fields
+		 */
 	}
 	
 	@Test
 	public void testExecuteCommandModelCommandAddType() {
-		// TODO write this test
+		/*
+		 * ModelCommands of add type add new objects to models.
+		 */
+		
+		// add a model on which the commands can be executed first
+		
+		XID modelId = XX.createUniqueId();
+		XAddress modelAddress = XX.resolveModel(this.repoId, modelId);
+		
+		XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId, false);
+		long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
+		assertTrue("The model wasn't correctly added, test cannot be executed.", revNr >= 0);
+		
+		/*
+		 * add a new object, should succeed
+		 */
+		
+		XID objectId = XX.createUniqueId();
+		
+		XAddress objectAddress = XX.resolveObject(this.repoId, modelId, objectId);
+		XCommand addObjectCom = this.comFactory.createAddObjectCommand(this.repoId, modelId,
+		        objectId, false);
+		
+		revNr = this.persistence.executeCommand(this.actorId, addObjectCom);
+		
+		assertTrue("Executing \"Adding a new object\"-command failed (should succeed), revNr was "
+		        + revNr, revNr >= 0);
+		
+		// check that the object actually exists
+		GetWithAddressRequest modelAdrRequest = new GetWithAddressRequest(modelAddress);
+		XWritableModel model = this.persistence.getModelSnapshot(modelAdrRequest);
+		
+		assertNotNull(
+		        "Model Snapshot Failure: The object we tried to create with an \"Adding a new object\"-command actually wasn't correctly added.",
+		        model.getObject(objectId));
+		
+		GetWithAddressRequest objectAdrRequest = new GetWithAddressRequest(objectAddress);
+		XWritableObject object = this.persistence.getObjectSnapshot(objectAdrRequest);
+		
+		assertNotNull(
+		        "Object Snapshot Failure: The object we tried to create with an \"Adding a new object\"-command actually wasn't correctly added.",
+		        object);
+		assertEquals("Returned object snapshot did not have the correct XAddress.", objectAddress,
+		        object.getAddress());
+		assertEquals("Returned object did not have the correct revision number.", revNr,
+		        object.getRevisionNumber());
+		
+		/*
+		 * try to add the same object again (with an unforced command), should
+		 * fail
+		 */
+		
+		long failRevNr = this.persistence.executeCommand(this.actorId, addObjectCom);
+		
+		assertTrue(
+		        "Trying to add an already existing object  with an unforced event succeeded (should fail), revNr was "
+		                + failRevNr, failRevNr == XCommand.FAILED);
+		
 	}
 	
 	@Test
 	public void testExecuteCommandModelCommandRemoveType() {
-		// TODO write this test
+		/*
+		 * ModelCommands of the remove type remove objects from models
+		 */
+		
+		/*
+		 * add a model with an object which we'll delete afterwards
+		 */
+		XID modelId = XX.createUniqueId();
+		XAddress modelAddress = XX.resolveModel(this.repoId, modelId);
+		XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId, false);
+		long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
+		
+		assertTrue("Adding a model failed, test cannot be executed.", revNr >= 0);
+		
+		GetWithAddressRequest modelAdrRequest = new GetWithAddressRequest(modelAddress);
+		XWritableModel model = this.persistence.getModelSnapshot(modelAdrRequest);
+		
+		assertNotNull("The model we tried to add doesn't exist, test cannot be executed.", model);
+		assertEquals(
+		        "The returned model has the wrong address, test cannot be executed, since it seems like adding models doesn't work correctly.",
+		        modelAddress, model.getAddress());
+		
+		XID objectId = XX.createUniqueId();
+		XAddress objectAddress = XX.resolveObject(this.repoId, modelId, objectId);
+		XCommand addObjectCom = this.comFactory.createAddObjectCommand(this.repoId, modelId,
+		        objectId, false);
+		revNr = this.persistence.executeCommand(this.actorId, addObjectCom);
+		
+		assertTrue("Adding an object failed, test cannot be executed.", revNr >= 0);
+		
+		GetWithAddressRequest objectAdrRequest = new GetWithAddressRequest(objectAddress);
+		XWritableObject object = this.persistence.getObjectSnapshot(objectAdrRequest);
+		
+		assertNotNull("The object we tried to add doesn't exist, test cannot be executed.", object);
+		assertEquals(
+		        "The returned object has the wrong address, test cannot be executed, since it seems like adding object doesn't work correctly.",
+		        objectAddress, object.getAddress());
+		
+		/*
+		 * delete the object again
+		 */
+		XCommand deleteObjectCom = this.comFactory.createRemoveObjectCommand(this.repoId, modelId,
+		        objectId, object.getRevisionNumber(), false);
+		
+		revNr = this.persistence.executeCommand(this.actorId, deleteObjectCom);
+		
+		assertTrue(
+		        "Executing \"Deleting an existing object\"-command failed (should succeed), revNr was "
+		                + revNr, revNr >= 0);
+		// check that the object was actually removed
+		model = this.persistence.getModelSnapshot(modelAdrRequest);
+		assertNull(
+		        "The object we tried to remove with an \"Removing an existing object\"-command actually wasn't correctly removed and still exists in the stored model.",
+		        model.getObject(objectId));
+		
+		object = this.persistence.getObjectSnapshot(objectAdrRequest);
+		assertNull(
+		        "The object we tried to remove with an \"Removing an existing object \"-command actually wasn't correctly removed.",
+		        object);
+		
+		/*
+		 * try to remove a not existing object
+		 * 
+		 * TODO check how forced & unforced commands behave in this case
+		 */
+		
+		objectId = XX.createUniqueId();
+		XCommand deleteNotExistingObjectCom = this.comFactory.createRemoveObjectCommand(
+		        this.repoId, modelId, objectId, 0, false);
+		
+		revNr = this.persistence.executeCommand(this.actorId, deleteNotExistingObjectCom);
+		
+		assertTrue(
+		        "Removing a not existing object with an unforced command succeeded (should fail), revNr was "
+		                + revNr, revNr == XCommand.FAILED);
+		
+		/*
+		 * TODO check that removing an object also removes all fields
+		 */
 	}
 	
 	@Test
@@ -189,6 +360,9 @@ public abstract class AbstractPersistenceTest {
 		 * that one and compare the returned model to the self-managed model
 		 */
 		// TODO check what a "tentative revision" is and write test accordingly
+		
+		// TODO check what happens when the wrong types of XAddresses are given
+		// as parameters
 	}
 	
 	@Test
