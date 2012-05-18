@@ -526,7 +526,8 @@ public class EventUtils {
 			if(!model.isEmpty()) {
 				throw new IllegalStateException(
 				        "Cannot apply repository ADD event to non-empty model "
-				                + model.getAddress() + " " + model.getRevisionNumber());
+				                + model.getAddress() + " " + model.getRevisionNumber() + " Event="
+				                + event);
 			}
 			model.setRevisionNumber(event.getRevisionNumber());
 			break;
