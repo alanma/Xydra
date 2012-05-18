@@ -12,6 +12,7 @@ import org.xydra.base.XID;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XCommandFactory;
+import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.store.impl.delegate.XydraPersistence;
@@ -145,9 +146,47 @@ public abstract class AbstractPersistenceTest {
 		                + revNr, revNr == XCommand.FAILED);
 		
 		/*
-		 * TODO also test that removing a model also removes the object
-		 * (snapshots) and their fields
+		 * test if removing a model also removes the object (snapshots) and
+		 * their fields
 		 */
+		
+		modelId = XX.createUniqueId();
+		modelAddress = XX.resolveModel(this.repoId, modelId);
+		addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId, false);
+		revNr = this.persistence.executeCommand(this.actorId, addModelCom);
+		
+		assertTrue("Adding a model failed, test cannot be executed.", revNr >= 0);
+		
+		XID objectId = XX.createUniqueId();
+		XAddress objectAddress = XX.resolveObject(this.repoId, modelId, objectId);
+		XCommand addObjectCom = this.comFactory.createAddObjectCommand(this.repoId, modelId,
+		        objectId, false);
+		
+		long objectRevNr = this.persistence.executeCommand(this.actorId, addObjectCom);
+		
+		assertTrue("Adding an object failed, test cannot be executed.", objectRevNr >= 0);
+		
+		// remove model and check if object is also removed
+		addressRequest = new GetWithAddressRequest(modelAddress);
+		model = this.persistence.getModelSnapshot(addressRequest);
+		deleteModelCom = this.comFactory.createRemoveModelCommand(this.repoId, modelId,
+		        model.getRevisionNumber(), false);
+		
+		revNr = this.persistence.executeCommand(this.actorId, deleteModelCom);
+		
+		assertTrue(
+		        "Executing \"Deleting an existing model\"-command failed (should succeed), revNr was "
+		                + revNr, revNr >= 0);
+		// check that the model was actually removed
+		model = this.persistence.getModelSnapshot(addressRequest);
+		assertNull(
+		        "The model we tried to remove with an \"Removing a model\"-command actually wasn't correctly removed.",
+		        model);
+		
+		GetWithAddressRequest objectAddressRequest = new GetWithAddressRequest(objectAddress);
+		XWritableObject object = this.persistence.getObjectSnapshot(objectAddressRequest);
+		
+		assertNull("The model was removed but its objects weren't removed.", object);
 	}
 	
 	@Test
@@ -183,21 +222,33 @@ public abstract class AbstractPersistenceTest {
 		// check that the object actually exists
 		GetWithAddressRequest modelAdrRequest = new GetWithAddressRequest(modelAddress);
 		XWritableModel model = this.persistence.getModelSnapshot(modelAdrRequest);
+		XWritableObject object = model.getObject(objectId);
 		
 		assertNotNull(
 		        "Model Snapshot Failure: The object we tried to create with an \"Adding a new object\"-command actually wasn't correctly added.",
-		        model.getObject(objectId));
+		        object);
 		
 		GetWithAddressRequest objectAdrRequest = new GetWithAddressRequest(objectAddress);
-		XWritableObject object = this.persistence.getObjectSnapshot(objectAdrRequest);
+		XWritableObject objectSnapshot = this.persistence.getObjectSnapshot(objectAdrRequest);
 		
 		assertNotNull(
 		        "Object Snapshot Failure: The object we tried to create with an \"Adding a new object\"-command actually wasn't correctly added.",
-		        object);
+		        objectSnapshot);
 		assertEquals("Returned object snapshot did not have the correct XAddress.", objectAddress,
-		        object.getAddress());
-		assertEquals("Returned object did not have the correct revision number.", revNr,
-		        object.getRevisionNumber());
+		        objectSnapshot.getAddress());
+		assertEquals("Returned object snapshot did not have the correct revision number.", revNr,
+		        objectSnapshot.getRevisionNumber());
+		
+		/*
+		 * TODO implement equals() methods and add this to all add-tests
+		 * 
+		 * This fails because the equals() method is not
+		 * overwritten/implemented.
+		 * 
+		 * assertEquals(
+		 * "Returned object snapshot is not equal to the object stored in the model."
+		 * , object, objectSnapshot);
+		 */
 		
 		/*
 		 * try to add the same object again (with an unforced command), should
@@ -292,12 +343,81 @@ public abstract class AbstractPersistenceTest {
 		
 		/*
 		 * TODO check that removing an object also removes all fields
+		 * 
+		 * (how? there are no field snapshots)
 		 */
 	}
 	
+	/*
+	 * TODO add tests -> try to add already existing things (unforced), should
+	 * fail
+	 */
+	
 	@Test
 	public void testExecuteCommandObjectCommandAddType() {
-		// TODO write this test
+		/*
+		 * ObjectCommands of add type add new fields to objects.
+		 */
+		
+		// add a model on which an object can be created first
+		
+		XID modelId = XX.createUniqueId();
+		XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId, false);
+		long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
+		assertTrue("The model wasn't correctly added, test cannot be executed.", revNr >= 0);
+		
+		/*
+		 * add a new object on which a new field can be created
+		 */
+		
+		XID objectId = XX.createUniqueId();
+		
+		XAddress objectAddress = XX.resolveObject(this.repoId, modelId, objectId);
+		XCommand addObjectCom = this.comFactory.createAddObjectCommand(this.repoId, modelId,
+		        objectId, false);
+		
+		revNr = this.persistence.executeCommand(this.actorId, addObjectCom);
+		
+		assertTrue("The model wasn't correctly added, test cannot be executed.", revNr >= 0);
+		
+		/*
+		 * add a new field, should succeed
+		 */
+		
+		XID fieldId = XX.createUniqueId();
+		
+		XAddress fieldAddress = XX.resolveField(this.repoId, modelId, objectId, fieldId);
+		XCommand addFieldCom = this.comFactory.createAddFieldCommand(this.repoId, modelId,
+		        objectId, fieldId, false);
+		
+		revNr = this.persistence.executeCommand(this.actorId, addFieldCom);
+		
+		assertTrue("Executing \"Adding a new field\"-command failed (should succeed), revNr was "
+		        + revNr, revNr >= 0);
+		
+		// check that the field actually exists
+		GetWithAddressRequest objectAdrRequest = new GetWithAddressRequest(objectAddress);
+		XWritableObject object = this.persistence.getObjectSnapshot(objectAdrRequest);
+		XWritableField field = object.getField(fieldId);
+		
+		assertNotNull(
+		        "The field we tried to create with an \"Adding a new feld\"-command actually wasn't correctly added.",
+		        field);
+		assertEquals("Returned field did not have the correct XAddress.", fieldAddress,
+		        field.getAddress());
+		assertEquals("Returned field did not have the correct revision number.", revNr,
+		        field.getRevisionNumber());
+		
+		/*
+		 * try to add the same field again (with an unforced command), should
+		 * fail
+		 */
+		
+		long failRevNr = this.persistence.executeCommand(this.actorId, addFieldCom);
+		
+		assertTrue(
+		        "Trying to add an already existing field with an unforced event succeeded (should fail), revNr was "
+		                + failRevNr, failRevNr == XCommand.FAILED);
 	}
 	
 	@Test
