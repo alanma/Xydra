@@ -206,6 +206,13 @@ public abstract class DeltaUtils {
 		return events;
 	}
 	
+	/**
+	 * @param events
+	 * @param actorId
+	 * @param changedModel
+	 * @param inTrans should alway be true if there are more than 1 events
+	 * @param implied
+	 */
 	public static void createEventsForChangedModel(List<XAtomicEvent> events, XID actorId,
 	        ChangedModel changedModel, boolean inTrans, boolean implied) {
 		
