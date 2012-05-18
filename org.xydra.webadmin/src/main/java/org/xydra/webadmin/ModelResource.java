@@ -467,8 +467,10 @@ public class ModelResource {
 			XWritableModel oldModel = repo.getModel(modelId);
 			Collection<XID> oldObjectsIds = IteratorUtils.addAll(oldModel.iterator(),
 			        new HashSet<XID>());
-			for(XID oldObjectID : oldObjectsIds) {
-				oldModel.removeObject(oldObjectID);
+			if(oldObjectsIds.size() > 20) {
+				for(XID oldObjectID : oldObjectsIds) {
+					oldModel.removeObject(oldObjectID);
+				}
 			}
 			repo.removeModel(modelId);
 		}
