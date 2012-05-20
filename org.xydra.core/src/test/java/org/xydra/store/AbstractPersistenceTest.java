@@ -15,6 +15,7 @@ import org.xydra.base.change.XCommandFactory;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
+import org.xydra.base.value.XValue;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
 
@@ -82,7 +83,7 @@ public abstract class AbstractPersistenceTest {
 		long failRevNr = this.persistence.executeCommand(this.actorId, addModelCom);
 		
 		assertTrue(
-		        "Trying to add an already existing model with an unforced event succeeded (should fail), revNr was "
+		        "Trying to add an already existing model with an unforced command succeeded (should fail), revNr was "
 		                + failRevNr, failRevNr == XCommand.FAILED);
 		
 	}
@@ -258,7 +259,7 @@ public abstract class AbstractPersistenceTest {
 		long failRevNr = this.persistence.executeCommand(this.actorId, addObjectCom);
 		
 		assertTrue(
-		        "Trying to add an already existing object  with an unforced event succeeded (should fail), revNr was "
+		        "Trying to add an already existing object  with an unforced command succeeded (should fail), revNr was "
 		                + failRevNr, failRevNr == XCommand.FAILED);
 		
 	}
@@ -416,29 +417,422 @@ public abstract class AbstractPersistenceTest {
 		long failRevNr = this.persistence.executeCommand(this.actorId, addFieldCom);
 		
 		assertTrue(
-		        "Trying to add an already existing field with an unforced event succeeded (should fail), revNr was "
+		        "Trying to add an already existing field with an unforced command succeeded (should fail), revNr was "
 		                + failRevNr, failRevNr == XCommand.FAILED);
 	}
 	
 	@Test
 	public void testExecuteCommandObjectCommandRemoveType() {
-		// TODO write this test
+		/*
+		 * FieldCommands of remove type remove fields from objects.
+		 */
+		
+		// add a model on which an object can be created first
+		
+		XID modelId = XX.createUniqueId();
+		XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId, false);
+		long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
+		assertTrue("The model wasn't correctly added, test cannot be executed.", revNr >= 0);
+		
+		/*
+		 * add a new object on which a new field can be created
+		 */
+		
+		XID objectId = XX.createUniqueId();
+		
+		XAddress objectAddress = XX.resolveObject(this.repoId, modelId, objectId);
+		XCommand addObjectCom = this.comFactory.createAddObjectCommand(this.repoId, modelId,
+		        objectId, false);
+		
+		revNr = this.persistence.executeCommand(this.actorId, addObjectCom);
+		
+		assertTrue("The model wasn't correctly added, test cannot be executed.", revNr >= 0);
+		
+		/*
+		 * add a new field, should succeed
+		 */
+		
+		XID fieldId = XX.createUniqueId();
+		
+		XCommand addFieldCom = this.comFactory.createAddFieldCommand(this.repoId, modelId,
+		        objectId, fieldId, false);
+		
+		revNr = this.persistence.executeCommand(this.actorId, addFieldCom);
+		
+		assertTrue("Executing \"Adding a new field\"-command failed (should succeed), revNr was "
+		        + revNr, revNr >= 0);
+		
+		/*
+		 * remove field, should succeed
+		 */
+		
+		XCommand removeFieldCom = this.comFactory.createRemoveFieldCommand(this.repoId, modelId,
+		        objectId, fieldId, revNr, false);
+		
+		revNr = this.persistence.executeCommand(this.actorId, removeFieldCom);
+		
+		assertTrue("Executing \"Removing a new field\"-command failed (should succeed), revNr was "
+		        + revNr, revNr >= 0);
+		
+		// check that the field was actually removed
+		GetWithAddressRequest objectAdrRequest = new GetWithAddressRequest(objectAddress);
+		XWritableObject object = this.persistence.getObjectSnapshot(objectAdrRequest);
+		XWritableField field = object.getField(fieldId);
+		
+		assertNull(
+		        "The field we tried to create with an \"Remove an existing field\"-command actually wasn't correctly removed.",
+		        field);
+		
+		/*
+		 * try to remove the same field again (with an unforced command), should
+		 * fail (since no such field exists)
+		 */
+		
+		removeFieldCom = this.comFactory.createRemoveFieldCommand(this.repoId, modelId, objectId,
+		        fieldId, revNr, false);
+		long failRevNr = this.persistence.executeCommand(this.actorId, removeFieldCom);
+		
+		assertTrue(
+		        "Trying to remove a not existing field with an unforced command succeeded (should fail), revNr was "
+		                + failRevNr, failRevNr == XCommand.FAILED);
 	}
 	
 	@Test
 	public void testExecuteCommandFieldCommandAddType() {
-		// TODO write this test
+		/*
+		 * FieldCommands of add type add new value to fields.
+		 */
+		
+		// add a model on which an object can be created first
+		
+		XID modelId = XX.createUniqueId();
+		XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId, false);
+		long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
+		assertTrue("The model wasn't correctly added, test cannot be executed.", revNr >= 0);
+		
+		/*
+		 * add a new object on which a new field can be created
+		 */
+		
+		XID objectId = XX.createUniqueId();
+		
+		XAddress objectAddress = XX.resolveObject(this.repoId, modelId, objectId);
+		XCommand addObjectCom = this.comFactory.createAddObjectCommand(this.repoId, modelId,
+		        objectId, false);
+		
+		revNr = this.persistence.executeCommand(this.actorId, addObjectCom);
+		
+		assertTrue("The model wasn't correctly added, test cannot be executed.", revNr >= 0);
+		
+		/*
+		 * add a new field, should succeed
+		 */
+		
+		XID fieldId = XX.createUniqueId();
+		
+		XAddress fieldAddress = XX.resolveField(this.repoId, modelId, objectId, fieldId);
+		XCommand addFieldCom = this.comFactory.createAddFieldCommand(this.repoId, modelId,
+		        objectId, fieldId, false);
+		
+		revNr = this.persistence.executeCommand(this.actorId, addFieldCom);
+		
+		assertTrue("Executing \"Adding a new field\"-command failed (should succeed), revNr was "
+		        + revNr, revNr >= 0);
+		
+		/*
+		 * add a new value to the field, should succeed
+		 */
+		XValue value = X.getValueFactory().createStringValue("test");
+		XCommand addValueCom = this.comFactory.createAddValueCommand(fieldAddress, revNr, value,
+		        false);
+		
+		revNr = this.persistence.executeCommand(this.actorId, addValueCom);
+		
+		assertTrue("Executing \"Adding a new value\"-command failed (should succeed), revNr was "
+		        + revNr, revNr >= 0);
+		
+		// check that the value actually exists
+		GetWithAddressRequest objectAdrRequest = new GetWithAddressRequest(objectAddress);
+		XWritableObject object = this.persistence.getObjectSnapshot(objectAdrRequest);
+		XWritableField field = object.getField(fieldId);
+		
+		assertNotNull(
+		        "The field we tried to create with an \"Adding a new feld\"-command actually wasn't correctly added.",
+		        field);
+		
+		XValue storedValue = field.getValue();
+		
+		assertNotNull(
+		        "The value we tried to add with an \"Add a new value to a field without a value\"-command actually wasn't correctly added.",
+		        storedValue);
+		assertEquals("The stored value is not equal to the value we wanted to add.", value,
+		        storedValue);
+		
+		/*
+		 * try to add a value to the same field again (with an unforced
+		 * command), should fail, since the value is now set and adding new
+		 * values no longer works
+		 */
+		
+		long failRevNr = this.persistence.executeCommand(this.actorId, addValueCom);
+		
+		assertTrue(
+		        "Trying to add the same value to a field which value is already set with an unforced command succeeded (should fail), revNr was "
+		                + failRevNr, failRevNr == XCommand.FAILED);
+		
+		// try to add a different value
+		XValue value2 = X.getValueFactory().createIntegerValue(42);
+		XCommand addValueCom2 = this.comFactory.createAddValueCommand(fieldAddress, revNr, value2,
+		        false);
+		
+		failRevNr = this.persistence.executeCommand(this.actorId, addValueCom2);
+		
+		assertTrue(
+		        "Trying to add a new value to a field which value is already set with an unforced command succeeded (should fail), revNr was "
+		                + failRevNr, failRevNr == XCommand.FAILED);
+		
+		// check that the value wasn't changed
+		object = this.persistence.getObjectSnapshot(objectAdrRequest);
+		field = object.getField(fieldId);
+		
+		storedValue = field.getValue();
+		
+		assertEquals("The stored value was changed, although the add-command failed.", value,
+		        storedValue);
+		
 	}
 	
 	@Test
 	public void testExecuteCommandFieldCommandRemoveType() {
-		// TODO write this test
+		/*
+		 * FieldCommands of remove type remove values from fields.
+		 */
+		
+		// add a model on which an object can be created first
+		
+		XID modelId = XX.createUniqueId();
+		XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId, false);
+		long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
+		assertTrue("The model wasn't correctly added, test cannot be executed.", revNr >= 0);
+		
+		/*
+		 * add a new object on which a new field can be created
+		 */
+		
+		XID objectId = XX.createUniqueId();
+		
+		XAddress objectAddress = XX.resolveObject(this.repoId, modelId, objectId);
+		XCommand addObjectCom = this.comFactory.createAddObjectCommand(this.repoId, modelId,
+		        objectId, false);
+		
+		revNr = this.persistence.executeCommand(this.actorId, addObjectCom);
+		
+		assertTrue("The model wasn't correctly added, test cannot be executed.", revNr >= 0);
+		
+		/*
+		 * add a new field, should succeed
+		 */
+		
+		XID fieldId = XX.createUniqueId();
+		
+		XAddress fieldAddress = XX.resolveField(this.repoId, modelId, objectId, fieldId);
+		XCommand addFieldCom = this.comFactory.createAddFieldCommand(this.repoId, modelId,
+		        objectId, fieldId, false);
+		
+		revNr = this.persistence.executeCommand(this.actorId, addFieldCom);
+		
+		assertTrue("Executing \"Adding a new field\"-command failed (should succeed), revNr was "
+		        + revNr, revNr >= 0);
+		
+		/*
+		 * add a new value to the field, should succeed
+		 */
+		XValue value = X.getValueFactory().createStringValue("test");
+		XCommand addValueCom = this.comFactory.createAddValueCommand(fieldAddress, revNr, value,
+		        false);
+		
+		revNr = this.persistence.executeCommand(this.actorId, addValueCom);
+		
+		assertTrue("Executing \"Adding a new field\"-command failed (should succeed), revNr was "
+		        + revNr, revNr >= 0);
+		
+		/*
+		 * remove the value again, should succeed
+		 */
+		
+		XCommand removeValueCom = this.comFactory.createRemoveValueCommand(fieldAddress, revNr,
+		        false);
+		
+		revNr = this.persistence.executeCommand(this.actorId, removeValueCom);
+		
+		assertTrue("Executing \"Remove a value \"-command failed (should succeed), revNr was "
+		        + revNr, revNr >= 0);
+		
+		// check that the value actually was removed
+		GetWithAddressRequest objectAdrRequest = new GetWithAddressRequest(objectAddress);
+		XWritableObject object = this.persistence.getObjectSnapshot(objectAdrRequest);
+		XWritableField field = object.getField(fieldId);
+		
+		assertNotNull(
+		        "The field we tried to create with an \"Adding a new feld\"-command actually wasn't correctly added.",
+		        field);
+		
+		XValue storedValue = field.getValue();
+		
+		assertNull(
+		        "The value we tried to remove with an \"Remove a value from a field with a value\"-command actually wasn't correctly removed.",
+		        storedValue);
+		
+		/*
+		 * try to remove a value from a field with no value (should fail)
+		 * 
+		 * TODO check how forced commands work here
+		 */
+		
+		long failRevNr = this.persistence.executeCommand(this.actorId, removeValueCom);
+		
+		assertTrue(
+		        "Removing a value from a field with no value with an unforced command succeeded (should fail), revNr was "
+		                + failRevNr, failRevNr == XCommand.FAILED);
 	}
 	
 	@Test
 	public void testExecuteCommandFieldCommandChangeType() {
-		// TODO write this test
+		/*
+		 * FieldCommands of change type change values of fields with values.
+		 */
+		
+		// add a model on which an object can be created first
+		
+		XID modelId = XX.createUniqueId();
+		XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId, false);
+		long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
+		assertTrue("The model wasn't correctly added, test cannot be executed.", revNr >= 0);
+		
+		/*
+		 * add a new object on which a new field can be created
+		 */
+		
+		XID objectId = XX.createUniqueId();
+		
+		XAddress objectAddress = XX.resolveObject(this.repoId, modelId, objectId);
+		XCommand addObjectCom = this.comFactory.createAddObjectCommand(this.repoId, modelId,
+		        objectId, false);
+		
+		revNr = this.persistence.executeCommand(this.actorId, addObjectCom);
+		
+		assertTrue("The model wasn't correctly added, test cannot be executed.", revNr >= 0);
+		
+		/*
+		 * add a new field, should succeed
+		 */
+		
+		XID fieldId = XX.createUniqueId();
+		
+		XAddress fieldAddress = XX.resolveField(this.repoId, modelId, objectId, fieldId);
+		XCommand addFieldCom = this.comFactory.createAddFieldCommand(this.repoId, modelId,
+		        objectId, fieldId, false);
+		
+		revNr = this.persistence.executeCommand(this.actorId, addFieldCom);
+		
+		assertTrue("Executing \"Adding a new field\"-command failed (should succeed), revNr was "
+		        + revNr, revNr >= 0);
+		
+		/*
+		 * try to change a value which does not exist, should fail
+		 */
+		XValue value = X.getValueFactory().createStringValue("test");
+		XCommand changeValueCom = this.comFactory.createChangeValueCommand(fieldAddress, revNr,
+		        value, false);
+		
+		revNr = this.persistence.executeCommand(this.actorId, changeValueCom);
+		
+		assertTrue(
+		        "Executing \"Change a value\"-command succeeded on a field with no value (should fail), revNr was "
+		                + revNr, revNr == XCommand.FAILED);
+		
+		/*
+		 * add a value to the field, should succeed
+		 */
+		// get the correct revision number
+		GetWithAddressRequest objectAdrRequest = new GetWithAddressRequest(objectAddress);
+		XWritableObject object = this.persistence.getObjectSnapshot(objectAdrRequest);
+		XWritableField field = object.getField(fieldId);
+		revNr = field.getRevisionNumber();
+		
+		XCommand addValueCom = this.comFactory.createAddValueCommand(fieldAddress, revNr, value,
+		        false);
+		
+		revNr = this.persistence.executeCommand(this.actorId, addValueCom);
+		
+		assertTrue("Executing \"Adding a new value\"-command failed (should succeed), revNr was "
+		        + revNr, revNr >= 0);
+		
+		/*
+		 * change the value, should succeed
+		 */
+		XValue value2 = X.getValueFactory().createIntegerValue(42);
+		changeValueCom = this.comFactory.createChangeValueCommand(fieldAddress, revNr, value2,
+		        false);
+		
+		revNr = this.persistence.executeCommand(this.actorId, changeValueCom);
+		
+		assertTrue("Executing \"Change a value\"-command failed (should succeed), revNr was "
+		        + revNr, revNr >= 0);
+		
+		// check that the value actually was changed
+		objectAdrRequest = new GetWithAddressRequest(objectAddress);
+		object = this.persistence.getObjectSnapshot(objectAdrRequest);
+		field = object.getField(fieldId);
+		
+		assertNotNull(
+		        "The field we tried to create with an \"Adding a new feld\"-command actually wasn't correctly added.",
+		        field);
+		
+		XValue storedValue = field.getValue();
+		
+		assertNotNull(
+		        "The value we tried to add with an \"Add a new value to a field without a value\"-command actually wasn't correctly added.",
+		        storedValue);
+		assertEquals("The stored value is not equal to the value that we tried to change it to.",
+		        value2, storedValue);
+		
+		/*
+		 * try to change the value to itself, should return
+		 * "nothing was changed".
+		 */
+		
+		long failRevNr = this.persistence.executeCommand(this.actorId, changeValueCom);
+		
+		assertTrue(
+		        "Trying to change the value to itself with an unforced command succeeded or failed (should return \"nothing was changed\"), revNr was "
+		                + failRevNr, failRevNr == XCommand.NOCHANGE);
+		
+		/*
+		 * try to change the value to "null", should fail (since this is a
+		 * remove-command, not a change command)
+		 */
+		
+		// get the correct revision number
+		objectAdrRequest = new GetWithAddressRequest(objectAddress);
+		object = this.persistence.getObjectSnapshot(objectAdrRequest);
+		field = object.getField(fieldId);
+		revNr = field.getRevisionNumber();
+		
+		XCommand changeToNullCom = this.comFactory.createChangeValueCommand(fieldAddress, revNr,
+		        null, false);
+		
+		failRevNr = this.persistence.executeCommand(this.actorId, changeToNullCom);
+		
+		assertTrue(
+		        "Trying to change an existing value to null with an unforced command succeeded (should fail), revNr was "
+		                + failRevNr, failRevNr == XCommand.FAILED);
+		
 	}
+	
+	/*
+	 * TODO don't forget to write tests for forced commands
+	 */
 	
 	@Test
 	public void testExecuteCommandSimpleTransaction() {
