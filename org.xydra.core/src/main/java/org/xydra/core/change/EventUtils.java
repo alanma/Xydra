@@ -459,12 +459,13 @@ public class EventUtils {
 	 * @param event to be applied
 	 */
 	private static void applyObjectEvent(@NeverNull XRevWritableObject object, XObjectEvent event) {
-		XyAssert.xyAssert(object != null);
+		XyAssert.xyAssert(object != null, "object was null");
 		assert object != null;
 		
 		switch(event.getChangeType()) {
 		case ADD: {
-			XyAssert.xyAssert(!object.hasField(event.getFieldId()));
+			XyAssert.xyAssert(!object.hasField(event.getFieldId()),
+			        "object %s had already field %s", object.getAddress(), event.getFieldId());
 			XRevWritableField field = object.createField(event.getFieldId());
 			field.setRevisionNumber(event.getRevisionNumber());
 			break;
