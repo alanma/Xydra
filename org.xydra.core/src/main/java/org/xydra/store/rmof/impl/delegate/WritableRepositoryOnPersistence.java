@@ -16,6 +16,7 @@ import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.GetWithAddressRequest;
+import org.xydra.store.ModelRevision;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
 
@@ -43,27 +44,23 @@ public class WritableRepositoryOnPersistence extends AbstractWritableOnPersisten
 	public XWritableModel createModel(XID modelId) {
 		XWritableModel model = getModel(modelId);
 		if(model == null) {
-			XyAssert.xyAssert(this.persistence.getModelRevision(new GetWithAddressRequest(
-			        getModelAddress(modelId), USE_TENTATIVE_STATE)) != null);
-			XyAssert.xyAssert(!this.persistence.getModelRevision(
-			        new GetWithAddressRequest(getModelAddress(modelId), USE_TENTATIVE_STATE))
-			        .modelExists());
+			
+			ModelRevision modelRev = this.persistence.getModelRevision(new GetWithAddressRequest(
+			        getModelAddress(modelId), USE_TENTATIVE_STATE));
+			XyAssert.xyAssert(modelRev != null);
+			assert modelRev != null;
+			XyAssert.xyAssert(!modelRev.modelExists());
 			
 			XCommand command = X.getCommandFactory().createAddModelCommand(
 			        this.persistence.getRepositoryId(), modelId, true);
 			long l = this.persistence.executeCommand(this.executingActorId, command);
-			XyAssert.xyAssert(l >= 0, "creating model '" + modelId + "' failed with " + l);
-			XyAssert.xyAssert(
-			        this.persistence
-			                .getModelRevision(
-			                        new GetWithAddressRequest(getModelAddress(modelId),
-			                                USE_TENTATIVE_STATE)).modelExists(),
-			        "model should exist "
-			                + this.persistence.getModelRevision(new GetWithAddressRequest(
-			                        getModelAddress(modelId), USE_TENTATIVE_STATE)));
 			
+			XyAssert.xyAssert(l >= 0, "creating model '" + modelId + "' failed with " + l);
+			
+			XyAssert.xyAssert(this.persistence.hasManagedModel(modelId));
+			XyAssert.xyAssert(hasModel(modelId));
 			model = getModel(modelId);
-			XyAssert.xyAssert(model != null);
+			XyAssert.xyAssert(model != null, "model == null");
 			assert model != null;
 		}
 		return model;
