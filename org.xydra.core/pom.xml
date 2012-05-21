@@ -54,6 +54,7 @@
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava-gwt</artifactId>
 			<!-- version info taken from parent -->
+			<version>12.0</version>
 		</dependency>
 
 		<!-- testing dependencies -->
