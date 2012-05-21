@@ -675,9 +675,9 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 	@Override
 	public Iterator<XID> iterator() {
 		// IMPROVE throw exception?
-		// if(!this.knowsAllObjectIds) {
-		// throw new PrefetchException("We don't know all object ids");
-		// }
+		if(!this.knowsAllObjectIds) {
+			log.warn("We don't know all object ids - returning incomplete set for " + this.address);
+		}
 		
 		return new TransformingIterator<Map.Entry<XID,CachedObject>,XID>(
 		
