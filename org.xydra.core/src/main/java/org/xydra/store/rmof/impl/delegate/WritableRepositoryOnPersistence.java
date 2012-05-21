@@ -30,6 +30,7 @@ public class WritableRepositoryOnPersistence extends AbstractWritableOnPersisten
 	
 	public static final boolean USE_TENTATIVE_STATE = false;
 	
+	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory
 	        .getLogger(WritableRepositoryOnPersistence.class);
 	
@@ -51,9 +52,7 @@ public class WritableRepositoryOnPersistence extends AbstractWritableOnPersisten
 			XCommand command = X.getCommandFactory().createAddModelCommand(
 			        this.persistence.getRepositoryId(), modelId, true);
 			long l = this.persistence.executeCommand(this.executingActorId, command);
-			if(l < 0) {
-				log.warn("creating model '" + modelId + "' failed with " + l);
-			}
+			XyAssert.xyAssert(l >= 0, "creating model '" + modelId + "' failed with " + l);
 			XyAssert.xyAssert(
 			        this.persistence
 			                .getModelRevision(
