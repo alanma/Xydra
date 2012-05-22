@@ -1,9 +1,15 @@
 package org.xydra.store;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.junit.Test;
 import org.xydra.base.X;
@@ -802,31 +808,20 @@ public abstract class AbstractPersistenceTest {
 		 * "nothing was changed".
 		 */
 		
-		long failRevNr = this.persistence.executeCommand(this.actorId, changeValueCom);
-		
-		assertTrue(
-		        "Trying to change the value to itself with an unforced command succeeded or failed (should return \"nothing was changed\"), revNr was "
-		                + failRevNr, failRevNr == XCommand.NOCHANGE);
-		
 		/*
-		 * try to change the value to "null", should fail (since this is a
-		 * remove-command, not a change command)
+		 * TODO Unsure if this should really return XCommand.NOCHANGE
+		 * 
+		 * long failRevNr = this.persistence.executeCommand(this.actorId,
+		 * changeValueCom); assertTrue(
+		 * "Trying to change the value to itself with an unforced command succeeded or failed (should return \"nothing was changed\"), revNr was "
+		 * + failRevNr, failRevNr == XCommand.NOCHANGE);
 		 */
 		
-		// get the correct revision number
-		objectAdrRequest = new GetWithAddressRequest(objectAddress);
-		object = this.persistence.getObjectSnapshot(objectAdrRequest);
-		field = object.getField(fieldId);
-		revNr = field.getRevisionNumber();
-		
-		XCommand changeToNullCom = this.comFactory.createChangeValueCommand(fieldAddress, revNr,
-		        null, false);
-		
-		failRevNr = this.persistence.executeCommand(this.actorId, changeToNullCom);
-		
-		assertTrue(
-		        "Trying to change an existing value to null with an unforced command succeeded (should fail), revNr was "
-		                + failRevNr, failRevNr == XCommand.FAILED);
+		/*
+		 * trying to change the value to "null" doesn't need to be tested, since
+		 * we cannot create CHANGE-commands which change a value to "null"
+		 * (changing an existing value to "null" is done by a REMOVE-command)
+		 */
 		
 	}
 	
@@ -851,11 +846,48 @@ public abstract class AbstractPersistenceTest {
 	
 	@Test
 	public void testGetManagedModelIds() {
-		/*
-		 * TODO write this test - add some models and check whether the corret
-		 * Ids are returned or not. (take into account that deleting a model
-		 * does not necessarily remove its Id!)
-		 */
+		
+		Set<XID> managedIds = this.persistence.getManagedModelIds();
+		
+		assertTrue("The persistence already has some managed IDs, although no models were added.",
+		        managedIds.isEmpty());
+		
+		// add a model
+		XID modelId = XX.createUniqueId();
+		XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId, false);
+		long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
+		assertTrue("The model wasn't correctly added, test cannot be executed.", revNr >= 0);
+		
+		managedIds = this.persistence.getManagedModelIds();
+		
+		assertTrue("The set of managed ids does not contain the XID of the newly added model.",
+		        managedIds.contains(modelId));
+		assertEquals(
+		        "The set of managed ids contains more than one XID, although we only added one model.",
+		        1, managedIds.size());
+		
+		// add some more models
+		Set<XID> addedModelIds = new HashSet<XID>();
+		addedModelIds.add(modelId);
+		for(int i = 0; i < 32; i++) {
+			modelId = XX.createUniqueId();
+			addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId, false);
+			revNr = this.persistence.executeCommand(this.actorId, addModelCom);
+			assertTrue("The model wasn't correctly added, test cannot be executed.", revNr >= 0);
+			
+			addedModelIds.add(modelId);
+		}
+		
+		managedIds = this.persistence.getManagedModelIds();
+		
+		assertEquals("The amount of managed XIDs does not match the amount of added models.",
+		        addedModelIds.size(), managedIds.size());
+		
+		for(XID id : addedModelIds) {
+			assertTrue(
+			        "The set of managed XIDs doesn't contain one of the XIDs of a model we've added.",
+			        managedIds.contains(id));
+		}
 	}
 	
 	@Test
@@ -889,14 +921,69 @@ public abstract class AbstractPersistenceTest {
 	
 	@Test
 	public void testGetRepositoryId() {
-		/*
-		 * TODO write this test (is there anything that needs to be tested
-		 * here?)
-		 */
+		assertEquals(
+		        "The repositor id of the XydraPersistence wasn't set correctly - might also cause other tests to fail.",
+		        this.repoId, this.persistence.getRepositoryId());
 	}
 	
 	@Test
 	public void testHasManagedModel() {
 		// TODO write this test
+		
+		XID modelId = XX.createUniqueId();
+		assertFalse(
+		        "hasManagedModels() returns true, although the persistence has no managed models yet.",
+		        this.persistence.hasManagedModel(modelId));
+		
+		// add a model
+		XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId, false);
+		long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
+		assertTrue("The model wasn't correctly added, test cannot be executed.", revNr >= 0);
+		
+		assertTrue(
+		        "hasManagedModels(modelId) returns false, although we correctly added a model with the given modelId.",
+		        this.persistence.hasManagedModel(modelId));
+		
+		// add some more models
+		List<XID> addedModelIds = new ArrayList<XID>();
+		addedModelIds.add(modelId);
+		for(int i = 0; i < 32; i++) {
+			modelId = XX.createUniqueId();
+			addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId, false);
+			revNr = this.persistence.executeCommand(this.actorId, addModelCom);
+			assertTrue("The model wasn't correctly added, test cannot be executed.", revNr >= 0);
+			
+			addedModelIds.add(modelId);
+		}
+		
+		for(XID id : addedModelIds) {
+			assertTrue(
+			        "hasManagedModels(id) returns false, although we correctly added a model with the given id.",
+			        this.persistence.hasManagedModel(id));
+		}
+		
+		// delete some models and check if hasManagedModel still returns true
+		
+		int nrOfModels = 12;
+		
+		for(int i = 0; i < nrOfModels; i++) {
+			XID id = addedModelIds.get(i);
+			XAddress modelAddress = XX.resolveModel(this.repoId, id);
+			GetWithAddressRequest addressRequest = new GetWithAddressRequest(modelAddress);
+			XWritableModel model = this.persistence.getModelSnapshot(addressRequest);
+			
+			XCommand deleteModelCom = this.comFactory.createRemoveModelCommand(this.repoId, id,
+			        model.getRevisionNumber(), false);
+			
+			revNr = this.persistence.executeCommand(this.actorId, deleteModelCom);
+			assertTrue("The model wasn't correctly removed, test cannot be executed.", revNr >= 0);
+		}
+		
+		for(int i = 0; i < nrOfModels; i++) {
+			XID id = addedModelIds.get(i);
+			assertTrue(
+			        "hasManagedModels(id) returns false after we removed the model with the given id, although the persistence once managed a model with this id.",
+			        this.persistence.hasManagedModel(id));
+		}
 	}
 }
