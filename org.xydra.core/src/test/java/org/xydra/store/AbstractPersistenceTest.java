@@ -347,18 +347,7 @@ public abstract class AbstractPersistenceTest {
 		assertTrue(
 		        "Removing a not existing object with an unforced command succeeded (should fail), revNr was "
 		                + revNr, revNr == XCommand.FAILED);
-		
-		/*
-		 * TODO check that removing an object also removes all fields
-		 * 
-		 * (how? there are no field snapshots)
-		 */
 	}
-	
-	/*
-	 * TODO add tests -> try to add already existing things (unforced), should
-	 * fail
-	 */
 	
 	@Test
 	public void testExecuteCommandObjectCommandAddType() {
@@ -892,10 +881,75 @@ public abstract class AbstractPersistenceTest {
 	
 	@Test
 	public void testGetModelRevision() {
+		
 		/*
-		 * TODO write this test - add & change some models and check their
-		 * revision numbers
+		 * TODO what are tentative revision numbers?
 		 */
+		
+		XID modelId = XX.createUniqueId();
+		XAddress modelAddress = XX.resolveModel(this.repoId, modelId);
+		XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId, false);
+		long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
+		assertTrue("The model wasn't correctly added, test cannot be executed.", revNr >= 0);
+		
+		GetWithAddressRequest modelAdrRequest = new GetWithAddressRequest(modelAddress);
+		XWritableModel model = this.persistence.getModelSnapshot(modelAdrRequest);
+		
+		ModelRevision storedRevision = this.persistence.getModelRevision(modelAdrRequest);
+		
+		assertEquals("Revision number does not match.", model.getRevisionNumber(),
+		        storedRevision.revision());
+		assertTrue("The model still exists, but exists() returns false.",
+		        storedRevision.modelExists());
+		
+		// add some objects, to increase the revision number
+		for(int i = 0; i < 50; i++) {
+			XID objectId = XX.createUniqueId();
+			XCommand addObjectCom = this.comFactory.createAddObjectCommand(this.repoId, modelId,
+			        objectId, false);
+			this.persistence.executeCommand(this.actorId, addObjectCom);
+		}
+		
+		model = this.persistence.getModelSnapshot(modelAdrRequest);
+		storedRevision = this.persistence.getModelRevision(modelAdrRequest);
+		
+		assertEquals("Revision number does not match.", model.getRevisionNumber(),
+		        storedRevision.revision());
+		assertTrue("The model still exists, but exists() returns false.",
+		        storedRevision.modelExists());
+		
+		// remove the model
+		XCommand removeModelCom = this.comFactory.createRemoveModelCommand(this.repoId, modelId,
+		        model.getRevisionNumber(), false);
+		revNr = this.persistence.executeCommand(this.actorId, removeModelCom);
+		assertTrue("The model wasn't correctly removed, test cannot be executed.", revNr >= 0);
+		
+		storedRevision = this.persistence.getModelRevision(modelAdrRequest);
+		
+		/*
+		 * according to the documentation of {@link ModelRevision}, a
+		 * ModelRevision stores XCommand.FAILED after the model was removed.
+		 */
+		assertEquals("Model was removed, the stored revision should be XCommand.FAILED.",
+		        XCommand.FAILED, storedRevision.revision());
+		assertFalse("The model does no longer exist, but exists() returns true.",
+		        storedRevision.modelExists());
+		
+		/*
+		 * try to get the model revision of a not existing model
+		 * 
+		 * According to the documentation of {@link XydraPersistence} null is
+		 * returned, if the state is not none. It is unclear what is meant with
+		 * that, but I suppose "unclear" means that no such model ever existed.
+		 */
+		XID modelId2 = XX.createUniqueId();
+		XAddress modelAddress2 = XX.resolveModel(this.repoId, modelId2);
+		GetWithAddressRequest modelAdr2Request = new GetWithAddressRequest(modelAddress2);
+		
+		storedRevision = this.persistence.getModelRevision(modelAdr2Request);
+		
+		assertEquals("Returned model revision should be null, since the model never existed.",
+		        null, storedRevision);
 	}
 	
 	@Test
@@ -928,8 +982,6 @@ public abstract class AbstractPersistenceTest {
 	
 	@Test
 	public void testHasManagedModel() {
-		// TODO write this test
-		
 		XID modelId = XX.createUniqueId();
 		assertFalse(
 		        "hasManagedModels() returns true, although the persistence has no managed models yet.",
