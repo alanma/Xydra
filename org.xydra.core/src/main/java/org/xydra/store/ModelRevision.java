@@ -2,6 +2,7 @@ package org.xydra.store;
 
 import java.io.Serializable;
 
+import org.xydra.annotations.NeverNull;
 import org.xydra.base.change.XCommand;
 import org.xydra.sharedutils.XyAssert;
 
@@ -22,15 +23,6 @@ import org.xydra.sharedutils.XyAssert;
  * been created and not deleted yet. It can of course be-recreated.
  * 
  * @author xamde
- */
-
-/*
- * TODO I think this class should enforce the behaviour described above by
- * throwing exceptions, i.e. when "modelExists" is set to true, the revision
- * should be XCommand.FAILED and nothing else.
- * 
- * 
- * ~Kaidel
  */
 public class ModelRevision implements Serializable {
 	
@@ -98,8 +90,12 @@ public class ModelRevision implements Serializable {
 		return this.revision + (this.modelExists ? "yes" : "no");
 	}
 	
-	@SuppressWarnings("null")
-	public boolean isBetterThan(ModelRevision other) {
+	/**
+	 * @param other @NeverNull
+	 * @return true if the other rev contains more up-to-date information than
+	 *         this one
+	 */
+	public boolean isBetterThan(@NeverNull ModelRevision other) {
 		XyAssert.xyAssert(other != null);
 		assert other != null;
 		// TODO tentative rev here?
