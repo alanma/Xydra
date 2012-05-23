@@ -23,6 +23,15 @@ import org.xydra.sharedutils.XyAssert;
  * 
  * @author xamde
  */
+
+/*
+ * TODO I think this class should enforce the behaviour described above by
+ * throwing exceptions, i.e. when "modelExists" is set to true, the revision
+ * should be XCommand.FAILED and nothing else.
+ * 
+ * 
+ * ~Kaidel
+ */
 public class ModelRevision implements Serializable {
 	
 	private static final long serialVersionUID = 2428661786025001891L;
@@ -37,8 +46,8 @@ public class ModelRevision implements Serializable {
 	private final long revision;
 	
 	/**
-	 * @param revision
-	 * @param modelExists
+	 * @param revision the current revision number
+	 * @param modelExists true, if the model exists, false otherwise
 	 * @param tentativeRevision allows to create tentative revisions
 	 */
 	public ModelRevision(long revision, boolean modelExists, long tentativeRevision) {
@@ -89,8 +98,10 @@ public class ModelRevision implements Serializable {
 		return this.revision + (this.modelExists ? "yes" : "no");
 	}
 	
+	@SuppressWarnings("null")
 	public boolean isBetterThan(ModelRevision other) {
-		XyAssert.xyAssert(other != null); assert other != null;
+		XyAssert.xyAssert(other != null);
+		assert other != null;
 		// TODO tentative rev here?
 		return this.revision > other.revision;
 	}
