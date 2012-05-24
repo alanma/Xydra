@@ -22,7 +22,11 @@ import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.value.XValue;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
+import org.xydra.log.gae.Log4jLoggerFactory;
 import org.xydra.store.impl.delegate.XydraPersistence;
+import org.xydra.store.rmof.impl.delegate.WritableRepositoryOnPersistence;
 
 
 /**
@@ -36,6 +40,12 @@ import org.xydra.store.impl.delegate.XydraPersistence;
  * commands that can be executed by persistence.
  */
 public abstract class AbstractPersistenceTest {
+	
+	static {
+		LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory());
+	}
+	
+	private static final Logger log = LoggerFactory.getLogger(AbstractPersistenceTest.class);
 	
 	public XydraPersistence persistence;
 	
@@ -965,6 +975,26 @@ public abstract class AbstractPersistenceTest {
 		
 		// TODO check what happens when the wrong types of XAddresses are given
 		// as parameters
+	}
+	
+	@Test
+	public void testGetLargeModelSnapshot() {
+		/*
+		 * Test that such a large snapshot at least is computed without throwing
+		 * an error
+		 */
+		WritableRepositoryOnPersistence repo = new WritableRepositoryOnPersistence(
+		        this.persistence, this.actorId);
+		XID model1 = XX.toId("model1");
+		XWritableModel model = repo.createModel(model1);
+		for(int i = 0; i < 600; i++) {
+			model.createObject(XX.toId("object" + i));
+		}
+		
+		log.info("Getting snapshot");
+		XWritableModel snapshot = this.persistence.getModelSnapshot(new GetWithAddressRequest(XX
+		        .resolveModel(this.repoId, model1), true));
+		assertNotNull(snapshot);
 	}
 	
 	@Test
