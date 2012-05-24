@@ -4,9 +4,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.Properties;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.PropertyConfigurator;
 import org.xydra.log.Logger;
@@ -26,6 +29,18 @@ import org.xydra.log.LoggerFactory;
 public class Log4jUtils {
 	
 	private static final Logger log = LoggerFactory.getLogger(Log4jUtils.class);
+	
+	public static void listConfigFromClasspath() throws IOException {
+		ClassLoader cl = Thread.currentThread().getContextClassLoader();
+		InputStream in = cl.getResourceAsStream("log4j.properties");
+		if(in == null) {
+			System.out.println("Found not log4j.properties on classpath.");
+			return;
+		}
+		Reader r = new InputStreamReader(in, "utf-8");
+		String s = IOUtils.toString(r);
+		System.out.println("Found config:\n" + s);
+	}
 	
 	public static void configureLog4j() {
 		File file = new File("./src/main/resources/log4j.properties");
@@ -47,6 +62,10 @@ public class Log4jUtils {
 		} catch(IOException e) {
 		}
 		
+	}
+	
+	public static void main(String[] args) throws IOException {
+		listConfigFromClasspath();
 	}
 	
 }
