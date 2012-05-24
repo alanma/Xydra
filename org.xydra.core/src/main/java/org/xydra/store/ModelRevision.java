@@ -3,7 +3,6 @@ package org.xydra.store;
 import java.io.Serializable;
 
 import org.xydra.annotations.NeverNull;
-import org.xydra.base.change.XCommand;
 import org.xydra.sharedutils.XyAssert;
 
 
@@ -16,11 +15,14 @@ import org.xydra.sharedutils.XyAssert;
  * users, we hope.
  * 
  * Contains a {@link #revision()}, which is the model's current revision number.
- * Non-existing models are signaled as {@link XCommand#FAILED}, i.e. those that
- * have just been removed from the repository.
  * 
- * Contains also a {@link #modelExists()} flag which is true if the model has
- * been created and not deleted yet. It can of course be-recreated.
+ * Non-existing models are either reported as {@link #MODEL_DOES_NOT_EXIST_YET}
+ * if it never existed (has not been managed). A previously existing but now
+ * deleted model simply has a growing, positive revision number. This makes it
+ * easier to layer synchronisation protocols on top.
+ * 
+ * Contains also a {@link #modelExists()} flag which is true if the model is
+ * currently in a state where it has been created and not deleted yet.
  * 
  * @author xamde
  */
