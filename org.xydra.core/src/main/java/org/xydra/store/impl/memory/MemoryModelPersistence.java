@@ -62,7 +62,8 @@ public class MemoryModelPersistence {
 		// changing the model.
 		List<XAtomicEvent> events = DeltaUtils
 		        .createEvents(this.modelAddr, change, actorId, newRev);
-		XyAssert.xyAssert(events != null); assert events != null;
+		XyAssert.xyAssert(events != null);
+		assert events != null;
 		
 		if(events.isEmpty()) {
 			// TODO take up a revision anyway with a null event to better test
@@ -118,6 +119,13 @@ public class MemoryModelPersistence {
 		if(start == 0 && end == currentRev) {
 			// we still need to copy the list because the caller might expect to
 			// have a instance it can modify when doing filtering.
+			
+			/*
+			 * FIXME This also returns events the user did not want, since the
+			 * addresses are not compared to the given XAddress (for example all
+			 * events are returned, even if the user only wants to get events
+			 * concerning an object specified by the given address). ~Kaidel
+			 */
 			List<XEvent> result = new ArrayList<XEvent>();
 			result.addAll(this.events);
 			return result;
