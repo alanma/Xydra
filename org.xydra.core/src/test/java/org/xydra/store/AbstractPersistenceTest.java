@@ -20,6 +20,7 @@ import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XCommandFactory;
 import org.xydra.base.change.XEvent;
+import org.xydra.base.change.XFieldEvent;
 import org.xydra.base.change.XModelEvent;
 import org.xydra.base.change.XObjectEvent;
 import org.xydra.base.change.XRepositoryEvent;
@@ -1054,7 +1055,159 @@ public abstract class AbstractPersistenceTest {
 		        events.contains(fieldAddEvent));
 		
 		/*
-		 * TODO continue with add/change/remove value events and then remove the
+		 * add a value and check if the correct events are returned. Check
+		 * getEvents(fieldAddress...), getEvents(objectAddress...) and
+		 * getEvents(modelAddress...) since they might behave differently.
+		 */
+		
+		XValue value = X.getValueFactory().createStringValue("testValue");
+		XCommand addValueCom = this.comFactory.createAddValueCommand(this.repoId, modelId,
+		        objectId, fieldId, revNr, value, false);
+		long oldFieldRev = revNr;
+		revNr = this.persistence.executeCommand(this.actorId, addValueCom);
+		assertTrue("The value  wasn't correctly added, test cannot be executed.", revNr >= 0);
+		
+		// get events from the field first and check them
+		events = this.persistence.getEvents(fieldAddress, revNr, revNr);
+		
+		assertEquals(
+		        "List of events should only contain one event (the \"add value\"-event), but actually contains multiple events.",
+		        1, events.size());
+		
+		XEvent valueAddEvent = events.get(0);
+		assertTrue(
+		        "The returned event is not an XFieldEvent, but \"value was added\"-events are XFieldEvents",
+		        valueAddEvent instanceof XFieldEvent);
+		assertEquals("The returned event was not of add-type.", ChangeType.ADD,
+		        valueAddEvent.getChangeType());
+		
+		// oldFieldRev is also the old revision number of the model & object
+		// (before the
+		// value was added)
+		assertEquals("The event didn't refer to the correct old model revision number.",
+		        oldFieldRev, valueAddEvent.getOldModelRevision());
+		assertEquals("The event didn't refer to the correct old object revision number.",
+		        oldFieldRev, valueAddEvent.getOldObjectRevision());
+		
+		assertEquals("The event didn't refer to the correct revision number.", revNr,
+		        valueAddEvent.getRevisionNumber());
+		assertEquals("Event doesn't refer to the correct target.", fieldAddress,
+		        valueAddEvent.getTarget());
+		assertEquals("Event doesn't refer to the correct field.", fieldAddress,
+		        fieldAddEvent.getChangedEntity());
+		assertEquals("The actor of the event is not correct.", this.actorId,
+		        fieldAddEvent.getActor());
+		assertFalse("The event is wrongly marked as implied.", fieldAddEvent.isImplied());
+		assertFalse("the event is wrongly marked as being part of a transaction.",
+		        fieldAddEvent.inTransaction());
+		
+		events = this.persistence.getEvents(fieldAddress, revNr, revNr);
+		assertEquals(
+		        "The list contains more than 1 element, although only 1 new command was executed since the last revision.",
+		        1, events.size());
+		assertTrue("The list does not contain the \"add value\"-event.",
+		        events.contains(valueAddEvent));
+		
+		events = this.persistence.getEvents(fieldAddress, oldFieldRev, revNr);
+		assertEquals(
+		        "The list contains more than 2 elements, even though only 2 commands were executed.",
+		        2, events.size());
+		assertTrue("The list does not contain the \"add value\"-event.",
+		        events.contains(valueAddEvent));
+		assertTrue("The list does not contain the \"add field\"-event.",
+		        events.contains(valueAddEvent));
+		
+		events = this.persistence.getEvents(fieldAddress, 0, revNr);
+		assertEquals(
+		        "The list contains more than 2 elements, even though only 2 commands were executed which affected the field.",
+		        2, events.size());
+		
+		/*
+		 * check if the list returned by the object contains the correct events.
+		 */
+		events = this.persistence.getEvents(objectAddress, revNr, revNr);
+		assertEquals(
+		        "The list contains more than 1 element, although only 1 new command was executed since the last revision.",
+		        1, events.size());
+		assertTrue("The list does not contain the \"add value\"-event.",
+		        events.contains(valueAddEvent));
+		
+		events = this.persistence.getEvents(objectAddress, oldFieldRev, revNr);
+		
+		assertEquals(
+		        "The list contains more than 2 elements, even though only 2 commands were executed.",
+		        2, events.size());
+		assertTrue("The list does not contain the \"add field\"-event.",
+		        events.contains(fieldAddEvent));
+		assertTrue("The list does not contain the \"add value\"-event.",
+		        events.contains(valueAddEvent));
+		
+		events = this.persistence.getEvents(objectAddress, oldObjectRev, revNr);
+		
+		assertEquals(
+		        "The list contains more than 3 elements, even though only 3 commands were executed.",
+		        3, events.size());
+		assertTrue("The list does not contain the \"add object\"-event.",
+		        events.contains(objectAddEvent));
+		assertTrue("The list does not contain the \"add field\"-event.",
+		        events.contains(fieldAddEvent));
+		assertTrue("The list does not contain the \"add value\"-event.",
+		        events.contains(valueAddEvent));
+		
+		events = this.persistence.getEvents(objectAddress, 0, revNr);
+		
+		assertEquals(
+		        "The list contains more than 3 elements, even though only 3 commands were executed which affected the object.",
+		        3, events.size());
+		
+		/*
+		 * check if the list returned by the model contains the correct events.
+		 */
+		events = this.persistence.getEvents(modelAddress, revNr, revNr);
+		assertEquals(
+		        "The list contains more than 1 element, although only 1 new command was executed since the last revision.",
+		        1, events.size());
+		assertTrue("The list does not contain the \"add value\"-event.",
+		        events.contains(valueAddEvent));
+		
+		events = this.persistence.getEvents(modelAddress, oldFieldRev, revNr);
+		
+		assertEquals(
+		        "The list contains more than 2 elements, although only 2 commands were executed.",
+		        2, events.size());
+		assertTrue("The list does not contain the \"add field\"-event.",
+		        events.contains(fieldAddEvent));
+		assertTrue("The list does not contain the \"add value\"-event.",
+		        events.contains(valueAddEvent));
+		
+		events = this.persistence.getEvents(modelAddress, oldObjectRev, revNr);
+		
+		assertEquals(
+		        "The list contains more than 3 elements, although only 3 commands were executed.",
+		        3, events.size());
+		assertTrue("The list does not contain the \"add object\"-event.",
+		        events.contains(objectAddEvent));
+		assertTrue("The list does not contain the \"add field\"-event.",
+		        events.contains(fieldAddEvent));
+		assertTrue("The list does not contain the \"add value\"-event.",
+		        events.contains(valueAddEvent));
+		
+		events = this.persistence.getEvents(modelAddress, 0, revNr);
+		
+		assertEquals(
+		        "The list contains more than 4 elements, although only 4 commands were executed.",
+		        4, events.size());
+		assertTrue("The list does not contain the \"add model\"-event.",
+		        events.contains(modelAddEvent));
+		assertTrue("The list does not contain the \"add object\"-event.",
+		        events.contains(objectAddEvent));
+		assertTrue("The list does not contain the \"add field\"-event.",
+		        events.contains(fieldAddEvent));
+		assertTrue("The list does not contain the \"add value\"-event.",
+		        events.contains(valueAddEvent));
+		
+		/*
+		 * TODO continue with change/remove value events and then remove the
 		 * object to also check implicit events
 		 */
 	}
