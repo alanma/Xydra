@@ -116,20 +116,26 @@ public class MemoryModelPersistence {
 			return new ArrayList<XEvent>();
 		}
 		
-		if(start == 0 && end == currentRev) {
-			// we still need to copy the list because the caller might expect to
-			// have a instance it can modify when doing filtering.
-			
-			/*
-			 * FIXME This also returns events the user did not want, since the
-			 * addresses are not compared to the given XAddress (for example all
-			 * events are returned, even if the user only wants to get events
-			 * concerning an object specified by the given address). ~Kaidel
-			 */
-			List<XEvent> result = new ArrayList<XEvent>();
-			result.addAll(this.events);
-			return result;
-		}
+		/*
+		 * FIXME/TODO The following outcommented code is buggy. It also returns
+		 * events the user did not want, since the addresses are not compared to
+		 * the given XAddress (for example all events are returned, even if the
+		 * user only wants to get events concerning an object specified by the
+		 * given address). Is there a specific reason why this case should be
+		 * treated differently?
+		 * 
+		 * Handling this case just like every other case fixes the bug.
+		 * 
+		 * ~Kaidel
+		 */
+		// if(start == 0 && end == currentRev) {
+		// // we still need to copy the list because the caller might expect to
+		// // have a instance it can modify when doing filtering.
+		//
+		// List<XEvent> result = new ArrayList<XEvent>();
+		// result.addAll(this.events);
+		// return result;
+		// }
 		
 		List<XEvent> result = new ArrayList<XEvent>();
 		
