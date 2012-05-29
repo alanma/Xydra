@@ -848,8 +848,9 @@ public abstract class AbstractPersistenceTest {
 	@Test
 	public void testGetEvents() {
 		/*
-		 * TODO write this test - execute some simple (and maybe some complex)
-		 * commands & transactions and check if the returned events match
+		 * This testcase is unfortunately pretty large, but since it's better to
+		 * test the events in context with multiple commands there's really no
+		 * good way around it.
 		 */
 		
 		XID modelId = XX.toId("testGetEventsModel");
@@ -865,7 +866,7 @@ public abstract class AbstractPersistenceTest {
 		 * event
 		 */
 		assertEquals(
-		        "List of events should only contain one event (the \"create model\"-event), but actually contains multiple events.",
+		        "List of events should only contain one event (the \"create model\"-event), but actually contains zero or multiple events.",
 		        1, events.size());
 		
 		XEvent modelAddEvent = events.get(0);
@@ -939,7 +940,7 @@ public abstract class AbstractPersistenceTest {
 		 */
 		events = this.persistence.getEvents(modelAddress, revNr, revNr);
 		assertEquals(
-		        "The list contains more than 1 element, although only 1 new command was executed since the last revision.",
+		        "The list contains zero or more than 1 element, although only 1 new command was executed since the last revision.",
 		        1, events.size());
 		assertTrue("The list does not contain the \"add object\"-event.",
 		        events.contains(objectAddEvent));
@@ -947,7 +948,7 @@ public abstract class AbstractPersistenceTest {
 		events = this.persistence.getEvents(modelAddress, 0, revNr);
 		
 		assertEquals(
-		        "The list contains more than 2 elements, although only 2 commands were executed.",
+		        "The list does not contain exactly 2 elements, although only 2 commands were executed.",
 		        2, events.size());
 		assertTrue("The list does not contain the \"add model\"-event.",
 		        events.contains(modelAddEvent));
@@ -972,7 +973,7 @@ public abstract class AbstractPersistenceTest {
 		events = this.persistence.getEvents(fieldAddress, revNr, revNr);
 		
 		assertEquals(
-		        "List of events should only contain one event (the \"create field\"-event), but actually contains multiple events.",
+		        "List of events should only contain one event (the \"create field\"-event), but actually contains zero or multiple events.",
 		        1, events.size());
 		
 		XEvent fieldAddEvent = events.get(0);
@@ -1006,14 +1007,15 @@ public abstract class AbstractPersistenceTest {
 		 */
 		events = this.persistence.getEvents(objectAddress, revNr, revNr);
 		assertEquals(
-		        "The list contains more than 1 element, although only 1 new command was executed since the last revision.",
+		        "The list contains zero or more than 1 element, although only 1 new command was executed since the last revision.",
 		        1, events.size());
 		assertTrue("The list does not contain the \"add field\"-event.",
 		        events.contains(fieldAddEvent));
 		
 		events = this.persistence.getEvents(objectAddress, 0, revNr);
 		
-		assertEquals("The list contains more than 2 elements, when only 2 commands were executed.",
+		assertEquals(
+		        "The list does not contain exactly 2 elements, although only 2 commands were executed.",
 		        2, events.size());
 		assertTrue("The list does not contain the \"add object\"-event.",
 		        events.contains(objectAddEvent));
@@ -1025,7 +1027,7 @@ public abstract class AbstractPersistenceTest {
 		 */
 		events = this.persistence.getEvents(modelAddress, revNr, revNr);
 		assertEquals(
-		        "The list contains more than 1 element, although only 1 new command was executed since the last revision.",
+		        "The list contains zero or more than 1 element, although only 1 new command was executed since the last revision.",
 		        1, events.size());
 		assertTrue("The list does not contain the \"add field\"-event.",
 		        events.contains(fieldAddEvent));
@@ -1035,7 +1037,7 @@ public abstract class AbstractPersistenceTest {
 		events = this.persistence.getEvents(modelAddress, oldObjectRev, revNr);
 		
 		assertEquals(
-		        "The list contains more than 2 elements, although only 2 commands were executed.",
+		        "The list does not contain exactly 2 elements, although only 2 commands were executed.",
 		        2, events.size());
 		assertTrue("The list does not contain the \"add object\"-event.",
 		        events.contains(objectAddEvent));
@@ -1045,7 +1047,7 @@ public abstract class AbstractPersistenceTest {
 		events = this.persistence.getEvents(modelAddress, 0, revNr);
 		
 		assertEquals(
-		        "The list contains more than 3 elements, although only 3 commands were executed.",
+		        "The list does not contain exactly 3 elements, although only 3 commands were executed.",
 		        3, events.size());
 		assertTrue("The list does not contain the \"add model\"-event.",
 		        events.contains(modelAddEvent));
@@ -1071,7 +1073,7 @@ public abstract class AbstractPersistenceTest {
 		events = this.persistence.getEvents(fieldAddress, revNr, revNr);
 		
 		assertEquals(
-		        "List of events should only contain one event (the \"add value\"-event), but actually contains multiple events.",
+		        "List of events should only contain one event (the \"add value\"-event), but actually contains zero or multiple events.",
 		        1, events.size());
 		
 		XEvent valueAddEvent = events.get(0);
@@ -1103,7 +1105,7 @@ public abstract class AbstractPersistenceTest {
 		
 		events = this.persistence.getEvents(fieldAddress, oldFieldRev, revNr);
 		assertEquals(
-		        "The list contains more than 2 elements, even though only 2 commands were executed.",
+		        "The list does not contain exactly 2 elements, even though only 2 commands were executed.",
 		        2, events.size());
 		assertTrue("The list does not contain the \"add value\"-event.",
 		        events.contains(valueAddEvent));
@@ -1112,7 +1114,7 @@ public abstract class AbstractPersistenceTest {
 		
 		events = this.persistence.getEvents(fieldAddress, 0, revNr);
 		assertEquals(
-		        "The list contains more than 2 elements, even though only 2 commands were executed which affected the field.",
+		        "The list does not contain exactly 2 elements, even though only 2 commands were executed which affected the field.",
 		        2, events.size());
 		
 		/*
@@ -1120,7 +1122,7 @@ public abstract class AbstractPersistenceTest {
 		 */
 		events = this.persistence.getEvents(objectAddress, revNr, revNr);
 		assertEquals(
-		        "The list contains more than 1 element, although only 1 new command was executed since the last revision.",
+		        "The list contains zero or more than 1 element, although only 1 new command was executed since the last revision.",
 		        1, events.size());
 		assertTrue("The list does not contain the \"add value\"-event.",
 		        events.contains(valueAddEvent));
@@ -1128,7 +1130,7 @@ public abstract class AbstractPersistenceTest {
 		events = this.persistence.getEvents(objectAddress, oldFieldRev, revNr);
 		
 		assertEquals(
-		        "The list contains more than 2 elements, even though only 2 commands were executed.",
+		        "The list does not contain exactly 2 elements, even though only 2 commands were executed.",
 		        2, events.size());
 		assertTrue("The list does not contain the \"add field\"-event.",
 		        events.contains(fieldAddEvent));
@@ -1138,7 +1140,7 @@ public abstract class AbstractPersistenceTest {
 		events = this.persistence.getEvents(objectAddress, oldObjectRev, revNr);
 		
 		assertEquals(
-		        "The list contains more than 3 elements, even though only 3 commands were executed.",
+		        "The list does not contain exactly 3 elements, even though only 3 commands were executed.",
 		        3, events.size());
 		assertTrue("The list does not contain the \"add object\"-event.",
 		        events.contains(objectAddEvent));
@@ -1150,7 +1152,7 @@ public abstract class AbstractPersistenceTest {
 		events = this.persistence.getEvents(objectAddress, 0, revNr);
 		
 		assertEquals(
-		        "The list contains more than 3 elements, even though only 3 commands were executed which affected the object.",
+		        "The list does not contain exactly 3 elements, even though only 3 commands were executed which affected the object.",
 		        3, events.size());
 		
 		/*
@@ -1158,7 +1160,7 @@ public abstract class AbstractPersistenceTest {
 		 */
 		events = this.persistence.getEvents(modelAddress, revNr, revNr);
 		assertEquals(
-		        "The list contains more than 1 element, although only 1 new command was executed since the last revision.",
+		        "The list contains zero or more than 1 element, although only 1 new command was executed since the last revision.",
 		        1, events.size());
 		assertTrue("The list does not contain the \"add value\"-event.",
 		        events.contains(valueAddEvent));
@@ -1166,7 +1168,7 @@ public abstract class AbstractPersistenceTest {
 		events = this.persistence.getEvents(modelAddress, oldFieldRev, revNr);
 		
 		assertEquals(
-		        "The list contains more than 2 elements, although only 2 commands were executed.",
+		        "The list does not contain exactly 2 elements, although only 2 commands were executed.",
 		        2, events.size());
 		assertTrue("The list does not contain the \"add field\"-event.",
 		        events.contains(fieldAddEvent));
@@ -1176,7 +1178,7 @@ public abstract class AbstractPersistenceTest {
 		events = this.persistence.getEvents(modelAddress, oldObjectRev, revNr);
 		
 		assertEquals(
-		        "The list contains more than 3 elements, although only 3 commands were executed.",
+		        "The list does not contain exactly 3 elements, although only 3 commands were executed.",
 		        3, events.size());
 		assertTrue("The list does not contain the \"add object\"-event.",
 		        events.contains(objectAddEvent));
@@ -1188,7 +1190,7 @@ public abstract class AbstractPersistenceTest {
 		events = this.persistence.getEvents(modelAddress, 0, revNr);
 		
 		assertEquals(
-		        "The list contains more than 4 elements, although only 4 commands were executed.",
+		        "The list does not contain exactly 4 elements, although only 4 commands were executed.",
 		        4, events.size());
 		assertTrue("The list does not contain the \"add model\"-event.",
 		        events.contains(modelAddEvent));
@@ -1216,7 +1218,7 @@ public abstract class AbstractPersistenceTest {
 		events = this.persistence.getEvents(fieldAddress, revNr, revNr);
 		
 		assertEquals(
-		        "List of events should only contain one event (the \"change value\"-event), but actually contains multiple events.",
+		        "List of events should only contain one event (the \"change value\"-event), but actually contains zero or multiple events.",
 		        1, events.size());
 		
 		XEvent valueChangeEvent = events.get(0);
@@ -1249,7 +1251,7 @@ public abstract class AbstractPersistenceTest {
 		
 		events = this.persistence.getEvents(fieldAddress, oldFieldRev2, revNr);
 		assertEquals(
-		        "The list contains more than 2 element, although only 2 new command was executed since the last revision.",
+		        "The list does not contain exactly 2 elements, although only 2 new command was executed since the last revision.",
 		        2, events.size());
 		assertTrue("The list does not contain the \"add value\"-event.",
 		        events.contains(valueAddEvent));
@@ -1258,7 +1260,7 @@ public abstract class AbstractPersistenceTest {
 		
 		events = this.persistence.getEvents(fieldAddress, oldFieldRev, revNr);
 		assertEquals(
-		        "The list contains more than 3 elements, even though only 3 commands were executed.",
+		        "The list does not contain exactly 3 elements, even though only 3 commands were executed.",
 		        3, events.size());
 		assertTrue("The list does not contain the \"add value\"-event.",
 		        events.contains(valueAddEvent));
@@ -1277,7 +1279,7 @@ public abstract class AbstractPersistenceTest {
 		 */
 		events = this.persistence.getEvents(objectAddress, revNr, revNr);
 		assertEquals(
-		        "The list contains more than 1 element, although only 1 new command was executed since the last revision.",
+		        "The list contains zero or more than 1 element, although only 1 new command was executed since the last revision.",
 		        1, events.size());
 		assertTrue("The list does not contain the \"change value\"-event.",
 		        events.contains(valueChangeEvent));
@@ -1285,7 +1287,7 @@ public abstract class AbstractPersistenceTest {
 		events = this.persistence.getEvents(objectAddress, oldFieldRev2, revNr);
 		
 		assertEquals(
-		        "The list contains more than 2 elements, even though only 2 commands were executed.",
+		        "The list does not contain exactly 2 elements, even though only 2 commands were executed.",
 		        2, events.size());
 		assertTrue("The list does not contain the \"add value\"-event.",
 		        events.contains(valueAddEvent));
@@ -1295,7 +1297,7 @@ public abstract class AbstractPersistenceTest {
 		events = this.persistence.getEvents(objectAddress, oldFieldRev, revNr);
 		
 		assertEquals(
-		        "The list contains more than 3 elements, even though only 3 commands were executed.",
+		        "The list does not contain exactly 3 elements, even though only 3 commands were executed.",
 		        3, events.size());
 		assertTrue("The list does not contain the \"add field\"-event.",
 		        events.contains(fieldAddEvent));
@@ -1307,7 +1309,7 @@ public abstract class AbstractPersistenceTest {
 		events = this.persistence.getEvents(objectAddress, oldObjectRev, revNr);
 		
 		assertEquals(
-		        "The list contains more than 4 elements, even though only 4 commands were executed.",
+		        "The list does not contain exactly 4 elements, even though only 4 commands were executed.",
 		        4, events.size());
 		assertTrue("The list does not contain the \"add object\"-event.",
 		        events.contains(objectAddEvent));
@@ -1321,7 +1323,7 @@ public abstract class AbstractPersistenceTest {
 		events = this.persistence.getEvents(objectAddress, 0, revNr);
 		
 		assertEquals(
-		        "The list contains more than 4 elements, even though only 4 commands were executed which affected the object.",
+		        "The list does not contain exactly 4 elements, even though only 4 commands were executed which affected the object.",
 		        4, events.size());
 		
 		/*
@@ -1329,7 +1331,7 @@ public abstract class AbstractPersistenceTest {
 		 */
 		events = this.persistence.getEvents(modelAddress, revNr, revNr);
 		assertEquals(
-		        "The list contains more than 1 element, although only 1 new command was executed since the last revision.",
+		        "The list contains zero or more than 1 element, although only 1 new command was executed since the last revision.",
 		        1, events.size());
 		assertTrue("The list does not contain the \"change field\"-event.",
 		        events.contains(valueChangeEvent));
@@ -1337,7 +1339,7 @@ public abstract class AbstractPersistenceTest {
 		events = this.persistence.getEvents(modelAddress, oldFieldRev2, revNr);
 		
 		assertEquals(
-		        "The list contains more than 2 elements, although only 2 commands were executed.",
+		        "The list does not contain exactly 2 elements, although only 2 commands were executed.",
 		        2, events.size());
 		assertTrue("The list does not contain the \"add value\"-event.",
 		        events.contains(valueAddEvent));
@@ -1347,7 +1349,7 @@ public abstract class AbstractPersistenceTest {
 		events = this.persistence.getEvents(modelAddress, oldFieldRev, revNr);
 		
 		assertEquals(
-		        "The list contains more than 3 elements, although only 3 commands were executed.",
+		        "The list does not contain exactly 3 elements, although only 3 commands were executed.",
 		        3, events.size());
 		assertTrue("The list does not contain the \"add field\"-event.",
 		        events.contains(fieldAddEvent));
@@ -1359,7 +1361,7 @@ public abstract class AbstractPersistenceTest {
 		events = this.persistence.getEvents(modelAddress, oldObjectRev, revNr);
 		
 		assertEquals(
-		        "The list contains more than 4 elements, although only 4 commands were executed.",
+		        "The list does not contain exactly 4 elements, although only 4 commands were executed.",
 		        4, events.size());
 		assertTrue("The list does not contain the \"add object\"-event.",
 		        events.contains(objectAddEvent));
@@ -1373,7 +1375,7 @@ public abstract class AbstractPersistenceTest {
 		events = this.persistence.getEvents(modelAddress, 0, revNr);
 		
 		assertEquals(
-		        "The list contains more than 5 elements, although only 5 commands were executed.",
+		        "The list does not contain exactly 5 elements, although only 5 commands were executed.",
 		        5, events.size());
 		assertTrue("The list does not contain the \"add model\"-event.",
 		        events.contains(modelAddEvent));
@@ -1402,7 +1404,7 @@ public abstract class AbstractPersistenceTest {
 		events = this.persistence.getEvents(fieldAddress, revNr, revNr);
 		
 		assertEquals(
-		        "List of events should only contain one event (the \"change value\"-event), but actually contains multiple events.",
+		        "List of events should only contain one event (the \"change value\"-event), but actually contains zero or multiple events.",
 		        1, events.size());
 		
 		XEvent valueRemoveEvent = events.get(0);
@@ -1435,7 +1437,7 @@ public abstract class AbstractPersistenceTest {
 		
 		events = this.persistence.getEvents(fieldAddress, oldFieldRev3, revNr);
 		assertEquals(
-		        "The list contains more than 2 element, although only 2 new command was executed since the last revision.",
+		        "The list does not contain exactly 2 element, although only 2 new command was executed since the last revision.",
 		        2, events.size());
 		assertTrue("The list does not contain the \"change field\"-event.",
 		        events.contains(valueChangeEvent));
@@ -1444,7 +1446,7 @@ public abstract class AbstractPersistenceTest {
 		
 		events = this.persistence.getEvents(fieldAddress, oldFieldRev2, revNr);
 		assertEquals(
-		        "The list contains more than 3 element, although only 3 new command was executed since the last revision.",
+		        "The list does not contain exactly 3 element, although only 3 new command was executed since the last revision.",
 		        3, events.size());
 		assertTrue("The list does not contain the \"add value\"-event.",
 		        events.contains(valueAddEvent));
@@ -1455,7 +1457,7 @@ public abstract class AbstractPersistenceTest {
 		
 		events = this.persistence.getEvents(fieldAddress, oldFieldRev, revNr);
 		assertEquals(
-		        "The list contains more than 4 elements, even though only 4 commands were executed.",
+		        "The list does not contain exactly 4 elements, even though only 4 commands were executed.",
 		        4, events.size());
 		assertTrue("The list does not contain the \"add value\"-event.",
 		        events.contains(valueAddEvent));
@@ -1468,7 +1470,7 @@ public abstract class AbstractPersistenceTest {
 		
 		events = this.persistence.getEvents(fieldAddress, 0, revNr);
 		assertEquals(
-		        "The list contains more than 4 elements, even though only 4 commands were executed which affected the field.",
+		        "The list does not contain exactly 4 elements, even though only 4 commands were executed which affected the field.",
 		        4, events.size());
 		
 		/*
@@ -1476,7 +1478,7 @@ public abstract class AbstractPersistenceTest {
 		 */
 		events = this.persistence.getEvents(objectAddress, revNr, revNr);
 		assertEquals(
-		        "The list contains more than 1 element, although only 1 new command was executed since the last revision.",
+		        "The list contains zero or more than 1 element, although only 1 new command was executed since the last revision.",
 		        1, events.size());
 		assertTrue("The list does not contain the \"remove field\"-event.",
 		        events.contains(valueRemoveEvent));
@@ -1484,7 +1486,7 @@ public abstract class AbstractPersistenceTest {
 		events = this.persistence.getEvents(objectAddress, oldFieldRev3, revNr);
 		
 		assertEquals(
-		        "The list contains more than 2 elements, even though only 2 commands were executed.",
+		        "The list does not contain exactly 2 elements, even though only 2 commands were executed.",
 		        2, events.size());
 		assertTrue("The list does not contain the \"change field\"-event.",
 		        events.contains(valueChangeEvent));
@@ -1494,7 +1496,7 @@ public abstract class AbstractPersistenceTest {
 		events = this.persistence.getEvents(objectAddress, oldFieldRev2, revNr);
 		
 		assertEquals(
-		        "The list contains more than 3 elements, even though only 3 commands were executed.",
+		        "The list does not contain exactly 3 elements, even though only 3 commands were executed.",
 		        3, events.size());
 		assertTrue("The list does not contain the \"add value\"-event.",
 		        events.contains(valueAddEvent));
@@ -1506,7 +1508,7 @@ public abstract class AbstractPersistenceTest {
 		events = this.persistence.getEvents(objectAddress, oldFieldRev, revNr);
 		
 		assertEquals(
-		        "The list contains more than 4 elements, even though only 4 commands were executed.",
+		        "The list does not contain exactly 4 elements, even though only 4 commands were executed.",
 		        4, events.size());
 		assertTrue("The list does not contain the \"add field\"-event.",
 		        events.contains(fieldAddEvent));
@@ -1520,7 +1522,7 @@ public abstract class AbstractPersistenceTest {
 		events = this.persistence.getEvents(objectAddress, oldObjectRev, revNr);
 		
 		assertEquals(
-		        "The list contains more than 5 elements, even though only 5 commands were executed.",
+		        "The list does not contain exactly 5 elements, even though only 5 commands were executed.",
 		        5, events.size());
 		assertTrue("The list does not contain the \"add object\"-event.",
 		        events.contains(objectAddEvent));
@@ -1536,7 +1538,7 @@ public abstract class AbstractPersistenceTest {
 		events = this.persistence.getEvents(objectAddress, 0, revNr);
 		
 		assertEquals(
-		        "The list contains more than 5 elements, even though only 5 commands were executed which affected the object.",
+		        "The list does not contain exactly 5 elements, even though only 5 commands were executed which affected the object.",
 		        5, events.size());
 		
 		/*
@@ -1544,7 +1546,7 @@ public abstract class AbstractPersistenceTest {
 		 */
 		events = this.persistence.getEvents(modelAddress, revNr, revNr);
 		assertEquals(
-		        "The list contains more than 1 element, although only 1 new command was executed since the last revision.",
+		        "The list contains zero or more than 1 element, although only 1 new command was executed since the last revision.",
 		        1, events.size());
 		assertTrue("The list does not contain the \"remove field\"-event.",
 		        events.contains(valueRemoveEvent));
@@ -1552,7 +1554,7 @@ public abstract class AbstractPersistenceTest {
 		events = this.persistence.getEvents(modelAddress, oldFieldRev3, revNr);
 		
 		assertEquals(
-		        "The list contains more than 2 elements, although only 2 commands were executed.",
+		        "The list does not contain exactly 2 elements, although only 2 commands were executed.",
 		        2, events.size());
 		assertTrue("The list does not contain the \"change field\"-event.",
 		        events.contains(valueChangeEvent));
@@ -1562,7 +1564,7 @@ public abstract class AbstractPersistenceTest {
 		events = this.persistence.getEvents(modelAddress, oldFieldRev2, revNr);
 		
 		assertEquals(
-		        "The list contains more than 3 elements, although only 3 commands were executed.",
+		        "The list does not contain exactly 3 elements, although only 3 commands were executed.",
 		        3, events.size());
 		assertTrue("The list does not contain the \"add value\"-event.",
 		        events.contains(valueAddEvent));
@@ -1574,7 +1576,7 @@ public abstract class AbstractPersistenceTest {
 		events = this.persistence.getEvents(modelAddress, oldFieldRev, revNr);
 		
 		assertEquals(
-		        "The list contains more than 4 elements, although only 4 commands were executed.",
+		        "The list does not contain exactly 4 elements, although only 4 commands were executed.",
 		        4, events.size());
 		assertTrue("The list does not contain the \"add field\"-event.",
 		        events.contains(fieldAddEvent));
@@ -1588,7 +1590,7 @@ public abstract class AbstractPersistenceTest {
 		events = this.persistence.getEvents(modelAddress, oldObjectRev, revNr);
 		
 		assertEquals(
-		        "The list contains more than 5 elements, although only 5 commands were executed.",
+		        "The list does not contain exactly 5 elements, although only 5 commands were executed.",
 		        5, events.size());
 		assertTrue("The list does not contain the \"add object\"-event.",
 		        events.contains(objectAddEvent));
@@ -1604,7 +1606,7 @@ public abstract class AbstractPersistenceTest {
 		events = this.persistence.getEvents(modelAddress, 0, revNr);
 		
 		assertEquals(
-		        "The list contains more than 6 elements, although only 6 commands were executed.",
+		        "The list does not contain exactly 6 elements, although only 6 commands were executed.",
 		        6, events.size());
 		assertTrue("The list does not contain the \"add model\"-event.",
 		        events.contains(modelAddEvent));
@@ -1620,7 +1622,88 @@ public abstract class AbstractPersistenceTest {
 		        events.contains(valueRemoveEvent));
 		
 		/*
-		 * TODO remove the object to also check implicit events
+		 * remove the object and check if the correct events are returned. Check
+		 * getEvents(fieldAddress...), getEvents(objectAddress...) and
+		 * getEvents(modelAddress...) since they might behave differently.
+		 * 
+		 * Check that the \"field was removed\"-event is implicit.
+		 */
+		
+		XCommand removeObjectCom = this.comFactory.createRemoveObjectCommand(this.repoId, modelId,
+		        objectId, revNr, false);
+		long oldObjectRev2 = revNr;
+		revNr = this.persistence.executeCommand(this.actorId, removeObjectCom);
+		assertTrue("The object  wasn't correctly removed, test cannot be executed.", revNr >= 0);
+		
+		// get events from the model first and check them
+		events = this.persistence.getEvents(modelAddress, revNr, revNr);
+		
+		assertEquals(
+		        "List of events should contain two events (the \"object was removed\"- and the implicit \"field was removed\"-event), but actually contains zero or more than 2 events.",
+		        2, events.size());
+		
+		XEvent fieldRemoveEvent, objectRemoveEvent;
+		
+		if(events.get(0) instanceof XObjectEvent) {
+			fieldRemoveEvent = events.get(0);
+			objectRemoveEvent = events.get(1);
+		} else {
+			fieldRemoveEvent = events.get(1);
+			objectRemoveEvent = events.get(0);
+		}
+		
+		assertEquals("The returned event was not of remove-type.", ChangeType.REMOVE,
+		        objectRemoveEvent.getChangeType());
+		assertEquals("The returned event was not of remove-type.", ChangeType.REMOVE,
+		        fieldRemoveEvent.getChangeType());
+		
+		/*
+		 * oldObjectRev2 is also the old revision number of the model & object
+		 * (before the value was changed)
+		 */
+		assertEquals("The event didn't refer to the correct old model revision number.",
+		        oldObjectRev2, fieldRemoveEvent.getOldModelRevision());
+		assertEquals("The event didn't refer to the correct old object revision number.",
+		        oldObjectRev2, fieldRemoveEvent.getOldObjectRevision());
+		
+		assertEquals("The event didn't refer to the correct revision number.", revNr,
+		        fieldRemoveEvent.getRevisionNumber());
+		assertEquals("Event doesn't refer to the correct target.", objectAddress,
+		        fieldRemoveEvent.getTarget());
+		assertEquals("Event doesn't refer to the correct field.", fieldAddress,
+		        fieldRemoveEvent.getChangedEntity());
+		assertEquals("The actor of the event is not correct.", this.actorId,
+		        fieldRemoveEvent.getActor());
+		assertTrue("The event is wrongly marked as not implied.", fieldRemoveEvent.isImplied());
+		assertFalse("the event is wrongly marked as being part of a transaction.",
+		        fieldRemoveEvent.inTransaction());
+		
+		assertEquals("The event didn't refer to the correct old model revision number.",
+		        oldObjectRev2, objectRemoveEvent.getOldModelRevision());
+		assertEquals("The event didn't refer to the correct old object revision number.",
+		        oldObjectRev2, objectRemoveEvent.getOldObjectRevision());
+		
+		assertEquals("The event didn't refer to the correct revision number.", revNr,
+		        objectRemoveEvent.getRevisionNumber());
+		assertEquals("Event doesn't refer to the correct target.", modelAddress,
+		        objectRemoveEvent.getTarget());
+		assertEquals("Event doesn't refer to the correct field.", objectAddress,
+		        objectRemoveEvent.getChangedEntity());
+		assertEquals("The actor of the event is not correct.", this.actorId,
+		        objectRemoveEvent.getActor());
+		assertFalse("The event is wrongly marked as implied.", objectRemoveEvent.isImplied());
+		assertFalse("the event is wrongly marked as being part of a transaction.",
+		        objectRemoveEvent.inTransaction());
+		
+		/*
+		 * TODO remove the model
+		 */
+	}
+	
+	@Test
+	public void testGetEventsTransactions() {
+		/*
+		 * TODO write this test
 		 */
 	}
 	
