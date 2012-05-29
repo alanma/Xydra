@@ -1743,8 +1743,9 @@ public abstract class AbstractPersistenceTest {
 		
 		storedRevision = this.persistence.getModelRevision(modelAdr2Request);
 		
-		assertEquals("Returned model revision should be null, since the model never existed.",
-		        null, storedRevision);
+		assertEquals(
+		        "Returned model revision should be ModelRevision.MODEL_DOES_NOT_EXIST_YET, since the model never existed.",
+		        ModelRevision.MODEL_DOES_NOT_EXIST_YET, storedRevision);
 	}
 	
 	@Test

@@ -3,6 +3,8 @@ package org.xydra.store.impl.delegate;
 import java.util.List;
 import java.util.Set;
 
+import org.xydra.annotations.CanBeNull;
+import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
@@ -85,7 +87,7 @@ public interface XydraPersistence {
 	 *            {@link XTransaction}.
 	 * @return a number indicating the result of executing the command.
 	 */
-	long executeCommand(XID actorId, XCommand command);
+	long executeCommand(@NeverNull XID actorId, @NeverNull XCommand command);
 	
 	/**
 	 * (Documentation copied from {@link GetEventsRequest})
@@ -120,13 +122,15 @@ public interface XydraPersistence {
 	 *         {@link XObjectEvent} and {@link XFieldEvent}. FIXME API CHANGE
 	 *         contains nulls for in-progress events (if endRev > currentRev)
 	 */
-	List<XEvent> getEvents(XAddress address, long beginRevision, long endRevision);
+	@NeverNull
+	List<XEvent> getEvents(@NeverNull XAddress address, long beginRevision, long endRevision);
 	
 	/**
 	 * @return a {@link Set} containing all XIDs of {@link XModel XModels} in
 	 *         this {@link XydraPersistence}. The models do not necessarily
 	 *         exist right now, i.e. they might have been deleted already.
 	 */
+	@NeverNull
 	Set<XID> getManagedModelIds();
 	
 	/**
@@ -143,10 +147,11 @@ public interface XydraPersistence {
 	 *            in the worst case its just the same.
 	 * 
 	 * @return The current revision number of the addressed {@link XModel}. And
-	 *         if the model currently exists or not. Or return null if not
+	 *         if the model currently exists or not. May return null only if not
 	 *         known.
 	 */
-	ModelRevision getModelRevision(GetWithAddressRequest addressRequest);
+	@CanBeNull
+	ModelRevision getModelRevision(@NeverNull GetWithAddressRequest addressRequest);
 	
 	/**
 	 * @param addressRequest of an {@link XModel} plus a flag whether to return
@@ -160,7 +165,8 @@ public interface XydraPersistence {
 	 * @return the current snapshot of the addressed {@link XModel} or null if
 	 *         none found.
 	 */
-	XWritableModel getModelSnapshot(GetWithAddressRequest addressRequest);
+	@CanBeNull
+	XWritableModel getModelSnapshot(@NeverNull GetWithAddressRequest addressRequest);
 	
 	/**
 	 * @param addressRequest of an {@link XObject} plus a flag whether to return
@@ -173,13 +179,15 @@ public interface XydraPersistence {
 	 * @return the current snapshot of the {@link XObject} addressed with
 	 *         'address' or null, if object does not exist.
 	 */
-	XWritableObject getObjectSnapshot(GetWithAddressRequest addressRequest);
+	@CanBeNull
+	XWritableObject getObjectSnapshot(@NeverNull GetWithAddressRequest addressRequest);
 	
 	/**
 	 * @return the XID of this {@link XydraPersistence}. This helps a client to
 	 *         differentiate among several {@link XydraPersistence}
 	 *         implementations, e.g. when synchronising between several of them.
 	 */
+	@NeverNull
 	XID getRepositoryId();
 	
 	/**
