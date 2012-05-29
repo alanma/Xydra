@@ -49,7 +49,8 @@ public class WritableRepositoryOnPersistence extends AbstractWritableOnPersisten
 			        getModelAddress(modelId), USE_TENTATIVE_STATE));
 			XyAssert.xyAssert(modelRev != null);
 			assert modelRev != null;
-			XyAssert.xyAssert(!modelRev.modelExists());
+			XyAssert.xyAssert(!modelRev.modelExists(), "modelExists should be false but rev is "
+			        + modelRev);
 			
 			XCommand command = X.getCommandFactory().createAddModelCommand(
 			        this.persistence.getRepositoryId(), modelId, true);
