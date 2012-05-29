@@ -440,7 +440,8 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 	}
 	
 	@Override
-	public List<XEvent> getEventsBetween(XAddress address, long beginRevision, long endRevision) {
+	public List<XEvent> getEventsBetween(final XAddress address, long beginRevision,
+	        long endRevision) {
 		Interval interval = new Interval(beginRevision, endRevision);
 		List<XEvent> events = this.changelogManager.getEventsInInterval(interval);
 		if(address.getAddressedType() == XType.XMODEL) {
@@ -461,13 +462,37 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 				
 				@Override
 				protected boolean matchesFilter(XEvent entry) {
-					return XX.resolveModel(entry.getTarget()).equals(
-					        GaeModelPersistenceNG.this.modelAddress);
+					return addressContainsOther(address, entry.getChangedEntity());
 				}
 				
 			};
 			return IteratorUtils.addAll(it, new LinkedList<XEvent>());
 		}
+	}
+	
+	/**
+	 * @param a
+	 * @param b
+	 * @return true iff a equals b or if b is an address within the entity
+	 *         addressed by a.
+	 * 
+	 *         // TODO move to core
+	 */
+	public static boolean addressContainsOther(XAddress a, XAddress b) {
+		switch(a.getAddressedType()) {
+		case XREPOSITORY:
+			return b.getRepository().equals(a.getRepository());
+		case XMODEL:
+			return b.getRepository().equals(a.getRepository()) && b.getModel() != null
+			        && b.getModel().equals(a.getModel());
+		case XOBJECT:
+			return b.getRepository().equals(a.getRepository()) && b.getModel() != null
+			        && b.getModel().equals(a.getModel()) && b.getObject() != null
+			        && b.getObject().equals(a.getObject());
+		case XFIELD:
+			return a.equals(b);
+		}
+		throw new AssertionError();
 	}
 	
 	/**
@@ -496,6 +521,7 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 		} else {
 			modelRev = new ModelRevision(revision, modelExists);
 		}
+		
 		return modelRev;
 	}
 	
