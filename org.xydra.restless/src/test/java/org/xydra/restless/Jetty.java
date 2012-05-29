@@ -199,10 +199,11 @@ public class Jetty {
 				Jetty.this.requests++;
 				if(req instanceof HttpServletRequest) {
 					HttpServletRequest hreq = (HttpServletRequest)req;
-					log.info("JETTY #" + Jetty.this.requests + " " + hreq.getMethod() + " "
+					log.info("_____JETTY #" + Jetty.this.requests + " " + hreq.getMethod() + " "
 					        + hreq.getRequestURL() + " @" + timeSinceStart());
 				} else {
-					log.info("JETTY Request Nr. " + Jetty.this.requests + " @" + timeSinceStart());
+					log.info("_____JETTY Request Nr. " + Jetty.this.requests + " @"
+					        + timeSinceStart());
 				}
 				filterChain.doFilter(req, response);
 			}
