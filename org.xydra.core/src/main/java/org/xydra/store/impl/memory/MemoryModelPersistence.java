@@ -66,8 +66,10 @@ public class MemoryModelPersistence {
 		assert events != null;
 		
 		if(events.isEmpty()) {
-			// TODO take up a revision anyway with a null event to better test
-			// users of the API? (to mimic behaviour of the GAE implementation)
+			/*
+			 * Note how this differs from the GAE implementation where failed
+			 * commands produce a NoChange event
+			 */
 			return XCommand.NOCHANGE;
 		}
 		
@@ -116,34 +118,15 @@ public class MemoryModelPersistence {
 			return new ArrayList<XEvent>();
 		}
 		
-		/*
-		 * FIXME/TODO The following outcommented code is buggy. It also returns
-		 * events the user did not want, since the addresses are not compared to
-		 * the given XAddress (for example all events are returned, even if the
-		 * user only wants to get events concerning an object specified by the
-		 * given address). Is there a specific reason why this case should be
-		 * treated differently?
-		 * 
-		 * Handling this case just like every other case fixes the bug.
-		 * 
-		 * ~Kaidel
-		 */
-		// if(start == 0 && end == currentRev) {
-		// // we still need to copy the list because the caller might expect to
-		// // have a instance it can modify when doing filtering.
-		//
-		// List<XEvent> result = new ArrayList<XEvent>();
-		// result.addAll(this.events);
-		// return result;
-		// }
-		
 		List<XEvent> result = new ArrayList<XEvent>();
 		
-		// filter a sub-list
-		// TODO IMROVE can handle max. Integer.MAX events. -- So what? 2^31 is a
-		// lot of events and the standard java containers cannot contain more
-		// anyway, at least the array-based ArrayList. ~Daniel
-		
+		/*
+		 * filter a (sub-) list
+		 * 
+		 * Note: Can handle max. Integer.MAX events = 2^31 which is a lot of
+		 * events and the standard java containers cannot contain more anyway,
+		 * at least the array-based ArrayList.
+		 */
 		for(XEvent xe : this.events.subList((int)start, (int)end + 1)) {
 			// TODO how to filter transaction events? ~Daniel
 			// TODO should this filtering be done in the calling
