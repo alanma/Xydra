@@ -185,8 +185,11 @@ public class RepositoryResource {
 		boolean cacheInInstance = ConfigUtils.isTrue(cacheInInstanceStr);
 		boolean cacheInMemcache = ConfigUtils.isTrue(cacheInMemcacheStr);
 		boolean cacheInDatastore = ConfigUtils.isTrue(cacheInDatastoreStr);
-		StorageOptions storeOpts = StorageOptions.create(cacheInInstance, cacheInMemcache,
-		        cacheInDatastore);
+		
+		StorageOptions storeOpts = StorageOptions.create(cacheInInstance ? 1 : 0, cacheInMemcache,
+		        cacheInDatastore,
+		        /* always allow on the-fly-computation */
+		        true);
 		
 		Clock c = new Clock().start();
 		XAddress repoAddress = XX.resolveRepository(XX.toId(repoIdStr));
@@ -195,7 +198,8 @@ public class RepositoryResource {
 		XydraPersistence p = Utils.getPersistence(repoId);
 		if(style == RStyle.xmlzip || style == RStyle.xmldump) {
 			List<XID> modelIdList = new ArrayList<XID>(p.getManagedModelIds());
-			// TODO we can use paging here to split work; BUT number of models
+			// IMPROVE we can use paging here to split work; BUT number of
+			// models
 			// might change.
 			Collections.sort(modelIdList);
 			boolean allUpToDate = SerialisationCache.updateAllModels(repoId, modelIdList,
@@ -385,7 +389,7 @@ public class RepositoryResource {
 	 * @param w for debug output
 	 * @param replaceModels if true existing content is ignored and just
 	 *            replaced with content of stream. If false, existing content is
-	 *            updated. TODO =?
+	 *            updated. TODO DOCU =?
 	 * @throws IOException
 	 */
 	public static void updateFromZippedInputStream(InputStream fis, XID repoId, Writer w,
@@ -454,6 +458,7 @@ public class RepositoryResource {
 				log.warn("Could not find model " + modelAddress + " - it might have been deleted");
 			} else {
 				String serialisation = ModelResource.computeSerialisation(model, MStyle.xml);
+				
 				ModelResource.writeToZipstreamDirectly(modelId, MStyle.xml, serialisation, zos);
 			}
 		}

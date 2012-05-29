@@ -39,7 +39,7 @@ public class CsvImportExportResource {
 	public static void index(HttpServletRequest req, HttpServletResponse res) throws IOException {
 		Writer w = HtmlUtils.startHtmlPage(res, "Xydra admin / CSV");
 		w.write("Export: <a href='" + req.getRequestURL() + "/export'>CSV</a>");
-		// FIXME impl.
+		// TODO impl. csv export
 		HtmlUtils.endHtmlPage(w);
 	}
 	
@@ -49,7 +49,7 @@ public class CsvImportExportResource {
 		Writer w = new OutputStreamWriter(res.getOutputStream(), "utf-8");
 		w.write("<html><head><title>Xydra admin / CSV / Import</title></head><body>");
 		w.write("Not implemented yet");
-		// FIXME impl.
+		// TODO impl. csv import
 		w.write("</body></html>");
 	}
 	

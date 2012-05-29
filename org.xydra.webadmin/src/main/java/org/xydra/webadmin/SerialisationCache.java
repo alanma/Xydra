@@ -23,6 +23,11 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Text;
 
 
+/**
+ * Stores serialised models
+ * 
+ * @author xamde
+ */
 public class SerialisationCache {
 	
 	public static final Logger log = LoggerFactory.getLogger(SerialisationCache.class);
@@ -30,7 +35,7 @@ public class SerialisationCache {
 	protected static final String PREFIX = "Serialised-";
 	
 	public static UniCache<SerialisationCache.ModelEntry> MODELS = new UniCache<SerialisationCache.ModelEntry>(
-	        new SerialisationCache.ModelEntryCacheHandler());
+	        new SerialisationCache.ModelEntryCacheHandler(), "SERIALMODEL");
 	
 	/**
 	 * A cached, serialised model
@@ -114,11 +119,17 @@ public class SerialisationCache {
 		log.info("Updating " + modelIdList.size() + " models. Options: useTaskQueue="
 		        + useTaskQueue + "; cacheInInstance=" + cacheInInstance + "; cacheInMemcache="
 		        + cacheInMemcache + "; cacheInDatastore=" + cacheInDatastore + "<br/>\n");
+		
+		if(!cacheInInstance && !cacheInMemcache && !cacheInDatastore) {
+			log.info("All storeOpts say: Don't persist, so assuming models later get serialised on the fly");
+			return true;
+		}
+		
 		Progress p = new Progress();
 		p.startTime();
 		/*
-		 * TODO by adding a batch-get-current-model-rev method to xydra-gae this
-		 * could be significantly speed-up
+		 * IMPROVE by adding a batch-get-current-model-rev method to xydra-gae
+		 * this could be significantly speed-up
 		 */
 		for(final XID modelId : modelIdList) {
 			log.info("Updating " + modelId);
@@ -144,8 +155,8 @@ public class SerialisationCache {
 			// proceed as normal
 			XAddress modelAddress = XX.resolveModel(repoId, modelId);
 			String key = PREFIX + modelAddress;
-			StorageOptions storeOpts = StorageOptions.create(cacheInInstance, cacheInMemcache,
-			        cacheInDatastore);
+			StorageOptions storeOpts = StorageOptions.create(cacheInInstance ? 1 : 0,
+			        cacheInMemcache, cacheInDatastore, false);
 			
 			log.info("Inspecting serialisation of " + modelAddress);
 			XydraPersistence persistence = Utils.getPersistence(repoId);
@@ -166,21 +177,10 @@ public class SerialisationCache {
 					public void run() {
 						XAddress modelAddress = XX.resolveModel(repoId, modelId);
 						String key = PREFIX + modelAddress;
-						StorageOptions storeOpts = StorageOptions.create(cacheInInstance,
-						        cacheInMemcache, cacheInDatastore);
+						StorageOptions storeOpts = StorageOptions.create(cacheInInstance ? 1 : 0,
+						        cacheInMemcache, cacheInDatastore, false);
 						
-						log.info("Computing serialisation of " + modelAddress);
-						XydraPersistence persistence = Utils.getPersistence(repoId);
-						XWritableModel model = persistence
-						        .getModelSnapshot(new GetWithAddressRequest(modelAddress,
-						                ModelResource.INCLUDE_TENTATIVE));
-						long rev = model.getRevisionNumber();
-						String ser = ModelResource.computeSerialisation(model, style);
-						if(ser == null) {
-							log.warn("Serialisation of model " + modelAddress + " is null");
-						}
-						ModelEntry modelEntry = new ModelEntry();
-						modelEntry.init(rev, ser);
+						ModelEntry modelEntry = computeSerialisation(modelAddress, style);
 						MODELS.put(key, modelEntry, storeOpts);
 					}
 					
@@ -201,12 +201,32 @@ public class SerialisationCache {
 		return !useTaskQueue;
 	}
 	
+	private static ModelEntry computeSerialisation(XAddress modelAddress, MStyle style) {
+		log.info("Computing serialisation of " + modelAddress);
+		XydraPersistence persistence = Utils.getPersistence(modelAddress.getRepository());
+		XWritableModel model = persistence.getModelSnapshot(new GetWithAddressRequest(modelAddress,
+		        ModelResource.INCLUDE_TENTATIVE));
+		long rev = model.getRevisionNumber();
+		String ser = ModelResource.computeSerialisation(model, style);
+		if(ser == null) {
+			log.warn("Serialisation of model " + modelAddress + " is null");
+		}
+		ModelEntry modelEntry = new ModelEntry();
+		modelEntry.init(rev, ser);
+		return modelEntry;
+	}
+	
 	public static String getSerialisation(XAddress modelAddress, StorageOptions storeOpts) {
 		String key = PREFIX + modelAddress;
 		ModelEntry modelEntry = SerialisationCache.MODELS.get(key, storeOpts);
 		if(modelEntry == null) {
 			log.debug("Cache was null for " + modelAddress + ". Options used: " + storeOpts);
-			return null;
+			if(storeOpts.isComputeIfNull()) {
+				ModelEntry onTheFly = computeSerialisation(modelAddress, MStyle.xml);
+				return onTheFly.serialisation;
+			} else {
+				return null;
+			}
 		}
 		if(modelEntry.serialisation == null) {
 			log.debug("Serialisation in cache was null for " + modelAddress + ". Options used: "

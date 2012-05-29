@@ -55,6 +55,7 @@ import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.restless.utils.ServletUtils;
 import org.xydra.restless.utils.SharedHtmlUtils.METHOD;
 import org.xydra.server.util.XydraHtmlUtils;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.GetWithAddressRequest;
 import org.xydra.store.ModelRevision;
 import org.xydra.store.impl.delegate.XydraPersistence;
@@ -115,7 +116,7 @@ public class ModelResource {
 		
 		XAddress modelAddress = XX.toAddress(XX.toId(repoIdStr), XX.toId(modelIdStr), null, null);
 		if(cmdStr.equals("delete")) {
-			// FIXME use Repo on Persistence to delete model
+			// TODO use Repo on Persistence to delete model
 		}
 		
 		AppConstants.endPage(w);
@@ -272,6 +273,8 @@ public class ModelResource {
 	
 	public static void writeToZipstreamDirectly(XID modelId, MStyle style, String serialisation,
 	        ZipOutputStream zos) throws IOException {
+		XyAssert.xyAssert(serialisation != null);
+		
 		ZipEntry e = new ZipEntry(getStorageName(modelId, style));
 		zos.putNextEntry(e);
 		OutputStreamWriter w = new OutputStreamWriter(zos, UTF8);
