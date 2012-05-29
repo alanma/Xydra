@@ -33,6 +33,13 @@
 
 	<dependencies>
 
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava-gwt</artifactId>
+			<!-- TODO remove version info taken in parent -->
+			<version>12.0</version>
+		</dependency>
+
 		<!-- test server -->
 		<dependency>
 			<groupId>org.mortbay.jetty</groupId>

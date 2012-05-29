@@ -2,7 +2,6 @@ package org.xydra.store.impl.gae;
 
 import java.io.Serializable;
 import java.util.ConcurrentModificationException;
-import java.util.Map;
 
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -12,12 +11,12 @@ import com.google.appengine.api.datastore.DatastoreFailureException;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.common.cache.Cache;
 
 
 /**
  * A universal <em>cache</em> system for instanceCache, memcache and datastore.
  * 
- * Datastore entries are stored as kind "XCACHE".
  * 
  * @author xamde
  * 
@@ -27,10 +26,12 @@ public class UniCache<T> {
 	
 	public static final Logger log = LoggerFactory.getLogger(UniCache.class);
 	
-	public static class StorageOptions {
-		boolean instance;
+	public static class StorageOptions implements Serializable {
+		private static final long serialVersionUID = 9163196946298146291L;
+		int instanceSize;
 		boolean memcache;
 		boolean datastore;
+		boolean computeIfNull;
 		
 		/**
 		 * @param instance true if value should be stored in local instance
@@ -41,25 +42,69 @@ public class UniCache<T> {
 		 *            slow datastore
 		 * @return options objects
 		 */
+		@Deprecated
 		public static StorageOptions create(boolean instance, boolean memcache, boolean datastore) {
 			StorageOptions so = new StorageOptions();
-			so.instance = instance;
+			so.instanceSize = instance ? 10 : 0;
 			so.memcache = memcache;
 			so.datastore = datastore;
 			return so;
 		}
 		
+		/**
+		 * @param instanceSize 0 = off. n = number of instance entries if value
+		 *            should be stored in local instance cache
+		 * @param memcache true if value should be stored in shared but volatile
+		 *            memcache
+		 * @param datastore true if value should be stored in persistent but
+		 *            slow datastore
+		 * @param computeIfNull when the cache returns null, should a new value
+		 *            be computed on the fly? This might not always be possible
+		 *            and the UniCache cannot do the calculation itself. It
+		 *            merely manages the configuration.
+		 * @return options objects
+		 */
+		public static StorageOptions create(int instanceSize, boolean memcache, boolean datastore,
+		        boolean computeIfNull) {
+			StorageOptions so = new StorageOptions();
+			so.instanceSize = instanceSize;
+			so.memcache = memcache;
+			so.datastore = datastore;
+			so.computeIfNull = computeIfNull;
+			return so;
+		}
+		
 		@Override
 		public String toString() {
-			return "instance:" + this.instance + "," + "memcache:" + this.memcache + ","
-			        + "datastore:" + this.datastore;
+			return "instance:" + this.instanceSize + "," + "memcache:" + this.memcache + ","
+			        + "datastore:" + this.datastore + " computeIfNull?" + this.computeIfNull;
+		}
+		
+		public boolean isComputeIfNull() {
+			return this.computeIfNull;
 		}
 	}
 	
 	private CacheEntryHandler<T> entryHandler;
 	
+	private String kindName;
+	
+	/**
+	 * Datastore entries are stored as kind "XCACHE", by default.
+	 * 
+	 * @param entryHandler
+	 */
 	public UniCache(CacheEntryHandler<T> entryHandler) {
+		this(entryHandler, "XCACHE");
+	}
+	
+	/**
+	 * @param entryHandler
+	 * @param kindName the GAE KIND of datastore keys
+	 */
+	public UniCache(CacheEntryHandler<T> entryHandler, String kindName) {
 		this.entryHandler = entryHandler;
+		this.kindName = kindName;
 	}
 	
 	/**
@@ -68,8 +113,8 @@ public class UniCache<T> {
 	 * @param storeOpts where to put
 	 */
 	public void put(String key, T value, StorageOptions storeOpts) {
-		if(storeOpts.instance) {
-			Map<String,Object> instanceCache = InstanceContext.getInstanceCache();
+		if(storeOpts.instanceSize > 0) {
+			Cache<String,Object> instanceCache = InstanceContext.getInstanceCache();
 			synchronized(instanceCache) {
 				instanceCache.put(key, value);
 			}
@@ -100,11 +145,11 @@ public class UniCache<T> {
 	 */
 	@SuppressWarnings("unchecked")
 	public T get(String key, StorageOptions storeOpts) {
-		if(storeOpts.instance) {
-			Map<String,Object> instanceCache = InstanceContext.getInstanceCache();
+		if(storeOpts.instanceSize > 0) {
+			Cache<String,Object> instanceCache = InstanceContext.getInstanceCache();
 			Object o = null;
 			synchronized(instanceCache) {
-				o = instanceCache.get(key);
+				o = instanceCache.getIfPresent(key);
 			}
 			if(o != null) {
 				log.debug("Return '" + key + "' from instance cache");
@@ -122,7 +167,7 @@ public class UniCache<T> {
 			Key datastoreKey = createCacheKey(key);
 			Entity entity = SyncDatastore.getEntity(datastoreKey);
 			if(entity != null) {
-				log.debug("Return '" + key + "' from datastore XCACHE entity");
+				log.debug("Return '" + key + "' from datastore entity");
 				return this.entryHandler.fromEntity(entity);
 			}
 		}
@@ -135,8 +180,8 @@ public class UniCache<T> {
 	 * @param s must be unique
 	 * @return a gae Key
 	 */
-	private static Key createCacheKey(String s) {
-		return KeyFactory.createKey("XCACHE", s);
+	private Key createCacheKey(String s) {
+		return KeyFactory.createKey(this.kindName, s);
 	}
 	
 	public static interface DatastoreEntryHandler<T> {

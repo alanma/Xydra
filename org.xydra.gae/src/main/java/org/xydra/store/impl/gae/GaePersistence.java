@@ -1,10 +1,9 @@
 package org.xydra.store.impl.gae;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
@@ -33,6 +32,7 @@ import org.xydra.store.impl.delegate.DelegatingSecureStore;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.gae.changes.KeyStructure;
 import org.xydra.store.impl.gae.changes.XIDLengthException;
+import org.xydra.store.impl.gae.ng.GaeModelPersistenceNG;
 
 import com.google.appengine.api.datastore.CommittedButStillApplyingException;
 import com.google.appengine.api.datastore.DatastoreFailureException;
@@ -42,6 +42,8 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 
 
 /**
@@ -105,7 +107,11 @@ public class GaePersistence implements XydraPersistence {
 		return XX.toId("data");
 	}
 	
-	private Map<XID,IGaeModelPersistence> modelPersistenceMap = new HashMap<XID,IGaeModelPersistence>();
+	// private Map<XID,IGaeModelPersistence> modelPersistenceMapXXXXOLD = new
+	// HashMap<XID,IGaeModelPersistence>();
+	
+	private Cache<XID,IGaeModelPersistence> modelPersistenceMap = CacheBuilder.newBuilder()
+	        .maximumSize(10).expireAfterAccess(5, TimeUnit.MINUTES).build();
 	
 	private final XAddress repoAddr;
 	
@@ -188,12 +194,12 @@ public class GaePersistence implements XydraPersistence {
 		synchronized(this.modelPersistenceMap) {
 			IGaeModelPersistence modelPersistence = null;
 			if(CACHE_MODEL_PERSISTENCES) {
-				modelPersistence = this.modelPersistenceMap.get(modelId);
+				modelPersistence = this.modelPersistenceMap.getIfPresent(modelId);
 			}
 			if(modelPersistence == null) {
 				XAddress modelAddress = getModelAddress(modelId);
 				XyAssert.xyAssert(modelAddress != null);
-				modelPersistence = new GaeModelPersistence3(modelAddress);
+				modelPersistence = new GaeModelPersistenceNG(modelAddress);
 				this.modelPersistenceMap.put(modelId, modelPersistence);
 			}
 			return modelPersistence;

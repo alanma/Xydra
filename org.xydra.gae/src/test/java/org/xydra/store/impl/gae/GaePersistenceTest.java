@@ -30,6 +30,7 @@ import org.xydra.core.util.DumpUtils;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.log.gae.Log4jLoggerFactory;
+import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.GetWithAddressRequest;
 import org.xydra.store.ModelRevision;
 import org.xydra.store.XydraRuntime;
@@ -58,8 +59,9 @@ public class GaePersistenceTest {
 	@Test
 	public void testQueryIds() {
 		LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory());
+		XID repoId = XX.toId("repo-testQueryIds");
 		
-		XydraPersistence pers = new GaePersistence(XX.toId("test-repo-1"));
+		XydraPersistence pers = new GaePersistence(repoId);
 		
 		XID modelId = XX.createUniqueId();
 		XAddress repoAddr = XX.toAddress(pers.getRepositoryId(), null, null, null);
@@ -90,7 +92,7 @@ public class GaePersistenceTest {
 		log.info("###   Clear memcache");
 		XydraRuntime.getMemcache().clear();
 		
-		pers = new GaePersistence(XX.toId("test-repo-1"));
+		pers = new GaePersistence(repoId);
 		
 		log.info("###   hasModel?");
 		assertTrue(pers.hasManagedModel(modelId));
@@ -108,15 +110,23 @@ public class GaePersistenceTest {
 	
 	@Test
 	public void getEmtpyModel() {
-		XydraPersistence pers = new GaePersistence(XX.toId("test-repo"));
-		XID modelId = XX.createUniqueId();
+		XID repoId = XX.toId("repo-getEmtpyModel");
+		XydraPersistence pers = new GaePersistence(repoId);
+		XID modelId = XX.toId("model-getEmtpyModel");
+		
+		ModelRevision modelRev = pers.getModelRevision(new GetWithAddressRequest(XX.resolveModel(
+		        repoId, modelId), true));
+		XyAssert.xyAssert(modelRev != null);
+		assert modelRev != null;
+		XyAssert.xyAssert(!modelRev.modelExists(), "modelExists should be false but rev is "
+		        + modelRev + " for " + modelId);
+		
 		WritableRepositoryOnPersistence repo = new WritableRepositoryOnPersistence(pers, ACTOR);
+		XyAssert.xyAssert(!repo.hasModel(modelId));
+		
 		repo.createModel(modelId);
-		
 		assertNotNull(repo.getModel(modelId));
-		
 		assertNull(repo.getModel(XX.createUniqueId()));
-		
 	}
 	
 	@Test

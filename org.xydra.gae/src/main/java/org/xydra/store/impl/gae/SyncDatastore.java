@@ -16,9 +16,11 @@ import org.xydra.store.impl.gae.DebugFormatter.Timing;
 import org.xydra.store.impl.gae.changes.KeyStructure;
 
 import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceConfig;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
+import com.google.appengine.api.datastore.ImplicitTransactionManagementPolicy;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
@@ -52,7 +54,17 @@ public class SyncDatastore {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		if(syncDatastore == null) {
 			log.debug(DebugFormatter.init(DATASTORE_NAME));
-			syncDatastore = DatastoreServiceFactory.getDatastoreService();
+			DatastoreServiceConfig config = DatastoreServiceConfig.Builder
+			        .withImplicitTransactionManagementPolicy(
+			                ImplicitTransactionManagementPolicy.NONE).maxEntityGroupsPerRpc(1);
+			
+			/*
+			 * Not allowed in a txn context:
+			 * 
+			 * ReadPolicy(Consistency.EVENTUAL))
+			 */
+			
+			syncDatastore = DatastoreServiceFactory.getDatastoreService(config);
 		}
 	}
 	

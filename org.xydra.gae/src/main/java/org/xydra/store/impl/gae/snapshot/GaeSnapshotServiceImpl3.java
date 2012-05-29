@@ -45,6 +45,7 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Text;
+import com.google.common.cache.Cache;
 
 
 /**
@@ -361,10 +362,11 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 	 */
 	private SortedMap<Long,XRevWritableModel> getModelSnapshotsCache() {
 		String key = "snapshots:" + this.changesService.getModelAddress();
-		Map<String,Object> instanceCache = InstanceContext.getInstanceCache();
+		Cache<String,Object> instanceCache = InstanceContext.getInstanceCache();
 		SortedMap<Long,XRevWritableModel> modelSnapshotsCache;
 		synchronized(instanceCache) {
-			modelSnapshotsCache = (SortedMap<Long,XRevWritableModel>)instanceCache.get(key);
+			modelSnapshotsCache = (SortedMap<Long,XRevWritableModel>)instanceCache
+			        .getIfPresent(key);
 			if(modelSnapshotsCache == null) {
 				log.debug("localVmcache for snapshots missing, creating one");
 				modelSnapshotsCache = new TreeMap<Long,XRevWritableModel>();

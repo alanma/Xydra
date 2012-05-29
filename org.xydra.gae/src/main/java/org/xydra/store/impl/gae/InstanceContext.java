@@ -1,10 +1,12 @@
 package org.xydra.store.impl.gae;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 
 
 /**
@@ -23,15 +25,17 @@ public class InstanceContext {
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(InstanceContext.class);
 	
-	private static Map<String,Object> sharedCache;
+	private static Cache<String,Object> sharedCache;
 	
 	/**
 	 * @return the static cache. Use with care (about race conditions).
 	 */
-	public static synchronized Map<String,Object> getInstanceCache() {
+	public static synchronized Cache<String,Object> getInstanceCache() {
 		if(sharedCache == null) {
-			// FIXME 2012-02 use Guava limited cache here to avoid memory leak
-			sharedCache = new ConcurrentHashMap<String,Object>();
+			// use Guava limited cache here to avoid memory leak
+			sharedCache = CacheBuilder.newBuilder().expireAfterAccess(30, TimeUnit.MINUTES)
+			        .maximumSize(100).build();
+			// new ConcurrentHashMap<String,Object>();
 		}
 		return sharedCache;
 	}
@@ -45,7 +49,8 @@ public class InstanceContext {
 	
 	public static void clearInstanceContext() {
 		if(sharedCache != null) {
-			sharedCache.clear();
+			sharedCache.invalidateAll();
+			sharedCache.cleanUp();
 		}
 	}
 	

@@ -1,7 +1,5 @@
 package org.xydra.store.impl.gae;
 
-import java.util.Map;
-
 import org.xydra.base.XAddress;
 import org.xydra.core.model.XModel;
 import org.xydra.log.Logger;
@@ -9,6 +7,8 @@ import org.xydra.log.LoggerFactory;
 import org.xydra.store.ModelRevision;
 import org.xydra.store.impl.gae.changes.GaeModelRevision;
 import org.xydra.store.impl.gae.changes.RevisionInfo;
+
+import com.google.common.cache.Cache;
 
 
 /**
@@ -132,10 +132,10 @@ public class InstanceRevisionManager {
 	 *         cached, and returned.
 	 */
 	public RevisionInfo getInstanceRevisionInfo() {
-		Map<String,Object> instanceContext = InstanceContext.getInstanceCache();
+		Cache<String,Object> instanceContext = InstanceContext.getInstanceCache();
 		String key = this.modelAddress + "/revisions";
 		synchronized(instanceContext) {
-			RevisionInfo instanceRevInfo = (RevisionInfo)instanceContext.get(key);
+			RevisionInfo instanceRevInfo = (RevisionInfo)instanceContext.getIfPresent(key);
 			if(instanceRevInfo == null) {
 				instanceRevInfo = new RevisionInfo(".instance-rev" + this.modelAddress);
 				instanceContext.put(key, instanceRevInfo);
