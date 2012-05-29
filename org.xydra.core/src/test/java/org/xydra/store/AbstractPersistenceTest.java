@@ -911,7 +911,7 @@ public abstract class AbstractPersistenceTest {
 		 * event
 		 */
 		assertEquals(
-		        "List of events should only contain one event (the \"create object\"-event), but actually contains multiple events.",
+		        "List of events should only contain one event (the \"create object\"-event), but contains 0 or multiple events.",
 		        1, events.size());
 		
 		XEvent objectAddEvent = events.get(0);
