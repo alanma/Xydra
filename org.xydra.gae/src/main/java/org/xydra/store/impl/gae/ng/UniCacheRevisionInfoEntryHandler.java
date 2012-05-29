@@ -49,9 +49,6 @@ class UniCacheRevisionInfoEntryHandler implements UniCache.CacheEntryHandler<Gae
 		String precStr = (String)e.getProperty(Precision);
 		org.xydra.store.impl.gae.ng.GaeModelRevInfo.Precision prec = org.xydra.store.impl.gae.ng.GaeModelRevInfo.Precision
 		        .valueOf(precStr);
-		if(prec == org.xydra.store.impl.gae.ng.GaeModelRevInfo.Precision.Precise) {
-			prec = org.xydra.store.impl.gae.ng.GaeModelRevInfo.Precision.Loaded;
-		}
 		GaeModelRevInfo ri = new GaeModelRevInfo(timestamp, modelExists, lastStableSuccess,
 		        lastStableCommitted, lastSuccess, lastTaken, prec);
 		log.debug("loaded from entity " + ri);

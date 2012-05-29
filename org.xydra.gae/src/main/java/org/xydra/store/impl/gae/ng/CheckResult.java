@@ -140,7 +140,7 @@ public class CheckResult {
 	        boolean inTransaction, @CanBeNull String explanation) {
 		XyAssert.xyAssert(status != null);
 		assert status != null;
-		XyAssert.xyAssert(status.isCommitted());
+		XyAssert.xyAssert(status.isCommitted(), status);
 		this.status = status;
 		this.actorId = actorId;
 		this.ctxInTxn = contextInTxn;

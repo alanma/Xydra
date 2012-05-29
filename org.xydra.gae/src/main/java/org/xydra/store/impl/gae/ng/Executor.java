@@ -243,7 +243,8 @@ public class Executor {
 				        + " is invalid (revNr mismatch)");
 			}
 			// command is OK and removes an existing object
-			return CheckResult.successRemovedObject(command, change, ctxInTxn, inTransaction);
+			return CheckResult.successRemovedObject(command, change, ctxInTxn, inTransaction
+			        || !objectInTxn.isEmpty());
 		default:
 			throw new AssertionError("impossible type for model command " + command);
 		}
@@ -271,9 +272,10 @@ public class Executor {
 		switch(command.getChangeType()) {
 		case ADD:
 			if(objectInTxn.hasField(fieldId)) {
-				return command.isForced() ? CheckResult.successNoChange("tos.hasField")
-				        : CheckResult.failed(command + " object has already field '" + fieldId
-				                + "' and foced=" + command.isForced());
+				return command.isForced() ? CheckResult.successNoChange("tos '"
+				        + objectInTxn.getAddress() + "' hasField '" + fieldId + "'") : CheckResult
+				        .failed(command + " object has already field '" + fieldId + "' and foced="
+				                + command.isForced());
 			}
 			// command is OK and adds a new field
 			return CheckResult.successCreatedField(command, ctxInTxn, change, inTransaction);
@@ -296,7 +298,8 @@ public class Executor {
 				        + " revNr mismatch");
 			}
 			// command is OK and removes an existing field
-			return CheckResult.successRemovedField(command, change, ctxInTxn, inTransaction);
+			return CheckResult.successRemovedField(command, change, ctxInTxn, inTransaction
+			        || !fieldBeforeCmd.isEmpty());
 			
 		default:
 			throw new AssertionError("impossible type for object command " + command);

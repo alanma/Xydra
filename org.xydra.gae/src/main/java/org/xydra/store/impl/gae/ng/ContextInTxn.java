@@ -28,10 +28,15 @@ import org.xydra.base.rmof.impl.memory.SimpleObject;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.delta.ChangedObject;
 import org.xydra.core.model.delta.DeltaUtils;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 import org.xydra.sharedutils.XyAssert;
 
 
 public class ContextInTxn implements XStateWritableModel {
+	
+	@SuppressWarnings("unused")
+	private static final Logger log = LoggerFactory.getLogger(ContextInTxn.class);
 	
 	private ChangedModel changedModel;
 	
@@ -134,8 +139,9 @@ public class ContextInTxn implements XStateWritableModel {
 			XyAssert.xyAssert(existedBefore && existsNow);
 			
 			List<XAtomicEvent> events = new ArrayList<XAtomicEvent>();
-			DeltaUtils.createEventsForChangedModel(events, actorId, this.changedModel,
-			        inTransaction, false);
+			boolean inTxn = inTransaction || this.changedModel.countCommandsNeeded(2) > 1;
+			DeltaUtils
+			        .createEventsForChangedModel(events, actorId, this.changedModel, inTxn, false);
 			return events;
 		}
 	}

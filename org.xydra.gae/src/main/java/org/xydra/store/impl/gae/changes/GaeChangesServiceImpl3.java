@@ -251,7 +251,7 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 				RevisionInfo revInfoFromMemcacheOrDatastore = this.revInfoMemcacheAndDatastoreCache
 				        .get(this.revisionCacheName, StorageOptions.create(
 				        /** We looked there already via instanceRevInfoManager */
-				        false, USE_MEMCACHE_FOR_REVISIONS, true));
+				        0, USE_MEMCACHE_FOR_REVISIONS, true, false));
 				if(revInfoFromMemcacheOrDatastore != null) {
 					this.revInfoFromMemcacheAndDatastore = revInfoFromMemcacheOrDatastore;
 					ModelRevision cachedModelRev = revInfoFromMemcacheOrDatastore
@@ -418,7 +418,7 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 					 * Impl note: Status.SuccessNoChange is not a candiate rev
 					 * because there is no event for that change
 					 */
-					if(change.getStatus() == Status.SuccessExecuted) {
+					if(change.getStatus().changedSomething()) {
 						// Candidate for new revision is changed
 						XEvent event = change.getEvent();
 						boolean modelExist = eventIndicatesModelExists(event);
@@ -456,8 +456,8 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 			boolean putInDatastore = i % 64 == OFFSET;
 			if(putInMemcache || putInDatastore) {
 				// share findings via memcache & datastore with other instances
-				StorageOptions storeOpts = UniCache.StorageOptions.create(false, putInMemcache,
-				        putInDatastore);
+				StorageOptions storeOpts = UniCache.StorageOptions.create(0, putInMemcache,
+				        putInDatastore, false);
 				// read cache first to prevent destroying good knowledge
 				if(this.revInfoFromMemcacheAndDatastore == null) {
 					this.revInfoFromMemcacheAndDatastore = this.revInfoMemcacheAndDatastoreCache
@@ -563,8 +563,7 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 			GaeChange change = new GaeChange(getModelAddress(), revFromKey, entity);
 			Status status = change.getStatus();
 			
-			if(!status.isCommitted()) {
-				XyAssert.xyAssert(status == Status.Creating);
+			if(status.canChange()) {
 				try {
 					progressChange(change);
 				} catch(CapabilityDisabledException err) {
@@ -753,13 +752,14 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 			GaeChange change = this.cachedChanges.getCachedChange(i);
 			// use only positive information
 			if(change != null) {
-				if(change.getStatus() == Status.SuccessExecuted) {
+				XyAssert.xyAssert(!change.getStatus().canChange(), change.getStatus());
+				if(change.getStatus().changedSomething()) {
 					log.debug("Change " + i + " rev=" + change.rev + " is successful");
 					XEvent event = change.getEvent();
 					XyAssert.xyAssert(event != null, change);
 					events.add(event);
 				} else {
-					XyAssert.xyAssert(change.getStatus() != Status.Creating);
+					XyAssert.xyAssert(change.getStatus().canChange());
 					log.debug("Change " + i + " is " + change.getStatus().name());
 				}
 			} else {

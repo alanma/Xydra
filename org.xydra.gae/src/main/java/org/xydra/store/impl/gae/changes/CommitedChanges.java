@@ -11,6 +11,8 @@ import org.xydra.store.impl.gae.DebugFormatter;
 import org.xydra.store.impl.gae.DebugFormatter.Timing;
 import org.xydra.store.impl.gae.InstanceContext;
 
+import com.google.common.cache.Cache;
+
 
 /**
  * In-memory representation for some change events. Required for
@@ -96,10 +98,10 @@ public class CommitedChanges {
 	 */
 	private Map<Long,GaeChange> getInstanceCommittedChangeCache() {
 		String key = "changes:" + this.modelAddr;
-		Map<String,Object> instanceCache = InstanceContext.getInstanceCache();
+		Cache<String,Object> instanceCache = InstanceContext.getInstanceCache();
 		Map<Long,GaeChange> committedChangeCache;
 		synchronized(instanceCache) {
-			committedChangeCache = (Map<Long,GaeChange>)instanceCache.get(key);
+			committedChangeCache = (Map<Long,GaeChange>)instanceCache.getIfPresent(key);
 			if(committedChangeCache == null) {
 				log.debug(DebugFormatter.init(INSTANCE_COMMITED_CHANGES_CACHENAME));
 				committedChangeCache = new HashMap<Long,GaeChange>();
@@ -114,12 +116,11 @@ public class CommitedChanges {
 	 * 
 	 * @param change to be cached; must have status == committed
 	 */
-	public void cacheCommittedChange(GaeChange change) {
+	public void cacheStableChange(GaeChange change) {
 		XyAssert.xyAssert(change != null);
 		assert change != null;
-		XyAssert.xyAssert(change.getStatus().isCommitted());
 		assert change.getStatus() != null;
-		assert change.getStatus().isCommitted();
+		XyAssert.xyAssert(!change.getStatus().canChange());
 		log.trace(DebugFormatter.dataPut(LOCAL_COMMITED_CHANGES_CACHENAME + this.modelAddr, ""
 		        + change.rev, change, Timing.Now));
 		this.localMap.put(change.rev, change);
@@ -136,9 +137,8 @@ public class CommitedChanges {
 	private void cacheInstanceCommittedChange(GaeChange change) {
 		XyAssert.xyAssert(change != null);
 		assert change != null;
-		XyAssert.xyAssert(change.getStatus().isCommitted());
+		XyAssert.xyAssert(!change.getStatus().canChange());
 		assert change.getStatus() != null;
-		assert change.getStatus().isCommitted();
 		log.trace(DebugFormatter.dataPut(INSTANCE_COMMITED_CHANGES_CACHENAME + this.modelAddr, ""
 		        + change.rev, change, Timing.Now));
 		Map<Long,GaeChange> committedChangeCache = getInstanceCommittedChangeCache();

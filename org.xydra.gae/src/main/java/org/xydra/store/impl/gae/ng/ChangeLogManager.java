@@ -1,11 +1,17 @@
 package org.xydra.store.impl.gae.ng;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import org.xydra.annotations.CanBeNull;
 import org.xydra.annotations.NeverNull;
+import org.xydra.annotations.Setting;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.change.XEvent;
@@ -36,6 +42,9 @@ public class ChangeLogManager {
 	
 	private static final Logger log = LoggerFactory.getLogger(ChangeLogManager.class);
 	
+	@Setting("")
+	static final int MAXIMAL_CHANGES_FETCH_SIZE = 256;
+	
 	private XAddress modelAddress;
 	
 	/**
@@ -51,8 +60,8 @@ public class ChangeLogManager {
 	 * @param status must be a terminal state, i.e. not 'Creating'
 	 */
 	public void commitAndClearLocks(GaeChange change, Status status) {
-		XyAssert.xyAssert(status.isCommitted());
-		XyAssert.xyAssert(!change.getStatus().isCommitted());
+		XyAssert.xyAssert(!status.canChange());
+		XyAssert.xyAssert(change.getStatus().canChange());
 		
 		change.commitAndClearLocks(status);
 		
@@ -70,28 +79,85 @@ public class ChangeLogManager {
 		return change;
 	}
 	
+	/**
+	 * @param maxSingleBatchFetchRange
+	 * @return at least one null change if there were null-changes at the end
+	 */
+	private Collection<? extends GaeChange> getChangesInBatch(Interval maxSingleBatchFetchRange) {
+		List<GaeChange> changes = new ArrayList<GaeChange>();
+		
+		List<Key> keys = new ArrayList<Key>();
+		for(long rev = maxSingleBatchFetchRange.start; rev <= maxSingleBatchFetchRange.end; rev++) {
+			Key key = KeyStructure.createChangeKey(this.modelAddress, rev);
+			keys.add(key);
+		}
+		Map<Key,Entity> entities = SyncDatastore.getEntities(keys);
+		for(Key key : keys) {
+			Entity entity = entities.get(key);
+			GaeChange change = null;
+			long rev = KeyStructure.getRevisionFromChangeKey(key);
+			if(entity != null) {
+				change = new GaeChange(this.modelAddress, rev, entity);
+			}
+			changes.add(change);
+		}
+		
+		log.debug("changes in batch from " + maxSingleBatchFetchRange + " got " + changes.size()
+		        + " changes");
+		
+		return changes;
+	}
+	
+	/**
+	 * @param fetchRange
+	 * @return at least one null-change at the end of there was a null change in
+	 *         the given fetchRange
+	 */
 	public List<GaeChange> getChanges(Interval fetchRange) {
 		List<GaeChange> changes = new LinkedList<GaeChange>();
+		
 		if(!fetchRange.isEmpty()) {
-			for(long rev = fetchRange.start; rev <= fetchRange.end; rev++) {
-				GaeChange change = getChange(rev);
-				if(change == null) {
-					return changes;
+			/**
+			 * get requested events in batches of MAXIMAL_CHANGES_FETCH_SIZE and
+			 * use smaller ranges when exceptions occur
+			 */
+			Interval singleBatchFetchRange = fetchRange.getSubInterval(MAXIMAL_CHANGES_FETCH_SIZE);
+			boolean hadNullChanges = false;
+			do {
+				try {
+					Collection<? extends GaeChange> newChanges = getChangesInBatch(singleBatchFetchRange);
+					for(GaeChange newChange : newChanges) {
+						if(newChange == null) {
+							hadNullChanges = true;
+						} else {
+							changes.add(newChange);
+						}
+					}
+					// OLD: hadNullChanges = newChanges.size() <
+					// singleBatchFetchRange.size();
+				} catch(Throwable t) {
+					log.warn("Could not read a change interval " + singleBatchFetchRange, t);
+					singleBatchFetchRange = singleBatchFetchRange.firstHalf();
 				}
-				changes.add(change);
-			}
+				singleBatchFetchRange = singleBatchFetchRange
+				        .moveRightAndShrinkToKeepEndMaxAt(fetchRange.end);
+			} while(singleBatchFetchRange.end < fetchRange.end && !hadNullChanges);
 		}
 		return changes;
 	}
 	
-	public List<XEvent> getEventsBetween(long start, long end) {
+	public @NeverNull
+	List<XEvent> getEventsInInterval(Interval interval) {
+		log.debug("Getting events from changes in " + interval + " for " + this.modelAddress);
 		LinkedList<XEvent> events = new LinkedList<XEvent>();
-		List<GaeChange> changes = getChanges(new Interval(start, end));
+		List<GaeChange> changes = getChanges(interval);
 		for(GaeChange change : changes) {
-			if(change.getStatus() == Status.SuccessExecuted) {
+			if(change.getStatus().changedSomething()) {
 				events.add(change.getEvent());
 			}
 		}
+		log.debug("Got " + events.size() + " events from " + changes.size() + " changes in "
+		        + interval + " for " + this.modelAddress);
 		return events;
 	}
 	
@@ -182,7 +248,7 @@ public class ChangeLogManager {
 	}
 	
 	/**
-	 * Check is change is timed-out and then move to status to FailedTimeout
+	 * Check if change is timed-out and then move to status
 	 * 
 	 * @param change @NeverNull
 	 * @param revisionManager @NeverNull
@@ -194,13 +260,28 @@ public class ChangeLogManager {
 		assert change != null;
 		
 		Status status = change.getStatus();
-		if(!status.isCommitted()) {
+		if(status.canChange()) {
 			log.debug("Trying to progress change " + change);
 			if(change.isTimedOut()) {
 				log.debug("handleTimeout: " + change);
-				commitAndClearLocks(change, Status.FailedTimeout);
-				revisionManager.foundNewHigherCommitedChange(change);
-				return true;
+				if(status == Status.Creating) {
+					commitAndClearLocks(change, Status.FailedTimeout);
+					revisionManager.foundNewHigherCommitedChange(change);
+					return true;
+				} else if(status == Status.SuccessExecuted) {
+					// record changes to signal other threads we work on it
+					Future<Key> f = change.save();
+					Key key;
+					try {
+						key = f.get();
+						if(key != null) {
+							GaeModelPersistenceNG.rollForward_updateTentativeObjectStates(
+							        this.modelAddress, change, revisionManager, this);
+						}
+					} catch(InterruptedException e) {
+					} catch(ExecutionException e) {
+					}
+				}
 			}
 		}
 		return false;

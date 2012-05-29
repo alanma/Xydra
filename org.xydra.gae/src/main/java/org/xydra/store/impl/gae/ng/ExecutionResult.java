@@ -29,6 +29,7 @@ class ExecutionResult {
 			return new ExecutionResult(checkResult.getStatus(), Collections.EMPTY_LIST,
 			        checkResult.getDebugHint());
 		case SuccessExecuted:
+		case SuccessExecutedApplied:
 			List<XAtomicEvent> events = checkResult.getExecutionContextInTxn().toEvents(
 			        checkResult.getActorId(), ctxBeforeCommand, checkResult.inTransaction());
 			return new ExecutionResult(checkResult.getStatus(), events, null);

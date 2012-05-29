@@ -55,8 +55,8 @@ public class AllChanges {
 		XyAssert.xyAssert(change != null);
 		assert change != null;
 		
-		if(change.getStatus().isCommitted()) {
-			this.commitedChanges.cacheCommittedChange(change);
+		if(!change.getStatus().canChange()) {
+			this.commitedChanges.cacheStableChange(change);
 		} else {
 			this.localMap.put(change.rev, change);
 		}

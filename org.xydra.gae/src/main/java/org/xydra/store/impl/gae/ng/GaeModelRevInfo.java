@@ -48,38 +48,42 @@ public class GaeModelRevInfo implements Serializable {
 	 * 
 	 * Helps to find the next relevant change.
 	 */
-	private long lastStableCommitted;
+	private long lastStableCommitted = -1;
 	
 	/**
 	 * All changes lower than this one are committed, failed or noChange. None
 	 * of them is creating.
 	 */
-	private long lastStableSuccess;
+	private long lastStableSuccess = -1;
 	
 	/**
 	 * This revision was successful and currently no other successful revs exist
 	 * 
 	 * Helps to estimate how many changes to grab from backend.
 	 */
-	private long lastSuccess;
+	private long lastSuccess = -1;
 	
 	/**
 	 * All revision numbers < this are taken.
 	 * 
 	 * This helps to grab faster a free revision number when executing commands.
 	 */
-	private long lastTaken;
+	private long lastTaken = -1;
 	
 	/**
 	 * true iff the model exists at the lastStableSuccess revision
 	 */
-	private boolean modelExists;
+	private boolean modelExists = false;
 	
 	/**
+	 * Time-stamp for lastStableSuccess
+	 * 
 	 * When have these informations been computed? Date of earliest relevant
 	 * change log read access that contributes to the information in here.
 	 */
-	private long timestamp;
+	private long timestamp = -1;
+	
+	private transient String debugHint = "na";
 	
 	private Precision precision = Precision.None;
 	
@@ -88,7 +92,14 @@ public class GaeModelRevInfo implements Serializable {
 	}
 	
 	public static enum Precision {
-		None, Loaded, Precise
+		/** Self-created */
+		None,
+		/** Was probably precise once */
+		Loaded,
+		/** Has been calculated and not knowingly invalidated */
+		Precise,
+		/** Changed after precise calculation. Still a good start. */
+		Imprecise
 	}
 	
 	GaeModelRevInfo() {
@@ -115,15 +126,13 @@ public class GaeModelRevInfo implements Serializable {
 		XyAssert.xyAssert(lastStableSuccess <= lastSuccess,
 		        "lastStableSuccess=%s <= lastSuccess=%s", lastStableSuccess, lastSuccess);
 		XyAssert.xyAssert(lastSuccess <= lastTaken);
+		this.modelExists = modelExists;
+		this.timestamp = timestamp;
 		this.lastStableSuccess = lastStableSuccess;
 		this.lastStableCommitted = lastStableCommitted;
 		this.lastSuccess = lastSuccess;
 		this.lastTaken = lastTaken;
 		this.precision = precision;
-	}
-	
-	public long getLastCommitted() {
-		return this.lastStableCommitted;
 	}
 	
 	public long getLastStableCommitted() {
@@ -146,17 +155,25 @@ public class GaeModelRevInfo implements Serializable {
 		return this.timestamp;
 	}
 	
+	/**
+	 * Caller should degrade precision via {@link #setPrecisionToImprecise()}
+	 * 
+	 * @param other
+	 */
 	public void incrementFrom(GaeModelRevInfo other) {
-		// start from highest numbers, to trigger the least changes
+		// trigger the least changes in this order
+		incrementLastStableSuccessChange(other.lastStableSuccess, other.modelExists,
+		        other.timestamp);
+		incrementLastStableCommitted(other.lastStableCommitted);
+		incrementLastSuccessChange(other.lastSuccess);
 		incrementLastTaken(other.lastTaken);
-		incrementLastTaken(other.lastSuccess);
-		incrementLastTaken(other.lastStableCommitted);
-		if(incrementLastTaken(other.lastStableSuccess)) {
-			setTimestamp(other.timestamp);
-			setModelExists(other.modelExists);
-		}
 	}
 	
+	/**
+	 * Caller should degrade precision via {@link #setPrecisionToImprecise()}
+	 * 
+	 * @param lastStableCommitted
+	 */
 	public void incrementLastStableCommitted(long lastStableCommitted) {
 		if(lastStableCommitted > this.lastStableCommitted) {
 			this.lastStableCommitted = lastStableCommitted;
@@ -164,14 +181,38 @@ public class GaeModelRevInfo implements Serializable {
 		incrementLastTaken(lastStableCommitted);
 	}
 	
-	public void incrementLastStableSuccessChange(long lastStableSuccess) {
+	/**
+	 * Caller should degrade precision via {@link #setPrecisionToImprecise()}
+	 * 
+	 * @param lastStableSuccess
+	 * @param modelExists
+	 * @param timestamp
+	 */
+	public void incrementLastStableSuccessChange(long lastStableSuccess, boolean modelExists,
+	        long timestamp) {
+		boolean changes = incrementLastStableSuccessChange_internal(lastStableSuccess);
+		if(changes) {
+			this.modelExists = modelExists;
+			this.timestamp = timestamp;
+		}
+	}
+	
+	private boolean incrementLastStableSuccessChange_internal(long lastStableSuccess) {
+		boolean changedStableSuccess = false;
 		if(lastStableSuccess > this.lastStableSuccess) {
 			this.lastStableSuccess = lastStableSuccess;
+			changedStableSuccess = true;
 		}
 		incrementLastStableCommitted(lastStableSuccess);
 		incrementLastSuccessChange(lastStableSuccess);
+		return changedStableSuccess;
 	}
 	
+	/**
+	 * Caller should degrade precision via {@link #setPrecisionToImprecise()}
+	 * 
+	 * @param lastSuccess
+	 */
 	public void incrementLastSuccessChange(long lastSuccess) {
 		if(lastSuccess > this.lastSuccess) {
 			this.lastSuccess = lastSuccess;
@@ -206,9 +247,10 @@ public class GaeModelRevInfo implements Serializable {
 	@Override
 	public String toString() {
 		return XyAssert
-		        .format("%s: (precision: %s) stable: ( success: %s <= committed %s ) <= unstable: ( success %s <= taken %s )",
-		                this.timestamp, this.precision, this.lastStableSuccess,
-		                this.lastStableCommitted, this.lastSuccess, this.lastTaken);
+		        .format("(precision: %s) stable: ( success: %s <= committed %s ) <= unstable: ( success %s <= taken %s ) modelExists?%s at %s. \nSOURCE %s",
+		                this.precision, this.lastStableSuccess, this.lastStableCommitted,
+		                this.lastSuccess, this.lastTaken, this.modelExists, this.timestamp,
+		                this.debugHint);
 	}
 	
 	public void setPrecision(Precision precision) {
@@ -218,6 +260,35 @@ public class GaeModelRevInfo implements Serializable {
 	public GaeModelRevInfo copy() {
 		return new GaeModelRevInfo(this.timestamp, this.modelExists, this.lastStableSuccess,
 		        this.lastStableCommitted, this.lastSuccess, this.lastTaken, this.precision);
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if(!(other instanceof GaeModelRevInfo))
+			return false;
+		
+		GaeModelRevInfo o = (GaeModelRevInfo)other;
+		return this.modelExists == o.modelExists && this.timestamp == o.timestamp
+		        && this.precision == o.precision
+		        && this.lastStableCommitted == o.lastStableCommitted
+		        && this.lastStableSuccess == o.lastStableSuccess
+		        && this.lastSuccess == o.lastSuccess && this.lastTaken == o.lastTaken;
+	}
+	
+	@Override
+	public int hashCode() {
+		return (int)this.timestamp + (int)this.lastStableSuccess + this.precision.hashCode()
+		        + (this.modelExists ? 0 : 1);
+	}
+	
+	public void setPrecisionToImprecise() {
+		if(this.precision == Precision.Precise) {
+			this.precision = Precision.Imprecise;
+		}
+	}
+	
+	public void setDebugHint(String debugHint) {
+		this.debugHint = debugHint;
 	}
 	
 }

@@ -5,6 +5,7 @@ import java.util.Iterator;
 
 import org.xydra.annotations.CanBeNull;
 import org.xydra.annotations.NeverNull;
+import org.xydra.annotations.Setting;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XType;
@@ -92,11 +93,13 @@ public class ContextBeforeCommand implements XRevWritableModel,
 		return "tos" + objectAddress;
 	}
 	
-	UniCache<TentativeObjectState> cache = new UniCache<TentativeObjectState>(this);
+	UniCache<TentativeObjectState> cache = new UniCache<TentativeObjectState>(this, "TOS");
 	
 	private XAddress modelAddress;
 	
-	private StorageOptions storeOpts = StorageOptions.create(false, false, true);
+	// FIXME was 1,false,true before
+	@Setting("Where to cache TOS")
+	private StorageOptions storeOpts = StorageOptions.create(0, false, true, false);
 	
 	protected XRevWritableObject deserialize(XAddress modelAddress, String data) {
 		JsonParser parser = new JsonParser();

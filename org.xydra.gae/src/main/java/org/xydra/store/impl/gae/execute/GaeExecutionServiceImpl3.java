@@ -143,7 +143,7 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 		c.stopAndStart("checkPreconditionsAndSaveEvents");
 		
 		XyAssert.xyAssert(change.getStatus().isCommitted(),
-		        "If we reach this line, change must be committed");
+		        "If we reach this line, change must be commited is %s", change.getStatus());
 		
 		if(log.isInfoEnabled() || ret == XCommand.FAILED && log.isWarnEnabled()) {
 			String msg = "[r"
@@ -190,7 +190,7 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 				        + " waits for locks. Check for " + checkRev + " got null from backend");
 			}
 			
-			if(!checkChange.getStatus().isCommitted()) {
+			if(checkChange.getStatus().canChange()) {
 				// Check if the change needs conflicting locks.
 				if(!change.isConflicting(checkChange)) {
 					// Mark any object revisions that we don't know as
@@ -226,7 +226,7 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 					
 					checkChange.reload();
 					
-					if(checkChange.getStatus().isCommitted()) {
+					if(!checkChange.getStatus().canChange()) {
 						this.changesservice.cacheCommittedChange(checkChange);
 						// now finished, so should have no locks anymore
 						XyAssert.xyAssert(!checkChange.hasLocks());

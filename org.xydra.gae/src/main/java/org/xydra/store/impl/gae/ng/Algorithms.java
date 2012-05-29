@@ -10,7 +10,6 @@ import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XTransactionEvent;
 import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.impl.gae.changes.GaeChange;
-import org.xydra.store.impl.gae.changes.GaeChange.Status;
 
 
 /**
@@ -23,13 +22,18 @@ public class Algorithms {
 	public static enum Effect {
 		Add, Remove, NoEffect;
 		
-		public static boolean modelExists(Effect e) {
-			if(e == Add) {
+		/**
+		 * @param effect
+		 * @return true if model has just been added, false if removed
+		 * @throws IllegalArgumentException if effect is neither add nor remove
+		 */
+		public static boolean modelExists(Effect effect) {
+			if(effect == Add) {
 				return true;
-			} else if(e == Remove) {
+			} else if(effect == Remove) {
 				return false;
 			} else {
-				throw new AssertionError("Effect is neither Add nor Remove");
+				throw new IllegalArgumentException("Effect is neither Add nor Remove");
 			}
 		}
 	}
@@ -38,8 +42,9 @@ public class Algorithms {
 	 * @param change must be Status.SuccessExecuted
 	 * @return ..
 	 */
+	@Deprecated
 	public static Effect effectOnModelExistsFlag(@NeverNull final GaeChange change) {
-		if(change.getStatus() == Status.SuccessExecuted) {
+		if(change.getStatus().changedSomething()) {
 			
 			List<XAtomicEvent> atomics = change.getAtomicEvents().getFirst();
 			XAtomicEvent last = atomics.get(atomics.size() - 1);
@@ -53,6 +58,24 @@ public class Algorithms {
 			// Effect.Remove;
 		}
 		return Effect.NoEffect;
+	}
+	
+	/**
+	 * @param change must have a status that changed something
+	 * @return true if the change indicates that the model exists; false if
+	 *         model does not exists.
+	 * @throws IllegalArgumentException if change did not change anything or
+	 *             even failed
+	 */
+	public static boolean changeIndicatesModelExists(@NeverNull final GaeChange change) {
+		if(!change.getStatus().changedSomething()) {
+			throw new IllegalArgumentException("change must have changed something but is "
+			        + change);
+		}
+		
+		List<XAtomicEvent> atomics = change.getAtomicEvents().getFirst();
+		XAtomicEvent last = atomics.get(atomics.size() - 1);
+		return eventIndicatesModelExists(last);
 	}
 	
 	/**

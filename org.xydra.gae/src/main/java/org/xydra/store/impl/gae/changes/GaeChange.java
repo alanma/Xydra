@@ -13,6 +13,7 @@ import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XTransaction;
 import org.xydra.base.change.impl.memory.MemoryTransactionEvent;
 import org.xydra.core.model.XChangeLog;
+import org.xydra.gae.AboutAppEngine;
 import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -98,7 +99,7 @@ public class GaeChange {
 	 * 
 	 *  Creating 
 	 *     |
-	 *     |----> SucessExecuted FIXME TODO -->  SucessExecutedApplied
+	 *     |----> SucessExecuted --->  SucessExecutedApplied
 	 *     |
 	 *     |----> SuccessNochange
 	 *     |
@@ -125,6 +126,13 @@ public class GaeChange {
 		
 		/** changes made, locks freed. Current revision is now bigger. */
 		SuccessExecuted(3),
+		
+		/**
+		 * Temporary object states updated
+		 * 
+		 * @since 2012-05
+		 */
+		SuccessExecutedApplied(5),
 		
 		/** there was nothing to change, locks freed */
 		SuccessNochange(4),
@@ -157,7 +165,7 @@ public class GaeChange {
 		 *         successfully executed - even if that changed nothing.
 		 */
 		public boolean isSuccess() {
-			return (this == SuccessExecuted || this == SuccessNochange);
+			return (this == SuccessExecuted || this == SuccessNochange || this == SuccessExecutedApplied);
 		}
 		
 		/**
@@ -178,7 +186,7 @@ public class GaeChange {
 		 *         {@link #SuccessExecuted} stages.
 		 */
 		public boolean hasEvents() {
-			return this == SuccessExecuted;
+			return this == SuccessExecuted || this == SuccessExecutedApplied;
 		}
 		
 		public static Status get(int value) {
@@ -193,6 +201,9 @@ public class GaeChange {
 			case 4:
 				status = SuccessNochange;
 				break;
+			case 5:
+				status = SuccessExecutedApplied;
+				break;
 			case 100:
 				status = FailedPreconditions;
 				break;
@@ -202,6 +213,14 @@ public class GaeChange {
 			}
 			assert status != null && status.value == value;
 			return status;
+		}
+		
+		public boolean canChange() {
+			return this == Creating || this == SuccessExecuted;
+		}
+		
+		public boolean changedSomething() {
+			return this == SuccessExecuted || this == SuccessExecutedApplied;
 		}
 		
 	}
@@ -310,7 +329,7 @@ public class GaeChange {
 	}
 	
 	public void reload(Transaction trans) {
-		assert !getStatus().isCommitted();
+		XyAssert.xyAssert(getStatus().canChange());
 		this.entity = SyncDatastore.getEntity(this.entity.getKey(), trans);
 		assert this.entity != null : "change entities should not vanish";
 		clearCache();
@@ -342,7 +361,7 @@ public class GaeChange {
 	 *         given change entity
 	 */
 	public boolean isTimedOut() {
-		if(getStatus() != Status.Creating)
+		if(!getStatus().canChange())
 			return false;
 		if(this.lastActivity < 0) {
 			this.lastActivity = (Long)this.entity.getProperty(PROP_LAST_ACTIVITY);
@@ -356,7 +375,7 @@ public class GaeChange {
 	 * @param status The new status of the entity.
 	 */
 	public void commitAndClearLocks(Status status) {
-		assert !getStatus().isCommitted();
+		assert getStatus().canChange();
 		this.locks = null;
 		this.entity.removeProperty(PROP_LOCKS);
 		setStatus(status);
@@ -369,8 +388,7 @@ public class GaeChange {
 	 * @param status
 	 */
 	public void setStatus(Status status) {
-		XyAssert.xyAssert(!getStatus().isCommitted());
-		assert !getStatus().isCommitted() : "A commited change cannot change its status";
+		XyAssert.xyAssert(getStatus().canChange(), "A commited change cannot change its status");
 		this.status = status;
 		this.entity.setUnindexedProperty(PROP_STATUS, status.value);
 	}
@@ -379,8 +397,7 @@ public class GaeChange {
 	 * @return the locks associated with this change.
 	 */
 	synchronized public GaeLocks getLocks() {
-		
-		assert !getStatus().isCommitted();
+		XyAssert.xyAssert(getStatus().canChange());
 		if(this.locks == null) {
 			List<String> lockStrs = (List<String>)this.entity.getProperty(PROP_LOCKS);
 			if(lockStrs == null) {
@@ -422,7 +439,7 @@ public class GaeChange {
 	}
 	
 	private void registerActivity() {
-		assert !getStatus().isCommitted();
+		XyAssert.xyAssert(getStatus().canChange());
 		this.lastActivity = now();
 		this.entity.setUnindexedProperty(PROP_LAST_ACTIVITY, this.lastActivity);
 	}
@@ -446,6 +463,12 @@ public class GaeChange {
 	 * @throws VoluntaryTimeoutException to abort the current change
 	 */
 	public void giveUpIfTimeoutCritical() throws VoluntaryTimeoutException {
+		
+		if(AboutAppEngine.onBackend()) {
+			// never time out on a backend
+			return;
+		}
+		
 		/* Don't give up in development mode to let the debugger step through */
 		// if(!AboutAppEngine.inProduction()) {
 		// this.timeoutCheckCount++;
@@ -454,7 +477,7 @@ public class GaeChange {
 		// }
 		// return;
 		// }
-		assert !getStatus().isCommitted();
+		XyAssert.xyAssert(getStatus().canChange());
 		long now = now();
 		// IMPROVE Use new API since AppEngine 1.6.5 to get time left
 		if(now - this.lastActivity > TIME_CRITICAL) {
@@ -466,7 +489,7 @@ public class GaeChange {
 	}
 	
 	public Pair<int[],List<Future<Key>>> setEvents(List<XAtomicEvent> events) {
-		XyAssert.xyAssert(!getStatus().isCommitted());
+		XyAssert.xyAssert(getStatus().canChange());
 		XyAssert.xyAssert(events.size() >= 1);
 		Pair<int[],List<Future<Key>>> res = GaeEvents.saveEvents(this.modelAddr, this.entity,
 		        events);
@@ -482,7 +505,7 @@ public class GaeChange {
 	 */
 	@GaeOperation(datastoreWrite = true ,memcacheWrite = true)
 	public void save(Transaction trans) {
-		assert !getStatus().isCommitted();
+		XyAssert.xyAssert(getStatus().canChange());
 		
 		registerActivity();
 		
@@ -492,16 +515,18 @@ public class GaeChange {
 	
 	/**
 	 * Put this change entity in the datastore.
+	 * 
+	 * @return a future that returns the putted key on success
 	 */
-	public void save() {
-		assert !getStatus().isCommitted();
+	public Future<Key> save() {
+		XyAssert.xyAssert(getStatus().canChange());
 		
 		registerActivity();
 		
-		XyAssert.xyAssert(!getStatus().isCommitted(), "!getStatus().isCommitted()");
+		XyAssert.xyAssert(getStatus().canChange(), "getStatus().canChange()");
 		XyAssert.xyAssert(this.entity.getProperty("eventTypes") != null,
 		        "Trying to save changeEntity with PROP_EVENT_TYPES==null");
-		AsyncDatastore.putEntity(this.entity);
+		return AsyncDatastore.putEntity(this.entity);
 	}
 	
 	/**
@@ -512,7 +537,7 @@ public class GaeChange {
 	 */
 	synchronized public Pair<List<XAtomicEvent>,int[]> getAtomicEvents() {
 		
-		assert getStatus().hasEvents();
+		XyAssert.xyAssert(getStatus().hasEvents());
 		
 		if(this.events == null) {
 			Pair<XAtomicEvent[],int[]> res = GaeEvents.loadAtomicEvents(this.modelAddr, this.rev,

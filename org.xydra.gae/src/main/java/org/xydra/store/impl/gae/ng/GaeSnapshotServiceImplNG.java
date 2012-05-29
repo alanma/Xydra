@@ -8,8 +8,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.Setting;
@@ -35,12 +33,10 @@ import org.xydra.log.LoggerFactory;
 import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.impl.gae.DebugFormatter;
 import org.xydra.store.impl.gae.GaeOperation;
-import org.xydra.store.impl.gae.InstanceContext;
 import org.xydra.store.impl.gae.Memcache;
 import org.xydra.store.impl.gae.SyncDatastore;
 import org.xydra.store.impl.gae.changes.KeyStructure;
 import org.xydra.store.impl.gae.snapshot.AbstractGaeSnapshotServiceImpl;
-import org.xydra.store.impl.gae.snapshot.GaeSnapshotServiceImpl3;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
@@ -161,7 +157,7 @@ public class GaeSnapshotServiceImplNG extends AbstractGaeSnapshotServiceImpl {
 	
 	private static final String KIND_SNAPSHOT = "XSNAPSHOT";
 	
-	private static final Logger log = LoggerFactory.getLogger(GaeSnapshotServiceImpl3.class);
+	private static final Logger log = LoggerFactory.getLogger(GaeSnapshotServiceImplNG.class);
 	
 	private static final long MODEL_DOES_NOT_EXIST = -1;
 	
@@ -323,37 +319,57 @@ public class GaeSnapshotServiceImplNG extends AbstractGaeSnapshotServiceImpl {
 		
 		// get events between [ start, end )
 		long start = Math.max(snapshot.getRevisionNumber() + 1, 0);
-		List<XEvent> events = this.changelogManager.getEventsBetween(start, requestedRevNr);
+		Interval requestedRange = new Interval(start, requestedRevNr);
 		
-		// This should not happen and should be fixed somewhere else
-		if(events.isEmpty()) {
-			log.warn("There are no events for " + this.modelAddress + " in range [" + start + ","
-			        + requestedRevNr + "]");
+		/*
+		 * if interval is large, compute intermediate snapshots and store them
+		 */
+		if(!requestedRange.isEmpty()) {
+			/**
+			 * get requested events in batches of MAXIMAL_CHANGES_FETCH_SIZE and
+			 * use smaller ranges when exceptions occur
+			 */
+			Interval stepRange = requestedRange
+			        .getSubInterval(ChangeLogManager.MAXIMAL_CHANGES_FETCH_SIZE);
+			log.debug("Fetching events " + stepRange);
+			List<XEvent> events;
+			do {
+				log.debug("Get events in range " + stepRange);
+				events = this.changelogManager.getEventsInInterval(stepRange);
+				// This should not happen and should be fixed somewhere else
+				if(events.isEmpty()) {
+					log.warn("There are no events for " + this.modelAddress + " in range [" + start
+					        + "," + requestedRevNr + "]");
+				}
+				assert events != null;
+				
+				// apply events to base
+				long memcachedSnapshots = 0;
+				for(XEvent event : events) {
+					log.trace("Basemodel[" + snapshot.getRevisionNumber() + "], applying event["
+					        + event.getRevisionNumber() + "]=" + DebugFormatter.format(event));
+					snapshot = EventUtils.applyEventNonDestructive(snapshot, event);
+					
+					long rev = snapshot.getRevisionNumber();
+					if(USE_MEMCACHE && revCanBeMemcached(rev) && memcachedSnapshots < 10) {
+						// cache some snapshots in memcache
+						Key key = getSnapshotKey(rev);
+						Memcache.put(key, snapshot);
+						memcachedSnapshots++;
+						// TODO SCALE put also some in datastore (async)
+						XyAssert.xyAssert(isConsistent(KeyStructure.toString(key), snapshot));
+					}
+					
+				}
+				stepRange = stepRange.moveRightAndShrinkToKeepEndMaxAt(requestedRange.end);
+			} while(stepRange.start <= requestedRange.end && events.size() > 0);
 		}
-		assert events != null;
 		
-		// apply events to base
-		long memcachedSnapshots = 0;
-		for(XEvent event : events) {
-			log.debug("Basemodel[" + snapshot.getRevisionNumber() + "], applying event["
-			        + event.getRevisionNumber() + "]=" + DebugFormatter.format(event));
-			
-			snapshot = EventUtils.applyEventNonDestructive(snapshot, event);
-			
-			// localVmCachePut(snapshot);
-			long rev = snapshot.getRevisionNumber();
-			if(USE_MEMCACHE && revCanBeMemcached(rev) && memcachedSnapshots < 10) {
-				// cache some snapshots in memcache
-				Key key = getSnapshotKey(rev);
-				Memcache.put(key, snapshot);
-				memcachedSnapshots++;
-				// TODO SCALE put also some in datastore (async)
-				XyAssert.xyAssert(isConsistent(KeyStructure.toString(key), snapshot));
-			}
-		}
+		XyAssert.xyAssert(snapshot.getRevisionNumber() == requestedRevNr,
+		        "got %s when I requested %s", snapshot.getRevisionNumber(), requestedRevNr);
+		
 		// when done, always cache 1 more snapshots
 		if(USE_MEMCACHE) {
-			XyAssert.xyAssert(snapshot.getRevisionNumber() == requestedRevNr);
 			Key key = getSnapshotKey(requestedRevNr);
 			Memcache.put(key, snapshot);
 			XyAssert.xyAssert(isConsistent(KeyStructure.toString(key), snapshot));
@@ -396,23 +412,6 @@ public class GaeSnapshotServiceImplNG extends AbstractGaeSnapshotServiceImpl {
 		return this.modelAddress;
 	}
 	
-	/**
-	 * @param requestedRevNr ..
-	 * @return the requested model snapshot
-	 */
-	synchronized public XRevWritableModel getModelSnapshot(long requestedRevNr) {
-		log.debug("Get snapshot " + this.modelAddress + " rev " + requestedRevNr);
-		
-		// /* if localVmCache has exact requested version, use it */
-		// XRevWritableModel cached = localVmCacheGet(requestedRevNr);
-		// if(cached != null) {
-		// log.debug("return locally cached");
-		// return cached;
-		// }
-		
-		return createModelSnapshot(requestedRevNr);
-	}
-	
 	@Override
 	public XRevWritableModel getModelSnapshot(long requestedRevNr, boolean precise) {
 		if(requestedRevNr == -1) {
@@ -422,62 +421,7 @@ public class GaeSnapshotServiceImplNG extends AbstractGaeSnapshotServiceImpl {
 			// model must be empty
 			return new SimpleModel(this.modelAddress);
 		}
-		if(precise) {
-			return XCopyUtils.createSnapshot(getModelSnapshot(requestedRevNr));
-		} else {
-			return XCopyUtils.createSnapshot(getModelSnapshotNewerOrAtRevision(requestedRevNr));
-		}
-	}
-	
-	/**
-	 * @param revisionNumber will be equal or less than the revision of the
-	 *            returned snapshot
-	 * @return a model snapshot with the given revisionNumber of an even more
-	 *         recent one (with a higher revision number)
-	 */
-	synchronized public XRevWritableModel getModelSnapshotNewerOrAtRevision(long revisionNumber) {
-		// if(!USE_SNAPSHOT_CACHE) {
-		// return getModelSnapshot(revisionNumber);
-		// }
-		
-		/* look for all versions at this or higher revNrs */
-		SortedMap<Long,XRevWritableModel> modelSnapshotsCache = getModelSnapshotsCache();
-		SortedMap<Long,XRevWritableModel> matchOrNewer;
-		synchronized(modelSnapshotsCache) {
-			matchOrNewer = modelSnapshotsCache.subMap(revisionNumber, Long.MAX_VALUE);
-		}
-		if(matchOrNewer.isEmpty()) {
-			// not cached
-			return createModelSnapshot(revisionNumber);
-		} else {
-			XRevWritableModel cached = matchOrNewer.values().iterator().next();
-			XyAssert.xyAssert(cached.getRevisionNumber() >= revisionNumber);
-			log.debug("re-using locamVmCache with revNr " + cached.getRevisionNumber() + " for "
-			        + revisionNumber);
-			return cached;
-		}
-	}
-	
-	/**
-	 * For this model: revNr -> modelSnapshot
-	 * 
-	 * TODO SCALE avoid growing large, keep only most recent version?
-	 */
-	private SortedMap<Long,XRevWritableModel> getModelSnapshotsCache() {
-		String key = "snapshots:" + this.getModelAddress();
-		Map<String,Object> instanceCache = InstanceContext.getInstanceCache();
-		SortedMap<Long,XRevWritableModel> modelSnapshotsCache;
-		synchronized(instanceCache) {
-			modelSnapshotsCache = (SortedMap<Long,XRevWritableModel>)instanceCache.get(key);
-			if(modelSnapshotsCache == null) {
-				log.debug("localVmcache for snapshots missing, creating one");
-				modelSnapshotsCache = new TreeMap<Long,XRevWritableModel>();
-				instanceCache.put(key, modelSnapshotsCache);
-			} else if(modelSnapshotsCache.size() > 100) {
-				modelSnapshotsCache.clear();
-			}
-		}
-		return modelSnapshotsCache;
+		return XCopyUtils.createSnapshot(createModelSnapshot(requestedRevNr));
 	}
 	
 	/*
@@ -511,7 +455,7 @@ public class GaeSnapshotServiceImplNG extends AbstractGaeSnapshotServiceImpl {
 		
 		// FIXME use object snapshots down here???
 		
-		XRevWritableModel fullModel = getModelSnapshot(snapshotRev);
+		XRevWritableModel fullModel = createModelSnapshot(snapshotRev);
 		SimpleModel partialModel = new SimpleModel(getModelAddress());
 		for(XAddress lock : locks) {
 			switch(lock.getAddressedType()) {
@@ -656,6 +600,11 @@ public class GaeSnapshotServiceImplNG extends AbstractGaeSnapshotServiceImpl {
 		return KeyFactory.createKey(KIND_SNAPSHOT, this.modelAddress.toURI() + "/" + revNr);
 	}
 	
+	/**
+	 * @param key
+	 * @param value
+	 * @return true if the key matches the revision number of the value
+	 */
 	private boolean isConsistent(String key, XRevWritableModel value) {
 		String generatedKey = KeyStructure.toString(getSnapshotKey(value.getRevisionNumber()));
 		if(!key.equals(generatedKey)) {

@@ -12,10 +12,14 @@ import org.xydra.base.XX;
 import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
+import org.xydra.base.change.XFieldEvent;
+import org.xydra.base.change.XTransactionEvent;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
+import org.xydra.base.rmof.XStateWritableField;
+import org.xydra.base.rmof.XStateWritableObject;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.core.XCopyUtils;
@@ -73,7 +77,7 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 	
 	/* How many changes to fetch in one batch fetch at most */
 	@Setting(value = "")
-	private static final long MAX_CHANGES_FETCH_SIZE = 50;
+	private static final long MAX_CHANGES_FETCH_SIZE = RevisionManager.WRITE_REV_EVERY + 4;
 	
 	/**
 	 * Initial time to wait before re-checking the status of an event who'se
@@ -151,7 +155,8 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 			        + ") GA?category=xydra&action=saveManyEvents&label=events&value="
 			        + atomicEventCount);
 			try {
-				throw new RuntimeException("Over 1000 events");
+				throw new RuntimeException("Over 1000 events for result=" + executionResult
+				        + " change=" + change);
 			} catch(Exception e) {
 				log.warn("Over 1000 events", e);
 			}
@@ -164,7 +169,7 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 		}
 		
 		change.giveUpIfTimeoutCritical();
-		this.changelogManager.commitAndClearLocks(change, Status.SuccessExecuted);
+		this.changelogManager.commitAndClearLocks(change, Status.SuccessExecutedApplied);
 	}
 	
 	/**
@@ -187,7 +192,7 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 	 */
 	private void execute_waitForLocks(GaeChange ourChange, RevisionManager revisionManager)
 	        throws VoluntaryTimeoutException {
-		long lastCommited = this.revisionManager.getInfo().getLastCommitted();
+		long lastCommited = this.revisionManager.getInfo().getLastStableCommitted();
 		XyAssert.xyAssert(lastCommited == -1 || ourChange.rev > lastCommited,
 		        "If a lastSilentCommitted is not undefiend (i.e. == -1), "
 		                + "it must be before this change");
@@ -197,6 +202,8 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 			/* working window is zero, there are no pending changes */
 			return;
 		}
+		XyAssert.xyAssert(pendingChangesSearchRange.size() < 1000, "?", pendingChangesSearchRange,
+		        pendingChangesSearchRange.size());
 		
 		Interval fetchRange = pendingChangesSearchRange.copy();
 		fetchRange.adjustStartToFitSizeIfNecessary(MAX_CHANGES_FETCH_SIZE);
@@ -209,7 +216,7 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 				/* now it cannot have any locks */
 				continue;
 			}
-			if(otherChange.getStatus().isCommitted()) {
+			if(!otherChange.getStatus().canChange()) {
 				this.revisionManager.foundNewHigherCommitedChange(otherChange);
 				continue;
 			} else {
@@ -256,7 +263,7 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 			
 			nextChange.reload();
 			
-			if(nextChange.getStatus().isCommitted()) {
+			if(!nextChange.getStatus().canChange()) {
 				XyAssert.xyAssert(!nextChange.hasLocks(),
 				        "now finished, so cannot have no locks anymore");
 				this.revisionManager.foundNewHigherCommitedChange(nextChange);
@@ -354,7 +361,7 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 		        + command);
 		execute_saveEventsReleaseLocks(executionResult, change);
 		c.stopAndStart("saveEvents");
-		XyAssert.xyAssert(change.getStatus().isCommitted(),
+		XyAssert.xyAssert(!change.getStatus().canChange(),
 		        "If we reach this line, change must be committed");
 		
 		this.revisionManager.foundNewHigherCommitedChange(change);
@@ -374,11 +381,12 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 			if(executionResult.getStatus().isFailure()) {
 				log.warn("!!! " + msg);
 			} else {
-				log.info("+++ " + msg);
+				log.debug("+++ " + msg);
 			}
 		}
 		
-		log.debug("Resulting revInfo: " + this.revisionManager.getInfo());
+		log.debug("Resulting revInfo: " + this.revisionManager.getInfo() + " for "
+		        + this.modelAddress);
 		
 		switch(executionResult.getStatus()) {
 		case FailedPreconditions:
@@ -386,6 +394,7 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 		case FailedTimeout:
 			return XCommand.FAILED;
 		case SuccessExecuted:
+		case SuccessExecutedApplied:
 			return change.rev;
 		case SuccessNochange:
 			return XCommand.NOCHANGE;
@@ -432,7 +441,8 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 	
 	@Override
 	public List<XEvent> getEventsBetween(XAddress address, long beginRevision, long endRevision) {
-		List<XEvent> events = this.changelogManager.getEventsBetween(beginRevision, endRevision);
+		Interval interval = new Interval(beginRevision, endRevision);
+		List<XEvent> events = this.changelogManager.getEventsInInterval(interval);
 		if(address.getAddressedType() == XType.XMODEL) {
 			XyAssert.xyAssert(address.equals(this.modelAddress));
 			/**
@@ -468,11 +478,14 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 	 */
 	@Override
 	public ModelRevision getModelRevision(boolean includeTentative) {
-		GaeModelRevInfo info = this.revisionManager.getInfo();
-		if(info.getPrecision() != Precision.Precise) {
-			// compute
-			computeMorePreciseCurrentRev();
-		}
+		GaeModelRevInfo info;
+		
+		// FIXME should suffice to compute only if imprecise
+		// info = this.revisionManager.getInfo();
+		// if(info.getPrecision() != Precision.Precise) {
+		computeMorePreciseCurrentRev();
+		info = this.revisionManager.getInfo();
+		// }
 		
 		long revision = info.getLastStableSuccessChange();
 		boolean modelExists = info.isModelExists();
@@ -488,34 +501,65 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 	
 	private void computeMorePreciseCurrentRev() {
 		long lastCommited = this.revisionManager.getInfo().getLastStableCommitted();
-		
 		Interval currentSearchRange = new Interval(lastCommited, lastCommited
 		        + MAX_CHANGES_FETCH_SIZE);
 		
+		log.debug("Compute more precise from " + this.revisionManager.getInfo() + " for @"
+		        + this.modelAddress + " in " + currentSearchRange);
+		
+		computeMorePreciseCurrentRevInInterval(currentSearchRange);
+		log.debug(".. new rev is " + this.revisionManager.getInfo() + " for @" + this.modelAddress);
+	}
+	
+	private void computeMorePreciseCurrentRevInInterval(Interval searchRange) {
+		Interval window = searchRange.copy();
 		while(true) {
-			List<GaeChange> changes = this.changelogManager.getChanges(currentSearchRange);
+			log.debug("Scanning changes in " + window);
+			List<GaeChange> changes = this.changelogManager.getChanges(window);
 			if(changes.isEmpty()) {
-				this.revisionManager.getInfo().setPrecision(Precision.Precise);
+				GaeModelRevInfo info = this.revisionManager.getInfo();
+				log.debug("Found no changes in " + window + " so rev " + info
+				        + " is now precise for " + this.modelAddress);
+				info.setPrecision(Precision.Precise);
+				info.setDebugHint("Found no changes in " + window + " so rev "
+				        + info.getLastStableSuccessChange() + " is now precise for "
+				        + this.modelAddress);
 				return;
-			}
-			for(int i = 0; i < changes.size(); i++) {
-				GaeChange change = changes.get(i);
-				if(change == null) {
-					this.revisionManager.getInfo().setPrecision(Precision.Precise);
-					return;
+			} else {
+				for(int i = 0; i < changes.size(); i++) {
+					GaeChange change = changes.get(i);
+					if(change == null) {
+						log.debug("Found first empty spot in changelog at rev=" + i);
+						GaeModelRevInfo info = this.revisionManager.getInfo();
+						info.setDebugHint("Found first empty spot in changelog at rev=" + i);
+						info.setPrecision(Precision.Precise);
+						return;
+					} else {
+						/*
+						 * Always check if a change is timed-out, and if so,
+						 * progress it
+						 */
+						boolean progressed = this.changelogManager.progressChangeIfTimedOut(change,
+						        this.revisionManager);
+						if(progressed) {
+							// revision was incremented via
+							// foundNewHigherCommitedChange
+						} else if(!change.getStatus().canChange()) {
+							this.revisionManager.foundNewHigherCommitedChange(change);
+						} else {
+							/* its pending, somebody else is just working on it */
+							log.debug("Found first pending spot in changelog at rev=" + i
+							        + " status=" + change.getStatus());
+							GaeModelRevInfo info = this.revisionManager.getInfo();
+							info.setPrecision(Precision.Precise);
+							info.setDebugHint("Found first pending spot in changelog at rev=" + i
+							        + " status=" + change.getStatus());
+							return;
+						}
+					}
 				}
-				/* Always check if a change is timed-out, and if so, progress it */
-				if(this.changelogManager.progressChangeIfTimedOut(change, this.revisionManager)) {
-					// revision was incremented
-				} else if(change.getStatus().isCommitted()) {
-					this.revisionManager.foundNewHigherCommitedChange(change);
-				} else {
-					/* its pending, somebody else is just working on it */
-					this.revisionManager.getInfo().setPrecision(Precision.Precise);
-					return;
-				}
+				window = window.moveRight();
 			}
-			currentSearchRange = currentSearchRange.moveRight();
 		}
 	}
 	
@@ -543,7 +587,27 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 	
 	@Override
 	synchronized public XWritableModel getSnapshot(boolean includeTentative) {
-		if(!this.revisionManager.getInfo().isModelExists()) {
+		computeMorePreciseCurrentRev();
+		GaeModelRevInfo info = this.revisionManager.getInfo();
+		
+		// // FIXME returns sometimes a way too low rev number as Precise
+		// GaeModelRevInfo info = this.revisionManager.getInfo();
+		// if(info.getPrecision() != Precision.Precise) {
+		// computeMorePreciseCurrentRev();
+		// info = this.revisionManager.getInfo();
+		// }
+		//
+		// // FIXME !!!!!!!!!!!!!!!
+		// else {
+		// GaeModelRevInfo before = info.copy();
+		// computeMorePreciseCurrentRev();
+		// XyAssert.xyAssert(before.equals(info), " before %s but after %s",
+		// before, info);
+		// }
+		
+		XyAssert.xyAssert(info.getPrecision() == Precision.Precise);
+		
+		if(!info.isModelExists()) {
 			return null;
 		}
 		
@@ -571,7 +635,7 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 	 *         Note: Reads revCache.lastTaken
 	 */
 	@GaeOperation(memcacheRead = true ,datastoreRead = true ,datastoreWrite = true ,memcacheWrite = true)
-	GaeChange grabRevisionAndRegisterLocks(GaeLocks locks, XID actorId) {
+	private GaeChange grabRevisionAndRegisterLocks(GaeLocks locks, XID actorId) {
 		long lastTaken = this.revisionManager.getInfo().getLastTaken();
 		XyAssert.xyAssert(lastTaken >= -1);
 		long start = lastTaken + 1;
@@ -590,6 +654,117 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 	public boolean modelHasBeenManaged() {
 		GaeChange change = this.changelogManager.getChange(0);
 		return change != null;
+	}
+	
+	/**
+	 * Saves the updated change.
+	 * 
+	 * @param modelAddress
+	 * 
+	 * @param change
+	 * @param revisionManager
+	 * @param changelogManager
+	 */
+	public static void rollForward_updateTentativeObjectStates(XAddress modelAddress,
+	        GaeChange change, RevisionManager revisionManager, ChangeLogManager changelogManager) {
+		XyAssert.xyAssert(change.getStatus().changedSomething());
+		log.debug("roll forward " + change);
+		
+		GaeSnapshotServiceImplNG snapshotService = new GaeSnapshotServiceImplNG(changelogManager);
+		ContextBeforeCommand ctxBeforeCmd = new ContextBeforeCommand(modelAddress, revisionManager,
+		        snapshotService);
+		ContextInTxn ctxInTxn = ctxBeforeCmd.forkTxn();
+		
+		XEvent event = change.getEvent();
+		if(event instanceof XTransactionEvent) {
+			XTransactionEvent txnEvent = (XTransactionEvent)event;
+			for(int i = 0; i < txnEvent.size(); i++) {
+				XAtomicEvent e = txnEvent.getEvent(i);
+				updateTentativeObjectStates(modelAddress, e, ctxInTxn);
+			}
+		} else {
+			XAtomicEvent e = (XAtomicEvent)event;
+			updateTentativeObjectStates(modelAddress, e, ctxInTxn);
+		}
+		
+		// move changes from txnContext to tos
+		updateTentativeObjectStates(ctxInTxn, ctxBeforeCmd, change.rev);
+		
+		change.setStatus(Status.SuccessExecutedApplied);
+		change.save();
+	}
+	
+	private static void updateTentativeObjectStates(XAddress modelAddress, XAtomicEvent e,
+	        ContextInTxn ctxInTxn) {
+		switch(e.getTarget().getAddressedType()) {
+		case XREPOSITORY: {
+			/* model add/remove */
+			switch(e.getChangeType()) {
+			case ADD:
+				ctxInTxn.setModelExists(true);
+				break;
+			case REMOVE:
+				ctxInTxn.setModelExists(false);
+				break;
+			default:
+				throw new AssertionError();
+			}
+			break;
+		}
+		case XMODEL: {
+			/* object add/remove */
+			switch(e.getChangeType()) {
+			case ADD:
+				ctxInTxn.createObject(e.getChangedEntity().getObject());
+				break;
+			case REMOVE:
+				ctxInTxn.removeObject(e.getChangedEntity().getObject());
+				break;
+			default:
+				throw new AssertionError();
+			}
+			break;
+		}
+		case XOBJECT: {
+			/* field add/remove */
+			XStateWritableObject obj = ctxInTxn.getObject(e.getChangedEntity().getObject());
+			switch(e.getChangeType()) {
+			case ADD:
+				obj.createField(e.getChangedEntity().getField());
+				break;
+			case REMOVE:
+				obj.removeField(e.getChangedEntity().getField());
+				break;
+			default:
+				throw new AssertionError();
+			}
+			break;
+		}
+		case XFIELD: {
+			/* value add/remove/change */
+			XStateWritableObject obj = ctxInTxn.getObject(e.getChangedEntity().getObject());
+			XStateWritableField field = obj.getField(e.getChangedEntity().getField());
+			XFieldEvent fieldEvent = (XFieldEvent)e;
+			switch(e.getChangeType()) {
+			case ADD:
+				field.setValue(fieldEvent.getNewValue());
+				break;
+			case REMOVE:
+				field.setValue(null);
+				break;
+			case CHANGE:
+				field.setValue(fieldEvent.getNewValue());
+				break;
+			default:
+				throw new AssertionError();
+			}
+			
+			break;
+		}
+		default:
+			break;
+		}
+		
 	}
 	
 }

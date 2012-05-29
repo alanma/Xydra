@@ -1,11 +1,12 @@
 package org.xydra.store.impl.gae.ng;
 
 import org.xydra.base.XAddress;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.impl.gae.UniCache;
 import org.xydra.store.impl.gae.changes.GaeChange;
-import org.xydra.store.impl.gae.changes.GaeChange.Status;
-import org.xydra.store.impl.gae.ng.Algorithms.Effect;
+import org.xydra.store.impl.gae.ng.GaeModelRevInfo.Precision;
 
 
 /**
@@ -19,40 +20,49 @@ import org.xydra.store.impl.gae.ng.Algorithms.Effect;
  */
 public class RevisionManager {
 	
-	private static final String KEY_VERSION_ID = "NG";
+	private static final Logger log = LoggerFactory.getLogger(RevisionManager.class);
+	
+	public static final long WRITE_REV_EVERY = 16;
 	
 	private XAddress modelAddress;
 	
 	private GaeModelRevInfo revision;
 	
-	private UniCache<GaeModelRevInfo> unicache = new UniCache<GaeModelRevInfo>(
-	        UniCacheRevisionInfoEntryHandler.instance());
+	private UniCache<GaeModelRevInfo> uniRevCache = new UniCache<GaeModelRevInfo>(
+	        UniCacheRevisionInfoEntryHandler.instance(), "CACHEDREV");
 	
 	public RevisionManager(XAddress modelAddress) {
 		this.modelAddress = modelAddress;
 		this.revision = null;
 	}
 	
+	/**
+	 * Takes cares of degrating precision
+	 * 
+	 * @param change
+	 */
 	public void foundNewHigherCommitedChange(GaeChange change) {
-		XyAssert.xyAssert(change.getStatus().isCommitted());
-		long rev = change.rev;
-		Effect modelExistsEffect = Algorithms.effectOnModelExistsFlag(change);
+		XyAssert.xyAssert(!change.getStatus().canChange());
 		
-		if(change.getStatus() == Status.SuccessExecuted) {
-			if(this.revision.getLastStableCommitted() + 1 == rev) {
-				this.revision.incrementLastStableSuccessChange(rev);
-				XyAssert.xyAssert(modelExistsEffect != Effect.NoEffect);
-				this.revision.setModelExists(Effect.modelExists(modelExistsEffect));
+		if(change.getStatus().changedSomething()) {
+			if(this.revision.getLastStableCommitted() + 1 == change.rev) {
+				boolean modelExists = Algorithms.changeIndicatesModelExists(change);
+				// IMPROVE use exact change read time instead of NOW
+				this.revision.incrementLastStableSuccessChange(change.rev, modelExists,
+				        System.currentTimeMillis());
+				this.revision.setPrecisionToImprecise();
 				writeToDatastoreAndMemcache();
 			} else {
-				this.revision.incrementLastSuccessChange(rev);
+				this.revision.incrementLastSuccessChange(change.rev);
+				this.revision.setPrecisionToImprecise();
 			}
 		} else {
-			if(this.revision.getLastCommitted() + 1 == rev) {
-				this.revision.incrementLastStableCommitted(rev);
+			if(this.revision.getLastStableCommitted() + 1 == change.rev) {
+				this.revision.incrementLastStableCommitted(change.rev);
+				this.revision.setPrecisionToImprecise();
 				writeToDatastoreAndMemcache();
 			} else {
-				this.revision.incrementLastTaken(rev);
+				this.revision.incrementLastTaken(change.rev);
 			}
 		}
 	}
@@ -61,6 +71,9 @@ public class RevisionManager {
 		this.revision.incrementLastTaken(rev);
 	}
 	
+	/**
+	 * @return a reference to the revision info
+	 */
 	public GaeModelRevInfo getInfo() {
 		if(this.revision == null) {
 			readFromDatastoreAndMemcache();
@@ -69,21 +82,36 @@ public class RevisionManager {
 			this.revision = GaeModelRevInfo.createModelDoesNotExist();
 		}
 		XyAssert.xyAssert(this.revision != null);
+		
+		log.debug("Return " + this.revision + " for " + this.modelAddress);
+		
+		// FIXME !!!!!!!!!!!!!
+		// check if still current
+		// if(this.revision.getPrecision() == Precision.Precise) {
+		// ChangeLogManager clm = new ChangeLogManager(this.modelAddress);
+		// long rev = this.revision.getLastStableSuccessChange() + 1;
+		// GaeChange chg = clm.getChange(rev);
+		// XyAssert.xyAssert(chg == null || !chg.getStatus().changedSomething()
+		// || chg.getStatus().canChange(),
+		// "revMan say %s but change at %s is %s",
+		// this.revision, rev, chg);
+		// }
+		
 		return this.revision;
 	}
 	
 	public void readFromDatastoreAndMemcache() {
-		boolean instance = false;
-		boolean memcache = false;
+		boolean memcache = true;
 		boolean datastore = true;
-		GaeModelRevInfo value = this.unicache.get(this.modelAddress + "/" + KEY_VERSION_ID,
-		        UniCache.StorageOptions.create(instance, memcache, datastore));
+		GaeModelRevInfo value = this.uniRevCache.get("" + this.modelAddress,
+		        UniCache.StorageOptions.create(0, memcache, datastore, false));
 		if(value != null) {
 			if(this.revision == null) {
 				this.revision = value;
 			} else {
 				this.revision.incrementFrom(value);
 			}
+			value.setPrecision(Precision.Loaded);
 		}
 	}
 	
@@ -92,20 +120,10 @@ public class RevisionManager {
 		if(this.revision == null) {
 			readFromDatastoreAndMemcache();
 		}
-		boolean instance = false;
-		boolean memcache = false;
-		boolean datastore = this.revision.getLastStableSuccessChange() % 32 == 0;
-		this.unicache.put(this.modelAddress + "/" + KEY_VERSION_ID, this.revision,
-		        UniCache.StorageOptions.create(instance, memcache, datastore));
-	}
-	
-	/**
-	 * @return a {@link RevisionManager} with a COPY of this state.
-	 */
-	public RevisionManager copy() {
-		RevisionManager fork = new RevisionManager(this.modelAddress);
-		fork.revision = this.revision.copy();
-		return fork;
+		boolean memcache = true;
+		boolean datastore = this.revision.getLastStableSuccessChange() % WRITE_REV_EVERY == 0;
+		this.uniRevCache.put("" + this.modelAddress, this.revision,
+		        UniCache.StorageOptions.create(0, memcache, datastore, false));
 	}
 	
 }
