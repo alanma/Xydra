@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -17,18 +18,25 @@ import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
 import org.xydra.base.change.ChangeType;
+import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XCommandFactory;
 import org.xydra.base.change.XEvent;
+import org.xydra.base.change.XFieldCommand;
 import org.xydra.base.change.XFieldEvent;
 import org.xydra.base.change.XModelEvent;
 import org.xydra.base.change.XObjectEvent;
 import org.xydra.base.change.XRepositoryEvent;
+import org.xydra.base.change.XTransaction;
 import org.xydra.base.change.XTransactionEvent;
+import org.xydra.base.change.impl.memory.MemoryFieldCommand;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
+import org.xydra.base.value.XStringValue;
 import org.xydra.base.value.XValue;
+import org.xydra.core.change.XTransactionBuilder;
+import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.log.gae.Log4jLoggerFactory;
@@ -1976,5 +1984,155 @@ public abstract class AbstractPersistenceTest {
 			        "hasManagedModels(id) returns false after we removed the model with the given id, although the persistence once managed a model with this id.",
 			        this.persistence.hasManagedModel(id));
 		}
+	}
+	
+	/**
+	 * Create Transaction of a simple MOF structure on a ChangedModel and check
+	 * revision numbers after a subsequent fieldCommand
+	 * 
+	 * Check in particular, if after an update of a field field.getOldFieldRev()
+	 * actually returns the former field rev (currently it seems to return 0).
+	 * 
+	 * This is causing an error right now as seen in FieldProperty.setValue,
+	 * where subsequent forced add cmd are used to set a value opposed to change
+	 * cmds.
+	 * 
+	 * This code is a mess, only commited so Max can test this special case.
+	 * 
+	 * @author xamde
+	 */
+	@Test
+	public void testExecuteCommandTransaction() {
+		/*
+		 * ObjectCommands of add type add new fields to objects.
+		 */
+		
+		// add a model on which an object can be created first
+		
+		XID modelId = XX.toId("testExecuteCommandTransaction");
+		XAddress modelAddress = XX.resolveModel(this.repoId, modelId);
+		XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId, false);
+		
+		long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
+		
+		GetWithAddressRequest modelAdrRequest = new GetWithAddressRequest(modelAddress);
+		
+		XWritableModel model = this.persistence.getModelSnapshot(modelAdrRequest);
+		
+		XTransactionBuilder txBuilder = new XTransactionBuilder(modelAddress);
+		
+		ChangedModel cm = new ChangedModel(model);
+		XID objectId = XX.toId("objectId");
+		XWritableObject xo = cm.createObject(objectId);
+		XID fieldId = XX.toId("fiedlId");
+		XWritableField field = xo.createField(fieldId);
+		XStringValue xValue = X.getValueFactory().createStringValue(new String("first"));
+		field.setValue(xValue);
+		
+		txBuilder.applyChanges(cm);
+		XTransaction tx = txBuilder.build();
+		
+		// create o,f with value as tx
+		revNr = this.persistence.executeCommand(this.actorId, tx);
+		assertTrue("The model wasn't correctly added, test cannot be executed.", revNr >= 0);
+		
+		log.info("result from tx: " + tx);
+		log.info("revision from fieldcmd " + revNr);
+		
+		/* output events */
+		List<XEvent> events = this.persistence.getEvents(modelAddress, 0, revNr);
+		
+		for(Iterator iterator = events.iterator(); iterator.hasNext();) {
+			XEvent xEvent = (XEvent)iterator.next();
+			log.info("got event " + xEvent + " with rev nr " + xEvent.getRevisionNumber());
+			if(xEvent instanceof XFieldEvent) {
+				log.info("old field rev was " + xEvent.getOldFieldRevision());
+			} else if(xEvent instanceof XObjectEvent) {
+				log.info("old object rev was " + xEvent.getOldObjectRevision());
+			} else if(xEvent instanceof XModelEvent) {
+				log.info("old model rev was " + xEvent.getOldModelRevision());
+			} else if(xEvent instanceof XTransactionEvent) {
+				log.info("event within tx:");
+				XTransactionEvent xTxEvent = (XTransactionEvent)xEvent;
+				Iterator<XAtomicEvent> it = xTxEvent.iterator();
+				while(it.hasNext()) {
+					XAtomicEvent xAtomicEvent = (XAtomicEvent)it.next();
+					if(xAtomicEvent instanceof XFieldEvent) {
+						log.info("old field rev was " + xAtomicEvent.getOldFieldRevision());
+					} else if(xAtomicEvent instanceof XObjectEvent) {
+						log.info("old object rev was " + xAtomicEvent.getOldObjectRevision());
+					} else if(xAtomicEvent instanceof XModelEvent) {
+						log.info("old model rev was " + xAtomicEvent.getOldModelRevision());
+					}
+				}
+				log.info("------ end tx events.");
+			}
+			
+		}
+		
+		/* get object from persistence */
+		
+		XAddress objectAddress = XX.resolveObject(this.repoId, modelId, objectId);
+		
+		// check that the field actually exists
+		GetWithAddressRequest objectAdrRequest = new GetWithAddressRequest(objectAddress);
+		XWritableObject object = this.persistence.getObjectSnapshot(objectAdrRequest);
+		field = object.getField(fieldId);
+		
+		assertNotNull("The field we tried to create actually wasn't correctly added.", field);
+		assertEquals("Returned field did not have the correct revision number.", revNr,
+		        field.getRevisionNumber());
+		
+		log.info("from persistence:");
+		log.info("field revision  " + field.getRevisionNumber());
+		log.info("object revision " + object.getRevisionNumber());
+		
+		long fieldRevNrBeforeUpdate = field.getRevisionNumber();
+		
+		/* overwrite field */
+		
+		xValue = X.getValueFactory().createStringValue(new String("second"));
+		XFieldCommand fieldCommand = MemoryFieldCommand.createAddCommand(field.getAddress(),
+		        XCommand.FORCED, xValue);
+		
+		long newRevNr = this.persistence.executeCommand(this.actorId, fieldCommand);
+		
+		assertTrue("The field value wasn't correctly added, test cannot be executed.",
+		        newRevNr >= 0);
+		
+		events = this.persistence.getEvents(modelAddress, revNr + 1, newRevNr);
+		
+		assertEquals("Got more than one event from field cmd", 1, events.size());
+		
+		XEvent event = events.get(0);
+		
+		assertTrue("event is not a FieldEvent", event instanceof XFieldEvent);
+		
+		long oldRevNr = event.getOldFieldRevision();
+		
+		assertEquals("Old field rev number and rev nr before field cmd did not match",
+		        fieldRevNrBeforeUpdate, oldRevNr);
+		
+		log.info("after update got event " + event + " with rev nr " + event.getRevisionNumber());
+		log.info("old field rev was " + oldRevNr);
+		log.info("field rev before update was " + fieldRevNrBeforeUpdate);
+		model = this.persistence.getModelSnapshot(modelAdrRequest);
+		
+		object = this.persistence.getObjectSnapshot(objectAdrRequest);
+		
+		field = object.getField(fieldId);
+		
+		log.info("revision from fieldcmd " + newRevNr);
+		assertNotNull("The field value we tried to add actually wasn't correctly added.", field);
+		assertEquals("Returned field did not have the correct revision number.", newRevNr,
+		        field.getRevisionNumber());
+		log.info("field revision from fieldcmd " + field.getRevisionNumber());
+		
+		assertEquals("Returned object did not have the correct revision number.", newRevNr,
+		        object.getRevisionNumber());
+		log.info("object revision " + object.getRevisionNumber());
+		assertEquals("Returned model did not have the correct revision number.", newRevNr,
+		        object.getRevisionNumber());
+		log.info("model revision " + model.getRevisionNumber());
 	}
 }
