@@ -24,6 +24,7 @@ import org.xydra.base.change.XFieldEvent;
 import org.xydra.base.change.XModelEvent;
 import org.xydra.base.change.XObjectEvent;
 import org.xydra.base.change.XRepositoryEvent;
+import org.xydra.base.change.XTransactionEvent;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
@@ -1622,11 +1623,11 @@ public abstract class AbstractPersistenceTest {
 		        events.contains(valueRemoveEvent));
 		
 		/*
-		 * remove the object and check if the correct events are returned. Check
-		 * getEvents(fieldAddress...), getEvents(objectAddress...) and
-		 * getEvents(modelAddress...) since they might behave differently.
+		 * Remove the object and check if the correct events are returned.
 		 * 
-		 * Check that the \"field was removed\"-event is implicit.
+		 * The returned event should be an XTransactionEvent since removing the
+		 * object also removes the field. Check that the \"field was
+		 * removed\"-event is implicit.
 		 */
 		
 		XCommand removeObjectCom = this.comFactory.createRemoveObjectCommand(this.repoId, modelId,
@@ -1639,17 +1640,56 @@ public abstract class AbstractPersistenceTest {
 		events = this.persistence.getEvents(modelAddress, revNr, revNr);
 		
 		assertEquals(
-		        "List of events should contain two events (the \"object was removed\"- and the implicit \"field was removed\"-event), but actually contains zero or more than 2 events.",
-		        2, events.size());
+		        "List of events should contain one transaction event (which represents the \"object was removed\"- and the implicit \"field was removed\"-event), but actually contains zero or more than 2 events.",
+		        1, events.size());
+		
+		assertTrue(
+		        "The returned event is not an XTransactionEvent, but it should be an XTransactionEvent, since we removed the object and thereby also implicitly removed the field.",
+		        events.get(0) instanceof XTransactionEvent);
+		XTransactionEvent transEvent = (XTransactionEvent)events.get(0);
+		
+		/*
+		 * check the transaction event
+		 */
+		assertEquals("The transaction event is not of the transaction-type.",
+		        ChangeType.TRANSACTION, transEvent.getChangeType());
+		assertEquals(
+		        "The transcation event should contain 2 events, but actually contains zero or more than 2 events.",
+		        2, transEvent.size());
+		assertEquals("The event didn't refer to the correct old model revision number.",
+		        oldObjectRev2, transEvent.getOldModelRevision());
+		
+		assertEquals("The event didn't refer to the correct revision number.", revNr,
+		        transEvent.getRevisionNumber());
+		assertEquals("Event doesn't refer to the correct target.", modelAddress,
+		        transEvent.getTarget());
+		assertEquals("Event doesn't refer to the correct changed entity.", modelAddress,
+		        transEvent.getChangedEntity());
+		assertEquals("The actor of the event is not correct.", this.actorId, transEvent.getActor());
+		assertFalse("The event is wrongly marked as bein implied implied.", transEvent.isImplied());
+		assertFalse("the event is wrongly marked as being part of a transaction.",
+		        transEvent.inTransaction());
 		
 		XEvent fieldRemoveEvent, objectRemoveEvent;
 		
-		if(events.get(0) instanceof XObjectEvent) {
-			fieldRemoveEvent = events.get(0);
-			objectRemoveEvent = events.get(1);
+		/*
+		 * check that the transaction event consists of one XModelEvent (=
+		 * Object was removed) and one XObjectEvent (= Field was removed)
+		 */
+		if(transEvent.getEvent(0) instanceof XObjectEvent) {
+			fieldRemoveEvent = transEvent.getEvent(0);
+			objectRemoveEvent = transEvent.getEvent(1);
+			
+			assertTrue("There was an XObjectEvent, but no XModelEvent.",
+			        objectRemoveEvent instanceof XModelEvent);
 		} else {
-			fieldRemoveEvent = events.get(1);
-			objectRemoveEvent = events.get(0);
+			fieldRemoveEvent = transEvent.getEvent(1);
+			objectRemoveEvent = transEvent.getEvent(0);
+			
+			assertTrue("The first event is neither an XObject- nor an XModelEvent.",
+			        objectRemoveEvent instanceof XModelEvent);
+			assertTrue("The second event is not an XModelEvent",
+			        fieldRemoveEvent instanceof XObjectEvent);
 		}
 		
 		assertEquals("The returned event was not of remove-type.", ChangeType.REMOVE,
@@ -1675,7 +1715,7 @@ public abstract class AbstractPersistenceTest {
 		assertEquals("The actor of the event is not correct.", this.actorId,
 		        fieldRemoveEvent.getActor());
 		assertTrue("The event is wrongly marked as not implied.", fieldRemoveEvent.isImplied());
-		assertFalse("the event is wrongly marked as being part of a transaction.",
+		assertTrue("the event is wrongly marked as not being part of a transaction.",
 		        fieldRemoveEvent.inTransaction());
 		
 		assertEquals("The event didn't refer to the correct old model revision number.",
@@ -1692,7 +1732,7 @@ public abstract class AbstractPersistenceTest {
 		assertEquals("The actor of the event is not correct.", this.actorId,
 		        objectRemoveEvent.getActor());
 		assertFalse("The event is wrongly marked as implied.", objectRemoveEvent.isImplied());
-		assertFalse("the event is wrongly marked as being part of a transaction.",
+		assertTrue("the event is wrongly marked as not being part of a transaction.",
 		        objectRemoveEvent.inTransaction());
 		
 		/*
