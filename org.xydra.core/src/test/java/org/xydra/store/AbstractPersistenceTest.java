@@ -36,6 +36,9 @@ import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.value.XStringValue;
 import org.xydra.base.value.XValue;
 import org.xydra.core.change.XTransactionBuilder;
+import org.xydra.core.model.XModel;
+import org.xydra.core.model.XObject;
+import org.xydra.core.model.XRepository;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -1881,6 +1884,125 @@ public abstract class AbstractPersistenceTest {
 	
 	@Test
 	public void testGetModelSnapshot() {
+		
+		/*
+		 * create a model and execute some commands on it, manage a separate
+		 * model in parallel, execute the same commands on that one and compare
+		 * the returned model to the self-managed model
+		 */
+		
+		XID modelId = X.getIDProvider().fromString("testGetModelSnapshotModel");
+		XAddress modelAddress = XX.resolveModel(this.repoId, modelId);
+		
+		XRepository repo = X.createMemoryRepository(this.repoId);
+		XModel model = repo.createModel(modelId);
+		
+		XCommand addModelCommand = this.comFactory.createAddModelCommand(this.repoId, modelId,
+		        false);
+		long revNr = this.persistence.executeCommand(this.actorId, addModelCommand);
+		assertTrue("Model could not be created, test cannot be executed.", revNr >= 0);
+		
+		int numberOfObjects = 15;
+		int numberOfObjectsWithFields = 10;
+		
+		assert numberOfObjects >= numberOfObjectsWithFields;
+		
+		int numberOfFields = 5;
+		
+		List<XID> objectIds = new ArrayList<XID>();
+		for(int i = 0; i < numberOfObjects; i++) {
+			XID objectId = X.getIDProvider().fromString("testGetModelSnapshotObject" + i);
+			objectIds.add(objectId);
+			
+			model.createObject(objectId);
+			
+			XCommand addObjectCommand = this.comFactory.createAddObjectCommand(this.repoId,
+			        modelId, objectId, false);
+			revNr = this.persistence.executeCommand(this.actorId, addObjectCommand);
+			assertTrue("The " + i + ". Object could not be created, test cannot be executed.",
+			        revNr > 0);
+		}
+		
+		List<XID> fieldIds = new ArrayList<XID>();
+		for(int i = 0; i < numberOfFields; i++) {
+			fieldIds.add(X.getIDProvider().fromString("testGetModelSnapshotField" + i));
+		}
+		
+		for(int i = 0; i < numberOfObjectsWithFields; i++) {
+			XID objectId = objectIds.get(i);
+			XObject object = model.getObject(objectId);
+			
+			for(XID fieldId : fieldIds) {
+				object.createField(fieldId);
+				
+				XCommand addFieldCommand = this.comFactory.createAddFieldCommand(this.repoId,
+				        modelId, objectId, fieldId, false);
+				revNr = this.persistence.executeCommand(this.actorId, addFieldCommand);
+				assertTrue("The " + i + ". field could not be created in the Object with id "
+				        + objectId + ", test cannot be executed.", revNr > 0);
+			}
+		}
+		
+		/*
+		 * TODO also add values and remove some things
+		 */
+		
+		// get the model snapshot
+		GetWithAddressRequest modelReq = new GetWithAddressRequest(modelAddress);
+		XWritableModel modelSnapshot = this.persistence.getModelSnapshot(modelReq);
+		
+		int objectsInSnapshot = 0;
+		
+		for(XID objectId : modelSnapshot) {
+			assert objectId != null;
+			objectsInSnapshot++;
+		}
+		
+		assertEquals("The snapshot does not have the correct amount of objects.", numberOfObjects,
+		        objectsInSnapshot);
+		
+		/*
+		 * compare the managed model with the snapshot. "equals" might not work
+		 * here, since the returned java objects might be of different types, so
+		 * we'll have to test the equality manually.
+		 */
+		
+		assertEquals(modelId, modelSnapshot.getId());
+		assertEquals(model.getRevisionNumber(), modelSnapshot.getRevisionNumber());
+		
+		int objectSnapshotsWithoutFields = 0;
+		
+		for(XID objectId : model) {
+			assertTrue("Snapshot does not contain an object which it should contain.",
+			        modelSnapshot.hasObject(objectId));
+			
+			XObject object = model.getObject(objectId);
+			XWritableObject objectSnapshot = modelSnapshot.getObject(objectId);
+			
+			int fieldsInSnapshot = 0;
+			
+			for(XID fieldId : objectSnapshot) {
+				assert fieldId != null;
+				fieldsInSnapshot++;
+			}
+			
+			if(fieldsInSnapshot != 0) {
+				assertEquals("The snapshot does not have the correct amount of fields.",
+				        numberOfFields, fieldsInSnapshot);
+				
+				for(XID fieldId : object) {
+					assertTrue("Snapshot does not contain a field which it should contain.",
+					        objectSnapshot.hasField(fieldId));
+				}
+			} else {
+				objectSnapshotsWithoutFields++;
+			}
+			
+		}
+		
+		assertEquals("The snapshot does not have the correct amount of objects without fields.",
+		        numberOfObjects - numberOfObjectsWithFields, objectSnapshotsWithoutFields);
+		
 		/*
 		 * TODO write this test - create a model and execute some commands on
 		 * it, manage a separate model in parallel, execute the same commands on
@@ -2042,8 +2164,8 @@ public abstract class AbstractPersistenceTest {
 		/* output events */
 		List<XEvent> events = this.persistence.getEvents(modelAddress, 0, revNr);
 		
-		for(Iterator iterator = events.iterator(); iterator.hasNext();) {
-			XEvent xEvent = (XEvent)iterator.next();
+		for(Iterator<XEvent> iterator = events.iterator(); iterator.hasNext();) {
+			XEvent xEvent = iterator.next();
 			log.info("got event " + xEvent + " with rev nr " + xEvent.getRevisionNumber());
 			if(xEvent instanceof XFieldEvent) {
 				log.info("old field rev was " + xEvent.getOldFieldRevision());
@@ -2056,7 +2178,7 @@ public abstract class AbstractPersistenceTest {
 				XTransactionEvent xTxEvent = (XTransactionEvent)xEvent;
 				Iterator<XAtomicEvent> it = xTxEvent.iterator();
 				while(it.hasNext()) {
-					XAtomicEvent xAtomicEvent = (XAtomicEvent)it.next();
+					XAtomicEvent xAtomicEvent = it.next();
 					if(xAtomicEvent instanceof XFieldEvent) {
 						log.info("old field rev was " + xAtomicEvent.getOldFieldRevision());
 					} else if(xAtomicEvent instanceof XObjectEvent) {
