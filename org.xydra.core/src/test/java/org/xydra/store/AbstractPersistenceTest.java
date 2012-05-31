@@ -2123,45 +2123,36 @@ public abstract class AbstractPersistenceTest {
 	 */
 	@Test
 	public void testExecuteCommandTransaction() {
-		/*
-		 * ObjectCommands of add type add new fields to objects.
-		 */
+		// constants
+		XID modelId = XX.toId("testExecuteCommandTransaction");
+		XID objectId = XX.toId("objectId");
+		XID fieldId = XX.toId("fiedlId");
+		XAddress modelAddress = XX.resolveModel(this.repoId, modelId);
+		XAddress objectAddress = XX.resolveObject(this.repoId, modelId, objectId);
+		XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId, false);
+		GetWithAddressRequest modelAdrRequest = new GetWithAddressRequest(modelAddress);
+		GetWithAddressRequest objectAdrRequest = new GetWithAddressRequest(objectAddress);
+		XStringValue valueFirst = X.getValueFactory().createStringValue(new String("first"));
+		XStringValue valueSecond = X.getValueFactory().createStringValue(new String("second"));
 		
 		// add a model on which an object can be created first
-		
-		XID modelId = XX.toId("testExecuteCommandTransaction");
-		XAddress modelAddress = XX.resolveModel(this.repoId, modelId);
-		XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId, false);
-		
 		long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
-		
-		GetWithAddressRequest modelAdrRequest = new GetWithAddressRequest(modelAddress);
 		
 		XWritableModel model = this.persistence.getModelSnapshot(modelAdrRequest);
 		
 		XTransactionBuilder txBuilder = new XTransactionBuilder(modelAddress);
-		
 		ChangedModel cm = new ChangedModel(model);
-		XID objectId = XX.toId("objectId");
 		XWritableObject xo = cm.createObject(objectId);
-		XID fieldId = XX.toId("fiedlId");
 		XWritableField field = xo.createField(fieldId);
-		XStringValue xValue = X.getValueFactory().createStringValue(new String("first"));
-		field.setValue(xValue);
 		
+		field.setValue(valueFirst);
 		txBuilder.applyChanges(cm);
-		XTransaction tx = txBuilder.build();
-		
+		XTransaction txn = txBuilder.build();
 		// create object and field with value as tx
-		revNr = this.persistence.executeCommand(this.actorId, tx);
+		revNr = this.persistence.executeCommand(this.actorId, txn);
 		assertTrue("The model wasn't correctly added, test cannot be executed.", revNr >= 0);
 		
-		/* get object from persistence */
-		
-		XAddress objectAddress = XX.resolveObject(this.repoId, modelId, objectId);
-		
-		// check that the field actually exists
-		GetWithAddressRequest objectAdrRequest = new GetWithAddressRequest(objectAddress);
+		/* get object from persistence ; check that the field actually exists */
 		XWritableObject object = this.persistence.getObjectSnapshot(objectAdrRequest);
 		field = object.getField(fieldId);
 		
@@ -2172,28 +2163,34 @@ public abstract class AbstractPersistenceTest {
 		long fieldRevNrBeforeUpdate = field.getRevisionNumber();
 		
 		/* overwrite field */
-		
-		xValue = X.getValueFactory().createStringValue(new String("second"));
-		XFieldCommand fieldCommand = MemoryFieldCommand.createAddCommand(field.getAddress(),
-		        XCommand.FORCED, xValue);
-		
-		long newRevNr = this.persistence.executeCommand(this.actorId, fieldCommand);
-		
+		XFieldCommand fieldChangeValueCommand = MemoryFieldCommand.createAddCommand(
+		        field.getAddress(), XCommand.FORCED, valueSecond);
+		long newRevNr = this.persistence.executeCommand(this.actorId, fieldChangeValueCommand);
 		assertTrue("The field value wasn't correctly added, test cannot be executed.",
 		        newRevNr >= 0);
 		
 		List<XEvent> events = this.persistence.getEvents(modelAddress, revNr + 1, newRevNr);
-		
 		assertEquals("Got more than one event from field cmd", 1, events.size());
-		
 		XEvent event = events.get(0);
-		
 		assertTrue("event is not a FieldEvent", event instanceof XFieldEvent);
-		
 		long oldRevNr = event.getOldFieldRevision();
+		
+		// System.out.println("========================================");
+		// List<XEvent> events1 = this.persistence.getEvents(modelAddress, 0,
+		// 1000);
+		// for(XEvent e : events1) {
+		// System.out.println("========= " + e.getRevisionNumber() + " " + e);
+		// if(e instanceof XTransactionEvent) {
+		// XTransactionEvent te = (XTransactionEvent)e;
+		// for(int i = 0; i < te.size(); i++) {
+		// XAtomicEvent sube = te.getEvent(i);
+		// System.out.println("========= " + sube.getRevisionNumber() + " --- "
+		// + sube);
+		// }
+		// }
+		// }
 		
 		assertEquals("Old field rev number and rev nr before field cmd did not match",
 		        fieldRevNrBeforeUpdate, oldRevNr);
-		
 	}
 }
