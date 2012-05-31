@@ -16,6 +16,7 @@ import org.xydra.base.change.XFieldEvent;
 import org.xydra.base.change.XTransactionEvent;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableObject;
+import org.xydra.base.rmof.XRevWritableField;
 import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.base.rmof.XStateWritableField;
@@ -409,6 +410,10 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 		
 		for(XReadableObject added : sourceContext.getAdded()) {
 			TentativeObjectState tos = new TentativeObjectState(added, true, changeRev);
+			for(XID fieldId : tos) {
+				XRevWritableField field = tos.getField(fieldId);
+				field.setRevisionNumber(changeRev);
+			}
 			tos.setRevisionNumber(changeRev);
 			targetContext.saveTentativeObjectState(tos);
 		}

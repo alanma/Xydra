@@ -14,6 +14,11 @@ import org.xydra.store.impl.gae.changes.GaeChange;
 import org.xydra.store.impl.gae.changes.GaeChange.Status;
 
 
+/**
+ * This class changes the TOS
+ * 
+ * @author xamde
+ */
 public class CheckResult {
 	
 	/**
@@ -163,7 +168,8 @@ public class CheckResult {
 	
 	@Override
 	public String toString() {
-		return this.status + " " + (this.debugHint == null ? "" : this.debugHint) + " -> TBD";
+		return this.status + " " + (this.debugHint == null ? "" : this.debugHint) + " actor:"
+		        + this.actorId + " inTxn?" + this.inTransaction + " see also ctxInTxn";
 	}
 	
 	public XID getActorId() {
