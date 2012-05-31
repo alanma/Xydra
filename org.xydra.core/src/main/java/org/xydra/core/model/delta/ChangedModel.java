@@ -77,18 +77,18 @@ public class ChangedModel implements XWritableModel, IModelDiff {
 	
 	// Fields that are not in base and have been added.
 	// Contains no XIDs that are in removed or changed.
-	private final Map<XID,SimpleObject> added = new HashMap<XID,SimpleObject>();
+	private final Map<XID,SimpleObject> added = new HashMap<XID,SimpleObject>(2);
 	
 	private final XReadableModel base;
 	
 	// Fields that are in base and have not been removed.
 	// While they were changed once, those changes might have been reverted.
 	// Contains no XIDs that are in added or removed.
-	private final Map<XID,ChangedObject> changed = new HashMap<XID,ChangedObject>();
+	private final Map<XID,ChangedObject> changed = new HashMap<XID,ChangedObject>(2);
 	
 	// Fields that are in base but have been removed.
 	// Contains no XIDs that are in added or changed.
-	private final Set<XID> removed = new HashSet<XID>();
+	private final Set<XID> removed = new HashSet<XID>(2);
 	
 	/**
 	 * Wrap an {@link XReadableModel} to record a set of changes made. Multiple
@@ -535,7 +535,7 @@ public class ChangedModel implements XWritableModel, IModelDiff {
 	}
 	
 	private static <T> boolean containsAllDifferentElements(Collection<T> c) {
-		Set<T> set = new HashSet<T>();
+		Set<T> set = new HashSet<T>(4);
 		set.addAll(c);
 		return set.size() == c.size();
 	}

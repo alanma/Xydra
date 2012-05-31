@@ -44,18 +44,18 @@ public class ChangedObject implements XWritableObject, DeltaUtils.IObjectDiff {
 	
 	// Fields that are not in base and have been added.
 	// Contains no XIDs that are in removed or changed.
-	private final Map<XID,SimpleField> added = new HashMap<XID,SimpleField>();
+	private final Map<XID,SimpleField> added = new HashMap<XID,SimpleField>(2);
 	
 	private final XReadableObject base;
 	
 	// Fields that are in base and have not been removed.
 	// While they were changed once, those changes might have been reverted.
 	// Contains no XIDs that are in added or removed.
-	private final Map<XID,ChangedField> changed = new HashMap<XID,ChangedField>();
+	private final Map<XID,ChangedField> changed = new HashMap<XID,ChangedField>(2);
 	
 	// Fields that are in base but have been removed.
 	// Contains no XIDs that are in added or changed.
-	private final Set<XID> removed = new HashSet<XID>();
+	private final Set<XID> removed = new HashSet<XID>(2);
 	
 	/**
 	 * Wrap an {@link XReadableObject} to record a set of changes made. Multiple
@@ -72,7 +72,8 @@ public class ChangedObject implements XWritableObject, DeltaUtils.IObjectDiff {
 	 *            encapsulate and represent
 	 */
 	public ChangedObject(XReadableObject base) {
-		XyAssert.xyAssert(base != null); assert base != null;
+		XyAssert.xyAssert(base != null);
+		assert base != null;
 		this.base = base;
 	}
 	
@@ -252,8 +253,10 @@ public class ChangedObject implements XWritableObject, DeltaUtils.IObjectDiff {
 	
 	@Override
 	public XWritableField getField(XID fieldId) {
-		XyAssert.xyAssert(fieldId != null); assert fieldId != null;
-		XyAssert.xyAssert(this.base != null); assert this.base != null;
+		XyAssert.xyAssert(fieldId != null);
+		assert fieldId != null;
+		XyAssert.xyAssert(this.base != null);
+		assert this.base != null;
 		XyAssert.xyAssert(checkSetInvariants());
 		
 		SimpleField newField = this.added.get(fieldId);
@@ -434,8 +437,10 @@ public class ChangedObject implements XWritableObject, DeltaUtils.IObjectDiff {
 	 *            create the changedObject
 	 */
 	public static void commitTo(ChangedObject changedObject, XWritableObject baseObject) {
-		XyAssert.xyAssert(changedObject != null); assert changedObject != null;
-		XyAssert.xyAssert(baseObject != null); assert baseObject != null;
+		XyAssert.xyAssert(changedObject != null);
+		assert changedObject != null;
+		XyAssert.xyAssert(baseObject != null);
+		assert baseObject != null;
 		XyAssert.xyAssert(changedObject.getId().equals(baseObject.getId()));
 		for(SimpleField field : changedObject.getNewFields()) {
 			XWritableField baseField = baseObject.createField(field.getId());
