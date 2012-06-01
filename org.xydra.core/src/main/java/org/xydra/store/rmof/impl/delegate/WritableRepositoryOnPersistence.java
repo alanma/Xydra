@@ -100,11 +100,12 @@ public class WritableRepositoryOnPersistence extends AbstractWritableOnPersisten
 	public boolean hasModel(XID modelId) {
 		XyAssert.xyAssert(this.persistence != null);
 		assert this.persistence != null;
-		return this.persistence.hasManagedModel(modelId)
-		        && this.persistence.getModelRevision(
-		                new GetWithAddressRequest(XX.resolveModel(
-		                        this.persistence.getRepositoryId(), modelId), USE_TENTATIVE_STATE))
-		                .modelExists();
+		if(!this.persistence.hasManagedModel(modelId))
+			return false;
+		
+		ModelRevision info = this.persistence.getModelRevision(new GetWithAddressRequest(XX
+		        .resolveModel(this.persistence.getRepositoryId(), modelId), USE_TENTATIVE_STATE));
+		return info.modelExists();
 	}
 	
 	@Override
