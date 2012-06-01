@@ -79,7 +79,7 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 	
 	/* How many changes to fetch in one batch fetch at most */
 	@Setting(value = "")
-	private static final long MAX_CHANGES_FETCH_SIZE = RevisionManager.WRITE_REV_EVERY + 4;
+	private static final long MAX_CHANGES_FETCH_SIZE = RevisionManager.WRITE_REV_EVERY + 3;
 	
 	/**
 	 * Initial time to wait before re-checking the status of an event who'se
