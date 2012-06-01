@@ -540,7 +540,8 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 	private void computeMorePreciseCurrentRev() {
 		GaeModelRevInfo info = this.revisionManager.getInfo();
 		long lastCommited = info.getLastStableCommitted();
-		Interval currentSearchRange = new Interval(lastCommited, lastCommited
+		long searchStart = Math.max(lastCommited, 0);
+		Interval currentSearchRange = new Interval(searchStart, searchStart
 		        + MAX_CHANGES_FETCH_SIZE);
 		
 		log.debug("@" + this.modelAddress + " compute rev from " + info + " in "
@@ -557,6 +558,7 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 	 *            infinity
 	 */
 	private void computeMorePreciseCurrentRevInInterval(GaeModelRevInfo info, Interval searchRange) {
+		XyAssert.xyAssert(searchRange.start >= 0);
 		Interval window = searchRange.copy();
 		while(true) {
 			// log.debug("Scanning changes in " + window + " within " +
