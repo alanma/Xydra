@@ -2,6 +2,7 @@ package org.xydra.store.impl.gae.ng;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Future;
 
 import org.xydra.annotations.Setting;
@@ -107,10 +108,11 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 	public GaeModelPersistenceNG(XAddress modelAddress) {
 		this.modelAddress = modelAddress;
 		this.revisionManager = new RevisionManager(this.modelAddress);
+		GaeModelRevInfo info = this.revisionManager.getInfo();
+		
 		this.changelogManager = new ChangeLogManager(this.modelAddress);
 		this.snapshotService = new GaeSnapshotServiceImplNG(this.changelogManager);
-		this.executionContext = new ContextBeforeCommand(modelAddress, this.revisionManager,
-		        this.snapshotService);
+		this.executionContext = new ContextBeforeCommand(modelAddress, info, this.snapshotService);
 		XyAssert.xyAssert(this.executionContext.getAddress() != null);
 	}
 	
@@ -189,11 +191,12 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 	 * change ca. 10 objects each with 4k => 40k. So we fetch 25 changes.
 	 * 
 	 * @param ourChange waiting to be executed
+	 * @param info
 	 * @throws VoluntaryTimeoutException
 	 */
-	private void execute_waitForLocks(GaeChange ourChange, RevisionManager revisionManager)
-	        throws VoluntaryTimeoutException {
-		long lastCommited = this.revisionManager.getInfo().getLastStableCommitted();
+	private void execute_waitForLocks(GaeChange ourChange, GaeModelRevInfo info,
+	        RevisionManager revisionManager) throws VoluntaryTimeoutException {
+		long lastCommited = info.getLastStableCommitted();
 		XyAssert.xyAssert(lastCommited == -1 || ourChange.rev > lastCommited,
 		        "If a lastSilentCommitted is not undefiend (i.e. == -1), "
 		                + "it must be before this change");
@@ -209,9 +212,12 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 		Interval fetchRange = pendingChangesSearchRange.copy();
 		fetchRange.adjustStartToFitSizeIfNecessary(MAX_CHANGES_FETCH_SIZE);
 		
-		List<GaeChange> changes = this.changelogManager.getChanges(fetchRange);
-		for(int i = 0; i < changes.size(); i++) {
-			GaeChange otherChange = changes.get(i);
+		Map<Long,GaeChange> changes = this.changelogManager.getChanges(fetchRange);
+		for(long rev = fetchRange.start; rev <= fetchRange.end; rev++) {
+			GaeChange otherChange = changes.get(rev);
+			XyAssert.xyAssert(otherChange != null);
+			assert otherChange != null;
+			
 			/* Always check if a change is timed-out, and if so, progress it */
 			if(this.changelogManager.progressChangeIfTimedOut(otherChange, revisionManager)) {
 				/* now it cannot have any locks */
@@ -311,13 +317,14 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 		 * status: Creating
 		 */
 		log.debug("[???] Phase 1: grabRevisionAndRegister " + locks.size() + " locks = " + locks);
-		GaeChange change = grabRevisionAndRegisterLocks(locks, actorId);
+		GaeModelRevInfo info = this.revisionManager.getInfo();
+		GaeChange change = grabRevisionAndRegisterLocks(info, locks, actorId);
 		XyAssert.xyAssert(change.rev >= 0);
 		c.stopAndStart("grabRevisionAndRegisterLocks");
 		
 		/* Phase 2: Entering synchronised code ... */
 		log.debug("[r" + change.rev + "] Phase 2: waitForLocks");
-		execute_waitForLocks(change, this.revisionManager);
+		execute_waitForLocks(change, info, this.revisionManager);
 		c.stopAndStart("waitForLocks");
 		
 		/* --- Code synchronised by Xydra locks in GAE datastore --- */
@@ -531,38 +538,44 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 	}
 	
 	private void computeMorePreciseCurrentRev() {
-		long lastCommited = this.revisionManager.getInfo().getLastStableCommitted();
+		GaeModelRevInfo info = this.revisionManager.getInfo();
+		long lastCommited = info.getLastStableCommitted();
 		Interval currentSearchRange = new Interval(lastCommited, lastCommited
 		        + MAX_CHANGES_FETCH_SIZE);
 		
-		log.debug("Compute more precise from " + this.revisionManager.getInfo() + " for @"
-		        + this.modelAddress + " in " + currentSearchRange);
+		log.debug("@" + this.modelAddress + " compute rev from " + info + " in "
+		        + currentSearchRange);
 		
-		computeMorePreciseCurrentRevInInterval(currentSearchRange);
-		log.debug(".. new rev is " + this.revisionManager.getInfo() + " for @" + this.modelAddress);
+		computeMorePreciseCurrentRevInInterval(info, currentSearchRange);
+		log.debug("@" + this.modelAddress + " new rev is " + info + "; searched "
+		        + currentSearchRange);
 	}
 	
-	private void computeMorePreciseCurrentRevInInterval(Interval searchRange) {
+	/**
+	 * @param info
+	 * @param searchRange just the initial search range, gets extended to
+	 *            infinity
+	 */
+	private void computeMorePreciseCurrentRevInInterval(GaeModelRevInfo info, Interval searchRange) {
 		Interval window = searchRange.copy();
 		while(true) {
-			log.debug("Scanning changes in " + window);
-			List<GaeChange> changes = this.changelogManager.getChanges(window);
+			// log.debug("Scanning changes in " + window + " within " +
+			// searchRange);
+			Map<Long,GaeChange> changes = this.changelogManager.getChanges(window);
 			if(changes.isEmpty()) {
-				GaeModelRevInfo info = this.revisionManager.getInfo();
-				log.debug("Found no changes in " + window + " so rev " + info
-				        + " is now precise for " + this.modelAddress);
+				log.debug("Found no changes in " + window);
 				info.setPrecision(Precision.Precise);
 				info.setDebugHint("Found no changes in " + window + " so rev "
 				        + info.getLastStableSuccessChange() + " is now precise for "
 				        + this.modelAddress);
 				return;
 			} else {
-				for(int i = 0; i < changes.size(); i++) {
-					GaeChange change = changes.get(i);
+				
+				for(long rev = window.start; rev <= window.end; rev++) {
+					GaeChange change = changes.get(rev);
 					if(change == null) {
-						log.debug("Found first empty spot in changelog at rev=" + i);
-						GaeModelRevInfo info = this.revisionManager.getInfo();
-						info.setDebugHint("Found first empty spot in changelog at rev=" + i);
+						log.debug("Found first empty spot in changelog at rev=" + rev);
+						info.setDebugHint("Found first empty spot in changelog at rev=" + rev);
 						info.setPrecision(Precision.Precise);
 						return;
 					} else {
@@ -579,11 +592,10 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 							this.revisionManager.foundNewHigherCommitedChange(change);
 						} else {
 							/* its pending, somebody else is just working on it */
-							log.debug("Found first pending spot in changelog at rev=" + i
+							log.debug("Found first pending spot in changelog at rev=" + rev
 							        + " status=" + change.getStatus());
-							GaeModelRevInfo info = this.revisionManager.getInfo();
 							info.setPrecision(Precision.Precise);
-							info.setDebugHint("Found first pending spot in changelog at rev=" + i
+							info.setDebugHint("Found first pending spot in changelog at rev=" + rev
 							        + " status=" + change.getStatus());
 							return;
 						}
@@ -655,6 +667,8 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 	 * Grabs the lowest available revision number and registers a change for
 	 * that revision number with the provided locks.
 	 * 
+	 * @param info
+	 * 
 	 * @param lastTaken
 	 * 
 	 * @param locks which locks to get
@@ -666,8 +680,8 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 	 *         Note: Reads revCache.lastTaken
 	 */
 	@GaeOperation(memcacheRead = true ,datastoreRead = true ,datastoreWrite = true ,memcacheWrite = true)
-	private GaeChange grabRevisionAndRegisterLocks(GaeLocks locks, XID actorId) {
-		long lastTaken = this.revisionManager.getInfo().getLastTaken();
+	private GaeChange grabRevisionAndRegisterLocks(GaeModelRevInfo info, GaeLocks locks, XID actorId) {
+		long lastTaken = info.getLastTaken();
 		XyAssert.xyAssert(lastTaken >= -1);
 		long start = lastTaken + 1;
 		
@@ -693,16 +707,16 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 	 * @param modelAddress
 	 * 
 	 * @param change
-	 * @param revisionManager
+	 * @param info
 	 * @param changelogManager
 	 */
 	public static void rollForward_updateTentativeObjectStates(XAddress modelAddress,
-	        GaeChange change, RevisionManager revisionManager, ChangeLogManager changelogManager) {
+	        GaeChange change, GaeModelRevInfo info, ChangeLogManager changelogManager) {
 		XyAssert.xyAssert(change.getStatus().changedSomething());
 		log.debug("roll forward " + change);
 		
 		GaeSnapshotServiceImplNG snapshotService = new GaeSnapshotServiceImplNG(changelogManager);
-		ContextBeforeCommand ctxBeforeCmd = new ContextBeforeCommand(modelAddress, revisionManager,
+		ContextBeforeCommand ctxBeforeCmd = new ContextBeforeCommand(modelAddress, info,
 		        snapshotService);
 		ContextInTxn ctxInTxn = ctxBeforeCmd.forkTxn();
 		

@@ -247,7 +247,7 @@ public class GaeModelRevInfo implements Serializable {
 	@Override
 	public String toString() {
 		return XyAssert
-		        .format("(precision: %s) stable: ( success: %s <= committed %s ) <= unstable: ( success %s <= taken %s ) modelExists?%s at %s. \nSOURCE %s",
+		        .format("(prec: %s),stable(succ: %s <= comm %s) <= unstable(succ %s <= taken %s) modelExists?%s at %s. \n  (SOURCE='%s')",
 		                this.precision, this.lastStableSuccess, this.lastStableCommitted,
 		                this.lastSuccess, this.lastTaken, this.modelExists, this.timestamp,
 		                this.debugHint);

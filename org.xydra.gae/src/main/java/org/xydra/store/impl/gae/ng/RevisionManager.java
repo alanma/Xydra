@@ -72,7 +72,7 @@ public class RevisionManager {
 	}
 	
 	/**
-	 * @return a reference to the revision info
+	 * @return a reference to <em>the</em> revision info of this model
 	 */
 	public GaeModelRevInfo getInfo() {
 		if(this.revision == null) {
@@ -83,7 +83,7 @@ public class RevisionManager {
 		}
 		XyAssert.xyAssert(this.revision != null);
 		
-		log.debug("Return " + this.revision + " for " + this.modelAddress);
+		// log.debug("Return " + this.revision + " for " + this.modelAddress);
 		
 		// FIXME !!!!!!!!!!!!!
 		// check if still current
@@ -107,8 +107,10 @@ public class RevisionManager {
 		        UniCache.StorageOptions.create(0, memcache, datastore, false));
 		if(value != null) {
 			if(this.revision == null) {
+				log.debug("Got rev " + value + " from unicache => using it");
 				this.revision = value;
 			} else {
+				log.debug("Got rev " + value + " from unicache -> updating from " + this.revision);
 				this.revision.incrementFrom(value);
 			}
 			value.setPrecision(Precision.Loaded);

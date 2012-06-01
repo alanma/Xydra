@@ -87,7 +87,7 @@ public class Interval {
 	
 	@Override
 	public String toString() {
-		return "[" + this.start + "," + this.end + "]=" + size();
+		return "[" + this.start + "," + this.end + "; size=" + size() + "]";
 	}
 	
 	/**

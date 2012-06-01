@@ -42,25 +42,25 @@ public class ContextBeforeCommand implements XRevWritableModel,
 	
 	private IGaeSnapshotService snapshotService;
 	
-	public ContextBeforeCommand(@NeverNull XAddress modelAddress, @NeverNull RevisionManager rm,
+	public ContextBeforeCommand(@NeverNull XAddress modelAddress, @NeverNull GaeModelRevInfo info,
 	        IGaeSnapshotService snapshotService) {
 		super();
 		this.modelAddress = modelAddress;
-		this.rm = rm;
+		this.info = info;
 		this.snapshotService = snapshotService;
 	}
 	
-	private RevisionManager rm;
+	private GaeModelRevInfo info;
 	
 	public XReadableModel getModelSnapshot() {
 		// TODO using tentative here - good idea?
-		long modelRev = getRevisionManager().getInfo().getLastSuccessChange();
+		long modelRev = getInfo().getLastSuccessChange();
 		XRevWritableModel modelSnapshot = this.snapshotService.getModelSnapshot(modelRev, false);
 		return modelSnapshot;
 	}
 	
 	public boolean isModelExists() {
-		return getRevisionManager().getInfo().isModelExists();
+		return getInfo().isModelExists();
 	}
 	
 	/**
@@ -70,8 +70,8 @@ public class ContextBeforeCommand implements XRevWritableModel,
 		return new ContextInTxn(this);
 	}
 	
-	public RevisionManager getRevisionManager() {
-		return this.rm;
+	public GaeModelRevInfo getInfo() {
+		return this.info;
 	}
 	
 	private static final String JSON = "json";
@@ -133,7 +133,7 @@ public class ContextBeforeCommand implements XRevWritableModel,
 		
 		// FIXME how to deal with legacy?
 		if(tos == null) {
-			long tentativeModelRev = this.rm.getInfo().getLastSuccessChange();
+			long tentativeModelRev = getInfo().getLastSuccessChange();
 			SimpleObject simpleObject = new SimpleObject(objectAddress);
 			simpleObject.setRevisionNumber(tentativeModelRev);
 			tos = new TentativeObjectState(simpleObject, false, tentativeModelRev);
@@ -193,7 +193,7 @@ public class ContextBeforeCommand implements XRevWritableModel,
 	@Override
 	public long getRevisionNumber() {
 		// TODO tentative: good idea?
-		return this.rm.getInfo().getLastSuccessChange();
+		return getInfo().getLastSuccessChange();
 	}
 	
 	@Override

@@ -352,8 +352,8 @@ public class Executor {
 	private static CheckResult checkRepositoryCommand(XRepositoryCommand rc, GaeChange change,
 	        ContextBeforeCommand ctxBeforeCmd, ContextInTxn ctxInTxn) {
 		
-		GaeModelRevInfo info = ctxBeforeCmd.getRevisionManager().getInfo();
-		boolean modelExists = info.isModelExists();
+		GaeModelRevInfo infoBeforeCmd = ctxBeforeCmd.getInfo();
+		boolean modelExistsBeforeCmd = infoBeforeCmd.isModelExists();
 		
 		switch(rc.getChangeType()) {
 		case ADD:
@@ -366,14 +366,15 @@ public class Executor {
 				        .failed("Safe RepositoryCommand ADD failed; model existed already");
 			}
 		case REMOVE:
-			long modelRev = ctxBeforeCmd.getRevisionManager().getInfo()
-			        .getLastStableSuccessChange();
-			if((!modelExists || modelRev != rc.getRevisionNumber()) && !rc.isForced()) {
+			long modelRevBeforeCmd = infoBeforeCmd.getLastStableSuccessChange();
+			if((!modelExistsBeforeCmd || modelRevBeforeCmd != rc.getRevisionNumber())
+			        && !rc.isForced()) {
 				return CheckResult.failed("Safe RepositoryCommand REMOVE failed. Reason: "
-				        + (!modelExists ? "model is null" : "modelRevNr:" + modelRev + " cmdRevNr:"
-				                + rc.getRevisionNumber() + " forced:" + rc.isForced()));
-			} else if(modelExists) {
-				log.debug("Removing model " + rc.getChangedEntity() + " " + modelRev);
+				        + (!modelExistsBeforeCmd ? "model is null" : "modelRevNr:"
+				                + modelRevBeforeCmd + " cmdRevNr:" + rc.getRevisionNumber()
+				                + " forced:" + rc.isForced()));
+			} else if(modelExistsBeforeCmd) {
+				log.debug("Removing model " + rc.getChangedEntity() + " " + modelRevBeforeCmd);
 				return CheckResult.successRemovedModel(rc, change, ctxInTxn);
 			} else {
 				return CheckResult.successNoChange("Model did not exist");
