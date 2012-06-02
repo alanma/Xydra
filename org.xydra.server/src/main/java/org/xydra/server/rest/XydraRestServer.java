@@ -37,6 +37,8 @@ public class XydraRestServer {
 	
 	public static final String INIT_PARAM_XYDRASTORE = "org.xydra.store";
 	
+	public static final String INIT_PARAM_DELAY = "org.xydra.server.util.delay";
+	
 	/**
 	 * A defined key for storing a reference to a {@link XydraStore} in the
 	 * servlet context
@@ -48,6 +50,8 @@ public class XydraRestServer {
 	 * the servlet context
 	 */
 	public static final String SERVLET_CONTEXT_ATTRIBUTE_XYDRA_PERSISTENCE = "org.xydra.persistence";
+	
+	private static boolean isEmulateAjaxDelay;
 	
 	public static XydraStore getStore(Restless restless) {
 		XydraStore store = getXydraStoreInternal(restless);
@@ -133,6 +137,11 @@ public class XydraRestServer {
 			        + INIT_PARAM_XYDRASTORE + "> to the classname of a XydraStore impl.");
 		}
 		
+		String simulateDelay = restless.getInitParameter(INIT_PARAM_DELAY);
+		if(simulateDelay.equals(new String("true"))) {
+			isEmulateAjaxDelay = true;
+		}
+		
 	}
 	
 	public static void ping(HttpServletResponse res) throws IOException {
@@ -183,6 +192,10 @@ public class XydraRestServer {
 			throw new RuntimeException("IOException while reading POSTed data", ioe);
 		}
 		
+	}
+	
+	public static boolean isSimulateDelay() {
+		return isEmulateAjaxDelay;
 	}
 	
 }

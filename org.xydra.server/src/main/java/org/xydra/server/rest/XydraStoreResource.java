@@ -38,6 +38,7 @@ import org.xydra.log.LoggerFactory;
 import org.xydra.restless.IRestlessContext;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
+import org.xydra.server.util.Delay;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.GetEventsRequest;
 import org.xydra.store.GetWithAddressRequest;
@@ -289,6 +290,10 @@ public class XydraStoreResource {
 	public void executeCommands(IRestlessContext context, String actorIdStr, String passwordHash,
 	        String[] addresses, String[] from, String[] to) throws Throwable {
 		
+		if(XydraRestServer.isSimulateDelay()) {
+			Delay.ajax();
+		}
+		
 		XydraRuntime.startRequest();
 		
 		XydraStore store = XydraRestServer.getStore(context.getRestless());
@@ -417,6 +422,10 @@ public class XydraStoreResource {
 	
 	public void getEvents(IRestlessContext context, String actorIdStr, String passwordHash,
 	        String[] addresses, String[] from, String[] to) throws Throwable {
+		
+		if(XydraRestServer.isSimulateDelay()) {
+			Delay.ajax();
+		}
 		
 		XydraRuntime.startRequest();
 		
