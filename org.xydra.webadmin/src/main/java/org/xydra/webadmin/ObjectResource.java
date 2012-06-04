@@ -42,13 +42,13 @@ public class ObjectResource {
 		XAddress objectAddress = XX.toAddress(XX.toId(repoIdStr), XX.toId(modelIdStr),
 		        XX.toId(objectIdStr), null);
 		
-		Writer w = AppConstants.startPage(res, PAGE_NAME, objectAddress.toString());
+		Writer w = Utils.startPage(res, PAGE_NAME, objectAddress.toString());
 		render(w, objectAddress, style);
-		AppConstants.endPage(w);
+		Utils.endPage(w);
 	}
 	
 	public static void render(Writer w, XAddress objectAddress, String style) throws IOException {
-		XydraPersistence p = Utils.getPersistence(objectAddress.getRepository());
+		XydraPersistence p = Utils.createPersistence(objectAddress.getRepository());
 		XWritableObject obj = p.getObjectSnapshot(new GetWithAddressRequest(objectAddress,
 		        ModelResource.INCLUDE_TENTATIVE));
 		if(obj != null) {

@@ -35,7 +35,7 @@ import org.xydra.log.LoggerFactory;
 import org.xydra.restless.IRestlessContext;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
-import org.xydra.restless.utils.CookieUtils;
+import org.xydra.restless.utils.FileDownloadUtils;
 import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.restless.utils.SharedHtmlUtils.METHOD;
 import org.xydra.store.GetWithAddressRequest;
@@ -57,7 +57,7 @@ import org.xydra.webadmin.ModelResource.SetStateResult;
  */
 public class RepositoryResource {
 	
-	public static final Logger log = LoggerFactory.getLogger(RepositoryResource.class);
+	private static final Logger log = LoggerFactory.getLogger(RepositoryResource.class);
 	
 	public static final String PAGE_NAME = "Repository";
 	
@@ -119,7 +119,7 @@ public class RepositoryResource {
 	}
 	
 	public static enum RStyle {
-		html, htmlrevs, xmlzip, xmldump
+		html, htmlrevs, xmlzip, xmldump, csvzip
 	}
 	
 	/**
@@ -137,12 +137,12 @@ public class RepositoryResource {
 	        String password, HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		Writer w = AppConstants.startPage(res, PAGE_NAME, "For each model");
+		Writer w = Utils.startPage(res, PAGE_NAME, "For each model");
 		
 		w.write("For-each model in repo " + repoId + " use param " + foreachmodel + "<br/>\n");
 		w.flush();
 		XID repositoryId = XX.toId(repoId);
-		XydraPersistence p = Utils.getPersistence(repositoryId);
+		XydraPersistence p = Utils.createPersistence(repositoryId);
 		List<XID> modelIdList = new ArrayList<XID>(p.getManagedModelIds());
 		Collections.sort(modelIdList);
 		Progress progress = new Progress();
@@ -195,7 +195,7 @@ public class RepositoryResource {
 		XAddress repoAddress = XX.resolveRepository(XX.toId(repoIdStr));
 		RStyle style = RStyle.valueOf(styleStr);
 		XID repoId = XX.toId(repoIdStr);
-		XydraPersistence p = Utils.getPersistence(repoId);
+		XydraPersistence p = Utils.createPersistence(repoId);
 		if(style == RStyle.xmlzip || style == RStyle.xmldump) {
 			List<XID> modelIdList = new ArrayList<XID>(p.getManagedModelIds());
 			// IMPROVE we can use paging here to split work; BUT number of
@@ -213,7 +213,7 @@ public class RepositoryResource {
 						log.info("No models, no zip");
 						return;
 					}
-					ZipOutputStream zos = Utils.toZipFileDownload(res, archivename);
+					ZipOutputStream zos = FileDownloadUtils.toZipFileDownload(res, archivename);
 					for(XID modelId : modelIdList) {
 						XAddress modelAddress = XX.resolveModel(repoId, modelId);
 						String serialisation = SerialisationCache.getSerialisation(modelAddress,
@@ -223,8 +223,8 @@ public class RepositoryResource {
 					}
 					zos.finish();
 				} else {
-					Writer w = AppConstants.startPage(res, PAGE_NAME, "Xyadmin XML dump of repo "
-					        + repoId);
+					Writer w = Utils
+					        .startPage(res, PAGE_NAME, "Xyadmin XML dump of repo " + repoId);
 					for(XID modelId : modelIdList) {
 						XAddress modelAddress = XX.resolveModel(repoId, modelId);
 						String serialisation = SerialisationCache.getSerialisation(modelAddress,
@@ -233,7 +233,7 @@ public class RepositoryResource {
 					}
 				}
 			} else {
-				Writer w = AppConstants.startPage(res, PAGE_NAME, "Xyadmin Repo " + repoId);
+				Writer w = Utils.startPage(res, PAGE_NAME, "Xyadmin Repo " + repoId);
 				w.write("Generating serialisations took too long. Watch task queue to finish and consider using different caching params.<br/>\n");
 				w.write(HtmlUtils.form(METHOD.GET, "").withHiddenInputText("", repoIdStr)
 				        .withHiddenInputText("style", styleStr)
@@ -245,7 +245,7 @@ public class RepositoryResource {
 			}
 		} else {
 			// style HTML
-			Writer w = AppConstants.startPage(res, PAGE_NAME, "" + repoAddress);
+			Writer w = Utils.startPage(res, PAGE_NAME, "" + repoAddress);
 			w.write(
 			
 			HtmlUtils.link(link(repoId) + "?style=" + RStyle.htmlrevs.name(), "With Revs")
@@ -293,40 +293,28 @@ public class RepositoryResource {
 		log.info(c.stop("index").getStats());
 	}
 	
-	public static void deleteAllModels(String repoIdStr, String commandStr, String confirm,
+	private static final String passwordPropertyNameInWebXml = "org.xydra.webadmin.RepositoryResource.password";
+	
+	public static void deleteAllModels(String repoIdStr, String commandStr, String confirmParam,
 	        HttpServletRequest req, HttpServletResponse res, IRestlessContext context)
 	        throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		
-		String COOKIE_NAME = "confirmCookie";
-		String password = context.getRestless().getInitParameter(
-		        "org.xydra.webadmin.RepositoryResource.password");
-		CookieUtils.setCookie(res, COOKIE_NAME, password, null, null, 120);
-		Writer w = AppConstants.startPage(res, PAGE_NAME, "Delete All Models");
+		AdminAuthUtils.setTempAuthCookie(context, passwordPropertyNameInWebXml);
+		
+		Writer w = Utils.startPage(res, PAGE_NAME, "Delete All Models");
 		Clock c = new Clock().start();
 		
-		if(password == null) {
-			w.write("Password not set in web.xml as init-param of Restless. So this resource will not delete anything."
-			        + LINEEND);
-			w.flush();
-			return;
-		}
+		String password = context.getRestless().getInitParameter(passwordPropertyNameInWebXml);
 		w.write("Password is '"
 		        + password
 		        + "' it must match the URL param 'confirm' and the cookie. Setting cookie for 120 seconds ..."
 		        + LINEEND);
 		
-		String gotCookie = CookieUtils.getCookie(req, COOKIE_NAME);
+		AdminAuthUtils.checkIfAuthorised(context, passwordPropertyNameInWebXml, confirmParam);
 		
-		w.write("Found confirm param='" + confirm + "'" + LINEEND);
-		w.write("Found cookie ='" + gotCookie + "'" + LINEEND);
-		w.flush();
+		doDeleteAllData(w, repoIdStr);
 		
-		if(confirm != null && gotCookie != null) {
-			if(confirm.equals(gotCookie)) {
-				doDeleteAllData(w, repoIdStr);
-			}
-		}
 		w.write("Stats: " + c.getStats() + "<br/>\n");
 		w.flush();
 		w.close();
@@ -334,7 +322,7 @@ public class RepositoryResource {
 	
 	private static void doDeleteAllData(Writer w, String repoIdStr) throws IOException {
 		XID repoId = XX.toId(repoIdStr);
-		XydraPersistence p = Utils.getPersistence(repoId);
+		XydraPersistence p = Utils.createPersistence(repoId);
 		for(XID modelId : p.getManagedModelIds()) {
 			w.write("Deleting model " + modelId);
 			w.flush();
@@ -364,7 +352,7 @@ public class RepositoryResource {
 	
 	HttpServletRequest req, HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		Writer w = AppConstants.startPage(res, PAGE_NAME, "Restore Repository");
+		Writer w = Utils.startPage(res, PAGE_NAME, "Restore Repository");
 		
 		XID repoId = XX.toId(repoIdStr);
 		boolean replaceModels = replaceModelsStr != null

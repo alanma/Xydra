@@ -31,11 +31,11 @@ public class DemoResource {
 	
 	public static void demo(HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		Writer w = AppConstants.startPage(res, PAGE_NAME, "");
+		Writer w = Utils.startPage(res, PAGE_NAME, "");
 		
 		w.write("Generating phonebook demodata...");
 		w.flush();
-		XydraPersistence p = Utils.getPersistence(XX.toId("repo1"));
+		XydraPersistence p = Utils.createPersistence(XX.toId("repo1"));
 		WritableRepositoryOnPersistence repository = new WritableRepositoryOnPersistence(p,
 		        XX.toId("DEMO"));
 		
@@ -47,7 +47,7 @@ public class DemoResource {
 		XCopyUtils.copyData(xr, repository);
 		w.write(" done");
 		
-		AppConstants.endPage(w);
+		Utils.endPage(w);
 	}
 	
 }

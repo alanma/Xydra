@@ -32,8 +32,6 @@ public class SerialisationCache {
 	
 	public static final Logger log = LoggerFactory.getLogger(SerialisationCache.class);
 	
-	protected static final String PREFIX = "Serialised-";
-	
 	public static UniCache<SerialisationCache.ModelEntry> MODELS = new UniCache<SerialisationCache.ModelEntry>(
 	        new SerialisationCache.ModelEntryCacheHandler(), "SERIALMODEL");
 	
@@ -81,10 +79,6 @@ public class SerialisationCache {
 			ModelEntry e = new ModelEntry();
 			e.rev = (Long)entity.getProperty(PROP_REV);
 			e.serialisation = ((Text)entity.getProperty(PROP_SERIALISATION)).getValue();
-			// TODO this fix required?
-			if(e.serialisation == null) {
-				e.serialisation = "";
-			}
 			return e;
 		}
 		
@@ -100,7 +94,13 @@ public class SerialisationCache {
 		
 	}
 	
+	private static String toKey(XAddress modelAddress) {
+		return modelAddress.toString();
+	}
+	
 	/**
+	 * Makes sure all models have a serialisation in the cache
+	 * 
 	 * @param repoId ..
 	 * @param modelIdList which models to compute a serialisation of
 	 * @param style for export
@@ -154,13 +154,12 @@ public class SerialisationCache {
 			}
 			// proceed as normal
 			XAddress modelAddress = XX.resolveModel(repoId, modelId);
-			String key = PREFIX + modelAddress;
 			StorageOptions storeOpts = StorageOptions.create(cacheInInstance ? 1 : 0,
 			        cacheInMemcache, cacheInDatastore, false);
 			
 			log.info("Inspecting serialisation of " + modelAddress);
-			XydraPersistence persistence = Utils.getPersistence(repoId);
-			ModelEntry cached = MODELS.get(key, storeOpts);
+			XydraPersistence persistence = Utils.createPersistence(repoId);
+			ModelEntry cached = MODELS.get(toKey(modelAddress), storeOpts);
 			if(cached != null
 			        && cached.getRev() == persistence
 			                .getModelRevision(
@@ -176,12 +175,11 @@ public class SerialisationCache {
 					@Override
 					public void run() {
 						XAddress modelAddress = XX.resolveModel(repoId, modelId);
-						String key = PREFIX + modelAddress;
 						StorageOptions storeOpts = StorageOptions.create(cacheInInstance ? 1 : 0,
 						        cacheInMemcache, cacheInDatastore, false);
 						
 						ModelEntry modelEntry = computeSerialisation(modelAddress, style);
-						MODELS.put(key, modelEntry, storeOpts);
+						MODELS.put(toKey(modelAddress), modelEntry, storeOpts);
 					}
 					
 					@Override
@@ -203,7 +201,7 @@ public class SerialisationCache {
 	
 	private static ModelEntry computeSerialisation(XAddress modelAddress, MStyle style) {
 		log.info("Computing serialisation of " + modelAddress);
-		XydraPersistence persistence = Utils.getPersistence(modelAddress.getRepository());
+		XydraPersistence persistence = Utils.createPersistence(modelAddress.getRepository());
 		XWritableModel model = persistence.getModelSnapshot(new GetWithAddressRequest(modelAddress,
 		        ModelResource.INCLUDE_TENTATIVE));
 		long rev = model.getRevisionNumber();
@@ -217,8 +215,7 @@ public class SerialisationCache {
 	}
 	
 	public static String getSerialisation(XAddress modelAddress, StorageOptions storeOpts) {
-		String key = PREFIX + modelAddress;
-		ModelEntry modelEntry = SerialisationCache.MODELS.get(key, storeOpts);
+		ModelEntry modelEntry = SerialisationCache.MODELS.get(toKey(modelAddress), storeOpts);
 		if(modelEntry == null) {
 			log.debug("Cache was null for " + modelAddress + ". Options used: " + storeOpts);
 			if(storeOpts.isComputeIfNull()) {

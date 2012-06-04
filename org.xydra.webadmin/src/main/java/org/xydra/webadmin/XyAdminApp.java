@@ -28,7 +28,7 @@ import org.xydra.webadmin.ModelResource.MStyle;
  * {@link XyAdminApp} or embed this admin tool in your own app by calling
  * {@link XyAdminApp#restless(Restless, String)} from your own restless app.
  * 
- * TODO ability to load from servletcontext via
+ * IMPROVE Add ability to load from servletcontext via
  * {@link XydraRestServer#SERVLET_CONTEXT_ATTRIBUTE_XYDRA_PERSISTENCE}
  * 
  * @author voelkel
@@ -74,7 +74,7 @@ public class XyAdminApp {
 	
 	public static void index(HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		Writer w = AppConstants.startPage(res, PAGE_NAME, "");
+		Writer w = Utils.startPage(res, PAGE_NAME, "");
 		
 		w.write(HtmlUtils.toOrderedList(
 		
@@ -88,12 +88,12 @@ public class XyAdminApp {
 		));
 		w.write("<p>Got to .." + RepositoryResource.URL + "/{repo-id}/</p>");
 		
-		AppConstants.endPage(w);
+		Utils.endPage(w);
 	}
 	
 	public static void listRepos(HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		Writer w = AppConstants.startPage(res, PAGE_NAME, "List all Models in all Repositories");
+		Writer w = Utils.startPage(res, PAGE_NAME, "List all Models in all Repositories");
 		
 		// find repositories in GAE datastore
 		Iterator<XAddress> it = org.xydra.store.impl.gae.changes.Utils.findModelAdresses();
@@ -101,7 +101,7 @@ public class XyAdminApp {
 			XAddress modelAddress = it.next();
 			ModelResource.render(w, modelAddress, MStyle.link);
 		}
-		AppConstants.endPage(w);
+		Utils.endPage(w);
 	}
 	
 }

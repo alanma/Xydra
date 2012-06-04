@@ -51,6 +51,7 @@ import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
+import org.xydra.restless.utils.FileDownloadUtils;
 import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.restless.utils.ServletUtils;
 import org.xydra.restless.utils.SharedHtmlUtils.METHOD;
@@ -73,9 +74,9 @@ public class ModelResource {
 	public static final String PAGE_NAME = "Model";
 	
 	public static enum MStyle {
-		html, htmlrev, htmlevents, link, xml, json, xmlhtml, /**
-		 * Direct output of
-		 * changelog
+		html, htmlrev, htmlevents, link, xml, json, xmlhtml, csv, /**
+		 * Direct
+		 * output of changelog
 		 */
 		htmlchanges
 	}
@@ -102,24 +103,26 @@ public class ModelResource {
 		        true,
 		        
 		        new RestlessParameter("repoId"), new RestlessParameter("modelId"),
+		        
+		        new RestlessParameter("replace", "false"),
+		        
 		        new RestlessParameter("_upload_", null)
 		
 		);
-		
 	}
 	
 	@SuppressWarnings("unused")
 	public static void command(String repoIdStr, String modelIdStr, String cmdStr,
 	        HttpServletRequest req, HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		Writer w = AppConstants.startPage(res, PAGE_NAME, "Deleting Model");
+		Writer w = Utils.startPage(res, PAGE_NAME, "Deleting Model");
 		
 		XAddress modelAddress = XX.toAddress(XX.toId(repoIdStr), XX.toId(modelIdStr), null, null);
 		if(cmdStr.equals("delete")) {
 			// TODO use Repo on Persistence to delete model
 		}
 		
-		AppConstants.endPage(w);
+		Utils.endPage(w);
 	}
 	
 	public static void index(String repoIdStr, String modelIdStr, String styleStr,
@@ -132,7 +135,7 @@ public class ModelResource {
 		boolean download = Boolean.parseBoolean(downloadStr);
 		
 		if(style == MStyle.xml || style == MStyle.xmlhtml || style == MStyle.json) {
-			XydraPersistence p = Utils.getPersistence(modelAddress.getRepository());
+			XydraPersistence p = Utils.createPersistence(modelAddress.getRepository());
 			ModelRevision rev = p.getModelRevision(new GetWithAddressRequest(modelAddress,
 			        INCLUDE_TENTATIVE));
 			log.debug(modelAddress + " rev=" + rev.revision() + " exists:" + rev.modelExists());
@@ -144,7 +147,7 @@ public class ModelResource {
 					String name = modelAddress.getRepository() + "-" + modelAddress.getModel()
 					        + "-rev" + model.getRevisionNumber();
 					String archivename = Utils.filenameOfNow(name);
-					ZipOutputStream zos = Utils.toZipFileDownload(res, archivename);
+					ZipOutputStream zos = FileDownloadUtils.toZipFileDownload(res, archivename);
 					
 					writeToZipstreamDirectly(model, zos, style);
 					
@@ -173,18 +176,26 @@ public class ModelResource {
 					}
 				}
 			} else {
-				Writer w = AppConstants.startPage(res, PAGE_NAME, "Model does not exist");
+				Writer w = Utils.startPage(res, PAGE_NAME, "Model does not exist");
 				w.write("<p>Model '" + modelAddress + "' does (currently) not exist.</p>");
-				AppConstants.endPage(w);
+				Utils.endPage(w);
 			}
 		} else {
 			// html
-			Writer w = AppConstants.startPage(res, PAGE_NAME, "" + modelAddress);
+			Writer w = Utils.startPage(res, PAGE_NAME, "" + modelAddress);
 			w.write(HtmlUtils.link(RepositoryResource.link(modelAddress.getRepository()),
 			        "Back to repository '" + modelAddress.getRepository() + "'<br/>\n"));
+			
+			// upload form
+			w.write(HtmlUtils.form(METHOD.POST, link(modelAddress) + "?replace=true")
+			        .withInputFile("backupfile")
+			        .withInputSubmit("Upload and force set as current state").toString());
+			w.write(HtmlUtils.form(METHOD.POST, link(modelAddress)).withInputFile("backupfile")
+			        .withInputSubmit("Upload and update to this as current state").toString());
+			
 			w.write("<hr/>");
 			render(w, modelAddress, style);
-			AppConstants.endPage(w);
+			Utils.endPage(w);
 		}
 		
 		c.stop("index");
@@ -194,21 +205,25 @@ public class ModelResource {
 	/**
 	 * @param repoIdStr
 	 * @param modelIdStr
+	 * @param replaceStr true or false
 	 * @param upload
 	 * @param req
 	 * @param res
 	 * @throws IOException
 	 */
-	public static void update(String repoIdStr, String modelIdStr, byte[] upload,
-	
-	HttpServletRequest req, HttpServletResponse res) throws IOException {
+	public static void update(String repoIdStr, String modelIdStr, String replaceStr,
+	        byte[] upload,
+	        
+	        HttpServletRequest req, HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		Writer w = AppConstants.startPage(res, PAGE_NAME, "Restore Model");
+		Writer w = Utils.startPage(res, PAGE_NAME, "Restore Model");
 		
 		Clock c = new Clock().start();
+		
+		boolean isReplace = replaceStr != null && replaceStr.equals("true");
 		XID repoId = XX.toId(repoIdStr);
 		
-		w.write("Processing upload...</br>");
+		w.write("Processing upload.with replace=" + isReplace + "..</br>");
 		w.flush();
 		
 		assert upload != null;
@@ -237,7 +252,7 @@ public class ModelResource {
 			        + "] ...</br>");
 			w.flush();
 			
-			SetStateResult result = ModelResource.updateStateTo(repoId, model, false);
+			SetStateResult result = ModelResource.updateStateTo(repoId, model, isReplace);
 			log.info("" + result);
 			c.stopAndStart("applied-" + model.getId());
 			w.write("... applied to server repository " + result + ".</br>");
@@ -248,7 +263,7 @@ public class ModelResource {
 		
 		w.write("Stats:" + c.getStats());
 		log.info("Stats: " + c.getStats());
-		AppConstants.endPage(w);
+		Utils.endPage(w);
 	}
 	
 	static final String getStorageName(XID modelId, MStyle style) {
@@ -351,7 +366,7 @@ public class ModelResource {
 		}
 		
 		if(style == MStyle.htmlrev || style == MStyle.htmlevents || style == MStyle.htmlchanges) {
-			XydraPersistence p = Utils.getPersistence(modelAddress.getRepository());
+			XydraPersistence p = Utils.createPersistence(modelAddress.getRepository());
 			ModelRevision rev = p.getModelRevision(new GetWithAddressRequest(modelAddress,
 			        INCLUDE_TENTATIVE));
 			w.write("rev=" + rev.revision() + " exists:" + rev.modelExists() + "<br/>\n");
@@ -398,7 +413,7 @@ public class ModelResource {
 	public static SetStateResult updateStateTo(XID repoId, XReadableModel model,
 	        boolean overwriteIfSameRevPresent) {
 		log.debug("Set state from " + model.getAddress() + " to " + repoId);
-		XydraPersistence p = Utils.getPersistence(repoId);
+		XydraPersistence p = Utils.createPersistence(repoId);
 		SetStateResult result = new SetStateResult();
 		
 		XID actor = XX.toId("ModelResource");
@@ -418,7 +433,6 @@ public class ModelResource {
 		// else: overwrite
 		XReadableModel oldModel = p.getModelSnapshot(new GetWithAddressRequest(modelAddress,
 		        INCLUDE_TENTATIVE));
-		XTransactionBuilder tb = new XTransactionBuilder(modelAddress);
 		
 		if(oldModel != null) {
 			result.modelExisted = true;
@@ -426,10 +440,18 @@ public class ModelResource {
 			result.modelExisted = false;
 			XRepositoryCommand createModelCommand = MemoryRepositoryCommand.createAddCommand(
 			        XX.resolveRepository(repoId), XCommand.FORCED, model.getId());
-			tb.addCommand(createModelCommand);
+			long cmdResult = p.executeCommand(actor, createModelCommand);
+			if(cmdResult == XCommand.FAILED) {
+				/*
+				 * should only happen if model changed since
+				 * tb.changeModel(oldModel, model)
+				 */
+				throw new RuntimeException("error creating model \"" + modelAddress + "\" ");
+			}
 			oldModel = new SimpleModel(modelAddress, 0);
 		}
 		assert oldModel != null;
+		XTransactionBuilder tb = new XTransactionBuilder(modelAddress);
 		tb.changeModel(oldModel, model);
 		// IMPROVE or use the change log if the model has one?
 		if(tb.isEmpty()) {
@@ -457,7 +479,7 @@ public class ModelResource {
 	public static SetStateResult setStateTo(XID repoId, XReadableModel model) {
 		log.debug("Set state of model " + model.getAddress() + " non-transactionally in repo "
 		        + repoId);
-		XydraPersistence p = Utils.getPersistence(repoId);
+		XydraPersistence p = Utils.createPersistence(repoId);
 		SetStateResult result = new SetStateResult();
 		
 		XID actor = XX.toId("ModelResource");
