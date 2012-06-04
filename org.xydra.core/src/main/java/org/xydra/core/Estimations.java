@@ -277,6 +277,7 @@ public class Estimations {
 	}
 	
 	public static void main(String[] args) {
+		System.out.println("Typical fields per user = " + objectsPerModel.times(fieldsPerObject));
 		System.out.println("Typical object size in bytes = "
 		        + sizeOfObject_inCharacters.times(bytesPerCharacter).toByteSizes());
 		System.out.println("Typical model size in bytes = "
