@@ -15,6 +15,7 @@ import org.xydra.csv.impl.memory.CsvTable;
 import org.xydra.csv.impl.memory.Row;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.restless.IRestlessContext;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
 import org.xydra.restless.utils.HtmlUtils;
@@ -59,7 +60,7 @@ public class DatastoreAdminResource {
 		
 		);
 		restless.addMethod(URL + "/deleteAll", "GET", DatastoreAdminResource.class, "deleteAll",
-		        true, new RestlessParameter("sure", "no"));
+		        true, new RestlessParameter("confirm", "wrong"));
 	}
 	
 	public void index(HttpServletResponse res, HttpServletRequest req) throws IOException {
@@ -78,16 +79,23 @@ public class DatastoreAdminResource {
 		AppConstants.endPage(w);
 	}
 	
+	private static final String passwordPropertyNameInWebXml = "org.xydra.gaemyadmin.DatastoreAdminResource.password";
+	
 	/**
 	 * Delete all data in the data store
 	 * 
+	 * @param context
 	 * @param res
-	 * @param sure must be "yes" if you are sure to delete all
+	 * @param confirmParam
 	 * 
 	 * @throws IOException from underlying http streams or datastore
 	 */
-	public void deleteAll(HttpServletResponse res, String sure) throws IOException {
+	public void deleteAll(IRestlessContext context, HttpServletResponse res, String confirmParam)
+	        throws IOException {
 		GaeMyAdmin_GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		
+		AdminAuthUtils.setTempAuthCookie(context, passwordPropertyNameInWebXml);
+		
 		Writer w = AppConstants.startPage(res, PAGE_NAME, "Delete All");
 		
 		// Get a handle on the datastore itself
@@ -101,9 +109,17 @@ public class DatastoreAdminResource {
 			w.write(count + "\n");
 		}
 		
-		if(sure.equalsIgnoreCase("yes")) {
+		String password = context.getRestless().getInitParameter(passwordPropertyNameInWebXml);
+		w.write("Password is '"
+		        + password
+		        + "' it must match the URL param 'confirm' and the cookie. Setting cookie for 120 seconds ..."
+		        + "<br/>\n");
+		
+		try {
+			AdminAuthUtils.checkIfAuthorised(context, passwordPropertyNameInWebXml, confirmParam);
 			for(String kind : kinds) {
 				w.write("Deleting kind " + kind + ". Getting keys ... ");
+				w.flush();
 				List<Key> keys = new LinkedList<Key>();
 				Query q = new Query(kind).setKeysOnly();
 				PreparedQuery pq = datastore.prepare(q);
@@ -120,8 +136,9 @@ public class DatastoreAdminResource {
 				}
 				w.write("Deleted all '" + kind + "'.\n");
 			}
-		} else {
-			w.write("Ok, did not delete anything. If you are really sure, add '?sure=yes' to this url.");
+			w.write("Done with delete all.\n");
+		} catch(Exception e) {
+			w.write("Ok, did not delete anything. If you are really sure, add '?confirm=....' to this url.");
 		}
 		
 		AppConstants.endPage(w);
