@@ -82,7 +82,17 @@ public abstract class AbstractPersistenceTest {
 	 */
 	
 	@Test
-	public void testExecuteCommandRepositoryCommandAddType() {
+	public void testExecuteCommandRepositorySafeCommandAddType() {
+		testExecuteCommandRepositoryCommandAddType(false);
+	}
+	
+	@Test
+	public void testExecuteCommandRepositoryForcedCommandAddType() {
+		testExecuteCommandRepositoryCommandAddType(true);
+		
+	}
+	
+	public void testExecuteCommandRepositoryCommandAddType(boolean forcedCommands) {
 		/*
 		 * RepositoryCommands of add type add new models to the repository.
 		 */
@@ -92,7 +102,8 @@ public abstract class AbstractPersistenceTest {
 		 */
 		XID modelId = XX.toId("testExecuteCommandRepositoryCommandAddType");
 		XAddress modelAddress = XX.resolveModel(this.repoId, modelId);
-		XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId, false);
+		XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId,
+		        forcedCommands);
 		
 		long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
 		
@@ -111,20 +122,36 @@ public abstract class AbstractPersistenceTest {
 		        model.getRevisionNumber());
 		
 		/*
-		 * try to add the same model again (with an unforced command), should
-		 * fail
+		 * try to add the same model again.
 		 */
 		
-		long failRevNr = this.persistence.executeCommand(this.actorId, addModelCom);
+		revNr = this.persistence.executeCommand(this.actorId, addModelCom);
 		
-		assertTrue(
-		        "Trying to add an already existing model with an unforced command succeeded (should fail), revNr was "
-		                + failRevNr, failRevNr == XCommand.FAILED);
+		if(forcedCommands) {
+			
+			assertEquals(
+			        "Executing \"Adding an existing model\"-command did not return \"No Change\", although the command was forced and the model we tried to add already exists.",
+			        XCommand.NOCHANGE, revNr);
+		} else {
+			
+			assertEquals(
+			        "Trying to add an already existing model with an unforced command succeeded (should fail).",
+			        XCommand.FAILED, revNr);
+		}
 		
 	}
 	
 	@Test
-	public void testExecuteCommandRepositoryCommandRemoveType() {
+	public void testExecuteCommandRepositorySafeCommandRemoveType() {
+		testExecuteCommandRepositoryCommandRemoveType(false);
+	}
+	
+	@Test
+	public void testExecuteCommandRepositoryForcedCommandRemoveType() {
+		testExecuteCommandRepositoryCommandRemoveType(true);
+	}
+	
+	public void testExecuteCommandRepositoryCommandRemoveType(boolean forcedCommands) {
 		/*
 		 * RepositoryCommands of the remove type remove models from the
 		 * repository
@@ -135,7 +162,8 @@ public abstract class AbstractPersistenceTest {
 		 */
 		XID modelId = XX.toId("testExecuteCommandRepositoryCommandRemoveTypeModel1");
 		XAddress modelAddress = XX.resolveModel(this.repoId, modelId);
-		XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId, false);
+		XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId,
+		        forcedCommands);
 		long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
 		
 		assertTrue("Adding a model failed, test cannot be executed.", revNr >= 0);
@@ -152,7 +180,7 @@ public abstract class AbstractPersistenceTest {
 		 * delete the model again
 		 */
 		XCommand deleteModelCom = this.comFactory.createRemoveModelCommand(this.repoId, modelId,
-		        model.getRevisionNumber(), false);
+		        model.getRevisionNumber(), forcedCommands);
 		
 		revNr = this.persistence.executeCommand(this.actorId, deleteModelCom);
 		
@@ -167,19 +195,27 @@ public abstract class AbstractPersistenceTest {
 		
 		/*
 		 * try to remove a not existing model
-		 * 
-		 * TODO check how forced & unforced commands behave in this case
 		 */
 		
 		modelId = XX.toId("testExecuteCommandRepositoryCommandRemoveTypeModel2");
 		XCommand deleteNotExistingModelCom = this.comFactory.createRemoveModelCommand(this.repoId,
-		        modelId, 0, false);
+		        modelId, 0, forcedCommands);
 		
 		revNr = this.persistence.executeCommand(this.actorId, deleteNotExistingModelCom);
 		
-		assertTrue(
-		        "Removing a not existing model with an unforced command succeeded (should fail), revNr was "
-		                + revNr, revNr == XCommand.FAILED);
+		if(forcedCommands) {
+			/*
+			 * Should suceed/return "No Change" since the command was forced.
+			 */
+			
+			assertEquals(
+			        "Trying to remove a not existing model should return \"No change\" when the command is forced.",
+			        XCommand.NOCHANGE, revNr);
+		} else {
+			assertTrue(
+			        "Removing a not existing model with an unforced command succeeded (should fail), revNr was "
+			                + revNr, revNr == XCommand.FAILED);
+		}
 		
 		/*
 		 * test if removing a model also removes the object (snapshots) and
@@ -188,7 +224,7 @@ public abstract class AbstractPersistenceTest {
 		
 		modelId = XX.toId("testExecuteCommandRepositoryCommandRemoveTypeModel3");
 		modelAddress = XX.resolveModel(this.repoId, modelId);
-		addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId, false);
+		addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId, forcedCommands);
 		revNr = this.persistence.executeCommand(this.actorId, addModelCom);
 		
 		assertTrue("Adding a model failed, test cannot be executed.", revNr >= 0);
@@ -197,7 +233,7 @@ public abstract class AbstractPersistenceTest {
 		
 		XAddress objectAddress = XX.resolveObject(this.repoId, modelId, objectId);
 		XCommand addObjectCom = this.comFactory.createAddObjectCommand(this.repoId, modelId,
-		        objectId, false);
+		        objectId, forcedCommands);
 		
 		long objectRevNr = this.persistence.executeCommand(this.actorId, addObjectCom);
 		
@@ -207,7 +243,7 @@ public abstract class AbstractPersistenceTest {
 		addressRequest = new GetWithAddressRequest(modelAddress);
 		model = this.persistence.getModelSnapshot(addressRequest);
 		deleteModelCom = this.comFactory.createRemoveModelCommand(this.repoId, modelId,
-		        model.getRevisionNumber(), false);
+		        model.getRevisionNumber(), forcedCommands);
 		
 		revNr = this.persistence.executeCommand(this.actorId, deleteModelCom);
 		
@@ -227,7 +263,16 @@ public abstract class AbstractPersistenceTest {
 	}
 	
 	@Test
-	public void testExecuteCommandModelCommandAddType() {
+	public void testExecuteCommandModelSafeCommandAddType() {
+		testExecuteCommandModelCommandAddType(false);
+	}
+	
+	@Test
+	public void testExecuteCommandModelForcedCommandAddType() {
+		testExecuteCommandModelCommandAddType(true);
+	}
+	
+	public void testExecuteCommandModelCommandAddType(boolean forcedCommands) {
 		/*
 		 * ModelCommands of add type add new objects to models.
 		 */
@@ -237,7 +282,8 @@ public abstract class AbstractPersistenceTest {
 		XID modelId = XX.toId("testExecuteCommandModelCommandAddTypeModel");
 		XAddress modelAddress = XX.resolveModel(this.repoId, modelId);
 		
-		XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId, false);
+		XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId,
+		        forcedCommands);
 		long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
 		assertTrue("The model wasn't correctly added, test cannot be executed.", revNr >= 0);
 		
@@ -249,7 +295,7 @@ public abstract class AbstractPersistenceTest {
 		
 		XAddress objectAddress = XX.resolveObject(this.repoId, modelId, objectId);
 		XCommand addObjectCom = this.comFactory.createAddObjectCommand(this.repoId, modelId,
-		        objectId, false);
+		        objectId, forcedCommands);
 		
 		revNr = this.persistence.executeCommand(this.actorId, addObjectCom);
 		
@@ -288,20 +334,35 @@ public abstract class AbstractPersistenceTest {
 		 */
 		
 		/*
-		 * try to add the same object again (with an unforced command), should
-		 * fail
+		 * try to add the same object again
 		 */
 		
-		long failRevNr = this.persistence.executeCommand(this.actorId, addObjectCom);
-		
-		assertTrue(
-		        "Trying to add an already existing object  with an unforced command succeeded (should fail), revNr was "
-		                + failRevNr, failRevNr == XCommand.FAILED);
+		revNr = this.persistence.executeCommand(this.actorId, addObjectCom);
+		if(forcedCommands) {
+			assertEquals(
+			        "Executing \"Adding an existing object\"-command did not return \"No Change\", although the command was forced and the object we tried to add already exists.",
+			        XCommand.NOCHANGE, revNr);
+			
+		} else {
+			assertEquals(
+			        "Trying to add an already existing object  with an unforced command succeeded (should fail).",
+			        XCommand.FAILED, revNr);
+			
+		}
 		
 	}
 	
 	@Test
-	public void testExecuteCommandModelCommandRemoveType() {
+	public void testExecuteCommandModelSafeCommandRemoveType() {
+		testExecuteCommandModelCommandRemoveType(false);
+	}
+	
+	@Test
+	public void testExecuteCommandModelForcedCommandRemoveType() {
+		testExecuteCommandModelCommandRemoveType(true);
+	}
+	
+	public void testExecuteCommandModelCommandRemoveType(boolean forcedCommands) {
 		/*
 		 * ModelCommands of the remove type remove objects from models
 		 */
@@ -311,7 +372,8 @@ public abstract class AbstractPersistenceTest {
 		 */
 		XID modelId = XX.toId("testExecuteCommandModelCommandRemoveTypeModel");
 		XAddress modelAddress = XX.resolveModel(this.repoId, modelId);
-		XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId, false);
+		XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId,
+		        forcedCommands);
 		long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
 		
 		assertTrue("Adding a model failed, test cannot be executed.", revNr >= 0);
@@ -327,7 +389,7 @@ public abstract class AbstractPersistenceTest {
 		XID objectId = XX.toId("testExecuteCommandModelCommandRemoveTypeObject1");
 		XAddress objectAddress = XX.resolveObject(this.repoId, modelId, objectId);
 		XCommand addObjectCom = this.comFactory.createAddObjectCommand(this.repoId, modelId,
-		        objectId, false);
+		        objectId, forcedCommands);
 		revNr = this.persistence.executeCommand(this.actorId, addObjectCom);
 		
 		assertTrue("Adding an object failed, test cannot be executed.", revNr >= 0);
@@ -344,7 +406,7 @@ public abstract class AbstractPersistenceTest {
 		 * delete the object again
 		 */
 		XCommand deleteObjectCom = this.comFactory.createRemoveObjectCommand(this.repoId, modelId,
-		        objectId, object.getRevisionNumber(), false);
+		        objectId, object.getRevisionNumber(), forcedCommands);
 		
 		revNr = this.persistence.executeCommand(this.actorId, deleteObjectCom);
 		
@@ -364,19 +426,24 @@ public abstract class AbstractPersistenceTest {
 		
 		/*
 		 * try to remove a not existing object
-		 * 
-		 * TODO check how forced & unforced commands behave in this case
 		 */
 		
 		objectId = XX.toId("testExecuteCommandModelCommandRemoveTypeObject2");
 		XCommand deleteNotExistingObjectCom = this.comFactory.createRemoveObjectCommand(
-		        this.repoId, modelId, objectId, 0, false);
+		        this.repoId, modelId, objectId, 0, forcedCommands);
 		
 		revNr = this.persistence.executeCommand(this.actorId, deleteNotExistingObjectCom);
 		
-		assertTrue(
-		        "Removing a not existing object with an unforced command succeeded (should fail), revNr was "
-		                + revNr, revNr == XCommand.FAILED);
+		if(forcedCommands) {
+			assertEquals(
+			        "Trying to remove a not existing object should return \"No change\" when the command is forced.",
+			        XCommand.NOCHANGE, revNr);
+		} else {
+			assertEquals(
+			        "Removing a not existing object with an unforced command succeeded (should fail).",
+			        XCommand.FAILED, revNr);
+		}
+		
 	}
 	
 	@Test
