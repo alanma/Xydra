@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.xydra.restless.Restless;
+
 
 /**
  * A fluent API for {@link HtmlUtils}.
@@ -154,10 +156,10 @@ public class Page {
 		
 	}
 	
-	// TODO this does not run in GWT; universal function in xydra.core
+	// TODO this does not run in GWT; universal function is in xydra.core
 	public static String urlencode(String s) {
 		try {
-			return URLEncoder.encode(s, "utf-8");
+			return URLEncoder.encode(s, Restless.JAVA_ENCODING_UTF8);
 		} catch(UnsupportedEncodingException e) {
 			throw new AssertionError(e);
 		}
@@ -233,7 +235,7 @@ public class Page {
 		protected boolean first;
 		
 		/**
-		 * @param tag never null
+		 * @param tag @NeverNull
 		 * @param parent may be null
 		 * @param first
 		 * @param attributes optional

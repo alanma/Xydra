@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.xydra.restless.utils.ServletUtils;
 
@@ -16,27 +15,11 @@ import org.xydra.restless.utils.ServletUtils;
 public class RestlessTest {
 	
 	@Test
-	@Ignore
-	// TODO need stub objects for req and res
-	public void testMatching() {
-		Restless restless = new Restless();
-		// setup
-		restless.addGet("/my/path", new RestlessTest(), "getMe");
-		// execution
-		restless.restlessService(null, null);
-	}
-	
-	public void getMe() {
-		
-	}
-	
-	@Test
 	public void testVariableExtraction() {
 		PathTemplate pe = new PathTemplate("/way/{id}/step");
 		System.out.println(pe.toString());
 		assertTrue("/way/13/step".matches(pe.getRegex()));
 		assertTrue("/way/13/step/".matches(pe.getRegex()));
-		// FIXME why should this match?
 		assertFalse("/way/13/step/this".matches(pe.getRegex()));
 		assertFalse("/way/13/step/this/".matches(pe.getRegex()));
 		List<String> var = pe.extractVariables("/way/13/step");

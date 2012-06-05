@@ -93,9 +93,27 @@ import org.xydra.restless.utils.XmlUtils;
  */
 public class Restless extends HttpServlet {
 	
-	public static final String X_HTTP_Method_Override = "X-HTTP-Method-Override";
-	/** Only effective on localhost for security reasons. Helps testing */
-	public static final String X_HOST_Override = "X-HTTP-Host-Override";
+	private static Logger log;
+	
+	/**
+	 * Gets notified before a request is send to a Java method (
+	 * {@link #onRequestStarted(IRestlessContext)}) and after the Java method
+	 * finished processing the request (
+	 * {@link #onRequestFinished(IRestlessContext)}).
+	 * 
+	 * Via {@link IRestlessContext#getRequestIdentifier()} a correlation from
+	 * start to finish can be achieved.
+	 * 
+	 * Implementations should have valid {@link #hashCode()} and
+	 * {@link #equals(Object)} methods.
+	 * 
+	 * @author xamde
+	 */
+	public static interface IRequestListener {
+		void onRequestFinished(IRestlessContext restlessContext);
+		
+		void onRequestStarted(IRestlessContext restlessContext);
+	}
 	
 	/**
 	 * Methods registered with the
@@ -104,20 +122,53 @@ public class Restless extends HttpServlet {
 	 * starting with this prefix.
 	 */
 	public static final String ADMIN_ONLY_URL_PREFIX = "/admin";
-	public static final String CHARSET_UTF8 = "utf-8";
-	public static final String MIME_TEXT_PLAIN = "text/plain";
-	public static final String MIME_XHTML = "application/xhtml+xml";
-	public static final String XHTML_DOCTYPE = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\" \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">";
-	public static final String XHTML_NS = "xmlns=\"http://www.w3.org/1999/xhtml\"";
-	public static final String XML_DECLARATION = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+	
+	public static final String CONTENT_TYPE_CHARSET_UTF8 = "utf-8";
+	/**
+	 * If true, unhandled requests (for which no mapping is found) are delegated
+	 * to the 'default' servlet of the container.
+	 * 
+	 * Default is false.
+	 */
+	public static boolean DELEGATE_UNHANDLED_TO_DEFAULT = false;
 	
 	public static final String INIT_PARAM_APP = "app";
 	public static final String INIT_PARAM_XYDRA_LOG_BACKEND = "loggerFactory";
-	
-	private static Logger log;
+	public static final String JAVA_ENCODING_UTF8 = "utf-8";
+	public static final String MIME_TEXT_PLAIN = "text/plain";
+	public static final String MIME_XHTML = "application/xhtml+xml";
 	
 	private static final long serialVersionUID = -1906300614203565189L;
+	/**
+	 * See http://en.wikipedia.org/wiki/X-Frame-Options#Frame-Options
+	 * 
+	 * Legal values are: 'deny', 'sameorigin'
+	 */
+	public static String X_FRAME_OPTIONS_DEFAULT = "sameorigin";
+	
 	public static final String X_FRAME_OPTIONS_HEADERNAME = "X-Frame-Options";
+	
+	/** Only effective on localhost for security reasons. Helps testing */
+	public static final String X_HOST_Override = "X-HTTP-Host-Override";
+	public static final String X_HTTP_Method_Override = "X-HTTP-Method-Override";
+	
+	public static final String XHTML_DOCTYPE = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\" \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">";
+	
+	public static final String XHTML_NS = "xmlns=\"http://www.w3.org/1999/xhtml\"";
+	
+	public static final String XML_DECLARATION = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+	
+	/**
+	 * @param req HttpServletRequest, @NeverNull
+	 * @return "/foo/" for a request uri of "/foo/bar" with a pathInfo of "bar"
+	 */
+	public static String getServletPath(HttpServletRequest req) {
+		String uri = req.getRequestURI();
+		String path = req.getPathInfo();
+		String servletPath = uri.substring(0, uri.length() - path.length());
+		log.debug("uri=" + uri + "\npath=" + path + "->" + servletPath);
+		return servletPath;
+	}
 	
 	/** =========== Utilities ================ */
 	
@@ -126,23 +177,6 @@ public class Restless extends HttpServlet {
 			return ((Class<?>)instanceOrClass).getCanonicalName();
 		} else {
 			return instanceOrClass.getClass().getName();
-		}
-	}
-	
-	/**
-	 * @param instanceOrClass an instance or class in which to search methodName
-	 * @param methodName e.g. 'getName'
-	 * @return a java.lang.reflect.{@link Method} from a String
-	 */
-	public static Method methodByName(Object instanceOrClass, String methodName) {
-		return methodByName(toClass(instanceOrClass), methodName);
-	}
-	
-	public static Class<?> toClass(Object instanceOrClass) {
-		if(instanceOrClass instanceof Class<?>) {
-			return (Class<?>)instanceOrClass;
-		} else {
-			return instanceOrClass.getClass();
 		}
 	}
 	
@@ -161,6 +195,47 @@ public class Restless extends HttpServlet {
 		return null;
 	}
 	
+	/**
+	 * @param instanceOrClass an instance or class in which to search methodName
+	 * @param methodName e.g. 'getName'
+	 * @return a java.lang.reflect.{@link Method} from a String
+	 */
+	public static Method methodByName(Object instanceOrClass, String methodName) {
+		return methodByName(toClass(instanceOrClass), methodName);
+	}
+	
+	/**
+	 * @param commaSeparatedClassnames
+	 * @return a list of classnames in order of appearance
+	 */
+	private static List<String> parseToList(String commaSeparatedClassnames) {
+		
+		List<String> list = new ArrayList<String>();
+		if(commaSeparatedClassnames == null) {
+			return list;
+		}
+		
+		String[] parts = commaSeparatedClassnames.split(",");
+		for(int i = 0; i < parts.length; i++) {
+			String classname = parts[i].trim();
+			assert !classname.contains(",");
+			list.add(classname);
+		}
+		return list;
+	}
+	
+	private static boolean requestIsViaAdminUrl(HttpServletRequest req) {
+		return req.getRequestURI().startsWith(ADMIN_ONLY_URL_PREFIX);
+	}
+	
+	public static Class<?> toClass(Object instanceOrClass) {
+		if(instanceOrClass instanceof Class<?>) {
+			return (Class<?>)instanceOrClass;
+		} else {
+			return instanceOrClass.getClass();
+		}
+	}
+	
 	/** =========== Instance code ================ */
 	
 	private String apps;
@@ -171,35 +246,20 @@ public class Restless extends HttpServlet {
 	private Map<String,String> initParams = new HashMap<String,String>();
 	
 	/**
-	 * All publicly exposed methods
-	 */
-	private List<RestlessMethod> methods = new LinkedList<RestlessMethod>();
-	
-	private ServletContext servletContext;
-	
-	private String loggerFactory;
-	
-	/**
 	 * Simulates the servlet context when run outside a servlet container
 	 */
 	private HashMap<String,Object> localContext;
 	
-	/**
-	 * If true, unhandled requests (for which no mapping is found) are delegated
-	 * to the 'default' servlet of the container.
-	 * 
-	 * Default is false.
-	 */
-	public static boolean DELEGATE_UNHANDLED_TO_DEFAULT = false;
+	private String loggerFactory;
 	
 	/**
-	 * See http://en.wikipedia.org/wiki/X-Frame-Options#Frame-Options
-	 * 
-	 * Legal values are: 'deny', 'sameorigin'
+	 * All publicly exposed methods
 	 */
-	public static String X_FRAME_OPTIONS_DEFAULT = "sameorigin";
+	private List<RestlessMethod> methods = new LinkedList<RestlessMethod>();
 	
 	private Set<IRequestListener> requestListeners = new HashSet<IRequestListener>();
+	
+	private ServletContext servletContext;
 	
 	/**
 	 * Register a handler that will receive exceptions thrown by the executed
@@ -255,6 +315,35 @@ public class Restless extends HttpServlet {
 		        + "' not found";
 	}
 	
+	public void addRequestListener(IRequestListener requestListener) {
+		this.requestListeners.add(requestListener);
+	}
+	
+	/**
+	 * Based on
+	 * http://stackoverflow.com/questions/132052/servlet-for-serving-static
+	 * -content
+	 * 
+	 * @param req
+	 * @param res
+	 * @throws IOException
+	 */
+	private void delegateToDefaultServlet(HttpServletRequest req, HttpServletResponse res)
+	        throws IOException {
+		try {
+			RequestDispatcher rd = getServletContext().getNamedDispatcher("default");
+			HttpServletRequest wrapped = new HttpServletRequestWrapper(req) {
+				@Override
+				public String getServletPath() {
+					return "";
+				}
+			};
+			rd.forward(wrapped, res);
+		} catch(ServletException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
 	/*
 	 * Called from servlet environment.
 	 * 
@@ -288,6 +377,26 @@ public class Restless extends HttpServlet {
 		}
 	}
 	
+	/*
+	 * Called from servlet environment.
+	 * 
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * javax.servlet.http.HttpServlet#doPut(javax.servlet.http.HttpServletRequest
+	 * , javax.servlet.http.HttpServletResponse)
+	 */
+	@Override
+	public void doHead(HttpServletRequest req, HttpServletResponse res) {
+		try {
+			super.doHead(req, res);
+		} catch(ServletException e) {
+			throw new RuntimeException(e);
+		} catch(IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
 	/**
 	 * Print the current mapping from URL patterns to Java methods as a web
 	 * page.
@@ -308,16 +417,17 @@ public class Restless extends HttpServlet {
 			
 			"<title>Restless Configuration</title>\n" +
 			
-			"<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />\n" +
-			
-			/* styling */
-			"<style type='text/css'> \n" +
-			
-			"body { font-family: Verdana,sans-serif; }" + "\n"
-			
-			+ "</style>\n" +
-			
-			"</head><body><div>");
+			"<meta http-equiv=\"Content-Type\" content=\"text/html; charset="
+			        + Restless.CONTENT_TYPE_CHARSET_UTF8 + "\" />\n" +
+			        
+			        /* styling */
+			        "<style type='text/css'> \n" +
+			        
+			        "body { font-family: Verdana,sans-serif; }" + "\n"
+			        
+			        + "</style>\n" +
+			        
+			        "</head><body><div>");
 			w.write("<h3>Restless configuration</h3>\n");
 			w.write("<ol>");
 			for(RestlessMethod rm : this.methods) {
@@ -345,18 +455,6 @@ public class Restless extends HttpServlet {
 		}
 	}
 	
-	/**
-	 * @param req HttpServletRequest, never null
-	 * @return "/foo/" for a request uri of "/foo/bar" with a pathInfo of "bar"
-	 */
-	public static String getServletPath(HttpServletRequest req) {
-		String uri = req.getRequestURI();
-		String path = req.getPathInfo();
-		String servletPath = uri.substring(0, uri.length() - path.length());
-		log.debug("uri=" + uri + "\npath=" + path + "->" + servletPath);
-		return servletPath;
-	}
-	
 	/*
 	 * Called from servlet environment.
 	 * 
@@ -381,28 +479,20 @@ public class Restless extends HttpServlet {
 	 * , javax.servlet.http.HttpServletResponse)
 	 */
 	@Override
-	public void doHead(HttpServletRequest req, HttpServletResponse res) {
-		try {
-			super.doHead(req, res);
-		} catch(ServletException e) {
-			throw new RuntimeException(e);
-		} catch(IOException e) {
-			throw new RuntimeException(e);
+	public void doPut(HttpServletRequest req, HttpServletResponse res) {
+		restlessService(req, res);
+	}
+	
+	protected void fireRequestFinished(IRestlessContext restlessContext) {
+		for(IRequestListener requestListener : this.requestListeners) {
+			requestListener.onRequestFinished(restlessContext);
 		}
 	}
 	
-	/*
-	 * Called from servlet environment.
-	 * 
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * javax.servlet.http.HttpServlet#doPut(javax.servlet.http.HttpServletRequest
-	 * , javax.servlet.http.HttpServletResponse)
-	 */
-	@Override
-	public void doPut(HttpServletRequest req, HttpServletResponse res) {
-		restlessService(req, res);
+	protected void fireRequestStarted(IRestlessContext restlessContext) {
+		for(IRequestListener requestListener : this.requestListeners) {
+			requestListener.onRequestStarted(restlessContext);
+		}
 	}
 	
 	/**
@@ -410,6 +500,28 @@ public class Restless extends HttpServlet {
 	 */
 	public String getApp() {
 		return this.apps;
+	}
+	
+	/**
+	 * Helper method to make writing JUnit tests easier.
+	 * 
+	 * @param key attribute name
+	 * @return when run in a servlet container, this method is simply a
+	 *         short-cut for getServletContext().getAttribute(key,value).
+	 *         Otherwise a local hash-map is used that can be set via
+	 *         {@link #setServletContextAttribute(String, Object)}
+	 */
+	public Object getServletContextAttribute(String key) {
+		try {
+			ServletContext sc = this.getServletContext();
+			return sc.getAttribute(key);
+		} catch(NullPointerException e) {
+			// deal with lazy init
+			if(this.localContext == null) {
+				return null;
+			}
+			return this.localContext.get(key);
+		}
 	}
 	
 	public ServletContext getServletContextFromInit() {
@@ -431,6 +543,7 @@ public class Restless extends HttpServlet {
 	 */
 	@Override
 	public void init(ServletConfig servletConfig) {
+		/* measure boot performance */
 		NanoClock clock = new NanoClock();
 		clock.start();
 		try {
@@ -548,7 +661,9 @@ public class Restless extends HttpServlet {
 	}
 	
 	/**
-	 * @param appClassName fully qualified java class name TODO make this faster
+	 * IMPROVE make this faster
+	 * 
+	 * @param appClassName fully qualified java class name
 	 * @return a String with statistics
 	 * @throws RuntimeException for many reflection-related issues
 	 */
@@ -624,24 +739,8 @@ public class Restless extends HttpServlet {
 		return clock.getStats();
 	}
 	
-	/**
-	 * @param commaSeparatedClassnames
-	 * @return a list of classnames in order of appearance
-	 */
-	private static List<String> parseToList(String commaSeparatedClassnames) {
-		
-		List<String> list = new ArrayList<String>();
-		if(commaSeparatedClassnames == null) {
-			return list;
-		}
-		
-		String[] parts = commaSeparatedClassnames.split(",");
-		for(int i = 0; i < parts.length; i++) {
-			String classname = parts[i].trim();
-			assert !classname.contains(",");
-			list.add(classname);
-		}
-		return list;
+	public void removeRequestListener(IRequestListener requestListener) {
+		this.requestListeners.remove(requestListener);
 	}
 	
 	/**
@@ -652,6 +751,8 @@ public class Restless extends HttpServlet {
 	 * @param res
 	 */
 	protected void restlessService(HttpServletRequest req, HttpServletResponse res) {
+		NanoClock requestClock = new NanoClock().start();
+		
 		/* If running on localhost, we might tweak the host */
 		boolean runningOnLocalhost = TweakedRequest.isLocalhost(req.getServerName());
 		final HttpServletRequest reqHandedDown = runningOnLocalhost ? new TweakedRequest(req) : req;
@@ -695,7 +796,8 @@ public class Restless extends HttpServlet {
 					if(httpMethod.equalsIgnoreCase(restlessMethod.httpMethod)) {
 						foundMethod = true;
 						try {
-							couldStartMethod = restlessMethod.run(this, reqHandedDown, res);
+							couldStartMethod = restlessMethod.run(this, reqHandedDown, res,
+							        requestClock);
 						} catch(IOException e) {
 							throw new RuntimeException(e);
 						}
@@ -736,35 +838,9 @@ public class Restless extends HttpServlet {
 			res.flushBuffer();
 		} catch(IOException e) {
 		}
-	}
-	
-	/**
-	 * Based on
-	 * http://stackoverflow.com/questions/132052/servlet-for-serving-static
-	 * -content
-	 * 
-	 * @param req
-	 * @param res
-	 * @throws IOException
-	 */
-	private void delegateToDefaultServlet(HttpServletRequest req, HttpServletResponse res)
-	        throws IOException {
-		try {
-			RequestDispatcher rd = getServletContext().getNamedDispatcher("default");
-			HttpServletRequest wrapped = new HttpServletRequestWrapper(req) {
-				@Override
-				public String getServletPath() {
-					return "";
-				}
-			};
-			rd.forward(wrapped, res);
-		} catch(ServletException e) {
-			throw new RuntimeException(e);
-		}
-	}
-	
-	private static boolean requestIsViaAdminUrl(HttpServletRequest req) {
-		return req.getRequestURI().startsWith(ADMIN_ONLY_URL_PREFIX);
+		
+		long requestTime = requestClock.stop("done").getDurationSinceStart();
+		log.info("Request time: " + requestTime + " causes: " + requestClock.getStats());
 	}
 	
 	/**
@@ -787,68 +863,6 @@ public class Restless extends HttpServlet {
 				this.localContext = new HashMap<String,Object>();
 			}
 			this.localContext.put(key, value);
-		}
-	}
-	
-	/**
-	 * Helper method to make writing JUnit tests easier.
-	 * 
-	 * @param key attribute name
-	 * @return when run in a servlet container, this method is simply a
-	 *         short-cut for getServletContext().getAttribute(key,value).
-	 *         Otherwise a local hash-map is used that can be set via
-	 *         {@link #setServletContextAttribute(String, Object)}
-	 */
-	public Object getServletContextAttribute(String key) {
-		try {
-			ServletContext sc = this.getServletContext();
-			return sc.getAttribute(key);
-		} catch(NullPointerException e) {
-			// deal with lazy init
-			if(this.localContext == null) {
-				return null;
-			}
-			return this.localContext.get(key);
-		}
-	}
-	
-	/**
-	 * Gets notified before a request is send to a Java method (
-	 * {@link #onRequestStarted(IRestlessContext)}) and after the Java method
-	 * finished processing the request (
-	 * {@link #onRequestFinished(IRestlessContext)}).
-	 * 
-	 * Via {@link IRestlessContext#getRequestIdentifier()} a correlation from
-	 * start to finish can be achieved.
-	 * 
-	 * Implementations should have valid {@link #hashCode()} and
-	 * {@link #equals(Object)} methods.
-	 * 
-	 * @author xamde
-	 */
-	public static interface IRequestListener {
-		void onRequestStarted(IRestlessContext restlessContext);
-		
-		void onRequestFinished(IRestlessContext restlessContext);
-	}
-	
-	public void addRequestListener(IRequestListener requestListener) {
-		this.requestListeners.add(requestListener);
-	}
-	
-	public void removeRequestListener(IRequestListener requestListener) {
-		this.requestListeners.remove(requestListener);
-	}
-	
-	protected void fireRequestStarted(IRestlessContext restlessContext) {
-		for(IRequestListener requestListener : this.requestListeners) {
-			requestListener.onRequestStarted(restlessContext);
-		}
-	}
-	
-	protected void fireRequestFinished(IRestlessContext restlessContext) {
-		for(IRequestListener requestListener : this.requestListeners) {
-			requestListener.onRequestFinished(restlessContext);
 		}
 	}
 }

@@ -9,7 +9,7 @@ import org.xydra.restless.utils.HostUtils;
 /**
  * A tweaked request that returns the server name with support for
  * Restless.X_HOST_Override. For security reasons, this is only effective on
- * localhost, where it simplified testing..
+ * localhost, where it simplifies testing..
  * 
  * @author xamde
  */

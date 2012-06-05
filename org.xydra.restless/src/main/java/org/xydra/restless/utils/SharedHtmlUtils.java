@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.xydra.restless.annot.CanBeNull;
+
 
 /**
  * Genereates some simple HTML5.
@@ -73,13 +75,13 @@ public class SharedHtmlUtils {
 		@Override
 		public String toString() {
 			return "<input" +
-
+			
 			" type=\"hidden\"" +
-
+			
 			" name=\"" + this.name + "\"" +
-
+			
 			" value=\"" + this.value + "\"" +
-
+			
 			"/>";
 		}
 	}
@@ -100,15 +102,15 @@ public class SharedHtmlUtils {
 		@Override
 		public String toString() {
 			return super.name + ": <input" +
-
+			
 			" type=\"file\"" +
-
+			
 			" name=\"" + super.name + "\"" +
-
+			
 			" value=\"" + this.value + "\"" +
-
+			
 			" size=\"" + this.size + "\"" +
-
+			
 			"/>";
 		}
 		
@@ -130,15 +132,15 @@ public class SharedHtmlUtils {
 		@Override
 		public String toString() {
 			return this.name + ": <input" +
-
+			
 			" type=\"text\"" +
-
+			
 			" name=\"" + this.name + "\"" +
-
+			
 			" value=\"" + this.value + "\"" +
-
+			
 			" size=\"" + this.size + "\"" +
-
+			
 			"/>";
 		}
 		
@@ -163,11 +165,11 @@ public class SharedHtmlUtils {
 		@Override
 		public String toString() {
 			return this.name + ": <textarea name=\"" + this.name
-
+			
 			+ "\" cols=\"" + this.cols
-
+			
 			+ "\" rows=\"" + this.rows
-
+			
 			+ "\">" + this.value + "</textarea>";
 		}
 		
@@ -272,15 +274,16 @@ public class SharedHtmlUtils {
 	public static class HeadLink implements HeadChild {
 		
 		private String href;
-		private String rel;
+		private @CanBeNull
+		String rel;
 		private String type;
 		
 		/**
-		 * @param href never null
-		 * @param rel can be null TODO when?
-		 * @param type never null
+		 * @param href @NeverNull
+		 * @param rel can be null
+		 * @param type @NeverNull
 		 */
-		public HeadLink(String href, String rel, String type) {
+		public HeadLink(String href, @CanBeNull String rel, String type) {
 			this.href = href;
 			this.rel = rel;
 			this.type = type;
@@ -289,13 +292,13 @@ public class SharedHtmlUtils {
 		@Override
 		public String toString() {
 			return "<link"
-
+			
 			+ attribute("href", this.href) + " "
-
+			
 			+ attribute("rel", this.rel) + " "
-
+			
 			+ attribute("type", this.type)
-
+			
 			+ " />";
 		}
 		
@@ -337,16 +340,16 @@ public class SharedHtmlUtils {
 	}
 	
 	/**
-	 * @param name never null
-	 * @param value can be null
+	 * @param name @NeverNull
+	 * @param value @CanBeNull
 	 * @return ' ' name '=' '"' value '"' OR the emtpy string if value is null.
 	 */
-	private static String attribute(String name, String value) {
+	private static String attribute(String name, @CanBeNull String value) {
 		assert name != null;
 		if(value != null) {
 			return " " + name + "=\"" + value + "\"";
 		} else {
-			return null;
+			return "";
 		}
 	}
 	

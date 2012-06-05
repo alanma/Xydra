@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.restless.Restless;
 
 
 /**
@@ -92,8 +93,8 @@ public class ServletUtils {
 	 * Turn all cookies that the request contains into a map, cookie name as
 	 * key, cookie value as map value.
 	 * 
-	 * @param req HttpServletRequest, never null
-	 * @return never null
+	 * @param req HttpServletRequest, @NeverNull
+	 * @return @NeverNull
 	 */
 	public static Map<String,String> getCookiesAsMap(HttpServletRequest req) {
 		Cookie[] cookies = req.getCookies();
@@ -178,7 +179,7 @@ public class ServletUtils {
 				String encKey = keyvalue[0];
 				String key;
 				try {
-					key = URLDecoder.decode(encKey, "utf-8");
+					key = URLDecoder.decode(encKey, Restless.JAVA_ENCODING_UTF8);
 					SortedSet<String> values = map.get(key);
 					if(values == null) {
 						values = new TreeSet<String>();
@@ -186,13 +187,14 @@ public class ServletUtils {
 					}
 					if(keyvalue.length == 2) {
 						String rawValue = keyvalue[1];
-						String value = URLDecoder.decode(rawValue, "utf-8");
+						String value = URLDecoder.decode(rawValue, Restless.JAVA_ENCODING_UTF8);
 						values.add(value);
 					} else {
 						values.add(null);
 					}
 				} catch(UnsupportedEncodingException e) {
-					throw new RuntimeException("No utf-8 on this system?", e);
+					throw new RuntimeException("No " + Restless.JAVA_ENCODING_UTF8
+					        + " on this system?", e);
 				}
 			}
 		}
@@ -256,16 +258,13 @@ public class ServletUtils {
 	 */
 	public static void headers(HttpServletResponse res, int status, long cachingInMinutes,
 	        String contentType) {
-		res.setCharacterEncoding("utf-8");
+		res.setCharacterEncoding(Restless.CONTENT_TYPE_CHARSET_UTF8);
 		res.setContentType(contentType);
 		if(status > 0) {
 			res.setStatus(status);
 		}
 		if(cachingInMinutes == -1) {
-			// TODO What is this? res.setHeader("Pragma", "no-cache");
-			res.setHeader("Cache-Control", "no-cache");
-			/* "Fri, 01 Jan 1990 00:00:00 GMT" */
-			res.setDateHeader("Expires", 0);
+			setNoCacheHeaders(res);
 		} else if(cachingInMinutes > 0) {
 			long millisSinceEpoch = System.currentTimeMillis() + (cachingInMinutes * 60 * 1000);
 			// TODO test header set correctly
@@ -285,10 +284,32 @@ public class ServletUtils {
 	 */
 	public static void headers(HttpServletResponse res, String contentType) {
 		// TODO this gives an error on GAE in context of URLFetch & GA
-		res.setCharacterEncoding("utf-8");
+		res.setCharacterEncoding(Restless.CONTENT_TYPE_CHARSET_UTF8);
 		res.setContentType(contentType);
 		res.setStatus(200);
+		
+		setNoCacheHeaders(res);
+	}
+	
+	public static void setNoCacheHeaders(HttpServletResponse res) {
+		/*
+		 * Pragma:
+		 * http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.32
+		 * 
+		 * When the no-cache directive is present in a request message, an
+		 * application SHOULD forward the request toward the origin server even
+		 * if it has a cached copy of what is being requested. This pragma
+		 * directive has the same semantics as the no-cache cache-directive (see
+		 * section 14.9) and is defined here for backward compatibility with
+		 * HTTP/1.0. Clients SHOULD include both header fields when a no-cache
+		 * request is sent to a server not known to be HTTP/1.1 compliant.
+		 */
 		res.setHeader("Pragma", "no-cache");
+		
+		// HTTP 1.1
+		res.setHeader("Cache-Control", "no-cache");
+		/* "Fri, 01 Jan 1990 00:00:00 GMT" */
+		res.setDateHeader("Expires", 0);
 		res.setHeader("Expires", "Fri, 01 Jan 1990 00:00:00 GMT");
 	}
 	

@@ -1,5 +1,8 @@
 package org.xydra.restless.utils;
 
+import org.xydra.restless.annot.NeverNull;
+
+
 /**
  * A simple named clock for measuring time. Nanosecond precision.
  * 
@@ -34,7 +37,7 @@ public class NanoClock {
 	 * @param name for the statistics
 	 * @return this instance for API chaining
 	 */
-	public NanoClock stop(String name) {
+	public NanoClock stop(@NeverNull String name) {
 		stopAndGetDuration(name);
 		return this;
 	}
@@ -43,7 +46,7 @@ public class NanoClock {
 	 * @param name for clock entry
 	 * @return duration since last start in milliseconds
 	 */
-	public long stopAndGetDuration(String name) {
+	public long stopAndGetDuration(@NeverNull String name) {
 		if(this.start == -1) {
 			throw new IllegalStateException("Cannot stop a clock that was never started.");
 		}
@@ -54,7 +57,7 @@ public class NanoClock {
 		return (long)durationInMs;
 	}
 	
-	public void stopAndStart(String name) {
+	public void stopAndStart(@NeverNull String name) {
 		stop(name);
 		start();
 	}
@@ -76,7 +79,7 @@ public class NanoClock {
 		System.out.println(c.getStats());
 	}
 	
-	public NanoClock append(String s) {
+	public NanoClock append(@NeverNull String s) {
 		this.stats.append(s);
 		return this;
 	}

@@ -97,18 +97,21 @@ public class RestlessMethod {
 	 * Precedence of variable extraction: urlPath (before questionmark) >
 	 * httpParams (query params + POST params ) > default value
 	 * 
-	 * TODO IMPROVE distinguish query params from POST params to define a
-	 * clearer precedence
+	 * IMPROVE distinguish query params from POST params to define a clearer
+	 * precedence
 	 * 
-	 * @param restless never null
+	 * @param restless @NeverNull
+	 * @param req @NeverNull
+	 * @param res @NeverNull
+	 * @param requestClock @NeverNull already be started
 	 * 
-	 * @param req never null
-	 * @param res never null
-	 * @return true if method launched succesfully, i.e. parameters matched
+	 * @return true if method launched successfully, i.e. parameters matched
 	 * @throws IOException if result writing fails
 	 */
 	public boolean run(final Restless restless, final HttpServletRequest req,
-	        final HttpServletResponse res) throws IOException {
+	        final HttpServletResponse res, NanoClock requestClock) throws IOException {
+		requestClock.stopAndStart("servlet->restless.run");
+		
 		// set standard headers
 		res.setHeader(Restless.X_FRAME_OPTIONS_HEADERNAME, Restless.X_FRAME_OPTIONS_DEFAULT);
 		
@@ -136,28 +139,8 @@ public class RestlessMethod {
 			final String uniqueRequestId = reuseOrCeateUniqueRequestIdentifier(urlParameter,
 			        cookieMap);
 			// define context
-			IRestlessContext restlessContext = new IRestlessContext() {
-				
-				@Override
-				public Restless getRestless() {
-					return restless;
-				}
-				
-				@Override
-				public HttpServletResponse getResponse() {
-					return res;
-				}
-				
-				@Override
-				public HttpServletRequest getRequest() {
-					return req;
-				}
-				
-				@Override
-				public String getRequestIdentifier() {
-					return uniqueRequestId;
-				}
-			};
+			IRestlessContext restlessContext = new RestlessContextImpl(restless, req, res,
+			        uniqueRequestId);
 			
 			for(Class<?> requiredParamType : method.getParameterTypes()) {
 				
@@ -174,6 +157,8 @@ public class RestlessMethod {
 				} else if(requiredParamType.equals(IRestlessContext.class)) {
 					javaMethodArgs.add(restlessContext);
 					hasHttpServletResponseParameter = true;
+				} else if(requiredParamType.equals(NanoClock.class)) {
+					javaMethodArgs.add(requestClock);
 				} else {
 					/*
 					 * Method might require a non-trivial parameter type for a
@@ -289,13 +274,18 @@ public class RestlessMethod {
 			}
 			
 			try {
-				// pre-run-event
+				requestClock.stopAndStart("restless.run->invoke");
+				// onBefore-run-event
 				restless.fireRequestStarted(restlessContext);
 				// run
 				Object result = invokeMethod(method, this.instanceOrClass, javaMethodArgs);
+				
+				requestClock
+				        .stopAndStart("invoke " + methodReference(this.instanceOrClass, method));
+				
 				if(!hasHttpServletResponseParameter) {
 					res.setContentType(Restless.MIME_TEXT_PLAIN + "; charset="
-					        + Restless.CHARSET_UTF8);
+					        + Restless.CONTENT_TYPE_CHARSET_UTF8);
 					res.setStatus(200);
 					Writer w = res.getWriter();
 					// we need to send back something standard ourselves
@@ -307,40 +297,22 @@ public class RestlessMethod {
 				}
 				// post-run-event
 				restless.fireRequestFinished(restlessContext);
+				
+				requestClock.stopAndStart("response");
+				
 			} catch(InvocationTargetException e) {
 				Throwable cause = e.getCause();
 				if(cause instanceof RestlessException) {
 					RestlessException re = (RestlessException)cause;
 					res.setStatus(re.getStatusCode());
 					res.setContentType(Restless.MIME_TEXT_PLAIN + "; charset="
-					        + Restless.CHARSET_UTF8);
+					        + Restless.CONTENT_TYPE_CHARSET_UTF8);
 					Writer w = res.getWriter();
 					w.write(re.getMessage());
 				} else {
 					
-					IRestlessContext context = new IRestlessContext() {
-						
-						@Override
-						public Restless getRestless() {
-							return restless;
-						}
-						
-						@Override
-						public HttpServletResponse getResponse() {
-							return res;
-						}
-						
-						@Override
-						public HttpServletRequest getRequest() {
-							return req;
-						}
-						
-						@Override
-						public String getRequestIdentifier() {
-							return uniqueRequestId;
-						}
-						
-					};
+					IRestlessContext context = new RestlessContextImpl(restless, req, res,
+					        uniqueRequestId);
 					
 					boolean handled = false;
 					
@@ -402,7 +374,8 @@ public class RestlessMethod {
 					String value = Streams.asString(stream);
 					map.put(fieldName, value);
 				} else {
-					// TODO no protection against gigantic uploads
+					// IMPROVE security, performance: add protection against
+					// gigantic uploads
 					byte[] bytes = IOUtils.toByteArray(stream);
 					if(fieldName.equals(UPLOAD_PARAM)) {
 						map.put(UPLOAD_PARAM, bytes);
@@ -443,7 +416,6 @@ public class RestlessMethod {
 	        InvocationTargetException {
 		/* Instantiate only for non-static methods */
 		boolean isStatic = Modifier.isStatic(method.getModifiers());
-		NanoClock c = new NanoClock().start();
 		Object result;
 		if(isStatic) {
 			result = method.invoke(null, javaMethodArgs.toArray(new Object[0]));
@@ -451,9 +423,6 @@ public class RestlessMethod {
 			Object instance = toInstance(instanceOrClass);
 			result = method.invoke(instance, javaMethodArgs.toArray(new Object[0]));
 		}
-		long duration = c.stopAndGetDuration("method");
-		log.info("Invoked method '" + methodReference(instanceOrClass, method) + "' in " + duration
-		        + "ms");
 		return result;
 	}
 	
@@ -524,8 +493,8 @@ public class RestlessMethod {
 	}
 	
 	/**
-	 * @param req never null
-	 * @param pathTemplate never null
+	 * @param req @NeverNull
+	 * @param pathTemplate @NeverNull
 	 * @return a single map of key-value pairs extracted from the path-part of
 	 *         the request-URI
 	 */

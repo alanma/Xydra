@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.xydra.restless.IRestlessContext;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
+import org.xydra.restless.utils.NanoClock;
 
 
 /**
@@ -26,7 +27,7 @@ public class ExampleResource {
 	/**
 	 * Naming this method 'restless()' is just a convention
 	 * 
-	 * @param restless never null
+	 * @param restless @NeverNull
 	 */
 	public static void restless(Restless restless) {
 		ExampleResource exampleResource = new ExampleResource();
@@ -56,14 +57,32 @@ public class ExampleResource {
 	private String name;
 	private String age;
 	
-	public void getName(HttpServletRequest req, String name, String age, HttpServletResponse res)
-	        throws IOException {
+	/**
+	 * This method is exposed by linking 'getName' in
+	 * {@link #restless(Restless)}. It can have String parameters, in order of
+	 * appearance of the {@link RestlessParameter}.
+	 * 
+	 * Additionally the parameter types {@link HttpServletResponse},
+	 * {@link HttpServletRequest}, {@link IRestlessContext} and
+	 * {@link NanoClock} are available.
+	 * 
+	 * @param req
+	 * @param name
+	 * @param age
+	 * @param res
+	 * @param requestClock
+	 * @throws IOException
+	 */
+	public void getName(HttpServletRequest req, String name, String age, HttpServletResponse res,
+	        NanoClock requestClock) throws IOException {
 		// process
 		this.name = name;
 		this.age = age;
 		
-		res.setCharacterEncoding("utf-8");
+		res.setCharacterEncoding(Restless.CONTENT_TYPE_CHARSET_UTF8);
 		res.setContentType("text/html");
+		
+		requestClock.stopAndStart("headers");
 		
 		/* usually use a template engine or XML generating library here */
 		Writer w = res.getWriter();
@@ -72,6 +91,9 @@ public class ExampleResource {
 		w.write("<head><title>A valid restless response</title></head>");
 		w.write("<body><p>name = " + this.name + ", age = " + this.age + "</p></body>");
 		w.write("</html>");
+		
+		requestClock.stopAndStart("content");
+		
 	}
 	
 	public String silly(IRestlessContext restlessContext) {

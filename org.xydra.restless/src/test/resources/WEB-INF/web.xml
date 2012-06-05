@@ -25,7 +25,7 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>Restless</servlet-name>
-		<url-pattern>/a/*</url-pattern>
+		<url-pattern>/*</url-pattern>
 		<!--  for secure resources -->
 		<url-pattern>/admin/*</url-pattern>
 	</servlet-mapping>
