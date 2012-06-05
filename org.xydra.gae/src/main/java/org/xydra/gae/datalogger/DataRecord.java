@@ -102,7 +102,14 @@ public class DataRecord {
 				if(prop.getKey().equals(CREATION_DATE)) {
 					creationDate = (Long)prop.getValue();
 				} else {
-					map.put(prop.getKey(), (String)prop.getValue());
+					Object v = prop.getValue();
+					String s;
+					if(v instanceof Text) {
+						s = ((Text)v).getValue();
+					} else {
+						s = v.toString();
+					}
+					map.put(prop.getKey(), s);
 				}
 			}
 			DataRecord dr = new DataRecord(creationDate, map);
