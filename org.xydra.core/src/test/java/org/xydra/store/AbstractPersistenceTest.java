@@ -447,7 +447,16 @@ public abstract class AbstractPersistenceTest {
 	}
 	
 	@Test
-	public void testExecuteCommandObjectCommandAddType() {
+	public void testExecuteCommandObjectSafeCommandAddType() {
+		testExecuteCommandObjectCommandAddType(false);
+	}
+	
+	@Test
+	public void testExecuteCommandObjectForcedCommandAddType() {
+		testExecuteCommandObjectCommandAddType(true);
+	}
+	
+	public void testExecuteCommandObjectCommandAddType(boolean forcedCommands) {
 		/*
 		 * ObjectCommands of add type add new fields to objects.
 		 */
@@ -455,7 +464,8 @@ public abstract class AbstractPersistenceTest {
 		// add a model on which an object can be created first
 		
 		XID modelId = XX.toId("testExecuteCommandObjectCommandAddTypeModel");
-		XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId, false);
+		XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId,
+		        forcedCommands);
 		long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
 		assertTrue("The model wasn't correctly added, test cannot be executed.", revNr >= 0);
 		
@@ -467,7 +477,7 @@ public abstract class AbstractPersistenceTest {
 		
 		XAddress objectAddress = XX.resolveObject(this.repoId, modelId, objectId);
 		XCommand addObjectCom = this.comFactory.createAddObjectCommand(this.repoId, modelId,
-		        objectId, false);
+		        objectId, forcedCommands);
 		
 		revNr = this.persistence.executeCommand(this.actorId, addObjectCom);
 		
@@ -481,7 +491,7 @@ public abstract class AbstractPersistenceTest {
 		
 		XAddress fieldAddress = XX.resolveField(this.repoId, modelId, objectId, fieldId);
 		XCommand addFieldCom = this.comFactory.createAddFieldCommand(this.repoId, modelId,
-		        objectId, fieldId, false);
+		        objectId, fieldId, forcedCommands);
 		
 		revNr = this.persistence.executeCommand(this.actorId, addFieldCom);
 		
@@ -506,15 +516,30 @@ public abstract class AbstractPersistenceTest {
 		 * fail
 		 */
 		
-		long failRevNr = this.persistence.executeCommand(this.actorId, addFieldCom);
+		revNr = this.persistence.executeCommand(this.actorId, addFieldCom);
+		if(forcedCommands) {
+			assertEquals(
+			        "Trying to add an already existing field with a forced command should return \"No change\".",
+			        XCommand.NOCHANGE, revNr);
+		} else {
+			assertEquals(
+			        "Trying to add an already existing field with an unforced command succeeded (should fail).",
+			        XCommand.FAILED, revNr);
+		}
 		
-		assertTrue(
-		        "Trying to add an already existing field with an unforced command succeeded (should fail), revNr was "
-		                + failRevNr, failRevNr == XCommand.FAILED);
 	}
 	
 	@Test
-	public void testExecuteCommandObjectCommandRemoveType() {
+	public void testExecuteCommandObjectSafeCommandRemoveType() {
+		testExecuteCommandObjectCommandRemoveType(false);
+	}
+	
+	@Test
+	public void testExecuteCommandObjectForcedCommandRemoveType() {
+		testExecuteCommandObjectCommandRemoveType(true);
+	}
+	
+	public void testExecuteCommandObjectCommandRemoveType(boolean forcedCommands) {
 		/*
 		 * FieldCommands of remove type remove fields from objects.
 		 */
@@ -522,7 +547,8 @@ public abstract class AbstractPersistenceTest {
 		// add a model on which an object can be created first
 		
 		XID modelId = XX.toId("testExecuteCommandObjectCommandRemoveTypeModel");
-		XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId, false);
+		XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId,
+		        forcedCommands);
 		long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
 		assertTrue("The model wasn't correctly added, test cannot be executed.", revNr >= 0);
 		
@@ -534,7 +560,7 @@ public abstract class AbstractPersistenceTest {
 		
 		XAddress objectAddress = XX.resolveObject(this.repoId, modelId, objectId);
 		XCommand addObjectCom = this.comFactory.createAddObjectCommand(this.repoId, modelId,
-		        objectId, false);
+		        objectId, forcedCommands);
 		
 		revNr = this.persistence.executeCommand(this.actorId, addObjectCom);
 		
@@ -547,7 +573,7 @@ public abstract class AbstractPersistenceTest {
 		XID fieldId = XX.toId("testExecuteCommandObjectCommandRemoveTypeField");
 		
 		XCommand addFieldCom = this.comFactory.createAddFieldCommand(this.repoId, modelId,
-		        objectId, fieldId, false);
+		        objectId, fieldId, forcedCommands);
 		
 		revNr = this.persistence.executeCommand(this.actorId, addFieldCom);
 		
@@ -559,7 +585,7 @@ public abstract class AbstractPersistenceTest {
 		 */
 		
 		XCommand removeFieldCom = this.comFactory.createRemoveFieldCommand(this.repoId, modelId,
-		        objectId, fieldId, revNr, false);
+		        objectId, fieldId, revNr, forcedCommands);
 		
 		revNr = this.persistence.executeCommand(this.actorId, removeFieldCom);
 		
@@ -576,21 +602,62 @@ public abstract class AbstractPersistenceTest {
 		        field);
 		
 		/*
-		 * try to remove the same field again (with an unforced command), should
-		 * fail (since no such field exists)
+		 * try to remove the same field again
+		 */
+		
+		/*
+		 * TODO Add this testcase (try to remove already removed entity) to
+		 * other remove-testcases
 		 */
 		
 		removeFieldCom = this.comFactory.createRemoveFieldCommand(this.repoId, modelId, objectId,
-		        fieldId, revNr, false);
-		long failRevNr = this.persistence.executeCommand(this.actorId, removeFieldCom);
+		        fieldId, revNr, forcedCommands);
 		
-		assertTrue(
-		        "Trying to remove a not existing field with an unforced command succeeded (should fail), revNr was "
-		                + failRevNr, failRevNr == XCommand.FAILED);
+		revNr = this.persistence.executeCommand(this.actorId, removeFieldCom);
+		
+		if(forcedCommands) {
+			assertEquals(
+			        "Trying to remove a not existing field with an forced command should return \"No change\".",
+			        XCommand.NOCHANGE, revNr);
+		} else {
+			assertEquals(
+			        "Trying to remove a not existing field with an unforced command succeeded (should fail).",
+			        XCommand.FAILED, revNr);
+		}
+		
+		/*
+		 * try to remove a not existing field
+		 */
+		
+		fieldId = XX.toId("testExecuteCommandObjectCommandRemoveTypeNotExistingField");
+		XCommand deleteNotExistingFieldCom = this.comFactory.createRemoveFieldCommand(this.repoId,
+		        modelId, objectId, fieldId, 0, forcedCommands);
+		
+		revNr = this.persistence.executeCommand(this.actorId, deleteNotExistingFieldCom);
+		
+		if(forcedCommands) {
+			assertEquals(
+			        "Trying to remove a not existing field should return \"No change\" when the command is forced.",
+			        XCommand.NOCHANGE, revNr);
+		} else {
+			assertEquals(
+			        "Removing a not existing field with an unforced command succeeded (should fail).",
+			        XCommand.FAILED, revNr);
+		}
+		
 	}
 	
 	@Test
-	public void testExecuteCommandFieldCommandAddType() {
+	public void testExecuteCommandFieldSafeCommandAddType() {
+		testExecuteCommandFieldCommandAddType(false);
+	}
+	
+	@Test
+	public void testExecuteCommandFieldForcedCommandAddType() {
+		testExecuteCommandFieldCommandAddType(true);
+	}
+	
+	public void testExecuteCommandFieldCommandAddType(boolean forcedCommands) {
 		/*
 		 * FieldCommands of add type add new value to fields.
 		 */
@@ -598,7 +665,8 @@ public abstract class AbstractPersistenceTest {
 		// add a model on which an object can be created first
 		
 		XID modelId = XX.toId("testExecuteCommandFieldCommandAddTypeModel");
-		XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId, false);
+		XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId,
+		        forcedCommands);
 		long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
 		assertTrue("The model wasn't correctly added, test cannot be executed.", revNr >= 0);
 		
@@ -610,7 +678,7 @@ public abstract class AbstractPersistenceTest {
 		
 		XAddress objectAddress = XX.resolveObject(this.repoId, modelId, objectId);
 		XCommand addObjectCom = this.comFactory.createAddObjectCommand(this.repoId, modelId,
-		        objectId, false);
+		        objectId, forcedCommands);
 		
 		revNr = this.persistence.executeCommand(this.actorId, addObjectCom);
 		
@@ -624,7 +692,7 @@ public abstract class AbstractPersistenceTest {
 		
 		XAddress fieldAddress = XX.resolveField(this.repoId, modelId, objectId, fieldId);
 		XCommand addFieldCom = this.comFactory.createAddFieldCommand(this.repoId, modelId,
-		        objectId, fieldId, false);
+		        objectId, fieldId, forcedCommands);
 		
 		revNr = this.persistence.executeCommand(this.actorId, addFieldCom);
 		
@@ -636,7 +704,7 @@ public abstract class AbstractPersistenceTest {
 		 */
 		XValue value = X.getValueFactory().createStringValue("test");
 		XCommand addValueCom = this.comFactory.createAddValueCommand(fieldAddress, revNr, value,
-		        false);
+		        forcedCommands);
 		
 		revNr = this.persistence.executeCommand(this.actorId, addValueCom);
 		
@@ -666,31 +734,46 @@ public abstract class AbstractPersistenceTest {
 		 * values no longer works
 		 */
 		
-		long failRevNr = this.persistence.executeCommand(this.actorId, addValueCom);
+		long revNr2 = this.persistence.executeCommand(this.actorId, addValueCom);
 		
-		assertTrue(
-		        "Trying to add the same value to a field which value is already set with an unforced command succeeded (should fail), revNr was "
-		                + failRevNr, failRevNr == XCommand.FAILED);
+		if(forcedCommands) {
+			assertEquals(
+			        "Trying to add the same value to a field which value is already set with a forced command should return \"No change\".",
+			        XCommand.NOCHANGE, revNr2);
+		} else {
+			assertEquals(
+			        "Trying to add the same value to a field which value is already set with an unforced command succeeded (should fail).",
+			        XCommand.FAILED, revNr2);
+		}
 		
 		// try to add a different value
 		XValue value2 = X.getValueFactory().createIntegerValue(42);
 		XCommand addValueCom2 = this.comFactory.createAddValueCommand(fieldAddress, revNr, value2,
-		        false);
+		        forcedCommands);
 		
-		failRevNr = this.persistence.executeCommand(this.actorId, addValueCom2);
+		revNr2 = this.persistence.executeCommand(this.actorId, addValueCom2);
 		
-		assertTrue(
-		        "Trying to add a new value to a field which value is already set with an unforced command succeeded (should fail), revNr was "
-		                + failRevNr, failRevNr == XCommand.FAILED);
-		
-		// check that the value wasn't changed
-		object = this.persistence.getObjectSnapshot(objectAdrRequest);
-		field = object.getField(fieldId);
-		
-		storedValue = field.getValue();
-		
-		assertEquals("The stored value was changed, although the add-command failed.", value,
-		        storedValue);
+		if(forcedCommands) {
+			// TODO check if this is correct
+			assertTrue(
+			        "A forced add-command should succeed, even though the value is already set.",
+			        revNr2 >= 0);
+			
+			// TODO check that the value was changed
+		} else {
+			assertEquals(
+			        "Trying to add a new value to a field which value is already set succeeded (should fail).",
+			        XCommand.FAILED, revNr2);
+			
+			// check that the value wasn't changed
+			object = this.persistence.getObjectSnapshot(objectAdrRequest);
+			field = object.getField(fieldId);
+			
+			storedValue = field.getValue();
+			
+			assertEquals("The stored value was changed, although the add-command failed.", value,
+			        storedValue);
+		}
 		
 	}
 	
