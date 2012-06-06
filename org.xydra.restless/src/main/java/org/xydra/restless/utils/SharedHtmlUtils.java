@@ -179,8 +179,60 @@ public class SharedHtmlUtils {
 		return new Form(method, action);
 	}
 	
+	public static Table table() {
+		return new Table();
+	}
+	
 	public static enum METHOD {
 		GET, POST
+	}
+	
+	public static class Table {
+		
+		private List<TableRow> rows = new LinkedList<SharedHtmlUtils.Table.TableRow>();
+		
+		public TableRow row() {
+			TableRow row = new TableRow();
+			this.rows.add(row);
+			return row;
+		}
+		
+		public class TableRow {
+			
+			private StringBuilder b = new StringBuilder();
+			
+			public TableRow td(String content) {
+				this.b.append("<td>").append(content).append("</td>");
+				return this;
+			}
+			
+			public TableRow th(String header) {
+				this.b.append("<th>").append(header).append("</th>");
+				return this;
+			}
+			
+			public Table rowEnd() {
+				return Table.this;
+			}
+			
+		}
+		
+		public String toString() {
+			return toStringBuilder().toString();
+		}
+		
+		public StringBuilder toStringBuilder() {
+			StringBuilder b = new StringBuilder();
+			b.append("<table>");
+			for(TableRow r : this.rows) {
+				b.append("<tr>");
+				b.append(r.b);
+				b.append("</tr>");
+			}
+			b.append("</table>");
+			return b;
+		}
+		
 	}
 	
 	public static class Form {

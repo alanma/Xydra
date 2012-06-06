@@ -134,6 +134,7 @@ public class Restless extends HttpServlet {
 	
 	public static final String INIT_PARAM_APP = "app";
 	public static final String INIT_PARAM_XYDRA_LOG_BACKEND = "loggerFactory";
+	public static final String INIT_PARAM_404URL = "error404";
 	public static final String JAVA_ENCODING_UTF8 = "utf-8";
 	public static final String MIME_TEXT_PLAIN = "text/plain";
 	public static final String MIME_XHTML = "application/xhtml+xml";
