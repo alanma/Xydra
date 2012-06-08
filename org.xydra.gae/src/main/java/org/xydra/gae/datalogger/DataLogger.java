@@ -13,6 +13,7 @@ import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.restless.utils.ServletUtils;
 import org.xydra.store.impl.gae.AsyncDatastore;
+import org.xydra.store.impl.gae.GaePersistence;
 import org.xydra.store.impl.gae.SyncDatastore;
 
 import com.google.appengine.api.datastore.Entity;
@@ -33,10 +34,10 @@ import com.google.apphosting.api.ApiProxy.CapabilityDisabledException;
  */
 public class DataLogger {
 	
-	private static final Logger log = LoggerFactory.getLogger(DataLogger.class);
-	
 	private static final DataRecord.DataRecordEntryHandler ENTRYHANDLER = new DataRecord.DataRecordEntryHandler();
+	
 	private static final String KIND_DATARECORD = "DATA_RECORD";
+	private static final Logger log = LoggerFactory.getLogger(DataLogger.class);
 	private static final Transformer<Entity,DataRecord> TRANSFORMER = new Transformer<Entity,DataRecord>() {
 		@Override
 		public DataRecord transform(Entity in) {
@@ -45,24 +46,19 @@ public class DataLogger {
 	};
 	
 	/**
-	 * @param map see {@link DataRecord#DataRecord(long, Map)} for constraints
-	 * @return the created DataRecord
+	 * @param key property name to be prefix-filtered
+	 * @param valuePrefix start of prefix search
+	 * @return the query further constrained with prefixKey ~ shouldStartWith
+	 *         prefixValue
 	 */
-	public static DataRecord log(Map<String,String> map) {
-		DataRecord dr = createDataRecord(map);
-		log(dr);
-		return dr;
+	private static Query addKeyPrefixFilter(Query query, String key, String valuePrefix) {
+		return query.addFilter(key, FilterOperator.GREATER_THAN_OR_EQUAL, valuePrefix).addFilter(
+		        key, FilterOperator.LESS_THAN_OR_EQUAL,
+		        valuePrefix + GaePersistence.LAST_UNICODE_CHAR);
 	}
 	
-	public static void log(DataRecord dataRecord) {
-		String keyStr = dataRecord.getCreationDate() + "-" + UUID.uuid(8);
-		Key key = KeyFactory.createKey(KIND_DATARECORD, keyStr);
-		Entity e = ENTRYHANDLER.toEntity(key, dataRecord);
-		try {
-			AsyncDatastore.putEntity(e);
-		} catch(CapabilityDisabledException err) {
-			log.warn("Could not write " + dataRecord.toString(), err);
-		}
+	private static Query addKeyValueFilter(Query query, String key, String value) {
+		return query.addFilter(key, FilterOperator.EQUAL, value);
 	}
 	
 	public static DataRecord createDataRecord(Map<String,String> map) {
@@ -71,29 +67,15 @@ public class DataLogger {
 	}
 	
 	/**
-	 * @param start first matching timestamp
-	 * @param end last matching timestamp
-	 * @param filter if defined, these are restricting the query
-	 * @return all {@link DataRecord} created in given time range.
+	 * @param start inclusive
+	 * @param end inclusive
+	 * @return a prepared query that returns all records in the given time range
 	 */
-	public static Iterator<DataRecord> getRecords(long start, long end,
-	        Pair<String,String> ... filter) {
-		Iterator<Entity> it = toGaeQuery(start, end, filter).asIterable().iterator();
-		return new TransformingIterator<Entity,DataRecord>(it, TRANSFORMER);
-	}
-	
-	private static PreparedQuery toGaeQuery(long start, long end, Pair<String,String> ... filter) {
+	private static Query createIntervalQuery(long start, long end) {
 		Query query = new Query(KIND_DATARECORD).addSort(DataRecord.CREATION_DATE)
 		        .addFilter(DataRecord.CREATION_DATE, FilterOperator.GREATER_THAN_OR_EQUAL, start)
 		        .addFilter(DataRecord.CREATION_DATE, FilterOperator.LESS_THAN_OR_EQUAL, end);
-		if(filter != null) {
-			for(Pair<String,String> p : filter) {
-				if(p != null && p.getFirst() != null && !p.getFirst().equals("")) {
-					query.addFilter(p.getFirst().trim(), FilterOperator.EQUAL, p.getSecond().trim());
-				}
-			}
-		}
-		return SyncDatastore.prepareQuery(query);
+		return query;
 	}
 	
 	/**
@@ -104,7 +86,8 @@ public class DataLogger {
 	 * @param filter if defined, these are restricting the query
 	 */
 	public static void deleteRecords(long start, long end, Pair<String,String> ... filter) {
-		Iterator<Entity> it = toGaeQuery(start, end, filter).asIterable().iterator();
+		Iterator<Entity> it = toExecutableQuery(toGaeQuery(start, end, filter)).asIterable()
+		        .iterator();
 		Iterator<Key> keyIt = new TransformingIterator<Entity,Key>(it,
 		
 		new Transformer<Entity,Key>() {
@@ -121,6 +104,19 @@ public class DataLogger {
 		} catch(CapabilityDisabledException err) {
 			log.warn("Could not delete anything. ", err);
 		}
+	}
+	
+	/**
+	 * @param start first matching timestamp (=inclusive)
+	 * @param end last matching timestamp (=inclusive)
+	 * @param filter if defined, these are restricting the query
+	 * @return all {@link DataRecord} created in given time range.
+	 */
+	public static Iterator<DataRecord> getRecords(long start, long end,
+	        Pair<String,String> ... filter) {
+		Iterator<Entity> it = toExecutableQuery(toGaeQuery(start, end, filter)).asIterable()
+		        .iterator();
+		return new TransformingIterator<Entity,DataRecord>(it, TRANSFORMER);
 	}
 	
 	/**
@@ -143,6 +139,71 @@ public class DataLogger {
 			        .done();
 			log(dr);
 		}
+	}
+	
+	public static void log(DataRecord dataRecord) {
+		String keyStr = dataRecord.getCreationDate() + "-" + UUID.uuid(8);
+		Key key = KeyFactory.createKey(KIND_DATARECORD, keyStr);
+		Entity e = ENTRYHANDLER.toEntity(key, dataRecord);
+		try {
+			AsyncDatastore.putEntity(e);
+		} catch(CapabilityDisabledException err) {
+			log.warn("Could not write " + dataRecord.toString(), err);
+		}
+	}
+	
+	/**
+	 * @param map see {@link DataRecord#DataRecord(long, Map)} for constraints
+	 * @return the created DataRecord
+	 */
+	public static DataRecord log(Map<String,String> map) {
+		DataRecord dr = createDataRecord(map);
+		log(dr);
+		return dr;
+	}
+	
+	private static PreparedQuery toExecutableQuery(Query query) {
+		return SyncDatastore.prepareQuery(query);
+	}
+	
+	/**
+	 * @param start inclusive
+	 * @param end inclusive
+	 * @param filter optional. Part values can either be a fixed value or some
+	 *            value ending with an asterisk '*'. A value with an asterisk is
+	 *            processed as a prefix match filter.
+	 * @return
+	 */
+	private static Query toGaeQuery(long start, long end, Pair<String,String> ... filter) {
+		Query query = createIntervalQuery(start, end);
+		if(filter != null) {
+			for(Pair<String,String> p : filter) {
+				if(p == null) {
+					throw new IllegalArgumentException("A pair was null");
+				}
+				if(p.getFirst() == null) {
+					throw new IllegalArgumentException("A pair.first was null");
+				}
+				if(p.getFirst().equals("")) {
+					throw new IllegalArgumentException("A pair.first was the empty string");
+				}
+				
+				String key = p.getFirst().trim();
+				String value = p.getSecond().trim();
+				
+				if(value.endsWith("*")) {
+					value = value.substring(0, value.length() - 1);
+					if(value.equals("")) {
+						throw new IllegalArgumentException(
+						        "prefix value must be more than just a single '*'");
+					}
+					addKeyPrefixFilter(query, key, value);
+				} else {
+					addKeyValueFilter(query, key, value);
+				}
+			}
+		}
+		return query;
 	}
 	
 }

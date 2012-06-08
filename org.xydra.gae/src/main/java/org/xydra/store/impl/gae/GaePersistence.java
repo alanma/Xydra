@@ -63,6 +63,8 @@ public class GaePersistence implements XydraPersistence {
 	
 	private static final int MAX_ID_LENGTH = 100;
 	
+	public static final String LAST_UNICODE_CHAR = "\uFFFF";
+	
 	@GaeOperation()
 	private static void checkIdLength(XID id) {
 		if(id != null && id.toString().length() > MAX_ID_LENGTH) {
@@ -234,7 +236,8 @@ public class GaePersistence implements XydraPersistence {
 		
 		Key first = KeyFactory.createKey(KeyStructure.KIND_XCHANGE,
 		        "0/" + this.repoAddr.getRepository());
-		Key last = KeyFactory.createKey(KeyStructure.KIND_XCHANGE, first.getName() + "\uFFFF");
+		Key last = KeyFactory.createKey(KeyStructure.KIND_XCHANGE, first.getName()
+		        + LAST_UNICODE_CHAR);
 		
 		Query q = new Query(KeyStructure.KIND_XCHANGE)
 		

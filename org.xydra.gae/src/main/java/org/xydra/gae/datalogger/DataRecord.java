@@ -29,7 +29,11 @@ public class DataRecord {
 	}
 	
 	public static Builder create() {
-		return new Builder(System.currentTimeMillis());
+		return create(System.currentTimeMillis());
+	}
+	
+	public static Builder create(long utcTime) {
+		return new Builder(utcTime);
 	}
 	
 	public static class Builder {
