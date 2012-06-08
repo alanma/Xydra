@@ -35,6 +35,8 @@ public class ServletUtils {
 	
 	private static final String HEADER_REFERER = "Referer";
 	
+	public static final String CONTENTTYPE_APPLICATION_JSON = "application/json.";
+	
 	private static Logger log = LoggerFactory.getLogger(ServletUtils.class);
 	
 	/**
