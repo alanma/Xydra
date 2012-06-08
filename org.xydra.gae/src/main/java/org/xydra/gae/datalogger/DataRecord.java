@@ -11,11 +11,18 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Text;
 
 
+/**
+ * TODO instead of storing _creationDate it can also be computed from the key
+ * 
+ * @author xamde
+ */
 public class DataRecord {
 	
 	public static final String CREATION_DATE = "_creationDate";
 	
 	public static final String INDEXED_PREFIX = "i";
+	
+	public static final String KEY = "__key__";
 	
 	/**
 	 * @param creationDate UTC
@@ -76,7 +83,7 @@ public class DataRecord {
 		@Override
 		public Entity toEntity(final Key datastoreKey, final DataRecord entry) {
 			Entity e = new Entity(datastoreKey);
-			e.setProperty(CREATION_DATE, entry.utcCreationDate);
+			e.setUnindexedProperty(CREATION_DATE, entry.utcCreationDate);
 			for(Entry<String,String> pair : entry.map.entrySet()) {
 				assert !pair.getKey().startsWith("_");
 				if(pair.getKey().startsWith(INDEXED_PREFIX)) {
@@ -102,6 +109,7 @@ public class DataRecord {
 		public DataRecord fromEntity(final Entity entity) {
 			Map<String,String> map = new HashMap<String,String>();
 			long creationDate = -1;
+			
 			for(Entry<String,Object> prop : entity.getProperties().entrySet()) {
 				if(prop.getKey().equals(CREATION_DATE)) {
 					creationDate = (Long)prop.getValue();

@@ -51,6 +51,7 @@ public class DataLogger {
 	 * @return the query further constrained with prefixKey ~ shouldStartWith
 	 *         prefixValue
 	 */
+	@SuppressWarnings("unused")
 	private static Query addKeyPrefixFilter(Query query, String key, String valuePrefix) {
 		return query.addFilter(key, FilterOperator.GREATER_THAN_OR_EQUAL, valuePrefix).addFilter(
 		        key, FilterOperator.LESS_THAN_OR_EQUAL,
@@ -71,10 +72,29 @@ public class DataLogger {
 	 * @param end inclusive
 	 * @return a prepared query that returns all records in the given time range
 	 */
-	private static Query createIntervalQuery(long start, long end) {
+	@SuppressWarnings("unused")
+	private static Query createIntervalQuery_property(long start, long end) {
 		Query query = new Query(KIND_DATARECORD).addSort(DataRecord.CREATION_DATE)
 		        .addFilter(DataRecord.CREATION_DATE, FilterOperator.GREATER_THAN_OR_EQUAL, start)
 		        .addFilter(DataRecord.CREATION_DATE, FilterOperator.LESS_THAN_OR_EQUAL, end);
+		return query;
+	}
+	
+	/**
+	 * @param start inclusive
+	 * @param end inclusive
+	 * @return a prepared query that returns all records in the given time range
+	 */
+	private static Query createIntervalQuery_key(long start, long end) {
+		Query query = new Query(KIND_DATARECORD)
+		        .addSort(DataRecord.KEY)
+		        .addFilter(DataRecord.KEY, FilterOperator.GREATER_THAN_OR_EQUAL,
+		                KeyFactory.createKey(KIND_DATARECORD, "" + start))
+		        .addFilter(
+		                DataRecord.KEY,
+		                FilterOperator.LESS_THAN_OR_EQUAL,
+		                KeyFactory.createKey(KIND_DATARECORD, "" + end
+		                        + GaePersistence.LAST_UNICODE_CHAR));
 		return query;
 	}
 	
@@ -109,7 +129,8 @@ public class DataLogger {
 	/**
 	 * @param start first matching timestamp (=inclusive)
 	 * @param end last matching timestamp (=inclusive)
-	 * @param filter if defined, these are restricting the query
+	 * @param filter if defined, these are restricting the query. Null-values
+	 *            are treaded as wildcard, i.e. that pair is ignored
 	 * @return all {@link DataRecord} created in given time range.
 	 */
 	public static Iterator<DataRecord> getRecords(long start, long end,
@@ -142,6 +163,7 @@ public class DataLogger {
 	}
 	
 	public static void log(DataRecord dataRecord) {
+		/* creation date is a prefix */
 		String keyStr = dataRecord.getCreationDate() + "-" + UUID.uuid(8);
 		Key key = KeyFactory.createKey(KIND_DATARECORD, keyStr);
 		Entity e = ENTRYHANDLER.toEntity(key, dataRecord);
@@ -169,13 +191,12 @@ public class DataLogger {
 	/**
 	 * @param start inclusive
 	 * @param end inclusive
-	 * @param filter optional. Part values can either be a fixed value or some
-	 *            value ending with an asterisk '*'. A value with an asterisk is
-	 *            processed as a prefix match filter.
+	 * @param filter optional
 	 * @return
 	 */
 	private static Query toGaeQuery(long start, long end, Pair<String,String> ... filter) {
-		Query query = createIntervalQuery(start, end);
+		Query query = createIntervalQuery_key(start, end);
+		
 		if(filter != null) {
 			for(Pair<String,String> p : filter) {
 				if(p == null) {
@@ -188,18 +209,11 @@ public class DataLogger {
 				if(p.getFirst().equals("")) {
 					throw new IllegalArgumentException("A pair.first was the empty string");
 				}
-				
-				String key = p.getFirst().trim();
-				String value = p.getSecond().trim();
-				
-				if(value.endsWith("*")) {
-					value = value.substring(0, value.length() - 1);
-					if(value.equals("")) {
-						throw new IllegalArgumentException(
-						        "prefix value must be more than just a single '*'");
-					}
-					addKeyPrefixFilter(query, key, value);
+				if(p.getSecond() == null || p.getSecond().equals("")) {
+					// does not constrain the query
 				} else {
+					String key = p.getFirst().trim();
+					String value = p.getSecond().trim();
 					addKeyValueFilter(query, key, value);
 				}
 			}

@@ -57,6 +57,8 @@ public class DataloggerResource {
 	}
 	
 	/**
+	 * Exposed via REST.
+	 * 
 	 * @param startStr
 	 * @param endStr
 	 * @param filterKey return only record where this key...
@@ -175,6 +177,13 @@ public class DataloggerResource {
 		}
 	}
 	
+	/**
+	 * Exposed via REST.
+	 * 
+	 * @param req
+	 * @param res
+	 * @throws IOException
+	 */
 	public static void record(HttpServletRequest req, HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		Map<String,String> map = new HashMap<String,String>();
