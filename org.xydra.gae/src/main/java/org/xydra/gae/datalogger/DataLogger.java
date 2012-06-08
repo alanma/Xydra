@@ -179,7 +179,8 @@ public class DataLogger {
 		if(filter != null) {
 			for(Pair<String,String> p : filter) {
 				if(p == null) {
-					throw new IllegalArgumentException("A pair was null");
+					// just ignored
+					continue;
 				}
 				if(p.getFirst() == null) {
 					throw new IllegalArgumentException("A pair.first was null");
