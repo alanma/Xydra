@@ -151,6 +151,7 @@ public class Restless extends HttpServlet {
 	
 	/** Only effective on localhost for security reasons. Helps testing */
 	public static final String X_HOST_Override = "X-HTTP-Host-Override";
+	
 	public static final String X_HTTP_Method_Override = "X-HTTP-Method-Override";
 	
 	public static final String XHTML_DOCTYPE = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\" \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">";
