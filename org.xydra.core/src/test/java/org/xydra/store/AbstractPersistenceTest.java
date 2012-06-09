@@ -71,16 +71,6 @@ public abstract class AbstractPersistenceTest {
 	public XAddress repoAddress = XX.resolveRepository(this.repoId);
 	public XID actorId = X.getIDProvider().fromString("testActor");
 	
-	/*
-	 * TODO also test forced commands! (for example by adding a model, executing
-	 * some changes on it, and then adding a new model with the same Id -> this
-	 * way we can actually check if the managed model is changed by the forced
-	 * command (i.e. in this case a new model needs to be created)
-	 * 
-	 * TODO is the above description correct? How are forced commands handled
-	 * exactly? Check this!
-	 */
-	
 	@Test
 	public void testExecuteCommandRepositorySafeCommandAddType() {
 		testExecuteCommandRepositoryCommandAddType(false);
@@ -187,6 +177,30 @@ public abstract class AbstractPersistenceTest {
 		assertTrue(
 		        "Executing \"Deleting an existing model\"-command failed (should succeed), revNr was "
 		                + revNr, revNr >= 0);
+		// check that the model was actually removed
+		model = this.persistence.getModelSnapshot(addressRequest);
+		assertNull(
+		        "The model we tried to remove with an \"Removing a model\"-command actually wasn't correctly removed.",
+		        model);
+		
+		/*
+		 * try to delete the model again
+		 */
+		deleteModelCom = this.comFactory.createRemoveModelCommand(this.repoId, modelId, revNr,
+		        forcedCommands);
+		
+		revNr = this.persistence.executeCommand(this.actorId, deleteModelCom);
+		
+		if(forcedCommands) {
+			assertEquals(
+			        "Trying to remove and already removed model with a forced command should return \"No change\".",
+			        XCommand.NOCHANGE, revNr);
+		} else {
+			assertEquals(
+			        "Trying to remove and already removed model with a safe command succeeded (should fail).",
+			        XCommand.FAILED, revNr);
+		}
+		
 		// check that the model was actually removed
 		model = this.persistence.getModelSnapshot(addressRequest);
 		assertNull(
@@ -425,6 +439,24 @@ public abstract class AbstractPersistenceTest {
 		        object);
 		
 		/*
+		 * try to delete the same object again
+		 */
+		deleteObjectCom = this.comFactory.createRemoveObjectCommand(this.repoId, modelId, objectId,
+		        revNr, forcedCommands);
+		
+		revNr = this.persistence.executeCommand(this.actorId, deleteObjectCom);
+		
+		if(forcedCommands) {
+			assertEquals(
+			        "Trying to remove and already removed object with a forced command should return \"No change\".",
+			        XCommand.NOCHANGE, revNr);
+		} else {
+			assertEquals(
+			        "Trying to remove and already removed object with a safe command succeeded (should fail).",
+			        XCommand.FAILED, revNr);
+		}
+		
+		/*
 		 * try to remove a not existing object
 		 */
 		
@@ -603,11 +635,6 @@ public abstract class AbstractPersistenceTest {
 		
 		/*
 		 * try to remove the same field again
-		 */
-		
-		/*
-		 * TODO Add this testcase (try to remove already removed entity) to
-		 * other remove-testcases
 		 */
 		
 		removeFieldCom = this.comFactory.createRemoveFieldCommand(this.repoId, modelId, objectId,
