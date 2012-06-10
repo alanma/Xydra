@@ -1,14 +1,8 @@
 package org.xydra.gae.datalogger;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-
-import org.xydra.store.impl.gae.UniCache;
-
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.Text;
 
 
 /**
@@ -16,7 +10,10 @@ import com.google.appengine.api.datastore.Text;
  * 
  * @author xamde
  */
-public class DataRecord {
+// TODO @RunsInGWT(true)
+public class DataRecord implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
 	
 	public static final String CREATION_DATE = "_creationDate";
 	
@@ -68,68 +65,14 @@ public class DataRecord {
 		
 	}
 	
-	private final long utcCreationDate;
+	final long utcCreationDate;
 	
 	/**
 	 * key-value-pairs
 	 */
-	private final Map<String,String> map;
+	final Map<String,String> map;
 	
-	private String key;
-	
-	public static class DataRecordEntryHandler implements
-	        UniCache.DatastoreEntryHandler<DataRecord> {
-		
-		@Override
-		public Entity toEntity(final Key datastoreKey, final DataRecord entry) {
-			Entity e = new Entity(datastoreKey);
-			e.setUnindexedProperty(CREATION_DATE, entry.utcCreationDate);
-			for(Entry<String,String> pair : entry.map.entrySet()) {
-				assert !pair.getKey().startsWith("_");
-				if(pair.getKey().startsWith(INDEXED_PREFIX)) {
-					e.setProperty(pair.getKey(), pair.getValue());
-				} else {
-					String s = pair.getValue();
-					if(s == null) {
-						continue;
-					}
-					if(s.length() > 400) {
-						Text value = new Text(s);
-						e.setUnindexedProperty(pair.getKey(), value);
-					} else {
-						e.setUnindexedProperty(pair.getKey(), s);
-					}
-				}
-			}
-			entry.key = datastoreKey.getName();
-			return e;
-		}
-		
-		@Override
-		public DataRecord fromEntity(final Entity entity) {
-			Map<String,String> map = new HashMap<String,String>();
-			long creationDate = -1;
-			
-			for(Entry<String,Object> prop : entity.getProperties().entrySet()) {
-				if(prop.getKey().equals(CREATION_DATE)) {
-					creationDate = (Long)prop.getValue();
-				} else {
-					Object v = prop.getValue();
-					String s;
-					if(v instanceof Text) {
-						s = ((Text)v).getValue();
-					} else {
-						s = v.toString();
-					}
-					map.put(prop.getKey(), s);
-				}
-			}
-			DataRecord dr = new DataRecord(creationDate, map);
-			dr.key = entity.getKey().getName();
-			return dr;
-		}
-		
-	}
+	String key;
 	
 	public long getCreationDate() {
 		return this.utcCreationDate;

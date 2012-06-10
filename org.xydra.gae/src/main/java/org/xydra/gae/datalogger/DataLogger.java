@@ -34,7 +34,7 @@ import com.google.apphosting.api.ApiProxy.CapabilityDisabledException;
  */
 public class DataLogger {
 	
-	private static final DataRecord.DataRecordEntryHandler ENTRYHANDLER = new DataRecord.DataRecordEntryHandler();
+	private static final DataRecordEntryHandler ENTRYHANDLER = new DataRecordEntryHandler();
 	
 	private static final String KIND_DATARECORD = "DATA_RECORD";
 	private static final Logger log = LoggerFactory.getLogger(DataLogger.class);
