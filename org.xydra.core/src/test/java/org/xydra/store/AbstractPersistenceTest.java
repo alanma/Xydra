@@ -9,6 +9,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 import org.junit.Test;
@@ -1081,6 +1082,89 @@ public abstract class AbstractPersistenceTest {
 		// TODO write this test
 		// TODO write multiple tests for Transactions, since they are pretty
 		// complex
+		
+		int nrOfTxns = 20;
+		
+		for(int i = 0; i <= nrOfTxns; i++) {
+			long seed = System.currentTimeMillis();
+			
+			XID modelId = X.getIDProvider().fromString(
+			        "testExecuteCommandSimpleTransactionModel" + i);
+			XAddress modelAddress = XX.resolveModel(this.repoId, modelId);
+			
+			GetWithAddressRequest modelAdrRequest = new GetWithAddressRequest(modelAddress);
+			XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId,
+			        false);
+			// add a model on which an object can be created first
+			long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
+			
+			assertTrue("Model could not be added, test cannot be executed.", revNr >= 0);
+			
+			XWritableModel model = this.persistence.getModelSnapshot(modelAdrRequest);
+			
+			XTransaction txn = createRandomTransaction(model, seed);
+			
+			revNr = this.persistence.executeCommand(this.actorId, txn);
+			assertTrue("Transaction failed, should succeed, seed was: " + seed, revNr >= 0);
+			
+			/*
+			 * TODO test whether the transaction was correctly executed
+			 */
+		}
+	}
+	
+	/**
+	 * Pseudorandomly generates a transaction on the given model. The seed
+	 * determines how the random number generator generates its pseudorandom
+	 * output. Using the same seed twice will result in deterministically
+	 * generating the same transaction again, which can be useful when executing
+	 * a transaction in a test fails and the failed transaction needs to be
+	 * reconstructed.
+	 */
+	private XTransaction createRandomTransaction(XWritableModel model, long seed) {
+		Random rand = new Random(seed);
+		
+		XTransactionBuilder txBuilder = new XTransactionBuilder(model.getAddress());
+		ChangedModel changedModel = new ChangedModel(model);
+		
+		// create random amount of objects
+		int nrOfObjects = 0;
+		
+		do {
+			nrOfObjects = rand.nextInt(50);
+		} while(nrOfObjects <= 0); // add at least one object
+		
+		for(int i = 0; i < nrOfObjects; i++) {
+			XID objectId = X.getIDProvider().fromString("randomObject" + i);
+			
+			changedModel.createObject(objectId);
+		}
+		
+		// add fields and values to the object
+		for(XID objectId : changedModel) {
+			XWritableObject object = changedModel.getObject(objectId);
+			
+			int nrOfFields = rand.nextInt(50);
+			for(int i = 0; i < nrOfFields; i++) {
+				XID fieldId = X.getIDProvider().fromString(objectId + "randomField" + i);
+				
+				XWritableField field = object.createField(fieldId);
+				
+				boolean hasValue = rand.nextBoolean();
+				
+				if(hasValue) {
+					XValue value = X.getValueFactory().createStringValue("randomValue" + fieldId);
+					
+					field.setValue(value);
+				}
+			}
+			
+		}
+		
+		txBuilder.applyChanges(changedModel);
+		XTransaction txn = txBuilder.build();
+		
+		return txn;
 	}
 	
 	@Test
