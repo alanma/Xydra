@@ -29,6 +29,8 @@ import org.xydra.base.change.XRepositoryEvent;
 import org.xydra.base.change.XTransaction;
 import org.xydra.base.change.XTransactionEvent;
 import org.xydra.base.change.impl.memory.MemoryFieldCommand;
+import org.xydra.base.rmof.XReadableField;
+import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
@@ -39,6 +41,7 @@ import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.delta.ChangedModel;
+import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.log.gae.Log4jLoggerFactory;
@@ -1078,11 +1081,7 @@ public abstract class AbstractPersistenceTest {
 	 */
 	
 	@Test
-	public void testExecuteCommandSimpleTransaction() {
-		// TODO write this test
-		// TODO write multiple tests for Transactions, since they are pretty
-		// complex
-		
+	public void testExecuteCommandSucceedingTransaction() {
 		int nrOfTxns = 20;
 		
 		for(int i = 0; i <= nrOfTxns; i++) {
@@ -1100,28 +1099,84 @@ public abstract class AbstractPersistenceTest {
 			
 			assertTrue("Model could not be added, test cannot be executed.", revNr >= 0);
 			
-			XWritableModel model = this.persistence.getModelSnapshot(modelAdrRequest);
+			XWritableModel modelSnapshot = this.persistence.getModelSnapshot(modelAdrRequest);
 			
-			XTransaction txn = createRandomTransaction(model, seed);
+			Pair<ChangedModel,XTransaction> pair = createRandomSucceedingModelTransaction(
+			        modelSnapshot, seed);
+			ChangedModel changedModel = pair.getFirst();
+			XTransaction txn = pair.getSecond();
 			
 			revNr = this.persistence.executeCommand(this.actorId, txn);
 			assertTrue("Transaction failed, should succeed, seed was: " + seed, revNr >= 0);
 			
-			/*
-			 * TODO test whether the transaction was correctly executed
-			 */
+			modelSnapshot = this.persistence.getModelSnapshot(modelAdrRequest);
+			
+			int nrOfObjectsInModelSnapshot = 0;
+			int nrOfObjectsInChangedModel = 0;
+			for(@SuppressWarnings("unused")
+			XID objectId : changedModel) {
+				nrOfObjectsInChangedModel++;
+			}
+			
+			for(@SuppressWarnings("unused")
+			XID objectId : modelSnapshot) {
+				nrOfObjectsInModelSnapshot++;
+			}
+			
+			assertEquals(
+			        "The transaction wasn't correctly executed, the stored model does not store the correct amount of objects it should be storing after execution of the transaction.",
+			        nrOfObjectsInChangedModel, nrOfObjectsInModelSnapshot);
+			
+			for(XID objectId : changedModel) {
+				assertTrue(
+				        "The stored model does not contain an object it should contain after the transaction was executed.",
+				        modelSnapshot.hasObject(objectId));
+				
+				XReadableObject changedObject = changedModel.getObject(objectId);
+				XReadableObject objectSnapshot = modelSnapshot.getObject(objectId);
+				
+				int nrOfFieldsInObjectSnapshot = 0;
+				int nrOfFieldsInChangedObject = 0;
+				for(@SuppressWarnings("unused")
+				XID id : changedObject) {
+					nrOfFieldsInChangedObject++;
+				}
+				
+				for(@SuppressWarnings("unused")
+				XID id : objectSnapshot) {
+					nrOfFieldsInObjectSnapshot++;
+				}
+				
+				assertEquals(
+				        "The transaction wasn't correctly executed, one of the stored objects does not store the correct amount of fields it should be storing after execution of the transaction.",
+				        nrOfFieldsInChangedObject, nrOfFieldsInObjectSnapshot);
+				
+				for(XID fieldId : changedObject) {
+					assertTrue(
+					        "One of the stored objects does not contain a field it should contain after the transaction was executed.",
+					        objectSnapshot.hasField(fieldId));
+					
+					XReadableField changedField = changedObject.getField(fieldId);
+					XReadableField fieldSnapshot = objectSnapshot.getField(fieldId);
+					
+					assertEquals(
+					        "One of the stored fields does not contain the value it should contain after the transaction was executed.",
+					        changedField.getValue(), fieldSnapshot.getValue());
+				}
+			}
 		}
 	}
 	
 	/**
-	 * Pseudorandomly generates a transaction on the given model. The seed
-	 * determines how the random number generator generates its pseudorandom
-	 * output. Using the same seed twice will result in deterministically
-	 * generating the same transaction again, which can be useful when executing
-	 * a transaction in a test fails and the failed transaction needs to be
-	 * reconstructed.
+	 * Pseudorandomly generates a transaction which should succeed on the given
+	 * model. The seed determines how the random number generator generates its
+	 * pseudorandom output. Using the same seed twice will result in
+	 * deterministically generating the same transaction again, which can be
+	 * useful when executing a transaction in a test fails and the failed
+	 * transaction needs to be reconstructed.
 	 */
-	private XTransaction createRandomTransaction(XWritableModel model, long seed) {
+	private Pair<ChangedModel,XTransaction> createRandomSucceedingModelTransaction(
+	        XWritableModel model, long seed) {
 		Random rand = new Random(seed);
 		
 		XTransactionBuilder txBuilder = new XTransactionBuilder(model.getAddress());
@@ -1153,6 +1208,9 @@ public abstract class AbstractPersistenceTest {
 				boolean hasValue = rand.nextBoolean();
 				
 				if(hasValue) {
+					/*
+					 * TODO add different types of values
+					 */
 					XValue value = X.getValueFactory().createStringValue("randomValue" + fieldId);
 					
 					field.setValue(value);
@@ -1164,8 +1222,118 @@ public abstract class AbstractPersistenceTest {
 		txBuilder.applyChanges(changedModel);
 		XTransaction txn = txBuilder.build();
 		
-		return txn;
+		return new Pair<ChangedModel,XTransaction>(changedModel, txn);
 	}
+	
+	// @Test (TODO test not yet ready)
+	public void testExecuteCommandFailingTransaction() {
+		// TODO write this test
+		// TODO write multiple tests for Transactions, since they are pretty
+		// complex
+		
+		int nrOfTxns = 20;
+		
+		for(int i = 0; i <= nrOfTxns; i++) {
+			long seed = System.currentTimeMillis();
+			
+			XID modelId = X.getIDProvider().fromString(
+			        "testExecuteCommandSimpleTransactionModel" + i);
+			XAddress modelAddress = XX.resolveModel(this.repoId, modelId);
+			
+			GetWithAddressRequest modelAdrRequest = new GetWithAddressRequest(modelAddress);
+			XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId,
+			        false);
+			// add a model on which an object can be created first
+			long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
+			
+			assertTrue("Model could not be added, test cannot be executed.", revNr >= 0);
+			
+			XWritableModel modelSnapshot = this.persistence.getModelSnapshot(modelAdrRequest);
+			
+			Pair<ChangedModel,XTransaction> pair = createRandomFailingModelTransaction(
+			        modelSnapshot, seed);
+			// ChangedModel changedModel = pair.getFirst();
+			XTransaction txn = pair.getSecond();
+			
+			revNr = this.persistence.executeCommand(this.actorId, txn);
+			assertEquals("Transaction succeed, should fail, seed was: " + seed, XCommand.FAILED,
+			        revNr);
+		}
+	}
+	
+	/*
+	 * TODO write a method which randomly creates Transactions that should fail
+	 * and assert that they fail!
+	 */
+	
+	private Pair<ChangedModel,XTransaction> createRandomFailingModelTransaction(
+	        XWritableModel model, long seed) {
+		Random rand = new Random(seed);
+		
+		XTransactionBuilder txBuilder = new XTransactionBuilder(model.getAddress());
+		ChangedModel changedModel = new ChangedModel(model);
+		
+		// create random amount of objects
+		int nrOfObjects = 0;
+		
+		do {
+			nrOfObjects = rand.nextInt(50);
+		} while(nrOfObjects <= 0); // add at least one object
+		
+		boolean objectCommandFail = rand.nextBoolean();
+		int faultyObjectCommand = -1;
+		
+		if(objectCommandFail) {
+			faultyObjectCommand = rand.nextInt();
+		}
+		
+		/*
+		 * TODO ChangedModel might not be able to create faulty transactions -
+		 * check this and write test accordingly
+		 */
+		
+		for(int i = 0; i < nrOfObjects; i++) {
+			XID objectId = X.getIDProvider().fromString("randomObject" + i);
+			
+			if(i == faultyObjectCommand) {
+				changedModel.removeObject(objectId);
+			} else {
+				changedModel.createObject(objectId);
+			}
+			
+		}
+		
+		// add fields and values to the object
+		for(XID objectId : changedModel) {
+			XWritableObject object = changedModel.getObject(objectId);
+			
+			int nrOfFields = rand.nextInt(50);
+			for(int i = 0; i < nrOfFields; i++) {
+				XID fieldId = X.getIDProvider().fromString(objectId + "randomField" + i);
+				
+				XWritableField field = object.createField(fieldId);
+				
+				boolean hasValue = rand.nextBoolean();
+				
+				if(hasValue) {
+					/*
+					 * TODO add different types of values
+					 */
+					XValue value = X.getValueFactory().createStringValue("randomValue" + fieldId);
+					
+					field.setValue(value);
+				}
+			}
+		}
+		
+		txBuilder.applyChanges(changedModel);
+		XTransaction txn = txBuilder.build();
+		return new Pair<ChangedModel,XTransaction>(changedModel, txn);
+	}
+	
+	/*
+	 * TODO also test object transactions
+	 */
 	
 	@Test
 	public void testGetEvents() {
@@ -2061,7 +2229,7 @@ public abstract class AbstractPersistenceTest {
 		 */
 	}
 	
-	@Test
+	// @Test (TODO test not yet ready)
 	public void testGetEventsTransactions() {
 		/*
 		 * TODO write this test
@@ -2344,7 +2512,7 @@ public abstract class AbstractPersistenceTest {
 		assertNotNull(snapshot);
 	}
 	
-	@Test
+	// @Test (TODO test not yet ready)
 	public void testGetObjectSnapshot() {
 		/*
 		 * TODO write this test - just like testgetModelSnapshot, but with
