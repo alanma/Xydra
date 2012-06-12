@@ -5,8 +5,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.xydra.googleanalytics.httpclienht.HttpUserAgent;
-import org.xydra.googleanalytics.httpclienht.HttpUserAgentFactory;
+import org.xydra.googleanalytics.httpclient.HttpUserAgent;
+import org.xydra.googleanalytics.httpclient.HttpUserAgentFactory;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 

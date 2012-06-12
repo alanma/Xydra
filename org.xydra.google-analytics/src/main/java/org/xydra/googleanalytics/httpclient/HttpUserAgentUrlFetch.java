@@ -1,4 +1,4 @@
-package org.xydra.googleanalytics.httpclienht;
+package org.xydra.googleanalytics.httpclient;
 
 import java.net.MalformedURLException;
 import java.net.URL;

@@ -2,7 +2,6 @@ package org.xydra.googleanalytics;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.Random;
 
 
 /*
@@ -23,17 +22,7 @@ import java.util.Random;
  * Contributor(s): Zwetan Kjukov <zwetan@gmail.com>. Marc Alcaraz
  * <ekameleon@gmail.com>.
  */
-public class Utils {
-	
-	private static final Random random = new Random();
-	
-	public static int random31bitInteger() {
-		return random.nextInt(2147483647) - 1;
-	}
-	
-	public static int random32bitInteger() {
-		return random.nextInt();
-	}
+public class Utils extends SharedUtils {
 	
 	/**
 	 * Generate hash for input string. This is a global method, since it does
@@ -98,10 +87,6 @@ public class Utils {
 	 */
 	public static int getDomainhash(String domainName) {
 		return Utils.generateHash(domainName);
-	}
-	
-	public static long getCurrentTimeInSeconds() {
-		return System.currentTimeMillis() / 1000;
 	}
 	
 	public static void main(String[] args) {

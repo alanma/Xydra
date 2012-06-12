@@ -1,4 +1,4 @@
-package org.xydra.googleanalytics.httpclienht;
+package org.xydra.googleanalytics.httpclient;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;

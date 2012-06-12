@@ -1,4 +1,4 @@
-package org.xydra.googleanalytics.httpclienht;
+package org.xydra.googleanalytics.httpclient;
 
 import com.google.appengine.api.utils.SystemProperty;
 
