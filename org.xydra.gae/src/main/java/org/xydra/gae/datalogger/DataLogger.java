@@ -98,6 +98,12 @@ public class DataLogger {
 		return query;
 	}
 	
+	private static Query createKeyQuery(String key) {
+		Query query = new Query(KIND_DATARECORD).addFilter(DataRecord.KEY, FilterOperator.EQUAL,
+		        KeyFactory.createKey(KIND_DATARECORD, "" + key));
+		return query;
+	}
+	
 	/**
 	 * Delete all records matching the filter criteria
 	 * 
@@ -219,6 +225,15 @@ public class DataLogger {
 			}
 		}
 		return query;
+	}
+	
+	public static DataRecord getRecordByKeys(String key) {
+		Query query = createKeyQuery(key);
+		PreparedQuery eQuery = toExecutableQuery(query);
+		Iterator<Entity> it = eQuery.asIterable().iterator();
+		TransformingIterator<Entity,DataRecord> transIt = new TransformingIterator<Entity,DataRecord>(
+		        it, TRANSFORMER);
+		return transIt.next();
 	}
 	
 }
