@@ -1225,7 +1225,7 @@ public abstract class AbstractPersistenceTest {
 		return new Pair<ChangedModel,XTransaction>(changedModel, txn);
 	}
 	
-	// @Test (TODO test not yet ready)
+	@Test
 	public void testExecuteCommandFailingTransaction() {
 		// TODO write this test
 		// TODO write multiple tests for Transactions, since they are pretty
@@ -1234,30 +1234,58 @@ public abstract class AbstractPersistenceTest {
 		int nrOfTxns = 20;
 		
 		for(int i = 0; i <= nrOfTxns; i++) {
-			long seed = System.currentTimeMillis();
+			XID failModelId = X.getIDProvider().fromString(
+			        "testExecuteCommandSimpleTransactionFailModel" + i);
+			XAddress failModelAddress = XX.resolveModel(this.repoId, failModelId);
 			
-			XID modelId = X.getIDProvider().fromString(
-			        "testExecuteCommandSimpleTransactionModel" + i);
-			XAddress modelAddress = XX.resolveModel(this.repoId, modelId);
+			GetWithAddressRequest failModelAdrRequest = new GetWithAddressRequest(failModelAddress);
+			XCommand addFailModelCom = this.comFactory.createAddModelCommand(this.repoId,
+			        failModelId, false);
 			
-			GetWithAddressRequest modelAdrRequest = new GetWithAddressRequest(modelAddress);
-			XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId,
-			        false);
+			XID succModelId = X.getIDProvider().fromString(
+			        "testExecuteCommandSimpleTransactionSuccModel" + i);
+			XAddress succModelAddress = XX.resolveModel(this.repoId, succModelId);
+			
+			GetWithAddressRequest succModelAdrRequest = new GetWithAddressRequest(succModelAddress);
+			XCommand addSuccModelCom = this.comFactory.createAddModelCommand(this.repoId,
+			        succModelId, false);
+			
+			/*
+			 * TODO document why there are two models
+			 */
+			
 			// add a model on which an object can be created first
-			long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
+			long failRevNr = this.persistence.executeCommand(this.actorId, addFailModelCom);
+			long succRevNr = this.persistence.executeCommand(this.actorId, addSuccModelCom);
 			
-			assertTrue("Model could not be added, test cannot be executed.", revNr >= 0);
+			assertTrue("One of the models could not be added, test cannot be executed.",
+			        failRevNr >= 0 && succRevNr >= 0);
 			
-			XWritableModel modelSnapshot = this.persistence.getModelSnapshot(modelAdrRequest);
+			XWritableModel failModelSnapshot = this.persistence
+			        .getModelSnapshot(failModelAdrRequest);
+			XWritableModel succModelSnapshot = this.persistence
+			        .getModelSnapshot(succModelAdrRequest);
 			
-			Pair<ChangedModel,XTransaction> pair = createRandomFailingModelTransaction(
-			        modelSnapshot, seed);
-			// ChangedModel changedModel = pair.getFirst();
-			XTransaction txn = pair.getSecond();
+			long seed = System.currentTimeMillis();
+			Pair<XTransaction,XTransaction> pair = createRandomFailingModelTransaction(
+			        failModelSnapshot, succModelSnapshot, seed);
 			
-			revNr = this.persistence.executeCommand(this.actorId, txn);
-			assertEquals("Transaction succeed, should fail, seed was: " + seed, XCommand.FAILED,
-			        revNr);
+			XTransaction failTxn = pair.getFirst();
+			XTransaction succTxn = pair.getSecond();
+			
+			succRevNr = this.persistence.executeCommand(this.actorId, succTxn);
+			assertTrue(
+			        "Transaction failed, should succeed, since this was the transaction that does not contain the command which should cause the transaction to fail, seed was: "
+			                + seed, succRevNr >= 0);
+			
+			failRevNr = this.persistence.executeCommand(this.actorId, failTxn);
+			assertEquals("Transaction succeeded, should fail, seed was: " + seed, XCommand.FAILED,
+			        failRevNr);
+			
+			/*
+			 * TODO make sure that the changes actually weren't executed!
+			 */
+			
 		}
 	}
 	
@@ -1266,69 +1294,148 @@ public abstract class AbstractPersistenceTest {
 	 * and assert that they fail!
 	 */
 	
-	private Pair<ChangedModel,XTransaction> createRandomFailingModelTransaction(
-	        XWritableModel model, long seed) {
+	private Pair<XTransaction,XTransaction> createRandomFailingModelTransaction(
+	        XWritableModel failModel, XWritableModel succModel, long seed) {
 		Random rand = new Random(seed);
 		
-		XTransactionBuilder txBuilder = new XTransactionBuilder(model.getAddress());
-		ChangedModel changedModel = new ChangedModel(model);
+		XTransactionBuilder failTxnBuilder = new XTransactionBuilder(failModel.getAddress());
+		XTransactionBuilder succTxnBuilder = new XTransactionBuilder(succModel.getAddress());
 		
 		// create random amount of objects
 		int nrOfObjects = 0;
 		
 		do {
 			nrOfObjects = rand.nextInt(50);
-		} while(nrOfObjects <= 0); // add at least one object
-		
-		boolean objectCommandFail = rand.nextBoolean();
-		int faultyObjectCommand = -1;
-		
-		if(objectCommandFail) {
-			faultyObjectCommand = rand.nextInt();
-		}
-		
+		} while(nrOfObjects <= 2);
 		/*
-		 * TODO ChangedModel might not be able to create faulty transactions -
-		 * check this and write test accordingly
+		 * we need to add at least 2 objects, so that we can add at least one
+		 * succeeding command so that the next loop will not be an infinite loop
+		 * (see comment there)
 		 */
 		
-		for(int i = 0; i < nrOfObjects; i++) {
-			XID objectId = X.getIDProvider().fromString("randomObject" + i);
+		boolean failBecauseOfAddOrRemoveObjectCommand = rand.nextBoolean();
+		int faultyAddOrRemoveObjectCommand = -1;
+		
+		if(failBecauseOfAddOrRemoveObjectCommand) {
 			
-			if(i == faultyObjectCommand) {
-				changedModel.removeObject(objectId);
-			} else {
-				changedModel.createObject(objectId);
-			}
-			
+			do {
+				faultyAddOrRemoveObjectCommand = rand.nextInt(nrOfObjects);
+			} while(faultyAddOrRemoveObjectCommand <= 1);
+			/*
+			 * add at least one succeeding command so that succTxnBuilder does
+			 * not throw an exception because of an empty command list.
+			 */
 		}
 		
-		// add fields and values to the object
-		for(XID objectId : changedModel) {
-			XWritableObject object = changedModel.getObject(objectId);
+		boolean failingCommandNotYetAdded = true;
+		for(int i = 0; i < nrOfObjects && failingCommandNotYetAdded; i++) {
+			XID objectId = X.getIDProvider().fromString("randomObject" + i);
+			XAddress failObjectAddress = XX.resolveObject(failModel.getAddress(), objectId);
+			XAddress succObjectAddress = XX.resolveObject(succModel.getAddress(), objectId);
 			
-			int nrOfFields = rand.nextInt(50);
-			for(int i = 0; i < nrOfFields; i++) {
-				XID fieldId = X.getIDProvider().fromString(objectId + "randomField" + i);
+			if(i == faultyAddOrRemoveObjectCommand) {
 				
-				XWritableField field = object.createField(fieldId);
+				boolean failBecauseOfFalseRemove = rand.nextBoolean();
 				
-				boolean hasValue = rand.nextBoolean();
-				
-				if(hasValue) {
-					/*
-					 * TODO add different types of values
-					 */
-					XValue value = X.getValueFactory().createStringValue("randomValue" + fieldId);
+				if(failBecauseOfFalseRemove) {
+					// fail because we try to remove a not existing object
+					XCommand removeCom = this.comFactory.createRemoveObjectCommand(
+					        failObjectAddress, failModel.getRevisionNumber(), false);
 					
-					field.setValue(value);
+					failTxnBuilder.addCommand(removeCom);
+					
+				} else {
+					// fail because we try to add an already existing object
+					XCommand addCom = this.comFactory.createAddObjectCommand(
+					        failModel.getAddress(), objectId, false);
+					
+					// we need to add it twice for this use-case
+					failTxnBuilder.addCommand(addCom);
+					failTxnBuilder.addCommand(addCom);
+				}
+				
+				failingCommandNotYetAdded = false;
+				
+			} else {
+				XCommand failAddCom = this.comFactory.createAddObjectCommand(
+				        failModel.getAddress(), objectId, false);
+				
+				XCommand succAddCom = this.comFactory.createAddObjectCommand(
+				        succModel.getAddress(), objectId, false);
+				
+				failTxnBuilder.addCommand(failAddCom);
+				succTxnBuilder.addCommand(succAddCom);
+			}
+			
+			// add fields
+			
+			int nrOfFields = 0;
+			do {
+				nrOfFields = rand.nextInt(50);
+			} while(nrOfFields <= 0); // add at least one field
+			
+			boolean failBecauseOfAddOrRemoveFieldCommand = !failBecauseOfAddOrRemoveObjectCommand; // rand.nextBoolean();
+			int faultyAddOrRemoveFieldCommand = -1;
+			
+			if(failBecauseOfAddOrRemoveFieldCommand) {
+				faultyAddOrRemoveFieldCommand = rand.nextInt(nrOfFields);
+			}
+			
+			for(int j = 0; j < nrOfFields && failingCommandNotYetAdded; j++) {
+				XID fieldId = X.getIDProvider().fromString("randomField" + j);
+				
+				if(j == faultyAddOrRemoveFieldCommand) {
+					
+					boolean failBecauseOfFalseRemove = rand.nextBoolean();
+					
+					if(failBecauseOfFalseRemove) {
+						// fail because we try to remove a not existing field
+						XAddress fieldAddress = XX.resolveField(failModel.getAddress(), objectId,
+						        fieldId);
+						
+						XCommand removeCom = this.comFactory.createRemoveFieldCommand(fieldAddress,
+						        failModel.getRevisionNumber(), false);
+						
+						failTxnBuilder.addCommand(removeCom);
+						
+					} else {
+						// fail because we try to add an already existing field
+						XCommand addCom = this.comFactory.createAddFieldCommand(failObjectAddress,
+						        fieldId, false);
+						
+						// we need to add it twice for this use-case
+						failTxnBuilder.addCommand(addCom);
+						failTxnBuilder.addCommand(addCom);
+					}
+					
+					failingCommandNotYetAdded = false;
+					
+				} else {
+					XCommand failAddCom = this.comFactory.createAddFieldCommand(failObjectAddress,
+					        fieldId, false);
+					
+					XCommand succAddCom = this.comFactory.createAddFieldCommand(succObjectAddress,
+					        fieldId, false);
+					
+					failTxnBuilder.addCommand(failAddCom);
+					succTxnBuilder.addCommand(succAddCom);
 				}
 			}
 		}
 		
-		txBuilder.applyChanges(changedModel);
-		XTransaction txn = txBuilder.build();
-		return new Pair<ChangedModel,XTransaction>(changedModel, txn);
+		/*
+		 * TODO also fail because of value commands!
+		 * 
+		 * TODO add some commands after the failed command to check that this is
+		 * no problem
+		 */
+		
+		XTransaction failTxn = failTxnBuilder.build();
+		XTransaction succTxn = succTxnBuilder.build();
+		
+		Pair<XTransaction,XTransaction> pair = new Pair<XTransaction,XTransaction>(failTxn, succTxn);
+		return pair;
+		
 	}
 	
 	/*
