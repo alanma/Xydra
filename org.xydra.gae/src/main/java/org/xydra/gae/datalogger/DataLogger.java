@@ -86,15 +86,18 @@ public class DataLogger {
 	 * @return a prepared query that returns all records in the given time range
 	 */
 	private static Query createIntervalQuery_key(long start, long end) {
-		Query query = new Query(KIND_DATARECORD)
-		        .addSort(DataRecord.KEY)
-		        .addFilter(DataRecord.KEY, FilterOperator.GREATER_THAN_OR_EQUAL,
-		                KeyFactory.createKey(KIND_DATARECORD, "" + start))
-		        .addFilter(
-		                DataRecord.KEY,
-		                FilterOperator.LESS_THAN_OR_EQUAL,
-		                KeyFactory.createKey(KIND_DATARECORD, "" + end
-		                        + GaePersistence.LAST_UNICODE_CHAR));
+		Query query = new Query(KIND_DATARECORD).addSort(DataRecord.KEY);
+		
+		/* constrain only if thats a benefit */
+		if(start > 0 && end < Long.MAX_VALUE) {
+			query = query.addFilter(DataRecord.KEY, FilterOperator.GREATER_THAN_OR_EQUAL,
+			        KeyFactory.createKey(KIND_DATARECORD, "" + start)).addFilter(
+			        DataRecord.KEY,
+			        FilterOperator.LESS_THAN_OR_EQUAL,
+			        KeyFactory.createKey(KIND_DATARECORD, "" + end
+			                + GaePersistence.LAST_UNICODE_CHAR));
+		}
+		
 		return query;
 	}
 	
@@ -197,8 +200,8 @@ public class DataLogger {
 	/**
 	 * @param start inclusive
 	 * @param end inclusive
-	 * @param filter optional
-	 * @return
+	 * @param filter optional, null-Filters are ignored
+	 * @return a GAE query
 	 */
 	private static Query toGaeQuery(long start, long end, Pair<String,String> ... filter) {
 		Query query = createIntervalQuery_key(start, end);
