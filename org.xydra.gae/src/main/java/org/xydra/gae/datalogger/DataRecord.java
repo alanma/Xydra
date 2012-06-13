@@ -4,13 +4,15 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.xydra.annotations.RunsInGWT;
+
 
 /**
  * TODO instead of storing _creationDate it can also be computed from the key
  * 
  * @author xamde
  */
-// TODO @RunsInGWT(true)
+@RunsInGWT(true)
 public class DataRecord implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
