@@ -65,6 +65,9 @@ public abstract class AbstractPersistenceTest {
 		LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory());
 	}
 	
+	/*
+	 * TODO logger doesn't work - why?
+	 */
 	private static final Logger log = LoggerFactory.getLogger(AbstractPersistenceTest.class);
 	
 	public XydraPersistence persistence;
@@ -1080,12 +1083,22 @@ public abstract class AbstractPersistenceTest {
 	 * revision numbers (as they should)
 	 */
 	
+	/**
+	 * This test randomly creates transactions which execution is supposed to
+	 * succeed. It uses {@link java.util.Random} to create random transactions.
+	 * We set the seed manually and always print it on the screen.
+	 * 
+	 * If the test fails, simply copy the seed which created the transaction
+	 * which was the cause of the failure and set the seed to this value
+	 * (instead of using System.currentTimeMills(), as the test normally does).
+	 * This makes the test deterministic and enables debugging.
+	 */
+	
 	@Test
 	public void testExecuteCommandSucceedingTransaction() {
 		int nrOfTxns = 20;
 		
 		for(int i = 0; i <= nrOfTxns; i++) {
-			long seed = System.currentTimeMillis();
 			
 			XID modelId = X.getIDProvider().fromString(
 			        "testExecuteCommandSimpleTransactionModel" + i);
@@ -1101,6 +1114,13 @@ public abstract class AbstractPersistenceTest {
 			
 			XWritableModel modelSnapshot = this.persistence.getModelSnapshot(modelAdrRequest);
 			
+			/*
+			 * Info: if the test fails, do the following to enable deterministic
+			 * debugging: Set the seed to the value which caused the test to
+			 * fail. This makes the test deterministic .
+			 */
+			long seed = System.currentTimeMillis();
+			System.out.println("Creating transaction " + i + " with seed " + seed + ".");
 			Pair<ChangedModel,XTransaction> pair = createRandomSucceedingModelTransaction(
 			        modelSnapshot, seed);
 			ChangedModel changedModel = pair.getFirst();
@@ -1185,9 +1205,8 @@ public abstract class AbstractPersistenceTest {
 		// create random amount of objects
 		int nrOfObjects = 0;
 		
-		do {
-			nrOfObjects = rand.nextInt(50);
-		} while(nrOfObjects <= 0); // add at least one object
+		nrOfObjects = 1 + rand.nextInt(50);
+		// add at least one object
 		
 		for(int i = 0; i < nrOfObjects; i++) {
 			XID objectId = X.getIDProvider().fromString("randomObject" + i);
@@ -1225,6 +1244,16 @@ public abstract class AbstractPersistenceTest {
 		return new Pair<ChangedModel,XTransaction>(changedModel, txn);
 	}
 	
+	/**
+	 * This test randomly creates transactions which execution is supposed to
+	 * fail. It uses {@link java.util.Random} to create random transactions. We
+	 * set the seed manually and always print it on the screen.
+	 * 
+	 * If the test fails, simply copy the seed which created the transaction
+	 * which was the cause of the failure and set the seed to this value
+	 * (instead of using System.currentTimeMills(), as the test normally does).
+	 * This makes the test deterministic and enables debugging.
+	 */
 	@Test
 	public void testExecuteCommandFailingTransaction() {
 		// TODO write this test
@@ -1266,7 +1295,13 @@ public abstract class AbstractPersistenceTest {
 			XWritableModel succModelSnapshot = this.persistence
 			        .getModelSnapshot(succModelAdrRequest);
 			
+			/*
+			 * Info: if the test fails, do the following for deterministic
+			 * debugging: Set the seed to the value which caused the test to
+			 * fail. This makes the test deterministic.
+			 */
 			long seed = System.currentTimeMillis();
+			System.out.println("Creating transaction pair " + i + " with seed" + seed + ".");
 			Pair<XTransaction,XTransaction> pair = createRandomFailingModelTransaction(
 			        failModelSnapshot, succModelSnapshot, seed);
 			
@@ -1298,43 +1333,71 @@ public abstract class AbstractPersistenceTest {
 	        XWritableModel failModel, XWritableModel succModel, long seed) {
 		Random rand = new Random(seed);
 		
+		/*
+		 * we create two transactions that basically do the same, but one of
+		 * them does not contain the command which is supposed to let the
+		 * execution of the transaction fail. By executing both transactions on
+		 * different models (which are in the same state), we'll be able to
+		 * ensure that the failing transaction actually fails because of the
+		 * specific command we added to let it fail and not because of another
+		 * event which execution should succeed.
+		 */
 		XTransactionBuilder failTxnBuilder = new XTransactionBuilder(failModel.getAddress());
 		XTransactionBuilder succTxnBuilder = new XTransactionBuilder(succModel.getAddress());
 		
 		// create random amount of objects
 		int nrOfObjects = 0;
 		
-		do {
-			nrOfObjects = rand.nextInt(50);
-		} while(nrOfObjects <= 2);
+		nrOfObjects = 2 + rand.nextInt(50);
 		/*
 		 * we need to add at least 2 objects, so that we can add at least one
-		 * succeeding command so that the next loop will not be an infinite loop
-		 * (see comment there)
+		 * succeeding command so that the following loop will not be an infinite
+		 * loop (if nrOfObjects would be equal to 1, we'd try to get random
+		 * integers between 0 and 1, but we actually need a random integer
+		 * greater than 1 - therefore the loop would never stop and we need to
+		 * have nrOfObjects >= 2)
 		 */
 		
+		/*
+		 * determines whether the constructed transaction's execution should
+		 * fail because of a command which tries to add or remove an object, but
+		 * fails.
+		 */
 		boolean failBecauseOfAddOrRemoveObjectCommand = rand.nextBoolean();
 		int faultyAddOrRemoveObjectCommand = -1;
 		
 		if(failBecauseOfAddOrRemoveObjectCommand) {
 			
-			do {
-				faultyAddOrRemoveObjectCommand = rand.nextInt(nrOfObjects);
-			} while(faultyAddOrRemoveObjectCommand <= 1);
+			faultyAddOrRemoveObjectCommand = 1 + rand.nextInt(nrOfObjects - 1);
+			
 			/*
 			 * add at least one succeeding command so that succTxnBuilder does
-			 * not throw an exception because of an empty command list.
+			 * not throw an exception because of an empty command list. The
+			 * range is from 0 to nrOfOBjects - 1 because of this too (this
+			 * ensures that the random value is between 1 and nrOfObjects-1, if
+			 * we wouldn't do this, the variable might be set to nrOfObjects,
+			 * which obviously can never be reached, because i only iterates
+			 * from 0 to nrOfObject-1).
 			 */
 		}
 		
-		boolean failingCommandNotYetAdded = true;
-		for(int i = 0; i < nrOfObjects && failingCommandNotYetAdded; i++) {
+		/*
+		 * begin adding commands until the command which should let the
+		 * execution fail is added.
+		 */
+		boolean faultyCommandNotYetAdded = true;
+		for(int i = 0; i < nrOfObjects && faultyCommandNotYetAdded; i++) {
 			XID objectId = X.getIDProvider().fromString("randomObject" + i);
 			XAddress failObjectAddress = XX.resolveObject(failModel.getAddress(), objectId);
 			XAddress succObjectAddress = XX.resolveObject(succModel.getAddress(), objectId);
 			
 			if(i == faultyAddOrRemoveObjectCommand) {
-				
+				/*
+				 * The transaction's execution is supposed to fail because of a
+				 * ModelCommand. The next random boolean determines whether it
+				 * will fail because we'll try to add an already existing object
+				 * or because we'll try to remove a not existing object.
+				 */
 				boolean failBecauseOfFalseRemove = rand.nextBoolean();
 				
 				if(failBecauseOfFalseRemove) {
@@ -1343,6 +1406,8 @@ public abstract class AbstractPersistenceTest {
 					        failObjectAddress, failModel.getRevisionNumber(), false);
 					
 					failTxnBuilder.addCommand(removeCom);
+					System.out
+					        .println("Transaction will fail because of a faulty ModelCommand of remove type.");
 					
 				} else {
 					// fail because we try to add an already existing object
@@ -1352,9 +1417,15 @@ public abstract class AbstractPersistenceTest {
 					// we need to add it twice for this use-case
 					failTxnBuilder.addCommand(addCom);
 					failTxnBuilder.addCommand(addCom);
+					
+					System.out
+					        .println("Transaction will fail because of a faulty ModelCommand of add type.");
 				}
 				
-				failingCommandNotYetAdded = false;
+				/*
+				 * faulty command was added, stop adding more elements
+				 */
+				faultyCommandNotYetAdded = false;
 				
 			} else {
 				XCommand failAddCom = this.comFactory.createAddObjectCommand(
@@ -1370,21 +1441,46 @@ public abstract class AbstractPersistenceTest {
 			// add fields
 			
 			int nrOfFields = 0;
-			do {
-				nrOfFields = rand.nextInt(50);
-			} while(nrOfFields <= 0); // add at least one field
 			
-			boolean failBecauseOfAddOrRemoveFieldCommand = !failBecauseOfAddOrRemoveObjectCommand; // rand.nextBoolean();
+			nrOfFields = 1 + rand.nextInt(50);
+			// add at least one field
+			
+			/*
+			 * if the transaction isn't supposed to fail because of a faulty
+			 * ModelCommand, randomly determine whether it should fail because
+			 * of a faulty ObjectCommand.
+			 */
+			boolean failBecauseOfAddOrRemoveFieldCommand = false;
 			int faultyAddOrRemoveFieldCommand = -1;
-			
-			if(failBecauseOfAddOrRemoveFieldCommand) {
-				faultyAddOrRemoveFieldCommand = rand.nextInt(nrOfFields);
+			if(!failBecauseOfAddOrRemoveObjectCommand) {
+				failBecauseOfAddOrRemoveFieldCommand = rand.nextBoolean();
+				
+				if(!failBecauseOfAddOrRemoveFieldCommand && i + 1 == nrOfObjects) {
+					/*
+					 * if the transaction wasn't supposed to fail because of a
+					 * ModelCommand and the current object is the last, make
+					 * sure that the transaction will actually fail by enforcing
+					 * that it will fail because of an ObjectCommand.
+					 */
+					failBecauseOfAddOrRemoveFieldCommand = true;
+				}
+				
+				if(failBecauseOfAddOrRemoveFieldCommand) {
+					faultyAddOrRemoveFieldCommand = rand.nextInt(nrOfFields);
+				}
 			}
 			
-			for(int j = 0; j < nrOfFields && failingCommandNotYetAdded; j++) {
+			for(int j = 0; j < nrOfFields && faultyCommandNotYetAdded; j++) {
 				XID fieldId = X.getIDProvider().fromString("randomField" + j);
 				
 				if(j == faultyAddOrRemoveFieldCommand) {
+					/*
+					 * The transaction's execution is supposed to fail because
+					 * of an ObjectCommand. The next random boolean determines
+					 * whether it will fail because we'll try to add an already
+					 * existing field or because we'll try to remove a not
+					 * existing field.
+					 */
 					
 					boolean failBecauseOfFalseRemove = rand.nextBoolean();
 					
@@ -1397,6 +1493,8 @@ public abstract class AbstractPersistenceTest {
 						        failModel.getRevisionNumber(), false);
 						
 						failTxnBuilder.addCommand(removeCom);
+						System.out
+						        .println("Transaction will fail because of a faulty ObjectCommand of remove type.");
 						
 					} else {
 						// fail because we try to add an already existing field
@@ -1406,9 +1504,15 @@ public abstract class AbstractPersistenceTest {
 						// we need to add it twice for this use-case
 						failTxnBuilder.addCommand(addCom);
 						failTxnBuilder.addCommand(addCom);
+						System.out
+						        .println("Transaction will fail because of a faulty ObjectCommand of add type.");
 					}
 					
-					failingCommandNotYetAdded = false;
+					/*
+					 * fauly command was added, stop the construction of the
+					 * transaction
+					 */
+					faultyCommandNotYetAdded = false;
 					
 				} else {
 					XCommand failAddCom = this.comFactory.createAddFieldCommand(failObjectAddress,
@@ -1419,13 +1523,54 @@ public abstract class AbstractPersistenceTest {
 					
 					failTxnBuilder.addCommand(failAddCom);
 					succTxnBuilder.addCommand(succAddCom);
+					
+					/*
+					 * randomly decide whether the field has a value or not
+					 */
+					boolean addValue = rand.nextBoolean();
+					if(addValue) {
+						XAddress failFieldAddress = XX.resolveField(failObjectAddress, fieldId);
+						XAddress succFieldAddress = XX.resolveField(succObjectAddress, fieldId);
+						
+						boolean failBecauseOfFaultyFieldCommand = false;
+						if(!failBecauseOfAddOrRemoveFieldCommand
+						        && !failBecauseOfAddOrRemoveObjectCommand) {
+							failBecauseOfFaultyFieldCommand = rand.nextBoolean();
+						}
+						
+						if(failBecauseOfFaultyFieldCommand) {
+							// fail because we try to remove a not existing
+							// value
+							XCommand failRemoveCom = this.comFactory.createRemoveValueCommand(
+							        failFieldAddress, failModel.getRevisionNumber(), false);
+							
+							failTxnBuilder.addCommand(failRemoveCom);
+							
+							/*
+							 * fauly command was added, stop construction
+							 */
+							faultyCommandNotYetAdded = false;
+							System.out
+							        .println("Transaction will fail because of a faulty FieldCommand of remove type.");
+							
+						} else {
+							XValue value = X.getValueFactory().createStringValue(
+							        "" + rand.nextInt());
+							
+							XCommand failAddValueCom = this.comFactory.createAddValueCommand(
+							        failFieldAddress, failModel.getRevisionNumber(), value, false);
+							XCommand succAddValueCom = this.comFactory.createAddValueCommand(
+							        succFieldAddress, succModel.getRevisionNumber(), value, false);
+							
+							failTxnBuilder.addCommand(failAddValueCom);
+							succTxnBuilder.addCommand(succAddValueCom);
+						}
+					}
 				}
 			}
 		}
 		
 		/*
-		 * TODO also fail because of value commands!
-		 * 
 		 * TODO add some commands after the failed command to check that this is
 		 * no problem
 		 */
