@@ -1349,14 +1349,6 @@ public abstract class AbstractPersistenceTest {
 		int nrOfObjects = 0;
 		
 		nrOfObjects = 2 + rand.nextInt(50);
-		/*
-		 * we need to add at least 2 objects, so that we can add at least one
-		 * succeeding command so that the following loop will not be an infinite
-		 * loop (if nrOfObjects would be equal to 1, we'd try to get random
-		 * integers between 0 and 1, but we actually need a random integer
-		 * greater than 1 - therefore the loop would never stop and we need to
-		 * have nrOfObjects >= 2)
-		 */
 		
 		/*
 		 * determines whether the constructed transaction's execution should
@@ -1509,7 +1501,7 @@ public abstract class AbstractPersistenceTest {
 					}
 					
 					/*
-					 * fauly command was added, stop the construction of the
+					 * faulty command was added, stop the construction of the
 					 * transaction
 					 */
 					faultyCommandNotYetAdded = false;
@@ -1547,7 +1539,7 @@ public abstract class AbstractPersistenceTest {
 							failTxnBuilder.addCommand(failRemoveCom);
 							
 							/*
-							 * fauly command was added, stop construction
+							 * faulty command was added, stop construction
 							 */
 							faultyCommandNotYetAdded = false;
 							System.out
@@ -2481,10 +2473,56 @@ public abstract class AbstractPersistenceTest {
 		 */
 	}
 	
-	// @Test (TODO test not yet ready)
+	@Test
 	public void testGetEventsTransactions() {
+		XID modelId = XX.toId("testGetEventsTransactionsModel");
+		XAddress modelAddress = XX.resolveModel(this.repoId, modelId);
+		XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId, false);
+		long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
+		assertTrue("The model wasn't correctly added, test cannot be executed.", revNr >= 0);
+		
+		GetWithAddressRequest modelAdrRequest = new GetWithAddressRequest(modelAddress);
+		XWritableModel model = this.persistence.getModelSnapshot(modelAdrRequest);
+		
 		/*
-		 * TODO write this test
+		 * Info: if the test fails, do the following for deterministic
+		 * debugging: Set the seed to the value which caused the test to fail.
+		 * This makes the test deterministic.
+		 */
+		long seed = System.currentTimeMillis();
+		System.out.println("Used seed: " + seed + ".");
+		Pair<ChangedModel,XTransaction> pair = createRandomSucceedingModelTransaction(model, seed);
+		XTransaction txn = pair.getSecond();
+		
+		revNr = this.persistence.executeCommand(this.actorId, txn);
+		assertTrue("Transaction did not succeed.", revNr >= 0);
+		
+		List<XEvent> events = this.persistence.getEvents(modelAddress, revNr, revNr);
+		assertEquals(
+		        "The list of events should contain one Transaction Event, but actually contains multiple events.",
+		        1, events.size());
+		
+		XEvent event = events.get(0);
+		assertTrue("The returned event should be a TransactionEvent.",
+		        event instanceof XTransactionEvent);
+		
+		XTransactionEvent txnEvent = (XTransactionEvent)event;
+		
+		assertEquals("The event didn't refer to the correct old revision number.", 0,
+		        txnEvent.getOldModelRevision());
+		assertEquals("The event didn't refer to the correct revision number.", revNr,
+		        txnEvent.getRevisionNumber());
+		assertEquals("Event doesn't refer to the correct target.", modelAddress,
+		        txnEvent.getTarget());
+		assertEquals("Event doesn't refer to the correct model.", modelAddress,
+		        txnEvent.getChangedEntity());
+		assertEquals("The actor of the event is not correct.", this.actorId, txnEvent.getActor());
+		assertFalse("The event is wrongly marked as implied.", txnEvent.isImplied());
+		assertFalse("the event is wrongly marked as being part of a transaction.",
+		        txnEvent.inTransaction());
+		
+		/*
+		 * TODO check the events that make up the transaction!
 		 */
 	}
 	
