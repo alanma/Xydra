@@ -7,8 +7,10 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
@@ -16,6 +18,7 @@ import org.junit.Test;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
+import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XCommand;
@@ -41,6 +44,7 @@ import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.delta.ChangedModel;
+import org.xydra.core.model.delta.ChangedObject;
 import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -77,6 +81,13 @@ public abstract class AbstractPersistenceTest {
 	public XID repoId = X.getIDProvider().fromString("testRepo");
 	public XAddress repoAddress = XX.resolveRepository(this.repoId);
 	public XID actorId = X.getIDProvider().fromString("testActor");
+	
+	/**
+	 * most tests that deal with transactions built transactions pseudorandomly,
+	 * so it is recommended to execute them multiple times. This parameter
+	 * determines how many times these tests will be executed.
+	 */
+	public int nrOfIterationsForTxnTests = 20;
 	
 	@Test
 	public void testExecuteCommandRepositorySafeCommandAddType() {
@@ -1095,13 +1106,12 @@ public abstract class AbstractPersistenceTest {
 	 */
 	
 	@Test
-	public void testExecuteCommandSucceedingTransaction() {
-		int nrOfTxns = 20;
+	public void testExecuteCommandSucceedingModelTransaction() {
 		
-		for(int i = 0; i <= nrOfTxns; i++) {
+		for(int i = 0; i <= this.nrOfIterationsForTxnTests; i++) {
 			
 			XID modelId = X.getIDProvider().fromString(
-			        "testExecuteCommandSimpleTransactionModel" + i);
+			        "testExecuteCommandSucceedingModelTransactionModel" + i);
 			XAddress modelAddress = XX.resolveModel(this.repoId, modelId);
 			
 			GetWithAddressRequest modelAdrRequest = new GetWithAddressRequest(modelAddress);
@@ -1187,6 +1197,84 @@ public abstract class AbstractPersistenceTest {
 		}
 	}
 	
+	@Test
+	public void testExecuteCommandSucceedingObjectTransaction() {
+		
+		for(int i = 0; i <= this.nrOfIterationsForTxnTests; i++) {
+			
+			XID modelId = X.getIDProvider().fromString(
+			        "testExecuteCommandSucceedingObjectTransactionModel" + i);
+			
+			XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId,
+			        false);
+			// add a model on which an object can be created first
+			long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
+			
+			assertTrue("Model could not be added, test cannot be executed.", revNr >= 0);
+			
+			XID objectId = X.getIDProvider().fromString(
+			        "testExecuteCommandSucceedingObjectTransactionObject" + i);
+			XAddress objectAddress = XX.resolveObject(this.repoId, modelId, objectId);
+			
+			GetWithAddressRequest objectAdrRequest = new GetWithAddressRequest(objectAddress);
+			XCommand addObjectCom = this.comFactory.createAddObjectCommand(this.repoId, modelId,
+			        objectId, false);
+			// add a model on which an object can be created first
+			revNr = this.persistence.executeCommand(this.actorId, addObjectCom);
+			
+			assertTrue("Object could not be added, test cannot be executed.", revNr >= 0);
+			
+			XWritableObject objectSnapshot = this.persistence.getObjectSnapshot(objectAdrRequest);
+			
+			/*
+			 * Info: if the test fails, do the following to enable deterministic
+			 * debugging: Set the seed to the value which caused the test to
+			 * fail. This makes the test deterministic .
+			 */
+			long seed = System.currentTimeMillis();
+			System.out.println("Creating transaction " + i + " with seed " + seed + ".");
+			Pair<ChangedObject,XTransaction> pair = createRandomSucceedingObjectTransaction(
+			        objectSnapshot, seed);
+			ChangedObject changedObject = pair.getFirst();
+			XTransaction txn = pair.getSecond();
+			
+			revNr = this.persistence.executeCommand(this.actorId, txn);
+			assertTrue("Transaction failed, should succeed, seed was: " + seed, revNr >= 0);
+			
+			objectSnapshot = this.persistence.getObjectSnapshot(objectAdrRequest);
+			
+			int nrOfFieldsInObjectSnapshot = 0;
+			int nrOfFieldsInChangedObject = 0;
+			for(@SuppressWarnings("unused")
+			XID id : changedObject) {
+				nrOfFieldsInChangedObject++;
+			}
+			
+			for(@SuppressWarnings("unused")
+			XID id : objectSnapshot) {
+				nrOfFieldsInObjectSnapshot++;
+			}
+			
+			assertEquals(
+			        "The transaction wasn't correctly executed, the stored objects does not store the correct amount of fields it should be storing after execution of the transaction.",
+			        nrOfFieldsInChangedObject, nrOfFieldsInObjectSnapshot);
+			
+			for(XID fieldId : changedObject) {
+				assertTrue(
+				        "The stored object does not contain a field it should contain after the transaction was executed.",
+				        objectSnapshot.hasField(fieldId));
+				
+				XReadableField changedField = changedObject.getField(fieldId);
+				XReadableField fieldSnapshot = objectSnapshot.getField(fieldId);
+				
+				assertEquals(
+				        "One of the stored fields does not contain the value it should contain after the transaction was executed.",
+				        changedField.getValue(), fieldSnapshot.getValue());
+			}
+		}
+		
+	}
+	
 	/**
 	 * Pseudorandomly generates a transaction which should succeed on the given
 	 * model. The seed determines how the random number generator generates its
@@ -1197,6 +1285,11 @@ public abstract class AbstractPersistenceTest {
 	 */
 	private Pair<ChangedModel,XTransaction> createRandomSucceedingModelTransaction(
 	        XWritableModel model, long seed) {
+		/*
+		 * TODO consider also adding other type of (succeeding) commands, i.e.
+		 * succeeding commands of remove or change type.
+		 */
+		
 		Random rand = new Random(seed);
 		
 		XTransactionBuilder txBuilder = new XTransactionBuilder(model.getAddress());
@@ -1216,13 +1309,13 @@ public abstract class AbstractPersistenceTest {
 		
 		// add fields and values to the object
 		for(XID objectId : changedModel) {
-			XWritableObject object = changedModel.getObject(objectId);
+			XWritableObject changedObject = changedModel.getObject(objectId);
 			
 			int nrOfFields = rand.nextInt(50);
 			for(int i = 0; i < nrOfFields; i++) {
 				XID fieldId = X.getIDProvider().fromString(objectId + "randomField" + i);
 				
-				XWritableField field = object.createField(fieldId);
+				XWritableField field = changedObject.createField(fieldId);
 				
 				boolean hasValue = rand.nextBoolean();
 				
@@ -1230,7 +1323,8 @@ public abstract class AbstractPersistenceTest {
 					/*
 					 * TODO add different types of values
 					 */
-					XValue value = X.getValueFactory().createStringValue("randomValue" + fieldId);
+					XValue value = X.getValueFactory().createStringValue(
+					        "randomValue" + rand.nextInt());
 					
 					field.setValue(value);
 				}
@@ -1244,6 +1338,44 @@ public abstract class AbstractPersistenceTest {
 		return new Pair<ChangedModel,XTransaction>(changedModel, txn);
 	}
 	
+	private Pair<ChangedObject,XTransaction> createRandomSucceedingObjectTransaction(
+	        XWritableObject object, long seed) {
+		/*
+		 * TODO consider also adding other type of (succeeding) commands, i.e.
+		 * succeeding commands of remove or change type.
+		 */
+		
+		Random rand = new Random(seed);
+		XID objectId = object.getId();
+		
+		XTransactionBuilder txBuilder = new XTransactionBuilder(object.getAddress());
+		ChangedObject changedObject = new ChangedObject(object);
+		
+		int nrOfFields = 1 + rand.nextInt(50); // add at least one field.
+		for(int i = 0; i < nrOfFields; i++) {
+			XID fieldId = X.getIDProvider().fromString(objectId + "randomField" + i);
+			
+			XWritableField field = changedObject.createField(fieldId);
+			
+			boolean hasValue = rand.nextBoolean();
+			
+			if(hasValue) {
+				/*
+				 * TODO add different types of values
+				 */
+				XValue value = X.getValueFactory()
+				        .createStringValue("randomValue" + rand.nextInt());
+				
+				field.setValue(value);
+			}
+		}
+		
+		txBuilder.applyChanges(changedObject);
+		XTransaction txn = txBuilder.build();
+		
+		return new Pair<ChangedObject,XTransaction>(changedObject, txn);
+	}
+	
 	/**
 	 * This test randomly creates transactions which execution is supposed to
 	 * fail. It uses {@link java.util.Random} to create random transactions. We
@@ -1255,14 +1387,9 @@ public abstract class AbstractPersistenceTest {
 	 * This makes the test deterministic and enables debugging.
 	 */
 	@Test
-	public void testExecuteCommandFailingTransaction() {
-		// TODO write this test
-		// TODO write multiple tests for Transactions, since they are pretty
-		// complex
+	public void testExecuteCommandFailingModelTransaction() {
 		
-		int nrOfTxns = 20;
-		
-		for(int i = 0; i <= nrOfTxns; i++) {
+		for(int i = 0; i <= this.nrOfIterationsForTxnTests; i++) {
 			XID failModelId = X.getIDProvider().fromString(
 			        "testExecuteCommandSimpleTransactionFailModel" + i);
 			XAddress failModelAddress = XX.resolveModel(this.repoId, failModelId);
@@ -1323,11 +1450,6 @@ public abstract class AbstractPersistenceTest {
 			
 		}
 	}
-	
-	/*
-	 * TODO write a method which randomly creates Transactions that should fail
-	 * and assert that they fail!
-	 */
 	
 	private Pair<XTransaction,XTransaction> createRandomFailingModelTransaction(
 	        XWritableModel failModel, XWritableModel succModel, long seed) {
@@ -2474,56 +2596,130 @@ public abstract class AbstractPersistenceTest {
 	}
 	
 	@Test
-	public void testGetEventsTransactions() {
-		XID modelId = XX.toId("testGetEventsTransactionsModel");
-		XAddress modelAddress = XX.resolveModel(this.repoId, modelId);
-		XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId, false);
-		long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
-		assertTrue("The model wasn't correctly added, test cannot be executed.", revNr >= 0);
+	public void testGetEventsModelTransactions() {
 		
-		GetWithAddressRequest modelAdrRequest = new GetWithAddressRequest(modelAddress);
-		XWritableModel model = this.persistence.getModelSnapshot(modelAdrRequest);
-		
-		/*
-		 * Info: if the test fails, do the following for deterministic
-		 * debugging: Set the seed to the value which caused the test to fail.
-		 * This makes the test deterministic.
-		 */
-		long seed = System.currentTimeMillis();
-		System.out.println("Used seed: " + seed + ".");
-		Pair<ChangedModel,XTransaction> pair = createRandomSucceedingModelTransaction(model, seed);
-		XTransaction txn = pair.getSecond();
-		
-		revNr = this.persistence.executeCommand(this.actorId, txn);
-		assertTrue("Transaction did not succeed.", revNr >= 0);
-		
-		List<XEvent> events = this.persistence.getEvents(modelAddress, revNr, revNr);
-		assertEquals(
-		        "The list of events should contain one Transaction Event, but actually contains multiple events.",
-		        1, events.size());
-		
-		XEvent event = events.get(0);
-		assertTrue("The returned event should be a TransactionEvent.",
-		        event instanceof XTransactionEvent);
-		
-		XTransactionEvent txnEvent = (XTransactionEvent)event;
-		
-		assertEquals("The event didn't refer to the correct old revision number.", 0,
-		        txnEvent.getOldModelRevision());
-		assertEquals("The event didn't refer to the correct revision number.", revNr,
-		        txnEvent.getRevisionNumber());
-		assertEquals("Event doesn't refer to the correct target.", modelAddress,
-		        txnEvent.getTarget());
-		assertEquals("Event doesn't refer to the correct model.", modelAddress,
-		        txnEvent.getChangedEntity());
-		assertEquals("The actor of the event is not correct.", this.actorId, txnEvent.getActor());
-		assertFalse("The event is wrongly marked as implied.", txnEvent.isImplied());
-		assertFalse("the event is wrongly marked as being part of a transaction.",
-		        txnEvent.inTransaction());
-		
-		/*
-		 * TODO check the events that make up the transaction!
-		 */
+		for(int i = 0; i < this.nrOfIterationsForTxnTests; i++) {
+			
+			XID modelId = XX.toId("testGetEventsTransactionsModel" + i);
+			XAddress modelAddress = XX.resolveModel(this.repoId, modelId);
+			XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId,
+			        false);
+			long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
+			assertTrue("The model wasn't correctly added, test cannot be executed.", revNr >= 0);
+			
+			GetWithAddressRequest modelAdrRequest = new GetWithAddressRequest(modelAddress);
+			XWritableModel model = this.persistence.getModelSnapshot(modelAdrRequest);
+			
+			/*
+			 * Info: if the test fails, do the following for deterministic
+			 * debugging: Set the seed to the value which caused the test to
+			 * fail. This makes the test deterministic.
+			 */
+			long seed = System.currentTimeMillis();
+			System.out.println("Used seed: " + seed + ".");
+			Pair<ChangedModel,XTransaction> pair = createRandomSucceedingModelTransaction(model,
+			        seed);
+			XTransaction txn = pair.getSecond();
+			
+			revNr = this.persistence.executeCommand(this.actorId, txn);
+			assertTrue("Transaction did not succeed.", revNr >= 0);
+			
+			List<XEvent> events = this.persistence.getEvents(modelAddress, revNr, revNr);
+			assertEquals(
+			        "The list of events should contain one Transaction Event, but actually contains multiple events.",
+			        1, events.size());
+			
+			XEvent event = events.get(0);
+			assertTrue("The returned event should be a TransactionEvent.",
+			        event instanceof XTransactionEvent);
+			
+			XTransactionEvent txnEvent = (XTransactionEvent)event;
+			
+			assertEquals("The event didn't refer to the correct old revision number.", 0,
+			        txnEvent.getOldModelRevision());
+			assertEquals("The event didn't refer to the correct revision number.", revNr,
+			        txnEvent.getRevisionNumber());
+			assertEquals("Event doesn't refer to the correct target.", modelAddress,
+			        txnEvent.getTarget());
+			assertEquals("Event doesn't refer to the correct model.", modelAddress,
+			        txnEvent.getChangedEntity());
+			assertEquals("The actor of the event is not correct.", this.actorId,
+			        txnEvent.getActor());
+			assertFalse("The event is wrongly marked as implied.", txnEvent.isImplied());
+			assertFalse("the event is wrongly marked as being part of a transaction.",
+			        txnEvent.inTransaction());
+			
+			/*
+			 * TODO check the events that make up the transaction!
+			 */
+			
+			/*
+			 * TODO document why there are no "removedObjectEvents" (etc.) lists
+			 */
+			Map<XAddress,XEvent> addedObjectEvents = new HashMap<XAddress,XEvent>();
+			Map<XAddress,XEvent> addedFieldEvents = new HashMap<XAddress,XEvent>();
+			Map<XAddress,XEvent> addedValueEvents = new HashMap<XAddress,XEvent>();
+			
+			for(XEvent ev : txnEvent) {
+				/*
+				 * TODO Notice that this might change in the future and the
+				 * randomly constructed succeeding transaction might also
+				 * contain events of other types.
+				 */
+				assertTrue("The transaction should only contain events of the Add-type.",
+				        ev.getChangeType() == ChangeType.ADD);
+				assertTrue("Event is wrongly marked as not being part of a transaction.",
+				        ev.inTransaction());
+				assertEquals("The event doesn't refer to the correct model.", modelId, ev
+				        .getTarget().getModel());
+				assertFalse("The event is wrongly marked as being implied.", event.isImplied());
+				assertEquals("The actor of the event is not correct.", this.actorId,
+				        event.getActor());
+				assertEquals("The event didn't refer to the correct revision number.", revNr,
+				        ev.getRevisionNumber());
+				
+				if(ev.getChangedEntity().getAddressedType() == XType.XOBJECT) {
+					
+					addedObjectEvents.put(ev.getChangedEntity(), ev);
+				} else {
+					assertEquals(
+					        "A model transaction should only contain commands that target objects or fields.",
+					        ev.getChangedEntity().getAddressedType(), XType.XFIELD);
+					
+					if(ev instanceof XObjectEvent) {
+						addedFieldEvents.put(ev.getChangedEntity(), ev);
+					} else {
+						assertTrue(ev instanceof XFieldEvent);
+						addedValueEvents.put(ev.getChangedEntity(), ev);
+					}
+				}
+			}
+			
+			model = this.persistence.getModelSnapshot(modelAdrRequest);
+			for(XID objectId : model) {
+				XAddress objectAddress = XX.resolveObject(this.repoId, modelId, objectId);
+				
+				assertTrue(
+				        "Since the model was emtpy before the transaction, there should be a fitting add-event for the object with XID "
+				                + objectId + ".", addedObjectEvents.containsKey(objectAddress));
+				XReadableObject object = model.getObject(objectId);
+				
+				for(XID fieldId : object) {
+					XAddress fieldAddress = XX
+					        .resolveField(this.repoId, modelId, objectId, fieldId);
+					
+					assertTrue(
+					        "Since the model was emtpy before the transaction, there should be a fitting add-event for the field with XID "
+					                + fieldId + ".", addedFieldEvents.containsKey(fieldAddress));
+					XReadableField field = object.getField(fieldId);
+					if(field.getValue() != null) {
+						assertTrue(
+						        "Since the model was emtpy before the transaction, there should be a fitting add-event for the value in the field with XID "
+						                + fieldId + ".", addedValueEvents.containsKey(fieldAddress));
+					}
+				}
+			}
+		}
 	}
 	
 	@Test
