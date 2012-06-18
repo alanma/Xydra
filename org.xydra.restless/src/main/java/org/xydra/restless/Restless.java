@@ -160,6 +160,8 @@ public class Restless extends HttpServlet {
 	
 	public static final String XML_DECLARATION = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 	
+	private static final String INTROSPECTION_PATH = "/admin/restless";
+	
 	/**
 	 * @param req HttpServletRequest, @NeverNull
 	 * @return "/foo/" for a request uri of "/foo/bar" with a pathInfo of "bar"
@@ -242,10 +244,10 @@ public class Restless extends HttpServlet {
 	
 	private String apps;
 	
-	List<RestlessExceptionHandler> exceptionHandlers = new LinkedList<RestlessExceptionHandler>();
+	final List<RestlessExceptionHandler> exceptionHandlers = new LinkedList<RestlessExceptionHandler>();
 	
 	/** Filled from web.xml */
-	private Map<String,String> initParams = new HashMap<String,String>();
+	private final Map<String,String> initParams = new HashMap<String,String>();
 	
 	/**
 	 * Simulates the servlet context when run outside a servlet container
@@ -254,12 +256,10 @@ public class Restless extends HttpServlet {
 	
 	private String loggerFactory;
 	
-	/**
-	 * All publicly exposed methods
-	 */
-	private List<RestlessMethod> methods = new LinkedList<RestlessMethod>();
+	/** All publicly exposed methods */
+	private final List<RestlessMethod> methods = new LinkedList<RestlessMethod>();
 	
-	private Set<IRequestListener> requestListeners = new HashSet<IRequestListener>();
+	private final Set<IRequestListener> requestListeners = new HashSet<IRequestListener>();
 	
 	private ServletContext servletContext;
 	
@@ -270,7 +270,9 @@ public class Restless extends HttpServlet {
 	 * @param handler a non-null {@link RestlessExceptionHandler}
 	 */
 	public void addExceptionHandler(RestlessExceptionHandler handler) {
-		this.exceptionHandlers.add(handler);
+		synchronized(this.exceptionHandlers) {
+			this.exceptionHandlers.add(handler);
+		}
 	}
 	
 	/**
@@ -370,9 +372,9 @@ public class Restless extends HttpServlet {
 	 * , javax.servlet.http.HttpServletResponse)
 	 */
 	@Override
-	public void doGet(HttpServletRequest req, HttpServletResponse res) {
-		String uri = req.getRequestURI();
-		if(uri.startsWith("/admin/restless")) {
+	public void doGet(final HttpServletRequest req, final HttpServletResponse res) {
+		final String uri = req.getRequestURI();
+		if(uri.startsWith(INTROSPECTION_PATH)) {
 			doIntrospection(req, res);
 		} else {
 			restlessService(req, res);
@@ -752,7 +754,7 @@ public class Restless extends HttpServlet {
 	 * @param req
 	 * @param res
 	 */
-	protected void restlessService(HttpServletRequest req, HttpServletResponse res) {
+	protected void restlessService(final HttpServletRequest req, final HttpServletResponse res) {
 		NanoClock requestClock = new NanoClock().start();
 		
 		/* If running on localhost, we might tweak the host */
@@ -782,7 +784,7 @@ public class Restless extends HttpServlet {
 		
 		/* Find RestlessMethod to be called ------------------ */
 		// look through all registered methods
-		boolean reqViaAdminUrl = requestIsViaAdminUrl(reqHandedDown);
+		final boolean reqViaAdminUrl = requestIsViaAdminUrl(reqHandedDown);
 		boolean couldStartMethod = false;
 		for(RestlessMethod restlessMethod : this.methods) {
 			/*

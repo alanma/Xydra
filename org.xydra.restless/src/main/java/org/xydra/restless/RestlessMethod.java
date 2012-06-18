@@ -484,12 +484,15 @@ public class RestlessMethod {
 	 * @return
 	 */
 	private static boolean callGlobalExceptionHandlers(Throwable cause, IRestlessContext context) {
-		for(RestlessExceptionHandler handler : context.getRestless().exceptionHandlers) {
-			if(handler.handleException(cause, context)) {
-				return true;
+		List<RestlessExceptionHandler> exceptionHandlers = context.getRestless().exceptionHandlers;
+		synchronized(exceptionHandlers) {
+			for(RestlessExceptionHandler handler : exceptionHandlers) {
+				if(handler.handleException(cause, context)) {
+					return true;
+				}
 			}
+			return false;
 		}
-		return false;
 	}
 	
 	/**
