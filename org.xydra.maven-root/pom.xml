@@ -599,7 +599,7 @@
 				<!-- Specify AppEngine version for your project. It should match SDK 
 					version pointed to by ${gae.home} property (Typically, one used by your Eclipse 
 					plug-in) -->
-				<gae.version>1.6.4</gae.version>
+				<gae.version>1.6.5</gae.version>
 
 			</properties>
 			<build>
