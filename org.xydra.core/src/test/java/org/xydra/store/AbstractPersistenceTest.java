@@ -1633,8 +1633,9 @@ public abstract class AbstractPersistenceTest {
 		 * begin adding commands until the command which should let the
 		 * execution fail is added.
 		 */
-		boolean faultyCommandNotYetAdded = true;
-		for(int i = 0; i < nrOfObjects && faultyCommandNotYetAdded; i++) {
+		boolean faultyCommandAdded = false;
+		
+		for(int i = 0; i < nrOfObjects && !faultyCommandAdded; i++) {
 			XID objectId = X.getIDProvider().fromString("randomObject" + i);
 			XAddress failObjectAddress = XX.resolveObject(failModel.getAddress(), objectId);
 			XAddress succObjectAddress = XX.resolveObject(succModel.getAddress(), objectId);
@@ -1673,7 +1674,7 @@ public abstract class AbstractPersistenceTest {
 				/*
 				 * faulty command was added, stop adding more elements
 				 */
-				faultyCommandNotYetAdded = false;
+				faultyCommandAdded = true;
 				
 			} else {
 				XCommand failAddCom = this.comFactory.createAddObjectCommand(
@@ -1718,7 +1719,7 @@ public abstract class AbstractPersistenceTest {
 				}
 			}
 			
-			for(int j = 0; j < nrOfFields && faultyCommandNotYetAdded; j++) {
+			for(int j = 0; j < nrOfFields && !faultyCommandAdded; j++) {
 				XID fieldId = X.getIDProvider().fromString("randomField" + j);
 				
 				if(j == faultyAddOrRemoveFieldCommand) {
@@ -1760,7 +1761,7 @@ public abstract class AbstractPersistenceTest {
 					 * faulty command was added, stop the construction of the
 					 * transaction
 					 */
-					faultyCommandNotYetAdded = false;
+					faultyCommandAdded = true;
 					
 				} else {
 					XCommand failAddCom = this.comFactory.createAddFieldCommand(failObjectAddress,
@@ -1777,8 +1778,11 @@ public abstract class AbstractPersistenceTest {
 					 */
 					boolean addValue = rand.nextBoolean();
 					if(addValue) {
-						XAddress failFieldAddress = XX.resolveField(failObjectAddress, fieldId);
-						XAddress succFieldAddress = XX.resolveField(succObjectAddress, fieldId);
+						/*
+						 * the field didn't exist before the transaction, so its
+						 * revision number is 0.
+						 */
+						long fieldRevNr = 0;
 						
 						boolean failBecauseOfFaultyFieldCommand = false;
 						if(!failBecauseOfAddOrRemoveFieldCommand
@@ -1786,38 +1790,28 @@ public abstract class AbstractPersistenceTest {
 							failBecauseOfFaultyFieldCommand = rand.nextBoolean();
 						}
 						
-						if(failBecauseOfFaultyFieldCommand) {
-							// fail because we try to remove a not existing
-							// value
-							XCommand failRemoveCom = this.comFactory.createRemoveValueCommand(
-							        failFieldAddress, failModel.getRevisionNumber(), false);
-							
-							failTxnBuilder.addCommand(failRemoveCom);
-							
+						XAddress failFieldAddress = XX.resolveField(failModel.getAddress(),
+						        objectId, fieldId);
+						XAddress succFieldAddress = XX.resolveField(succModel.getAddress(),
+						        objectId, fieldId);
+						
+						boolean temp = constructFieldCommandForFaultyTransaction(failFieldAddress,
+						        succFieldAddress, failTxnBuilder, succTxnBuilder,
+						        failBecauseOfFaultyFieldCommand, fieldRevNr, rand);
+						
+						if(temp) {
 							/*
-							 * faulty command was added, stop construction
-							 */
-							faultyCommandNotYetAdded = false;
-							System.out
-							        .println("Transaction will fail because of a faulty FieldCommand of remove type.");
-							
-							/*
-							 * TODO also let it fail because of faulty add or
-							 * change commands
+							 * we're using a temporary variable here because
+							 * faultyCommandAdded might already be set to true
+							 * and the method might return false, thereby
+							 * wrongly setting the faultyCommandAdd to false if
+							 * we'd just assign the return value of the method
+							 * to faultyCommandAdded.
 							 */
 							
-						} else {
-							XValue value = X.getValueFactory().createStringValue(
-							        "" + rand.nextInt());
-							
-							XCommand failAddValueCom = this.comFactory.createAddValueCommand(
-							        failFieldAddress, failModel.getRevisionNumber(), value, false);
-							XCommand succAddValueCom = this.comFactory.createAddValueCommand(
-							        succFieldAddress, succModel.getRevisionNumber(), value, false);
-							
-							failTxnBuilder.addCommand(failAddValueCom);
-							succTxnBuilder.addCommand(succAddValueCom);
+							faultyCommandAdded = true;
 						}
+						
 					}
 				}
 			}
@@ -1856,7 +1850,7 @@ public abstract class AbstractPersistenceTest {
 		 * begin adding commands until the command which should let the
 		 * execution fail is added.
 		 */
-		boolean faultyCommandNotYetAdded = true;
+		boolean faultyCommandAdded = false;
 		
 		// add fields
 		
@@ -1878,7 +1872,7 @@ public abstract class AbstractPersistenceTest {
 			faultyAddOrRemoveFieldCommand = 1 + rand.nextInt(nrOfFields - 1);
 		}
 		
-		for(int j = 0; j < nrOfFields && faultyCommandNotYetAdded; j++) {
+		for(int j = 0; j < nrOfFields && !faultyCommandAdded; j++) {
 			XID fieldId = X.getIDProvider().fromString("randomField" + j);
 			
 			if(j == faultyAddOrRemoveFieldCommand) {
@@ -1918,7 +1912,7 @@ public abstract class AbstractPersistenceTest {
 				 * faulty command was added, stop the construction of the
 				 * transaction
 				 */
-				faultyCommandNotYetAdded = false;
+				faultyCommandAdded = true;
 				
 			} else {
 				XCommand failAddCom = this.comFactory.createAddFieldCommand(
@@ -1941,9 +1935,6 @@ public abstract class AbstractPersistenceTest {
 					 */
 					long fieldRevNr = 0;
 					
-					XAddress failFieldAddress = XX.resolveField(failObject.getAddress(), fieldId);
-					XAddress succFieldAddress = XX.resolveField(succObject.getAddress(), fieldId);
-					
 					boolean failBecauseOfFaultyFieldCommand = false;
 					if(!failBecauseOfAddOrRemoveFieldCommand) {
 						failBecauseOfFaultyFieldCommand = rand.nextBoolean();
@@ -1958,36 +1949,24 @@ public abstract class AbstractPersistenceTest {
 						}
 					}
 					
-					if(failBecauseOfFaultyFieldCommand) {
-						// fail because we try to remove a not existing
-						// value
-						XCommand failRemoveCom = this.comFactory.createRemoveValueCommand(
-						        failFieldAddress, fieldRevNr, false);
-						
-						failTxnBuilder.addCommand(failRemoveCom);
-						
+					XAddress failFieldAddress = XX.resolveField(failObject.getAddress(), fieldId);
+					XAddress succFieldAddress = XX.resolveField(succObject.getAddress(), fieldId);
+					
+					boolean temp = constructFieldCommandForFaultyTransaction(failFieldAddress,
+					        succFieldAddress, failTxnBuilder, succTxnBuilder,
+					        failBecauseOfFaultyFieldCommand, fieldRevNr, rand);
+					
+					if(temp) {
 						/*
-						 * faulty command was added, stop construction
-						 */
-						faultyCommandNotYetAdded = false;
-						System.out
-						        .println("Transaction will fail because of a faulty FieldCommand of remove type.");
-						
-						/*
-						 * TODO also let it fail because of faulty add or remove
-						 * commands
+						 * we're using a temporary variable here because
+						 * faultyCommandAdded might already be set to true and
+						 * the method might return false, thereby wrongly
+						 * setting the faultyCommandAdd to false if we'd just
+						 * assign the return value of the method to
+						 * faultyCommandAdded.
 						 */
 						
-					} else {
-						XValue value = X.getValueFactory().createStringValue("" + rand.nextInt());
-						
-						XCommand failAddValueCom = this.comFactory.createAddValueCommand(
-						        failFieldAddress, fieldRevNr, value, false);
-						XCommand succAddValueCom = this.comFactory.createAddValueCommand(
-						        succFieldAddress, fieldRevNr, value, false);
-						
-						failTxnBuilder.addCommand(failAddValueCom);
-						succTxnBuilder.addCommand(succAddValueCom);
+						faultyCommandAdded = true;
 					}
 				}
 			}
@@ -2004,6 +1983,77 @@ public abstract class AbstractPersistenceTest {
 		Pair<XTransaction,XTransaction> pair = new Pair<XTransaction,XTransaction>(failTxn, succTxn);
 		return pair;
 		
+	}
+	
+	private boolean constructFieldCommandForFaultyTransaction(XAddress failFieldAddress,
+	        XAddress succFieldAddress, XTransactionBuilder failTxnBuilder,
+	        XTransactionBuilder succTxnBuilder, boolean failBecauseOfFaultyFieldCommand,
+	        long fieldRevNr, Random rand) {
+		
+		if(failBecauseOfFaultyFieldCommand) {
+			int reason = rand.nextInt(3);
+			
+			/*
+			 * TODO write method which randomly creates values
+			 */
+			if(reason == 0) {
+				// fail because we try to remove a not existing
+				// value
+				XCommand failRemoveCom = this.comFactory.createRemoveValueCommand(failFieldAddress,
+				        fieldRevNr, false);
+				
+				failTxnBuilder.addCommand(failRemoveCom);
+				
+				System.out
+				        .println("Transaction will fail because of a faulty FieldCommand of remove type.");
+			} else if(reason == 1) {
+				// fail because we try to add a value to a field
+				// which value is already set
+				
+				XValue value1 = XX.createUniqueId();
+				XValue value2 = XX.createUniqueId();
+				XCommand failAddCom1 = this.comFactory.createAddValueCommand(failFieldAddress,
+				        fieldRevNr, value1, false);
+				XCommand failAddCom2 = this.comFactory.createAddValueCommand(failFieldAddress,
+				        fieldRevNr, value2, false);
+				
+				failTxnBuilder.addCommand(failAddCom1);
+				failTxnBuilder.addCommand(failAddCom2);
+				
+				System.out
+				        .println("Transaction will fail because of a faulty FieldCommand of add type.");
+			} else {
+				assert reason == 2;
+				// fail because we try to change the value of a
+				// field which value isn't set
+				XValue value = XX.createUniqueId();
+				XCommand failChangeCom = this.comFactory.createChangeValueCommand(failFieldAddress,
+				        fieldRevNr, value, false);
+				
+				failTxnBuilder.addCommand(failChangeCom);
+				
+				System.out
+				        .println("Transaction will fail because of a faulty FieldCommand of change type.");
+			}
+			
+			/*
+			 * faulty command was added, stop construction
+			 */
+			return true;
+			
+		} else {
+			XValue value = X.getValueFactory().createStringValue("" + rand.nextInt());
+			
+			XCommand failAddValueCom = this.comFactory.createAddValueCommand(failFieldAddress,
+			        fieldRevNr, value, false);
+			XCommand succAddValueCom = this.comFactory.createAddValueCommand(succFieldAddress,
+			        fieldRevNr, value, false);
+			
+			failTxnBuilder.addCommand(failAddValueCom);
+			succTxnBuilder.addCommand(succAddValueCom);
+			
+			return false;
+		}
 	}
 	
 	@Test
