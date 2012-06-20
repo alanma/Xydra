@@ -93,4 +93,12 @@ public class Utils extends SharedUtils {
 		System.out.println(urlencode("he he+ho"));
 	}
 	
+	public static long parseAsLong(String s) throws IllegalArgumentException {
+		try {
+			return Long.parseLong(s);
+		} catch(NumberFormatException e) {
+			throw new IllegalArgumentException(e);
+		}
+	}
+	
 }
