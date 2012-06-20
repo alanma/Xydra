@@ -110,8 +110,8 @@ public abstract class AbstractPersistenceTest {
 		 */
 		XID modelId = XX.toId("testExecuteCommandRepositoryCommandAddType");
 		XAddress modelAddress = XX.resolveModel(this.repoId, modelId);
-		XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId,
-		        forcedCommands);
+		XCommand addModelCom =
+		        this.comFactory.createAddModelCommand(this.repoId, modelId, forcedCommands);
 		
 		long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
 		
@@ -170,8 +170,8 @@ public abstract class AbstractPersistenceTest {
 		 */
 		XID modelId = XX.toId("testExecuteCommandRepositoryCommandRemoveTypeModel1");
 		XAddress modelAddress = XX.resolveModel(this.repoId, modelId);
-		XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId,
-		        forcedCommands);
+		XCommand addModelCom =
+		        this.comFactory.createAddModelCommand(this.repoId, modelId, forcedCommands);
 		long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
 		
 		assertTrue("Adding a model failed, test cannot be executed.", revNr >= 0);
@@ -187,8 +187,9 @@ public abstract class AbstractPersistenceTest {
 		/*
 		 * delete the model again
 		 */
-		XCommand deleteModelCom = this.comFactory.createRemoveModelCommand(this.repoId, modelId,
-		        model.getRevisionNumber(), forcedCommands);
+		XCommand deleteModelCom =
+		        this.comFactory.createRemoveModelCommand(this.repoId, modelId,
+		                model.getRevisionNumber(), forcedCommands);
 		
 		revNr = this.persistence.executeCommand(this.actorId, deleteModelCom);
 		
@@ -204,8 +205,9 @@ public abstract class AbstractPersistenceTest {
 		/*
 		 * try to delete the model again
 		 */
-		deleteModelCom = this.comFactory.createRemoveModelCommand(this.repoId, modelId, revNr,
-		        forcedCommands);
+		deleteModelCom =
+		        this.comFactory.createRemoveModelCommand(this.repoId, modelId, revNr,
+		                forcedCommands);
 		
 		revNr = this.persistence.executeCommand(this.actorId, deleteModelCom);
 		
@@ -230,8 +232,8 @@ public abstract class AbstractPersistenceTest {
 		 */
 		
 		modelId = XX.toId("testExecuteCommandRepositoryCommandRemoveTypeModel2");
-		XCommand deleteNotExistingModelCom = this.comFactory.createRemoveModelCommand(this.repoId,
-		        modelId, 0, forcedCommands);
+		XCommand deleteNotExistingModelCom =
+		        this.comFactory.createRemoveModelCommand(this.repoId, modelId, 0, forcedCommands);
 		
 		revNr = this.persistence.executeCommand(this.actorId, deleteNotExistingModelCom);
 		
@@ -264,8 +266,9 @@ public abstract class AbstractPersistenceTest {
 		XID objectId = XX.toId("testExecuteCommandRepositoryCommandRemoveTypeObject1");
 		
 		XAddress objectAddress = XX.resolveObject(this.repoId, modelId, objectId);
-		XCommand addObjectCom = this.comFactory.createAddObjectCommand(this.repoId, modelId,
-		        objectId, forcedCommands);
+		XCommand addObjectCom =
+		        this.comFactory.createAddObjectCommand(this.repoId, modelId, objectId,
+		                forcedCommands);
 		
 		long objectRevNr = this.persistence.executeCommand(this.actorId, addObjectCom);
 		
@@ -274,8 +277,9 @@ public abstract class AbstractPersistenceTest {
 		// remove model and check if object is also removed
 		addressRequest = new GetWithAddressRequest(modelAddress);
 		model = this.persistence.getModelSnapshot(addressRequest);
-		deleteModelCom = this.comFactory.createRemoveModelCommand(this.repoId, modelId,
-		        model.getRevisionNumber(), forcedCommands);
+		deleteModelCom =
+		        this.comFactory.createRemoveModelCommand(this.repoId, modelId,
+		                model.getRevisionNumber(), forcedCommands);
 		
 		revNr = this.persistence.executeCommand(this.actorId, deleteModelCom);
 		
@@ -314,8 +318,8 @@ public abstract class AbstractPersistenceTest {
 		XID modelId = XX.toId("testExecuteCommandModelCommandAddTypeModel");
 		XAddress modelAddress = XX.resolveModel(this.repoId, modelId);
 		
-		XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId,
-		        forcedCommands);
+		XCommand addModelCom =
+		        this.comFactory.createAddModelCommand(this.repoId, modelId, forcedCommands);
 		long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
 		assertTrue("The model wasn't correctly added, test cannot be executed.", revNr >= 0);
 		
@@ -326,8 +330,9 @@ public abstract class AbstractPersistenceTest {
 		XID objectId = XX.toId("testExecuteCommandModelCommandAddTypeObject");
 		
 		XAddress objectAddress = XX.resolveObject(this.repoId, modelId, objectId);
-		XCommand addObjectCom = this.comFactory.createAddObjectCommand(this.repoId, modelId,
-		        objectId, forcedCommands);
+		XCommand addObjectCom =
+		        this.comFactory.createAddObjectCommand(this.repoId, modelId, objectId,
+		                forcedCommands);
 		
 		revNr = this.persistence.executeCommand(this.actorId, addObjectCom);
 		
@@ -404,8 +409,8 @@ public abstract class AbstractPersistenceTest {
 		 */
 		XID modelId = XX.toId("testExecuteCommandModelCommandRemoveTypeModel");
 		XAddress modelAddress = XX.resolveModel(this.repoId, modelId);
-		XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId,
-		        forcedCommands);
+		XCommand addModelCom =
+		        this.comFactory.createAddModelCommand(this.repoId, modelId, forcedCommands);
 		long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
 		
 		assertTrue("Adding a model failed, test cannot be executed.", revNr >= 0);
@@ -420,8 +425,9 @@ public abstract class AbstractPersistenceTest {
 		
 		XID objectId = XX.toId("testExecuteCommandModelCommandRemoveTypeObject1");
 		XAddress objectAddress = XX.resolveObject(this.repoId, modelId, objectId);
-		XCommand addObjectCom = this.comFactory.createAddObjectCommand(this.repoId, modelId,
-		        objectId, forcedCommands);
+		XCommand addObjectCom =
+		        this.comFactory.createAddObjectCommand(this.repoId, modelId, objectId,
+		                forcedCommands);
 		revNr = this.persistence.executeCommand(this.actorId, addObjectCom);
 		
 		assertTrue("Adding an object failed, test cannot be executed.", revNr >= 0);
@@ -437,8 +443,9 @@ public abstract class AbstractPersistenceTest {
 		/*
 		 * delete the object again
 		 */
-		XCommand deleteObjectCom = this.comFactory.createRemoveObjectCommand(this.repoId, modelId,
-		        objectId, object.getRevisionNumber(), forcedCommands);
+		XCommand deleteObjectCom =
+		        this.comFactory.createRemoveObjectCommand(this.repoId, modelId, objectId,
+		                object.getRevisionNumber(), forcedCommands);
 		
 		revNr = this.persistence.executeCommand(this.actorId, deleteObjectCom);
 		
@@ -459,8 +466,9 @@ public abstract class AbstractPersistenceTest {
 		/*
 		 * try to delete the same object again
 		 */
-		deleteObjectCom = this.comFactory.createRemoveObjectCommand(this.repoId, modelId, objectId,
-		        revNr, forcedCommands);
+		deleteObjectCom =
+		        this.comFactory.createRemoveObjectCommand(this.repoId, modelId, objectId, revNr,
+		                forcedCommands);
 		
 		revNr = this.persistence.executeCommand(this.actorId, deleteObjectCom);
 		
@@ -479,8 +487,9 @@ public abstract class AbstractPersistenceTest {
 		 */
 		
 		objectId = XX.toId("testExecuteCommandModelCommandRemoveTypeObject2");
-		XCommand deleteNotExistingObjectCom = this.comFactory.createRemoveObjectCommand(
-		        this.repoId, modelId, objectId, 0, forcedCommands);
+		XCommand deleteNotExistingObjectCom =
+		        this.comFactory.createRemoveObjectCommand(this.repoId, modelId, objectId, 0,
+		                forcedCommands);
 		
 		revNr = this.persistence.executeCommand(this.actorId, deleteNotExistingObjectCom);
 		
@@ -514,8 +523,8 @@ public abstract class AbstractPersistenceTest {
 		// add a model on which an object can be created first
 		
 		XID modelId = XX.toId("testExecuteCommandObjectCommandAddTypeModel");
-		XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId,
-		        forcedCommands);
+		XCommand addModelCom =
+		        this.comFactory.createAddModelCommand(this.repoId, modelId, forcedCommands);
 		long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
 		assertTrue("The model wasn't correctly added, test cannot be executed.", revNr >= 0);
 		
@@ -526,8 +535,9 @@ public abstract class AbstractPersistenceTest {
 		XID objectId = XX.toId("testExecuteCommandObjectCommandAddTypeObject");
 		
 		XAddress objectAddress = XX.resolveObject(this.repoId, modelId, objectId);
-		XCommand addObjectCom = this.comFactory.createAddObjectCommand(this.repoId, modelId,
-		        objectId, forcedCommands);
+		XCommand addObjectCom =
+		        this.comFactory.createAddObjectCommand(this.repoId, modelId, objectId,
+		                forcedCommands);
 		
 		revNr = this.persistence.executeCommand(this.actorId, addObjectCom);
 		
@@ -540,8 +550,9 @@ public abstract class AbstractPersistenceTest {
 		XID fieldId = XX.toId("testExecuteCommandObjectCommandAddTypeField");
 		
 		XAddress fieldAddress = XX.resolveField(this.repoId, modelId, objectId, fieldId);
-		XCommand addFieldCom = this.comFactory.createAddFieldCommand(this.repoId, modelId,
-		        objectId, fieldId, forcedCommands);
+		XCommand addFieldCom =
+		        this.comFactory.createAddFieldCommand(this.repoId, modelId, objectId, fieldId,
+		                forcedCommands);
 		
 		revNr = this.persistence.executeCommand(this.actorId, addFieldCom);
 		
@@ -597,8 +608,8 @@ public abstract class AbstractPersistenceTest {
 		// add a model on which an object can be created first
 		
 		XID modelId = XX.toId("testExecuteCommandObjectCommandRemoveTypeModel");
-		XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId,
-		        forcedCommands);
+		XCommand addModelCom =
+		        this.comFactory.createAddModelCommand(this.repoId, modelId, forcedCommands);
 		long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
 		assertTrue("The model wasn't correctly added, test cannot be executed.", revNr >= 0);
 		
@@ -609,8 +620,9 @@ public abstract class AbstractPersistenceTest {
 		XID objectId = XX.toId("testExecuteCommandObjectCommandRemoveTypeObject");
 		
 		XAddress objectAddress = XX.resolveObject(this.repoId, modelId, objectId);
-		XCommand addObjectCom = this.comFactory.createAddObjectCommand(this.repoId, modelId,
-		        objectId, forcedCommands);
+		XCommand addObjectCom =
+		        this.comFactory.createAddObjectCommand(this.repoId, modelId, objectId,
+		                forcedCommands);
 		
 		revNr = this.persistence.executeCommand(this.actorId, addObjectCom);
 		
@@ -622,8 +634,9 @@ public abstract class AbstractPersistenceTest {
 		
 		XID fieldId = XX.toId("testExecuteCommandObjectCommandRemoveTypeField");
 		
-		XCommand addFieldCom = this.comFactory.createAddFieldCommand(this.repoId, modelId,
-		        objectId, fieldId, forcedCommands);
+		XCommand addFieldCom =
+		        this.comFactory.createAddFieldCommand(this.repoId, modelId, objectId, fieldId,
+		                forcedCommands);
 		
 		revNr = this.persistence.executeCommand(this.actorId, addFieldCom);
 		
@@ -634,8 +647,9 @@ public abstract class AbstractPersistenceTest {
 		 * remove field, should succeed
 		 */
 		
-		XCommand removeFieldCom = this.comFactory.createRemoveFieldCommand(this.repoId, modelId,
-		        objectId, fieldId, revNr, forcedCommands);
+		XCommand removeFieldCom =
+		        this.comFactory.createRemoveFieldCommand(this.repoId, modelId, objectId, fieldId,
+		                revNr, forcedCommands);
 		
 		revNr = this.persistence.executeCommand(this.actorId, removeFieldCom);
 		
@@ -655,8 +669,9 @@ public abstract class AbstractPersistenceTest {
 		 * try to remove the same field again
 		 */
 		
-		removeFieldCom = this.comFactory.createRemoveFieldCommand(this.repoId, modelId, objectId,
-		        fieldId, revNr, forcedCommands);
+		removeFieldCom =
+		        this.comFactory.createRemoveFieldCommand(this.repoId, modelId, objectId, fieldId,
+		                revNr, forcedCommands);
 		
 		revNr = this.persistence.executeCommand(this.actorId, removeFieldCom);
 		
@@ -675,8 +690,9 @@ public abstract class AbstractPersistenceTest {
 		 */
 		
 		fieldId = XX.toId("testExecuteCommandObjectCommandRemoveTypeNotExistingField");
-		XCommand deleteNotExistingFieldCom = this.comFactory.createRemoveFieldCommand(this.repoId,
-		        modelId, objectId, fieldId, 0, forcedCommands);
+		XCommand deleteNotExistingFieldCom =
+		        this.comFactory.createRemoveFieldCommand(this.repoId, modelId, objectId, fieldId,
+		                0, forcedCommands);
 		
 		revNr = this.persistence.executeCommand(this.actorId, deleteNotExistingFieldCom);
 		
@@ -710,8 +726,8 @@ public abstract class AbstractPersistenceTest {
 		// add a model on which an object can be created first
 		
 		XID modelId = XX.toId("testExecuteCommandFieldCommandAddTypeModel");
-		XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId,
-		        forcedCommands);
+		XCommand addModelCom =
+		        this.comFactory.createAddModelCommand(this.repoId, modelId, forcedCommands);
 		long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
 		assertTrue("The model wasn't correctly added, test cannot be executed.", revNr >= 0);
 		
@@ -722,8 +738,9 @@ public abstract class AbstractPersistenceTest {
 		XID objectId = XX.toId("testExecuteCommandFieldCommandAddTypeObject");
 		
 		XAddress objectAddress = XX.resolveObject(this.repoId, modelId, objectId);
-		XCommand addObjectCom = this.comFactory.createAddObjectCommand(this.repoId, modelId,
-		        objectId, forcedCommands);
+		XCommand addObjectCom =
+		        this.comFactory.createAddObjectCommand(this.repoId, modelId, objectId,
+		                forcedCommands);
 		
 		revNr = this.persistence.executeCommand(this.actorId, addObjectCom);
 		
@@ -736,8 +753,9 @@ public abstract class AbstractPersistenceTest {
 		XID fieldId = XX.toId("testExecuteCommandFieldCommandAddTypeField");
 		
 		XAddress fieldAddress = XX.resolveField(this.repoId, modelId, objectId, fieldId);
-		XCommand addFieldCom = this.comFactory.createAddFieldCommand(this.repoId, modelId,
-		        objectId, fieldId, forcedCommands);
+		XCommand addFieldCom =
+		        this.comFactory.createAddFieldCommand(this.repoId, modelId, objectId, fieldId,
+		                forcedCommands);
 		
 		revNr = this.persistence.executeCommand(this.actorId, addFieldCom);
 		
@@ -748,8 +766,8 @@ public abstract class AbstractPersistenceTest {
 		 * add a new value to the field, should succeed
 		 */
 		XValue value = X.getValueFactory().createStringValue("test");
-		XCommand addValueCom = this.comFactory.createAddValueCommand(fieldAddress, revNr, value,
-		        forcedCommands);
+		XCommand addValueCom =
+		        this.comFactory.createAddValueCommand(fieldAddress, revNr, value, forcedCommands);
 		
 		revNr = this.persistence.executeCommand(this.actorId, addValueCom);
 		
@@ -793,8 +811,8 @@ public abstract class AbstractPersistenceTest {
 		
 		// try to add a different value
 		XValue value2 = X.getValueFactory().createIntegerValue(42);
-		XCommand addValueCom2 = this.comFactory.createAddValueCommand(fieldAddress, revNr, value2,
-		        forcedCommands);
+		XCommand addValueCom2 =
+		        this.comFactory.createAddValueCommand(fieldAddress, revNr, value2, forcedCommands);
 		
 		revNr2 = this.persistence.executeCommand(this.actorId, addValueCom2);
 		
@@ -844,8 +862,8 @@ public abstract class AbstractPersistenceTest {
 		// add a model on which an object can be created first
 		
 		XID modelId = XX.toId("testExecuteCommandFieldCommandRemoveTypeModel");
-		XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId,
-		        forcedCommands);
+		XCommand addModelCom =
+		        this.comFactory.createAddModelCommand(this.repoId, modelId, forcedCommands);
 		long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
 		assertTrue("The model wasn't correctly added, test cannot be executed.", revNr >= 0);
 		
@@ -856,8 +874,9 @@ public abstract class AbstractPersistenceTest {
 		XID objectId = XX.toId("testExecuteCommandFieldCommandRemoveTypeObject");
 		
 		XAddress objectAddress = XX.resolveObject(this.repoId, modelId, objectId);
-		XCommand addObjectCom = this.comFactory.createAddObjectCommand(this.repoId, modelId,
-		        objectId, forcedCommands);
+		XCommand addObjectCom =
+		        this.comFactory.createAddObjectCommand(this.repoId, modelId, objectId,
+		                forcedCommands);
 		
 		revNr = this.persistence.executeCommand(this.actorId, addObjectCom);
 		
@@ -870,8 +889,9 @@ public abstract class AbstractPersistenceTest {
 		XID fieldId = XX.toId("testExecuteCommandFieldCommandRemoveTypeField");
 		
 		XAddress fieldAddress = XX.resolveField(this.repoId, modelId, objectId, fieldId);
-		XCommand addFieldCom = this.comFactory.createAddFieldCommand(this.repoId, modelId,
-		        objectId, fieldId, forcedCommands);
+		XCommand addFieldCom =
+		        this.comFactory.createAddFieldCommand(this.repoId, modelId, objectId, fieldId,
+		                forcedCommands);
 		
 		revNr = this.persistence.executeCommand(this.actorId, addFieldCom);
 		
@@ -882,8 +902,8 @@ public abstract class AbstractPersistenceTest {
 		 * add a new value to the field, should succeed
 		 */
 		XValue value = X.getValueFactory().createStringValue("test");
-		XCommand addValueCom = this.comFactory.createAddValueCommand(fieldAddress, revNr, value,
-		        forcedCommands);
+		XCommand addValueCom =
+		        this.comFactory.createAddValueCommand(fieldAddress, revNr, value, forcedCommands);
 		
 		revNr = this.persistence.executeCommand(this.actorId, addValueCom);
 		
@@ -894,8 +914,8 @@ public abstract class AbstractPersistenceTest {
 		 * remove the value again, should succeed
 		 */
 		
-		XCommand removeValueCom = this.comFactory.createRemoveValueCommand(fieldAddress, revNr,
-		        forcedCommands);
+		XCommand removeValueCom =
+		        this.comFactory.createRemoveValueCommand(fieldAddress, revNr, forcedCommands);
 		
 		revNr = this.persistence.executeCommand(this.actorId, removeValueCom);
 		
@@ -952,8 +972,8 @@ public abstract class AbstractPersistenceTest {
 		// add a model on which an object can be created first
 		
 		XID modelId = XX.toId("testExecuteCommandFieldCommandChangeTypeModel");
-		XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId,
-		        forcedCommands);
+		XCommand addModelCom =
+		        this.comFactory.createAddModelCommand(this.repoId, modelId, forcedCommands);
 		long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
 		assertTrue("The model wasn't correctly added, test cannot be executed.", revNr >= 0);
 		
@@ -964,8 +984,9 @@ public abstract class AbstractPersistenceTest {
 		XID objectId = XX.toId("testExecuteCommandFieldCommandChangeTypeObject");
 		
 		XAddress objectAddress = XX.resolveObject(this.repoId, modelId, objectId);
-		XCommand addObjectCom = this.comFactory.createAddObjectCommand(this.repoId, modelId,
-		        objectId, forcedCommands);
+		XCommand addObjectCom =
+		        this.comFactory.createAddObjectCommand(this.repoId, modelId, objectId,
+		                forcedCommands);
 		
 		revNr = this.persistence.executeCommand(this.actorId, addObjectCom);
 		
@@ -978,8 +999,9 @@ public abstract class AbstractPersistenceTest {
 		XID fieldId = XX.toId("testExecuteCommandFieldCommandChangeTypeField");
 		
 		XAddress fieldAddress = XX.resolveField(this.repoId, modelId, objectId, fieldId);
-		XCommand addFieldCom = this.comFactory.createAddFieldCommand(this.repoId, modelId,
-		        objectId, fieldId, forcedCommands);
+		XCommand addFieldCom =
+		        this.comFactory.createAddFieldCommand(this.repoId, modelId, objectId, fieldId,
+		                forcedCommands);
 		
 		revNr = this.persistence.executeCommand(this.actorId, addFieldCom);
 		
@@ -990,8 +1012,9 @@ public abstract class AbstractPersistenceTest {
 		 * try to change a value which does not exist, should fail
 		 */
 		XValue value = X.getValueFactory().createStringValue("test");
-		XCommand changeValueCom = this.comFactory.createChangeValueCommand(fieldAddress, revNr,
-		        value, forcedCommands);
+		XCommand changeValueCom =
+		        this.comFactory
+		                .createChangeValueCommand(fieldAddress, revNr, value, forcedCommands);
 		
 		revNr = this.persistence.executeCommand(this.actorId, changeValueCom);
 		
@@ -1020,8 +1043,8 @@ public abstract class AbstractPersistenceTest {
 		XWritableField field = object.getField(fieldId);
 		revNr = field.getRevisionNumber();
 		
-		XCommand addValueCom = this.comFactory.createAddValueCommand(fieldAddress, revNr, value,
-		        forcedCommands);
+		XCommand addValueCom =
+		        this.comFactory.createAddValueCommand(fieldAddress, revNr, value, forcedCommands);
 		
 		revNr = this.persistence.executeCommand(this.actorId, addValueCom);
 		
@@ -1046,8 +1069,9 @@ public abstract class AbstractPersistenceTest {
 		 * change the value, should succeed
 		 */
 		XValue value2 = X.getValueFactory().createIntegerValue(42);
-		changeValueCom = this.comFactory.createChangeValueCommand(fieldAddress, revNr, value2,
-		        forcedCommands);
+		changeValueCom =
+		        this.comFactory.createChangeValueCommand(fieldAddress, revNr, value2,
+		                forcedCommands);
 		
 		revNr = this.persistence.executeCommand(this.actorId, changeValueCom);
 		
@@ -1114,13 +1138,14 @@ public abstract class AbstractPersistenceTest {
 		
 		for(int i = 0; i <= this.nrOfIterationsForTxnTests; i++) {
 			
-			XID modelId = X.getIDProvider().fromString(
-			        "testExecuteCommandSucceedingModelTransactionModel" + i);
+			XID modelId =
+			        X.getIDProvider().fromString(
+			                "testExecuteCommandSucceedingModelTransactionModel" + i);
 			XAddress modelAddress = XX.resolveModel(this.repoId, modelId);
 			
 			GetWithAddressRequest modelAdrRequest = new GetWithAddressRequest(modelAddress);
-			XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId,
-			        false);
+			XCommand addModelCom =
+			        this.comFactory.createAddModelCommand(this.repoId, modelId, false);
 			// add a model on which an object can be created first
 			long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
 			
@@ -1135,8 +1160,8 @@ public abstract class AbstractPersistenceTest {
 			 */
 			long seed = System.nanoTime();
 			System.out.println("Creating transaction " + i + " with seed " + seed + ".");
-			Pair<ChangedModel,XTransaction> pair = createRandomSucceedingModelTransaction(
-			        modelSnapshot, seed);
+			Pair<ChangedModel,XTransaction> pair =
+			        createRandomSucceedingModelTransaction(modelSnapshot, seed);
 			ChangedModel changedModel = pair.getFirst();
 			XTransaction txn = pair.getSecond();
 			
@@ -1220,23 +1245,25 @@ public abstract class AbstractPersistenceTest {
 		
 		for(int i = 0; i <= this.nrOfIterationsForTxnTests; i++) {
 			
-			XID modelId = X.getIDProvider().fromString(
-			        "testExecuteCommandSucceedingObjectTransactionModel" + i);
+			XID modelId =
+			        X.getIDProvider().fromString(
+			                "testExecuteCommandSucceedingObjectTransactionModel" + i);
 			
-			XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId,
-			        false);
+			XCommand addModelCom =
+			        this.comFactory.createAddModelCommand(this.repoId, modelId, false);
 			// add a model on which an object can be created first
 			long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
 			
 			assertTrue("Model could not be added, test cannot be executed.", revNr >= 0);
 			
-			XID objectId = X.getIDProvider().fromString(
-			        "testExecuteCommandSucceedingObjectTransactionObject" + i);
+			XID objectId =
+			        X.getIDProvider().fromString(
+			                "testExecuteCommandSucceedingObjectTransactionObject" + i);
 			XAddress objectAddress = XX.resolveObject(this.repoId, modelId, objectId);
 			
 			GetWithAddressRequest objectAdrRequest = new GetWithAddressRequest(objectAddress);
-			XCommand addObjectCom = this.comFactory.createAddObjectCommand(this.repoId, modelId,
-			        objectId, false);
+			XCommand addObjectCom =
+			        this.comFactory.createAddObjectCommand(this.repoId, modelId, objectId, false);
 			// add a model on which an object can be created first
 			revNr = this.persistence.executeCommand(this.actorId, addObjectCom);
 			
@@ -1251,8 +1278,8 @@ public abstract class AbstractPersistenceTest {
 			 */
 			long seed = System.nanoTime();
 			System.out.println("Creating transaction " + i + " with seed " + seed + ".");
-			Pair<ChangedObject,XTransaction> pair = createRandomSucceedingObjectTransaction(
-			        objectSnapshot, seed);
+			Pair<ChangedObject,XTransaction> pair =
+			        createRandomSucceedingObjectTransaction(objectSnapshot, seed);
 			ChangedObject changedObject = pair.getFirst();
 			XTransaction txn = pair.getSecond();
 			
@@ -1348,11 +1375,8 @@ public abstract class AbstractPersistenceTest {
 				boolean hasValue = rand.nextBoolean();
 				
 				if(hasValue) {
-					/*
-					 * TODO add different types of values
-					 */
-					XValue value = X.getValueFactory().createStringValue(
-					        "randomValue" + rand.nextInt());
+					
+					XValue value = createRandomValue(rand);
 					
 					field.setValue(value);
 				}
@@ -1388,11 +1412,8 @@ public abstract class AbstractPersistenceTest {
 			boolean hasValue = rand.nextBoolean();
 			
 			if(hasValue) {
-				/*
-				 * TODO add different types of values
-				 */
-				XValue value = X.getValueFactory()
-				        .createStringValue("randomValue" + rand.nextInt());
+				
+				XValue value = createRandomValue(rand);
 				
 				field.setValue(value);
 			}
@@ -1418,21 +1439,23 @@ public abstract class AbstractPersistenceTest {
 	public void testExecuteCommandFailingModelTransaction() {
 		
 		for(int i = 0; i <= this.nrOfIterationsForTxnTests; i++) {
-			XID failModelId = X.getIDProvider().fromString(
-			        "testExecuteCommandFailingModelTransactionFailModel" + i);
+			XID failModelId =
+			        X.getIDProvider().fromString(
+			                "testExecuteCommandFailingModelTransactionFailModel" + i);
 			XAddress failModelAddress = XX.resolveModel(this.repoId, failModelId);
 			
 			GetWithAddressRequest failModelAdrRequest = new GetWithAddressRequest(failModelAddress);
-			XCommand addFailModelCom = this.comFactory.createAddModelCommand(this.repoId,
-			        failModelId, false);
+			XCommand addFailModelCom =
+			        this.comFactory.createAddModelCommand(this.repoId, failModelId, false);
 			
-			XID succModelId = X.getIDProvider().fromString(
-			        "testExecuteCommandFailingModelTranscationSuccModel" + i);
+			XID succModelId =
+			        X.getIDProvider().fromString(
+			                "testExecuteCommandFailingModelTranscationSuccModel" + i);
 			XAddress succModelAddress = XX.resolveModel(this.repoId, succModelId);
 			
 			GetWithAddressRequest succModelAdrRequest = new GetWithAddressRequest(succModelAddress);
-			XCommand addSuccModelCom = this.comFactory.createAddModelCommand(this.repoId,
-			        succModelId, false);
+			XCommand addSuccModelCom =
+			        this.comFactory.createAddModelCommand(this.repoId, succModelId, false);
 			
 			/*
 			 * TODO document why there are two models
@@ -1449,10 +1472,10 @@ public abstract class AbstractPersistenceTest {
 			        "Model for the succeeding transaction could not be added, test cannot be executed",
 			        succRevNr >= 0);
 			
-			XWritableModel failModelSnapshot = this.persistence
-			        .getModelSnapshot(failModelAdrRequest);
-			XWritableModel succModelSnapshot = this.persistence
-			        .getModelSnapshot(succModelAdrRequest);
+			XWritableModel failModelSnapshot =
+			        this.persistence.getModelSnapshot(failModelAdrRequest);
+			XWritableModel succModelSnapshot =
+			        this.persistence.getModelSnapshot(succModelAdrRequest);
 			
 			/*
 			 * Info: if the test fails, do the following for deterministic
@@ -1461,8 +1484,8 @@ public abstract class AbstractPersistenceTest {
 			 */
 			long seed = System.nanoTime();
 			System.out.println("Creating transaction pair " + i + " with seed " + seed + ".");
-			Pair<XTransaction,XTransaction> pair = createRandomFailingModelTransaction(
-			        failModelSnapshot, succModelSnapshot, seed);
+			Pair<XTransaction,XTransaction> pair =
+			        createRandomFailingModelTransaction(failModelSnapshot, succModelSnapshot, seed);
 			
 			XTransaction failTxn = pair.getFirst();
 			XTransaction succTxn = pair.getSecond();
@@ -1482,9 +1505,18 @@ public abstract class AbstractPersistenceTest {
 			        XCommand.FAILED, failRevNr);
 			
 			/*
-			 * TODO make sure that the changes actually weren't executed!
+			 * Make sure that the changes actually weren't executed. Since the
+			 * model was empty before the execution of the faulty transaction,
+			 * we just need to check if it's still empty. If this is not the
+			 * case, this implies that some of the commands in the faulty
+			 * transaction were executed, although the transaction's execution
+			 * failed.
 			 */
 			
+			failModelSnapshot = this.persistence.getModelSnapshot(failModelAdrRequest);
+			assertTrue(
+			        "Since the model was empty before the execution of the faulty transaction, it  should be empty. Since it is not empty, some commands of the transaction must've been executed, although the transaction failed.",
+			        failModelSnapshot.isEmpty());
 		}
 	}
 	
@@ -1492,17 +1524,19 @@ public abstract class AbstractPersistenceTest {
 	public void testExecuteCommandFailingObjectTransaction() {
 		
 		for(int i = 0; i <= this.nrOfIterationsForTxnTests; i++) {
-			XID failModelId = X.getIDProvider().fromString(
-			        "testExecuteCommandFailingObjectTransactionFailModel" + i);
+			XID failModelId =
+			        X.getIDProvider().fromString(
+			                "testExecuteCommandFailingObjectTransactionFailModel" + i);
 			
-			XCommand addFailModelCom = this.comFactory.createAddModelCommand(this.repoId,
-			        failModelId, false);
+			XCommand addFailModelCom =
+			        this.comFactory.createAddModelCommand(this.repoId, failModelId, false);
 			
-			XID succModelId = X.getIDProvider().fromString(
-			        "testExecuteCommandFailingObjectTransactionSuccModel" + i);
+			XID succModelId =
+			        X.getIDProvider().fromString(
+			                "testExecuteCommandFailingObjectTransactionSuccModel" + i);
 			
-			XCommand addSuccModelCom = this.comFactory.createAddModelCommand(this.repoId,
-			        succModelId, false);
+			XCommand addSuccModelCom =
+			        this.comFactory.createAddModelCommand(this.repoId, succModelId, false);
 			
 			/*
 			 * TODO document why there are two models/objects
@@ -1515,23 +1549,27 @@ public abstract class AbstractPersistenceTest {
 			assertTrue("One of the models could not be added, test cannot be executed.",
 			        failRevNr >= 0 && succRevNr >= 0);
 			
-			XID failObjectId = X.getIDProvider().fromString(
-			        "testExecuteCommandFailingObjectTransactionFailObject" + i);
+			XID failObjectId =
+			        X.getIDProvider().fromString(
+			                "testExecuteCommandFailingObjectTransactionFailObject" + i);
 			XAddress failObjectAddress = XX.resolveObject(this.repoId, failModelId, failObjectId);
 			
-			GetWithAddressRequest failObjectAdrRequest = new GetWithAddressRequest(
-			        failObjectAddress);
-			XCommand addFailObjectCom = this.comFactory.createAddObjectCommand(this.repoId,
-			        failModelId, failObjectId, false);
+			GetWithAddressRequest failObjectAdrRequest =
+			        new GetWithAddressRequest(failObjectAddress);
+			XCommand addFailObjectCom =
+			        this.comFactory.createAddObjectCommand(this.repoId, failModelId, failObjectId,
+			                false);
 			
-			XID succObjectId = X.getIDProvider().fromString(
-			        "testExecuteCommandFailingObjectTransactionSuccObject" + i);
+			XID succObjectId =
+			        X.getIDProvider().fromString(
+			                "testExecuteCommandFailingObjectTransactionSuccObject" + i);
 			XAddress succObjectAddress = XX.resolveObject(this.repoId, succModelId, succObjectId);
 			
-			GetWithAddressRequest succObjectAdrRequest = new GetWithAddressRequest(
-			        succObjectAddress);
-			XCommand addSuccObjectCom = this.comFactory.createAddObjectCommand(this.repoId,
-			        succModelId, succObjectId, false);
+			GetWithAddressRequest succObjectAdrRequest =
+			        new GetWithAddressRequest(succObjectAddress);
+			XCommand addSuccObjectCom =
+			        this.comFactory.createAddObjectCommand(this.repoId, succModelId, succObjectId,
+			                false);
 			
 			/*
 			 * TODO document why there are two models/objects
@@ -1545,10 +1583,10 @@ public abstract class AbstractPersistenceTest {
 			assertTrue("The object for the succeeding transaction could not be added.",
 			        succRevNr >= 0);
 			
-			XWritableObject failObjectSnapshot = this.persistence
-			        .getObjectSnapshot(failObjectAdrRequest);
-			XWritableObject succObjectSnapshot = this.persistence
-			        .getObjectSnapshot(succObjectAdrRequest);
+			XWritableObject failObjectSnapshot =
+			        this.persistence.getObjectSnapshot(failObjectAdrRequest);
+			XWritableObject succObjectSnapshot =
+			        this.persistence.getObjectSnapshot(succObjectAdrRequest);
 			
 			/*
 			 * Info: if the test fails, do the following for deterministic
@@ -1558,8 +1596,9 @@ public abstract class AbstractPersistenceTest {
 			long seed = System.nanoTime();
 			System.out
 			        .println("Creating object transaction pair " + i + " with seed " + seed + ".");
-			Pair<XTransaction,XTransaction> pair = createRandomFailingObjectTransaction(
-			        failObjectSnapshot, succObjectSnapshot, seed);
+			Pair<XTransaction,XTransaction> pair =
+			        createRandomFailingObjectTransaction(failObjectSnapshot, succObjectSnapshot,
+			                seed);
 			
 			XTransaction failTxn = pair.getFirst();
 			XTransaction succTxn = pair.getSecond();
@@ -1579,8 +1618,15 @@ public abstract class AbstractPersistenceTest {
 			        XCommand.FAILED, failRevNr);
 			
 			/*
-			 * TODO make sure that the changes actually weren't executed!
+			 * Make sure that the changes actually weren't executed. Since the
+			 * object was empty before we tried to execute the faulty
+			 * transaction, we just have to assert that it is still empty. This
+			 * implies that no commands of the transaction were executed.
 			 */
+			failObjectSnapshot = this.persistence.getObjectSnapshot(failObjectAdrRequest);
+			assertTrue(
+			        "Object was empty before we tried to execute the faulty transaction, but has fields now, which means that some of the commands of the faulty transaction must've been executed, although its execution failed.",
+			        failObjectSnapshot.isEmpty());
 			
 		}
 	}
@@ -1651,8 +1697,9 @@ public abstract class AbstractPersistenceTest {
 				
 				if(failBecauseOfFalseRemove) {
 					// fail because we try to remove a not existing object
-					XCommand removeCom = this.comFactory.createRemoveObjectCommand(
-					        failObjectAddress, failModel.getRevisionNumber(), false);
+					XCommand removeCom =
+					        this.comFactory.createRemoveObjectCommand(failObjectAddress,
+					                failModel.getRevisionNumber(), false);
 					
 					failTxnBuilder.addCommand(removeCom);
 					System.out
@@ -1660,8 +1707,9 @@ public abstract class AbstractPersistenceTest {
 					
 				} else {
 					// fail because we try to add an already existing object
-					XCommand addCom = this.comFactory.createAddObjectCommand(
-					        failModel.getAddress(), objectId, false);
+					XCommand addCom =
+					        this.comFactory.createAddObjectCommand(failModel.getAddress(),
+					                objectId, false);
 					
 					// we need to add it twice for this use-case
 					failTxnBuilder.addCommand(addCom);
@@ -1677,11 +1725,13 @@ public abstract class AbstractPersistenceTest {
 				faultyCommandAdded = true;
 				
 			} else {
-				XCommand failAddCom = this.comFactory.createAddObjectCommand(
-				        failModel.getAddress(), objectId, false);
+				XCommand failAddCom =
+				        this.comFactory.createAddObjectCommand(failModel.getAddress(), objectId,
+				                false);
 				
-				XCommand succAddCom = this.comFactory.createAddObjectCommand(
-				        succModel.getAddress(), objectId, false);
+				XCommand succAddCom =
+				        this.comFactory.createAddObjectCommand(succModel.getAddress(), objectId,
+				                false);
 				
 				failTxnBuilder.addCommand(failAddCom);
 				succTxnBuilder.addCommand(succAddCom);
@@ -1735,11 +1785,12 @@ public abstract class AbstractPersistenceTest {
 					
 					if(failBecauseOfFalseRemove) {
 						// fail because we try to remove a not existing field
-						XAddress fieldAddress = XX.resolveField(failModel.getAddress(), objectId,
-						        fieldId);
+						XAddress fieldAddress =
+						        XX.resolveField(failModel.getAddress(), objectId, fieldId);
 						
-						XCommand removeCom = this.comFactory.createRemoveFieldCommand(fieldAddress,
-						        failModel.getRevisionNumber(), false);
+						XCommand removeCom =
+						        this.comFactory.createRemoveFieldCommand(fieldAddress,
+						                failModel.getRevisionNumber(), false);
 						
 						failTxnBuilder.addCommand(removeCom);
 						System.out
@@ -1747,8 +1798,9 @@ public abstract class AbstractPersistenceTest {
 						
 					} else {
 						// fail because we try to add an already existing field
-						XCommand addCom = this.comFactory.createAddFieldCommand(failObjectAddress,
-						        fieldId, false);
+						XCommand addCom =
+						        this.comFactory.createAddFieldCommand(failObjectAddress, fieldId,
+						                false);
 						
 						// we need to add it twice for this use-case
 						failTxnBuilder.addCommand(addCom);
@@ -1764,11 +1816,13 @@ public abstract class AbstractPersistenceTest {
 					faultyCommandAdded = true;
 					
 				} else {
-					XCommand failAddCom = this.comFactory.createAddFieldCommand(failObjectAddress,
-					        fieldId, false);
+					XCommand failAddCom =
+					        this.comFactory
+					                .createAddFieldCommand(failObjectAddress, fieldId, false);
 					
-					XCommand succAddCom = this.comFactory.createAddFieldCommand(succObjectAddress,
-					        fieldId, false);
+					XCommand succAddCom =
+					        this.comFactory
+					                .createAddFieldCommand(succObjectAddress, fieldId, false);
 					
 					failTxnBuilder.addCommand(failAddCom);
 					succTxnBuilder.addCommand(succAddCom);
@@ -1790,14 +1844,15 @@ public abstract class AbstractPersistenceTest {
 							failBecauseOfFaultyFieldCommand = rand.nextBoolean();
 						}
 						
-						XAddress failFieldAddress = XX.resolveField(failModel.getAddress(),
-						        objectId, fieldId);
-						XAddress succFieldAddress = XX.resolveField(succModel.getAddress(),
-						        objectId, fieldId);
+						XAddress failFieldAddress =
+						        XX.resolveField(failModel.getAddress(), objectId, fieldId);
+						XAddress succFieldAddress =
+						        XX.resolveField(succModel.getAddress(), objectId, fieldId);
 						
-						boolean temp = constructFieldCommandForFaultyTransaction(failFieldAddress,
-						        succFieldAddress, failTxnBuilder, succTxnBuilder,
-						        failBecauseOfFaultyFieldCommand, fieldRevNr, rand);
+						boolean temp =
+						        constructFieldCommandForFaultyTransaction(failFieldAddress,
+						                succFieldAddress, failTxnBuilder, succTxnBuilder,
+						                failBecauseOfFaultyFieldCommand, fieldRevNr, rand);
 						
 						if(temp) {
 							/*
@@ -1825,7 +1880,11 @@ public abstract class AbstractPersistenceTest {
 		XTransaction failTxn = failTxnBuilder.build();
 		XTransaction succTxn = succTxnBuilder.build();
 		
-		Pair<XTransaction,XTransaction> pair = new Pair<XTransaction,XTransaction>(failTxn, succTxn);
+		assertTrue(
+		        "There seems to be a bug in the code of the test, since no faulty command was added to the transaction which' execution is supposed to fail, which results in a transaction which' execution would succeed.",
+		        faultyCommandAdded);
+		Pair<XTransaction,XTransaction> pair =
+		        new Pair<XTransaction,XTransaction>(failTxn, succTxn);
 		return pair;
 		
 	}
@@ -1889,8 +1948,9 @@ public abstract class AbstractPersistenceTest {
 					// fail because we try to remove a not existing field
 					XAddress fieldAddress = XX.resolveField(failObject.getAddress(), fieldId);
 					
-					XCommand removeCom = this.comFactory.createRemoveFieldCommand(fieldAddress,
-					        failObject.getRevisionNumber(), false);
+					XCommand removeCom =
+					        this.comFactory.createRemoveFieldCommand(fieldAddress,
+					                failObject.getRevisionNumber(), false);
 					
 					failTxnBuilder.addCommand(removeCom);
 					System.out
@@ -1898,8 +1958,9 @@ public abstract class AbstractPersistenceTest {
 					
 				} else {
 					// fail because we try to add an already existing field
-					XCommand addCom = this.comFactory.createAddFieldCommand(
-					        failObject.getAddress(), fieldId, false);
+					XCommand addCom =
+					        this.comFactory.createAddFieldCommand(failObject.getAddress(), fieldId,
+					                false);
 					
 					// we need to add it twice for this use-case
 					failTxnBuilder.addCommand(addCom);
@@ -1915,11 +1976,13 @@ public abstract class AbstractPersistenceTest {
 				faultyCommandAdded = true;
 				
 			} else {
-				XCommand failAddCom = this.comFactory.createAddFieldCommand(
-				        failObject.getAddress(), fieldId, false);
+				XCommand failAddCom =
+				        this.comFactory.createAddFieldCommand(failObject.getAddress(), fieldId,
+				                false);
 				
-				XCommand succAddCom = this.comFactory.createAddFieldCommand(
-				        succObject.getAddress(), fieldId, false);
+				XCommand succAddCom =
+				        this.comFactory.createAddFieldCommand(succObject.getAddress(), fieldId,
+				                false);
 				
 				failTxnBuilder.addCommand(failAddCom);
 				succTxnBuilder.addCommand(succAddCom);
@@ -1927,7 +1990,26 @@ public abstract class AbstractPersistenceTest {
 				/*
 				 * randomly decide whether the field has a value or not
 				 */
+				
 				boolean addValue = rand.nextBoolean();
+				if(!faultyCommandAdded && j + 1 == nrOfFields) {
+					/*
+					 * assures that a faulty field command will be added if no
+					 * faulty command was added up till now and this is the last
+					 * iteration through the loop which creates commands.
+					 * 
+					 * If we wouldn't set addValue to true here, the following
+					 * might occur: No faulty command was added until the last
+					 * iteration, addValue is set to false and therefore no
+					 * faulty field command might be added, which will result in
+					 * a transaction without a faulty command, i.e. a
+					 * transaction which' execution should succeed. If we set
+					 * addValue to true in this case, the code after
+					 * "if(addValue)..." will ensure that a faulty field command
+					 * will be added.
+					 */
+					addValue = true;
+				}
 				if(addValue) {
 					/*
 					 * the field didn't exist before the transaction, so its
@@ -1952,9 +2034,10 @@ public abstract class AbstractPersistenceTest {
 					XAddress failFieldAddress = XX.resolveField(failObject.getAddress(), fieldId);
 					XAddress succFieldAddress = XX.resolveField(succObject.getAddress(), fieldId);
 					
-					boolean temp = constructFieldCommandForFaultyTransaction(failFieldAddress,
-					        succFieldAddress, failTxnBuilder, succTxnBuilder,
-					        failBecauseOfFaultyFieldCommand, fieldRevNr, rand);
+					boolean temp =
+					        constructFieldCommandForFaultyTransaction(failFieldAddress,
+					                succFieldAddress, failTxnBuilder, succTxnBuilder,
+					                failBecauseOfFaultyFieldCommand, fieldRevNr, rand);
 					
 					if(temp) {
 						/*
@@ -1980,7 +2063,11 @@ public abstract class AbstractPersistenceTest {
 		XTransaction failTxn = failTxnBuilder.build();
 		XTransaction succTxn = succTxnBuilder.build();
 		
-		Pair<XTransaction,XTransaction> pair = new Pair<XTransaction,XTransaction>(failTxn, succTxn);
+		assertTrue(
+		        "There seems to be a bug in the code of the test, since no faulty command was added to the transaction which' execution is supposed to fail, which results in a transaction which' execution would succeed.",
+		        faultyCommandAdded);
+		Pair<XTransaction,XTransaction> pair =
+		        new Pair<XTransaction,XTransaction>(failTxn, succTxn);
 		return pair;
 		
 	}
@@ -1993,14 +2080,12 @@ public abstract class AbstractPersistenceTest {
 		if(failBecauseOfFaultyFieldCommand) {
 			int reason = rand.nextInt(3);
 			
-			/*
-			 * TODO write method which randomly creates values
-			 */
 			if(reason == 0) {
 				// fail because we try to remove a not existing
 				// value
-				XCommand failRemoveCom = this.comFactory.createRemoveValueCommand(failFieldAddress,
-				        fieldRevNr, false);
+				XCommand failRemoveCom =
+				        this.comFactory.createRemoveValueCommand(failFieldAddress, fieldRevNr,
+				                false);
 				
 				failTxnBuilder.addCommand(failRemoveCom);
 				
@@ -2010,12 +2095,14 @@ public abstract class AbstractPersistenceTest {
 				// fail because we try to add a value to a field
 				// which value is already set
 				
-				XValue value1 = XX.createUniqueId();
-				XValue value2 = XX.createUniqueId();
-				XCommand failAddCom1 = this.comFactory.createAddValueCommand(failFieldAddress,
-				        fieldRevNr, value1, false);
-				XCommand failAddCom2 = this.comFactory.createAddValueCommand(failFieldAddress,
-				        fieldRevNr, value2, false);
+				XValue value1 = createRandomValue(rand);
+				XValue value2 = createRandomValue(rand);
+				XCommand failAddCom1 =
+				        this.comFactory.createAddValueCommand(failFieldAddress, fieldRevNr, value1,
+				                false);
+				XCommand failAddCom2 =
+				        this.comFactory.createAddValueCommand(failFieldAddress, fieldRevNr, value2,
+				                false);
 				
 				failTxnBuilder.addCommand(failAddCom1);
 				failTxnBuilder.addCommand(failAddCom2);
@@ -2026,9 +2113,10 @@ public abstract class AbstractPersistenceTest {
 				assert reason == 2;
 				// fail because we try to change the value of a
 				// field which value isn't set
-				XValue value = XX.createUniqueId();
-				XCommand failChangeCom = this.comFactory.createChangeValueCommand(failFieldAddress,
-				        fieldRevNr, value, false);
+				XValue value = createRandomValue(rand);
+				XCommand failChangeCom =
+				        this.comFactory.createChangeValueCommand(failFieldAddress, fieldRevNr,
+				                value, false);
 				
 				failTxnBuilder.addCommand(failChangeCom);
 				
@@ -2044,16 +2132,69 @@ public abstract class AbstractPersistenceTest {
 		} else {
 			XValue value = X.getValueFactory().createStringValue("" + rand.nextInt());
 			
-			XCommand failAddValueCom = this.comFactory.createAddValueCommand(failFieldAddress,
-			        fieldRevNr, value, false);
-			XCommand succAddValueCom = this.comFactory.createAddValueCommand(succFieldAddress,
-			        fieldRevNr, value, false);
+			XCommand failAddValueCom =
+			        this.comFactory.createAddValueCommand(failFieldAddress, fieldRevNr, value,
+			                false);
+			XCommand succAddValueCom =
+			        this.comFactory.createAddValueCommand(succFieldAddress, fieldRevNr, value,
+			                false);
 			
 			failTxnBuilder.addCommand(failAddValueCom);
 			succTxnBuilder.addCommand(succAddValueCom);
 			
 			return false;
 		}
+	}
+	
+	private static XValue createRandomValue(Random rand) {
+		int type = rand.nextInt(6);
+		
+		XValue value = null;
+		
+		switch(type) {
+		case 0:
+			// random integer value
+			value = X.getValueFactory().createIntegerValue(rand.nextInt());
+			
+			break;
+		case 1:
+			// random long value
+			value = X.getValueFactory().createLongValue(rand.nextLong());
+			
+			break;
+		case 2:
+			// random double value
+			value = X.getValueFactory().createDoubleValue(rand.nextDouble());
+			
+			break;
+		case 3:
+			// random boolean value
+			value = X.getValueFactory().createBooleanValue(rand.nextBoolean());
+			
+			break;
+		case 4:
+			// random String value
+			value = X.getValueFactory().createStringValue("" + rand.nextInt());
+			
+			break;
+		case 5:
+			// random XID
+			value = XX.toId("RandomXID" + rand.nextInt());
+			
+			break;
+		case 6:
+			// random XAddress
+			XID repoId = XX.toId("RandomRepoID" + rand.nextInt());
+			XID modelId = XX.toId("RandomModelID" + rand.nextInt());
+			XID objectId = XX.toId("RandomObjectID" + rand.nextInt());
+			XID fieldId = XX.toId("RandomFieldID" + rand.nextInt());
+			
+			value = XX.toAddress(repoId, modelId, objectId, fieldId);
+			
+			break;
+		}
+		
+		return value;
 	}
 	
 	@Test
@@ -2108,8 +2249,8 @@ public abstract class AbstractPersistenceTest {
 		
 		XID objectId = XX.toId("testGetEventsObject");
 		XAddress objectAddress = XX.resolveObject(this.repoId, modelId, objectId);
-		XCommand addObjectCom = this.comFactory.createAddObjectCommand(this.repoId, modelId,
-		        objectId, false);
+		XCommand addObjectCom =
+		        this.comFactory.createAddObjectCommand(this.repoId, modelId, objectId, false);
 		long oldModelRev = revNr;
 		revNr = this.persistence.executeCommand(this.actorId, addObjectCom);
 		assertTrue("The object wasn't correctly added, test cannot be executed.", revNr >= 0);
@@ -2174,8 +2315,9 @@ public abstract class AbstractPersistenceTest {
 		
 		XID fieldId = XX.toId("testGetEventsField");
 		XAddress fieldAddress = XX.resolveField(this.repoId, modelId, objectId, fieldId);
-		XCommand addFieldCom = this.comFactory.createAddFieldCommand(this.repoId, modelId,
-		        objectId, fieldId, false);
+		XCommand addFieldCom =
+		        this.comFactory.createAddFieldCommand(this.repoId, modelId, objectId, fieldId,
+		                false);
 		long oldObjectRev = revNr;
 		revNr = this.persistence.executeCommand(this.actorId, addFieldCom);
 		assertTrue("The field  wasn't correctly added, test cannot be executed.", revNr >= 0);
@@ -2274,8 +2416,9 @@ public abstract class AbstractPersistenceTest {
 		 */
 		
 		XValue value = X.getValueFactory().createStringValue("testValue");
-		XCommand addValueCom = this.comFactory.createAddValueCommand(this.repoId, modelId,
-		        objectId, fieldId, revNr, value, false);
+		XCommand addValueCom =
+		        this.comFactory.createAddValueCommand(this.repoId, modelId, objectId, fieldId,
+		                revNr, value, false);
 		long oldFieldRev = revNr;
 		revNr = this.persistence.executeCommand(this.actorId, addValueCom);
 		assertTrue("The value  wasn't correctly added, test cannot be executed.", revNr >= 0);
@@ -2419,8 +2562,9 @@ public abstract class AbstractPersistenceTest {
 		 */
 		
 		XValue value2 = X.getValueFactory().createStringValue("testValue2");
-		XCommand changeValueCom = this.comFactory.createChangeValueCommand(this.repoId, modelId,
-		        objectId, fieldId, revNr, value2, false);
+		XCommand changeValueCom =
+		        this.comFactory.createChangeValueCommand(this.repoId, modelId, objectId, fieldId,
+		                revNr, value2, false);
 		long oldFieldRev2 = revNr;
 		revNr = this.persistence.executeCommand(this.actorId, changeValueCom);
 		assertTrue("The value  wasn't correctly changed, test cannot be executed.", revNr >= 0);
@@ -2605,8 +2749,9 @@ public abstract class AbstractPersistenceTest {
 		 * getEvents(modelAddress...) since they might behave differently.
 		 */
 		
-		XCommand removeValueCom = this.comFactory.createRemoveValueCommand(this.repoId, modelId,
-		        objectId, fieldId, revNr, false);
+		XCommand removeValueCom =
+		        this.comFactory.createRemoveValueCommand(this.repoId, modelId, objectId, fieldId,
+		                revNr, false);
 		long oldFieldRev3 = revNr;
 		revNr = this.persistence.executeCommand(this.actorId, removeValueCom);
 		assertTrue("The value  wasn't correctly removed, test cannot be executed.", revNr >= 0);
@@ -2840,8 +2985,9 @@ public abstract class AbstractPersistenceTest {
 		 * removed\"-event is implicit.
 		 */
 		
-		XCommand removeObjectCom = this.comFactory.createRemoveObjectCommand(this.repoId, modelId,
-		        objectId, revNr, false);
+		XCommand removeObjectCom =
+		        this.comFactory.createRemoveObjectCommand(this.repoId, modelId, objectId, revNr,
+		                false);
 		long oldObjectRev2 = revNr;
 		revNr = this.persistence.executeCommand(this.actorId, removeObjectCom);
 		assertTrue("The object  wasn't correctly removed, test cannot be executed.", revNr >= 0);
@@ -2950,6 +3096,9 @@ public abstract class AbstractPersistenceTest {
 		 */
 	}
 	
+	/*
+	 * TODO also write test for object transaction events
+	 */
 	@Test
 	public void testGetEventsModelTransactions() {
 		
@@ -2957,8 +3106,8 @@ public abstract class AbstractPersistenceTest {
 			
 			XID modelId = XX.toId("testGetEventsTransactionsModel" + i);
 			XAddress modelAddress = XX.resolveModel(this.repoId, modelId);
-			XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId,
-			        false);
+			XCommand addModelCom =
+			        this.comFactory.createAddModelCommand(this.repoId, modelId, false);
 			long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
 			assertTrue("The model wasn't correctly added, test cannot be executed.", revNr >= 0);
 			
@@ -2972,8 +3121,8 @@ public abstract class AbstractPersistenceTest {
 			 */
 			long seed = System.nanoTime();
 			System.out.println("Used seed: " + seed + ".");
-			Pair<ChangedModel,XTransaction> pair = createRandomSucceedingModelTransaction(model,
-			        seed);
+			Pair<ChangedModel,XTransaction> pair =
+			        createRandomSucceedingModelTransaction(model, seed);
 			XTransaction txn = pair.getSecond();
 			
 			revNr = this.persistence.executeCommand(this.actorId, txn);
@@ -3060,8 +3209,8 @@ public abstract class AbstractPersistenceTest {
 				XReadableObject object = model.getObject(objectId);
 				
 				for(XID fieldId : object) {
-					XAddress fieldAddress = XX
-					        .resolveField(this.repoId, modelId, objectId, fieldId);
+					XAddress fieldAddress =
+					        XX.resolveField(this.repoId, modelId, objectId, fieldId);
 					
 					assertTrue(
 					        "Since the model was emtpy before the transaction, there should be a fitting add-event for the field with XID "
@@ -3150,8 +3299,8 @@ public abstract class AbstractPersistenceTest {
 		int nrOfModels = 50;
 		for(int i = 2; i < nrOfModels; i++) {
 			XID objectId = XX.toId("testGetModelRevisionModel" + i);
-			XCommand addObjectCom = this.comFactory.createAddObjectCommand(this.repoId, modelId,
-			        objectId, false);
+			XCommand addObjectCom =
+			        this.comFactory.createAddObjectCommand(this.repoId, modelId, objectId, false);
 			this.persistence.executeCommand(this.actorId, addObjectCom);
 		}
 		
@@ -3164,8 +3313,9 @@ public abstract class AbstractPersistenceTest {
 		        storedRevision.modelExists());
 		
 		// remove the model
-		XCommand removeModelCom = this.comFactory.createRemoveModelCommand(this.repoId, modelId,
-		        model.getRevisionNumber(), false);
+		XCommand removeModelCom =
+		        this.comFactory.createRemoveModelCommand(this.repoId, modelId,
+		                model.getRevisionNumber(), false);
 		revNr = this.persistence.executeCommand(this.actorId, removeModelCom);
 		assertTrue("The model wasn't correctly removed, test cannot be executed.", revNr >= 0);
 		
@@ -3216,8 +3366,8 @@ public abstract class AbstractPersistenceTest {
 		XRepository repo = X.createMemoryRepository(this.repoId);
 		XModel model = repo.createModel(modelId);
 		
-		XCommand addModelCommand = this.comFactory.createAddModelCommand(this.repoId, modelId,
-		        false);
+		XCommand addModelCommand =
+		        this.comFactory.createAddModelCommand(this.repoId, modelId, false);
 		long revNr = this.persistence.executeCommand(this.actorId, addModelCommand);
 		assertTrue("Model could not be created, test cannot be executed.", revNr >= 0);
 		
@@ -3235,8 +3385,8 @@ public abstract class AbstractPersistenceTest {
 			
 			model.createObject(objectId);
 			
-			XCommand addObjectCommand = this.comFactory.createAddObjectCommand(this.repoId,
-			        modelId, objectId, false);
+			XCommand addObjectCommand =
+			        this.comFactory.createAddObjectCommand(this.repoId, modelId, objectId, false);
 			revNr = this.persistence.executeCommand(this.actorId, addObjectCommand);
 			assertTrue("The " + i + ". Object could not be created, test cannot be executed.",
 			        revNr > 0);
@@ -3254,8 +3404,9 @@ public abstract class AbstractPersistenceTest {
 			for(XID fieldId : fieldIds) {
 				object.createField(fieldId);
 				
-				XCommand addFieldCommand = this.comFactory.createAddFieldCommand(this.repoId,
-				        modelId, objectId, fieldId, false);
+				XCommand addFieldCommand =
+				        this.comFactory.createAddFieldCommand(this.repoId, modelId, objectId,
+				                fieldId, false);
 				revNr = this.persistence.executeCommand(this.actorId, addFieldCommand);
 				assertTrue("The " + i + ". field could not be created in the Object with id "
 				        + objectId + ", test cannot be executed.", revNr > 0);
@@ -3334,8 +3485,8 @@ public abstract class AbstractPersistenceTest {
 		 * Test that such a large snapshot at least is computed without throwing
 		 * an error
 		 */
-		WritableRepositoryOnPersistence repo = new WritableRepositoryOnPersistence(
-		        this.persistence, this.actorId);
+		WritableRepositoryOnPersistence repo =
+		        new WritableRepositoryOnPersistence(this.persistence, this.actorId);
 		XID model1 = XX.toId("model1");
 		XWritableModel model = repo.createModel(model1);
 		for(int i = 0; i < 600; i++) {
@@ -3343,8 +3494,9 @@ public abstract class AbstractPersistenceTest {
 		}
 		
 		log.info("Getting snapshot");
-		XWritableModel snapshot = this.persistence.getModelSnapshot(new GetWithAddressRequest(XX
-		        .resolveModel(this.repoId, model1), true));
+		XWritableModel snapshot =
+		        this.persistence.getModelSnapshot(new GetWithAddressRequest(XX.resolveModel(
+		                this.repoId, model1), true));
 		assertNotNull(snapshot);
 	}
 	
@@ -3407,8 +3559,9 @@ public abstract class AbstractPersistenceTest {
 			GetWithAddressRequest addressRequest = new GetWithAddressRequest(modelAddress);
 			XWritableModel model = this.persistence.getModelSnapshot(addressRequest);
 			
-			XCommand deleteModelCom = this.comFactory.createRemoveModelCommand(this.repoId, id,
-			        model.getRevisionNumber(), false);
+			XCommand deleteModelCom =
+			        this.comFactory.createRemoveModelCommand(this.repoId, id,
+			                model.getRevisionNumber(), false);
 			
 			revNr = this.persistence.executeCommand(this.actorId, deleteModelCom);
 			assertTrue("The model wasn't correctly removed, test cannot be executed.", revNr >= 0);
@@ -3479,8 +3632,9 @@ public abstract class AbstractPersistenceTest {
 		long fieldRevNrBeforeUpdate = field.getRevisionNumber();
 		
 		/* overwrite field */
-		XFieldCommand fieldChangeValueCommand = MemoryFieldCommand.createAddCommand(
-		        field.getAddress(), XCommand.FORCED, valueSecond);
+		XFieldCommand fieldChangeValueCommand =
+		        MemoryFieldCommand.createAddCommand(field.getAddress(), XCommand.FORCED,
+		                valueSecond);
 		long newRevNr = this.persistence.executeCommand(this.actorId, fieldChangeValueCommand);
 		assertTrue("The field value wasn't correctly added, test cannot be executed.",
 		        newRevNr >= 0);
