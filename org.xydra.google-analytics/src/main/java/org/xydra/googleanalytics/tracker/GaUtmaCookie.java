@@ -54,6 +54,11 @@ public class GaUtmaCookie extends GaUtmbCookie {
 		        + this.sessionCount;
 	}
 	
+	/**
+	 * @param cookieString format:
+	 *            (domainHash).(visitorId).(firstVisit).(previousSession
+	 *            ).(currentSession).(sessionNumber)
+	 */
 	@Override
 	public void setFromCookieString(String cookieString) throws IllegalArgumentException {
 		// try to parse
@@ -77,28 +82,6 @@ public class GaUtmaCookie extends GaUtmbCookie {
 	
 	public long getFirstVisit() {
 		return this.firstVisitStartTime;
-	}
-	
-	/**
-	 * @return uniqueId number + '.' + first visit start time = a very good
-	 *         unique ID
-	 */
-	public String getCombinedIdString() {
-		return getUniqueId() + "." + getFirstVisit();
-	}
-	
-	/**
-	 * @param combinedId must be in format long+'.'+long NEVERNULL
-	 * @return a {@link GaUtmaCookie} with only {@link #getUniqueId()} and
-	 *         {@link #getFirstVisit()} set.
-	 */
-	public static GaUtmaCookie fromCombinedIdString(String combinedId) {
-		String[] parts = combinedId.split("[.]");
-		assert parts.length == 2;
-		long id = Utils.parseAsLong(parts[0]);
-		long firstVisist = Utils.parseAsLong(parts[1]);
-		GaUtmaCookie utma = new GaUtmaCookie(null, id, firstVisist, 0, 0, 0);
-		return utma;
 	}
 	
 	/**
