@@ -71,8 +71,8 @@ public class Tracker {
 	}
 	
 	/**
-	 * warn only once when going over 500 events - which is the limit GA tracks
-	 * per session
+	 * flag to warn only *once* when going over 500 events - which is the limit
+	 * GA tracks per session (as of 2012-06-15)
 	 */
 	boolean warnedAbout500Events = false;
 	
