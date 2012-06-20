@@ -87,6 +87,10 @@ public class DataRecord implements Serializable {
 		return this.key;
 	}
 	
+	protected void setKey(String key) {
+		this.key = key;
+	}
+	
 	public Map<String,String> getMap() {
 		return this.map;
 	}

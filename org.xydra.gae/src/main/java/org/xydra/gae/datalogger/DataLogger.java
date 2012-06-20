@@ -172,8 +172,11 @@ public class DataLogger {
 	}
 	
 	public static void log(DataRecord dataRecord) {
-		/* creation date is a prefix */
-		String keyStr = dataRecord.getCreationDate() + "-" + UUID.uuid(8);
+		String keyStr = dataRecord.getKey();
+		if(keyStr == null) {
+			/* creation date is a prefix */
+			keyStr = dataRecord.getCreationDate() + "-" + UUID.uuid(8);
+		}
 		Key key = KeyFactory.createKey(KIND_DATARECORD, keyStr);
 		Entity e = ENTRYHANDLER.toEntity(key, dataRecord);
 		try {
