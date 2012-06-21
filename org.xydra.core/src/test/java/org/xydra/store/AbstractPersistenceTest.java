@@ -3145,7 +3145,7 @@ public abstract class AbstractPersistenceTest {
 			        txnEvent.getRevisionNumber());
 			assertEquals("Event doesn't refer to the correct target.", modelAddress,
 			        txnEvent.getTarget());
-			assertEquals("Event doesn't refer to the correct model.", modelAddress,
+			assertEquals("Event doesn't refer to the correct changed entity.", modelAddress,
 			        txnEvent.getChangedEntity());
 			assertEquals("The actor of the event is not correct.", this.actorId,
 			        txnEvent.getActor());
@@ -3224,6 +3224,126 @@ public abstract class AbstractPersistenceTest {
 				}
 			}
 		}
+	}
+	
+	@Test
+	public void testGetEventsObjectTransactions() {
+		
+		for(int i = 0; i < this.nrOfIterationsForTxnTests; i++) {
+			
+			XID modelId = XX.toId("testGetEventsObjectTransactionsModel" + i);
+			XCommand addModelCom =
+			        this.comFactory.createAddModelCommand(this.repoId, modelId, false);
+			long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
+			assertTrue("The model wasn't correctly added, test cannot be executed.", revNr >= 0);
+			
+			XID objectId = XX.toId("testGetEventsObjectTransactionsObject" + i);
+			XAddress objectAddress = XX.resolveObject(this.repoId, modelId, objectId);
+			XCommand addObjectCom =
+			        this.comFactory.createAddObjectCommand(this.repoId, modelId, objectId, false);
+			revNr = this.persistence.executeCommand(this.actorId, addObjectCom);
+			assertTrue("The object wasn't correctly added, test cannot be executed.", revNr >= 0);
+			
+			GetWithAddressRequest objectAdrRequest = new GetWithAddressRequest(objectAddress);
+			XWritableObject object = this.persistence.getObjectSnapshot(objectAdrRequest);
+			
+			/*
+			 * Info: if the test fails, do the following for deterministic
+			 * debugging: Set the seed to the value which caused the test to
+			 * fail. This makes the test deterministic.
+			 */
+			long seed = 35331613198746l; // System.nanoTime();
+			System.out.println("Used seed: " + seed + ".");
+			Pair<ChangedObject,XTransaction> pair =
+			        createRandomSucceedingObjectTransaction(object, seed);
+			XTransaction txn = pair.getSecond();
+			
+			revNr = this.persistence.executeCommand(this.actorId, txn);
+			assertTrue("Transaction did not succeed.", revNr >= 0);
+			
+			List<XEvent> events = this.persistence.getEvents(objectAddress, revNr, revNr);
+			assertEquals(
+			        "The list of events should contain one Transaction Event, but actually contains zero or multiple events.",
+			        1, events.size());
+			
+			XEvent event = events.get(0);
+			assertTrue("The returned event should be a TransactionEvent.",
+			        event instanceof XTransactionEvent);
+			
+			XTransactionEvent txnEvent = (XTransactionEvent)event;
+			
+			assertEquals("The event didn't refer to the correct old revision number.", 1,
+			        txnEvent.getOldObjectRevision());
+			assertEquals("The event didn't refer to the correct revision number.", revNr,
+			        txnEvent.getRevisionNumber());
+			assertEquals("Event doesn't refer to the correct target.", objectAddress,
+			        txnEvent.getTarget());
+			assertEquals("Event doesn't refer to the correct changed entity.", objectAddress,
+			        txnEvent.getChangedEntity());
+			assertEquals("The actor of the event is not correct.", this.actorId,
+			        txnEvent.getActor());
+			assertFalse("The event is wrongly marked as implied.", txnEvent.isImplied());
+			assertFalse("the event is wrongly marked as being part of a transaction.",
+			        txnEvent.inTransaction());
+			
+			/*
+			 * TODO check the events that make up the transaction!
+			 */
+			
+			/*
+			 * TODO document why there are no "removedObjectEvents" (etc.) lists
+			 */
+			Map<XAddress,XEvent> addedFieldEvents = new HashMap<XAddress,XEvent>();
+			Map<XAddress,XEvent> addedValueEvents = new HashMap<XAddress,XEvent>();
+			
+			for(XEvent ev : txnEvent) {
+				/*
+				 * TODO Notice that this might change in the future and the
+				 * randomly constructed succeeding transaction might also
+				 * contain events of other types.
+				 */
+				assertTrue("The transaction should only contain events of the Add-type.",
+				        ev.getChangeType() == ChangeType.ADD);
+				assertTrue("Event is wrongly marked as not being part of a transaction.",
+				        ev.inTransaction());
+				assertEquals("The event doesn't refer to the correct model.", modelId, ev
+				        .getTarget().getModel());
+				assertEquals("The event doesn't refer to the correct object.", objectId, ev
+				        .getTarget().getObject());
+				assertFalse("The event is wrongly marked as being implied.", event.isImplied());
+				assertEquals("The actor of the event is not correct.", this.actorId,
+				        event.getActor());
+				assertEquals("The event didn't refer to the correct revision number.", revNr,
+				        ev.getRevisionNumber());
+				
+				assertEquals(
+				        "A object transaction should only contain commands that target fields.", ev
+				                .getChangedEntity().getAddressedType(), XType.XFIELD);
+				
+				if(ev instanceof XObjectEvent) {
+					addedFieldEvents.put(ev.getChangedEntity(), ev);
+				} else {
+					assertTrue(ev instanceof XFieldEvent);
+					addedValueEvents.put(ev.getChangedEntity(), ev);
+				}
+			}
+			
+			object = this.persistence.getObjectSnapshot(objectAdrRequest);
+			for(XID fieldId : object) {
+				XAddress fieldAddress = XX.resolveField(this.repoId, modelId, objectId, fieldId);
+				
+				assertTrue(
+				        "Since the object was emtpy before the transaction, there should be a fitting add-event for the field with XID "
+				                + fieldId + ".", addedFieldEvents.containsKey(fieldAddress));
+				XReadableField field = object.getField(fieldId);
+				if(field.getValue() != null) {
+					assertTrue(
+					        "Since the object was emtpy before the transaction, there should be a fitting add-event for the value in the field with XID "
+					                + fieldId + ".", addedValueEvents.containsKey(fieldAddress));
+				}
+			}
+		}
+		
 	}
 	
 	@Test
