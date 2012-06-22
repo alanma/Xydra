@@ -1411,6 +1411,16 @@ public abstract class AbstractPersistenceTest {
 			
 			boolean hasValue = rand.nextBoolean();
 			
+			if(nrOfFields == 1) {
+				/*
+				 * since a transaction needs be made up of more than one
+				 * command, we enforce adding a value, when only one field will
+				 * be added (if we wouldn't do this in this case, we'd create a
+				 * transaction which only has one command)
+				 */
+				hasValue = true;
+			}
+			
 			if(hasValue) {
 				
 				XValue value = createRandomValue(rand);
@@ -3252,7 +3262,7 @@ public abstract class AbstractPersistenceTest {
 			 * debugging: Set the seed to the value which caused the test to
 			 * fail. This makes the test deterministic.
 			 */
-			long seed = 35331613198746l; // System.nanoTime();
+			long seed = System.nanoTime();
 			System.out.println("Used seed: " + seed + ".");
 			Pair<ChangedObject,XTransaction> pair =
 			        createRandomSucceedingObjectTransaction(object, seed);
