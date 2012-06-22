@@ -73,6 +73,8 @@ public class XyAssert {
 	}
 	
 	/**
+	 * Validations are always active.
+	 * 
 	 * @param o
 	 * @throws IllegalArgumentException if o is null
 	 */
@@ -83,12 +85,13 @@ public class XyAssert {
 	}
 	
 	/**
+	 * Validations are always active.
+	 * 
 	 * @param condition
-	 * @param o
 	 * @param explanation what to tell users when the condition fails
 	 * @throws IllegalArgumentException if condition is false
 	 */
-	public static void validatecondition(boolean condition, Object o, final String explanation)
+	public static void validateCondition(boolean condition, final String explanation)
 	        throws IllegalArgumentException {
 		if(!condition) {
 			throw new IllegalArgumentException("Parameter is not valid. Reason: " + explanation);
