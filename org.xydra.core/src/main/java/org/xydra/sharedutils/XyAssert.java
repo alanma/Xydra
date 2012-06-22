@@ -73,6 +73,29 @@ public class XyAssert {
 	}
 	
 	/**
+	 * @param o
+	 * @throws IllegalArgumentException if o is null
+	 */
+	public static void validateNotNull(Object o) throws IllegalArgumentException {
+		if(o == null) {
+			throw new IllegalArgumentException("Parameter may not be null");
+		}
+	}
+	
+	/**
+	 * @param condition
+	 * @param o
+	 * @param explanation what to tell users when the condition fails
+	 * @throws IllegalArgumentException if condition is false
+	 */
+	public static void validatecondition(boolean condition, Object o, final String explanation)
+	        throws IllegalArgumentException {
+		if(!condition) {
+			throw new IllegalArgumentException("Parameter is not valid. Reason: " + explanation);
+		}
+	}
+	
+	/**
 	 * Ensures the truth of an expression.
 	 * 
 	 * @param expression a boolean expression
