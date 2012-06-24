@@ -87,6 +87,20 @@ public class XyAssert {
 	/**
 	 * Validations are always active.
 	 * 
+	 * @param o
+	 * @param parameterName that is checked
+	 * @throws IllegalArgumentException if o is null
+	 */
+	public static void validateNotNull(Object o, String parameterName)
+	        throws IllegalArgumentException {
+		if(o == null) {
+			throw new IllegalArgumentException("Parameter '" + parameterName + "' may not be null");
+		}
+	}
+	
+	/**
+	 * Validations are always active.
+	 * 
 	 * @param condition
 	 * @param explanation what to tell users when the condition fails
 	 * @throws IllegalArgumentException if condition is false
