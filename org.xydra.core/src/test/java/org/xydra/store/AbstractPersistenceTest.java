@@ -9,6 +9,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -1330,6 +1331,10 @@ public abstract class AbstractPersistenceTest {
 		
 	}
 	
+	/*
+	 * TODO also test transactions which execution would result in NOCHANGE.
+	 */
+	
 	/**
 	 * Pseudorandomly generates a transaction which should succeed on the given
 	 * model. The seed determines how the random number generator generates its
@@ -1338,16 +1343,13 @@ public abstract class AbstractPersistenceTest {
 	 * useful when executing a transaction in a test fails and the failed
 	 * transaction needs to be reconstructed.
 	 */
-	private static Pair<ChangedModel,XTransaction> createRandomSucceedingModelTransaction(
+	private Pair<ChangedModel,XTransaction> createRandomSucceedingModelTransaction(
 	        XWritableModel model, long seed) {
-		/*
-		 * TODO consider also adding other type of (succeeding) commands, i.e.
-		 * succeeding commands of remove or change type.
-		 */
 		
 		Random rand = new Random(seed);
+		XAddress modelAddress = model.getAddress();
 		
-		XTransactionBuilder txBuilder = new XTransactionBuilder(model.getAddress());
+		XTransactionBuilder txBuilder = new XTransactionBuilder(modelAddress);
 		ChangedModel changedModel = new ChangedModel(model);
 		
 		// create random amount of objects
@@ -1360,17 +1362,31 @@ public abstract class AbstractPersistenceTest {
 			XID objectId = X.getIDProvider().fromString("randomObject" + i);
 			
 			changedModel.createObject(objectId);
+			
+			XCommand addObjectCommand =
+			        this.comFactory.createAddObjectCommand(modelAddress, objectId, false);
+			
+			txBuilder.addCommand(addObjectCommand);
 		}
+		
+		List<XID> toBeRemovedObjects = new LinkedList<XID>();
 		
 		// add fields and values to the object
 		for(XID objectId : changedModel) {
 			XWritableObject changedObject = changedModel.getObject(objectId);
+			XAddress objectAddress = XX.resolveObject(modelAddress, objectId);
 			
 			int nrOfFields = rand.nextInt(50);
 			for(int i = 0; i < nrOfFields; i++) {
 				XID fieldId = X.getIDProvider().fromString(objectId + "randomField" + i);
+				XAddress fieldAddress = XX.resolveField(objectAddress, fieldId);
 				
 				XWritableField field = changedObject.createField(fieldId);
+				
+				XCommand addFieldCommand =
+				        this.comFactory.createAddFieldCommand(objectAddress, fieldId, false);
+				
+				txBuilder.addCommand(addFieldCommand);
 				
 				boolean hasValue = rand.nextBoolean();
 				
@@ -1379,12 +1395,110 @@ public abstract class AbstractPersistenceTest {
 					XValue value = createRandomValue(rand);
 					
 					field.setValue(value);
+					
+					XCommand addValueCommand =
+					        this.comFactory.createAddValueCommand(fieldAddress, 0, value, false);
+					
+					txBuilder.addCommand(addValueCommand);
+				}
+			}
+			
+			// randomly determine if some of the fields should be removed
+			List<XID> toBeRemovedFields = new LinkedList<XID>();
+			for(XID fieldId : changedObject) {
+				boolean removeField = rand.nextBoolean();
+				XAddress fieldAddress = XX.resolveField(objectAddress, fieldId);
+				
+				if(removeField) {
+					toBeRemovedFields.add(fieldId);
+					XCommand removeFieldCommand =
+					        this.comFactory.createRemoveFieldCommand(fieldAddress, 0, false);
+					
+					txBuilder.addCommand(removeFieldCommand);
+					
+				} else {
+					// randomly determine if its value should be changed/removed
+					XWritableField field = changedObject.getField(fieldId);
+					XValue currentValue = field.getValue();
+					
+					if(currentValue != null) {
+						boolean removeValue = rand.nextBoolean();
+						if(removeValue) {
+							field.setValue(null);
+							
+							XCommand removeValueCommand =
+							        this.comFactory
+							                .createRemoveValueCommand(fieldAddress, 0, false);
+							
+							txBuilder.addCommand(removeValueCommand);
+							
+						} else {
+							boolean changeValue = rand.nextBoolean();
+							
+							if(changeValue) {
+								XValue newValue = null;
+								do {
+									newValue = createRandomValue(rand);
+								} while(newValue.equals(currentValue));
+								
+								field.setValue(newValue);
+								
+								XCommand changeValueCommand =
+								        this.comFactory.createChangeValueCommand(fieldAddress, 0,
+								                newValue, false);
+								
+								txBuilder.addCommand(changeValueCommand);
+							}
+						}
+					}
+				}
+			}
+			
+			/*
+			 * we need to remove the fields in a separate loop because modifying
+			 * the set of fields of the changedObject while we iterate over it
+			 * results in ConcurrentModificationExceptions
+			 */
+			for(XID fieldId : toBeRemovedFields) {
+				changedObject.removeField(fieldId);
+			}
+			
+			XID firstObjectId = X.getIDProvider().fromString("randomObject" + 0);
+			XID secondObjectId = X.getIDProvider().fromString("randomObject" + 1);
+			if(!objectId.equals(firstObjectId) && !objectId.equals(secondObjectId)) {
+				
+				/*
+				 * randomly determine if the object should be removed in the
+				 * transaction.
+				 * 
+				 * Never remove the first and second object that was added so
+				 * that at least two objects will be added and we're actually
+				 * building a transaction (and not just a single command or a
+				 * transaction which execution would result in NOCHANGE)
+				 */
+				boolean removeObject = rand.nextBoolean();
+				if(removeObject) {
+					
+					toBeRemovedObjects.add(objectId);
+					
+					XCommand removeObjectCommand =
+					        this.comFactory.createRemoveObjectCommand(objectAddress, 0, false);
+					
+					txBuilder.addCommand(removeObjectCommand);
 				}
 			}
 			
 		}
 		
-		txBuilder.applyChanges(changedModel);
+		/*
+		 * we need to remove the objects in a separate loop because modifying
+		 * the set of objects of the changedModel while we iterate over it
+		 * results in ConcurrentModificationExceptions
+		 */
+		for(XID fieldId : toBeRemovedObjects) {
+			changedModel.removeObject(fieldId);
+		}
+		
 		XTransaction txn = txBuilder.build();
 		
 		return new Pair<ChangedModel,XTransaction>(changedModel, txn);
@@ -3179,6 +3293,14 @@ public abstract class AbstractPersistenceTest {
 				 * TODO Notice that this might change in the future and the
 				 * randomly constructed succeeding transaction might also
 				 * contain events of other types.
+				 * 
+				 * Check why the transaction events only contain ADD type
+				 * events, although the transactions themselves also contain
+				 * changes and removes. Does the TransactionBuilder or the
+				 * system which creates the transaction event already fine tune
+				 * the result so that changes and removes which occur on
+				 * objects/fields which were added during the transaction aren't
+				 * event shown?
 				 */
 				assertTrue("The transaction should only contain events of the Add-type.",
 				        ev.getChangeType() == ChangeType.ADD);
