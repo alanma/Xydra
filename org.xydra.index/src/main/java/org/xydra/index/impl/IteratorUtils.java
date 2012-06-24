@@ -13,7 +13,7 @@ public class IteratorUtils {
 	 * @param collection to which elements are added
 	 * @return as a convenience, the supplied collection
 	 */
-	public static <C extends Collection<T>, T> C addAll(Iterator<T> it, C collection) {
+	public static <C extends Collection<T>, T> C addAll(Iterator<? extends T> it, C collection) {
 		while(it.hasNext()) {
 			T t = it.next();
 			collection.add(t);
