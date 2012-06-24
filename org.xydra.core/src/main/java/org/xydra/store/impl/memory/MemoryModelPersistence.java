@@ -79,7 +79,8 @@ public class MemoryModelPersistence {
 			// Create a transaction event.
 			
 			// check whether it needs to be a model or an object transaction
-			if(command.getTarget().getAddressedType() == XType.XMODEL) {
+			if(command.getTarget().getAddressedType() == XType.XMODEL
+			        || command.getTarget().getAddressedType() == XType.XREPOSITORY) {
 				event =
 				        MemoryTransactionEvent.createTransactionEvent(actorId, this.modelAddr,
 				                events, getRevisionNumber(), XEvent.RevisionOfEntityNotSet);
