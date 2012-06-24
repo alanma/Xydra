@@ -17,7 +17,7 @@
     <source path="shared" />
     <source path="client" />
 
-	<entry-point class="com.sonicmetrics.core.client.SonicGwtClient" />
+	<entry-point class="com.sonicmetrics.core.client.DummyEntryPoint" />
 
 
 </module>
