@@ -61,6 +61,13 @@ public class DatastoreAdminResource {
 		);
 		restless.addMethod(URL + "/deleteAll", "GET", DatastoreAdminResource.class, "deleteAll",
 		        true, new RestlessParameter("confirm", "wrong"));
+		
+		restless.addMethod(URL + "/deleteKind", "GET", DatastoreAdminResource.class, "deleteKind",
+		        true,
+		        
+		        new RestlessParameter("kind"), new RestlessParameter("confirm", "wrong")
+		
+		);
 	}
 	
 	public void index(HttpServletResponse res, HttpServletRequest req) throws IOException {
@@ -68,11 +75,15 @@ public class DatastoreAdminResource {
 		Writer w = AppConstants.startPage(res, PAGE_NAME, "");
 		
 		w.write(HtmlUtils.toOrderedList(Arrays.asList(
-		
-		HtmlUtils.link("/admin" + URL + "/stats", "Statistics"),
-		
-		HtmlUtils.link("/admin" + URL + "/deleteAll",
-		        "Page to delete all data - clicking this link just lists all data")
+		        
+		        HtmlUtils.link("/admin" + URL + "/stats", "Statistics"),
+		        
+		        HtmlUtils
+		                .link("/admin" + URL + "/deleteKind?kind=",
+		                        "Page to delete data of a certain kind - clicking this link just lists stats about data"),
+		        
+		        HtmlUtils.link("/admin" + URL + "/deleteAll",
+		                "Page to delete all data - clicking this link just lists stats about data")
 		
 		)));
 		
@@ -114,7 +125,6 @@ public class DatastoreAdminResource {
 		        + password
 		        + "' it must match the URL param 'confirm' and the cookie. Setting cookie for 120 seconds ..."
 		        + "<br/>\n");
-		
 		try {
 			AdminAuthUtils.checkIfAuthorised(context, passwordPropertyNameInWebXml, confirmParam);
 			for(String kind : kinds) {
@@ -137,6 +147,62 @@ public class DatastoreAdminResource {
 				w.write("Deleted all '" + kind + "'.\n");
 			}
 			w.write("Done with delete all.\n");
+		} catch(Exception e) {
+			w.write("Ok, did not delete anything. If you are really sure, add '?confirm=....' to this url.");
+		}
+		
+		AppConstants.endPage(w);
+	}
+	
+	/**
+	 * Delete all data of a certain KIND in the data store
+	 * 
+	 * @param context
+	 * @param res
+	 * @param kind to be deleted
+	 * @param confirmParam
+	 * 
+	 * @throws IOException from underlying http streams or datastore
+	 */
+	public void deleteKind(IRestlessContext context, HttpServletResponse res, String kind,
+	        String confirmParam) throws IOException {
+		GaeMyAdmin_GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+		Writer w = AppConstants.startPage(res, PAGE_NAME, "Delete Kind '" + kind + "'");
+		
+		AdminAuthUtils.setTempAuthCookie(context, passwordPropertyNameInWebXml);
+		
+		// Get a handle on the datastore itself
+		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+		
+		w.write("Kind '" + kind + "'. Counting ... ");
+		Query q = new Query(kind).setKeysOnly();
+		PreparedQuery pq = datastore.prepare(q);
+		int count = pq.countEntities(FetchOptions.Builder.withDefaults());
+		w.write(count + "\n");
+		
+		String password = context.getRestless().getInitParameter(passwordPropertyNameInWebXml);
+		w.write("Password is '"
+		        + password
+		        + "' it must match the URL param 'confirm' and the cookie. Setting cookie for 120 seconds ..."
+		        + "<br/>\n");
+		try {
+			AdminAuthUtils.checkIfAuthorised(context, passwordPropertyNameInWebXml, confirmParam);
+			w.write("Deleting kind " + kind + ". Getting keys ... ");
+			List<Key> keys = new LinkedList<Key>();
+			q = new Query(kind).setKeysOnly();
+			pq = datastore.prepare(q);
+			for(Entity entity : pq.asIterable()) {
+				keys.add(entity.getKey());
+			}
+			w.write("Bulk delete ... ");
+			try {
+				datastore.delete(keys);
+			} catch(Exception e) {
+				log.warn("Could not delete kind '" + kind + "'", e);
+				w.write("Could not delete kind '" + kind + "'.");
+				
+			}
+			w.write("Deleted all '" + kind + "'.\n");
 		} catch(Exception e) {
 			w.write("Ok, did not delete anything. If you are really sure, add '?confirm=....' to this url.");
 		}
