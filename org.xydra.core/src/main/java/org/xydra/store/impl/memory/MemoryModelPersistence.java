@@ -81,6 +81,13 @@ public class MemoryModelPersistence {
 			// check whether it needs to be a model or an object transaction
 			if(command.getTarget().getAddressedType() == XType.XMODEL
 			        || command.getTarget().getAddressedType() == XType.XREPOSITORY) {
+				/*
+				 * if the target is a repository and the list of events contains
+				 * more than one event, a model with child-object was removed,
+				 * which is why we need to construct a transaction event in this
+				 * case.
+				 */
+				
 				event =
 				        MemoryTransactionEvent.createTransactionEvent(actorId, this.modelAddr,
 				                events, getRevisionNumber(), XEvent.RevisionOfEntityNotSet);
