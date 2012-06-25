@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1124,18 +1125,19 @@ public abstract class AbstractPersistenceTest {
 	 */
 	
 	/**
-	 * This test randomly creates transactions which execution is supposed to
-	 * succeed. It uses {@link java.util.Random} to create random transactions.
-	 * We set the seed manually and always print it on the screen.
+	 * This test pseudorandomly creates model transactions which execution is
+	 * supposed to succeed. It uses {@link java.util.Random} to create random
+	 * transactions. We set the seed manually and always print it on the screen.
 	 * 
 	 * If the test fails, simply copy the seed which created the transaction
 	 * which was the cause of the failure and set the seed to this value
-	 * (instead of using System.currentTimeMills(), as the test normally does).
-	 * This makes the test deterministic and enables debugging.
+	 * (instead of using random seeds, as the test normally does). This makes
+	 * the test deterministic and enables debugging.
 	 */
 	
 	@Test
 	public void testExecuteCommandSucceedingModelTransaction() {
+		SecureRandom seedGen = new SecureRandom();
 		
 		for(int i = 0; i <= this.nrOfIterationsForTxnTests; i++) {
 			
@@ -1159,7 +1161,7 @@ public abstract class AbstractPersistenceTest {
 			 * debugging: Set the seed to the value which caused the test to
 			 * fail. This makes the test deterministic .
 			 */
-			long seed = System.nanoTime();
+			long seed = seedGen.nextLong();
 			System.out.println("Creating transaction " + i + " with seed " + seed + ".");
 			Pair<ChangedModel,XTransaction> pair =
 			        createRandomSucceedingModelTransaction(modelSnapshot, seed);
@@ -1241,8 +1243,19 @@ public abstract class AbstractPersistenceTest {
 		}
 	}
 	
+	/**
+	 * This test pseudorandomly creates object transactions which execution is
+	 * supposed to succeed. It uses {@link java.util.Random} to create random
+	 * transactions. We set the seed manually and always print it on the screen.
+	 * 
+	 * If the test fails, simply copy the seed which created the transaction
+	 * which was the cause of the failure and set the seed to this value
+	 * (instead of using random seeds, as the test normally does). This makes
+	 * the test deterministic and enables debugging.
+	 */
 	@Test
 	public void testExecuteCommandSucceedingObjectTransaction() {
+		SecureRandom seedGen = new SecureRandom();
 		
 		for(int i = 0; i <= this.nrOfIterationsForTxnTests; i++) {
 			
@@ -1277,7 +1290,7 @@ public abstract class AbstractPersistenceTest {
 			 * debugging: Set the seed to the value which caused the test to
 			 * fail. This makes the test deterministic .
 			 */
-			long seed = System.nanoTime();
+			long seed = seedGen.nextLong();
 			System.out.println("Creating transaction " + i + " with seed " + seed + ".");
 			Pair<ChangedObject,XTransaction> pair =
 			        createRandomSucceedingObjectTransaction(objectSnapshot, seed);
@@ -1333,18 +1346,26 @@ public abstract class AbstractPersistenceTest {
 	
 	/*
 	 * TODO also test transactions which execution would result in NOCHANGE.
+	 * 
+	 * TODO also test transactions which operate on models/objects etc. which
+	 * are not empty and modify the already existing fields etc.
+	 * 
+	 * TODO also write the used seeds into a text file so that they can be
+	 * recovered when a test fails and the user did not safe it.
 	 */
 	
 	/**
 	 * Pseudorandomly generates a transaction which should succeed on the given
-	 * model. The seed determines how the random number generator generates its
-	 * pseudorandom output. Using the same seed twice will result in
-	 * deterministically generating the same transaction again, which can be
-	 * useful when executing a transaction in a test fails and the failed
-	 * transaction needs to be reconstructed.
+	 * empty model. The seed determines how the random number generator
+	 * generates its pseudorandom output.
+	 * 
+	 * Using the same seed twice will result in deterministically generating the
+	 * same transaction again, which can be useful when executing a transaction
+	 * in a test fails and the failed transaction needs to be reconstructed.
 	 */
 	private Pair<ChangedModel,XTransaction> createRandomSucceedingModelTransaction(
 	        XWritableModel model, long seed) {
+		assertTrue("This method only works with empty models.", model.isEmpty());
 		
 		Random rand = new Random(seed);
 		XAddress modelAddress = model.getAddress();
@@ -1382,6 +1403,7 @@ public abstract class AbstractPersistenceTest {
 				XAddress fieldAddress = XX.resolveField(objectAddress, fieldId);
 				
 				XWritableField field = changedObject.createField(fieldId);
+				long fieldRevNr = field.getRevisionNumber();
 				
 				XCommand addFieldCommand =
 				        this.comFactory.createAddFieldCommand(objectAddress, fieldId, false);
@@ -1397,71 +1419,18 @@ public abstract class AbstractPersistenceTest {
 					field.setValue(value);
 					
 					XCommand addValueCommand =
-					        this.comFactory.createAddValueCommand(fieldAddress, 0, value, false);
+					        this.comFactory.createAddValueCommand(fieldAddress, fieldRevNr, value,
+					                false);
 					
 					txBuilder.addCommand(addValueCommand);
 				}
 			}
 			
-			// randomly determine if some of the fields should be removed
-			List<XID> toBeRemovedFields = new LinkedList<XID>();
-			for(XID fieldId : changedObject) {
-				boolean removeField = rand.nextBoolean();
-				XAddress fieldAddress = XX.resolveField(objectAddress, fieldId);
-				
-				if(removeField) {
-					toBeRemovedFields.add(fieldId);
-					XCommand removeFieldCommand =
-					        this.comFactory.createRemoveFieldCommand(fieldAddress, 0, false);
-					
-					txBuilder.addCommand(removeFieldCommand);
-					
-				} else {
-					// randomly determine if its value should be changed/removed
-					XWritableField field = changedObject.getField(fieldId);
-					XValue currentValue = field.getValue();
-					
-					if(currentValue != null) {
-						boolean removeValue = rand.nextBoolean();
-						if(removeValue) {
-							field.setValue(null);
-							
-							XCommand removeValueCommand =
-							        this.comFactory
-							                .createRemoveValueCommand(fieldAddress, 0, false);
-							
-							txBuilder.addCommand(removeValueCommand);
-							
-						} else {
-							boolean changeValue = rand.nextBoolean();
-							
-							if(changeValue) {
-								XValue newValue = null;
-								do {
-									newValue = createRandomValue(rand);
-								} while(newValue.equals(currentValue));
-								
-								field.setValue(newValue);
-								
-								XCommand changeValueCommand =
-								        this.comFactory.createChangeValueCommand(fieldAddress, 0,
-								                newValue, false);
-								
-								txBuilder.addCommand(changeValueCommand);
-							}
-						}
-					}
-				}
-			}
-			
 			/*
-			 * we need to remove the fields in a separate loop because modifying
-			 * the set of fields of the changedObject while we iterate over it
-			 * results in ConcurrentModificationExceptions
+			 * randomly change fields, i.e. randomly remove or change some
+			 * values and randomly remove some fields
 			 */
-			for(XID fieldId : toBeRemovedFields) {
-				changedObject.removeField(fieldId);
-			}
+			randomlyChangeFields(rand, changedObject, txBuilder);
 			
 			XID firstObjectId = X.getIDProvider().fromString("randomObject" + 0);
 			XID secondObjectId = X.getIDProvider().fromString("randomObject" + 1);
@@ -1481,6 +1450,10 @@ public abstract class AbstractPersistenceTest {
 					
 					toBeRemovedObjects.add(objectId);
 					
+					/*
+					 * object was added in the transaction, so its revision
+					 * number should be 0.
+					 */
 					XCommand removeObjectCommand =
 					        this.comFactory.createRemoveObjectCommand(objectAddress, 0, false);
 					
@@ -1495,8 +1468,8 @@ public abstract class AbstractPersistenceTest {
 		 * the set of objects of the changedModel while we iterate over it
 		 * results in ConcurrentModificationExceptions
 		 */
-		for(XID fieldId : toBeRemovedObjects) {
-			changedModel.removeObject(fieldId);
+		for(XID objectId : toBeRemovedObjects) {
+			changedModel.removeObject(objectId);
 		}
 		
 		XTransaction txn = txBuilder.build();
@@ -1504,15 +1477,22 @@ public abstract class AbstractPersistenceTest {
 		return new Pair<ChangedModel,XTransaction>(changedModel, txn);
 	}
 	
-	private static Pair<ChangedObject,XTransaction> createRandomSucceedingObjectTransaction(
+	/**
+	 * Pseudorandomly generates a transaction which should succeed on the given
+	 * empty object. The seed determines how the random number generator
+	 * generates its pseudorandom output.
+	 * 
+	 * Using the same seed twice will result in deterministically generating the
+	 * same transaction again, which can be useful when executing a transaction
+	 * in a test fails and the failed transaction needs to be reconstructed.
+	 */
+	private Pair<ChangedObject,XTransaction> createRandomSucceedingObjectTransaction(
 	        XWritableObject object, long seed) {
-		/*
-		 * TODO consider also adding other type of (succeeding) commands, i.e.
-		 * succeeding commands of remove or change type.
-		 */
+		assertTrue("This method only works with empty objects.", object.isEmpty());
 		
 		Random rand = new Random(seed);
 		XID objectId = object.getId();
+		XAddress objectAddress = object.getAddress();
 		
 		XTransactionBuilder txBuilder = new XTransactionBuilder(object.getAddress());
 		ChangedObject changedObject = new ChangedObject(object);
@@ -1520,47 +1500,155 @@ public abstract class AbstractPersistenceTest {
 		int nrOfFields = 1 + rand.nextInt(50); // add at least one field.
 		for(int i = 0; i < nrOfFields; i++) {
 			XID fieldId = X.getIDProvider().fromString(objectId + "randomField" + i);
+			XAddress fieldAddress = XX.resolveField(objectAddress, fieldId);
 			
 			XWritableField field = changedObject.createField(fieldId);
+			long fieldRevNr = field.getRevisionNumber();
+			XCommand addFieldCommand =
+			        this.comFactory.createAddFieldCommand(objectAddress, fieldId, false);
+			txBuilder.addCommand(addFieldCommand);
 			
 			boolean hasValue = rand.nextBoolean();
-			
-			if(nrOfFields == 1) {
-				/*
-				 * since a transaction needs be made up of more than one
-				 * command, we enforce adding a value, when only one field will
-				 * be added (if we wouldn't do this in this case, we'd create a
-				 * transaction which only has one command)
-				 */
-				hasValue = true;
-			}
 			
 			if(hasValue) {
 				
 				XValue value = createRandomValue(rand);
 				
 				field.setValue(value);
+				
+				XCommand addValueCommand =
+				        this.comFactory.createAddValueCommand(fieldAddress, fieldRevNr, value,
+				                false);
+				txBuilder.addCommand(addValueCommand);
 			}
 		}
 		
-		txBuilder.applyChanges(changedObject);
+		/*
+		 * randomly change fields, i.e. randomly remove or change some values
+		 * and randomly remove some fields
+		 */
+		randomlyChangeFields(rand, changedObject, txBuilder);
+		
+		/*
+		 * The code above might construct transactions which add some fields,
+		 * but immediately removes these fields again, so the execution of this
+		 * transaction would return "No change" or it might create a transaction
+		 * which only contains one command which actually changes one thing (for
+		 * example when nrOfFields equals 1, but we don't add a value to the
+		 * field or we add a value, but remove it again). But we want to create
+		 * a succeeding transaction, which actually changes something, which is
+		 * the reason why another field is added here to be on the safe side. We
+		 * also need to add a value, since a transaction should be made up of at
+		 * least 2 commands which actually change something.
+		 */
+		
+		XID fieldId = X.getIDProvider().fromString(objectId + "randomField" + nrOfFields + 1);
+		XAddress fieldAddress = XX.resolveField(objectAddress, fieldId);
+		
+		XWritableField field = changedObject.createField(fieldId);
+		long fieldRevNr = field.getRevisionNumber();
+		XCommand addFieldCommand =
+		        this.comFactory.createAddFieldCommand(objectAddress, fieldId, false);
+		txBuilder.addCommand(addFieldCommand);
+		
+		XValue value = createRandomValue(rand);
+		
+		field.setValue(value);
+		
+		XCommand addValueCommand =
+		        this.comFactory.createAddValueCommand(fieldAddress, fieldRevNr, value, false);
+		txBuilder.addCommand(addValueCommand);
+		
 		XTransaction txn = txBuilder.build();
 		
 		return new Pair<ChangedObject,XTransaction>(changedObject, txn);
 	}
 	
 	/**
-	 * This test randomly creates transactions which execution is supposed to
-	 * fail. It uses {@link java.util.Random} to create random transactions. We
-	 * set the seed manually and always print it on the screen.
+	 * Pseudorandomly manipulates the fields of the given object (removes and
+	 * changes values of fields which already have a value or remove fields)
+	 * using the given pseudorandom generator and adds the appropriate commands
+	 * to the given transaction builder.
+	 */
+	private void randomlyChangeFields(Random rand, XWritableObject changedObject,
+	        XTransactionBuilder txnBuilder) {
+		XAddress objectAddress = changedObject.getAddress();
+		
+		// randomly determine if some of the fields should be removed
+		List<XID> toBeRemovedFields = new LinkedList<XID>();
+		for(XID fieldId : changedObject) {
+			boolean removeField = rand.nextBoolean();
+			XAddress fieldAddress = XX.resolveField(objectAddress, fieldId);
+			XWritableField field = changedObject.getField(fieldId);
+			long fieldRevNr = field.getRevisionNumber();
+			
+			if(removeField) {
+				toBeRemovedFields.add(fieldId);
+				XCommand removeFieldCommand =
+				        this.comFactory.createRemoveFieldCommand(fieldAddress, fieldRevNr, false);
+				
+				txnBuilder.addCommand(removeFieldCommand);
+				
+			} else {
+				// randomly determine if its value should be changed/removed
+				XValue currentValue = field.getValue();
+				
+				if(currentValue != null) {
+					boolean removeValue = rand.nextBoolean();
+					if(removeValue) {
+						field.setValue(null);
+						
+						XCommand removeValueCommand =
+						        this.comFactory.createRemoveValueCommand(fieldAddress, fieldRevNr,
+						                false);
+						
+						txnBuilder.addCommand(removeValueCommand);
+						
+					} else {
+						boolean changeValue = rand.nextBoolean();
+						
+						if(changeValue) {
+							XValue newValue = null;
+							do {
+								newValue = createRandomValue(rand);
+							} while(newValue.equals(currentValue));
+							
+							field.setValue(newValue);
+							
+							XCommand changeValueCommand =
+							        this.comFactory.createChangeValueCommand(fieldAddress,
+							                fieldRevNr, newValue, false);
+							
+							txnBuilder.addCommand(changeValueCommand);
+						}
+					}
+				}
+			}
+		}
+		
+		/*
+		 * we need to remove the fields in a separate loop because modifying the
+		 * set of fields of the changedObject while we iterate over it results
+		 * in ConcurrentModificationExceptions
+		 */
+		for(XID fieldId : toBeRemovedFields) {
+			changedObject.removeField(fieldId);
+		}
+	}
+	
+	/**
+	 * This test randomly creates model transactions which execution is supposed
+	 * to fail. It uses {@link java.util.Random} to create random transactions.
+	 * We set the seed manually and always print it on the screen.
 	 * 
 	 * If the test fails, simply copy the seed which created the transaction
 	 * which was the cause of the failure and set the seed to this value
-	 * (instead of using System.currentTimeMills(), as the test normally does).
-	 * This makes the test deterministic and enables debugging.
+	 * (instead of using a random seed, as the test normally does). This makes
+	 * the test deterministic and enables debugging.
 	 */
 	@Test
 	public void testExecuteCommandFailingModelTransaction() {
+		SecureRandom seedGen = new SecureRandom();
 		
 		for(int i = 0; i <= this.nrOfIterationsForTxnTests; i++) {
 			XID failModelId =
@@ -1606,7 +1694,7 @@ public abstract class AbstractPersistenceTest {
 			 * debugging: Set the seed to the value which caused the test to
 			 * fail. This makes the test deterministic.
 			 */
-			long seed = System.nanoTime();
+			long seed = seedGen.nextLong();
 			System.out.println("Creating transaction pair " + i + " with seed " + seed + ".");
 			Pair<XTransaction,XTransaction> pair =
 			        createRandomFailingModelTransaction(failModelSnapshot, succModelSnapshot, seed);
@@ -1639,13 +1727,27 @@ public abstract class AbstractPersistenceTest {
 			
 			failModelSnapshot = this.persistence.getModelSnapshot(failModelAdrRequest);
 			assertTrue(
-			        "Since the model was empty before the execution of the faulty transaction, it  should be empty. Since it is not empty, some commands of the transaction must've been executed, although the transaction failed.",
+			        "Since the model was empty before the execution of the faulty transaction, it  should be empty. Since it is not empty, some commands of the transaction must've been executed, although the transaction failed."
+			                + " Seed was: "
+			                + seed
+			                + " (please see the documentation about the use of the seed, it is needed for debugging, do not discard it before you've read the docu).",
 			        failModelSnapshot.isEmpty());
 		}
 	}
 	
+	/**
+	 * This test randomly creates object transactions which execution is
+	 * supposed to fail. It uses {@link java.util.Random} to create random
+	 * transactions. We set the seed manually and always print it on the screen.
+	 * 
+	 * If the test fails, simply copy the seed which created the transaction
+	 * which was the cause of the failure and set the seed to this value
+	 * (instead of using random seeds, as the test normally does). This makes
+	 * the test deterministic and enables debugging.
+	 */
 	@Test
 	public void testExecuteCommandFailingObjectTransaction() {
+		SecureRandom seedGen = new SecureRandom();
 		
 		for(int i = 0; i <= this.nrOfIterationsForTxnTests; i++) {
 			XID failModelId =
@@ -1717,7 +1819,7 @@ public abstract class AbstractPersistenceTest {
 			 * debugging: Set the seed to the value which caused the test to
 			 * fail. This makes the test deterministic.
 			 */
-			long seed = System.nanoTime();
+			long seed = seedGen.nextLong();
 			System.out
 			        .println("Creating object transaction pair " + i + " with seed " + seed + ".");
 			Pair<XTransaction,XTransaction> pair =
@@ -1749,14 +1851,32 @@ public abstract class AbstractPersistenceTest {
 			 */
 			failObjectSnapshot = this.persistence.getObjectSnapshot(failObjectAdrRequest);
 			assertTrue(
-			        "Object was empty before we tried to execute the faulty transaction, but has fields now, which means that some of the commands of the faulty transaction must've been executed, although its execution failed.",
+			        "Object was empty before we tried to execute the faulty transaction, but has fields now, which means that some of the commands of the faulty transaction must've been executed, although its execution failed."
+			                + " Seed was: "
+			                + seed
+			                + " (please see the documentation about the use of the seed, it is needed for debugging, do not discard it before you've read the docu).",
 			        failObjectSnapshot.isEmpty());
 			
 		}
 	}
 	
+	/**
+	 * Pseudorandomly generates a transaction which should fail on the given
+	 * empty model (failModel). Also creates a transaction which does not
+	 * contain the event which makes the transaction fail (i.e. this transaction
+	 * is supposed to succeed) for the given empty model succModel.
+	 * 
+	 * The seed determines how the random number generator generates its
+	 * pseudorandom output. Using the same seed twice will result in
+	 * deterministically generating the same transaction again, which can be
+	 * useful when executing a transaction in a test fails and the failed
+	 * transaction needs to be reconstructed.
+	 */
 	private Pair<XTransaction,XTransaction> createRandomFailingModelTransaction(
 	        XWritableModel failModel, XWritableModel succModel, long seed) {
+		assertTrue("This test only works with empty models.", failModel.isEmpty());
+		assertTrue("This test only works with empty models.", succModel.isEmpty());
+		
 		Random rand = new Random(seed);
 		
 		/*
@@ -2013,8 +2133,23 @@ public abstract class AbstractPersistenceTest {
 		
 	}
 	
+	/**
+	 * Pseudorandomly generates a transaction which should fail on the given
+	 * empty object (failObject). Also creates a transaction which does not
+	 * contain the event which makes the transaction fail (i.e. this transaction
+	 * is supposed to succeed) for the given empty object (succObject).
+	 * 
+	 * The seed determines how the random number generator generates its
+	 * pseudorandom output. Using the same seed twice will result in
+	 * deterministically generating the same transaction again, which can be
+	 * useful when executing a transaction in a test fails and the failed
+	 * transaction needs to be reconstructed.
+	 */
 	private Pair<XTransaction,XTransaction> createRandomFailingObjectTransaction(
 	        XWritableObject failObject, XWritableObject succObject, long seed) {
+		assertTrue("This test only works with empty objects.", failObject.isEmpty());
+		assertTrue("This test only works with empty objects", succObject.isEmpty());
+		
 		Random rand = new Random(seed);
 		
 		/*
@@ -3220,11 +3355,9 @@ public abstract class AbstractPersistenceTest {
 		 */
 	}
 	
-	/*
-	 * TODO also write test for object transaction events
-	 */
 	@Test
 	public void testGetEventsModelTransactions() {
+		SecureRandom seedGen = new SecureRandom();
 		
 		for(int i = 0; i < this.nrOfIterationsForTxnTests; i++) {
 			
@@ -3243,7 +3376,7 @@ public abstract class AbstractPersistenceTest {
 			 * debugging: Set the seed to the value which caused the test to
 			 * fail. This makes the test deterministic.
 			 */
-			long seed = System.nanoTime();
+			long seed = seedGen.nextLong();
 			System.out.println("Used seed: " + seed + ".");
 			Pair<ChangedModel,XTransaction> pair =
 			        createRandomSucceedingModelTransaction(model, seed);
@@ -3360,6 +3493,7 @@ public abstract class AbstractPersistenceTest {
 	
 	@Test
 	public void testGetEventsObjectTransactions() {
+		SecureRandom seedGen = new SecureRandom();
 		
 		for(int i = 0; i < this.nrOfIterationsForTxnTests; i++) {
 			
@@ -3384,7 +3518,7 @@ public abstract class AbstractPersistenceTest {
 			 * debugging: Set the seed to the value which caused the test to
 			 * fail. This makes the test deterministic.
 			 */
-			long seed = System.nanoTime();
+			long seed = seedGen.nextLong();
 			System.out.println("Used seed: " + seed + ".");
 			Pair<ChangedObject,XTransaction> pair =
 			        createRandomSucceedingObjectTransaction(object, seed);
@@ -3423,7 +3557,7 @@ public abstract class AbstractPersistenceTest {
 			 */
 			
 			/*
-			 * TODO document why there are no "removedObjectEvents" (etc.) lists
+			 * TODO document why there are no "removedFieldEvents" (etc.) lists
 			 */
 			Map<XAddress,XEvent> addedFieldEvents = new HashMap<XAddress,XEvent>();
 			Map<XAddress,XEvent> addedValueEvents = new HashMap<XAddress,XEvent>();
@@ -3528,7 +3662,8 @@ public abstract class AbstractPersistenceTest {
 	public void testGetModelRevision() {
 		
 		/*
-		 * TODO what are tentative revision numbers?
+		 * TODO what are tentative revision numbers? These need to be tested,
+		 * too.
 		 */
 		
 		XID modelId = XX.toId("testGetModelRevisionModel1");
@@ -3724,8 +3859,6 @@ public abstract class AbstractPersistenceTest {
 		
 		assertEquals("The snapshot does not have the correct amount of objects without fields.",
 		        numberOfObjects - numberOfObjectsWithFields, objectSnapshotsWithoutFields);
-		
-		// TODO check what a "tentative revision" is and write test accordingly
 		
 		// TODO check what happens when the wrong types of XAddresses are given
 		// as parameters
