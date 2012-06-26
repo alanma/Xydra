@@ -71,9 +71,6 @@ public abstract class AbstractPersistenceTest {
 		LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory());
 	}
 	
-	/*
-	 * TODO logger doesn't work - why?
-	 */
 	private static final Logger log = LoggerFactory.getLogger(AbstractPersistenceTest.class);
 	
 	public XydraPersistence persistence;
