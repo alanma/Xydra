@@ -329,6 +329,26 @@ public class SonicEvent implements ISonicEvent, Serializable {
 			return this;
 		}
 		
+		public Builder value(String value) {
+			XyAssert.validateNotNull(value, "value");
+			this.se.value = value;
+			return this;
+		}
+		
+		public Builder valueIgnoreIfNull(String value) {
+			if(value != null) {
+				this.se.value = value;
+			}
+			return this;
+		}
+		
+		public Builder labelIgnoreIfNull(String label) {
+			if(label != null) {
+				this.se.label = label;
+			}
+			return this;
+		}
+		
 	}
 	
 	@Override
