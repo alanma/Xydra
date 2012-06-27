@@ -133,7 +133,8 @@ public interface ISonicEvent {
 	Map<String,String> getExtensionData();
 	
 	/**
-	 * Used by {@link ISonicDB} to set a key. May be set only once.
+	 * Used by {@link ISonicDB} to set a key. May be set only once. Key must
+	 * match internal time encoding.
 	 * 
 	 * @param key
 	 */

@@ -98,4 +98,10 @@ public class SonicMemoryDB implements ISonicDB {
 		
 	}
 	
+	@Override
+	public void receiveEventAsync(ISonicEvent sonicEvent) {
+		// TODO Auto-generated method stub
+		
+	}
+	
 }

@@ -240,6 +240,7 @@ public class SonicEvent implements ISonicEvent, Serializable {
 	
 	public void setKey(String key) {
 		XyAssert.validateCondition(this.key == null, "Key can be set only once");
+		// key = key name
 		this.key = key;
 	}
 	
