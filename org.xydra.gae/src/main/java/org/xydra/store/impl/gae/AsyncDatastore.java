@@ -79,11 +79,15 @@ public class AsyncDatastore {
 		log.debug(DebugFormatter.dataPut(DATASTORE_NAME, KeyStructure.toString(entity.getKey()),
 		        entity, Timing.Started));
 		makeSureDatestoreServiceIsInitialised();
-		// FIXME ASYNC AGAIN
-		SyncDatastore.putEntity(entity, txn);
-		return FutureUtils.createCompleted(null);
-		// Future<Key> f = asyncDatastore.put(txn, entity);
-		// return new FuturePutEntity(entity, f);
+		
+		// fake async version
+		// SyncDatastore.putEntity(entity, txn);
+		// syncDatastore.put(txn, entity);
+		// return FutureUtils.createCompleted(null);
+		
+		// true async version
+		Future<Key> f = asyncDatastore.put(txn, entity);
+		return new FuturePutEntity(entity, f);
 	}
 	
 	/**
@@ -274,7 +278,6 @@ public class AsyncDatastore {
 		
 	}
 	
-	@SuppressWarnings("unused")
 	private static class FuturePutEntity extends DebugFuture<Entity,Key> {
 		public FuturePutEntity(Entity key, Future<Key> f) {
 			super(key, f);
