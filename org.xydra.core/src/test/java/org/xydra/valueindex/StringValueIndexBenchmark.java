@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
@@ -33,6 +34,7 @@ import org.xydra.core.serialize.xml.XmlParser;
 import org.xydra.sharedutils.XyAssert;
 
 
+@Ignore
 public class StringValueIndexBenchmark {
 	private List<XModel> models;
 	final static String lineSeparator = System.getProperty("line.separator");

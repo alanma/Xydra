@@ -151,7 +151,8 @@ public class MemoryPersistence implements XydraPersistence {
 	public boolean hasManagedModel(XID modelId) {
 		synchronized(this.models) {
 			MemoryModelPersistence modelPersistence = this.models.get(modelId);
-			return modelPersistence != null && modelPersistence.exists();
+			return modelPersistence != null; // FIXME KILL &&
+											 // modelPersistence.exists();
 		}
 	}
 	
