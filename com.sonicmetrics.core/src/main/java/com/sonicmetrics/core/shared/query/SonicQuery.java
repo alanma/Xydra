@@ -8,6 +8,8 @@ import org.xydra.annotations.CanBeNull;
 import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.RunsInGWT;
 
+import com.sonicmetrics.core.shared.ISonicEvent.IndexedProperty;
+
 
 /**
  * @author xamde
@@ -27,7 +29,18 @@ public class SonicQuery implements ISonicQuery {
 			this.timeConstraint = timeConstraint;
 		}
 		
+		/**
+		 * If value is null or '*', this contraint is silentyl ignored at
+		 * creation time.
+		 * 
+		 * @param keyValueConstraint
+		 * @return this
+		 */
 		public Builder where(KeyValueConstraint keyValueConstraint) {
+			if(keyValueConstraint.value == null || keyValueConstraint.value.equals("")
+			        || keyValueConstraint.value.equals("*"))
+				return this;
+			
 			this.keyValueConstraints.add(keyValueConstraint);
 			return this;
 		}
@@ -41,6 +54,18 @@ public class SonicQuery implements ISonicQuery {
 		public Builder limit(int limit) {
 			this.limit = limit;
 			return this;
+		}
+		
+		/**
+		 * If value is null or '*', this contraint is silentyl ignored at
+		 * creation time.
+		 * 
+		 * @param key
+		 * @param value
+		 * @return this
+		 */
+		public Builder whereProperty(IndexedProperty key, String value) {
+			return where(KeyValueConstraint.keyValue(key, value));
 		}
 		
 	}

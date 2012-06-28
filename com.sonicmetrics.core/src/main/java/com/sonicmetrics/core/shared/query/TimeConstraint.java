@@ -35,7 +35,7 @@ public class TimeConstraint implements Serializable {
 	 * @param startInclusive first matching time-stamp (=inclusive)
 	 * @return for all events since a certain date until now
 	 */
-	public static TimeConstraint from(int startInclusive) {
+	public static TimeConstraint from(long startInclusive) {
 		return new TimeConstraint(startInclusive, Long.MAX_VALUE, null);
 	}
 	
