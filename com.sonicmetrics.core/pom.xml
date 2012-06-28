@@ -15,6 +15,12 @@
 		<version>2012.04.13</version>
 	</parent>
 
+	<properties>
+		<!-- Specify AppEngine version for your project. It should match SDK version 
+			pointed to by ${gae.home} property (Typically, one used by your Eclipse plug-in) -->
+		<gae.version>1.7.0</gae.version>
+	</properties>
+
 	<repositories>
 		<!-- xydra repo -->
 		<repository>
@@ -95,28 +101,28 @@
 
 	</dependencies>
 
-    <distributionManagement>
-        <!-- Add this to settings.xml <server> <id>xydra-repo</id> <username>xamde</username> 
-            <password>********</password> </server> <server> <id>xydra-snap</id> <username>xamde</username> 
-            <password>********</password> </server> <server> <id>xydra-site</id> <username>xamde</username> 
-            <password>********</password> </server> -->
-        <repository>
-            <id>xydra-repo</id>
-            <url>svn:https://xydra.googlecode.com/svn/repository</url>
-        </repository>
-        <snapshotRepository>
-            <id>xydra-snap</id>
-            <url>svn:https://xydra.googlecode.com/svn/snapshots</url>
-        </snapshotRepository>
-        <site>
-            <id>xydra-site</id>
-            <url>scp://${xydra.site}/${artifactId}</url>
-        </site>
-    </distributionManagement>
+	<distributionManagement>
+		<!-- Add this to settings.xml <server> <id>xydra-repo</id> <username>xamde</username> 
+			<password>********</password> </server> <server> <id>xydra-snap</id> <username>xamde</username> 
+			<password>********</password> </server> <server> <id>xydra-site</id> <username>xamde</username> 
+			<password>********</password> </server> -->
+		<repository>
+			<id>xydra-repo</id>
+			<url>svn:https://xydra.googlecode.com/svn/repository</url>
+		</repository>
+		<snapshotRepository>
+			<id>xydra-snap</id>
+			<url>svn:https://xydra.googlecode.com/svn/snapshots</url>
+		</snapshotRepository>
+		<site>
+			<id>xydra-site</id>
+			<url>scp://${xydra.site}/${artifactId}</url>
+		</site>
+	</distributionManagement>
 
-    <scm>
-        <connection>svn:https://xydra.googlecode.com/svn/trunk/com.sonicmetrics.core</connection>
-        <developerConnection>svn:https://xydra.googlecode.com/svn/trunk/com.sonicmetrics.core</developerConnection>
-    </scm>
+	<scm>
+		<connection>svn:https://xydra.googlecode.com/svn/trunk/com.sonicmetrics.core</connection>
+		<developerConnection>svn:https://xydra.googlecode.com/svn/trunk/com.sonicmetrics.core</developerConnection>
+	</scm>
 
 </project>
