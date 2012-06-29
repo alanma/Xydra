@@ -7,6 +7,8 @@
 <!-- Inherit as 'org.xydra.restless.XydraRestless'  -->
 <module>
 	
+	<inherits name="org.xydra.annotations.XydraAnnotations" />
+	
 	<source path="" >
 		<include name="utils/XmlUtils.java" />
 		<include name="utils/SharedHtmlUtils.java" />

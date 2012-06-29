@@ -1,6 +1,6 @@
 package org.xydra.restless.utils;
 
-import org.xydra.restless.annot.NeverNull;
+import org.xydra.annotations.NeverNull;
 
 
 /**

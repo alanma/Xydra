@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.xydra.restless.annot.CanBeNull;
+import org.xydra.annotations.CanBeNull;
 
 
 /**
