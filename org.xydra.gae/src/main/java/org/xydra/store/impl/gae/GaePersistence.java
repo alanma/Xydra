@@ -31,6 +31,7 @@ import org.xydra.store.XydraStoreAdmin;
 import org.xydra.store.impl.delegate.DelegatingSecureStore;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.gae.changes.KeyStructure;
+import org.xydra.store.impl.gae.changes.Utils;
 import org.xydra.store.impl.gae.changes.XIDLengthException;
 import org.xydra.store.impl.gae.ng.GaeModelPersistenceNG;
 
@@ -41,6 +42,7 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.CompositeFilterOperator;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -239,13 +241,19 @@ public class GaePersistence implements XydraPersistence {
 		Key last = KeyFactory.createKey(KeyStructure.KIND_XCHANGE, first.getName()
 		        + LAST_UNICODE_CHAR);
 		
-		Query q = new Query(KeyStructure.KIND_XCHANGE)
+		Query q = new Query(KeyStructure.KIND_XCHANGE);
 		
-		.addFilter("__key__", FilterOperator.GREATER_THAN, first)
+		q.setFilter(
 		
-		.addFilter("__key__", FilterOperator.LESS_THAN, last)
+		CompositeFilterOperator.and(
 		
-		.setKeysOnly();
+		new Query.FilterPredicate(Utils.PROP_KEY, FilterOperator.GREATER_THAN, first),
+		
+		new Query.FilterPredicate(Utils.PROP_KEY, FilterOperator.LESS_THAN, last)
+		
+		));
+		
+		q.setKeysOnly();
 		
 		Set<XID> managedModelIds = new HashSet<XID>();
 		for(Entity e : SyncDatastore.prepareQuery(q).asIterable()) {

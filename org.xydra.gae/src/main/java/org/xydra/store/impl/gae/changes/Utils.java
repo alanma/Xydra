@@ -18,6 +18,7 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.CompositeFilterOperator;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 
 
@@ -31,7 +32,7 @@ public class Utils {
 	
 	private static final Logger log = LoggerFactory.getLogger(Utils.class);
 	
-	private static final String PROP_KEY = "__key__";
+	public static final String PROP_KEY = "__key__";
 	
 	/**
 	 * Asks the datastore via a query for all children of the given address by
@@ -71,8 +72,18 @@ public class Utils {
 		
 		Set<XID> childIds = new HashSet<XID>();
 		
-		Query q = new Query(kind).addFilter(PROP_KEY, FilterOperator.GREATER_THAN, first)
-		        .addFilter(PROP_KEY, FilterOperator.LESS_THAN, last).setKeysOnly();
+		Query q = new Query(kind);
+		q.setFilter(
+		
+		CompositeFilterOperator.and(
+		
+		new Query.FilterPredicate(PROP_KEY, FilterOperator.GREATER_THAN, first),
+		
+		new Query.FilterPredicate(PROP_KEY, FilterOperator.LESS_THAN, last)
+		
+		));
+		q.setKeysOnly();
+		
 		for(Entity e : SyncDatastore.prepareQuery(q).asIterable()) {
 			XAddress childAddr = KeyStructure.toAddress(e.getKey());
 			assert address.equals(childAddr.getParent());
@@ -101,8 +112,15 @@ public class Utils {
 		 * lookup XCHANGE entities by query: SELECT __key__ FROM XCHANGE WHERE
 		 * __key__ < KEY('XCHANGE', '1')
 		 */
-		Query q = new Query(KeyStructure.KIND_XCHANGE).setKeysOnly().addFilter("__key__",
-		        FilterOperator.LESS_THAN, KeyFactory.createKey(KeyStructure.KIND_XCHANGE, "1"));
+		Query q = new Query(KeyStructure.KIND_XCHANGE);
+		q.setFilter(
+		
+		new Query.FilterPredicate(PROP_KEY, FilterOperator.LESS_THAN, KeyFactory.createKey(
+		        KeyStructure.KIND_XCHANGE, "1"))
+		
+		);
+		q.setKeysOnly();
+		
 		final Iterator<Entity> it = SyncDatastore.prepareQuery(q).asIterable().iterator();
 		
 		return new TransformingIterator<Entity,XAddress>(it,
