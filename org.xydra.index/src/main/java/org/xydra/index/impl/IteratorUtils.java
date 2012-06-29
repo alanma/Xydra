@@ -28,4 +28,12 @@ public class IteratorUtils {
 	public static <T> boolean isEmpty(Iterator<T> it) {
 		return !it.hasNext();
 	}
+	
+	public static String toText(Collection<String> value) {
+		StringBuffer buf = new StringBuffer();
+		for(String s : value) {
+			buf.append(s).append(",");
+		}
+		return buf.toString();
+	}
 }
