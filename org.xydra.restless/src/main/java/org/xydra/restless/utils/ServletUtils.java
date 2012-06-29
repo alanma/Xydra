@@ -14,6 +14,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.xydra.annotations.CanBeNull;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.restless.Restless;
@@ -158,14 +159,14 @@ public class ServletUtils {
 	 *         values for the same key are put in order of appearance in the
 	 *         list. Duplicate values are omitted.
 	 * 
-	 *         The members of the {@link SortedSet} may be null if the query
-	 *         string was just 'a=&b=foo'.
+	 *         The members of the {@link SortedSet} may be the empty string if
+	 *         the query string was just 'a=&b=foo'.
 	 * 
 	 *         Encoding UTF-8 is used for URLDecoding the key and value strings.
 	 * 
 	 *         Keys and values get URL-decoded.
 	 */
-	public static Map<String,SortedSet<String>> getQueryStringAsMap(String queryString) {
+	public static Map<String,SortedSet<String>> getQueryStringAsMap(@CanBeNull String queryString) {
 		Map<String,SortedSet<String>> map = new HashMap<String,SortedSet<String>>();
 		if(queryString == null) {
 			return map;
@@ -179,24 +180,31 @@ public class ServletUtils {
 				throw new IllegalArgumentException("Malformed query string " + queryString);
 			} else {
 				String encKey = keyvalue[0];
-				String key;
-				try {
-					key = URLDecoder.decode(encKey, Restless.JAVA_ENCODING_UTF8);
-					SortedSet<String> values = map.get(key);
-					if(values == null) {
-						values = new TreeSet<String>();
-						map.put(key, values);
+				if(encKey != null && !encKey.equals("")) {
+					String key;
+					try {
+						key = URLDecoder.decode(encKey, Restless.JAVA_ENCODING_UTF8);
+						if(key != null && !key.equals("")) {
+							SortedSet<String> values = map.get(key);
+							if(values == null) {
+								values = new TreeSet<String>();
+								map.put(key, values);
+							}
+							if(keyvalue.length == 2) {
+								String rawValue = keyvalue[1];
+								String value = URLDecoder.decode(rawValue,
+								        Restless.JAVA_ENCODING_UTF8);
+								values.add(value);
+							} else {
+								values.add("");
+							}
+							
+						}
+					} catch(UnsupportedEncodingException e) {
+						throw new RuntimeException("No " + Restless.JAVA_ENCODING_UTF8
+						        + " on this system?", e);
 					}
-					if(keyvalue.length == 2) {
-						String rawValue = keyvalue[1];
-						String value = URLDecoder.decode(rawValue, Restless.JAVA_ENCODING_UTF8);
-						values.add(value);
-					} else {
-						values.add(null);
-					}
-				} catch(UnsupportedEncodingException e) {
-					throw new RuntimeException("No " + Restless.JAVA_ENCODING_UTF8
-					        + " on this system?", e);
+					
 				}
 			}
 		}
