@@ -3,6 +3,8 @@
 <!--  This module is the MAIN module of this project -->
 <module>
 	
+	<!-- inherit as 'org.xydra.core.XydraCore' -->
+	
 	<inherits name="org.xydra.base.XydraBase" />
 	<inherits name="org.xydra.store.XydraStore" />
 	<inherits name="org.xydra.sharedutils.XydraSharedUtils" />
