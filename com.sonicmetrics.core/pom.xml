@@ -101,6 +101,20 @@
 
 	</dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>log4j.properties</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
 	<distributionManagement>
 		<!-- Add this to settings.xml <server> <id>xydra-repo</id> <username>xamde</username> 
 			<password>********</password> </server> <server> <id>xydra-snap</id> <username>xamde</username> 
