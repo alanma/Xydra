@@ -37,6 +37,7 @@ public class SonicQuery implements ISonicQuery {
 		 * @return this
 		 */
 		public Builder where(KeyValueConstraint keyValueConstraint) {
+			// wildcards
 			if(keyValueConstraint.value == null || keyValueConstraint.value.equals("")
 			        || keyValueConstraint.value.equals("*"))
 				return this;
@@ -66,6 +67,21 @@ public class SonicQuery implements ISonicQuery {
 		 */
 		public Builder whereProperty(IndexedProperty key, String value) {
 			return where(KeyValueConstraint.keyValue(key, value));
+		}
+		
+		public Builder categoryActionLabelSubjectSource(String category, String action,
+		        String label, String subject, String source) {
+			whereProperty(IndexedProperty.Category, category);
+			
+			whereProperty(IndexedProperty.Action, action);
+			
+			whereProperty(IndexedProperty.Label, label);
+			
+			whereProperty(IndexedProperty.Subject, subject);
+			
+			whereProperty(IndexedProperty.Source, source);
+			
+			return this;
 		}
 		
 	}

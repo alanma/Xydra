@@ -4,13 +4,13 @@
 
 	<super-source path="gwtemul" />
 
-	<!-- inherit as com.sonicmetrics.SonicMetrics -->
+	<!-- inherit as com.sonicmetrics.core.SonicMetricsCore -->
 
 	<inherits name="com.google.gwt.logging.Logging" />
 	<inherits name='com.google.gwt.http.HTTP' />
 
 
-	<inherits name="org.xydra.annotations.Annotations" />
+	<inherits name="org.xydra.annotations.XydraAnnotations" />
 	<inherits name="org.xydra.index.XydraIndex" />
 	<inherits name='org.xydra.log.Xlog' />
 

@@ -34,7 +34,7 @@ public class SonicMemoryDB implements ISonicDB {
 		if(key == null) {
 			key = toKey(sonicEvent.getWhen()) + "-" + UUID.uuid(8);
 		}
-		// FIXME set key in event
+		sonicEvent.setKey(key);
 		this.db.put(key, sonicEvent);
 	}
 	
