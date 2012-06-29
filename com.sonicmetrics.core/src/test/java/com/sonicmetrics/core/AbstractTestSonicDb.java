@@ -77,11 +77,10 @@ public abstract class AbstractTestSonicDb {
 			set.add(se);
 		}
 		assertEquals(5, set.size());
-		assertTrue("Set did not contain " + se1, set.contains(se1));
-		assertTrue(set.contains(se2));
-		assertTrue(set.contains(se3));
-		assertTrue(set.contains(se4));
-		assertTrue(set.contains(se5));
+		/*
+		 * it does <em>not</em> hold that the set contains the original events.
+		 * See definition of equals in SonicEvent.
+		 */
 	}
 	
 	@Test
