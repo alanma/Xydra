@@ -8,6 +8,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 import org.junit.Test;
+import org.xydra.log.LoggerFactory;
+import org.xydra.log.gae.Log4jLoggerFactory;
 
 import com.sonicmetrics.core.shared.ISonicDB;
 import com.sonicmetrics.core.shared.ISonicEvent;
@@ -27,37 +29,51 @@ public abstract class AbstractTestSonicDb {
 	
 	protected ISonicDB db = null;
 	
+	static {
+		LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory());
+	}
+	
+	@Test
+	public void testHashcodeAndEquals() {
+		ISonicEvent se1a = SonicEvent.create(120).subject("@xamde").category("cat1").action("act")
+		        .label("lab").source("test").done();
+		
+		ISonicEvent se1b = SonicEvent.create(120).subject("@xamde").category("cat1").action("act")
+		        .label("lab").source("test").done();
+		
+		assertTrue(se1a.equals(se1b));
+		assertEquals(se1a.hashCode(), se1b.hashCode());
+	}
+	
 	@Test
 	public void testPutAndGet() {
 		assertTrue(dbIsEmpty());
 		
 		ISonicEvent se1 = SonicEvent.create(120).subject("@xamde").category("cat1").action("act")
 		        .label("lab").source("test").done();
-		System.out.println("Adding " + se1);
 		this.db.receiveEvent(se1);
 		assertFalse(dbIsEmpty());
 		
 		ISonicEvent se2 = SonicEvent.create(120).subject("@xamde").category("cat2").action("act")
 		        .label("lab").source("test").done();
+		this.db.receiveEvent(se2);
 		ISonicEvent se3 = SonicEvent.create(120).subject("@xamde").category("cat3").action("act")
 		        .label("lab").source("test").done();
+		this.db.receiveEvent(se3);
 		ISonicEvent se4 = SonicEvent.create(120).subject("@xamde").category("cat4").action("act")
 		        .label("lab").source("test").done();
+		this.db.receiveEvent(se4);
 		ISonicEvent se5 = SonicEvent.create(120).subject("@xamde").category("cat5").action("act")
 		        .label("lab").source("test").done();
-		this.db.receiveEvent(se2);
-		this.db.receiveEvent(se3);
-		this.db.receiveEvent(se4);
 		this.db.receiveEvent(se5);
 		
 		ISonicQuery sq = SonicQuery.build(TimeConstraint.fromTo(120, 180)).done();
-		System.out.println("Asking for " + sq);
 		Iterator<? extends ISonicEvent> it = this.db.query(sq).iterator();
 		
 		HashSet<ISonicEvent> set = new HashSet<ISonicEvent>();
 		while(it.hasNext()) {
 			ISonicEvent se = it.next();
-			System.out.println(se);
+			System.out.println(se + " equal to se1?" + se.equals(se1));
 			set.add(se);
 		}
 		assertEquals(5, set.size());

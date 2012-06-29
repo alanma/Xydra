@@ -45,7 +45,7 @@ public class JsonUtils {
 				b.append("\\r");
 			else if(c == '\t')
 				b.append("\\t");
-			else if(Character.isISOControl(c)) {
+			else if(isISOControl(c)) {
 				b.append(unicode(c));
 			} else {
 				b.append(c);
@@ -53,6 +53,29 @@ public class JsonUtils {
 		}
 		b.append('"');
 		return b;
+		
+	}
+	
+	/**
+	 * The GWT version for Character.isISOControl(c).
+	 * 
+	 * Determines if the specified character is an ISO control character. A
+	 * character is considered to be an ISO control character if its code is in
+	 * the range '\u0000' through '\u001F' or in the range '\u007F' through
+	 * '\u009F'.
+	 * 
+	 * 
+	 * GWT's Character knows only: // isDigit(char), // isHighSurrogate(char),
+	 * // isLetter(char), // isLetterOrDigit(char), // isLowerCase(char), //
+	 * isLowSurrogate(char), // isSpace(char), // isSupplementaryCodePoint(int),
+	 * // isSurrogatePair(char, char), // isUpperCase(char), //
+	 * isValidCodePoint(int),
+	 * 
+	 * @param c
+	 * @return true if Java would return true
+	 */
+	public static boolean isISOControl(char c) {
+		return ('\u0000' <= c && c <= '\u001F') || ('\u007F' <= c && c <= '\u009F');
 	}
 	
 	protected static StringBuilder unicode(char c) {

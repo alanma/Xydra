@@ -26,6 +26,11 @@ import com.sonicmetrics.core.shared.util.ValidationUtils;
  * the server slower, but allows this class to be used seamlessly in client code
  * as well.
  * 
+ * Note: Hashcode and equals are defined in a way that two events are only equal
+ * if both have the same KEY as well. That means an event that has not been
+ * logged (and hence has no key set) is never equals to an event that has been
+ * logged (and hence has a key defined).
+ * 
  * @author xamde
  */
 @RunsInGWT(true)
@@ -163,9 +168,9 @@ public class SonicEvent implements ISonicEvent, Serializable {
 	
 	@Override
 	public String toString() {
-		return "At " + this.timestamp + " (" + toDebugTime(this.timestamp) + ") '" + this.subject
-		        + "' did '" + this.category + "." + this.action + "." + this.label
-		        + (this.value == null ? "" : "=" + this.value) + "' source: '" + this.source + "'";
+		return this.timestamp + "utc=(" + toDebugTime(this.timestamp) + ") subject:'"
+		        + this.subject + "':'" + this.category + "." + this.action + "." + this.label
+		        + (this.value == null ? "" : "=" + this.value) + "' source:'" + this.source + "'";
 	}
 	
 	public StringBuilder toJsonObject() {
@@ -297,7 +302,18 @@ public class SonicEvent implements ISonicEvent, Serializable {
 			return this;
 		}
 		
+		/**
+		 * Ignored if value is null.
+		 * 
+		 * @param key
+		 * @param value
+		 * @return this builder
+		 * @throws IllegalArgumentException
+		 */
 		public Builder withParam(String key, String value) throws IllegalArgumentException {
+			if(value == null) {
+				return this;
+			}
 			if(ValidationUtils.matches(IDENTIFIER_PATTERN, key)) {
 				this.se.extensionDataMap.put(key, value);
 			} else {
@@ -316,8 +332,16 @@ public class SonicEvent implements ISonicEvent, Serializable {
 			return this.se;
 		}
 		
-		public Builder withParams(Map<String,String> map) throws IllegalArgumentException {
-			// TODO validate
+		/**
+		 * Adds all data given in map to the extension data.
+		 * 
+		 * @param map
+		 * @return this
+		 * @throws IllegalArgumentException
+		 */
+		public Builder withParams(@NeverNull Map<String,String> map)
+		        throws IllegalArgumentException {
+			// FIXME validate
 			this.se.extensionDataMap.putAll(map);
 			return this;
 		}
