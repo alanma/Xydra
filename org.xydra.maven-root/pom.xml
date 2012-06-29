@@ -243,17 +243,17 @@
 
 
 			<!-- +++ Propose Xydra version numbers (alpabetic order) +++ -->
-            <dependency>
-                <groupId>org.xydra</groupId>
-                <artifactId>annotations</artifactId>
-                <version>${xydra.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.xydra</groupId>
-                <artifactId>annotations</artifactId>
-                <version>${xydra.version}</version>
-                <classifier>sources</classifier>
-            </dependency>
+			<dependency>
+				<groupId>org.xydra</groupId>
+				<artifactId>annotations</artifactId>
+				<version>${xydra.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.xydra</groupId>
+				<artifactId>annotations</artifactId>
+				<version>${xydra.version}</version>
+				<classifier>sources</classifier>
+			</dependency>
 			<dependency>
 				<groupId>org.xydra</groupId>
 				<artifactId>core</artifactId>
@@ -323,13 +323,13 @@
 				<version>${xydra.version}</version>
 				<classifier>sources</classifier>
 			</dependency>
-<!-- 			<dependency> -->
-<!-- 				<groupId>org.xydra</groupId> -->
-<!-- 				<artifactId>gwt</artifactId> -->
-<!-- 				<version>${xydra.version}</version> -->
-<!-- 				<type>test-jar</type> -->
-<!-- 				<scope>test</scope> -->
-<!-- 			</dependency> -->
+			<!-- <dependency> -->
+			<!-- <groupId>org.xydra</groupId> -->
+			<!-- <artifactId>gwt</artifactId> -->
+			<!-- <version>${xydra.version}</version> -->
+			<!-- <type>test-jar</type> -->
+			<!-- <scope>test</scope> -->
+			<!-- </dependency> -->
 			<dependency>
 				<groupId>org.xydra</groupId>
 				<artifactId>log</artifactId>
@@ -391,6 +391,22 @@
 
 		</dependencies>
 	</dependencyManagement>
+
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<excludes>
+						<exclude>log4j.properties</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
 
 	<profiles>
 		<!-- _______________________ DETAILED __________ -->
