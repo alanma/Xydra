@@ -52,7 +52,7 @@ public class SonicMemoryDB implements ISonicDB {
 		// start
 		String lastKey = timeConstraint.lastKey;
 		if(lastKey == null) {
-			assert timeConstraint.start > 0;
+			assert timeConstraint.start >= 0 : timeConstraint.start;
 			long startInclusive = timeConstraint.start;
 			lastKey = startInclusive + "";
 		}
