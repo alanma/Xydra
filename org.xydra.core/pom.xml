@@ -32,6 +32,16 @@
 
 	<dependencies>
 
+        <dependency>
+            <groupId>org.xydra</groupId>
+            <artifactId>annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.xydra</groupId>
+            <artifactId>annotations</artifactId>
+            <classifier>sources</classifier>
+        </dependency>
+
 		<!-- XIndex -->
 		<dependency>
 			<groupId>org.xydra</groupId>
