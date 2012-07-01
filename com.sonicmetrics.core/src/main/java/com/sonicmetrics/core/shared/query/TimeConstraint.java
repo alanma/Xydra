@@ -54,7 +54,7 @@ public class TimeConstraint implements Serializable {
 	/** Exclusive */
 	public final String lastKey;
 	
-	/** Inclusive */
+	/** Inclusive. Ranges from 0 to Long.MAX_VALUE. */
 	public final long start;
 	
 	/** Inclusive. Long.MAX_VALUE = current server time */
