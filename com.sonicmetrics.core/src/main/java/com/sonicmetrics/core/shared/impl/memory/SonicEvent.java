@@ -250,6 +250,19 @@ public class SonicEvent implements ISonicEvent, Serializable {
 		this.key = key;
 	}
 	
+	public static Builder createFrom(ISonicEvent se) {
+		Builder b = create(se.getWhen());
+		b.category(se.getCategory());
+		b.action(se.getAction());
+		b.source(se.getSource());
+		b.subject(se.getSubject());
+		b.labelIgnoreIfNull(se.getLabel());
+		b.valueIgnoreIfNull(se.getLabel());
+		b.uniqueId(se.getUniqueId());
+		b.withParams(se.getExtensionData());
+		return b;
+	}
+	
 	public static class Builder {
 		
 		private SonicEvent se;
@@ -390,6 +403,13 @@ public class SonicEvent implements ISonicEvent, Serializable {
 			return this;
 		}
 		
+		public Builder uniqueIdIgnoredIfNull(String uniqueId) {
+			if(uniqueId != null) {
+				return uniqueId(uniqueId);
+			}
+			return this;
+		}
+		
 		public Builder valueIgnoreIfNull(String value) {
 			if(value != null) {
 				this.se.value = value;
@@ -399,7 +419,7 @@ public class SonicEvent implements ISonicEvent, Serializable {
 		
 		public Builder labelIgnoreIfNull(String label) {
 			if(label != null) {
-				this.se.label = label;
+				return label(label);
 			}
 			return this;
 		}
