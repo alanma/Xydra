@@ -1,6 +1,7 @@
 package com.sonicmetrics.core.shared.impl.memory;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -302,6 +303,22 @@ public class SonicEvent implements ISonicEvent, Serializable {
 			return this;
 		}
 		
+		public Builder withParam(IndexedProperty key, String value) {
+			switch(key) {
+			case Action:
+				return action(value);
+			case Category:
+				return category(value);
+			case Label:
+				return label(value);
+			case Source:
+				return source(value);
+			case Subject:
+				return subject(value);
+			}
+			throw new AssertionError();
+		}
+		
 		/**
 		 * Ignored if value is null.
 		 * 
@@ -341,8 +358,22 @@ public class SonicEvent implements ISonicEvent, Serializable {
 		 */
 		public Builder withParams(@NeverNull Map<String,String> map)
 		        throws IllegalArgumentException {
-			// FIXME validate
-			this.se.extensionDataMap.putAll(map);
+			for(Entry<String,String> e : map.entrySet()) {
+				String key = e.getKey();
+				String value = e.getValue();
+				
+				boolean recognized = false;
+				for(IndexedProperty ip : IndexedProperty.values()) {
+					if(ip.name().toLowerCase().equals(key.toLowerCase())) {
+						recognized = true;
+						withParam(ip, value);
+						break;
+					}
+				}
+				if(!recognized) {
+					withParam(key, value);
+				}
+			}
 			return this;
 		}
 		
@@ -377,8 +408,7 @@ public class SonicEvent implements ISonicEvent, Serializable {
 	
 	@Override
 	public Map<String,String> getExtensionData() {
-		// TODO this breaks validation
-		return this.extensionDataMap;
+		return Collections.unmodifiableMap(this.extensionDataMap);
 	}
 	
 	public int hashCode() {

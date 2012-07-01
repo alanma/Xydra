@@ -126,8 +126,9 @@ public interface ISonicEvent {
 	boolean hasUniqueId();
 	
 	/**
-	 * @return user-supplied extension data. Keys are valid Identifier, values
-	 *         can be any strings. User data may not exceed 500 KB.
+	 * @return an unmodifiable map of user-supplied extension data. Keys are
+	 *         valid Identifier, values can be any strings. User data may not
+	 *         exceed 500 KB.
 	 */
 	@NeverNull
 	Map<String,String> getExtensionData();
