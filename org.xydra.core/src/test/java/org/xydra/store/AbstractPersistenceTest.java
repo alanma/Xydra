@@ -42,6 +42,7 @@ import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.value.XStringValue;
 import org.xydra.base.value.XValue;
 import org.xydra.core.change.XTransactionBuilder;
+import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
@@ -1122,11 +1123,6 @@ public abstract class AbstractPersistenceTest {
 	 */
 	
 	/*
-	 * TODO also test transactions which execution would result in NOCHANGE.
-	 * 
-	 * TODO also test transactions which operate on models/objects etc. which
-	 * are not empty and modify the already existing fields etc.
-	 * 
 	 * TODO also write the used seeds into a text file so that they can be
 	 * recovered when a test fails and the user did not safe it.
 	 */
@@ -4047,7 +4043,7 @@ public abstract class AbstractPersistenceTest {
 				 * system which creates the transaction event already fine tune
 				 * the result so that changes and removes which occur on
 				 * objects/fields which were added during the transaction aren't
-				 * event shown?
+				 * even shown?
 				 */
 				assertTrue("The transaction should only contain events of the Add-type.",
 				        ev.getChangeType() == ChangeType.ADD);
@@ -4374,10 +4370,17 @@ public abstract class AbstractPersistenceTest {
 		
 		int numberOfObjects = 15;
 		int numberOfObjectsWithFields = 10;
+		int numberOfObjectsToRemove = 5;
 		
 		assert numberOfObjects >= numberOfObjectsWithFields;
+		assert numberOfObjectsWithFields >= numberOfObjectsToRemove;
 		
-		int numberOfFields = 5;
+		int numberOfFields = 15;
+		int numberOfFieldsWithValue = 10;
+		int numberOfFieldsToRemove = 5;
+		
+		assert numberOfFields >= numberOfFieldsWithValue;
+		assert numberOfFieldsWithValue >= numberOfFieldsToRemove;
 		
 		List<XID> objectIds = new ArrayList<XID>();
 		for(int i = 0; i < numberOfObjects; i++) {
@@ -4393,30 +4396,60 @@ public abstract class AbstractPersistenceTest {
 			        revNr > 0);
 		}
 		
-		List<XID> fieldIds = new ArrayList<XID>();
-		for(int i = 0; i < numberOfFields; i++) {
-			fieldIds.add(X.getIDProvider().fromString("testGetModelSnapshotField" + i));
-		}
-		
 		for(int i = 0; i < numberOfObjectsWithFields; i++) {
 			XID objectId = objectIds.get(i);
 			XObject object = model.getObject(objectId);
 			
-			for(XID fieldId : fieldIds) {
-				object.createField(fieldId);
+			for(int j = 0; j < numberOfFields; j++) {
+				XID fieldId = X.getIDProvider().fromString("testGetModelSnapshotField" + j);
+				
+				XField field = object.createField(fieldId);
 				
 				XCommand addFieldCommand =
 				        this.comFactory.createAddFieldCommand(this.repoId, modelId, objectId,
 				                fieldId, false);
 				revNr = this.persistence.executeCommand(this.actorId, addFieldCommand);
-				assertTrue("The " + i + ". field could not be created in the Object with id "
+				assertTrue("The " + j + ". field could not be created in the Object with id "
 				        + objectId + ", test cannot be executed.", revNr > 0);
+				
+				if(j < numberOfFieldsWithValue) {
+					XValue value =
+					        X.getValueFactory().createStringValue("testGetModelSnapshotValue" + j);
+					field.setValue(value);
+					
+					XCommand addValueCommand =
+					        this.comFactory.createAddValueCommand(this.repoId, modelId, objectId,
+					                fieldId, revNr, value, false);
+					revNr = this.persistence.executeCommand(this.actorId, addValueCommand);
+					assertTrue("The value for the " + j
+					        + ". field could not be created in the Object with id " + objectId
+					        + ", test cannot be executed.", revNr >= 0);
+					
+					if(j < numberOfFieldsToRemove) {
+						object.removeField(fieldId);
+						
+						XCommand removeFieldCommand =
+						        this.comFactory.createRemoveFieldCommand(this.repoId, modelId,
+						                objectId, fieldId, revNr, false);
+						revNr = this.persistence.executeCommand(this.actorId, removeFieldCommand);
+						assertTrue("The " + j
+						        + ". field could not be removed in the object with id " + objectId
+						        + ", test cannot be executed.", revNr >= 0);
+					}
+				}
+			}
+			
+			if(i < numberOfObjectsToRemove) {
+				model.removeObject(objectId);
+				
+				XCommand removeObjectCommand =
+				        this.comFactory.createRemoveObjectCommand(this.repoId, modelId, objectId,
+				                revNr, false);
+				revNr = this.persistence.executeCommand(this.actorId, removeObjectCommand);
+				assertTrue("The " + i + ". object could not be removed, test cannot be executed.",
+				        revNr >= 0);
 			}
 		}
-		
-		/*
-		 * TODO also add values and remove some things
-		 */
 		
 		// get the model snapshot
 		GetWithAddressRequest modelReq = new GetWithAddressRequest(modelAddress);
@@ -4441,7 +4474,21 @@ public abstract class AbstractPersistenceTest {
 		assertEquals(modelId, modelSnapshot.getId());
 		assertEquals(model.getRevisionNumber(), modelSnapshot.getRevisionNumber());
 		
-		int objectSnapshotsWithoutFields = 0;
+		int nrOfObjectsInManagedModel = 0;
+		int nrOfObjectsInModelSnapshot = 0;
+		
+		for(@SuppressWarnings("unused")
+		XID objectId : model) {
+			nrOfObjectsInManagedModel++;
+		}
+		
+		for(@SuppressWarnings("unused")
+		XID objectId : modelSnapshot) {
+			nrOfObjectsInModelSnapshot++;
+		}
+		
+		assertEquals("The snapshot does not have the correct amount of objects.",
+		        nrOfObjectsInManagedModel, nrOfObjectsInModelSnapshot);
 		
 		for(XID objectId : model) {
 			assertTrue("Snapshot does not contain an object which it should contain.",
@@ -4450,32 +4497,72 @@ public abstract class AbstractPersistenceTest {
 			XObject object = model.getObject(objectId);
 			XWritableObject objectSnapshot = modelSnapshot.getObject(objectId);
 			
-			int fieldsInSnapshot = 0;
+			int nrOfFieldsInManagedObject = 0;
+			int nrOfFieldsInObjectSnapshot = 0;
 			
-			for(XID fieldId : objectSnapshot) {
-				assert fieldId != null;
-				fieldsInSnapshot++;
+			for(@SuppressWarnings("unused")
+			XID fieldId : object) {
+				nrOfFieldsInManagedObject++;
 			}
 			
-			if(fieldsInSnapshot != 0) {
-				assertEquals("The snapshot does not have the correct amount of fields.",
-				        numberOfFields, fieldsInSnapshot);
+			for(@SuppressWarnings("unused")
+			XID fieldId : objectSnapshot) {
+				nrOfFieldsInObjectSnapshot++;
+			}
+			
+			assertEquals("The object snapshot does not have the correct amount of fields.",
+			        nrOfFieldsInManagedObject, nrOfFieldsInObjectSnapshot);
+			
+			for(XID fieldId : object) {
+				assertTrue("Snapshot does not contain a field which it should contain.",
+				        objectSnapshot.hasField(fieldId));
 				
-				for(XID fieldId : object) {
-					assertTrue("Snapshot does not contain a field which it should contain.",
-					        objectSnapshot.hasField(fieldId));
-				}
-			} else {
-				objectSnapshotsWithoutFields++;
+				XField field = object.getField(fieldId);
+				XWritableField fieldSnapshot = objectSnapshot.getField(fieldId);
+				
+				assertEquals("The field snapshot does not contain the correct value.",
+				        field.getValue(), fieldSnapshot.getValue());
 			}
 			
 		}
 		
-		assertEquals("The snapshot does not have the correct amount of objects without fields.",
-		        numberOfObjects - numberOfObjectsWithFields, objectSnapshotsWithoutFields);
+	}
+	
+	@Test
+	public void testGetModelSnapshotWrongAddressType() {
+		XID modelId = XX.createUniqueId();
+		XID objectId = XX.createUniqueId();
+		XID fieldId = XX.createUniqueId();
 		
-		// TODO check what happens when the wrong types of XAddresses are given
-		// as parameters
+		XAddress repoAddress = XX.resolveRepository(this.repoId);
+		XAddress objectAddress = XX.resolveObject(this.repoId, objectId, fieldId);
+		XAddress fieldAddress = XX.resolveField(this.repoId, modelId, objectId, fieldId);
+		
+		/*
+		 * TODO should the method really throw exceptions in this cases? docu is
+		 * unclear.
+		 */
+		
+		try {
+			this.persistence.getModelSnapshot(new GetWithAddressRequest(repoAddress));
+			assertTrue("The method should've thrown an execption", false);
+		} catch(Exception e) {
+			assertTrue(true);
+		}
+		
+		try {
+			this.persistence.getModelSnapshot(new GetWithAddressRequest(objectAddress));
+			assertTrue("The method should've thrown an execption", false);
+		} catch(Exception e) {
+			assertTrue(true);
+		}
+		
+		try {
+			this.persistence.getModelSnapshot(new GetWithAddressRequest(fieldAddress));
+			assertTrue("The method should've thrown an execption", false);
+		} catch(Exception e) {
+			assertTrue(true);
+		}
 	}
 	
 	@Test
@@ -4499,12 +4586,158 @@ public abstract class AbstractPersistenceTest {
 		assertNotNull(snapshot);
 	}
 	
-	// @Test (TODO test not yet ready)
+	@Test
 	public void testGetObjectSnapshot() {
+		
 		/*
-		 * TODO write this test - just like testgetModelSnapshot, but with
-		 * Objects
+		 * create an object and execute some commands on it, manage a separate
+		 * object in parallel, execute the same commands on that one and compare
+		 * the returned object to the self-managed object
 		 */
+		
+		// create appropriate objects first
+		XID modelId = X.getIDProvider().fromString("testGetObjectSnapshotModel");
+		
+		XRepository repo = X.createMemoryRepository(this.repoId);
+		XModel model = repo.createModel(modelId);
+		
+		XCommand addModelCommand =
+		        this.comFactory.createAddModelCommand(this.repoId, modelId, false);
+		long revNr = this.persistence.executeCommand(this.actorId, addModelCommand);
+		assertTrue("Model could not be created, test cannot be executed.", revNr >= 0);
+		
+		int numberOfFields = 15;
+		int numberOfFieldsWithValue = 10;
+		int numberOfFieldsToRemove = 5;
+		
+		assert numberOfFields >= numberOfFieldsWithValue;
+		assert numberOfFieldsWithValue >= numberOfFieldsToRemove;
+		
+		XID objectId = X.getIDProvider().fromString("testGetObjectSnapshotObject");
+		XAddress objectAddress = XX.resolveObject(this.repoId, modelId, objectId);
+		XObject object = model.createObject(objectId);
+		
+		XCommand addObjectCommand =
+		        this.comFactory.createAddObjectCommand(this.repoId, modelId, objectId, false);
+		revNr = this.persistence.executeCommand(this.actorId, addObjectCommand);
+		assertTrue("The object could not be created, test cannot be executed.", revNr >= 0);
+		
+		List<XID> fieldIds = new ArrayList<XID>();
+		for(int i = 0; i < numberOfFields; i++) {
+			XID fieldId = X.getIDProvider().fromString("testGetObjectSnapshotField" + i);
+			fieldIds.add(fieldId);
+			
+			XField field = object.createField(fieldId);
+			
+			XCommand addFieldCommand =
+			        this.comFactory.createAddFieldCommand(this.repoId, modelId, objectId, fieldId,
+			                false);
+			revNr = this.persistence.executeCommand(this.actorId, addFieldCommand);
+			assertTrue("The " + i + ". field could not be created in the Object with id "
+			        + objectId + ", test cannot be executed.", revNr >= 0);
+			
+			if(i < numberOfFieldsWithValue) {
+				XValue value =
+				        X.getValueFactory().createStringValue("testGetObjectSnapshotValue" + i);
+				field.setValue(value);
+				
+				XCommand addValueCommand =
+				        this.comFactory.createAddValueCommand(this.repoId, modelId, objectId,
+				                fieldId, revNr, value, false);
+				revNr = this.persistence.executeCommand(this.actorId, addValueCommand);
+				assertTrue("The value for the " + i
+				        + ". field could not be created in the Object with id " + objectId
+				        + ", test cannot be executed.", revNr >= 0);
+				
+				if(i < numberOfFieldsToRemove) {
+					object.removeField(fieldId);
+					
+					XCommand removeFieldCommand =
+					        this.comFactory.createRemoveFieldCommand(this.repoId, modelId,
+					                objectId, fieldId, revNr, false);
+					revNr = this.persistence.executeCommand(this.actorId, removeFieldCommand);
+					assertTrue("The " + i + ". field could not be removed in the object with id "
+					        + objectId + ", test cannot be executed.", revNr >= 0);
+				}
+			}
+		}
+		
+		// get the object snapshot
+		GetWithAddressRequest objectReq = new GetWithAddressRequest(objectAddress);
+		XWritableObject objectSnapshot = this.persistence.getObjectSnapshot(objectReq);
+		
+		/*
+		 * compare the managed object with the snapshot. "equals" might not work
+		 * here, since the returned java objects might be of different types, so
+		 * we'll have to test the equality manually.
+		 */
+		
+		assertEquals(objectId, objectSnapshot.getId());
+		assertEquals(object.getRevisionNumber(), objectSnapshot.getRevisionNumber());
+		
+		int nrOfFields = 0;
+		int nrOfFieldsInSnapshot = 0;
+		
+		for(@SuppressWarnings("unused")
+		XID fieldId : objectSnapshot) {
+			nrOfFieldsInSnapshot++;
+		}
+		
+		for(XID fieldId : object) {
+			nrOfFields++;
+			
+			assertTrue("Snapshot does not contain a field which it should contain.",
+			        objectSnapshot.hasField(fieldId));
+			
+			XField field = object.getField(fieldId);
+			XWritableField fieldSnapshot = objectSnapshot.getField(fieldId);
+			
+			assertEquals("Field snapshot does not contain the correct value.", field.getValue(),
+			        fieldSnapshot.getValue());
+		}
+		
+		assertEquals("Object snapshot does not contain the correct amount of fields.", nrOfFields,
+		        nrOfFieldsInSnapshot);
+		
+		// TODO check what happens when the wrong types of XAddresses are given
+		// as parameters
+	}
+	
+	@Test
+	public void testGetObjectSnapshotWrongAddressType() {
+		XID modelId = XX.createUniqueId();
+		XID objectId = XX.createUniqueId();
+		XID fieldId = XX.createUniqueId();
+		
+		XAddress repoAddress = XX.resolveRepository(this.repoId);
+		XAddress modelAddress = XX.resolveModel(this.repoId, modelId);
+		XAddress fieldAddress = XX.resolveField(this.repoId, modelId, objectId, fieldId);
+		
+		/*
+		 * TODO should the method really throw exceptions in this cases? docu is
+		 * unclear.
+		 */
+		
+		try {
+			this.persistence.getModelSnapshot(new GetWithAddressRequest(repoAddress));
+			assertTrue("The method should've thrown an execption", false);
+		} catch(Exception e) {
+			assertTrue(true);
+		}
+		
+		try {
+			this.persistence.getModelSnapshot(new GetWithAddressRequest(modelAddress));
+			assertTrue("The method should've thrown an execption", false);
+		} catch(Exception e) {
+			assertTrue(true);
+		}
+		
+		try {
+			this.persistence.getModelSnapshot(new GetWithAddressRequest(fieldAddress));
+			assertTrue("The method should've thrown an execption", false);
+		} catch(Exception e) {
+			assertTrue(true);
+		}
 	}
 	
 	@Test
