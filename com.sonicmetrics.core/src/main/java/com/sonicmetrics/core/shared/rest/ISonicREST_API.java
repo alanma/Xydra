@@ -34,6 +34,11 @@ public interface ISonicREST_API {
 	public static final String LABEL = "label";
 	
 	/**
+	 * Parameter name in URL and databases for label, like in Google Analytics
+	 */
+	public static final String VALUE = "value";
+	
+	/**
 	 * Parameter name in URL and databases for time-stamp
 	 */
 	public static final String WHEN = "when";

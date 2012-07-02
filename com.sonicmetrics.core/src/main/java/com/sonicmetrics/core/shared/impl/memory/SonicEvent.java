@@ -345,12 +345,28 @@ public class SonicEvent implements ISonicEvent, Serializable {
 				return this;
 			}
 			if(ValidationUtils.matches(IDENTIFIER_PATTERN, key)) {
-				this.se.extensionDataMap.put(key, value);
+				// auto-fix mapping to built-in parameters
+				if(key.equalsIgnoreCase(ISonicREST_API.CATEGORY)) {
+					return category(key);
+				} else if(key.equalsIgnoreCase(ISonicREST_API.ACTION)) {
+					return action(key);
+				} else if(key.equalsIgnoreCase(ISonicREST_API.LABEL)) {
+					return label(key);
+				} else if(key.equalsIgnoreCase(ISonicREST_API.VALUE)) {
+					return value(key);
+				} else if(key.equalsIgnoreCase(ISonicREST_API.SUBJECT)) {
+					return subject(key);
+				} else if(key.equalsIgnoreCase(ISonicREST_API.SOURCE)) {
+					return source(key);
+				} else if(key.equalsIgnoreCase(ISonicREST_API.UNIQUEID)) {
+					return uniqueId(key);
+				} else {
+					this.se.extensionDataMap.put(key, value);
+				}
 			} else {
 				log.debug("Ignored invalid key '" + key + "'" + ". Did not match the regex '"
 				        + IDENTIFIER + "' (Java syntax). See doc.sonicmetrics.com");
 			}
-			
 			return this;
 		}
 		
