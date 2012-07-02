@@ -5,7 +5,7 @@ import java.util.Iterator;
 
 /**
  * Encapsulates an iterator, returning only those elements matching a filter.
- * Uses a pre-fetch strategy
+ * Uses a pre-fetch strategy.
  * 
  * @author voelkel
  * 
@@ -23,13 +23,13 @@ public abstract class AbstractFilteringIterator<E> implements Iterator<E> {
 	}
 	
 	@Override
-    public boolean hasNext() {
+	public boolean hasNext() {
 		this.lookAhead();
 		return this.hasNext;
 	}
 	
 	@Override
-    public E next() {
+	public E next() {
 		E result = this.nextItem;
 		this.hasNext = false;
 		this.lookAhead();
@@ -37,7 +37,7 @@ public abstract class AbstractFilteringIterator<E> implements Iterator<E> {
 	}
 	
 	@Override
-    public void remove() {
+	public void remove() {
 		throw new UnsupportedOperationException();
 	}
 	
