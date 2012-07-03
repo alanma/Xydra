@@ -24,7 +24,6 @@
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-
 	</properties>
 
 	<repositories>
@@ -164,7 +163,18 @@
 				</configuration>
 			</plugin>
 
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>log4j.properties</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+
 		</plugins>
+
 	</build>
 
 	<dependencies>
@@ -392,21 +402,6 @@
 		</dependencies>
 	</dependencyManagement>
 	
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<configuration>
-					<excludes>
-						<exclude>log4j.properties</exclude>
-					</excludes>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
-
-
 	<profiles>
 		<!-- _______________________ DETAILED __________ -->
 		<profile>
@@ -533,7 +528,7 @@
 					<groupId>com.google.gwt</groupId>
 					<artifactId>gwt-dev</artifactId>
 					<version>${gwt.version}</version>
-					<scope>test</scope>
+					<scope>provided</scope>
 				</dependency>
 				<!-- Removed since 2012-04-13, now using the new emulated java.util.logging -->
 				<!-- <dependency> <groupId>com.allen-sauer.gwt.log</groupId> <artifactId>gwt-log</artifactId> 
