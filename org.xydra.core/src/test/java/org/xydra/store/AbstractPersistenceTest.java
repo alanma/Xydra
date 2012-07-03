@@ -1122,11 +1122,6 @@ public abstract class AbstractPersistenceTest {
 	 * revision numbers (as they should)
 	 */
 	
-	/*
-	 * TODO also write the used seeds into a text file so that they can be
-	 * recovered when a test fails and the user did not safe it.
-	 */
-	
 	@Test
 	public void testExecuteTransactionAddObjectWithForcedCmd() {
 		testExecuteTransactionAddObject(true);
@@ -2280,7 +2275,10 @@ public abstract class AbstractPersistenceTest {
 			        this.comFactory.createAddModelCommand(this.repoId, succModelId, false);
 			
 			/*
-			 * TODO document why there are two models
+			 * We use two model instance, which basically represent the same
+			 * model. One will be used to execute the succeeding transaction and
+			 * the other one for the transaction which is supposed to fail. This
+			 * makes testing easier and more flexible.
 			 */
 			
 			// add a model on which an object can be created first
@@ -2375,7 +2373,11 @@ public abstract class AbstractPersistenceTest {
 			        this.comFactory.createAddModelCommand(this.repoId, succModelId, false);
 			
 			/*
-			 * TODO document why there are two models/objects
+			 * We use two model instances, which basically represent the same
+			 * model. One will be used to hold the object on which we'll execute
+			 * the succeeding transaction and the other one for the object on
+			 * which we'll execute the transaction which is supposed to fail.
+			 * This makes testing easier and more flexible.
 			 */
 			
 			// add a model on which an object can be created first
@@ -2408,7 +2410,10 @@ public abstract class AbstractPersistenceTest {
 			                false);
 			
 			/*
-			 * TODO document why there are two models/objects
+			 * We use two object instances, which basically represent the same
+			 * object. One will be used to execute the succeeding transaction
+			 * and the other one for the transaction which is supposed to fail.
+			 * This makes testing easier and more flexible.
 			 */
 			
 			// create the objects on which the transactions will be executed
@@ -3961,8 +3966,11 @@ public abstract class AbstractPersistenceTest {
 		        objectRemoveEvent.inTransaction());
 		
 		/*
-		 * TODO remove the model
+		 * removing the model doesn't need to be checked, since the getEvents
+		 * method only gets events from models, objects and fields, but not from
+		 * the repository.
 		 */
+		
 	}
 	
 	@Test
@@ -4455,15 +4463,21 @@ public abstract class AbstractPersistenceTest {
 		GetWithAddressRequest modelReq = new GetWithAddressRequest(modelAddress);
 		XWritableModel modelSnapshot = this.persistence.getModelSnapshot(modelReq);
 		
+		int objectsInManagedModel = 0;
 		int objectsInSnapshot = 0;
 		
-		for(XID objectId : modelSnapshot) {
-			assert objectId != null;
+		for(@SuppressWarnings("unused")
+		XID objectId : model) {
+			objectsInManagedModel++;
+		}
+		
+		for(@SuppressWarnings("unused")
+		XID objectId : modelSnapshot) {
 			objectsInSnapshot++;
 		}
 		
-		assertEquals("The snapshot does not have the correct amount of objects.", numberOfObjects,
-		        objectsInSnapshot);
+		assertEquals("The snapshot does not have the correct amount of objects.",
+		        objectsInManagedModel, objectsInSnapshot);
 		
 		/*
 		 * compare the managed model with the snapshot. "equals" might not work
@@ -4698,9 +4712,6 @@ public abstract class AbstractPersistenceTest {
 		
 		assertEquals("Object snapshot does not contain the correct amount of fields.", nrOfFields,
 		        nrOfFieldsInSnapshot);
-		
-		// TODO check what happens when the wrong types of XAddresses are given
-		// as parameters
 	}
 	
 	@Test
