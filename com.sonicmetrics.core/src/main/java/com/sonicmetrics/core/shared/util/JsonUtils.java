@@ -94,7 +94,7 @@ public class JsonUtils {
 	static char[] hex = "0123456789ABCDEF".toCharArray();
 	
 	public static void appendKeyValue(StringBuilder b, String key, String value) {
-		b.append(string(key).toString()).append(": ").append(string(value));
+		b.append(string(key).toString()).append(": ").append(string(value).toString());
 	}
 	
 	public static void appendKeyValue(StringBuilder b, String key, long value) {

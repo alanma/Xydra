@@ -348,19 +348,19 @@ public class SonicEvent implements ISonicEvent, Serializable {
 			if(ValidationUtils.matches(IDENTIFIER_PATTERN, key)) {
 				// auto-fix mapping to built-in parameters
 				if(key.equalsIgnoreCase(ISonicREST_API.CATEGORY)) {
-					return category(key);
+					return category(value);
 				} else if(key.equalsIgnoreCase(ISonicREST_API.ACTION)) {
-					return action(key);
+					return action(value);
 				} else if(key.equalsIgnoreCase(ISonicREST_API.LABEL)) {
-					return label(key);
+					return label(value);
 				} else if(key.equalsIgnoreCase(ISonicREST_API.VALUE)) {
-					return value(key);
+					return value(value);
 				} else if(key.equalsIgnoreCase(ISonicREST_API.SUBJECT)) {
-					return subject(key);
+					return subject(value);
 				} else if(key.equalsIgnoreCase(ISonicREST_API.SOURCE)) {
-					return source(key);
+					return source(value);
 				} else if(key.equalsIgnoreCase(ISonicREST_API.UNIQUEID)) {
-					return uniqueId(key);
+					return uniqueId(value);
 				} else {
 					this.se.extensionDataMap.put(key, value);
 				}
