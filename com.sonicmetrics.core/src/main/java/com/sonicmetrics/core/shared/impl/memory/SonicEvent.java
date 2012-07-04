@@ -333,7 +333,8 @@ public class SonicEvent implements ISonicEvent, Serializable {
 		}
 		
 		/**
-		 * Ignored if value is null.
+		 * If a reserved key such as 'category' is used, this is mapped to a
+		 * call of category(s). Silently ignored if value is null.
 		 * 
 		 * @param key
 		 * @param value
