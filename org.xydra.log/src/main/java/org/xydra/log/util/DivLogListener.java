@@ -21,29 +21,32 @@ public class DivLogListener implements ILogListener {
 	}
 	
 	private void log(String level, Logger log, String msg, Throwable ... t) {
+		StringBuilder b = new StringBuilder();
 		if(level.equalsIgnoreCase("warn") || level.equalsIgnoreCase("error")) {
-			append("<span style='color:red;'>" + level + "</span> ");
+			b.append("<span style='color:red;'>" + level + "</span> ");
 		}
 		boolean dataAccess = msg.startsWith("|");
 		if(dataAccess) {
-			append("<span style='color:blue';>");
+			b.append("<span style='color:blue';>");
 		}
-		append("<b>");
-		append(msg);
-		append("</b>");
+		b.append("<b>");
+		b.append(msg);
+		b.append("</b>");
 		if(dataAccess) {
-			append("</span>");
+			b.append("</span>");
 		}
-		append("<span style='font-size: smaller; color: #ccc;'>");
-		append(" @");
-		append(lastDotPart(log.toString()));
-		append("<i>" + level + "</i> ");
+		b.append("<span style='font-size: smaller; color: #ccc;'>");
+		b.append(" @");
+		b.append(lastDotPart(log.toString()));
+		b.append("<i>" + level + "</i> ");
 		if(t != null && t.length > 0) {
-			append(" " + t.getClass().getName());
+			b.append(" " + t.getClass().getName());
 		} else {
 		}
-		append("</span> ");
-		append("<br/>\n");
+		b.append("</span> ");
+		b.append("<br/>\n");
+		
+		append(b.toString());
 	}
 	
 	private void append(String s) {
