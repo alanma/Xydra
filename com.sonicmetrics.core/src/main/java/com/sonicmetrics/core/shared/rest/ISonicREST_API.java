@@ -57,7 +57,10 @@ public interface ISonicREST_API {
 	public static final String APIKEY = "apikey";
 	
 	/** Support JSON-P */
-	public static final String CALLBACK = "callb∆ack";
+	public static final String CALLBACK = "callback";
+	
+	/** JSON key for time in response to /time query */
+	public static final String TIME = "time";
 	
 	/** Parameter names used in URLs, alphabetical order */
 	public static final String[] RESERVED_KEYS = { ACTION, APIKEY, CALLBACK, CATEGORY, KEY, LABEL,
