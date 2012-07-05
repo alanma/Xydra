@@ -44,7 +44,7 @@ public class TimeConstraint implements Serializable {
 	 * @return all events since a known last key until now
 	 */
 	public static TimeConstraint sinceLastkey(String lastKey) {
-		return new TimeConstraint(0, Long.MAX_VALUE, null);
+		return new TimeConstraint(0, Long.MAX_VALUE, lastKey);
 	}
 	
 	public boolean isConstraining() {
