@@ -116,6 +116,7 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 	 * value is used for all following rounds as well.
 	 */
 	// IMPROVE verify that 128 is not too large
+	// IMPROVE find better values
 	private static final int[] WINDOW_SIZES = { 1, 8, 32, 128 };
 	
 	@Override
