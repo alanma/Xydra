@@ -47,7 +47,7 @@ public class DivLogListener implements ILogListener {
 	}
 	
 	private void append(String s) {
-		this.hostPanel.add(new InlineHTML(s));
+		this.hostPanel.add(new InlineHTML("" + s));
 	}
 	
 	@Override
