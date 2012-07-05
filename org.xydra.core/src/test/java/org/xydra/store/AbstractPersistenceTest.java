@@ -1735,6 +1735,350 @@ public abstract class AbstractPersistenceTest {
 		assertEquals("Field doesn't have the right value.", value, field.getValue());
 	}
 	
+	@Test
+	public void testExecuteTransactionAddValueToExistingFieldWithForcedCmd() {
+		testExecuteTransactionAddValueToExistingField(true);
+	}
+	
+	@Test
+	public void testExecuteTransactionAddValueToExistingFieldWithSafeCmd() {
+		testExecuteTransactionAddValueToExistingField(false);
+	}
+	
+	private void testExecuteTransactionAddValueToExistingField(boolean forced) {
+		XID modelId =
+		        X.getIDProvider().fromString("executeTransactionAddValueToExistingField-Model");
+		XAddress modelAddress = XX.resolveModel(this.repoId, modelId);
+		
+		XCommand addModelCommand =
+		        this.comFactory.createAddModelCommand(this.repoId, modelId, false);
+		long revNr = this.persistence.executeCommand(this.actorId, addModelCommand);
+		
+		assertTrue("Model wasn't added correctly, test cannot be executed.", revNr >= 0);
+		
+		XID objectId =
+		        X.getIDProvider().fromString("executeTransactionAddValueToExistingField-Object");
+		XCommand addObjectCommand =
+		        this.comFactory.createAddObjectCommand(this.repoId, modelId, objectId, forced);
+		
+		revNr = this.persistence.executeCommand(this.actorId, addObjectCommand);
+		
+		assertTrue("Object wasn't added correctly, test cannot be executed.", revNr >= 0);
+		
+		XID fieldId =
+		        X.getIDProvider().fromString("executeTransactionAddValueToExistingField-Field");
+		XCommand addFieldCommand =
+		        this.comFactory.createAddFieldCommand(this.repoId, modelId, objectId, fieldId,
+		                forced);
+		
+		revNr = this.persistence.executeCommand(this.actorId, addFieldCommand);
+		
+		assertTrue("Field wasn't added correctly, test cannot be executed.", revNr >= 0);
+		
+		XValue value = X.getValueFactory().createStringValue("test");
+		XCommand addValueCommand =
+		        this.comFactory.createAddValueCommand(this.repoId, modelId, objectId, fieldId,
+		                revNr, value, forced);
+		
+		XTransactionBuilder txnBuilder = new XTransactionBuilder(modelAddress);
+		txnBuilder.addCommand(addValueCommand);
+		
+		XTransaction txn = txnBuilder.build();
+		
+		revNr = this.persistence.executeCommand(this.actorId, txn);
+		
+		assertTrue("Transaction wasn't executed correctly.", revNr > 0);
+		
+		GetWithAddressRequest addressRequest =
+		        new GetWithAddressRequest(XX.resolveObject(this.repoId, modelId, objectId));
+		XReadableObject object = this.persistence.getObjectSnapshot(addressRequest);
+		
+		assertNotNull("Object does not exist, but the transactions execution reported a success.",
+		        object);
+		
+		XReadableField field = object.getField(fieldId);
+		assertNotNull("Object does not contain the field the transaction should've added.", field);
+		
+		assertEquals("Field doesn't have the right value.", value, field.getValue());
+	}
+	
+	@Test
+	public void testExecuteTransactionAddValueToNotExistingFieldWithForcedCmd() {
+		testExecuteTransactionAddValueToNotExistingField(true);
+	}
+	
+	@Test
+	public void testExecuteTransactionAddValueToNotExistingFieldWithSafeCmd() {
+		testExecuteTransactionAddValueToExistingField(false);
+	}
+	
+	private void testExecuteTransactionAddValueToNotExistingField(boolean forced) {
+		XID modelId =
+		        X.getIDProvider().fromString("executeTransactionAddValueToNotExistingField-Model");
+		XAddress modelAddress = XX.resolveModel(this.repoId, modelId);
+		
+		XCommand addModelCommand =
+		        this.comFactory.createAddModelCommand(this.repoId, modelId, false);
+		long revNr = this.persistence.executeCommand(this.actorId, addModelCommand);
+		
+		assertTrue("Model wasn't added correctly, test cannot be executed.", revNr >= 0);
+		
+		XID objectId =
+		        X.getIDProvider().fromString("executeTransactionAddValueToNotExistingField-Object");
+		XCommand addObjectCommand =
+		        this.comFactory.createAddObjectCommand(this.repoId, modelId, objectId, forced);
+		
+		revNr = this.persistence.executeCommand(this.actorId, addObjectCommand);
+		
+		assertTrue("Object wasn't added correctly, test cannot be executed.", revNr >= 0);
+		
+		XID fieldId =
+		        X.getIDProvider().fromString("executeTransactionAddValueToNotExistingField-Field");
+		
+		XValue value = X.getValueFactory().createStringValue("test");
+		XCommand addValueCommand =
+		        this.comFactory.createAddValueCommand(this.repoId, modelId, objectId, fieldId,
+		                revNr, value, forced);
+		
+		XTransactionBuilder txnBuilder = new XTransactionBuilder(modelAddress);
+		txnBuilder.addCommand(addValueCommand);
+		
+		XTransaction txn = txnBuilder.build();
+		
+		revNr = this.persistence.executeCommand(this.actorId, txn);
+		
+		assertEquals("Transaction should've failed, since we never added the needed field.",
+		        XCommand.FAILED, revNr);
+	}
+	
+	@Test
+	public void testExecuteTransactionAddValueToExistingFieldWithValueWithForcedCmd() {
+		testExecuteTransactionAddValueToExistingFieldWithValue(true);
+	}
+	
+	@Test
+	public void testExecuteTransactionAddValueToExistingFieldWithValueWithSafeCmd() {
+		testExecuteTransactionAddValueToExistingFieldWithValue(false);
+	}
+	
+	private void testExecuteTransactionAddValueToExistingFieldWithValue(boolean forced) {
+		XID modelId =
+		        X.getIDProvider().fromString(
+		                "executeTransactionAddValueToExistingFieldWithValue-Model");
+		XAddress modelAddress = XX.resolveModel(this.repoId, modelId);
+		
+		XCommand addModelCommand =
+		        this.comFactory.createAddModelCommand(this.repoId, modelId, false);
+		long revNr = this.persistence.executeCommand(this.actorId, addModelCommand);
+		
+		assertTrue("Model wasn't added correctly, test cannot be executed.", revNr >= 0);
+		
+		XID objectId =
+		        X.getIDProvider().fromString(
+		                "executeTransactionAddValueToExistingFieldWithValue-Object");
+		XCommand addObjectCommand =
+		        this.comFactory.createAddObjectCommand(this.repoId, modelId, objectId, forced);
+		
+		revNr = this.persistence.executeCommand(this.actorId, addObjectCommand);
+		
+		assertTrue("Object wasn't added correctly, test cannot be executed.", revNr >= 0);
+		
+		XID fieldId =
+		        X.getIDProvider().fromString(
+		                "executeTransactionAddValueToExistingFieldWithValue-Field");
+		XCommand addFieldCommand =
+		        this.comFactory.createAddFieldCommand(this.repoId, modelId, objectId, fieldId,
+		                forced);
+		
+		revNr = this.persistence.executeCommand(this.actorId, addFieldCommand);
+		
+		assertTrue("Field wasn't added correctly, test cannot be executed.", revNr >= 0);
+		
+		XValue value = X.getValueFactory().createStringValue("test");
+		XCommand addValueCommand =
+		        this.comFactory.createAddValueCommand(this.repoId, modelId, objectId, fieldId,
+		                revNr, value, forced);
+		
+		revNr = this.persistence.executeCommand(this.actorId, addValueCommand);
+		
+		assertTrue("Value wasn't added correctly, test cannot be executed.", revNr >= 0);
+		
+		XValue value2 = X.getValueFactory().createStringValue("test2");
+		XCommand addValueCommand2 =
+		        this.comFactory.createAddValueCommand(this.repoId, modelId, objectId, fieldId,
+		                revNr, value2, forced);
+		
+		XTransactionBuilder txnBuilder = new XTransactionBuilder(modelAddress);
+		txnBuilder.addCommand(addValueCommand2);
+		
+		XTransaction txn = txnBuilder.build();
+		
+		revNr = this.persistence.executeCommand(this.actorId, txn);
+		
+		if(forced) {
+			assertTrue("Transaction wasn't executed correctly.", revNr > 0);
+			
+			GetWithAddressRequest addressRequest =
+			        new GetWithAddressRequest(XX.resolveObject(this.repoId, modelId, objectId));
+			XReadableObject object = this.persistence.getObjectSnapshot(addressRequest);
+			
+			assertNotNull(
+			        "Object does not exist, but the transactions execution reported a success.",
+			        object);
+			
+			XReadableField field = object.getField(fieldId);
+			assertNotNull("Object does not contain the field the transaction should've added.",
+			        field);
+			
+			assertEquals("Field doesn't have the right value.", value2, field.getValue());
+		} else {
+			assertEquals(
+			        "Execution should return \"Failed\", since the command wasn't forced and the value was already set.",
+			        XCommand.FAILED, revNr);
+		}
+	}
+	
+	@Test
+	public void testExecuteTransactionRemoveValueFromExistingFieldWithForcedCmd() {
+		testExecuteTransactionRemoveValueFromExistingField(true);
+	}
+	
+	@Test
+	public void testExecuteTransactionRemoveValueFromExistingFieldWithSafeCmd() {
+		testExecuteTransactionRemoveValueFromExistingField(false);
+	}
+	
+	private void testExecuteTransactionRemoveValueFromExistingField(boolean forced) {
+		XID modelId =
+		        X.getIDProvider()
+		                .fromString("executeTransactionRemoveValueFromExistingField-Model");
+		XAddress modelAddress = XX.resolveModel(this.repoId, modelId);
+		
+		XCommand addModelCommand =
+		        this.comFactory.createAddModelCommand(this.repoId, modelId, false);
+		long revNr = this.persistence.executeCommand(this.actorId, addModelCommand);
+		
+		assertTrue("Model wasn't added correctly, test cannot be executed.", revNr >= 0);
+		
+		XID objectId =
+		        X.getIDProvider().fromString(
+		                "executeTransactionRemoveValueFromExistingField-Object");
+		XCommand addObjectCommand =
+		        this.comFactory.createAddObjectCommand(this.repoId, modelId, objectId, forced);
+		
+		revNr = this.persistence.executeCommand(this.actorId, addObjectCommand);
+		
+		assertTrue("Object wasn't added correctly, test cannot be executed.", revNr >= 0);
+		
+		XID fieldId =
+		        X.getIDProvider()
+		                .fromString("executeTransactionRemoveValueFromExistingField-Field");
+		XCommand addFieldCommand =
+		        this.comFactory.createAddFieldCommand(this.repoId, modelId, objectId, fieldId,
+		                forced);
+		
+		revNr = this.persistence.executeCommand(this.actorId, addFieldCommand);
+		
+		assertTrue("Field wasn't added correctly, test cannot be executed.", revNr >= 0);
+		
+		XValue value = X.getValueFactory().createStringValue("test");
+		XCommand addValueCommand =
+		        this.comFactory.createAddValueCommand(this.repoId, modelId, objectId, fieldId,
+		                revNr, value, forced);
+		
+		revNr = this.persistence.executeCommand(this.actorId, addValueCommand);
+		
+		assertTrue("Value wasn't added correctly, test cannot be executed.", revNr >= 0);
+		
+		XCommand removeValueCommand =
+		        this.comFactory.createRemoveValueCommand(this.repoId, modelId, objectId, fieldId,
+		                revNr, forced);
+		
+		XTransactionBuilder txnBuilder = new XTransactionBuilder(modelAddress);
+		txnBuilder.addCommand(removeValueCommand);
+		
+		XTransaction txn = txnBuilder.build();
+		
+		revNr = this.persistence.executeCommand(this.actorId, txn);
+		
+		assertTrue("Transaction wasn't executed correctly.", revNr > 0);
+		
+		GetWithAddressRequest addressRequest =
+		        new GetWithAddressRequest(XX.resolveObject(this.repoId, modelId, objectId));
+		XReadableObject object = this.persistence.getObjectSnapshot(addressRequest);
+		
+		assertNotNull("Object does not exist, but the transactions execution reported a success.",
+		        object);
+		
+		XReadableField field = object.getField(fieldId);
+		assertNotNull("Object does not contain the field the transaction should've added.", field);
+		
+		assertEquals("Field should have no value.", null, field.getValue());
+	}
+	
+	@Test
+	public void testExecuteTransactionRemoveValueFromExistingFieldWithoutValueForcedCmd() {
+		testExecuteTransactionRemoveValueFromExistingFieldWithoutValue(true);
+	}
+	
+	@Test
+	public void testExecuteTransactionRemoveValueFromExistingFieldWithoutValueSafeCmd() {
+		testExecuteTransactionRemoveValueFromExistingFieldWithoutValue(false);
+	}
+	
+	private void testExecuteTransactionRemoveValueFromExistingFieldWithoutValue(boolean forced) {
+		XID modelId =
+		        X.getIDProvider().fromString(
+		                "executeTransactionRemoveValueFromExistingFieldWithoutValue-Model");
+		XAddress modelAddress = XX.resolveModel(this.repoId, modelId);
+		
+		XCommand addModelCommand =
+		        this.comFactory.createAddModelCommand(this.repoId, modelId, false);
+		long revNr = this.persistence.executeCommand(this.actorId, addModelCommand);
+		
+		assertTrue("Model wasn't added correctly, test cannot be executed.", revNr >= 0);
+		
+		XID objectId =
+		        X.getIDProvider().fromString(
+		                "executeTransactionRemoveValueFromExistingFieldWithoutValue-Object");
+		XCommand addObjectCommand =
+		        this.comFactory.createAddObjectCommand(this.repoId, modelId, objectId, forced);
+		
+		revNr = this.persistence.executeCommand(this.actorId, addObjectCommand);
+		
+		assertTrue("Object wasn't added correctly, test cannot be executed.", revNr >= 0);
+		
+		XID fieldId =
+		        X.getIDProvider().fromString(
+		                "executeTransactionRemoveValueFromExistingFieldWithoutValue-Field");
+		XCommand addFieldCommand =
+		        this.comFactory.createAddFieldCommand(this.repoId, modelId, objectId, fieldId,
+		                forced);
+		
+		revNr = this.persistence.executeCommand(this.actorId, addFieldCommand);
+		
+		assertTrue("Field wasn't added correctly, test cannot be executed.", revNr >= 0);
+		
+		XCommand removeValueCommand =
+		        this.comFactory.createRemoveValueCommand(this.repoId, modelId, objectId, fieldId,
+		                revNr, forced);
+		
+		XTransactionBuilder txnBuilder = new XTransactionBuilder(modelAddress);
+		txnBuilder.addCommand(removeValueCommand);
+		
+		XTransaction txn = txnBuilder.build();
+		
+		revNr = this.persistence.executeCommand(this.actorId, txn);
+		
+		if(forced) {
+			assertEquals("Execution should return \"No Change\", since the command was forced.",
+			        XCommand.NOCHANGE, revNr);
+		} else {
+			assertEquals("Execution should return \"Failed\", since the command wasn't forced.",
+			        XCommand.FAILED, revNr);
+		}
+	}
+	
 	/*
 	 * TODO continue writing deterministic tests.
 	 */
