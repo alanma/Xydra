@@ -628,9 +628,12 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 	 * @param baseModel
 	 */
 	public void indexModel(XReadableModel baseModel) {
+		long c = 0;
 		for(XID id : baseModel) {
 			indexObject(baseModel.getObject(id));
+			c++;
 		}
+		log.info("Indexed " + c + " object in model " + baseModel.getAddress());
 		this.rev = baseModel.getRevisionNumber();
 		this.knowsAllObjectIds = true;
 	}

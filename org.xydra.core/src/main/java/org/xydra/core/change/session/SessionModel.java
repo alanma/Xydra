@@ -252,6 +252,9 @@ public class SessionModel implements XSessionModel {
 	
 	@Override
 	public SessionModel loadAllObjects() {
+		log.info("Loading all objects in " + getAddress() + ". Already known?"
+		        + this.sessionCacheModel.knowsAllObjects());
+		
 		// load only if not already present
 		if(this.sessionCacheModel.knowsAllObjects()) {
 			return this;
