@@ -169,7 +169,7 @@ public class GaeSnapshotServiceImplNG extends AbstractGaeSnapshotServiceImpl {
 	
 	private static final long STANDARD_DISTANCE = 10;
 	
-	@Setting(value = "")
+	@Setting("if memcache should be used to cache snapshots")
 	private static final boolean USE_MEMCACHE = true;
 	
 	// @Setting
