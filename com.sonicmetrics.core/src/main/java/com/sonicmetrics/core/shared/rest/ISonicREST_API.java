@@ -66,4 +66,13 @@ public interface ISonicREST_API {
 	public static final String[] RESERVED_KEYS = { ACTION, APIKEY, CALLBACK, CATEGORY, KEY, LABEL,
 	        SOURCE, SUBJECT, UNIQUEID, WHEN };
 	
+	/** the last key of an event that has already been received */
+	public static final String LAST_KEY = "lastkey";
+	
+	/** first time-stamp for which to get events */
+	public static final String START = "start";
+	
+	/** Last time-stamp for which to get events */
+	public static final String END = "end";
+	
 }
