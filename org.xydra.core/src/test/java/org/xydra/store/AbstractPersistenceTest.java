@@ -2333,7 +2333,7 @@ public abstract class AbstractPersistenceTest {
 	        int maxNrOfFields, long seed) {
 		
 		String modelIdString =
-		        "testExecuteCommandSucceedingModelTransaction_seed2634857159770016178FindFailingSubTxn-Model";
+		        "testExecuteCommandSucceedingModelTransactionFindFailingSubTxn-Model_seed" + seed;
 		
 		XTransaction txn =
 		        findFailingSubtransactionInSucceedingTransaction(modelIdString, seed,
