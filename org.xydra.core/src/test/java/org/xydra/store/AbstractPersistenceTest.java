@@ -2314,17 +2314,30 @@ public abstract class AbstractPersistenceTest {
 	}
 	
 	@Test
-	public void testExecuteCommandSucceedingModelTransaction_seed2634857159770016178FindFailingSubTxn() {
-		String modelIdString =
-		        "testExecuteCommandSucceedingModelTransaction_seed2634857159770016178FindFailingSubTxn-Model";
-		
+	public void testExecuteCommandSucceedingModelTransactionFindFailingSubTxn_seed2634857159770016178() {
 		/*
 		 * TODO setting the "maxNrOfObjectsParameter" to 1 also causes the test
 		 * to fail
 		 */
+		
+		int maxNrOfObjects = 10;
+		int maxNrOfFields = 10;
+		
+		long seed = 2634857159770016178l;
+		
+		testExecuteCommandSucceedingModelTransactionFindFailingSubTxn(maxNrOfObjects,
+		        maxNrOfFields, seed);
+	}
+	
+	private void testExecuteCommandSucceedingModelTransactionFindFailingSubTxn(int maxNrOfObjects,
+	        int maxNrOfFields, long seed) {
+		
+		String modelIdString =
+		        "testExecuteCommandSucceedingModelTransaction_seed2634857159770016178FindFailingSubTxn-Model";
+		
 		XTransaction txn =
-		        findFailingSubtransactionInSucceedingTransaction(modelIdString,
-		                2634857159770016178l, 10, 10);
+		        findFailingSubtransactionInSucceedingTransaction(modelIdString, seed,
+		                maxNrOfObjects, maxNrOfFields);
 		
 		if(txn != null) {
 			XID modelId = X.getIDProvider().fromString(modelIdString);
