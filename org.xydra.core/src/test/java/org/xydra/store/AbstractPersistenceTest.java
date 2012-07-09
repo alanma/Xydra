@@ -28,6 +28,7 @@ import org.xydra.base.change.XCommandFactory;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XFieldCommand;
 import org.xydra.base.change.XFieldEvent;
+import org.xydra.base.change.XModelCommand;
 import org.xydra.base.change.XModelEvent;
 import org.xydra.base.change.XObjectEvent;
 import org.xydra.base.change.XRepositoryEvent;
@@ -2310,6 +2311,155 @@ public abstract class AbstractPersistenceTest {
 	@Test
 	public void testExecuteCommandSucceedingModelTransaction_seed2634857159770016178() {
 		testExecuteCommandSucceedingModelTransaction_withSeed(0, 2634857159770016178l, 1, 10);
+	}
+	
+	@Test
+	public void testExecuteCommandSucceedingModelTransaction_seed2634857159770016178FindFailingSubTxn() {
+		String modelIdString =
+		        "testExecuteCommandSucceedingModelTransaction_seed2634857159770016178FindFailingSubTxn-Model";
+		
+		/*
+		 * TODO setting the "maxNrOfObjectsParameter" to 1 also causes the test
+		 * to fail
+		 */
+		XTransaction txn =
+		        findFailingSubtransactionInSucceedingTransaction(modelIdString,
+		                2634857159770016178l, 10, 10);
+		
+		if(txn != null) {
+			XID modelId = X.getIDProvider().fromString(modelIdString);
+			
+			XCommand addModelCom =
+			        this.comFactory.createAddModelCommand(this.repoId, modelId, false);
+			// add a model on which an object can be created first
+			long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
+			
+			assertTrue("Model could not be added, test cannot be executed.", revNr >= 0);
+			
+			revNr = this.persistence.executeCommand(this.actorId, txn);
+			
+			assertTrue("Transaction failed, should've succeeded.", revNr >= 0);
+		}
+	}
+	
+	private XTransaction findFailingSubtransactionInSucceedingTransaction(String modelIdString,
+	        long seed, int maxNrOfObjects, int maxNrOfFields) {
+		XID modelId = X.getIDProvider().fromString(modelIdString);
+		XAddress modelAddress = XX.resolveModel(this.repoId, modelId);
+		
+		GetWithAddressRequest modelAdrRequest = new GetWithAddressRequest(modelAddress);
+		XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId, false);
+		// add a model on which an object can be created first
+		long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
+		
+		assertTrue("Model could not be added, test cannot be executed.", revNr >= 0);
+		
+		XWritableModel modelSnapshot = this.persistence.getModelSnapshot(modelAdrRequest);
+		
+		log.info("Creating transaction with seed " + seed + ".");
+		Pair<ChangedModel,XTransaction> pair =
+		        createRandomSucceedingModelTransaction(modelSnapshot, seed, maxNrOfObjects,
+		                maxNrOfFields);
+		XTransaction txn = pair.getSecond();
+		
+		revNr = 0;
+		
+		XTransaction testTxn = null;
+		
+		for(int i = 1; i < txn.size() && revNr != XCommand.FAILED; i++) {
+			/*
+			 * reset state, so that we try to execute the transaction part we're
+			 * now checking on the old state
+			 */
+			XCommand removeModelCommand =
+			        this.comFactory.createRemoveModelCommand(modelAddress, 0, true);
+			
+			long removeRevNr = this.persistence.executeCommand(this.actorId, removeModelCommand);
+			
+			assertTrue(
+			        "Model couldn't be removed, state couldn't be reset, therefore method cannot be executed correctly.",
+			        removeRevNr >= 0);
+			
+			// add model again
+			long addRevNr = this.persistence.executeCommand(this.actorId, addModelCom);
+			
+			assertTrue("Model could not be added, test cannot be executed.", addRevNr >= 0);
+			
+			/*
+			 * build sub transaction
+			 */
+			
+			XTransactionBuilder txnBuilder = new XTransactionBuilder(modelAddress);
+			
+			for(int j = 0; j < i; j++) {
+				txnBuilder.addCommand(txn.getCommand(j));
+			}
+			
+			testTxn = txnBuilder.build();
+			
+			revNr = this.persistence.executeCommand(this.actorId, testTxn);
+			
+			if(revNr == XCommand.FAILED) {
+				// last command is the one that fails
+				XCommand failCmd = testTxn.getCommand(testTxn.size() - 1);
+				XID failId;
+				if(failCmd instanceof XModelCommand) {
+					failId = failCmd.getChangedEntity().getObject();
+				} else {
+					failId = failCmd.getTarget().getObject();
+				}
+				
+				XTransactionBuilder txnBuilder2 = new XTransactionBuilder(modelAddress);
+				
+				for(XCommand cmd : testTxn) {
+					if(failId.equals(cmd.getTarget().getObject())) {
+						txnBuilder2.addCommand(cmd);
+					}
+				}
+				
+				/*
+				 * reset state, so that we try to execute the transaction part
+				 * we're now checking on the old state
+				 */
+				removeModelCommand =
+				        this.comFactory.createRemoveModelCommand(modelAddress, 0, true);
+				
+				removeRevNr = this.persistence.executeCommand(this.actorId, removeModelCommand);
+				
+				assertTrue(
+				        "Model couldn't be removed, state couldn't be reset, therefore method cannot be executed correctly.",
+				        removeRevNr >= 0);
+				
+				// add model again
+				addRevNr = this.persistence.executeCommand(this.actorId, addModelCom);
+				
+				assertTrue("Model could not be added, test cannot be executed.", addRevNr >= 0);
+				
+				XTransaction testTxn2 = txnBuilder2.build();
+				
+				long testRevNr = this.persistence.executeCommand(this.actorId, testTxn2);
+				
+				if(testRevNr == XCommand.FAILED) {
+					testTxn = testTxn2;
+				}
+			}
+			
+		}
+		
+		/*
+		 * reset state, so that we try to execute the transaction part we're now
+		 * checking on the old state
+		 */
+		XCommand removeModelCommand =
+		        this.comFactory.createRemoveModelCommand(modelAddress, 0, true);
+		
+		long removeRevNr = this.persistence.executeCommand(this.actorId, removeModelCommand);
+		
+		assertTrue(
+		        "Model couldn't be removed, state couldn't be reset, therefore method cannot be executed correctly.",
+		        removeRevNr >= 0);
+		
+		return testTxn;
 	}
 	
 	private void testExecuteCommandSucceedingModelTransaction_withSeed(int i, long seed,
