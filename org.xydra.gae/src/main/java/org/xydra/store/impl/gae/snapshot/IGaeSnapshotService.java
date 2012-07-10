@@ -8,6 +8,7 @@ import org.xydra.base.rmof.XRevWritableField;
 import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.base.rmof.XWritableField;
+import org.xydra.base.rmof.XWritableModel;
 import org.xydra.core.model.XChangeLog;
 
 
@@ -74,4 +75,6 @@ public interface IGaeSnapshotService {
 	XRevWritableModel getPartialSnapshot(long modelRevisionNumber, Iterable<XAddress> parts);
 	
 	XAddress getModelAddress();
+	
+	XWritableModel getTentativeModelSnapshot(long currentRevNr);
 }

@@ -1,7 +1,9 @@
 package org.xydra.store.impl.gae.ng;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.xydra.annotations.CanBeNull;
 import org.xydra.annotations.NeverNull;
@@ -20,14 +22,26 @@ import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.XydraOut;
 import org.xydra.core.serialize.json.JsonParser;
 import org.xydra.core.serialize.json.JsonSerializer;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 import org.xydra.sharedutils.XyAssert;
+import org.xydra.store.impl.gae.GaeTestFixer_LocalPart;
+import org.xydra.store.impl.gae.GaeTestfixer;
+import org.xydra.store.impl.gae.GaeUtils2;
+import org.xydra.store.impl.gae.SyncDatastore;
 import org.xydra.store.impl.gae.UniCache;
 import org.xydra.store.impl.gae.UniCache.CacheEntryHandler;
 import org.xydra.store.impl.gae.UniCache.StorageOptions;
 import org.xydra.store.impl.gae.snapshot.IGaeSnapshotService;
 
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.Filter;
+import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Text;
 
 
@@ -39,6 +53,8 @@ import com.google.appengine.api.datastore.Text;
  */
 public class ContextBeforeCommand implements XRevWritableModel,
         CacheEntryHandler<TentativeObjectState> {
+	
+	private static final Logger log = LoggerFactory.getLogger(ContextBeforeCommand.class);
 	
 	private IGaeSnapshotService snapshotService;
 	
@@ -89,11 +105,19 @@ public class ContextBeforeCommand implements XRevWritableModel,
 		return address;
 	}
 	
-	private static String toKey(XAddress objectAddress) {
-		return "tos" + objectAddress;
+	/**
+	 * Internally used also to generate the key prefix
+	 * 
+	 * @param objectOrModelAddress
+	 * @return key
+	 */
+	private static String toKey(XAddress objectOrModelAddress) {
+		return "tos" + objectOrModelAddress;
 	}
 	
-	UniCache<TentativeObjectState> cache = new UniCache<TentativeObjectState>(this, "TOS");
+	public static final String KIND_TOS = "TOS";
+	
+	UniCache<TentativeObjectState> cache = new UniCache<TentativeObjectState>(this, KIND_TOS);
 	
 	private XAddress modelAddress;
 	
@@ -101,7 +125,7 @@ public class ContextBeforeCommand implements XRevWritableModel,
 	@Setting("Where to cache TOS")
 	private StorageOptions storeOpts = StorageOptions.create(0, false, true, false);
 	
-	protected XRevWritableObject deserialize(XAddress modelAddress, String data) {
+	protected static XRevWritableObject deserialize(XAddress modelAddress, String data) {
 		JsonParser parser = new JsonParser();
 		XydraElement xydraElement = parser.parse(data);
 		XRevWritableObject object = SerializedModel.toObjectState(xydraElement, modelAddress);
@@ -110,11 +134,15 @@ public class ContextBeforeCommand implements XRevWritableModel,
 	
 	@Override
 	public TentativeObjectState fromEntity(Entity entity) {
+		return fromEntity_static(entity, this.modelAddress);
+	}
+	
+	public static TentativeObjectState fromEntity_static(Entity entity, XAddress modelAddress) {
 		long revUsed = (Long)entity.getProperty(USED_REV);
 		boolean objectExists = (Boolean)entity.getProperty(OBJECT_EXISTS);
 		Text jsonText = (Text)entity.getProperty(JSON);
 		String json = jsonText.getValue();
-		XRevWritableObject obj = deserialize(this.modelAddress, json);
+		XRevWritableObject obj = deserialize(modelAddress, json);
 		
 		return new TentativeObjectState(obj, objectExists, revUsed);
 	}
@@ -122,6 +150,51 @@ public class ContextBeforeCommand implements XRevWritableModel,
 	@Override
 	public TentativeObjectState fromSerializable(Serializable s) {
 		return (TentativeObjectState)s;
+	}
+	
+	public static List<TentativeObjectState> getAllTentativeObjectStatesOfModel(
+	        XAddress modelAddress) {
+		
+		/* Make sure to keep in sync with #toKey(..) */
+		String keyPrefix = "tos/" + modelAddress.getRepository() + "/" + modelAddress.getModel();
+		
+		Query query = new Query(KIND_TOS);
+		List<Filter> subFilters = new ArrayList<Filter>(2);
+		
+		subFilters.add(
+		
+		new Query.FilterPredicate(GaeUtils2.KEY, FilterOperator.GREATER_THAN_OR_EQUAL, KeyFactory
+		        .createKey(KIND_TOS, keyPrefix)));
+		
+		subFilters.add(
+		
+		new Query.FilterPredicate(GaeUtils2.KEY, FilterOperator.LESS_THAN_OR_EQUAL, KeyFactory
+		        .createKey(KIND_TOS, keyPrefix + GaeUtils2.LAST_UNICODE_CHAR)));
+		
+		query.setFilter(Query.CompositeFilterOperator.and(subFilters));
+		
+		PreparedQuery prepQuery = SyncDatastore.prepareQuery(query);
+		
+		log.info("Firing query " + prepQuery.toString());
+		
+		List<Entity> entityList = prepQuery.asList(FetchOptions.Builder.withChunkSize(128));
+		
+		List<TentativeObjectState> tosList = new ArrayList<TentativeObjectState>(entityList.size());
+		log.info("got " + entityList.size() + " results");
+		
+		for(Entity entity : entityList) {
+			TentativeObjectState tos = fromEntity_static(entity, modelAddress);
+			tosList.add(tos);
+		}
+		
+		return tosList;
+	}
+	
+	public static void main(String[] args) {
+		GaeTestfixer.enable();
+		GaeTestFixer_LocalPart.initialiseHelperAndAttachToCurrentThread();
+		getAllTentativeObjectStatesOfModel(XX
+		        .toAddress("/gae-data/a00024529-BB2E-4B97-AE12-13B67C9D68ED-tasks"));
 	}
 	
 	@CanBeNull

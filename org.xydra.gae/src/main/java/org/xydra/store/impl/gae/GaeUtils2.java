@@ -13,6 +13,10 @@ public class GaeUtils2 {
 	/* Compile time flag */
 	private static final boolean useMemCache = true;
 	
+	public static final String KEY = "__key__";
+	
+	public static final String LAST_UNICODE_CHAR = "\uFFFF";
+	
 	public static AsyncEntity getEntityFromMemcacheAndAsyncDatatore(Key key) {
 		if(useMemCache) {
 			// try first to get from memcache

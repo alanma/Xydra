@@ -18,7 +18,6 @@ import org.xydra.base.change.XTransactionEvent;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XRevWritableField;
-import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.base.rmof.XStateWritableField;
 import org.xydra.base.rmof.XStateWritableObject;
@@ -111,7 +110,7 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 		GaeModelRevInfo info = this.revisionManager.getInfo();
 		
 		this.changelogManager = new ChangeLogManager(this.modelAddress);
-		this.snapshotService = new GaeSnapshotServiceImplNG(this.changelogManager);
+		this.snapshotService = new GaeSnapshotServiceImpl5(this.changelogManager);
 		this.executionContext = new ContextBeforeCommand(modelAddress, info, this.snapshotService);
 		XyAssert.xyAssert(this.executionContext.getAddress() != null);
 	}
@@ -656,13 +655,21 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 			return null;
 		}
 		
-		long modelRev = this.revisionManager.getInfo().getLastStableSuccessChange();
-		XRevWritableModel snapshot = this.snapshotService.getModelSnapshot(modelRev,
-		        !includeTentative);
+		long currentRevNr = info.getLastStableSuccessChange();
+		if(includeTentative) {
+			// take performance short-cut for large models
+			XWritableModel snapshot = this.snapshotService.getTentativeModelSnapshot(currentRevNr);
+			log.info("return tentative snapshot rev " + currentRevNr + " for model "
+			        + this.modelAddress);
+			return snapshot;
+		} else {
+			// do slower standard way
+			XWritableModel snapshot = this.snapshotService.getModelSnapshot(currentRevNr,
+			        !includeTentative);
+			log.debug("return snapshot rev " + currentRevNr + " for model " + this.modelAddress);
+			return snapshot;
+		}
 		
-		log.debug("return snapshot rev " + snapshot.getRevisionNumber() + " for model "
-		        + this.modelAddress);
-		return snapshot;
 	}
 	
 	/**
@@ -717,7 +724,7 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 		XyAssert.xyAssert(change.getStatus().changedSomething());
 		log.debug("roll forward " + change);
 		
-		GaeSnapshotServiceImplNG snapshotService = new GaeSnapshotServiceImplNG(changelogManager);
+		GaeSnapshotServiceImpl5 snapshotService = new GaeSnapshotServiceImpl5(changelogManager);
 		ContextBeforeCommand ctxBeforeCmd = new ContextBeforeCommand(modelAddress, info,
 		        snapshotService);
 		ContextInTxn ctxInTxn = ctxBeforeCmd.forkTxn();

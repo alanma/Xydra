@@ -19,6 +19,7 @@ import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XRevWritableField;
 import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
+import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.impl.memory.SimpleField;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.base.rmof.impl.memory.SimpleObject;
@@ -665,6 +666,11 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 		log.debug("Partial snapshot: " + DumpUtils.toStringBuffer(partialModel));
 		
 		return partialModel;
+	}
+	
+	@Override
+	public XWritableModel getTentativeModelSnapshot(long currentRevNr) {
+		return getModelSnapshot(currentRevNr, false);
 	}
 	
 }

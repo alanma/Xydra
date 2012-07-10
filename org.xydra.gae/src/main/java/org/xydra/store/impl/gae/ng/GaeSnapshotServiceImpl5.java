@@ -8,12 +8,17 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.Setting;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.change.XEvent;
+import org.xydra.base.rmof.XReadableField;
+import org.xydra.base.rmof.XReadableModel;
+import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XRevWritableField;
 import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
@@ -21,6 +26,7 @@ import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.impl.memory.SimpleField;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.base.rmof.impl.memory.SimpleObject;
+import org.xydra.base.value.XValue;
 import org.xydra.core.XCopyUtils;
 import org.xydra.core.change.EventUtils;
 import org.xydra.core.model.XChangeLog;
@@ -43,23 +49,20 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Text;
+import com.google.appengine.api.memcache.MemcacheServiceException;
+import com.google.common.collect.Sets;
 
 
 /**
  * Computes *Snapshots ( {@link SimpleField}, {@link SimpleObject},
  * {@link SimpleModel}) from a given {@link XChangeLog}.
  * 
- * An entity of kind 'XSNAPSHOT' with the key (model-address) + '/-/-/' +
+ * An entity of kind 'XMSNAPSHOT' with the key (model-address) + '/-/-/' +
  * (revNr) contains a snapshot for a model with the given address and the given
- * revNr.
+ * revNr - containing ONLY the referenced objectIds.
  * 
  * Recent improvements:
  * <ul>
- * <li>Doesn't ask memcache or datastore when there is a snapshot in the local
- * vm cache that is less than n (=2) revisions older than the requested one.
- * <li>When no matching revision was found in either local vm cache, memcache or
- * datastore, look if any any of the revisions in the batch are in the local vm
- * cache before asking memcache.
  * <li>Avoid unnecessary copies when updating snapshots / while generating a
  * partial snapshot.
  * </ul>
@@ -89,81 +92,13 @@ import com.google.appengine.api.datastore.Text;
  * @author dscharrer
  * @author xamde
  */
-public class GaeSnapshotServiceImplNG extends AbstractGaeSnapshotServiceImpl {
-	
-	// private static final class NonexistantModel implements XRevWritableModel
-	// {
-	//
-	// @Override
-	// public XAddress getAddress() {
-	// return null;
-	// }
-	//
-	// @Override
-	// public XID getId() {
-	// return XX.toId("_NonExistant");
-	// }
-	//
-	// @Override
-	// public XRevWritableObject getObject(XID objectId) {
-	// return null;
-	// }
-	//
-	// @Override
-	// public long getRevisionNumber() {
-	// return -3;
-	// }
-	//
-	// @Override
-	// public XType getType() {
-	// return XType.XMODEL;
-	// }
-	//
-	// @Override
-	// public boolean hasObject(XID objectId) {
-	// return false;
-	// }
-	//
-	// @Override
-	// public boolean isEmpty() {
-	// return true;
-	// }
-	//
-	// @Override
-	// public Iterator<XID> iterator() {
-	// return Iterators.emptyIterator();
-	// }
-	//
-	// @Override
-	// public void addObject(XRevWritableObject object) {
-	// // stub
-	// }
-	//
-	// @Override
-	// public XRevWritableObject createObject(XID id) {
-	// return null;
-	// }
-	//
-	// @Override
-	// public void setRevisionNumber(long rev) {
-	// // stub
-	// }
-	//
-	// @Override
-	// public boolean removeObject(XID objectId) {
-	// return false;
-	// }
-	//
-	// }
+public class GaeSnapshotServiceImpl5 extends AbstractGaeSnapshotServiceImpl {
 	
 	private static final String KIND_SNAPSHOT = "XSNAPSHOT";
 	
-	private static final Logger log = LoggerFactory.getLogger(GaeSnapshotServiceImplNG.class);
+	private static final Logger log = LoggerFactory.getLogger(GaeSnapshotServiceImpl5.class);
 	
 	private static final long MODEL_DOES_NOT_EXIST = -1;
-	
-	// private static final NonexistantModel NONEXISTANT_MODEL = new
-	// NonexistantModel();
 	
 	/** property name for storing serialised XML content of a snapshot */
 	private static final String PROP_XML = "xml";
@@ -172,9 +107,6 @@ public class GaeSnapshotServiceImplNG extends AbstractGaeSnapshotServiceImpl {
 	
 	@Setting("if memcache should be used to cache snapshots")
 	private static final boolean USE_MEMCACHE = true;
-	
-	// @Setting
-	// public static boolean USE_SNAPSHOT_CACHE = true;
 	
 	/**
 	 * @param requestedRevNr
@@ -186,21 +118,12 @@ public class GaeSnapshotServiceImplNG extends AbstractGaeSnapshotServiceImpl {
 	
 	private final ChangeLogManager changelogManager;
 	
-	// /**
-	// * Number of previous revisions to look for in local vm cache before
-	// * checking the memcache / datastore at all.
-	// */
-	// @Setting
-	// private static final long SNAPSHOT_LOAD_THRESHOLD = 2;
-	
-	// private static final String DATASOURCE_SNAPSHOTS_VM = "[.snap]";
-	
 	private final XAddress modelAddress;
 	
 	/**
 	 * @param changelogManager The change log to load snapshots from.
 	 */
-	public GaeSnapshotServiceImplNG(ChangeLogManager changelogManager) {
+	public GaeSnapshotServiceImpl5(ChangeLogManager changelogManager) {
 		this.modelAddress = changelogManager.getModelAddress();
 		this.changelogManager = changelogManager;
 	}
@@ -354,11 +277,9 @@ public class GaeSnapshotServiceImplNG extends AbstractGaeSnapshotServiceImpl {
 					long rev = snapshot.getRevisionNumber();
 					if(USE_MEMCACHE && revCanBeMemcached(rev) && memcachedSnapshots < 10) {
 						// cache some snapshots in memcache
-						Key key = getSnapshotKey(rev);
-						Memcache.put(key, snapshot);
+						putInMemcacheIfNotTooLarge(rev, snapshot);
 						memcachedSnapshots++;
 						// TODO SCALE put also some in datastore (async)
-						XyAssert.xyAssert(isConsistent(KeyStructure.toString(key), snapshot));
 					}
 					
 				}
@@ -371,12 +292,62 @@ public class GaeSnapshotServiceImplNG extends AbstractGaeSnapshotServiceImpl {
 		
 		// when done, always cache 1 more snapshots
 		if(USE_MEMCACHE) {
-			Key key = getSnapshotKey(requestedRevNr);
-			Memcache.put(key, snapshot);
-			XyAssert.xyAssert(isConsistent(KeyStructure.toString(key), snapshot));
+			putInMemcacheIfNotTooLarge(requestedRevNr, snapshot);
 		}
 		
 		return snapshot;
+	}
+	
+	private static Set<XAddress> uncacheable = Sets
+	        .newSetFromMap(new ConcurrentHashMap<XAddress,Boolean>());
+	
+	private void putInMemcacheIfNotTooLarge(long rev, XRevWritableModel snapshot) {
+		Key key = getSnapshotKey(rev);
+		XyAssert.xyAssert(isConsistent(KeyStructure.toString(key), snapshot));
+		if(!uncacheable.contains(snapshot.getAddress())) {
+			try {
+				Memcache.put(key, snapshot);
+			} catch(MemcacheServiceException e) {
+				/*
+				 * remember on this instance that the snapshot is probably too
+				 * big and don't try to store it again
+				 */
+				uncacheable.add(snapshot.getAddress());
+				log.info("Snapshot " + snapshot.getAddress() + " [" + snapshot.getRevisionNumber()
+				        + "] could not be memcached, most likely too big. Size estimated as "
+				        + estimateSizeOf(snapshot, 1024 * 1024), e);
+			}
+		}
+	}
+	
+	/**
+	 * @param model
+	 * @param max as soon as this limit is reached the method stops calculating
+	 *            further. Use Long.MAX_VALUE for most accurate estimation.
+	 * @return a lower bound for the size in bytes
+	 */
+	public static long estimateSizeOf(XReadableModel model, long max) {
+		long bytes = 0;
+		if(model == null)
+			return 0;
+		for(XID oid : model) {
+			bytes += oid.toString().length() * 2;
+			XReadableObject obj = model.getObject(oid);
+			if(obj != null) {
+				for(XID fid : obj) {
+					bytes += fid.toString().length() * 2;
+					XReadableField field = obj.getField(fid);
+					XValue value = field.getValue();
+					if(value != null) {
+						bytes += value.toString().length();
+						if(bytes >= max) {
+							return bytes;
+						}
+					}
+				}
+			}
+		}
+		return bytes;
 	}
 	
 	/**
@@ -617,7 +588,20 @@ public class GaeSnapshotServiceImplNG extends AbstractGaeSnapshotServiceImpl {
 	
 	@Override
 	public XWritableModel getTentativeModelSnapshot(long currentRevNr) {
-		return getModelSnapshot(currentRevNr, false);
+		
+		/* prepare query for all TOS parts */
+		List<TentativeObjectState> list = ContextBeforeCommand
+		        .getAllTentativeObjectStatesOfModel(getModelAddress());
+		
+		SimpleModel model = new SimpleModel(getModelAddress());
+		model.setRevisionNumber(currentRevNr);
+		for(TentativeObjectState tos : list) {
+			if(tos.exists()) {
+				model.addObject(tos);
+			}
+		}
+		
+		return model;
 	}
 	
 }
