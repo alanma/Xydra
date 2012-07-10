@@ -9,12 +9,14 @@
 	<!-- Compile both `DEBUG` and `ERROR` log levels, with level selection via 
 		a `gwt:property` in your HTML page: <meta name="gwt:property" content="log_level=DEBUG"> 
 		</head> -->
+<!-- 
 	<inherits name='com.allen_sauer.gwt.log.gwt-log-DEBUG' />
+ -->
 	<!-- <define-property values="log_level" name="DEBUG" /> -->
 	<!-- Set settings for specific loggers: ENABLED or DISABLED -->
-	<set-property name="log_DivLogger" value="DISABLED" />
-	<set-property name="log_FirebugLogger" value="ENABLED" />
-	<set-property name="log_GWTLogger" value="ENABLED" />
+<!-- 	<set-property name="log_DivLogger" value="DISABLED" /> -->
+<!-- 	<set-property name="log_FirebugLogger" value="ENABLED" /> -->
+<!-- 	<set-property name="log_GWTLogger" value="ENABLED" /> -->
 
 	<!-- For testing only! -->
 	<!-- <set-property name="user.agent" value="safari"/> -->
