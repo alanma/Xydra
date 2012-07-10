@@ -30,6 +30,7 @@ import org.xydra.base.change.XFieldCommand;
 import org.xydra.base.change.XFieldEvent;
 import org.xydra.base.change.XModelCommand;
 import org.xydra.base.change.XModelEvent;
+import org.xydra.base.change.XObjectCommand;
 import org.xydra.base.change.XObjectEvent;
 import org.xydra.base.change.XRepositoryEvent;
 import org.xydra.base.change.XTransaction;
@@ -2309,11 +2310,6 @@ public abstract class AbstractPersistenceTest {
 	}
 	
 	@Test
-	public void testExecuteCommandSucceedingModelTransaction_seed2634857159770016178() {
-		testExecuteCommandSucceedingModelTransaction_withSeed(0, 2634857159770016178l, 1, 10);
-	}
-	
-	@Test
 	public void testExecuteCommandSucceedingModelTransactionFindFailingSubTxn_seed2634857159770016178() {
 		/*
 		 * TODO setting the "maxNrOfObjectsParameter" to 1 also causes the test
@@ -2329,6 +2325,39 @@ public abstract class AbstractPersistenceTest {
 		        maxNrOfFields, seed);
 	}
 	
+	@Test
+	public void testExecuteCommandSucceedingModelTransactionFindFailingSubTxn_seed2758510421983848470() {
+		int maxNrOfObjects = 10;
+		int maxNrOfFields = 10;
+		
+		long seed = 2758510421983848470l;
+		
+		testExecuteCommandSucceedingModelTransactionFindFailingSubTxn(maxNrOfObjects,
+		        maxNrOfFields, seed);
+	}
+	
+	@Test
+	public void testExecuteCommandSucceedingModelTransactionFindFailingSubTxn_seedMinus7411071230466049407() {
+		int maxNrOfObjects = 10;
+		int maxNrOfFields = 10;
+		
+		long seed = -7411071230466049407l;
+		
+		testExecuteCommandSucceedingModelTransactionFindFailingSubTxn(maxNrOfObjects,
+		        maxNrOfFields, seed);
+	}
+	
+	@Test
+	public void testExecuteCommandSucceedingModelTransactionFindFailingSubTxn_seedMinus3557338955757355024() {
+		int maxNrOfObjects = 10;
+		int maxNrOfFields = 10;
+		
+		long seed = -7411071230466049407l;
+		
+		testExecuteCommandSucceedingModelTransactionFindFailingSubTxn(maxNrOfObjects,
+		        maxNrOfFields, seed);
+	}
+	
 	private void testExecuteCommandSucceedingModelTransactionFindFailingSubTxn(int maxNrOfObjects,
 	        int maxNrOfFields, long seed) {
 		
@@ -2336,7 +2365,7 @@ public abstract class AbstractPersistenceTest {
 		        "testExecuteCommandSucceedingModelTransactionFindFailingSubTxn-Model_seed" + seed;
 		
 		XTransaction txn =
-		        findFailingSubtransactionInSucceedingTransaction(modelIdString, seed,
+		        findFailingSubtransactionInSucceedingModelTransaction(modelIdString, seed,
 		                maxNrOfObjects, maxNrOfFields);
 		
 		if(txn != null) {
@@ -2355,8 +2384,8 @@ public abstract class AbstractPersistenceTest {
 		}
 	}
 	
-	private XTransaction findFailingSubtransactionInSucceedingTransaction(String modelIdString,
-	        long seed, int maxNrOfObjects, int maxNrOfFields) {
+	private XTransaction findFailingSubtransactionInSucceedingModelTransaction(
+	        String modelIdString, long seed, int maxNrOfObjects, int maxNrOfFields) {
 		XID modelId = X.getIDProvider().fromString(modelIdString);
 		XAddress modelAddress = XX.resolveModel(this.repoId, modelId);
 		
@@ -2415,6 +2444,9 @@ public abstract class AbstractPersistenceTest {
 			if(revNr == XCommand.FAILED) {
 				// last command is the one that fails
 				XCommand failCmd = testTxn.getCommand(testTxn.size() - 1);
+				
+				// assertTrue(failCmd.getChangeType() == ChangeType.REMOVE);
+				
 				XID failId;
 				if(failCmd instanceof XModelCommand) {
 					failId = failCmd.getChangedEntity().getObject();
@@ -2425,7 +2457,8 @@ public abstract class AbstractPersistenceTest {
 				XTransactionBuilder txnBuilder2 = new XTransactionBuilder(modelAddress);
 				
 				for(XCommand cmd : testTxn) {
-					if(failId.equals(cmd.getTarget().getObject())) {
+					if(failId.equals(cmd.getTarget().getObject())
+					        || failId.equals(cmd.getChangedEntity().getObject())) {
 						txnBuilder2.addCommand(cmd);
 					}
 				}
@@ -2587,10 +2620,123 @@ public abstract class AbstractPersistenceTest {
 		SecureRandom seedGen = new SecureRandom();
 		
 		for(int i = 0; i <= this.nrOfIterationsForTxnTests; i++) {
+			/*
+			 * Info: if the test fails, do the following to enable deterministic
+			 * debugging: Set the seed to the value which caused the test to
+			 * fail. This makes the test deterministic .
+			 */
+			long seed = seedGen.nextLong();
+			testExecuteCommandSucceedingObjectTransaction_withSeed(i, seed, 10);
+		}
+	}
+	
+	private void testExecuteCommandSucceedingObjectTransaction_withSeed(int i, long seed,
+	        int maxNrOfFields) {
+		
+		XID modelId =
+		        X.getIDProvider().fromString(
+		                "testExecuteCommandSucceedingObjectTransactionModel" + i);
+		
+		XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId, false);
+		// add a model on which an object can be created first
+		long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
+		
+		assertTrue("Model could not be added, test cannot be executed.", revNr >= 0);
+		
+		XID objectId =
+		        X.getIDProvider().fromString(
+		                "testExecuteCommandSucceedingObjectTransactionObject" + i);
+		XAddress objectAddress = XX.resolveObject(this.repoId, modelId, objectId);
+		
+		GetWithAddressRequest objectAdrRequest = new GetWithAddressRequest(objectAddress);
+		XCommand addObjectCom =
+		        this.comFactory.createAddObjectCommand(this.repoId, modelId, objectId, false);
+		// add a model on which an object can be created first
+		revNr = this.persistence.executeCommand(this.actorId, addObjectCom);
+		
+		assertTrue("Object could not be added, test cannot be executed.", revNr >= 0);
+		
+		XWritableObject objectSnapshot = this.persistence.getObjectSnapshot(objectAdrRequest);
+		
+		/*
+		 * Info: if the test fails, do the following to enable deterministic
+		 * debugging: Set the seed to the value which caused the test to fail.
+		 * This makes the test deterministic .
+		 */
+		log.info("Creating transaction " + i + " with seed " + seed + ".");
+		Pair<ChangedObject,XTransaction> pair =
+		        createRandomSucceedingObjectTransaction(objectSnapshot, seed, maxNrOfFields);
+		ChangedObject changedObject = pair.getFirst();
+		XTransaction txn = pair.getSecond();
+		
+		revNr = this.persistence.executeCommand(this.actorId, txn);
+		assertTrue(
+		        "Transaction failed, should succeed, seed was: "
+		                + seed
+		                + " (please see the documentation about the use of the seed, it is needed for debugging, do not discard it before you've read the docu).",
+		        revNr >= 0);
+		
+		objectSnapshot = this.persistence.getObjectSnapshot(objectAdrRequest);
+		
+		int nrOfFieldsInObjectSnapshot = 0;
+		int nrOfFieldsInChangedObject = 0;
+		for(@SuppressWarnings("unused")
+		XID id : changedObject) {
+			nrOfFieldsInChangedObject++;
+		}
+		
+		for(@SuppressWarnings("unused")
+		XID id : objectSnapshot) {
+			nrOfFieldsInObjectSnapshot++;
+		}
+		
+		assertEquals(
+		        "The transaction wasn't correctly executed, the stored objects does not store the correct amount of fields it should be storing after execution of the transaction, seed was "
+		                + seed
+		                + " (please see the documentation about the use of the seed, it is needed for debugging, do not discard it before you've read the docu).",
+		        nrOfFieldsInChangedObject, nrOfFieldsInObjectSnapshot);
+		
+		for(XID fieldId : changedObject) {
+			assertTrue(
+			        "The stored object does not contain a field it should contain after the transaction was executed, seed was "
+			                + seed
+			                + " (please see the documentation about the use of the seed, it is needed for debugging, do not discard it before you've read the docu).",
+			        objectSnapshot.hasField(fieldId));
 			
-			XID modelId =
-			        X.getIDProvider().fromString(
-			                "testExecuteCommandSucceedingObjectTransactionModel" + i);
+			XReadableField changedField = changedObject.getField(fieldId);
+			XReadableField fieldSnapshot = objectSnapshot.getField(fieldId);
+			
+			assertEquals(
+			        "One of the stored fields does not contain the value it should contain after the transaction was executed, seed was "
+			                + seed
+			                + " (please see the documentation about the use of the seed, it is needed for debugging, do not discard it before you've read the docu).",
+			        changedField.getValue(), fieldSnapshot.getValue());
+		}
+		
+	}
+	
+	@Test
+	public void testExecuteCommandSucceedingObjectTransactionFindFailingSubTxn_seed2745963502525881193() {
+		int maxNrOfFields = 10;
+		
+		long seed = 2745963502525881193l;
+		
+		testExecuteCommandSucceedingObjectTransactionFindFailingSubTxn(maxNrOfFields, seed);
+	}
+	
+	private void testExecuteCommandSucceedingObjectTransactionFindFailingSubTxn(int maxNrOfFields,
+	        long seed) {
+		
+		String modelIdString = "FindFailingSubTxn-Model_seed" + seed;
+		String objectIdString = "FindFailingSubTxn-Object_seed" + seed;
+		
+		XTransaction txn =
+		        findFailingSubtransactionInSucceedingObjectTransaction(modelIdString,
+		                objectIdString, seed, maxNrOfFields);
+		
+		if(txn != null) {
+			XID modelId = X.getIDProvider().fromString(modelIdString);
+			XID objectId = X.getIDProvider().fromString(objectIdString);
 			
 			XCommand addModelCom =
 			        this.comFactory.createAddModelCommand(this.repoId, modelId, false);
@@ -2599,78 +2745,156 @@ public abstract class AbstractPersistenceTest {
 			
 			assertTrue("Model could not be added, test cannot be executed.", revNr >= 0);
 			
-			XID objectId =
-			        X.getIDProvider().fromString(
-			                "testExecuteCommandSucceedingObjectTransactionObject" + i);
-			XAddress objectAddress = XX.resolveObject(this.repoId, modelId, objectId);
-			
-			GetWithAddressRequest objectAdrRequest = new GetWithAddressRequest(objectAddress);
 			XCommand addObjectCom =
 			        this.comFactory.createAddObjectCommand(this.repoId, modelId, objectId, false);
-			// add a model on which an object can be created first
+			// add an object on which the txn can be executed
 			revNr = this.persistence.executeCommand(this.actorId, addObjectCom);
 			
 			assertTrue("Object could not be added, test cannot be executed.", revNr >= 0);
 			
-			XWritableObject objectSnapshot = this.persistence.getObjectSnapshot(objectAdrRequest);
+			revNr = this.persistence.executeCommand(this.actorId, txn);
+			
+			assertTrue("Transaction failed, should've succeeded.", revNr >= 0);
+		}
+	}
+	
+	private XTransaction findFailingSubtransactionInSucceedingObjectTransaction(
+	        String modelIdString, String objectIdString, long seed, int maxNrOfFields) {
+		XID modelId = X.getIDProvider().fromString(modelIdString);
+		XID objectId = X.getIDProvider().fromString(objectIdString);
+		XAddress modelAddress = XX.resolveModel(this.repoId, modelId);
+		XAddress objectAddress = XX.resolveObject(this.repoId, modelId, objectId);
+		
+		GetWithAddressRequest objectAdrRequest = new GetWithAddressRequest(objectAddress);
+		
+		XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId, false);
+		// add a model on which an object can be created first
+		long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
+		
+		assertTrue("Model could not be added, test cannot be executed.", revNr >= 0);
+		
+		XCommand addObjectCom =
+		        this.comFactory.createAddObjectCommand(this.repoId, modelId, objectId, false);
+		// add an object on which the txn can be executed
+		revNr = this.persistence.executeCommand(this.actorId, addObjectCom);
+		
+		assertTrue("Object could not be added, test cannot be executed.", revNr >= 0);
+		
+		XWritableObject objectSnapshot = this.persistence.getObjectSnapshot(objectAdrRequest);
+		
+		log.info("Creating transaction with seed " + seed + ".");
+		Pair<ChangedObject,XTransaction> pair =
+		        createRandomSucceedingObjectTransaction(objectSnapshot, seed, maxNrOfFields);
+		XTransaction txn = pair.getSecond();
+		
+		revNr = 0;
+		
+		XTransaction testTxn = null;
+		
+		for(int i = 1; i < txn.size() && revNr != XCommand.FAILED; i++) {
+			/*
+			 * reset state, so that we try to execute the transaction part we're
+			 * now checking on the old state
+			 */
+			XCommand removeModelCommand =
+			        this.comFactory.createRemoveModelCommand(modelAddress, 0, true);
+			
+			long removeRevNr = this.persistence.executeCommand(this.actorId, removeModelCommand);
+			
+			assertTrue(
+			        "Model couldn't be removed, state couldn't be reset, therefore method cannot be executed correctly.",
+			        removeRevNr >= 0);
+			
+			// add model and object again
+			long addRevNr = this.persistence.executeCommand(this.actorId, addModelCom);
+			
+			assertTrue("Model could not be added, test cannot be executed.", addRevNr >= 0);
+			
+			addRevNr = this.persistence.executeCommand(this.actorId, addObjectCom);
+			
+			assertTrue("Object could not be added, test cannot be executed.", addRevNr >= 0);
 			
 			/*
-			 * Info: if the test fails, do the following to enable deterministic
-			 * debugging: Set the seed to the value which caused the test to
-			 * fail. This makes the test deterministic .
+			 * build sub transaction
 			 */
-			long seed = seedGen.nextLong();
-			log.info("Creating transaction " + i + " with seed " + seed + ".");
-			Pair<ChangedObject,XTransaction> pair =
-			        createRandomSucceedingObjectTransaction(objectSnapshot, seed);
-			ChangedObject changedObject = pair.getFirst();
-			XTransaction txn = pair.getSecond();
 			
-			revNr = this.persistence.executeCommand(this.actorId, txn);
-			assertTrue(
-			        "Transaction failed, should succeed, seed was: "
-			                + seed
-			                + " (please see the documentation about the use of the seed, it is needed for debugging, do not discard it before you've read the docu).",
-			        revNr >= 0);
+			XTransactionBuilder txnBuilder = new XTransactionBuilder(modelAddress);
 			
-			objectSnapshot = this.persistence.getObjectSnapshot(objectAdrRequest);
-			
-			int nrOfFieldsInObjectSnapshot = 0;
-			int nrOfFieldsInChangedObject = 0;
-			for(@SuppressWarnings("unused")
-			XID id : changedObject) {
-				nrOfFieldsInChangedObject++;
+			for(int j = 0; j < i; j++) {
+				txnBuilder.addCommand(txn.getCommand(j));
 			}
 			
-			for(@SuppressWarnings("unused")
-			XID id : objectSnapshot) {
-				nrOfFieldsInObjectSnapshot++;
-			}
+			testTxn = txnBuilder.build();
 			
-			assertEquals(
-			        "The transaction wasn't correctly executed, the stored objects does not store the correct amount of fields it should be storing after execution of the transaction, seed was "
-			                + seed
-			                + " (please see the documentation about the use of the seed, it is needed for debugging, do not discard it before you've read the docu).",
-			        nrOfFieldsInChangedObject, nrOfFieldsInObjectSnapshot);
+			revNr = this.persistence.executeCommand(this.actorId, testTxn);
 			
-			for(XID fieldId : changedObject) {
+			if(revNr == XCommand.FAILED) {
+				// last command is the one that fails
+				XCommand failCmd = testTxn.getCommand(testTxn.size() - 1);
+				
+				// assertTrue(failCmd.getChangeType() == ChangeType.REMOVE);
+				
+				XID failId;
+				if(failCmd instanceof XObjectCommand) {
+					failId = failCmd.getChangedEntity().getField();
+				} else {
+					failId = failCmd.getTarget().getField();
+				}
+				
+				XTransactionBuilder txnBuilder2 = new XTransactionBuilder(modelAddress);
+				
+				for(XCommand cmd : testTxn) {
+					if(failId.equals(cmd.getTarget().getField())
+					        || failId.equals(cmd.getChangedEntity().getField())) {
+						txnBuilder2.addCommand(cmd);
+					}
+				}
+				
+				/*
+				 * reset state, so that we try to execute the transaction part
+				 * we're now checking on the old state
+				 */
+				removeModelCommand =
+				        this.comFactory.createRemoveModelCommand(modelAddress, 0, true);
+				removeRevNr = this.persistence.executeCommand(this.actorId, removeModelCommand);
 				assertTrue(
-				        "The stored object does not contain a field it should contain after the transaction was executed, seed was "
-				                + seed
-				                + " (please see the documentation about the use of the seed, it is needed for debugging, do not discard it before you've read the docu).",
-				        objectSnapshot.hasField(fieldId));
+				        "Model couldn't be removed, state couldn't be reset, therefore method cannot be executed correctly.",
+				        removeRevNr >= 0);
 				
-				XReadableField changedField = changedObject.getField(fieldId);
-				XReadableField fieldSnapshot = objectSnapshot.getField(fieldId);
+				// add model and object again
+				addRevNr = this.persistence.executeCommand(this.actorId, addModelCom);
 				
-				assertEquals(
-				        "One of the stored fields does not contain the value it should contain after the transaction was executed, seed was "
-				                + seed
-				                + " (please see the documentation about the use of the seed, it is needed for debugging, do not discard it before you've read the docu).",
-				        changedField.getValue(), fieldSnapshot.getValue());
+				assertTrue("Model could not be added, test cannot be executed.", addRevNr >= 0);
+				
+				addRevNr = this.persistence.executeCommand(this.actorId, addObjectCom);
+				
+				assertTrue("Object could not be added, test cannot be executed.", addRevNr >= 0);
+				
+				XTransaction testTxn2 = txnBuilder2.build();
+				
+				long testRevNr = this.persistence.executeCommand(this.actorId, testTxn2);
+				
+				if(testRevNr == XCommand.FAILED) {
+					testTxn = testTxn2;
+				}
 			}
+			
 		}
 		
+		/*
+		 * reset state, so that we try to execute the transaction part we're now
+		 * checking on the old state
+		 */
+		XCommand removeModelCommand =
+		        this.comFactory.createRemoveModelCommand(modelAddress, 0, true);
+		
+		long removeRevNr = this.persistence.executeCommand(this.actorId, removeModelCommand);
+		
+		assertTrue(
+		        "Model couldn't be removed, state couldn't be reset, therefore method cannot be executed correctly.",
+		        removeRevNr >= 0);
+		
+		return testTxn;
 	}
 	
 	/**
@@ -2823,7 +3047,7 @@ public abstract class AbstractPersistenceTest {
 	 * in a test fails and the failed transaction needs to be reconstructed.
 	 */
 	private Pair<ChangedObject,XTransaction> createRandomSucceedingObjectTransaction(
-	        XWritableObject object, long seed) {
+	        XWritableObject object, long seed, int maxNrOfFields) {
 		assertTrue("This method only works with empty objects.", object.isEmpty());
 		
 		Random rand = new Random(seed);
@@ -2833,7 +3057,14 @@ public abstract class AbstractPersistenceTest {
 		XTransactionBuilder txBuilder = new XTransactionBuilder(object.getAddress());
 		ChangedObject changedObject = new ChangedObject(object);
 		
-		int nrOfFields = 1 + rand.nextInt(10); // add at least one field.
+		int nrOfFields;
+		if(maxNrOfFields == 1) {
+			nrOfFields = 1;
+		} else {
+			nrOfFields = 1 + rand.nextInt(maxNrOfFields - 1);
+		}
+		// add at least one field.
+		
 		for(int i = 0; i < nrOfFields; i++) {
 			XID fieldId = X.getIDProvider().fromString(objectId + "randomField" + i);
 			XAddress fieldAddress = XX.resolveField(objectAddress, fieldId);
@@ -4876,7 +5107,7 @@ public abstract class AbstractPersistenceTest {
 			long seed = seedGen.nextLong();
 			log.info("Used seed: " + seed + ".");
 			Pair<ChangedObject,XTransaction> pair =
-			        createRandomSucceedingObjectTransaction(object, seed);
+			        createRandomSucceedingObjectTransaction(object, seed, 10);
 			XTransaction txn = pair.getSecond();
 			
 			revNr = this.persistence.executeCommand(this.actorId, txn);
