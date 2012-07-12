@@ -3220,95 +3220,95 @@ public abstract class AbstractPersistenceTest {
 	 * the test deterministic and enables debugging.
 	 */
 	@Test
-	public void testExecuteCommandFailingModelTransaction() {
+	public void testExecuteCommandFailingModelTransactions() {
 		SecureRandom seedGen = new SecureRandom();
 		
 		for(int i = 0; i <= this.nrOfIterationsForTxnTests; i++) {
-			XID failModelId =
-			        X.getIDProvider().fromString(
-			                "testExecuteCommandFailingModelTransactionFailModel" + i);
-			XAddress failModelAddress = XX.resolveModel(this.repoId, failModelId);
-			
-			GetWithAddressRequest failModelAdrRequest = new GetWithAddressRequest(failModelAddress);
-			XCommand addFailModelCom =
-			        this.comFactory.createAddModelCommand(this.repoId, failModelId, false);
-			
-			XID succModelId =
-			        X.getIDProvider().fromString(
-			                "testExecuteCommandFailingModelTranscationSuccModel" + i);
-			XAddress succModelAddress = XX.resolveModel(this.repoId, succModelId);
-			
-			GetWithAddressRequest succModelAdrRequest = new GetWithAddressRequest(succModelAddress);
-			XCommand addSuccModelCom =
-			        this.comFactory.createAddModelCommand(this.repoId, succModelId, false);
-			
-			/*
-			 * We use two model instance, which basically represent the same
-			 * model. One will be used to execute the succeeding transaction and
-			 * the other one for the transaction which is supposed to fail. This
-			 * makes testing easier and more flexible.
-			 */
-			
-			// add a model on which an object can be created first
-			long failRevNr = this.persistence.executeCommand(this.actorId, addFailModelCom);
-			long succRevNr = this.persistence.executeCommand(this.actorId, addSuccModelCom);
-			
-			assertTrue(
-			        "Model for the failing transaction could not be added, test cannot be executed",
-			        failRevNr >= 0);
-			assertTrue(
-			        "Model for the succeeding transaction could not be added, test cannot be executed",
-			        succRevNr >= 0);
-			
-			XWritableModel failModelSnapshot =
-			        this.persistence.getModelSnapshot(failModelAdrRequest);
-			XWritableModel succModelSnapshot =
-			        this.persistence.getModelSnapshot(succModelAdrRequest);
-			
-			/*
-			 * Info: if the test fails, do the following for deterministic
-			 * debugging: Set the seed to the value which caused the test to
-			 * fail. This makes the test deterministic.
-			 */
-			long seed = seedGen.nextLong();
-			log.info("Creating transaction pair " + i + " with seed " + seed + ".");
-			Pair<XTransaction,XTransaction> pair =
-			        createRandomFailingModelTransaction(failModelSnapshot, succModelSnapshot, seed);
-			
-			XTransaction failTxn = pair.getFirst();
-			XTransaction succTxn = pair.getSecond();
-			
-			succRevNr = this.persistence.executeCommand(this.actorId, succTxn);
-			assertTrue(
-			        "Model Transaction failed, should succeed, since this was the transaction that does not contain the command which should cause the transaction to fail, seed was: "
-			                + seed
-			                + " (please see the documentation about the use of the seed, it is needed for debugging, do not discard it before you've read the docu).",
-			        succRevNr >= 0);
-			
-			failRevNr = this.persistence.executeCommand(this.actorId, failTxn);
-			assertEquals(
-			        "Model Transaction succeeded, should fail, seed was: "
-			                + seed
-			                + " (please see the documentation about the use of the seed, it is needed for debugging, do not discard it before you've read the docu).",
-			        XCommand.FAILED, failRevNr);
-			
-			/*
-			 * Make sure that the changes actually weren't executed. Since the
-			 * model was empty before the execution of the faulty transaction,
-			 * we just need to check if it's still empty. If this is not the
-			 * case, this implies that some of the commands in the faulty
-			 * transaction were executed, although the transaction's execution
-			 * failed.
-			 */
-			
-			failModelSnapshot = this.persistence.getModelSnapshot(failModelAdrRequest);
-			assertTrue(
-			        "Since the model was empty before the execution of the faulty transaction, it  should be empty. Since it is not empty, some commands of the transaction must've been executed, although the transaction failed."
-			                + " Seed was: "
-			                + seed
-			                + " (please see the documentation about the use of the seed, it is needed for debugging, do not discard it before you've read the docu).",
-			        failModelSnapshot.isEmpty());
+			testExecuteCommandFailingModelTransactionWithSeed(i, seedGen.nextLong());
 		}
+	}
+	
+	private void testExecuteCommandFailingModelTransactionWithSeed(int i, long seed) {
+		
+		XID failModelId =
+		        X.getIDProvider().fromString(
+		                "testExecuteCommandFailingModelTransactionFailModel" + i);
+		XAddress failModelAddress = XX.resolveModel(this.repoId, failModelId);
+		
+		GetWithAddressRequest failModelAdrRequest = new GetWithAddressRequest(failModelAddress);
+		XCommand addFailModelCom =
+		        this.comFactory.createAddModelCommand(this.repoId, failModelId, false);
+		
+		XID succModelId =
+		        X.getIDProvider().fromString(
+		                "testExecuteCommandFailingModelTranscationSuccModel" + i);
+		XAddress succModelAddress = XX.resolveModel(this.repoId, succModelId);
+		
+		GetWithAddressRequest succModelAdrRequest = new GetWithAddressRequest(succModelAddress);
+		XCommand addSuccModelCom =
+		        this.comFactory.createAddModelCommand(this.repoId, succModelId, false);
+		
+		/*
+		 * We use two model instance, which basically represent the same model.
+		 * One will be used to execute the succeeding transaction and the other
+		 * one for the transaction which is supposed to fail. This makes testing
+		 * easier and more flexible.
+		 */
+		
+		// add a model on which an object can be created first
+		long failRevNr = this.persistence.executeCommand(this.actorId, addFailModelCom);
+		long succRevNr = this.persistence.executeCommand(this.actorId, addSuccModelCom);
+		
+		assertTrue("Model for the failing transaction could not be added, test cannot be executed",
+		        failRevNr >= 0);
+		assertTrue(
+		        "Model for the succeeding transaction could not be added, test cannot be executed",
+		        succRevNr >= 0);
+		
+		XWritableModel failModelSnapshot = this.persistence.getModelSnapshot(failModelAdrRequest);
+		XWritableModel succModelSnapshot = this.persistence.getModelSnapshot(succModelAdrRequest);
+		
+		/*
+		 * Info: if the test fails, do the following for deterministic
+		 * debugging: Set the seed to the value which caused the test to fail.
+		 * This makes the test deterministic.
+		 */
+		log.info("Creating transaction pair " + i + " with seed " + seed + ".");
+		Pair<XTransaction,XTransaction> pair =
+		        createRandomFailingModelTransaction(failModelSnapshot, succModelSnapshot, seed);
+		
+		XTransaction failTxn = pair.getFirst();
+		XTransaction succTxn = pair.getSecond();
+		
+		succRevNr = this.persistence.executeCommand(this.actorId, succTxn);
+		assertTrue(
+		        "Model Transaction failed, should succeed, since this was the transaction that does not contain the command which should cause the transaction to fail, seed was: "
+		                + seed
+		                + " (please see the documentation about the use of the seed, it is needed for debugging, do not discard it before you've read the docu).",
+		        succRevNr >= 0);
+		
+		failRevNr = this.persistence.executeCommand(this.actorId, failTxn);
+		assertEquals(
+		        "Model Transaction succeeded, should fail, seed was: "
+		                + seed
+		                + " (please see the documentation about the use of the seed, it is needed for debugging, do not discard it before you've read the docu).",
+		        XCommand.FAILED, failRevNr);
+		
+		/*
+		 * Make sure that the changes actually weren't executed. Since the model
+		 * was empty before the execution of the faulty transaction, we just
+		 * need to check if it's still empty. If this is not the case, this
+		 * implies that some of the commands in the faulty transaction were
+		 * executed, although the transaction's execution failed.
+		 */
+		
+		failModelSnapshot = this.persistence.getModelSnapshot(failModelAdrRequest);
+		assertTrue(
+		        "Since the model was empty before the execution of the faulty transaction, it  should be empty. Since it is not empty, some commands of the transaction must've been executed, although the transaction failed."
+		                + " Seed was: "
+		                + seed
+		                + " (please see the documentation about the use of the seed, it is needed for debugging, do not discard it before you've read the docu).",
+		        failModelSnapshot.isEmpty());
 	}
 	
 	/**
@@ -3321,126 +3321,126 @@ public abstract class AbstractPersistenceTest {
 	 * (instead of using random seeds, as the test normally does). This makes
 	 * the test deterministic and enables debugging.
 	 */
+	
 	@Test
-	public void testExecuteCommandFailingObjectTransaction() {
+	public void testExecuteCommandFailingObjectTransactions() {
 		SecureRandom seedGen = new SecureRandom();
 		
 		for(int i = 0; i <= this.nrOfIterationsForTxnTests; i++) {
-			XID failModelId =
-			        X.getIDProvider().fromString(
-			                "testExecuteCommandFailingObjectTransactionFailModel" + i);
-			
-			XCommand addFailModelCom =
-			        this.comFactory.createAddModelCommand(this.repoId, failModelId, false);
-			
-			XID succModelId =
-			        X.getIDProvider().fromString(
-			                "testExecuteCommandFailingObjectTransactionSuccModel" + i);
-			
-			XCommand addSuccModelCom =
-			        this.comFactory.createAddModelCommand(this.repoId, succModelId, false);
-			
-			/*
-			 * We use two model instances, which basically represent the same
-			 * model. One will be used to hold the object on which we'll execute
-			 * the succeeding transaction and the other one for the object on
-			 * which we'll execute the transaction which is supposed to fail.
-			 * This makes testing easier and more flexible.
-			 */
-			
-			// add a model on which an object can be created first
-			long failRevNr = this.persistence.executeCommand(this.actorId, addFailModelCom);
-			long succRevNr = this.persistence.executeCommand(this.actorId, addSuccModelCom);
-			
-			assertTrue("One of the models could not be added, test cannot be executed.",
-			        failRevNr >= 0 && succRevNr >= 0);
-			
-			XID failObjectId =
-			        X.getIDProvider().fromString(
-			                "testExecuteCommandFailingObjectTransactionFailObject" + i);
-			XAddress failObjectAddress = XX.resolveObject(this.repoId, failModelId, failObjectId);
-			
-			GetWithAddressRequest failObjectAdrRequest =
-			        new GetWithAddressRequest(failObjectAddress);
-			XCommand addFailObjectCom =
-			        this.comFactory.createAddObjectCommand(this.repoId, failModelId, failObjectId,
-			                false);
-			
-			XID succObjectId =
-			        X.getIDProvider().fromString(
-			                "testExecuteCommandFailingObjectTransactionSuccObject" + i);
-			XAddress succObjectAddress = XX.resolveObject(this.repoId, succModelId, succObjectId);
-			
-			GetWithAddressRequest succObjectAdrRequest =
-			        new GetWithAddressRequest(succObjectAddress);
-			XCommand addSuccObjectCom =
-			        this.comFactory.createAddObjectCommand(this.repoId, succModelId, succObjectId,
-			                false);
-			
-			/*
-			 * We use two object instances, which basically represent the same
-			 * object. One will be used to execute the succeeding transaction
-			 * and the other one for the transaction which is supposed to fail.
-			 * This makes testing easier and more flexible.
-			 */
-			
-			// create the objects on which the transactions will be executed
-			failRevNr = this.persistence.executeCommand(this.actorId, addFailObjectCom);
-			succRevNr = this.persistence.executeCommand(this.actorId, addSuccObjectCom);
-			
-			assertTrue("The object for the failing transaction could not be added.", failRevNr >= 0);
-			assertTrue("The object for the succeeding transaction could not be added.",
-			        succRevNr >= 0);
-			
-			XWritableObject failObjectSnapshot =
-			        this.persistence.getObjectSnapshot(failObjectAdrRequest);
-			XWritableObject succObjectSnapshot =
-			        this.persistence.getObjectSnapshot(succObjectAdrRequest);
-			
-			/*
-			 * Info: if the test fails, do the following for deterministic
-			 * debugging: Set the seed to the value which caused the test to
-			 * fail. This makes the test deterministic.
-			 */
-			long seed = seedGen.nextLong();
-			System.out
-			        .println("Creating object transaction pair " + i + " with seed " + seed + ".");
-			Pair<XTransaction,XTransaction> pair =
-			        createRandomFailingObjectTransaction(failObjectSnapshot, succObjectSnapshot,
-			                seed);
-			
-			XTransaction failTxn = pair.getFirst();
-			XTransaction succTxn = pair.getSecond();
-			
-			succRevNr = this.persistence.executeCommand(this.actorId, succTxn);
-			assertTrue(
-			        "Object Transaction failed, should succeed, since this was the transaction that does not contain the command which should cause the transaction to fail, seed was: "
-			                + seed
-			                + " (please see the documentation about the use of the seed, it is needed for debugging, do not discard it before you've read the docu).",
-			        succRevNr >= 0);
-			
-			failRevNr = this.persistence.executeCommand(this.actorId, failTxn);
-			assertEquals(
-			        "Object Transaction succeeded, should fail, seed was: "
-			                + seed
-			                + " (please see the documentation about the use of the seed, it is needed for debugging, do not discard it before you've read the docu).",
-			        XCommand.FAILED, failRevNr);
-			
-			/*
-			 * Make sure that the changes actually weren't executed. Since the
-			 * object was empty before we tried to execute the faulty
-			 * transaction, we just have to assert that it is still empty. This
-			 * implies that no commands of the transaction were executed.
-			 */
-			failObjectSnapshot = this.persistence.getObjectSnapshot(failObjectAdrRequest);
-			assertTrue(
-			        "Object was empty before we tried to execute the faulty transaction, but has fields now, which means that some of the commands of the faulty transaction must've been executed, although its execution failed."
-			                + " Seed was: "
-			                + seed
-			                + " (please see the documentation about the use of the seed, it is needed for debugging, do not discard it before you've read the docu).",
-			        failObjectSnapshot.isEmpty());
-			
+			testExecuteCommandFailingObjectTransactionWithSeed(i, seedGen.nextLong());
 		}
+	}
+	
+	private void testExecuteCommandFailingObjectTransactionWithSeed(int i, long seed) {
+		
+		XID failModelId =
+		        X.getIDProvider().fromString(
+		                "testExecuteCommandFailingObjectTransactionFailModel" + i);
+		
+		XCommand addFailModelCom =
+		        this.comFactory.createAddModelCommand(this.repoId, failModelId, false);
+		
+		XID succModelId =
+		        X.getIDProvider().fromString(
+		                "testExecuteCommandFailingObjectTransactionSuccModel" + i);
+		
+		XCommand addSuccModelCom =
+		        this.comFactory.createAddModelCommand(this.repoId, succModelId, false);
+		
+		/*
+		 * We use two model instances, which basically represent the same model.
+		 * One will be used to hold the object on which we'll execute the
+		 * succeeding transaction and the other one for the object on which
+		 * we'll execute the transaction which is supposed to fail. This makes
+		 * testing easier and more flexible.
+		 */
+		
+		// add a model on which an object can be created first
+		long failRevNr = this.persistence.executeCommand(this.actorId, addFailModelCom);
+		long succRevNr = this.persistence.executeCommand(this.actorId, addSuccModelCom);
+		
+		assertTrue("One of the models could not be added, test cannot be executed.", failRevNr >= 0
+		        && succRevNr >= 0);
+		
+		XID failObjectId =
+		        X.getIDProvider().fromString(
+		                "testExecuteCommandFailingObjectTransactionFailObject" + i);
+		XAddress failObjectAddress = XX.resolveObject(this.repoId, failModelId, failObjectId);
+		
+		GetWithAddressRequest failObjectAdrRequest = new GetWithAddressRequest(failObjectAddress);
+		XCommand addFailObjectCom =
+		        this.comFactory.createAddObjectCommand(this.repoId, failModelId, failObjectId,
+		                false);
+		
+		XID succObjectId =
+		        X.getIDProvider().fromString(
+		                "testExecuteCommandFailingObjectTransactionSuccObject" + i);
+		XAddress succObjectAddress = XX.resolveObject(this.repoId, succModelId, succObjectId);
+		
+		GetWithAddressRequest succObjectAdrRequest = new GetWithAddressRequest(succObjectAddress);
+		XCommand addSuccObjectCom =
+		        this.comFactory.createAddObjectCommand(this.repoId, succModelId, succObjectId,
+		                false);
+		
+		/*
+		 * We use two object instances, which basically represent the same
+		 * object. One will be used to execute the succeeding transaction and
+		 * the other one for the transaction which is supposed to fail. This
+		 * makes testing easier and more flexible.
+		 */
+		
+		// create the objects on which the transactions will be executed
+		failRevNr = this.persistence.executeCommand(this.actorId, addFailObjectCom);
+		succRevNr = this.persistence.executeCommand(this.actorId, addSuccObjectCom);
+		
+		assertTrue("The object for the failing transaction could not be added.", failRevNr >= 0);
+		assertTrue("The object for the succeeding transaction could not be added.", succRevNr >= 0);
+		
+		XWritableObject failObjectSnapshot =
+		        this.persistence.getObjectSnapshot(failObjectAdrRequest);
+		XWritableObject succObjectSnapshot =
+		        this.persistence.getObjectSnapshot(succObjectAdrRequest);
+		
+		/*
+		 * Info: if the test fails, do the following for deterministic
+		 * debugging: Set the seed to the value which caused the test to fail.
+		 * This makes the test deterministic.
+		 */
+		System.out.println("Creating object transaction pair " + i + " with seed " + seed + ".");
+		Pair<XTransaction,XTransaction> pair =
+		        createRandomFailingObjectTransaction(failObjectSnapshot, succObjectSnapshot, seed);
+		
+		XTransaction failTxn = pair.getFirst();
+		XTransaction succTxn = pair.getSecond();
+		
+		succRevNr = this.persistence.executeCommand(this.actorId, succTxn);
+		assertTrue(
+		        "Object Transaction failed, should succeed, since this was the transaction that does not contain the command which should cause the transaction to fail, seed was: "
+		                + seed
+		                + " (please see the documentation about the use of the seed, it is needed for debugging, do not discard it before you've read the docu).",
+		        succRevNr >= 0);
+		
+		failRevNr = this.persistence.executeCommand(this.actorId, failTxn);
+		assertEquals(
+		        "Object Transaction succeeded, should fail, seed was: "
+		                + seed
+		                + " (please see the documentation about the use of the seed, it is needed for debugging, do not discard it before you've read the docu).",
+		        XCommand.FAILED, failRevNr);
+		
+		/*
+		 * Make sure that the changes actually weren't executed. Since the
+		 * object was empty before we tried to execute the faulty transaction,
+		 * we just have to assert that it is still empty. This implies that no
+		 * commands of the transaction were executed.
+		 */
+		failObjectSnapshot = this.persistence.getObjectSnapshot(failObjectAdrRequest);
+		assertTrue(
+		        "Object was empty before we tried to execute the faulty transaction, but has fields now, which means that some of the commands of the faulty transaction must've been executed, although its execution failed."
+		                + " Seed was: "
+		                + seed
+		                + " (please see the documentation about the use of the seed, it is needed for debugging, do not discard it before you've read the docu).",
+		        failObjectSnapshot.isEmpty());
+		
 	}
 	
 	/**
@@ -4946,231 +4946,103 @@ public abstract class AbstractPersistenceTest {
 		SecureRandom seedGen = new SecureRandom();
 		
 		for(int i = 0; i < this.nrOfIterationsForTxnTests; i++) {
-			
-			XID modelId = XX.toId("testGetEventsTransactionsModel" + i);
-			XAddress modelAddress = XX.resolveModel(this.repoId, modelId);
-			XCommand addModelCom =
-			        this.comFactory.createAddModelCommand(this.repoId, modelId, false);
-			long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
-			assertTrue("The model wasn't correctly added, test cannot be executed.", revNr >= 0);
-			
-			GetWithAddressRequest modelAdrRequest = new GetWithAddressRequest(modelAddress);
-			XWritableModel model = this.persistence.getModelSnapshot(modelAdrRequest);
-			
-			/*
-			 * Info: if the test fails, do the following for deterministic
-			 * debugging: Set the seed to the value which caused the test to
-			 * fail. This makes the test deterministic.
-			 */
-			long seed = seedGen.nextLong();
-			log.info("Used seed: " + seed + ".");
-			Pair<ChangedModel,XTransaction> pair =
-			        createRandomSucceedingModelTransaction(model, seed, 10, 10);
-			XTransaction txn = pair.getSecond();
-			
-			revNr = this.persistence.executeCommand(this.actorId, txn);
-			assertTrue("Transaction did not succeed.", revNr >= 0);
-			
-			List<XEvent> events = this.persistence.getEvents(modelAddress, revNr, revNr);
-			assertEquals(
-			        "The list of events should contain one Transaction Event, but actually contains multiple events.",
-			        1, events.size());
-			
-			XEvent event = events.get(0);
-			assertTrue("The returned event should be a TransactionEvent.",
-			        event instanceof XTransactionEvent);
-			
-			XTransactionEvent txnEvent = (XTransactionEvent)event;
-			
-			assertEquals("The event didn't refer to the correct old revision number.", 0,
-			        txnEvent.getOldModelRevision());
-			assertEquals("The event didn't refer to the correct revision number.", revNr,
-			        txnEvent.getRevisionNumber());
-			assertEquals("Event doesn't refer to the correct target.", modelAddress,
-			        txnEvent.getTarget());
-			assertEquals("Event doesn't refer to the correct changed entity.", modelAddress,
-			        txnEvent.getChangedEntity());
-			assertEquals("The actor of the event is not correct.", this.actorId,
-			        txnEvent.getActor());
-			assertFalse("The event is wrongly marked as implied.", txnEvent.isImplied());
-			assertFalse("the event is wrongly marked as being part of a transaction.",
-			        txnEvent.inTransaction());
-			
-			/*
-			 * TODO check the events that make up the transaction!
-			 */
-			
-			/*
-			 * TODO document why there are no "removedObjectEvents" (etc.) lists
-			 */
-			Map<XAddress,XEvent> addedObjectEvents = new HashMap<XAddress,XEvent>();
-			Map<XAddress,XEvent> addedFieldEvents = new HashMap<XAddress,XEvent>();
-			Map<XAddress,XEvent> addedValueEvents = new HashMap<XAddress,XEvent>();
-			
-			for(XEvent ev : txnEvent) {
-				/*
-				 * TODO Notice that this might change in the future and the
-				 * randomly constructed succeeding transaction might also
-				 * contain events of other types.
-				 * 
-				 * Check why the transaction events only contain ADD type
-				 * events, although the transactions themselves also contain
-				 * changes and removes. Does the TransactionBuilder or the
-				 * system which creates the transaction event already fine tune
-				 * the result so that changes and removes which occur on
-				 * objects/fields which were added during the transaction aren't
-				 * even shown?
-				 */
-				assertTrue("The transaction should only contain events of the Add-type.",
-				        ev.getChangeType() == ChangeType.ADD);
-				assertTrue("Event is wrongly marked as not being part of a transaction.",
-				        ev.inTransaction());
-				assertEquals("The event doesn't refer to the correct model.", modelId, ev
-				        .getTarget().getModel());
-				assertFalse("The event is wrongly marked as being implied.", event.isImplied());
-				assertEquals("The actor of the event is not correct.", this.actorId,
-				        event.getActor());
-				assertEquals("The event didn't refer to the correct revision number.", revNr,
-				        ev.getRevisionNumber());
-				
-				if(ev.getChangedEntity().getAddressedType() == XType.XOBJECT) {
-					
-					addedObjectEvents.put(ev.getChangedEntity(), ev);
-				} else {
-					assertEquals(
-					        "A model transaction should only contain commands that target objects or fields.",
-					        ev.getChangedEntity().getAddressedType(), XType.XFIELD);
-					
-					if(ev instanceof XObjectEvent) {
-						addedFieldEvents.put(ev.getChangedEntity(), ev);
-					} else {
-						assertTrue(ev instanceof XFieldEvent);
-						addedValueEvents.put(ev.getChangedEntity(), ev);
-					}
-				}
-			}
-			
-			model = this.persistence.getModelSnapshot(modelAdrRequest);
-			for(XID objectId : model) {
-				XAddress objectAddress = XX.resolveObject(this.repoId, modelId, objectId);
-				
-				assertTrue(
-				        "Since the model was emtpy before the transaction, there should be a fitting add-event for the object with XID "
-				                + objectId + ".", addedObjectEvents.containsKey(objectAddress));
-				XReadableObject object = model.getObject(objectId);
-				
-				for(XID fieldId : object) {
-					XAddress fieldAddress =
-					        XX.resolveField(this.repoId, modelId, objectId, fieldId);
-					
-					assertTrue(
-					        "Since the model was emtpy before the transaction, there should be a fitting add-event for the field with XID "
-					                + fieldId + ".", addedFieldEvents.containsKey(fieldAddress));
-					XReadableField field = object.getField(fieldId);
-					if(field.getValue() != null) {
-						assertTrue(
-						        "Since the model was emtpy before the transaction, there should be a fitting add-event for the value in the field with XID "
-						                + fieldId + ".", addedValueEvents.containsKey(fieldAddress));
-					}
-				}
-			}
+			testGetEventsModelTransactionWithSeed(i, seedGen.nextLong());
 		}
 	}
 	
-	@Test
-	public void testGetEventsObjectTransactions() {
-		SecureRandom seedGen = new SecureRandom();
+	private void testGetEventsModelTransactionWithSeed(int i, long seed) {
 		
-		for(int i = 0; i < this.nrOfIterationsForTxnTests; i++) {
-			
-			XID modelId = XX.toId("testGetEventsObjectTransactionsModel" + i);
-			XCommand addModelCom =
-			        this.comFactory.createAddModelCommand(this.repoId, modelId, false);
-			long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
-			assertTrue("The model wasn't correctly added, test cannot be executed.", revNr >= 0);
-			
-			XID objectId = XX.toId("testGetEventsObjectTransactionsObject" + i);
-			XAddress objectAddress = XX.resolveObject(this.repoId, modelId, objectId);
-			XCommand addObjectCom =
-			        this.comFactory.createAddObjectCommand(this.repoId, modelId, objectId, false);
-			revNr = this.persistence.executeCommand(this.actorId, addObjectCom);
-			assertTrue("The object wasn't correctly added, test cannot be executed.", revNr >= 0);
-			
-			GetWithAddressRequest objectAdrRequest = new GetWithAddressRequest(objectAddress);
-			XWritableObject object = this.persistence.getObjectSnapshot(objectAdrRequest);
-			
+		XID modelId = XX.toId("testGetEventsTransactionsModel" + i);
+		XAddress modelAddress = XX.resolveModel(this.repoId, modelId);
+		XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId, false);
+		long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
+		assertTrue("The model wasn't correctly added, test cannot be executed", revNr >= 0);
+		
+		GetWithAddressRequest modelAdrRequest = new GetWithAddressRequest(modelAddress);
+		XWritableModel model = this.persistence.getModelSnapshot(modelAdrRequest);
+		
+		/*
+		 * Info: if the test fails, do the following for deterministic
+		 * debugging: Set the seed to the value which caused the test to fail.
+		 * This makes the test deterministic.
+		 */
+		log.info("Used seed: " + seed + ".");
+		Pair<ChangedModel,XTransaction> pair =
+		        createRandomSucceedingModelTransaction(model, seed, 10, 10);
+		XTransaction txn = pair.getSecond();
+		
+		revNr = this.persistence.executeCommand(this.actorId, txn);
+		assertTrue("Transaction did not succeed, seed was " + seed, revNr >= 0);
+		
+		List<XEvent> events = this.persistence.getEvents(modelAddress, revNr, revNr);
+		assertEquals(
+		        "The list of events should contain one Transaction Event, but actually contains multiple events, seed was "
+		                + seed, 1, events.size());
+		
+		XEvent event = events.get(0);
+		assertTrue("The returned event should be a TransactionEvent, seed was " + seed,
+		        event instanceof XTransactionEvent);
+		
+		XTransactionEvent txnEvent = (XTransactionEvent)event;
+		
+		assertEquals("The event didn't refer to the correct old revision number, seed was " + seed,
+		        0, txnEvent.getOldModelRevision());
+		assertEquals("The event didn't refer to the correct revision number, seed was " + seed,
+		        revNr, txnEvent.getRevisionNumber());
+		assertEquals("Event doesn't refer to the correct target, seed was " + seed, modelAddress,
+		        txnEvent.getTarget());
+		assertEquals("Event doesn't refer to the correct changed entity, seed was " + seed,
+		        modelAddress, txnEvent.getChangedEntity());
+		assertEquals("The actor of the event is not correct, seed was " + seed, this.actorId,
+		        txnEvent.getActor());
+		assertFalse("The event is wrongly marked as implied, seed was " + seed,
+		        txnEvent.isImplied());
+		assertFalse("the event is wrongly marked as being part of a transaction, seed was " + seed,
+		        txnEvent.inTransaction());
+		
+		/*
+		 * TODO check the events that make up the transaction!
+		 */
+		
+		/*
+		 * TODO document why there are no "removedObjectEvents" (etc.) lists
+		 */
+		Map<XAddress,XEvent> addedObjectEvents = new HashMap<XAddress,XEvent>();
+		Map<XAddress,XEvent> addedFieldEvents = new HashMap<XAddress,XEvent>();
+		Map<XAddress,XEvent> addedValueEvents = new HashMap<XAddress,XEvent>();
+		
+		for(XEvent ev : txnEvent) {
 			/*
-			 * Info: if the test fails, do the following for deterministic
-			 * debugging: Set the seed to the value which caused the test to
-			 * fail. This makes the test deterministic.
+			 * TODO Notice that this might change in the future and the randomly
+			 * constructed succeeding transaction might also contain events of
+			 * other types.
+			 * 
+			 * Check why the transaction events only contain ADD type events,
+			 * although the transactions themselves also contain changes and
+			 * removes. Does the TransactionBuilder or the system which creates
+			 * the transaction event already fine tune the result so that
+			 * changes and removes which occur on objects/fields which were
+			 * added during the transaction aren't even shown?
 			 */
-			long seed = seedGen.nextLong();
-			log.info("Used seed: " + seed + ".");
-			Pair<ChangedObject,XTransaction> pair =
-			        createRandomSucceedingObjectTransaction(object, seed, 10);
-			XTransaction txn = pair.getSecond();
+			assertTrue("The transaction should only contain events of the Add-type, seed was "
+			        + seed, ev.getChangeType() == ChangeType.ADD);
+			assertTrue("Event is wrongly marked as not being part of a transaction, seed was "
+			        + seed, ev.inTransaction());
+			assertEquals("The event doesn't refer to the correct model, seed was " + seed, modelId,
+			        ev.getTarget().getModel());
+			assertFalse("The event is wrongly marked as being implied, seed was " + seed,
+			        event.isImplied());
+			assertEquals("The actor of the event is not correct.", this.actorId, event.getActor());
+			assertEquals("The event didn't refer to the correct revision number, seed was " + seed,
+			        revNr, ev.getRevisionNumber());
 			
-			revNr = this.persistence.executeCommand(this.actorId, txn);
-			assertTrue("Transaction did not succeed.", revNr >= 0);
-			
-			List<XEvent> events = this.persistence.getEvents(objectAddress, revNr, revNr);
-			assertEquals(
-			        "The list of events should contain one Transaction Event, but actually contains zero or multiple events.",
-			        1, events.size());
-			
-			XEvent event = events.get(0);
-			assertTrue("The returned event should be a TransactionEvent.",
-			        event instanceof XTransactionEvent);
-			
-			XTransactionEvent txnEvent = (XTransactionEvent)event;
-			
-			assertEquals("The event didn't refer to the correct old revision number.", 1,
-			        txnEvent.getOldObjectRevision());
-			assertEquals("The event didn't refer to the correct revision number.", revNr,
-			        txnEvent.getRevisionNumber());
-			assertEquals("Event doesn't refer to the correct target.", objectAddress,
-			        txnEvent.getTarget());
-			assertEquals("Event doesn't refer to the correct changed entity.", objectAddress,
-			        txnEvent.getChangedEntity());
-			assertEquals("The actor of the event is not correct.", this.actorId,
-			        txnEvent.getActor());
-			assertFalse("The event is wrongly marked as implied.", txnEvent.isImplied());
-			assertFalse("the event is wrongly marked as being part of a transaction.",
-			        txnEvent.inTransaction());
-			
-			/*
-			 * TODO check the events that make up the transaction!
-			 */
-			
-			/*
-			 * TODO document why there are no "removedFieldEvents" (etc.) lists
-			 */
-			Map<XAddress,XEvent> addedFieldEvents = new HashMap<XAddress,XEvent>();
-			Map<XAddress,XEvent> addedValueEvents = new HashMap<XAddress,XEvent>();
-			
-			for(XEvent ev : txnEvent) {
-				/*
-				 * TODO Notice that this might change in the future and the
-				 * randomly constructed succeeding transaction might also
-				 * contain events of other types.
-				 */
-				assertTrue("The transaction should only contain events of the Add-type.",
-				        ev.getChangeType() == ChangeType.ADD);
-				assertTrue("Event is wrongly marked as not being part of a transaction.",
-				        ev.inTransaction());
-				assertEquals("The event doesn't refer to the correct model.", modelId, ev
-				        .getTarget().getModel());
-				assertEquals("The event doesn't refer to the correct object.", objectId, ev
-				        .getTarget().getObject());
-				assertFalse("The event is wrongly marked as being implied.", event.isImplied());
-				assertEquals("The actor of the event is not correct.", this.actorId,
-				        event.getActor());
-				assertEquals("The event didn't refer to the correct revision number.", revNr,
-				        ev.getRevisionNumber());
+			if(ev.getChangedEntity().getAddressedType() == XType.XOBJECT) {
 				
+				addedObjectEvents.put(ev.getChangedEntity(), ev);
+			} else {
 				assertEquals(
-				        "A object transaction should only contain commands that target fields.", ev
-				                .getChangedEntity().getAddressedType(), XType.XFIELD);
+				        "A model transaction should only contain commands that target objects or fields, seed was "
+				                + seed, ev.getChangedEntity().getAddressedType(), XType.XFIELD);
 				
 				if(ev instanceof XObjectEvent) {
 					addedFieldEvents.put(ev.getChangedEntity(), ev);
@@ -5179,20 +5051,164 @@ public abstract class AbstractPersistenceTest {
 					addedValueEvents.put(ev.getChangedEntity(), ev);
 				}
 			}
+		}
+		
+		model = this.persistence.getModelSnapshot(modelAdrRequest);
+		for(XID objectId : model) {
+			XAddress objectAddress = XX.resolveObject(this.repoId, modelId, objectId);
 			
-			object = this.persistence.getObjectSnapshot(objectAdrRequest);
+			assertTrue(
+			        "Since the model was emtpy before the transaction, there should be a fitting add-event for the object with XID "
+			                + objectId + ", seed was " + seed,
+			        addedObjectEvents.containsKey(objectAddress));
+			XReadableObject object = model.getObject(objectId);
+			
 			for(XID fieldId : object) {
 				XAddress fieldAddress = XX.resolveField(this.repoId, modelId, objectId, fieldId);
 				
 				assertTrue(
-				        "Since the object was emtpy before the transaction, there should be a fitting add-event for the field with XID "
-				                + fieldId + ".", addedFieldEvents.containsKey(fieldAddress));
+				        "Since the model was emtpy before the transaction, there should be a fitting add-event for the field with XID "
+				                + fieldId + ", seed was " + seed,
+				        addedFieldEvents.containsKey(fieldAddress));
 				XReadableField field = object.getField(fieldId);
 				if(field.getValue() != null) {
 					assertTrue(
-					        "Since the object was emtpy before the transaction, there should be a fitting add-event for the value in the field with XID "
-					                + fieldId + ".", addedValueEvents.containsKey(fieldAddress));
+					        "Since the model was emtpy before the transaction, there should be a fitting add-event for the value in the field with XID "
+					                + fieldId + ", seed was " + seed,
+					        addedValueEvents.containsKey(fieldAddress));
 				}
+			}
+		}
+		
+	}
+	
+	@Test
+	public void testGetEventsObjectTransactions() {
+		SecureRandom seedGen = new SecureRandom();
+		
+		for(int i = 0; i < this.nrOfIterationsForTxnTests; i++) {
+			testGetEventsObjectTransactionsWithSeed(i, seedGen.nextLong());
+		}
+	}
+	
+	@Test
+	public void testGetEventsObjectTransactionWithSeedMinus602254616775376772() {
+		testGetEventsObjectTransactionsWithSeed(0, -602254616775376772l);
+	}
+	
+	private void testGetEventsObjectTransactionsWithSeed(int i, long seed) {
+		
+		XID modelId = XX.toId("testGetEventsObjectTransactionsModel" + i);
+		XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId, false);
+		long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
+		assertTrue("The model wasn't correctly added, test cannot be executed.", revNr >= 0);
+		
+		XID objectId = XX.toId("testGetEventsObjectTransactionsObject" + i);
+		XAddress objectAddress = XX.resolveObject(this.repoId, modelId, objectId);
+		XCommand addObjectCom =
+		        this.comFactory.createAddObjectCommand(this.repoId, modelId, objectId, false);
+		revNr = this.persistence.executeCommand(this.actorId, addObjectCom);
+		assertTrue("The object wasn't correctly added, test cannot be executed.", revNr >= 0);
+		
+		GetWithAddressRequest objectAdrRequest = new GetWithAddressRequest(objectAddress);
+		XWritableObject object = this.persistence.getObjectSnapshot(objectAdrRequest);
+		
+		/*
+		 * Info: if the test fails, do the following for deterministic
+		 * debugging: Set the seed to the value which caused the test to fail.
+		 * This makes the test deterministic.
+		 */
+		log.info("Used seed: " + seed + ".");
+		Pair<ChangedObject,XTransaction> pair =
+		        createRandomSucceedingObjectTransaction(object, seed, 10);
+		XTransaction txn = pair.getSecond();
+		
+		revNr = this.persistence.executeCommand(this.actorId, txn);
+		assertTrue("Transaction did not succeed, seed was " + seed, revNr >= 0);
+		
+		List<XEvent> events = this.persistence.getEvents(objectAddress, revNr, revNr);
+		assertEquals(
+		        "The list of events should contain one Transaction Event, but actually contains zero or multiple events, seed was "
+		                + seed, 1, events.size());
+		
+		XEvent event = events.get(0);
+		assertTrue("The returned event should be a TransactionEvent.",
+		        event instanceof XTransactionEvent);
+		
+		XTransactionEvent txnEvent = (XTransactionEvent)event;
+		
+		assertEquals("The event didn't refer to the correct old revision number, seed was " + seed,
+		        1, txnEvent.getOldObjectRevision());
+		assertEquals("The event didn't refer to the correct revision number, seed was " + seed,
+		        revNr, txnEvent.getRevisionNumber());
+		assertEquals("Event doesn't refer to the correct target, seed was " + seed, objectAddress,
+		        txnEvent.getTarget());
+		assertEquals("Event doesn't refer to the correct changed entity, seed was " + seed,
+		        objectAddress, txnEvent.getChangedEntity());
+		assertEquals("The actor of the event is not correct, seed was " + seed, this.actorId,
+		        txnEvent.getActor());
+		assertFalse("The event is wrongly marked as implied, seed was " + seed,
+		        txnEvent.isImplied());
+		assertFalse("the event is wrongly marked as being part of a transaction, seed was " + seed,
+		        txnEvent.inTransaction());
+		
+		/*
+		 * TODO check the events that make up the transaction!
+		 */
+		
+		/*
+		 * TODO document why there are no "removedFieldEvents" (etc.) lists
+		 */
+		Map<XAddress,XEvent> addedFieldEvents = new HashMap<XAddress,XEvent>();
+		Map<XAddress,XEvent> addedValueEvents = new HashMap<XAddress,XEvent>();
+		
+		for(XEvent ev : txnEvent) {
+			/*
+			 * TODO Notice that this might change in the future and the randomly
+			 * constructed succeeding transaction might also contain events of
+			 * other types.
+			 */
+			assertTrue("The transaction should only contain events of the Add-type, seed was "
+			        + seed, ev.getChangeType() == ChangeType.ADD);
+			assertTrue("Event is wrongly marked as not being part of a transaction, seed was "
+			        + seed, ev.inTransaction());
+			assertEquals("The event doesn't refer to the correct model, seed was " + seed, modelId,
+			        ev.getTarget().getModel());
+			assertEquals("The event doesn't refer to the correct object, seed was " + seed,
+			        objectId, ev.getTarget().getObject());
+			assertFalse("The event is wrongly marked as being implied, seed was " + seed,
+			        event.isImplied());
+			assertEquals("The actor of the event is not correct, seed was " + seed, this.actorId,
+			        event.getActor());
+			assertEquals("The event didn't refer to the correct revision number, seed was " + seed,
+			        revNr, ev.getRevisionNumber());
+			
+			assertEquals(
+			        "A object transaction should only contain commands that target fields, seed was "
+			                + seed, ev.getChangedEntity().getAddressedType(), XType.XFIELD);
+			
+			if(ev instanceof XObjectEvent) {
+				addedFieldEvents.put(ev.getChangedEntity(), ev);
+			} else {
+				assertTrue(ev instanceof XFieldEvent);
+				addedValueEvents.put(ev.getChangedEntity(), ev);
+			}
+		}
+		
+		object = this.persistence.getObjectSnapshot(objectAdrRequest);
+		for(XID fieldId : object) {
+			XAddress fieldAddress = XX.resolveField(this.repoId, modelId, objectId, fieldId);
+			
+			assertTrue(
+			        "Since the object was emtpy before the transaction, there should be a fitting add-event for the field with XID "
+			                + fieldId + ", seed was " + seed,
+			        addedFieldEvents.containsKey(fieldAddress));
+			XReadableField field = object.getField(fieldId);
+			if(field.getValue() != null) {
+				assertTrue(
+				        "Since the object was emtpy before the transaction, there should be a fitting add-event for the value in the field with XID "
+				                + fieldId + ", seed was " + seed,
+				        addedValueEvents.containsKey(fieldAddress));
 			}
 		}
 		
