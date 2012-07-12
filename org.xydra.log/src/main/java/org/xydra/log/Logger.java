@@ -13,7 +13,22 @@ public abstract class Logger {
 	 * @author voelkel
 	 */
 	public static enum Level {
-		Trace, Debug, Info, Warn, Error;
+		Trace(0), Debug(1), Info(2), Warn(3), Error(4);
+		
+		Level(int num) {
+			this.num = num;
+		}
+		
+		private int num;
+		
+		public int getNumericLevel() {
+			return this.num;
+		}
+		
+		public boolean isAsImportantOrEvenMoreImportantThan(Level other) {
+			return this.num >= other.num;
+		}
+		
 	}
 	
 	public abstract boolean isDebugEnabled();

@@ -1,16 +1,41 @@
 package org.xydra.log.util;
 
+import org.xydra.annotations.RunsInAppEngine;
+import org.xydra.annotations.RunsInGWT;
 import org.xydra.log.ILogListener;
 import org.xydra.log.Logger;
+import org.xydra.log.Logger.Level;
 
+import com.google.gwt.user.client.Window.Location;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.InlineHTML;
 
 
+/**
+ * Logs to a DIV. Default log level is 'Info', can be set by using the
+ * 'loglevel' URL parameter.
+ * 
+ * @author xamde
+ * 
+ */
+@RunsInAppEngine(false)
+@RunsInGWT(true)
 public class DivLogListener implements ILogListener {
+	
+	private Logger.Level logLevel = Level.Info;
 	
 	public DivLogListener(FlowPanel hostPanel) {
 		this.hostPanel = hostPanel;
+		// get log level from url
+		String loglevel = Location.getParameter("loglevel");
+		if(loglevel != null) {
+			try {
+				Level level = Logger.Level.valueOf(loglevel);
+				this.logLevel = level;
+			} catch(Throwable t) {
+				log("warn", "DivLogListener", "Error parsing '" + loglevel + "'", t);
+			}
+		}
 	}
 	
 	private FlowPanel hostPanel;
@@ -21,6 +46,10 @@ public class DivLogListener implements ILogListener {
 	}
 	
 	private void log(String level, Logger log, String msg, Throwable ... t) {
+		log(level, lastDotPart(log.toString()), msg, t);
+	}
+	
+	private void log(String level, String loggerName, String msg, Throwable ... t) {
 		StringBuilder b = new StringBuilder();
 		if(level.equalsIgnoreCase("warn") || level.equalsIgnoreCase("error")) {
 			b.append("<span style='color:red;'>" + level + "</span> ");
@@ -37,7 +66,7 @@ public class DivLogListener implements ILogListener {
 		}
 		b.append("<span style='font-size: smaller; color: #ccc;'>");
 		b.append(" @");
-		b.append(lastDotPart(log.toString()));
+		b.append(loggerName);
 		b.append("<i>" + level + "</i> ");
 		if(t != null && t.length > 0) {
 			b.append(" " + t.getClass().getName());
@@ -55,47 +84,56 @@ public class DivLogListener implements ILogListener {
 	
 	@Override
 	public void trace(Logger log, String msg, Throwable t) {
-		log("TRACE", log, msg, t);
+		if(Level.Trace.isAsImportantOrEvenMoreImportantThan(this.logLevel))
+			log("TRACE", log, msg, t);
 	}
 	
 	@Override
 	public void debug(Logger log, String msg) {
-		log("DEBUG", log, msg);
+		if(Level.Debug.isAsImportantOrEvenMoreImportantThan(this.logLevel))
+			log("DEBUG", log, msg);
 	}
 	
 	@Override
 	public void debug(Logger log, String msg, Throwable t) {
-		log("DEBUG", log, msg, t);
+		if(Level.Debug.isAsImportantOrEvenMoreImportantThan(this.logLevel))
+			log("DEBUG", log, msg, t);
 	}
 	
 	@Override
 	public void info(Logger log, String msg) {
-		log("INFO", log, msg);
+		if(Level.Info.isAsImportantOrEvenMoreImportantThan(this.logLevel))
+			log("INFO", log, msg);
 	}
 	
 	@Override
 	public void info(Logger log, String msg, Throwable t) {
-		log("INFO", log, msg, t);
+		if(Level.Info.isAsImportantOrEvenMoreImportantThan(this.logLevel))
+			log("INFO", log, msg, t);
 	}
 	
 	@Override
 	public void warn(Logger log, String msg) {
-		log("WARN", log, msg);
+		if(Level.Warn.isAsImportantOrEvenMoreImportantThan(this.logLevel))
+			log("WARN", log, msg);
 	}
 	
 	@Override
 	public void warn(Logger log, String msg, Throwable t) {
-		log("WARN", log, msg, t);
+		if(Level.Warn.isAsImportantOrEvenMoreImportantThan(this.logLevel))
+			log("WARN", log, msg, t);
 	}
 	
 	@Override
 	public void error(Logger log, String msg) {
-		log("ERROR", log, msg);
+		if(Level.Error.isAsImportantOrEvenMoreImportantThan(this.logLevel))
+			log("ERROR", log, msg);
 	}
 	
 	@Override
 	public void error(Logger log, String msg, Throwable t) {
-		log("ERROR", log, msg, t);
+		if(Level.Error.isAsImportantOrEvenMoreImportantThan(this.logLevel))
+			log("ERROR", log, msg, t);
 	}
 	
 	/**
