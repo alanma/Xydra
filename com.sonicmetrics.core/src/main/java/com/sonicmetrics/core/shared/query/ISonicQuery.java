@@ -1,7 +1,5 @@
 package com.sonicmetrics.core.shared.query;
 
-import java.util.List;
-
 import org.xydra.annotations.NeverNull;
 
 
@@ -9,13 +7,7 @@ import org.xydra.annotations.NeverNull;
  * @author xamde
  * 
  */
-public interface ISonicQuery {
-	
-	/**
-	 * @return the list of key-value-constraints
-	 */
-	@NeverNull
-	List<KeyValueConstraint> getKeyValueConstraints();
+public interface ISonicQuery extends ISonicFilter {
 	
 	/**
 	 * @return the (potentially trivial) time constraint

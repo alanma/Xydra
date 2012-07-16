@@ -36,10 +36,10 @@ public abstract class AbstractTestSonicDb {
 	@Test
 	public void testHashcodeAndEquals() {
 		ISonicEvent se1a = SonicEvent.create(120).subject("@xamde").category("cat1").action("act")
-		        .label("lab").source("test").done();
+		        .label("lab").source("test").build();
 		
 		ISonicEvent se1b = SonicEvent.create(120).subject("@xamde").category("cat1").action("act")
-		        .label("lab").source("test").done();
+		        .label("lab").source("test").build();
 		
 		assertTrue(se1a.equals(se1b));
 		assertEquals(se1a.hashCode(), se1b.hashCode());
@@ -50,21 +50,21 @@ public abstract class AbstractTestSonicDb {
 		assertTrue(dbIsEmpty());
 		
 		ISonicEvent se1 = SonicEvent.create(120).subject("@xamde").category("cat1").action("act")
-		        .label("lab").source("test").done();
+		        .label("lab").source("test").build();
 		this.db.receiveEvent(se1);
 		assertFalse(dbIsEmpty());
 		
 		ISonicEvent se2 = SonicEvent.create(120).subject("@xamde").category("cat2").action("act")
-		        .label("lab").source("test").done();
+		        .label("lab").source("test").build();
 		this.db.receiveEvent(se2);
 		ISonicEvent se3 = SonicEvent.create(120).subject("@xamde").category("cat3").action("act")
-		        .label("lab").source("test").done();
+		        .label("lab").source("test").build();
 		this.db.receiveEvent(se3);
 		ISonicEvent se4 = SonicEvent.create(120).subject("@xamde").category("cat4").action("act")
-		        .label("lab").source("test").done();
+		        .label("lab").source("test").build();
 		this.db.receiveEvent(se4);
 		ISonicEvent se5 = SonicEvent.create(120).subject("@xamde").category("cat5").action("act")
-		        .label("lab").source("test").done();
+		        .label("lab").source("test").build();
 		this.db.receiveEvent(se5);
 		
 		ISonicQuery sq = SonicQuery.build(TimeConstraint.fromTo(120, 180)).done();
@@ -95,17 +95,17 @@ public abstract class AbstractTestSonicDb {
 		assertTrue(dbIsEmpty());
 		
 		ISonicEvent se1 = SonicEvent.create(120).subject("@xamde").category("cat1").action("act")
-		        .label("lab").source("test").uniqueId("abc").done();
+		        .label("lab").source("test").uniqueId("abc").build();
 		this.db.receiveEvent(se1);
 		ISonicEvent se2 = SonicEvent.create(120).subject("@xamde").category("cat2").action("act")
-		        .label("lab").source("test").done();
+		        .label("lab").source("test").build();
 		this.db.receiveEvent(se2);
 		
 		assertEquals(2, getDbSize());
 		
 		@SuppressWarnings("unused")
 		ISonicEvent se3 = SonicEvent.create(120).subject("@xamde").category("cat3").action("act")
-		        .label("lab").source("test").uniqueId("abc").done();
+		        .label("lab").source("test").uniqueId("abc").build();
 		
 		assertEquals(2, getDbSize());
 	}

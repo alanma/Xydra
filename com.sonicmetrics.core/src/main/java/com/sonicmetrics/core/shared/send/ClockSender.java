@@ -2,6 +2,7 @@ package com.sonicmetrics.core.shared.send;
 
 import com.sonicmetrics.core.shared.ISonicEvent;
 import com.sonicmetrics.core.shared.impl.memory.SonicEvent;
+import com.sonicmetrics.core.shared.impl.memory.SonicEvent.SeBuilder;
 import com.sonicmetrics.core.shared.query.ISonicListener;
 
 
@@ -20,10 +21,14 @@ public class ClockSender {
 		for(int i = 0; i < 15; i++) {
 			long time = (minute + i) * ONE_MINUTE;
 			
-			ISonicEvent sonicEvent = SonicEvent.create(time).category("time").action("minute")
-			        .uniqueId("" + time).subject("time").source("ClockResource").done();
+			SeBuilder b = SonicEvent.create(time);
+			b.category("time");
+			b.action("minute");
+			b.uniqueId("" + time);
+			b.subject("time");
+			b.source("ClockResource");
+			ISonicEvent sonicEvent = b.build();
 			listener.receiveEvent(sonicEvent);
-			
 		}
 	}
 	

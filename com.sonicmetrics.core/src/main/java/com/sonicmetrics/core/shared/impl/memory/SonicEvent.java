@@ -1,8 +1,6 @@
 package com.sonicmetrics.core.shared.impl.memory;
 
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -13,11 +11,9 @@ import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.sharedutils.XyAssert;
 
-import com.google.gwt.regexp.shared.RegExp;
 import com.sonicmetrics.core.shared.ISonicEvent;
 import com.sonicmetrics.core.shared.rest.ISonicREST_API;
 import com.sonicmetrics.core.shared.util.JsonUtils;
-import com.sonicmetrics.core.shared.util.ValidationUtils;
 
 
 /**
@@ -35,124 +31,89 @@ import com.sonicmetrics.core.shared.util.ValidationUtils;
  * @author xamde
  */
 @RunsInGWT(true)
-public class SonicEvent implements ISonicEvent, Serializable {
+public class SonicEvent extends SonicPotentialEvent implements ISonicEvent, Serializable {
 	
+	public static class SeBuilder extends
+	        SonicPotentialEvent.Builder<SonicEvent,SonicEvent.SeBuilder> {
+		
+		public SeBuilder(long utcTimestamp) {
+			this.t = new SonicEvent(utcTimestamp);
+			this.b = this;
+		}
+		
+		public void validate() {
+			XyAssert.validateNotNull(this.t.category, "category");
+			XyAssert.validateNotNull(this.t.action, "action");
+			XyAssert.validateNotNull(this.t.subject, "subject");
+			XyAssert.validateNotNull(this.t.source, "source");
+		}
+		
+		/**
+		 * Adds all data given in map to the extension data.
+		 * 
+		 * @param map
+		 * @return this
+		 * @throws IllegalArgumentException
+		 */
+		public SeBuilder withParams(@NeverNull Map<String,String> map)
+		        throws IllegalArgumentException {
+			for(Entry<String,String> e : map.entrySet()) {
+				String key = e.getKey();
+				String value = e.getValue();
+				
+				boolean recognized = false;
+				for(FilterProperty ip : FilterProperty.values()) {
+					if(ip.name().toLowerCase().equals(key.toLowerCase())) {
+						recognized = true;
+						withParam(ip, value);
+						break;
+					}
+				}
+				if(!recognized) {
+					withParam(key, value);
+				}
+			}
+			return this;
+		}
+		
+	}
+	
+	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(SonicEvent.class);
+	
+	private static final long MS_PER_MINUTE = 1000 * 60;
+	
+	private static final long MS_PER_DAY = MS_PER_MINUTE * 60 * 24;
 	
 	private static final long serialVersionUID = 1L;
 	
-	/**
-	 * Alphanumerics plus dash '-' and underscore '_'. May not begin with
-	 * underscore. Required length: 2-100 characters.
-	 */
-	public static final String IDENTIFIER = "[0-9a-zA-Z][0-9a-zA-Z-_]{1,99}";
-	
-	/**
-	 * Alphanumerics plus dash '-', underscore '_', at '@', and dot '.'. May not
-	 * begin with underscore. Required length: 2-99 characters.
-	 */
-	public static final String USERIDENTIFIER = "[0-9a-zA-Z-@.][0-9a-zA-Z-_@.]{1,100}";
-	
-	public static final RegExp IDENTIFIER_PATTERN = ValidationUtils.compilePattern(IDENTIFIER);
-	
-	public static final RegExp USERIDENTIFIER_PATTERN = ValidationUtils
-	        .compilePattern(USERIDENTIFIER);
-	
-	@NeverNull
-	protected String source;
-	
-	@NeverNull
-	protected String action;
-	
-	@NeverNull
-	protected String category;
-	
-	@CanBeNull
-	protected String label;
-	
-	protected long timestamp;
-	
-	@NeverNull
-	protected String subject;
-	
-	@CanBeNull
-	protected String value;
-	
-	@CanBeNull
-	public String key;
-	
-	@CanBeNull
-	protected String uniqueId;
-	
-	public String getUniqueId() {
-		return this.uniqueId;
-	}
-	
-	// for GWT only
-	public SonicEvent() {
-	}
-	
-	private SonicEvent(long utcTimestamp) {
-		this.timestamp = utcTimestamp;
-	}
-	
-	public String getAction() {
-		return this.action;
-	}
-	
-	public String getCategory() {
-		return this.category;
-	}
-	
-	public long getWhen() {
-		return this.timestamp;
-	}
-	
-	public String getSubject() {
-		return this.subject;
-	}
-	
-	public String getSource() {
-		return this.source;
-	}
-	
-	public String getKey() {
-		return this.key;
-	}
-	
-	/**
-	 * Additional key-value-pairs
-	 */
-	private final Map<String,String> extensionDataMap = new HashMap<String,String>();
-	
-	/**
-	 * @return category.action.label if all three are defined; category.action
-	 *         if these two are defined; or just the category.
-	 */
-	public String getDotString() {
-		StringBuilder b = new StringBuilder();
-		b.append(this.getCategory());
-		String action = this.getAction();
-		if(action != null) {
-			b.append(".").append(action);
+	private static boolean bothNullOrEqual(Object a, Object b) {
+		if(a == null) {
+			return b == null;
+		} else {
+			if(b == null)
+				return false;
+			else
+				return a.equals(b);
 		}
-		String label = this.getLabel();
-		if(label != null) {
-			b.append(".").append(label);
-		}
-		return b.toString();
 	}
 	
-	public String getLabel() {
-		return this.label;
+	public static SeBuilder create(long utcTimestamp) {
+		return new SeBuilder(utcTimestamp);
 	}
 	
-	public String getValue() {
-		return this.value;
+	public static SeBuilder createFrom(ISonicEvent se) {
+		SeBuilder b = create(se.getWhen());
+		b.category(se.getCategory());
+		b.action(se.getAction());
+		b.source(se.getSource());
+		b.subject(se.getSubject());
+		b.labelIgnoreIfNull(se.getLabel());
+		b.valueIgnoreIfNull(se.getValue());
+		b.uniqueId(se.getUniqueId());
+		b.withParams(se.getExtensionData());
+		return b;
 	}
-	
-	private static final long MS_PER_MINUTE = 1000 * 60;
-	private static final long MS_PER_DAY = MS_PER_MINUTE * 60 * 24;
 	
 	/**
 	 * @param utcTimestamp
@@ -167,11 +128,69 @@ public class SonicEvent implements ISonicEvent, Serializable {
 		return days + "d|" + minutes + "m|" + remainingMillis + "ms";
 	}
 	
-	@Override
-	public String toString() {
-		return this.timestamp + "utc=(" + toDebugTime(this.timestamp) + ") subject:'"
-		        + this.subject + "':'" + this.category + "." + this.action + "." + this.label
-		        + (this.value == null ? "" : "=" + this.value) + "' source:'" + this.source + "'";
+	@CanBeNull
+	public String key;
+	
+	protected long timestamp;
+	
+	// for GWT only
+	public SonicEvent() {
+	}
+	
+	private SonicEvent(long utcTimestamp) {
+		this.timestamp = utcTimestamp;
+	}
+	
+	public boolean equals(Object other) {
+		if(!(other instanceof ISonicEvent))
+			return false;
+		
+		ISonicEvent o = (ISonicEvent)other;
+		
+		if(this.getWhen() != o.getWhen())
+			return false;
+		
+		if(!bothNullOrEqual(this.getKey(), o.getKey())) {
+			return false;
+		}
+		if(!bothNullOrEqual(this.getUniqueId(), o.getUniqueId())) {
+			return false;
+		}
+		if(!bothNullOrEqual(this.getSubject(), o.getSubject())) {
+			return false;
+		}
+		if(!bothNullOrEqual(this.getCategory(), o.getCategory())) {
+			return false;
+		}
+		if(!bothNullOrEqual(this.getAction(), o.getAction())) {
+			return false;
+		}
+		if(!bothNullOrEqual(this.getLabel(), o.getLabel())) {
+			return false;
+		}
+		if(!bothNullOrEqual(this.getSource(), o.getSource())) {
+			return false;
+		}
+		return true;
+	}
+	
+	public String getKey() {
+		return this.key;
+	}
+	
+	public long getWhen() {
+		return this.timestamp;
+	}
+	
+	public int hashCode() {
+		return ((int)(this.timestamp % Integer.MAX_VALUE))
+		        + (this.key == null ? 0 : this.key.hashCode());
+	}
+	
+	public void setKey(String key) {
+		XyAssert.validateCondition(this.key == null, "Key can be set only once");
+		// key = key name
+		this.key = key;
 	}
 	
 	public StringBuilder toJsonObject() {
@@ -232,269 +251,10 @@ public class SonicEvent implements ISonicEvent, Serializable {
 		return b;
 	}
 	
-	public boolean hasLabel() {
-		return getLabel() != null;
-	}
-	
-	public boolean hasUniqueId() {
-		return this.getUniqueId() != null;
-	}
-	
-	public static Builder create(long utcTimestamp) {
-		return new Builder(utcTimestamp);
-	}
-	
-	public void setKey(String key) {
-		XyAssert.validateCondition(this.key == null, "Key can be set only once");
-		// key = key name
-		this.key = key;
-	}
-	
-	public static Builder createFrom(ISonicEvent se) {
-		Builder b = create(se.getWhen());
-		b.category(se.getCategory());
-		b.action(se.getAction());
-		b.source(se.getSource());
-		b.subject(se.getSubject());
-		b.labelIgnoreIfNull(se.getLabel());
-		b.valueIgnoreIfNull(se.getLabel());
-		b.uniqueId(se.getUniqueId());
-		b.withParams(se.getExtensionData());
-		return b;
-	}
-	
-	public static class Builder {
-		
-		private SonicEvent se;
-		
-		public Builder(long utcTimestamp) {
-			this.se = new SonicEvent(utcTimestamp);
-		}
-		
-		public Builder category(String category) throws IllegalArgumentException {
-			XyAssert.validateNotNull(category, "category");
-			this.se.category = category.toLowerCase();
-			XyAssert.validateCondition(ValidationUtils.matches(IDENTIFIER_PATTERN, category),
-			        "Category must be a valid Identifier" + ", i.e. match the regex '" + IDENTIFIER
-			                + "' (Java syntax). See doc.sonicmetrics.com");
-			return this;
-		}
-		
-		public Builder action(String action) throws IllegalArgumentException {
-			XyAssert.validateNotNull(action, "action");
-			this.se.action = action.toLowerCase();
-			XyAssert.validateCondition(ValidationUtils.matches(IDENTIFIER_PATTERN, action),
-			        "Action must be a valid Identifier" + ", i.e. match the regex '" + IDENTIFIER
-			                + "' (Java syntax). See doc.sonicmetrics.com");
-			return this;
-		}
-		
-		public Builder label(String label) throws IllegalArgumentException {
-			XyAssert.validateNotNull(label, "label");
-			this.se.label = label.toLowerCase();
-			XyAssert.validateCondition(ValidationUtils.matches(IDENTIFIER_PATTERN, label),
-			        "Label must be a valid Identifier" + ", i.e. match the regex '" + IDENTIFIER
-			                + "' (Java syntax). See doc.sonicmetrics.com");
-			return this;
-		}
-		
-		public Builder subject(String subject) throws IllegalArgumentException {
-			XyAssert.validateNotNull(subject, "subject");
-			this.se.subject = subject.toLowerCase();
-			XyAssert.validateCondition(ValidationUtils.matches(USERIDENTIFIER_PATTERN, subject),
-			        "Subject must be a valid UserIdentifier" + ", i.e. match the regex '"
-			                + USERIDENTIFIER_PATTERN + "' (Java syntax). See doc.sonicmetrics.com");
-			return this;
-		}
-		
-		public Builder source(String source) throws IllegalArgumentException {
-			XyAssert.validateNotNull(source, "source");
-			this.se.source = source.toLowerCase();
-			XyAssert.validateCondition(ValidationUtils.matches(USERIDENTIFIER_PATTERN, source),
-			        "Source must be a valid UserIdentifier" + ", i.e. match the regex '"
-			                + USERIDENTIFIER_PATTERN + "' (Java syntax). See doc.sonicmetrics.com");
-			return this;
-		}
-		
-		public Builder withParam(IndexedProperty key, String value) {
-			switch(key) {
-			case Action:
-				return action(value);
-			case Category:
-				return category(value);
-			case Label:
-				return label(value);
-			case Source:
-				return source(value);
-			case Subject:
-				return subject(value);
-			}
-			throw new AssertionError();
-		}
-		
-		/**
-		 * If a reserved key such as 'category' is used, this is mapped to a
-		 * call of category(s). Silently ignored if value is null.
-		 * 
-		 * @param key
-		 * @param value
-		 * @return this builder
-		 * @throws IllegalArgumentException
-		 */
-		public Builder withParam(String key, String value) throws IllegalArgumentException {
-			if(value == null) {
-				return this;
-			}
-			if(ValidationUtils.matches(IDENTIFIER_PATTERN, key)) {
-				// auto-fix mapping to built-in parameters
-				if(key.equalsIgnoreCase(ISonicREST_API.CATEGORY)) {
-					return category(value);
-				} else if(key.equalsIgnoreCase(ISonicREST_API.ACTION)) {
-					return action(value);
-				} else if(key.equalsIgnoreCase(ISonicREST_API.LABEL)) {
-					return label(value);
-				} else if(key.equalsIgnoreCase(ISonicREST_API.VALUE)) {
-					return value(value);
-				} else if(key.equalsIgnoreCase(ISonicREST_API.SUBJECT)) {
-					return subject(value);
-				} else if(key.equalsIgnoreCase(ISonicREST_API.SOURCE)) {
-					return source(value);
-				} else if(key.equalsIgnoreCase(ISonicREST_API.UNIQUEID)) {
-					return uniqueId(value);
-				} else {
-					this.se.extensionDataMap.put(key, value);
-				}
-			} else {
-				log.debug("Ignored invalid key '" + key + "'" + ". Did not match the regex '"
-				        + IDENTIFIER + "' (Java syntax). See doc.sonicmetrics.com");
-			}
-			return this;
-		}
-		
-		public SonicEvent done() {
-			XyAssert.validateNotNull(this.se.category, "category");
-			XyAssert.validateNotNull(this.se.action, "action");
-			XyAssert.validateNotNull(this.se.subject, "subject");
-			XyAssert.validateNotNull(this.se.source, "source");
-			return this.se;
-		}
-		
-		/**
-		 * Adds all data given in map to the extension data.
-		 * 
-		 * @param map
-		 * @return this
-		 * @throws IllegalArgumentException
-		 */
-		public Builder withParams(@NeverNull Map<String,String> map)
-		        throws IllegalArgumentException {
-			for(Entry<String,String> e : map.entrySet()) {
-				String key = e.getKey();
-				String value = e.getValue();
-				
-				boolean recognized = false;
-				for(IndexedProperty ip : IndexedProperty.values()) {
-					if(ip.name().toLowerCase().equals(key.toLowerCase())) {
-						recognized = true;
-						withParam(ip, value);
-						break;
-					}
-				}
-				if(!recognized) {
-					withParam(key, value);
-				}
-			}
-			return this;
-		}
-		
-		public Builder uniqueId(String uniqueId) {
-			XyAssert.validateNotNull(uniqueId, "uniqueid");
-			// intentionally not to lowercase
-			this.se.uniqueId = uniqueId;
-			return this;
-		}
-		
-		public Builder value(String value) {
-			XyAssert.validateNotNull(value, "value");
-			this.se.value = value;
-			return this;
-		}
-		
-		public Builder uniqueIdIgnoredIfNull(String uniqueId) {
-			if(uniqueId != null) {
-				return uniqueId(uniqueId);
-			}
-			return this;
-		}
-		
-		public Builder valueIgnoreIfNull(String value) {
-			if(value != null) {
-				this.se.value = value;
-			}
-			return this;
-		}
-		
-		public Builder labelIgnoreIfNull(String label) {
-			if(label != null) {
-				return label(label);
-			}
-			return this;
-		}
-		
-	}
-	
 	@Override
-	public Map<String,String> getExtensionData() {
-		return Collections.unmodifiableMap(this.extensionDataMap);
-	}
-	
-	public int hashCode() {
-		return ((int)(this.timestamp % Integer.MAX_VALUE))
-		        + (this.key == null ? 0 : this.key.hashCode());
-	}
-	
-	public boolean equals(Object other) {
-		if(!(other instanceof ISonicEvent))
-			return false;
-		
-		ISonicEvent o = (ISonicEvent)other;
-		
-		if(this.getWhen() != o.getWhen())
-			return false;
-		
-		if(!bothNullOrEqual(this.getKey(), o.getKey())) {
-			return false;
-		}
-		if(!bothNullOrEqual(this.getUniqueId(), o.getUniqueId())) {
-			return false;
-		}
-		if(!bothNullOrEqual(this.getSubject(), o.getSubject())) {
-			return false;
-		}
-		if(!bothNullOrEqual(this.getCategory(), o.getCategory())) {
-			return false;
-		}
-		if(!bothNullOrEqual(this.getAction(), o.getAction())) {
-			return false;
-		}
-		if(!bothNullOrEqual(this.getLabel(), o.getLabel())) {
-			return false;
-		}
-		if(!bothNullOrEqual(this.getSource(), o.getSource())) {
-			return false;
-		}
-		return true;
-	}
-	
-	private static boolean bothNullOrEqual(Object a, Object b) {
-		if(a == null) {
-			return b == null;
-		} else {
-			if(b == null)
-				return false;
-			else
-				return a.equals(b);
-		}
+	public String toString() {
+		return this.timestamp + "utc=(" + toDebugTime(this.timestamp) + ") subject:'"
+		        + super.toString();
 	}
 	
 }
