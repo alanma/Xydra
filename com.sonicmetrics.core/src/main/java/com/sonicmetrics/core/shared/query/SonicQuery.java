@@ -18,6 +18,7 @@ public class SonicQuery extends SonicFilter implements ISonicQuery {
 		private int limit = 100;
 		
 		public Builder(TimeConstraint timeConstraint) {
+			this.b = this;
 			this.timeConstraint = timeConstraint;
 		}
 		
