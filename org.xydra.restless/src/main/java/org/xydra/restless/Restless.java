@@ -154,7 +154,8 @@ public class Restless extends HttpServlet {
 	
 	public static final String X_HTTP_Method_Override = "X-HTTP-Method-Override";
 	
-	public static final String XHTML_DOCTYPE = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\" \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">";
+	public static final String XHTML_DOCTYPE =
+	        "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\" \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">";
 	
 	public static final String XHTML_NS = "xmlns=\"http://www.w3.org/1999/xhtml\"";
 	
@@ -244,7 +245,8 @@ public class Restless extends HttpServlet {
 	
 	private String apps;
 	
-	final List<RestlessExceptionHandler> exceptionHandlers = new LinkedList<RestlessExceptionHandler>();
+	final List<RestlessExceptionHandler> exceptionHandlers =
+	        new LinkedList<RestlessExceptionHandler>();
 	
 	/** Filled from web.xml */
 	private final Map<String,String> initParams = new HashMap<String,String>();
@@ -313,14 +315,19 @@ public class Restless extends HttpServlet {
 	public void addMethod(String pathTemplate, String httpMethod, Object instanceOrClass,
 	        String javaMethodName, boolean adminOnly, RestlessParameter ... parameter) {
 		PathTemplate pt = new PathTemplate(pathTemplate);
-		this.methods.add(new RestlessMethod(instanceOrClass, httpMethod, javaMethodName, pt,
-		        adminOnly, parameter));
+		
+		synchronized(this.methods) {
+			this.methods.add(new RestlessMethod(instanceOrClass, httpMethod, javaMethodName, pt,
+			        adminOnly, parameter));
+		}
 		assert methodByName(instanceOrClass, javaMethodName) != null : "method '" + javaMethodName
 		        + "' not found";
 	}
 	
 	public void addRequestListener(IRequestListener requestListener) {
-		this.requestListeners.add(requestListener);
+		synchronized(this.requestListeners) {
+			this.requestListeners.add(requestListener);
+		}
 	}
 	
 	/**
@@ -335,6 +342,9 @@ public class Restless extends HttpServlet {
 	private void delegateToDefaultServlet(HttpServletRequest req, HttpServletResponse res)
 	        throws IOException {
 		try {
+			/*
+			 * TODO maybe a "getServlectContext"-lock might be appropriate?
+			 */
 			RequestDispatcher rd = getServletContext().getNamedDispatcher("default");
 			HttpServletRequest wrapped = new HttpServletRequestWrapper(req) {
 				@Override
@@ -342,6 +352,9 @@ public class Restless extends HttpServlet {
 					return "";
 				}
 			};
+			/*
+			 * TODO maybe a "request dispatcher"-Lock might be appropriate?
+			 */
 			rd.forward(wrapped, res);
 		} catch(ServletException e) {
 			throw new RuntimeException(e);
@@ -393,6 +406,9 @@ public class Restless extends HttpServlet {
 	@Override
 	public void doHead(HttpServletRequest req, HttpServletResponse res) {
 		try {
+			/*
+			 * TODO do we need a lock here?
+			 */
 			super.doHead(req, res);
 		} catch(ServletException e) {
 			throw new RuntimeException(e);
@@ -410,6 +426,10 @@ public class Restless extends HttpServlet {
 	 */
 	private void doIntrospection(HttpServletRequest req, HttpServletResponse res) {
 		String servletPath = getServletPath(req);
+		
+		/*
+		 * TODO do we need a lock here?
+		 */
 		ServletUtils.headers(res, MIME_XHTML);
 		try {
 			Writer w = res.getWriter();
@@ -434,23 +454,27 @@ public class Restless extends HttpServlet {
 			        "</head><body><div>");
 			w.write("<h3>Restless configuration</h3>\n");
 			w.write("<ol>");
-			for(RestlessMethod rm : this.methods) {
-				w.write("<li>");
-				String url = servletPath + XmlUtils.xmlEncode(rm.pathTemplate.getRegex());
-				w.write((rm.adminOnly ? "ADMIN ONLY" : "PUBLIC") + " resource <b class='resource'>"
-				        + url + "</b>: " + rm.httpMethod + " =&gt; ");
-				w.write(instanceOrClass_className(rm.instanceOrClass) + "#" + rm.methodName);
-				
-				/* list parameters */
-				w.write("<form action='" + url + "' method='" + rm.httpMethod.toLowerCase()
-				        + "'><div>");
-				for(RestlessParameter parameter : rm.requiredNamedParameter) {
-					w.write(parameter.name + " <input type='text' name='" + parameter.name
-					        + "' value='" + parameter.defaultValue + "' />");
+			
+			synchronized(this.methods) {
+				for(RestlessMethod rm : this.methods) {
+					w.write("<li>");
+					String url = servletPath + XmlUtils.xmlEncode(rm.pathTemplate.getRegex());
+					w.write((rm.adminOnly ? "ADMIN ONLY" : "PUBLIC")
+					        + " resource <b class='resource'>" + url + "</b>: " + rm.httpMethod
+					        + " =&gt; ");
+					w.write(instanceOrClass_className(rm.instanceOrClass) + "#" + rm.methodName);
+					
+					/* list parameters */
+					w.write("<form action='" + url + "' method='" + rm.httpMethod.toLowerCase()
+					        + "'><div>");
+					for(RestlessParameter parameter : rm.requiredNamedParameter) {
+						w.write(parameter.name + " <input type='text' name='" + parameter.name
+						        + "' value='" + parameter.defaultValue + "' />");
+					}
+					w.write("<input type='submit' value='Send' /></div></form>");
+					
+					w.write("</li>\n");
 				}
-				w.write("<input type='submit' value='Send' /></div></form>");
-				
-				w.write("</li>\n");
 			}
 			w.write("</ol>");
 			HtmlUtils.endHtmlPage(w);
@@ -488,14 +512,18 @@ public class Restless extends HttpServlet {
 	}
 	
 	protected void fireRequestFinished(IRestlessContext restlessContext) {
-		for(IRequestListener requestListener : this.requestListeners) {
-			requestListener.onRequestFinished(restlessContext);
+		synchronized(this.requestListeners) {
+			for(IRequestListener requestListener : this.requestListeners) {
+				requestListener.onRequestFinished(restlessContext);
+			}
 		}
 	}
 	
 	protected void fireRequestStarted(IRestlessContext restlessContext) {
-		for(IRequestListener requestListener : this.requestListeners) {
-			requestListener.onRequestStarted(restlessContext);
+		synchronized(this.requestListeners) {
+			for(IRequestListener requestListener : this.requestListeners) {
+				requestListener.onRequestStarted(restlessContext);
+			}
 		}
 	}
 	
@@ -517,6 +545,9 @@ public class Restless extends HttpServlet {
 	 */
 	public Object getServletContextAttribute(String key) {
 		try {
+			/*
+			 * TODO do we need a lock here? (servlet context lock)
+			 */
 			ServletContext sc = this.getServletContext();
 			return sc.getAttribute(key);
 		} catch(NullPointerException e) {
@@ -524,6 +555,9 @@ public class Restless extends HttpServlet {
 			if(this.localContext == null) {
 				return null;
 			}
+			/*
+			 * TODO do we need a lock here? (local context)
+			 */
 			return this.localContext.get(key);
 		}
 	}
@@ -547,10 +581,17 @@ public class Restless extends HttpServlet {
 	 */
 	@Override
 	public void init(ServletConfig servletConfig) {
+		/*
+		 * TODO is this supposed to run only once or multiple times?
+		 */
+		
 		/* measure boot performance */
 		NanoClock clock = new NanoClock();
 		clock.start();
 		try {
+			/*
+			 * TODO do we need a lock here?
+			 */
 			super.init(servletConfig);
 		} catch(ServletException e) {
 			throw new RuntimeException("Could not initialise super servlet", e);
@@ -560,6 +601,9 @@ public class Restless extends HttpServlet {
 		/**
 		 * Configuration option in web.xml to select class for logging back-end,
 		 * which must be an implementation of ILoggerFactorySPI.
+		 */
+		/*
+		 * TODO do we need a lock here? (logger factory)
 		 */
 		this.loggerFactory = servletConfig.getInitParameter(INIT_PARAM_XYDRA_LOG_BACKEND);
 		if(this.loggerFactory != null) {
@@ -581,6 +625,9 @@ public class Restless extends HttpServlet {
 			this.initParams.put(key, value);
 		}
 		
+		/*
+		 * TODO do we need a lock here? (init parameters)
+		 */
 		this.initParams.put("context:contextPath", servletConfig.getServletContext()
 		        .getContextPath());
 		this.initParams.put("context:realPath of '/'", servletConfig.getServletContext()
@@ -623,6 +670,9 @@ public class Restless extends HttpServlet {
 		        + "Init performance " + clock.getStats());
 	}
 	
+	/*
+	 * TODO continue to check for synchronization issues
+	 */
 	private void initLoggerFactory() {
 		if(LoggerFactory.hasLoggerFactorySPI()) {
 			return;
@@ -683,8 +733,8 @@ public class Restless extends HttpServlet {
 					clock.stop(appClassName + "-newinstance");
 					try {
 						clock.start();
-						Method restlessMethod = clazz.getMethod("restless", Restless.class,
-						        String.class);
+						Method restlessMethod =
+						        clazz.getMethod("restless", Restless.class, String.class);
 						clock.stop(appClassName + "-get-restless-method");
 						try {
 							clock.start();
@@ -800,8 +850,8 @@ public class Restless extends HttpServlet {
 					if(httpMethod.equalsIgnoreCase(restlessMethod.httpMethod)) {
 						foundMethod = true;
 						try {
-							couldStartMethod = restlessMethod.run(this, reqHandedDown, res,
-							        requestClock);
+							couldStartMethod =
+							        restlessMethod.run(this, reqHandedDown, res, requestClock);
 						} catch(IOException e) {
 							throw new RuntimeException(e);
 						}
@@ -822,13 +872,14 @@ public class Restless extends HttpServlet {
 				}
 			} else {
 				// produce better error message
-				String msg = "No handler matched your "
-				        + reqHandedDown.getMethod()
-				        + "-request path '"
-				        + path
-				        + "'. "
-				        + (foundPath ? "Found at least one path mapping (wrong HTTP method or missing parameters)."
-				                : "Found not even a path mapping. Check your Restless App and web.xml.");
+				String msg =
+				        "No handler matched your "
+				                + reqHandedDown.getMethod()
+				                + "-request path '"
+				                + path
+				                + "'. "
+				                + (foundPath ? "Found at least one path mapping (wrong HTTP method or missing parameters)."
+				                        : "Found not even a path mapping. Check your Restless App and web.xml.");
 				log.warn(msg);
 				try {
 					res.sendError(404, msg);
