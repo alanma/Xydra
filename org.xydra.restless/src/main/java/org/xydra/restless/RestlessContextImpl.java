@@ -22,6 +22,12 @@ public class RestlessContextImpl implements IRestlessContext {
 		this.requestIdentifier = requestIdentifier;
 	}
 	
+	/*
+	 * TODO are HttpServletRequests and HttpServletResponses already
+	 * thread-safe?
+	 */
+	
+	@Override
 	public HttpServletRequest getRequest() {
 		return this.req;
 	}
@@ -31,6 +37,7 @@ public class RestlessContextImpl implements IRestlessContext {
 		return this.requestIdentifier;
 	}
 	
+	@Override
 	public HttpServletResponse getResponse() {
 		return this.res;
 	}

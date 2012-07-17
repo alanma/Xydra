@@ -671,7 +671,8 @@ public class Restless extends HttpServlet {
 	}
 	
 	/*
-	 * TODO continue to check for synchronization issues
+	 * TODO do we need a lock here? Is this called more than once/only during
+	 * the creation?
 	 */
 	private void initLoggerFactory() {
 		if(LoggerFactory.hasLoggerFactorySPI()) {
@@ -794,7 +795,9 @@ public class Restless extends HttpServlet {
 	}
 	
 	public void removeRequestListener(IRequestListener requestListener) {
-		this.requestListeners.remove(requestListener);
+		synchronized(this.requestListeners) {
+			this.requestListeners.remove(requestListener);
+		}
 	}
 	
 	/**
@@ -803,6 +806,9 @@ public class Restless extends HttpServlet {
 	 * 
 	 * @param req
 	 * @param res
+	 */
+	/*
+	 * TODO do multiple threads operate on the same HttpServletResponses?
 	 */
 	protected void restlessService(final HttpServletRequest req, final HttpServletResponse res) {
 		NanoClock requestClock = new NanoClock().start();
@@ -836,27 +842,36 @@ public class Restless extends HttpServlet {
 		// look through all registered methods
 		final boolean reqViaAdminUrl = requestIsViaAdminUrl(reqHandedDown);
 		boolean couldStartMethod = false;
-		for(RestlessMethod restlessMethod : this.methods) {
-			/*
-			 * if secure access, ignore all public methods. if insecure access,
-			 * ignore all secure methods: Skip all restlessMethods that may not
-			 * be accessed
-			 */
-			if(reqViaAdminUrl == restlessMethod.adminOnly) {
-				// if path matches
-				if(restlessMethod.pathTemplate.matches(path)) {
-					foundPath = true;
-					// and HTTP method matches
-					if(httpMethod.equalsIgnoreCase(restlessMethod.httpMethod)) {
-						foundMethod = true;
-						try {
-							couldStartMethod =
-							        restlessMethod.run(this, reqHandedDown, res, requestClock);
-						} catch(IOException e) {
-							throw new RuntimeException(e);
-						}
-						if(couldStartMethod) {
-							break;
+		
+		synchronized(this.methods) {
+			for(RestlessMethod restlessMethod : this.methods) {
+				/*
+				 * if secure access, ignore all public methods. if insecure
+				 * access, ignore all secure methods: Skip all restlessMethods
+				 * that may not be accessed
+				 */
+				if(reqViaAdminUrl == restlessMethod.adminOnly) {
+					// if path matches
+					if(restlessMethod.pathTemplate.matches(path)) {
+						foundPath = true;
+						// and HTTP method matches
+						if(httpMethod.equalsIgnoreCase(restlessMethod.httpMethod)) {
+							foundMethod = true;
+							try {
+								/*
+								 * TODO is this execution asynchronous or do we
+								 * wait until it is finished? , * (if it's not
+								 * asynchronous, having it in the
+								 * synchronized-block results in no slow down)
+								 */
+								couldStartMethod =
+								        restlessMethod.run(this, reqHandedDown, res, requestClock);
+							} catch(IOException e) {
+								throw new RuntimeException(e);
+							}
+							if(couldStartMethod) {
+								break;
+							}
 						}
 					}
 				}

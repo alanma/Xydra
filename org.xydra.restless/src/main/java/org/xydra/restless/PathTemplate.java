@@ -98,6 +98,10 @@ public class PathTemplate {
 	 * @return values of variables in order
 	 */
 	public List<String> extractVariables(String path) {
+		/*
+		 * TODO is synchronized access on p necessary?
+		 */
+		
 		Matcher m = this.p.matcher(path);
 		if(m.groupCount() != this.variableNames.size()) {
 			throw new IllegalArgumentException("Path contains a different number of variables ("
@@ -128,6 +132,16 @@ public class PathTemplate {
 	 *         call the Java method
 	 */
 	public List<String> getVariableNames() {
+		/*
+		 * TODO maybe this needs to be synchronized, if multiple threads want to
+		 * access the variable names.
+		 * 
+		 * Options:
+		 * 
+		 * 1) use a list which is already thread-safe
+		 * 
+		 * 2) copy the list and return the copy
+		 */
 		return this.variableNames;
 	}
 	
@@ -136,6 +150,10 @@ public class PathTemplate {
 	 * @return true if this PathTemplate matches a given path
 	 */
 	public boolean matches(String path) {
+		/*
+		 * TODO is synchronized access on p necessary?
+		 */
+		
 		return this.p.matcher(path).matches();
 	}
 	
