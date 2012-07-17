@@ -18,7 +18,6 @@ public class KeyValueConstraint {
 	
 	public static KeyValueConstraint keyValue(ISonicEvent.FilterProperty key, String value) {
 		XyAssert.validateNotNull(key, "key");
-		XyAssert.validateNotNull(value, "value for key='" + key + "'");
 		return new KeyValueConstraint(key, value);
 	}
 	
