@@ -53,6 +53,10 @@ public class RestlessMethod {
 	/**
 	 * GET, PUT, POST, DELETE
 	 */
+	
+	/*
+	 * TODO Why are this parameters not declared as private/public or protected?
+	 */
 	String httpMethod;
 	Object instanceOrClass;
 	String methodName;
@@ -136,11 +140,11 @@ public class RestlessMethod {
 			
 			int boundNamedParameterNumber = 0;
 			boolean hasHttpServletResponseParameter = false;
-			final String uniqueRequestId = reuseOrCeateUniqueRequestIdentifier(urlParameter,
-			        cookieMap);
+			final String uniqueRequestId =
+			        reuseOrCeateUniqueRequestIdentifier(urlParameter, cookieMap);
 			// define context
-			IRestlessContext restlessContext = new RestlessContextImpl(restless, req, res,
-			        uniqueRequestId);
+			IRestlessContext restlessContext =
+			        new RestlessContextImpl(restless, req, res, uniqueRequestId);
 			
 			for(Class<?> requiredParamType : method.getParameterTypes()) {
 				
@@ -164,195 +168,203 @@ public class RestlessMethod {
 					 * Method might require a non-trivial parameter type for a
 					 * named parameter (usually: String)
 					 */
-					if(this.requiredNamedParameter.length == 0) {
-						/*
-						 * Java method tries to fill a non-built-in parameter
-						 * type, i.e. a parameter type for which we need to get
-						 * a value from the request. If there is no named
-						 * parameter from which we can even try to fill the
-						 * value, throw a usage error
-						 */
-						throw new IllegalArgumentException(
-						        "It looks like you have parameters in your java method '"
-						                + methodReference(this.instanceOrClass, method)
-						                + "' for which there have no RestlessParameter been defined.");
-					}
-					if(this.requiredNamedParameter.length <= boundNamedParameterNumber) {
-						throw new IllegalArgumentException(
-						        "Require "
-						                + this.requiredNamedParameter.length
-						                + " named parameters in method '"
-						                + Restless.toClass(this.instanceOrClass).getCanonicalName()
-						                + ":"
-						                + method.getName()
-						                + "', processed "
-						                + boundNamedParameterNumber
-						                + " parameters from request so far. Required parameters: "
-						                + this.requiredNamedParameter
-						                + ". I.e. your Java method wants more parameters than defined in your restless() method.");
-					}
-					RestlessParameter param = this.requiredNamedParameter[boundNamedParameterNumber];
-					Object value = null;
-					
-					/* 1) look in urlParameters (not query params) */
-					if(!param.isArray) {
-						value = urlParameter.get(param.name);
-					}
-					
-					/* 2) look in POST params and query params */
-					if(notSet(value)) {
-						String[] values = req.getParameterValues(param.name);
-						if(values != null) {
-							// handle POST and query param values
-							if(param.isArray) {
-								value = values;
-							} else if(values.length > 1) {
-								// remove redundant
-								Set<String> uniqueValues = new HashSet<String>();
-								for(String s : values) {
-									uniqueValues.add(s);
-								}
-								if(uniqueValues.size() > 1) {
-									StringBuffer buf = new StringBuffer();
-									for(int j = 0; j < values.length; j++) {
-										buf.append(values[j]);
-										buf.append(", ");
+					synchronized(this.requiredNamedParameter) {
+						if(this.requiredNamedParameter.length == 0) {
+							/*
+							 * Java method tries to fill a non-built-in
+							 * parameter type, i.e. a parameter type for which
+							 * we need to get a value from the request. If there
+							 * is no named parameter from which we can even try
+							 * to fill the value, throw a usage error
+							 */
+							throw new IllegalArgumentException(
+							        "It looks like you have parameters in your java method '"
+							                + methodReference(this.instanceOrClass, method)
+							                + "' for which there have no RestlessParameter been defined.");
+						}
+						if(this.requiredNamedParameter.length <= boundNamedParameterNumber) {
+							throw new IllegalArgumentException(
+							        "Require "
+							                + this.requiredNamedParameter.length
+							                + " named parameters in method '"
+							                + Restless.toClass(this.instanceOrClass)
+							                        .getCanonicalName()
+							                + ":"
+							                + method.getName()
+							                + "', processed "
+							                + boundNamedParameterNumber
+							                + " parameters from request so far. Required parameters: "
+							                + this.requiredNamedParameter
+							                + ". I.e. your Java method wants more parameters than defined in your restless() method.");
+						}
+						RestlessParameter param =
+						        this.requiredNamedParameter[boundNamedParameterNumber];
+						Object value = null;
+						
+						/* 1) look in urlParameters (not query params) */
+						if(!param.isArray) {
+							value = urlParameter.get(param.name);
+						}
+						
+						/* 2) look in POST params and query params */
+						if(notSet(value)) {
+							String[] values = req.getParameterValues(param.name);
+							if(values != null) {
+								// handle POST and query param values
+								if(param.isArray) {
+									value = values;
+								} else if(values.length > 1) {
+									// remove redundant
+									Set<String> uniqueValues = new HashSet<String>();
+									for(String s : values) {
+										uniqueValues.add(s);
 									}
-									
-									if(param.mustBeDefinedExplicitly()) {
-										throw new IllegalArgumentException(
-										        "Parameter '"
-										                + param.name
-										                + "' required but not explicitly defined. Found multiple values.");
+									if(uniqueValues.size() > 1) {
+										StringBuffer buf = new StringBuffer();
+										for(int j = 0; j < values.length; j++) {
+											buf.append(values[j]);
+											buf.append(", ");
+										}
+										
+										if(param.mustBeDefinedExplicitly()) {
+											throw new IllegalArgumentException(
+											        "Parameter '"
+											                + param.name
+											                + "' required but not explicitly defined. Found multiple values.");
+										} else {
+											log.warn("Multiple values for parameter '"
+											        + param.name
+											        + "' (values="
+											        + buf.toString()
+											        + ") from queryString and POST params, using default ("
+											        + param.defaultValue + ")");
+											value = param.defaultValue;
+										}
+										
 									} else {
-										log.warn("Multiple values for parameter '"
-										        + param.name
-										        + "' (values="
-										        + buf.toString()
-										        + ") from queryString and POST params, using default ("
-										        + param.defaultValue + ")");
-										value = param.defaultValue;
+										value = uniqueValues.iterator().next();
 									}
 									
 								} else {
-									value = uniqueValues.iterator().next();
+									value = values[0];
 								}
-								
-							} else {
-								value = values[0];
 							}
 						}
-					}
-					
-					/* 3) look in cookies */
-					if(notSet(value) && !param.isArray) {
-						value = cookieMap.get(param.name);
-					}
-					
-					/* 4) look in multipart-upload */
-					if(notSet(value) && !param.isArray) {
-						value = multipartMap.get(param.name);
-					}
-					
-					/* 5) use default */
-					if(notSet(value)) {
-						if(param.mustBeDefinedExplicitly()) {
-							log.debug("Parameter '" + param.name
-							        + "' required but no explicitly defined. Found no value.");
-							return false;
-						} else {
-							value = param.defaultValue;
+						
+						/* 3) look in cookies */
+						if(notSet(value) && !param.isArray) {
+							value = cookieMap.get(param.name);
 						}
-					}
-					javaMethodArgs.add(value);
-					boundNamedParameterNumber++;
-					if(boundNamedParameterNumber > this.requiredNamedParameter.length) {
-						log.debug("More non-trivial parameter required by Java method than mapped via RestlessParameters");
-						return false;
+						
+						/* 4) look in multipart-upload */
+						if(notSet(value) && !param.isArray) {
+							value = multipartMap.get(param.name);
+						}
+						
+						/* 5) use default */
+						if(notSet(value)) {
+							if(param.mustBeDefinedExplicitly()) {
+								log.debug("Parameter '" + param.name
+								        + "' required but no explicitly defined. Found no value.");
+								return false;
+							} else {
+								value = param.defaultValue;
+							}
+						}
+						javaMethodArgs.add(value);
+						boundNamedParameterNumber++;
+						if(boundNamedParameterNumber > this.requiredNamedParameter.length) {
+							log.debug("More non-trivial parameter required by Java method than mapped via RestlessParameters");
+							return false;
+						}
 					}
 				}
 			}
 			
-			try {
-				requestClock.stopAndStart("restless.run->invoke");
-				// onBefore-run-event
-				restless.fireRequestStarted(restlessContext);
-				// run
-				Object result = invokeMethod(method, this.instanceOrClass, javaMethodArgs);
-				
-				requestClock
-				        .stopAndStart("invoke " + methodReference(this.instanceOrClass, method));
-				
-				if(!hasHttpServletResponseParameter) {
-					res.setContentType(Restless.MIME_TEXT_PLAIN + "; charset="
-					        + Restless.CONTENT_TYPE_CHARSET_UTF8);
-					res.setStatus(200);
-					Writer w = res.getWriter();
-					// we need to send back something standard ourselves
-					w.write("Executed " + methodReference(this.instanceOrClass, method) + "\n");
-					if(result != null && result instanceof String) {
-						w.write("Result: " + result);
+			synchronized(this.instanceOrClass) {
+				try {
+					requestClock.stopAndStart("restless.run->invoke");
+					// onBefore-run-event
+					restless.fireRequestStarted(restlessContext);
+					// run
+					
+					Object result = invokeMethod(method, this.instanceOrClass, javaMethodArgs);
+					
+					requestClock.stopAndStart("invoke "
+					        + methodReference(this.instanceOrClass, method));
+					
+					if(!hasHttpServletResponseParameter) {
+						res.setContentType(Restless.MIME_TEXT_PLAIN + "; charset="
+						        + Restless.CONTENT_TYPE_CHARSET_UTF8);
+						res.setStatus(200);
+						Writer w = res.getWriter();
+						// we need to send back something standard ourselves
+						w.write("Executed " + methodReference(this.instanceOrClass, method) + "\n");
+						if(result != null && result instanceof String) {
+							w.write("Result: " + result);
+						}
+						w.flush();
 					}
-					w.flush();
-				}
-				// post-run-event
-				restless.fireRequestFinished(restlessContext);
-				
-				requestClock.stopAndStart("response");
-				
-			} catch(InvocationTargetException e) {
-				Throwable cause = e.getCause();
-				if(cause instanceof RestlessException) {
-					RestlessException re = (RestlessException)cause;
-					res.setStatus(re.getStatusCode());
-					res.setContentType(Restless.MIME_TEXT_PLAIN + "; charset="
-					        + Restless.CONTENT_TYPE_CHARSET_UTF8);
-					Writer w = res.getWriter();
-					w.write(re.getMessage());
-				} else {
+					// post-run-event
+					restless.fireRequestFinished(restlessContext);
 					
-					IRestlessContext context = new RestlessContextImpl(restless, req, res,
-					        uniqueRequestId);
+					requestClock.stopAndStart("response");
 					
-					boolean handled = false;
-					
-					try {
-						handled = callLocalExceptionHandler(cause, this.instanceOrClass, context);
-					} catch(InvocationTargetException ite) {
-						cause = new ExceptionHandlerException(e.getCause());
-					} catch(Throwable th) {
-						cause = new ExceptionHandlerException(th);
-					}
-					
-					if(!handled) {
+				} catch(InvocationTargetException e) {
+					Throwable cause = e.getCause();
+					if(cause instanceof RestlessException) {
+						RestlessException re = (RestlessException)cause;
+						res.setStatus(re.getStatusCode());
+						res.setContentType(Restless.MIME_TEXT_PLAIN + "; charset="
+						        + Restless.CONTENT_TYPE_CHARSET_UTF8);
+						Writer w = res.getWriter();
+						w.write(re.getMessage());
+					} else {
+						
+						IRestlessContext context =
+						        new RestlessContextImpl(restless, req, res, uniqueRequestId);
+						
+						boolean handled = false;
+						
 						try {
-							handled = callGlobalExceptionHandlers(cause, context);
+							handled =
+							        callLocalExceptionHandler(cause, this.instanceOrClass, context);
+						} catch(InvocationTargetException ite) {
+							cause = new ExceptionHandlerException(e.getCause());
 						} catch(Throwable th) {
 							cause = new ExceptionHandlerException(th);
 						}
-					}
-					
-					if(!handled) {
-						// TODO hide internal messages better from user
-						StringWriter sw = new StringWriter();
-						PrintWriter pw = new PrintWriter(sw);
-						e.printStackTrace(pw);
-						String stacktrace = sw.toString();
-						if(!res.isCommitted()) {
-							res.sendError(500, e + " -- " + stacktrace);
+						
+						if(!handled) {
+							try {
+								handled = callGlobalExceptionHandlers(cause, context);
+							} catch(Throwable th) {
+								cause = new ExceptionHandlerException(th);
+							}
 						}
-						log.error("Exception while executing RESTless method. Stacktrace: "
-						        + stacktrace, cause);
+						
+						if(!handled) {
+							// TODO hide internal messages better from user
+							StringWriter sw = new StringWriter();
+							PrintWriter pw = new PrintWriter(sw);
+							e.printStackTrace(pw);
+							String stacktrace = sw.toString();
+							if(!res.isCommitted()) {
+								res.sendError(500, e + " -- " + stacktrace);
+							}
+							log.error("Exception while executing RESTless method. Stacktrace: "
+							        + stacktrace, cause);
+						}
 					}
+				} catch(IllegalArgumentException e) {
+					res.sendError(500, e.toString());
+					log.error("RESTless method registered with wrong arguments: ", e);
+				} catch(IllegalAccessException e) {
+					res.sendError(500, e.toString());
+					log.error("", e);
 				}
-			} catch(IllegalArgumentException e) {
-				res.sendError(500, e.toString());
-				log.error("RESTless method registered with wrong arguments: ", e);
-			} catch(IllegalAccessException e) {
-				res.sendError(500, e.toString());
-				log.error("", e);
+				
 			}
-			
 		}
 		return true;
 	}
@@ -507,8 +519,11 @@ public class RestlessMethod {
 		String urlPath = req.getPathInfo();
 		if(urlPath != null) {
 			List<String> variablesFromUrlPath = pathTemplate.extractVariables(urlPath);
-			for(int i = 0; i < pathTemplate.variableNames.size(); i++) {
-				urlParameter.put(pathTemplate.variableNames.get(i), variablesFromUrlPath.get(i));
+			synchronized(variablesFromUrlPath) {
+				for(int i = 0; i < pathTemplate.variableNames.size(); i++) {
+					urlParameter
+					        .put(pathTemplate.variableNames.get(i), variablesFromUrlPath.get(i));
+				}
 			}
 		}
 		return urlParameter;

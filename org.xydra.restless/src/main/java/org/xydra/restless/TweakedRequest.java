@@ -41,9 +41,22 @@ class TweakedRequest extends HttpServletRequestWrapper {
 	}
 	
 	private void initialise() {
+		/*
+		 * TODO why not initialize the class directly in the constructor?
+		 * 
+		 * Setting this.initialised to true at the beginning might cause
+		 * problems when the initializing process fails. Setting it to true
+		 * after the process needs synchronization.
+		 */
+		
 		this.initalised = true;
 		String serverName = super.getServerName();
 		assert isLocalhost(serverName);
+		
+		/*
+		 * TODO do we need to synchronize here? (hostOverride/superPathInfo -
+		 * are these variables final?)
+		 */
 		// look for override param
 		this.hostOverride = super.getParameter(Restless.X_HOST_Override);
 		
