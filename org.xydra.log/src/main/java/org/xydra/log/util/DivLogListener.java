@@ -75,10 +75,10 @@ public class DivLogListener implements ILogListener {
 		b.append("</span> ");
 		b.append("<br/>\n");
 		
-		append(b.toString());
+		appendAsInlineHtml(b.toString());
 	}
 	
-	private void append(String s) {
+	public void appendAsInlineHtml(String s) {
 		this.hostPanel.add(new InlineHTML("" + s));
 	}
 	
