@@ -38,7 +38,7 @@ public interface IGaeModelPersistence {
 	/**
 	 * See {@link XydraPersistence#getEvents(XAddress, long, long)}
 	 * 
-	 * @param address
+	 * @param address of model, object or field
 	 * @param beginRevision
 	 * @param endRevision
 	 * @return ..

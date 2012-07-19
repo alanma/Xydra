@@ -134,10 +134,10 @@ class GaeFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 	
 	@Override
 	public String toString() {
-		String prefix = "GaeFieldEvent by " + getActor() + ": "
-		        + (this.inTransaction() ? "inTxn" : "atomic");
+		String prefix = "GaeFieldEvent by " + getActor() + ": ";
 		String suffix = " @" + getTarget() + " rev m" + rev2str(this.modelRevision) + "/o"
-		        + rev2str(this.objectRevision) + "/f" + rev2str(this.fieldRevision);
+		        + rev2str(this.objectRevision) + "/f" + rev2str(this.fieldRevision) + " "
+		        + (this.inTransaction() ? "[inTxn]" : "[atomic]");
 		switch(getChangeType()) {
 		case ADD:
 			return prefix + "ADD " + getNewValue() + suffix;

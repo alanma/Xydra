@@ -458,8 +458,8 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 		if(address.getAddressedType() == XType.XMODEL) {
 			XyAssert.xyAssert(address.equals(this.modelAddress));
 			/**
-			 * Fullfill the XydraStore spec and return null if the model has not
-			 * been managed
+			 * Fulfil the XydraStore specification and return null if the model
+			 * has not been managed
 			 */
 			if(events.size() == 0) {
 				return null;
@@ -473,7 +473,16 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 				
 				@Override
 				protected boolean matchesFilter(XEvent entry) {
-					return addressContainsOther(address, entry.getChangedEntity());
+					if(entry instanceof XTransactionEvent) {
+						XTransactionEvent txnEvent = (XTransactionEvent)entry;
+						for(XAtomicEvent a : txnEvent) {
+							if(addressContainsOther(address, a.getChangedEntity())) {
+								return true;
+							}
+						}
+						return false;
+					} else
+						return addressContainsOther(address, entry.getChangedEntity());
 				}
 				
 			};
@@ -482,8 +491,8 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 	}
 	
 	/**
-	 * @param a
-	 * @param b
+	 * @param a parent
+	 * @param b child
 	 * @return true iff a equals b or if b is an address within the entity
 	 *         addressed by a.
 	 * 
