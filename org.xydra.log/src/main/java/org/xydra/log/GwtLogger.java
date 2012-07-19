@@ -1,8 +1,5 @@
 package org.xydra.log;
 
-import com.google.gwt.dev.shell.HostedModeException;
-
-
 /**
  * Delegate to an GWT 2.1 logger
  * 
@@ -24,7 +21,7 @@ public class GwtLogger extends org.xydra.log.Logger {
 	public void debug(String msg) {
 		try {
 			this.logger.log(java.util.logging.Level.FINE, msg);
-		} catch(HostedModeException e) {
+		} catch(Exception e) {
 			// this can happen and is nothing to worry about
 		}
 	}
@@ -33,7 +30,7 @@ public class GwtLogger extends org.xydra.log.Logger {
 	public void debug(String msg, Throwable t) {
 		try {
 			this.logger.log(java.util.logging.Level.FINE, msg, t);
-		} catch(HostedModeException e) {
+		} catch(Exception e) {
 			// this can happen and is nothing to worry about
 		}
 	}
@@ -52,7 +49,7 @@ public class GwtLogger extends org.xydra.log.Logger {
 	public void info(String msg) {
 		try {
 			this.logger.log(java.util.logging.Level.INFO, msg);
-		} catch(HostedModeException e) {
+		} catch(Exception e) {
 			// this can happen and is nothing to worry about
 		}
 	}
@@ -61,7 +58,7 @@ public class GwtLogger extends org.xydra.log.Logger {
 	public void info(String msg, Throwable t) {
 		try {
 			this.logger.log(java.util.logging.Level.INFO, msg, t);
-		} catch(HostedModeException e) {
+		} catch(Exception e) {
 			// this can happen and is nothing to worry about
 		}
 	}
@@ -95,7 +92,7 @@ public class GwtLogger extends org.xydra.log.Logger {
 	public void trace(String msg) {
 		try {
 			this.logger.log(java.util.logging.Level.FINEST, msg);
-		} catch(HostedModeException e) {
+		} catch(Exception e) {
 			// this can happen and is nothing to worry about
 		}
 	}
@@ -104,7 +101,7 @@ public class GwtLogger extends org.xydra.log.Logger {
 	public void trace(String msg, Throwable t) {
 		try {
 			this.logger.log(java.util.logging.Level.FINEST, msg, t);
-		} catch(HostedModeException e) {
+		} catch(Exception e) {
 			// this can happen and is nothing to worry about
 		}
 	}
