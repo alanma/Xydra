@@ -243,7 +243,12 @@ public class JsonParserSAJ {
 			case 0:
 			case '\n':
 			case '\r':
-				throw syntaxError("Unterminated string");
+				// FIXME !!! newlines and json DIRTY HACK
+				// throw syntaxError("Unterminated string");
+				
+				// just pretend we read a properly escaped \n
+				sb.append("\n");
+				break;
 			case '\\':
 				c = next();
 				switch(c) {
