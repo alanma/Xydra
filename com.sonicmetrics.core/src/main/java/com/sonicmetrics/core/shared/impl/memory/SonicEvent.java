@@ -110,7 +110,9 @@ public class SonicEvent extends SonicPotentialEvent implements ISonicEvent, Seri
 		b.subject(se.getSubject());
 		b.labelIgnoreIfNull(se.getLabel());
 		b.valueIgnoreIfNull(se.getValue());
-		b.uniqueId(se.getUniqueId());
+		if(se.getUniqueId() != null) {
+			b.uniqueId(se.getUniqueId());
+		}
 		b.withParams(se.getExtensionData());
 		return b;
 	}
@@ -253,8 +255,11 @@ public class SonicEvent extends SonicPotentialEvent implements ISonicEvent, Seri
 	
 	@Override
 	public String toString() {
-		return this.timestamp + "utc=(" + toDebugTime(this.timestamp) + ") subject:'"
-		        + super.toString();
+		return this.timestamp + "utc=(" + toDebugTime(this.timestamp) + ") " + super.toString();
+	}
+	
+	public Map<String,String> getModifyableExtensionData() {
+		return this.extensionDataMap;
 	}
 	
 }
