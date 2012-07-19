@@ -23,4 +23,6 @@ public interface ISonicFilter {
 	
 	String getSource();
 	
+	String getDotString();
+	
 }

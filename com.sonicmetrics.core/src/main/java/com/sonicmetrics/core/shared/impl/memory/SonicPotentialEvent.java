@@ -268,17 +268,7 @@ public class SonicPotentialEvent implements ISonicPotentialEvent {
 	 *         if these two are defined; or just the category.
 	 */
 	public String getDotString() {
-		StringBuilder b = new StringBuilder();
-		b.append(this.getCategory());
-		String action = this.getAction();
-		if(action != null) {
-			b.append(".").append(action);
-		}
-		String label = this.getLabel();
-		if(label != null) {
-			b.append(".").append(label);
-		}
-		return b.toString();
+		return SonicUtils.toDotString(getCategory(), getAction(), getLabel());
 	}
 	
 	@Override

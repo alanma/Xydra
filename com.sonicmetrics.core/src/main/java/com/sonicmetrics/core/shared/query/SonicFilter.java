@@ -11,6 +11,7 @@ import org.xydra.annotations.CanBeNull;
 import com.sonicmetrics.core.shared.ISonicEvent;
 import com.sonicmetrics.core.shared.ISonicPotentialEvent;
 import com.sonicmetrics.core.shared.ISonicPotentialEvent.FilterProperty;
+import com.sonicmetrics.core.shared.impl.memory.SonicUtils;
 
 
 public class SonicFilter implements ISonicFilter {
@@ -133,6 +134,11 @@ public class SonicFilter implements ISonicFilter {
 	@Override
 	public String getSource() {
 		return valueOf(this.keyValueConstraints.get(FilterProperty.Source));
+	}
+	
+	@Override
+	public String getDotString() {
+		return SonicUtils.toDotString(getCategory(), getAction(), getLabel());
 	}
 	
 }
