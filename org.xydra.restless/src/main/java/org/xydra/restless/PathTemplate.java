@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
  * @author voelkel
  * 
  */
-public class PathTemplate {
+class PathTemplate {
 	
 	/** Matches any character */
 	static final String ANY_REGEX = ".*";
@@ -50,7 +50,13 @@ public class PathTemplate {
 	
 	private String regex;
 	
-	private final List<String> variableNames = new ArrayList<String>();
+	/*
+	 * TODO make this private and thread-safe
+	 * 
+	 * TODO write comment that this should never be edited, also write this in
+	 * the Doc of the method
+	 */
+	private List<String> variableNames = new ArrayList<String>();
 	
 	/**
 	 * Create a new URL pattern with variable parts.
@@ -89,6 +95,11 @@ public class PathTemplate {
 		}
 		regexBuf.append(END_REGEX);
 		this.regex = regexBuf.toString();
+		
+		/*
+		 * TODO is synchronized access on p necessary?
+		 */
+		
 		this.p = Pattern.compile(this.regex);
 	}
 	

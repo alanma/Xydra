@@ -93,6 +93,11 @@ import org.xydra.restless.utils.XmlUtils;
  */
 public class Restless extends HttpServlet {
 	
+	/*
+	 * TODO make logger itself thread-safe
+	 * https://xydra.googlecode.com/svn/trunk/org.xydra.log
+	 */
+	
 	private static Logger log;
 	
 	/**
@@ -557,6 +562,9 @@ public class Restless extends HttpServlet {
 			}
 			/*
 			 * TODO do we need a lock here? (local context)
+			 * 
+			 * It's a hashmap, maybe use a thread-safe implementation from
+			 * Google Guava
 			 */
 			return this.localContext.get(key);
 		}
@@ -583,6 +591,8 @@ public class Restless extends HttpServlet {
 	public void init(ServletConfig servletConfig) {
 		/*
 		 * TODO is this supposed to run only once or multiple times?
+		 * 
+		 * unclear...
 		 */
 		
 		/* measure boot performance */
@@ -603,7 +613,8 @@ public class Restless extends HttpServlet {
 		 * which must be an implementation of ILoggerFactorySPI.
 		 */
 		/*
-		 * TODO do we need a lock here? (logger factory)
+		 * TODO do we need a lock here? (logger factory) Yes, logger needs to be
+		 * made thread-safe
 		 */
 		this.loggerFactory = servletConfig.getInitParameter(INIT_PARAM_XYDRA_LOG_BACKEND);
 		if(this.loggerFactory != null) {
@@ -673,6 +684,8 @@ public class Restless extends HttpServlet {
 	/*
 	 * TODO do we need a lock here? Is this called more than once/only during
 	 * the creation?
+	 * 
+	 * only once
 	 */
 	private void initLoggerFactory() {
 		if(LoggerFactory.hasLoggerFactorySPI()) {
@@ -860,9 +873,12 @@ public class Restless extends HttpServlet {
 							try {
 								/*
 								 * TODO is this execution asynchronous or do we
-								 * wait until it is finished? , * (if it's not
-								 * asynchronous, having it in the
+								 * wait until it is finished? ,
+								 * 
+								 * (if it's not asynchronous, having it in the
 								 * synchronized-block results in no slow down)
+								 * 
+								 * it's synchronous
 								 */
 								couldStartMethod =
 								        restlessMethod.run(this, reqHandedDown, res, requestClock);
