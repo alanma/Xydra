@@ -50,7 +50,7 @@ public class PathTemplate {
 	
 	private String regex;
 	
-	List<String> variableNames = new ArrayList<String>();
+	private final List<String> variableNames = new ArrayList<String>();
 	
 	/**
 	 * Create a new URL pattern with variable parts.

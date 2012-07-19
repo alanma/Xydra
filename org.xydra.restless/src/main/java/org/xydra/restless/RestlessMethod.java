@@ -520,9 +520,9 @@ public class RestlessMethod {
 		if(urlPath != null) {
 			List<String> variablesFromUrlPath = pathTemplate.extractVariables(urlPath);
 			synchronized(variablesFromUrlPath) {
-				for(int i = 0; i < pathTemplate.variableNames.size(); i++) {
+				for(int i = 0; i < pathTemplate.getVariableNames().size(); i++) {
 					urlParameter
-					        .put(pathTemplate.variableNames.get(i), variablesFromUrlPath.get(i));
+					        .put(pathTemplate.getVariableNames().get(i), variablesFromUrlPath.get(i));
 				}
 			}
 		}
