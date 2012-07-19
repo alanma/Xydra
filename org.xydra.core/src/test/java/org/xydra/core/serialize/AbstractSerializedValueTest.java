@@ -304,6 +304,21 @@ abstract public class AbstractSerializedValueTest extends AbstractSerializingTes
 		testValue(XV.toValue("\n\ntest\n\n"));
 	}
 	
+	// @Test
+	// public void testStringValueNewlines2() {
+	// testValue(XV.toValue("aaa\rbbb"));
+	// }
+	
+	// @Test
+	// public void testStringValueNewlines3() {
+	// testValue(XV.toValue("aaa\r\nbbb"));
+	// }
+	//
+	// @Test
+	// public void testStringValueNewlines4() {
+	// testValue(XV.toValue("aaa\n\rbbb"));
+	// }
+	
 	@Test
 	public void testStringValueNull() {
 		testValue(XV.toValue((String)null));
