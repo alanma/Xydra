@@ -142,9 +142,14 @@ public class ContextBeforeCommand implements XRevWritableModel,
 		boolean objectExists = (Boolean)entity.getProperty(OBJECT_EXISTS);
 		Text jsonText = (Text)entity.getProperty(JSON);
 		String json = jsonText.getValue();
-		XRevWritableObject obj = deserialize(modelAddress, json);
+		try {
+			XRevWritableObject obj = deserialize(modelAddress, json);
+			return new TentativeObjectState(obj, objectExists, revUsed);
+		} catch(Throwable e) {
+			throw new RuntimeException("Could not deserialize TOS with key = '" + entity.getKey()
+			        + "'", e);
+		}
 		
-		return new TentativeObjectState(obj, objectExists, revUsed);
 	}
 	
 	@Override

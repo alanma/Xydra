@@ -115,6 +115,20 @@ public class SyncDatastore {
 	}
 	
 	/**
+	 * Batch put
+	 * 
+	 * @param it
+	 */
+	@GaeOperation(datastoreWrite = true)
+	public static void putEntities(Iterable<Entity> it) {
+		XyAssert.xyAssert(it != null, "iterable is null");
+		assert it != null;
+		log.debug(DebugFormatter.dataPut(DATASTORE_NAME, "entities", "many", Timing.Now));
+		makeSureDatestoreServiceIsInitialised();
+		syncDatastore.put(it);
+	}
+	
+	/**
 	 * Begin a synchronous GAE Transaction.
 	 * 
 	 * @return The started Transaction.

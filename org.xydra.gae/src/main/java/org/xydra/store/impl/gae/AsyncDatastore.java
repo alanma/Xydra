@@ -3,6 +3,7 @@ package org.xydra.store.impl.gae;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -88,6 +89,22 @@ public class AsyncDatastore {
 		// true async version
 		Future<Key> f = asyncDatastore.put(txn, entity);
 		return new FuturePutEntity(entity, f);
+	}
+	
+	/**
+	 * Batch put
+	 * 
+	 * @param it
+	 * @return a future that returns the keys of the putted entities on success
+	 */
+	@GaeOperation(datastoreWrite = true)
+	public static FuturePutEntities putEntities(Iterable<Entity> it) {
+		XyAssert.xyAssert(it != null, "iterable is null");
+		assert it != null;
+		log.debug(DebugFormatter.dataPut(DATASTORE_NAME, "entities", "many", Timing.Now));
+		makeSureDatestoreServiceIsInitialised();
+		Future<List<Key>> f = asyncDatastore.put(it);
+		return new FuturePutEntities(it, f);
 	}
 	
 	/**
@@ -287,6 +304,17 @@ public class AsyncDatastore {
 		void log(Entity key, Key result) {
 			log.debug(DebugFormatter.dataPut(DATASTORE_NAME, KeyStructure.toString(result), key,
 			        Timing.Finished));
+		}
+	}
+	
+	private static class FuturePutEntities extends DebugFuture<Iterable<Entity>,List<Key>> {
+		public FuturePutEntities(Iterable<Entity> it, Future<List<Key>> f) {
+			super(it, f);
+		}
+		
+		@Override
+		void log(Iterable<Entity> key, List<Key> result) {
+			log.debug(DebugFormatter.dataPut(DATASTORE_NAME, "manyKeys", key, Timing.Finished));
 		}
 	}
 	
