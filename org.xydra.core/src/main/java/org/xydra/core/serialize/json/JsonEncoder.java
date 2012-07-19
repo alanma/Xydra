@@ -17,7 +17,12 @@ public class JsonEncoder {
 		String result = in;
 		result = result.replace("\\", "\\\\");
 		result = result.replace("\"", "\\\"");
+		// windows
+		result = result.replace("\r\n", "\\n");
+		// more or less standard
 		result = result.replace("\n", "\\n");
+		// old macs
+		result = result.replace("\r", "\\n");
 		return result;
 	}
 	
