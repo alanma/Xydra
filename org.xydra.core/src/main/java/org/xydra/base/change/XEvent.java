@@ -65,9 +65,10 @@ public interface XEvent extends Serializable {
 	 * @return The revision number of the {@link XObject} holding the changed
 	 *         entity (or which is the changed entity) at the time when this
 	 *         event happened (may be {@link #RevisionOfEntityNotSet} if this
-	 *         XEvent refers to something that is not an object or has no
-	 *         father-object; may be {@link #RevisionNotAvailable} if the object
-	 *         revision cannot be efficiently calculated)
+	 *         XEvent refers to something that is not an object (e.g. if the
+	 *         event is an {@link XTransactionEvent}) or has no father-object;
+	 *         may be {@link #RevisionNotAvailable} if the object revision
+	 *         cannot be efficiently calculated)
 	 */
 	long getOldObjectRevision();
 	
