@@ -17,6 +17,15 @@ public class CookieUtils {
 	
 	private static final Logger log = LoggerFactory.getLogger(CookieUtils.class);
 	
+	/*
+	 * TODO A lock on req.getCookies() might be appropriate even if req is only
+	 * used once, for example if the same cookies are used in multiple requests.
+	 * 
+	 * The important questions are: Are cookie instances shared between
+	 * different requests? Are whole arrays of cookies shared between different
+	 * requests?
+	 */
+	
 	/**
 	 * @param req ..
 	 * @param name of the cookie
@@ -27,11 +36,23 @@ public class CookieUtils {
 		if(req.getCookies() == null) {
 			return null;
 		}
-		for(Cookie cookie : req.getCookies()) {
-			if(cookie.getName().equals(name)) {
-				return cookie.getValue();
+		
+		Cookie[] cookies = req.getCookies();
+		if(cookies != null) {
+			synchronized(cookies) {
+				for(Cookie cookie : cookies) {
+					
+					if(cookie != null) {
+						synchronized(cookie) {
+							if(cookie.getName().equals(name)) {
+								return cookie.getValue();
+							}
+						}
+					}
+				}
 			}
 		}
+		
 		return null;
 	}
 	
@@ -40,9 +61,23 @@ public class CookieUtils {
 	 * @return a list of (potentially duplicate) cookie names
 	 */
 	public static List<String> listCookieNames(HttpServletRequest req) {
+		
 		List<String> cookieNames = new LinkedList<String>();
-		for(Cookie cookie : req.getCookies()) {
-			cookieNames.add(cookie.getName());
+		
+		Cookie[] cookies = req.getCookies();
+		
+		if(cookies != null) {
+			synchronized(cookies) {
+				for(Cookie cookie : cookies) {
+					
+					if(cookie != null) {
+						
+						synchronized(cookie) {
+							cookieNames.add(cookie.getName());
+						}
+					}
+				}
+			}
 		}
 		return cookieNames;
 	}
@@ -65,27 +100,38 @@ public class CookieUtils {
 		+ "<tr>" + "<th>Domain</th>" + "<th>Path</th>" + "<th>Secure?</th>" + "<th>Name</th>"
 		        + "<th>Value</th>" + "<th>MaxAge</th>" + "<th>Comment</th>" + "<th>Version</th>"
 		        + "</tr>");
-		for(Cookie cookie : req.getCookies()) {
-			
-			w.write("<tr>"
-			
-			+ "<td>" + cookie.getDomain() + "</td>"
-			
-			+ "<td>" + cookie.getPath() + "</td>"
-			
-			+ "<td>" + cookie.getSecure() + "</td>"
-			
-			+ "<td>" + cookie.getName() + "</td>"
-			
-			+ "<td>" + cookie.getValue() + "</td>"
-			
-			+ "<td>" + cookie.getMaxAge() + "</td>"
-			
-			+ "<td>" + cookie.getComment() + "</td>"
-			
-			+ "<td>" + cookie.getVersion() + "</td>"
-			
-			+ "</tr>");
+		
+		Cookie[] cookies = req.getCookies();
+		
+		if(cookies != null) {
+			synchronized(cookies) {
+				for(Cookie cookie : cookies) {
+					
+					if(cookie != null) {
+						synchronized(cookie) {
+							w.write("<tr>"
+							
+							+ "<td>" + cookie.getDomain() + "</td>"
+							
+							+ "<td>" + cookie.getPath() + "</td>"
+							
+							+ "<td>" + cookie.getSecure() + "</td>"
+							
+							+ "<td>" + cookie.getName() + "</td>"
+							
+							+ "<td>" + cookie.getValue() + "</td>"
+							
+							+ "<td>" + cookie.getMaxAge() + "</td>"
+							
+							+ "<td>" + cookie.getComment() + "</td>"
+							
+							+ "<td>" + cookie.getVersion() + "</td>"
+							
+							+ "</tr>");
+						}
+					}
+				}
+			}
 		}
 		w.write("</table>");
 	}
@@ -100,17 +146,29 @@ public class CookieUtils {
 		if(req.getCookies() == null) {
 			return false;
 		}
-		for(Cookie cookie : req.getCookies()) {
-			if(cookie.getName().equals(name)) {
-				if(cookie.getValue() == null) {
-					log.warn("cookie '" + name + "' is present but contains null");
-					return false;
+		
+		Cookie[] cookies = req.getCookies();
+		synchronized(cookies) {
+			
+			for(Cookie cookie : req.getCookies()) {
+				
+				if(cookie != null) {
+					
+					synchronized(cookie) {
+						if(cookie.getName().equals(name)) {
+							if(cookie.getValue() == null) {
+								log.warn("cookie '" + name + "' is present but contains null");
+								return false;
+							}
+							if(cookie.getValue().equals("")) {
+								log.warn("cookie '" + name
+								        + "' is present but contains empty string");
+								return false;
+							}
+							return true;
+						}
+					}
 				}
-				if(cookie.getValue().equals("")) {
-					log.warn("cookie '" + name + "' is present but contains empty string");
-					return false;
-				}
-				return true;
 			}
 		}
 		return false;
@@ -128,8 +186,22 @@ public class CookieUtils {
 	public static void removeCookieIfPresent(HttpServletRequest req, HttpServletResponse res,
 	        String name, String domain) {
 		assert req != null;
-		if(hasCookie(req, name)) {
-			setCookie(res, name, "", domain, null, 0);
+		
+		Cookie[] cookies = req.getCookies();
+		
+		if(cookies != null) {
+			synchronized(cookies) {
+				/*
+				 * although the following methods are technically already
+				 * synchronized on cookies, we need to make sure that the
+				 * cookies are not changed in between the methods. This is the
+				 * reason for this synchronized-block.
+				 */
+				
+				if(hasCookie(req, name)) {
+					setCookie(res, name, "", domain, null, 0);
+				}
+			}
 		}
 	}
 	
@@ -165,6 +237,10 @@ public class CookieUtils {
 		if(comment != null) {
 			cookie.setComment(comment);
 		}
+		
+		/*
+		 * TODO check whether the requests are synchronized or not
+		 */
 		res.addCookie(cookie);
 	}
 	

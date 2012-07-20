@@ -12,6 +12,16 @@ import org.xydra.log.LoggerFactory;
 
 public class FileDownloadUtils {
 	
+	/*
+	 * FIXME most methods do not specify what happens when given parameters
+	 * equal null or how this is handled.
+	 */
+	
+	/*
+	 * TODO is synchronization on response objects really necessary? Are
+	 * responses shared between different calls to different methods?
+	 */
+	
 	private static final Logger log = LoggerFactory.getLogger(FileDownloadUtils.class);
 	
 	/**
@@ -34,6 +44,7 @@ public class FileDownloadUtils {
 	 *         will end up in a downloadable zip file.
 	 * @throws IOException ...
 	 */
+	
 	public static ZipOutputStream toZipFileDownload(HttpServletResponse res, String archivename)
 	        throws IOException {
 		String fullArchiveName = archivename + ".zip";
@@ -41,11 +52,15 @@ public class FileDownloadUtils {
 		log.info("Wrapping in zipfile named " + fullArchiveName);
 		
 		// Send the correct response headers.
-		res.setContentType("application/zip");
-		res.addHeader("Content-Disposition", "attachment; filename=\"" + fullArchiveName + "\"");
 		
-		ZipOutputStream zos = new ZipOutputStream(res.getOutputStream());
-		return zos;
+		synchronized(res) {
+			
+			res.setContentType("application/zip");
+			res.addHeader("Content-Disposition", "attachment; filename=\"" + fullArchiveName + "\"");
+			
+			ZipOutputStream zos = new ZipOutputStream(res.getOutputStream());
+			return zos;
+		}
 	}
 	
 	/**
@@ -59,11 +74,14 @@ public class FileDownloadUtils {
 	 */
 	public static OutputStream toFileDownload(HttpServletResponse res, String archivename,
 	        String extension) throws IOException {
-		String fullFileName = archivename + "." + extension;
-		log.info("Wrapping in file named " + fullFileName);
-		res.addHeader("Content-Disposition", "attachment; filename=\"" + fullFileName + "\"");
-		OutputStream os = res.getOutputStream();
-		return os;
+		
+		synchronized(res) {
+			String fullFileName = archivename + "." + extension;
+			log.info("Wrapping in file named " + fullFileName);
+			res.addHeader("Content-Disposition", "attachment; filename=\"" + fullFileName + "\"");
+			OutputStream os = res.getOutputStream();
+			return os;
+		}
 	}
 	
 	/**
@@ -83,8 +101,10 @@ public class FileDownloadUtils {
 		 * http://stackoverflow.com/questions/398237/how-to-use-the-csv-mime-
 		 * type
 		 */
-		ServletUtils.headers(res, contentType);
-		return toFileDownload(res, archivename, extension);
+		synchronized(res) {
+			ServletUtils.headers(res, contentType);
+			return toFileDownload(res, archivename, extension);
+		}
 	}
 	
 }

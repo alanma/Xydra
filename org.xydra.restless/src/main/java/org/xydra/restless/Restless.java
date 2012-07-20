@@ -250,6 +250,12 @@ public class Restless extends HttpServlet {
 	
 	private String apps;
 	
+	/*
+	 * TODO access to the lists of listeners also needs to be synchronized on
+	 * the listeners themselves, since they might be shared between different
+	 * lists.
+	 */
+	
 	final List<RestlessExceptionHandler> exceptionHandlers =
 	        new LinkedList<RestlessExceptionHandler>();
 	

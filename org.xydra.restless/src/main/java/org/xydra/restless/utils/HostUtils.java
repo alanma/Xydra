@@ -49,14 +49,22 @@ public class HostUtils {
 		return ipaddress;
 	}
 	
+	/*
+	 * TODO is synchronization on requests really necessary?
+	 */
+	
 	public static int getRequestPort(HttpServletRequest req) {
-		return req.getServerPort();
+		synchronized(req) {
+			return req.getServerPort();
+		}
 	}
 	
 	public static String getServernameWithPort(HttpServletRequest req) {
-		int port = getRequestPort(req);
-		String hostname = isLocalRequest(req) ? getLocalIpAddress() : req.getServerName();
-		return hostname + (port == 80 ? "" : ":" + port);
+		synchronized(req) {
+			int port = getRequestPort(req);
+			String hostname = isLocalRequest(req) ? getLocalIpAddress() : req.getServerName();
+			return hostname + (port == 80 ? "" : ":" + port);
+		}
 	}
 	
 	/**
@@ -64,11 +72,13 @@ public class HostUtils {
 	 * @return true if host indicated in 'req' is a local host
 	 */
 	public static boolean isLocalRequest(HttpServletRequest req) {
-		String serverName = req.getServerName();
-		log.debug("localhost = " + serverName);
-		if(serverName.equals("127.0.0.1") || serverName.equals("localhost")
-		        || serverName.equals(getLocalHostname())) {
-			return true;
+		synchronized(req) {
+			String serverName = req.getServerName();
+			log.debug("localhost = " + serverName);
+			if(serverName.equals("127.0.0.1") || serverName.equals("localhost")
+			        || serverName.equals(getLocalHostname())) {
+				return true;
+			}
 		}
 		return false;
 	}

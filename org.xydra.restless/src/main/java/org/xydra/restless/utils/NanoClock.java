@@ -11,6 +11,10 @@ import org.xydra.annotations.NeverNull;
  */
 public class NanoClock {
 	
+	/*
+	 * TODO maybe declaring the methods as synchronized would suffice?
+	 */
+	
 	private StringBuffer stats = new StringBuffer();
 	
 	/** -1 = not running */
@@ -23,14 +27,18 @@ public class NanoClock {
 	 *         <code>Clock c = new Clock().start();</code>
 	 */
 	public NanoClock start() {
-		this.start = System.nanoTime();
-		this.firstStart = this.start;
-		return this;
+		synchronized(this) {
+			this.start = System.nanoTime();
+			this.firstStart = this.start;
+			return this;
+		}
 	}
 	
 	public void reset() {
-		this.start = -1;
-		this.stats = new StringBuffer();
+		synchronized(this) {
+			this.start = -1;
+			this.stats = new StringBuffer();
+		}
 	}
 	
 	/**
@@ -38,8 +46,10 @@ public class NanoClock {
 	 * @return this instance for API chaining
 	 */
 	public NanoClock stop(@NeverNull String name) {
-		stopAndGetDuration(name);
-		return this;
+		synchronized(this) {
+			stopAndGetDuration(name);
+			return this;
+		}
 	}
 	
 	/**
@@ -47,23 +57,34 @@ public class NanoClock {
 	 * @return duration since last start in milliseconds
 	 */
 	public long stopAndGetDuration(@NeverNull String name) {
-		if(this.start == -1) {
-			throw new IllegalStateException("Cannot stop a clock that was never started.");
+		synchronized(this) {
+			if(this.start == -1) {
+				/*
+				 * TODO what if the clock was started at some point in time and
+				 * then stopped. Should trying to stop it really throw an
+				 * exception in this case?
+				 */
+				throw new IllegalStateException("Cannot stop a clock that was never started.");
+			}
+			long stop = System.nanoTime();
+			double durationInMs = (stop - this.start) / 1000000d;
+			this.stats.append(name).append("=").append(durationInMs).append("ms <br />\n");
+			this.start = -1;
+			return (long)durationInMs;
 		}
-		long stop = System.nanoTime();
-		double durationInMs = (stop - this.start) / 1000000d;
-		this.stats.append(name).append("=").append(durationInMs).append("ms <br />\n");
-		this.start = -1;
-		return (long)durationInMs;
 	}
 	
 	public void stopAndStart(@NeverNull String name) {
-		stop(name);
-		start();
+		synchronized(this) {
+			stop(name);
+			start();
+		}
 	}
 	
 	public String getStats() {
-		return this.stats.toString();
+		synchronized(this) {
+			return this.stats.toString();
+		}
 	}
 	
 	public static void main(String[] args) {
@@ -79,9 +100,14 @@ public class NanoClock {
 		System.out.println(c.getStats());
 	}
 	
+	/*
+	 * TODO is this really supposed to be public?
+	 */
 	public NanoClock append(@NeverNull String s) {
-		this.stats.append(s);
-		return this;
+		synchronized(this) {
+			this.stats.append(s);
+			return this;
+		}
 	}
 	
 	/**
