@@ -47,8 +47,20 @@ public class TimeConstraint implements Serializable {
 		return new TimeConstraint(0, Long.MAX_VALUE, lastKey);
 	}
 	
+	/**
+	 * @return true if at least start is not begin of time OR end is not end of
+	 *         time.
+	 */
 	public boolean isConstraining() {
 		return this.start > 0 || this.lastKey != null || this.end < Long.MAX_VALUE;
+	}
+	
+	/**
+	 * @return length of interval, can be Long.MAX_VALUE if interval is
+	 *         unconstrained
+	 */
+	public long getIntervalLength() {
+		return this.end - this.start;
 	}
 	
 	/** Exclusive */
