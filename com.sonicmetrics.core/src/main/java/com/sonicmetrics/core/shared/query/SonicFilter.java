@@ -88,6 +88,10 @@ public class SonicFilter implements ISonicFilter {
 		
 	}
 	
+	public static Builder create() {
+		return new Builder();
+	}
+	
 	public static class Builder extends
 	        SonicFilter.AbstractBuilder<SonicFilter,SonicFilter.Builder> {
 		
