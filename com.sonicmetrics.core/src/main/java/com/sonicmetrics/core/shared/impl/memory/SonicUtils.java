@@ -10,14 +10,18 @@ public class SonicUtils {
 	        @CanBeNull String label) {
 		StringBuilder b = new StringBuilder();
 		b.append(category.toLowerCase());
-		if(action != null) {
+		if(isDefined(action)) {
 			b.append(".").append(action.toLowerCase());
-		}
-		if(label != null) {
-			b.append(".").append(label.toLowerCase());
+			if(isDefined(label)) {
+				b.append(".").append(label.toLowerCase());
+			}
 		}
 		return b.toString();
 		
+	}
+	
+	public static boolean isDefined(String s) {
+		return s != null && !s.equals("") && !s.equals("*");
 	}
 	
 }
