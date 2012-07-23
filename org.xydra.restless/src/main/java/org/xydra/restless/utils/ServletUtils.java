@@ -57,6 +57,10 @@ public class ServletUtils {
 	 * @return a single chosen content-Type.
 	 */
 	public static String conneg(HttpServletRequest req) {
+		/*
+		 * TODO is the request already thread-safe or not?
+		 */
+		
 		// parse
 		Enumeration<String> enu = req.getHeaders(HEADER_ACCEPT);
 		assert enu != null : "Container allows no header access";
@@ -100,25 +104,34 @@ public class ServletUtils {
 	 * @return @NeverNull
 	 */
 	public static Map<String,String> getCookiesAsMap(HttpServletRequest req) {
+		/*
+		 * TODO is the request already thread-safe or not?
+		 */
+		
 		Cookie[] cookies = req.getCookies();
 		Map<String,String> cookieMap = new HashMap<String,String>();
 		if(cookies != null) {
-			for(Cookie cookie : cookies) {
-				String name = cookie.getName();
-				String value = cookie.getValue();
-				// ignoring:
-				// cookie.getComment()
-				// cookie.getDomain()
-				// cookie.getMaxAge()
-				// cookie.getPath()
-				// cookie.getSecure() if true, sent only over HTTPS
-				// cookie.getVersion() usually = 1
-				if(cookieMap.containsKey(name)) {
-					log.info("Found multiple cookies with the name '" + name
-					        + "' with values. Using last one. E.g., '" + cookieMap.get(name)
-					        + "' is overwritten by '" + value + "'");
+			
+			synchronized(cookies) {
+				for(Cookie cookie : cookies) {
+					synchronized(cookie) {
+						String name = cookie.getName();
+						String value = cookie.getValue();
+						// ignoring:
+						// cookie.getComment()
+						// cookie.getDomain()
+						// cookie.getMaxAge()
+						// cookie.getPath()
+						// cookie.getSecure() if true, sent only over HTTPS
+						// cookie.getVersion() usually = 1
+						if(cookieMap.containsKey(name)) {
+							log.info("Found multiple cookies with the name '" + name
+							        + "' with values. Using last one. E.g., '"
+							        + cookieMap.get(name) + "' is overwritten by '" + value + "'");
+						}
+						cookieMap.put(name, value);
+					}
 				}
-				cookieMap.put(name, value);
 			}
 		}
 		return cookieMap;
@@ -130,6 +143,10 @@ public class ServletUtils {
 	 *         (as a list).
 	 */
 	public static Map<String,List<String>> getHeadersAsMap(HttpServletRequest req) {
+		/*
+		 * TODO is the request already thread-safe or not?
+		 */
+		
 		Map<String,List<String>> map = new HashMap<String,List<String>>();
 		Enumeration<?> en = req.getHeaderNames();
 		while(en.hasMoreElements()) {
@@ -150,6 +167,9 @@ public class ServletUtils {
 	 *         contain any query parameters or hash fragments.
 	 */
 	public static final String getPageUri(HttpServletRequest req) {
+		/*
+		 * TODO is the request already thread-safe or not?
+		 */
 		return req.getProtocol() + req.getRemoteHost() + req.getRequestURI();
 	}
 	
@@ -216,6 +236,9 @@ public class ServletUtils {
 	 * @return the referrer header url or null
 	 */
 	public static String getReferrerUrl(HttpServletRequest req) {
+		/*
+		 * TODO is the request already thread-safe or not?
+		 */
 		return req.getHeader(HEADER_REFERER);
 	}
 	
@@ -228,6 +251,10 @@ public class ServletUtils {
 	 */
 	public static Map<String,String> getRequestparametersAsMap(HttpServletRequest req)
 	        throws IllegalStateException {
+		/*
+		 * TODO is the request already thread-safe or not?
+		 */
+		
 		Map<String,String> map = new HashMap<String,String>();
 		Enumeration<?> en = req.getParameterNames();
 		while(en.hasMoreElements()) {
@@ -248,10 +275,18 @@ public class ServletUtils {
 	}
 	
 	public static final String getServerUri(HttpServletRequest req) {
+		/*
+		 * TODO is the request already thread-safe or not?
+		 */
+		
 		return req.getProtocol() + req.getRemoteHost();
 	}
 	
 	public static boolean hasParameter(HttpServletRequest req, String paramName) {
+		/*
+		 * TODO is the request already thread-safe or not?
+		 */
+		
 		return req.getParameter(paramName) != null;
 	}
 	
@@ -268,6 +303,10 @@ public class ServletUtils {
 	 */
 	public static void headers(HttpServletResponse res, int status, long cachingInMinutes,
 	        String contentType) {
+		/*
+		 * TODO is the request already thread-safe or not?
+		 */
+		
 		res.setCharacterEncoding(Restless.CONTENT_TYPE_CHARSET_UTF8);
 		res.setContentType(contentType);
 		if(status > 0) {
@@ -293,6 +332,10 @@ public class ServletUtils {
 	 * @param contentType to be sent
 	 */
 	public static void headers(HttpServletResponse res, String contentType) {
+		/*
+		 * TODO is the request already thread-safe or not?
+		 */
+		
 		// TODO this gives an error on GAE in context of URLFetch & GA
 		res.setCharacterEncoding(Restless.CONTENT_TYPE_CHARSET_UTF8);
 		res.setContentType(contentType);
@@ -302,6 +345,10 @@ public class ServletUtils {
 	}
 	
 	public static void setNoCacheHeaders(HttpServletResponse res) {
+		/*
+		 * TODO is the request already thread-safe or not?
+		 */
+		
 		/*
 		 * Pragma:
 		 * http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.32
@@ -335,6 +382,10 @@ public class ServletUtils {
 	 */
 	public static void headersXhtmlViaConneg(HttpServletRequest req, HttpServletResponse res,
 	        int status, long cachingInMinutes) {
+		/*
+		 * TODO is the request already thread-safe or not?
+		 */
+		
 		String chosenContentType = conneg(req);
 		headers(res, status, cachingInMinutes, chosenContentType);
 	}
@@ -345,6 +396,10 @@ public class ServletUtils {
 	 *         request.
 	 */
 	public static boolean isInsecureHttpRequest(HttpServletRequest req) {
+		/*
+		 * TODO is the request already thread-safe or not?
+		 */
+		
 		return req.getScheme().equals("http");
 	}
 	
@@ -354,6 +409,10 @@ public class ServletUtils {
 	 *         parameters
 	 */
 	public static boolean isRequestToRoot(HttpServletRequest req) {
+		/*
+		 * TODO is the request already thread-safe or not?
+		 */
+		
 		String path = req.getPathInfo();
 		return path == null || path.equals("") || path.equals("/");
 	}
@@ -363,6 +422,10 @@ public class ServletUtils {
 	 * @return true if request is a secure https://-request
 	 */
 	public static boolean isSecureHttpsRequest(HttpServletRequest req) {
+		/*
+		 * TODO is the request already thread-safe or not?
+		 */
+		
 		return req.getScheme().equals("https");
 	}
 	

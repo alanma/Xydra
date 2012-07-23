@@ -18,6 +18,10 @@ import org.xydra.annotations.CanBeNull;
  * @author xamde
  * 
  */
+
+/*
+ * TODO does this class need to be thread-safe?
+ */
 public class SharedHtmlUtils {
 	
 	public static String link(String url, String text) {

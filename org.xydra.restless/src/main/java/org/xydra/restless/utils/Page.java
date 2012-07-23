@@ -15,6 +15,11 @@ import org.xydra.restless.Restless;
  * @author xamde
  * 
  */
+
+/*
+ * TODO I don't really understand the purpose of this class... does it need to
+ * be thread-safe?
+ */
 public class Page {
 	
 	private static final ToHtml BR = new HtmlNode("<br />");
