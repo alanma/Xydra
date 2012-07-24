@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 public class EchoServlet extends HttpServlet {
 	
 	/*
-	 * TODO check/understand what this class does and then make it thread-safe
+	 * TODO needs to be made thread-safe, too
 	 */
 	
 	private static final long serialVersionUID = 4266214485819030466L;

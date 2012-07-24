@@ -19,6 +19,8 @@ import org.xydra.restless.Restless;
 /*
  * TODO I don't really understand the purpose of this class... does it need to
  * be thread-safe?
+ * 
+ * Objects of theses classes aren't shared between different threads
  */
 public class Page {
 	

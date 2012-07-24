@@ -15,6 +15,9 @@ public class FileDownloadUtils {
 	/*
 	 * FIXME most methods do not specify what happens when given parameters
 	 * equal null or how this is handled.
+	 * 
+	 * TODO -> Mark parameters with @NeverNull and @CanBeNull in the method
+	 * signatures and the JavaDoc (not just in this class, but everywhere)
 	 */
 	
 	/*

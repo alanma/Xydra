@@ -24,6 +24,8 @@ public class HtmlUtils extends SharedHtmlUtils {
 	/*
 	 * TODO is synchronization on writers, resquests and responses really
 	 * necessary?
+	 * 
+	 * writers and headchildren shouldn't be shared between threads
 	 */
 	
 	public static void writeHtmlHeaderOpenBody(Writer w, String title, HeadChild ... headChildren)
