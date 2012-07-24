@@ -7,7 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.http.annotation.NotThreadSafe;
 import org.xydra.annotations.CanBeNull;
+import org.xydra.annotations.RunsInGWT;
 
 
 /**
@@ -18,10 +20,8 @@ import org.xydra.annotations.CanBeNull;
  * @author xamde
  * 
  */
-
-/*
- * TODO does this class need to be thread-safe?
- */
+@RunsInGWT(true)
+@NotThreadSafe
 public class SharedHtmlUtils {
 	
 	public static String link(String url, String text) {
