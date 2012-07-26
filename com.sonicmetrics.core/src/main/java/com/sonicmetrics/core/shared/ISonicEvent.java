@@ -26,7 +26,7 @@ import org.xydra.annotations.RunsInGWT;
  * @author xamde
  */
 @RunsInGWT(true)
-public interface ISonicEvent extends ISonicPotentialEvent {
+public interface ISonicEvent extends ISonicPotentialEvent, Comparable<ISonicEvent> {
 	
 	/**
 	 * @return the time-stamp of the event

@@ -1,5 +1,6 @@
 package com.sonicmetrics.core.shared.query;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -14,7 +15,9 @@ import com.sonicmetrics.core.shared.ISonicPotentialEvent.FilterProperty;
 import com.sonicmetrics.core.shared.impl.memory.SonicUtils;
 
 
-public class SonicFilter implements ISonicFilter {
+public class SonicFilter implements ISonicFilter, Serializable {
+	
+	private static final long serialVersionUID = 1L;
 	
 	@CanBeNull
 	protected final Map<ISonicEvent.FilterProperty,KeyValueConstraint> keyValueConstraints = new HashMap<ISonicPotentialEvent.FilterProperty,KeyValueConstraint>();
@@ -99,7 +102,7 @@ public class SonicFilter implements ISonicFilter {
 			this.b = this;
 		}
 		
-		// FIXME rename
+		// FIXME rename to build();
 		public SonicFilter done() {
 			return new SonicFilter(
 			        this.keyValueConstraints

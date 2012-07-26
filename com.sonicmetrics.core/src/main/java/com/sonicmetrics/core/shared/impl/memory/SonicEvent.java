@@ -131,7 +131,7 @@ public class SonicEvent extends SonicPotentialEvent implements ISonicEvent, Seri
 	}
 	
 	@CanBeNull
-	public String key;
+	protected String key;
 	
 	protected long timestamp;
 	
@@ -262,4 +262,74 @@ public class SonicEvent extends SonicPotentialEvent implements ISonicEvent, Seri
 		return this.extensionDataMap;
 	}
 	
+	@Override
+	public int compareTo(ISonicEvent o) {
+		if(this.getWhen() < o.getWhen()) {
+			return -1;
+		}
+		if(this.getWhen() > o.getWhen()) {
+			return 1;
+		}
+		// same time stamp
+		int c = compare(this.getKey(), o.getKey());
+		if(c != 0)
+			return c;
+		
+		c = compare(this.getUniqueId(), o.getUniqueId());
+		if(c != 0)
+			return c;
+		
+		c = compare(this.getSubject(), o.getSubject());
+		if(c != 0)
+			return c;
+		
+		c = compare(this.getCategory(), o.getCategory());
+		if(c != 0)
+			return c;
+		
+		c = compare(this.getAction(), o.getAction());
+		if(c != 0)
+			return c;
+		
+		c = compare(this.getLabel(), o.getLabel());
+		if(c != 0)
+			return c;
+		
+		c = compare(this.getSource(), o.getSource());
+		if(c != 0)
+			return c;
+		
+		// ignoring extension data
+		
+		return 0;
+	}
+	
+	private static int compare(String t, String o) {
+		if(t == null) {
+			if(o == null) {
+				return 0;
+			} else {
+				return 1;
+			}
+		} else {
+			if(o == null) {
+				return -1;
+			} else {
+				return t.compareTo(o);
+			}
+		}
+	}
+	
+	/**
+	 * @return a pessimistic estimate of the size in bytes if serialised
+	 */
+	public final int size() {
+		/* measured overhead */
+		int size = 39 + super.size();
+		for(Entry<String,String> e : this.extensionDataMap.entrySet()) {
+			size += size(e.getKey()) + size(e.getValue());
+		}
+		size += size(this.key);
+		return size;
+	}
 }

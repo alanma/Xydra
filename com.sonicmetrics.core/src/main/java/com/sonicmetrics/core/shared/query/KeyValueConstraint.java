@@ -1,5 +1,7 @@
 package com.sonicmetrics.core.shared.query;
 
+import java.io.Serializable;
+
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.sharedutils.XyAssert;
 
@@ -14,7 +16,9 @@ import com.sonicmetrics.core.shared.ISonicPotentialEvent.FilterProperty;
  * @author xamde
  */
 @RunsInGWT(true)
-public class KeyValueConstraint {
+public class KeyValueConstraint implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
 	
 	public static KeyValueConstraint keyValue(ISonicEvent.FilterProperty key, String value) {
 		XyAssert.validateNotNull(key, "key");

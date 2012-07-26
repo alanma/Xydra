@@ -11,6 +11,8 @@ import org.xydra.annotations.RunsInGWT;
 @RunsInGWT(true)
 public class SonicQuery extends SonicFilter implements ISonicQuery {
 	
+	private static final long serialVersionUID = 1L;
+	
 	public static class Builder extends SonicFilter.AbstractBuilder<SonicQuery,Builder> {
 		
 		private final TimeConstraint timeConstraint;

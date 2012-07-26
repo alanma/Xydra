@@ -18,7 +18,11 @@ import org.xydra.annotations.RunsInGWT;
 @RunsInGWT(true)
 public class SharedIndexedDay {
 	
-	public static final long MILLIS_PER_DAY = 24 * 60 * 60 * 1000;
+	public static final long MINUTES_PER_DAY = 24 * 60;
+	
+	public static final long MILLIS_PER_MINUTE = 60 * 1000;
+	
+	public static final long MILLIS_PER_DAY = MINUTES_PER_DAY * MILLIS_PER_MINUTE;
 	
 	protected static void assertAfterBigBang(long timeUtc, long bigBang) {
 		if(timeUtc < bigBang) {

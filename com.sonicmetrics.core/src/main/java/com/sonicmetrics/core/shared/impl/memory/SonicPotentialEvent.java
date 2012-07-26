@@ -1,11 +1,13 @@
 package com.sonicmetrics.core.shared.impl.memory;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.xydra.annotations.CanBeNull;
 import org.xydra.annotations.NeverNull;
+import org.xydra.annotations.RunsInGWT;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.sharedutils.XyAssert;
@@ -22,7 +24,9 @@ import com.sonicmetrics.core.shared.util.ValidationUtils;
  * @author xamde
  * 
  */
-public class SonicPotentialEvent implements ISonicPotentialEvent {
+public class SonicPotentialEvent implements ISonicPotentialEvent, Serializable {
+	
+	private static final long serialVersionUID = 1L;
 	
 	/**
 	 * Subclasses must set t to a temp object and b to a concrete builder.
@@ -86,7 +90,8 @@ public class SonicPotentialEvent implements ISonicPotentialEvent {
 			this.t.source = source.toLowerCase();
 			XyAssert.validateCondition(ValidationUtils.matches(USERIDENTIFIER_PATTERN, source),
 			        "Source must be a valid UserIdentifier" + ", i.e. match the regex '"
-			                + USERIDENTIFIER_PATTERN + "' (Java syntax). See doc.sonicmetrics.com");
+			                + USERIDENTIFIER_PATTERN.getSource()
+			                + "' (Java syntax). See doc.sonicmetrics.com");
 			return this.b;
 		}
 		
@@ -95,7 +100,8 @@ public class SonicPotentialEvent implements ISonicPotentialEvent {
 			this.t.subject = subject.toLowerCase();
 			XyAssert.validateCondition(ValidationUtils.matches(USERIDENTIFIER_PATTERN, subject),
 			        "Subject must be a valid UserIdentifier" + ", i.e. match the regex '"
-			                + USERIDENTIFIER_PATTERN + "' (Java syntax). See doc.sonicmetrics.com");
+			                + USERIDENTIFIER_PATTERN.getSource()
+			                + "' (Java syntax). See doc.sonicmetrics.com");
 			return this.b;
 		}
 		
@@ -309,6 +315,37 @@ public class SonicPotentialEvent implements ISonicPotentialEvent {
 		return "subject:'" + this.subject + "':'" + this.category + "." + this.action + "."
 		        + this.label + (this.value == null ? "" : "=" + this.value) + "' source:'"
 		        + this.source + "'";
+	}
+	
+	/**
+	 * @return a pessimistic estimate of the size in bytes if serialised
+	 */
+	public int size() {
+		return size(this.action) + size(this.category) + size(this.label) + size(this.source)
+		        + size(this.subject) + size(this.uniqueId) + size(this.value);
+	}
+	
+	protected int size(String s) {
+		return 1 + (s == null ? 0 : 2 + length(s));
+	}
+	
+	@RunsInGWT(true)
+	public static int length(CharSequence sequence) {
+		int count = 0;
+		for(int i = 0, len = sequence.length(); i < len; i++) {
+			char ch = sequence.charAt(i);
+			if(ch <= 0x7F) {
+				count++;
+			} else if(ch <= 0x7FF) {
+				count += 2;
+			} else if(Character.isHighSurrogate(ch)) {
+				count += 4;
+				++i;
+			} else {
+				count += 3;
+			}
+		}
+		return count;
 	}
 	
 }
