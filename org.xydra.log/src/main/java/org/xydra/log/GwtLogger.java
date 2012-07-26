@@ -5,7 +5,14 @@ package org.xydra.log;
  * 
  * @author xamde
  */
-public class GwtLogger extends org.xydra.log.Logger {
+public class GwtLogger extends org.xydra.log.Logger implements IThreadSafe {
+	
+	/*
+	 * this implementation is inherently thread-safe, since
+	 * java.util.logging.Logger is already thread-safe according to the official
+	 * documentation. Since this is the only instance variable, nothing else
+	 * needs to be done.
+	 */
 	
 	private java.util.logging.Logger logger;
 	
