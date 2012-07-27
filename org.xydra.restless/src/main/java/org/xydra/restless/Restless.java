@@ -93,11 +93,6 @@ import org.xydra.restless.utils.XmlUtils;
  */
 public class Restless extends HttpServlet {
 	
-	/*
-	 * TODO make logger itself thread-safe
-	 * https://xydra.googlecode.com/svn/trunk/org.xydra.log
-	 */
-	
 	private static Logger log;
 	
 	/**
@@ -159,8 +154,7 @@ public class Restless extends HttpServlet {
 	
 	public static final String X_HTTP_Method_Override = "X-HTTP-Method-Override";
 	
-	public static final String XHTML_DOCTYPE =
-	        "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\" \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">";
+	public static final String XHTML_DOCTYPE = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\" \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">";
 	
 	public static final String XHTML_NS = "xmlns=\"http://www.w3.org/1999/xhtml\"";
 	
@@ -256,8 +250,7 @@ public class Restless extends HttpServlet {
 	 * lists.
 	 */
 	
-	final List<RestlessExceptionHandler> exceptionHandlers =
-	        new LinkedList<RestlessExceptionHandler>();
+	final List<RestlessExceptionHandler> exceptionHandlers = new LinkedList<RestlessExceptionHandler>();
 	
 	/** Filled from web.xml */
 	private final Map<String,String> initParams = new HashMap<String,String>();
@@ -353,9 +346,6 @@ public class Restless extends HttpServlet {
 	private void delegateToDefaultServlet(HttpServletRequest req, HttpServletResponse res)
 	        throws IOException {
 		try {
-			/*
-			 * TODO maybe a "getServlectContext"-lock might be appropriate?
-			 */
 			RequestDispatcher rd = getServletContext().getNamedDispatcher("default");
 			HttpServletRequest wrapped = new HttpServletRequestWrapper(req) {
 				@Override
@@ -363,9 +353,7 @@ public class Restless extends HttpServlet {
 					return "";
 				}
 			};
-			/*
-			 * TODO maybe a "request dispatcher"-Lock might be appropriate?
-			 */
+			
 			rd.forward(wrapped, res);
 		} catch(ServletException e) {
 			throw new RuntimeException(e);
@@ -417,9 +405,6 @@ public class Restless extends HttpServlet {
 	@Override
 	public void doHead(HttpServletRequest req, HttpServletResponse res) {
 		try {
-			/*
-			 * TODO do we need a lock here?
-			 */
 			super.doHead(req, res);
 		} catch(ServletException e) {
 			throw new RuntimeException(e);
@@ -438,9 +423,6 @@ public class Restless extends HttpServlet {
 	private void doIntrospection(HttpServletRequest req, HttpServletResponse res) {
 		String servletPath = getServletPath(req);
 		
-		/*
-		 * TODO do we need a lock here?
-		 */
 		ServletUtils.headers(res, MIME_XHTML);
 		try {
 			Writer w = res.getWriter();
@@ -556,9 +538,6 @@ public class Restless extends HttpServlet {
 	 */
 	public Object getServletContextAttribute(String key) {
 		try {
-			/*
-			 * TODO do we need a lock here? (servlet context lock)
-			 */
 			ServletContext sc = this.getServletContext();
 			return sc.getAttribute(key);
 		} catch(NullPointerException e) {
@@ -596,18 +575,13 @@ public class Restless extends HttpServlet {
 	@Override
 	public void init(ServletConfig servletConfig) {
 		/*
-		 * TODO is this supposed to run only once or multiple times?
-		 * 
-		 * unclear...
+		 * this is only run once, so it doesn't need to be thread-safe!
 		 */
 		
 		/* measure boot performance */
 		NanoClock clock = new NanoClock();
 		clock.start();
 		try {
-			/*
-			 * TODO do we need a lock here?
-			 */
 			super.init(servletConfig);
 		} catch(ServletException e) {
 			throw new RuntimeException("Could not initialise super servlet", e);
@@ -618,16 +592,15 @@ public class Restless extends HttpServlet {
 		 * Configuration option in web.xml to select class for logging back-end,
 		 * which must be an implementation of ILoggerFactorySPI.
 		 */
-		/*
-		 * TODO do we need a lock here? (logger factory) Yes, logger needs to be
-		 * made thread-safe
-		 */
 		this.loggerFactory = servletConfig.getInitParameter(INIT_PARAM_XYDRA_LOG_BACKEND);
 		if(this.loggerFactory != null) {
 			initLoggerFactory();
 		}
 		clock.stopAndStart("logger-init");
 		
+		/*
+		 * TODO get thread-safe logger!
+		 */
 		log = LoggerFactory.getLogger(Restless.class);
 		log.info("Restless: Init. Using loggerFactory '" + this.loggerFactory + "'...");
 		
@@ -642,9 +615,6 @@ public class Restless extends HttpServlet {
 			this.initParams.put(key, value);
 		}
 		
-		/*
-		 * TODO do we need a lock here? (init parameters)
-		 */
 		this.initParams.put("context:contextPath", servletConfig.getServletContext()
 		        .getContextPath());
 		this.initParams.put("context:realPath of '/'", servletConfig.getServletContext()
@@ -687,12 +657,6 @@ public class Restless extends HttpServlet {
 		        + "Init performance " + clock.getStats());
 	}
 	
-	/*
-	 * TODO do we need a lock here? Is this called more than once/only during
-	 * the creation?
-	 * 
-	 * only once
-	 */
 	private void initLoggerFactory() {
 		if(LoggerFactory.hasLoggerFactorySPI()) {
 			return;
@@ -753,8 +717,8 @@ public class Restless extends HttpServlet {
 					clock.stop(appClassName + "-newinstance");
 					try {
 						clock.start();
-						Method restlessMethod =
-						        clazz.getMethod("restless", Restless.class, String.class);
+						Method restlessMethod = clazz.getMethod("restless", Restless.class,
+						        String.class);
 						clock.stop(appClassName + "-get-restless-method");
 						try {
 							clock.start();
@@ -826,10 +790,11 @@ public class Restless extends HttpServlet {
 	 * @param req
 	 * @param res
 	 */
-	/*
-	 * TODO do multiple threads operate on the same HttpServletResponses?
-	 */
 	protected void restlessService(final HttpServletRequest req, final HttpServletResponse res) {
+		/*
+		 * TODO recheck that this is actually thread-safe now
+		 */
+		
 		NanoClock requestClock = new NanoClock().start();
 		
 		/* If running on localhost, we might tweak the host */
@@ -877,17 +842,8 @@ public class Restless extends HttpServlet {
 						if(httpMethod.equalsIgnoreCase(restlessMethod.httpMethod)) {
 							foundMethod = true;
 							try {
-								/*
-								 * TODO is this execution asynchronous or do we
-								 * wait until it is finished? ,
-								 * 
-								 * (if it's not asynchronous, having it in the
-								 * synchronized-block results in no slow down)
-								 * 
-								 * it's synchronous
-								 */
-								couldStartMethod =
-								        restlessMethod.run(this, reqHandedDown, res, requestClock);
+								couldStartMethod = restlessMethod.run(this, reqHandedDown, res,
+								        requestClock);
 							} catch(IOException e) {
 								throw new RuntimeException(e);
 							}
@@ -909,14 +865,13 @@ public class Restless extends HttpServlet {
 				}
 			} else {
 				// produce better error message
-				String msg =
-				        "No handler matched your "
-				                + reqHandedDown.getMethod()
-				                + "-request path '"
-				                + path
-				                + "'. "
-				                + (foundPath ? "Found at least one path mapping (wrong HTTP method or missing parameters)."
-				                        : "Found not even a path mapping. Check your Restless App and web.xml.");
+				String msg = "No handler matched your "
+				        + reqHandedDown.getMethod()
+				        + "-request path '"
+				        + path
+				        + "'. "
+				        + (foundPath ? "Found at least one path mapping (wrong HTTP method or missing parameters)."
+				                : "Found not even a path mapping. Check your Restless App and web.xml.");
 				log.warn(msg);
 				try {
 					res.sendError(404, msg);
@@ -957,4 +912,9 @@ public class Restless extends HttpServlet {
 			this.localContext.put(key, value);
 		}
 	}
+	
+	/*
+	 * TODO make sure that the destroy() method is only called when all running
+	 * threads are finished
+	 */
 }
