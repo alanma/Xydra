@@ -3,7 +3,11 @@ package org.xydra.restless;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.xydra.annotations.NeverNull;
+import org.xydra.annotations.ThreadSafe;
 
+
+@ThreadSafe
 public class RestlessContextImpl implements IRestlessContext {
 	
 	private HttpServletRequest req;
@@ -14,18 +18,20 @@ public class RestlessContextImpl implements IRestlessContext {
 	
 	private Restless restless;
 	
-	public RestlessContextImpl(Restless restless, HttpServletRequest req, HttpServletResponse res,
-	        String requestIdentifier) {
+	/**
+	 * 
+	 * @param restless @NeverNull
+	 * @param req @NeverNull
+	 * @param res @NeverNull
+	 * @param requestIdentifier @NeverNull
+	 */
+	public RestlessContextImpl(@NeverNull Restless restless, @NeverNull HttpServletRequest req,
+	        @NeverNull HttpServletResponse res, @NeverNull String requestIdentifier) {
 		this.restless = restless;
 		this.req = req;
 		this.res = res;
 		this.requestIdentifier = requestIdentifier;
 	}
-	
-	/*
-	 * TODO are HttpServletRequests and HttpServletResponses already
-	 * thread-safe?
-	 */
 	
 	@Override
 	public HttpServletRequest getRequest() {

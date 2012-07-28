@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.xydra.annotations.NeverNull;
+import org.xydra.annotations.ThreadSafe;
+
 
 /**
  * Internal class to represent a URL path that gets mapped to a set of variables
@@ -32,6 +35,7 @@ import java.util.regex.Pattern;
  * @author voelkel
  * 
  */
+@ThreadSafe
 class PathTemplate {
 	
 	/** Matches any character */
@@ -46,24 +50,34 @@ class PathTemplate {
 	/** Matches '/' or empty string */
 	static final String END_REGEX = "/?";
 	
+	/*
+	 * patterns are thread-safe. Matchers are not thread-safe, but
+	 * p.matcher(...) always creates new matchers, so there's no problem here.
+	 */
 	private transient Pattern p;
 	
+	/*
+	 * since this variable is only read in this class, access to it is also
+	 * thread-safe. (at the moment - if a method which writes to this variable
+	 * is added, access to this variable needs to be made thread-safe)
+	 */
 	private String regex;
 	
-	/*
-	 * TODO make this private and thread-safe
+	/**
+	 * Changing the contents of this list is not allowed!
 	 * 
-	 * TODO write comment that this should never be edited, also write this in
-	 * the Doc of the method
+	 * Concerning thread-safety: Since we're disallowing write access to this
+	 * list, all threads only read from it, which means that no specific
+	 * synchronization needs to take place.
 	 */
 	private List<String> variableNames = new ArrayList<String>();
 	
 	/**
 	 * Create a new URL pattern with variable parts.
 	 * 
-	 * @param pathExpression must start with '/'; may not contain '//'
+	 * @param pathExpression must start with '/'; may not contain '//' @NeverNull
 	 */
-	public PathTemplate(String pathExpression) {
+	public PathTemplate(@NeverNull String pathExpression) {
 		if(!pathExpression.startsWith("/")) {
 			throw new IllegalArgumentException("Path must start with '/'. Path ='" + pathExpression
 			        + "'");
@@ -86,6 +100,10 @@ class PathTemplate {
 					                + segment + "'.");
 				}
 				String variableName = segment.substring(1, segment.length() - 1);
+				
+				/*
+				 * since this the constructor, we don't need to synchronize here
+				 */
 				this.variableNames.add(variableName);
 				regexBuf.append(VAR_REGEX);
 			} else {
@@ -96,10 +114,6 @@ class PathTemplate {
 		regexBuf.append(END_REGEX);
 		this.regex = regexBuf.toString();
 		
-		/*
-		 * TODO is synchronized access on p necessary?
-		 */
-		
 		this.p = Pattern.compile(this.regex);
 	}
 	
@@ -109,11 +123,8 @@ class PathTemplate {
 	 * @return values of variables in order
 	 */
 	public List<String> extractVariables(String path) {
-		/*
-		 * TODO is synchronized access on p necessary?
-		 */
-		
 		Matcher m = this.p.matcher(path);
+		
 		if(m.groupCount() != this.variableNames.size()) {
 			throw new IllegalArgumentException("Path contains a different number of variables ("
 			        + m.groupCount() + ") than the template (" + this.variableNames.size() + ")");
@@ -139,20 +150,16 @@ class PathTemplate {
 	}
 	
 	/**
+	 * Returns the list of variable names.
+	 * 
+	 * Changing the content of this list is not allowed. If you're changing the
+	 * content, no guarantees can be made to the behavior of the complete
+	 * application (for example, it might lead to synchronization problems).
+	 * 
 	 * @return the names of variables in the order in which they are used to
 	 *         call the Java method
 	 */
 	public List<String> getVariableNames() {
-		/*
-		 * TODO maybe this needs to be synchronized, if multiple threads want to
-		 * access the variable names.
-		 * 
-		 * Options:
-		 * 
-		 * 1) use a list which is already thread-safe
-		 * 
-		 * 2) copy the list and return the copy
-		 */
 		return this.variableNames;
 	}
 	
@@ -161,9 +168,6 @@ class PathTemplate {
 	 * @return true if this PathTemplate matches a given path
 	 */
 	public boolean matches(String path) {
-		/*
-		 * TODO is synchronized access on p necessary?
-		 */
 		
 		return this.p.matcher(path).matches();
 	}

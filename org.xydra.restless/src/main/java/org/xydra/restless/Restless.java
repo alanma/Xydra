@@ -23,6 +23,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
+import org.xydra.annotations.CanBeNull;
+import org.xydra.annotations.NeverNull;
+import org.xydra.annotations.ThreadSafe;
 import org.xydra.log.ILoggerFactorySPI;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -91,6 +94,8 @@ import org.xydra.restless.utils.XmlUtils;
  * @author voelkel
  * 
  */
+
+@ThreadSafe
 public class Restless extends HttpServlet {
 	
 	private static Logger log;
@@ -166,7 +171,7 @@ public class Restless extends HttpServlet {
 	 * @param req HttpServletRequest, @NeverNull
 	 * @return "/foo/" for a request uri of "/foo/bar" with a pathInfo of "bar"
 	 */
-	public static String getServletPath(HttpServletRequest req) {
+	public static String getServletPath(@NeverNull HttpServletRequest req) {
 		String uri = req.getRequestURI();
 		String path = req.getPathInfo();
 		String servletPath = uri.substring(0, uri.length() - path.length());
@@ -176,7 +181,12 @@ public class Restless extends HttpServlet {
 	
 	/** =========== Utilities ================ */
 	
-	protected static final String instanceOrClass_className(Object instanceOrClass) {
+	/**
+	 * 
+	 * @param instanceOrClass @NeverNull
+	 * @return
+	 */
+	protected static final String instanceOrClass_className(@NeverNull Object instanceOrClass) {
 		if(instanceOrClass instanceof Class<?>) {
 			return ((Class<?>)instanceOrClass).getCanonicalName();
 		} else {
@@ -185,12 +195,12 @@ public class Restless extends HttpServlet {
 	}
 	
 	/**
-	 * @param clazz Class from which to get the method reference
-	 * @param methodName Name of Java method to get
+	 * @param clazz Class from which to get the method reference @NeverNull
+	 * @param methodName Name of Java method to get @NeverNull
 	 * @return a java.lang.reflect.{@link Method} from a Class with a given
 	 *         methodName
 	 */
-	public static Method methodByName(Class<?> clazz, String methodName) {
+	public static Method methodByName(@NeverNull Class<?> clazz, @NeverNull String methodName) {
 		for(Method method : clazz.getMethods()) {
 			if(method.getName().equals(methodName)) {
 				return method;
@@ -200,19 +210,20 @@ public class Restless extends HttpServlet {
 	}
 	
 	/**
-	 * @param instanceOrClass an instance or class in which to search methodName
-	 * @param methodName e.g. 'getName'
+	 * @param instanceOrClass an instance or class in which to search methodName @NeverNull
+	 * @param methodName e.g. 'getName' @NeverNull
 	 * @return a java.lang.reflect.{@link Method} from a String
 	 */
-	public static Method methodByName(Object instanceOrClass, String methodName) {
+	public static Method methodByName(@NeverNull Object instanceOrClass,
+	        @NeverNull String methodName) {
 		return methodByName(toClass(instanceOrClass), methodName);
 	}
 	
 	/**
-	 * @param commaSeparatedClassnames
+	 * @param commaSeparatedClassnames @CanBeNull
 	 * @return a list of classnames in order of appearance
 	 */
-	private static List<String> parseToList(String commaSeparatedClassnames) {
+	private static List<String> parseToList(@CanBeNull String commaSeparatedClassnames) {
 		
 		List<String> list = new ArrayList<String>();
 		if(commaSeparatedClassnames == null) {
@@ -228,11 +239,16 @@ public class Restless extends HttpServlet {
 		return list;
 	}
 	
-	private static boolean requestIsViaAdminUrl(HttpServletRequest req) {
+	private static boolean requestIsViaAdminUrl(@NeverNull HttpServletRequest req) {
 		return req.getRequestURI().startsWith(ADMIN_ONLY_URL_PREFIX);
 	}
 	
-	public static Class<?> toClass(Object instanceOrClass) {
+	/**
+	 * 
+	 * @param instanceOrClass @NeverNull
+	 * @return
+	 */
+	public static Class<?> toClass(@NeverNull Object instanceOrClass) {
 		if(instanceOrClass instanceof Class<?>) {
 			return (Class<?>)instanceOrClass;
 		} else {
@@ -273,9 +289,9 @@ public class Restless extends HttpServlet {
 	 * Register a handler that will receive exceptions thrown by the executed
 	 * REST methods.
 	 * 
-	 * @param handler a non-null {@link RestlessExceptionHandler}
+	 * @param handler a non-null {@link RestlessExceptionHandler} @NeverNull
 	 */
-	public void addExceptionHandler(RestlessExceptionHandler handler) {
+	public void addExceptionHandler(@NeverNull RestlessExceptionHandler handler) {
 		synchronized(this.exceptionHandlers) {
 			this.exceptionHandlers.add(handler);
 		}
@@ -284,15 +300,15 @@ public class Restless extends HttpServlet {
 	/**
 	 * Shortcut for adding addMethod( method = 'GET', admin-only = 'false' )
 	 * 
-	 * @param pathTemplate see {@link PathTemplate} for syntax
-	 * @param instanceOrClass a Java isntance or class
+	 * @param pathTemplate see {@link PathTemplate} for syntax @NeverNull
+	 * @param instanceOrClass a Java instance or class @NeverNull
 	 * @param javaMethodName a method name like 'getName', see
 	 *            {@link #addMethod(String, String, Object, String, boolean, RestlessParameter...)}
-	 *            for handling of this parameter
-	 * @param parameter
+	 *            for handling of this parameter @NeverNull
+	 * @param parameter @NeverNull
 	 */
-	public void addGet(String pathTemplate, Object instanceOrClass, String javaMethodName,
-	        RestlessParameter ... parameter) {
+	public void addGet(@NeverNull String pathTemplate, @NeverNull Object instanceOrClass,
+	        @NeverNull String javaMethodName, @NeverNull RestlessParameter ... parameter) {
 		addMethod(pathTemplate, "GET", instanceOrClass, javaMethodName, false, parameter);
 	}
 	
@@ -302,22 +318,23 @@ public class Restless extends HttpServlet {
 	 * if any. Otherwise the method return value is converted toString() and
 	 * returned as text/plain.
 	 * 
-	 * @param pathTemplate see {@link PathTemplate} for syntax
-	 * @param httpMethod one of 'GET', 'PUT', 'POST', or 'DELETE'
+	 * @param pathTemplate see {@link PathTemplate} for syntax @NeverNull
+	 * @param httpMethod one of 'GET', 'PUT', 'POST', or 'DELETE' @NeverNull
 	 * @param instanceOrClass Java instance to be called or Java class to be
 	 *            instantiated. If a class is given, the instance is created on
-	 *            first access and cached in memory from there on.
+	 *            first access and cached in memory from there on. @NeverNull
 	 * @param javaMethodName to be called on the Java instance. This method may
-	 *            not have several signatures.
+	 *            not have several signatures. @NeverNull
 	 * @param adminOnly
 	 * @param parameter in the order in which they are used in the Java method.
 	 *            The Java method may additionally use
 	 *            {@link HttpServletRequest} and {@link HttpServletResponse} at
 	 *            any position in the Java method. {@link HttpServletResponse}
-	 *            should be used to send a response.
+	 *            should be used to send a response. @NeverNull
 	 */
-	public void addMethod(String pathTemplate, String httpMethod, Object instanceOrClass,
-	        String javaMethodName, boolean adminOnly, RestlessParameter ... parameter) {
+	public void addMethod(@NeverNull String pathTemplate, @NeverNull String httpMethod,
+	        @NeverNull Object instanceOrClass, @NeverNull String javaMethodName, boolean adminOnly,
+	        @NeverNull RestlessParameter ... parameter) {
 		PathTemplate pt = new PathTemplate(pathTemplate);
 		
 		synchronized(this.methods) {
@@ -339,12 +356,12 @@ public class Restless extends HttpServlet {
 	 * http://stackoverflow.com/questions/132052/servlet-for-serving-static
 	 * -content
 	 * 
-	 * @param req
-	 * @param res
+	 * @param req @NeverNull
+	 * @param res @NeverNull
 	 * @throws IOException
 	 */
-	private void delegateToDefaultServlet(HttpServletRequest req, HttpServletResponse res)
-	        throws IOException {
+	private void delegateToDefaultServlet(@NeverNull HttpServletRequest req,
+	        @NeverNull HttpServletResponse res) throws IOException {
 		try {
 			RequestDispatcher rd = getServletContext().getNamedDispatcher("default");
 			HttpServletRequest wrapped = new HttpServletRequestWrapper(req) {
@@ -369,8 +386,12 @@ public class Restless extends HttpServlet {
 	 * javax.servlet.http.HttpServlet#doPut(javax.servlet.http.HttpServletRequest
 	 * , javax.servlet.http.HttpServletResponse)
 	 */
+	/**
+	 * @param req @NeverNull
+	 * @param res @NeverNull
+	 */
 	@Override
-	public void doDelete(HttpServletRequest req, HttpServletResponse res) {
+	public void doDelete(@NeverNull HttpServletRequest req, @NeverNull HttpServletResponse res) {
 		restlessService(req, res);
 	}
 	
@@ -383,8 +404,13 @@ public class Restless extends HttpServlet {
 	 * javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest
 	 * , javax.servlet.http.HttpServletResponse)
 	 */
+	/**
+	 * @param req @NeverNull
+	 * @param res @NeverNull
+	 */
 	@Override
-	public void doGet(final HttpServletRequest req, final HttpServletResponse res) {
+	public void doGet(@NeverNull final HttpServletRequest req,
+	        @NeverNull final HttpServletResponse res) {
 		final String uri = req.getRequestURI();
 		if(uri.startsWith(INTROSPECTION_PATH)) {
 			doIntrospection(req, res);
@@ -402,8 +428,12 @@ public class Restless extends HttpServlet {
 	 * javax.servlet.http.HttpServlet#doPut(javax.servlet.http.HttpServletRequest
 	 * , javax.servlet.http.HttpServletResponse)
 	 */
+	/**
+	 * @param req @NeverNull
+	 * @param res @NeverNull
+	 */
 	@Override
-	public void doHead(HttpServletRequest req, HttpServletResponse res) {
+	public void doHead(@NeverNull HttpServletRequest req, @NeverNull HttpServletResponse res) {
 		try {
 			super.doHead(req, res);
 		} catch(ServletException e) {
@@ -417,10 +447,11 @@ public class Restless extends HttpServlet {
 	 * Print the current mapping from URL patterns to Java methods as a web
 	 * page.
 	 * 
-	 * @param req
-	 * @param res
+	 * @param req @NeverNull
+	 * @param res @NeverNull
 	 */
-	private void doIntrospection(HttpServletRequest req, HttpServletResponse res) {
+	private void doIntrospection(@NeverNull HttpServletRequest req,
+	        @NeverNull HttpServletResponse res) {
 		String servletPath = getServletPath(req);
 		
 		ServletUtils.headers(res, MIME_XHTML);
@@ -485,8 +516,12 @@ public class Restless extends HttpServlet {
 	 * javax.servlet.http.HttpServlet#doPut(javax.servlet.http.HttpServletRequest
 	 * , javax.servlet.http.HttpServletResponse)
 	 */
+	/**
+	 * @param req @NeverNull
+	 * @param res @NeverNull
+	 */
 	@Override
-	public void doPost(HttpServletRequest req, HttpServletResponse res) {
+	public void doPost(@NeverNull HttpServletRequest req, @NeverNull HttpServletResponse res) {
 		restlessService(req, res);
 	}
 	
@@ -499,12 +534,20 @@ public class Restless extends HttpServlet {
 	 * javax.servlet.http.HttpServlet#doPut(javax.servlet.http.HttpServletRequest
 	 * , javax.servlet.http.HttpServletResponse)
 	 */
+	/**
+	 * @param req @NeverNull
+	 * @param res @NeverNull
+	 */
 	@Override
-	public void doPut(HttpServletRequest req, HttpServletResponse res) {
+	public void doPut(@NeverNull HttpServletRequest req, @NeverNull HttpServletResponse res) {
 		restlessService(req, res);
 	}
 	
-	protected void fireRequestFinished(IRestlessContext restlessContext) {
+	/**
+	 * 
+	 * @param restlessContext @NeverNull
+	 */
+	protected void fireRequestFinished(@NeverNull IRestlessContext restlessContext) {
 		synchronized(this.requestListeners) {
 			for(IRequestListener requestListener : this.requestListeners) {
 				requestListener.onRequestFinished(restlessContext);
@@ -512,7 +555,11 @@ public class Restless extends HttpServlet {
 		}
 	}
 	
-	protected void fireRequestStarted(IRestlessContext restlessContext) {
+	/**
+	 * 
+	 * @param restlessContext @NeverNull
+	 */
+	protected void fireRequestStarted(@NeverNull IRestlessContext restlessContext) {
 		synchronized(this.requestListeners) {
 			for(IRequestListener requestListener : this.requestListeners) {
 				requestListener.onRequestStarted(restlessContext);
@@ -530,13 +577,13 @@ public class Restless extends HttpServlet {
 	/**
 	 * Helper method to make writing JUnit tests easier.
 	 * 
-	 * @param key attribute name
+	 * @param key attribute name @CanBeNull
 	 * @return when run in a servlet container, this method is simply a
 	 *         short-cut for getServletContext().getAttribute(key,value).
 	 *         Otherwise a local hash-map is used that can be set via
 	 *         {@link #setServletContextAttribute(String, Object)}
 	 */
-	public Object getServletContextAttribute(String key) {
+	public Object getServletContextAttribute(@CanBeNull String key) {
 		try {
 			ServletContext sc = this.getServletContext();
 			return sc.getAttribute(key);
@@ -572,8 +619,11 @@ public class Restless extends HttpServlet {
 	 * 
 	 * @see javax.servlet.GenericServlet#init()
 	 */
+	/**
+	 * @param servletConfig @NeverNull
+	 */
 	@Override
-	public void init(ServletConfig servletConfig) {
+	public void init(@NeverNull ServletConfig servletConfig) {
 		/*
 		 * this is only run once, so it doesn't need to be thread-safe!
 		 */
@@ -777,7 +827,10 @@ public class Restless extends HttpServlet {
 		return clock.getStats();
 	}
 	
-	public void removeRequestListener(IRequestListener requestListener) {
+	/**
+	 * @param requestListener @CanBenNull
+	 */
+	public void removeRequestListener(@CanBeNull IRequestListener requestListener) {
 		synchronized(this.requestListeners) {
 			this.requestListeners.remove(requestListener);
 		}
@@ -787,10 +840,11 @@ public class Restless extends HttpServlet {
 	 * Generic method to map incoming web requests to mapped
 	 * {@link RestlessMethod}. Match path and HTTP method.
 	 * 
-	 * @param req
-	 * @param res
+	 * @param req @NeverNull
+	 * @param res @NeverNull
 	 */
-	protected void restlessService(final HttpServletRequest req, final HttpServletResponse res) {
+	protected void restlessService(@NeverNull final HttpServletRequest req,
+	        @NeverNull final HttpServletResponse res) {
 		/*
 		 * TODO recheck that this is actually thread-safe now
 		 */
@@ -897,10 +951,10 @@ public class Restless extends HttpServlet {
 	 * getServletContext().setAttribute(key,value). Otherwise a local hash-map
 	 * is used.
 	 * 
-	 * @param key attribute name
-	 * @param value attribute value
+	 * @param key attribute name @NeverNull
+	 * @param value attribute value @NeverNull
 	 */
-	public void setServletContextAttribute(String key, Object value) {
+	public void setServletContextAttribute(@NeverNull String key, @NeverNull Object value) {
 		try {
 			ServletContext sc = this.getServletContext();
 			sc.setAttribute(key, value);

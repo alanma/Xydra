@@ -1,5 +1,11 @@
 package org.xydra.restless;
 
+import org.xydra.annotations.CanBeNull;
+import org.xydra.annotations.NeverNull;
+import org.xydra.annotations.ThreadSafe;
+
+
+@ThreadSafe
 public class RestlessException extends RuntimeException {
 	
 	public static final int Moved_permanently = 301;
@@ -178,23 +184,24 @@ public class RestlessException extends RuntimeException {
 	private final int statusCode;
 	
 	/**
-	 * @param statusCode a HTTP status code
+	 * @param statusCode a HTTP status code @NeverNull
 	 * @param message a short message to be displayed to the user. Don't put
-	 *            confidential information here.
+	 *            confidential information here. @CanBeNull
 	 */
-	public RestlessException(int statusCode, String message) {
+	public RestlessException(@NeverNull int statusCode, @CanBeNull String message) {
 		super(message);
 		this.statusCode = statusCode;
 	}
 	
 	/**
-	 * @param statusCode a HTTP status code
+	 * @param statusCode a HTTP status code @NeverNull
 	 * @param message a short message to be displayed to the user. Don't put
-	 *            confidential information here.
+	 *            confidential information here. @CanBeNull
 	 * @param t TODO make sure this {@link Throwable} is not displayed to remote
-	 *            users
+	 *            users @CanBeNull
 	 */
-	public RestlessException(int statusCode, String message, Throwable t) {
+	public RestlessException(@NeverNull int statusCode, @CanBeNull String message,
+	        @CanBeNull Throwable t) {
 		super(message, t);
 		this.statusCode = statusCode;
 	}
