@@ -36,7 +36,7 @@ import org.xydra.annotations.ThreadSafe;
  * 
  */
 @ThreadSafe
-class PathTemplate {
+public class PathTemplate {
 	
 	/** Matches any character */
 	static final String ANY_REGEX = ".*";
@@ -159,7 +159,7 @@ class PathTemplate {
 	 * @return the names of variables in the order in which they are used to
 	 *         call the Java method
 	 */
-	public List<String> getVariableNames() {
+	protected List<String> getVariableNames() {
 		return this.variableNames;
 	}
 	

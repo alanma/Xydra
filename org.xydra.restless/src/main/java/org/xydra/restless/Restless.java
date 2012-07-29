@@ -482,16 +482,17 @@ public class Restless extends HttpServlet {
 			synchronized(this.methods) {
 				for(RestlessMethod rm : this.methods) {
 					w.write("<li>");
-					String url = servletPath + XmlUtils.xmlEncode(rm.pathTemplate.getRegex());
+					String url = servletPath + XmlUtils.xmlEncode(rm.getPathTemplate().getRegex());
 					w.write((rm.adminOnly ? "ADMIN ONLY" : "PUBLIC")
-					        + " resource <b class='resource'>" + url + "</b>: " + rm.httpMethod
-					        + " =&gt; ");
-					w.write(instanceOrClass_className(rm.instanceOrClass) + "#" + rm.methodName);
+					        + " resource <b class='resource'>" + url + "</b>: "
+					        + rm.getHttpMethod() + " =&gt; ");
+					w.write(instanceOrClass_className(rm.getInstanceOrClass()) + "#"
+					        + rm.getMethodName());
 					
 					/* list parameters */
-					w.write("<form action='" + url + "' method='" + rm.httpMethod.toLowerCase()
-					        + "'><div>");
-					for(RestlessParameter parameter : rm.requiredNamedParameter) {
+					w.write("<form action='" + url + "' method='"
+					        + rm.getHttpMethod().toLowerCase() + "'><div>");
+					for(RestlessParameter parameter : rm.getRequiredNamedParameter()) {
 						w.write(parameter.name + " <input type='text' name='" + parameter.name
 						        + "' value='" + parameter.defaultValue + "' />");
 					}
@@ -694,9 +695,10 @@ public class Restless extends HttpServlet {
 		
 		if(log.isDebugEnabled()) {
 			for(RestlessMethod rm : this.methods) {
-				log.debug("Mapping " + rm.httpMethod + " " + rm.pathTemplate.getRegex() + " --> "
-				        + instanceOrClass_className(rm.instanceOrClass) + "#" + rm.methodName
-				        + " access:" + (rm.adminOnly ? "ADMIN ONLY" : "PUBLIC"));
+				log.debug("Mapping " + rm.getHttpMethod() + " " + rm.getPathTemplate().getRegex()
+				        + " --> " + instanceOrClass_className(rm.getInstanceOrClass()) + "#"
+				        + rm.getMethodName() + " access:"
+				        + (rm.adminOnly ? "ADMIN ONLY" : "PUBLIC"));
 			}
 			
 		}
@@ -890,10 +892,10 @@ public class Restless extends HttpServlet {
 				 */
 				if(reqViaAdminUrl == restlessMethod.adminOnly) {
 					// if path matches
-					if(restlessMethod.pathTemplate.matches(path)) {
+					if(restlessMethod.getPathTemplate().matches(path)) {
 						foundPath = true;
 						// and HTTP method matches
-						if(httpMethod.equalsIgnoreCase(restlessMethod.httpMethod)) {
+						if(httpMethod.equalsIgnoreCase(restlessMethod.getHttpMethod())) {
 							foundMethod = true;
 							try {
 								couldStartMethod = restlessMethod.run(this, reqHandedDown, res,

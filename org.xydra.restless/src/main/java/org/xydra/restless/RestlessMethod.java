@@ -26,6 +26,8 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.util.Streams;
 import org.apache.commons.io.IOUtils;
+import org.xydra.annotations.NeverNull;
+import org.xydra.annotations.ThreadSafe;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.restless.utils.NanoClock;
@@ -41,6 +43,8 @@ import org.xydra.restless.utils.ServletUtils;
  * 
  * @author voelkel
  */
+
+@ThreadSafe
 public class RestlessMethod {
 	
 	private static final String UPLOAD_PARAM = "_upload_";
@@ -53,21 +57,45 @@ public class RestlessMethod {
 	/**
 	 * GET, PUT, POST, DELETE
 	 */
+	/*
+	 * currently, httpMethod (and its contents) is never written after creation
+	 * and all methods only read this variable -> no synchronization necessary
+	 * at the moment
+	 */
+	private String httpMethod;
 	
 	/*
-	 * TODO Why are this parameters not declared as private/public or protected?
+	 * instanceOrClass might be an instance on which methods are executed,
+	 * therefore we don't know in advance how it will be manipulated -> Access
+	 * on instanceOrClass must be synchronized
 	 */
-	String httpMethod;
-	Object instanceOrClass;
-	String methodName;
+	private Object instanceOrClass;
+	
+	/*
+	 * currently, methodName is never written after creation and all methods
+	 * only read this variable -> no synchronization necessary at the moment
+	 */
+	private String methodName;
+	
 	/** The parameter required by this restless method */
-	RestlessParameter[] requiredNamedParameter;
-	PathTemplate pathTemplate;
+	/*
+	 * currently, requiredNamedParameter (and its contents) is never written
+	 * after creation and all methods only read this variable -> no
+	 * synchronization necessary at the moment
+	 */
+	private RestlessParameter[] requiredNamedParameter;
+	
+	/*
+	 * currently, pathTemplate (and its contents) is never written after
+	 * creation and all methods only read this variable -> no synchronization
+	 * necessary at the moment
+	 */
+	private PathTemplate pathTemplate;
 	
 	/**
 	 * @param object instance to be called when web method is used - or class to
-	 *            be instantiated
-	 * @param httpMethod 'GET', 'PUT', 'POST', or' DELETE'
+	 *            be instantiated @NeverNull
+	 * @param httpMethod 'GET', 'PUT', 'POST', or' DELETE' @NeverNull
 	 * @param methodName instance method to be called. This method may not have
 	 *            several signatures with the same name.
 	 * 
@@ -78,17 +106,24 @@ public class RestlessMethod {
 	 *            If no {@link HttpServletResponse} is used, a default content
 	 *            type of text/plain is used and the method return type is
 	 *            expected to be of type String. This facility is designer to
-	 *            return status information at development time.
-	 * @param pathTemplate see {@link PathTemplate} for syntax
+	 *            return status information at development time. @NeverNull
+	 * @param pathTemplate see {@link PathTemplate} for syntax @NeverNull
 	 * @param adminOnly if true, this method can only be executed it the request
 	 *            URL starts with '/admin'.
 	 * @param parameter in order of variables in 'method'. See
-	 *            {@link RestlessParameter}.
+	 *            {@link RestlessParameter}. @NeverNull TODO is this correct?
 	 */
-	public RestlessMethod(Object object, String httpMethod, String methodName,
-	        PathTemplate pathTemplate, boolean adminOnly, RestlessParameter[] parameter) {
+	public RestlessMethod(@NeverNull Object object, @NeverNull String httpMethod,
+	        @NeverNull String methodName, @NeverNull PathTemplate pathTemplate, boolean adminOnly,
+	        @NeverNull RestlessParameter[] parameter) {
 		this.instanceOrClass = object;
 		this.httpMethod = httpMethod;
+		
+		/*
+		 * TODO why is the given methodName not checked for well-formedness?
+		 * What if an instance is created with a methodName which is not GET,
+		 * PUT, POST or DELETE?
+		 */
 		this.methodName = methodName;
 		this.pathTemplate = pathTemplate;
 		this.adminOnly = adminOnly;
@@ -112,8 +147,9 @@ public class RestlessMethod {
 	 * @return true if method launched successfully, i.e. parameters matched
 	 * @throws IOException if result writing fails
 	 */
-	public boolean run(final Restless restless, final HttpServletRequest req,
-	        final HttpServletResponse res, NanoClock requestClock) throws IOException {
+	public boolean run(@NeverNull final Restless restless, @NeverNull final HttpServletRequest req,
+	        @NeverNull final HttpServletResponse res, @NeverNull NanoClock requestClock)
+	        throws IOException {
 		requestClock.stopAndStart("servlet->restless.run");
 		
 		// set standard headers
@@ -140,11 +176,11 @@ public class RestlessMethod {
 			
 			int boundNamedParameterNumber = 0;
 			boolean hasHttpServletResponseParameter = false;
-			final String uniqueRequestId =
-			        reuseOrCeateUniqueRequestIdentifier(urlParameter, cookieMap);
+			final String uniqueRequestId = reuseOrCeateUniqueRequestIdentifier(urlParameter,
+			        cookieMap);
 			// define context
-			IRestlessContext restlessContext =
-			        new RestlessContextImpl(restless, req, res, uniqueRequestId);
+			IRestlessContext restlessContext = new RestlessContextImpl(restless, req, res,
+			        uniqueRequestId);
 			
 			for(Class<?> requiredParamType : method.getParameterTypes()) {
 				
@@ -168,115 +204,112 @@ public class RestlessMethod {
 					 * Method might require a non-trivial parameter type for a
 					 * named parameter (usually: String)
 					 */
-					synchronized(this.requiredNamedParameter) {
-						if(this.requiredNamedParameter.length == 0) {
-							/*
-							 * Java method tries to fill a non-built-in
-							 * parameter type, i.e. a parameter type for which
-							 * we need to get a value from the request. If there
-							 * is no named parameter from which we can even try
-							 * to fill the value, throw a usage error
-							 */
-							throw new IllegalArgumentException(
-							        "It looks like you have parameters in your java method '"
-							                + methodReference(this.instanceOrClass, method)
-							                + "' for which there have no RestlessParameter been defined.");
-						}
-						if(this.requiredNamedParameter.length <= boundNamedParameterNumber) {
-							throw new IllegalArgumentException(
-							        "Require "
-							                + this.requiredNamedParameter.length
-							                + " named parameters in method '"
-							                + Restless.toClass(this.instanceOrClass)
-							                        .getCanonicalName()
-							                + ":"
-							                + method.getName()
-							                + "', processed "
-							                + boundNamedParameterNumber
-							                + " parameters from request so far. Required parameters: "
-							                + this.requiredNamedParameter
-							                + ". I.e. your Java method wants more parameters than defined in your restless() method.");
-						}
-						RestlessParameter param =
-						        this.requiredNamedParameter[boundNamedParameterNumber];
-						Object value = null;
-						
-						/* 1) look in urlParameters (not query params) */
-						if(!param.isArray) {
-							value = urlParameter.get(param.name);
-						}
-						
-						/* 2) look in POST params and query params */
-						if(notSet(value)) {
-							String[] values = req.getParameterValues(param.name);
-							if(values != null) {
-								// handle POST and query param values
-								if(param.isArray) {
-									value = values;
-								} else if(values.length > 1) {
-									// remove redundant
-									Set<String> uniqueValues = new HashSet<String>();
-									for(String s : values) {
-										uniqueValues.add(s);
+					
+					if(this.requiredNamedParameter.length == 0) {
+						/*
+						 * Java method tries to fill a non-built-in parameter
+						 * type, i.e. a parameter type for which we need to get
+						 * a value from the request. If there is no named
+						 * parameter from which we can even try to fill the
+						 * value, throw a usage error
+						 */
+						throw new IllegalArgumentException(
+						        "It looks like you have parameters in your java method '"
+						                + methodReference(this.instanceOrClass, method)
+						                + "' for which there have no RestlessParameter been defined.");
+					}
+					if(this.requiredNamedParameter.length <= boundNamedParameterNumber) {
+						throw new IllegalArgumentException(
+						        "Require "
+						                + this.requiredNamedParameter.length
+						                + " named parameters in method '"
+						                + Restless.toClass(this.instanceOrClass).getCanonicalName()
+						                + ":"
+						                + method.getName()
+						                + "', processed "
+						                + boundNamedParameterNumber
+						                + " parameters from request so far. Required parameters: "
+						                + this.requiredNamedParameter
+						                + ". I.e. your Java method wants more parameters than defined in your restless() method.");
+					}
+					RestlessParameter param = this.requiredNamedParameter[boundNamedParameterNumber];
+					Object value = null;
+					
+					/* 1) look in urlParameters (not query params) */
+					if(!param.isArray) {
+						value = urlParameter.get(param.name);
+					}
+					
+					/* 2) look in POST params and query params */
+					if(notSet(value)) {
+						String[] values = req.getParameterValues(param.name);
+						if(values != null) {
+							// handle POST and query param values
+							if(param.isArray) {
+								value = values;
+							} else if(values.length > 1) {
+								// remove redundant
+								Set<String> uniqueValues = new HashSet<String>();
+								for(String s : values) {
+									uniqueValues.add(s);
+								}
+								if(uniqueValues.size() > 1) {
+									StringBuffer buf = new StringBuffer();
+									for(int j = 0; j < values.length; j++) {
+										buf.append(values[j]);
+										buf.append(", ");
 									}
-									if(uniqueValues.size() > 1) {
-										StringBuffer buf = new StringBuffer();
-										for(int j = 0; j < values.length; j++) {
-											buf.append(values[j]);
-											buf.append(", ");
-										}
-										
-										if(param.mustBeDefinedExplicitly()) {
-											throw new IllegalArgumentException(
-											        "Parameter '"
-											                + param.name
-											                + "' required but not explicitly defined. Found multiple values.");
-										} else {
-											log.warn("Multiple values for parameter '"
-											        + param.name
-											        + "' (values="
-											        + buf.toString()
-											        + ") from queryString and POST params, using default ("
-											        + param.defaultValue + ")");
-											value = param.defaultValue;
-										}
-										
+									
+									if(param.mustBeDefinedExplicitly()) {
+										throw new IllegalArgumentException(
+										        "Parameter '"
+										                + param.name
+										                + "' required but not explicitly defined. Found multiple values.");
 									} else {
-										value = uniqueValues.iterator().next();
+										log.warn("Multiple values for parameter '"
+										        + param.name
+										        + "' (values="
+										        + buf.toString()
+										        + ") from queryString and POST params, using default ("
+										        + param.defaultValue + ")");
+										value = param.defaultValue;
 									}
 									
 								} else {
-									value = values[0];
+									value = uniqueValues.iterator().next();
 								}
-							}
-						}
-						
-						/* 3) look in cookies */
-						if(notSet(value) && !param.isArray) {
-							value = cookieMap.get(param.name);
-						}
-						
-						/* 4) look in multipart-upload */
-						if(notSet(value) && !param.isArray) {
-							value = multipartMap.get(param.name);
-						}
-						
-						/* 5) use default */
-						if(notSet(value)) {
-							if(param.mustBeDefinedExplicitly()) {
-								log.debug("Parameter '" + param.name
-								        + "' required but no explicitly defined. Found no value.");
-								return false;
+								
 							} else {
-								value = param.defaultValue;
+								value = values[0];
 							}
 						}
-						javaMethodArgs.add(value);
-						boundNamedParameterNumber++;
-						if(boundNamedParameterNumber > this.requiredNamedParameter.length) {
-							log.debug("More non-trivial parameter required by Java method than mapped via RestlessParameters");
+					}
+					
+					/* 3) look in cookies */
+					if(notSet(value) && !param.isArray) {
+						value = cookieMap.get(param.name);
+					}
+					
+					/* 4) look in multipart-upload */
+					if(notSet(value) && !param.isArray) {
+						value = multipartMap.get(param.name);
+					}
+					
+					/* 5) use default */
+					if(notSet(value)) {
+						if(param.mustBeDefinedExplicitly()) {
+							log.debug("Parameter '" + param.name
+							        + "' required but no explicitly defined. Found no value.");
 							return false;
+						} else {
+							value = param.defaultValue;
 						}
+					}
+					javaMethodArgs.add(value);
+					boundNamedParameterNumber++;
+					if(boundNamedParameterNumber > this.requiredNamedParameter.length) {
+						log.debug("More non-trivial parameter required by Java method than mapped via RestlessParameters");
+						return false;
 					}
 				}
 			}
@@ -321,14 +354,14 @@ public class RestlessMethod {
 						w.write(re.getMessage());
 					} else {
 						
-						IRestlessContext context =
-						        new RestlessContextImpl(restless, req, res, uniqueRequestId);
+						IRestlessContext context = new RestlessContextImpl(restless, req, res,
+						        uniqueRequestId);
 						
 						boolean handled = false;
 						
 						try {
-							handled =
-							        callLocalExceptionHandler(cause, this.instanceOrClass, context);
+							handled = callLocalExceptionHandler(cause, this.instanceOrClass,
+							        context);
 						} catch(InvocationTargetException ite) {
 							cause = new ExceptionHandlerException(e.getCause());
 						} catch(Throwable th) {
@@ -407,6 +440,44 @@ public class RestlessMethod {
 		}
 		return map;
 		
+	}
+	
+	public String getHttpMethod() {
+		return this.httpMethod;
+	}
+	
+	/**
+	 * Attention: Do not write on the returned object, only read-access is
+	 * allowed. No guarantees to the behavior of the application can be made if
+	 * you write on the returned object (for example, this might result in
+	 * synchronization problems).
+	 */
+	protected PathTemplate getPathTemplate() {
+		return this.pathTemplate;
+	}
+	
+	/**
+	 * Attention: Do not write on the returned object, only read-access is
+	 * allowed. No guarantees to the behavior of the application can be made if
+	 * you write on the returned object (for example, this might result in
+	 * synchronization problems).
+	 */
+	protected Object getInstanceOrClass() {
+		return this.instanceOrClass;
+	}
+	
+	public String getMethodName() {
+		return this.methodName;
+	}
+	
+	/**
+	 * Attention: Do not write on the returned object, only read-access is
+	 * allowed. No guarantees to the behavior of the application can be made if
+	 * you write on the returned object (for example, this might result in
+	 * synchronization problems).
+	 */
+	protected RestlessParameter[] getRequiredNamedParameter() {
+		return this.requiredNamedParameter;
 	}
 	
 	private static boolean notSet(Object value) {
@@ -521,8 +592,8 @@ public class RestlessMethod {
 			List<String> variablesFromUrlPath = pathTemplate.extractVariables(urlPath);
 			synchronized(variablesFromUrlPath) {
 				for(int i = 0; i < pathTemplate.getVariableNames().size(); i++) {
-					urlParameter
-					        .put(pathTemplate.getVariableNames().get(i), variablesFromUrlPath.get(i));
+					urlParameter.put(pathTemplate.getVariableNames().get(i),
+					        variablesFromUrlPath.get(i));
 				}
 			}
 		}
