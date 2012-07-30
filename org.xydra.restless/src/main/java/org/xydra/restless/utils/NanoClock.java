@@ -1,6 +1,7 @@
 package org.xydra.restless.utils;
 
 import org.xydra.annotations.NeverNull;
+import org.xydra.annotations.NotThreadSafe;
 
 
 /**
@@ -9,11 +10,9 @@ import org.xydra.annotations.NeverNull;
  * @author xamde
  * 
  */
+
+@NotThreadSafe
 public class NanoClock {
-	
-	/*
-	 * TODO maybe declaring the methods as synchronized would suffice?
-	 */
 	
 	private StringBuffer stats = new StringBuffer();
 	
@@ -27,64 +26,63 @@ public class NanoClock {
 	 *         <code>Clock c = new Clock().start();</code>
 	 */
 	public NanoClock start() {
-		synchronized(this) {
-			this.start = System.nanoTime();
-			this.firstStart = this.start;
-			return this;
-		}
+		this.start = System.nanoTime();
+		this.firstStart = this.start;
+		return this;
 	}
 	
 	public void reset() {
-		synchronized(this) {
-			this.start = -1;
-			this.stats = new StringBuffer();
-		}
+		
+		this.start = -1;
+		this.stats = new StringBuffer();
 	}
 	
 	/**
-	 * @param name for the statistics
+	 * @param name for the statistics @NeverNull
 	 * @return this instance for API chaining
 	 */
 	public NanoClock stop(@NeverNull String name) {
-		synchronized(this) {
-			stopAndGetDuration(name);
-			return this;
-		}
+		
+		stopAndGetDuration(name);
+		return this;
 	}
 	
 	/**
-	 * @param name for clock entry
+	 * @param name for clock entry @NeverNull
 	 * @return duration since last start in milliseconds
 	 */
 	public long stopAndGetDuration(@NeverNull String name) {
-		synchronized(this) {
-			if(this.start == -1) {
-				/*
-				 * TODO what if the clock was started at some point in time and
-				 * then stopped. Should trying to stop it really throw an
-				 * exception in this case?
-				 */
-				throw new IllegalStateException("Cannot stop a clock that was never started.");
-			}
-			long stop = System.nanoTime();
-			double durationInMs = (stop - this.start) / 1000000d;
-			this.stats.append(name).append("=").append(durationInMs).append("ms <br />\n");
-			this.start = -1;
-			return (long)durationInMs;
+		
+		if(this.start == -1) {
+			/*
+			 * TODO what if the clock was started at some point in time and then
+			 * stopped. Should trying to stop it really throw an exception in
+			 * this case?
+			 */
+			throw new IllegalStateException("Cannot stop a clock that was never started.");
 		}
+		long stop = System.nanoTime();
+		double durationInMs = (stop - this.start) / 1000000d;
+		this.stats.append(name).append("=").append(durationInMs).append("ms <br />\n");
+		this.start = -1;
+		return (long)durationInMs;
 	}
 	
+	/**
+	 * Stops the clock with the given name for the clock entry and immediately
+	 * restarts it.
+	 * 
+	 * @param name @NeverNull
+	 */
 	public void stopAndStart(@NeverNull String name) {
-		synchronized(this) {
-			stop(name);
-			start();
-		}
+		
+		stop(name);
+		start();
 	}
 	
 	public String getStats() {
-		synchronized(this) {
-			return this.stats.toString();
-		}
+		
+		return this.stats.toString();
 	}
 	
 	public static void main(String[] args) {
@@ -104,10 +102,9 @@ public class NanoClock {
 	 * TODO is this really supposed to be public?
 	 */
 	public NanoClock append(@NeverNull String s) {
-		synchronized(this) {
-			this.stats.append(s);
-			return this;
-		}
+		
+		this.stats.append(s);
+		return this;
 	}
 	
 	/**

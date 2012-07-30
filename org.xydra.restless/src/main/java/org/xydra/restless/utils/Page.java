@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.xydra.annotations.NotThreadSafe;
 import org.xydra.restless.Restless;
 
 
@@ -16,12 +17,7 @@ import org.xydra.restless.Restless;
  * 
  */
 
-/*
- * TODO I don't really understand the purpose of this class... does it need to
- * be thread-safe?
- * 
- * Objects of theses classes aren't shared between different threads
- */
+@NotThreadSafe
 public class Page {
 	
 	private static final ToHtml BR = new HtmlNode("<br />");

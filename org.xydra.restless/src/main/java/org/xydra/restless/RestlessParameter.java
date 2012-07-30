@@ -1,15 +1,27 @@
 package org.xydra.restless;
 
+import org.xydra.annotations.CanBeNull;
+import org.xydra.annotations.NeverNull;
+import org.xydra.annotations.ThreadSafe;
+
+
 /**
  * A parameter that can be used in a method exposed via Restless to the web.
  * 
  * @author voelkel
  */
+
+@ThreadSafe
 public class RestlessParameter {
 	
-	String name;
-	Object defaultValue;
-	boolean isArray;
+	/*
+	 * currently, all variables (and its contents) are never written after
+	 * creation and all methods only read these variable -> no synchronization
+	 * necessary at the moment
+	 */
+	private String name;
+	private Object defaultValue;
+	private boolean isArray;
 	
 	public static final String DEFAULT_VALUE_NONE_BUT_REQUIRED = "missing_required_parameter";
 	
@@ -17,22 +29,29 @@ public class RestlessParameter {
 	
 	/**
 	 * 
-	 * @param name for binding it to variable names
+	 * @param name for binding it to variable names @NeverNull TODO is this
+	 *            correct?
 	 * @param defaultValue the default value if the parameter could not be set
-	 *            from HTTP request content. Use null for none.
+	 *            from HTTP request content. Use null for none. @CanBeNull
 	 */
-	public RestlessParameter(String name, String defaultValue) {
+	public RestlessParameter(@NeverNull String name, @CanBeNull String defaultValue) {
 		super();
+		/*
+		 * TODO what's the reason for calling super() here? This class has no
+		 * super class other than Object?
+		 */
+		
 		this.name = name;
 		this.defaultValue = defaultValue;
 		this.isArray = false;
 	}
 	
 	/**
-	 * @param name for binding it to variable names
-	 * @param isArray true if there can be multiple values
+	 * @param name for binding it to variable names @NeverNull TODO is this
+	 *            correct?
+	 * @param isArray true if there can be multiple values @NeverNull
 	 */
-	public RestlessParameter(String name, boolean isArray) {
+	public RestlessParameter(@NeverNull String name, @NeverNull boolean isArray) {
 		super();
 		this.name = name;
 		this.defaultValue = isArray ? defaultArray : null;
@@ -43,14 +62,40 @@ public class RestlessParameter {
 	 * Create a parameter without a default value. Method fails if parameter not
 	 * set.
 	 * 
-	 * @param name for binding it to variable names
+	 * @param name for binding it to variable names @NeverNull TODO is this
+	 *            correct?
 	 */
-	public RestlessParameter(String name) {
+	public RestlessParameter(@NeverNull String name) {
 		this(name, DEFAULT_VALUE_NONE_BUT_REQUIRED);
 	}
 	
 	public boolean mustBeDefinedExplicitly() {
 		return this.defaultValue == DEFAULT_VALUE_NONE_BUT_REQUIRED;
+	}
+	
+	/**
+	 * 
+	 * @return true, if there can be multiple values
+	 */
+	public boolean isArray() {
+		return this.isArray;
+	}
+	
+	/**
+	 * 
+	 * @return a String for binding it to variable names
+	 */
+	public String getName() {
+		return this.name;
+	}
+	
+	/**
+	 * 
+	 * @return the default value if the parameter could not be set from HTTP
+	 *         request content. May be null (for none).
+	 */
+	public Object getDefaultValue() {
+		return this.defaultValue;
 	}
 	
 }

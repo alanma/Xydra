@@ -6,20 +6,19 @@ import java.util.zip.ZipOutputStream;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.xydra.annotations.CanBeNull;
+import org.xydra.annotations.NeverNull;
+import org.xydra.annotations.ThreadSafe;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 
 
+@ThreadSafe
 public class FileDownloadUtils {
 	
 	/*
-	 * FIXME most methods do not specify what happens when given parameters
-	 * equal null or how this is handled.
-	 * 
-	 * TODO -> Mark parameters with @NeverNull and @CanBeNull in the method
-	 * signatures and the JavaDoc (not just in this class, but everywhere)
+	 * TODO is it really okay if archivenames and extensions are null?
 	 */
-	
 	/*
 	 * TODO is synchronization on response objects really necessary? Are
 	 * responses shared between different calls to different methods?
@@ -42,72 +41,67 @@ public class FileDownloadUtils {
 	 * </pre>
 	 * 
 	 * @param res ..
-	 * @param archivename '.zip' is added automatically
+	 * @param archivename '.zip' is added automatically @CanBeNull
 	 * @return a ZipOutputStream to which the caller should write his data. It
-	 *         will end up in a downloadable zip file.
+	 *         will end up in a downloadable zip file. @NeverNull
 	 * @throws IOException ...
 	 */
 	
-	public static ZipOutputStream toZipFileDownload(HttpServletResponse res, String archivename)
-	        throws IOException {
+	public static ZipOutputStream toZipFileDownload(@NeverNull HttpServletResponse res,
+	        @CanBeNull String archivename) throws IOException {
 		String fullArchiveName = archivename + ".zip";
 		
 		log.info("Wrapping in zipfile named " + fullArchiveName);
 		
 		// Send the correct response headers.
 		
-		synchronized(res) {
-			
-			res.setContentType("application/zip");
-			res.addHeader("Content-Disposition", "attachment; filename=\"" + fullArchiveName + "\"");
-			
-			ZipOutputStream zos = new ZipOutputStream(res.getOutputStream());
-			return zos;
-		}
+		res.setContentType("application/zip");
+		res.addHeader("Content-Disposition", "attachment; filename=\"" + fullArchiveName + "\"");
+		
+		ZipOutputStream zos = new ZipOutputStream(res.getOutputStream());
+		return zos;
 	}
 	
 	/**
 	 * This sets no "Content-Type" headers.
 	 * 
-	 * @param res
-	 * @param archivename
-	 * @param extension
+	 * @param res @NeverNull
+	 * @param archivename @CanBeNull
+	 * @param extension @CanBeNull
 	 * @return an OutputStream to which you can write
 	 * @throws IOException
 	 */
-	public static OutputStream toFileDownload(HttpServletResponse res, String archivename,
-	        String extension) throws IOException {
+	public static OutputStream toFileDownload(@NeverNull HttpServletResponse res,
+	        @CanBeNull String archivename, @CanBeNull String extension) throws IOException {
 		
-		synchronized(res) {
-			String fullFileName = archivename + "." + extension;
-			log.info("Wrapping in file named " + fullFileName);
-			res.addHeader("Content-Disposition", "attachment; filename=\"" + fullFileName + "\"");
-			OutputStream os = res.getOutputStream();
-			return os;
-		}
+		String fullFileName = archivename + "." + extension;
+		log.info("Wrapping in file named " + fullFileName);
+		res.addHeader("Content-Disposition", "attachment; filename=\"" + fullFileName + "\"");
+		OutputStream os = res.getOutputStream();
+		return os;
+		
 	}
 	
 	/**
 	 * This sets also "Content-Type" headers.
 	 * 
-	 * @param res
-	 * @param archivename
-	 * @param extension
-	 * @param contentType e.g. 'application/zip' or 'text/csv'
+	 * @param res @NeverNull
+	 * @param archivename @CanBeNull
+	 * @param extension @CanBeNull
+	 * @param contentType e.g. 'application/zip' or 'text/csv' @NeverNull
 	 * @return an OutputStream to which you can write
 	 * @throws IOException
 	 */
-	public static OutputStream toFileDownload(HttpServletResponse res, String archivename,
-	        String extension, String contentType) throws IOException {
+	public static OutputStream toFileDownload(@NeverNull HttpServletResponse res,
+	        @CanBeNull String archivename, @CanBeNull String extension,
+	        @NeverNull String contentType) throws IOException {
 		/*
 		 * via
 		 * http://stackoverflow.com/questions/398237/how-to-use-the-csv-mime-
 		 * type
 		 */
-		synchronized(res) {
-			ServletUtils.headers(res, contentType);
-			return toFileDownload(res, archivename, extension);
-		}
+		ServletUtils.headers(res, contentType);
+		return toFileDownload(res, archivename, extension);
 	}
 	
 }

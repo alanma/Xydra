@@ -10,6 +10,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.xydra.annotations.NeverNull;
+import org.xydra.annotations.ThreadSafe;
+
 
 /**
  * Loops back the complete incoming request
@@ -17,25 +20,46 @@ import javax.servlet.http.HttpServletResponse;
  * @author voelkel
  * 
  */
+
+@ThreadSafe
 public class EchoServlet extends HttpServlet {
-	
-	/*
-	 * TODO needs to be made thread-safe, too
-	 */
 	
 	private static final long serialVersionUID = 4266214485819030466L;
 	
+	/*
+	 * Requests and responses aren't shared between different threads, so no
+	 * synchronization is necessary here.
+	 */
+	
+	/**
+	 * 
+	 * @param req @NeverNull
+	 * @param resp @NeverNull
+	 */
 	@Override
-	public void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+	public void doGet(@NeverNull HttpServletRequest req, @NeverNull HttpServletResponse resp)
+	        throws IOException {
 		echo(req, resp);
 	}
 	
+	/**
+	 * 
+	 * @param req @NeverNull
+	 * @param resp @NeverNull
+	 */
 	@Override
-	public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+	public void doPost(@NeverNull HttpServletRequest req, @NeverNull HttpServletResponse resp)
+	        throws IOException {
 		echo(req, resp);
 	}
 	
-	private static void echo(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+	/**
+	 * 
+	 * @param req @NeverNull
+	 * @param resp @NeverNull
+	 */
+	private static void echo(@NeverNull HttpServletRequest req, @NeverNull HttpServletResponse resp)
+	        throws IOException {
 		resp.setStatus(200);
 		resp.setContentType("text/plain");
 		

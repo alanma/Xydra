@@ -3,6 +3,8 @@ package org.xydra.restless;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
+import org.xydra.annotations.NeverNull;
+import org.xydra.annotations.ThreadSafe;
 import org.xydra.restless.utils.HostUtils;
 
 
@@ -13,14 +15,26 @@ import org.xydra.restless.utils.HostUtils;
  * 
  * @author xamde
  */
+
+@ThreadSafe
 class TweakedRequest extends HttpServletRequestWrapper {
+	
+	/*
+	 * TODO it's not really clear, if this class needs explicit synchronization.
+	 * Maybe instances of this class are only used by single threads, like
+	 * normal HttpServletRequests?
+	 */
 	
 	private boolean initalised = false;
 	
 	private String hostOverride = null;
 	private String pathInfo = null;
 	
-	public TweakedRequest(HttpServletRequest baseReq) {
+	/**
+	 * 
+	 * @param baseReq @NeverNull
+	 */
+	public TweakedRequest(@NeverNull HttpServletRequest baseReq) {
 		super(baseReq);
 	}
 	
@@ -41,22 +55,10 @@ class TweakedRequest extends HttpServletRequestWrapper {
 	}
 	
 	private void initialise() {
-		/*
-		 * TODO why not initialize the class directly in the constructor?
-		 * 
-		 * Setting this.initialised to true at the beginning might cause
-		 * problems when the initializing process fails. Setting it to true
-		 * after the process needs synchronization.
-		 */
-		
 		this.initalised = true;
 		String serverName = super.getServerName();
 		assert isLocalhost(serverName);
 		
-		/*
-		 * TODO do we need to synchronize here? (hostOverride/superPathInfo -
-		 * are these variables final?)
-		 */
 		// look for override param
 		this.hostOverride = super.getParameter(Restless.X_HOST_Override);
 		

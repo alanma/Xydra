@@ -493,8 +493,9 @@ public class Restless extends HttpServlet {
 					w.write("<form action='" + url + "' method='"
 					        + rm.getHttpMethod().toLowerCase() + "'><div>");
 					for(RestlessParameter parameter : rm.getRequiredNamedParameter()) {
-						w.write(parameter.name + " <input type='text' name='" + parameter.name
-						        + "' value='" + parameter.defaultValue + "' />");
+						w.write(parameter.getName() + " <input type='text' name='"
+						        + parameter.getName() + "' value='" + parameter.getDefaultValue()
+						        + "' />");
 					}
 					w.write("<input type='submit' value='Send' /></div></form>");
 					
@@ -898,6 +899,12 @@ public class Restless extends HttpServlet {
 						if(httpMethod.equalsIgnoreCase(restlessMethod.getHttpMethod())) {
 							foundMethod = true;
 							try {
+								/*
+								 * TODO could restlessMethod.run() somehow start
+								 * multiple threads which then operate on the
+								 * given requestClock? If yes, the clock needs
+								 * to be synchronized.
+								 */
 								couldStartMethod = restlessMethod.run(this, reqHandedDown, res,
 								        requestClock);
 							} catch(IOException e) {

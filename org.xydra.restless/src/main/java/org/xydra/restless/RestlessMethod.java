@@ -236,16 +236,16 @@ public class RestlessMethod {
 					Object value = null;
 					
 					/* 1) look in urlParameters (not query params) */
-					if(!param.isArray) {
-						value = urlParameter.get(param.name);
+					if(!param.isArray()) {
+						value = urlParameter.get(param.getName());
 					}
 					
 					/* 2) look in POST params and query params */
 					if(notSet(value)) {
-						String[] values = req.getParameterValues(param.name);
+						String[] values = req.getParameterValues(param.getName());
 						if(values != null) {
 							// handle POST and query param values
-							if(param.isArray) {
+							if(param.isArray()) {
 								value = values;
 							} else if(values.length > 1) {
 								// remove redundant
@@ -263,16 +263,16 @@ public class RestlessMethod {
 									if(param.mustBeDefinedExplicitly()) {
 										throw new IllegalArgumentException(
 										        "Parameter '"
-										                + param.name
+										                + param.getName()
 										                + "' required but not explicitly defined. Found multiple values.");
 									} else {
 										log.warn("Multiple values for parameter '"
-										        + param.name
+										        + param.getName()
 										        + "' (values="
 										        + buf.toString()
 										        + ") from queryString and POST params, using default ("
-										        + param.defaultValue + ")");
-										value = param.defaultValue;
+										        + param.getDefaultValue() + ")");
+										value = param.getDefaultValue();
 									}
 									
 								} else {
@@ -286,23 +286,23 @@ public class RestlessMethod {
 					}
 					
 					/* 3) look in cookies */
-					if(notSet(value) && !param.isArray) {
-						value = cookieMap.get(param.name);
+					if(notSet(value) && !param.isArray()) {
+						value = cookieMap.get(param.getName());
 					}
 					
 					/* 4) look in multipart-upload */
-					if(notSet(value) && !param.isArray) {
-						value = multipartMap.get(param.name);
+					if(notSet(value) && !param.isArray()) {
+						value = multipartMap.get(param.getName());
 					}
 					
 					/* 5) use default */
 					if(notSet(value)) {
 						if(param.mustBeDefinedExplicitly()) {
-							log.debug("Parameter '" + param.name
+							log.debug("Parameter '" + param.getName()
 							        + "' required but no explicitly defined. Found no value.");
 							return false;
 						} else {
-							value = param.defaultValue;
+							value = param.getDefaultValue();
 						}
 					}
 					javaMethodArgs.add(value);
@@ -446,6 +446,11 @@ public class RestlessMethod {
 		return this.httpMethod;
 	}
 	
+	/*
+	 * TODO instead of just warning the user that he/she is not supposed to
+	 * write on the given variable, writing interfaces which prohibit
+	 * write-access altogether might be an option?
+	 */
 	/**
 	 * Attention: Do not write on the returned object, only read-access is
 	 * allowed. No guarantees to the behavior of the application can be made if

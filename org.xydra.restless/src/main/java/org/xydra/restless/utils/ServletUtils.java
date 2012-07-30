@@ -15,6 +15,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.xydra.annotations.CanBeNull;
+import org.xydra.annotations.NeverNull;
+import org.xydra.annotations.ThreadSafe;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.restless.Restless;
@@ -24,6 +26,8 @@ import org.xydra.restless.Restless;
  * @author xamde
  * 
  */
+
+@ThreadSafe
 public class ServletUtils {
 	
 	public static final String CONTENTTYPE_APPLICATION_XHTML_XML = "application/xhtml+xml";
@@ -38,6 +42,7 @@ public class ServletUtils {
 	
 	public static final String CONTENTTYPE_APPLICATION_JSON = "application/json.";
 	
+	// TODO get thread-safe logger
 	private static Logger log = LoggerFactory.getLogger(ServletUtils.class);
 	
 	/**
@@ -53,14 +58,10 @@ public class ServletUtils {
 	 * use to indicate that they will accept anything), deliver the document
 	 * using text/html.
 	 * 
-	 * @param req containing the Accept header
+	 * @param req containing the Accept header @NeverNull
 	 * @return a single chosen content-Type.
 	 */
-	public static String conneg(HttpServletRequest req) {
-		/*
-		 * TODO is the request already thread-safe or not?
-		 */
-		
+	public static String conneg(@NeverNull HttpServletRequest req) {
 		// parse
 		Enumeration<String> enu = req.getHeaders(HEADER_ACCEPT);
 		assert enu != null : "Container allows no header access";
@@ -103,11 +104,10 @@ public class ServletUtils {
 	 * @param req HttpServletRequest, @NeverNull
 	 * @return @NeverNull
 	 */
-	public static Map<String,String> getCookiesAsMap(HttpServletRequest req) {
+	public static Map<String,String> getCookiesAsMap(@NeverNull HttpServletRequest req) {
 		/*
-		 * TODO is the request already thread-safe or not?
+		 * TODO is access on the cookies thread-safe?
 		 */
-		
 		Cookie[] cookies = req.getCookies();
 		Map<String,String> cookieMap = new HashMap<String,String>();
 		if(cookies != null) {
@@ -138,15 +138,11 @@ public class ServletUtils {
 	}
 	
 	/**
-	 * @param req ..
+	 * @param req .. @NeverNull
 	 * @return all headers of the given request as map headerName -&gt; values
 	 *         (as a list).
 	 */
-	public static Map<String,List<String>> getHeadersAsMap(HttpServletRequest req) {
-		/*
-		 * TODO is the request already thread-safe or not?
-		 */
-		
+	public static Map<String,List<String>> getHeadersAsMap(@NeverNull HttpServletRequest req) {
 		Map<String,List<String>> map = new HashMap<String,List<String>>();
 		Enumeration<?> en = req.getHeaderNames();
 		while(en.hasMoreElements()) {
@@ -162,19 +158,16 @@ public class ServletUtils {
 	}
 	
 	/**
-	 * @param req ...
+	 * @param req ... @NeverNull
 	 * @return the full request URI from http up to the page name. Does not
 	 *         contain any query parameters or hash fragments.
 	 */
-	public static final String getPageUri(HttpServletRequest req) {
-		/*
-		 * TODO is the request already thread-safe or not?
-		 */
+	public static final String getPageUri(@NeverNull HttpServletRequest req) {
 		return req.getProtocol() + req.getRemoteHost() + req.getRequestURI();
 	}
 	
 	/**
-	 * @param queryString a query string in a URL (the part after the '?')
+	 * @param queryString a query string in a URL (the part after the '?') @CanBeNull
 	 * @return a Map that contains key=value from the query string. Multiple
 	 *         values for the same key are put in order of appearance in the
 	 *         list. Duplicate values are omitted.
@@ -232,28 +225,22 @@ public class ServletUtils {
 	}
 	
 	/**
-	 * @param req ..
+	 * @param req .. @NeverNull
 	 * @return the referrer header url or null
 	 */
-	public static String getReferrerUrl(HttpServletRequest req) {
-		/*
-		 * TODO is the request already thread-safe or not?
-		 */
+	public static String getReferrerUrl(@NeverNull HttpServletRequest req) {
 		return req.getHeader(HEADER_REFERER);
 	}
 	
 	/**
-	 * @param req
+	 * @param req @NeverNull
 	 * @return all get and post parameters as delivered in the servlet API - but
 	 *         additionally URL-decoded
 	 * @throws IllegalStateException if one of the parameters has more than one
 	 *             value
 	 */
-	public static Map<String,String> getRequestparametersAsMap(HttpServletRequest req)
+	public static Map<String,String> getRequestparametersAsMap(@NeverNull HttpServletRequest req)
 	        throws IllegalStateException {
-		/*
-		 * TODO is the request already thread-safe or not?
-		 */
 		
 		Map<String,String> map = new HashMap<String,String>();
 		Enumeration<?> en = req.getParameterNames();
@@ -274,35 +261,40 @@ public class ServletUtils {
 		return map;
 	}
 	
-	public static final String getServerUri(HttpServletRequest req) {
-		/*
-		 * TODO is the request already thread-safe or not?
-		 */
+	/**
+	 * 
+	 * @param req @NeverNull
+	 * @return
+	 */
+	public static final String getServerUri(@NeverNull HttpServletRequest req) {
 		
 		return req.getProtocol() + req.getRemoteHost();
 	}
 	
-	public static boolean hasParameter(HttpServletRequest req, String paramName) {
-		/*
-		 * TODO is the request already thread-safe or not?
-		 */
-		
+	/**
+	 * 
+	 * @param req @NeverNull
+	 * @param paramName @CanBeNull TODO is it really okay if this is null?
+	 * @return
+	 */
+	public static boolean hasParameter(@NeverNull HttpServletRequest req,
+	        @CanBeNull String paramName) {
 		return req.getParameter(paramName) != null;
 	}
 	
 	/**
 	 * Sets encoding always to utf-8.
 	 * 
-	 * @param res ..
-	 * @param status if 0 no status code is set.
+	 * @param res .. @NeverNull
+	 * @param status if 0 no status code is set. @NeverNull
 	 * @param cachingInMinutes if 0 no header is set. If -1, caching is
 	 *            explicitly disabled via headers (Cache-Control=no-cache;
 	 *            Expires=0). Positive numbers are the time to cache the
-	 *            response in minutes from now on.
-	 * @param contentType
+	 *            response in minutes from now on. @NeverNull
+	 * @param contentType @NeverNull
 	 */
-	public static void headers(HttpServletResponse res, int status, long cachingInMinutes,
-	        String contentType) {
+	public static void headers(@NeverNull HttpServletResponse res, @NeverNull int status,
+	        @NeverNull long cachingInMinutes, @CanBeNull String contentType) {
 		/*
 		 * TODO is the request already thread-safe or not?
 		 */
@@ -319,6 +311,10 @@ public class ServletUtils {
 			// TODO test header set correctly
 			res.setDateHeader("Expires", millisSinceEpoch);
 		}
+		
+		/*
+		 * TODO what happens when neither of these conditions are fulfilled?
+		 */
 	}
 	
 	/**
@@ -328,14 +324,10 @@ public class ServletUtils {
 	 * {@link #headersXhtmlViaConneg(HttpServletRequest, HttpServletResponse, int, long)}
 	 * for a variant with content-negotiation.
 	 * 
-	 * @param res where to send to
-	 * @param contentType to be sent
+	 * @param res where to send to @NeverNull
+	 * @param contentType to be sent @CanBeNull
 	 */
-	public static void headers(HttpServletResponse res, String contentType) {
-		/*
-		 * TODO is the request already thread-safe or not?
-		 */
-		
+	public static void headers(@NeverNull HttpServletResponse res, @CanBeNull String contentType) {
 		// TODO this gives an error on GAE in context of URLFetch & GA
 		res.setCharacterEncoding(Restless.CONTENT_TYPE_CHARSET_UTF8);
 		res.setContentType(contentType);
@@ -344,10 +336,7 @@ public class ServletUtils {
 		setNoCacheHeaders(res);
 	}
 	
-	public static void setNoCacheHeaders(HttpServletResponse res) {
-		/*
-		 * TODO is the request already thread-safe or not?
-		 */
+	public static void setNoCacheHeaders(@NeverNull HttpServletResponse res) {
 		
 		/*
 		 * Pragma:
@@ -373,71 +362,65 @@ public class ServletUtils {
 	/**
 	 * Compute best header to send for XHTML content.
 	 * 
-	 * @param req ..
-	 * @param res ..
-	 * @param status if 0 no header is set.
+	 * @param req .. @NeverNull
+	 * @param res ..@NeverNull
+	 * @param status if 0 no header is set. @NeverNull
 	 * @param cachingInMinutes if 0 no header is set. If -1, caching is
 	 *            explicitly disabled via headers. Positive numbers are the time
-	 *            to cache the response in minutes.
+	 *            to cache the response in minutes. @NeverNull
 	 */
-	public static void headersXhtmlViaConneg(HttpServletRequest req, HttpServletResponse res,
-	        int status, long cachingInMinutes) {
-		/*
-		 * TODO is the request already thread-safe or not?
-		 */
-		
+	public static void headersXhtmlViaConneg(@NeverNull HttpServletRequest req,
+	        @NeverNull HttpServletResponse res, @NeverNull int status,
+	        @NeverNull long cachingInMinutes) {
 		String chosenContentType = conneg(req);
 		headers(res, status, cachingInMinutes, chosenContentType);
 	}
 	
 	/**
-	 * @param req
+	 * @param req @NeverNull
 	 * @return true if request is just an http://-request and not an https://
 	 *         request.
 	 */
-	public static boolean isInsecureHttpRequest(HttpServletRequest req) {
-		/*
-		 * TODO is the request already thread-safe or not?
-		 */
+	public static boolean isInsecureHttpRequest(@NeverNull HttpServletRequest req) {
 		
 		return req.getScheme().equals("http");
 	}
 	
 	/**
-	 * @param req
+	 * @param req @NeverNull
 	 * @return true if request is to root URL '/', may also have query
 	 *         parameters
 	 */
-	public static boolean isRequestToRoot(HttpServletRequest req) {
-		/*
-		 * TODO is the request already thread-safe or not?
-		 */
+	public static boolean isRequestToRoot(@NeverNull HttpServletRequest req) {
 		
 		String path = req.getPathInfo();
 		return path == null || path.equals("") || path.equals("/");
 	}
 	
 	/**
-	 * @param req
+	 * @param req @NeverNull
 	 * @return true if request is a secure https://-request
 	 */
-	public static boolean isSecureHttpsRequest(HttpServletRequest req) {
-		/*
-		 * TODO is the request already thread-safe or not?
-		 */
+	public static boolean isSecureHttpsRequest(@NeverNull HttpServletRequest req) {
 		
 		return req.getScheme().equals("https");
 	}
 	
 	/**
-	 * @param paramValue can be null
+	 * @param paramValue @CanBeNull
 	 * @return true if value is neither null nor an empty string
 	 */
-	public static boolean isSet(String paramValue) {
+	public static boolean isSet(@CanBeNull String paramValue) {
 		return paramValue != null && !paramValue.equals("");
 	}
 	
-	private static void parseAcceptHeaderPart(String headerValue, Map<String,Double> contentType2q) {
+	/**
+	 * 
+	 * @param headerValue @NeverNull
+	 * @param contentType2q @NeverNull
+	 */
+	private static void parseAcceptHeaderPart(@NeverNull String headerValue,
+	        @NeverNull Map<String,Double> contentType2q) {
 		String[] parts = headerValue.split(";");
 		String contentDef = parts[0];
 		if(parts.length > 1) {
@@ -459,7 +442,12 @@ public class ServletUtils {
 		}
 	}
 	
-	public static Map<String,String> parseQueryString(String q) {
+	/**
+	 * 
+	 * @param q @NeverNull
+	 * @return
+	 */
+	public static Map<String,String> parseQueryString(@NeverNull String q) {
 		Map<String,String> map = new HashMap<String,String>();
 		String[] pairs = q.split("\\&");
 		
@@ -472,6 +460,11 @@ public class ServletUtils {
 		return map;
 	}
 	
+	/**
+	 * 
+	 * @param encoded TODO @NeverNull or @CanBeNull?
+	 * @return
+	 */
 	public static String urldecode(String encoded) {
 		try {
 			return URLDecoder.decode(encoded, "utf-8");
@@ -481,11 +474,11 @@ public class ServletUtils {
 	}
 	
 	/**
-	 * @param b
+	 * @param b @CanBeNull
 	 * @return true if b is (after trim and lowecasing) one of 'true','yes' or
 	 *         'on'
 	 */
-	public static boolean toBoolean(String b) {
+	public static boolean toBoolean(@CanBeNull String b) {
 		if(!isSet(b)) {
 			return false;
 		}
