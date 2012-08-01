@@ -87,17 +87,6 @@ public class SonicEvent extends SonicPotentialEvent implements ISonicEvent, Seri
 	
 	private static final long serialVersionUID = 1L;
 	
-	private static boolean bothNullOrEqual(Object a, Object b) {
-		if(a == null) {
-			return b == null;
-		} else {
-			if(b == null)
-				return false;
-			else
-				return a.equals(b);
-		}
-	}
-	
 	public static SeBuilder create(long utcTimestamp) {
 		return new SeBuilder(utcTimestamp);
 	}
@@ -152,25 +141,25 @@ public class SonicEvent extends SonicPotentialEvent implements ISonicEvent, Seri
 		if(this.getWhen() != o.getWhen())
 			return false;
 		
-		if(!bothNullOrEqual(this.getKey(), o.getKey())) {
+		if(!SonicUtils.bothNullOrEqual(this.getKey(), o.getKey())) {
 			return false;
 		}
-		if(!bothNullOrEqual(this.getUniqueId(), o.getUniqueId())) {
+		if(!SonicUtils.bothNullOrEqual(this.getUniqueId(), o.getUniqueId())) {
 			return false;
 		}
-		if(!bothNullOrEqual(this.getSubject(), o.getSubject())) {
+		if(!SonicUtils.bothNullOrEqual(this.getSubject(), o.getSubject())) {
 			return false;
 		}
-		if(!bothNullOrEqual(this.getCategory(), o.getCategory())) {
+		if(!SonicUtils.bothNullOrEqual(this.getCategory(), o.getCategory())) {
 			return false;
 		}
-		if(!bothNullOrEqual(this.getAction(), o.getAction())) {
+		if(!SonicUtils.bothNullOrEqual(this.getAction(), o.getAction())) {
 			return false;
 		}
-		if(!bothNullOrEqual(this.getLabel(), o.getLabel())) {
+		if(!SonicUtils.bothNullOrEqual(this.getLabel(), o.getLabel())) {
 			return false;
 		}
-		if(!bothNullOrEqual(this.getSource(), o.getSource())) {
+		if(!SonicUtils.bothNullOrEqual(this.getSource(), o.getSource())) {
 			return false;
 		}
 		return true;

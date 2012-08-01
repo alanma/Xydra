@@ -24,4 +24,34 @@ public class SonicUtils {
 		return s != null && !s.equals("") && !s.equals("*");
 	}
 	
+	public static boolean bothNullOrEqual(Object a, Object b) {
+		if(a == null) {
+			return b == null;
+		} else {
+			if(b == null)
+				return false;
+			else
+				return a.equals(b);
+		}
+	}
+	
+	/**
+	 * @param a
+	 * @param b
+	 * @return true if constraint a is more general than b (or at most as
+	 *         specific)
+	 */
+	public static boolean moreGeneralThanOrEqualTo(String a, String b) {
+		if(a == null) {
+			// a is unconstrained
+			return true;
+		} else {
+			return a.equals(b);
+		}
+	}
+	
+	public static int hashCode(String s) {
+		return s == null ? 0 : s.hashCode();
+	}
+	
 }

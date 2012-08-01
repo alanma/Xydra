@@ -148,4 +148,60 @@ public class SonicFilter implements ISonicFilter, Serializable {
 		return SonicUtils.toDotString(getCategory(), getAction(), getLabel());
 	}
 	
+	public boolean equals(Object other) {
+		if(!(other instanceof ISonicFilter))
+			return false;
+		
+		ISonicFilter o = (ISonicFilter)other;
+		
+		if(!SonicUtils.bothNullOrEqual(this.getSubject(), o.getSubject())) {
+			return false;
+		}
+		if(!SonicUtils.bothNullOrEqual(this.getCategory(), o.getCategory())) {
+			return false;
+		}
+		if(!SonicUtils.bothNullOrEqual(this.getAction(), o.getAction())) {
+			return false;
+		}
+		if(!SonicUtils.bothNullOrEqual(this.getLabel(), o.getLabel())) {
+			return false;
+		}
+		if(!SonicUtils.bothNullOrEqual(this.getSource(), o.getSource())) {
+			return false;
+		}
+		return true;
+	}
+	
+	/**
+	 * @param other
+	 * @return true if this filter includes the other filter, i.e. this filter
+	 *         is more general (or equal) to the other filter and the other
+	 *         filter requests no events that this filter won't return.
+	 */
+	public boolean includes(ISonicFilter other) {
+		if(!SonicUtils.moreGeneralThanOrEqualTo(this.getSubject(), other.getSubject())) {
+			return false;
+		}
+		if(!SonicUtils.moreGeneralThanOrEqualTo(this.getCategory(), other.getCategory())) {
+			return false;
+		}
+		if(!SonicUtils.moreGeneralThanOrEqualTo(this.getAction(), other.getAction())) {
+			return false;
+		}
+		if(!SonicUtils.moreGeneralThanOrEqualTo(this.getLabel(), other.getLabel())) {
+			return false;
+		}
+		if(!SonicUtils.moreGeneralThanOrEqualTo(this.getSource(), other.getSource())) {
+			return false;
+		}
+		return true;
+	}
+	
+	@Override
+	public int hashCode() {
+		return SonicUtils.hashCode(getSubject()) + SonicUtils.hashCode(getSource())
+		        + SonicUtils.hashCode(getCategory()) + SonicUtils.hashCode(getAction())
+		        + SonicUtils.hashCode(getLabel());
+	}
+	
 }
