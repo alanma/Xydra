@@ -148,28 +148,31 @@ public class SonicFilter implements ISonicFilter, Serializable {
 		return SonicUtils.toDotString(getCategory(), getAction(), getLabel());
 	}
 	
+	public static boolean equals(ISonicFilter a, ISonicFilter b) {
+		if(!SonicUtils.bothNullOrEqual(a.getSubject(), b.getSubject())) {
+			return false;
+		}
+		if(!SonicUtils.bothNullOrEqual(a.getCategory(), b.getCategory())) {
+			return false;
+		}
+		if(!SonicUtils.bothNullOrEqual(a.getAction(), b.getAction())) {
+			return false;
+		}
+		if(!SonicUtils.bothNullOrEqual(a.getLabel(), b.getLabel())) {
+			return false;
+		}
+		if(!SonicUtils.bothNullOrEqual(a.getSource(), b.getSource())) {
+			return false;
+		}
+		return true;
+	}
+	
 	public boolean equals(Object other) {
 		if(!(other instanceof ISonicFilter))
 			return false;
 		
 		ISonicFilter o = (ISonicFilter)other;
-		
-		if(!SonicUtils.bothNullOrEqual(this.getSubject(), o.getSubject())) {
-			return false;
-		}
-		if(!SonicUtils.bothNullOrEqual(this.getCategory(), o.getCategory())) {
-			return false;
-		}
-		if(!SonicUtils.bothNullOrEqual(this.getAction(), o.getAction())) {
-			return false;
-		}
-		if(!SonicUtils.bothNullOrEqual(this.getLabel(), o.getLabel())) {
-			return false;
-		}
-		if(!SonicUtils.bothNullOrEqual(this.getSource(), o.getSource())) {
-			return false;
-		}
-		return true;
+		return equals(this, o);
 	}
 	
 	/**

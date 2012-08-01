@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 import org.xydra.annotations.RunsInGWT;
 
+import com.sonicmetrics.core.shared.impl.memory.SonicUtils;
+
 
 /**
  * @author xamde
@@ -76,6 +78,30 @@ public class TimeConstraint implements Serializable {
 	public String toString() {
 		return (this.lastKey == null ? "[" + this.start : "(key=" + this.lastKey) + "," + this.end
 		        + "]";
+	}
+	
+	public boolean equals(Object other) {
+		return other instanceof TimeConstraint && equals(this, (TimeConstraint)other);
+	}
+	
+	@Override
+	public int hashCode() {
+		return (int)(this.start + this.end + SonicUtils.hashCode(this.lastKey));
+	}
+	
+	public static boolean equals(TimeConstraint a, TimeConstraint b) {
+		return a.start == b.start && a.end == b.end && a.lastKey == b.lastKey;
+	}
+	
+	public boolean includes(TimeConstraint other) {
+		boolean includesInterval = this.start <= other.start && this.end >= other.end;
+		if(!includesInterval)
+			return false;
+		
+		if(this.lastKey == null)
+			return true;
+		else
+			return this.lastKey.compareTo(other.lastKey) < 0;
 	}
 	
 }

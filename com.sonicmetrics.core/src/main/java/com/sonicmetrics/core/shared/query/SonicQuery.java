@@ -3,6 +3,8 @@ package com.sonicmetrics.core.shared.query;
 import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.RunsInGWT;
 
+import com.sonicmetrics.core.shared.impl.memory.SonicUtils;
+
 
 /**
  * @author xamde
@@ -75,6 +77,59 @@ public class SonicQuery extends SonicFilter implements ISonicQuery {
 		}
 		sb.append(" limit:" + this.limit);
 		return sb.toString();
+	}
+	
+	public static boolean equals(ISonicQuery a, ISonicQuery b) {
+		if(!SonicFilter.equals(a, b))
+			return false;
+		
+		// compare remaining properties
+		if(!a.getTimeConstraint().equals(b.getTimeConstraint()))
+			return false;
+		
+		if(a.getLimit() != b.getLimit())
+			return false;
+		
+		return true;
+	}
+	
+	public boolean equals(Object other) {
+		if(!(other instanceof ISonicQuery))
+			return false;
+		
+		ISonicQuery o = (ISonicQuery)other;
+		return equals(this, o);
+	}
+	
+	/**
+	 * Note: Even if this query is more general and has a higher limit it might
+	 * still return less events than the other query requested, due to too many
+	 * events delivered in total.
+	 * 
+	 * @param other
+	 * @return true if this query includes the other query, i.e. this query is
+	 *         more general (or equal) to the other query and the other query
+	 *         requests no events that this query won't return.
+	 */
+	public boolean includes(ISonicQuery other) {
+		if(!super.includes(other))
+			return false;
+		
+		if(!this.getTimeConstraint().includes(other.getTimeConstraint())) {
+			return false;
+		}
+		
+		if(this.getLimit() < other.getLimit()) {
+			return false;
+		}
+		return true;
+	}
+	
+	@Override
+	public int hashCode() {
+		return SonicUtils.hashCode(getSubject()) + SonicUtils.hashCode(getSource())
+		        + SonicUtils.hashCode(getCategory()) + SonicUtils.hashCode(getAction())
+		        + SonicUtils.hashCode(getLabel());
 	}
 	
 }
