@@ -42,8 +42,7 @@ public class ServletUtils {
 	
 	public static final String CONTENTTYPE_APPLICATION_JSON = "application/json.";
 	
-	// TODO get thread-safe logger
-	private static Logger log = LoggerFactory.getLogger(ServletUtils.class);
+	private static Logger log = LoggerFactory.getThreadSafeLogger(ServletUtils.class);
 	
 	/**
 	 * If the Accept header explicitly contains application/xhtml+xml (with
@@ -295,10 +294,6 @@ public class ServletUtils {
 	 */
 	public static void headers(@NeverNull HttpServletResponse res, @NeverNull int status,
 	        @NeverNull long cachingInMinutes, @CanBeNull String contentType) {
-		/*
-		 * TODO is the request already thread-safe or not?
-		 */
-		
 		res.setCharacterEncoding(Restless.CONTENT_TYPE_CHARSET_UTF8);
 		res.setContentType(contentType);
 		if(status > 0) {
