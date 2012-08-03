@@ -650,10 +650,7 @@ public class Restless extends HttpServlet {
 		}
 		clock.stopAndStart("logger-init");
 		
-		/*
-		 * TODO get thread-safe logger!
-		 */
-		log = LoggerFactory.getLogger(Restless.class);
+		log = LoggerFactory.getThreadSafeLogger(Restless.class);
 		log.info("Restless: Init. Using loggerFactory '" + this.loggerFactory + "'...");
 		
 		/** provide servletContext object for other parts of the application */

@@ -51,7 +51,7 @@ public class RestlessMethod {
 	
 	private static Map<Class<?>,Object> instanceCache = new HashMap<Class<?>,Object>();
 	
-	private static Logger log = LoggerFactory.getLogger(RestlessMethod.class);
+	private static Logger log = LoggerFactory.getThreadSafeLogger(RestlessMethod.class);
 	
 	boolean adminOnly;
 	/**
