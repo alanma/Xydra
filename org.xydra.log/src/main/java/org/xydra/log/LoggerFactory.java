@@ -47,6 +47,13 @@ public class LoggerFactory {
 		return loggerFactorySPI.getLogger(clazz.getName(), logListeners_);
 	}
 	
+	public static Logger getThreadSafeLogger(Class<?> clazz) {
+		if(loggerFactorySPI == null) {
+			init();
+		}
+		return loggerFactorySPI.getThreadSafeLogger(clazz.getName(), logListeners_);
+	}
+	
 	private static void init() {
 		// try to use GWT logger
 		if(gwtEnabled() && gwtLogEnabled()) {
