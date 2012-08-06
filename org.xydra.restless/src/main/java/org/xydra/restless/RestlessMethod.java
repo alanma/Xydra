@@ -150,6 +150,12 @@ public class RestlessMethod {
 	public boolean run(@NeverNull final Restless restless, @NeverNull final HttpServletRequest req,
 	        @NeverNull final HttpServletResponse res, @NeverNull NanoClock requestClock)
 	        throws IOException {
+		
+		/*
+		 * TODO is this really thread-safe? Is the method executed in a
+		 * thread-safe manner?
+		 */
+		
 		requestClock.stopAndStart("servlet->restless.run");
 		
 		// set standard headers

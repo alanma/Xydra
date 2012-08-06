@@ -260,12 +260,6 @@ public class Restless extends HttpServlet {
 	
 	private String apps;
 	
-	/*
-	 * TODO access to the lists of listeners also needs to be synchronized on
-	 * the listeners themselves, since they might be shared between different
-	 * lists.
-	 */
-	
 	final List<RestlessExceptionHandler> exceptionHandlers = new LinkedList<RestlessExceptionHandler>();
 	
 	/** Filled from web.xml */
@@ -881,6 +875,20 @@ public class Restless extends HttpServlet {
 		final boolean reqViaAdminUrl = requestIsViaAdminUrl(reqHandedDown);
 		boolean couldStartMethod = false;
 		
+		/**
+		 * TODO Optimization:
+		 * 
+		 * Find the method in a synchronized(this.methods) block, go out of this
+		 * block, and run the method. The method is supposed to be thread-safe
+		 * and there is no reason that the whole list of methods should remain
+		 * locked during its execution.
+		 * 
+		 * Problem: The method-list could be modified during between the
+		 * find-process and the execution of the method.
+		 * 
+		 * There's absolutely no synchronization problem here if the list cannot
+		 * be changed anyways!
+		 */
 		synchronized(this.methods) {
 			for(RestlessMethod restlessMethod : this.methods) {
 				/*
@@ -908,6 +916,14 @@ public class Restless extends HttpServlet {
 								throw new RuntimeException(e);
 							}
 							if(couldStartMethod) {
+								/*
+								 * TODO if the method could not be started, the
+								 * for-loop continues iterating over the
+								 * methods, although the method which should've
+								 * been run was already found. Is there a reason
+								 * for this?
+								 */
+								
 								break;
 							}
 						}

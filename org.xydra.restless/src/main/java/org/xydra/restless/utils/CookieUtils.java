@@ -66,17 +66,18 @@ public class CookieUtils {
 		
 		Cookie[] cookies = req.getCookies();
 		
+		/*
+		 * no synchronization on cookies is necessary here (even if they're
+		 * shared), since we're only reading the cookies name, which cannot be
+		 * changed after its creation.
+		 */
+		
 		if(cookies != null) {
-			synchronized(cookies) {
-				for(Cookie cookie : cookies) {
-					
-					if(cookie != null) {
-						
-						synchronized(cookie) {
-							cookieNames.add(cookie.getName());
-						}
-					}
-				}
+			for(Cookie cookie : cookies) {
+				
+				assert cookie != null;
+				cookieNames.add(cookie.getName());
+				
 			}
 		}
 		return cookieNames;
@@ -238,9 +239,6 @@ public class CookieUtils {
 			cookie.setComment(comment);
 		}
 		
-		/*
-		 * TODO check whether the requests are synchronized or not
-		 */
 		res.addCookie(cookie);
 	}
 	
