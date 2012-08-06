@@ -69,6 +69,15 @@ public class RestlessMethod {
 	 * therefore we don't know in advance how it will be manipulated -> Access
 	 * on instanceOrClass must be synchronized
 	 */
+	/*
+	 * TODO the best thing for optimization would be if only thread-safeclasses
+	 * would be allowed here. Currently we're locking on the whole
+	 * instanceOrClassobject during the execution of a method, which might not
+	 * be necessary if it is thread-safe.We'd still need to synchronize the
+	 * creation process when this is a class and not an instance.(what's the
+	 * reason for having this anyway? Why isn't this an instance right from the
+	 * start? lazy instanziation?)
+	 */
 	private Object instanceOrClass;
 	
 	/*
