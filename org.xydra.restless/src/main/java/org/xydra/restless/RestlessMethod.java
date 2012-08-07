@@ -49,6 +49,9 @@ public class RestlessMethod {
 	
 	private static final String UPLOAD_PARAM = "_upload_";
 	
+	/*
+	 * TODO use a thread-safe map here!
+	 */
 	private static Map<Class<?>,Object> instanceCache = new HashMap<Class<?>,Object>();
 	
 	private static Logger log = LoggerFactory.getThreadSafeLogger(RestlessMethod.class);
@@ -62,6 +65,9 @@ public class RestlessMethod {
 	 * and all methods only read this variable -> no synchronization necessary
 	 * at the moment
 	 */
+	/*
+	 * TODO what about making this final?
+	 */
 	private String httpMethod;
 	
 	/*
@@ -70,7 +76,7 @@ public class RestlessMethod {
 	 * on instanceOrClass must be synchronized
 	 */
 	/*
-	 * TODO the best thing for optimization would be if only thread-safeclasses
+	 * TODO the best thing for optimization would be if only thread-safe classes
 	 * would be allowed here. Currently we're locking on the whole
 	 * instanceOrClassobject during the execution of a method, which might not
 	 * be necessary if it is thread-safe.We'd still need to synchronize the
@@ -83,6 +89,9 @@ public class RestlessMethod {
 	/*
 	 * currently, methodName is never written after creation and all methods
 	 * only read this variable -> no synchronization necessary at the moment
+	 */
+	/*
+	 * TODO what about making this final?
 	 */
 	private String methodName;
 	
@@ -170,8 +179,24 @@ public class RestlessMethod {
 		// set standard headers
 		res.setHeader(Restless.X_FRAME_OPTIONS_HEADERNAME, Restless.X_FRAME_OPTIONS_DEFAULT);
 		
-		Method method = Restless.methodByName(this.instanceOrClass, this.methodName);
+		Method method;
+		
+		synchronized(this.instanceOrClass) {
+			method = Restless.methodByName(this.instanceOrClass, this.methodName);
+		}
+		
+		/*
+		 * TODO is this okay? instanceOrClass might change after the method was
+		 * returned, which might result in slightly inconsistent behavior...
+		 * 
+		 * Would only be a problem if methods can be removed or their behavior
+		 * could be changed... is this possible?
+		 */
+		
 		if(method == null) {
+			/*
+			 * TODO synchronization necessary here? Can the name change?
+			 */
 			res.sendError(500, "Malconfigured server. Method '" + this.methodName
 			        + "' not found in '" + Restless.instanceOrClass_className(this.instanceOrClass)
 			        + "'");
@@ -181,6 +206,10 @@ public class RestlessMethod {
 			// build up parameters
 			
 			// extract values from path
+			/*
+			 * PathTemplate is thread-safe, so no synchronization is necessary
+			 * here
+			 */
 			Map<String,String> urlParameter = getUrlParametersAsMap(req, this.pathTemplate);
 			
 			// extract Cookie values
@@ -191,7 +220,7 @@ public class RestlessMethod {
 			
 			int boundNamedParameterNumber = 0;
 			boolean hasHttpServletResponseParameter = false;
-			final String uniqueRequestId = reuseOrCeateUniqueRequestIdentifier(urlParameter,
+			final String uniqueRequestId = reuseOrCreateUniqueRequestIdentifier(urlParameter,
 			        cookieMap);
 			// define context
 			IRestlessContext restlessContext = new RestlessContextImpl(restless, req, res,
@@ -329,91 +358,89 @@ public class RestlessMethod {
 				}
 			}
 			
-			synchronized(this.instanceOrClass) {
-				try {
-					requestClock.stopAndStart("restless.run->invoke");
-					// onBefore-run-event
-					restless.fireRequestStarted(restlessContext);
-					// run
-					
-					Object result = invokeMethod(method, this.instanceOrClass, javaMethodArgs);
-					
-					requestClock.stopAndStart("invoke "
-					        + methodReference(this.instanceOrClass, method));
-					
-					if(!hasHttpServletResponseParameter) {
-						res.setContentType(Restless.MIME_TEXT_PLAIN + "; charset="
-						        + Restless.CONTENT_TYPE_CHARSET_UTF8);
-						res.setStatus(200);
-						Writer w = res.getWriter();
-						// we need to send back something standard ourselves
-						w.write("Executed " + methodReference(this.instanceOrClass, method) + "\n");
-						if(result != null && result instanceof String) {
-							w.write("Result: " + result);
-						}
-						w.flush();
+			try {
+				requestClock.stopAndStart("restless.run->invoke");
+				// onBefore-run-event
+				restless.fireRequestStarted(restlessContext);
+				// run
+				
+				Object result = invokeMethod(method, this.instanceOrClass, javaMethodArgs);
+				
+				requestClock
+				        .stopAndStart("invoke " + methodReference(this.instanceOrClass, method));
+				
+				if(!hasHttpServletResponseParameter) {
+					res.setContentType(Restless.MIME_TEXT_PLAIN + "; charset="
+					        + Restless.CONTENT_TYPE_CHARSET_UTF8);
+					res.setStatus(200);
+					Writer w = res.getWriter();
+					// we need to send back something standard ourselves
+					w.write("Executed " + methodReference(this.instanceOrClass, method) + "\n");
+					if(result != null && result instanceof String) {
+						w.write("Result: " + result);
 					}
-					// post-run-event
-					restless.fireRequestFinished(restlessContext);
+					w.flush();
+				}
+				// post-run-event
+				restless.fireRequestFinished(restlessContext);
+				
+				requestClock.stopAndStart("response");
+				
+			} catch(InvocationTargetException e) {
+				Throwable cause = e.getCause();
+				if(cause instanceof RestlessException) {
+					RestlessException re = (RestlessException)cause;
+					res.setStatus(re.getStatusCode());
+					res.setContentType(Restless.MIME_TEXT_PLAIN + "; charset="
+					        + Restless.CONTENT_TYPE_CHARSET_UTF8);
+					Writer w = res.getWriter();
+					w.write(re.getMessage());
+				} else {
 					
-					requestClock.stopAndStart("response");
+					IRestlessContext context = new RestlessContextImpl(restless, req, res,
+					        uniqueRequestId);
 					
-				} catch(InvocationTargetException e) {
-					Throwable cause = e.getCause();
-					if(cause instanceof RestlessException) {
-						RestlessException re = (RestlessException)cause;
-						res.setStatus(re.getStatusCode());
-						res.setContentType(Restless.MIME_TEXT_PLAIN + "; charset="
-						        + Restless.CONTENT_TYPE_CHARSET_UTF8);
-						Writer w = res.getWriter();
-						w.write(re.getMessage());
-					} else {
-						
-						IRestlessContext context = new RestlessContextImpl(restless, req, res,
-						        uniqueRequestId);
-						
-						boolean handled = false;
-						
+					boolean handled = false;
+					
+					try {
+						handled = callLocalExceptionHandler(cause, this.instanceOrClass, context);
+					} catch(InvocationTargetException ite) {
+						cause = new ExceptionHandlerException(e.getCause());
+					} catch(Throwable th) {
+						cause = new ExceptionHandlerException(th);
+					}
+					
+					if(!handled) {
 						try {
-							handled = callLocalExceptionHandler(cause, this.instanceOrClass,
-							        context);
-						} catch(InvocationTargetException ite) {
-							cause = new ExceptionHandlerException(e.getCause());
+							handled = callGlobalExceptionHandlers(cause, context);
 						} catch(Throwable th) {
 							cause = new ExceptionHandlerException(th);
 						}
-						
-						if(!handled) {
-							try {
-								handled = callGlobalExceptionHandlers(cause, context);
-							} catch(Throwable th) {
-								cause = new ExceptionHandlerException(th);
-							}
-						}
-						
-						if(!handled) {
-							// TODO hide internal messages better from user
-							StringWriter sw = new StringWriter();
-							PrintWriter pw = new PrintWriter(sw);
-							e.printStackTrace(pw);
-							String stacktrace = sw.toString();
-							if(!res.isCommitted()) {
-								res.sendError(500, e + " -- " + stacktrace);
-							}
-							log.error("Exception while executing RESTless method. Stacktrace: "
-							        + stacktrace, cause);
-						}
 					}
-				} catch(IllegalArgumentException e) {
-					res.sendError(500, e.toString());
-					log.error("RESTless method registered with wrong arguments: ", e);
-				} catch(IllegalAccessException e) {
-					res.sendError(500, e.toString());
-					log.error("", e);
+					
+					if(!handled) {
+						// TODO hide internal messages better from user
+						StringWriter sw = new StringWriter();
+						PrintWriter pw = new PrintWriter(sw);
+						e.printStackTrace(pw);
+						String stacktrace = sw.toString();
+						if(!res.isCommitted()) {
+							res.sendError(500, e + " -- " + stacktrace);
+						}
+						log.error("Exception while executing RESTless method. Stacktrace: "
+						        + stacktrace, cause);
+					}
 				}
-				
+			} catch(IllegalArgumentException e) {
+				res.sendError(500, e.toString());
+				log.error("RESTless method registered with wrong arguments: ", e);
+			} catch(IllegalAccessException e) {
+				res.sendError(500, e.toString());
+				log.error("", e);
 			}
+			
 		}
+		
 		return true;
 	}
 	
@@ -521,10 +548,24 @@ public class RestlessMethod {
 		boolean isStatic = Modifier.isStatic(method.getModifiers());
 		Object result;
 		if(isStatic) {
+			/*
+			 * TODO how to synchronize the execution of the method here? If the
+			 * method itself is not thread-safe, there might be some problems.
+			 * Synchronizing on the method object probably doesn't work, since
+			 * there could be multiple objects representing the same method.
+			 */
+			
 			result = method.invoke(null, javaMethodArgs.toArray(new Object[0]));
 		} else {
 			Object instance = toInstance(instanceOrClass);
-			result = method.invoke(instance, javaMethodArgs.toArray(new Object[0]));
+			
+			/*
+			 * synchronization on the instance is necessary here, since the
+			 * instances might be shared through the instanceCache
+			 */
+			synchronized(instance) {
+				result = method.invoke(instance, javaMethodArgs.toArray(new Object[0]));
+			}
 		}
 		return result;
 	}
@@ -686,7 +727,7 @@ public class RestlessMethod {
 	 * @param cookieMap
 	 * @return an existing request id found in URL parameters or cookies.
 	 */
-	private static String reuseOrCeateUniqueRequestIdentifier(Map<String,String> urlParameter,
+	private static String reuseOrCreateUniqueRequestIdentifier(Map<String,String> urlParameter,
 	        Map<String,String> cookieMap) {
 		String requestId = urlParameter.get(IRestlessContext.PARAM_REQUEST_ID);
 		if(requestId == null) {

@@ -61,6 +61,9 @@ public class PathTemplate {
 	 * thread-safe. (at the moment - if a method which writes to this variable
 	 * is added, access to this variable needs to be made thread-safe)
 	 */
+	/*
+	 * TODO what about making this final?
+	 */
 	private String regex;
 	
 	/**
@@ -158,6 +161,9 @@ public class PathTemplate {
 	 * 
 	 * @return the names of variables in the order in which they are used to
 	 *         call the Java method
+	 */
+	/*
+	 * TODO what about using a "read-only" wrapper here?
 	 */
 	protected List<String> getVariableNames() {
 		return this.variableNames;
