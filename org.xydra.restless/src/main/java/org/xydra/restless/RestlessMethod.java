@@ -56,7 +56,7 @@ public class RestlessMethod {
 	
 	private static Logger log = LoggerFactory.getThreadSafeLogger(RestlessMethod.class);
 	
-	boolean adminOnly;
+	private final boolean adminOnly; // TODO or could this be changed?
 	/**
 	 * GET, PUT, POST, DELETE
 	 */
@@ -515,6 +515,10 @@ public class RestlessMethod {
 	
 	public String getMethodName() {
 		return this.methodName;
+	}
+	
+	public boolean isAdminOnly() {
+		return this.adminOnly;
 	}
 	
 	/**

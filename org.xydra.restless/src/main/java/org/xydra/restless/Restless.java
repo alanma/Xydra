@@ -477,7 +477,7 @@ public class Restless extends HttpServlet {
 				for(RestlessMethod rm : this.methods) {
 					w.write("<li>");
 					String url = servletPath + XmlUtils.xmlEncode(rm.getPathTemplate().getRegex());
-					w.write((rm.adminOnly ? "ADMIN ONLY" : "PUBLIC")
+					w.write((rm.isAdminOnly() ? "ADMIN ONLY" : "PUBLIC")
 					        + " resource <b class='resource'>" + url + "</b>: "
 					        + rm.getHttpMethod() + " =&gt; ");
 					w.write(instanceOrClass_className(rm.getInstanceOrClass()) + "#"
@@ -690,7 +690,7 @@ public class Restless extends HttpServlet {
 				log.debug("Mapping " + rm.getHttpMethod() + " " + rm.getPathTemplate().getRegex()
 				        + " --> " + instanceOrClass_className(rm.getInstanceOrClass()) + "#"
 				        + rm.getMethodName() + " access:"
-				        + (rm.adminOnly ? "ADMIN ONLY" : "PUBLIC"));
+				        + (rm.isAdminOnly() ? "ADMIN ONLY" : "PUBLIC"));
 			}
 			
 		}
@@ -839,9 +839,6 @@ public class Restless extends HttpServlet {
 	 */
 	protected void restlessService(@NeverNull final HttpServletRequest req,
 	        @NeverNull final HttpServletResponse res) {
-		/*
-		 * TODO recheck that this is actually thread-safe now
-		 */
 		
 		NanoClock requestClock = new NanoClock().start();
 		
@@ -883,11 +880,33 @@ public class Restless extends HttpServlet {
 		 * and there is no reason that the whole list of methods should remain
 		 * locked during its execution.
 		 * 
-		 * Problem: The method-list could be modified during between the
-		 * find-process and the execution of the method.
+		 * Problem: The method-list could be modified between the find-process
+		 * and the execution of the method. But methods cannot be removed, so
+		 * this shouldn't be a problem... the worst thing that could happen is
+		 * that two different threads want to execute the same method, where the
+		 * first thread starts first, finds the method, is interrupted and then
+		 * the second finds and immediately executes the method (before the
+		 * first thread). This shouldn't be a problem, since the behavior of
+		 * different threads should not depend on
+		 * "Thread A finished before Thread B"-type assumptions. Even if we do
+		 * ensure that Thread A starts executing the method before Thread B, an
+		 * interruption during the execution might occur, which might lead to
+		 * the case that Thread B finishes before Thread A, we the method itself
+		 * is not completely synchronized, i.e. when multiple threads might
+		 * execute the method concurrently and only the necessary parts in the
+		 * method are synchronized, instead of blocking the complete method,
+		 * which is desirable.
 		 * 
-		 * There's absolutely no synchronization problem here if the list cannot
-		 * be changed anyways!
+		 * If we block the whole method, we could implement a queueing monitor
+		 * for the method which ensures that the threads execute the method in
+		 * the correct order. But this is difficult and might potentially
+		 * introduce deadlocks.
+		 * 
+		 * If we do not change the current implementation, it seems like
+		 * RestlessMethod doesn't need to be threadsafe itself, since executing
+		 * it is completely blocked from other threads, because the methods are
+		 * only accessed here (at least it looks like that)
+		 * 
 		 */
 		synchronized(this.methods) {
 			for(RestlessMethod restlessMethod : this.methods) {
@@ -896,7 +915,7 @@ public class Restless extends HttpServlet {
 				 * access, ignore all secure methods: Skip all restlessMethods
 				 * that may not be accessed
 				 */
-				if(reqViaAdminUrl == restlessMethod.adminOnly) {
+				if(reqViaAdminUrl == restlessMethod.isAdminOnly()) {
 					// if path matches
 					if(restlessMethod.getPathTemplate().matches(path)) {
 						foundPath = true;
@@ -976,6 +995,13 @@ public class Restless extends HttpServlet {
 	 * @param key attribute name @NeverNull
 	 * @param value attribute value @NeverNull
 	 */
+	
+	/*
+	 * TODO How important is this method? This more or less decides whether we
+	 * need to synchronize on the ServletContext or not (basically an
+	 * optimization question, since access should be synchronized).
+	 */
+	
 	public void setServletContextAttribute(@NeverNull String key, @NeverNull Object value) {
 		try {
 			ServletContext sc = this.getServletContext();
@@ -992,5 +1018,8 @@ public class Restless extends HttpServlet {
 	/*
 	 * TODO make sure that the destroy() method is only called when all running
 	 * threads are finished
+	 * 
+	 * Can the service method be called after destroy was called or while
+	 * destroy is in progress?
 	 */
 }
