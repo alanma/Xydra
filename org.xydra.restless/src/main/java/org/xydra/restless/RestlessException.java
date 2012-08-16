@@ -2,10 +2,10 @@ package org.xydra.restless;
 
 import org.xydra.annotations.CanBeNull;
 import org.xydra.annotations.NeverNull;
-import org.xydra.annotations.ThreadSafe;
+import org.xydra.annotations.NotThreadSafe;
 
 
-@ThreadSafe
+@NotThreadSafe
 public class RestlessException extends RuntimeException {
 	
 	public static final int Moved_permanently = 301;

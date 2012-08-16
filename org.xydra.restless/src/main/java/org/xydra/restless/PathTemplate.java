@@ -123,9 +123,9 @@ public class PathTemplate {
 	/**
 	 * @param path a full path containing values for parameters as declared in
 	 *            constructor
-	 * @return values of variables in order
+	 * @return values of variables in order @NeverNull
 	 */
-	public List<String> extractVariables(String path) {
+	public List<String> extractVariables(@NeverNull String path) {
 		Matcher m = this.p.matcher(path);
 		
 		if(m.groupCount() != this.variableNames.size()) {
@@ -170,10 +170,10 @@ public class PathTemplate {
 	}
 	
 	/**
-	 * @param path starting with slash '/'
+	 * @param path starting with slash '/' @NeverNull
 	 * @return true if this PathTemplate matches a given path
 	 */
-	public boolean matches(String path) {
+	public boolean matches(@NeverNull String path) {
 		
 		return this.p.matcher(path).matches();
 	}

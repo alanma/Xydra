@@ -279,6 +279,10 @@ public class Restless extends HttpServlet {
 	
 	private ServletContext servletContext;
 	
+	private Object serviceLock = new Object();
+	private int serviceCounter = 0;
+	private boolean shuttingDown = false;
+	
 	/**
 	 * Register a handler that will receive exceptions thrown by the executed
 	 * REST methods.
@@ -827,6 +831,76 @@ public class Restless extends HttpServlet {
 	public void removeRequestListener(@CanBeNull IRequestListener requestListener) {
 		synchronized(this.requestListeners) {
 			this.requestListeners.remove(requestListener);
+		}
+	}
+	
+	/*
+	 * the following code was basically taken from
+	 * http://docs.oracle.com/javaee/6/tutorial/doc/bnags.html and ensures that
+	 * the destroy methods makes sure that it waits until all threads which are
+	 * currently executing a service on this servlet are finished.
+	 */
+	@Override
+	protected void service(@NeverNull HttpServletRequest req, @NeverNull HttpServletResponse res)
+	        throws ServletException, IOException {
+		enteringServiceMethod();
+		try {
+			super.service(req, res);
+		} finally {
+			leavingServiceMethod();
+		}
+	}
+	
+	private void enteringServiceMethod() {
+		synchronized(this.serviceLock) {
+			this.serviceCounter += 1;
+		}
+	}
+	
+	private void leavingServiceMethod() {
+		synchronized(this.serviceLock) {
+			this.serviceCounter -= 1;
+		}
+	}
+	
+	private int numServices() {
+		synchronized(this.serviceLock) {
+			return this.serviceCounter;
+		}
+	}
+	
+	private void setShuttingDown() {
+		this.shuttingDown = true;
+	}
+	
+	public boolean isShuttingDown() {
+		return this.shuttingDown;
+	}
+	
+	@Override
+	public void destroy() {
+		/*
+		 * Check to see whether there are still service methods running, and if
+		 * there are, tell them to stop.
+		 */
+		if(numServices() > 0) {
+			setShuttingDown();
+		}
+		
+		/* Wait for the service methods to stop. */
+		try {
+			while(numServices() > 0) {
+				try {
+					Thread.sleep(1000);
+				} catch(InterruptedException e) {
+				}
+			}
+		} finally {
+			/*
+			 * Custom destroy code (if necessary) goes here
+			 */
+			
+			super.destroy();
 		}
 	}
 	
