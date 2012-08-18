@@ -6,7 +6,6 @@ import java.util.zip.ZipOutputStream;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.xydra.annotations.CanBeNull;
 import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.ThreadSafe;
 import org.xydra.log.Logger;
@@ -16,9 +15,6 @@ import org.xydra.log.LoggerFactory;
 @ThreadSafe
 public class FileDownloadUtils {
 	
-	/*
-	 * TODO is it really okay if archivenames and extensions are null?
-	 */
 	/*
 	 * TODO is synchronization on response objects really necessary? Are
 	 * responses shared between different calls to different methods?
@@ -41,14 +37,14 @@ public class FileDownloadUtils {
 	 * </pre>
 	 * 
 	 * @param res ..
-	 * @param archivename '.zip' is added automatically @CanBeNull
+	 * @param archivename '.zip' is added automatically @NeverNull
 	 * @return a ZipOutputStream to which the caller should write his data. It
 	 *         will end up in a downloadable zip file. @NeverNull
 	 * @throws IOException ...
 	 */
 	
 	public static ZipOutputStream toZipFileDownload(@NeverNull HttpServletResponse res,
-	        @CanBeNull String archivename) throws IOException {
+	        @NeverNull String archivename) throws IOException {
 		String fullArchiveName = archivename + ".zip";
 		
 		log.info("Wrapping in zipfile named " + fullArchiveName);
@@ -66,13 +62,13 @@ public class FileDownloadUtils {
 	 * This sets no "Content-Type" headers.
 	 * 
 	 * @param res @NeverNull
-	 * @param archivename @CanBeNull
-	 * @param extension @CanBeNull
+	 * @param archivename @NeverNull
+	 * @param extension @NeverNull
 	 * @return an OutputStream to which you can write
 	 * @throws IOException
 	 */
 	public static OutputStream toFileDownload(@NeverNull HttpServletResponse res,
-	        @CanBeNull String archivename, @CanBeNull String extension) throws IOException {
+	        @NeverNull String archivename, @NeverNull String extension) throws IOException {
 		
 		String fullFileName = archivename + "." + extension;
 		log.info("Wrapping in file named " + fullFileName);
@@ -86,14 +82,14 @@ public class FileDownloadUtils {
 	 * This sets also "Content-Type" headers.
 	 * 
 	 * @param res @NeverNull
-	 * @param archivename @CanBeNull
-	 * @param extension @CanBeNull
+	 * @param archivename @NeverNull
+	 * @param extension @NeverNull
 	 * @param contentType e.g. 'application/zip' or 'text/csv' @NeverNull
 	 * @return an OutputStream to which you can write
 	 * @throws IOException
 	 */
 	public static OutputStream toFileDownload(@NeverNull HttpServletResponse res,
-	        @CanBeNull String archivename, @CanBeNull String extension,
+	        @NeverNull String archivename, @NeverNull String extension,
 	        @NeverNull String contentType) throws IOException {
 		/*
 		 * via

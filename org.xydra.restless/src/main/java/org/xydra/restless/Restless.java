@@ -839,6 +839,8 @@ public class Restless extends HttpServlet {
 	 * http://docs.oracle.com/javaee/6/tutorial/doc/bnags.html and ensures that
 	 * the destroy methods makes sure that it waits until all threads which are
 	 * currently executing a service on this servlet are finished.
+	 * 
+	 * TODO tell Max about this code
 	 */
 	@Override
 	protected void service(@NeverNull HttpServletRequest req, @NeverNull HttpServletResponse res)

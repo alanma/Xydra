@@ -26,6 +26,7 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.util.Streams;
 import org.apache.commons.io.IOUtils;
+import org.xydra.annotations.CanBeNull;
 import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.ThreadSafe;
 import org.xydra.log.Logger;
@@ -90,10 +91,7 @@ public class RestlessMethod {
 	 * currently, methodName is never written after creation and all methods
 	 * only read this variable -> no synchronization necessary at the moment
 	 */
-	/*
-	 * TODO what about making this final?
-	 */
-	private String methodName;
+	private final String methodName;
 	
 	/** The parameter required by this restless method */
 	/*
@@ -165,13 +163,19 @@ public class RestlessMethod {
 	 * @return true if method launched successfully, i.e. parameters matched
 	 * @throws IOException if result writing fails
 	 */
+	/*
+	 * TODO maybe call this method "execute" to avoid disambiguation with
+	 * Thread.run()?
+	 */
 	public boolean run(@NeverNull final Restless restless, @NeverNull final HttpServletRequest req,
 	        @NeverNull final HttpServletResponse res, @NeverNull NanoClock requestClock)
 	        throws IOException {
 		
 		/*
-		 * TODO is this really thread-safe? Is the method executed in a
+		 * TODO is this really thread-safe now? Is the method executed in a
 		 * thread-safe manner?
+		 * 
+		 * TODO why exactly is a restless instance passed as a parameter?
 		 */
 		
 		requestClock.stopAndStart("servlet->restless.run");
@@ -531,11 +535,17 @@ public class RestlessMethod {
 		return this.requiredNamedParameter;
 	}
 	
-	private static boolean notSet(Object value) {
+	/**
+	 * 
+	 * @param value @CanBeNull
+	 * @return true, if the given value is null or equals the empty string
+	 */
+	private static boolean notSet(@CanBeNull Object value) {
 		return value == null || value.equals("");
 	}
 	
-	private static String methodReference(Object instanceOrClass, Method method) {
+	private static String methodReference(@NeverNull Object instanceOrClass,
+	        @NeverNull Method method) {
 		Class<?> clazz;
 		if(instanceOrClass instanceof Class<?>) {
 			clazz = (Class<?>)instanceOrClass;
@@ -545,9 +555,9 @@ public class RestlessMethod {
 		return clazz.getSimpleName() + "." + method.getName() + "(..)";
 	}
 	
-	private static Object invokeMethod(Method method, Object instanceOrClass,
-	        List<Object> javaMethodArgs) throws IllegalArgumentException, IllegalAccessException,
-	        InvocationTargetException {
+	private static Object invokeMethod(@NeverNull Method method, @NeverNull Object instanceOrClass,
+	        @NeverNull List<Object> javaMethodArgs) throws IllegalArgumentException,
+	        IllegalAccessException, InvocationTargetException {
 		/* Instantiate only for non-static methods */
 		boolean isStatic = Modifier.isStatic(method.getModifiers());
 		Object result;
@@ -587,9 +597,9 @@ public class RestlessMethod {
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 */
-	private static boolean callLocalExceptionHandler(Throwable cause, Object instanceOrClass,
-	        IRestlessContext context) throws InvocationTargetException, IllegalArgumentException,
-	        IllegalAccessException {
+	private static boolean callLocalExceptionHandler(@NeverNull Throwable cause,
+	        @NeverNull Object instanceOrClass, @NeverNull IRestlessContext context)
+	        throws InvocationTargetException, IllegalArgumentException, IllegalAccessException {
 		
 		Method method = Restless.methodByName(instanceOrClass, "onException");
 		if(method == null) {
@@ -627,11 +637,12 @@ public class RestlessMethod {
 	 * Handle exceptions via handlers registered before at
 	 * {@link Restless#addExceptionHandler(RestlessExceptionHandler)}
 	 * 
-	 * @param cause
-	 * @param context
+	 * @param cause @NeverNull
+	 * @param context @NeverNull
 	 * @return
 	 */
-	private static boolean callGlobalExceptionHandlers(Throwable cause, IRestlessContext context) {
+	private static boolean callGlobalExceptionHandlers(@NeverNull Throwable cause,
+	        @NeverNull IRestlessContext context) {
 		List<RestlessExceptionHandler> exceptionHandlers = context.getRestless().exceptionHandlers;
 		synchronized(exceptionHandlers) {
 			for(RestlessExceptionHandler handler : exceptionHandlers) {
@@ -649,8 +660,8 @@ public class RestlessMethod {
 	 * @return a single map of key-value pairs extracted from the path-part of
 	 *         the request-URI
 	 */
-	public static Map<String,String> getUrlParametersAsMap(HttpServletRequest req,
-	        PathTemplate pathTemplate) {
+	public static Map<String,String> getUrlParametersAsMap(@NeverNull HttpServletRequest req,
+	        @NeverNull PathTemplate pathTemplate) {
 		Map<String,String> urlParameter = new HashMap<String,String>();
 		String urlPath = req.getPathInfo();
 		if(urlPath != null) {
@@ -669,10 +680,10 @@ public class RestlessMethod {
 	 * If the given parameter is a Class, return an instance of it, otherwise
 	 * simply return the given parameter itself.
 	 * 
-	 * @param instanceOrClass
+	 * @param instanceOrClass @NeverNull
 	 * @return an instance
 	 */
-	private static Object toInstance(Object instanceOrClass) {
+	private static Object toInstance(@NeverNull Object instanceOrClass) {
 		if(instanceOrClass instanceof Class<?>) {
 			// need to created instance
 			Class<?> clazz = (Class<?>)instanceOrClass;
@@ -727,12 +738,12 @@ public class RestlessMethod {
 	 * 
 	 * Note: POST-parameters are ignored.
 	 * 
-	 * @param urlParameter
-	 * @param cookieMap
+	 * @param urlParameter @NeverNull
+	 * @param cookieMap @NeverNull
 	 * @return an existing request id found in URL parameters or cookies.
 	 */
-	private static String reuseOrCreateUniqueRequestIdentifier(Map<String,String> urlParameter,
-	        Map<String,String> cookieMap) {
+	private static String reuseOrCreateUniqueRequestIdentifier(
+	        @NeverNull Map<String,String> urlParameter, @NeverNull Map<String,String> cookieMap) {
 		String requestId = urlParameter.get(IRestlessContext.PARAM_REQUEST_ID);
 		if(requestId == null) {
 			requestId = cookieMap.get(IRestlessContext.PARAM_REQUEST_ID);

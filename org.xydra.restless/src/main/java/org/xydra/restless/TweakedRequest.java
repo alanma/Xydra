@@ -3,6 +3,7 @@ package org.xydra.restless;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
+import org.xydra.annotations.CanBeNull;
 import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.ThreadSafe;
 import org.xydra.restless.utils.HostUtils;
@@ -101,9 +102,13 @@ class TweakedRequest extends HttpServletRequestWrapper {
 	 * @return true if the servername denotes localhost be means of 'localhost',
 	 *         '127.0.0.1' or COMPUTERNAME
 	 */
-	static boolean isLocalhost(String serverName) {
-		return serverName.equals("localhost") || serverName.equals("127.0.0.1")
-		        || serverName.equals(HostUtils.getLocalHostname());
+	static boolean isLocalhost(@CanBeNull String serverName) {
+		if(serverName == null) {
+			return false;
+		} else {
+			return serverName.equals("localhost") || serverName.equals("127.0.0.1")
+			        || serverName.equals(HostUtils.getLocalHostname());
+		}
 	}
 	
 }

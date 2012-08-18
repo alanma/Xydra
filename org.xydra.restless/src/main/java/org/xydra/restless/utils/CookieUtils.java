@@ -9,6 +9,8 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.xydra.annotations.CanBeNull;
+import org.xydra.annotations.NeverNull;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 
@@ -27,12 +29,12 @@ public class CookieUtils {
 	 */
 	
 	/**
-	 * @param req ..
-	 * @param name of the cookie
+	 * @param req .. @NeverNull
+	 * @param name of the cookie @NeverNull
 	 * @return the current cookie value with given name in the given request or
 	 *         null
 	 */
-	public static String getCookie(HttpServletRequest req, String name) {
+	public static String getCookie(@NeverNull HttpServletRequest req, @NeverNull String name) {
 		if(req.getCookies() == null) {
 			return null;
 		}
@@ -57,10 +59,10 @@ public class CookieUtils {
 	}
 	
 	/**
-	 * @param req ..
+	 * @param req .. @NeverNull
 	 * @return a list of (potentially duplicate) cookie names
 	 */
-	public static List<String> listCookieNames(HttpServletRequest req) {
+	public static List<String> listCookieNames(@NeverNull HttpServletRequest req) {
 		
 		List<String> cookieNames = new LinkedList<String>();
 		
@@ -86,11 +88,12 @@ public class CookieUtils {
 	/**
 	 * Dumps cookies as a piece of HTML code
 	 * 
-	 * @param req where to read cookies
-	 * @param w there to dump the cookie information
+	 * @param req where to read cookies @NeverNull
+	 * @param w there to dump the cookie information @NeverNull
 	 * @throws IOException ...
 	 */
-	public static void dumpCookies(HttpServletRequest req, Writer w) throws IOException {
+	public static void dumpCookies(@NeverNull HttpServletRequest req, @NeverNull Writer w)
+	        throws IOException {
 		w.write("<style>" +
 		
 		"td, th { border: 1px solid black; margin: 0px; padding: 2px;}" +
@@ -138,12 +141,12 @@ public class CookieUtils {
 	}
 	
 	/**
-	 * @param req ...
-	 * @param name of cookie
+	 * @param req ... @NeverNull
+	 * @param name of cookie @NeverNull
 	 * @return true if the request contains a cookie with the given name which
 	 *         is non-empty
 	 */
-	public static boolean hasCookie(HttpServletRequest req, String name) {
+	public static boolean hasCookie(@NeverNull HttpServletRequest req, @NeverNull String name) {
 		if(req.getCookies() == null) {
 			return false;
 		}
@@ -178,14 +181,14 @@ public class CookieUtils {
 	/**
 	 * Remove the cookie with the given name from the users browser, if present.
 	 * 
-	 * @param req ..
-	 * @param res ..
-	 * @param name of cookie to be removed
+	 * @param req .. @NeverNull
+	 * @param res .. @NeverNull
+	 * @param name of cookie to be removed @NeverNull
 	 * @param domain can be null. Should in any case be the same value as was
-	 *            used to set the cookie.
+	 *            used to set the cookie. @CanBeNull
 	 */
-	public static void removeCookieIfPresent(HttpServletRequest req, HttpServletResponse res,
-	        String name, String domain) {
+	public static void removeCookieIfPresent(@NeverNull HttpServletRequest req,
+	        @NeverNull HttpServletResponse res, @NeverNull String name, @CanBeNull String domain) {
 		assert req != null;
 		
 		Cookie[] cookies = req.getCookies();
@@ -207,17 +210,18 @@ public class CookieUtils {
 	}
 	
 	/**
-	 * @param res ..
-	 * @param name name of the cookie
-	 * @param value value of the cookie
+	 * @param res .. @NeverNull
+	 * @param name name of the cookie @NeverNull
+	 * @param value value of the cookie @NeverNull
 	 * @param domain can be null. If non null, RFC 2109 'An explicitly specified
 	 *            domain must always start with a dot.' Example:
-	 *            '.www.example.com' or '.example.com'
-	 * @param comment can be null
-	 * @param maxAge in seconds
+	 *            '.www.example.com' or '.example.com' @CanBeNull
+	 * @param comment can be null @CanBeNull
+	 * @param maxAge in seconds @NeverNull
 	 */
-	public static void setCookie(HttpServletResponse res, String name, String value, String domain,
-	        String comment, int maxAge) {
+	public static void setCookie(@NeverNull HttpServletResponse res, @NeverNull String name,
+	        @NeverNull String value, @CanBeNull String domain, @CanBeNull String comment,
+	        @NeverNull int maxAge) {
 		if(name == null || name.equals("")) {
 			throw new IllegalArgumentException("name is null or empty");
 		}
