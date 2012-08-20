@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.xydra.annotations.CanBeNull;
+import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.NotThreadSafe;
 import org.xydra.restless.Restless;
 
@@ -23,7 +25,12 @@ public class Page {
 	private static final ToHtml BR = new HtmlNode("<br />");
 	
 	public static class Attribute {
-		public Attribute(String name, String value) {
+		/**
+		 * 
+		 * @param name @CanBeNull
+		 * @param value @CanBeNull
+		 */
+		public Attribute(@CanBeNull String name, @CanBeNull String value) {
 			this.name = name;
 			this.value = value;
 		}
@@ -38,7 +45,15 @@ public class Page {
 	
 	public static abstract class BlockElement extends ElementWithChildren implements ToHtml {
 		
-		public BlockElement(String tag, ToHtml parent, boolean first, Attribute ... attributes) {
+		/**
+		 * 
+		 * @param tag @NeverNull
+		 * @param parent @CanBeNull
+		 * @param first @NeverNull
+		 * @param attributes @CanBeNull
+		 */
+		public BlockElement(@NeverNull String tag, @CanBeNull ToHtml parent,
+		        @NeverNull boolean first, @CanBeNull Attribute ... attributes) {
 			super(tag, parent, first, attributes);
 		}
 		
@@ -57,7 +72,10 @@ public class Page {
 			}
 		}
 		
-		public Paragraph paragraph(String content) {
+		/**
+		 * @param content @NeverNull
+		 */
+		public Paragraph paragraph(@NeverNull String content) {
 			Paragraph p = new Paragraph(this, content);
 			this.children.add(p);
 			return p;
@@ -239,19 +257,36 @@ public class Page {
 		
 		/**
 		 * @param tag @NeverNull
-		 * @param parent may be null
-		 * @param first
-		 * @param attributes optional
+		 * @param parent may be null @CanBeNull
+		 * @param first @NeverNull
+		 * @param attributes optional @CanBeNull
 		 */
-		public ElementWithChildren(String tag, ToHtml parent, boolean first,
-		        Attribute ... attributes) {
+		public ElementWithChildren(@NeverNull String tag, @CanBeNull ToHtml parent,
+		        @NeverNull boolean first, @CanBeNull Attribute ... attributes) {
 			this.tag = tag;
 			this.parent = parent;
 			this.first = first;
-			this.attributes = Arrays.asList(attributes);
+			if(attributes != null) {
+				this.attributes = Arrays.asList(attributes);
+			} else {
+				/*
+				 * create an empty array and instantiate the list with it by
+				 * calling Arrays.asList so that the behavior/the class of
+				 * this.attributes is the same as when the given attributes
+				 * weren't null.
+				 */
+				
+				Attribute[] emptyArray = new Attribute[0];
+				this.attributes = Arrays.asList(emptyArray);
+			}
 		}
 		
-		public void addAttribute(String name, String value) {
+		/**
+		 * 
+		 * @param name @CanBeNull
+		 * @param value @CanBeNull
+		 */
+		public void addAttribute(@CanBeNull String name, @CanBeNull String value) {
 			this.attributes.add(new Attribute(name, value));
 		}
 		
@@ -363,14 +398,17 @@ public class Page {
 		private String content;
 		
 		/**
-		 * @param content will be HTML-escaped
+		 * @param content will be HTML-escaped @NeverNull
 		 */
-		public TextNode(String content) {
+		public TextNode(@NeverNull String content) {
 			this.content = content;
 		}
 		
+		/**
+		 * @param indent @CanBeNull
+		 */
 		@Override
-		public String toHtml(String indent) {
+		public String toHtml(@CanBeNull String indent) {
 			return xmlEncode(this.content);
 		}
 		

@@ -96,7 +96,7 @@ public class HtmlUtils extends SharedHtmlUtils {
 	 * @param w @NeverNull
 	 * @throws IOException
 	 */
-	public static void endHtmlPage(Writer w) throws IOException {
+	public static void endHtmlPage(@NeverNull Writer w) throws IOException {
 		
 		writeCloseBodyHtml(w);
 		w.close();
