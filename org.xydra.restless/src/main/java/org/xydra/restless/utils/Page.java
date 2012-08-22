@@ -422,15 +422,23 @@ public class Page {
 			this.renderMode = renderMode;
 		}
 		
+		/**
+		 * @param indent @CanBeNull
+		 */
 		@Override
-		public String toHtml(String indent) {
+		public String toHtml(@CanBeNull String indent) {
 			return Page.renderToHtml(indent, false, this.renderMode, this.tag,
 			        Page.toHtml("", this.children), this.attributes.toArray(new Attribute[0]));
 		}
 	}
 	
 	public static class Paragraph extends BlockElement {
-		public Paragraph(BlockElement parent, String content) {
+		/**
+		 * 
+		 * @param parent @CanBeNull
+		 * @param content @NeverNull
+		 */
+		public Paragraph(@CanBeNull BlockElement parent, @NeverNull String content) {
 			super("p", parent, false);
 			this.children.add(new TextNode(content));
 		}
@@ -476,14 +484,17 @@ public class Page {
 		private String content;
 		
 		/**
-		 * @param content will NOT be HTML-escaped
+		 * @param content will NOT be HTML-escaped @CanBeNull
 		 */
-		public HtmlNode(final String content) {
+		public HtmlNode(@CanBeNull final String content) {
 			this.content = content;
 		}
 		
+		/**
+		 * @param indent @CanBeNull
+		 */
 		@Override
-		public String toHtml(String indent) {
+		public String toHtml(@CanBeNull String indent) {
 			return this.content;
 		}
 		
@@ -511,17 +522,32 @@ public class Page {
 	}
 	
 	public static interface ToHtml {
-		public String toHtml(String indent);
+		/**
+		 * 
+		 * @param indent @CanBeNull
+		 * @return @CanBeNull
+		 */
+		public String toHtml(@CanBeNull String indent);
 	}
 	
-	public static Head htmlHeadTitle(String title) {
+	/**
+	 * 
+	 * @param title @NeverNull
+	 * 
+	 */
+	public static Head htmlHeadTitle(@NeverNull String title) {
 		Html html = new Html();
 		Head head = html.head();
 		head.title(title);
 		return head;
 	}
 	
-	public static String toHtml(String indent, List<ToHtml> children) {
+	/**
+	 * 
+	 * @param indent @CanBeNull
+	 * @param children @CanBeNull
+	 */
+	public static String toHtml(@CanBeNull String indent, @CanBeNull List<ToHtml> children) {
 		StringBuffer buf = new StringBuffer();
 		for(ToHtml child : children) {
 			buf.append(child.toHtml(indent));
@@ -547,7 +573,7 @@ public class Page {
 	 * @param renderMode @NeverNull
 	 * @param tag @NeverNull
 	 * @param content @CanBeNull
-	 * @param attributes
+	 * @param attributes @CanBeNull
 	 * @return
 	 */
 	private static String renderToHtml(@CanBeNull String indent, @NeverNull boolean first,
@@ -578,7 +604,11 @@ public class Page {
 		return buf.toString();
 	}
 	
-	private static String toHtmlAttributes(Attribute ... attributes) {
+	/**
+	 * 
+	 * @param attributes @CanBeNull
+	 */
+	private static String toHtmlAttributes(@CanBeNull Attribute ... attributes) {
 		StringBuffer buf = new StringBuffer();
 		for(Attribute attribute : attributes) {
 			if(attribute.value != null)
@@ -587,7 +617,12 @@ public class Page {
 		return buf.toString();
 	}
 	
-	public static final String xmlEncode(String raw) {
+	/**
+	 * 
+	 * @param raw @NeverNull
+	 * 
+	 */
+	public static final String xmlEncode(@NeverNull String raw) {
 		String safe = raw.replace("&", "&amp;");
 		safe = safe.replace("<", "&lt;");
 		safe = safe.replace(">", "&gt;");

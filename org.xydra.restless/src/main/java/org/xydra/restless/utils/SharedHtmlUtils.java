@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 
 import org.apache.http.annotation.NotThreadSafe;
 import org.xydra.annotations.CanBeNull;
+import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.RunsInGWT;
 
 
@@ -24,31 +25,44 @@ import org.xydra.annotations.RunsInGWT;
 @NotThreadSafe
 public class SharedHtmlUtils {
 	
-	public static String link(String url, String text) {
+	/**
+	 * 
+	 * @param url @NeverNull
+	 * @param text @CanBeNull
+	 */
+	public static String link(@NeverNull String url, @CanBeNull String text) {
 		return "<a href=\"" + url + "\">" + text + "</a>";
 	}
 	
 	/**
-	 * @param url href target and link label
+	 * @param url href target and link label @NeverNull
 	 * @return a HTML 'a' element using url both as label and as link target
 	 */
-	public static String link(String url) {
+	public static String link(@NeverNull String url) {
 		return "<a href=\"" + url + "\">" + url + "</a>";
 	}
 	
-	public static SubmitInput inputSubmit(String label) {
+	/**
+	 * 
+	 * @param label @NeverNull
+	 */
+	public static SubmitInput inputSubmit(@NeverNull String label) {
 		return new SubmitInput(label);
 	}
 	
 	public static class Input {
-		
+		// TODO why is this a class and not an interface?
 	}
 	
 	public static class SubmitInput extends Input {
 		
 		private String label;
 		
-		public SubmitInput(String label) {
+		/**
+		 * 
+		 * @param label @NeverNull
+		 */
+		public SubmitInput(@NeverNull String label) {
 			this.label = label;
 		}
 		
@@ -64,7 +78,12 @@ public class SharedHtmlUtils {
 		protected String name;
 		protected String value;
 		
-		public KeyValueInput(String name, String value) {
+		/**
+		 * 
+		 * @param name @CanBeNull
+		 * @param value @CanBeNull
+		 */
+		public KeyValueInput(@CanBeNull String name, @CanBeNull String value) {
 			this.name = name;
 			this.value = value;
 		}
@@ -72,7 +91,12 @@ public class SharedHtmlUtils {
 	
 	public static class HiddenInput extends KeyValueInput {
 		
-		public HiddenInput(String name, String value) {
+		/**
+		 * 
+		 * @param name @NeverNull
+		 * @param value @NeverNull
+		 */
+		public HiddenInput(@NeverNull String name, @NeverNull String value) {
 			super(name, value);
 		}
 		
@@ -95,13 +119,18 @@ public class SharedHtmlUtils {
 		private int size;
 		
 		/**
-		 * @param name ..
-		 * @param size of file name field
+		 * @param name .. @NeverNull
+		 * @param size of file name field @NeverNull
 		 */
-		public FileInput(String name, int size) {
+		public FileInput(@NeverNull String name, @NeverNull int size) {
 			super(name, "");
 			this.size = size;
 		}
+		
+		/**
+		 * TODO value is never set in the constructor where size is set and vice
+		 * versa
+		 */
 		
 		@Override
 		public String toString() {
@@ -124,11 +153,22 @@ public class SharedHtmlUtils {
 		
 		private int size;
 		
-		public TextInput(String name, String value) {
+		/**
+		 * 
+		 * @param name @NeverNull
+		 * @param value @NeverNull
+		 */
+		public TextInput(@NeverNull String name, @NeverNull String value) {
 			this(name, value, 30);
 		}
 		
-		public TextInput(String name, String value, int size) {
+		/**
+		 * 
+		 * @param name @NeverNull
+		 * @param value @NeverNull
+		 * @param size @NeverNull
+		 */
+		public TextInput(@NeverNull String name, @NeverNull String value, @NeverNull int size) {
 			super(name, value);
 			this.size = size;
 		}

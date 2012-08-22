@@ -457,10 +457,9 @@ public class ServletUtils {
 	
 	/**
 	 * 
-	 * @param encoded TODO @NeverNull or @CanBeNull?
-	 * @return
+	 * @param encoded @NeverNull
 	 */
-	public static String urldecode(String encoded) {
+	public static String urldecode(@NeverNull String encoded) {
 		try {
 			return URLDecoder.decode(encoded, "utf-8");
 		} catch(UnsupportedEncodingException e) {
