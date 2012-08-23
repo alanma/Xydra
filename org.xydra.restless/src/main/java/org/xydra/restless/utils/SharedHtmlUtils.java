@@ -195,16 +195,28 @@ public class SharedHtmlUtils {
 		private int rows;
 		private int cols;
 		
-		public TextAreaInput(String name, String value, int cols, int rows) {
+		private String name;
+		private String value;
+		
+		/**
+		 * 
+		 * @param name @NeverNull
+		 * @param value @NeverNull
+		 * @param cols @NeverNull
+		 * @param rows @NeverNull
+		 */
+		public TextAreaInput(@NeverNull String name, @NeverNull String value, @NeverNull int cols,
+		        @NeverNull int rows) {
+			/*
+			 * TODO Why is there a call to super? Inputs constructor doesn't do
+			 * anything
+			 */
 			super();
 			this.name = name;
 			this.value = value;
 			this.cols = cols;
 			this.rows = rows;
 		}
-		
-		private String name;
-		private String value;
 		
 		@Override
 		public String toString() {
@@ -219,7 +231,12 @@ public class SharedHtmlUtils {
 		
 	}
 	
-	public static Form form(METHOD method, String action) {
+	/**
+	 * 
+	 * @param method @NeverNull
+	 * @param action @NeverNull
+	 */
+	public static Form form(@NeverNull METHOD method, @NeverNull String action) {
 		return new Form(method, action);
 	}
 	
@@ -245,12 +262,20 @@ public class SharedHtmlUtils {
 			
 			private StringBuilder b = new StringBuilder();
 			
-			public TableRow td(String content) {
+			/**
+			 * 
+			 * @param content @CanBeNull
+			 */
+			public TableRow td(@CanBeNull String content) {
 				this.b.append("<td>").append(content).append("</td>");
 				return this;
 			}
 			
-			public TableRow th(String header) {
+			/**
+			 * 
+			 * @param header @CanBeNull
+			 */
+			public TableRow th(@CanBeNull String header) {
 				this.b.append("<th>").append(header).append("</th>");
 				return this;
 			}
@@ -261,6 +286,7 @@ public class SharedHtmlUtils {
 			
 		}
 		
+		@Override
 		public String toString() {
 			return toStringBuilder().toString();
 		}
@@ -286,65 +312,76 @@ public class SharedHtmlUtils {
 		private List<Input> inputs = new LinkedList<SharedHtmlUtils.Input>();
 		private boolean hasFileInput = false;
 		
-		public Form(METHOD method, String action) {
+		/**
+		 * 
+		 * @param method @NeverNull
+		 * @param action @NeverNull
+		 */
+		public Form(@NeverNull METHOD method, @NeverNull String action) {
 			this.method = method;
 			this.action = action;
 		}
 		
 		/**
-		 * @param name input name
-		 * @param value predefined form value
+		 * @param name input name @NeverNull
+		 * @param value predefined form value @NeverNull
 		 * @return the {@link Form} for a fluent API
 		 */
-		public Form withInputText(String name, String value) {
+		public Form withInputText(@NeverNull String name, @NeverNull String value) {
 			this.inputs.add(new TextInput(name, value));
 			return this;
 		}
 		
 		/**
-		 * @param name input name
-		 * @param value predefined form value
+		 * @param name input name @NeverNull
+		 * @param value predefined form value @NeverNull
 		 * @return the {@link Form} for a fluent API
 		 */
-		public Form withHiddenInputText(String name, String value) {
+		public Form withHiddenInputText(@NeverNull String name, @NeverNull String value) {
 			this.inputs.add(new HiddenInput(name, value));
 			return this;
 		}
 		
 		/**
-		 * @param name input name
-		 * @param value predefined form value
-		 * @param size of text field
+		 * @param name input name @NeverNull
+		 * @param value predefined form value @NeverNull
+		 * @param size of text field @NeverNull
 		 * @return the {@link Form} for a fluent API
 		 */
-		public Form withInputText(String name, String value, int size) {
+		public Form withInputText(@NeverNull String name, @NeverNull String value,
+		        @NeverNull int size) {
 			this.inputs.add(new TextInput(name, value, size));
 			return this;
 		}
 		
 		/**
-		 * @param name input name
+		 * @param name input name @NeverNull
 		 * @return the {@link Form} for a fluent API
 		 */
-		public Form withInputFile(String name) {
+		public Form withInputFile(@NeverNull String name) {
 			this.inputs.add(new FileInput(name, 100));
 			this.hasFileInput = true;
 			return this;
 		}
 		
 		/**
-		 * @param name form name
-		 * @param value predefined form value
-		 * @param cols number of columns
-		 * @param rows number of rows
+		 * @param name form name @NeverNull
+		 * @param value predefined form value @NeverNull
+		 * @param cols number of columns @NeverNull
+		 * @param rows number of rows @NeverNull
 		 * @return the {@link Form} for a fluent API
 		 */
-		public Form withInputTextArea(String name, String value, int cols, int rows) {
+		public Form withInputTextArea(@NeverNull String name, @NeverNull String value,
+		        @NeverNull int cols, @NeverNull int rows) {
 			this.inputs.add(new TextAreaInput(name, value, cols, rows));
 			return this;
 		}
 		
-		public Form withInputSubmit(String value) {
+		/**
+		 * 
+		 * @param value @NeverNull
+		 */
+		public Form withInputSubmit(@NeverNull String value) {
 			this.inputs.add(new SubmitInput(value));
 			return this;
 		}
@@ -376,10 +413,10 @@ public class SharedHtmlUtils {
 		
 		/**
 		 * @param href @NeverNull
-		 * @param rel can be null
+		 * @param rel can be null @CanBeNull
 		 * @param type @NeverNull
 		 */
-		public HeadLink(String href, @CanBeNull String rel, String type) {
+		public HeadLink(@NeverNull String href, @CanBeNull String rel, @NeverNull String type) {
 			this.href = href;
 			this.rel = rel;
 			this.type = type;
@@ -405,7 +442,11 @@ public class SharedHtmlUtils {
 	 */
 	public static class HeadLinkStyle extends HeadLink {
 		
-		public HeadLinkStyle(String href) {
+		/**
+		 * 
+		 * @param href @NeverNull
+		 */
+		public HeadLinkStyle(@NeverNull String href) {
 			super(href, "stylesheet", "text/css");
 		}
 		
@@ -424,7 +465,11 @@ public class SharedHtmlUtils {
 		
 		private String href;
 		
-		public ScriptLink(String href) {
+		/**
+		 * 
+		 * @param href @NeverNull
+		 */
+		public ScriptLink(@NeverNull String href) {
 			this.href = href;
 		}
 		
@@ -440,7 +485,7 @@ public class SharedHtmlUtils {
 	 * @param value @CanBeNull
 	 * @return ' ' name '=' '"' value '"' OR the emtpy string if value is null.
 	 */
-	private static String attribute(String name, @CanBeNull String value) {
+	private static String attribute(@NeverNull String name, @CanBeNull String value) {
 		assert name != null;
 		if(value != null) {
 			return " " + name + "=\"" + value + "\"";
@@ -452,11 +497,14 @@ public class SharedHtmlUtils {
 	/**
 	 * Utility functions to turn a Map to HTML definition list
 	 * 
-	 * @param mapEntries input, nut null. Entries are NOT HTML-encoded or
-	 *            escaped in any way. Used valid HTML inside!
+	 * @param mapEntries input, not null. Entries are NOT HTML-encoded or
+	 *            escaped in any way. Used valid HTML inside! @NeverNull
 	 * @return a string containing the resulting HTML
 	 */
-	public static String toDefinitionList(Map<String,? extends Object> mapEntries) {
+	/*
+	 * TODO what's the reason for "? extends Object"?
+	 */
+	public static String toDefinitionList(@NeverNull Map<String,? extends Object> mapEntries) {
 		StringBuffer buf = new StringBuffer();
 		buf.append("<dl>\n");
 		for(Entry<String,? extends Object> e : mapEntries.entrySet()) {
@@ -469,10 +517,10 @@ public class SharedHtmlUtils {
 	/**
 	 * Utility functions to turn a Collection of Strings to HTML ordered list
 	 * 
-	 * @param listEntries input, not null
+	 * @param listEntries input, not null @NeverNull
 	 * @return a string containing the resulting HTML
 	 */
-	public static String toOrderedList(Collection<String> listEntries) {
+	public static String toOrderedList(@NeverNull Collection<String> listEntries) {
 		StringBuffer buf = new StringBuffer();
 		buf.append("<ol>\n");
 		for(String li : listEntries) {
@@ -482,16 +530,20 @@ public class SharedHtmlUtils {
 		return buf.toString();
 	}
 	
-	public static String toOrderedList(String ... listItemContent) {
+	/**
+	 * 
+	 * @param listItemContent @NeverNull
+	 */
+	public static String toOrderedList(@NeverNull String ... listItemContent) {
 		return toOrderedList(Arrays.asList(listItemContent));
 	}
 	
 	/**
-	 * @param s may be null
+	 * @param s @CanBeNull
 	 * @return a sanitised form of s that cannot have malicious side effects.
-	 *         Result is XHTML compliant.
+	 *         Result is XHTML compliant. @CanBeNull
 	 */
-	public static String sanitize(String s) {
+	public static String sanitize(@CanBeNull String s) {
 		if(s == null) {
 			return null;
 		}
