@@ -104,33 +104,27 @@ public class ServletUtils {
 	 * @return @NeverNull
 	 */
 	public static Map<String,String> getCookiesAsMap(@NeverNull HttpServletRequest req) {
-		/*
-		 * TODO is access on the cookies thread-safe?
-		 */
 		Cookie[] cookies = req.getCookies();
 		Map<String,String> cookieMap = new HashMap<String,String>();
 		if(cookies != null) {
 			
-			synchronized(cookies) {
-				for(Cookie cookie : cookies) {
-					synchronized(cookie) {
-						String name = cookie.getName();
-						String value = cookie.getValue();
-						// ignoring:
-						// cookie.getComment()
-						// cookie.getDomain()
-						// cookie.getMaxAge()
-						// cookie.getPath()
-						// cookie.getSecure() if true, sent only over HTTPS
-						// cookie.getVersion() usually = 1
-						if(cookieMap.containsKey(name)) {
-							log.info("Found multiple cookies with the name '" + name
-							        + "' with values. Using last one. E.g., '"
-							        + cookieMap.get(name) + "' is overwritten by '" + value + "'");
-						}
-						cookieMap.put(name, value);
-					}
+			for(Cookie cookie : cookies) {
+				String name = cookie.getName();
+				String value = cookie.getValue();
+				// ignoring:
+				// cookie.getComment()
+				// cookie.getDomain()
+				// cookie.getMaxAge()
+				// cookie.getPath()
+				// cookie.getSecure() if true, sent only over HTTPS
+				// cookie.getVersion() usually = 1
+				if(cookieMap.containsKey(name)) {
+					log.info("Found multiple cookies with the name '" + name
+					        + "' with values. Using last one. E.g., '" + cookieMap.get(name)
+					        + "' is overwritten by '" + value + "'");
 				}
+				cookieMap.put(name, value);
+				
 			}
 		}
 		return cookieMap;
