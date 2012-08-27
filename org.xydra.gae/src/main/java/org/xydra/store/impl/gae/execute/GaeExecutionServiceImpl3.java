@@ -7,6 +7,7 @@ import org.xydra.annotations.CanBeNull;
 import org.xydra.annotations.NeverNull;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
+import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
@@ -352,7 +353,8 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 			return XCommand.FAILED;
 		}
 		
-		List<XAtomicEvent> events = DeltaUtils.createEvents(this.modelAddr, c, actorId, change.rev);
+		List<XAtomicEvent> events = DeltaUtils.createEvents(this.modelAddr, c, actorId, change.rev,
+		        command.getChangeType() == ChangeType.TRANSACTION);
 		log.debug("[r" + change.rev + "] DeltaUtils generated " + events.size() + " events");
 		if(events.size() > 1000) {
 			log.warn("Created over 1000 events (" + events.size()
