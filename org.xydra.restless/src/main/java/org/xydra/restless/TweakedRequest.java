@@ -20,12 +20,6 @@ import org.xydra.restless.utils.HostUtils;
 @ThreadSafe
 class TweakedRequest extends HttpServletRequestWrapper {
 	
-	/*
-	 * TODO it's not really clear, if this class needs explicit synchronization.
-	 * Maybe instances of this class are only used by single threads, like
-	 * normal HttpServletRequests?
-	 */
-	
 	private boolean initalised = false;
 	
 	private String hostOverride = null;
