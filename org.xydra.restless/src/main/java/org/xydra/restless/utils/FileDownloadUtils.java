@@ -15,11 +15,6 @@ import org.xydra.log.LoggerFactory;
 @ThreadSafe
 public class FileDownloadUtils {
 	
-	/*
-	 * TODO is synchronization on response objects really necessary? Are
-	 * responses shared between different calls to different methods?
-	 */
-	
 	private static final Logger log = LoggerFactory.getLogger(FileDownloadUtils.class);
 	
 	/**
