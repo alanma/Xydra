@@ -156,11 +156,13 @@ public abstract class DeltaUtils {
 	 *            {@link #executeCommand(XReadableModel, XCommand)}.
 	 * @param actorId The actor that initiated the change.
 	 * @param rev The revision number of the change.
+	 * @param forceTxnEvent if true, a txn is created even if there is only 1
+	 *            change and thus no transaction necessary
 	 * @return the appropriate events for the change (as returned by
 	 *         {@link #executeCommand(XReadableModel, XCommand)}
 	 */
 	public static List<XAtomicEvent> createEvents(XAddress modelAddr,
-	        Pair<ChangedModel,ModelChange> change, XID actorId, long rev) {
+	        Pair<ChangedModel,ModelChange> change, XID actorId, long rev, boolean forceTxnEvent) {
 		XyAssert.xyAssert(change != null);
 		assert change != null;
 		
@@ -182,7 +184,7 @@ public abstract class DeltaUtils {
 		}
 		
 		XyAssert.xyAssert(nChanges > 0);
-		boolean inTrans = (nChanges > 1);
+		boolean inTrans = (nChanges > 1) || forceTxnEvent;
 		
 		if(mc == ModelChange.CREATED) {
 			events.add(MemoryRepositoryEvent.createAddEvent(actorId, modelAddr.getParent(),
@@ -199,8 +201,6 @@ public abstract class DeltaUtils {
 			        modelAddr.getModel(), rev - 1, inTrans));
 		}
 		
-		assert inTrans ^ (events.size() == 1) : "inTrans?" + inTrans + " events.size=="
-		        + events.size();
 		assert nChanges == 1 ? events.size() == 1 : events.size() >= 2;
 		
 		return events;

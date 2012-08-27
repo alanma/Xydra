@@ -14,7 +14,6 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XCommandFactory;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XTransaction;
-import org.xydra.base.change.XTransactionEvent;
 import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -44,8 +43,8 @@ public abstract class AbstractSingleCommandTransactionTest {
 		XID modelId = X.getIDProvider().fromString("singleCommandTransactionModel");
 		XAddress modelAddress = XX.resolveModel(this.repoId, modelId);
 		
-		XCommand addModelCommand =
-		        this.comFactory.createAddModelCommand(this.repoId, modelId, false);
+		XCommand addModelCommand = this.comFactory.createAddModelCommand(this.repoId, modelId,
+		        false);
 		
 		long revNr = this.persistence.executeCommand(this.actorId, addModelCommand);
 		
@@ -53,8 +52,8 @@ public abstract class AbstractSingleCommandTransactionTest {
 		
 		XTransactionBuilder txnBuilder = new XTransactionBuilder(modelAddress);
 		XID objectId = X.getIDProvider().fromString("singleCommandTransactionObject");
-		XCommand addObjectCommand =
-		        this.comFactory.createAddObjectCommand(this.repoId, modelId, objectId, false);
+		XCommand addObjectCommand = this.comFactory.createAddObjectCommand(this.repoId, modelId,
+		        objectId, false);
 		
 		txnBuilder.addCommand(addObjectCommand);
 		XTransaction txn = txnBuilder.build();
@@ -66,7 +65,12 @@ public abstract class AbstractSingleCommandTransactionTest {
 		List<XEvent> events = this.persistence.getEvents(modelAddress, revNr, revNr);
 		
 		assertEquals("There should only be one event.", 1, events.size());
-		assertTrue("The event should be a TransactionEvent.",
-		        events.get(0) instanceof XTransactionEvent);
+		/*
+		 * implementations are free to replace a txn with a single command with
+		 * a standalone single command
+		 */
+		// assertTrue("The event should be a TransactionEvent was " +
+		// events.get(0).getClass(), events.get(0) instanceof
+		// XTransactionEvent);
 	}
 }

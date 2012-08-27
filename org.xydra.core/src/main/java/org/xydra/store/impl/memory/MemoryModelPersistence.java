@@ -6,6 +6,7 @@ import java.util.List;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XType;
+import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
@@ -52,8 +53,8 @@ public class MemoryModelPersistence {
 		
 		// Parse the command and calculate the changes needed to apply it. This
 		// does not actually change the model.
-		Pair<ChangedModel,DeltaUtils.ModelChange> change =
-		        DeltaUtils.executeCommand(this.model, command);
+		Pair<ChangedModel,DeltaUtils.ModelChange> change = DeltaUtils.executeCommand(this.model,
+		        command);
 		if(change == null) {
 			// There was something wrong with the command.
 			return XCommand.FAILED;
@@ -61,8 +62,8 @@ public class MemoryModelPersistence {
 		
 		// Create events. Do this before we destroy any necessary information by
 		// changing the model.
-		List<XAtomicEvent> events =
-		        DeltaUtils.createEvents(this.modelAddr, change, actorId, newRev);
+		List<XAtomicEvent> events = DeltaUtils.createEvents(this.modelAddr, change, actorId,
+		        newRev, command.getChangeType() == ChangeType.TRANSACTION);
 		XyAssert.xyAssert(events != null);
 		assert events != null;
 		
@@ -75,7 +76,7 @@ public class MemoryModelPersistence {
 		}
 		
 		XEvent event;
-		if(events.size() > 1) {
+		if(events.size() > 1 || command.getChangeType() == ChangeType.TRANSACTION) {
 			// Create a transaction event.
 			
 			// check whether it needs to be a model or an object transaction
@@ -88,15 +89,13 @@ public class MemoryModelPersistence {
 				 * case.
 				 */
 				
-				event =
-				        MemoryTransactionEvent.createTransactionEvent(actorId, this.modelAddr,
-				                events, getRevisionNumber(), XEvent.RevisionOfEntityNotSet);
+				event = MemoryTransactionEvent.createTransactionEvent(actorId, this.modelAddr,
+				        events, getRevisionNumber(), XEvent.RevisionOfEntityNotSet);
 			} else {
 				assert command.getTarget().getAddressedType() == XType.XOBJECT;
 				
-				event =
-				        MemoryTransactionEvent.createTransactionEvent(actorId, command.getTarget(),
-				                events, XEvent.RevisionOfEntityNotSet, getRevisionNumber());
+				event = MemoryTransactionEvent.createTransactionEvent(actorId, command.getTarget(),
+				        events, XEvent.RevisionOfEntityNotSet, getRevisionNumber());
 			}
 			
 		} else {
