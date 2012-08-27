@@ -1087,6 +1087,10 @@ public class Restless extends HttpServlet {
 			if(this.localContext == null) {
 				this.localContext = new HashMap<String,Object>();
 			}
+			/*
+			 * TODO synchronization on localContext (or a thread-safe local
+			 * context) might be necessary here!
+			 */
 			this.localContext.put(key, value);
 		}
 	}
