@@ -19,15 +19,6 @@ public class CookieUtils {
 	
 	private static final Logger log = LoggerFactory.getLogger(CookieUtils.class);
 	
-	/*
-	 * TODO A lock on req.getCookies() might be appropriate even if req is only
-	 * used once, for example if the same cookies are used in multiple requests.
-	 * 
-	 * The important questions are: Are cookie instances shared between
-	 * different requests? Are whole arrays of cookies shared between different
-	 * requests?
-	 */
-	
 	/**
 	 * @param req .. @NeverNull
 	 * @param name of the cookie @NeverNull
@@ -41,16 +32,10 @@ public class CookieUtils {
 		
 		Cookie[] cookies = req.getCookies();
 		if(cookies != null) {
-			synchronized(cookies) {
-				for(Cookie cookie : cookies) {
-					
-					if(cookie != null) {
-						synchronized(cookie) {
-							if(cookie.getName().equals(name)) {
-								return cookie.getValue();
-							}
-						}
-					}
+			for(Cookie cookie : cookies) {
+				
+				if(cookie.getName().equals(name)) {
+					return cookie.getValue();
 				}
 			}
 		}
@@ -67,12 +52,6 @@ public class CookieUtils {
 		List<String> cookieNames = new LinkedList<String>();
 		
 		Cookie[] cookies = req.getCookies();
-		
-		/*
-		 * no synchronization on cookies is necessary here (even if they're
-		 * shared), since we're only reading the cookies name, which cannot be
-		 * changed after its creation.
-		 */
 		
 		if(cookies != null) {
 			for(Cookie cookie : cookies) {
@@ -108,35 +87,32 @@ public class CookieUtils {
 		Cookie[] cookies = req.getCookies();
 		
 		if(cookies != null) {
-			synchronized(cookies) {
-				for(Cookie cookie : cookies) {
+			for(Cookie cookie : cookies) {
+				
+				if(cookie != null) {
+					w.write("<tr>"
 					
-					if(cookie != null) {
-						synchronized(cookie) {
-							w.write("<tr>"
-							
-							+ "<td>" + cookie.getDomain() + "</td>"
-							
-							+ "<td>" + cookie.getPath() + "</td>"
-							
-							+ "<td>" + cookie.getSecure() + "</td>"
-							
-							+ "<td>" + cookie.getName() + "</td>"
-							
-							+ "<td>" + cookie.getValue() + "</td>"
-							
-							+ "<td>" + cookie.getMaxAge() + "</td>"
-							
-							+ "<td>" + cookie.getComment() + "</td>"
-							
-							+ "<td>" + cookie.getVersion() + "</td>"
-							
-							+ "</tr>");
-						}
-					}
+					+ "<td>" + cookie.getDomain() + "</td>"
+					
+					+ "<td>" + cookie.getPath() + "</td>"
+					
+					+ "<td>" + cookie.getSecure() + "</td>"
+					
+					+ "<td>" + cookie.getName() + "</td>"
+					
+					+ "<td>" + cookie.getValue() + "</td>"
+					
+					+ "<td>" + cookie.getMaxAge() + "</td>"
+					
+					+ "<td>" + cookie.getComment() + "</td>"
+					
+					+ "<td>" + cookie.getVersion() + "</td>"
+					
+					+ "</tr>");
 				}
 			}
 		}
+		
 		w.write("</table>");
 	}
 	
@@ -152,29 +128,27 @@ public class CookieUtils {
 		}
 		
 		Cookie[] cookies = req.getCookies();
-		synchronized(cookies) {
-			
-			for(Cookie cookie : req.getCookies()) {
+		
+		if(cookies != null) {
+			for(Cookie cookie : cookies) {
 				
 				if(cookie != null) {
 					
-					synchronized(cookie) {
-						if(cookie.getName().equals(name)) {
-							if(cookie.getValue() == null) {
-								log.warn("cookie '" + name + "' is present but contains null");
-								return false;
-							}
-							if(cookie.getValue().equals("")) {
-								log.warn("cookie '" + name
-								        + "' is present but contains empty string");
-								return false;
-							}
-							return true;
+					if(cookie.getName().equals(name)) {
+						if(cookie.getValue() == null) {
+							log.warn("cookie '" + name + "' is present but contains null");
+							return false;
 						}
+						if(cookie.getValue().equals("")) {
+							log.warn("cookie '" + name + "' is present but contains empty string");
+							return false;
+						}
+						return true;
 					}
 				}
 			}
 		}
+		
 		return false;
 	}
 	
@@ -194,19 +168,11 @@ public class CookieUtils {
 		Cookie[] cookies = req.getCookies();
 		
 		if(cookies != null) {
-			synchronized(cookies) {
-				/*
-				 * although the following methods are technically already
-				 * synchronized on cookies, we need to make sure that the
-				 * cookies are not changed in between the methods. This is the
-				 * reason for this synchronized-block.
-				 */
-				
-				if(hasCookie(req, name)) {
-					setCookie(res, name, "", domain, null, 0);
-				}
+			if(hasCookie(req, name)) {
+				setCookie(res, name, "", domain, null, 0);
 			}
 		}
+		
 	}
 	
 	/**
