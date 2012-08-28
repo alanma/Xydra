@@ -184,6 +184,22 @@ public abstract class DeltaUtils {
 		}
 		
 		XyAssert.xyAssert(nChanges > 0);
+		
+		/*
+		 * FIXME is this the correct way to check if the events are supposed to
+		 * be in a transaction or not? We can construct transaction which
+		 * actually contain a lot of commands, but every command but one is
+		 * cancelled out by another command (i.e. adds get undone by removes in
+		 * the same transaction) and the transaction actually only changes one
+		 * single thing. Should we think of this case as a transaction (and
+		 * create a transaction event) or as a single command (and create a
+		 * single atomic event). I suppose a single, atomic event is preferable,
+		 * but we should document this thoroughly, since this behavior seems
+		 * logical, but actually is quite strange. (we execute a transaction,
+		 * but do not create a transaction event)
+		 * 
+		 * ~Kaidel
+		 */
 		boolean inTrans = (nChanges > 1) || forceTxnEvent;
 		
 		if(mc == ModelChange.CREATED) {
