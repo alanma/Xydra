@@ -36,7 +36,7 @@ import org.xydra.annotations.ThreadSafe;
  * 
  */
 @ThreadSafe
-public class PathTemplate {
+class PathTemplate {
 	
 	/** Matches any character */
 	static final String ANY_REGEX = ".*";
@@ -161,9 +161,6 @@ public class PathTemplate {
 	 * 
 	 * @return the names of variables in the order in which they are used to
 	 *         call the Java method
-	 */
-	/*
-	 * TODO what about using a "read-only" wrapper here?
 	 */
 	protected List<String> getVariableNames() {
 		return this.variableNames;

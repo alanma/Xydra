@@ -595,8 +595,9 @@ public class Restless extends HttpServlet {
 			/*
 			 * TODO do we need a lock here? (local context)
 			 * 
-			 * It's a hashmap, maybe use a thread-safe implementation from
-			 * Google Guava
+			 * use
+			 * http://docs.oracle.com/javase/1.5.0/docs/api/java/util/concurrent
+			 * /ConcurrentHashMap.html
 			 */
 			return this.localContext.get(key);
 		}
@@ -839,8 +840,6 @@ public class Restless extends HttpServlet {
 	 * http://docs.oracle.com/javaee/6/tutorial/doc/bnags.html and ensures that
 	 * the destroy methods makes sure that it waits until all threads which are
 	 * currently executing a service on this servlet are finished.
-	 * 
-	 * TODO tell Max about this code
 	 */
 	@Override
 	protected void service(@NeverNull HttpServletRequest req, @NeverNull HttpServletResponse res)
@@ -999,12 +998,6 @@ public class Restless extends HttpServlet {
 						if(httpMethod.equalsIgnoreCase(restlessMethod.getHttpMethod())) {
 							foundMethod = true;
 							try {
-								/*
-								 * TODO could restlessMethod.run() somehow start
-								 * multiple threads which then operate on the
-								 * given requestClock? If yes, the clock needs
-								 * to be synchronized.
-								 */
 								couldStartMethod = restlessMethod.run(this, reqHandedDown, res,
 								        requestClock);
 							} catch(IOException e) {
@@ -1076,6 +1069,8 @@ public class Restless extends HttpServlet {
 	 * TODO How important is this method? This more or less decides whether we
 	 * need to synchronize on the ServletContext or not (basically an
 	 * optimization question, since access should be synchronized).
+	 * 
+	 * synchronize
 	 */
 	
 	public void setServletContextAttribute(@NeverNull String key, @NeverNull Object value) {
@@ -1094,12 +1089,4 @@ public class Restless extends HttpServlet {
 			this.localContext.put(key, value);
 		}
 	}
-	
-	/*
-	 * TODO make sure that the destroy() method is only called when all running
-	 * threads are finished
-	 * 
-	 * Can the service method be called after destroy was called or while
-	 * destroy is in progress?
-	 */
 }

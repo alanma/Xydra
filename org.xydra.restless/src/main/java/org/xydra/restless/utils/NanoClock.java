@@ -54,11 +54,6 @@ public class NanoClock {
 	public long stopAndGetDuration(@NeverNull String name) {
 		
 		if(this.start == -1) {
-			/*
-			 * TODO what if the clock was started at some point in time and then
-			 * stopped. Should trying to stop it really throw an exception in
-			 * this case?
-			 */
 			throw new IllegalStateException("Cannot stop a clock that was never started.");
 		}
 		long stop = System.nanoTime();
@@ -98,9 +93,6 @@ public class NanoClock {
 		System.out.println(c.getStats());
 	}
 	
-	/*
-	 * TODO is this really supposed to be public?
-	 */
 	public NanoClock append(@NeverNull String s) {
 		
 		this.stats.append(s);

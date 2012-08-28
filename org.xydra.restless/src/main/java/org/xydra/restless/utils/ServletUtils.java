@@ -300,10 +300,6 @@ public class ServletUtils {
 			// TODO test header set correctly
 			res.setDateHeader("Expires", millisSinceEpoch);
 		}
-		
-		/*
-		 * TODO what happens when neither of these conditions are fulfilled?
-		 */
 	}
 	
 	/**

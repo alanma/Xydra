@@ -35,12 +35,6 @@ public class RestlessParameter {
 	 *            from HTTP request content. Use null for none. @CanBeNull
 	 */
 	public RestlessParameter(@NeverNull String name, @CanBeNull String defaultValue) {
-		super();
-		/*
-		 * TODO what's the reason for calling super() here? This class has no
-		 * super class other than Object?
-		 */
-		
 		this.name = name;
 		this.defaultValue = defaultValue;
 		this.isArray = false;

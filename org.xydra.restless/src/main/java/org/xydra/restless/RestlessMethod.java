@@ -46,7 +46,7 @@ import org.xydra.restless.utils.ServletUtils;
  */
 
 @ThreadSafe
-public class RestlessMethod {
+class RestlessMethod {
 	
 	private static final String UPLOAD_PARAM = "_upload_";
 	
@@ -84,6 +84,8 @@ public class RestlessMethod {
 	 * creation process when this is a class and not an instance.(what's the
 	 * reason for having this anyway? Why isn't this an instance right from the
 	 * start? lazy instanziation?)
+	 * 
+	 * instanceOrClass-classes are always thread-safe
 	 */
 	private Object instanceOrClass;
 	
@@ -166,6 +168,8 @@ public class RestlessMethod {
 	/*
 	 * TODO maybe call this method "execute" to avoid disambiguation with
 	 * Thread.run()?
+	 * 
+	 * Yes
 	 */
 	public boolean run(@NeverNull final Restless restless, @NeverNull final HttpServletRequest req,
 	        @NeverNull final HttpServletResponse res, @NeverNull NanoClock requestClock)
@@ -362,6 +366,11 @@ public class RestlessMethod {
 				}
 			}
 			
+			/*
+			 * TODO split method in two (check/run) and return wrapper object
+			 * containing the necessary data to actuallyexecute the method.
+			 */
+			
 			try {
 				requestClock.stopAndStart("restless.run->invoke");
 				// onBefore-run-event
@@ -492,11 +501,6 @@ public class RestlessMethod {
 		return this.httpMethod;
 	}
 	
-	/*
-	 * TODO instead of just warning the user that he/she is not supposed to
-	 * write on the given variable, writing interfaces which prohibit
-	 * write-access altogether might be an option?
-	 */
 	/**
 	 * Attention: Do not write on the returned object, only read-access is
 	 * allowed. No guarantees to the behavior of the application can be made if
@@ -562,12 +566,6 @@ public class RestlessMethod {
 		boolean isStatic = Modifier.isStatic(method.getModifiers());
 		Object result;
 		if(isStatic) {
-			/*
-			 * TODO how to synchronize the execution of the method here? If the
-			 * method itself is not thread-safe, there might be some problems.
-			 * Synchronizing on the method object probably doesn't work, since
-			 * there could be multiple objects representing the same method.
-			 */
 			
 			result = method.invoke(null, javaMethodArgs.toArray(new Object[0]));
 		} else {
