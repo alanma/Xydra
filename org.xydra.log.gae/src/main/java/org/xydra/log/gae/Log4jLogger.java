@@ -1,5 +1,6 @@
 package org.xydra.log.gae;
 
+import org.xydra.annotations.ThreadSafe;
 import org.xydra.log.Logger;
 
 
@@ -18,8 +19,14 @@ import org.xydra.log.Logger;
  * 
  * @author voelkel
  */
+@ThreadSafe
 public class Log4jLogger extends Logger {
 	
+	/*
+	 * log4j is already thread-safe (according to the official website:
+	 * http://logging.apache.org/log4j/1.2/faq.html#a1.7), so no manual
+	 * synchronization needs to be done in this class.
+	 */
 	private org.apache.log4j.Logger log4j;
 	private String callerClassToHideFromStacktrace;
 	
@@ -31,7 +38,8 @@ public class Log4jLogger extends Logger {
 	
 	@Override
 	public void debug(String msg) {
-		this.log4j.log(this.callerClassToHideFromStacktrace, org.apache.log4j.Level.DEBUG, msg, null);
+		this.log4j.log(this.callerClassToHideFromStacktrace, org.apache.log4j.Level.DEBUG, msg,
+		        null);
 	}
 	
 	@Override
@@ -41,7 +49,8 @@ public class Log4jLogger extends Logger {
 	
 	@Override
 	public void error(String msg) {
-		this.log4j.log(this.callerClassToHideFromStacktrace, org.apache.log4j.Level.ERROR, msg, null);
+		this.log4j.log(this.callerClassToHideFromStacktrace, org.apache.log4j.Level.ERROR, msg,
+		        null);
 	}
 	
 	@Override
@@ -51,7 +60,8 @@ public class Log4jLogger extends Logger {
 	
 	@Override
 	public void info(String msg) {
-		this.log4j.log(this.callerClassToHideFromStacktrace, org.apache.log4j.Level.INFO, msg, null);
+		this.log4j
+		        .log(this.callerClassToHideFromStacktrace, org.apache.log4j.Level.INFO, msg, null);
 	}
 	
 	@Override
@@ -86,7 +96,8 @@ public class Log4jLogger extends Logger {
 	
 	@Override
 	public void trace(String msg) {
-		this.log4j.log(this.callerClassToHideFromStacktrace, org.apache.log4j.Level.TRACE, msg, null);
+		this.log4j.log(this.callerClassToHideFromStacktrace, org.apache.log4j.Level.TRACE, msg,
+		        null);
 	}
 	
 	@Override
@@ -96,7 +107,8 @@ public class Log4jLogger extends Logger {
 	
 	@Override
 	public void warn(String msg) {
-		this.log4j.log(this.callerClassToHideFromStacktrace, org.apache.log4j.Level.WARN, msg, null);
+		this.log4j
+		        .log(this.callerClassToHideFromStacktrace, org.apache.log4j.Level.WARN, msg, null);
 	}
 	
 	@Override

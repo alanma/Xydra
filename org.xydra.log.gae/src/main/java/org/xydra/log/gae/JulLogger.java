@@ -3,6 +3,7 @@ package org.xydra.log.gae;
 import java.util.Collection;
 import java.util.logging.LogRecord;
 
+import org.xydra.annotations.ThreadSafe;
 import org.xydra.log.ILogListener;
 import org.xydra.log.Logger;
 
@@ -22,9 +23,25 @@ import org.xydra.log.Logger;
  * 
  * @author voelkel
  */
+@ThreadSafe
 public class JulLogger extends Logger {
 	
+	/**
+	 * java.util.logging.Logger is thread-safe.
+	 */
 	private java.util.logging.Logger jul;
+	
+	/**
+	 * access on this collection needs to be manually synchronized on the
+	 * collection itself. Since the collection which is given in the
+	 * constructors might be shared between different objects (for example, see
+	 * {@link JulLoggerFactory}, line 37) the access always needs to be
+	 * synchronized on this object, so that the synchronization can be
+	 * consistent over the different objects which share this object.
+	 * 
+	 * TODO what is the purpose of these listeners anyway? They're never called
+	 * as far as I can see. ~Kaidel
+	 */
 	private Collection<ILogListener> logListeners;
 	
 	public JulLogger(java.util.logging.Logger julLogger) {
@@ -57,7 +74,7 @@ public class JulLogger extends Logger {
 		return record;
 	}
 	
-	private void setCorrectCallerClassAndMethod(LogRecord record) {
+	private synchronized void setCorrectCallerClassAndMethod(LogRecord record) {
 		try {
 			throw new RuntimeException("trigger");
 		} catch(RuntimeException e) {

@@ -2,6 +2,8 @@ package org.xydra.log.gae;
 
 import java.util.logging.LogRecord;
 
+import org.xydra.annotations.ThreadSafe;
+
 
 /**
  * A custom java util logging formatter trying to output the pattern
@@ -25,6 +27,7 @@ import java.util.logging.LogRecord;
  * 
  * @author voelkel
  */
+@ThreadSafe
 public class ClickbableLinksInEclipseLogFormatter extends java.util.logging.Formatter {
 	
 	@Override
