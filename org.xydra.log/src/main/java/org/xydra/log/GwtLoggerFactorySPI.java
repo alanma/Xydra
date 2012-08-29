@@ -2,12 +2,15 @@ package org.xydra.log;
 
 import java.util.Collection;
 
+import org.xydra.annotations.ThreadSafe;
+
 
 /**
  * Delegate to an GWT 2.1 logger
  * 
  * @author xamde
  */
+@ThreadSafe
 public class GwtLoggerFactorySPI implements ILoggerFactorySPI {
 	
 	@Override

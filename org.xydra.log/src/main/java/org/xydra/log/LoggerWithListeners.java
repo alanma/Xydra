@@ -2,15 +2,18 @@ package org.xydra.log;
 
 import java.util.Collection;
 
+import org.apache.http.annotation.NotThreadSafe;
+
 
 /**
  * Log to logger and delegate to {@link ILogListener}.
  * 
  * @author voelkel
  */
+@NotThreadSafe
 public class LoggerWithListeners extends Logger {
 	
-	private Collection<ILogListener> logListeners;
+	protected Collection<ILogListener> logListeners;
 	private Logger log;
 	
 	public LoggerWithListeners(Logger logger, Collection<ILogListener> logListeners) {

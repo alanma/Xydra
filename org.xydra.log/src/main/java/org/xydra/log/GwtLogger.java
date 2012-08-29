@@ -1,11 +1,15 @@
 package org.xydra.log;
 
+import org.xydra.annotations.ThreadSafe;
+
+
 /**
  * Delegate to an GWT 2.1 logger
  * 
  * @author xamde
  */
-public class GwtLogger extends org.xydra.log.Logger implements IThreadSafe {
+@ThreadSafe
+public class GwtLogger extends org.xydra.log.Logger {
 	
 	/*
 	 * this implementation is inherently thread-safe, since

@@ -1,12 +1,15 @@
 package org.xydra.log;
 
+import org.xydra.annotations.ThreadSafe;
+
+
 /**
  * A thread-safe version of {@link DefaultLogger}.
  * 
  * @author Kaidel
  */
-
-public class ThreadSafeDefaultLogger extends DefaultLogger implements IThreadSafe {
+@ThreadSafe
+public class ThreadSafeDefaultLogger extends DefaultLogger {
 	
 	private Object levelLock;
 	private Object loggingLock;

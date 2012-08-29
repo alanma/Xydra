@@ -7,6 +7,12 @@ package org.xydra.log;
  */
 public abstract class Logger {
 	
+	/*
+	 * The current code in this class is thread safe. Changing this class might
+	 * change that and may make implementations of this abstract class, which
+	 * are currently thread-safe, thread-unsafe.
+	 */
+	
 	/**
 	 * The classic set of warning levels as found in log4j and slf4j.
 	 * 

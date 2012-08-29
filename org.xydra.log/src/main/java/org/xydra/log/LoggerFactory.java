@@ -3,6 +3,8 @@ package org.xydra.log;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.xydra.annotations.ThreadSafe;
+
 import com.google.gwt.core.client.GWT;
 
 
@@ -12,6 +14,7 @@ import com.google.gwt.core.client.GWT;
  * @author voelkel
  * 
  */
+@ThreadSafe
 public class LoggerFactory {
 	
 	private static ILoggerFactorySPI loggerFactorySPI;
@@ -24,13 +27,13 @@ public class LoggerFactory {
 	 * 
 	 * @param logListener a listener to receive all log messages
 	 */
-	public static void addLogListener(ILogListener logListener) {
+	public static synchronized void addLogListener(ILogListener logListener) {
 		logListeners_.add(logListener);
 		loggerFactorySPI.getLogger(ROOT_LOGGER_NAME, null).info(
 		        "Logging: Attached log listener " + logListener.getClass().getName());
 	}
 	
-	public static void removeLogListener(ILogListener logListener) {
+	public static synchronized void removeLogListener(ILogListener logListener) {
 		logListeners_.remove(logListener);
 		loggerFactorySPI.getLogger(ROOT_LOGGER_NAME, null).info(
 		        "Logging: Removed log listener " + logListener.getClass().getName());
@@ -40,21 +43,21 @@ public class LoggerFactory {
 	 * @param clazz used as a name for the logger
 	 * @return a logger, using the sub-system configured by
 	 */
-	public static Logger getLogger(Class<?> clazz) {
+	public static synchronized Logger getLogger(Class<?> clazz) {
 		if(loggerFactorySPI == null) {
 			init();
 		}
 		return loggerFactorySPI.getLogger(clazz.getName(), logListeners_);
 	}
 	
-	public static Logger getThreadSafeLogger(Class<?> clazz) {
+	public static synchronized Logger getThreadSafeLogger(Class<?> clazz) {
 		if(loggerFactorySPI == null) {
 			init();
 		}
 		return loggerFactorySPI.getThreadSafeLogger(clazz.getName(), logListeners_);
 	}
 	
-	private static void init() {
+	private static synchronized void init() {
 		// try to use GWT logger
 		if(gwtEnabled() && gwtLogEnabled()) {
 			loggerFactorySPI = new GwtLoggerFactorySPI();
@@ -108,7 +111,7 @@ public class LoggerFactory {
 	/**
 	 * @param spi an {@link ILoggerFactorySPI} instance
 	 */
-	public static void setLoggerFactorySPI(ILoggerFactorySPI spi) {
+	public static synchronized void setLoggerFactorySPI(ILoggerFactorySPI spi) {
 		if(loggerFactorySPI == null || !loggerFactorySPI.getClass().equals(spi.getClass())) {
 			loggerFactorySPI = spi;
 			try {
@@ -120,7 +123,7 @@ public class LoggerFactory {
 		}
 	}
 	
-	public static boolean hasLoggerFactorySPI() {
+	public static synchronized boolean hasLoggerFactorySPI() {
 		return loggerFactorySPI != null;
 	}
 	

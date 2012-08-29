@@ -1,5 +1,9 @@
 package org.xydra.log;
 
+import org.xydra.annotations.NotThreadSafe;
+
+
+@NotThreadSafe
 public class DefaultLogger extends Logger {
 	
 	public static final String ROOT_LOGGER_NAME = "ROOT";

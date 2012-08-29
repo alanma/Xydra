@@ -2,7 +2,10 @@ package org.xydra.log;
 
 import java.util.Collection;
 
+import org.xydra.annotations.ThreadSafe;
 
+
+@ThreadSafe
 public class DefaultLoggerFactorySPI implements ILoggerFactorySPI {
 	
 	/*
