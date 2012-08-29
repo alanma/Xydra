@@ -20,6 +20,9 @@ public class ThreadSafeLoggerWithListeners extends LoggerWithListeners {
 	 * The given logger needs to be thread-safe. TODO is this the way to go?
 	 * Maybe there's an option to check whether the given logger is annotated
 	 * with "@ThreadSafe"
+	 * 
+	 * @param logger
+	 * @param logListeners
 	 */
 	public ThreadSafeLoggerWithListeners(Logger logger, Collection<ILogListener> logListeners) {
 		super(logger, logListeners);
