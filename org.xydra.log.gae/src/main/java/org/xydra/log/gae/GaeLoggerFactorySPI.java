@@ -62,8 +62,7 @@ public class GaeLoggerFactorySPI implements ILoggerFactorySPI {
 	
 	@Override
 	public Logger getThreadSafeLogger(String name, Collection<ILogListener> logListeners) {
-		// TODO Auto-generated method stub
-		return null;
+		return factory.getThreadSafeLogger(name, logListeners);
 	}
 	
 }
