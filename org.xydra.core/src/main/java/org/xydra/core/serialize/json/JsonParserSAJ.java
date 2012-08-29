@@ -243,10 +243,20 @@ public class JsonParserSAJ {
 			case 0:
 			case '\n':
 			case '\r':
-				// FIXME !!! newlines and json DIRTY HACK
-				// throw syntaxError("Unterminated string");
+				/*
+				 * FIXME This hack tells the JsonParser to read newlines as if
+				 * they were encoded newlines. All newlines written by the
+				 * encoder form now on are properly encoded. Reading
+				 * pretty-printed valid JSON from other sources will fail here.
+				 * There is currently production data with the wrong encoding
+				 * and it wouldbe too costly to re-encode all data. Therefore
+				 * this fix must live until the last such production data has
+				 * been migrated.
+				 */
 				
-				// just pretend we read a properly escaped \n
+				// Was: throw syntaxError("Unterminated string");
+				
+				// Is: just pretend we read a properly escaped \n
 				sb.append("\n");
 				break;
 			case '\\':
