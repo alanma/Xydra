@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -51,13 +52,13 @@ class RestlessMethod {
 	private static final String UPLOAD_PARAM = "_upload_";
 	
 	/*
-	 * TODO use a thread-safe map here!
+	 * TODO is a ConcurrentHashMap really what we want here?
 	 */
-	private static Map<Class<?>,Object> instanceCache = new HashMap<Class<?>,Object>();
+	private static Map<Class<?>,Object> instanceCache = new ConcurrentHashMap<Class<?>,Object>();
 	
 	private static Logger log = LoggerFactory.getThreadSafeLogger(RestlessMethod.class);
 	
-	private final boolean adminOnly; // TODO or could this be changed?
+	private final boolean adminOnly;
 	/**
 	 * GET, PUT, POST, DELETE
 	 */
@@ -66,26 +67,10 @@ class RestlessMethod {
 	 * and all methods only read this variable -> no synchronization necessary
 	 * at the moment
 	 */
-	/*
-	 * TODO what about making this final?
-	 */
-	private String httpMethod;
+	private final String httpMethod;
 	
 	/*
-	 * instanceOrClass might be an instance on which methods are executed,
-	 * therefore we don't know in advance how it will be manipulated -> Access
-	 * on instanceOrClass must be synchronized
-	 */
-	/*
-	 * TODO the best thing for optimization would be if only thread-safe classes
-	 * would be allowed here. Currently we're locking on the whole
-	 * instanceOrClassobject during the execution of a method, which might not
-	 * be necessary if it is thread-safe.We'd still need to synchronize the
-	 * creation process when this is a class and not an instance.(what's the
-	 * reason for having this anyway? Why isn't this an instance right from the
-	 * start? lazy instanziation?)
-	 * 
-	 * instanceOrClass-classes are always thread-safe
+	 * Only thread-safe classes are allowed here!
 	 */
 	private Object instanceOrClass;
 	
@@ -101,14 +86,14 @@ class RestlessMethod {
 	 * after creation and all methods only read this variable -> no
 	 * synchronization necessary at the moment
 	 */
-	private RestlessParameter[] requiredNamedParameter;
+	private final RestlessParameter[] requiredNamedParameter;
 	
 	/*
 	 * currently, pathTemplate (and its contents) is never written after
 	 * creation and all methods only read this variable -> no synchronization
 	 * necessary at the moment
 	 */
-	private PathTemplate pathTemplate;
+	private final PathTemplate pathTemplate;
 	
 	/**
 	 * @param object instance to be called when web method is used - or class to
@@ -131,7 +116,7 @@ class RestlessMethod {
 	 * @param parameter in order of variables in 'method'. See
 	 *            {@link RestlessParameter}. @NeverNull TODO is this correct?
 	 */
-	public RestlessMethod(@NeverNull Object object, @NeverNull String httpMethod,
+	protected RestlessMethod(@NeverNull Object object, @NeverNull String httpMethod,
 	        @NeverNull String methodName, @NeverNull PathTemplate pathTemplate, boolean adminOnly,
 	        @NeverNull RestlessParameter[] parameter) {
 		this.instanceOrClass = object;
@@ -148,38 +133,14 @@ class RestlessMethod {
 		this.requiredNamedParameter = parameter;
 	}
 	
-	/**
-	 * Executes the method on the mapped instance.
-	 * 
-	 * Precedence of variable extraction: urlPath (before questionmark) >
-	 * httpParams (query params + POST params ) > default value
-	 * 
-	 * IMPROVE distinguish query params from POST params to define a clearer
-	 * precedence
-	 * 
-	 * @param restless @NeverNull
-	 * @param req @NeverNull
-	 * @param res @NeverNull
-	 * @param requestClock @NeverNull already be started
-	 * 
-	 * @return true if method launched successfully, i.e. parameters matched
-	 * @throws IOException if result writing fails
-	 */
-	/*
-	 * TODO maybe call this method "execute" to avoid disambiguation with
-	 * Thread.run()?
-	 * 
-	 * Yes
-	 */
-	public boolean run(@NeverNull final Restless restless, @NeverNull final HttpServletRequest req,
+	public RestlessMethodExecutionParameters prepareMethodExecution(
+	        @NeverNull final Restless restless, @NeverNull final HttpServletRequest req,
 	        @NeverNull final HttpServletResponse res, @NeverNull NanoClock requestClock)
 	        throws IOException {
 		
 		/*
 		 * TODO is this really thread-safe now? Is the method executed in a
 		 * thread-safe manner?
-		 * 
-		 * TODO why exactly is a restless instance passed as a parameter?
 		 */
 		
 		requestClock.stopAndStart("servlet->restless.run");
@@ -208,6 +169,7 @@ class RestlessMethod {
 			res.sendError(500, "Malconfigured server. Method '" + this.methodName
 			        + "' not found in '" + Restless.instanceOrClass_className(this.instanceOrClass)
 			        + "'");
+			return null;
 		} else {
 			// try to call it
 			List<Object> javaMethodArgs = new ArrayList<Object>();
@@ -352,7 +314,7 @@ class RestlessMethod {
 						if(param.mustBeDefinedExplicitly()) {
 							log.debug("Parameter '" + param.getName()
 							        + "' required but no explicitly defined. Found no value.");
-							return false;
+							return null;
 						} else {
 							value = param.getDefaultValue();
 						}
@@ -361,97 +323,122 @@ class RestlessMethod {
 					boundNamedParameterNumber++;
 					if(boundNamedParameterNumber > this.requiredNamedParameter.length) {
 						log.debug("More non-trivial parameter required by Java method than mapped via RestlessParameters");
-						return false;
+						return null;
 					}
 				}
 			}
 			
-			/*
-			 * TODO split method in two (check/run) and return wrapper object
-			 * containing the necessary data to actuallyexecute the method.
-			 */
+			return new RestlessMethodExecutionParameters(method, restlessContext, javaMethodArgs,
+			        hasHttpServletResponseParameter, uniqueRequestId, requestClock);
+		}
+		
+	}
+	
+	/**
+	 * Executes the method on the mapped instance.
+	 * 
+	 * Precedence of variable extraction: urlPath (before questionmark) >
+	 * httpParams (query params + POST params ) > default value
+	 * 
+	 * IMPROVE distinguish query params from POST params to define a clearer
+	 * precedence
+	 * 
+	 * @param restless @NeverNull
+	 * @param req @NeverNull
+	 * @param res @NeverNull
+	 * 
+	 * @return true if method launched successfully, i.e. parameters matched
+	 * @throws IOException if result writing fails
+	 */
+	public boolean execute(@NeverNull RestlessMethodExecutionParameters params,
+	        @NeverNull final Restless restless, @NeverNull final HttpServletRequest req,
+	        @NeverNull final HttpServletResponse res) throws IOException {
+		
+		Method method = params.getMethod();
+		IRestlessContext restlessContext = params.getRestlessContext();
+		List<Object> javaMethodArgs = params.getJavaMethodArgs();
+		boolean hasHttpServletResponseParameter = params.hasHttpServletResponseParameter();
+		String uniqueRequestId = params.getUniqueRequestId();
+		NanoClock requestClock = params.getClock();
+		
+		try {
+			requestClock.stopAndStart("restless.run->invoke");
+			// onBefore-run-event
+			restless.fireRequestStarted(restlessContext);
+			// run
 			
-			try {
-				requestClock.stopAndStart("restless.run->invoke");
-				// onBefore-run-event
-				restless.fireRequestStarted(restlessContext);
-				// run
-				
-				Object result = invokeMethod(method, this.instanceOrClass, javaMethodArgs);
-				
-				requestClock
-				        .stopAndStart("invoke " + methodReference(this.instanceOrClass, method));
-				
-				if(!hasHttpServletResponseParameter) {
-					res.setContentType(Restless.MIME_TEXT_PLAIN + "; charset="
-					        + Restless.CONTENT_TYPE_CHARSET_UTF8);
-					res.setStatus(200);
-					Writer w = res.getWriter();
-					// we need to send back something standard ourselves
-					w.write("Executed " + methodReference(this.instanceOrClass, method) + "\n");
-					if(result != null && result instanceof String) {
-						w.write("Result: " + result);
-					}
-					w.flush();
+			Object result = invokeMethod(method, this.instanceOrClass, javaMethodArgs);
+			
+			requestClock.stopAndStart("invoke " + methodReference(this.instanceOrClass, method));
+			
+			if(!hasHttpServletResponseParameter) {
+				res.setContentType(Restless.MIME_TEXT_PLAIN + "; charset="
+				        + Restless.CONTENT_TYPE_CHARSET_UTF8);
+				res.setStatus(200);
+				Writer w = res.getWriter();
+				// we need to send back something standard ourselves
+				w.write("Executed " + methodReference(this.instanceOrClass, method) + "\n");
+				if(result != null && result instanceof String) {
+					w.write("Result: " + result);
 				}
-				// post-run-event
-				restless.fireRequestFinished(restlessContext);
+				w.flush();
+			}
+			// post-run-event
+			restless.fireRequestFinished(restlessContext);
+			
+			requestClock.stopAndStart("response");
+			
+		} catch(InvocationTargetException e) {
+			Throwable cause = e.getCause();
+			if(cause instanceof RestlessException) {
+				RestlessException re = (RestlessException)cause;
+				res.setStatus(re.getStatusCode());
+				res.setContentType(Restless.MIME_TEXT_PLAIN + "; charset="
+				        + Restless.CONTENT_TYPE_CHARSET_UTF8);
+				Writer w = res.getWriter();
+				w.write(re.getMessage());
+			} else {
 				
-				requestClock.stopAndStart("response");
+				IRestlessContext context = new RestlessContextImpl(restless, req, res,
+				        uniqueRequestId);
 				
-			} catch(InvocationTargetException e) {
-				Throwable cause = e.getCause();
-				if(cause instanceof RestlessException) {
-					RestlessException re = (RestlessException)cause;
-					res.setStatus(re.getStatusCode());
-					res.setContentType(Restless.MIME_TEXT_PLAIN + "; charset="
-					        + Restless.CONTENT_TYPE_CHARSET_UTF8);
-					Writer w = res.getWriter();
-					w.write(re.getMessage());
-				} else {
-					
-					IRestlessContext context = new RestlessContextImpl(restless, req, res,
-					        uniqueRequestId);
-					
-					boolean handled = false;
-					
+				boolean handled = false;
+				
+				try {
+					handled = callLocalExceptionHandler(cause, this.instanceOrClass, context);
+				} catch(InvocationTargetException ite) {
+					cause = new ExceptionHandlerException(e.getCause());
+				} catch(Throwable th) {
+					cause = new ExceptionHandlerException(th);
+				}
+				
+				if(!handled) {
 					try {
-						handled = callLocalExceptionHandler(cause, this.instanceOrClass, context);
-					} catch(InvocationTargetException ite) {
-						cause = new ExceptionHandlerException(e.getCause());
+						handled = callGlobalExceptionHandlers(cause, context);
 					} catch(Throwable th) {
 						cause = new ExceptionHandlerException(th);
 					}
-					
-					if(!handled) {
-						try {
-							handled = callGlobalExceptionHandlers(cause, context);
-						} catch(Throwable th) {
-							cause = new ExceptionHandlerException(th);
-						}
-					}
-					
-					if(!handled) {
-						// TODO hide internal messages better from user
-						StringWriter sw = new StringWriter();
-						PrintWriter pw = new PrintWriter(sw);
-						e.printStackTrace(pw);
-						String stacktrace = sw.toString();
-						if(!res.isCommitted()) {
-							res.sendError(500, e + " -- " + stacktrace);
-						}
-						log.error("Exception while executing RESTless method. Stacktrace: "
-						        + stacktrace, cause);
-					}
 				}
-			} catch(IllegalArgumentException e) {
-				res.sendError(500, e.toString());
-				log.error("RESTless method registered with wrong arguments: ", e);
-			} catch(IllegalAccessException e) {
-				res.sendError(500, e.toString());
-				log.error("", e);
+				
+				if(!handled) {
+					// TODO hide internal messages better from user
+					StringWriter sw = new StringWriter();
+					PrintWriter pw = new PrintWriter(sw);
+					e.printStackTrace(pw);
+					String stacktrace = sw.toString();
+					if(!res.isCommitted()) {
+						res.sendError(500, e + " -- " + stacktrace);
+					}
+					log.error("Exception while executing RESTless method. Stacktrace: "
+					        + stacktrace, cause);
+				}
 			}
-			
+		} catch(IllegalArgumentException e) {
+			res.sendError(500, e.toString());
+			log.error("RESTless method registered with wrong arguments: ", e);
+		} catch(IllegalAccessException e) {
+			res.sendError(500, e.toString());
+			log.error("", e);
 		}
 		
 		return true;

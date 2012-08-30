@@ -13,6 +13,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletConfig;
@@ -268,7 +269,10 @@ public class Restless extends HttpServlet {
 	/**
 	 * Simulates the servlet context when run outside a servlet container
 	 */
-	private HashMap<String,Object> localContext;
+	/**
+	 * TODO is a ConcurrentHashMap really what we want here?
+	 */
+	private ConcurrentHashMap<String,Object> localContext;
 	
 	private String loggerFactory;
 	
@@ -361,15 +365,19 @@ public class Restless extends HttpServlet {
 	private void delegateToDefaultServlet(@NeverNull HttpServletRequest req,
 	        @NeverNull HttpServletResponse res) throws IOException {
 		try {
-			RequestDispatcher rd = getServletContext().getNamedDispatcher("default");
-			HttpServletRequest wrapped = new HttpServletRequestWrapper(req) {
-				@Override
-				public String getServletPath() {
-					return "";
-				}
-			};
+			ServletContext sc = this.getServletContext();
 			
-			rd.forward(wrapped, res);
+			synchronized(sc) {
+				RequestDispatcher rd = sc.getNamedDispatcher("default");
+				HttpServletRequest wrapped = new HttpServletRequestWrapper(req) {
+					@Override
+					public String getServletPath() {
+						return "";
+					}
+				};
+				
+				rd.forward(wrapped, res);
+			}
 		} catch(ServletException e) {
 			throw new RuntimeException(e);
 		}
@@ -586,24 +594,30 @@ public class Restless extends HttpServlet {
 	public Object getServletContextAttribute(@CanBeNull String key) {
 		try {
 			ServletContext sc = this.getServletContext();
-			return sc.getAttribute(key);
+			synchronized(sc) {
+				return sc.getAttribute(key);
+			}
 		} catch(NullPointerException e) {
 			// deal with lazy init
 			if(this.localContext == null) {
 				return null;
 			}
-			/*
-			 * TODO do we need a lock here? (local context)
-			 * 
-			 * use
-			 * http://docs.oracle.com/javase/1.5.0/docs/api/java/util/concurrent
-			 * /ConcurrentHashMap.html
-			 */
+			
 			return this.localContext.get(key);
 		}
 	}
 	
+	/**
+	 * Attention: Please always synchronize access on the returned
+	 * ServletContext on itself, to ensure that the access on it is always
+	 * correctly synchronized over all objects that share it.
+	 */
 	public ServletContext getServletContextFromInit() {
+		/*
+		 * TODO this doesn't really return the servlectContext in the state it
+		 * was during init(), since there's only one context per servlet (as far
+		 * as I know), which might be changed by other methods.
+		 */
 		return this.servletContext;
 	}
 	
@@ -945,78 +959,55 @@ public class Restless extends HttpServlet {
 		/* Find RestlessMethod to be called ------------------ */
 		// look through all registered methods
 		final boolean reqViaAdminUrl = requestIsViaAdminUrl(reqHandedDown);
-		boolean couldStartMethod = false;
 		
-		/**
-		 * TODO Optimization:
+		/*
+		 * Searching and executing the correct method is split up in two blocks
+		 * to only block the list of methods during the search.
 		 * 
-		 * Find the method in a synchronized(this.methods) block, go out of this
-		 * block, and run the method. The method is supposed to be thread-safe
-		 * and there is no reason that the whole list of methods should remain
-		 * locked during its execution.
-		 * 
-		 * Problem: The method-list could be modified between the find-process
-		 * and the execution of the method. But methods cannot be removed, so
-		 * this shouldn't be a problem... the worst thing that could happen is
-		 * that two different threads want to execute the same method, where the
-		 * first thread starts first, finds the method, is interrupted and then
-		 * the second finds and immediately executes the method (before the
-		 * first thread). This shouldn't be a problem, since the behavior of
-		 * different threads should not depend on
-		 * "Thread A finished before Thread B"-type assumptions. Even if we do
-		 * ensure that Thread A starts executing the method before Thread B, an
-		 * interruption during the execution might occur, which might lead to
-		 * the case that Thread B finishes before Thread A, we the method itself
-		 * is not completely synchronized, i.e. when multiple threads might
-		 * execute the method concurrently and only the necessary parts in the
-		 * method are synchronized, instead of blocking the complete method,
-		 * which is desirable.
-		 * 
-		 * If we block the whole method, we could implement a queueing monitor
-		 * for the method which ensures that the threads execute the method in
-		 * the correct order. But this is difficult and might potentially
-		 * introduce deadlocks.
-		 * 
-		 * If we do not change the current implementation, it seems like
-		 * RestlessMethod doesn't need to be threadsafe itself, since executing
-		 * it is completely blocked from other threads, because the methods are
-		 * only accessed here (at least it looks like that)
-		 * 
+		 * Find the correct method, get the necessary parameters...
 		 */
+		RestlessMethodExecutionParameters params = null;
+		RestlessMethod restlessMethod = null;
 		synchronized(this.methods) {
-			for(RestlessMethod restlessMethod : this.methods) {
+			for(RestlessMethod m : this.methods) {
 				/*
 				 * if secure access, ignore all public methods. if insecure
 				 * access, ignore all secure methods: Skip all restlessMethods
 				 * that may not be accessed
 				 */
-				if(reqViaAdminUrl == restlessMethod.isAdminOnly()) {
+				if(reqViaAdminUrl == m.isAdminOnly()) {
 					// if path matches
-					if(restlessMethod.getPathTemplate().matches(path)) {
+					if(m.getPathTemplate().matches(path)) {
 						foundPath = true;
 						// and HTTP method matches
-						if(httpMethod.equalsIgnoreCase(restlessMethod.getHttpMethod())) {
-							foundMethod = true;
+						if(httpMethod.equalsIgnoreCase(m.getHttpMethod())) {
 							try {
-								couldStartMethod = restlessMethod.run(this, reqHandedDown, res,
+								params = m.prepareMethodExecution(this, reqHandedDown, res,
 								        requestClock);
+								
 							} catch(IOException e) {
 								throw new RuntimeException(e);
 							}
-							if(couldStartMethod) {
-								/*
-								 * TODO if the method could not be started, the
-								 * for-loop continues iterating over the
-								 * methods, although the method which should've
-								 * been run was already found. Is there a reason
-								 * for this?
-								 */
-								
+							if(params != null) {
+								restlessMethod = m;
+								foundMethod = true;
 								break;
 							}
 						}
 					}
 				}
+			}
+		}
+		
+		/*
+		 * ... and execute the method if it was found.
+		 */
+		if(restlessMethod != null) {
+			assert params != null;
+			try {
+				restlessMethod.execute(params, this, reqHandedDown, res);
+			} catch(IOException e) {
+				throw new RuntimeException(e);
 			}
 		}
 		
@@ -1065,27 +1056,17 @@ public class Restless extends HttpServlet {
 	 * @param value attribute value @NeverNull
 	 */
 	
-	/*
-	 * TODO How important is this method? This more or less decides whether we
-	 * need to synchronize on the ServletContext or not (basically an
-	 * optimization question, since access should be synchronized).
-	 * 
-	 * synchronize
-	 */
-	
 	public void setServletContextAttribute(@NeverNull String key, @NeverNull Object value) {
 		try {
 			ServletContext sc = this.getServletContext();
-			sc.setAttribute(key, value);
+			synchronized(sc) {
+				sc.setAttribute(key, value);
+			}
 		} catch(NullPointerException e) {
 			// lazy init
 			if(this.localContext == null) {
-				this.localContext = new HashMap<String,Object>();
+				this.localContext = new ConcurrentHashMap<String,Object>();
 			}
-			/*
-			 * TODO synchronization on localContext (or a thread-safe local
-			 * context) might be necessary here!
-			 */
 			this.localContext.put(key, value);
 		}
 	}

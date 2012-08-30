@@ -29,8 +29,7 @@ public class RestlessParameter {
 	
 	/**
 	 * 
-	 * @param name for binding it to variable names @NeverNull TODO is this
-	 *            correct?
+	 * @param name for binding it to variable names @NeverNull
 	 * @param defaultValue the default value if the parameter could not be set
 	 *            from HTTP request content. Use null for none. @CanBeNull
 	 */
@@ -41,8 +40,7 @@ public class RestlessParameter {
 	}
 	
 	/**
-	 * @param name for binding it to variable names @NeverNull TODO is this
-	 *            correct?
+	 * @param name for binding it to variable names @NeverNull
 	 * @param isArray true if there can be multiple values @NeverNull
 	 */
 	public RestlessParameter(@NeverNull String name, @NeverNull boolean isArray) {
@@ -56,8 +54,7 @@ public class RestlessParameter {
 	 * Create a parameter without a default value. Method fails if parameter not
 	 * set.
 	 * 
-	 * @param name for binding it to variable names @NeverNull TODO is this
-	 *            correct?
+	 * @param name for binding it to variable names @NeverNull
 	 */
 	public RestlessParameter(@NeverNull String name) {
 		this(name, DEFAULT_VALUE_NONE_BUT_REQUIRED);

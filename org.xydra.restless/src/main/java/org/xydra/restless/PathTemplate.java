@@ -61,10 +61,7 @@ class PathTemplate {
 	 * thread-safe. (at the moment - if a method which writes to this variable
 	 * is added, access to this variable needs to be made thread-safe)
 	 */
-	/*
-	 * TODO what about making this final?
-	 */
-	private String regex;
+	private final String regex;
 	
 	/**
 	 * Changing the contents of this list is not allowed!
