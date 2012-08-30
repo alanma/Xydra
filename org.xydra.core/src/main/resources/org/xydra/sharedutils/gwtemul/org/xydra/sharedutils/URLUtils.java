@@ -16,7 +16,8 @@ public class URLUtils {
 	 *         to their original character representations.
 	 * @throws IllegalArgumentException if could not be decoded
 	 */
-	public static String decode(String coded) throws IllegalArgumentException {
+	public static String decode(@CanBeNull String coded) throws IllegalArgumentException {
+		if (coded == null) return null;
 		return URL.decode(coded);
 	}
 	
@@ -27,7 +28,8 @@ public class URLUtils {
 	 *         converting it into its UTF-8 encoding and then encoding each of
 	 *         the resulting bytes as a %xx hexadecimal escape sequence.
 	 */
-	public static String encode(String raw) {
+	public static String encode(@CanBeNull String raw) {
+		if (raw == null) return null;
 		return URL.encode(raw);
 	}
 	

@@ -4,7 +4,12 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 
+import org.xydra.annotations.CanBeNull;
+import org.xydra.annotations.RunsInGWT;
 
+
+/** For GWT, super-source is used */
+@RunsInGWT(true)
 public class URLUtils {
 	
 	private static final String UTF8 = "utf-8";
@@ -15,7 +20,9 @@ public class URLUtils {
 	 *         to their original character representations.
 	 * @throws IllegalArgumentException if could not be decoded
 	 */
-	public static String decode(String coded) throws IllegalArgumentException {
+	public static String decode(@CanBeNull String coded) throws IllegalArgumentException {
+		if(coded == null)
+			return null;
 		try {
 			return URLDecoder.decode(coded, UTF8);
 		} catch(UnsupportedEncodingException e) {
@@ -30,7 +37,9 @@ public class URLUtils {
 	 *         converting it into its UTF-8 encoding and then encoding each of
 	 *         the resulting bytes as a %xx hexadecimal escape sequence.
 	 */
-	public static String encode(String raw) {
+	public static String encode(@CanBeNull String raw) {
+		if(raw == null)
+			return null;
 		try {
 			return URLEncoder.encode(raw, UTF8);
 		} catch(UnsupportedEncodingException e) {
