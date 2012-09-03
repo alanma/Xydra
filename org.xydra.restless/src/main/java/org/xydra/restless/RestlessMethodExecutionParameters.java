@@ -3,6 +3,8 @@ package org.xydra.restless;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import org.xydra.annotations.NeverNull;
+import org.xydra.annotations.NotThreadSafe;
 import org.xydra.restless.utils.NanoClock;
 
 
@@ -16,6 +18,7 @@ import org.xydra.restless.utils.NanoClock;
  * @author Kaidel
  * 
  */
+@NotThreadSafe
 @SuppressWarnings("javadoc")
 class RestlessMethodExecutionParameters {
 	private Method method;
@@ -25,9 +28,19 @@ class RestlessMethodExecutionParameters {
 	private String uniqueRequestId;
 	private NanoClock clock;
 	
-	public RestlessMethodExecutionParameters(Method method, IRestlessContext restlessContext,
-	        List<Object> javaMethodArgs, boolean hasHttpServletResponseParameter,
-	        String uniqueRequestId, NanoClock clock) {
+	/**
+	 * 
+	 * @param method @NeverNull
+	 * @param restlessContext @NeverNull
+	 * @param javaMethodArgs @NeverNull
+	 * @param hasHttpServletResponseParameter @NeverNull
+	 * @param uniqueRequestId @NeverNull
+	 * @param clock @NeverNull
+	 */
+	public RestlessMethodExecutionParameters(@NeverNull Method method,
+	        @NeverNull IRestlessContext restlessContext, @NeverNull List<Object> javaMethodArgs,
+	        @NeverNull boolean hasHttpServletResponseParameter, @NeverNull String uniqueRequestId,
+	        @NeverNull NanoClock clock) {
 		this.method = method;
 		this.restlessContext = restlessContext;
 		this.javaMethodArgs = javaMethodArgs;
