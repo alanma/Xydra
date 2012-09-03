@@ -207,11 +207,6 @@ public class SharedHtmlUtils {
 		 */
 		public TextAreaInput(@NeverNull String name, @NeverNull String value, @NeverNull int cols,
 		        @NeverNull int rows) {
-			/*
-			 * TODO Why is there a call to super? Inputs constructor doesn't do
-			 * anything
-			 */
-			super();
 			this.name = name;
 			this.value = value;
 			this.cols = cols;
@@ -500,9 +495,6 @@ public class SharedHtmlUtils {
 	 * @param mapEntries input, not null. Entries are NOT HTML-encoded or
 	 *            escaped in any way. Used valid HTML inside! @NeverNull
 	 * @return a string containing the resulting HTML
-	 */
-	/*
-	 * TODO what's the reason for "? extends Object"?
 	 */
 	public static String toDefinitionList(@NeverNull Map<String,? extends Object> mapEntries) {
 		StringBuffer buf = new StringBuffer();
