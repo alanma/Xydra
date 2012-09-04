@@ -28,4 +28,10 @@ public class DefaultLoggerFactorySPI implements ILoggerFactorySPI {
 		throw new UnsupportedOperationException();
 	}
 	
+	@Override
+	public Logger getThreadSafeWrappedLogger(String name,
+	        String fullyQualifiedNameOfDelegatingLoggerClass) {
+		throw new UnsupportedOperationException();
+	}
+	
 }

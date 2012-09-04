@@ -39,4 +39,10 @@ public class GwtLoggerFactorySPI implements ILoggerFactorySPI {
 	public Logger getWrappedLogger(String name, String fullyQualifiedNameOfDelegatingLoggerClass) {
 		throw new UnsupportedOperationException();
 	}
+	
+	@Override
+	public Logger getThreadSafeWrappedLogger(String name,
+	        String fullyQualifiedNameOfDelegatingLoggerClass) {
+		throw new UnsupportedOperationException();
+	}
 }

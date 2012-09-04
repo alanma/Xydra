@@ -59,8 +59,14 @@ public interface ILoggerFactorySPI {
 	 */
 	Logger getWrappedLogger(String name, String fullyQualifiedNameOfDelegatingLoggerClass);
 	
-	/*
-	 * TODO this probably also needs a thread-safe version, right?
+	/**
+	 * OPTIONAL OPERATION
+	 * 
+	 * @param name
+	 * @param fullyQualifiedNameOfDelegatingLoggerClass TODO
+	 * @return a logger wrapped in a delegating class (which should not appear
+	 *         in stack traces)
 	 */
+	Logger getThreadSafeWrappedLogger(String name, String fullyQualifiedNameOfDelegatingLoggerClass);
 	
 }

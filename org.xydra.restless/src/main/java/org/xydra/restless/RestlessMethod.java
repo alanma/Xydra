@@ -138,11 +138,6 @@ class RestlessMethod {
 	        @NeverNull final HttpServletResponse res, @NeverNull NanoClock requestClock)
 	        throws IOException {
 		
-		/*
-		 * TODO is this really thread-safe now? Is the method executed in a
-		 * thread-safe manner?
-		 */
-		
 		requestClock.stopAndStart("servlet->restless.run");
 		
 		// set standard headers
@@ -171,7 +166,8 @@ class RestlessMethod {
 			        + "'");
 			return null;
 		} else {
-			// try to call it
+			// try to prepare parameters for execution of the method
+			
 			List<Object> javaMethodArgs = new ArrayList<Object>();
 			// build up parameters
 			
@@ -362,7 +358,7 @@ class RestlessMethod {
 		NanoClock requestClock = params.getClock();
 		
 		try {
-			requestClock.stopAndStart("restless.run->invoke");
+			requestClock.stopAndStart("restless.execute->invoke");
 			// onBefore-run-event
 			restless.fireRequestStarted(restlessContext);
 			// run

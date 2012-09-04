@@ -2,6 +2,7 @@ package org.xydra.log.gae;
 
 import java.util.Collection;
 
+import org.xydra.annotations.ThreadSafe;
 import org.xydra.log.ILogListener;
 import org.xydra.log.ILoggerFactorySPI;
 import org.xydra.log.Logger;
@@ -16,6 +17,7 @@ import com.google.appengine.api.utils.SystemProperty;
  * @author voelkel
  * 
  */
+@ThreadSafe
 public class GaeLoggerFactorySPI implements ILoggerFactorySPI {
 	
 	private static ILoggerFactorySPI factory = null;
@@ -63,6 +65,12 @@ public class GaeLoggerFactorySPI implements ILoggerFactorySPI {
 	@Override
 	public Logger getThreadSafeLogger(String name, Collection<ILogListener> logListeners) {
 		return factory.getThreadSafeLogger(name, logListeners);
+	}
+	
+	@Override
+	public Logger getThreadSafeWrappedLogger(String name,
+	        String fullyQualifiedNameOfDelegatingLoggerClass) {
+		return factory.getThreadSafeWrappedLogger(name, fullyQualifiedNameOfDelegatingLoggerClass);
 	}
 	
 }

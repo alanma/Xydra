@@ -28,6 +28,14 @@ public class ThreadSafeLoggerWithListeners extends LoggerWithListeners {
 		super(logger, logListeners);
 	}
 	
+	/*
+	 * We're explicitly synchronizing on the logListeners instead of using
+	 * synchronized methods or a simple lock object, to ensure that it's
+	 * possible to synchronize access on the logListeners when they're shared
+	 * between different objects (these objects also need to synchronize their
+	 * access to the logListners on the listeners)
+	 */
+	
 	@Override
 	public void debug(String msg, Throwable t) {
 		synchronized(this.logListeners) {

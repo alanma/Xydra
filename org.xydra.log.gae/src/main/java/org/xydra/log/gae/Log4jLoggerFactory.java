@@ -42,4 +42,11 @@ public class Log4jLoggerFactory implements ILoggerFactorySPI {
 		}
 	}
 	
+	@Override
+	public Logger getThreadSafeWrappedLogger(String name,
+	        String fullyQualifiedNameOfDelegatingLoggerClass) {
+		// getWrappedLogger already returns a thread-safe logger
+		return this.getWrappedLogger(name, fullyQualifiedNameOfDelegatingLoggerClass);
+	}
+	
 }
