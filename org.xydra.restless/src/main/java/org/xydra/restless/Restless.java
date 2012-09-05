@@ -13,7 +13,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletConfig;
@@ -272,7 +271,7 @@ public class Restless extends HttpServlet {
 	/**
 	 * TODO is a ConcurrentHashMap really what we want here?
 	 */
-	private ConcurrentHashMap<String,Object> localContext;
+	private HashMap<String,Object> localContext;
 	
 	private String loggerFactory;
 	
@@ -603,9 +602,17 @@ public class Restless extends HttpServlet {
 				return null;
 			}
 			
-			return this.localContext.get(key);
+			synchronized(this.localContext) {
+				return this.localContext.get(key);
+			}
 		}
 	}
+	
+	/*
+	 * TODO maybe a "setServletContextAttribute if..." method might be a good
+	 * idea, because the get and set methods aren't synchronized as one big
+	 * method, so checking something before changing might not be atomic.
+	 */
 	
 	/**
 	 * Attention: Please always synchronize access on the returned
@@ -1065,9 +1072,12 @@ public class Restless extends HttpServlet {
 		} catch(NullPointerException e) {
 			// lazy init
 			if(this.localContext == null) {
-				this.localContext = new ConcurrentHashMap<String,Object>();
+				this.localContext = new HashMap<String,Object>();
 			}
-			this.localContext.put(key, value);
+			
+			synchronized(this.localContext) {
+				this.localContext.put(key, value);
+			}
 		}
 	}
 }
