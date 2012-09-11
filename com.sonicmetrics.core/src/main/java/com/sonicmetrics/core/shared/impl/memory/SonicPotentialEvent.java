@@ -154,8 +154,9 @@ public class SonicPotentialEvent implements ISonicPotentialEvent, Serializable {
 		 * If a reserved key such as 'category' is used, this is mapped to a
 		 * call of category(s). Silently ignored if value is null.
 		 * 
-		 * @param key
-		 * @param value
+		 * @param key Syntax must match IDENTIFIER,
+		 *            [0-9a-zA-Z][0-9a-zA-Z-_]{1,99}
+		 * @param value TODO what syntax is allowed here?
 		 * @return this builder
 		 * @throws IllegalArgumentException
 		 */
