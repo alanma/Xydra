@@ -268,9 +268,6 @@ public class Restless extends HttpServlet {
 	/**
 	 * Simulates the servlet context when run outside a servlet container
 	 */
-	/**
-	 * TODO is a ConcurrentHashMap really what we want here?
-	 */
 	private HashMap<String,Object> localContext;
 	
 	private String loggerFactory;
