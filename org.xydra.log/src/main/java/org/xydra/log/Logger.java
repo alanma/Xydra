@@ -35,6 +35,26 @@ public abstract class Logger {
 			return this.num >= other.num;
 		}
 		
+		/**
+		 * @param levelName upper, lower or mixed case
+		 * @return the Level
+		 * @throws IllegalArgumentException
+		 */
+		public static Level fromString(String levelName) throws IllegalArgumentException {
+			if(levelName.equalsIgnoreCase(Trace.name()))
+				return Trace;
+			if(levelName.equalsIgnoreCase(Debug.name()))
+				return Debug;
+			if(levelName.equalsIgnoreCase(Info.name()))
+				return Info;
+			if(levelName.equalsIgnoreCase(Warn.name()))
+				return Warn;
+			if(levelName.equalsIgnoreCase(Error.name()))
+				return Error;
+			
+			throw new IllegalArgumentException("Could not parse '" + levelName + "'");
+		}
+		
 	}
 	
 	public abstract boolean isDebugEnabled();
