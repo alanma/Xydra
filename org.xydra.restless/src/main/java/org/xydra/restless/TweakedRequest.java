@@ -93,7 +93,7 @@ class TweakedRequest extends HttpServletRequestWrapper {
 	
 	/**
 	 * @param serverName
-	 * @return true if the servername denotes localhost be means of 'localhost',
+	 * @return true if the servername denotes localhost by means of 'localhost',
 	 *         '127.0.0.1' or COMPUTERNAME
 	 */
 	static boolean isLocalhost(@CanBeNull String serverName) {

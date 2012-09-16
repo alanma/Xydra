@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -51,10 +50,7 @@ class RestlessMethod {
 	
 	private static final String UPLOAD_PARAM = "_upload_";
 	
-	/*
-	 * TODO is a ConcurrentHashMap really what we want here?
-	 */
-	private static Map<Class<?>,Object> instanceCache = new ConcurrentHashMap<Class<?>,Object>();
+	private static Map<Class<?>,Object> instanceCache = new HashMap<Class<?>,Object>();
 	
 	private static Logger log = LoggerFactory.getThreadSafeLogger(RestlessMethod.class);
 	
@@ -133,6 +129,18 @@ class RestlessMethod {
 		this.requiredNamedParameter = parameter;
 	}
 	
+	/**
+	 * Checks whether this method fits to the given parameters and returns
+	 * parameters which are necessary for executing the method after this check.
+	 * 
+	 * @param restless
+	 * @param req
+	 * @param res
+	 * @param requestClock
+	 * @return the necessary parameters for executing this method or null if
+	 *         this method doesn't fit the given parameters.
+	 * @throws IOException
+	 */
 	public RestlessMethodExecutionParameters prepareMethodExecution(
 	        @NeverNull final Restless restless, @NeverNull final HttpServletRequest req,
 	        @NeverNull final HttpServletResponse res, @NeverNull NanoClock requestClock)
@@ -329,6 +337,28 @@ class RestlessMethod {
 		}
 		
 	}
+	
+	/**
+	 * Please note: Great care must be taken, that instanceOrClass isn't changed
+	 * between calling prepareMethodExecution() and actually executing the
+	 * method with the returned parameters in such a fundamental way, that the
+	 * parameters which were returned by prepareMethodExecution() become
+	 * outdated. This might result in all kinds of problems.
+	 * 
+	 * This shouldn't be a problem at the moment, since only thread-safe classes
+	 * are allowed for instanceOrClass and all things which are read on
+	 * instanceOrClass (and on which the following method execution depends)
+	 * during prepareMethodExecution() only look for the correct method and it's
+	 * name. These parameters cannot be changed during runtime, so there
+	 * shouldn't be a problem.
+	 * 
+	 * But, if it would be for example possible to remove methods from
+	 * instanceOrClass, no guarantees could be made and splitting the
+	 * preparation and execution wouldn't work with the current implementation.
+	 * In this example-case, we would need to make sure that the method which is
+	 * returned in the parameters by prepareMethodExecution() isn't removed
+	 * until it was executed.
+	 */
 	
 	/**
 	 * Executes the method on the mapped instance.
@@ -672,33 +702,40 @@ class RestlessMethod {
 			Object instance;
 			
 			// look in cache
-			instance = instanceCache.get(clazz);
-			if(instance != null) {
-				return instance;
-			}
-			
-			try {
-				Constructor<?> constructor = clazz.getConstructor();
-				try {
-					instance = constructor.newInstance();
-					// cache and return
-					instanceCache.put(clazz, instance);
+			synchronized(instanceCache) {
+				/*
+				 * TODO a ConcurrentHashMap may be better for performance here
+				 * but would also be unsafe. Is there a better way than
+				 * completely locking the cache?
+				 */
+				instance = instanceCache.get(clazz);
+				if(instance != null) {
 					return instance;
-				} catch(IllegalArgumentException e) {
+				}
+				
+				try {
+					Constructor<?> constructor = clazz.getConstructor();
+					try {
+						instance = constructor.newInstance();
+						// cache and return
+						instanceCache.put(clazz, instance);
+						return instance;
+					} catch(IllegalArgumentException e) {
+						throw new RestlessException(500,
+						        "Server misconfigured - constructor needs to have no parameters", e);
+					} catch(InstantiationException e) {
+						throw new RestlessException(500, "Server misconfigured", e);
+					} catch(IllegalAccessException e) {
+						throw new RestlessException(500, "Server misconfigured", e);
+					} catch(InvocationTargetException e) {
+						throw new RestlessException(500, "Server misconfigured", e);
+					}
+				} catch(SecurityException e) {
+					throw new RestlessException(500, "Server misconfigured", e);
+				} catch(NoSuchMethodException e) {
 					throw new RestlessException(500,
 					        "Server misconfigured - constructor needs to have no parameters", e);
-				} catch(InstantiationException e) {
-					throw new RestlessException(500, "Server misconfigured", e);
-				} catch(IllegalAccessException e) {
-					throw new RestlessException(500, "Server misconfigured", e);
-				} catch(InvocationTargetException e) {
-					throw new RestlessException(500, "Server misconfigured", e);
 				}
-			} catch(SecurityException e) {
-				throw new RestlessException(500, "Server misconfigured", e);
-			} catch(NoSuchMethodException e) {
-				throw new RestlessException(500,
-				        "Server misconfigured - constructor needs to have no parameters", e);
 			}
 			
 		} else {

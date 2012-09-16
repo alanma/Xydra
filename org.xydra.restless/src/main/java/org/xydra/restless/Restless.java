@@ -725,6 +725,11 @@ public class Restless extends HttpServlet {
 	}
 	
 	private void initLoggerFactory() {
+		/*
+		 * this is only called during init(), so sync isn't necessary here,
+		 * since init() is executed before anything else happens on the servlet.
+		 */
+		
 		if(LoggerFactory.hasLoggerFactorySPI()) {
 			return;
 		}
@@ -856,7 +861,7 @@ public class Restless extends HttpServlet {
 	/*
 	 * the following code was basically taken from
 	 * http://docs.oracle.com/javaee/6/tutorial/doc/bnags.html and ensures that
-	 * the destroy methods makes sure that it waits until all threads which are
+	 * the destroy() method makes sure that it waits until all threads which are
 	 * currently executing a service on this servlet are finished.
 	 */
 	@Override
@@ -892,6 +897,15 @@ public class Restless extends HttpServlet {
 		this.shuttingDown = true;
 	}
 	
+	/**
+	 * Tells whether this servlet is in the process of being destroyed.
+	 * Potentially long running tasks should query this method in regular
+	 * intervals to check whether the servlet is being shut down or not and act
+	 * accordingly (i.e. try to finish in a safe way as fast as possible when
+	 * it's shutting down).
+	 * 
+	 * @return true, if the servlet is being shut down/destroyed.
+	 */
 	public boolean isShuttingDown() {
 		return this.shuttingDown;
 	}
@@ -966,7 +980,8 @@ public class Restless extends HttpServlet {
 		
 		/*
 		 * Searching and executing the correct method is split up in two blocks
-		 * to only block the list of methods during the search.
+		 * so that the list of methods is only blocked during the
+		 * search-process.
 		 * 
 		 * Find the correct method, get the necessary parameters...
 		 */
@@ -993,6 +1008,10 @@ public class Restless extends HttpServlet {
 								throw new RuntimeException(e);
 							}
 							if(params != null) {
+								/*
+								 * non-null params imply that the correct method
+								 * was found.
+								 */
 								restlessMethod = m;
 								foundMethod = true;
 								break;
