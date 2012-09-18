@@ -246,7 +246,8 @@ public class Restless extends HttpServlet {
 	/**
 	 * 
 	 * @param instanceOrClass @NeverNull
-	 * @return
+	 * @return the given class, if it was a class. If it was an object, return
+	 *         the class of it.
 	 */
 	public static Class<?> toClass(@NeverNull Object instanceOrClass) {
 		if(instanceOrClass instanceof Class<?>) {
@@ -615,13 +616,14 @@ public class Restless extends HttpServlet {
 	 * Attention: Please always synchronize access on the returned
 	 * ServletContext on itself, to ensure that the access on it is always
 	 * correctly synchronized over all objects that share it.
+	 * 
+	 * Note: This doesn't really return the servlectContext in the state it was
+	 * during init(), since there's only one context per servlet (as far as I
+	 * know), which might be changed by other methods.
+	 * 
+	 * @return the context which was also filled with init params from web.xml
 	 */
 	public ServletContext getServletContextFromInit() {
-		/*
-		 * TODO this doesn't really return the servlectContext in the state it
-		 * was during init(), since there's only one context per servlet (as far
-		 * as I know), which might be changed by other methods.
-		 */
 		return this.servletContext;
 	}
 	

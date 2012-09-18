@@ -26,9 +26,9 @@ import org.xydra.annotations.RunsInGWT;
 public class SharedHtmlUtils {
 	
 	/**
-	 * 
 	 * @param url @NeverNull
 	 * @param text @CanBeNull
+	 * @return HTML source code snippet for a link
 	 */
 	public static String link(@NeverNull String url, @CanBeNull String text) {
 		return "<a href=\"" + url + "\">" + text + "</a>";
@@ -45,6 +45,7 @@ public class SharedHtmlUtils {
 	/**
 	 * 
 	 * @param label @NeverNull
+	 * @return ...
 	 */
 	public static SubmitInput inputSubmit(@NeverNull String label) {
 		return new SubmitInput(label);
@@ -230,6 +231,7 @@ public class SharedHtmlUtils {
 	 * 
 	 * @param method @NeverNull
 	 * @param action @NeverNull
+	 * @return ...
 	 */
 	public static Form form(@NeverNull METHOD method, @NeverNull String action) {
 		return new Form(method, action);
@@ -260,6 +262,7 @@ public class SharedHtmlUtils {
 			/**
 			 * 
 			 * @param content @CanBeNull
+			 * @return ...
 			 */
 			public TableRow td(@CanBeNull String content) {
 				this.b.append("<td>").append(content).append("</td>");
@@ -269,6 +272,7 @@ public class SharedHtmlUtils {
 			/**
 			 * 
 			 * @param header @CanBeNull
+			 * @return ...
 			 */
 			public TableRow th(@CanBeNull String header) {
 				this.b.append("<th>").append(header).append("</th>");
@@ -375,6 +379,7 @@ public class SharedHtmlUtils {
 		/**
 		 * 
 		 * @param value @NeverNull
+		 * @return ...
 		 */
 		public Form withInputSubmit(@NeverNull String value) {
 			this.inputs.add(new SubmitInput(value));
@@ -525,6 +530,7 @@ public class SharedHtmlUtils {
 	/**
 	 * 
 	 * @param listItemContent @NeverNull
+	 * @return ...
 	 */
 	public static String toOrderedList(@NeverNull String ... listItemContent) {
 		return toOrderedList(Arrays.asList(listItemContent));

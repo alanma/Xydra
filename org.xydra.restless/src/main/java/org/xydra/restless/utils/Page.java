@@ -9,6 +9,7 @@ import java.util.List;
 import org.xydra.annotations.CanBeNull;
 import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.NotThreadSafe;
+import org.xydra.annotations.RunsInGWT;
 import org.xydra.restless.Restless;
 
 
@@ -74,6 +75,7 @@ public class Page {
 		
 		/**
 		 * @param content @NeverNull
+		 * @return a P-element wrapper
 		 */
 		public Paragraph paragraph(@NeverNull String content) {
 			Paragraph p = new Paragraph(this, content);
@@ -85,6 +87,7 @@ public class Page {
 		 * 
 		 * @param method @NeverNull
 		 * @param action @CanBeNull
+		 * @return a FORM-element wrapper
 		 */
 		public Form form(@NeverNull METHOD method, @CanBeNull String action) {
 			Form form = new Form(this, method, action);
@@ -96,6 +99,7 @@ public class Page {
 		/**
 		 * 
 		 * @param label @CanBeNull
+		 * @return a DIV-element wrapper
 		 */
 		public BlockElement inputSubmit(@CanBeNull String label) {
 			SubmitInput input = new SubmitInput(this, label);
@@ -210,10 +214,13 @@ public class Page {
 		
 	}
 	
-	// TODO this does not run in GWT; universal function is in xydra.core
 	/**
+	 * For GWT there is a univerals function in Xydra.core
+	 * 
 	 * @param s @NeverNull
+	 * @return encoded string
 	 */
+	@RunsInGWT(false)
 	public static String urlencode(@NeverNull String s) {
 		try {
 			return URLEncoder.encode(s, Restless.JAVA_ENCODING_UTF8);
@@ -237,6 +244,7 @@ public class Page {
 		 * 
 		 * @param term @NeverNull
 		 * @param definition @NeverNull
+		 * @return a DL-element wrapper
 		 */
 		public DefinitionList define(@NeverNull String term, @NeverNull String definition) {
 			this.children.add(new DefinitionListTermDefinition(term, definition));
@@ -533,6 +541,7 @@ public class Page {
 	/**
 	 * 
 	 * @param title @NeverNull
+	 * @return a HEAD-element
 	 * 
 	 */
 	public static Head htmlHeadTitle(@NeverNull String title) {
@@ -546,6 +555,8 @@ public class Page {
 	 * 
 	 * @param indent @CanBeNull
 	 * @param children @CanBeNull
+	 * @return the given children as matching html, e.g. in a list the children
+	 *         become LI-elements.
 	 */
 	public static String toHtml(@CanBeNull String indent, @CanBeNull List<ToHtml> children) {
 		StringBuffer buf = new StringBuffer();
@@ -620,6 +631,7 @@ public class Page {
 	/**
 	 * 
 	 * @param raw @NeverNull
+	 * @return XML-encoded string
 	 * 
 	 */
 	public static final String xmlEncode(@NeverNull String raw) {

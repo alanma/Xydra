@@ -19,7 +19,6 @@ import org.xydra.restless.utils.NanoClock;
  * 
  */
 @NotThreadSafe
-@SuppressWarnings("javadoc")
 class RestlessMethodExecutionParameters {
 	private Method method;
 	private IRestlessContext restlessContext;

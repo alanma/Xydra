@@ -128,7 +128,7 @@ public class HtmlUtils extends SharedHtmlUtils {
 	 * @param statusCode @NeverNull
 	 * @param title @CanBeNull
 	 * @param headChildren @CanBeNull
-	 * @return
+	 * @return an opened writer that has just written the start of the page
 	 * @throws IOException
 	 */
 	public static Writer startHtmlPage(@NeverNull HttpServletResponse res,

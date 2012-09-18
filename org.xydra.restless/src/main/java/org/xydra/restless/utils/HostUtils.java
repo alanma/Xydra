@@ -64,17 +64,16 @@ public class HostUtils {
 	/**
 	 * 
 	 * @param req @NeverNull
-	 * @return
+	 * @return the port number of the request
 	 */
 	public static int getRequestPort(@NeverNull HttpServletRequest req) {
-		
 		return req.getServerPort();
 	}
 	
 	/**
 	 * 
 	 * @param req @NeverNull
-	 * @return
+	 * @return the server name (part before the port)
 	 */
 	public static String getServernameWithPort(@NeverNull HttpServletRequest req) {
 		int port = getRequestPort(req);

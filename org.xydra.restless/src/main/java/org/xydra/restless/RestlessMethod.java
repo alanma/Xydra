@@ -385,6 +385,7 @@ class RestlessMethod {
 	 * IMPROVE distinguish query params from POST params to define a clearer
 	 * precedence
 	 * 
+	 * @param params @NeverNull
 	 * @param restless @NeverNull
 	 * @param req @NeverNull
 	 * @param res @NeverNull

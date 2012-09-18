@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.xydra.annotations.CanBeNull;
 import org.xydra.annotations.NeverNull;
+import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.ThreadSafe;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -255,23 +256,22 @@ public class ServletUtils {
 	}
 	
 	/**
-	 * 
 	 * @param req @NeverNull
-	 * @return
+	 * @return complete server URI (protocol+host), not port
 	 */
 	public static final String getServerUri(@NeverNull HttpServletRequest req) {
-		
 		return req.getProtocol() + req.getRemoteHost();
 	}
 	
 	/**
-	 * 
 	 * @param req @NeverNull
-	 * @param paramName @CanBeNull TODO is it really okay if this is null?
-	 * @return
+	 * @param paramName @CanBeNull
+	 * @return true if parameter name not null and value defined
 	 */
 	public static boolean hasParameter(@NeverNull HttpServletRequest req,
 	        @CanBeNull String paramName) {
+		if(paramName == null)
+			return false;
 		return req.getParameter(paramName) != null;
 	}
 	
@@ -430,7 +430,9 @@ public class ServletUtils {
 	/**
 	 * 
 	 * @param q @NeverNull
-	 * @return
+	 * @return the query string as a map: parameter name maps to parameter
+	 *         value. If the URL contains the same key twice, later values
+	 *         override earlier values.
 	 */
 	public static Map<String,String> parseQueryString(@NeverNull String q) {
 		Map<String,String> map = new HashMap<String,String>();
@@ -448,7 +450,9 @@ public class ServletUtils {
 	/**
 	 * 
 	 * @param encoded @NeverNull
+	 * @return url decoded string
 	 */
+	@RunsInGWT(false)
 	public static String urldecode(@NeverNull String encoded) {
 		try {
 			return URLDecoder.decode(encoded, "utf-8");
