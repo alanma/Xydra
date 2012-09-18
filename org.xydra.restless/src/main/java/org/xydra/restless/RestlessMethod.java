@@ -200,7 +200,7 @@ class RestlessMethod {
 			 * PathTemplate is thread-safe, so no synchronization is necessary
 			 * here
 			 */
-			Map<String,String> urlParameter = getUrlParametersAsMap(req, this.pathTemplate);
+			Map<String,String> urlParameter = RestlessUtils.getUrlParametersAsMap(req, this.pathTemplate);
 			
 			// extract Cookie values
 			Map<String,String> cookieMap = ServletUtils.getCookiesAsMap(req);
@@ -680,28 +680,6 @@ class RestlessMethod {
 			}
 			return false;
 		}
-	}
-	
-	/**
-	 * @param req @NeverNull
-	 * @param pathTemplate @NeverNull
-	 * @return a single map of key-value pairs extracted from the path-part of
-	 *         the request-URI
-	 */
-	public static Map<String,String> getUrlParametersAsMap(@NeverNull HttpServletRequest req,
-	        @NeverNull PathTemplate pathTemplate) {
-		Map<String,String> urlParameter = new HashMap<String,String>();
-		String urlPath = req.getPathInfo();
-		if(urlPath != null) {
-			List<String> variablesFromUrlPath = pathTemplate.extractVariables(urlPath);
-			synchronized(variablesFromUrlPath) {
-				for(int i = 0; i < pathTemplate.getVariableNames().size(); i++) {
-					urlParameter.put(pathTemplate.getVariableNames().get(i),
-					        variablesFromUrlPath.get(i));
-				}
-			}
-		}
-		return urlParameter;
 	}
 	
 	/**

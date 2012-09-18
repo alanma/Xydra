@@ -14,6 +14,8 @@ import org.xydra.annotations.ThreadSafe;
  * Internal class to represent a URL path that gets mapped to a set of variables
  * via regular expressions. Syntax inspired from JRS-311.
  * 
+ * Can also be used as TODO...
+ * 
  * Examples for valid patterns
  * <ul>
  * <li>/my/path/is/this</li>
@@ -36,7 +38,7 @@ import org.xydra.annotations.ThreadSafe;
  * 
  */
 @ThreadSafe
-class PathTemplate {
+public class PathTemplate {
 	
 	/** Matches any character */
 	static final String ANY_REGEX = ".*";
