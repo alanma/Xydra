@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -50,7 +51,22 @@ class RestlessMethod {
 	
 	private static final String UPLOAD_PARAM = "_upload_";
 	
-	private static Map<Class<?>,Object> instanceCache = new HashMap<Class<?>,Object>();
+	/*
+	 * See
+	 * http://ria101.wordpress.com/2011/12/12/concurrenthashmap-avoid-a-common
+	 * -misuse/ for a discussion of the different parameters.
+	 * 
+	 * Important: The way we're using the ConcurrentHashMap is only safe if
+	 * nothings changed here. If other methods which operate on instanceCache
+	 * are added, the current implementation might not necessarily be
+	 * thread-safe anymore.
+	 * 
+	 * TODO test/check performance with different ConcurrentHashMap. Different
+	 * parameters might improve/degrade the performance of Restless, so some
+	 * fine-tuning might be necessary.
+	 */
+	private static ConcurrentHashMap<Class<?>,Object> instanceCache = new ConcurrentHashMap<Class<?>,Object>(
+	        20, 0.75f, 5);
 	
 	private static Logger log = LoggerFactory.getThreadSafeLogger(RestlessMethod.class);
 	
@@ -702,40 +718,57 @@ class RestlessMethod {
 			Object instance;
 			
 			// look in cache
-			synchronized(instanceCache) {
-				/*
-				 * TODO a ConcurrentHashMap may be better for performance here
-				 * but would also be unsafe. Is there a better way than
-				 * completely locking the cache?
-				 */
-				instance = instanceCache.get(clazz);
-				if(instance != null) {
-					return instance;
-				}
-				
+			instance = instanceCache.get(clazz);
+			if(instance != null) {
+				return instance;
+			}
+			
+			try {
+				Constructor<?> constructor = clazz.getConstructor();
 				try {
-					Constructor<?> constructor = clazz.getConstructor();
-					try {
-						instance = constructor.newInstance();
-						// cache and return
-						instanceCache.put(clazz, instance);
+					instance = constructor.newInstance();
+					// cache and return
+					Object previousInstance = instanceCache.putIfAbsent(clazz, instance);
+					
+					/*
+					 * if another thread added an instance of the class between
+					 * our instanceCache.get(), we should return this instance,
+					 * to keep everything consistent. "putIfAbsent" atomically
+					 * checks whether an instance was added to the cache and if
+					 * this is the case, it returns this instance and keeps the
+					 * cache unchanged. If still no such instance exists, our
+					 * newly created instance is added to the cache and
+					 * putIfAbsent returns null.
+					 * 
+					 * This might result in an unnecessary object instantiation,
+					 * but at least keeps everything consistent and is not as
+					 * restricting as blocking the whole cache completely every
+					 * time we need to access it.
+					 * 
+					 * This looks like dangerous double checked locking, but
+					 * this should be safe because of the behavior of
+					 * ConcurrentHashMap and the way we're using it here.
+					 */
+					if(previousInstance != null) {
+						return previousInstance;
+					} else {
 						return instance;
-					} catch(IllegalArgumentException e) {
-						throw new RestlessException(500,
-						        "Server misconfigured - constructor needs to have no parameters", e);
-					} catch(InstantiationException e) {
-						throw new RestlessException(500, "Server misconfigured", e);
-					} catch(IllegalAccessException e) {
-						throw new RestlessException(500, "Server misconfigured", e);
-					} catch(InvocationTargetException e) {
-						throw new RestlessException(500, "Server misconfigured", e);
 					}
-				} catch(SecurityException e) {
-					throw new RestlessException(500, "Server misconfigured", e);
-				} catch(NoSuchMethodException e) {
+				} catch(IllegalArgumentException e) {
 					throw new RestlessException(500,
 					        "Server misconfigured - constructor needs to have no parameters", e);
+				} catch(InstantiationException e) {
+					throw new RestlessException(500, "Server misconfigured", e);
+				} catch(IllegalAccessException e) {
+					throw new RestlessException(500, "Server misconfigured", e);
+				} catch(InvocationTargetException e) {
+					throw new RestlessException(500, "Server misconfigured", e);
 				}
+			} catch(SecurityException e) {
+				throw new RestlessException(500, "Server misconfigured", e);
+			} catch(NoSuchMethodException e) {
+				throw new RestlessException(500,
+				        "Server misconfigured - constructor needs to have no parameters", e);
 			}
 			
 		} else {
