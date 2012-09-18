@@ -31,31 +31,27 @@ public class HostUtils {
 		return System.getProperty("user.name");
 	}
 	
-	public static String getLocalHostname() {
-		synchronized(hostname) {
-			if(hostname == null) {
-				try {
-					InetAddress addr = InetAddress.getLocalHost();
-					hostname = addr.getHostName();
-				} catch(UnknownHostException e) {
-					log.warn("Sorry, could not create a better localhost name than 'localhost'");
-					hostname = "localhost";
-				}
+	public static synchronized String getLocalHostname() {
+		if(hostname == null) {
+			try {
+				InetAddress addr = InetAddress.getLocalHost();
+				hostname = addr.getHostName();
+			} catch(UnknownHostException e) {
+				log.warn("Sorry, could not create a better localhost name than 'localhost'");
+				hostname = "localhost";
 			}
-			return hostname;
 		}
+		return hostname;
 	}
 	
-	public static String getLocalIpAddress() {
-		synchronized(ipaddress) {
-			if(ipaddress == null) {
-				try {
-					InetAddress addr = InetAddress.getLocalHost();
-					ipaddress = addr.getHostAddress();
-				} catch(UnknownHostException e) {
-					log.warn("Sorry, could not create a better IP address than '127.0.0.1'");
-					ipaddress = "127.0.0.1";
-				}
+	public static synchronized String getLocalIpAddress() {
+		if(ipaddress == null) {
+			try {
+				InetAddress addr = InetAddress.getLocalHost();
+				ipaddress = addr.getHostAddress();
+			} catch(UnknownHostException e) {
+				log.warn("Sorry, could not create a better IP address than '127.0.0.1'");
+				ipaddress = "127.0.0.1";
 			}
 		}
 		return ipaddress;
