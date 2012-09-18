@@ -24,7 +24,6 @@ import org.xydra.testgae.server.model.xmas.Xmas;
  * Main resource for the Xmas sample application
  * 
  * @author xamde
- * 
  */
 public class XmasResource {
 	

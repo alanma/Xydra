@@ -33,14 +33,14 @@ public class XmasApp {
 		
 		// FIXME DataloggerResource.restless(r, "");
 		
+		// a nice sample app
 		XmasResource.restless(r, path);
 		
+		// very cool for debugging consistency/race conditions
 		ConsistencyTestResource.restless(r, path);
 		
-		// additionally run xydra rest endpoint
-		
+		// additionally run xydra REST endpoint
 		XydraRestServer.initializeServer(r);
-		
 		XydraStoreResource.restless(r, "/xydra/store/v1");
 	}
 	

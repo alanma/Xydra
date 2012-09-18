@@ -27,7 +27,7 @@ import org.xydra.testgae.server.model.xmas.Xmas;
 
 
 /**
- * Expose a {@link Wish} to the web.
+ * Expose a single {@link Wish} to the web.
  * 
  * @author xamde
  */

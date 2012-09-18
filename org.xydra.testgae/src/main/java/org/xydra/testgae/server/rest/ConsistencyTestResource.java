@@ -33,6 +33,12 @@ import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.gae.GaeTestfixer;
 
 
+/**
+ * Expose a textual list which appends each access. Great for testing
+ * concurrency.
+ * 
+ * @author xamde
+ */
 public class ConsistencyTestResource {
 	
 	private static final XID repoId = XX.toId("gae-data");
@@ -43,7 +49,7 @@ public class ConsistencyTestResource {
 	private static final XID ctId = XX.toId("__consistencyTest");
 	
 	/**
-	 * Expose /consistency for read/write access and /consitency/events to help
+	 * Expose /consistency for read/write access and /consistency/events to help
 	 * debugging
 	 * 
 	 * @param restless
