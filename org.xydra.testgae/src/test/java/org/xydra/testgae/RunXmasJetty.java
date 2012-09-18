@@ -16,7 +16,6 @@ import org.xydra.store.impl.gae.GaeTestfixer;
  * required to run the webapp.
  * 
  * @author voelkel
- * 
  */
 public class RunXmasJetty {
 	

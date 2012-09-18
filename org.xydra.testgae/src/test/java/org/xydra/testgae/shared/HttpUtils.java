@@ -16,6 +16,11 @@ import com.google.appengine.repackaged.org.apache.http.params.HttpConnectionPara
 import com.google.appengine.repackaged.org.apache.http.params.HttpParams;
 
 
+/**
+ * Tiny util to make calling remote HTTP methods easier
+ * 
+ * @author xamde
+ */
 public class HttpUtils {
 	
 	private static final Logger log = LoggerFactory.getLogger(HttpUtils.class);

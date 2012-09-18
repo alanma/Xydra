@@ -14,6 +14,11 @@ import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.gae.GaeTestfixer;
 
 
+/**
+ * Test StatsGatheringPersistenceWrapper, Memcache, Init
+ * 
+ * @author xamde
+ */
 public class SimpleOperationsTest {
 	
 	private static final XID REPO_ID = XX.toId("repo");

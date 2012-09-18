@@ -27,9 +27,7 @@ import org.xydra.testgae.shared.Operations;
  * System.currentTimeMillis() + ".html".
  * 
  * @author Kaidel
- * 
  */
-
 public class PerformanceDataAnalyzer {
 	
 	/**
@@ -53,10 +51,13 @@ public class PerformanceDataAnalyzer {
 	private static boolean version2Exists;
 	
 	public static void main(String args[]) {
-		final String[] oldVersions = new String[] { "Version2", "gae20111105", "gae20111105-20" };
+		final String[] oldVersions = new String[] { // "Version2",
+													// "gae20111105",
+													// "gae20111105-20"
+		};
 		
-		String url = "http://testgae20111219.xydra-live.appspot.com/";
-		String newVersion = "20111219";
+		String url = "http://testgae20120918.xydra-1.appspot.com/";
+		String newVersion = "20120918";
 		ArrayList<String> list = new ArrayList<String>();
 		
 		for(String old : oldVersions) {
@@ -70,8 +71,7 @@ public class PerformanceDataAnalyzer {
 		evaluateBenchmark(allVersions);
 		
 		/*
-		 * 
-		 * Last url: "http://testgae20111105.xydra-live.appspot.com/logged";
+		 * Last url: "http://testgae20111105.xydra-1.appspot.com/logged";
 		 * 
 		 * Last label: "gae20111105-20";
 		 */
