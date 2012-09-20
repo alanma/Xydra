@@ -9,6 +9,6 @@
 	</system-properties>
 	
 	<!-- TODO test both -->
-	<threadsafe>false</threadsafe>
+	<threadsafe>true</threadsafe>
 	
 </appengine-web-app>
