@@ -11,7 +11,7 @@ public class RemoteConsistencyTest {
 	private static final Logger log = LoggerFactory.getLogger(RemoteConsistencyTest.class);
 	
 	// your url here
-	private static final String SERVER_ROOT = "http://http://testgae20120918.xydra-1.appspot.com/";
+	private static final String SERVER_ROOT = "http://testgae20120918.xydra-1.appspot.com/";
 	// "testgae.latest.xydra-live.appspot.com";
 	
 	public static final int THREADS = 10;
