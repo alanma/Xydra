@@ -265,6 +265,97 @@ public abstract class RemoteBenchmark {
 		
 	}
 	
+	public void addingWishesMultipleThreadsInTransaction(int wishes, int operations,
+	        int initialWishes, String filePath, int iteration, int threads) {
+		this.currentRepo = "/repo" + System.currentTimeMillis();
+		
+		for(int i = 0; i < threads; i++) {
+			Thread t = new Thread(new AddingWishesRunnable(this.currentRepo, this.absoluteUrl,
+			        initialWishes, operations, iteration, wishes, i, filePath, this));
+			
+			t.start();
+		}
+	}
+	
+	private class AddingWishesRunnable implements Runnable {
+		private String currentRepo;
+		private String absoluteUrl;
+		private int initialWishes;
+		private int operations;
+		private int iteration;
+		private int wishes;
+		private int threadNumber;
+		private String filePath;
+		private RemoteBenchmark benchmark;
+		
+		public AddingWishesRunnable(String currentRepo, String absoluteUrl, int initialWishes,
+		        int operations, int iteration, int wishes, int threadNumber, String filePath,
+		        RemoteBenchmark benchmark) {
+			this.currentRepo = currentRepo;
+			this.absoluteUrl = absoluteUrl;
+			this.initialWishes = initialWishes;
+			this.operations = operations;
+			this.iteration = iteration;
+			this.wishes = wishes;
+			this.threadNumber = threadNumber;
+			this.filePath = filePath;
+			this.benchmark = benchmark;
+		}
+		
+		@Override
+		public void run() {
+			String listStr = this.benchmark.addList(this.currentRepo, this.initialWishes);
+			
+			// in total 6 tries to create a list... if it doesn't work, this
+			// test
+			// fails
+			for(int i = 0; i < 5 & listStr == null; i++) {
+				listStr = this.benchmark.addList(this.currentRepo, this.initialWishes);
+			}
+			
+			int addExceptions = 0;
+			
+			double avgTime = 0;
+			for(int i = 0; i < this.operations; i++) {
+				try {
+					long time = 0l;
+					boolean succGet = false;
+					
+					time = System.currentTimeMillis();
+					succGet = (HttpUtils.makeGetRequest(this.absoluteUrl + listStr + "/add?wishes="
+					        + this.wishes));
+					time = System.currentTimeMillis() - time;
+					
+					if(!succGet) {
+						System.out.println("addingWishes: Failed GET-Request at iteration "
+						        + this.iteration + ", " + this.initialWishes
+						        + " initial wishes while adding " + this.wishes + " wishes");
+						
+						this.benchmark.outputResults(this.filePath, this.initialWishes,
+						        this.operations, this.initialWishes, 0, Double.NaN, 1,
+						        this.threadNumber);
+						this.benchmark.outputCriticalErrors(this.filePath, this.initialWishes,
+						        this.wishes, this.threadNumber);
+						return;
+					}
+					
+					avgTime += time;
+				} catch(Exception e) {
+					addExceptions++;
+				}
+			}
+			
+			int successfulOperations = (this.operations - addExceptions);
+			avgTime = avgTime / successfulOperations;
+			
+			// Output Results in a simple CSV format
+			this.benchmark.outputResults(this.filePath, this.initialWishes, this.operations,
+			        this.wishes, successfulOperations, avgTime, addExceptions, this.threadNumber);
+			
+		}
+		
+	}
+	
 	public void deletingWishesOneThreadInTransaction(int operations, int initialWishes,
 	        String filePath, int iteration) {
 		// TODO implement initial wishes mechanic
@@ -320,6 +411,109 @@ public abstract class RemoteBenchmark {
 		
 		// Output Results in a simple CSV format
 		outputResults(filePath, 0, operations, 1, successfulOperations, avgTime, addExceptions);
+		
+	}
+	
+	public void deletingWishesMultipleThreadsInTransaction(int operations, int initialWishes,
+	        String filePath, int iteration, int threads) {
+		// TODO implement initial wishes mechanic
+		this.currentRepo = "/repo" + System.currentTimeMillis();
+		
+		for(int i = 0; i < threads; i++) {
+			Thread t = new Thread(new DeletingWishesRunnable(this.currentRepo, this.absoluteUrl,
+			        initialWishes, operations, iteration, i, filePath, this));
+			
+			t.start();
+		}
+		
+	}
+	
+	private class DeletingWishesRunnable implements Runnable {
+		private String currentRepo;
+		private String absoluteUrl;
+		private int initialWishes;
+		private int operations;
+		private int iteration;
+		private int threadNumber;
+		private String filePath;
+		private RemoteBenchmark benchmark;
+		
+		public DeletingWishesRunnable(String currentRepo, String absoluteUrl, int initialWishes,
+		        int operations, int iteration, int threadNumber, String filePath,
+		        RemoteBenchmark benchmark) {
+			this.currentRepo = currentRepo;
+			this.absoluteUrl = absoluteUrl;
+			this.initialWishes = initialWishes;
+			this.operations = operations;
+			this.iteration = iteration;
+			this.threadNumber = threadNumber;
+			this.filePath = filePath;
+			this.benchmark = benchmark;
+		}
+		
+		@Override
+		public void run() {
+			String listStr = this.benchmark.addList(this.currentRepo);
+			
+			// in total 6 tries to create a list... if it doesn't work, this
+			// test
+			// fails
+			for(int i = 0; i < 5 & listStr == null; i++) {
+				listStr = this.benchmark.addList(this.currentRepo);
+			}
+			
+			int addExceptions = 0;
+			double avgTime = 0;
+			for(int i = 0; i < this.operations; i++) {
+				try {
+					
+					// TODO is this safe/okay/correct?
+					String wishStr = addWishToEmptyList(this.absoluteUrl + listStr);
+					
+					if(wishStr == null) {
+						System.out
+						        .println("deletingWishes: Failed addWish-GET-Request at iteration "
+						                + this.iteration + ", " + this.initialWishes
+						                + " initial wishes in DeleteWishes-Test");
+						this.benchmark.outputResults(this.filePath, 0, this.operations, 1, 0,
+						        Double.NaN, 1, this.threadNumber);
+						this.benchmark.outputCriticalErrors(this.filePath, this.initialWishes, 1,
+						        this.threadNumber);
+						return;
+					}
+					
+					long time = 0l;
+					boolean succGet = false;
+					
+					time = System.currentTimeMillis();
+					succGet = HttpUtils.makeGetRequest(this.absoluteUrl + wishStr + "/delete");
+					time = System.currentTimeMillis() - time;
+					
+					if(!succGet) {
+						System.out.println("deletingWishes: Failed GET-Request at iteration "
+						        + this.iteration + ", " + this.initialWishes
+						        + " initial wishes while deleting 1 wish");
+						this.benchmark.outputResults(this.filePath, 0, this.operations, 1, 0,
+						        Double.NaN, 1, this.threadNumber);
+						this.benchmark.outputCriticalErrors(this.filePath, this.initialWishes, 1,
+						        this.threadNumber);
+						return;
+					}
+					
+					avgTime += time;
+				} catch(Exception e) {
+					addExceptions++;
+				}
+			}
+			
+			int successfulOperations = (this.operations - addExceptions);
+			
+			avgTime = avgTime / successfulOperations;
+			
+			// Output Results in a simple CSV format
+			this.benchmark.outputResults(this.filePath, 0, this.operations, 1,
+			        successfulOperations, avgTime, addExceptions, this.threadNumber);
+		}
 		
 	}
 	
@@ -385,7 +579,113 @@ public abstract class RemoteBenchmark {
 		
 	}
 	
+	public void editingWishesMultipleThreadsInTransaction(int operations, int initialWishes,
+	        String filePath, int iteration, int threads) {
+		this.currentRepo = "/repo" + System.currentTimeMillis();
+		
+		for(int i = 0; i < threads; i++) {
+			Thread t = new Thread(new EditingWishesRunnable(this.currentRepo, this.absoluteUrl,
+			        initialWishes, operations, iteration, i, filePath, this));
+			
+			t.start();
+		}
+		
+	}
+	
+	private class EditingWishesRunnable implements Runnable {
+		private String currentRepo;
+		private String absoluteUrl;
+		private int initialWishes;
+		private int operations;
+		private int iteration;
+		private int threadNumber;
+		private String filePath;
+		private RemoteBenchmark benchmark;
+		
+		public EditingWishesRunnable(String currentRepo, String absoluteUrl, int initialWishes,
+		        int operations, int iteration, int threadNumber, String filePath,
+		        RemoteBenchmark benchmark) {
+			this.currentRepo = currentRepo;
+			this.absoluteUrl = absoluteUrl;
+			this.initialWishes = initialWishes;
+			this.operations = operations;
+			this.iteration = iteration;
+			this.threadNumber = threadNumber;
+			this.filePath = filePath;
+			this.benchmark = benchmark;
+		}
+		
+		@Override
+		public void run() {
+			String listStr = this.benchmark.addList(this.currentRepo, this.initialWishes);
+			
+			// in total 6 tries to create a list... if it doesn't work, this
+			// test
+			// fails
+			for(int i = 0; i < 5 & listStr == null; i++) {
+				listStr = this.benchmark.addList(this.currentRepo, this.initialWishes);
+			}
+			
+			double avgTime;
+			
+			int addExceptions = 0;
+			
+			avgTime = 0;
+			for(int i = 0; i < this.operations; i++) {
+				try {
+					String wishStr = addWish(this.absoluteUrl + listStr);
+					
+					if(wishStr == null) {
+						System.out
+						        .println("editingWishes: Failed addWish-GET-Request at iteration "
+						                + this.iteration + ", " + this.initialWishes
+						                + " initial wishes in EditWish-Test");
+						this.benchmark.outputResults(this.filePath, this.initialWishes,
+						        this.operations, 0, 0, Double.NaN, 1);
+						this.benchmark.outputCriticalErrors(this.filePath + this.initialWishes,
+						        this.initialWishes, 1);
+						return;
+					}
+					
+					long time = 0l;
+					boolean succGet = false;
+					
+					time = System.currentTimeMillis();
+					succGet = HttpUtils.makeGetRequest(this.absoluteUrl + wishStr
+					        + "/editName?name=performanceTest");
+					time = System.currentTimeMillis() - time;
+					
+					if(!succGet) {
+						System.out.println("editingWishes: Failed GET-Request at iteration "
+						        + this.iteration + ", " + this.initialWishes
+						        + " initial wishes while editing 1 wish");
+						this.benchmark.outputResults(this.filePath, this.initialWishes,
+						        this.operations, 0, 0, Double.NaN, 1, this.threadNumber);
+						this.benchmark.outputCriticalErrors(this.filePath + this.initialWishes,
+						        this.initialWishes, 1, this.threadNumber);
+						return;
+					}
+					
+					avgTime += time;
+				} catch(Exception e) {
+					addExceptions++;
+				}
+			}
+			
+			int successfulOperations = (this.operations - addExceptions);
+			avgTime = avgTime / successfulOperations;
+			
+			// Output Results in a simple CSV format
+			this.benchmark.outputResults(this.filePath, this.initialWishes, this.operations, 0,
+			        successfulOperations, avgTime, addExceptions, this.threadNumber);
+			
+		}
+		
+	}
+	
 	// ----------------- Helper Methods ------------------------
+	
+	private Object outputResultsLock = new Object();
 	
 	/**
 	 * Outputs the given data to a file at {@link RemoteBenchmark#path} /
@@ -405,27 +705,62 @@ public abstract class RemoteBenchmark {
 	 */
 	private void outputResults(String fileName, int initialWishes, int operations, int wishes,
 	        int successfulOps, double avgTime, int opExceps) {
-		// Output Results in a simple CSV format
-		try {
-			File f = new File(this.path + fileName + ".txt");
-			if(!f.exists()) {
-				f.getParentFile().mkdirs();
-				f.createNewFile();
-			}
-			BufferedWriter out = new BufferedWriter(new FileWriter(f, true));
-			out.write("#Initial Wishes:, " + initialWishes + ", ");
-			out.write("#Operations:, " + operations + ", ");
-			out.write("#Wishes per Op.:, " + wishes + ", ");
-			out.write("#Successful Operations:, " + successfulOps + ", ");
-			out.write("Average Time (ms):, " + avgTime + ", ");
-			out.write("#Operation Exceptions:, " + opExceps + ", ");
-			out.write(lineSeparator);
-			
-			out.close();
-		} catch(IOException e) {
-			e.printStackTrace();
+		synchronized(this.outputResultsLock) {
+			outputResults(fileName, initialWishes, operations, wishes, successfulOps, avgTime,
+			        opExceps, -1);
 		}
 	}
+	
+	/**
+	 * Outputs the given data to a file at {@link RemoteBenchmark#path} /
+	 * {@link outputResults#fileName}.txt.
+	 * 
+	 * The new data will be appended to the end of the file in the following
+	 * CSV-type in a single new line:
+	 * 
+	 * #Initial Wishes:, {@link outputResults#initialWishes}, #Wishes per Op.:,
+	 * {@link outputResults#wishes},#Successful Operations:,
+	 * {@link outputResults#successfulOps}, Average Time (ms):,
+	 * {@link outputResults#avgTime}, #Operation Exceptions:,
+	 * {@link outputResults#opExceps}
+	 * 
+	 * 
+	 * @param fileName the name of the file
+	 */
+	private void outputResults(String fileName, int initialWishes, int operations, int wishes,
+	        int successfulOps, double avgTime, int opExceps, int threadNumber) {
+		synchronized(this.outputResultsLock) {
+			// Output Results in a simple CSV format
+			try {
+				File f = new File(this.path + fileName + ".txt");
+				if(!f.exists()) {
+					f.getParentFile().mkdirs();
+					f.createNewFile();
+				}
+				BufferedWriter out = new BufferedWriter(new FileWriter(f, true));
+				out.write("#Initial Wishes:, " + initialWishes + ", ");
+				out.write("#Operations:, " + operations + ", ");
+				out.write("#Wishes per Op.:, " + wishes + ", ");
+				out.write("#Successful Operations:, " + successfulOps + ", ");
+				out.write("Average Time (ms):, " + avgTime + ", ");
+				out.write("#Operation Exceptions:, " + opExceps + ", ");
+				
+				if(threadNumber >= 0) {
+					out.write("Thread Nr.:, " + threadNumber + ", ");
+				} else {
+					out.write("Thread Nr.:, - , ");
+				}
+				
+				out.write(lineSeparator);
+				
+				out.close();
+			} catch(IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	private Object outputCriticalErrorsLock = new Object();
 	
 	/**
 	 * Used to output to a special critical error file when such an error
@@ -439,21 +774,37 @@ public abstract class RemoteBenchmark {
 	 * Op., {@link outputCriticalErrors#wishes},
 	 */
 	private void outputCriticalErrors(String fileName, int initialWishes, int wishes) {
-		// Output Results in a simple CSV format
-		try {
-			File f = new File(this.path + fileName + "CriticalErrors.txt");
-			if(!f.exists()) {
-				f.getParentFile().mkdirs();
-				f.createNewFile();
+		synchronized(this.outputCriticalErrorsLock) {
+			outputCriticalErrors(fileName, initialWishes, wishes, -1);
+		}
+	}
+	
+	private void outputCriticalErrors(String fileName, int initialWishes, int wishes,
+	        int threadNumber) {
+		synchronized(this.outputCriticalErrorsLock) {
+			// Output Results in a simple CSV format
+			try {
+				File f = new File(this.path + fileName + "CriticalErrors.txt");
+				if(!f.exists()) {
+					f.getParentFile().mkdirs();
+					f.createNewFile();
+				}
+				BufferedWriter out = new BufferedWriter(new FileWriter(f, true));
+				out.write("#Initial Wishes:, " + initialWishes + ", ");
+				out.write("#Wishes per Op.:, " + wishes + ", ");
+				
+				if(threadNumber >= 0) {
+					out.write("Thread Nr.:, " + threadNumber + ", ");
+				} else {
+					out.write("Thread Nr.:, - , ");
+				}
+				
+				out.write(lineSeparator);
+				
+				out.close();
+			} catch(IOException e) {
+				e.printStackTrace();
 			}
-			BufferedWriter out = new BufferedWriter(new FileWriter(f, true));
-			out.write("#Initial Wishes:, " + initialWishes + ", ");
-			out.write("#Wishes per Op.:, " + wishes + ", ");
-			out.write(lineSeparator);
-			
-			out.close();
-		} catch(IOException e) {
-			e.printStackTrace();
 		}
 	}
 	
