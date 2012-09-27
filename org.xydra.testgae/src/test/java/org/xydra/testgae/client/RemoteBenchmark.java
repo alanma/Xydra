@@ -67,6 +67,8 @@ public abstract class RemoteBenchmark {
 	 */
 	protected Integer[] range;
 	
+	public static final int SINGLETHREADONLY = -1;
+	
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(HttpUtils.class);
 	final static String lineSeparator = System.getProperty("line.separator");
@@ -284,7 +286,7 @@ public abstract class RemoteBenchmark {
 		private int operations;
 		private int iteration;
 		private int wishes;
-		private int threadNumber;
+		private int threadNr;
 		private String filePath;
 		private RemoteBenchmark benchmark;
 		
@@ -297,20 +299,22 @@ public abstract class RemoteBenchmark {
 			this.operations = operations;
 			this.iteration = iteration;
 			this.wishes = wishes;
-			this.threadNumber = threadNumber;
+			this.threadNr = threadNumber;
 			this.filePath = filePath;
 			this.benchmark = benchmark;
 		}
 		
 		@Override
 		public void run() {
-			String listStr = this.benchmark.addList(this.currentRepo, this.initialWishes);
+			String listStr = this.benchmark.addList(this.currentRepo, this.initialWishes,
+			        this.threadNr);
 			
 			// in total 6 tries to create a list... if it doesn't work, this
 			// test
 			// fails
 			for(int i = 0; i < 5 & listStr == null; i++) {
-				listStr = this.benchmark.addList(this.currentRepo, this.initialWishes);
+				listStr = this.benchmark.addList(this.currentRepo, this.initialWishes,
+				        this.threadNr);
 			}
 			
 			int addExceptions = 0;
@@ -322,8 +326,8 @@ public abstract class RemoteBenchmark {
 					boolean succGet = false;
 					
 					time = System.currentTimeMillis();
-					succGet = (HttpUtils.makeGetRequest(this.absoluteUrl + listStr + "/add?wishes="
-					        + this.wishes));
+					succGet = HttpUtils.makeGetRequest(this.absoluteUrl + listStr + "/add?wishes="
+					        + this.wishes, this.threadNr);
 					time = System.currentTimeMillis() - time;
 					
 					if(!succGet) {
@@ -333,9 +337,9 @@ public abstract class RemoteBenchmark {
 						
 						this.benchmark.outputResults(this.filePath, this.initialWishes,
 						        this.operations, this.initialWishes, 0, Double.NaN, 1,
-						        this.threadNumber);
+						        this.threadNr);
 						this.benchmark.outputCriticalErrors(this.filePath, this.initialWishes,
-						        this.wishes, this.threadNumber);
+						        this.wishes, this.threadNr);
 						return;
 					}
 					
@@ -350,7 +354,7 @@ public abstract class RemoteBenchmark {
 			
 			// Output Results in a simple CSV format
 			this.benchmark.outputResults(this.filePath, this.initialWishes, this.operations,
-			        this.wishes, successfulOperations, avgTime, addExceptions, this.threadNumber);
+			        this.wishes, successfulOperations, avgTime, addExceptions, this.threadNr);
 			
 		}
 		
@@ -434,7 +438,7 @@ public abstract class RemoteBenchmark {
 		private int initialWishes;
 		private int operations;
 		private int iteration;
-		private int threadNumber;
+		private int threadNr;
 		private String filePath;
 		private RemoteBenchmark benchmark;
 		
@@ -446,20 +450,22 @@ public abstract class RemoteBenchmark {
 			this.initialWishes = initialWishes;
 			this.operations = operations;
 			this.iteration = iteration;
-			this.threadNumber = threadNumber;
+			this.threadNr = threadNumber;
 			this.filePath = filePath;
 			this.benchmark = benchmark;
 		}
 		
+		// TODO implement initial wishes mechanic
+		
 		@Override
 		public void run() {
-			String listStr = this.benchmark.addList(this.currentRepo);
+			String listStr = this.benchmark.addList(this.currentRepo, 0, this.threadNr);
 			
 			// in total 6 tries to create a list... if it doesn't work, this
 			// test
 			// fails
 			for(int i = 0; i < 5 & listStr == null; i++) {
-				listStr = this.benchmark.addList(this.currentRepo);
+				listStr = this.benchmark.addList(this.currentRepo, 0, this.threadNr);
 			}
 			
 			int addExceptions = 0;
@@ -467,7 +473,6 @@ public abstract class RemoteBenchmark {
 			for(int i = 0; i < this.operations; i++) {
 				try {
 					
-					// TODO is this safe/okay/correct?
 					String wishStr = addWishToEmptyList(this.absoluteUrl + listStr);
 					
 					if(wishStr == null) {
@@ -476,9 +481,9 @@ public abstract class RemoteBenchmark {
 						                + this.iteration + ", " + this.initialWishes
 						                + " initial wishes in DeleteWishes-Test");
 						this.benchmark.outputResults(this.filePath, 0, this.operations, 1, 0,
-						        Double.NaN, 1, this.threadNumber);
+						        Double.NaN, 1, this.threadNr);
 						this.benchmark.outputCriticalErrors(this.filePath, this.initialWishes, 1,
-						        this.threadNumber);
+						        this.threadNr);
 						return;
 					}
 					
@@ -486,7 +491,8 @@ public abstract class RemoteBenchmark {
 					boolean succGet = false;
 					
 					time = System.currentTimeMillis();
-					succGet = HttpUtils.makeGetRequest(this.absoluteUrl + wishStr + "/delete");
+					succGet = HttpUtils.makeGetRequest(this.absoluteUrl + wishStr + "/delete",
+					        this.threadNr);
 					time = System.currentTimeMillis() - time;
 					
 					if(!succGet) {
@@ -494,9 +500,9 @@ public abstract class RemoteBenchmark {
 						        + this.iteration + ", " + this.initialWishes
 						        + " initial wishes while deleting 1 wish");
 						this.benchmark.outputResults(this.filePath, 0, this.operations, 1, 0,
-						        Double.NaN, 1, this.threadNumber);
+						        Double.NaN, 1, this.threadNr);
 						this.benchmark.outputCriticalErrors(this.filePath, this.initialWishes, 1,
-						        this.threadNumber);
+						        this.threadNr);
 						return;
 					}
 					
@@ -512,7 +518,7 @@ public abstract class RemoteBenchmark {
 			
 			// Output Results in a simple CSV format
 			this.benchmark.outputResults(this.filePath, 0, this.operations, 1,
-			        successfulOperations, avgTime, addExceptions, this.threadNumber);
+			        successfulOperations, avgTime, addExceptions, this.threadNr);
 		}
 		
 	}
@@ -707,7 +713,7 @@ public abstract class RemoteBenchmark {
 	        int successfulOps, double avgTime, int opExceps) {
 		synchronized(this.outputResultsLock) {
 			outputResults(fileName, initialWishes, operations, wishes, successfulOps, avgTime,
-			        opExceps, -1);
+			        opExceps, RemoteBenchmark.SINGLETHREADONLY);
 		}
 	}
 	
@@ -775,7 +781,7 @@ public abstract class RemoteBenchmark {
 	 */
 	private void outputCriticalErrors(String fileName, int initialWishes, int wishes) {
 		synchronized(this.outputCriticalErrorsLock) {
-			outputCriticalErrors(fileName, initialWishes, wishes, -1);
+			outputCriticalErrors(fileName, initialWishes, wishes, RemoteBenchmark.SINGLETHREADONLY);
 		}
 	}
 	
@@ -861,10 +867,14 @@ public abstract class RemoteBenchmark {
 	 * @return the url of the repository or null if the operation fails
 	 */
 	private String addList(String repoIdStr, int initialWishes) {
+		return addList(repoIdStr, initialWishes, RemoteBenchmark.SINGLETHREADONLY);
+	}
+	
+	private String addList(String repoIdStr, int initialWishes, int threadNr) {
 		String response = null;
 		try {
 			response = HttpUtils.getRequestAsStringResponse(this.absoluteUrl + "/xmas" + repoIdStr
-			        + "/add?lists=1&wishes=" + initialWishes);
+			        + "/add?lists=1&wishes=" + initialWishes, threadNr);
 		} catch(Exception e) {
 			return null;
 		}
@@ -899,12 +909,17 @@ public abstract class RemoteBenchmark {
 	 *         another wish) Returns null if operations fails.
 	 */
 	private static String addWishToEmptyList(String listUrlStr) {
-		boolean succ = HttpUtils.makeGetRequest(listUrlStr + "/add?wishes=1");
+		return addWishToEmptyList(listUrlStr, RemoteBenchmark.SINGLETHREADONLY);
+	}
+	
+	private static String addWishToEmptyList(String listUrlStr, int threadNr) {
+		boolean succ = HttpUtils.makeGetRequest(listUrlStr + "/add?wishes=1", threadNr);
 		if(!succ) {
 			return null;
 		}
 		
-		String response = HttpUtils.getRequestAsStringResponse(listUrlStr + "?format=urls");
+		String response = HttpUtils.getRequestAsStringResponse(listUrlStr + "?format=urls",
+		        threadNr);
 		if(response == null) {
 			return null;
 		}

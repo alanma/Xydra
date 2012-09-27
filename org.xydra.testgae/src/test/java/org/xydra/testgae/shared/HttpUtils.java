@@ -7,6 +7,7 @@ import java.io.Reader;
 import org.apache.commons.io.IOUtils;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.testgae.client.RemoteBenchmark;
 
 import com.google.appengine.repackaged.org.apache.http.HttpResponse;
 import com.google.appengine.repackaged.org.apache.http.client.methods.HttpGet;
@@ -32,22 +33,28 @@ public class HttpUtils {
 	 * @return true if request returned 200 code
 	 */
 	public static synchronized boolean makeGetRequest(String absoluteUrl) {
+		return makeGetRequest(absoluteUrl, RemoteBenchmark.SINGLETHREADONLY);
+	}
+	
+	public static synchronized boolean makeGetRequest(String absoluteUrl, int threadNr) {
 		assert absoluteUrl != null;
 		assert absoluteUrl.startsWith("http");
 		DefaultHttpClient httpclient = createHttpClient();
 		HttpGet httpget = new HttpGet(absoluteUrl);
 		try {
-			// log.info("GET STATUS " + absoluteUrl);
+			// log.info("Thread Nr. " + threadNr + ": GET STATUS " +
+			// absoluteUrl);
 			HttpResponse res = httpclient.execute(httpget);
 			int status = res.getStatusLine().getStatusCode();
-			// log.info("GOT STATUS " + absoluteUrl + " => " + status);
+			// log.info("Thread Nr. " + threadNr + ":GOT STATUS " + absoluteUrl
+			// + " => " + status);
 			return status == 200;
 		} catch(Exception e) {
 			// In case of an unexpected exception you may want to abort
 			// the HTTP request in order to shut down the underlying
 			// connection immediately.
 			httpget.abort();
-			throw new RuntimeException("Failed on " + absoluteUrl, e);
+			throw new RuntimeException("Thread Nr. " + threadNr + ":Failed on " + absoluteUrl, e);
 		}
 	}
 	
@@ -56,13 +63,17 @@ public class HttpUtils {
 	 * @return true if request returned 200 code
 	 */
 	public static synchronized String getRequestAsStringResponse(String absoluteUrl) {
+		return getRequestAsStringResponse(absoluteUrl, RemoteBenchmark.SINGLETHREADONLY);
+	}
+	
+	public static synchronized String getRequestAsStringResponse(String absoluteUrl, int threadNr) {
 		assert absoluteUrl != null;
 		assert absoluteUrl.startsWith("http");
 		DefaultHttpClient httpclient = createHttpClient();
 		HttpGet httpget = new HttpGet(absoluteUrl);
 		try {
 			// this may take a while
-			log.info("GET CONTENT " + absoluteUrl);
+			log.info("Thread Nr. " + threadNr + ": GET CONTENT " + absoluteUrl);
 			HttpResponse res = httpclient.execute(httpget);
 			int status = res.getStatusLine().getStatusCode();
 			assert status == 200 : "status is " + status + " for " + absoluteUrl;
@@ -71,7 +82,8 @@ public class HttpUtils {
 			String content = IOUtils.toString(r);
 			r.close();
 			in.close();
-			log.info("GOT CONTENT " + absoluteUrl + " " + content.length() + " chars");
+			log.info("Thread Nr. " + threadNr + ":GOT CONTENT " + absoluteUrl + " "
+			        + content.length() + " chars");
 			return content;
 		} catch(AssertionError e) {
 			// for example if returned status is 500
@@ -81,7 +93,7 @@ public class HttpUtils {
 			// the HTTP request in order to shut down the underlying
 			// connection immediately.
 			httpget.abort();
-			log.info("Failed on " + absoluteUrl, e);
+			log.info("Thread Nr. " + threadNr + ":Failed on " + absoluteUrl, e);
 			
 			return null;
 		}
