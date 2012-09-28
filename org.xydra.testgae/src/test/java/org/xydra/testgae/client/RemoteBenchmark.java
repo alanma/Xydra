@@ -88,21 +88,36 @@ public abstract class RemoteBenchmark {
 	 * Benchmarks adding one single wish to an empty list.
 	 */
 	public void benchmarkAddingOneWishOneThread() {
-		runSingleOperationBenchmark(Operations.ADD, "AddingOneWishOneThread");
+		runSingleOperationBenchmarkOneThread(Operations.ADD, "AddingOneWishOneThread");
+	}
+	
+	public void benchmarkAddingOneWishMultipleThreads(int threads) {
+		runSingleOperationBenchmarkMultipleThreads(Operations.ADD, "AddingOneWish" + threads
+		        + "Threads", threads);
 	}
 	
 	/**
 	 * Benchmarks deleting one single wish from a list with exactly one wish.
 	 */
 	public void benchmarkDeletingOneWishOneThread() {
-		runSingleOperationBenchmark(Operations.DELETE, "DeletingOneWishOneThread");
+		runSingleOperationBenchmarkOneThread(Operations.DELETE, "DeletingOneWishOneThread");
+	}
+	
+	public void benchmarkDeletingOneWishMultipleThreads(int threads) {
+		runSingleOperationBenchmarkMultipleThreads(Operations.DELETE, "DeletingOneWish" + threads
+		        + "Threads", threads);
 	}
 	
 	/**
 	 * Benchmarks editing one wish single wish in a list with exactly one wish.
 	 */
 	public void benchmarkEditingOneWishOneThread() {
-		runSingleOperationBenchmark(Operations.EDIT, "EditingOneWishOneThread");
+		runSingleOperationBenchmarkOneThread(Operations.EDIT, "EditingOneWishOneThread");
+	}
+	
+	public void benchmarkEditingOneWishMultipleThreads(int threads) {
+		runSingleOperationBenchmarkMultipleThreads(Operations.EDIT, "EditingOneWish" + threads
+		        + "Threads", threads);
 	}
 	
 	/**
@@ -110,15 +125,28 @@ public abstract class RemoteBenchmark {
 	 * values given in the 'range'-parameter of the constructor
 	 * {@link RemoteBenchmark#RemoteBenchmark(String, String, int, int, Integer[])}
 	 */
-	public void benchmarkAddingMultipleWishesInTransaction() {
-		String fileName = "AddingMultipleWishesInTransaction";
+	public void benchmarkAddingMultipleWishesInTransactionOneThread() {
+		String fileName = "AddingMultipleWishesInTransactionOneThread";
 		
 		for(int X : this.range) {
 			
 			int amount = this.getAmountOfAlreadyMeasuredData(fileName + X);
 			
 			for(int i = 0; i < this.iterations && (amount + i) < this.maxAmount; i++) {
-				addingWishesOneThreadInTransaction(X, 1, 0, fileName + X, i);
+				addingWishesInTransactionOneThread(X, 1, 0, fileName + X, i);
+			}
+		}
+	}
+	
+	public void benchmarkAddingMultipleWishesInTransactionMultipleThreads(int threads) {
+		String fileName = "AddingMultipleWishesInTransaction" + threads + "Threads";
+		
+		for(int X : this.range) {
+			
+			int amount = this.getAmountOfAlreadyMeasuredData(fileName + X);
+			
+			for(int i = 0; i < this.iterations && (amount + i) < this.maxAmount; i++) {
+				addingWishesInTransactionMultipleThreads(X, 1, 0, fileName + X, i, threads);
 			}
 		}
 	}
@@ -128,9 +156,15 @@ public abstract class RemoteBenchmark {
 	 * wishes for all values X given in the 'range'-parameter of the constructor
 	 * {@link RemoteBenchmark#RemoteBenchmark(String, String, int, int, Integer[])}
 	 */
-	public void benchmarkAddingWishesInTransactionWithInitialWishes() {
-		String fileName = "AddingWishesInTransactionWithInitialWishes";
-		this.runSingleOperationWithInitialWishesBenchmark(Operations.ADD, fileName);
+	public void benchmarkAddingWishesInTransactionWithInitialWishesOneThread() {
+		String fileName = "AddingWishesInTransactionWithInitialWishesOneThread";
+		this.runSingleOperationWithInitialWishesBenchmarkOneThread(Operations.ADD, fileName);
+	}
+	
+	public void benchmarkAddingWishesInTransactionWithInitialWishesMultipleThreads(int threads) {
+		String fileName = "AddingWishesInTransactionWithInitialWishes" + threads + "Threads";
+		this.runSingleOperationWithInitialWishesBenchmarkMultipleThreads(Operations.ADD, fileName,
+		        threads);
 	}
 	
 	/**
@@ -141,7 +175,7 @@ public abstract class RemoteBenchmark {
 	 */
 	public void benchmarkEditingOneWishInTransactionWithInitialWishes() {
 		String fileName = "EditingOneWishInTransactionWithInitialWishes";
-		this.runSingleOperationWithInitialWishesBenchmark(Operations.EDIT, fileName);
+		this.runSingleOperationWithInitialWishesBenchmarkOneThread(Operations.EDIT, fileName);
 	}
 	
 	// - Benchmark Execution Code -
@@ -149,14 +183,14 @@ public abstract class RemoteBenchmark {
 	/**
 	 * Used to run the "single operation" type benchmarks, for example the "add
 	 * one single wish to an empty list" benchmark
-	 * {@link RemoteBenchmark#benchmarkAddingWishesInTransactionWithInitialWishes()}
+	 * {@link RemoteBenchmark#benchmarkAddingWishesInTransactionWithInitialWishesOneThread()}
 	 * 
 	 * @param operation the operation which "single operation"-type benchmark is
 	 *            to be executed
 	 * @param fileName the name of the file in which the measured data is to be
 	 *            saved
 	 */
-	private void runSingleOperationBenchmark(Operations operation, String fileName) {
+	private void runSingleOperationBenchmarkOneThread(Operations operation, String fileName) {
 		int amount = this.getAmountOfAlreadyMeasuredData(fileName);
 		
 		for(int i = 0; i < this.iterations && (amount + i) < this.maxAmount; i++) {
@@ -177,24 +211,47 @@ public abstract class RemoteBenchmark {
 		}
 	}
 	
+	private void runSingleOperationBenchmarkMultipleThreads(Operations operation, String fileName,
+	        int threads) {
+		int amount = this.getAmountOfAlreadyMeasuredData(fileName);
+		
+		for(int i = 0; i < this.iterations && (amount + i) < this.maxAmount; i++) {
+			switch(operation) {
+			case ADD:
+				addingWishesMultipleThreadsInTransaction(1, 1, fileName, i, threads);
+				break;
+			
+			case DELETE:
+				deletingWishesMultipleThreadsInTransaction(1, 0, fileName, i, threads);
+				break;
+			case EDIT:
+				editingWishesMultipleThreadsInTransaction(1, 0, fileName, i, threads);
+				break;
+			default:
+				break;
+			}
+		}
+	}
+	
 	/**
 	 * Used to run the "with initial wishes"-type benchmarks, for example the
 	 * "add one single wish to a list with X initial wishes" benchmark
-	 * {@link RemoteBenchmark#benchmarkAddingWishesInTransactionWithInitialWishes()}
+	 * {@link RemoteBenchmark#benchmarkAddingWishesInTransactionWithInitialWishesOneThread()}
 	 * 
 	 * @param operation the operation which "with initial wishes"-type benchmark
 	 *            is to be executed
 	 * @param fileName the name of the file in which the measured data is to be
 	 *            saved
 	 */
-	private void runSingleOperationWithInitialWishesBenchmark(Operations operation, String fileName) {
+	private void runSingleOperationWithInitialWishesBenchmarkOneThread(Operations operation,
+	        String fileName) {
 		for(int X : this.range) {
 			int amount = this.getAmountOfAlreadyMeasuredData(fileName + X);
 			
 			for(int i = 0; i < this.iterations && (amount + i) < this.maxAmount; i++) {
 				switch(operation) {
 				case ADD:
-					addingWishesOneThreadInTransaction(10, 1, X, fileName + X, i);
+					addingWishesInTransactionOneThread(10, 1, X, fileName + X, i);
 					break;
 				case DELETE:
 					break; // no such benchmark implemented at this time
@@ -208,15 +265,37 @@ public abstract class RemoteBenchmark {
 		}
 	}
 	
+	private void runSingleOperationWithInitialWishesBenchmarkMultipleThreads(Operations operation,
+	        String fileName, int threads) {
+		for(int X : this.range) {
+			int amount = this.getAmountOfAlreadyMeasuredData(fileName + X);
+			
+			for(int i = 0; i < this.iterations && (amount + i) < this.maxAmount; i++) {
+				switch(operation) {
+				case ADD:
+					addingWishesInTransactionMultipleThreads(10, 1, X, fileName + X, i, threads);
+					break;
+				case DELETE:
+					break; // no such benchmark implemented at this time
+				case EDIT:
+					editingWishesMultipleThreadsInTransaction(1, X, fileName + X, i, threads);
+					break;
+				default:
+					break;
+				}
+			}
+		}
+	}
+	
 	public void addingWishesOneThreadInTransaction(int wishes, int operations, String filePath,
 	        int iteration) {
-		addingWishesOneThreadInTransaction(wishes, operations, 0, filePath, iteration);
+		addingWishesInTransactionOneThread(wishes, operations, 0, filePath, iteration);
 	}
 	
 	// TODO Maybe the following three benchmarks can be merged to one generic
 	// benchmark?
 	
-	public void addingWishesOneThreadInTransaction(int wishes, int operations, int initialWishes,
+	public void addingWishesInTransactionOneThread(int wishes, int operations, int initialWishes,
 	        String filePath, int iteration) {
 		this.currentRepo = "/repo" + System.currentTimeMillis();
 		
@@ -268,6 +347,12 @@ public abstract class RemoteBenchmark {
 	}
 	
 	public void addingWishesMultipleThreadsInTransaction(int wishes, int operations,
+	        String filePath, int iteration, int threads) {
+		addingWishesInTransactionMultipleThreads(wishes, operations, 0, filePath, iteration,
+		        threads);
+	}
+	
+	public void addingWishesInTransactionMultipleThreads(int wishes, int operations,
 	        int initialWishes, String filePath, int iteration, int threads) {
 		this.currentRepo = "/repo" + System.currentTimeMillis();
 		
@@ -604,7 +689,7 @@ public abstract class RemoteBenchmark {
 		private int initialWishes;
 		private int operations;
 		private int iteration;
-		private int threadNumber;
+		private int threadNr;
 		private String filePath;
 		private RemoteBenchmark benchmark;
 		
@@ -616,7 +701,7 @@ public abstract class RemoteBenchmark {
 			this.initialWishes = initialWishes;
 			this.operations = operations;
 			this.iteration = iteration;
-			this.threadNumber = threadNumber;
+			this.threadNr = threadNumber;
 			this.filePath = filePath;
 			this.benchmark = benchmark;
 		}
@@ -629,7 +714,8 @@ public abstract class RemoteBenchmark {
 			// test
 			// fails
 			for(int i = 0; i < 5 & listStr == null; i++) {
-				listStr = this.benchmark.addList(this.currentRepo, this.initialWishes);
+				listStr = this.benchmark.addList(this.currentRepo, this.initialWishes,
+				        this.threadNr);
 			}
 			
 			double avgTime;
@@ -647,9 +733,9 @@ public abstract class RemoteBenchmark {
 						                + this.iteration + ", " + this.initialWishes
 						                + " initial wishes in EditWish-Test");
 						this.benchmark.outputResults(this.filePath, this.initialWishes,
-						        this.operations, 0, 0, Double.NaN, 1);
+						        this.operations, 0, 0, Double.NaN, 1, this.threadNr);
 						this.benchmark.outputCriticalErrors(this.filePath + this.initialWishes,
-						        this.initialWishes, 1);
+						        this.initialWishes, 1, this.threadNr);
 						return;
 					}
 					
@@ -658,7 +744,7 @@ public abstract class RemoteBenchmark {
 					
 					time = System.currentTimeMillis();
 					succGet = HttpUtils.makeGetRequest(this.absoluteUrl + wishStr
-					        + "/editName?name=performanceTest");
+					        + "/editName?name=performanceTest", this.threadNr);
 					time = System.currentTimeMillis() - time;
 					
 					if(!succGet) {
@@ -666,9 +752,9 @@ public abstract class RemoteBenchmark {
 						        + this.iteration + ", " + this.initialWishes
 						        + " initial wishes while editing 1 wish");
 						this.benchmark.outputResults(this.filePath, this.initialWishes,
-						        this.operations, 0, 0, Double.NaN, 1, this.threadNumber);
+						        this.operations, 0, 0, Double.NaN, 1, this.threadNr);
 						this.benchmark.outputCriticalErrors(this.filePath + this.initialWishes,
-						        this.initialWishes, 1, this.threadNumber);
+						        this.initialWishes, 1, this.threadNr);
 						return;
 					}
 					
@@ -683,7 +769,7 @@ public abstract class RemoteBenchmark {
 			
 			// Output Results in a simple CSV format
 			this.benchmark.outputResults(this.filePath, this.initialWishes, this.operations, 0,
-			        successfulOperations, avgTime, addExceptions, this.threadNumber);
+			        successfulOperations, avgTime, addExceptions, this.threadNr);
 			
 		}
 		

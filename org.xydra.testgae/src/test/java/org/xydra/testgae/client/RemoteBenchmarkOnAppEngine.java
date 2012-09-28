@@ -18,8 +18,8 @@ public class RemoteBenchmarkOnAppEngine extends RemoteBenchmark {
 		benchmarkAddingOneWishOneThread();
 		benchmarkDeletingOneWishOneThread();
 		benchmarkEditingOneWishOneThread();
-		benchmarkAddingMultipleWishesInTransaction();
-		benchmarkAddingWishesInTransactionWithInitialWishes();
+		benchmarkAddingMultipleWishesInTransactionOneThread();
+		benchmarkAddingWishesInTransactionWithInitialWishesOneThread();
 		benchmarkEditingOneWishInTransactionWithInitialWishes();
 		
 	}
