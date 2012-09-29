@@ -14,13 +14,23 @@ public class RemoteBenchmarkOnAppEngine extends RemoteBenchmark {
 		super(absoluteUrl, path, iterations, maxAmount, range);
 	}
 	
-	public void executeAllBenchmarks() {
+	public void executeAllSingleThreadBenchmarks() {
 		benchmarkAddingOneWishOneThread();
 		benchmarkDeletingOneWishOneThread();
 		benchmarkEditingOneWishOneThread();
 		benchmarkAddingMultipleWishesInTransactionOneThread();
 		benchmarkAddingWishesInTransactionWithInitialWishesOneThread();
-		benchmarkEditingOneWishInTransactionWithInitialWishes();
+		benchmarkEditingOneWishInTransactionWithInitialWishesOneThread();
+		
+	}
+	
+	public void executeAllMultiThreadedBenchmarks(int threads) {
+		benchmarkAddingOneWishMultipleThreads(threads);
+		benchmarkDeletingOneWishMultipleThreads(threads);
+		benchmarkEditingOneWishMultipleThreads(threads);
+		benchmarkAddingMultipleWishesInTransactionMultipleThreads(threads);
+		benchmarkAddingWishesInTransactionWithInitialWishesMultipleThreads(threads);
+		benchmarkEditingOneWishInTransactionWithInitialWishesMultipleThreads(threads);
 		
 	}
 }

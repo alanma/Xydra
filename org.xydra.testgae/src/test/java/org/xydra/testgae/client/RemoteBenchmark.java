@@ -173,9 +173,15 @@ public abstract class RemoteBenchmark {
 	 * constructor
 	 * {@link RemoteBenchmark#RemoteBenchmark(String, String, int, int, Integer[])}
 	 */
-	public void benchmarkEditingOneWishInTransactionWithInitialWishes() {
-		String fileName = "EditingOneWishInTransactionWithInitialWishes";
+	public void benchmarkEditingOneWishInTransactionWithInitialWishesOneThread() {
+		String fileName = "EditingOneWishInTransactionWithInitialWishesOneThread";
 		this.runSingleOperationWithInitialWishesBenchmarkOneThread(Operations.EDIT, fileName);
+	}
+	
+	public void benchmarkEditingOneWishInTransactionWithInitialWishesMultipleThreads(int threads) {
+		String fileName = "EditingOneWishInTransactionWithInitialWishes" + threads + "Threads";
+		this.runSingleOperationWithInitialWishesBenchmarkMultipleThreads(Operations.EDIT, fileName,
+		        threads);
 	}
 	
 	// - Benchmark Execution Code -
@@ -910,23 +916,27 @@ public abstract class RemoteBenchmark {
 	 * @return the amount of already measured data
 	 */
 	private int getAmountOfAlreadyMeasuredData(String fileName) {
-		try {
-			BufferedReader in = new BufferedReader(new FileReader(this.path + fileName + ".txt"));
-			
-			String currentLine = in.readLine();
-			int count = 0;
-			while(currentLine != null) {
-				count++;
-				currentLine = in.readLine();
+		synchronized(this.outputResultsLock) {
+			try {
+				BufferedReader in = new BufferedReader(
+				        new FileReader(this.path + fileName + ".txt"));
+				
+				String currentLine = in.readLine();
+				int count = 0;
+				while(currentLine != null) {
+					count++;
+					currentLine = in.readLine();
+				}
+				
+				in.close();
+				
+				return count;
+				
+			} catch(IOException e) {
+				// no data measured until now
+				return 0;
 			}
 			
-			in.close();
-			
-			return count;
-			
-		} catch(IOException e) {
-			// no data measured until now
-			return 0;
 		}
 		
 	}

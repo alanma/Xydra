@@ -48,12 +48,17 @@ public class PerformanceDataAnalyzer {
 	private static Integer[] range = new Integer[] { 8, 10, 16, 20, 32, 40, 64, 80, 128, 256, 512,
 	        1024 };
 	
+	/**
+	 * determines how many threads are used in the multi-threaded benchmarks
+	 */
+	private static int threads = 20;
+	
 	private static boolean version2Exists;
 	
 	public static void main(String args[]) {
 		final String[] oldVersions = new String[] { // "Version2",
-													// "gae20111105",
-													// "gae20111105-20"
+		                                            // "gae20111105",
+		                                            // "gae20111105-20"
 		};
 		
 		String url = "http://testgae20120918.xydra-1.appspot.com/";
@@ -66,9 +71,9 @@ public class PerformanceDataAnalyzer {
 		list.add(newVersion);
 		final String[] allVersions = list.toArray(new String[0]);
 		
-		runAndEvaluateBenchmark(url, newVersion, oldVersions, 20, 20);
+		runAndEvaluateSingleThreadBenchmark(url, newVersion, oldVersions, 20, 20);
 		
-		evaluateBenchmark(allVersions);
+		evaluateSingleThreadBenchmark(allVersions);
 		
 		/*
 		 * Last url: "http://testgae20111105.xydra-1.appspot.com/logged";
@@ -100,13 +105,13 @@ public class PerformanceDataAnalyzer {
 	 *            not exceeded.
 	 */
 	
-	public static void runAndEvaluateBenchmark(String versionUrl, String versionLabel,
+	public static void runAndEvaluateSingleThreadBenchmark(String versionUrl, String versionLabel,
 	        String[] oldVersions, int iterations, int maxAmount) {
 		
 		RemoteBenchmarkOnAppEngine benchmark = new RemoteBenchmarkOnAppEngine(versionUrl, DIR_DATA
 		        + versionLabel + "/", iterations, maxAmount, range);
 		
-		benchmark.executeAllBenchmarks();
+		benchmark.executeAllSingleThreadBenchmarks();
 		
 		String versions[] = new String[oldVersions.length + 1];
 		
@@ -118,7 +123,28 @@ public class PerformanceDataAnalyzer {
 			}
 		}
 		
-		evaluateBenchmark(versions);
+		evaluateSingleThreadBenchmark(versions);
+	}
+	
+	public static void runAndEvaluateMultiThreadedBenchmark(String versionUrl, String versionLabel,
+	        String[] oldVersions, int iterations, int maxAmount) {
+		
+		RemoteBenchmarkOnAppEngine benchmark = new RemoteBenchmarkOnAppEngine(versionUrl, DIR_DATA
+		        + versionLabel + "/", iterations, maxAmount, range);
+		
+		benchmark.executeAllMultiThreadedBenchmarks(threads);
+		
+		String versions[] = new String[oldVersions.length + 1];
+		
+		for(int i = 0; i < versions.length; i++) {
+			if(i < oldVersions.length) {
+				versions[i] = oldVersions[i];
+			} else {
+				versions[i] = versionLabel;
+			}
+		}
+		
+		evaluateMultiThreadedBenchmark(versions);
 	}
 	
 	/**
@@ -126,7 +152,7 @@ public class PerformanceDataAnalyzer {
 	 * 
 	 * @param versions array of versions of which the data is to be measured
 	 */
-	public static void evaluateBenchmark(String[] versions) {
+	public static void evaluateSingleThreadBenchmark(String[] versions) {
 		fileName = "Evaluation" + System.currentTimeMillis() + ".html";
 		
 		// check if "Version2" is one of the versions
@@ -140,23 +166,57 @@ public class PerformanceDataAnalyzer {
 		 * Evaluate the data of the single operation tests, like adding one
 		 * single wish
 		 */
-		evaluateSingleOperationBenchmark(versions, Operations.ADD);
-		evaluateSingleOperationBenchmark(versions, Operations.DELETE);
-		evaluateSingleOperationBenchmark(versions, Operations.EDIT);
+		evaluateSingleOperationBenchmarkOneThread(versions, Operations.ADD);
+		evaluateSingleOperationBenchmarkOneThread(versions, Operations.DELETE);
+		evaluateSingleOperationBenchmarkOneThread(versions, Operations.EDIT);
 		
 		/*
 		 * Evaluate the "add multiple wishes in transaction" benchmark
 		 */
-		evaluateAddingMultipleWishes(versions, range);
+		evaluateAddingMultipleWishesOneThread(versions, range);
 		
 		/*
 		 * Evaluate the "single operation with initial wishes" benchmarks
 		 */
-		evaluateSingleOperationWithInitialWishesBenchmarks(versions, Operations.ADD, range);
-		evaluateSingleOperationWithInitialWishesBenchmarks(versions, Operations.EDIT, range);
+		evaluateSingleOperationWithInitialWishesBenchmarksOneThread(versions, Operations.ADD, range);
+		evaluateSingleOperationWithInitialWishesBenchmarksOneThread(versions, Operations.EDIT,
+		        range);
 	}
 	
-	public static void evaluateSingleOperationBenchmark(String[] versions, Operations op) {
+	public static void evaluateMultiThreadedBenchmark(String[] versions) {
+		fileName = "Evaluation" + System.currentTimeMillis() + "MultiThreaded" + threads
+		        + "Threads.html";
+		
+		// check if "Version2" is one of the versions
+		for(int i = 0; i < versions.length; i++) {
+			if(versions[i].equals("Version2")) {
+				version2Exists = true;
+			}
+		}
+		
+		/*
+		 * Evaluate the data of the single operation tests, like adding one
+		 * single wish
+		 */
+		evaluateSingleOperationBenchmarkMultipleThreads(versions, Operations.ADD);
+		evaluateSingleOperationBenchmarkMultipleThreads(versions, Operations.DELETE);
+		evaluateSingleOperationBenchmarkMultipleThreads(versions, Operations.EDIT);
+		
+		/*
+		 * Evaluate the "add multiple wishes in transaction" benchmark
+		 */
+		evaluateAddingMultipleWishesMultipleThreads(versions, range);
+		
+		/*
+		 * Evaluate the "single operation with initial wishes" benchmarks
+		 */
+		evaluateSingleOperationWithInitialWishesBenchmarksMultipleThreads(versions, Operations.ADD,
+		        range);
+		evaluateSingleOperationWithInitialWishesBenchmarksMultipleThreads(versions,
+		        Operations.EDIT, range);
+	}
+	
+	public static void evaluateSingleOperationBenchmarkOneThread(String[] versions, Operations op) {
 		CsvTable results = new CsvTable(true);
 		
 		String path = null;
@@ -235,8 +295,8 @@ public class PerformanceDataAnalyzer {
 				}
 				
 				CsvTable dataTarget = new CsvTable();
-				TableTools.groupBy(dataTable, Arrays.asList("X"), Collections.EMPTY_LIST,
-				        Arrays.asList("data"), Collections.EMPTY_LIST, dataTarget);
+				TableTools.groupBy(dataTable, Arrays.asList("X"), Collections.<String>emptyList(),
+				        Arrays.asList("data"), Collections.<String>emptyList(), dataTarget);
 				
 				avg.setValue(i + "-" + versions[i], dataTarget.getValue("" + 0, "data"
 				        + "--average"), true);
@@ -245,8 +305,8 @@ public class PerformanceDataAnalyzer {
 				amount.setValue(i + "-" + versions[i], dataCount, true);
 				
 				CsvTable excepTarget = new CsvTable();
-				TableTools.groupBy(excepTable, Arrays.asList("X"), Collections.EMPTY_LIST,
-				        Arrays.asList("data"), Collections.EMPTY_LIST, excepTarget);
+				TableTools.groupBy(excepTable, Arrays.asList("X"), Collections.<String>emptyList(),
+				        Arrays.asList("data"), Collections.<String>emptyList(), excepTarget);
 				
 				excep.setValue(i + "-" + versions[i], excepTarget.getValue("" + 0, "data"
 				        + "--average"), true);
@@ -333,13 +393,191 @@ public class PerformanceDataAnalyzer {
 		
 	}
 	
-	public static void evaluateAddingMultipleWishes(String[] versions, Integer[] range) {
+	public static void evaluateSingleOperationBenchmarkMultipleThreads(String[] versions,
+	        Operations op) {
+		CsvTable results = new CsvTable(true);
+		
+		String path = null;
+		
+		// Get correct file name
+		switch(op) {
+		case ADD:
+			path = "AddingOneWish" + threads + "Threads";
+			break;
+		case DELETE:
+			path = "DeletingOneWish" + threads + "Threads";
+			break;
+		case EDIT:
+			path = "EditingOneWish" + threads + "Threads";
+			break;
+		}
+		
+		assert path != null;
+		
+		// add rows for average, standard deviation and exceptions
+		IRow avg = results.getOrCreateRow("avg", true);
+		IRow stdev = results.getOrCreateRow("stdev", true);
+		IRow excep = results.getOrCreateRow("Excep", true);
+		IRow critEr = results.getOrCreateRow("Critical Errors", true);
+		IRow amount = results.getOrCreateRow("Amount of data", true);
+		
+		avg.setValue("", "Average (ms)", true);
+		stdev.setValue("", "Standard Deviation (ms)", true);
+		excep.setValue("", "Average Amount of Exceptions", true);
+		critEr.setValue("", "Average Amount of Critical Errors (i.e 404)", true);
+		amount.setValue("", "Amount of data", true);
+		
+		int version2Operations = 0;
+		
+		for(int i = 0; i < versions.length; i++) {
+			CsvTable dataTable = new CsvTable(true);
+			CsvTable excepTable = new CsvTable(true);
+			
+			int dataCount = 0;
+			try {
+				/*
+				 * Read data for the current version and write it in the CSV
+				 * table
+				 */
+				BufferedReader in = new BufferedReader(new FileReader(DIR_DATA + versions[i] + "/"
+				        + path + ".txt"));
+				
+				String currentLine = in.readLine();
+				int excepCount = 0;
+				
+				if(versions[i].equals("Version2")) {
+					String[] data = currentLine.split(",");
+					version2Operations = Integer.parseInt(data[3].replaceAll(" ", ""));
+				}
+				
+				while(currentLine != null) {
+					String[] csvData = currentLine.split(",");
+					
+					IRow dataRow = dataTable.getOrCreateRow("" + dataCount, true);
+					IRow excepRow = excepTable.getOrCreateRow("" + excepCount, true);
+					
+					// csv column 9 holds the data for the average time
+					if(!csvData[9].contains("NaN")) {
+						dataRow.setValue("X", "0", true);
+						dataRow.setValue("data", Double.parseDouble(csvData[9]), true);
+						
+						dataCount++;
+					}
+					
+					// csv column 11 holds the data for the exceptions
+					excepRow.setValue("X", "0", true);
+					excepRow.setValue("data", csvData[11], true);
+					excepCount++;
+					
+					currentLine = in.readLine();
+				}
+				
+				CsvTable dataTarget = new CsvTable();
+				TableTools.groupBy(dataTable, Arrays.asList("X"), Collections.<String>emptyList(),
+				        Arrays.asList("data"), Collections.<String>emptyList(), dataTarget);
+				
+				avg.setValue(i + "-" + versions[i], dataTarget.getValue("" + 0, "data"
+				        + "--average"), true);
+				stdev.setValue(i + "-" + versions[i], dataTarget.getValue("" + 0, "data"
+				        + "--stdev"), true);
+				amount.setValue(i + "-" + versions[i], dataCount, true);
+				
+				CsvTable excepTarget = new CsvTable();
+				TableTools.groupBy(excepTable, Arrays.asList("X"), Collections.<String>emptyList(),
+				        Arrays.asList("data"), Collections.<String>emptyList(), excepTarget);
+				
+				excep.setValue(i + "-" + versions[i], excepTarget.getValue("" + 0, "data"
+				        + "--average"), true);
+				
+				in.close();
+			} catch(IOException e) {
+				e.printStackTrace();
+			}
+			
+			try {
+				BufferedReader in = new BufferedReader(new FileReader(DIR_DATA + versions[i] + "/"
+				        + path + "CriticalErrors.txt"));
+				
+				/*
+				 * The file for the critical errors only contains the lines when
+				 * a critical errors happened, therefore the average amount of
+				 * cirital errors can be calculated by counting its number of
+				 * rows and dividing it by the amount of data (which was
+				 * measured in the previous block)
+				 */
+				
+				String currentLine = in.readLine();
+				
+				int count = 0;
+				
+				while(currentLine != null) {
+					count++;
+					currentLine = in.readLine();
+				}
+				
+				critEr.setValue(i + "-" + versions[i], (double)(count) / dataCount, true);
+				
+				in.close();
+				
+			} catch(IOException e) {
+				if(versions[i].equals("Version2")) {
+					/*
+					 * critical errors weren't measured for version 2
+					 */
+					critEr.setValue(i + "-" + versions[i], "N/A", true);
+				} else {
+					/*
+					 * The file for critical errors is only created when one
+					 * happens, therefore if no such file exists, no critical
+					 * error happened
+					 */
+					
+					critEr.setValue(i + "-" + versions[i], "0", true);
+				}
+			}
+		}
+		
+		try {
+			FileWriter fw = new FileWriter(new File(DIR_DATA + fileName), true);
+			// add some CSS to have table border lines
+			fw.write("<style>\n" + "  table.csv * { border: 1px solid; } \n" + "</style>\n");
+			
+			switch(op) {
+			case ADD:
+				fw.write("<h1> Adding One Wish </h1>");
+				break;
+			case DELETE:
+				fw.write("<h1> Deleting One Wish </h1>");
+				break;
+			case EDIT:
+				fw.write("<h1> Editing One Wish </h1>");
+				break;
+			}
+			
+			HtmlTool.writeToHtml(results, null, fw);
+			if(version2Exists) {
+				fw.write("<b>Attention</b>: Averages etc. for Version 2 were measured over averages of "
+				        + version2Operations
+				        + " operations. "
+				        + "Other Versions build their average over single exceutions of the given operation.");
+			}
+			
+			fw.write("\n  <hr />  \n");
+			
+			fw.close();
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
+	public static void evaluateAddingMultipleWishesOneThread(String[] versions, Integer[] range) {
 		CsvTable avgResults = new CsvTable(true);
 		CsvTable stdevResults = new CsvTable(true);
 		CsvTable excepResults = new CsvTable(true);
 		CsvTable critErResults = new CsvTable(true);
 		
-		String path = "/AddingMultipleWishesInTransaction";
+		String path = "/AddingMultipleWishesInTransactionOneThread";
 		
 		int version2Operations = 0;
 		
@@ -395,8 +633,71 @@ public class PerformanceDataAnalyzer {
 		
 	}
 	
-	public static void evaluateSingleOperationWithInitialWishesBenchmarks(String[] versions,
-	        Operations op, Integer[] range) {
+	public static void evaluateAddingMultipleWishesMultipleThreads(String[] versions,
+	        Integer[] range) {
+		CsvTable avgResults = new CsvTable(true);
+		CsvTable stdevResults = new CsvTable(true);
+		CsvTable excepResults = new CsvTable(true);
+		CsvTable critErResults = new CsvTable(true);
+		
+		String path = "/AddingMultipleWishesInTransaction" + threads + "Threads";
+		
+		int version2Operations = 0;
+		
+		if(version2Exists) {
+			try {
+				BufferedReader in = new BufferedReader(new FileReader(DIR_DATA + "Version2/" + path
+				        + "10.txt"));
+				
+				String currentLine = in.readLine();
+				
+				String[] data = currentLine.split(",");
+				version2Operations = Integer.parseInt(data[3].replaceAll(" ", ""));
+				
+				in.close();
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
+			
+		}
+		
+		collectDataAndEvaluate(versions, path, range, avgResults, stdevResults, excepResults,
+		        critErResults);
+		
+		try {
+			FileWriter fw = new FileWriter(new File(DIR_DATA + fileName), true);
+			// add some CSS to have table border lines
+			fw.write("<style>\n" + "  table.csv * { border: 1px solid; } \n" + "</style>\n");
+			
+			fw.write("<h1> Adding Multiple Wishes </h1>");
+			
+			if(version2Exists) {
+				fw.write("<b>Attention</b>: Averages etc. for Version 2 were measured over averages of "
+				        + version2Operations
+				        + " operations. "
+				        + "Other Versions build their average over single exceutions of the given operation.");
+			}
+			
+			fw.write("<h3> Average Times </h3>");
+			HtmlTool.writeToHtml(avgResults, "0-X", fw);
+			fw.write("<h3> Standard Deviation of Averages </h3>");
+			HtmlTool.writeToHtml(stdevResults, "0-X", fw);
+			fw.write("<h3> Exceptions </h3>");
+			HtmlTool.writeToHtml(excepResults, "0-X", fw);
+			fw.write("<h3> Critical Errors </h3>");
+			HtmlTool.writeToHtml(critErResults, "0-X", fw);
+			
+			fw.write("\n  <hr />  \n");
+			
+			fw.close();
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
+	public static void evaluateSingleOperationWithInitialWishesBenchmarksOneThread(
+	        String[] versions, Operations op, Integer[] range) {
 		CsvTable avgResults = new CsvTable(true);
 		CsvTable stdevResults = new CsvTable(true);
 		CsvTable excepResults = new CsvTable(true);
@@ -407,13 +708,107 @@ public class PerformanceDataAnalyzer {
 		// Get correct file name
 		switch(op) {
 		case ADD:
-			path = "AddingWishesInTransactionWithInitialWishes";
+			path = "AddingWishesInTransactionWithInitialWishesOneThread";
 			break;
 		case DELETE:
 			// at the moment no such benchmark exists
 			return;
 		case EDIT:
-			path = "EditingOneWishInTransactionWithInitialWishes";
+			path = "EditingOneWishInTransactionWithInitialWishesOneThread";
+			break;
+		}
+		
+		assert path != null;
+		
+		int version2Operations = 0;
+		
+		if(version2Exists) {
+			try {
+				BufferedReader in = new BufferedReader(new FileReader(DIR_DATA + "Version2/" + path
+				        + "10.txt"));
+				
+				String currentLine = in.readLine();
+				
+				String[] data = currentLine.split(",");
+				version2Operations = Integer.parseInt(data[3].replaceAll(" ", ""));
+				
+				in.close();
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
+			
+		}
+		
+		collectDataAndEvaluate(versions, path, range, avgResults, stdevResults, excepResults,
+		        critErResults);
+		
+		try {
+			FileWriter fw = new FileWriter(new File(DIR_DATA + fileName), true);
+			// add some CSS to have table border lines
+			fw.write("<style>\n" + "  table.csv * { border: 1px solid; } \n" + "</style>\n");
+			
+			String heading = null;
+			
+			switch(op) {
+			case ADD:
+				heading = "<h1> Adding ten wishes with inital wishes </h1>";
+				break;
+			case DELETE:
+				// at the moment no such benchmark exists
+				fw.close();
+				return;
+			case EDIT:
+				heading = "<h1> Editing one wish with inital wishes </h1>";
+				break;
+			}
+			
+			assert heading != null;
+			
+			fw.write(heading);
+			if(version2Exists) {
+				fw.write("<b>Attention</b>: Averages etc. for Version 2 were measured over averages of "
+				        + version2Operations
+				        + " operations. "
+				        + "Other Versions build their average over single exceutions of the given operation.");
+			}
+			
+			fw.write("<h3> Average Times </h3>");
+			HtmlTool.writeToHtml(avgResults, "0-X", fw);
+			fw.write("<h3> Standard Deviation of Averages </h3>");
+			HtmlTool.writeToHtml(stdevResults, "0-X", fw);
+			fw.write("<h3> Exceptions </h3>");
+			HtmlTool.writeToHtml(excepResults, "0-X", fw);
+			fw.write("<h3> Critical Errors </h3>");
+			HtmlTool.writeToHtml(critErResults, "0-X", fw);
+			
+			fw.write("\n  <hr />  \n");
+			
+			fw.close();
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
+	public static void evaluateSingleOperationWithInitialWishesBenchmarksMultipleThreads(
+	        String[] versions, Operations op, Integer[] range) {
+		CsvTable avgResults = new CsvTable(true);
+		CsvTable stdevResults = new CsvTable(true);
+		CsvTable excepResults = new CsvTable(true);
+		CsvTable critErResults = new CsvTable(true);
+		
+		String path = null;
+		
+		// Get correct file name
+		switch(op) {
+		case ADD:
+			path = "AddingWishesInTransactionWithInitialWishes" + threads + "Threads";
+			break;
+		case DELETE:
+			// at the moment no such benchmark exists
+			return;
+		case EDIT:
+			path = "EditingOneWishInTransactionWithInitialWishes" + threads + "Threads";
 			break;
 		}
 		
