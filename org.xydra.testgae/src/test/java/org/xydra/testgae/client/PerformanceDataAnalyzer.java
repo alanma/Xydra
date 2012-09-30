@@ -51,7 +51,7 @@ public class PerformanceDataAnalyzer {
 	/**
 	 * determines how many threads are used in the multi-threaded benchmarks
 	 */
-	private static int threads = 20;
+	private static int threads = 2;
 	
 	private static boolean version2Exists;
 	
@@ -62,7 +62,7 @@ public class PerformanceDataAnalyzer {
 		};
 		
 		String url = "http://testgae20120918.xydra-1.appspot.com/";
-		String newVersion = "20120918";
+		String newVersion = "20120930";
 		ArrayList<String> list = new ArrayList<String>();
 		
 		for(String old : oldVersions) {
@@ -74,6 +74,17 @@ public class PerformanceDataAnalyzer {
 		runAndEvaluateSingleThreadBenchmark(url, newVersion, oldVersions, 20, 20);
 		
 		evaluateSingleThreadBenchmark(allVersions);
+		
+		runMultiThreadedBenchmark(url, newVersion, oldVersions, 20, 20);
+		
+		/*
+		 * Only uncomment the following line when "runMultiThreadedBenchmark"
+		 * ran at least once with the current version, otherwise the thread of
+		 * this benchmark might not have finished, therefore not have written
+		 * their data to the respective files and the evaluation will throw
+		 * FileNotFoundExceptions
+		 */
+		// evaluateMultiThreadedBenchmark(allVersions);
 		
 		/*
 		 * Last url: "http://testgae20111105.xydra-1.appspot.com/logged";
@@ -126,7 +137,7 @@ public class PerformanceDataAnalyzer {
 		evaluateSingleThreadBenchmark(versions);
 	}
 	
-	public static void runAndEvaluateMultiThreadedBenchmark(String versionUrl, String versionLabel,
+	public static void runMultiThreadedBenchmark(String versionUrl, String versionLabel,
 	        String[] oldVersions, int iterations, int maxAmount) {
 		
 		RemoteBenchmarkOnAppEngine benchmark = new RemoteBenchmarkOnAppEngine(versionUrl, DIR_DATA
@@ -143,8 +154,6 @@ public class PerformanceDataAnalyzer {
 				versions[i] = versionLabel;
 			}
 		}
-		
-		evaluateMultiThreadedBenchmark(versions);
 	}
 	
 	/**
@@ -1105,7 +1114,7 @@ public class PerformanceDataAnalyzer {
 				}
 				
 				Integer dataCount = dataCounts[i].get(rowX);
-				System.out.println(dataCount);
+				// System.out.println(dataCount);
 				if(dataCount == 0) {
 					avgResultRow.setValue(column + "-" + versions[i] + "- Amount", "N/A", true);
 				} else {

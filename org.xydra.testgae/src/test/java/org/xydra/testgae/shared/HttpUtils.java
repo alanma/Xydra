@@ -46,7 +46,7 @@ public class HttpUtils {
 			// absoluteUrl);
 			HttpResponse res = httpclient.execute(httpget);
 			int status = res.getStatusLine().getStatusCode();
-			// log.info("Thread Nr. " + threadNr + ":GOT STATUS " + absoluteUrl
+			// log.info("Thread Nr. " + threadNr + ": GOT STATUS " + absoluteUrl
 			// + " => " + status);
 			return status == 200;
 		} catch(Exception e) {
@@ -54,7 +54,7 @@ public class HttpUtils {
 			// the HTTP request in order to shut down the underlying
 			// connection immediately.
 			httpget.abort();
-			throw new RuntimeException("Thread Nr. " + threadNr + ":Failed on " + absoluteUrl, e);
+			throw new RuntimeException("Thread Nr. " + threadNr + ": Failed on " + absoluteUrl, e);
 		}
 	}
 	
@@ -82,7 +82,7 @@ public class HttpUtils {
 			String content = IOUtils.toString(r);
 			r.close();
 			in.close();
-			log.info("Thread Nr. " + threadNr + ":GOT CONTENT " + absoluteUrl + " "
+			log.info("Thread Nr. " + threadNr + ": GOT CONTENT " + absoluteUrl + " "
 			        + content.length() + " chars");
 			return content;
 		} catch(AssertionError e) {
@@ -93,7 +93,7 @@ public class HttpUtils {
 			// the HTTP request in order to shut down the underlying
 			// connection immediately.
 			httpget.abort();
-			log.info("Thread Nr. " + threadNr + ":Failed on " + absoluteUrl, e);
+			log.info("Thread Nr. " + threadNr + ": Failed on " + absoluteUrl, e);
 			
 			return null;
 		}

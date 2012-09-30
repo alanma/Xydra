@@ -228,10 +228,10 @@ public abstract class RemoteBenchmark {
 				break;
 			
 			case DELETE:
-				deletingWishesMultipleThreadsInTransaction(1, 0, fileName, i, threads);
+				deletingWishesInTransactionMultipleThreads(1, 0, fileName, i, threads);
 				break;
 			case EDIT:
-				editingWishesMultipleThreadsInTransaction(1, 0, fileName, i, threads);
+				editingWishesInTransactionMultipleThreads(1, 0, fileName, i, threads);
 				break;
 			default:
 				break;
@@ -284,7 +284,7 @@ public abstract class RemoteBenchmark {
 				case DELETE:
 					break; // no such benchmark implemented at this time
 				case EDIT:
-					editingWishesMultipleThreadsInTransaction(1, X, fileName + X, i, threads);
+					editingWishesInTransactionMultipleThreads(1, X, fileName + X, i, threads);
 					break;
 				default:
 					break;
@@ -363,6 +363,8 @@ public abstract class RemoteBenchmark {
 		this.currentRepo = "/repo" + System.currentTimeMillis();
 		
 		for(int i = 0; i < threads; i++) {
+			System.out.println("addingWishesInTransactionMultipleThreads: Starting thread nr. " + i
+			        + " with " + initialWishes + " initial wishes.");
 			Thread t = new Thread(new AddingWishesRunnable(this.currentRepo, this.absoluteUrl,
 			        initialWishes, operations, iteration, wishes, i, filePath, this));
 			
@@ -509,12 +511,14 @@ public abstract class RemoteBenchmark {
 		
 	}
 	
-	public void deletingWishesMultipleThreadsInTransaction(int operations, int initialWishes,
+	public void deletingWishesInTransactionMultipleThreads(int operations, int initialWishes,
 	        String filePath, int iteration, int threads) {
 		// TODO implement initial wishes mechanic
 		this.currentRepo = "/repo" + System.currentTimeMillis();
 		
 		for(int i = 0; i < threads; i++) {
+			System.out.println("deletingWishesInTransactionMultipleThreads: Starting thread nr. "
+			        + i + ".");
 			Thread t = new Thread(new DeletingWishesRunnable(this.currentRepo, this.absoluteUrl,
 			        initialWishes, operations, iteration, i, filePath, this));
 			
@@ -564,7 +568,7 @@ public abstract class RemoteBenchmark {
 			for(int i = 0; i < this.operations; i++) {
 				try {
 					
-					String wishStr = addWishToEmptyList(this.absoluteUrl + listStr);
+					String wishStr = addWishToEmptyList(this.absoluteUrl + listStr, this.threadNr);
 					
 					if(wishStr == null) {
 						System.out
@@ -676,11 +680,13 @@ public abstract class RemoteBenchmark {
 		
 	}
 	
-	public void editingWishesMultipleThreadsInTransaction(int operations, int initialWishes,
+	public void editingWishesInTransactionMultipleThreads(int operations, int initialWishes,
 	        String filePath, int iteration, int threads) {
 		this.currentRepo = "/repo" + System.currentTimeMillis();
 		
 		for(int i = 0; i < threads; i++) {
+			System.out.println("editingWishesInTransactionMultipleThreads: Starting thread nr. "
+			        + i + " with " + initialWishes + " initial wishes.");
 			Thread t = new Thread(new EditingWishesRunnable(this.currentRepo, this.absoluteUrl,
 			        initialWishes, operations, iteration, i, filePath, this));
 			
@@ -714,7 +720,8 @@ public abstract class RemoteBenchmark {
 		
 		@Override
 		public void run() {
-			String listStr = this.benchmark.addList(this.currentRepo, this.initialWishes);
+			String listStr = this.benchmark.addList(this.currentRepo, this.initialWishes,
+			        this.threadNr);
 			
 			// in total 6 tries to create a list... if it doesn't work, this
 			// test
@@ -731,7 +738,7 @@ public abstract class RemoteBenchmark {
 			avgTime = 0;
 			for(int i = 0; i < this.operations; i++) {
 				try {
-					String wishStr = addWish(this.absoluteUrl + listStr);
+					String wishStr = addWish(this.absoluteUrl + listStr, this.threadNr);
 					
 					if(wishStr == null) {
 						System.out
@@ -968,6 +975,11 @@ public abstract class RemoteBenchmark {
 	
 	private String addList(String repoIdStr, int initialWishes, int threadNr) {
 		String response = null;
+		
+		if(threadNr < 0) {
+			System.out.println("What the...?");
+		}
+		
 		try {
 			response = HttpUtils.getRequestAsStringResponse(this.absoluteUrl + "/xmas" + repoIdStr
 			        + "/add?lists=1&wishes=" + initialWishes, threadNr);
@@ -989,6 +1001,7 @@ public abstract class RemoteBenchmark {
 			}
 		}
 		assert list != null;
+		
 		assert list.startsWith("/xmas" + this.currentRepo + "/");
 		
 		return list;
@@ -1026,12 +1039,17 @@ public abstract class RemoteBenchmark {
 	}
 	
 	private static String addWish(String listUrlStr) {
+		return addWish(listUrlStr, RemoteBenchmark.SINGLETHREADONLY);
+	}
+	
+	private static String addWish(String listUrlStr, int threadNr) {
 		boolean succ = HttpUtils.makeGetRequest(listUrlStr + "/add?wishes=1");
 		if(!succ) {
 			return null;
 		}
 		
-		String response = HttpUtils.getRequestAsStringResponse(listUrlStr + "?format=urls");
+		String response = HttpUtils.getRequestAsStringResponse(listUrlStr + "?format=urls",
+		        threadNr);
 		if(response == null) {
 			return null;
 		}
