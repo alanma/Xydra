@@ -242,7 +242,7 @@ public class SessionModel implements XSessionModel {
 		if(this.sessionCacheModel.isKnownObject(objectId)) {
 			return this;
 		}
-		log.info("Loading object '" + objectId + "' in " + this.getAddress());
+		log.trace("Loading object '" + objectId + "' in " + this.getAddress());
 		XReadableObject objectSnapshot = this.session.getSessionPersistence().getObjectSnapshot(
 		        new GetWithAddressRequest(XX.resolveObject(getAddress(), objectId),
 		                INCLUDE_TENTATIVE_CHANGES));
