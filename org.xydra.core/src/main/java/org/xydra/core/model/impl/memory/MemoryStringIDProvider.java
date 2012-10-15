@@ -33,15 +33,15 @@ public class MemoryStringIDProvider implements XIDProvider {
 	 * IMPROVE precompiling the regex in a java.util.regex.Pattern is faster,
 	 * but GWT doesn't support that class
 	 */
-
+	
 	@Override
-    public XID createUniqueId() {
+	public XID createUniqueId() {
 		/* leading 'a' ensures legal XML name */
 		return new MemoryStringID("a" + UUID.uuid());
 	}
 	
 	@Override
-    public XAddress fromAddress(String address) {
+	public XAddress fromAddress(String address) {
 		
 		if(address == null) {
 			throw new IllegalArgumentException("address may not be null");
@@ -83,12 +83,15 @@ public class MemoryStringIDProvider implements XIDProvider {
 	}
 	
 	@Override
-    public XAddress fromComponents(XID repositoryId, XID modelId, XID objectId, XID fieldId) {
+	public XAddress fromComponents(XID repositoryId, XID modelId, XID objectId, XID fieldId) {
 		return new MemoryAddress(repositoryId, modelId, objectId, fieldId);
 	}
 	
 	@Override
-    public XID fromString(String uriString) {
+	public XID fromString(String uriString) {
+		if(uriString == null) {
+			throw new IllegalArgumentException("'" + uriString + "' is null - cannot create XID");
+		}
 		if(!uriString.matches(nameRegex)) {
 			throw new IllegalArgumentException("'" + uriString
 			        + "' is not a valid XML name or contains ':', cannot create XID");
