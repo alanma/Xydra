@@ -555,7 +555,7 @@ public class SharedHtmlUtils {
 			return null;
 		Set<String> safe = new HashSet<String>();
 		for(String u : unsafe) {
-			safe.add(HtmlUtils.sanitize(u));
+			safe.add(sanitize(u));
 		}
 		return safe;
 	}
