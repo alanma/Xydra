@@ -13,6 +13,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletConfig;
@@ -139,7 +140,7 @@ public class Restless extends HttpServlet {
 	
 	public static final String INIT_PARAM_APP = "app";
 	public static final String INIT_PARAM_XYDRA_LOG_BACKEND = "loggerFactory";
-	public static final String INIT_PARAM_404URL = "error404";
+	public static final String INIT_PARAM_404RESOURCE = "error404";
 	public static final String JAVA_ENCODING_UTF8 = "utf-8";
 	public static final String MIME_TEXT_PLAIN = "text/plain";
 	public static final String MIME_XHTML = "application/xhtml+xml";
@@ -284,6 +285,12 @@ public class Restless extends HttpServlet {
 	private int serviceCounter = 0;
 	private boolean shuttingDown = false;
 	
+	private String error404resourceClassname = null;
+	
+	public boolean hasCustomError404HandlerDefined() {
+		return this.error404resourceClassname != null;
+	}
+	
 	/**
 	 * Register a handler that will receive exceptions thrown by the executed
 	 * REST methods.
@@ -359,7 +366,7 @@ public class Restless extends HttpServlet {
 	 * @param res @NeverNull
 	 * @throws IOException
 	 */
-	private void delegateToDefaultServlet(@NeverNull HttpServletRequest req,
+	public void delegateToDefaultServlet(@NeverNull HttpServletRequest req,
 	        @NeverNull HttpServletResponse res) throws IOException {
 		try {
 			ServletContext sc = this.getServletContext();
@@ -695,6 +702,8 @@ public class Restless extends HttpServlet {
 		/** invoke restless(this,'/') on configured application class */
 		this.apps = this.initParams.get(INIT_PARAM_APP);
 		
+		this.error404resourceClassname = this.initParams.get(INIT_PARAM_404RESOURCE);
+		
 		List<String> appClassNames = parseToList(this.apps);
 		clock.stop("param-parsing");
 		for(String appClassName : appClassNames) {
@@ -773,6 +782,109 @@ public class Restless extends HttpServlet {
 	}
 	
 	/**
+	 * @param clock
+	 * @param staticMethodName
+	 * @param instance @NeverNull
+	 * @param parameterTypes length n, excluding the type of instance
+	 * @param parameters length n, excluding the instance
+	 */
+	private static void invokeStaticMethodOnInstance(NanoClock clock, Object instance,
+	        String staticMethodName, Class<?>[] parameterTypes, Object[] parameters) {
+		clock.start();
+		Class<?> clazz = instance.getClass();
+		String className = clazz.getCanonicalName();
+		try {
+			Class<?>[] fullParameterTypes = new Class[parameterTypes.length + 1];
+			System.arraycopy(parameterTypes, 0, fullParameterTypes, 1, parameterTypes.length);
+			fullParameterTypes[0] = clazz;
+			
+			Method staticMethod = clazz.getMethod(staticMethodName, parameterTypes);
+			clock.stop(className + "-get-method-" + staticMethodName);
+			// invoke
+			try {
+				clock.start();
+				staticMethod.invoke(instance, parameters);
+				clock.stop(className + "-invoke-method-" + staticMethodName);
+			} catch(IllegalArgumentException e) {
+				throw new RuntimeException("Class '" + className + "." + staticMethodName
+				        + "(...)' failed with IllegalArgumentException", e);
+			} catch(IllegalAccessException e) {
+				throw new RuntimeException("Class '" + className + "." + staticMethodName
+				        + "(...)' failed with IllegalAccessException", e);
+			} catch(InvocationTargetException e) {
+				throw new RuntimeException("Class '" + className + "." + staticMethodName
+				        + "(...)' failed with InvocationTargetException", e);
+			}
+		} catch(NoSuchMethodException e) {
+			throw new RuntimeException("Class '" + className + "' has no " + staticMethodName
+			        + "( ... ) method.");
+		}
+	}
+	
+	/**
+	 * @param clock
+	 * @param className
+	 * @param staticMethodName
+	 * @param parameterTypes length n
+	 * @param parameters length n
+	 */
+	private static void invokeStaticMethod(NanoClock clock, String className,
+	        String staticMethodName, Class<?>[] parameterTypes, Object[] parameters) {
+		clock.start();
+		try {
+			Class<?> clazz = Class.forName(className);
+			try {
+				try {
+					try {
+						// create instance
+						Constructor<?> cons = clazz.getConstructor();
+						try {
+							Object instance = cons.newInstance();
+							clock.stop(className + "-newinstance");
+							// invoke
+							invokeStaticMethodOnInstance(clock, instance, staticMethodName,
+							        parameterTypes, parameters);
+						} catch(IllegalArgumentException e) {
+							throw new RuntimeException("new '" + className + "() failed with "
+							        + e.getClass() + ":" + e.getMessage(), e);
+						} catch(InstantiationException e) {
+							throw new RuntimeException("new '" + className + "() failed with "
+							        + e.getClass() + ":" + e.getMessage(), e);
+						} catch(IllegalAccessException e) {
+							throw new RuntimeException("new '" + className + "() failed with "
+							        + e.getClass() + ":" + e.getMessage() + " caused by "
+							        + e.getCause() == null ? "--" : e.getCause().getClass() + ":"
+							        + e.getCause().getMessage(), e);
+						} catch(InvocationTargetException e) {
+							throw new RuntimeException("new '" + className + "() failed with "
+							        + e.getClass() + ":" + e.getMessage(), e);
+						}
+					} catch(NoSuchMethodException e) {
+						throw new RuntimeException("Class '" + className + "' has no "
+						        + staticMethodName + "( ... ) method.");
+					}
+				} catch(IllegalArgumentException e) {
+					throw new RuntimeException("new '" + className + "() failed with "
+					        + e.getClass() + ":" + e.getMessage(), e);
+				}
+			} catch(SecurityException e) {
+				throw new RuntimeException("Class '" + className + " failed to get constructor", e);
+			}
+		} catch(ClassNotFoundException e) {
+			throw new RuntimeException("Class '" + className + "' not found");
+		}
+	}
+	
+	private static void invokeStaticMethod(String className, String staticMethodName,
+	        Class<?>[] parameterTypes, Object[] parameters) {
+		NanoClock clock = new NanoClock();
+		invokeStaticMethod(clock, className, staticMethodName, parameterTypes, parameters);
+	}
+	
+	private static final Class<?>[] RESTLESS_METHOD_PARAMETERS = new Class[] { Restless.class,
+	        String.class };
+	
+	/**
 	 * IMPROVE make this faster
 	 * 
 	 * @param appClassName fully qualified java class name
@@ -781,73 +893,8 @@ public class Restless extends HttpServlet {
 	 */
 	private String instatiateAndInit(String appClassName) throws RuntimeException {
 		NanoClock clock = new NanoClock();
-		clock.start();
-		try {
-			Class<?> clazz = Class.forName(appClassName);
-			try {
-				Constructor<?> cons = clazz.getConstructor();
-				try {
-					Object appInstance = cons.newInstance();
-					clock.stop(appClassName + "-newinstance");
-					try {
-						clock.start();
-						Method restlessMethod = clazz.getMethod("restless", Restless.class,
-						        String.class);
-						clock.stop(appClassName + "-get-restless-method");
-						try {
-							clock.start();
-							restlessMethod.invoke(appInstance, this, "");
-							clock.stop(appClassName + "-invoke-restless-method");
-						} catch(IllegalArgumentException e) {
-							throw new RuntimeException(
-							        "Class '"
-							                + appClassName
-							                + ".restless(Restless,String prefix)' failed with IllegalArgumentException",
-							        e);
-						} catch(IllegalAccessException e) {
-							throw new RuntimeException(
-							        "Class '"
-							                + appClassName
-							                + ".restless(Restless,String prefix)' failed with IllegalAccessException",
-							        e);
-						} catch(InvocationTargetException e) {
-							throw new RuntimeException(
-							        "Class '"
-							                + appClassName
-							                + ".restless(Restless,String prefix)' failed with InvocationTargetException",
-							        e);
-						}
-					} catch(NoSuchMethodException e) {
-						log.warn("Class '"
-						        + this.apps
-						        + "' has no restless( Restless restless, String prefix ) method. Relying on static initializer.");
-						log.debug("Configured with " + clazz.getName());
-					}
-				} catch(IllegalArgumentException e) {
-					throw new RuntimeException("new '" + appClassName + "() failed with "
-					        + e.getClass() + ":" + e.getMessage(), e);
-				} catch(InstantiationException e) {
-					throw new RuntimeException("new '" + appClassName + "() failed with "
-					        + e.getClass() + ":" + e.getMessage(), e);
-				} catch(IllegalAccessException e) {
-					throw new RuntimeException(
-					        "new '" + appClassName + "() failed with " + e.getClass() + ":"
-					                + e.getMessage() + " caused by " + e.getCause() == null ? "--"
-					                : e.getCause().getClass() + ":" + e.getCause().getMessage(), e);
-				} catch(InvocationTargetException e) {
-					throw new RuntimeException("new '" + appClassName + "() failed with "
-					        + e.getClass() + ":" + e.getMessage(), e);
-				}
-			} catch(SecurityException e) {
-				throw new RuntimeException("Class '" + appClassName + " failed to get constructor",
-				        e);
-			} catch(NoSuchMethodException e) {
-				throw new RuntimeException("Class '" + appClassName
-				        + " has no parameterless constructor", e);
-			}
-		} catch(ClassNotFoundException e) {
-			throw new RuntimeException("Class '" + appClassName + "' not found");
-		}
+		invokeStaticMethod(clock, appClassName, "restless", RESTLESS_METHOD_PARAMETERS,
+		        new Object[] { this, "" });
 		return clock.getStats();
 	}
 	
@@ -1037,14 +1084,21 @@ public class Restless extends HttpServlet {
 		}
 		
 		if(!foundMethod) {
-			if(DELEGATE_UNHANDLED_TO_DEFAULT) {
+			if(hasCustomError404HandlerDefined()) {
+				log.info("Launching custom error404 handler");
+				// define context
+				IRestlessContext restlessContext = new RestlessContextImpl(this, req, res, "error-"
+				        + UUID.randomUUID());
+				invokeStaticMethod(this.error404resourceClassname, "error404",
+				        new Class[] { IRestlessContext.class }, new Object[] { restlessContext });
+			} else if(DELEGATE_UNHANDLED_TO_DEFAULT) {
 				try {
 					delegateToDefaultServlet(reqHandedDown, res);
 				} catch(IOException e) {
 					throw new RuntimeException(e);
 				}
 			} else {
-				// produce better error message
+				// produce even better error message?
 				String msg = "No handler matched your "
 				        + reqHandedDown.getMethod()
 				        + "-request path '"
@@ -1098,4 +1152,5 @@ public class Restless extends HttpServlet {
 			}
 		}
 	}
+	
 }

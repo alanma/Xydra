@@ -2,10 +2,12 @@ package org.xydra.restless.utils;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.http.annotation.NotThreadSafe;
 import org.xydra.annotations.CanBeNull;
@@ -546,6 +548,16 @@ public class SharedHtmlUtils {
 			return null;
 		}
 		return XmlUtils.xmlEncode(s);
+	}
+	
+	public static Set<String> sanitize(@CanBeNull Set<String> unsafe) {
+		if(unsafe == null)
+			return null;
+		Set<String> safe = new HashSet<String>();
+		for(String u : unsafe) {
+			safe.add(HtmlUtils.sanitize(u));
+		}
+		return safe;
 	}
 	
 	private static final String MALICIOUS_INPUT_SAMPLE = "Dirk<script>alert('test');</script>";
