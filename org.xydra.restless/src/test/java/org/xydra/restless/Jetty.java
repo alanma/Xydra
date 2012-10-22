@@ -26,6 +26,7 @@ import org.mortbay.jetty.Server;
 import org.mortbay.jetty.security.UserRealm;
 import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.webapp.WebAppContext;
+import org.xydra.annotations.CanBeNull;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.restless.utils.HostUtils;
@@ -74,8 +75,14 @@ public class Jetty {
 		this.port = port;
 	}
 	
-	public URI startServer(String contextPath, File docRoot) {
-		
+	/**
+	 * @param contextPath
+	 * @param docRoot
+	 * @param localFilter a filter to be added first on localhost. Simplifies
+	 *            some test setups.
+	 * @return the URI where the server runs
+	 */
+	public URI startServer(String contextPath, File docRoot, @CanBeNull Filter localFilter) {
 		if(this.server != null)
 			throw new RuntimeException("server is already startet");
 		
@@ -96,49 +103,59 @@ public class Jetty {
 		
 		this.webapp.setClassLoader(classloader);
 		// caching
-		FilterHolder filterHolder = new FilterHolder();
-		filterHolder.setFilter(new Filter() {
-			
-			@Override
-			public void destroy() {
-				// do nothing
-			}
-			
-			@Override
-			public void doFilter(ServletRequest request, ServletResponse response,
-			        FilterChain filterChain) throws IOException, ServletException {
-				log.debug("JETTY Image GET " + ((HttpServletRequest)request).getRequestURI());
-				HttpServletResponseWrapper responseWrapper = new HttpServletResponseWrapper(
-				        (HttpServletResponse)response);
+		if(localFilter != null) {
+			FilterHolder filterHolder = new FilterHolder();
+			filterHolder.setFilter(localFilter);
+			this.webapp.addFilter(filterHolder, "*", Handler.ALL);
+		}
+		{
+			FilterHolder filterHolder = new FilterHolder();
+			filterHolder.setFilter(new Filter() {
 				
-				// Modify the servlet which serves png and gif files so that it
-				// explicitly sets the Pragma, Cache-Control, and Expires
-				// headers. The Pragma and Cache-Control headers should be
-				// removed. The Expires header should be set according to the
-				// caching recommendations mentioned in the previous section.
+				@Override
+				public void destroy() {
+					// do nothing
+				}
 				
-				Calendar cal = Calendar.getInstance();
-				cal.set(Calendar.YEAR, cal.get(Calendar.YEAR) + 1);
+				@Override
+				public void doFilter(ServletRequest request, ServletResponse response,
+				        FilterChain filterChain) throws IOException, ServletException {
+					log.debug("JETTY Image GET " + ((HttpServletRequest)request).getRequestURI());
+					HttpServletResponseWrapper responseWrapper = new HttpServletResponseWrapper(
+					        (HttpServletResponse)response);
+					
+					// Modify the servlet which serves png and gif files so that
+					// it
+					// explicitly sets the Pragma, Cache-Control, and Expires
+					// headers. The Pragma and Cache-Control headers should be
+					// removed. The Expires header should be set according to
+					// the
+					// caching recommendations mentioned in the previous
+					// section.
+					
+					Calendar cal = Calendar.getInstance();
+					cal.set(Calendar.YEAR, cal.get(Calendar.YEAR) + 1);
+					
+					SimpleDateFormat dateFormatter = new SimpleDateFormat(
+					        "EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
+					TimeZone tz = TimeZone.getTimeZone("GMT");
+					dateFormatter.setTimeZone(tz);
+					String rfc1123 = dateFormatter.format(cal.getTime());
+					((HttpServletResponse)response).addHeader("Expires", rfc1123);
+					((HttpServletResponse)response).addHeader("Cache-Control",
+					        "public; max-age=31536000");
+					filterChain.doFilter(request, responseWrapper);
+				}
 				
-				SimpleDateFormat dateFormatter = new SimpleDateFormat(
-				        "EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
-				TimeZone tz = TimeZone.getTimeZone("GMT");
-				dateFormatter.setTimeZone(tz);
-				String rfc1123 = dateFormatter.format(cal.getTime());
-				((HttpServletResponse)response).addHeader("Expires", rfc1123);
-				((HttpServletResponse)response).addHeader("Cache-Control",
-				        "public; max-age=31536000");
-				filterChain.doFilter(request, responseWrapper);
-			}
-			
-			@Override
-			public void init(FilterConfig filterConfig) {
-				// do nothing
-			}
-		});
-		this.webapp.addFilter(filterHolder, "*.png", Handler.ALL);
-		this.webapp.addFilter(filterHolder, "*.gif", Handler.ALL);
-		// this.webapp.addFilter(filterHolder, ".cache.*", Handler.ALL);
+				@Override
+				public void init(FilterConfig filterConfig) {
+					// do nothing
+				}
+			});
+			this.webapp.addFilter(filterHolder, "*.png", Handler.ALL);
+			this.webapp.addFilter(filterHolder, "*.gif", Handler.ALL);
+			// this.webapp.addFilter(filterHolder, ".cache.*", Handler.ALL);
+		}
 		
 		// GWT caching
 		FilterHolder gwtFilterHolder = new FilterHolder();
@@ -325,7 +342,10 @@ public class Jetty {
 		} catch(URISyntaxException e) {
 			throw new RuntimeException(e);
 		}
-		
+	}
+	
+	public URI startServer(String contextPath, File docRoot) {
+		return startServer(contextPath, docRoot, null);
 	}
 	
 	public long timeSinceStart() {
