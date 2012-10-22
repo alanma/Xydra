@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  * denotes where. E.g. "server".
  */
 @Retention(RetentionPolicy.SOURCE)
-@Target({ ElementType.FIELD })
+@Target({ ElementType.FIELD, ElementType.METHOD })
 public @interface Indexed {
 	String[] value();
 }
