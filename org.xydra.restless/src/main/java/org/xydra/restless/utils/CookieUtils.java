@@ -20,49 +20,9 @@ public class CookieUtils {
 	private static final Logger log = LoggerFactory.getLogger(CookieUtils.class);
 	
 	/**
-	 * @param req .. @NeverNull
-	 * @param name of the cookie @NeverNull
-	 * @return the current cookie value with given name in the given request or
-	 *         null
+	 * A long value that is tolerated by most (all?) browsers
 	 */
-	public static String getCookie(@NeverNull HttpServletRequest req, @NeverNull String name) {
-		if(req.getCookies() == null) {
-			return null;
-		}
-		
-		Cookie[] cookies = req.getCookies();
-		if(cookies != null) {
-			for(Cookie cookie : cookies) {
-				
-				if(cookie.getName().equals(name)) {
-					return cookie.getValue();
-				}
-			}
-		}
-		
-		return null;
-	}
-	
-	/**
-	 * @param req .. @NeverNull
-	 * @return a list of (potentially duplicate) cookie names
-	 */
-	public static List<String> listCookieNames(@NeverNull HttpServletRequest req) {
-		
-		List<String> cookieNames = new LinkedList<String>();
-		
-		Cookie[] cookies = req.getCookies();
-		
-		if(cookies != null) {
-			for(Cookie cookie : cookies) {
-				
-				assert cookie != null;
-				cookieNames.add(cookie.getName());
-				
-			}
-		}
-		return cookieNames;
-	}
+	public static final int MANY_DAYS = 300 * 24 * 60 * 60;
 	
 	/**
 	 * Dumps cookies as a piece of HTML code
@@ -117,6 +77,47 @@ public class CookieUtils {
 	}
 	
 	/**
+	 * @param req .. @NeverNull
+	 * @param name of the cookie @NeverNull
+	 * @return the current cookie value with given name in the given request or
+	 *         null
+	 */
+	public static String getCookie(@NeverNull HttpServletRequest req, @NeverNull String name) {
+		if(req.getCookies() == null) {
+			return null;
+		}
+		
+		Cookie[] cookies = req.getCookies();
+		if(cookies != null) {
+			for(Cookie cookie : cookies) {
+				
+				if(cookie.getName().equals(name)) {
+					return cookie.getValue();
+				}
+			}
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * @param req
+	 * @param cookieName
+	 * @return the {@link Cookie} object for the given cookie name
+	 */
+	public static Cookie getCookieObject(HttpServletRequest req, String cookieName) {
+		if(req.getCookies() == null) {
+			return null;
+		}
+		for(Cookie cookie : req.getCookies()) {
+			if(cookie.getName().equals(cookieName)) {
+				return cookie;
+			}
+		}
+		return null;
+	}
+	
+	/**
 	 * @param req ... @NeverNull
 	 * @param name of cookie @NeverNull
 	 * @return true if the request contains a cookie with the given name which
@@ -153,6 +154,27 @@ public class CookieUtils {
 	}
 	
 	/**
+	 * @param req .. @NeverNull
+	 * @return a list of (potentially duplicate) cookie names
+	 */
+	public static List<String> listCookieNames(@NeverNull HttpServletRequest req) {
+		
+		List<String> cookieNames = new LinkedList<String>();
+		
+		Cookie[] cookies = req.getCookies();
+		
+		if(cookies != null) {
+			for(Cookie cookie : cookies) {
+				
+				assert cookie != null;
+				cookieNames.add(cookie.getName());
+				
+			}
+		}
+		return cookieNames;
+	}
+	
+	/**
 	 * Remove the cookie with the given name from the users browser, if present.
 	 * 
 	 * @param req .. @NeverNull
@@ -173,6 +195,23 @@ public class CookieUtils {
 			}
 		}
 		
+	}
+	
+	/**
+	 * @param res ..
+	 * @param name name of the cookie
+	 * @param value value of the cookie
+	 * @param domain can be null. If non null, RFC 2109 'An explicitly specified
+	 *            domain must always start with a dot.' Example:
+	 *            '.app.calpano.com' or '.calpano.com'
+	 * @param comment can be null
+	 * @param persist if true, creates a long-living cookie that expires after
+	 *            {@value #MANY_DAYS}. If false, creates a session cookie, which
+	 *            is deleted when the user closes the browser.
+	 */
+	public static void setCookie(HttpServletResponse res, String name, String value, String domain,
+	        String comment, boolean persist) {
+		setCookie(res, name, value, domain, comment, persist ? MANY_DAYS : -1);
 	}
 	
 	/**
@@ -210,6 +249,26 @@ public class CookieUtils {
 		}
 		
 		res.addCookie(cookie);
+	}
+	
+	/**
+	 * Set the cookie only if not present yet
+	 * 
+	 * @param req ..
+	 * @param res ..
+	 * @param name value of the cookie
+	 * @param value value of the cookie
+	 * @param domain can be null. If non null, RFC 2109 'An explicitly specified
+	 *            domain must always start with a dot.' Example:
+	 *            '.www.example.com' or '.example.com'
+	 * @param comment can be null
+	 */
+	public static void setCookieIfNecessary(HttpServletRequest req, HttpServletResponse res,
+	        String name, String value, String domain, String comment) {
+		String currentCuid = getCookie(req, name);
+		if(currentCuid == null || !currentCuid.equals(value)) {
+			setCookie(res, name, value, domain, comment, true);
+		}
 	}
 	
 }
