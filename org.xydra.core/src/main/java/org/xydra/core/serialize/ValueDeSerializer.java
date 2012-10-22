@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
@@ -22,9 +23,9 @@ public class ValueDeSerializer {
 	 * @param value not null
 	 * @return a pair of type/value, both represented as strings
 	 */
-	public static Pair<String,String> toStringPair(XValue value) {
+	public static Pair<String,String> toStringPair(@NeverNull XValue value) {
 		if(value == null)
-			throw new IllegalArgumentException("vaue was null");
+			throw new IllegalArgumentException("value was null");
 		String typeStr = value.getType().name();
 		String valueStr;
 		if(value.getType() == ValueType.Binary) {
