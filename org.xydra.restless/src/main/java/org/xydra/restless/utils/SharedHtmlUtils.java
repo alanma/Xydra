@@ -547,7 +547,32 @@ public class SharedHtmlUtils {
 		if(s == null) {
 			return null;
 		}
-		return XmlUtils.xmlEncode(s);
+		return htmlEncode(s);
+	}
+	
+	/**
+	 * @param raw unencoded string @NeverNull
+	 * @return the input string with HTML escaping
+	 */
+	public static final String htmlEncode(@NeverNull String raw) {
+		String safe = raw;
+		
+		safe = safe.replace("&", "&amp;");
+		
+		safe = safe.replace("<", "&lt;");
+		// unicode equivalent
+		safe = safe.replace("\u00AB", "&lt");
+		
+		safe = safe.replace(">", "&gt;");
+		// unicode equivalent
+		safe = safe.replace("\u00BB", "&lt");
+		
+		/* "'" == In X(HT)ML: &quot; In HTML: &#39; For both: do nothing */
+		safe = safe.replace("'", "&#39;");
+		
+		safe = safe.replace("\"", "&quot;");
+		
+		return safe;
 	}
 	
 	public static Set<String> sanitize(@CanBeNull Set<String> unsafe) {
