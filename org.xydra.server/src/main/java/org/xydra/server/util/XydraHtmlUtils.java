@@ -16,6 +16,7 @@ import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.value.XValue;
 import org.xydra.restless.utils.HtmlUtils;
+import org.xydra.restless.utils.SharedHtmlUtils;
 import org.xydra.sharedutils.XyAssert;
 
 
@@ -106,8 +107,9 @@ public class XydraHtmlUtils {
 			XReadableField field = xo.getField(fieldId);
 			assert field != null;
 			XValue value = field.getValue();
-			map.put(fieldId.toString(), (value == null ? "null" : value.toString())
-			        + " <span class='rev'>" + field.getRevisionNumber() + "</span>");
+			map.put(fieldId.toString(),
+			        (value == null ? "null" : SharedHtmlUtils.sanitize(value.toString()))
+			                + " <span class='rev'>" + field.getRevisionNumber() + "</span>");
 		}
 		return buf + HtmlUtils.toDefinitionList(map);
 	}
