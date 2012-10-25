@@ -3,6 +3,7 @@
  */
 package org.xydra.core.serialize.json;
 
+import org.xydra.annotations.CanBeNull;
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
@@ -19,7 +20,15 @@ import org.xydra.core.serialize.LineBreaks;
 @RequiresAppEngine(false)
 public class JsonEncoder {
 	
-	public static String encode(String in) {
+	/**
+	 * @param in
+	 * @return a valid json string
+	 */
+	public static String encode(@CanBeNull String in) {
+		if(in == null) {
+			return "null";
+		}
+		
 		String result = LineBreaks.normalizeLinebreaks(in);
 		result = result.replace("\\", "\\\\");
 		result = result.replace("\"", "\\\"");
