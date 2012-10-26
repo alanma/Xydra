@@ -3,6 +3,7 @@ package org.xydra.store.impl.gae;
 import java.io.Serializable;
 import java.util.ConcurrentModificationException;
 
+import org.xydra.annotations.NeverNull;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.XydraRuntime;
@@ -187,13 +188,13 @@ public class UniCache<T> {
 	public static interface DatastoreEntryHandler<T> {
 		Entity toEntity(Key datastoreKey, T entry);
 		
-		T fromEntity(Entity entity);
+		T fromEntity(@NeverNull Entity entity);
 	}
 	
 	public static interface MemcacheEntryHandler<T> {
 		Serializable toSerializable(T entry);
 		
-		T fromSerializable(Serializable s);
+		T fromSerializable(@NeverNull Serializable s);
 	}
 	
 	public static interface CacheEntryHandler<T> extends DatastoreEntryHandler<T>,
