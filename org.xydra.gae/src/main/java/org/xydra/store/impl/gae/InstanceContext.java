@@ -18,11 +18,12 @@ import com.google.common.cache.CacheBuilder;
  * are nice-to-cache. Add different importance levels & expire dates within each
  * layer.
  * 
+ * Config: Entries expire after 30 minutes.
+ * 
  * @author xamde
  */
 public class InstanceContext {
 	
-	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(InstanceContext.class);
 	
 	private static Cache<String,Object> sharedCache;
@@ -32,6 +33,7 @@ public class InstanceContext {
 	 */
 	public static synchronized Cache<String,Object> getInstanceCache() {
 		if(sharedCache == null) {
+			log.info("Created InstanceContext");
 			// use Guava limited cache here to avoid memory leak
 			sharedCache = CacheBuilder.newBuilder().expireAfterAccess(30, TimeUnit.MINUTES)
 			        .maximumSize(100).build();
@@ -48,6 +50,7 @@ public class InstanceContext {
 	}
 	
 	public static void clearInstanceContext() {
+		log.info("Cleared InstanceContext");
 		if(sharedCache != null) {
 			sharedCache.invalidateAll();
 			sharedCache.cleanUp();
