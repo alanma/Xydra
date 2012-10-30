@@ -577,10 +577,10 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 		 */
 		XID oldActor = getSessionActor();
 		/* switch actor to the one specified in this event */
-		setSessionActor(event.getActor(), null);
+		setSessionActor(event.getActor(), "NOTSET");
 		long result = replayCommand(replayCommand);
 		/* Switch back actor */
-		setSessionActor(oldActor, null);
+		setSessionActor(oldActor, "NOTSET");
 		
 		if(result < 0) {
 			setRevisionNumberIfModel(oldModelRev);
