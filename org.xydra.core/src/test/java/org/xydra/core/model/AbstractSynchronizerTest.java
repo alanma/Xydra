@@ -301,7 +301,7 @@ abstract public class AbstractSynchronizerTest {
 			assertTrue(XCompareUtils.equalState(model, remoteModel));
 			assertTrue(XCompareUtils.equalTree(model, testModel));
 			assertEquals(model.getRevisionNumber(), model.getSynchronizedRevision());
-			assertFalse(hc2.eventsReceived);
+			assertTrue(hc2.eventsReceived);
 			
 			checkEvents(model);
 			

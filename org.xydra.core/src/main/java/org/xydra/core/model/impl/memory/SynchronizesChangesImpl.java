@@ -570,12 +570,18 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 		// synchronizing parent-less
 		// objects and/or if there are missing events (access rights?)
 		
-		/*
-		 * FIXME the remote changes should be applied as the actor specified in
-		 * the event
-		 */
 		XCommand replayCommand = XChanges.createReplayCommand(event);
+		/*
+		 * The remote changes should be applied as the actor specified in the
+		 * event
+		 */
+		XID oldActor = getSessionActor();
+		/* switch actor to the one specified in this event */
+		setSessionActor(event.getActor(), null);
 		long result = replayCommand(replayCommand);
+		/* Switch back actor */
+		setSessionActor(oldActor, null);
+		
 		if(result < 0) {
 			setRevisionNumberIfModel(oldModelRev);
 			return false;

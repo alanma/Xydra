@@ -102,12 +102,12 @@ public class MemoryEventManager implements Serializable {
 	/**
 	 * Creates a new MemoryEventQueue
 	 * 
-	 * @param actorId
-	 * @param passwordHash
+	 * @param actorId ...
+	 * @param passwordHash ...
 	 * 
 	 * @param log The {@link XChangeLog} this MemoryEventQueue will use for
 	 *            logging (may be null)
-	 * @param syncRev
+	 * @param syncRev TODO
 	 */
 	public MemoryEventManager(XID actorId, String passwordHash, MemoryChangeLog log, long syncRev) {
 		XyAssert.xyAssert(actorId != null);
@@ -154,7 +154,11 @@ public class MemoryEventManager implements Serializable {
 			assert event != null;
 			
 			if(event instanceof XTransactionEvent) {
-				this.eventQueue.set(i, null);
+				/*
+				 * Since 2012-10-30: Keep TransactionEvents in queue to be sent
+				 * out. (MOF)-Events that are part of this Transaction are
+				 * additionally sent out on their own.
+				 */
 				continue;
 			}
 			XyAssert.xyAssert(!(event instanceof XTransactionEvent));
