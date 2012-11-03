@@ -76,6 +76,14 @@ public class SonicEvent extends SonicPotentialEvent implements ISonicEvent, Seri
 			return this;
 		}
 		
+		/**
+		 * @param key
+		 * @return current value for key or null
+		 */
+		public String getExtensionDataValue(String key) {
+			return this.t.getExtensionData().get(key);
+		}
+		
 	}
 	
 	@SuppressWarnings("unused")
