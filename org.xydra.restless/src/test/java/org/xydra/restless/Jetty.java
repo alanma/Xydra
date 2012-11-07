@@ -67,6 +67,8 @@ public class Jetty {
 	
 	protected long startTime;
 	
+	private Filter localFilter;
+	
 	public Jetty() {
 		this(8080);
 	}
@@ -86,6 +88,11 @@ public class Jetty {
 		if(this.server != null)
 			throw new RuntimeException("server is already startet");
 		
+		/* remember across restarts */
+		if(localFilter != null) {
+			this.localFilter = localFilter;
+		}
+		
 		// Create an instance of the jetty server.
 		this.server = new Server(this.port);
 		
@@ -103,9 +110,9 @@ public class Jetty {
 		
 		this.webapp.setClassLoader(classloader);
 		// caching
-		if(localFilter != null) {
+		if(this.localFilter != null) {
 			FilterHolder filterHolder = new FilterHolder();
-			filterHolder.setFilter(localFilter);
+			filterHolder.setFilter(this.localFilter);
 			this.webapp.addFilter(filterHolder, "*", Handler.ALL);
 		}
 		{
@@ -352,12 +359,16 @@ public class Jetty {
 		return System.currentTimeMillis() - this.startTime;
 	}
 	
-	public void refreshWebapp() throws Exception {
+	public synchronized void refreshWebapp() throws Exception {
 		if(this.webapp != null) {
 			if(this.webapp.isRunning()) {
 				this.webapp.stop();
-				this.webapp.start();
+				while(this.webapp.isRunning()) {
+					Thread.yield();
+				}
 			}
+			assert !this.webapp.isRunning();
+			this.webapp.start();
 		}
 	}
 	
