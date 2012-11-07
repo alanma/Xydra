@@ -353,8 +353,10 @@ public class Jetty {
 	}
 	
 	public void refreshWebapp() throws Exception {
-		this.webapp.stop();
-		this.webapp.start();
+		if(this.webapp != null) {
+			this.webapp.stop();
+			this.webapp.start();
+		}
 	}
 	
 	public void stopServer() {
