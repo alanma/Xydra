@@ -352,6 +352,11 @@ public class Jetty {
 		return System.currentTimeMillis() - this.startTime;
 	}
 	
+	public void refreshWebapp() throws Exception {
+		this.webapp.stop();
+		this.webapp.start();
+	}
+	
 	public void stopServer() {
 		if(this.server != null) {
 			try {
