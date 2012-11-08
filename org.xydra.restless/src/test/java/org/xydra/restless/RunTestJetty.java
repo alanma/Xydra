@@ -25,8 +25,8 @@ public class RunTestJetty {
 	
 	public static void main(String[] args) throws Exception {
 		Jetty jetty = new Jetty();
-		
-		URI uri = jetty.startServer("", new File("src/test/resources"));
+		jetty.configure("", new File("src/test/resources"));
+		URI uri = jetty.startServer();
 		log.info("Started embedded Jetty server. User interface is at " + uri.toString());
 		
 	}

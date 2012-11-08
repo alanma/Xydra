@@ -57,26 +57,45 @@ public class Jetty {
 	
 	private static Logger log = LoggerFactory.getLogger(Jetty.class);
 	
-	private int port;
-	
-	private Server server;
-	
-	private WebAppContext webapp;
-	
-	protected int requests;
-	
-	protected long startTime;
-	
-	private Filter localFilter;
-	
+	/** exposed in URL */
 	private String contextPath;
 	
+	/**
+	 * where the webapp is served from. If you use /src/main/webapp you can
+	 * debug better
+	 */
 	private File docRoot;
 	
+	private int port;
+	
+	/** counter for request numbering, helps debugging */
+	protected int requests;
+	
+	@CanBeNull
+	private Server server;
+	
+	/** when was server started or restarted? */
+	protected long startTime;
+	
+	/** User can give a filter to be first in chain. */
+	@CanBeNull
+	private Filter userFirstFilter;
+	
+	@CanBeNull
+	private WebAppContext webapp;
+	
+	/**
+	 * Jetty with default port on 8080
+	 */
 	public Jetty() {
 		this(8080);
 	}
 	
+	/**
+	 * Jetty with your port of choice
+	 * 
+	 * @param port
+	 */
 	public Jetty(int port) {
 		this.port = port;
 	}
@@ -84,70 +103,18 @@ public class Jetty {
 	/**
 	 * @param contextPath
 	 * @param docRoot
-	 * @param localFilter a filter to be added first on localhost. Simplifies
-	 *            some test setups.
-	 * @return the URI where the server runs
 	 */
-	public URI startServer(String contextPath, File docRoot, @CanBeNull Filter localFilter) {
+	public void configure(String contextPath, File docRoot) {
 		if(this.server != null)
 			throw new RuntimeException("server is already startet");
 		
 		this.contextPath = contextPath;
 		this.docRoot = docRoot;
-		
-		/* remember across restarts */
-		if(localFilter != null) {
-			this.localFilter = localFilter;
-		}
-		
-		return configureAndStartServer();
 	}
 	
-	private URI configureAndStartServer() {
-		// Create an instance of the jetty server.
-		this.server = new Server(this.port);
-		
-		this.webapp = configureWebapp();
-		
-		// Add the webapp to the server.
-		this.server.setHandler(this.webapp);
-		
-		this.startTime = System.currentTimeMillis();
-		try {
-			this.server.start();
-		} catch(Exception e) {
-			throw new RuntimeException(e);
-		}
-		
-		try {
-			return new URI("http://" + HostUtils.getLocalHostname() + ":" + this.port + "/")
-			        .resolve(this.contextPath + "/");
-		} catch(URISyntaxException e) {
-			throw new RuntimeException(e);
-		}
-	}
-	
-	public URI startServer(String contextPath, File docRoot) {
-		return startServer(contextPath, docRoot, null);
-	}
-	
-	public long timeSinceStart() {
-		return System.currentTimeMillis() - this.startTime;
-	}
-	
-	public synchronized void refreshWebapp() throws Exception {
-		if(this.server != null) {
-			if(this.server.isRunning()) {
-				this.server.stop();
-				while(this.server.isRunning()) {
-					Thread.yield();
-				}
-			}
-			assert !this.server.isRunning();
-			configureAndStartServer();
-		}
-	}
-	
+	/**
+	 * @return a configured webapp with some nice default servlet filters
+	 */
 	private WebAppContext configureWebapp() {
 		WebAppContext webappContext;
 		/*
@@ -164,11 +131,12 @@ public class Jetty {
 		
 		webappContext.setClassLoader(classloader);
 		// user given filter goes first
-		if(this.localFilter != null) {
+		if(this.userFirstFilter != null) {
 			FilterHolder filterHolder = new FilterHolder();
-			filterHolder.setFilter(this.localFilter);
+			filterHolder.setFilter(this.userFirstFilter);
 			webappContext.addFilter(filterHolder, "*", Handler.ALL);
 		}
+		
 		// caching filter
 		{
 			FilterHolder filterHolder = new FilterHolder();
@@ -301,27 +269,17 @@ public class Jetty {
 		webappContext.getSecurityHandler().setUserRealm(new UserRealm() {
 			
 			@Override
-			public boolean reauthenticate(Principal user) {
-				return true;
+			public Principal authenticate(String username, Object credentials, Request request) {
+				return getPrincipal(username);
 			}
 			
 			@Override
-			public Principal pushRole(Principal user, String role) {
-				return user;
+			public void disassociate(Principal user) {
 			}
 			
 			@Override
-			public Principal popRole(Principal user) {
-				return user;
-			}
-			
-			@Override
-			public void logout(Principal user) {
-			}
-			
-			@Override
-			public boolean isUserInRole(Principal user, String role) {
-				return user.getName().equalsIgnoreCase("admin");
+			public String getName() {
+				return "dummyRealm";
 			}
 			
 			@Override
@@ -335,17 +293,27 @@ public class Jetty {
 			}
 			
 			@Override
-			public String getName() {
-				return "dummyRealm";
+			public boolean isUserInRole(Principal user, String role) {
+				return user.getName().equalsIgnoreCase("admin");
 			}
 			
 			@Override
-			public void disassociate(Principal user) {
+			public void logout(Principal user) {
 			}
 			
 			@Override
-			public Principal authenticate(String username, Object credentials, Request request) {
-				return getPrincipal(username);
+			public Principal popRole(Principal user) {
+				return user;
+			}
+			
+			@Override
+			public Principal pushRole(Principal user, String role) {
+				return user;
+			}
+			
+			@Override
+			public boolean reauthenticate(Principal user) {
+				return true;
 			}
 		});
 		
@@ -390,6 +358,44 @@ public class Jetty {
 		return webappContext;
 	}
 	
+	public boolean isConfigured() {
+		return this.contextPath != null && this.docRoot != null;
+	}
+	
+	public void setFirstFilter(Filter filter) {
+		this.userFirstFilter = filter;
+	}
+	
+	/**
+	 * Make sure to #configure first
+	 * 
+	 * @return the URI where the server runs
+	 */
+	public URI startServer() {
+		assert this.server == null;
+		if(!isConfigured()) {
+			throw new IllegalStateException("configure(...) first");
+		}
+		
+		this.server = new Server(this.port);
+		this.webapp = configureWebapp();
+		this.server.setHandler(this.webapp);
+		
+		this.startTime = System.currentTimeMillis();
+		try {
+			this.server.start();
+		} catch(Exception e) {
+			throw new RuntimeException(e);
+		}
+		
+		try {
+			return new URI("http://" + HostUtils.getLocalHostname() + ":" + this.port + "/")
+			        .resolve(this.contextPath + "/");
+		} catch(URISyntaxException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
 	public void stopServer() {
 		if(this.server != null) {
 			try {
@@ -400,6 +406,10 @@ public class Jetty {
 			}
 			this.server = null;
 		}
+	}
+	
+	public long timeSinceStart() {
+		return System.currentTimeMillis() - this.startTime;
 	}
 	
 }
