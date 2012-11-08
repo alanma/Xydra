@@ -35,8 +35,8 @@ public class RunXmasJetty {
 		
 		// start jetty
 		Jetty jetty = new Jetty(8787);
-		
-		URI uri = jetty.startServer("", new File("src/main/webapp"));
+		jetty.configure("", new File("src/main/webapp"));
+		URI uri = jetty.startServer();
 		
 		log.info("Started embedded Jetty server. User interface is at " + uri.toString());
 	}
