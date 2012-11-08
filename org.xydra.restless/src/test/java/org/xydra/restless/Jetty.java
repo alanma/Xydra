@@ -69,6 +69,10 @@ public class Jetty {
 	
 	private Filter localFilter;
 	
+	private String contextPath;
+	
+	private File docRoot;
+	
 	public Jetty() {
 		this(8080);
 	}
@@ -88,19 +92,69 @@ public class Jetty {
 		if(this.server != null)
 			throw new RuntimeException("server is already startet");
 		
+		this.contextPath = contextPath;
+		this.docRoot = docRoot;
+		
 		/* remember across restarts */
 		if(localFilter != null) {
 			this.localFilter = localFilter;
 		}
 		
+		return configureAndStartServer();
+	}
+	
+	private URI configureAndStartServer() {
 		// Create an instance of the jetty server.
 		this.server = new Server(this.port);
 		
+		this.webapp = configureWebapp();
+		
+		// Add the webapp to the server.
+		this.server.setHandler(this.webapp);
+		
+		this.startTime = System.currentTimeMillis();
+		try {
+			this.server.start();
+		} catch(Exception e) {
+			throw new RuntimeException(e);
+		}
+		
+		try {
+			return new URI("http://" + HostUtils.getLocalHostname() + ":" + this.port + "/")
+			        .resolve(this.contextPath + "/");
+		} catch(URISyntaxException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	public URI startServer(String contextPath, File docRoot) {
+		return startServer(contextPath, docRoot, null);
+	}
+	
+	public long timeSinceStart() {
+		return System.currentTimeMillis() - this.startTime;
+	}
+	
+	public synchronized void refreshWebapp() throws Exception {
+		if(this.server != null) {
+			if(this.server.isRunning()) {
+				this.server.stop();
+				while(this.server.isRunning()) {
+					Thread.yield();
+				}
+			}
+			assert !this.server.isRunning();
+			configureAndStartServer();
+		}
+	}
+	
+	private WebAppContext configureWebapp() {
+		WebAppContext webappContext;
 		/*
 		 * Create the webapp. This will load the servlet configuration from
 		 * docRoot + WEB-INF/web.xml
 		 */
-		this.webapp = new WebAppContext(docRoot.getAbsolutePath(), contextPath);
+		webappContext = new WebAppContext(this.docRoot.getAbsolutePath(), this.contextPath);
 		
 		// make sure 'com.google.appengine.tools.appstats.AppstatsFilter' is on
 		// the classpath
@@ -108,13 +162,14 @@ public class Jetty {
 		// Add the servlets.
 		ClassLoader classloader = Thread.currentThread().getContextClassLoader();
 		
-		this.webapp.setClassLoader(classloader);
-		// caching
+		webappContext.setClassLoader(classloader);
+		// user given filter goes first
 		if(this.localFilter != null) {
 			FilterHolder filterHolder = new FilterHolder();
 			filterHolder.setFilter(this.localFilter);
-			this.webapp.addFilter(filterHolder, "*", Handler.ALL);
+			webappContext.addFilter(filterHolder, "*", Handler.ALL);
 		}
+		// caching filter
 		{
 			FilterHolder filterHolder = new FilterHolder();
 			filterHolder.setFilter(new Filter() {
@@ -159,9 +214,9 @@ public class Jetty {
 					// do nothing
 				}
 			});
-			this.webapp.addFilter(filterHolder, "*.png", Handler.ALL);
-			this.webapp.addFilter(filterHolder, "*.gif", Handler.ALL);
-			// this.webapp.addFilter(filterHolder, ".cache.*", Handler.ALL);
+			webappContext.addFilter(filterHolder, "*.png", Handler.ALL);
+			webappContext.addFilter(filterHolder, "*.gif", Handler.ALL);
+			// webappContext.addFilter(filterHolder, ".cache.*", Handler.ALL);
 		}
 		
 		// GWT caching
@@ -206,7 +261,7 @@ public class Jetty {
 				// do nothing
 			}
 		});
-		this.webapp.addFilter(gwtFilterHolder, "*.nocache*", Handler.ALL);
+		webappContext.addFilter(gwtFilterHolder, "*.nocache*", Handler.ALL);
 		
 		// count requests
 		FilterHolder filterHolderForCounting = new FilterHolder();
@@ -237,13 +292,13 @@ public class Jetty {
 				// do nothing
 			}
 		});
-		this.webapp.addFilter(filterHolderForCounting, "*", Handler.ALL);
+		webappContext.addFilter(filterHolderForCounting, "*", Handler.ALL);
 		
 		/*
 		 * Add simple security handler that puts anybody with the name 'admin'
 		 * into the admin role.
 		 */
-		this.webapp.getSecurityHandler().setUserRealm(new UserRealm() {
+		webappContext.getSecurityHandler().setUserRealm(new UserRealm() {
 			
 			@Override
 			public boolean reauthenticate(Principal user) {
@@ -330,46 +385,9 @@ public class Jetty {
 		// // do nothing
 		// }
 		// });
-		// this.webapp.addFilter(filterHolderForStaticContent, "*",
+		// webappContext.addFilter(filterHolderForStaticContent, "*",
 		// Handler.ALL);
-		
-		// Add the webapp to the server.
-		this.server.setHandler(this.webapp);
-		
-		this.startTime = System.currentTimeMillis();
-		try {
-			this.server.start();
-		} catch(Exception e) {
-			throw new RuntimeException(e);
-		}
-		
-		try {
-			return new URI("http://" + HostUtils.getLocalHostname() + ":" + this.port + "/")
-			        .resolve(contextPath + "/");
-		} catch(URISyntaxException e) {
-			throw new RuntimeException(e);
-		}
-	}
-	
-	public URI startServer(String contextPath, File docRoot) {
-		return startServer(contextPath, docRoot, null);
-	}
-	
-	public long timeSinceStart() {
-		return System.currentTimeMillis() - this.startTime;
-	}
-	
-	public synchronized void refreshWebapp() throws Exception {
-		if(this.webapp != null) {
-			if(this.webapp.isRunning()) {
-				this.webapp.stop();
-				while(this.webapp.isRunning()) {
-					Thread.yield();
-				}
-			}
-			assert !this.webapp.isRunning();
-			this.webapp.start();
-		}
+		return webappContext;
 	}
 	
 	public void stopServer() {
