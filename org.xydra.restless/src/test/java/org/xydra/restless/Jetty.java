@@ -112,6 +112,12 @@ public class Jetty {
 		this.docRoot = docRoot;
 	}
 	
+	@Deprecated
+	public URI startServer(String contextPath, File docRoot) {
+		configure(contextPath, docRoot);
+		return startServer();
+	}
+	
 	/**
 	 * @return a configured webapp with some nice default servlet filters
 	 */
