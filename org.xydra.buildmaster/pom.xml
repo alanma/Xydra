@@ -4,7 +4,7 @@
 
 	<groupId>org.xydra</groupId>
 	<artifactId>buildmaster</artifactId>
-	<version>${xydra.version}</version>
+	<!--@@ use xydra.version here --><version>0.1.6-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>Xydra Buildmaster</name>
@@ -14,6 +14,9 @@
 		and deploy them -->
 
 	<modules>
+        <!-- No Xydra dependencies -->
+        <module>../org.xydra.annotations/</module>
+
 		<!-- No Xydra dependencies -->
 		<module>../org.xydra.log/</module>
 		<!-- DONE -->
@@ -78,6 +81,9 @@
 
 		<module>../org.xydra.google-analytics/</module>
 
+        <module>../org.xydra.gwt/</module>
+
+        <module>../org.xydra.testgae/</module>
 
 		<!-- Experimental. Depends on: .core -->
 <!-- 		<module>../org.xydra.schema/</module>
