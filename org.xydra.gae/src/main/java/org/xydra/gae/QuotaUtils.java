@@ -13,6 +13,7 @@ public class QuotaUtils {
 	 * @return apiTime and cpuTime of the current running request (or -1 for
 	 *         undefined values).
 	 */
+	@SuppressWarnings("deprecation")
 	public static Pair<Long,Long> getCurrentQuotas() {
 		QuotaService qs = QuotaServiceFactory.getQuotaService();
 		long apiTime = -1;
