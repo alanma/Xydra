@@ -29,7 +29,6 @@
 				<checksumPolicy>fail</checksumPolicy>
 			</releases>
 		</repository>
-
 	</repositories>
 
 	<dependencies>
@@ -71,8 +70,6 @@
 			<version>0.1.6-SNAPSHOT</version>
 			<type>test-jar</type>
 		</dependency>
-
-		<!-- Xydra Server -->
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>server</artifactId>
@@ -98,7 +95,6 @@
 			</exclusions>
 			<type>test-jar</type>
 		</dependency>
-
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>csv</artifactId>
@@ -123,8 +119,6 @@
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
 		</dependency>
-
-
 
 		<!-- <dependency> <groupId>org.slf4j</groupId> <artifactId>jul-to-slf4j</artifactId> 
 			<version>1.5.11</version> </dependency> -->
