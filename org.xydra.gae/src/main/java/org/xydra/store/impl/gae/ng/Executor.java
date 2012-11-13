@@ -262,12 +262,9 @@ public class Executor {
 		XRevWritableObject objectBeforeCmd = ctxBeforeCmd.getObject(objectId);
 		
 		XyAssert.xyAssert(objectInTxn != null, "XObjectCommand is invalid: " + command
-		        + ", object is null");
+		        + ", object is null. TOS says, object " + command.getChangedEntity()
+		        + " does not exist");
 		assert objectInTxn != null;
-		if(objectInTxn == null) {
-			return CheckResult.failed("TOS says, object '" + command.getChangedEntity()
-			        + "' does not exist");
-		}
 		XID fieldId = command.getFieldId();
 		switch(command.getChangeType()) {
 		case ADD:
