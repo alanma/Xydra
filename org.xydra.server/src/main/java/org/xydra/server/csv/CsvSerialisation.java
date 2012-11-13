@@ -26,6 +26,7 @@ import org.xydra.base.value.XValue;
 import org.xydra.core.DemoModelUtil;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
+import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.impl.memory.MemoryRepository;
 import org.xydra.core.serialize.SerializedValue;
@@ -39,8 +40,6 @@ import org.xydra.csv.IRow;
 import org.xydra.csv.impl.memory.CsvTable;
 import org.xydra.csv.impl.memory.Row;
 import org.xydra.index.query.Pair;
-
-import com.sun.org.apache.xpath.internal.objects.XObject;
 
 
 /**
