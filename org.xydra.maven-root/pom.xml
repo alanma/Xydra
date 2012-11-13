@@ -1,10 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-
 	<groupId>org.xydra</groupId>
 	<artifactId>maven-root</artifactId>
-	<version>2012.04.13</version>
+	<version>2012.11.12</version>
 	<packaging>pom</packaging>
 
 	<name>Xydra Maven Root</name>
@@ -20,10 +20,17 @@
 		<maven.compiler.source>1.6</maven.compiler.source>
 		<maven.compiler.target>1.6</maven.compiler.target>
 
-		<xydra.version>0.1.6-SNAPSHOT</xydra.version>
+		<!-- For properties like xydra.version, gae.version and gwt.version us 
+			full-text search. gwt.version should match the version of get plugin, if 
+			the corresponding plugin exists already. gae.version should match the version 
+			that was locally installed via unpack-version. -->
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+		<!-- define a transient output directory for gwt -->
+		<gwt.output.directory>${project.build.directory}/war</gwt.output.directory>
+
 	</properties>
 
 	<repositories>
@@ -113,21 +120,6 @@
 				<version>1.7</version>
 			</plugin>
 
-			<!-- Deploy tests as a separate jar as explained at -->
-			<!-- http://maven.apache.org/guides/mini/guide-attached-tests.html -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.2</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>jar</goal>
-							<goal>test-jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -163,18 +155,62 @@
 				</configuration>
 			</plugin>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>log4j.properties</exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
+			<!-- Deploy tests as a separate jar as explained at -->
+			<!-- http://maven.apache.org/guides/mini/guide-attached-tests.html -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.2</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>jar</goal>
+							<goal>test-jar</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<excludes>
+						<exclude>log4j.properties</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
 
 		</plugins>
 
+		<pluginManagement>
+			<plugins>
+				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.codehaus.mojo
+										</groupId>
+										<artifactId>
+											gwt-maven-plugin
+										</artifactId>
+										<versionRange>[2.4.0,)</versionRange>
+										<goals>
+											<goal>compile</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
 
 	<dependencies>
@@ -251,149 +287,6 @@
 				<version>12.0</version>
 			</dependency>
 
-
-			<!-- +++ Propose Xydra version numbers (alpabetic order) +++ -->
-			<dependency>
-				<groupId>org.xydra</groupId>
-				<artifactId>annotations</artifactId>
-				<version>${xydra.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.xydra</groupId>
-				<artifactId>annotations</artifactId>
-				<version>${xydra.version}</version>
-				<classifier>sources</classifier>
-			</dependency>
-			<dependency>
-				<groupId>org.xydra</groupId>
-				<artifactId>core</artifactId>
-				<version>${xydra.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.xydra</groupId>
-				<artifactId>core</artifactId>
-				<version>${xydra.version}</version>
-				<classifier>sources</classifier>
-			</dependency>
-			<dependency>
-				<groupId>org.xydra</groupId>
-				<artifactId>core</artifactId>
-				<version>${xydra.version}</version>
-				<type>test-jar</type>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.xydra</groupId>
-				<artifactId>csv</artifactId>
-				<version>${xydra.version}</version>
-			</dependency>
-			<!-- XIndex -->
-			<dependency>
-				<groupId>org.xydra</groupId>
-				<artifactId>index</artifactId>
-				<version>${xydra.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.xydra</groupId>
-				<artifactId>index</artifactId>
-				<version>${xydra.version}</version>
-				<classifier>sources</classifier>
-			</dependency>
-			<dependency>
-				<groupId>org.xydra</groupId>
-				<artifactId>json</artifactId>
-				<version>${xydra.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.xydra</groupId>
-				<artifactId>gae</artifactId>
-				<version>${xydra.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.xydra</groupId>
-				<artifactId>gae</artifactId>
-				<version>${xydra.version}</version>
-				<type>test-jar</type>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.xydra</groupId>
-				<artifactId>gae</artifactId>
-				<version>${xydra.version}</version>
-				<classifier>sources</classifier>
-			</dependency>
-			<dependency>
-				<groupId>org.xydra</groupId>
-				<artifactId>gwt</artifactId>
-				<version>${xydra.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.xydra</groupId>
-				<artifactId>gwt</artifactId>
-				<version>${xydra.version}</version>
-				<classifier>sources</classifier>
-			</dependency>
-			<!-- <dependency> -->
-			<!-- <groupId>org.xydra</groupId> -->
-			<!-- <artifactId>gwt</artifactId> -->
-			<!-- <version>${xydra.version}</version> -->
-			<!-- <type>test-jar</type> -->
-			<!-- <scope>test</scope> -->
-			<!-- </dependency> -->
-			<dependency>
-				<groupId>org.xydra</groupId>
-				<artifactId>log</artifactId>
-				<version>${xydra.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.xydra</groupId>
-				<artifactId>log</artifactId>
-				<version>${xydra.version}</version>
-				<classifier>sources</classifier>
-			</dependency>
-			<dependency>
-				<groupId>org.xydra</groupId>
-				<artifactId>log</artifactId>
-				<version>${xydra.version}</version>
-				<type>test-jar</type>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.xydra</groupId>
-				<artifactId>log.gae</artifactId>
-				<version>${xydra.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.xydra</groupId>
-				<artifactId>restless</artifactId>
-				<version>${xydra.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.xydra</groupId>
-				<artifactId>restless</artifactId>
-				<version>${xydra.version}</version>
-				<classifier>sources</classifier>
-			</dependency>
-			<dependency>
-				<groupId>org.xydra</groupId>
-				<artifactId>restless</artifactId>
-				<version>${xydra.version}</version>
-				<type>test-jar</type>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.xydra</groupId>
-				<artifactId>server</artifactId>
-				<version>${xydra.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.xydra</groupId>
-				<artifactId>server</artifactId>
-				<version>${xydra.version}</version>
-				<type>test-jar</type>
-				<scope>test</scope>
-			</dependency>
-
 			<!-- via http://hobione.wordpress.com/2009/03/11/missing-comsuntoolsjar142/ 
 				<dependency> <groupId>com.sun</groupId> <artifactId>tools</artifactId> <version>1.4.2</version> 
 				<scope>system</scope> <systemPath>${java.home}/../lib/tools.jar</systemPath> 
@@ -401,7 +294,7 @@
 
 		</dependencies>
 	</dependencyManagement>
-	
+
 	<profiles>
 		<!-- _______________________ DETAILED __________ -->
 		<profile>
@@ -429,13 +322,19 @@
 					<plugin>
 						<groupId>net.kindleit</groupId>
 						<artifactId>maven-gae-plugin</artifactId>
-						<version>0.9.2</version>
+						<version>0.9.4</version>
 						<configuration>
 							<keepTempUploadDir>false</keepTempUploadDir>
 							<days>30</days>
 							<outputFile>${project.build.directory}/gae.log</outputFile>
 							<!-- 0 = debug, info, warn, error, critical = 4 -->
 							<severity>0</severity>
+							<!-- ADDED -->
+							<jvmFlags>
+								<jvmFlag>
+									-Xmx1024m
+								</jvmFlag>
+							</jvmFlags>
 						</configuration>
 					</plugin>
 				</plugins>
@@ -464,9 +363,15 @@
 					<plugin>
 						<groupId>net.kindleit</groupId>
 						<artifactId>maven-gae-plugin</artifactId>
-						<version>0.9.2</version>
+						<version>0.9.4</version>
 						<configuration>
 							<disableUpdateCheck>true</disableUpdateCheck>
+							<!-- ADDED -->
+							<jvmFlags>
+								<jvmFlag>
+									-Xmx1024m
+								</jvmFlag>
+							</jvmFlags>
 						</configuration>
 					</plugin>
 				</plugins>
@@ -501,25 +406,19 @@
 					<exists>uses-gwt.marker</exists>
 				</file>
 			</activation>
-			<properties>
-				<!-- GWT version, should match version of gwt-maven-plugin -->
-				<gwt.version>2.4.0</gwt.version>
-
-				<!-- define a transient output directory for gwt -->
-				<gwt.output.directory>${project.build.directory}/war</gwt.output.directory>
-
-			</properties>
 			<dependencies>
 				<!-- gwt-dev is not here, on purpose -->
 				<dependency>
 					<groupId>com.google.gwt</groupId>
 					<artifactId>gwt-servlet</artifactId>
-					<version>${gwt.version}</version>
+					<!-- @@ use gwt.version here -->
+					<version>2.5.0</version>
 				</dependency>
 				<dependency>
 					<groupId>com.google.gwt</groupId>
 					<artifactId>gwt-user</artifactId>
-					<version>${gwt.version}</version>
+					<!-- @@ use gwt.version here -->
+					<version>2.5.0</version>
 					<scope>provided</scope>
 					<!-- Transitive dependency to javax.validation required for tests in 
 						GWT -->
@@ -527,7 +426,8 @@
 				<dependency>
 					<groupId>com.google.gwt</groupId>
 					<artifactId>gwt-dev</artifactId>
-					<version>${gwt.version}</version>
+					<!-- @@ use gwt.version here -->
+					<version>2.5.0</version>
 					<scope>provided</scope>
 				</dependency>
 				<!-- Removed since 2012-04-13, now using the new emulated java.util.logging -->
@@ -556,7 +456,7 @@
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>gwt-maven-plugin</artifactId>
-						<version>2.4.0</version>
+						<version>2.5.0</version>
 						<!-- TODO: Add configuration to your pom. -->
 						<!-- Example: <configuration> <module>org.xydra.core.XydraCore</module> 
 							</configuration> -->
@@ -616,29 +516,27 @@
 					<exists>uses-gae.marker</exists>
 				</file>
 			</activation>
-			<properties>
-				<!-- Specify AppEngine version for your project. It should match SDK 
-					version pointed to by ${gae.home} property (Typically, one used by your Eclipse 
-					plug-in) -->
-				<gae.version>1.7.0</gae.version>
-
-			</properties>
 			<build>
 				<plugins>
 					<!-- Google App Engine (GAE) plugin -->
 					<plugin>
 						<groupId>net.kindleit</groupId>
 						<artifactId>maven-gae-plugin</artifactId>
-						<version>0.9.2</version>
+						<version>0.9.4</version>
 						<configuration>
-							<unpackVersion>${gae.version}</unpackVersion>
+							<!-- @@ use gae.version here -->
+							<unpackVersion>1.7.3</unpackVersion>
 							<splitJars>true</splitJars>
 							<jvmFlags>
 								<jvmFlag>-ea</jvmFlag>
+								<jvmFlag>
+									-Xmx1024m
+								</jvmFlag>
 							</jvmFlags>
 						</configuration>
 						<!-- <dependencies> <dependency> <groupId>net.kindleit</groupId> <artifactId>gae-runtime</artifactId> 
-							<version>${gae.version}</version> <type>pom</type> </dependency> </dependencies> -->
+							<version>${project.gae.version}</version> <type>pom</type> </dependency> 
+							</dependencies> -->
 					</plugin>
 				</plugins>
 			</build>
@@ -648,12 +546,14 @@
 				<dependency>
 					<groupId>com.google.appengine</groupId>
 					<artifactId>appengine-api-1.0-sdk</artifactId>
-					<version>${gae.version}</version>
+					<!-- @@ use gae.version here -->
+					<version>1.7.3</version>
 				</dependency>
 				<dependency>
 					<groupId>com.google.appengine</groupId>
 					<artifactId>appengine-api-labs</artifactId>
-					<version>${gae.version}</version>
+					<!-- @@ use gae.version here -->
+					<version>1.7.3</version>
 				</dependency>
 
 				<!-- J2EE Servlet API. -->
@@ -668,14 +568,16 @@
 				<dependency>
 					<groupId>com.google.appengine</groupId>
 					<artifactId>appengine-api-stubs</artifactId>
-					<version>${gae.version}</version>
+					<!-- @@ use gae.version here -->
+					<version>1.7.3</version>
 					<scope>test</scope>
 				</dependency>
 
 				<dependency>
 					<groupId>com.google.appengine</groupId>
 					<artifactId>appengine-testing</artifactId>
-					<version>${gae.version}</version>
+					<!-- @@ use gae.version here -->
+					<version>1.7.3</version>
 					<scope>test</scope>
 				</dependency>
 
@@ -1017,7 +919,7 @@
 		</snapshotRepository>
 		<site>
 			<id>xydra-site</id>
-			<url>scp://${xydra.site}/${project.artifactId}</url>
+			<url>scp://${project.xydra.site}/${project.artifactId}</url>
 		</site>
 	</distributionManagement>
 
