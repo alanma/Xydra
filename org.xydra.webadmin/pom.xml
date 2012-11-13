@@ -6,35 +6,30 @@
 	<parent>
 		<groupId>org.xydra</groupId>
 		<artifactId>maven-root</artifactId>
-		<version>2012.04.13</version>
+		<version>2012.11.12</version>
 	</parent>
 
 
 	<artifactId>webadmin</artifactId>
-	<version>${xydra.version}</version>
+	<!--@@ use xydra.version here -->
+	<version>0.1.6-SNAPSHOT</version>
 	<!-- 'war' for web deployment, 'jar' for maven deploy -->
-	<!--  For embedding, make sure to have the static file /s/xml-to-html.xsl 
-	and /s/xyadmin.css 
-	
-	/!\
-	If you do this wrong and try to deploy, you'll get an exception like:
-	com.google.apphosting.utils.config.AppEngineWebXmlReader readAppEngineWebXml
-	Received exception processing .../webadmin-0.1.5-SNAPSHOT\WEB-INF/appengine-web.xml
-	com.google.apphosting.utils.config.AppEngineConfigException: Could not locate ...\webadmin-0.1.5-SNAPSHOT\WEB-INF\appengine-web.xml
-	Bad configuration: Could not locate ... Please see the logs
-	-->
+	<!-- For embedding, make sure to have the static file /s/xml-to-html.xsl 
+		and /s/xyadmin.css /!\ If you do this wrong and try to deploy, you'll get 
+		an exception like: com.google.apphosting.utils.config.AppEngineWebXmlReader 
+		readAppEngineWebXml Received exception processing .../webadmin-0.1.5-SNAPSHOT\WEB-INF/appengine-web.xml 
+		com.google.apphosting.utils.config.AppEngineConfigException: Could not locate 
+		...\webadmin-0.1.5-SNAPSHOT\WEB-INF\appengine-web.xml Bad configuration: 
+		Could not locate ... Please see the logs -->
 	<name>Xydra Webadmin</name>
 
 
 	<properties>
 
 		<!-- define a transient output directory for gwt -->
-<!-- 		<gwt.output.directory>${project.build.directory}/war</gwt.output.directory>
- -->
+		<!-- <gwt.output.directory>${project.build.directory}/war</gwt.output.directory> -->
 		<!-- the value of the rename-to attribute in your GWT module configuration -->
-<!-- 		<gwt.module.alias>gwt</gwt.module.alias>
-		<gwt.compiler.force>true</gwt.compiler.force>
- -->
+		<!-- <gwt.module.alias>gwt</gwt.module.alias> <gwt.compiler.force>true</gwt.compiler.force> -->
 	</properties>
 
 	<repositories>
@@ -63,16 +58,22 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>csv</artifactId>
+			<!-- @@ use xydra.version here -->
+			<version>0.1.6-SNAPSHOT</version>
 		</dependency>
 
 		<!-- RESTless -->
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>restless</artifactId>
+			<!-- @@ use xydra.version here -->
+			<version>0.1.6-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>restless</artifactId>
+			<!-- @@ use xydra.version here -->
+			<version>0.1.6-SNAPSHOT</version>
 			<type>test-jar</type>
 		</dependency>
 
@@ -80,10 +81,14 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>core</artifactId>
+			<!-- @@ use xydra.version here -->
+			<version>0.1.6-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>core</artifactId>
+			<!-- @@ use xydra.version here -->
+			<version>0.1.6-SNAPSHOT</version>
 			<type>test-jar</type>
 			<scope>compile</scope>
 		</dependency>
@@ -92,6 +97,8 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>gae</artifactId>
+			<!-- @@ use xydra.version here -->
+			<version>0.1.6-SNAPSHOT</version>
 		</dependency>
 
 	</dependencies>
@@ -123,7 +130,8 @@
 	<build>
 		<pluginManagement>
 			<plugins>
-				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+				<!--This plugin's configuration is used to store Eclipse m2e settings 
+					only. It has no influence on the Maven build itself. -->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
 					<artifactId>lifecycle-mapping</artifactId>

@@ -4,14 +4,15 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>annotations</artifactId>
-	<version>${xydra.version}</version>
+	<!--@@ use xydra.version here -->
+	<version>0.1.6-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>Xydra Annotations</name>
 
 	<parent>
 		<groupId>org.xydra</groupId>
 		<artifactId>maven-root</artifactId>
-		<version>2012.04.13</version>
+		<version>2012.11.12</version>
 	</parent>
 
 	<repositories>
@@ -65,7 +66,8 @@
 	<build>
 		<pluginManagement>
 			<plugins>
-				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+				<!--This plugin's configuration is used to store Eclipse m2e settings 
+					only. It has no influence on the Maven build itself. -->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
 					<artifactId>lifecycle-mapping</artifactId>

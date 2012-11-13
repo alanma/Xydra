@@ -6,14 +6,14 @@
 	<parent>
 		<groupId>org.xydra</groupId>
 		<artifactId>maven-root</artifactId>
-		<version>2012.04.13</version>
+		<version>2012.11.12</version>
 	</parent>
 
 	<artifactId>index</artifactId>
-	<version>${xydra.version}</version>
+	<!-- @@ use xydra.version here -->
+	<version>0.1.6-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>Xydra Index</name>
-
 
 	<repositories>
 		<repository>
@@ -32,26 +32,27 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>log</artifactId>
+			<!-- @@ use xydra.version here -->
+			<version>0.1.6-SNAPSHOT</version>
 		</dependency>
-		
-		<!--  This is only required for logging in GWT -->
+
+		<!-- This is only required for logging in GWT -->
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>log</artifactId>
+			<!-- @@ use xydra.version here -->
+			<version>0.1.6-SNAPSHOT</version>
 			<classifier>sources</classifier>
 		</dependency>
-		
+
 	</dependencies>
 
 	<distributionManagement>
-		<!--
-			add this to settings.xml <server> <id>xydra-repo</id>
-			<username>xamde</username> <password>********</password> </server>
-			<server> <id>xydra-snap</id> <username>xamde</username>
-			<password>********</password> </server> <server> <id>xydra-site</id>
-			<username>xamde</username> <password>********</password> </server>
-		-->
-		
+		<!-- add this to settings.xml <server> <id>xydra-repo</id> <username>xamde</username> 
+			<password>********</password> </server> <server> <id>xydra-snap</id> <username>xamde</username> 
+			<password>********</password> </server> <server> <id>xydra-site</id> <username>xamde</username> 
+			<password>********</password> </server> -->
+
 		<repository>
 			<id>xydra-repo</id>
 			<uniqueVersion>false</uniqueVersion>
@@ -70,7 +71,8 @@
 	<build>
 		<pluginManagement>
 			<plugins>
-				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+				<!--This plugin's configuration is used to store Eclipse m2e settings 
+					only. It has no influence on the Maven build itself. -->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
 					<artifactId>lifecycle-mapping</artifactId>
