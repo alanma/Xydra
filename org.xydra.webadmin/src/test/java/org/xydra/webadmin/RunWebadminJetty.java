@@ -66,7 +66,8 @@ public class RunWebadminJetty {
 		
 		File webappDir = new File("src/main/webapp");
 		
-		uri = jetty.startServer("", webappDir);
+		jetty.configure("", webappDir);
+		uri = jetty.startServer();
 		log.info("Embedded jetty serves " + webappDir.getAbsolutePath() + " at " + uri.toString());
 		log.info(".oO ___________ Running ____________________________");
 	}
