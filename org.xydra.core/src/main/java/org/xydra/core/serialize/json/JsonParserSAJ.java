@@ -278,7 +278,7 @@ public class JsonParserSAJ {
 					sb.append('\r');
 					break;
 				case 'u':
-					sb.append((char)Integer.parseInt(next(4), 16));
+					sb.append((char)ParseNumber.parseInt(next(4), 16));
 					break;
 				case '"':
 				case '\'':
@@ -545,7 +545,7 @@ public class JsonParserSAJ {
 				if(b == '0') {
 					if(s.length() > 2 && (s.charAt(1) == 'x' || s.charAt(1) == 'X')) {
 						try {
-							int i = Integer.parseInt(s.substring(2), 16);
+							int i = ParseNumber.parseInt(s.substring(2), 16);
 							this.saj.onInteger(i);
 							return;
 						} catch(Exception e) {
@@ -553,7 +553,7 @@ public class JsonParserSAJ {
 						}
 					} else {
 						try {
-							int i = Integer.parseInt(s, 8);
+							int i = ParseNumber.parseInt(s, 8);
 							this.saj.onInteger(i);
 							return;
 						} catch(Exception e) {

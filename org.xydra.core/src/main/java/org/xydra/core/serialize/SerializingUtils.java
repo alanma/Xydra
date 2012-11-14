@@ -8,6 +8,7 @@ import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
 import org.xydra.base.change.ChangeType;
+import org.xydra.core.serialize.json.ParseNumber;
 import org.xydra.index.XI;
 
 
@@ -134,7 +135,7 @@ class SerializingUtils {
 		}
 		
 		try {
-			return Integer.parseInt(toString(value));
+			return ParseNumber.parseInt(toString(value));
 		} catch(Exception e) {
 			throw new RuntimeException("Expected a valid integer, got " + value, e);
 		}

@@ -13,6 +13,7 @@ import org.xydra.base.value.ValueType;
 import org.xydra.base.value.XBinaryValue;
 import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
+import org.xydra.core.serialize.json.ParseNumber;
 import org.xydra.index.query.Pair;
 
 
@@ -120,7 +121,7 @@ public class ValueDeSerializer {
 			case Id:
 				return XX.toId(valueStr.trim());
 			case Integer:
-				int i = Integer.parseInt(valueStr.trim());
+				int i = ParseNumber.parseInt(valueStr.trim());
 				return XV.toValue(i);
 			case Long:
 				long l = Long.parseLong(valueStr.trim());
@@ -156,7 +157,7 @@ public class ValueDeSerializer {
 				list.add((T)(Double)Double.parseDouble(s));
 				break;
 			case Integer:
-				list.add((T)(Integer)Integer.parseInt(s));
+				list.add((T)(Integer)ParseNumber.parseInt(s));
 				break;
 			case Long:
 				list.add((T)(Long)Long.parseLong(s));
