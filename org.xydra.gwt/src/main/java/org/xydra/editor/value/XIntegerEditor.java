@@ -27,6 +27,12 @@ public class XIntegerEditor extends AtomicXValueEditor<XIntegerValue> implements
 	public XIntegerValue getValue() {
 		int v = 0;
 		try {
+			/*
+			 * work around Blackberry bug
+			 * http://code.google.com/p/google-web-toolkit/issues/detail?id=7291
+			 * 
+			 * use Long.parseLong instead
+			 */
 			v = Integer.parseInt(this.editor.getText());
 		} catch(NumberFormatException nfe) {
 			v = (int)XValueUtils.generateLong(this.editor.getText());
@@ -36,7 +42,7 @@ public class XIntegerEditor extends AtomicXValueEditor<XIntegerValue> implements
 	}
 	
 	@Override
-    public void onKeyPress(KeyPressEvent e) {
+	public void onKeyPress(KeyPressEvent e) {
 		
 		char cc = e.getCharCode();
 		
