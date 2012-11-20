@@ -27,9 +27,11 @@ public class SonicQuery extends SonicFilter implements ISonicQuery {
 		}
 		
 		public SonicQuery done() {
-			return new SonicQuery(this.timeConstraint, this.limit,
+			return new SonicQuery(
+			        this.timeConstraint,
+			        this.limit,
 			        this.keyValueConstraints
-			                .toArray(new KeyValueConstraint[this.keyValueConstraints.size()]));
+			                .toArray(new BuiltinKeyValueConstraint[this.keyValueConstraints.size()]));
 		}
 		
 		public Builder limit(int limit) {
@@ -45,7 +47,7 @@ public class SonicQuery extends SonicFilter implements ISonicQuery {
 	private int limit;
 	
 	public SonicQuery(TimeConstraint timeConstraint, int limit,
-	        KeyValueConstraint ... keyValueConstraints) {
+	        BuiltinKeyValueConstraint ... keyValueConstraints) {
 		super(keyValueConstraints);
 		this.timeConstraint = timeConstraint;
 		this.limit = limit;
@@ -73,7 +75,7 @@ public class SonicQuery extends SonicFilter implements ISonicQuery {
 		StringBuilder sb = new StringBuilder();
 		sb.append(this.timeConstraint.toString());
 		for(KeyValueConstraint c : this.keyValueConstraints.values()) {
-			sb.append(" '" + c.key + "'='" + c.value + "'");
+			sb.append(" '" + c.getKey() + "'='" + c.getValue() + "'");
 		}
 		sb.append(" limit:" + this.limit);
 		return sb.toString();

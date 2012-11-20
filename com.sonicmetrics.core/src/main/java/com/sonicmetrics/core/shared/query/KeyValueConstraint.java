@@ -5,9 +5,6 @@ import java.io.Serializable;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.sharedutils.XyAssert;
 
-import com.sonicmetrics.core.shared.ISonicEvent;
-import com.sonicmetrics.core.shared.ISonicPotentialEvent.FilterProperty;
-
 
 /**
  * Each defined filter is restricting the query. Null-values are treated as
@@ -20,18 +17,26 @@ public class KeyValueConstraint implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
-	public static KeyValueConstraint keyValue(ISonicEvent.FilterProperty key, String value) {
+	public static KeyValueConstraint keyValue(String key, String value) {
 		XyAssert.validateNotNull(key, "key");
 		return new KeyValueConstraint(key, value);
 	}
 	
-	private KeyValueConstraint(FilterProperty key, String value) {
+	protected KeyValueConstraint(String key, String value) {
 		this.key = key;
 		this.value = value;
 	}
 	
-	public final FilterProperty key;
+	public String getKey() {
+		return this.key;
+	}
 	
-	public final String value;
+	public String getValue() {
+		return this.value;
+	}
+	
+	private final String key;
+	
+	private final String value;
 	
 }

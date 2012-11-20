@@ -9,8 +9,6 @@ import java.util.Map;
 
 import org.xydra.annotations.CanBeNull;
 
-import com.sonicmetrics.core.shared.ISonicEvent;
-import com.sonicmetrics.core.shared.ISonicPotentialEvent;
 import com.sonicmetrics.core.shared.ISonicPotentialEvent.FilterProperty;
 import com.sonicmetrics.core.shared.impl.memory.SonicUtils;
 
@@ -20,11 +18,11 @@ public class SonicFilter implements ISonicFilter, Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	@CanBeNull
-	protected final Map<ISonicEvent.FilterProperty,KeyValueConstraint> keyValueConstraints = new HashMap<ISonicPotentialEvent.FilterProperty,KeyValueConstraint>();
+	protected final Map<String,KeyValueConstraint> keyValueConstraints = new HashMap<String,KeyValueConstraint>();
 	
 	public SonicFilter(KeyValueConstraint ... keyValueConstraints) {
 		for(KeyValueConstraint a : Arrays.asList(keyValueConstraints)) {
-			this.keyValueConstraints.put(a.key, a);
+			this.keyValueConstraints.put(a.getKey(), a);
 		}
 	}
 	
@@ -46,8 +44,8 @@ public class SonicFilter implements ISonicFilter, Serializable {
 		 */
 		public B where(KeyValueConstraint keyValueConstraint) {
 			// wildcards
-			if(keyValueConstraint.value == null || keyValueConstraint.value.equals("")
-			        || keyValueConstraint.value.equals("*"))
+			if(keyValueConstraint.getValue() == null || keyValueConstraint.getValue().equals("")
+			        || keyValueConstraint.getValue().equals("*"))
 				return this.b;
 			
 			this.keyValueConstraints.add(keyValueConstraint);
@@ -63,7 +61,7 @@ public class SonicFilter implements ISonicFilter, Serializable {
 		 * @return this
 		 */
 		public B whereProperty(FilterProperty key, String value) {
-			return where(KeyValueConstraint.keyValue(key, value));
+			return where(KeyValueConstraint.keyValue(key.name(), value));
 		}
 		
 		/**
@@ -120,7 +118,7 @@ public class SonicFilter implements ISonicFilter, Serializable {
 		if(keyValueConstraint == null)
 			return null;
 		
-		return keyValueConstraint.value;
+		return keyValueConstraint.getValue();
 	}
 	
 	@Override
