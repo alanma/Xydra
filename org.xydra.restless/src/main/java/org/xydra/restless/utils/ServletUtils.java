@@ -179,43 +179,52 @@ public class ServletUtils {
 			return map;
 		}
 		
-		String[] pairs = queryString.split("&");
+		String[] pairs = queryString.split("[&;]");
 		for(String pair : pairs) {
-			String[] keyvalue = pair.split("=");
-			if(keyvalue.length > 2) {
-				// invalid pair, give up on unreliable parsing
-				throw new IllegalArgumentException("Malformed query string " + queryString);
+			int equalSignIndex = pair.indexOf("=");
+			if(equalSignIndex > 0) {
+				// parse as key-value
+				String first = pair.substring(0, equalSignIndex);
+				String second = pair.substring(equalSignIndex + 1, pair.length());
+				addRawKeyValue(map, first, second);
 			} else {
-				String encKey = keyvalue[0];
-				if(encKey != null && !encKey.equals("")) {
-					String key;
-					try {
-						key = URLDecoder.decode(encKey, Restless.JAVA_ENCODING_UTF8);
-						if(key != null && !key.equals("")) {
-							SortedSet<String> values = map.get(key);
-							if(values == null) {
-								values = new TreeSet<String>();
-								map.put(key, values);
-							}
-							if(keyvalue.length == 2) {
-								String rawValue = keyvalue[1];
-								String value = URLDecoder.decode(rawValue,
-								        Restless.JAVA_ENCODING_UTF8);
-								values.add(value);
-							} else {
-								values.add("");
-							}
-							
-						}
-					} catch(UnsupportedEncodingException e) {
-						throw new RuntimeException("No " + Restless.JAVA_ENCODING_UTF8
-						        + " on this system?", e);
-					}
-					
-				}
+				// parse as key-only
+				addRawKeyValue(map, pair, null);
 			}
 		}
 		return map;
+	}
+	
+	/**
+	 * @param map
+	 * @param rawKey
+	 * @param rawValue TODO can contain commas
+	 */
+	private static void addRawKeyValue(Map<String,SortedSet<String>> map, String rawKey,
+	        String rawValue) {
+		assert rawKey != null;
+		assert !rawKey.equals("");
+		
+		String key;
+		try {
+			key = URLDecoder.decode(rawKey, Restless.JAVA_ENCODING_UTF8);
+			if(key != null && !key.equals("")) {
+				SortedSet<String> values = map.get(key);
+				if(values == null) {
+					values = new TreeSet<String>();
+					map.put(key, values);
+				}
+				if(rawValue != null) {
+					String value = URLDecoder.decode(rawValue, Restless.JAVA_ENCODING_UTF8);
+					values.add(value);
+				} else {
+					values.add("");
+				}
+				
+			}
+		} catch(UnsupportedEncodingException e) {
+			throw new RuntimeException("No " + Restless.JAVA_ENCODING_UTF8 + " on this system?", e);
+		}
 	}
 	
 	/**
