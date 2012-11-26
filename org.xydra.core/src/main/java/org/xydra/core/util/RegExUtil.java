@@ -20,6 +20,9 @@ import org.xydra.annotations.RunsInGWT;
 @RunsInGWT(true)
 public class RegExUtil {
 	
+	/**
+	 * Meta-characters that have specials semantics if used within regexes
+	 */
 	public static final String METACHARS = "\\|.?*+{}()[]";
 	
 	/**
@@ -96,7 +99,7 @@ public class RegExUtil {
 	/**
 	 * Java + ECMA, same as {@link #JAVA_PUNCT}
 	 */
-	public static final String PUNCT = "[-!\"#$%&'()*+,.\\/:;<=>?@\\[\\\\]^_`{|}~]";
+	public static final String PUNCT = "[-}!\"#$%&'()*+,.\\/:;<=>?@\\[\\\\\\]^_`|{~]";
 	
 	/** ECMA: '[ \t]' */
 	public static final String JAVA_BLANK = "\\p{Blank}";
@@ -105,7 +108,7 @@ public class RegExUtil {
 	 * There are a number of additional predefined classes that you will find
 	 * useful. Taken from: http://javascript.about.com/library/blre10.htm
 	 */
-
+	
 	/** any non-digit ~ equivalent to [^0-9] */
 	public static final String ECMA_NON_DIGIT = "\\D";
 	
