@@ -15,8 +15,8 @@ import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.restless.Restless;
-import org.xydra.server.rest.demo.AddDemoDataResource;
 import org.xydra.server.rest.log.LogTestResource;
+import org.xydra.server.util.Delay;
 import org.xydra.store.InternalStoreException;
 import org.xydra.store.XydraStore;
 import org.xydra.store.impl.delegate.XydraPersistence;
@@ -24,6 +24,9 @@ import org.xydra.store.impl.delegate.XydraPersistence;
 
 /**
  * A REST-server exposing a {@link XydraStore} over HTTP.
+ * 
+ * 
+ * 
  * 
  * @author voelkel
  * @author dscharrer
@@ -35,70 +38,96 @@ public class XydraRestServer {
 	
 	private static final Logger log = LoggerFactory.getLogger(XydraRestServer.class);
 	
+	/**
+	 * Web.xml param. Mandatory. Which {@link XydraStore} to use.
+	 */
 	public static final String INIT_PARAM_XYDRASTORE = "org.xydra.store";
 	
+	/**
+	 * Web.xml param. Optional. 0 or not set: No delay. Other values: Delay in
+	 * milliseconds.
+	 */
 	public static final String INIT_PARAM_DELAY = "org.xydra.server.util.delay";
 	
 	/**
-	 * A defined key for storing a reference to a {@link XydraStore} in the
-	 * servlet context
+	 * The defined key used for storing a reference to a {@link XydraStore} in
+	 * the servlet context.
 	 */
 	public static final String SERVLET_CONTEXT_ATTRIBUTE_XYDRASTORE = "org.xydra.store";
 	
 	/**
-	 * A defined key for storing a reference to a {@link XydraPersistence} in
-	 * the servlet context
+	 * The defined key for storing a reference to a {@link XydraPersistence} in
+	 * the servlet context.
 	 */
 	public static final String SERVLET_CONTEXT_ATTRIBUTE_XYDRA_PERSISTENCE = "org.xydra.persistence";
 	
-	private static boolean isEmulateAjaxDelay;
-	
+	/**
+	 * @param restless
+	 * @return a {@link XydraStore} from servlet context
+	 * @throws InternalStoreException if no XydraStore is found in servlet
+	 *             context
+	 */
 	public static XydraStore getStore(Restless restless) {
 		XydraStore store = getXydraStoreInternal(restless);
 		if(store == null) {
-			throw new InternalStoreException("XydraRestSever not initialized");
+			throw new InternalStoreException(
+			        "XydraRestServer not initialized - store not found in servlet context");
 		}
 		return store;
 	}
 	
+	/**
+	 * @param restless
+	 * @return a {@link XydraStore} from servlet context
+	 */
 	private static XydraStore getXydraStoreInternal(Restless restless) {
 		return (XydraStore)restless.getServletContext().getAttribute(
 		        SERVLET_CONTEXT_ATTRIBUTE_XYDRASTORE);
 	}
 	
+	/**
+	 * @param restless
+	 * @param store too be retrieved via {@link #getStore(Restless)}
+	 */
 	public static void setXydraStoreInServletContext(Restless restless, XydraStore store) {
 		restless.getServletContext().setAttribute(SERVLET_CONTEXT_ATTRIBUTE_XYDRASTORE, store);
 	}
 	
 	/**
-	 * Setup the Xydra REST API.
+	 * Setup the Xydra REST API at '/store/v1'
 	 * 
 	 * @param restless
 	 * @param prefix
 	 */
 	public static void restless(Restless restless, String prefix) {
+		log.info("Booting XydraRestServer");
 		
 		// configure
 		initializeServer(restless);
 		
 		restless.addExceptionHandler(new XAccessExceptionHandler());
 		
-		// init store resources
+		// init store resources, delegate all traffic to XydraStoreResource
 		String storePrefix = prefix + "/store/v1";
 		XydraStoreResource.restless(restless, storePrefix);
 		
-		// for debugging purposes
+		// '/ping' - for debugging purposes
 		restless.addMethod(prefix + "/ping", "GET", XydraRestServer.class, "ping", false);
-		AddDemoDataResource.restless(restless, prefix);
+		
+		// AddDemoDataResource.restless(restless, prefix);
+		
+		// '/logtest' - for debugging purposes
 		LogTestResource.restless(restless, prefix);
 	}
 	
 	/**
+	 * Instantiate a XydraStore via reflection as configured in web.xml
+	 * 
 	 * @param restless never null
 	 * @throws RuntimeException if instantiation goes wrong
 	 */
 	public static synchronized void initializeServer(Restless restless) throws RuntimeException {
-		
+		// initialize only once
 		if(getXydraStoreInternal(restless) != null) {
 			// server already initialized
 			return;
@@ -116,8 +145,7 @@ public class XydraRestServer {
 				
 				storeInstance = (XydraStore)cons.newInstance();
 				// store in context
-				restless.getServletContext().setAttribute(SERVLET_CONTEXT_ATTRIBUTE_XYDRASTORE,
-				        storeInstance);
+				setXydraStoreInServletContext(restless, storeInstance);
 				log.info("XydraStore instance stored in servletContext at key '"
 				        + SERVLET_CONTEXT_ATTRIBUTE_XYDRASTORE + "'");
 			} catch(InvocationTargetException e) {
@@ -137,13 +165,23 @@ public class XydraRestServer {
 			        + INIT_PARAM_XYDRASTORE + "> to the classname of a XydraStore impl.");
 		}
 		
+		/* Configure simulated delay */
 		String simulateDelay = restless.getInitParameter(INIT_PARAM_DELAY);
-		if(simulateDelay.equals(new String("true"))) {
-			isEmulateAjaxDelay = true;
+		if(simulateDelay == null || simulateDelay.equals(new String("false"))) {
+			Delay.setAjaxDelayMs(0);
+		} else {
+			int msDelay = Integer.parseInt(simulateDelay);
+			Delay.setAjaxDelayMs(msDelay);
 		}
 		
 	}
 	
+	/**
+	 * Returns server time as text/plain
+	 * 
+	 * @param res
+	 * @throws IOException
+	 */
 	public static void ping(HttpServletResponse res) throws IOException {
 		res.setStatus(200);
 		res.setContentType("text/plain");
@@ -192,10 +230,6 @@ public class XydraRestServer {
 			throw new RuntimeException("IOException while reading POSTed data", ioe);
 		}
 		
-	}
-	
-	public static boolean isSimulateDelay() {
-		return isEmulateAjaxDelay;
 	}
 	
 }

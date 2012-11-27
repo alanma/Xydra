@@ -262,6 +262,14 @@ public class XydraStoreResource {
 		}
 	}
 	
+	/**
+	 * Let caller determine login infos without executing anything else
+	 * 
+	 * @param context
+	 * @param actorIdStr
+	 * @param passwordHash
+	 * @throws Throwable
+	 */
 	public void checkLogin(IRestlessContext context, String actorIdStr, String passwordHash)
 	        throws Throwable {
 		
@@ -290,7 +298,7 @@ public class XydraStoreResource {
 	public void executeCommands(IRestlessContext context, String actorIdStr, String passwordHash,
 	        String[] addresses, String[] from, String[] to) throws Throwable {
 		
-		if(XydraRestServer.isSimulateDelay()) {
+		if(Delay.isSimulateDelay()) {
 			Delay.ajax();
 		}
 		
@@ -302,6 +310,7 @@ public class XydraStoreResource {
 		EventsRequest ger = parseEventsRequest(addresses, from, to);
 		
 		WaitingCallback<XID> revId = new WaitingCallback<XID>();
+		// implicitly check security
 		store.getRepositoryId(actorId, passwordHash, revId);
 		
 		if(revId.getException() != null) {
@@ -423,7 +432,7 @@ public class XydraStoreResource {
 	public void getEvents(IRestlessContext context, String actorIdStr, String passwordHash,
 	        String[] addresses, String[] from, String[] to) throws Throwable {
 		
-		if(XydraRestServer.isSimulateDelay()) {
+		if(Delay.isSimulateDelay()) {
 			Delay.ajax();
 		}
 		

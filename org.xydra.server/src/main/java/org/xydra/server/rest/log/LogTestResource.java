@@ -10,6 +10,11 @@ import org.xydra.restless.Restless;
 import org.xydra.server.rest.XydraRestServer;
 
 
+/**
+ * At boot time, logs on all levels to test logging, exposed at '/logtest'
+ * 
+ * @author xamde
+ */
 public class LogTestResource {
 	
 	static Logger log = LoggerFactory.getLogger(LogTestResource.class);

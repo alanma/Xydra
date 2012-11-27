@@ -19,7 +19,7 @@ import org.xydra.store.XydraStore;
 
 
 /**
- * Add a demo data to the repository
+ * Add a demo data (phonebook) to the repository
  * 
  * @author voelkel
  */
@@ -43,8 +43,9 @@ public class AddDemoDataResource {
 		WaitingCallback<BatchedResult<Long>[]> result = new WaitingCallback<BatchedResult<Long>[]>();
 		
 		// TODO move command into transaction
-		XRepositoryCommand createCommand = MemoryRepositoryCommand.createAddCommand(XX.toAddress(
-		        repoAddr.getResult(), null, null, null), XCommand.SAFE, DemoModelUtil.PHONEBOOK_ID);
+		XRepositoryCommand createCommand = MemoryRepositoryCommand.createAddCommand(
+		        XX.toAddress(repoAddr.getResult(), null, null, null), XCommand.SAFE,
+		        DemoModelUtil.PHONEBOOK_ID);
 		store.executeCommands(actorId, passwordHash, new XCommand[] { createCommand }, result);
 		
 		result.getException(); // wait for command to execute
