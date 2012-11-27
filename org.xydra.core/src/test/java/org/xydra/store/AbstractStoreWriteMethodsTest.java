@@ -546,6 +546,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 		assertNull(result2[0].getException());
 		assertNotNull(result2);
 		for(int i = 0; i < fieldCount; i++) {
+			assertNotNull(result2[0].getResult());
 			assertNotNull(result2[0].getResult().getField(fieldIds[i]));
 		}
 		
@@ -1664,6 +1665,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
 			assertTrue(this.waitOnCallback(objectCallback));
 			
 			XReadableObject object = objectCallback.getEffect()[0].getResult();
+			assert object != null;
 			if(type == XType.XOBJECT) {
 				return object.getRevisionNumber();
 			} else {

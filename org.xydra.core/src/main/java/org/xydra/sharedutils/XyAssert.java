@@ -68,7 +68,7 @@ public class XyAssert {
 			return;
 		}
 		if(!expression) {
-			throw new AssertionError();
+			throw new AssertionError("xyAssert failed");
 		}
 	}
 	

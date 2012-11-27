@@ -77,8 +77,10 @@ import org.xydra.index.query.Pair;
  * <li></li>
  * </ul>
  * 
- * <h3>Implementation guidelines</h3> For anonymous users over HTTP, the
- * IP-Address could be used as an actorId.
+ * <h3>Implementation guidelines</h3> Implementations must support a zero-arg
+ * constructor
+ * 
+ * For anonymous users over HTTP, the IP-Address could be used as an actorId.
  * 
  * @author voelkel
  * @author dscharrer

@@ -183,7 +183,7 @@ abstract public class AbstractSynchronizerTest {
 	}
 	
 	private void removeModel(XID modelId) {
-		XyAssert.xyAssert(this.repoAddr != null);
+		XyAssert.xyAssert(this.repoAddr != null, "this.repoAddr != null");
 		assert this.repoAddr != null;
 		executeCommand(MemoryRepositoryCommand.createRemoveCommand(this.repoAddr, XCommand.FORCED,
 		        modelId));
