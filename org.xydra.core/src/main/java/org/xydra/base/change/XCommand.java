@@ -58,10 +58,8 @@ public interface XCommand extends Serializable {
      * The returned revision of new models, objects and fields, before they are
      * assigned a proper revision number (for example during a transaction).
      * 
-     * TODO use a different constant? Max: Better yes. 0 = not set/bug. 1...n =
-     * proper revNr. < 0 = special state
+     * New models always have revision number 0 when created.
      */
-    // some tests fail with -3
     static final long NEW = 0;
     
     /**
