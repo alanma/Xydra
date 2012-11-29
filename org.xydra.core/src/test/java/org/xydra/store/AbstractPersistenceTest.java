@@ -100,7 +100,6 @@ public abstract class AbstractPersistenceTest {
     @Test
     public void testExecuteCommandRepositoryForcedCommandAddType() {
         testExecuteCommandRepositoryCommandAddType(true);
-        
     }
     
     public void testExecuteCommandRepositoryCommandAddType(boolean forcedCommands) {
@@ -111,7 +110,7 @@ public abstract class AbstractPersistenceTest {
         /*
          * add a new model, should succeed
          */
-        XID modelId = XX.toId("testExecuteCommandRepositoryCommandAddType");
+        XID modelId = XX.toId("testExecuteCommandRepositoryCommandAddType-" + forcedCommands);
         XAddress modelAddress = XX.resolveModel(this.repoId, modelId);
         XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId,
                 forcedCommands);
@@ -320,7 +319,8 @@ public abstract class AbstractPersistenceTest {
         XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId,
                 forcedCommands);
         long revNr = this.persistence.executeCommand(this.actorId, addModelCom);
-        assertTrue("The model wasn't correctly added, test cannot be executed.", revNr >= 0);
+        assertTrue("The model wasn't correctly added (" + revNr + "), test cannot be executed.",
+                revNr >= 0);
         
         /*
          * add a new object, should succeed
