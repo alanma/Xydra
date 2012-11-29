@@ -100,17 +100,22 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 		if(passwordHash == null) {
 			return true;
 		}
-		XyAssert.xyAssert(actorId != null); assert actorId != null;
+		XyAssert.xyAssert(actorId != null);
+		assert actorId != null;
+		
+		boolean authenticated = this.acm.isAuthenticated(actorId, passwordHash);
+		
 		if(this.acm.getAuthenticationDatabase() == null) {
 			// we cannot log
 			return true;
+			// FIXME DO: return authenticated;
 		}
 		int failedLoginAttempts = this.acm.getAuthenticationDatabase().getFailedLoginAttempts(
 		        actorId);
 		if(failedLoginAttempts > XydraStore.MAX_FAILED_LOGIN_ATTEMPTS) {
 			// TODO IMPROVE block the account automatically
 		}
-		if(this.acm.isAuthenticated(actorId, passwordHash)) {
+		if(authenticated) {
 			this.acm.getAuthenticationDatabase().resetFailedLoginAttempts(actorId);
 			return true;
 		} else {
@@ -150,7 +155,8 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 	@Override
 	public long executeCommand(XID actorId, String passwordHash, XCommand command)
 	        throws AccessException {
-		XyAssert.xyAssert(actorId != null); assert actorId != null;
+		XyAssert.xyAssert(actorId != null);
+		assert actorId != null;
 		authorise(actorId, passwordHash);
 		XAddress address = command.getChangedEntity();
 		checkRepoId(address);
@@ -176,7 +182,8 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 			throw new RequestException("getEventsRequest must not be null");
 		}
 		
-		XyAssert.xyAssert(actorId != null); assert actorId != null;
+		XyAssert.xyAssert(actorId != null);
+		assert actorId != null;
 		authorise(actorId, passwordHash);
 		XAddress address = getEventsRequest.address;
 		long beginRevision = getEventsRequest.beginRevision;
@@ -209,7 +216,8 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 		 * authenticated, not that he is authorized to view all requested info
 		 */
 		if(!triviallyAllowed(passwordHash)) {
-			XyAssert.xyAssert(this.acm.getAuthorisationManager() != null); assert this.acm.getAuthorisationManager() != null;
+			XyAssert.xyAssert(this.acm.getAuthorisationManager() != null);
+			assert this.acm.getAuthorisationManager() != null;
 			Iterator<XEvent> it = events.iterator();
 			while(it.hasNext()) {
 				// TODO handle XTransactionEvents
@@ -255,7 +263,8 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 	
 	@Override
 	public Set<XID> getModelIds(XID actorId, String passwordHash) {
-		XyAssert.xyAssert(actorId != null); assert actorId != null;
+		XyAssert.xyAssert(actorId != null);
+		assert actorId != null;
 		authorise(actorId, passwordHash);
 		Set<XID> modelIds = new HashSet<XID>();
 		synchronized(this.persistence) {
@@ -281,7 +290,8 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 	@Override
 	public ModelRevision getModelRevision(XID actorId, String passwordHash,
 	        GetWithAddressRequest getWithAddressRequest) {
-		XyAssert.xyAssert(actorId != null); assert actorId != null;
+		XyAssert.xyAssert(actorId != null);
+		assert actorId != null;
 		XAddress address = getWithAddressRequest.address;
 		authorise(actorId, passwordHash);
 		if(address.getAddressedType() != XType.XMODEL) {
@@ -300,7 +310,8 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 	@Override
 	public XReadableModel getModelSnapshot(XID actorId, String passwordHash,
 	        GetWithAddressRequest addressRequest) {
-		XyAssert.xyAssert(actorId != null); assert actorId != null;
+		XyAssert.xyAssert(actorId != null);
+		assert actorId != null;
 		authorise(actorId, passwordHash);
 		XAddress address = addressRequest.address;
 		if(address.getAddressedType() != XType.XMODEL) {
@@ -348,7 +359,8 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 	@Override
 	public XReadableObject getObjectSnapshot(XID actorId, String passwordHash,
 	        GetWithAddressRequest addressRequest) {
-		XyAssert.xyAssert(actorId != null); assert actorId != null;
+		XyAssert.xyAssert(actorId != null);
+		assert actorId != null;
 		authorise(actorId, passwordHash);
 		XAddress address = addressRequest.address;
 		if(address.getAddressedType() != XType.XOBJECT) {
@@ -385,7 +397,8 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 	
 	@Override
 	public XID getRepositoryId(XID actorId, String passwordHash) {
-		XyAssert.xyAssert(actorId != null); assert actorId != null;
+		XyAssert.xyAssert(actorId != null);
+		assert actorId != null;
 		authorise(actorId, passwordHash);
 		return this.getRepoId();
 	}
