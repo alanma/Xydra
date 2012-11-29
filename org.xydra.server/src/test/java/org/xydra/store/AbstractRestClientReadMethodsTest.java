@@ -29,101 +29,101 @@ import org.xydra.store.impl.rest.XydraStoreRestClient;
  * 
  */
 public abstract class AbstractRestClientReadMethodsTest extends AbstractStoreReadMethodsTest {
-	
-	protected static ServerConfig serverconfig;
-	
-	public static ServerConfig getServerConfig() {
-		if(serverconfig == null) {
-			throw new IllegalStateException(
-			        "Sublcasses must set the serverconfig in a static{...} block.");
-		}
-		return serverconfig;
-	}
-	
-	abstract protected XydraSerializer getSerializer();
-	
-	abstract protected XydraParser getParser();
-	
-	private final XydraSerializer serializer;
-	private final XydraParser parser;
-	
-	protected AbstractRestClientReadMethodsTest() {
-		this.serializer = getSerializer();
-		this.parser = getParser();
-	}
-	
-	protected XydraOut create() {
-		return this.serializer.create();
-	}
-	
-	protected XydraElement parse(String data) {
-		return this.parser.parse(data);
-	}
-	
-	@SuppressWarnings("unused")
-	private static final Logger log = LoggerFactory
-	        .getLogger(AbstractRestClientReadMethodsTest.class);
-	
-	private XydraStore clientStore;
-	
-	@Override
-	@Before
-	public void before() {
-		this.clientStore = new XydraStoreRestClient(getServerConfig().absoluteURI, this.serializer,
-		        this.parser);
-		super.before();
-	}
-	
-	@After
-	public void after() {
-		SynchronousCallbackWithOneResult<Set<XID>> mids = new SynchronousCallbackWithOneResult<Set<XID>>();
-		this.store.getModelIds(getCorrectUser(), getCorrectUserPasswordHash(), mids);
-		assertEquals(SynchronousCallbackWithOneResult.SUCCESS, mids.waitOnCallback(Long.MAX_VALUE));
-		XAddress repoAddr = XX.toAddress(getRepositoryId(), null, null, null);
-		for(XID modelId : mids.effect) {
-			if(modelId.toString().startsWith("internal--")) {
-				continue;
-			}
-			XCommand removeCommand = MemoryRepositoryCommand.createRemoveCommand(repoAddr,
-			        XCommand.FORCED, modelId);
-			this.store.executeCommands(getCorrectUser(), getCorrectUserPasswordHash(),
-			        new XCommand[] { removeCommand }, null);
-		}
-	}
-	
-	@Override
-	protected XCommandFactory getCommandFactory() {
-		return X.getCommandFactory();
-	}
-	
-	@Override
-	protected XID getCorrectUser() {
-		return getServerConfig().testerActor;
-	}
-	
-	@Override
-	protected String getCorrectUserPasswordHash() {
-		return getServerConfig().testerPasswordHash;
-	}
-	
-	@Override
-	protected XID getIncorrectUser() {
-		return XX.toId("bob");
-	}
-	
-	@Override
-	protected String getIncorrectUserPasswordHash() {
-		return "wrong";
-	}
-	
-	@Override
-	protected XID getRepositoryId() {
-		return getServerConfig().mainRepositoryId;
-	}
-	
-	@Override
-	protected XydraStore getStore() {
-		return this.clientStore;
-	}
-	
+    
+    protected static ServerConfig serverconfig;
+    
+    public static ServerConfig getServerConfig() {
+        if(serverconfig == null) {
+            throw new IllegalStateException(
+                    "Sublcasses must set the serverconfig in a static{...} block.");
+        }
+        return serverconfig;
+    }
+    
+    abstract protected XydraSerializer getSerializer();
+    
+    abstract protected XydraParser getParser();
+    
+    private final XydraSerializer serializer;
+    private final XydraParser parser;
+    
+    protected AbstractRestClientReadMethodsTest() {
+        this.serializer = getSerializer();
+        this.parser = getParser();
+    }
+    
+    protected XydraOut create() {
+        return this.serializer.create();
+    }
+    
+    protected XydraElement parse(String data) {
+        return this.parser.parse(data);
+    }
+    
+    @SuppressWarnings("unused")
+    private static final Logger log = LoggerFactory
+            .getLogger(AbstractRestClientReadMethodsTest.class);
+    
+    private XydraStore clientStore;
+    
+    @Override
+    @Before
+    public void before() {
+        this.clientStore = new XydraStoreRestClient(getServerConfig().absoluteURI, this.serializer,
+                this.parser);
+        super.before();
+    }
+    
+    @After
+    public void after() {
+        SynchronousCallbackWithOneResult<Set<XID>> mids = new SynchronousCallbackWithOneResult<Set<XID>>();
+        this.store.getModelIds(getCorrectUser(), getCorrectUserPasswordHash(), mids);
+        assertEquals(SynchronousCallbackWithOneResult.SUCCESS, mids.waitOnCallback(Long.MAX_VALUE));
+        XAddress repoAddr = XX.toAddress(getRepositoryId(), null, null, null);
+        for(XID modelId : mids.effect) {
+            if(modelId.toString().startsWith("internal--")) {
+                continue;
+            }
+            XCommand removeCommand = MemoryRepositoryCommand.createRemoveCommand(repoAddr,
+                    XCommand.FORCED, modelId);
+            this.store.executeCommands(getCorrectUser(), getCorrectUserPasswordHash(),
+                    new XCommand[] { removeCommand }, null);
+        }
+    }
+    
+    @Override
+    protected XCommandFactory getCommandFactory() {
+        return X.getCommandFactory();
+    }
+    
+    @Override
+    protected XID getCorrectUser() {
+        return getServerConfig().testerActor;
+    }
+    
+    @Override
+    protected String getCorrectUserPasswordHash() {
+        return getServerConfig().testerPasswordHash;
+    }
+    
+    @Override
+    protected XID getIncorrectUser() {
+        return XX.toId("wrongbob");
+    }
+    
+    @Override
+    protected String getIncorrectUserPasswordHash() {
+        return "wrong";
+    }
+    
+    @Override
+    protected XID getRepositoryId() {
+        return getServerConfig().mainRepositoryId;
+    }
+    
+    @Override
+    protected XydraStore getStore() {
+        return this.clientStore;
+    }
+    
 }
