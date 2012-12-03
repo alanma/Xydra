@@ -38,7 +38,7 @@ import org.xydra.log.LoggerFactory;
 import org.xydra.restless.IRestlessContext;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
-import org.xydra.server.util.Delay;
+import org.xydra.restless.utils.Delay;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.GetEventsRequest;
 import org.xydra.store.GetWithAddressRequest;
