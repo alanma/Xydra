@@ -60,6 +60,7 @@ public class SonicQuery extends SonicFilter implements ISonicQuery {
         return this.timeConstraint != null && this.timeConstraint.isConstraining();
     }
     
+    @NeverNull
     public TimeConstraint getTimeConstraint() {
         return this.timeConstraint;
     }
