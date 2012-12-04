@@ -262,7 +262,7 @@ public class ChangedModel implements XWritableModel, IModelDiff {
     }
     
     @Override
-    public XWritableObject createObject(XID objectId) {
+    public XWritableObject createObject(@NeverNull XID objectId) {
         
         XWritableObject oldObject = getObject(objectId);
         if(oldObject != null) {
@@ -558,7 +558,7 @@ public class ChangedModel implements XWritableModel, IModelDiff {
     }
     
     @Override
-    public XWritableObject getObject(XID objectId) {
+    public XWritableObject getObject(@NeverNull XID objectId) {
         
         XWritableObject newObject = this.added.get(objectId);
         if(newObject != null) {
