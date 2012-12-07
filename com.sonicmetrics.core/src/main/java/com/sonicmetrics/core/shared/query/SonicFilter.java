@@ -118,7 +118,7 @@ public class SonicFilter implements ISonicFilter, Serializable {
     @Override
     @NeverNull
     public String getSubject() {
-        return valueOf(this.keyValueConstraints.get(FilterProperty.Subject));
+        return valueOf(this.keyValueConstraints.get(FilterProperty.Subject.name()));
     }
     
     private static String valueOf(KeyValueConstraint keyValueConstraint) {
@@ -131,24 +131,24 @@ public class SonicFilter implements ISonicFilter, Serializable {
     @Override
     @NeverNull
     public String getCategory() {
-        return valueOf(this.keyValueConstraints.get(FilterProperty.Category));
+        return valueOf(this.keyValueConstraints.get(FilterProperty.Category.name()));
     }
     
     @Override
     @NeverNull
     public String getAction() {
-        return valueOf(this.keyValueConstraints.get(FilterProperty.Action));
+        return valueOf(this.keyValueConstraints.get(FilterProperty.Action.name()));
     }
     
     @Override
     public String getLabel() {
-        return valueOf(this.keyValueConstraints.get(FilterProperty.Label));
+        return valueOf(this.keyValueConstraints.get(FilterProperty.Label.name()));
     }
     
     @Override
     @NeverNull
     public String getSource() {
-        return valueOf(this.keyValueConstraints.get(FilterProperty.Source));
+        return valueOf(this.keyValueConstraints.get(FilterProperty.Source.name()));
     }
     
     @Override
@@ -214,6 +214,11 @@ public class SonicFilter implements ISonicFilter, Serializable {
         return SonicUtils.hashCode(getSubject()) + SonicUtils.hashCode(getSource())
                 + SonicUtils.hashCode(getCategory()) + SonicUtils.hashCode(getAction())
                 + SonicUtils.hashCode(getLabel());
+    }
+    
+    public String toString() {
+        return "cat.act.lab.sou.sub=" + this.getCategory() + "." + this.getAction() + "."
+                + this.getLabel() + "." + this.getSource() + "." + this.getSubject();
     }
     
 }
