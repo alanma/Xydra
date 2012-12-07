@@ -1,3 +1,0 @@
-How to run example for logging in pure Java:
-
-In Eclipse: Run the class HowToLogInPureJava via "Run As > Java Application"
