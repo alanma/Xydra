@@ -105,6 +105,7 @@ public class ChangedModel implements XWritableModel, IModelDiff {
      *            and represent
      */
     public ChangedModel(XReadableModel base) {
+        XyAssert.validateNotNull(base, "base");
         this.base = base;
     }
     
