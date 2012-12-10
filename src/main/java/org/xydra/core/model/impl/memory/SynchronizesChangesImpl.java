@@ -30,7 +30,9 @@ import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.core.change.XChanges;
 import org.xydra.core.change.XFieldEventListener;
+import org.xydra.core.change.XFieldSyncEventListener;
 import org.xydra.core.change.XObjectEventListener;
+import org.xydra.core.change.XObjectSyncEventListener;
 import org.xydra.core.change.XSendsFieldEvents;
 import org.xydra.core.change.XSendsObjectEvents;
 import org.xydra.core.change.XSendsTransactionEvents;
@@ -85,11 +87,16 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 	protected boolean removed = false;
 	private final Set<XTransactionEventListener> transactionListenerCollection;
 	
+	private final Set<XObjectSyncEventListener> objectSyncChangeListenerCollection;
+	private final Set<XFieldSyncEventListener> fieldSyncChangeListenerCollection;
+	
 	public SynchronizesChangesImpl(MemoryEventManager queue) {
 		this.eventQueue = queue;
 		this.objectChangeListenerCollection = new HashSet<XObjectEventListener>();
 		this.fieldChangeListenerCollection = new HashSet<XFieldEventListener>();
 		this.transactionListenerCollection = new HashSet<XTransactionEventListener>();
+		this.objectSyncChangeListenerCollection = new HashSet<XObjectSyncEventListener>();
+		this.fieldSyncChangeListenerCollection = new HashSet<XFieldSyncEventListener>();
 	}
 	
 	@Override
@@ -842,6 +849,8 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 				if(lc.isApplied() && lc.getRemoteRevision() <= remoteRev) {
 					XyAssert.xyAssert(lc.getRemoteRevision() >= 0);
 					localChanges.remove(i);
+					this.eventQueue.enqueueLocalChangeSyncedEvent(getModel(), getChangeLog()
+					        .getEventAt(lc.getRemoteRevision()));
 				}
 			}
 			
@@ -882,6 +891,9 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 					log.info("sync: client command redundant: " + change.getCommand());
 					if(change.getCallback() != null) {
 						change.getCallback().onSuccess(results[i]);
+						// TODO also enqueue Sync events for all entities
+						// affected by this command
+						
 					}
 				}
 			}
@@ -898,6 +910,7 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 			removedChanged = (oldRemoved != this.removed && model != null && model.getFather() != null);
 			if(!removedChanged) {
 				this.eventQueue.sendEvents();
+				this.eventQueue.sendSyncEvents();
 			}
 			
 			log.info("sync: merged changes, new local rev is " + getCurrentRevisionNumber()
@@ -914,4 +927,48 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 		
 	}
 	
+	@Override
+	public boolean addListenerForObjectSyncEvents(XObjectSyncEventListener syncListener) {
+		synchronized(this.eventQueue) {
+			return this.objectSyncChangeListenerCollection.add(syncListener);
+		}
+	}
+	
+	@Override
+	public boolean removeListenerForObjectSyncEvents(XObjectSyncEventListener syncListener) {
+		synchronized(this.eventQueue) {
+			return this.objectSyncChangeListenerCollection.remove(syncListener);
+		}
+	}
+	
+	@Override
+	public boolean addListenerForFieldSyncEvents(XFieldSyncEventListener syncListener) {
+		synchronized(this.eventQueue) {
+			return this.fieldSyncChangeListenerCollection.add(syncListener);
+		}
+	}
+	
+	@Override
+	public boolean removeListenerForFieldSyncEvents(XFieldSyncEventListener syncListener) {
+		synchronized(this.eventQueue) {
+			return this.fieldSyncChangeListenerCollection.remove(syncListener);
+		}
+	}
+	
+	public void fireObjectSyncEvent(XObjectEvent event) {
+		for(XObjectSyncEventListener listener : this.objectSyncChangeListenerCollection) {
+			listener.onSynced(event);
+		}
+	}
+	
+	public void fireFieldSyncEvent(XFieldEvent event) {
+		for(XFieldSyncEventListener listener : this.fieldSyncChangeListenerCollection) {
+			listener.onSynced(event);
+		}
+	}
+	
+	@Override
+	public boolean isSynchronized() {
+		return (getRevisionNumber() <= getSynchronizedRevision());
+	}
 }

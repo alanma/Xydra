@@ -23,6 +23,7 @@ import org.xydra.base.rmof.impl.memory.SimpleField;
 import org.xydra.base.value.XValue;
 import org.xydra.core.XCopyUtils;
 import org.xydra.core.change.XFieldEventListener;
+import org.xydra.core.change.XFieldSyncEventListener;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.XObject;
@@ -38,7 +39,8 @@ import org.xydra.sharedutils.XyAssert;
  * 
  */
 
-public class MemoryField extends AbstractEntity implements XField, Serializable {
+public class MemoryField extends AbstractEntity implements XField, Serializable,
+        XSendsFieldSyncEvents, Synchronizable {
 	
 	private static final long serialVersionUID = -4390811955475742528L;
 	
@@ -63,6 +65,8 @@ public class MemoryField extends AbstractEntity implements XField, Serializable 
 	
 	private final XRevWritableField state;
 	
+	private final Set<XFieldSyncEventListener> syncChangeListenerCollection;
+	
 	/**
 	 * Creates a new MemoryField with or without a father-{@link XObject}.
 	 * 
@@ -77,7 +81,8 @@ public class MemoryField extends AbstractEntity implements XField, Serializable 
 	 */
 	protected MemoryField(MemoryObject parent, MemoryEventManager eventQueue,
 	        XRevWritableField fieldState) {
-		XyAssert.xyAssert(eventQueue != null); assert eventQueue != null;
+		XyAssert.xyAssert(eventQueue != null);
+		assert eventQueue != null;
 		
 		this.eventQueue = eventQueue;
 		
@@ -92,6 +97,7 @@ public class MemoryField extends AbstractEntity implements XField, Serializable 
 		this.father = parent;
 		
 		this.fieldChangeListenerCollection = new HashSet<XFieldEventListener>();
+		this.syncChangeListenerCollection = new HashSet<XFieldSyncEventListener>();
 	}
 	
 	/**
@@ -487,7 +493,8 @@ public class MemoryField extends AbstractEntity implements XField, Serializable 
 		XID actorId = this.eventQueue.getActor();
 		XReversibleFieldEvent event = null;
 		if((oldValue == null)) {
-			XyAssert.xyAssert(newValue != null); assert newValue != null;
+			XyAssert.xyAssert(newValue != null);
+			assert newValue != null;
 			event = MemoryReversibleFieldEvent.createAddEvent(actorId, getAddress(), newValue,
 			        modelRev, objectRev, fieldRev, inTrans);
 		} else {
@@ -503,7 +510,8 @@ public class MemoryField extends AbstractEntity implements XField, Serializable 
 			}
 		}
 		
-		XyAssert.xyAssert(event != null); assert event != null;
+		XyAssert.xyAssert(event != null);
+		assert event != null;
 		
 		this.eventQueue.enqueueFieldEvent(this, event);
 		
@@ -539,4 +547,35 @@ public class MemoryField extends AbstractEntity implements XField, Serializable 
 		return XType.XFIELD;
 	}
 	
+	@Override
+	public boolean removeListenerForFieldSyncEvents(XFieldSyncEventListener syncListener) {
+		synchronized(this.eventQueue) {
+			return this.syncChangeListenerCollection.remove(syncListener);
+		}
+	}
+	
+	public void fireFieldSyncEvent(XFieldEvent event) {
+		for(XFieldSyncEventListener listener : this.syncChangeListenerCollection) {
+			listener.onSynced(event);
+		}
+	}
+	
+	@Override
+	public boolean addListenerForFieldSyncEvents(XFieldSyncEventListener syncListener) {
+		synchronized(this.eventQueue) {
+			return this.syncChangeListenerCollection.add(syncListener);
+		}
+	}
+	
+	@Override
+	public boolean isSynchronized() {
+		
+		assert getFather() != null : "A standalone MemoryField can't be synchronized.";
+		
+		/*
+		 * If the field's RevNo is smaller than its father's SyncRevNo, the
+		 * field is synchronized.
+		 */
+		return (getRevisionNumber() <= getFather().getSynchronizedRevision());
+	}
 }

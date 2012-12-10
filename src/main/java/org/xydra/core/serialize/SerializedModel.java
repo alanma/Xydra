@@ -30,6 +30,7 @@ import org.xydra.core.model.XLoggedObject;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
+import org.xydra.core.model.XSynchronizesChanges;
 import org.xydra.core.model.impl.memory.MemoryChangeLogState;
 import org.xydra.core.model.impl.memory.MemoryField;
 import org.xydra.core.model.impl.memory.MemoryModel;
@@ -61,6 +62,7 @@ public class SerializedModel {
 	private static final String NAME_MODELS = "models";
 	public static final long NO_REVISION = -1;
 	private static final String REVISION_ATTRIBUTE = "revision";
+	private static final String SYNC_REVISION_ATTRIBUTE = "syncRevision";
 	private static final String STARTREVISION_ATTRIBUTE = "startRevision";
 	private static final String XCHANGELOG_ELEMENT = "xlog";
 	private static final String XFIELD_ELEMENT = "xfield";
@@ -73,6 +75,17 @@ public class SerializedModel {
 	private static long getRevisionAttribute(XydraElement element) {
 		
 		Object revisionString = element.getAttribute(REVISION_ATTRIBUTE);
+		
+		if(revisionString == null) {
+			return NO_REVISION;
+		}
+		
+		return SerializingUtils.toLong(revisionString);
+	}
+	
+	public static long getSyncRevisionAttribute(XydraElement element) {
+		
+		Object revisionString = element.getAttribute(SYNC_REVISION_ATTRIBUTE);
 		
 		if(revisionString == null) {
 			return NO_REVISION;
@@ -521,6 +534,12 @@ public class SerializedModel {
 	
 	public static void serialize(XReadableModel xmodel, XydraOut out, boolean saveRevision,
 	        boolean ignoreInaccessible, boolean saveChangeLog, boolean saveId) {
+		serialize(xmodel, out, saveRevision, ignoreInaccessible, saveChangeLog, saveId, false);
+	}
+	
+	public static void serialize(XReadableModel xmodel, XydraOut out, boolean saveRevision,
+	        boolean ignoreInaccessible, boolean saveChangeLog, boolean saveId,
+	        boolean saveSyncRevision) {
 		
 		if(!saveRevision && saveChangeLog) {
 			throw new IllegalArgumentException("cannot save change log without saving revisions");
@@ -536,6 +555,11 @@ public class SerializedModel {
 		}
 		if(saveRevision) {
 			out.attribute(REVISION_ATTRIBUTE, rev);
+		}
+		if(saveSyncRevision) {
+			assert (xmodel instanceof XSynchronizesChanges);
+			out.attribute(SYNC_REVISION_ATTRIBUTE,
+			        ((XSynchronizesChanges)xmodel).getSynchronizedRevision());
 		}
 		
 		out.child(NAME_OBJECTS);
