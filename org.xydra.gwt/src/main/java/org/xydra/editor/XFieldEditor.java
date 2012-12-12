@@ -69,7 +69,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 
-public class XFieldEditor extends VerticalPanel implements XFieldEventListener, addEditor {
+public class XFieldEditor extends VerticalPanel implements XFieldEventListener, AddEditor {
 	
 	private static final Logger log = LoggerFactory.getLogger(XFieldEditor.class);
 	
