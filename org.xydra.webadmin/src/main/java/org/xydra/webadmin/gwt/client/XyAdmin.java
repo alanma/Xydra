@@ -32,6 +32,8 @@ public class XyAdmin extends Composite {
     
     private static final Logger log = LoggerFactory.getLogger(XyAdmin.class);
     
+    private static final XID REPO1 = XX.toId("repo1");
+    
     @UiField
     HTML title;
     
@@ -68,6 +70,26 @@ public class XyAdmin extends Composite {
                 log.warn("Error", caught);
             }
         });
+        
+        // TODO max
+        // // create a model
+        // XRepositoryCommand command =
+        // X.getCommandFactory().createAddModelCommand(REPO1,
+        // XX.toId("model1"), true);
+        // this.service.executeCommand(REPO1, command, new AsyncCallback<Long>()
+        // {
+        //
+        // @Override
+        // public void onSuccess(Long result) {
+        // log.info("Server said: " + result);
+        // }
+        //
+        // @Override
+        // public void onFailure(Throwable caught) {
+        // log.warn("Error", caught);
+        // }
+        // });
+        
     }
     
     @UiHandler("modelIds")
@@ -75,7 +97,7 @@ public class XyAdmin extends Composite {
         
         // TODO phonebook is in 'repo1', other data in 'gae-repo' - make
         // configurable
-        this.service.getModelIds(XX.toId("repo1"), new AsyncCallback<Set<XID>>() {
+        this.service.getModelIds(REPO1, new AsyncCallback<Set<XID>>() {
             
             @Override
             public void onSuccess(Set<XID> result) {
