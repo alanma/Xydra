@@ -47,6 +47,41 @@
 		</repository>
 	</repositories>
 
+	<pluginRepositories>
+		<!-- xydra repo -->
+		<pluginRepository>
+			<id>xydra-repo</id>
+			<url>
+				https://xydra.googlecode.com/svn/repository
+			</url>
+			<releases>
+				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+				<checksumPolicy>fail</checksumPolicy>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</pluginRepository>
+
+		<!-- xydra snaps -->
+		<pluginRepository>
+			<id>xydra-snaps</id>
+			<url>
+				https://xydra.googlecode.com/svn/snapshots
+			</url>
+			<releases>
+				<enabled>false</enabled>
+				<updatePolicy>always</updatePolicy>
+				<checksumPolicy>fail</checksumPolicy>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</pluginRepository>
+
+	</pluginRepositories>
+
 	<dependencies>
 
 		<!-- test server -->
