@@ -2,6 +2,7 @@ package org.xydra.webadmin.gwt.client;
 
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.webadmin.gwt.shared.XyAdminServiceAsync;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -24,10 +25,17 @@ public class XyAdmin extends Composite {
     @UiField
     HTML title;
     
+    private XyAdminServiceAsync service;
+    
     public XyAdmin() {
         initWidget(uiBinder.createAndBindUi(this));
         
         this.title.setHTML("Loaded.");
+        
+    }
+    
+    public XyAdmin(XyAdminServiceAsync service) {
+        this.service = service;
     }
     
 }

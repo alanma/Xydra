@@ -77,4 +77,16 @@
 	</servlet-mapping>
  -->
 
+
+	<!-- GWT remote service -->
+	<servlet>
+		<servlet-name>XyAdminService</servlet-name>
+		<servlet-class>org.xydra.webadmin.gwt.server.XyAdminServiceImpl</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>XyAdminService</servlet-name>
+		<!-- As defined in FavrService -->
+		<url-pattern>/xyadmin/ajax</url-pattern>
+	</servlet-mapping>
+
 </web-app>
