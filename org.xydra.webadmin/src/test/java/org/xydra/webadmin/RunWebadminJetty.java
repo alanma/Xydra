@@ -7,7 +7,6 @@ import java.net.URISyntaxException;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.log.gae.Log4jLoggerFactory;
-import org.xydra.mvnxy.CopyGwt;
 import org.xydra.restless.Jetty;
 import org.xydra.restless.Restless;
 import org.xydra.store.impl.gae.GaeTestfixer;
@@ -58,11 +57,6 @@ public class RunWebadminJetty {
         GaeTestfixer.enable();
     }
     
-    public static void copyGwt() {
-        // need to copy GWT stuff
-        CopyGwt.copyCompiledGwtModule("./target/webadmin-0.1.6-SNAPSHOT", "xyadmin");
-    }
-    
     public static void start() {
         
         // LogUtils.configureLog4j();
@@ -71,8 +65,6 @@ public class RunWebadminJetty {
         
         // initialize GAE
         GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-        
-        copyGwt();
         
         // start jetty
         jetty = new Jetty(8765);
