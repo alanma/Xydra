@@ -8,6 +8,12 @@
 	<g:HTMLPanel styleName="xyadmin">
 
 		<g:HTML ui:field="title" styleName="title" >Hello World</g:HTML>
+		
+		<g:TextBox ui:field="name" />
+		
+		<g:Button ui:field="send" />
+		
+		<g:HTML ui:field="greeting" />
 
 	</g:HTMLPanel>
 

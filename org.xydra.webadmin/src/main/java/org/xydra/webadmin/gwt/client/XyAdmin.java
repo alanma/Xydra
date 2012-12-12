@@ -5,10 +5,14 @@ import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.shared.XyAdminServiceAsync;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
 
@@ -24,6 +28,20 @@ public class XyAdmin extends Composite {
     
     @UiField
     HTML title;
+    
+    @UiField
+    TextBox name;
+    
+    @UiField
+    Button send;
+    
+    @UiField
+    HTML greeting;
+    
+    @UiHandler("send")
+    public void onClick(ClickEvent e) {
+        log.info("Clicked");
+    }
     
     private XyAdminServiceAsync service;
     
