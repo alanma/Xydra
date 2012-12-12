@@ -45,14 +45,11 @@ public class XyAdmin extends Composite {
     
     private XyAdminServiceAsync service;
     
-    public XyAdmin() {
+    public XyAdmin(XyAdminServiceAsync service) {
         initWidget(uiBinder.createAndBindUi(this));
         
         this.title.setHTML("Loaded.");
         
-    }
-    
-    public XyAdmin(XyAdminServiceAsync service) {
         this.service = service;
     }
     

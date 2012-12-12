@@ -11,7 +11,7 @@
 		
 		<g:TextBox ui:field="name" />
 		
-		<g:Button ui:field="send" />
+		<g:Button ui:field="send" >Send!</g:Button>
 		
 		<g:HTML ui:field="greeting" />
 
