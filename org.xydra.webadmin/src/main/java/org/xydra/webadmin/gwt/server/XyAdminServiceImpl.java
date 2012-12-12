@@ -1,5 +1,10 @@
 package org.xydra.webadmin.gwt.server;
 
+import java.util.Set;
+
+import org.xydra.base.XID;
+import org.xydra.store.impl.delegate.XydraPersistence;
+import org.xydra.webadmin.Utils;
 import org.xydra.webadmin.gwt.shared.XyAdminService;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -16,5 +21,11 @@ public class XyAdminServiceImpl extends RemoteServiceServlet implements XyAdminS
         } else {
             return "Hello " + name;
         }
+    }
+    
+    @Override
+    public Set<XID> getModelIds(XID repoId) {
+        XydraPersistence p = Utils.createPersistence(repoId);
+        return p.getManagedModelIds();
     }
 }

@@ -15,6 +15,12 @@
 		
 		<g:HTML ui:field="greeting" />
 
+		<hr/>
+
+		<g:Button ui:field="modelIds" >Get modelIds!</g:Button>
+
+		<g:SimplePanel ui:field="modelIdResult" />
+
 	</g:HTMLPanel>
 
 </ui:UiBinder> 
