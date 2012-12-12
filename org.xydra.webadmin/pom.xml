@@ -54,6 +54,12 @@
 			<groupId>org.mortbay.jetty</groupId>
 			<artifactId>jetty</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>xydra-maven-plugin</artifactId>
+			<version>1.0-SNAPSHOT</version>
+			<scope>test</scope>
+		</dependency>
 
 		<dependency>
 			<groupId>org.xydra</groupId>
@@ -101,6 +107,21 @@
 			<version>0.1.6-SNAPSHOT</version>
 		</dependency>
 
+		<!-- Xydra GWT -->
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>gwt</artifactId>
+			<!-- @@ use xydra.version here -->
+			<version>0.1.6-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>gwt</artifactId>
+			<!-- @@ use xydra.version here -->
+			<classifier>sources</classifier>
+			<version>0.1.6-SNAPSHOT</version>
+		</dependency>
+
 	</dependencies>
 
 	<distributionManagement>
@@ -128,6 +149,36 @@
 	</scm>
 
 	<build>
+
+		<plugins>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>gwt-maven-plugin</artifactId>
+				<!-- @@ use gwt.version here -->
+				<version>2.5.0</version>
+				<configuration>
+					<!-- FIXME not always detailed -->
+					<style>DETAILED</style>
+					<extraJvmArgs>-Xmx1024m</extraJvmArgs>
+
+					<modules>
+						<module>org.xydra.webadmin.gwt.XyAdmin</module>
+					</modules>
+
+					<runTarget>http://localhost:8765/</runTarget>
+					<noServer>true</noServer>
+					<workDir>${project.build.directory}/gwt-compile-temp</workDir>
+
+					<!-- the value of the rename-to attribute in your GWT module configuration -->
+					<!-- <gwt.module.alias>gwt</gwt.module.alias> -->
+
+				</configuration>
+			</plugin>
+
+		</plugins>
+
+
 		<pluginManagement>
 			<plugins>
 				<!--This plugin's configuration is used to store Eclipse m2e settings 

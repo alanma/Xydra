@@ -7,6 +7,7 @@ import java.net.URISyntaxException;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.log.gae.Log4jLoggerFactory;
+import org.xydra.mvnxy.CopyGwt;
 import org.xydra.restless.Jetty;
 import org.xydra.restless.Restless;
 import org.xydra.store.impl.gae.GaeTestfixer;
@@ -34,58 +35,70 @@ import org.xydra.store.impl.gae.GaeTestfixer;
  * 
  */
 public class RunWebadminJetty {
-	
-	private static Jetty jetty;
-	private static URI uri;
-	
-	static {
-		LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory());
-		GaeTestfixer.enable();
-	}
-	
-	private static final Logger log = LoggerFactory.getLogger(RunWebadminJetty.class);
-	
-	public static void main(String[] args) throws Exception {
-		start();
-	}
-	
-	public static void start() {
-		// LogUtils.configureLog4j();
-		log.info("--- Booting WebAdmin Jetty ---");
-		Restless.DELEGATE_UNHANDLED_TO_DEFAULT = true;
-		
-		/*
-		 * Enable tests with GAE (especially mail)
-		 */
-		GaeTestfixer.enable();
-		// initialize GAE
-		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		
-		// start jetty
-		jetty = new Jetty(8765);
-		
-		File webappDir = new File("src/main/webapp");
-		
-		jetty.configure("", webappDir);
-		uri = jetty.startServer();
-		log.info("Embedded jetty serves " + webappDir.getAbsolutePath() + " at " + uri.toString());
-		log.info(".oO ___________ Running ____________________________");
-	}
-	
-	public static URI getServerURI() {
-		if(jetty == null) {
-			try {
-				return new URI("http://0.0.0.0:8765");
-			} catch(URISyntaxException e) {
-				throw new RuntimeException(e);
-			}
-		}
-		return uri;
-	}
-	
-	public static void stop() {
-		assert jetty != null;
-		jetty.stopServer();
-		log.info("Server stopped.");
-	}
+    
+    private static Jetty jetty;
+    private static URI uri;
+    
+    static {
+        LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory());
+        GaeTestfixer.enable();
+    }
+    
+    private static final Logger log = LoggerFactory.getLogger(RunWebadminJetty.class);
+    
+    public static void main(String[] args) throws Exception {
+        start();
+    }
+    
+    static {
+        LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory());
+        /*
+         * Enable tests with GAE (especially mail)
+         */
+        GaeTestfixer.enable();
+    }
+    
+    public static void copyGwt() {
+        // need to copy GWT stuff
+        CopyGwt.copyCompiledGwtModule("./target/webadmin-0.1.6-SNAPSHOT", "xyadmin");
+    }
+    
+    public static void start() {
+        
+        // LogUtils.configureLog4j();
+        log.info("--- Booting WebAdmin Jetty ---");
+        Restless.DELEGATE_UNHANDLED_TO_DEFAULT = true;
+        
+        // initialize GAE
+        GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+        
+        copyGwt();
+        
+        // start jetty
+        jetty = new Jetty(8765);
+        
+        File webappDir = new File("src/main/webapp");
+        
+        jetty.configure("", webappDir);
+        uri = jetty.startServer();
+        log.info("Embedded jetty serves " + webappDir.getAbsolutePath() + " at " + uri.toString());
+        log.info(".oO ___________ Running ____________________________");
+    }
+    
+    public static URI getServerURI() {
+        if(jetty == null) {
+            try {
+                return new URI("http://0.0.0.0:8765");
+            } catch(URISyntaxException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return uri;
+    }
+    
+    public static void stop() {
+        assert jetty != null;
+        jetty.stopServer();
+        log.info("Server stopped.");
+    }
 }

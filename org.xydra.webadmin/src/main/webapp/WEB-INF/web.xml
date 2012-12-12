@@ -2,6 +2,7 @@
 <web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
+<!-- 
 	<filter>
 		<filter-name>appstats</filter-name>
 		<filter-class>com.google.appengine.tools.appstats.AppstatsFilter</filter-class>
@@ -15,6 +16,7 @@
 		<filter-name>appstats</filter-name>
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
+-->
 
 	<security-constraint>
 		<auth-constraint>
@@ -28,6 +30,7 @@
 		</web-resource-collection>
 	</security-constraint>
 		
+<!-- 
 	<security-constraint>
 		<auth-constraint>
 			<description>admin</description>
@@ -39,6 +42,7 @@
 			<web-resource-name>appstats</web-resource-name>
 		</web-resource-collection>
 	</security-constraint>
+ -->		
 
 	<servlet>
 		<servlet-name>XyAdmin</servlet-name>
@@ -54,19 +58,23 @@
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 
+<!-- 
 	<servlet>
 		<servlet-name>appstats</servlet-name>
 		<servlet-class>com.google.appengine.tools.appstats.AppstatsServlet</servlet-class>
 	</servlet>
+ -->
 
 	<servlet-mapping>
 		<servlet-name>XyAdmin</servlet-name>
 		<url-pattern>/admin/*</url-pattern>
 	</servlet-mapping>
 
+<!-- 
 	<servlet-mapping>
 		<servlet-name>appstats</servlet-name>
 		<url-pattern>/appstats/*</url-pattern>
 	</servlet-mapping>
+ -->
 
 </web-app>
