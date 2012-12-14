@@ -20,6 +20,7 @@
 	
 	<source path="">
 		<exclude name="**/*Test.java" />
+		<exclude name="TestServer.java" />
 		<exclude name="GwtTestServer.java" />
 		<exclude name="ProxyServlet.java" />
 	</source>
