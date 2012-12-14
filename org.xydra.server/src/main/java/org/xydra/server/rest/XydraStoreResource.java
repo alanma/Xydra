@@ -309,14 +309,14 @@ public class XydraStoreResource {
 		
 		EventsRequest ger = parseEventsRequest(addresses, from, to);
 		
-		WaitingCallback<XID> revId = new WaitingCallback<XID>();
+		WaitingCallback<XID> repoId = new WaitingCallback<XID>();
 		// implicitly check security
-		store.getRepositoryId(actorId, passwordHash, revId);
+		store.getRepositoryId(actorId, passwordHash, repoId);
 		
-		if(revId.getException() != null) {
-			throw revId.getException();
+		if(repoId.getException() != null) {
+			throw repoId.getException();
 		}
-		XAddress repoAddr = XX.toAddress(revId.getResult(), null, null, null);
+		XAddress repoAddr = XX.toAddress(repoId.getResult(), null, null, null);
 		
 		String rawCommands = XydraRestServer.readPostData(context.getRequest());
 		List<XCommand> commandsList;
