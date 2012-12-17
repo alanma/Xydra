@@ -3,16 +3,19 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:c='urn:import:com.google.gwt.user.cellview.client'
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="urn:ui:com.google.gwt.uibinder http://google-web-toolkit.googlecode.com/svn-history/trunk/user/src/com/google/gwt/uibinder/resources/UiBinder.xsd"
-	xmlns:xy="urn:import:org.xydra.webadmin.gwt.client">
+	xmlns:w="urn:import:org.xydra.webadmin.gwt.client.widgets">
 
-	<g:HTMLPanel styleName="xyadmin">
+	<g:HTMLPanel styleName="field">
 
-		<g:HTML ui:field="title" styleName="title" >Hello World</g:HTML>
-		
-		<g:Button ui:field="repo1"> repo1 </g:Button>
-		
-		<g:FlowPanel ui:field="modelIdResult" />
+		<g:FlowPanel ui:field="fieldPanel">
+
+			<g:Label ui:field="fieldLabel" />
+
+			<g:Anchor ui:field="valueAnchor" />
+
+		</g:FlowPanel>
 
 	</g:HTMLPanel>
 
 </ui:UiBinder> 
+
