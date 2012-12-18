@@ -19,6 +19,10 @@ public class MemoryModelCommand extends MemoryAtomicCommand implements XModelCom
     
     private static final long serialVersionUID = -8516270265119646260L;
     
+    /** For GWT serialisation only - Do not use. */
+    public MemoryModelCommand() {
+    }
+    
     /**
      * Creates a new {@link XModelCommand} of the add-type. Will add a new
      * {@link XObject} with the specified {@link XID} to the {@link XModel} this
@@ -89,8 +93,8 @@ public class MemoryModelCommand extends MemoryAtomicCommand implements XModelCom
         return new MemoryModelCommand(target, ChangeType.REMOVE, objectRevision, objectId);
     }
     
-    // ID of the object being added or removed
-    private final XID objectId;
+    /** ID of the object being added or removed */
+    private XID objectId;
     
     private MemoryModelCommand(XAddress target, ChangeType changeType, long objectRevision,
             XID objectId) {
