@@ -57,7 +57,7 @@ public class XyAdminServiceImpl extends RemoteServiceServlet implements XyAdminS
         return snapshot;
     }
     
-    // @Override
+    @Override
     public long executeCommand(XID repoId, XCommand command) {
         XydraPersistence p = Utils.createPersistence(repoId);
         long result = p.executeCommand(ACTOR, command);

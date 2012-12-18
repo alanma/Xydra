@@ -3,6 +3,7 @@ package org.xydra.webadmin.gwt.shared;
 import java.util.Set;
 
 import org.xydra.base.XID;
+import org.xydra.base.change.XCommand;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
 
@@ -23,7 +24,6 @@ public interface XyAdminServiceAsync {
     
     // TODO max needs research - add default constructors to
     // org.xydra.base.change.impl.memory.MemoryRepositoryCommand
-    // public void executeCommand(XID repoId, XCommand command,
-    // AsyncCallback<Long> asyncCallback);
+    public void executeCommand(XID repoId, XCommand command, AsyncCallback<Long> asyncCallback);
     
 }
