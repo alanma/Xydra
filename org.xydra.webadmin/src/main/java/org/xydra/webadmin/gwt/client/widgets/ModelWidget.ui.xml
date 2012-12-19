@@ -8,10 +8,14 @@
 	<g:HTMLPanel styleName="model">
 
 		<g:Button ui:field="modelButton" />
+		
+		<g:Label ui:field="revisionLabel" />
+		
+		<g:Button ui:field="eraseButton"> erase this model </g:Button>
 
 		<g:FlowPanel ui:field="buttonPanel">
 
-			<g:Button ui:field="addUserButton" > add Object </g:Button>
+			<g:Button ui:field="addObjectButton" > add Object </g:Button>
 
 		</g:FlowPanel>
 

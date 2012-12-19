@@ -1,6 +1,10 @@
 package org.xydra.webadmin.gwt.client.widgets;
 
+import org.xydra.base.X;
 import org.xydra.base.XID;
+import org.xydra.base.XX;
+import org.xydra.base.change.XModelCommand;
+import org.xydra.base.change.XRepositoryCommand;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
@@ -14,10 +18,12 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
 
@@ -36,10 +42,16 @@ public class ModelWidget extends Composite {
 	public Button modelButton;
 	
 	@UiField
+	public Label revisionLabel;
+	
+	@UiField
+	public Button eraseButton;
+	
+	@UiField
 	public FlowPanel buttonPanel;
 	
 	@UiField
-	public Button addUserButton;
+	public Button addObjectButton;
 	
 	@UiField
 	public FlowPanel objectPanel;
@@ -117,24 +129,65 @@ public class ModelWidget extends Composite {
 		this.objectPanel.add(widget);
 	}
 	
-	// private void addObject() {
-	// XRepositoryCommand command = X.getCommandFactory().createAddModelCommand(
-	// this.modelConfig.repoId, XX.toId("model1"), true);
-	// // FIXME das hier funktioniert nicht
-	// this.modelConfig.adminObject.service.executeCommand(this.modelConfig.repoId,
-	// command,
-	// new AsyncCallback<Long>() {
-	//
-	// @Override
-	// public void onSuccess(Long result) {
-	// log.info("Server said: " + result);
-	// }
-	//
-	// @Override
-	// public void onFailure(Throwable caught) {
-	// log.warn("Error", caught);
-	// }
-	// });
-	//
-	// }
+	@UiHandler("addObjectButton")
+	void onObjectButtonClick(ClickEvent e) {
+		XModelCommand command = X.getCommandFactory().createAddObjectCommand(
+		        this.modelConfig.repoId, this.modelConfig.modelId, XX.toId("user1"), true);
+		
+		this.modelConfig.adminObject.service.executeCommand(this.modelConfig.repoId, command,
+		        new AsyncCallback<Long>() {
+			        
+			        @Override
+			        public void onSuccess(Long result) {
+				        log.info("Server said: " + result);
+			        }
+			        
+			        @Override
+			        public void onFailure(Throwable caught) {
+				        log.warn("Error", caught);
+			        }
+		        });
+		
+	}
+	
+	@UiHandler("eraseButton")
+	void onEraseButtonClick(ClickEvent e) {
+		
+		this.modelConfig.adminObject.service.getModelSnapshot(this.modelConfig.repoId,
+		        this.modelConfig.modelId, new AsyncCallback<XReadableModel>() {
+			        
+			        @Override
+			        public void onSuccess(XReadableModel model) {
+				        
+				        ModelWidget.this.modelConfig.revisionNumber = model.getRevisionNumber();
+				        
+				        log.info("model for revision number read: "
+				                + ModelWidget.this.modelConfig.revisionNumber);
+			        }
+			        
+			        @Override
+			        public void onFailure(Throwable caught) {
+				        log.warn("Error", caught);
+			        }
+		        });
+		
+		XRepositoryCommand command = X.getCommandFactory().createRemoveModelCommand(
+		        ModelWidget.this.modelConfig.repoId, ModelWidget.this.modelConfig.modelId,
+		        this.modelConfig.revisionNumber, true);
+		
+		ModelWidget.this.modelConfig.adminObject.service.executeCommand(
+		        ModelWidget.this.modelConfig.repoId, command, new AsyncCallback<Long>() {
+			        
+			        @Override
+			        public void onSuccess(Long result) {
+				        log.info("Server said: " + result);
+			        }
+			        
+			        @Override
+			        public void onFailure(Throwable caught) {
+				        log.warn("Error", caught);
+			        }
+		        });
+		
+	}
 }

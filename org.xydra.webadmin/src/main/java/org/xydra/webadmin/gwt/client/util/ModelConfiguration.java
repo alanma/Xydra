@@ -9,6 +9,7 @@ public class ModelConfiguration {
 	public XyAdmin adminObject;
 	public XID repoId;
 	public XID modelId;
+	public long revisionNumber;
 	
 	public ModelConfiguration(XyAdmin adminObject, XID repoId, XID modelId) {
 		
