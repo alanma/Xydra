@@ -14,6 +14,8 @@ import org.xydra.webadmin.gwt.client.XyAdmin;
 import org.xydra.webadmin.gwt.client.util.ModelConfiguration;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Node;
+import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -188,6 +190,20 @@ public class ModelWidget extends Composite {
 				        log.warn("Error", caught);
 			        }
 		        });
+		this.clear();
 		
+		Label infoLabel = new Label("" + this.modelConfig.modelId + " erased!");
+		infoLabel.setText("" + this.modelConfig.modelId + " erased!");
+		((FlowPanel)this.getParent()).add(infoLabel);
+		
+	}
+	
+	private void clear() {
+		NodeList<Node> childs = this.getElement().getChildNodes();
+		for(int i = 0; i < childs.getLength(); i++) {
+			// log.info("child " + childs.getItem(i) + " removed!");
+			childs.getItem(i).removeFromParent();
+			
+		}
 	}
 }
