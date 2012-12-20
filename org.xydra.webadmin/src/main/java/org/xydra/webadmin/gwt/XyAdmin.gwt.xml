@@ -18,6 +18,7 @@
 
 	<!-- Inherit the GWT-specific Xydra bits -->
 	<inherits name='org.xydra.gwt.XydraGwt' />
+	<inherits name="org.xydra.editor.XydraEditorComponents" />
 
 	<inherits name="org.xydra.store.impl.gae.XydraGae" />
 
@@ -27,6 +28,7 @@
 	<source path="client" />
 
 	<entry-point class="org.xydra.webadmin.gwt.client.XyAdminEntryPoint" />
+	<!-- WARN dont use in production -->
 	<set-property name="user.agent" value="safari" />
 
 </module>
