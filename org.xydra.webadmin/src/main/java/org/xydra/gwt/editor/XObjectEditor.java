@@ -13,8 +13,8 @@ import org.xydra.core.change.XObjectEventListener;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
-import org.xydra.editor.value.XIDEditor;
-import org.xydra.editor.value.XValueEditor.EditListener;
+import org.xydra.gwt.editor.value.XIDEditor;
+import org.xydra.gwt.editor.value.XValueEditor.EditListener;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 
