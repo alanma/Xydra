@@ -18,7 +18,7 @@
 
 	<!-- Inherit the GWT-specific Xydra bits -->
 	<inherits name='org.xydra.gwt.XydraGwt' />
-	<inherits name="org.xydra.editor.XydraEditorComponents" />
+	<inherits name="org.xydra.gwt.editor.XydraEditorComponents" />
 
 	<inherits name="org.xydra.store.impl.gae.XydraGae" />
 

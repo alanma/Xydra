@@ -34,6 +34,6 @@
 	
 	<source path="" />
 	
-	<entry-point class='org.xydra.editor.XydraEditor'/>
+	<entry-point class='org.xydra.gwt.editor.XydraEditor'/>
 	
 </module>
