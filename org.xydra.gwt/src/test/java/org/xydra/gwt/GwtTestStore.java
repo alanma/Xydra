@@ -1,5 +1,6 @@
 package org.xydra.gwt;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.xydra.core.serialize.XydraParser;
 import org.xydra.gwt.xml.GwtXmlParser;
@@ -12,18 +13,19 @@ import com.google.gwt.junit.client.GWTTestCase;
  * that such testst will not match the standard Surefire pattern.
  */
 public class GwtTestStore extends GWTTestCase {
-	
-	@Override
-	public String getModuleName() {
-		return "org.xydra.gwt.XydraGwtTest";
-	}
-	
-	@Test
-	public void test() {
-		
-		XydraParser parser = new GwtXmlParser();
-		assertNotNull(parser);
-		
-	}
-	
+    
+    @Override
+    public String getModuleName() {
+        return "org.xydra.gwt.XydraGwtTest";
+    }
+    
+    @Test
+    @Ignore
+    public void test() {
+        
+        XydraParser parser = new GwtXmlParser();
+        assertNotNull(parser);
+        
+    }
+    
 }
