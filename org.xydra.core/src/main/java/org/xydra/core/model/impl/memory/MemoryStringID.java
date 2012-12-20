@@ -18,65 +18,64 @@ import org.xydra.base.value.ValueType;
 @RunsInGWT(true)
 @RequiresAppEngine(false)
 public class MemoryStringID implements XID, Serializable {
-	
-	private static final long serialVersionUID = 3397013331330118533L;
-	
-	/** Impl Note: field is not final to allow GWT-Serialisation to work on it */
-	private String string;
-	
-	/** Required for GWT */
-	@SuppressWarnings("unused")
-	private MemoryStringID() {
-	}
-	
-	/**
-	 * No syntax checks are performed.
-	 * 
-	 * @param uriString
-	 */
-	protected MemoryStringID(String uriString) {
-		this.string = uriString;
-	}
-	
-	@Override
-	public int compareTo(XID o) {
-		return this.toString().compareTo(o.toString());
-	}
-	
-	@Override
-	public boolean equals(Object other) {
-		if(other instanceof MemoryStringID) {
-			return ((MemoryStringID)other).string.equals(this.string);
-		} else if(other instanceof XID) {
-			return ((XID)other).toString().equals(this.string);
-		} else {
-			return false;
-		}
-	}
-	
-	@Override
-	public XID getId() {
-		return this;
-	}
-	
-	@Override
-	public ValueType getType() {
-		return ValueType.Id;
-	}
-	
-	@Override
-	public XID getValue() {
-		return this;
-	}
-	
-	@Override
-	public int hashCode() {
-		return this.string.hashCode();
-	}
-	
-	@Override
-	public String toString() {
-		return this.string;
-	}
-	
+    
+    private static final long serialVersionUID = 3397013331330118533L;
+    
+    /** Impl Note: field is not final to allow GWT-Serialisation to work on it */
+    private String string;
+    
+    /** Required for GWT. Do not use. */
+    public MemoryStringID() {
+    }
+    
+    /**
+     * No syntax checks are performed.
+     * 
+     * @param uriString
+     */
+    protected MemoryStringID(String uriString) {
+        this.string = uriString;
+    }
+    
+    @Override
+    public int compareTo(XID o) {
+        return this.toString().compareTo(o.toString());
+    }
+    
+    @Override
+    public boolean equals(Object other) {
+        if(other instanceof MemoryStringID) {
+            return ((MemoryStringID)other).string.equals(this.string);
+        } else if(other instanceof XID) {
+            return ((XID)other).toString().equals(this.string);
+        } else {
+            return false;
+        }
+    }
+    
+    @Override
+    public XID getId() {
+        return this;
+    }
+    
+    @Override
+    public ValueType getType() {
+        return ValueType.Id;
+    }
+    
+    @Override
+    public XID getValue() {
+        return this;
+    }
+    
+    @Override
+    public int hashCode() {
+        return this.string.hashCode();
+    }
+    
+    @Override
+    public String toString() {
+        return this.string;
+    }
+    
 }
