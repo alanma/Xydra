@@ -1,13 +1,14 @@
 package org.xydra.webadmin.gwt.client;
 
-import java.util.Set;
+import java.util.HashSet;
 
+import org.xydra.base.X;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
+import org.xydra.base.change.XRepositoryCommand;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.webadmin.gwt.client.util.ModelConfiguration;
-import org.xydra.webadmin.gwt.client.widgets.ModelWidget;
+import org.xydra.webadmin.gwt.client.widgets.RepoWidget;
 import org.xydra.webadmin.gwt.shared.XyAdminServiceAsync;
 
 import com.google.gwt.core.client.GWT;
@@ -20,6 +21,8 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
+import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.Widget;
 
 
@@ -32,16 +35,20 @@ public class XyAdmin extends Composite {
 	
 	private static final Logger log = LoggerFactory.getLogger(XyAdmin.class);
 	
-	private static final XID REPO1 = XX.toId("repo1");
+	@UiField
+	public FlowPanel repoChoosePanel;
 	
 	@UiField
 	HTML title;
 	
-	@UiField
-	Button repo1;
+	@UiField(provided = true)
+	SuggestBox repositoryChooser;
 	
 	@UiField
-	FlowPanel modelIdResult;
+	Button loadButton;
+	
+	@UiField
+	FlowPanel repoPanel;
 	
 	// XRepositoryCommand command =
 	// X.getCommandFactory().createAddModelCommand(REPO1, XX.toId("model1"),
@@ -61,25 +68,57 @@ public class XyAdmin extends Composite {
 	// }
 	// });
 	
-	@UiHandler("repo1")
+	@UiHandler("loadButton")
 	public void onModelIdsClick(ClickEvent e) {
+		
+		final String selectedRepo = this.repositoryChooser.getText();
+		final XID selectedRepoId = XX.toId(selectedRepo);
+		log.info("text from SuggestBox: " + selectedRepo);
+		
+		RepoWidget repoWidget = new RepoWidget(this, selectedRepoId);
 		
 		// TODO phonebook is in 'repo1', other data in 'gae-repo' - make
 		// configurable
-		this.service.getModelIds(REPO1, new AsyncCallback<Set<XID>>() {
+		
+		this.repoPanel.add(repoWidget);
+		
+	}
+	
+	public XyAdminServiceAsync service;
+	
+	public XyAdmin(XyAdminServiceAsync service) {
+		
+		// HashSet<String> currentlyUsedRepos = Sets.newHashSet("repo1",
+		// "gae-repo");
+		HashSet<String> currentlyUsedRepos = new HashSet<String>();
+		currentlyUsedRepos.add("repo1");
+		currentlyUsedRepos.add("gae-repo");
+		
+		MultiWordSuggestOracle oracle = new MultiWordSuggestOracle();
+		oracle.addAll(currentlyUsedRepos);
+		
+		this.repositoryChooser = new SuggestBox(oracle);
+		// this.repositoryChooser.addKeyPressHandler(new KeyPressHandler() {
+		//
+		// @Override
+		// public void onKeyPress(KeyPressEvent event) {
+		// if(event.() == KeyboardEvent.DOM_VK_ENTER) {
+		// this.loadButton.click();
+		// }
+		// }
+		// })
+		initWidget(uiBinder.createAndBindUi(this));
+		
+		this.service = service;
+		
+		XRepositoryCommand command = X.getCommandFactory().createAddModelCommand(XX.toId("repo1"),
+		        XX.toId("newModel"), true);
+		
+		service.executeCommand(XX.toId("repo1"), command, new AsyncCallback<Long>() {
 			
 			@Override
-			public void onSuccess(Set<XID> result) {
+			public void onSuccess(Long result) {
 				log.info("Server said: " + result);
-				
-				for(final XID modelId : result) {
-					
-					ModelConfiguration modelConfig = new ModelConfiguration(XyAdmin.this, REPO1,
-					        modelId);
-					
-					ModelWidget modelWidget = new ModelWidget(modelConfig);
-					XyAdmin.this.modelIdResult.add(modelWidget);
-				}
 			}
 			
 			@Override
@@ -88,16 +127,9 @@ public class XyAdmin extends Composite {
 			}
 		});
 		
-	}
-	
-	public XyAdminServiceAsync service;
-	
-	public XyAdmin(XyAdminServiceAsync service) {
-		initWidget(uiBinder.createAndBindUi(this));
+		this.repositoryChooser.setText("repo1");
 		
-		this.title.setHTML("Select Repo!");
-		
-		this.service = service;
+		this.onModelIdsClick(null);
 	}
 	
 }

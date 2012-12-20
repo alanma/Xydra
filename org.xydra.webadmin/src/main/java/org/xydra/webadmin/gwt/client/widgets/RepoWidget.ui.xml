@@ -6,12 +6,12 @@
 	xmlns:w="urn:import:org.xydra.webadmin.gwt.client.widgets">
 
 	<g:HTMLPanel styleName="model">
-	
-		<g:Button ui:field="modelLabel" />
-		
-		<g:Label ui:field="revisionLabel" />
-		
-		<g:FlowPanel ui:field="objectPanel" />
+
+		<g:FlowPanel ui:field="modelButtonPanel" styleName="field">
+
+		</g:FlowPanel>
+
+		<g:FlowPanel ui:field="modelPanel" styleName="field" />
 
 	</g:HTMLPanel>
 

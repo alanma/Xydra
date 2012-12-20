@@ -7,11 +7,17 @@
 
 	<g:HTMLPanel styleName="xyadmin">
 
-		<g:HTML ui:field="title" styleName="title" >Hello World</g:HTML>
+		<g:FlowPanel ui:field="repoChoosePanel" styleName="field">
+
+			<g:HTML ui:field="title" styleName="title" >select repository: </g:HTML>
+			
+			<g:SuggestBox ui:field="repositoryChooser" />
 		
-		<g:Button ui:field="repo1"> repo1 </g:Button>
+			<g:Button ui:field="loadButton"> load </g:Button>
+
+		</g:FlowPanel>
 		
-		<g:FlowPanel ui:field="modelIdResult" />
+		<g:FlowPanel ui:field="repoPanel" />
 
 	</g:HTMLPanel>
 

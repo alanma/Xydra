@@ -22,7 +22,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -41,19 +40,10 @@ public class ModelWidget extends Composite {
 	private ModelConfiguration modelConfig;
 	
 	@UiField
-	public Button modelButton;
+	public Label modelLabel;
 	
 	@UiField
 	public Label revisionLabel;
-	
-	@UiField
-	public Button eraseButton;
-	
-	@UiField
-	public FlowPanel buttonPanel;
-	
-	@UiField
-	public Button addObjectButton;
 	
 	@UiField
 	public FlowPanel objectPanel;
@@ -64,9 +54,9 @@ public class ModelWidget extends Composite {
 		
 		this.modelConfig = modelConfig;
 		
-		this.modelButton.setText(modelConfig.modelId.toString());
+		this.modelLabel.setText(modelConfig.modelId.toString());
 		
-		this.modelButton.addClickHandler(new ClickHandler() {
+		this.modelLabel.addClickHandler(new ClickHandler() {
 			
 			@Override
 			public void onClick(ClickEvent event) {
