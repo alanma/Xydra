@@ -29,6 +29,7 @@ import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.core.XCopyUtils;
+import org.xydra.core.change.XChanges;
 import org.xydra.core.change.XModelEventListener;
 import org.xydra.core.change.XModelSyncEventListener;
 import org.xydra.core.model.XChangeLog;
@@ -38,6 +39,7 @@ import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
+import org.xydra.core.model.XUndoFailedLocalChangeCallback;
 import org.xydra.sharedutils.XyAssert;
 
 
@@ -95,8 +97,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, XSen
 	public MemoryModel(XID actorId, String passwordHash, MemoryRepository father,
 	        XRevWritableModel modelState, XChangeLogState log, long syncRev,
 	        boolean loadLocalChanges) {
-		super(new MemoryEventManager(actorId, passwordHash, new MemoryChangeLog(log), syncRev,
-		        loadLocalChanges));
+		super(new MemoryEventManager(actorId, passwordHash, new MemoryChangeLog(log), syncRev));
 		XyAssert.xyAssert(log != null);
 		assert log != null;
 		
@@ -119,6 +120,19 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, XSen
 			this.eventQueue.sendEvents();
 		}
 		
+		if(loadLocalChanges) {
+			
+			Iterator<XEvent> localEvents = this.eventQueue.getChangeLog().getEventsSince(
+			        syncRev + 1);
+			
+			while(localEvents.hasNext()) {
+				XEvent event = localEvents.next();
+				XCommand command = XChanges.createReplayCommand(event);
+				this.eventQueue.newLocalChange(command, new XUndoFailedLocalChangeCallback(command,
+				        this, null));
+			}
+			
+		}
 		XyAssert.xyAssert(
 		        this.eventQueue.getChangeLog() == null
 		                || this.eventQueue.getChangeLog().getCurrentRevisionNumber() == getRevisionNumber(),
@@ -377,17 +391,18 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, XSen
 	
 	@Override
 	public long executeCommand(XCommand command, XLocalChangeCallback callback) {
-		
+		XUndoFailedLocalChangeCallback wrappingCallback = new XUndoFailedLocalChangeCallback(
+		        command, this, callback);
 		if(command instanceof XTransaction) {
-			return executeTransaction((XTransaction)command, callback);
+			return executeTransaction((XTransaction)command, wrappingCallback);
 		} else if(command instanceof XModelCommand) {
-			return executeModelCommand((XModelCommand)command, callback);
+			return executeModelCommand((XModelCommand)command, wrappingCallback);
 		}
 		MemoryObject object = getObject(command.getTarget().getObject());
 		if(object == null) {
 			return XCommand.FAILED;
 		}
-		return object.executeCommand(command, callback);
+		return object.executeCommand(command, wrappingCallback);
 	}
 	
 	@Override

@@ -3,7 +3,6 @@ package org.xydra.core.model.impl.memory;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.RandomAccess;
@@ -22,7 +21,6 @@ import org.xydra.base.change.XReversibleFieldEvent;
 import org.xydra.base.change.XTransactionEvent;
 import org.xydra.base.change.impl.memory.MemoryReversibleFieldEvent;
 import org.xydra.base.change.impl.memory.MemoryTransactionEvent;
-import org.xydra.core.change.XChanges;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.impl.memory.SynchronizesChangesImpl.Orphans;
@@ -116,24 +114,6 @@ public class MemoryEventManager implements Serializable {
 	 * @param syncRev TODO
 	 */
 	public MemoryEventManager(XID actorId, String passwordHash, MemoryChangeLog log, long syncRev) {
-		this(actorId, passwordHash, log, syncRev, false);
-	}
-	
-	/**
-	 * Creates a new MemoryEventQueue
-	 * 
-	 * @param actorId ...
-	 * @param passwordHash ...
-	 * 
-	 * @param log The {@link XChangeLog} this MemoryEventQueue will use for
-	 *            logging (may be null)
-	 * @param syncRev the synchronized revision of this MemoryEventQueue
-	 * @param loadLocalChanges if true, the
-	 *            {@link MemoryEventManager#localChanges} will be
-	 *            initialized/rebuild from the provided {@link XChangeLog} log.
-	 */
-	public MemoryEventManager(XID actorId, String passwordHash, MemoryChangeLog log, long syncRev,
-	        boolean loadLocalChanges) {
 		XyAssert.xyAssert(actorId != null);
 		assert actorId != null;
 		this.sessionActor = actorId;
@@ -141,14 +121,6 @@ public class MemoryEventManager implements Serializable {
 		this.changeLog = log;
 		this.logging = this.changeLog != null;
 		this.syncRevision = syncRev;
-		if(loadLocalChanges) {
-			Iterator<XEvent> localEvents = log.getEventsSince(syncRev + 1);
-			
-			while(localEvents.hasNext()) {
-				XEvent event = localEvents.next();
-				newLocalChange(XChanges.createReplayCommand(event), null);
-			}
-		}
 	}
 	
 	/**

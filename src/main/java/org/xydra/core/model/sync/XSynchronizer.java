@@ -72,7 +72,7 @@ public class XSynchronizer {
 		
 		if(remoteChanges.length == 0) {
 			// no changes to merge
-			return;
+			// return; keep them
 		}
 		
 		boolean success = this.entity.synchronize(remoteChanges);
