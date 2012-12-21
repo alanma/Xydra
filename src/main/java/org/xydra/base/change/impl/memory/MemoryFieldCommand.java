@@ -17,6 +17,10 @@ public class MemoryFieldCommand extends MemoryAtomicCommand implements XFieldCom
     
     private static final long serialVersionUID = -1637754092944391876L;
     
+    /** For GWT serialisation only - Do not use. */
+    public MemoryFieldCommand() {
+    }
+    
     /**
      * Creates a new {@link XFieldCommand} of the add-type. Will add the given
      * {@link XValue} to the specified {@link XField}, if possible.
@@ -88,7 +92,7 @@ public class MemoryFieldCommand extends MemoryAtomicCommand implements XFieldCom
         return new MemoryFieldCommand(target, ChangeType.REMOVE, fieldRevision, null);
     }
     
-    private final XValue newValue;
+    private XValue newValue;
     
     private MemoryFieldCommand(XAddress target, ChangeType changeType, long fieldRevision,
             XValue newValue) {
