@@ -170,6 +170,7 @@ abstract public class AbstractSynchronizerTest {
         return XX.wrap(actorId, passwordHash, modelSnapshot);
     }
     
+    /** @return model with given ID loaded from store */
     private XReadableModel loadModelSnapshot(XID modelId) {
         XAddress modelAddr = XX.resolveModel(this.repoAddr, modelId);
         
@@ -236,11 +237,12 @@ abstract public class AbstractSynchronizerTest {
         
         try {
             
-            assertNull(loadModelSnapshot(NEWMODEL_ID));
+            assertNull("Model should not exist yet", loadModelSnapshot(NEWMODEL_ID));
             
             XRepository repo = new MemoryRepository(actorId, passwordHash,
                     this.repoAddr.getRepository());
             
+            // model is created
             XModel model = repo.createModel(NEWMODEL_ID);
             XSynchronizer sync = new XSynchronizer(model, store);
             XObject object = model.createObject(XX.toId("bob"));
@@ -260,6 +262,8 @@ abstract public class AbstractSynchronizerTest {
             assertEquals(modelRev, model.getSynchronizedRevision());
             assertFalse(hc1.eventsReceived);
             
+            // we have a local model == remote model with some test data in it
+            
             checkEvents(model);
             
             // check that the local model still works
@@ -269,6 +273,8 @@ abstract public class AbstractSynchronizerTest {
             modelRev = model.getRevisionNumber();
             hc1.eventsReceived = false;
             
+            // FIXME this line fails. Synchronizer complains that model has been
+            // removed
             synchronize(sync);
             
             assertNull(loadModelSnapshot(NEWMODEL_ID));
