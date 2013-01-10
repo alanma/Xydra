@@ -13,24 +13,26 @@ import org.xydra.index.query.Constraint;
  * @param <E> entity type
  */
 public interface IEntrySet<E> extends IIndex, Iterable<E> {
-	
-	@Override
+    
+    @Override
     public Iterator<E> iterator();
-	
-	void deIndex(E entry);
-	
-	void index(E entry);
-	
-	IEntrySetDiff<E> computeDiff(IEntrySet<E> other);
-	
-	static interface IEntrySetDiff<E> {
-		IEntrySet<E> getAdded();
-		
-		IEntrySet<E> getRemoved();
-	}
-	
-	boolean contains(E entry);
-	
-	Iterator<E> constraintIterator(Constraint<E> entryConstraint);
-	
+    
+    void deIndex(E entry);
+    
+    void index(E entry);
+    
+    IEntrySetDiff<E> computeDiff(IEntrySet<E> other);
+    
+    static interface IEntrySetDiff<E> {
+        IEntrySet<E> getAdded();
+        
+        IEntrySet<E> getRemoved();
+    }
+    
+    boolean contains(E entry);
+    
+    Iterator<E> constraintIterator(Constraint<E> entryConstraint);
+    
+    int size();
+    
 }
