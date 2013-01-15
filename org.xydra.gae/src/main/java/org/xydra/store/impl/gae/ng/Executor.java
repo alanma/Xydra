@@ -84,8 +84,9 @@ public class Executor {
             boolean inTransaction) {
         
         if(!ctxInTxn.isModelExists()) {
-            return CheckResult.failed("Model does not exist, no field command can succeed");
+            return CheckResult.failed("Model '" + command.getModelId() + "' does not exist");
         }
+        
         XID objectId = command.getChangedEntity().getObject();
         XStateWritableObject objectInTxn = ctxInTxn.getObject(objectId);
         if(objectInTxn == null) {
@@ -245,6 +246,10 @@ public class Executor {
             @NeverNull ContextBeforeCommand ctxBeforeCmd, @NeverNull ContextInTxn ctxInTxn,
             boolean inTransaction) {
         
+        if(!ctxInTxn.isModelExists()) {
+            return CheckResult.failed("Model '" + command.getModelId() + "' does not exist");
+        }
+        
         XID objectId = command.getChangedEntity().getObject();
         
         if(command.isForced()) {
@@ -324,7 +329,7 @@ public class Executor {
             boolean inTransaction) {
         
         if(!ctxInTxn.isModelExists()) {
-            return CheckResult.failed("Model does not exist");
+            return CheckResult.failed("Model '" + command.getModelId() + "' does not exist");
         }
         
         XID objectId = command.getChangedEntity().getObject();

@@ -34,13 +34,14 @@ import org.xydra.sharedutils.XyAssert;
 
 
 /**
- * @@ TODO
+ * The execution context within a transaction. This is where things change while
+ * things outside this context remain stable, so that before and after-effect
+ * can be calculated.
  * 
  * @author xamde
  */
 public class ContextInTxn implements XStateWritableModel {
     
-    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(ContextInTxn.class);
     
     private ChangedModel changedModel;
@@ -89,6 +90,8 @@ public class ContextInTxn implements XStateWritableModel {
         
         this.changedModel = new ChangedModel(ctxBeforeCmd);
         this.modelExists = ctxBeforeCmd.isModelExists();
+        log.trace("At context creation time model '" + this.changedModel.getAddress()
+                + "' exists: " + this.modelExists);
     }
     
     /**
