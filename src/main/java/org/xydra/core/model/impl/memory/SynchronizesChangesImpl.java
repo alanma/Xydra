@@ -849,8 +849,6 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 				if(lc.isApplied() && lc.getRemoteRevision() <= remoteRev) {
 					XyAssert.xyAssert(lc.getRemoteRevision() >= 0);
 					localChanges.remove(i);
-					this.eventQueue.enqueueLocalChangeSyncedEvent(getModel(), getChangeLog()
-					        .getEventAt(lc.getRemoteRevision()));
 				}
 			}
 			

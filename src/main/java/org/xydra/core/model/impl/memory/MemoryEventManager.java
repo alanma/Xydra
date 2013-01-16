@@ -79,7 +79,7 @@ public class MemoryEventManager implements Serializable {
 	private final MemoryChangeLog changeLog;
 	
 	private final List<EventQueueEntry> eventQueue = new ArrayList<EventQueueEntry>();
-	private final List<EventQueueEntry> syncEventQueue = new ArrayList<EventQueueEntry>();
+	private final List<EventQueueEntry> potentialSyncEventQueue = new ArrayList<EventQueueEntry>();
 	private final List<MemoryLocalChange> localChanges = new ArrayList<MemoryLocalChange>();
 	/**
 	 * Should events be logged right now?
@@ -345,6 +345,10 @@ public class MemoryEventManager implements Serializable {
 		}
 		
 		this.eventQueue.add(entry);
+		// TODO Thomas write tests
+		if(!(entry.event instanceof XTransactionEvent)) {
+			this.potentialSyncEventQueue.add(entry);
+		}
 	}
 	
 	/**
@@ -675,15 +679,19 @@ public class MemoryEventManager implements Serializable {
 		XyAssert.xyAssert(this.changeLog.getCurrentRevisionNumber() == revision);
 	}
 	
-	public void enqueueLocalChangeSyncedEvent(MemoryModel model, XEvent event) {
+	public void disabledEnqueueLocalChangeSyncedEvent(MemoryModel model, XEvent event) {
 		if(event instanceof XAtomicEvent) {
 			MemoryRepository repo = model.getFather();
+			if(model.removed) {
+				@SuppressWarnings("unused")
+				boolean aua = true;
+			}
 			MemoryObject object = event.getTarget().getObject() == null ? null : model
 			        .getObject(event.getTarget().getObject());
 			MemoryField field = object == null || event.getTarget().getField() == null ? null
 			        : object.getField(event.getTarget().getField());
 			EventQueueEntry entry = new EventQueueEntry(repo, model, object, field, event);
-			this.syncEventQueue.add(entry);
+			this.potentialSyncEventQueue.add(entry);
 		}
 		
 		/*
@@ -693,7 +701,7 @@ public class MemoryEventManager implements Serializable {
 		else if(event instanceof XTransactionEvent) {
 			XTransactionEvent txEvent = (XTransactionEvent)event;
 			for(XAtomicEvent atomicEvent : txEvent) {
-				enqueueLocalChangeSyncedEvent(model, atomicEvent);
+				disabledEnqueueLocalChangeSyncedEvent(model, atomicEvent);
 			}
 		} else {
 			throw new AssertionError("unknown event type queued: " + event);
@@ -702,8 +710,8 @@ public class MemoryEventManager implements Serializable {
 	
 	public void sendSyncEvents() {
 		
-		while(!this.syncEventQueue.isEmpty()) {
-			EventQueueEntry entry = this.syncEventQueue.remove(0);
+		while(!this.potentialSyncEventQueue.isEmpty()) {
+			EventQueueEntry entry = this.potentialSyncEventQueue.remove(0);
 			
 			XyAssert.xyAssert(entry != null);
 			assert entry != null;

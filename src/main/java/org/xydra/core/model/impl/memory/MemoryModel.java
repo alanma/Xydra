@@ -113,7 +113,8 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, XSen
 			XAddress repoAddr = getAddress().getParent();
 			XCommand createCommand = MemoryRepositoryCommand.createAddCommand(repoAddr, true,
 			        getId());
-			this.eventQueue.newLocalChange(createCommand, null);
+			// FIXME Thomas
+			// this.eventQueue.newLocalChange(createCommand, null);
 			XRepositoryEvent createEvent = MemoryRepositoryEvent.createAddEvent(actorId, repoAddr,
 			        getId());
 			this.eventQueue.enqueueRepositoryEvent(null, createEvent);

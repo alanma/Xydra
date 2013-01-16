@@ -60,7 +60,7 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
 		this.parser = parser;
 	}
 	
-	protected abstract class Request<T> {
+	public abstract class Request<T> {
 		
 		final public XID actor;
 		final public String password;
@@ -303,7 +303,8 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
 		}
 		
 		for(; i < result.length; i++) {
-			XyAssert.xyAssert(result[i] != null); assert result[i] != null;
+			XyAssert.xyAssert(result[i] != null);
+			assert result[i] != null;
 		}
 		
 	}

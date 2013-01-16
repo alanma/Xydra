@@ -48,29 +48,37 @@ public class DelegatingSessionPersistence implements ISessionPersistence {
 		XyAssert.xyAssert(actorId != null);
 		assert actorId != null;
 		
-		if(!sessionCacheModel.hasChanges()) {
+		ModelRevision modelRev = this.persistence.getModelRevision(new GetWithAddressRequest(
+		        sessionCacheModel.getAddress(), INCLUDE_TENTATIVE));
+		boolean modelExists = modelRev.modelExists();
+		
+		if(!sessionCacheModel.hasChanges() && modelExists) {
 			log.debug("Model has no changes.");
 			return XCommand.NOCHANGE;
 		}
 		
+		long result = XCommand.FAILED;
+		
 		// TODO move model creation into txn
-		ModelRevision modelRev = this.persistence.getModelRevision(new GetWithAddressRequest(
-		        sessionCacheModel.getAddress(), INCLUDE_TENTATIVE));
-		if(!modelRev.modelExists()) {
-			long l = this.persistence.executeCommand(this.actorId, X.getCommandFactory()
+		if(!modelExists) {
+			result = this.persistence.executeCommand(this.actorId, X.getCommandFactory()
 			        .createForcedAddModelCommand(getRepositoryId(), sessionCacheModel.getId()));
-			if(XCommandUtils.failed(l)) {
+			if(XCommandUtils.failed(result)) {
 				throw new SessionException("Could not create model '"
-				        + sessionCacheModel.getAddress() + "'. Got: " + l);
+				        + sessionCacheModel.getAddress() + "'. Got: " + result);
 			}
 		}
 		
-		// TODO 2012-01 Sync: add "safe" vs. "forced" param to underlying txns
-		XTransactionBuilder builder = new XTransactionBuilder(sessionCacheModel.getAddress());
-		sessionCacheModel.commitTo(builder);
-		XTransaction txn = builder.build();
-		long result = this.persistence.executeCommand(actorId, txn);
-		// TODO if success, make sure to reflect new revNrs
+		if(sessionCacheModel.hasChanges()) {
+			// all commands are FORCED
+			XTransactionBuilder builder = new XTransactionBuilder(sessionCacheModel.getAddress(),
+			        true);
+			sessionCacheModel.commitTo(builder);
+			XTransaction txn = builder.build();
+			result = this.persistence.executeCommand(actorId, txn);
+			// TODO if success, make sure to reflect new revNrs
+		}
+		
 		return result;
 	}
 	
