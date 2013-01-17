@@ -110,7 +110,7 @@ public abstract class AbstractTestSonicDb {
 		assertEquals(2, getDbSize());
 	}
 	
-	private void dbClear() {
+	protected void dbClear() {
 		this.db.delete(SonicQuery.build(TimeConstraint.ALL_UNTIL_NOW).done());
 	}
 	
@@ -127,4 +127,5 @@ public abstract class AbstractTestSonicDb {
 		return !this.db.query(SonicQuery.build(TimeConstraint.ALL_UNTIL_NOW).limit(2).done())
 		        .iterator().hasNext();
 	}
+	
 }
