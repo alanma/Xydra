@@ -165,13 +165,11 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
 		assert command.getChangedEntity().getAddressedType() != XType.XREPOSITORY : "Nobody can add or remove a repository";
 		
 		// check access rights
-		log.warn("Skipping authorization for testing.");
-		/*
-		 * if(!triviallyAllowed(passwordHash) &&
-		 * !this.acm.getAuthorisationManager().canExecute(actorId, command)) {
-		 * throw new AccessException(actorId +
-		 * " is not allowed to execute this command."); }
-		 */
+		
+		if(!triviallyAllowed(passwordHash)
+		        && !this.acm.getAuthorisationManager().canExecute(actorId, command)) {
+			throw new AccessException(actorId + " is not allowed to execute this command.");
+		}
 		
 		return this.persistence.executeCommand(actorId, command);
 	}
