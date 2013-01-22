@@ -1,10 +1,6 @@
 package org.xydra.webadmin.gwt.client.widgets;
 
-import org.xydra.base.X;
 import org.xydra.base.XID;
-import org.xydra.base.XX;
-import org.xydra.base.change.XModelCommand;
-import org.xydra.base.change.XRepositoryCommand;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
@@ -14,13 +10,10 @@ import org.xydra.webadmin.gwt.client.XyAdmin;
 import org.xydra.webadmin.gwt.client.util.ModelConfiguration;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Node;
-import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -119,81 +112,5 @@ public class ModelWidget extends Composite {
 	
 	private void add(Widget widget) {
 		this.objectPanel.add(widget);
-	}
-	
-	@UiHandler("addObjectButton")
-	void onObjectButtonClick(ClickEvent e) {
-		XModelCommand command = X.getCommandFactory().createAddObjectCommand(
-		        this.modelConfig.repoId, this.modelConfig.modelId, XX.toId("user1"), true);
-		
-		this.modelConfig.adminObject.service.executeCommand(this.modelConfig.repoId, command,
-		        new AsyncCallback<Long>() {
-			        
-			        @Override
-			        public void onSuccess(Long result) {
-				        log.info("Server said: " + result);
-			        }
-			        
-			        @Override
-			        public void onFailure(Throwable caught) {
-				        log.warn("Error", caught);
-			        }
-		        });
-		
-	}
-	
-	@UiHandler("eraseButton")
-	void onEraseButtonClick(ClickEvent e) {
-		
-		this.modelConfig.adminObject.service.getModelSnapshot(this.modelConfig.repoId,
-		        this.modelConfig.modelId, new AsyncCallback<XReadableModel>() {
-			        
-			        @Override
-			        public void onSuccess(XReadableModel model) {
-				        
-				        ModelWidget.this.modelConfig.revisionNumber = model.getRevisionNumber();
-				        
-				        log.info("model for revision number read: "
-				                + ModelWidget.this.modelConfig.revisionNumber);
-			        }
-			        
-			        @Override
-			        public void onFailure(Throwable caught) {
-				        log.warn("Error", caught);
-			        }
-		        });
-		
-		XRepositoryCommand command = X.getCommandFactory().createRemoveModelCommand(
-		        ModelWidget.this.modelConfig.repoId, ModelWidget.this.modelConfig.modelId,
-		        this.modelConfig.revisionNumber, true);
-		
-		ModelWidget.this.modelConfig.adminObject.service.executeCommand(
-		        ModelWidget.this.modelConfig.repoId, command, new AsyncCallback<Long>() {
-			        
-			        @Override
-			        public void onSuccess(Long result) {
-				        log.info("Server said: " + result);
-			        }
-			        
-			        @Override
-			        public void onFailure(Throwable caught) {
-				        log.warn("Error", caught);
-			        }
-		        });
-		this.clear();
-		
-		Label infoLabel = new Label("" + this.modelConfig.modelId + " erased!");
-		infoLabel.setText("" + this.modelConfig.modelId + " erased!");
-		((FlowPanel)this.getParent()).add(infoLabel);
-		
-	}
-	
-	private void clear() {
-		NodeList<Node> childs = this.getElement().getChildNodes();
-		for(int i = 0; i < childs.getLength(); i++) {
-			// log.info("child " + childs.getItem(i) + " removed!");
-			childs.getItem(i).removeFromParent();
-			
-		}
 	}
 }

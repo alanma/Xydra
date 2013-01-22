@@ -3,6 +3,74 @@
 display: inline;
 }
 
-.object {
+
 	
+.browsingPanel {
+	
+	
+}
+
+.sessionLabelDummy {
+
+background-color: cyan;
+width: 1200px;
+height: 150px;
+
+}
+
+.treeMainPanel {
+
+width: 320px;
+height: 1000px;
+
+}
+
+.editorLabelDummy {
+	
+	background-color: olive;
+/* 	width: 900px; */
+	height: 1000px;
+	}
+	
+.treeItem {
+	
+	height: 30px;
+	
+}
+
+.modelControlButtonPanel
+{
+	height: 50px;
+	width: 800px;
+	background-color: lime;
+}
+
+.modelPane
+{
+	
+	height: 1000px;
+/* 	width: 800px; */
+}
+
+.editorPanel
+{
+	height: 1000px;
+/* 	width: 880px; */
+}
+.informationPanel
+{
+	height: 950px;
+/* 	width: 800px; */
+	background-color: gray;
+}
+	
+.headerStyle
+{
+	width: 20px;
+	height: : 20px;
+}
+
+.optionalFooCellStyle
+{
+	width: 500px;
 }
