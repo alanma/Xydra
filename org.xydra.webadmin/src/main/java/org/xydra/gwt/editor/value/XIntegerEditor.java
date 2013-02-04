@@ -59,6 +59,9 @@ public class XIntegerEditor extends AtomicXValueEditor<XIntegerValue> implements
 			return;
 		case KeyCodes.KEY_DOWN:
 			return;
+		case KeyCodes.KEY_ENTER:
+			super.execute();
+			return;
 		}
 		
 		if(cc >= '0' && cc <= '9')

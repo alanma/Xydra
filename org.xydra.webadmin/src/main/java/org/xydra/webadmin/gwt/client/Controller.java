@@ -5,8 +5,12 @@ import java.util.Set;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
+import org.xydra.base.change.XAtomicCommand;
+import org.xydra.base.change.XTransaction;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
+import org.xydra.core.change.SessionCachedModel;
+import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.datamodels.DataModel;
@@ -27,7 +31,6 @@ public class Controller {
 	private EditorPanel editorPanel;
 	private TempStorage tempStorage;
 	private XAddress lastClickedElement;
-	// private HashMap<XID,SharedSession> repos;
 	
 	private static final Logger log = LoggerFactory.getLogger(XyAdmin.class);
 	
@@ -46,10 +49,33 @@ public class Controller {
 		this.service = service;
 	}
 	
-	public void getIDs(final XAddress address) {
+	public Iterator<XID> getLocallyStoredIDs(final XAddress address) {
 		
 		BranchTypes clickedBranchType = BranchTypes.getBranchFromAddress(address);
-		XID repoId = address.getRepository();
+		final XID repoId = address.getRepository();
+		XID modelId = address.getModel();
+		
+		Iterator<XID> iterator = null;
+		
+		if(clickedBranchType.equals(BranchTypes.REPO)) {
+			
+			iterator = Controller.this.dataModel.getRepo(repoId).getModelIDs();
+			
+		} else if(clickedBranchType.equals(BranchTypes.MODEL)) {
+			
+			// Controller.this.notifySelectionTree(address,
+			// Controller.this.dataModel.getRepo(repoId)
+			// .getModelIDs());
+			
+		}
+		// this.lastClickedElement = address;
+		return iterator;
+	}
+	
+	public void getIDsFromServer(final XAddress address) {
+		
+		BranchTypes clickedBranchType = BranchTypes.getBranchFromAddress(address);
+		final XID repoId = address.getRepository();
 		XID modelId = address.getModel();
 		
 		if(clickedBranchType.equals(BranchTypes.REPO)) {
@@ -60,7 +86,10 @@ public class Controller {
 				public void onSuccess(Set<XID> result) {
 					log.info("Server said: " + result);
 					
-					Controller.this.notifySelectionTree(address, result.iterator());
+					for(XID modelID : result) {
+						Controller.this.dataModel.getRepo(repoId).addModelID(modelID);
+					}
+					Controller.this.notifySelectionTree(address);
 				}
 				
 				@Override
@@ -68,6 +97,7 @@ public class Controller {
 					log.warn("Error", caught);
 				}
 			});
+			
 		} else if(clickedBranchType.equals(BranchTypes.MODEL)) {
 			this.service.getModelSnapshot(repoId, modelId, new AsyncCallback<XReadableModel>() {
 				
@@ -76,7 +106,7 @@ public class Controller {
 					log.info("Server said: " + result);
 					
 					Iterator<XID> iterator = result.iterator();
-					Controller.this.notifySelectionTree(address, iterator);
+					Controller.this.notifySelectionTree(address);
 					
 				}
 				
@@ -89,9 +119,11 @@ public class Controller {
 		this.lastClickedElement = address;
 	}
 	
-	private void notifySelectionTree(XAddress address, Iterator<XID> iterator) {
-		this.selectionTree.notifyMe(address, iterator);
-	}
+	// public void notifySelectionTree(XAddress address, Iterator<XID> iterator)
+	// {
+	// log.info("selectionTree notified for address " + address.toString());
+	// this.selectionTree.notifyMe(address, iterator);
+	// }
 	
 	public void registerSelectionTree(Observable widget) {
 		
@@ -114,37 +146,12 @@ public class Controller {
 		XID modelId = address.getModel();
 		XID objectId = address.getObject();
 		
-		if(clickedBranchType.equals(BranchTypes.REPO)) {
+		if(clickedBranchType.equals(BranchTypes.MODEL)) {
 			
-			// this.service.getModelIds(repoId, new AsyncCallback<Set<XID>>() {
-			//
-			// @Override
-			// public void onSuccess(Set<XID> result) {
-			// log.info("Server said: " + result);
-			//
-			// Controller.this.notifySelectionTree(address, result.iterator());
-			// }
-			//
-			// @Override
-			// public void onFailure(Throwable caught) {
-			// log.warn("Error", caught);
-			// }
-			// });
-		} else if(clickedBranchType.equals(BranchTypes.MODEL)) {
-			this.service.getModelSnapshot(repoId, modelId, new AsyncCallback<XReadableModel>() {
-				
-				@Override
-				public void onSuccess(XReadableModel result) {
-					Controller.this.notifyEditorPanel(result);
-					
-				}
-				
-				@Override
-				public void onFailure(Throwable caught) {
-					log.warn("Error", caught);
-					
-				}
-			});
+			XReadableModel localModel = this.dataModel.getRepo(repoId).getModel(modelId);
+			
+			Controller.this.notifyEditorPanel(localModel);
+			
 		} else if(clickedBranchType.equals(BranchTypes.OBJECT)) {
 			this.service.getObjectSnapshot(repoId, modelId, objectId,
 			        new AsyncCallback<XReadableObject>() {
@@ -179,8 +186,76 @@ public class Controller {
 		return this.tempStorage;
 	}
 	
-	public void getSelectedModel() {
-		this.dataModel.getData(this.lastClickedElement);
+	public XAddress getSelectedModelAddress() {
+		return this.lastClickedElement;
+	}
+	
+	public void loadCurrentData() {
+		this.service.getModelSnapshot(this.lastClickedElement.getRepository(),
+		        this.lastClickedElement.getModel(), new AsyncCallback<XReadableModel>() {
+			        
+			        @Override
+			        public void onSuccess(XReadableModel result) {
+				        Controller.this.dataModel.getRepo(
+				                Controller.this.lastClickedElement.getRepository()).addBaseModel(
+				                result);
+				        updateEditorPanel();
+			        }
+			        
+			        @Override
+			        public void onFailure(Throwable caught) {
+				        log.warn("Error", caught);
+				        
+			        }
+		        });
+		
+	}
+	
+	public void updateEditorPanel() {
+		SessionCachedModel model = Controller.this.dataModel.getRepo(
+		        Controller.this.lastClickedElement.getRepository()).getModel(
+		        Controller.this.lastClickedElement.getModel());
+		if(model == null) {
+			log.warn("problem! lastClickedElement: "
+			        + Controller.this.lastClickedElement.toString());
+		}
+		Controller.this.notifyEditorPanel(model);
+	}
+	
+	public void commit() {
+		XTransactionBuilder txnBuilder = new XTransactionBuilder(getSelectedModelAddress());
+		SessionCachedModel model = this.dataModel.getRepo(this.lastClickedElement.getRepository())
+		        .getModel(this.lastClickedElement.getModel());
+		model.commitTo(txnBuilder);
+		XTransaction transaction = txnBuilder.build();
+		
+		for(XAtomicCommand xAtomicCommand : transaction) {
+			System.out
+			        .println("changes will be at " + xAtomicCommand.getChangedEntity().toString());
+		}
+		
+		this.service.executeCommand(this.lastClickedElement.getRepository(), transaction,
+		        new AsyncCallback<Long>() {
+			        
+			        @Override
+			        public void onSuccess(Long result) {
+				        log.info("worked!");
+				        
+			        }
+			        
+			        @Override
+			        public void onFailure(Throwable caught) {
+				        log.error(caught.getMessage());
+				        caught.printStackTrace();
+				        
+			        }
+		        });
+		
+	}
+	
+	public void notifySelectionTree(XAddress address) {
+		log.info("selection tree notified for address " + address.toString());
+		this.selectionTree.notifyMe(address);
 		
 	}
 }

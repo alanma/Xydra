@@ -6,6 +6,8 @@ import java.util.Iterator;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.Controller;
 import org.xydra.webadmin.gwt.client.Observable;
 
@@ -19,6 +21,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class BranchWidget extends VerticalPanel implements Observable {
 	
+	private static final Logger log = LoggerFactory.getLogger(BranchWidget.class);
+	
 	private BranchTypes type;
 	private XID id;
 	private HashMap<XID,BranchWidget> existingBranches;
@@ -26,6 +30,8 @@ public class BranchWidget extends VerticalPanel implements Observable {
 	private XAddress address;
 	
 	private Button expandButton;
+	
+	private boolean expanded = false;
 	
 	public BranchWidget(XAddress address) {
 		this.address = address;
@@ -39,28 +45,32 @@ public class BranchWidget extends VerticalPanel implements Observable {
 		this.add(buttonPanel);
 		
 		{
-			if(!this.type.equals(BranchTypes.OBJECT)) {
+			if(this.type.equals(BranchTypes.REPO)) {
 				this.expandButton = new Button("+");
 				this.expandButton.setStyleName("treeItem", true);
 				this.expandButton.addClickHandler(new ClickHandler() {
 					
 					@Override
 					public void onClick(ClickEvent event) {
-						if(BranchWidget.this.existingBranches == null) {
-							System.out.println("building branches!");
-							BranchWidget.this.existingBranches = new HashMap<XID,BranchWidget>();
-							System.out.println("request for "
-							        + BranchWidget.this.address.toString() + " received!");
-							Controller.getInstance().getIDs(BranchWidget.this.address);
-							BranchWidget.this.expandButton.setText("-");
+						if(BranchWidget.this.expanded == false) {
+							BranchWidget.this.expand();
 						} else {
-							BranchWidget.this.branches.clear();
-							BranchWidget.this.existingBranches = null;
-							BranchWidget.this.expandButton.setText("+");
+							BranchWidget.this.contract();
 						}
 					}
 				});
 				buttonPanel.add(this.expandButton);
+				
+				Button loadModelsButton = new Button("fetch Models");
+				loadModelsButton.addClickHandler(new ClickHandler() {
+					
+					@Override
+					public void onClick(ClickEvent event) {
+						System.out.println("building branches!");
+						Controller.getInstance().getIDsFromServer(BranchWidget.this.address);
+					}
+				});
+				buttonPanel.add(loadModelsButton);
 			}
 			
 			Anchor anchor = new Anchor(this.id.toString());
@@ -80,7 +90,8 @@ public class BranchWidget extends VerticalPanel implements Observable {
 				public void onClick(ClickEvent event) {
 					
 					Controller.getInstance().getTempStorage().register(BranchWidget.this);
-					AddDialog addDialog = new AddDialog(BranchWidget.this.type.addWidgetText);
+					AddDialog addDialog = new AddDialog(BranchWidget.this.address,
+					        BranchWidget.this.type.addWidgetText);
 					addDialog.show();
 					addDialog.selectEverything();
 				}
@@ -94,7 +105,8 @@ public class BranchWidget extends VerticalPanel implements Observable {
 					
 					@Override
 					public void onClick(ClickEvent event) {
-						BranchWidget.this.removeFromParent();
+						RemoveDialog removeDialog = new RemoveDialog(BranchWidget.this.address);
+						removeDialog.show();
 					}
 				});
 				buttonPanel.add(removeModelButton);
@@ -104,12 +116,15 @@ public class BranchWidget extends VerticalPanel implements Observable {
 		this.add(this.branches);
 	}
 	
-	private void setComponents(Iterator<XID> iterator) {
-		System.out.println("adding components");
+	private void setComponents() {
+		
+		Iterator<XID> iterator = Controller.getInstance().getLocallyStoredIDs(this.address);
 		
 		while(iterator.hasNext()) {
 			XID modelId = iterator.next();
-			addBranch(modelId);
+			if(!this.existingBranches.keySet().contains(modelId)) {
+				addBranch(modelId);
+			}
 		}
 	}
 	
@@ -136,18 +151,19 @@ public class BranchWidget extends VerticalPanel implements Observable {
 		return address;
 	}
 	
-	// @Override
-	public void notifyMe(XAddress address, Iterator<XID> iterator) {
-		XID childID = address.getModel();
-		System.out.println("my address: " + this.address + ", other address: " + address);
-		if(this.address.equals(address)) {
-			System.out.println("i contain the other address");
-			this.setComponents(iterator);
-		} else {
-			BranchWidget branch = this.existingBranches.get(childID);
-			branch.notifyMe(address, iterator);
-		}
-	}
+	// // @Override
+	// public void notifyMe(XAddress address, Iterator<XID> iterator) {
+	// XID childID = address.getModel();
+	// System.out.println("my address: " + this.address + ", other address: " +
+	// address);
+	// if(this.address.equals(address)) {
+	// System.out.println("i contain the other address");
+	// this.setComponents(iterator);
+	// } else {
+	// BranchWidget branch = this.existingBranches.get(childID);
+	// branch.notifyMe(address, iterator);
+	// }
+	// }
 	
 	private void getIDFromAddress(XAddress address) {
 		
@@ -169,5 +185,38 @@ public class BranchWidget extends VerticalPanel implements Observable {
 	
 	public void addElement(String id) {
 		this.addBranch(XX.toId(id));
+	}
+	
+	@Override
+	public void notifyMe(XAddress address) {
+		XID childID = address.getModel();
+		if(this.address.equals(address)) {
+			log.info("i am " + this.address.toString() + " and I contain the other address");
+			this.contract();
+			this.expand();
+		} else {
+			BranchWidget branch = this.existingBranches.get(childID);
+			branch.notifyMe(address);
+		}
+		
+	}
+	
+	private void expand() {
+		BranchWidget.this.existingBranches = new HashMap<XID,BranchWidget>();
+		System.out.println("request for " + BranchWidget.this.address.toString() + " received!");
+		BranchWidget.this.expandButton.setText("-");
+		
+		this.setComponents();
+		
+		this.expanded = true;
+		
+	}
+	
+	private void contract() {
+		BranchWidget.this.branches.clear();
+		BranchWidget.this.existingBranches = null;
+		BranchWidget.this.expandButton.setText("+");
+		
+		this.expanded = false;
 	}
 }

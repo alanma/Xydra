@@ -74,3 +74,26 @@ height: 1000px;
 {
 	width: 500px;
 }
+
+.description
+{
+	font-style: italic;
+	text-align: center;
+}
+.fieldValueInfo
+{
+	margin: 0px;
+	padding: 0px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.revisionLabelStyle
+{
+	font-style: italic;
+	font-size: 14px;
+}
+.emptyFieldButtonStyle
+{
+	
+}

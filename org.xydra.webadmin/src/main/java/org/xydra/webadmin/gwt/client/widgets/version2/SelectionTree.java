@@ -61,8 +61,9 @@ public class SelectionTree extends Composite implements Observable {
 	}
 	
 	@Override
-	public void notifyMe(XAddress address, Iterator<XID> result) {
+	public void notifyMe(XAddress address) {
+		
 		XID repoId = address.getRepository();
-		this.branches.get(repoId).notifyMe(address, result);
+		this.branches.get(repoId).notifyMe(address);
 	}
 }

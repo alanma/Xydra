@@ -3,11 +3,15 @@ package org.xydra.webadmin.gwt.client.widgets.version2;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
+import org.xydra.base.XAddress;
 import org.xydra.base.XID;
+import org.xydra.base.XX;
 import org.xydra.base.rmof.XReadableObject;
+import org.xydra.base.value.ValueType;
 import org.xydra.base.value.XValue;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
@@ -16,8 +20,10 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class TableGenerator {
 	
+	private static final Logger log = LoggerFactory.getLogger(TableGenerator.class);
+	
 	List<FieldRow> rows = new ArrayList<FieldRow>();
-	HashMap<XID,HashMap<Integer,Widget>> map = new HashMap<XID,HashMap<Integer,Widget>>();
+	HashMap<XID,ValueType> valueTypes = new HashMap<XID,ValueType>();
 	List<XID> columnIDs = new ArrayList<XID>();
 	
 	public void add(FieldRow row) {
@@ -27,75 +33,72 @@ public class TableGenerator {
 	
 	public Grid createTable() {
 		
-		int rowCounter = 0;
-		int columnCounter = 0;
 		for(FieldRow row : this.rows) {
 			XReadableObject object = row.getObject();
-			int tempColumnCounter = 0;
-			for(XID field : object) {
-				HashMap<Integer,Widget> valueMap = this.map.get(field);
-				if(valueMap == null) {
-					valueMap = new HashMap<Integer,Widget>();
-					this.map.put(field, valueMap);
+			for(XID xid : object) {
+				if(!this.columnIDs.contains(xid)) {
+					this.columnIDs.add(xid);
 				}
-				XValue fieldValue = object.getField(field).getValue();
-				String labelString = "null";
-				if(fieldValue != null)
-					labelString = fieldValue.toString();
-				valueMap.put(rowCounter, new Label(labelString));
-				tempColumnCounter++;
-				
-				this.columnIDs.add(field);
 			}
-			if(tempColumnCounter > columnCounter) {
-				columnCounter = tempColumnCounter;
-			}
-			rowCounter++;
 		}
+		Grid table = new Grid(this.rows.size() + 1, this.columnIDs.size() + 1);
 		
-		int rowsPlusHeader = rowCounter + 1;
-		int columnsPlusFirstOne = columnCounter + 1;
-		Grid table = new Grid(rowsPlusHeader, columnsPlusFirstOne);
-		table.setText(0, 0, "id");
-		
-		int columnCount = 1;
-		for(XID id : this.map.keySet()) {
+		for(int i = 0; i < this.rows.size() + 1; i++) {
 			
-			table.setText(0, columnCount, id.toString());
-			HashMap<Integer,Widget> valueMap = this.map.get(id);
-			
-			Set<Integer> rowsWithInformation = valueMap.keySet();
-			for(Integer rowNumber : rowsWithInformation) {
-				table.setWidget(rowNumber + 1, columnCount, valueMap.get(rowNumber));
-			}
-			columnCount++;
-		}
-		
-		// for(int i = 0; i < this.rows.size(); i++) {
-		// table.setText(i + 1, 0, this.rows.get(i).getID().toString());
-		// }
-		
-		for(int i = 0; i < this.rows.size(); i++) {
-			XReadableObject currentObject = this.rows.get(i).getObject();
-			
-			for(int j = 0; j < this.columnIDs.size(); j++) {
-				XID currentColumn = this.columnIDs.get(j);
-				
+			for(int j = 0; j < this.columnIDs.size() + 1; j++) {
 				String widgetText = "";
-				if(i == 0) {
-					widgetText = currentColumn.toString();
-				} else {
-					if(currentObject.hasField(currentColumn)) {
-						
-					}
-				}
-				Label widget = new Label(widgetText);
-				table.setWidget(i, j, widget);
+				Widget widget = null;
 				
+				if(j == 0) {
+					
+					if(i == 0) {
+						widgetText = "id";
+						widget = new Label(widgetText);
+					} else {
+						XReadableObject currentObject = this.rows.get(i - 1).getObject();
+						long revision = currentObject.getRevisionNumber();
+						
+						widget = new ObjectHeadWidget(currentObject.getAddress(), revision);
+					}
+				} else {
+					XID currentColumn = this.columnIDs.get(j - 1);
+					
+					if(i == 0) {
+						
+						widget = new Label(currentColumn.toString());
+						
+					} else {
+						XReadableObject currentObject = this.rows.get(i - 1).getObject();
+						XAddress currentObjectAddress = currentObject.getAddress();
+						final XAddress currentFieldAddress = XX.resolveField(currentObjectAddress,
+						        currentColumn);
+						if(currentObject.hasField(currentColumn)) {
+							XValue fieldValue = currentObject.getField(currentColumn).getValue();
+							
+							if(fieldValue != null) {
+								long revisionNumber = currentObject.getField(currentColumn)
+								        .getRevisionNumber();
+								
+								widget = new FieldWidget(currentFieldAddress, fieldValue,
+								        revisionNumber);
+							} else {
+								widget = new EmptyFieldWidget(currentFieldAddress);
+								
+							}
+							
+						} else {
+							widget = new EmptyFieldWidget(currentFieldAddress);
+						}
+					}
+					
+				}
+				
+				table.setWidget(i, j, widget);
 			}
 			
 		}
 		
 		return table;
 	}
+	
 }

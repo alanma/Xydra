@@ -73,7 +73,6 @@ public class XyAdmin extends Composite {
 		commands.add(X.getCommandFactory().createForcedAddFieldCommand(repo1, model, user1, value2));
 		commands.add(X.getCommandFactory().createForcedAddValueCommand(repo1, model, user1, value2,
 		        value1));
-		
 		commands.add(X.getCommandFactory().createForcedAddFieldCommand(repo1, XX.toId("phonebook"),
 		        XX.toId("peter"), XX.toId("emptyfield")));
 		commands.add(X.getCommandFactory().createForcedAddValueCommand(repo1, XX.toId("phonebook"),

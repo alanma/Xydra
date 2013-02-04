@@ -5,15 +5,9 @@
 	xsi:schemaLocation="urn:ui:com.google.gwt.uibinder http://google-web-toolkit.googlecode.com/svn-history/trunk/user/src/com/google/gwt/uibinder/resources/UiBinder.xsd"
 	xmlns:w="urn:import:org.xydra.webadmin.gwt.client.widgets" xmlns:ak="urn:import:org.xydra.webadmin.gwt.client.widgets.version2">
 
-	<g:HTMLPanel styleName="modelControlButtonPanel">
-
-		<g:HorizontalPanel ui:field="mainPanel">
-
-			<g:Button ui:field="loadAllButton">load all Objects from repo</g:Button>
-			<g:Button ui:field="commitModelChangesButton">commit all changes</g:Button>
-
-		</g:HorizontalPanel>
-	</g:HTMLPanel>
+	<g:VerticalPanel ui:field="mainPanel" styleName="fieldValueInfo">
+	
+	</g:VerticalPanel>
 
 </ui:UiBinder> 
 

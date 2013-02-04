@@ -1,8 +1,8 @@
 package org.xydra.webadmin.gwt.client.widgets.version2;
 
+import org.xydra.base.XAddress;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.webadmin.gwt.client.Controller;
 import org.xydra.webadmin.gwt.client.XyAdmin;
 
 import com.google.gwt.core.client.GWT;
@@ -12,52 +12,67 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 
-public class ModelControlPanel extends Composite {
+public class ObjectHeadWidget extends Composite {
 	
 	private static final Logger log = LoggerFactory.getLogger(XyAdmin.class);
 	
-	interface ViewUiBinder extends UiBinder<Widget,ModelControlPanel> {
+	interface ViewUiBinder extends UiBinder<Widget,ObjectHeadWidget> {
 	}
 	
 	private static ViewUiBinder uiBinder = GWT.create(ViewUiBinder.class);
 	
 	@UiField
-	HorizontalPanel mainPanel;
+	VerticalPanel panel;
 	
 	@UiField
-	Button loadAllButton;
+	Label idLabel;
 	
 	@UiField
-	Button commitModelChangesButton;
+	Label revisionLabel;
 	
-	public ModelControlPanel() {
+	@UiField
+	Button removeObjectButton;
+	
+	@UiField
+	Button addFieldButton;
+	
+	private XAddress address;
+	
+	public ObjectHeadWidget(XAddress address, long revisionNumber) {
 		super();
 		initWidget(uiBinder.createAndBindUi(this));
 		
-		buildComponents();
-	}
-	
-	private void buildComponents() {
-		this.loadAllButton.addClickHandler(new ClickHandler() {
+		this.address = address;
+		
+		this.idLabel.setText(address.getObject().toString());
+		
+		this.revisionLabel.setText("" + revisionNumber);
+		
+		this.removeObjectButton.addClickHandler(new ClickHandler() {
 			
 			@Override
 			public void onClick(ClickEvent event) {
-				Controller.getInstance().loadCurrentData();
+				
+				RemoveDialog removeDialog = new RemoveDialog(ObjectHeadWidget.this.address);
+				removeDialog.show();
 				
 			}
 		});
 		
-		this.commitModelChangesButton.addClickHandler(new ClickHandler() {
+		this.addFieldButton.addClickHandler(new ClickHandler() {
 			
 			@Override
 			public void onClick(ClickEvent event) {
-				Controller.getInstance().commit();
+				AddEditorDialog addDialog = new AddEditorDialog(ObjectHeadWidget.this.address);
+				addDialog.show();
 				
 			}
 		});
+		
 	}
 }

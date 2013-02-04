@@ -1,5 +1,6 @@
 package org.xydra.webadmin.gwt.client.widgets.version2;
 
+import org.xydra.base.XAddress;
 import org.xydra.webadmin.gwt.client.Controller;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -20,7 +21,7 @@ public class AddDialog extends DialogBox {
 	TextBox textArea;
 	Button okButton;
 	
-	public AddDialog(String text) {
+	public AddDialog(final XAddress address, String text) {
 		this.setPopupPosition(200, 500);
 		this.dialogPanel = new HorizontalPanel();
 		this.textArea = new TextBox();
@@ -44,7 +45,7 @@ public class AddDialog extends DialogBox {
 			public void onClick(ClickEvent event) {
 				AddDialog.this.removeFromParent();
 				Controller.getInstance().getTempStorage()
-				        .setInformation(AddDialog.this.textArea.getText());
+				        .setInformation(address, AddDialog.this.textArea.getText());
 			}
 		});
 		this.dialogPanel.add(this.okButton);
