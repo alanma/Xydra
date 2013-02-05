@@ -13,6 +13,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class MainFrameWidget extends Composite {
 	
+	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(XyAdmin.class);
 	
 	interface ViewUiBinder extends UiBinder<Widget,MainFrameWidget> {

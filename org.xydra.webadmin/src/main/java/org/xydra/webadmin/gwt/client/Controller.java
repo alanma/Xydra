@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
+import org.xydra.base.XType;
 import org.xydra.base.change.XAtomicCommand;
 import org.xydra.base.change.XTransaction;
 import org.xydra.base.rmof.XReadableModel;
@@ -15,7 +16,6 @@ import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.datamodels.DataModel;
 import org.xydra.webadmin.gwt.client.util.TempStorage;
 import org.xydra.webadmin.gwt.client.widgets.editorpanel.EditorPanel;
-import org.xydra.webadmin.gwt.client.widgets.selectiontree.BranchTypes;
 import org.xydra.webadmin.gwt.shared.XyAdminServiceAsync;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -50,17 +50,16 @@ public class Controller {
 	
 	public Iterator<XID> getLocallyStoredIDs(final XAddress address) {
 		
-		BranchTypes clickedBranchType = BranchTypes.getBranchFromAddress(address);
 		final XID repoId = address.getRepository();
-		XID modelId = address.getModel();
 		
 		Iterator<XID> iterator = null;
 		
-		if(clickedBranchType.equals(BranchTypes.REPO)) {
+		XType addressedType = address.getAddressedType();
+		if(addressedType.equals(XType.XREPOSITORY)) {
 			
 			iterator = Controller.this.dataModel.getRepo(repoId).getModelIDs();
 			
-		} else if(clickedBranchType.equals(BranchTypes.MODEL)) {
+		} else if(addressedType.equals(XType.XMODEL)) {
 			
 			// Controller.this.notifySelectionTree(address,
 			// Controller.this.dataModel.getRepo(repoId)
@@ -73,11 +72,12 @@ public class Controller {
 	
 	public void getIDsFromServer(final XAddress address) {
 		
-		BranchTypes clickedBranchType = BranchTypes.getBranchFromAddress(address);
 		final XID repoId = address.getRepository();
 		XID modelId = address.getModel();
 		
-		if(clickedBranchType.equals(BranchTypes.REPO)) {
+		XType addressedType = address.getAddressedType();
+		
+		if(addressedType.equals(XType.XREPOSITORY)) {
 			
 			this.service.getModelIds(repoId, new AsyncCallback<Set<XID>>() {
 				
@@ -97,14 +97,13 @@ public class Controller {
 				}
 			});
 			
-		} else if(clickedBranchType.equals(BranchTypes.MODEL)) {
+		} else if(addressedType.equals(XType.XMODEL)) {
 			this.service.getModelSnapshot(repoId, modelId, new AsyncCallback<XReadableModel>() {
 				
 				@Override
 				public void onSuccess(XReadableModel result) {
 					log.info("Server said: " + result);
 					
-					Iterator<XID> iterator = result.iterator();
 					Controller.this.notifySelectionTree(address);
 					
 				}
@@ -140,12 +139,11 @@ public class Controller {
 	
 	public void getData(XAddress address) {
 		
-		BranchTypes clickedBranchType = BranchTypes.getBranchFromAddress(address);
 		XID repoId = address.getRepository();
 		XID modelId = address.getModel();
-		XID objectId = address.getObject();
 		
-		if(clickedBranchType.equals(BranchTypes.MODEL)) {
+		XType addressedType = address.getAddressedType();
+		if(addressedType.equals(XType.XMODEL)) {
 			
 			XReadableModel localModel = this.dataModel.getRepo(repoId).getModel(modelId);
 			
