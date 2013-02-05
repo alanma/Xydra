@@ -1,0 +1,23 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:c='urn:import:com.google.gwt.user.cellview.client'
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="urn:ui:com.google.gwt.uibinder http://google-web-toolkit.googlecode.com/svn-history/trunk/user/src/com/google/gwt/uibinder/resources/UiBinder.xsd"
+	xmlns:w="urn:import:org.xydra.webadmin.gwt.client.widgets" xmlns:ak="urn:import:org.xydra.webadmin.gwt.client.widgets.version2">
+
+<g:VerticalPanel>
+	<g:HorizontalPanel ui:field="buttonPanel">
+
+		<g:Button ui:field="expandButton" styleName="treeItem"> + </g:Button>
+		<g:Button ui:field="fetchModelsButton">fetch childs</g:Button>
+		<g:Anchor ui:field="anchor"></g:Anchor>
+		<g:Button ui:field="addButton"></g:Button>
+		<g:Button ui:field="removeModelButton">delete Model</g:Button>
+
+	</g:HorizontalPanel>
+	<g:VerticalPanel ui:field="branches">
+
+	</g:VerticalPanel>
+</g:VerticalPanel>
+</ui:UiBinder> 
+

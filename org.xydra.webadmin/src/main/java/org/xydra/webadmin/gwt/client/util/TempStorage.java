@@ -7,7 +7,7 @@ import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.Controller;
 import org.xydra.webadmin.gwt.client.datamodels.DataModel;
-import org.xydra.webadmin.gwt.client.widgets.version2.BranchWidget;
+import org.xydra.webadmin.gwt.client.widgets.selectiontree.BranchWidget;
 
 
 public class TempStorage {

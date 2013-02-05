@@ -3,16 +3,21 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:c='urn:import:com.google.gwt.user.cellview.client'
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="urn:ui:com.google.gwt.uibinder http://google-web-toolkit.googlecode.com/svn-history/trunk/user/src/com/google/gwt/uibinder/resources/UiBinder.xsd"
-	xmlns:xy="urn:import:org.xydra.webadmin.gwt.client"
 	xmlns:ep="urn:import:org.xydra.webadmin.gwt.client.widgets.editorpanel"
 	xmlns:st="urn:import:org.xydra.webadmin.gwt.client.widgets.selectiontree"
-	xmlns:d="urn:import:org.xydra.webadmin.gwt.client.widgets.dialogs"
-	xmlns:w="urn:import:org.xydra.webadmin.gwt.client.widgets">
+	xmlns:d="urn:import:org.xydra.webadmin.gwt.client.widgets.dialogs">
+	<g:VerticalPanel ui:field="mainPanel">
 
-	<g:HTMLPanel styleName="xyadmin">
+		<d:TextAreaWidget ui:field="textArea"></d:TextAreaWidget>
+		<g:HorizontalPanel ui:field="selectEditorPanel">
 
-		<w:MainFrameWidget ui:field="mainPanel"/>
+			<g:ListBox ui:field="listBox"></g:ListBox>
+			<g:HorizontalPanel ui:field="editorPanel"></g:HorizontalPanel>
 
-	</g:HTMLPanel>
+		</g:HorizontalPanel>
+
+		<d:ButtonPanel ui:field="buttonPanel"></d:ButtonPanel>
+	</g:VerticalPanel>
 
 </ui:UiBinder> 
+

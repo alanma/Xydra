@@ -9,7 +9,7 @@ import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.webadmin.gwt.client.widgets.version2.MainFrameWidget;
+import org.xydra.webadmin.gwt.client.widgets.MainFrameWidget;
 import org.xydra.webadmin.gwt.shared.XyAdminServiceAsync;
 
 import com.google.gwt.core.client.GWT;

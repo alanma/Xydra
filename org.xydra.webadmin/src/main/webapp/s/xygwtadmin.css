@@ -1,99 +1,129 @@
 .field * {
-
-display: inline;
+	display: inline;
 }
 
-
-	
 .browsingPanel {
-	
 	
 }
 
 .sessionLabelDummy {
-
-background-color: cyan;
-width: 1200px;
-height: 150px;
-
+	background-color: cyan;
+	width: 1200px;
+	height: 150px;
 }
 
 .treeMainPanel {
-
-width: 320px;
-height: 1000px;
-
+	width: 320px;
+	height: 1000px;
 }
 
 .editorLabelDummy {
-	
 	background-color: olive;
-/* 	width: 900px; */
+	/* 	width: 900px; */
 	height: 1000px;
-	}
-	
-.treeItem {
-	
-	height: 30px;
-	
 }
 
-.modelControlButtonPanel
-{
+.treeItem {
+	height: 30px;
+}
+
+.modelControlButtonPanel {
 	height: 50px;
 	width: 800px;
 	background-color: lime;
 }
 
-.modelPane
-{
-	
+.modelPane {
 	height: 1000px;
-/* 	width: 800px; */
+	/* 	width: 800px; */
 }
 
-.editorPanel
-{
+.editorPanel {
 	height: 1000px;
-/* 	width: 880px; */
+	/* 	width: 880px; */
 }
-.informationPanel
-{
+
+.informationPanel {
 	height: 950px;
-/* 	width: 800px; */
+	/* 	width: 800px; */
 	background-color: gray;
 }
-	
-.headerStyle
-{
+
+.headerStyle {
 	width: 20px;
 	height: : 20px;
 }
 
-.optionalFooCellStyle
-{
+.optionalFooCellStyle {
 	width: 500px;
 }
 
-.description
-{
+.description {
 	font-style: italic;
 	text-align: center;
 }
-.fieldValueInfo
-{
+
+.fieldValueInfo {
 	margin: 0px;
 	padding: 0px;
 	margin-left: auto;
 	margin-right: auto;
 }
 
-.revisionLabelStyle
-{
+.revisionLabelStyle {
 	font-style: italic;
 	font-size: 14px;
 }
-.emptyFieldButtonStyle
-{
+
+.emptyFieldButtonStyle {
 	
+}
+
+.buttonPanelStyle {
+	margin: auto;
+}
+
+.dialogStyle {
+	background-color: lightgrey;
+	border: 3px solid #009;
+}
+
+.dialogStyle .Caption  {
+	background-color: #ff0;
+	font-size: 90%;
+	font-weight: bold;
+	border-bottom: 3px solid #009;
+	padding: 5px;
+	text-align: center;
+	cursor: move;
+}
+
+.dialogStyle td, .dialogStyle div, .dialogStyle table {
+	padding: 0px;
+	margin: 0px;
+	border-spacing: 0px;
+	border: 0px;
+	
+}
+
+.dialogStyle .buttonPanelStyle {
+	margin: auto;
+}
+
+.textAreaStyle 
+{
+	width: 200px;
+}
+
+.defaultLabelStyle
+{
+	width: 800px;
+	height: 800px;
+	font-style: italic;
+	margin: auto;
+}
+
+.noData
+{
+	font-style: italic;
 }

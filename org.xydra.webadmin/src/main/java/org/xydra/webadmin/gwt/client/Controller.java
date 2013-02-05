@@ -8,15 +8,14 @@ import org.xydra.base.XID;
 import org.xydra.base.change.XAtomicCommand;
 import org.xydra.base.change.XTransaction;
 import org.xydra.base.rmof.XReadableModel;
-import org.xydra.base.rmof.XReadableObject;
 import org.xydra.core.change.SessionCachedModel;
 import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.datamodels.DataModel;
 import org.xydra.webadmin.gwt.client.util.TempStorage;
-import org.xydra.webadmin.gwt.client.widgets.version2.BranchTypes;
-import org.xydra.webadmin.gwt.client.widgets.version2.EditorPanel;
+import org.xydra.webadmin.gwt.client.widgets.editorpanel.EditorPanel;
+import org.xydra.webadmin.gwt.client.widgets.selectiontree.BranchTypes;
 import org.xydra.webadmin.gwt.shared.XyAdminServiceAsync;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -152,29 +151,8 @@ public class Controller {
 			
 			Controller.this.notifyEditorPanel(localModel);
 			
-		} else if(clickedBranchType.equals(BranchTypes.OBJECT)) {
-			this.service.getObjectSnapshot(repoId, modelId, objectId,
-			        new AsyncCallback<XReadableObject>() {
-				        
-				        @Override
-				        public void onSuccess(XReadableObject result) {
-					        Controller.this.notifyEditorPanel(result);
-					        
-				        }
-				        
-				        @Override
-				        public void onFailure(Throwable caught) {
-					        log.warn("Error", caught);
-					        
-				        }
-			        });
 		}
 		this.lastClickedElement = address;
-	}
-	
-	private void notifyEditorPanel(XReadableObject result) {
-		this.editorPanel.notifyMe(result);
-		
 	}
 	
 	private void notifyEditorPanel(XReadableModel result) {
