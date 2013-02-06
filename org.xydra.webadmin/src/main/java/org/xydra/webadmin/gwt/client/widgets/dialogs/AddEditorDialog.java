@@ -103,9 +103,9 @@ public class AddEditorDialog extends DialogBox {
 	public AddEditorDialog(final XAddress address) {
 		
 		this.address = address;
-		this.setPopupPosition(200, 500);
 		
 		XID fieldName = address.getField();
+		
 		String textFieldInput = null;
 		if(fieldName != null) {
 			textFieldInput = fieldName.toString();

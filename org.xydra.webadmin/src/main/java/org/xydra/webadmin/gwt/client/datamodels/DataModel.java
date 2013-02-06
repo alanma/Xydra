@@ -71,6 +71,8 @@ public class DataModel {
 		        + field.getRevisionNumber() + ")";
 		log.warn(beforeString + afterString);
 		
+		Controller.getInstance().updateEditorPanel();
+		
 	}
 	
 	public void addObject(XAddress address, XID objectID) {
@@ -79,6 +81,8 @@ public class DataModel {
 		model.createObject(objectID);
 		
 		log.info("object " + objectID.toString() + " added to " + address.toString());
+		
+		Controller.getInstance().updateEditorPanel();
 		
 	}
 	
@@ -107,14 +111,17 @@ public class DataModel {
 			XWritableObject object = model.getObject(address.getObject());
 			object.removeField(address.getField());
 			log.info("deleted field " + address.getField().toString());
+			Controller.getInstance().updateEditorPanel();
 			break;
 		case XOBJECT:
 			model.removeObject(address.getObject());
 			log.info("deleted object " + address.getObject().toString());
+			Controller.getInstance().updateEditorPanel();
 			break;
 		default:
 			break;
 		}
+		
 	}
 	
 	public void addField(XAddress address, XValue value) {
@@ -125,7 +132,7 @@ public class DataModel {
 		
 		log.info("added field " + address.toString());
 		
-		changeValue(address, value);
+		// changeValue(address, value);
 		
 		Controller.getInstance().updateEditorPanel();
 		

@@ -4,7 +4,7 @@ import org.xydra.base.XAddress;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.XyAdmin;
-import org.xydra.webadmin.gwt.client.widgets.dialogs.AddEditorDialog;
+import org.xydra.webadmin.gwt.client.widgets.dialogs.AddElementDialog;
 import org.xydra.webadmin.gwt.client.widgets.dialogs.RemoveElementDialog;
 
 import com.google.gwt.core.client.GWT;
@@ -68,8 +68,10 @@ public class RowHeaderWidget extends Composite {
 	
 	@UiHandler("addFieldButton")
 	void onClickAdd(ClickEvent event) {
-		AddEditorDialog addDialog = new AddEditorDialog(RowHeaderWidget.this.address);
+		AddElementDialog addDialog = new AddElementDialog(RowHeaderWidget.this.address,
+		        "enter Field ID");
 		addDialog.show();
+		addDialog.selectEverything();
 		
 	}
 }

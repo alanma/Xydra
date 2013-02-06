@@ -7,6 +7,7 @@ import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.Controller;
 import org.xydra.webadmin.gwt.client.datamodels.DataModel;
+import org.xydra.webadmin.gwt.client.widgets.dialogs.CommittingDialog;
 import org.xydra.webadmin.gwt.client.widgets.selectiontree.BranchWidget;
 
 
@@ -16,21 +17,28 @@ public class TempStorage {
 	
 	public BranchWidget branch;
 	
+	private CommittingDialog committingDialog;
+	
 	public void register(BranchWidget branch) {
 		this.branch = branch;
 	}
 	
 	public void setInformation(XAddress address, String text) {
-		if(address.getAddressedType().equals(XType.XREPOSITORY)) {
+		XType addressedType = address.getAddressedType();
+		if(addressedType.equals(XType.XREPOSITORY)) {
 			Controller.getInstance().getDataModel()
 			        .addModel(address.getRepository(), XX.toId(text));
 			log.info("model " + text + " added!");
 			
-		} else {
+		} else if(addressedType.equals(XType.XMODEL)) {
 			Controller.getInstance().getDataModel().addObject(address, XX.toId(text));
-			if(address.equals(Controller.getInstance().getSelectedModelAddress())) {
-				Controller.getInstance().updateEditorPanel();
-			}
+		} else if(addressedType.equals(XType.XOBJECT)) {
+			XAddress fieldAddress = XX.resolveField(address, XX.toId(text));
+			Controller.getInstance().getDataModel().addField(fieldAddress, null);
+			// if(address.equals(Controller.getInstance().getSelectedModelAddress()))
+			// {
+			// Controller.getInstance().updateEditorPanel();
+			// }
 		}
 		this.branch = null;
 		Controller.getInstance().notifySelectionTree(address);
@@ -47,5 +55,14 @@ public class TempStorage {
 			Controller.getInstance().updateEditorPanel();
 		}
 		
+	}
+	
+	public void register(CommittingDialog committingDialog) {
+		this.committingDialog = committingDialog;
+		
+	}
+	
+	public void notifyDialog(String message) {
+		this.committingDialog.notifyMe(message);
 	}
 }

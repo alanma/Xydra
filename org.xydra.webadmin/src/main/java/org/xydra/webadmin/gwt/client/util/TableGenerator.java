@@ -7,15 +7,15 @@ import java.util.List;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XX;
+import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.value.ValueType;
-import org.xydra.base.value.XValue;
+import org.xydra.gwt.editor.XFieldEditor;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.datatypes.FieldRow;
 import org.xydra.webadmin.gwt.client.widgets.tablewidgets.ColumnHeaderWidget;
 import org.xydra.webadmin.gwt.client.widgets.tablewidgets.EmptyFieldWidget;
-import org.xydra.webadmin.gwt.client.widgets.tablewidgets.FieldWidget;
 import org.xydra.webadmin.gwt.client.widgets.tablewidgets.RowHeaderWidget;
 
 import com.google.gwt.user.client.ui.Grid;
@@ -79,18 +79,27 @@ public class TableGenerator {
 						final XAddress currentFieldAddress = XX.resolveField(currentObjectAddress,
 						        currentColumn);
 						if(currentObject.hasField(currentColumn)) {
-							XValue fieldValue = currentObject.getField(currentColumn).getValue();
 							
-							if(fieldValue != null) {
-								long revisionNumber = currentObject.getField(currentColumn)
-								        .getRevisionNumber();
-								
-								widget = new FieldWidget(currentFieldAddress, fieldValue,
-								        revisionNumber);
-							} else {
-								widget = new EmptyFieldWidget(currentFieldAddress);
-								
-							}
+							XReadableField field = currentObject.getField(currentColumn);
+							
+							XFieldEditor fieldEditor = new XFieldEditor(field);
+							// XValue fieldValue =
+							// currentObject.getField(currentColumn).getValue();
+							//
+							// if(fieldValue != null) {
+							// long revisionNumber =
+							// currentObject.getField(currentColumn)
+							// .getRevisionNumber();
+							//
+							// widget = new FieldWidget(currentFieldAddress,
+							// fieldValue,
+							// revisionNumber);
+							// } else {
+							// widget = new
+							// EmptyFieldWidget(currentFieldAddress);
+							//
+							// }
+							widget = fieldEditor;
 							
 						} else {
 							widget = new EmptyFieldWidget(currentFieldAddress);

@@ -2,10 +2,8 @@ package org.xydra.gwt.editor;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
-import org.xydra.base.change.XFieldCommand;
 import org.xydra.base.change.XFieldEvent;
-import org.xydra.base.change.impl.memory.MemoryFieldCommand;
-import org.xydra.base.change.impl.memory.MemoryObjectCommand;
+import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.value.XAddressListValue;
 import org.xydra.base.value.XAddressSetValue;
 import org.xydra.base.value.XAddressSortedSetValue;
@@ -29,8 +27,6 @@ import org.xydra.base.value.XStringSetValue;
 import org.xydra.base.value.XStringValue;
 import org.xydra.base.value.XValue;
 import org.xydra.core.change.XFieldEventListener;
-import org.xydra.core.model.XField;
-import org.xydra.core.model.XObject;
 import org.xydra.gwt.editor.value.XAddressEditor;
 import org.xydra.gwt.editor.value.XAddressListEditor;
 import org.xydra.gwt.editor.value.XAddressSetEditor;
@@ -57,6 +53,7 @@ import org.xydra.gwt.editor.value.XValueUtils;
 import org.xydra.index.XI;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.webadmin.gwt.client.Controller;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -95,8 +92,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 	private static final int IDX_SET_ADDRESS_SORTED = 19;
 	private static final int IDX_SET_ID_SORTED = 20;
 	
-	private final XObject object;
-	private final XField field;
+	private final XReadableField field;
 	private final Label revision = new Label();
 	private final HorizontalPanel inner = new HorizontalPanel();
 	private final Button delete = new Button("Remove Field");
@@ -110,16 +106,12 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 	private Button cancel;
 	private XValueEditor editor;
 	
-	public XFieldEditor(XObject object, XField field) {
+	public XFieldEditor(XReadableField field2) {
 		
-		this.field = field;
-		this.field.addListenerForFieldEvents(this);
-		this.object = object;
+		this.field = field2;
 		
 		add(this.inner);
 		
-		this.inner.add(new Label(field.getId().toString()));
-		this.inner.add(new Label("="));
 		this.innerIndex = this.inner.getWidgetCount();
 		this.inner.add(this.contents);
 		this.inner.add(this.edit);
@@ -141,12 +133,11 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		
 		setStyleName("editor-xfield");
 		
-		changeValue(field.getValue());
+		changeValue(field2.getValue());
 	}
 	
 	protected void delete() {
-		this.object.executeCommand(MemoryObjectCommand.createRemoveCommand(this.field.getAddress()
-		        .getParent(), this.field.getRevisionNumber(), this.field.getId()));
+		Controller.getInstance().getDataModel().removeItem(this.field.getAddress());
 	}
 	
 	protected void changeValue(XValue value) {
@@ -264,6 +255,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		this.contents.setVisible(false);
 		
 		this.cancel = new Button("Cancel");
+		
 		this.inner.insert(this.cancel, this.innerIndex);
 		this.cancel.addClickHandler(new ClickHandler() {
 			@Override
@@ -408,20 +400,16 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 			return;
 		}
 		
-		XFieldCommand command;
 		if(this.field.isEmpty()) {
-			command = MemoryFieldCommand.createAddCommand(this.field.getAddress(),
-			        this.field.getRevisionNumber(), newValue);
+			Controller.getInstance().getDataModel().changeValue(this.field.getAddress(), newValue);
 		} else {
 			if(newValue == null) {
-				command = MemoryFieldCommand.createRemoveCommand(this.field.getAddress(),
-				        this.field.getRevisionNumber());
+				Controller.getInstance().getDataModel().removeItem(this.field.getAddress());
 			} else {
-				command = MemoryFieldCommand.createChangeCommand(this.field.getAddress(),
-				        this.field.getRevisionNumber(), newValue);
+				Controller.getInstance().getDataModel()
+				        .changeValue(this.field.getAddress(), newValue);
 			}
 		}
-		this.field.executeFieldCommand(command);
 	}
 	
 	protected void typeChanged() {

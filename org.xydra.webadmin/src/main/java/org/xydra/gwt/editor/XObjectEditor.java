@@ -58,7 +58,7 @@ public class XObjectEditor extends VerticalPanel implements XObjectEventListener
 			this.inner.add(delete);
 			delete.addClickHandler(new ClickHandler() {
 				@Override
-                public void onClick(ClickEvent e) {
+				public void onClick(ClickEvent e) {
 					delete();
 				}
 			});
@@ -66,13 +66,13 @@ public class XObjectEditor extends VerticalPanel implements XObjectEventListener
 		
 		this.add.addClickHandler(new ClickHandler() {
 			@Override
-            public void onClick(ClickEvent e) {
+			public void onClick(ClickEvent e) {
 				final PopupPanel pp = new PopupPanel(false, true);
 				HorizontalPanel layout = new HorizontalPanel();
 				final Button add = new Button("Add Field");
 				final XIDEditor editor = new XIDEditor(null, new EditListener() {
 					@Override
-                    public void newValue(XValue value) {
+					public void newValue(XValue value) {
 						add.setEnabled(value != null && value instanceof XID
 						        && !XObjectEditor.this.object.hasField(((XID)value)));
 					}
@@ -85,14 +85,14 @@ public class XObjectEditor extends VerticalPanel implements XObjectEventListener
 				pp.add(layout);
 				cancel.addClickHandler(new ClickHandler() {
 					@Override
-                    public void onClick(ClickEvent e) {
+					public void onClick(ClickEvent e) {
 						pp.hide();
 						pp.removeFromParent();
 					}
 				});
 				add.addClickHandler(new ClickHandler() {
 					@Override
-                    public void onClick(ClickEvent e) {
+					public void onClick(ClickEvent e) {
 						// TODO simply this block now that XID=XIDValue
 						XID value = editor.getValue();
 						if(value == null)
@@ -123,7 +123,7 @@ public class XObjectEditor extends VerticalPanel implements XObjectEventListener
 			log.info("editor: asked to add field " + fieldId + ", which doesn't exist (anymore)");
 			return;
 		}
-		XFieldEditor editor = new XFieldEditor(this.object, field);
+		XFieldEditor editor = new XFieldEditor(field);
 		this.fields.put(fieldId, editor);
 		// TODO sort
 		add(editor);
@@ -139,7 +139,7 @@ public class XObjectEditor extends VerticalPanel implements XObjectEventListener
 	}
 	
 	@Override
-    public void onChangeEvent(XObjectEvent event) {
+	public void onChangeEvent(XObjectEvent event) {
 		log.info("editor: got " + event);
 		if(event.getChangeType() == ChangeType.ADD) {
 			newField(event.getFieldId());
@@ -149,8 +149,8 @@ public class XObjectEditor extends VerticalPanel implements XObjectEventListener
 	}
 	
 	private void add(XID id) {
-		this.object.executeCommand(MemoryObjectCommand.createAddCommand(this.object.getAddress(),
-		        true, id), null);
+		this.object.executeCommand(
+		        MemoryObjectCommand.createAddCommand(this.object.getAddress(), true, id), null);
 	}
 	
 	protected void delete() {

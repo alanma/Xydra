@@ -6,7 +6,7 @@ import java.util.Set;
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.XType;
-import org.xydra.base.change.XAtomicCommand;
+import org.xydra.base.change.XCommandUtils;
 import org.xydra.base.change.XTransaction;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.core.change.SessionCachedModel;
@@ -205,24 +205,32 @@ public class Controller {
 		model.commitTo(txnBuilder);
 		XTransaction transaction = txnBuilder.build();
 		
-		for(XAtomicCommand xAtomicCommand : transaction) {
-			System.out
-			        .println("changes will be at " + xAtomicCommand.getChangedEntity().toString());
-		}
-		
 		this.service.executeCommand(this.lastClickedElement.getRepository(), transaction,
 		        new AsyncCallback<Long>() {
 			        
+			        String resultString = "";
+			        
 			        @Override
 			        public void onSuccess(Long result) {
-				        log.info("worked!");
+				        if(XCommandUtils.success(result)) {
+					        this.resultString = "successfully committed! New revision number: "
+					                + result;
+				        } else if(XCommandUtils.noChange(result)) {
+					        this.resultString = "no Changes!";
+				        } else if(XCommandUtils.failed(result)) {
+					        this.resultString = "commit failed!";
+				        } else {
+					        this.resultString = "i have no idea...";
+				        }
+				        
+				        Controller.this.tempStorage.notifyDialog(this.resultString);
 				        
 			        }
 			        
 			        @Override
 			        public void onFailure(Throwable caught) {
-				        log.error(caught.getMessage());
-				        caught.printStackTrace();
+				        Controller.this.tempStorage.notifyDialog(this.resultString + "error! \n"
+				                + caught.getMessage());
 				        
 			        }
 		        });
