@@ -216,7 +216,7 @@ public class DumpUtils {
 		Collections.sort(addedList, XidComparator.INSTANCE);
 		for(XReadableObject addedObject : addedList) {
 			sb.append("=== ADDED   Object '" + addedObject.getId() + "' ===<br/>\n");
-			sb.append(DumpUtils.toStringBuffer(addedObject));
+			sb.append(DumpUtils.toStringBuffer(addedObject).toString());
 		}
 		List<XID> removedList = new ArrayList<XID>(changedModel.getRemoved());
 		Collections.sort(removedList, XidComparator.INSTANCE);
@@ -229,7 +229,7 @@ public class DumpUtils {
 		for(IObjectDiff changedObject : potentiallyChangedList) {
 			if(changedObject.hasChanges()) {
 				sb.append("=== CHANGED Object '" + changedObject.getId() + "' === <br/>\n");
-				sb.append(changesToString(changedObject));
+				sb.append(changesToString(changedObject).toString());
 			}
 		}
 		return sb;
@@ -254,7 +254,7 @@ public class DumpUtils {
 		for(IFieldDiff changedField : potentiallyChangedList) {
 			if(changedField.isChanged()) {
 				sb.append("--- CHANGED Field '" + changedField.getId() + "' ---<br/>\n");
-				sb.append(changesToString(changedField));
+				sb.append(changesToString(changedField).toString());
 			}
 		}
 		return sb;

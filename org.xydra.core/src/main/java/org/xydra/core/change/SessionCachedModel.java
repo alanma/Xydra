@@ -2,10 +2,13 @@ package org.xydra.core.change;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.xydra.annotations.NeverNull;
 import org.xydra.base.XAddress;
@@ -156,6 +159,10 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 		public String toString() {
 			return "F:" + this.getId() + " {\n" + DumpUtils.toStringBuffer(this) + "Changes: \n"
 			        + DumpUtils.changesToString(this).toString() + "}";
+		}
+		
+		public void discardChanges() {
+			this.current = this.initial;
 		}
 		
 	}
@@ -340,6 +347,32 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 		public String toString() {
 			return "O:" + this.getId() + " {\n" + DumpUtils.toStringBuffer(this) + "Changes: \n"
 			        + DumpUtils.changesToString(this).toString() + "}";
+		}
+		
+		public void discardChanges() {
+			Set<XID> fieldsToDelete = new HashSet<XID>();
+			
+			Iterator<XID> iterator = this.cachedFields.keySet().iterator();
+			while(iterator.hasNext()) {
+				XID key = iterator.next();
+				CachedField cf = this.cachedFields.get(key);
+				if(cf.isAdded()) {
+					fieldsToDelete.add(key);
+				} else if(cf.isRemoved() || cf.isChanged())
+					if(cf.isRemoved()) {
+						if(cf.getRevisionNumber() < 0) {
+							fieldsToDelete.add(key);
+						} else {
+							cf.state = EntityState.Present;
+						}
+					}
+				
+				cf.discardChanges();
+			}
+			
+			for(XID xid : fieldsToDelete) {
+				this.cachedFields.remove(xid);
+			}
 		}
 	}
 	
@@ -766,6 +799,37 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 	
 	public boolean knowsAllObjects() {
 		return this.knowsAllObjectIds;
+	}
+	
+	/**
+	 * Removes all changes in the SessionCachedModel, its XObjects, their
+	 * XFields their XValues
+	 */
+	public void discardAllChanges() {
+		
+		Set<XID> objectsToDelete = new HashSet<XID>();
+		
+		for(Entry<XID,CachedObject> e : this.cachedObjects.entrySet()) {
+			XID key = e.getKey();
+			CachedObject co = e.getValue();
+			
+			if(co.isAdded()) {
+				objectsToDelete.add(key);
+			} else if(co.isRemoved() || co.hasChanges()) {
+				if(co.isRemoved()) {
+					if(co.getRevisionNumber() < 0) {
+						objectsToDelete.add(key);
+					} else {
+						co.state = EntityState.Present;
+					}
+				}
+				co.discardChanges();
+			}
+		}
+		
+		for(XID xid : objectsToDelete) {
+			this.cachedObjects.remove(xid);
+		}
 	}
 	
 }
