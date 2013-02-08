@@ -246,6 +246,8 @@ public class CsvTable extends CsvCoreTable implements ICsvTable, ICsvTableFactor
         writeTo(w, 0, this.rowCount());
     }
     
+    private boolean oversizeWarning = false;
+    
     /*
      * (non-Javadoc)
      * 
@@ -253,8 +255,10 @@ public class CsvTable extends CsvCoreTable implements ICsvTable, ICsvTableFactor
      */
     @Override
     public void writeTo(Writer w, int startRow, int endRow) throws IOException, ExcelLimitException {
-        if(endRow - startRow > EXCEL_MAX_ROWS) {
-            throw new ExcelLimitException("Exceeding Excels limit of " + EXCEL_MAX_ROWS + " rows");
+        if(!this.oversizeWarning && endRow - startRow > EXCEL_MAX_ROWS) {
+            log.warn("Exceeding Excels limit of " + EXCEL_MAX_ROWS
+                    + " rows - older versions of Excel cannot read it");
+            this.oversizeWarning = true;
         }
         log.debug("Writing rows " + startRow + " to " + endRow + " of " + this.rowCount()
                 + " rows with " + this.colCount() + " columns");
