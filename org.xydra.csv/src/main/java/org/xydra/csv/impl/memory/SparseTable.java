@@ -21,6 +21,7 @@ import org.xydra.csv.IRowVisitor;
 import org.xydra.csv.ISparseTable;
 import org.xydra.csv.RowFilter;
 import org.xydra.csv.WrongDatatypeException;
+import org.xydra.index.iterator.ReadOnlyIterator;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 
@@ -52,10 +53,62 @@ public class SparseTable implements ISparseTable {
     
     private IRowInsertionHandler rowInsertionHandler;
     
-    /* maintain row insertion order */
-    protected List<String> rowNames = new LinkedList<String>();
+    // ----------------- row handling
     
-    protected Map<String,Row> table = new TreeMap<String,Row>();
+    /* maintain any row insertion order */
+    private List<String> rowNames = new LinkedList<String>();
+    
+    /* automatically sorted */
+    private Map<String,Row> table = new TreeMap<String,Row>();
+    
+    private void insertRow(String rowName, Row row) {
+        if(this.rowCount() == EXCEL_MAX_ROWS) {
+            log.warn("Adding the " + EXCEL_MAX_ROWS + "th row - that is Excels limit");
+            if(this.restrictToExcelSize)
+                throw new ExcelLimitException("Row limit reached");
+        }
+        
+        /* new key? */
+        if(this.table.containsKey(rowName)) {
+            assert this.rowNames.contains(rowName);
+            // attempt a merge
+            IRow existingRow = this.getOrCreateRow(rowName, false);
+            
+            for(Map.Entry<String,ICell> entry : row.entrySet()) {
+                try {
+                    existingRow.setValue(entry.getKey(), entry.getValue().getValue(), true);
+                } catch(IllegalStateException ex) {
+                    throw new IllegalStateException("Table contains already a row named '"
+                            + rowName + "' and for key '" + entry.getKey()
+                            + "' there was already a value.", ex);
+                }
+            }
+        } else {
+            assert !this.rowNames.contains(rowName);
+            this.rowNames.add(rowName);
+            this.table.put(rowName, row);
+        }
+    }
+    
+    protected Iterable<String> rowNamesIterable() {
+        return this.rowNames;
+    }
+    
+    protected Iterator<String> subIterator(int startRow, int endRow) {
+        return this.rowNames.subList(startRow, endRow).iterator();
+    }
+    
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.xydra.csv.ICsvTable#iterator()
+     */
+    @Override
+    public Iterator<Row> iterator() {
+        return new ReadOnlyIterator<Row>(this.table.values().iterator());
+    }
+    
+    // -----------------
     
     public SparseTable() {
         this.columnNames = new TreeSet<String>();
@@ -197,7 +250,7 @@ public class SparseTable implements ISparseTable {
      * @see org.xydra.csv.ICsvTable#drop(java.lang.String, java.lang.String)
      */
     @Override
-    public ISparseTable drop(String columnName, String value) {
+    public ISparseTable dropColumn(String columnName, String value) {
         ISparseTable target = new SparseTable();
         for(String rowName : this.rowNames) {
             IRow sourceRow = this.getOrCreateRow(rowName, false);
@@ -246,9 +299,12 @@ public class SparseTable implements ISparseTable {
     @Override
     public Row getOrCreateRow(String rowName, boolean create) {
         Row row = this.table.get(rowName);
-        if(row == null && create) {
-            row = new Row(rowName, this);
-            this.insertRow(rowName, row);
+        if(row == null) {
+            assert !this.rowNames.contains(rowName);
+            if(create) {
+                row = new Row(rowName, this);
+                this.insertRow(rowName, row);
+            }
         }
         return row;
     }
@@ -295,43 +351,6 @@ public class SparseTable implements ISparseTable {
         c.incrementValue(increment);
     }
     
-    private void insertRow(String rowName, Row row) {
-        if(this.table.size() == EXCEL_MAX_ROWS) {
-            log.warn("Adding the " + EXCEL_MAX_ROWS + "th row - that is Excels limit");
-            if(this.restrictToExcelSize)
-                throw new ExcelLimitException("Row limit reached");
-        }
-        /* new key? */
-        if(this.table.containsKey(rowName)) {
-            // attempt a merge
-            IRow existingRow = this.getOrCreateRow(rowName, false);
-            
-            for(Map.Entry<String,ICell> entry : row.entrySet()) {
-                try {
-                    existingRow.setValue(entry.getKey(), entry.getValue().getValue(), true);
-                } catch(IllegalStateException ex) {
-                    throw new IllegalStateException("Table contains already a row named '"
-                            + rowName + "' and for key '" + entry.getKey()
-                            + "' there was already a value.", ex);
-                }
-            }
-        } else {
-            assert !this.rowNames.contains(rowName);
-            this.rowNames.add(rowName);
-            this.table.put(rowName, row);
-        }
-    }
-    
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.xydra.csv.ICsvTable#iterator()
-     */
-    @Override
-    public Iterator<Row> iterator() {
-        return this.table.values().iterator();
-    }
-    
     /*
      * (non-Javadoc)
      * 
@@ -342,9 +361,17 @@ public class SparseTable implements ISparseTable {
         Iterator<Entry<String,Row>> it = this.table.entrySet().iterator();
         while(it.hasNext()) {
             Map.Entry<String,Row> entry = it.next();
+            String rowName = entry.getKey();
             if(rowFilter.matches(entry.getValue())) {
                 it.remove();
+                this.rowNames.remove(rowName);
             }
+        }
+        
+        // FIXME
+        // Sanity check
+        for(String rowName : this.rowNames) {
+            assert this.table.get(rowName) != null;
         }
     }
     

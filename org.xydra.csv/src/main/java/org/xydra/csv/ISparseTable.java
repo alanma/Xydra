@@ -114,7 +114,7 @@ public interface ISparseTable extends Iterable<Row>, IRowHandler {
      * @return a sub-table with dropped rows. The resulting table has no row in
      *         which column 'columnName' has the given 'value'.
      */
-    ISparseTable drop(String columnName, String value);
+    ISparseTable dropColumn(String columnName, String value);
     
     /**
      * Create a sub-table
@@ -171,6 +171,8 @@ public interface ISparseTable extends Iterable<Row>, IRowHandler {
     
     /**
      * See also {@link Iterable#iterator()}.
+     * 
+     * Remove is forbidden.
      * 
      * Some implementations return elements sorted by row key.
      */
