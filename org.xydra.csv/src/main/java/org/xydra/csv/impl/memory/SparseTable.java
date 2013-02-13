@@ -196,7 +196,7 @@ public class SparseTable implements ISparseTable {
                 
                 // delete row
                 rowIt.remove();
-                // rowKeysToBeRemoved.add(row.getKey());
+                this.rowNames.remove(row.getKey());
             } else {
                 // just mark key as seen
                 compoundKeys2row.put(compoundKey, row);
@@ -207,11 +207,6 @@ public class SparseTable implements ISparseTable {
                 log.info("Aggregate processed " + processed + " rows, aggregated " + aggregated);
             }
         }
-        // // delete
-        // log.info("Deleting " + rowKeysToBeRemoved.size() + " rows");
-        // for (String rowKeyToBeRemoved : rowKeysToBeRemoved) {
-        // this.table.remove(rowKeyToBeRemoved);
-        // }
         log.info(this.rowCount() + " rows with aggregated data remain");
     }
     
@@ -302,9 +297,9 @@ public class SparseTable implements ISparseTable {
         if(row == null) {
             assert !this.rowNames.contains(rowName);
             if(create) {
-                row = new Row(rowName, this);
-                this.insertRow(rowName, row);
-            }
+            row = new Row(rowName, this);
+            this.insertRow(rowName, row);
+        }
         }
         return row;
     }
@@ -366,12 +361,6 @@ public class SparseTable implements ISparseTable {
                 it.remove();
                 this.rowNames.remove(rowName);
             }
-        }
-        
-        // FIXME
-        // Sanity check
-        for(String rowName : this.rowNames) {
-            assert this.table.get(rowName) != null;
         }
     }
     
