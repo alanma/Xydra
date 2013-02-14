@@ -1,5 +1,6 @@
 package org.xydra.webadmin.gwt.client;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -14,7 +15,10 @@ import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.datamodels.DataModel;
+import org.xydra.webadmin.gwt.client.util.TableController;
+import org.xydra.webadmin.gwt.client.util.TableController.Status;
 import org.xydra.webadmin.gwt.client.util.TempStorage;
+import org.xydra.webadmin.gwt.client.widgets.WarningWidget;
 import org.xydra.webadmin.gwt.client.widgets.editorpanel.EditorPanel;
 import org.xydra.webadmin.gwt.shared.XyAdminServiceAsync;
 
@@ -30,6 +34,8 @@ public class Controller {
 	private EditorPanel editorPanel;
 	private TempStorage tempStorage;
 	private XAddress lastClickedElement;
+	private WarningWidget warningWidget;
+	private TableController tableController;
 	
 	private static final Logger log = LoggerFactory.getLogger(XyAdmin.class);
 	
@@ -145,7 +151,7 @@ public class Controller {
 		XType addressedType = address.getAddressedType();
 		if(addressedType.equals(XType.XMODEL)) {
 			
-			XReadableModel localModel = this.dataModel.getRepo(repoId).getModel(modelId);
+			SessionCachedModel localModel = this.dataModel.getRepo(repoId).getModel(modelId);
 			
 			Controller.this.notifyEditorPanel(localModel);
 			
@@ -153,7 +159,7 @@ public class Controller {
 		this.lastClickedElement = address;
 	}
 	
-	private void notifyEditorPanel(XReadableModel result) {
+	private void notifyEditorPanel(SessionCachedModel result) {
 		this.editorPanel.notifyMe(result);
 		
 	}
@@ -166,15 +172,15 @@ public class Controller {
 		return this.lastClickedElement;
 	}
 	
-	public void loadCurrentData() {
+	public void loadCurrentModelsObjects() {
 		this.service.getModelSnapshot(this.lastClickedElement.getRepository(),
 		        this.lastClickedElement.getModel(), new AsyncCallback<XReadableModel>() {
 			        
 			        @Override
 			        public void onSuccess(XReadableModel result) {
-				        Controller.this.dataModel.getRepo(
-				                Controller.this.lastClickedElement.getRepository()).addBaseModel(
-				                result);
+				        Controller.this.dataModel
+				                .getRepo(Controller.this.lastClickedElement.getRepository())
+				                .getModel(result.getId()).indexModel(result);
 				        updateEditorPanel();
 			        }
 			        
@@ -223,6 +229,11 @@ public class Controller {
 					        this.resultString = "i have no idea...";
 				        }
 				        
+				        SessionCachedModel model2 = Controller.this.dataModel.getRepo(
+				                Controller.this.lastClickedElement.getRepository()).getModel(
+				                Controller.this.lastClickedElement.getModel());
+				        model2.markAsCommitted();
+				        Controller.this.loadCurrentModelsObjects();
 				        Controller.this.tempStorage.notifyDialog(this.resultString);
 				        
 			        }
@@ -241,5 +252,49 @@ public class Controller {
 		log.info("selection tree notified for address " + address.toString());
 		this.selectionTree.notifyMe(address);
 		
+	}
+	
+	public void displayError(String message) {
+		this.warningWidget.display(message);
+		
+	}
+	
+	public void registerWarningWidget(WarningWidget warningWidget) {
+		this.warningWidget = warningWidget;
+	}
+	
+	public void loadCurrentModelsIDs() {
+		this.service.getModelSnapshot(this.lastClickedElement.getRepository(),
+		        this.lastClickedElement.getModel(), new AsyncCallback<XReadableModel>() {
+			        
+			        @Override
+			        public void onSuccess(XReadableModel result) {
+				        
+				        HashSet<XID> objectIDs = new HashSet<XID>();
+				        for(XID xid : result) {
+					        objectIDs.add(xid);
+				        }
+				        
+				        SessionCachedModel currentModel = Controller.this.dataModel.getRepo(
+				                Controller.this.lastClickedElement.getRepository()).getModel(
+				                result.getId());
+			        }
+			        
+			        @Override
+			        public void onFailure(Throwable caught) {
+				        log.warn("Error", caught);
+				        
+			        }
+		        });
+		
+	}
+	
+	public void registerTableController(TableController tableController) {
+		this.tableController = tableController;
+		
+	}
+	
+	public void notifyTableController(XAddress eventLocation, Status status) {
+		this.tableController.notifyTable(eventLocation, status);
 	}
 }

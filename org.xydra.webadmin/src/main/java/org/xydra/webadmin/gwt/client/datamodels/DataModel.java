@@ -5,6 +5,7 @@ import java.util.Iterator;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
+import org.xydra.base.XX;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.value.XValue;
@@ -12,6 +13,7 @@ import org.xydra.core.change.SessionCachedModel;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.Controller;
+import org.xydra.webadmin.gwt.client.util.TableController.Status;
 
 
 public class DataModel {
@@ -71,18 +73,19 @@ public class DataModel {
 		        + field.getRevisionNumber() + ")";
 		log.warn(beforeString + afterString);
 		
-		Controller.getInstance().updateEditorPanel();
+		Controller.getInstance().notifyTableController(address, Status.Opened);
 		
 	}
 	
-	public void addObject(XAddress address, XID objectID) {
-		RepoDataModel repo = this.repoModels.get(address.getRepository());
-		SessionCachedModel model = repo.getModel(address.getModel());
+	public void addObject(XAddress modelAddress, XID objectID) {
+		RepoDataModel repo = this.repoModels.get(modelAddress.getRepository());
+		SessionCachedModel model = repo.getModel(modelAddress.getModel());
 		model.createObject(objectID);
 		
-		log.info("object " + objectID.toString() + " added to " + address.toString());
+		log.info("object " + objectID.toString() + " added to " + modelAddress.toString());
 		
-		Controller.getInstance().updateEditorPanel();
+		Controller.getInstance().notifyTableController(XX.resolveObject(modelAddress, objectID),
+		        Status.Opened);
 		
 	}
 	
@@ -111,12 +114,14 @@ public class DataModel {
 			XWritableObject object = model.getObject(address.getObject());
 			object.removeField(address.getField());
 			log.info("deleted field " + address.getField().toString());
-			Controller.getInstance().updateEditorPanel();
+			Controller.getInstance().notifyTableController(address, Status.Opened);
 			break;
 		case XOBJECT:
+			log.info("object to be removed: " + model.getObject(address.getObject()).toString());
 			model.removeObject(address.getObject());
+			log.info("new object status: " + model.getObject(address.getObject()).toString());
 			log.info("deleted object " + address.getObject().toString());
-			Controller.getInstance().updateEditorPanel();
+			Controller.getInstance().notifyTableController(address, Status.Deleted);
 			break;
 		default:
 			break;
@@ -134,7 +139,31 @@ public class DataModel {
 		
 		// changeValue(address, value);
 		
-		Controller.getInstance().updateEditorPanel();
+		Controller.getInstance().notifyTableController(address, Status.Opened);
 		
+	}
+	
+	public void loadEntity(XAddress typedAddress) {
+		
+		XID repoID = typedAddress.getRepository();
+		RepoDataModel repoDataModel = this.repoModels.get(repoID);
+		if(repoDataModel == null) {
+			
+			log.error("no such repo found!");
+			return;
+		} else {
+			SessionCachedModel model = repoDataModel.getModel(typedAddress.getModel());
+			if(model == null) {
+				log.error("no such model found!");
+				return;
+			} else {
+				XID objectID = typedAddress.getObject();
+				if(objectID == null) {
+					// Controller.getInstance().openView(model);
+				} else {
+					// an object = model.getObject(objectID)
+				}
+			}
+		}
 	}
 }

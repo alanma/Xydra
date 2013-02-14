@@ -9,17 +9,32 @@
 .sessionLabelDummy {
 	background-color: cyan;
 	width: 1200px;
-	height: 150px;
+	height: 75px;
 }
 
+/* selection tree  */
 .treeMainPanel {
 	width: 320px;
-	height: 1000px;
+	/* 	height: 1000px; */
+	margin: 1px;
+}
+
+.treeMainPanel td,.treeMainPanel tr,.treeMainPanel div,.treeMainPanel table
+	{
+	padding: 1px;
+	margin: 1px;
+	border-spacing: 1px;
+	/* 	border: 0px; */
+}
+
+.treeButtonPanelStyle td {
+	border: 0px;
+	text-align: auto;
 }
 
 .editorLabelDummy {
 	background-color: olive;
-	/* 	width: 900px; */
+	width: 900px;
 	height: 1000px;
 }
 
@@ -39,14 +54,13 @@
 }
 
 .editorPanel {
-	height: 1000px;
+	height: 500px;
 	/* 	width: 880px; */
 }
 
 .informationPanel {
-	height: 950px;
+	height: 800px;
 	/* 	width: 800px; */
-	background-color: gray;
 }
 
 .headerStyle {
@@ -85,45 +99,142 @@
 
 .dialogStyle {
 	background-color: lightgrey;
-	border: 3px solid #009;
+	border: 1px solid #009;
 }
 
-.dialogStyle .Caption  {
+.dialogStyle .Caption {
 	background-color: #ff0;
 	font-size: 90%;
 	font-weight: bold;
 	border-bottom: 3px solid #009;
 	padding: 5px;
 	text-align: center;
-	cursor: move;
+	cursor: pointermove;
 }
 
-.dialogStyle td, .dialogStyle div, .dialogStyle table {
+.dialogStyle td,.dialogStyle div,.dialogStyle table {
 	padding: 0px;
 	margin: 0px;
 	border-spacing: 0px;
 	border: 0px;
-	
 }
 
 .dialogStyle .buttonPanelStyle {
 	margin: auto;
 }
 
-.textAreaStyle 
-{
+.textAreaStyle {
 	width: 200px;
 }
 
-.defaultLabelStyle
-{
+.defaultLabelStyle {
 	width: 800px;
 	height: 800px;
 	font-style: italic;
 	margin: auto;
 }
 
-.noData
-{
+.noData {
 	font-style: italic;
+}
+
+.fieldIDWidget td,.fieldValueInfo td {
+	border: 0px;
+}
+
+.fieldIDWidget {
+	
+}
+
+.editorStyle td {
+	border-top: 1px solid #ccc;
+	border-bottom: 1px solid #ccc;
+}
+
+.editorStyle tbody {
+	border: 1px solid #ccc;
+}
+
+.compactTable {
+	margin: 0px;
+	padding: 0px;
+	border-spacing: 0px;
+	border: 0px;
+}
+
+.cellElement {
+	width: 200px;
+	height: 200px;
+}
+
+.scrollTableStyle {
+	height: 900px;
+	padding: 0;
+	margin: 0;
+}
+
+.scrollTableStyle>div {
+	padding: 0;
+	margin: 0;
+}
+
+.cellHeight {
+	height: 150px;
+}
+
+.cellWidth {
+	width: 200px;
+	margin: 0;
+	padding: 0;
+}
+
+.rowHeaderWidth {
+	width: 200px; margin : 0;
+	padding: 0;
+	margin: 0;
+}
+
+.rowHeaderStyle {
+	
+}
+
+.rowHeaderStyle td {
+	border: 0px;
+	margin: 0px;
+	padding: 0px;
+}
+
+.valueLabelWidth {
+	width: 180px;
+}
+
+.evenRow {
+/* background-color : rgb(187, 187, 187);} */
+		background-color : rgba(255, 105, 0, 0.6);
+
+}
+.oddRow {
+/* 		background-color : rgba(155, 155, 155, 0.23); */
+/* 		color: #FF6900; */
+		background-color : rgba(255, 105, 0, 1.0);
+	
+}
+
+.noBorder td{
+	border: 0;
+}
+
+.repoBranchBorder
+{
+	border: 1px solid #009;
+}
+
+.modelAnchorStyle
+{
+	font-size: 18px;
+		font-style: normal;
+		text-decoration: underline;
+		cursor: pointer;
+			margin-bottom: 5px;
+		
 }

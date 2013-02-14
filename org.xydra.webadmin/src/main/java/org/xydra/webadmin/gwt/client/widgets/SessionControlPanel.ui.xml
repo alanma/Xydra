@@ -3,13 +3,16 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:c='urn:import:com.google.gwt.user.cellview.client'
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="urn:ui:com.google.gwt.uibinder http://google-web-toolkit.googlecode.com/svn-history/trunk/user/src/com/google/gwt/uibinder/resources/UiBinder.xsd"
-	xmlns:w="urn:import:org.xydra.webadmin.gwt.client.widgets"
-	>
+	xmlns:w="urn:import:org.xydra.webadmin.gwt.client.widgets">
 
-	<g:HTMLPanel styleName="model">
+	
 
-		<g:Label ui:field="dummyLabel" styleName="sessionLabelDummy"> Hier werden sich die Session-Bedienelemente befinden </g:Label>
+	<g:HTMLPanel styleName="sessionLabelDummy">
 
+		<g:Label ui:field="dummyLabel"> Hier werden sich die
+			Session-Bedienelemente befinden </g:Label>
+
+		<w:AddressWidget ></w:AddressWidget>
 	</g:HTMLPanel>
 
 </ui:UiBinder> 

@@ -50,10 +50,6 @@ public class TempStorage {
 		Controller.getInstance().notifySelectionTree(reducedAddress);
 		log.info("inspecting address " + address.toString() + " which has object: "
 		        + address.getObject().toString());
-		if(address.getObject() != null) {
-			log.info("updating Editor panel!");
-			Controller.getInstance().updateEditorPanel();
-		}
 		
 	}
 	

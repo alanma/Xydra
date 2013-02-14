@@ -36,6 +36,11 @@ public class XAddressEditor extends AtomicXValueEditor<XAddress> implements KeyP
 		initWidget(this.editor);
 	}
 	
+	public void setValue(XAddress value) {
+		if(value != null)
+			this.editor.setText(value.toString());
+	}
+	
 	@Override
 	public XAddress getValue() {
 		XAddress xid;
@@ -52,7 +57,7 @@ public class XAddressEditor extends AtomicXValueEditor<XAddress> implements KeyP
 	}
 	
 	@Override
-    public void onKeyPress(KeyPressEvent e) {
+	public void onKeyPress(KeyPressEvent e) {
 		
 		char cc = e.getCharCode();
 		
@@ -88,7 +93,7 @@ public class XAddressEditor extends AtomicXValueEditor<XAddress> implements KeyP
 	}
 	
 	@Override
-    public void onKeyDown(KeyDownEvent e) {
+	public void onKeyDown(KeyDownEvent e) {
 		boolean allowed = true;
 		
 		switch(e.getNativeKeyCode()) {
@@ -104,7 +109,7 @@ public class XAddressEditor extends AtomicXValueEditor<XAddress> implements KeyP
 				break;
 			}
 		}
-			//$FALL-THROUGH$
+		//$FALL-THROUGH$
 		case KeyCodes.KEY_DELETE: {
 			if(this.editor.getCursorPos() > 0)
 				break;
@@ -118,7 +123,7 @@ public class XAddressEditor extends AtomicXValueEditor<XAddress> implements KeyP
 			allowed = c.matches(startClass);
 			
 		}
-			
+		
 		}
 		
 		if(!allowed) {

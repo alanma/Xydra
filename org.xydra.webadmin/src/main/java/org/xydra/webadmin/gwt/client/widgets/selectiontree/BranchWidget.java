@@ -22,6 +22,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -39,6 +40,8 @@ public class BranchWidget extends Composite implements Observable {
 	private HashMap<XID,BranchWidget> existingBranches;
 	private XAddress address;
 	
+	@UiField
+	VerticalPanel mainPanel;
 	@UiField
 	VerticalPanel branches;
 	@UiField
@@ -73,13 +76,23 @@ public class BranchWidget extends Composite implements Observable {
 			plusButtonText = "add Model";
 			
 			this.removeModelButton.removeFromParent();
+			
+			this.mainPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
+			this.mainPanel.addStyleName("repoBranchBorder");
+			
 		} else {
 			this.expandButton.removeFromParent();
 			this.fetchModelsButton.removeFromParent();
+			this.anchor.setStyleName("modelAnchorStyle");
+			this.buttonPanel.getElement().setAttribute("style", "margin-bottom: 5px;");
+			
 		}
 		this.anchor.setText(id.toString());
 		
 		this.addButton.setText(plusButtonText);
+		
+		this.mainPanel
+		        .setCellHorizontalAlignment(this.branches, HasHorizontalAlignment.ALIGN_RIGHT);
 		
 	}
 	
@@ -133,6 +146,10 @@ public class BranchWidget extends Composite implements Observable {
 	}
 	
 	private void addBranch(XID modelId) {
+		if(this.branches.getWidgetCount() == 0) {
+			this.buttonPanel.getElement().setAttribute("style",
+			        "border-bottom: 1px solid #009; margin-bottom: 5px");
+		}
 		XAddress address = buildChildAddress(modelId);
 		BranchWidget newBranch = new BranchWidget(address);
 		this.branches.add(newBranch);

@@ -5,7 +5,7 @@
 	xsi:schemaLocation="urn:ui:com.google.gwt.uibinder http://google-web-toolkit.googlecode.com/svn-history/trunk/user/src/com/google/gwt/uibinder/resources/UiBinder.xsd"
 	xmlns:w="urn:import:org.xydra.webadmin.gwt.client.widgets" xmlns:ak="urn:import:org.xydra.webadmin.gwt.client.widgets.version2">
 
-	<g:VerticalPanel ui:field="mainPanel" styleName="fieldValueInfo">
+	<g:VerticalPanel ui:field="mainPanel" horizontalAlignment="center" verticalAlignment="middle" styleName="fieldValueInfo cellHeight cellWidth">
 
 		<g:Button ui:field="addButton" styleName="emptyFieldButtonStyle"> + </g:Button>
 	

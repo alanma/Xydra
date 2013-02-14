@@ -1,11 +1,12 @@
 package org.xydra.webadmin.gwt.client.widgets.editorpanel;
 
-import org.xydra.core.change.SessionCachedModel;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.Controller;
 import org.xydra.webadmin.gwt.client.XyAdmin;
 import org.xydra.webadmin.gwt.client.widgets.dialogs.CommittingDialog;
+import org.xydra.webadmin.gwt.client.widgets.dialogs.ConfirmationDialog;
+import org.xydra.webadmin.gwt.client.widgets.dialogs.NYIDialog;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -32,7 +33,10 @@ public class ModelControlPanel extends Composite {
 	HorizontalPanel mainPanel;
 	
 	@UiField
-	Button loadAllButton;
+	Button loadAllObjectsButton;
+	
+	@UiField
+	Button loadAllIDsButton;
 	
 	@UiField
 	Button commitModelChangesButton;
@@ -45,9 +49,16 @@ public class ModelControlPanel extends Composite {
 		initWidget(uiBinder.createAndBindUi(this));
 	}
 	
-	@UiHandler("loadAllButton")
-	void onClickFetch(ClickEvent event) {
-		Controller.getInstance().loadCurrentData();
+	@UiHandler("loadAllIDsButton")
+	void onClickFetchIDs(ClickEvent event) {
+		// Controller.getInstance().loadCurrentModelsIDs();
+		NYIDialog dialog = new NYIDialog();
+		dialog.show();
+	}
+	
+	@UiHandler("loadAllObjectsButton")
+	void onClickFetchObjects(ClickEvent event) {
+		Controller.getInstance().loadCurrentModelsObjects();
 		
 	}
 	
@@ -60,8 +71,8 @@ public class ModelControlPanel extends Composite {
 	
 	@UiHandler("discardModelChangesButton")
 	public void onClickDiscard(ClickEvent event) {
-		SessionCachedModel model = Controller.getInstance().getDataModel()
-		        .getRepo(Controller.getInstance().getSelectedModelAddress().getRepository())
-		        .getModel(Controller.getInstance().getSelectedModelAddress().getModel());
+		
+		ConfirmationDialog dialog = new ConfirmationDialog("discard all Changes");
+		
 	}
 }

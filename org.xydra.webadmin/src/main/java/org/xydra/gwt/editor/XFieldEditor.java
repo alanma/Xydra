@@ -60,6 +60,7 @@ import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
@@ -94,11 +95,14 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 	
 	private final XReadableField field;
 	private final Label revision = new Label();
-	private final HorizontalPanel inner = new HorizontalPanel();
-	private final Button delete = new Button("Remove Field");
+	private final Button delete = new Button("x");
 	private final Label contents = new Label();
 	private final Button edit = new Button("Edit");
 	private final int innerIndex;
+	
+	private HorizontalPanel upperPanel = new HorizontalPanel();
+	private HorizontalPanel middlePanel = new HorizontalPanel();
+	private HorizontalPanel lowerPanel = new HorizontalPanel();
 	
 	private ListBox type;
 	private Button add;
@@ -110,12 +114,21 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		
 		this.field = field2;
 		
-		add(this.inner);
+		this.add(this.upperPanel);
+		this.add(this.middlePanel);
+		this.add(this.lowerPanel);
 		
-		this.innerIndex = this.inner.getWidgetCount();
-		this.inner.add(this.contents);
-		this.inner.add(this.edit);
-		this.inner.add(this.delete);
+		this.upperPanel.addStyleName("editorStyle");
+		this.middlePanel.addStyleName("editorStyle");
+		this.lowerPanel.addStyleName("editorStyle");
+		
+		this.innerIndex = this.getWidgetCount();
+		this.contents.addStyleName("valueLabelWidth");
+		this.upperPanel.add(this.contents);
+		this.middlePanel.add(this.edit);
+		this.middlePanel.add(this.delete);
+		
+		this.setCellHorizontalAlignment(this.middlePanel, HasHorizontalAlignment.ALIGN_CENTER);
 		
 		this.edit.addClickHandler(new ClickHandler() {
 			@Override
@@ -131,7 +144,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 			}
 		});
 		
-		setStyleName("editor-xfield");
+		this.setStyleName("editor-xfield");
 		
 		changeValue(field2.getValue());
 	}
@@ -243,6 +256,9 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		this.cancel = null;
 		this.type = null;
 		
+		this.upperPanel.remove(this.delete);
+		this.middlePanel.add(this.delete);
+		this.middlePanel.setVisible(true);
 	}
 	
 	public void showEditor() {
@@ -254,9 +270,12 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		this.edit.setVisible(false);
 		this.contents.setVisible(false);
 		
+		this.upperPanel.add(this.delete);
+		this.middlePanel.remove(this.delete);
+		
 		this.cancel = new Button("Cancel");
 		
-		this.inner.insert(this.cancel, this.innerIndex);
+		this.lowerPanel.add(this.cancel);
 		this.cancel.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent arg0) {
@@ -265,7 +284,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		});
 		
 		this.save = new Button("Save");
-		this.inner.insert(this.save, this.innerIndex);
+		this.lowerPanel.add(this.save);
 		this.save.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent arg0) {
@@ -274,7 +293,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		});
 		
 		this.add = new Button("Add Entry");
-		this.inner.insert(this.add, this.innerIndex);
+		this.lowerPanel.insert(this.add, 0);
 		this.add.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent e) {
@@ -305,7 +324,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		this.type.addItem("sorted address set");
 		this.type.addItem("sorted id set");
 		
-		this.inner.insert(this.type, this.innerIndex);
+		this.upperPanel.insert(this.type, 0);
 		this.type.addChangeHandler(new ChangeHandler() {
 			@Override
 			public void onChange(ChangeEvent e) {
@@ -501,9 +520,10 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		if(this.editor != null) {
 			if(this.editor instanceof XCollectionEditor<?,?>) {
 				add(this.editor);
+				this.middlePanel.setVisible(false);
 				this.add.setVisible(true);
 			} else {
-				this.inner.insert(this.editor, this.innerIndex + 1);
+				this.middlePanel.add(this.editor);
 				this.add.setVisible(false);
 			}
 		}

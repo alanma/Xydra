@@ -3,7 +3,9 @@ package org.xydra.webadmin.gwt.client.widgets.tablewidgets;
 import org.xydra.base.XAddress;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.webadmin.gwt.client.Controller;
 import org.xydra.webadmin.gwt.client.XyAdmin;
+import org.xydra.webadmin.gwt.client.util.TableController.Status;
 import org.xydra.webadmin.gwt.client.widgets.dialogs.AddElementDialog;
 import org.xydra.webadmin.gwt.client.widgets.dialogs.RemoveElementDialog;
 
@@ -14,6 +16,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -33,7 +36,7 @@ public class RowHeaderWidget extends Composite {
 	VerticalPanel panel;
 	
 	@UiField
-	Label idLabel;
+	HTML idLabel;
 	
 	@UiField
 	Label revisionLabel;
@@ -44,17 +47,29 @@ public class RowHeaderWidget extends Composite {
 	@UiField
 	Button addFieldButton;
 	
+	@UiField
+	Button expandButton;
+	
 	private XAddress address;
 	
-	public RowHeaderWidget(XAddress address, long revisionNumber) {
+	private Status status;
+	
+	public RowHeaderWidget(XAddress address, long revisionNumber, Status status) {
 		super();
 		initWidget(uiBinder.createAndBindUi(this));
 		
 		this.address = address;
+		this.status = status;
 		
-		this.idLabel.setText(address.getObject().toString());
+		this.idLabel.setHTML("<b>" + address.getObject().toString() + "</b>");
 		
-		this.revisionLabel.setText("" + revisionNumber);
+		this.revisionLabel.setText("rev. " + revisionNumber);
+		
+		if(this.status.equals(Status.Present)) {
+			this.expandButton.setText("o p e n");
+		} else if(this.status.equals(Status.Opened)) {
+			this.expandButton.setText("c l o s e");
+		}
 		
 	}
 	
@@ -73,5 +88,17 @@ public class RowHeaderWidget extends Composite {
 		addDialog.show();
 		addDialog.selectEverything();
 		
+	}
+	
+	@UiHandler("expandButton")
+	void onClickExpand(ClickEvent e) {
+		if(this.status.equals(Status.Present)) {
+			this.status = Status.Opened;
+			this.expandButton.setText("c l o s e");
+		} else if(this.status.equals(Status.Opened)) {
+			this.status = Status.Present;
+			this.expandButton.setText("o p e n");
+		}
+		Controller.getInstance().notifyTableController(this.address, this.status);
 	}
 }

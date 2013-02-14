@@ -6,7 +6,7 @@
 	xmlns:w="urn:import:org.xydra.webadmin.gwt.client.widgets"
 	xmlns:ak="urn:import:org.xydra.webadmin.gwt.client.widgets.version2">
 
-		<g:VerticalPanel ui:field="mainPanel" styleName="treeMainPanel"/>
+		<g:VerticalPanel ui:field="mainPanel" styleName="treeMainPanel noBorder"/>
 
 </ui:UiBinder> 
 

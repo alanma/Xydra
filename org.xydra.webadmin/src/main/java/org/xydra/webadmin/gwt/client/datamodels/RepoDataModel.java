@@ -5,7 +5,6 @@ import java.util.Iterator;
 
 import org.xydra.base.XID;
 import org.xydra.base.XX;
-import org.xydra.base.rmof.XReadableModel;
 import org.xydra.core.change.SessionCachedModel;
 
 
@@ -43,12 +42,6 @@ public class RepoDataModel {
 	public SessionCachedModel getModel(XID modelId) {
 		
 		return this.models.get(modelId);
-	}
-	
-	public void addBaseModel(XReadableModel result) {
-		SessionCachedModel cachedModel = this.models.get(result.getId());
-		
-		cachedModel.indexModel(result);
 	}
 	
 	public void removeModel(XID model) {

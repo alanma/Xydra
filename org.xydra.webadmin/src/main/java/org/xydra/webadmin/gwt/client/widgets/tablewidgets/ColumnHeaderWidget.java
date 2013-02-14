@@ -9,8 +9,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 
@@ -31,7 +31,7 @@ public class ColumnHeaderWidget extends Composite {
 	private static ViewUiBinder uiBinder = GWT.create(ViewUiBinder.class);
 	
 	@UiField
-	VerticalPanel panel;
+	HTMLPanel panel;
 	
 	@UiField
 	Label idLabel;

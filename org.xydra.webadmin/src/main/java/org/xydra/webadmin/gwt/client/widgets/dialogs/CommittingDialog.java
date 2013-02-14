@@ -1,13 +1,19 @@
 package org.xydra.webadmin.gwt.client.widgets.dialogs;
 
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XID;
 import org.xydra.base.rmof.XReadableField;
+import org.xydra.base.rmof.XReadableObject;
 import org.xydra.core.change.SessionCachedModel;
+import org.xydra.core.model.delta.DeltaUtils;
 import org.xydra.core.model.delta.DeltaUtils.IFieldDiff;
 import org.xydra.core.model.delta.DeltaUtils.IObjectDiff;
+import org.xydra.core.util.DumpUtils;
+import org.xydra.core.util.DumpUtils.XidComparator;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.Controller;
@@ -20,6 +26,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -72,46 +79,11 @@ public class CommittingDialog extends DialogBox {
 	
 	private void showChanges() {
 		
-		boolean changesHappened = false;
-		
-		this.changesPanel.add(new Label("changes: "));
-		
 		Controller controller = Controller.getInstance();
 		XAddress selectedModel = controller.getSelectedModelAddress();
 		SessionCachedModel model = controller.getDataModel().getRepo(selectedModel.getRepository())
 		        .getModel(selectedModel.getModel());
-		
-		Collection<? extends IObjectDiff> objectChanges = model.getPotentiallyChanged();
-		for(IObjectDiff iObjectDiff : objectChanges) {
-			changesHappened = true;
-			this.changesPanel.add(new Label("changes in Object " + iObjectDiff.getId().toString()));
-			
-			Collection<? extends IFieldDiff> fieldChanges = iObjectDiff.getPotentiallyChanged();
-			for(IFieldDiff iFieldDiff : fieldChanges) {
-				this.changesPanel
-				        .add(new Label("changes in Field " + iFieldDiff.getId().toString()));
-				this.changesPanel.add(new Label("old Value: " + iFieldDiff.getInitialValue()
-				        + ", new Value: " + iFieldDiff.getValue()));
-				
-			}
-			
-			Collection<? extends XReadableField> addedFields = iObjectDiff.getAdded();
-			for(XReadableField xReadableField : addedFields) {
-				this.changesPanel.add(new Label("added Field " + xReadableField.getId().toString()
-				        + "with value: " + xReadableField.getValue()));
-			}
-			
-			Collection<XID> removedFields = iObjectDiff.getRemoved();
-			for(XID xid : removedFields) {
-				this.changesPanel.add(new Label("removed Field " + xid.toString()));
-			}
-		}
-		
-		if(!changesHappened) {
-			this.mainPanel.clear();
-			this.mainPanel.add(new Label("no Changes!"));
-			this.addCloseOKButton();
-		}
+		this.changesPanel.add(new HTML("Changes: " + changesToString(model).toString()));
 		
 	}
 	
@@ -132,5 +104,62 @@ public class CommittingDialog extends DialogBox {
 			}
 		});
 		this.mainPanel.add(okButton);
+	}
+	
+	public static StringBuilder changesToString(final DeltaUtils.IModelDiff changedModel) {
+		StringBuilder sb = new StringBuilder();
+		List<XReadableObject> addedList = new ArrayList<XReadableObject>(changedModel.getAdded());
+		Collections.sort(addedList, XidComparator.INSTANCE);
+		for(XReadableObject addedObject : addedList) {
+			sb.append("<br><br>=== ADDED   Object '" + addedObject.getId() + "' ===<br/>\n");
+			sb.append(DumpUtils.toStringBuffer(addedObject).toString());
+		}
+		List<XID> removedList = new ArrayList<XID>(changedModel.getRemoved());
+		Collections.sort(removedList, XidComparator.INSTANCE);
+		for(XID removedObjectId : removedList) {
+			sb.append("<br><br>=== REMOVED Object '" + removedObjectId + "' ===<br/>\n");
+		}
+		List<IObjectDiff> potentiallyChangedList = new ArrayList<IObjectDiff>(
+		        changedModel.getPotentiallyChanged());
+		Collections.sort(potentiallyChangedList, XidComparator.INSTANCE);
+		for(IObjectDiff changedObject : potentiallyChangedList) {
+			if(changedObject.hasChanges()) {
+				sb.append("<br><br>=== CHANGED Object '" + changedObject.getId() + "' === <br/>\n");
+				sb.append(changesToString(changedObject).toString());
+			}
+		}
+		return sb;
+	}
+	
+	public static StringBuilder changesToString(final DeltaUtils.IObjectDiff changedObject) {
+		StringBuilder sb = new StringBuilder();
+		List<XReadableField> addedList = new ArrayList<XReadableField>(changedObject.getAdded());
+		Collections.sort(addedList, XidComparator.INSTANCE);
+		for(XReadableField field : addedList) {
+			sb.append("--- ADDED Field '" + field.getId() + "' ---<br/>\n");
+			sb.append(DumpUtils.toStringBuffer(field));
+		}
+		List<XID> removedList = new ArrayList<XID>(changedObject.getRemoved());
+		Collections.sort(removedList, XidComparator.INSTANCE);
+		for(XID objectId : changedObject.getRemoved()) {
+			sb.append("--- REMOVED Field '" + objectId + "' ---<br/>\n");
+		}
+		List<IFieldDiff> potentiallyChangedList = new ArrayList<IFieldDiff>(
+		        changedObject.getPotentiallyChanged());
+		Collections.sort(potentiallyChangedList, XidComparator.INSTANCE);
+		for(IFieldDiff changedField : potentiallyChangedList) {
+			if(changedField.isChanged()) {
+				sb.append("--- CHANGED Field '" + changedField.getId() + "' ---<br/>\n");
+				sb.append(changesToString(changedField).toString());
+			}
+		}
+		return sb;
+	}
+	
+	public static StringBuilder changesToString(final DeltaUtils.IFieldDiff changedField) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("'" + changedField.getInitialValue() + "' ==> '" + changedField.getValue()
+		        + "' \n");
+		return sb;
 	}
 }

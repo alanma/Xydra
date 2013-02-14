@@ -9,7 +9,7 @@ xmlns:ep="urn:import:org.xydra.webadmin.gwt.client.widgets.editorpanel" xmlns:st
 
 		<g:Label ui:field="information">derzeit lokal geladene Objekte: </g:Label>
 
-		<g:HorizontalPanel ui:field="tablePanel" />
+		<g:ScrollPanel ui:field="tablePanel" />
 	</g:HTMLPanel>
 
 </ui:UiBinder> 

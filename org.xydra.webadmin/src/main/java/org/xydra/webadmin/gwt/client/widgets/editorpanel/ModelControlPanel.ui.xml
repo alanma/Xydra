@@ -9,7 +9,8 @@ xmlns:ep="urn:import:org.xydra.webadmin.gwt.client.widgets.editorpanel" xmlns:st
 
 		<g:HorizontalPanel ui:field="mainPanel">
 
-			<g:Button ui:field="loadAllButton">load all Objects from repo</g:Button>
+			<g:Button ui:field="loadAllIDsButton">load all IDs from repo</g:Button>
+			<g:Button ui:field="loadAllObjectsButton">load all Objects from repo</g:Button>
 			<g:Button ui:field="commitModelChangesButton">check changes and maybe commit</g:Button>
 			<g:Button ui:field="discardModelChangesButton">discard all changes</g:Button>
 

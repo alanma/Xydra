@@ -28,8 +28,8 @@ h1,h2,h3,h4 {
 
 div,span,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,code,img,dl,dt,dd,ol,ul,li,table,tbody,tfoot,thead,tr,th,td
 	{
-	margin: 4px;
-	padding: 2px;
+	margin: 1px;
+	padding: 1px;
 }
 
 dl {
