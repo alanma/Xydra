@@ -9,9 +9,9 @@ import java.lang.annotation.RetentionPolicy;
  * A setting that allows to fine-tune behaviour at runtime or compile time.
  */
 @Documented
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.RUNTIME)
 public @interface Setting {
-	
-	String value();
-	
+    
+    String value();
+    
 }
