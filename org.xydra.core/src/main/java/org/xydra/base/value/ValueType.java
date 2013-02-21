@@ -239,14 +239,14 @@ public enum ValueType {
         if(xydraInterface.equals(XStringValue.class)) {
             return String;
         }
-        throw new IllegalArgumentException("Don't know how to map '"
-                + xydraInterface.getCanonicalName() + "' to a ValueType");
+        throw new IllegalArgumentException("Don't know how to map '" + xydraInterface.getName()
+                + "' to a ValueType");
     }
     
-    public static void main(String[] args) {
-        for(ValueType v : ValueType.values()) {
-            System.out.println(v.getXydraInterface().getSimpleName() + ".class, ");
-        }
-    }
+    // public static void main(String[] args) {
+    // for(ValueType v : ValueType.values()) {
+    // System.out.println(v.getXydraInterface().getSimpleName() + ".class, ");
+    // }
+    // }
     
 }
