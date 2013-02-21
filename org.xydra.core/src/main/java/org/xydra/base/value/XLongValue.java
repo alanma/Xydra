@@ -7,12 +7,12 @@ package org.xydra.base.value;
  * 
  */
 public interface XLongValue extends XNumberValue, XSingleValue<Long> {
-	
-	/**
-	 * Return the stored Long value.
-	 * 
-	 * @return The stored Long value.
-	 */
-	public long contents();
-	
+    
+    /**
+     * Return the stored Long value.
+     * 
+     * @return The stored Long value.
+     */
+    public long contents();
+    
 }
