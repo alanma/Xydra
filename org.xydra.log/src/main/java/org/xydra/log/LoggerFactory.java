@@ -28,14 +28,15 @@ public class LoggerFactory {
      * @param logListener a listener to receive all log messages
      */
     public static synchronized void addLogListener(ILogListener logListener) {
-        logListeners_.add(logListener);
         ensureLoggerFactoryInit();
-        assert loggerFactorySPI != null;
-        loggerFactorySPI.getLogger(ROOT_LOGGER_NAME, null).info(
-                "Logging: Attached log listener " + logListener.getClass().getName());
+        logListeners_.add(logListener);
+        Logger logger = loggerFactorySPI.getLogger(ROOT_LOGGER_NAME, null);
+        assert logger != null;
+        logger.info("Logging: Attached log listener " + logListener.getClass().getName());
     }
     
     public static synchronized void removeLogListener(ILogListener logListener) {
+        ensureLoggerFactoryInit();
         logListeners_.remove(logListener);
         loggerFactorySPI.getLogger(ROOT_LOGGER_NAME, null).info(
                 "Logging: Removed log listener " + logListener.getClass().getName());
@@ -50,17 +51,15 @@ public class LoggerFactory {
         return loggerFactorySPI.getLogger(clazz.getName(), logListeners_);
     }
     
+    public static synchronized Logger getThreadSafeLogger(Class<?> clazz) {
+        ensureLoggerFactoryInit();
+        return loggerFactorySPI.getThreadSafeLogger(clazz.getName(), logListeners_);
+    }
+    
     private static void ensureLoggerFactoryInit() {
         if(loggerFactorySPI == null) {
             init();
         }
-    }
-    
-    public static synchronized Logger getThreadSafeLogger(Class<?> clazz) {
-        if(loggerFactorySPI == null) {
-            init();
-        }
-        return loggerFactorySPI.getThreadSafeLogger(clazz.getName(), logListeners_);
     }
     
     private static synchronized void init() {
