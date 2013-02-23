@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.junit.Test;
 import org.xydra.oo.generator.codespec.ClassSpec;
+import org.xydra.oo.generator.codespec.PackageSpec;
 import org.xydra.oo.testgen.tasks.shared.ITask;
 
 
@@ -19,8 +20,9 @@ public class TestGwtGenerator {
     
     @Test
     public void generateGwtClasses() throws IOException, ClassNotFoundException {
-        ClassSpec c = GwtCodeGenerator
-                .constructClassSpec(ITask.class.getCanonicalName(), "GwtTask");
+        PackageSpec ps = new PackageSpec(ITask.class.getPackage().getName(), false);
+        ClassSpec c = GwtCodeGenerator.constructClassSpec(ps, ITask.class.getCanonicalName(),
+                "GwtTask");
         c.dump();
     }
     

@@ -11,8 +11,6 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.xydra.annotations.CanBeNull;
-
 
 /**
  * Knows nothing about ...Specs. Knows just how to write certain things as Java
@@ -83,7 +81,7 @@ public class CodeWriter {
                 lineLen = 0;
             }
         }
-        shortLines.add(current.toString());
+        shortLines.add(current.toString().trim());
         return shortLines;
     }
     
@@ -96,33 +94,6 @@ public class CodeWriter {
         w.write("(\"");
         w.write(stringValue);
         w.write("\")\n");
-    }
-    
-    static void writeGetterSetter(Writer w, String name, String typeName,
-            @CanBeNull String comment, String generatedFrom) throws IOException {
-        MethodSpec getter = new MethodSpec("get" + NameUtils.toJavaName(name), typeName,
-                generatedFrom);
-        getter.returnType.comment = "the current value or null if not defined\n";
-        getter.comment = (comment == null ? "" : comment + ".\n");
-        getter.comment += "Generated from " + generatedFrom + ".";
-        SpecWriter.writeMethodComment(w, "    ", getter);
-        writeAnnotation(w, "    ", "Field", NameUtils.toXFieldName(name));
-        SpecWriter.writeInterfaceMethod(w, "    ", getter);
-        w.write("\n");
-        
-        MethodSpec setter = new MethodSpec("set" + NameUtils.toJavaName(name), "void",
-                generatedFrom);
-        FieldSpec param = new FieldSpec(NameUtils.toXFieldName(name), typeName, generatedFrom);
-        param.comment = "the value to set";
-        setter.params.add(param);
-        setter.comment = "Set a value, silently overwriting existing values, if any.\n";
-        setter.comment += (comment == null ? "" : comment + ".\n");
-        setter.comment += "Generated from " + generatedFrom + ".";
-        
-        SpecWriter.writeMethodComment(w, "    ", setter);
-        writeAnnotation(w, "    ", "Field", NameUtils.toXFieldName(name));
-        SpecWriter.writeInterfaceMethod(w, "    ", setter);
-        w.write("\n");
     }
     
     public static File toJavaSourceFile(File outDir, String basePackage, String className) {

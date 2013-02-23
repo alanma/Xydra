@@ -1,4 +1,4 @@
-package org.xydra.oo.testgen.alltypes;
+package org.xydra.oo.testgen.alltypes.client;
 
 import org.xydra.base.X;
 import org.xydra.base.XID;

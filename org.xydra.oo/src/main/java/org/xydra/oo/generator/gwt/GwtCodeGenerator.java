@@ -15,6 +15,7 @@ import org.xydra.base.value.XIDSortedSetValue;
 import org.xydra.oo.generator.codespec.ClassSpec;
 import org.xydra.oo.generator.codespec.FieldSpec;
 import org.xydra.oo.generator.codespec.MethodSpec;
+import org.xydra.oo.generator.codespec.PackageSpec;
 import org.xydra.oo.generator.codespec.SpecWriter;
 import org.xydra.oo.runtime.client.GwtXydraMapped;
 import org.xydra.oo.runtime.java.OOJavaOnlyProxy;
@@ -103,7 +104,8 @@ public class GwtCodeGenerator extends Generator {
         
         // construct
         try {
-            ClassSpec c = constructClassSpec(javaInterfaceFqName, gwtSimpleName);
+            PackageSpec packageSpec = new PackageSpec(gwtPackageName, false);
+            ClassSpec c = constructClassSpec(packageSpec, javaInterfaceFqName, gwtSimpleName);
             // write
             PrintWriter pw = ctx.tryCreate(logger, gwtPackageName, gwtSimpleName);
             try {
@@ -117,10 +119,11 @@ public class GwtCodeGenerator extends Generator {
         }
     }
     
-    public static ClassSpec constructClassSpec(String javaInterfaceFqName, String gwtSimpleName)
-            throws ClassNotFoundException {
-        ClassSpec c = new ClassSpec("class", gwtSimpleName);
-        c.superClass = new ClassSpec("class", GwtXydraMapped.class.getSimpleName());
+    public static ClassSpec constructClassSpec(PackageSpec packageSpec, String javaInterfaceFqName,
+            String gwtSimpleName) throws ClassNotFoundException {
+        ClassSpec c = new ClassSpec(packageSpec, "class", gwtSimpleName);
+        PackageSpec builtIn = new PackageSpec(GwtXydraMapped.class.getPackage().getName(), true);
+        c.superClass = new ClassSpec(builtIn, "class", GwtXydraMapped.class.getSimpleName());
         Class<?> javaInterface;
         javaInterface = Class.forName(javaInterfaceFqName);
         for(Method m : javaInterface.getDeclaredMethods()) {

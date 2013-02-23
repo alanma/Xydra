@@ -33,7 +33,7 @@ public class TestInterfaceGenerator {
     
     @Test
     public void generateTasksInterfaces() throws IOException {
-        JavaCodeGenerator.generateInterfaces(TasksSpec.class, new File("./src/test/java"), TESTGEN
+        JavaCodeGenerator.generateInterfaces(TasksSpec.class, new File("./src/main/java"), TESTGEN
                 + ".tasks");
         
         String logs = REMEMBER_LISTENER.getLogs();
@@ -44,7 +44,7 @@ public class TestInterfaceGenerator {
     public void generateAllTypesInterfaces() throws IOException {
         log.info("Start");
         
-        JavaCodeGenerator.generateInterfaces(AllTypesSpec.class, new File("./src/test/java"),
+        JavaCodeGenerator.generateInterfaces(AllTypesSpec.class, new File("./src/main/java"),
                 TESTGEN + ".alltypes");
         
         String logs = REMEMBER_LISTENER.getLogs();

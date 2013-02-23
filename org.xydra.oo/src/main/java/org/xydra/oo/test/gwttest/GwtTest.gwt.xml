@@ -3,9 +3,8 @@
 	
 <!-- 	<inherits name='com.allen_sauer.gwt.log.gwt-log-OFF' /> -->
 	
-	<inherits name="com.google.gwt.user.User" />
-	<inherits name="org.xydra.core.XydraCore" />
-	
+	<inherits name="org.xydra.oo.testgen.alltypes.OODomainModel" />
+
 	<entry-point class="org.xydra.oo.test.gwttest.DummyEntryPoint" />
 	
 	<!-- we don't care about the output, just that it compiles; so limit the number of permutations -->

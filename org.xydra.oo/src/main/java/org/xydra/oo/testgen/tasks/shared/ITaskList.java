@@ -1,12 +1,10 @@
 package org.xydra.oo.testgen.tasks.shared;
 
 import java.util.List;
+import org.xydra.oo.testgen.tasks.shared.IBaseList;
 import org.xydra.oo.Field;
 
-/** 
- * Generated on Thu Feb 21 21:10:34 CET 2013 by  
- * PersistenceSpec2InterfacesGenerator, a part of Xydra.org  
- */
+/** Generated on Sun Feb 24 00:02:41 CET 2013 by SpecWriter, a part of xydra.org:oo */
 public interface ITaskList extends IBaseList {
 
     /** 

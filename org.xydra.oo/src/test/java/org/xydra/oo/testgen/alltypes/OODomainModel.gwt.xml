@@ -1,9 +1,0 @@
-<module>
-    <generate-with class="org.xydra.oo.generator.gwt.GwtCodeGenerator">
-        <when-type-assignable class="org.xydra.oo.testgen.alltypes.shared.IPerson">
-    </generate-with>
-    <generate-with class="org.xydra.oo.generator.gwt.GwtCodeGenerator">
-        <when-type-assignable class="org.xydra.oo.testgen.alltypes.shared.IHasAllType">
-    </generate-with>
-<!-- Default warning for non-static, final fields enabled -->
- <set-property name="gwt.suppressNonStaticFinalFieldWarnings" value="false" /></module>

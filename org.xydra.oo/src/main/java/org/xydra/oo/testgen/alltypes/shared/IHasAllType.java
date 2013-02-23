@@ -26,10 +26,7 @@ import org.xydra.base.value.XBooleanListValue;
 import org.xydra.base.value.XAddressListValue;
 import org.xydra.base.XID;
 
-/** 
- * Generated on Thu Feb 21 21:10:34 CET 2013 by  
- * PersistenceSpec2InterfacesGenerator, a part of Xydra.org  
- */
+/** Generated on Sun Feb 24 00:02:41 CET 2013 by SpecWriter, a part of xydra.org:oo */
 public interface IHasAllType extends IHasXID {
 
     /** 

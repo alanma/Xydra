@@ -14,6 +14,14 @@ public abstract class AbstractFactory {
         this.model = model;
     }
     
+    protected void createXObject(XID id) {
+        this.model.createObject(id);
+    }
+    
+    protected boolean hasXObject(XID id) {
+        return this.model.hasObject(id);
+    }
+    
     public ITask createTask(String idStr) {
         return createTask(XX.toId(idStr));
     }
@@ -37,13 +45,5 @@ public abstract class AbstractFactory {
     }
     
     protected abstract ITask getTaskInternal(XWritableModel model, XID id);
-    
-    protected void createXObject(XID id) {
-        this.model.createObject(id);
-    }
-    
-    protected boolean hasXObject(XID id) {
-        return this.model.hasObject(id);
-    }
     
 }

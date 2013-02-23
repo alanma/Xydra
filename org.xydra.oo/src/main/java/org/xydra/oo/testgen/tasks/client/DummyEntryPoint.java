@@ -1,4 +1,4 @@
-package org.xydra.oo.testgen.tasks;
+package org.xydra.oo.testgen.tasks.client;
 
 import org.xydra.base.X;
 import org.xydra.base.XID;

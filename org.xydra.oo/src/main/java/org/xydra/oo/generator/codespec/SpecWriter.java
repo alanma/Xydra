@@ -8,9 +8,10 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.xydra.base.IHasXID;
+import org.xydra.annotations.CanBeNull;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.oo.Field;
 import org.xydra.oo.generator.java.JavaCodeGenerator;
 
 
@@ -23,9 +24,8 @@ public class SpecWriter {
     
     private static final Logger log = LoggerFactory.getLogger(JavaCodeGenerator.class);
     
-    static void writeClass(Writer w, PackageSpec packageSpec, ClassSpec classSpec)
-            throws IOException {
-        writeClass(w, packageSpec.fullPackageName, classSpec);
+    static void writeClass(Writer w, ClassSpec classSpec) throws IOException {
+        writeClass(w, classSpec.getPackageName(), classSpec);
     }
     
     public static void writeClass(Writer w, String packageName, ClassSpec classSpec)
@@ -39,10 +39,9 @@ public class SpecWriter {
         // import org.xydra.oo.*;
         //
         Set<String> imports = new HashSet<>();
-        if(classSpec.superClass == null) {
-            imports.add(IHasXID.class.getCanonicalName());
+        if(classSpec.superClass != null) {
+            imports.add(classSpec.superClass.getCanonicalName());
         }
-        imports.add(org.xydra.oo.Field.class.getCanonicalName());
         for(IMember t : classSpec.members) {
             for(String req : t.getRequiredImports()) {
                 imports.add(req);
@@ -58,13 +57,11 @@ public class SpecWriter {
         // */
         // public interface ITaskList {
         //
-        CodeWriter.writeJavaDocComment(w, "", "Generated on " + new Date()
-                + " by PersistenceSpec2InterfacesGenerator, a part of Xydra.org");
+        CodeWriter.writeJavaDocComment(w, "", "Generated on " + new Date() + " by "
+                + SpecWriter.class.getSimpleName() + ", a part of xydra.org:oo");
         w.write("public " + classSpec.kind + " " + classSpec.getName() + " ");
         if(classSpec.superClass != null) {
             w.write("extends " + classSpec.superClass.getName());
-        } else {
-            w.write("extends " + IHasXID.class.getSimpleName());
         }
         if(!classSpec.implementedInterfaces.isEmpty()) {
             w.write("implements ");
@@ -89,11 +86,7 @@ public class SpecWriter {
     private static void writeClassMethod(Writer w, String indent, MethodSpec method)
             throws IOException {
         writeMethodHead(w, indent, method);
-        w.write(" {\n");
-        for(String line : method.sourceLines) {
-            w.write(line + "\n");
-        }
-        w.write("}\n");
+        writeMethodBody(w, indent, method);
     }
     
     private static void writeCollectionGetter(Writer w, String name, TypeSpec t, String comment,
@@ -104,6 +97,7 @@ public class SpecWriter {
         getter.comment = (comment == null ? "" : comment + ".\n");
         getter.comment += "Generated from " + generatedFrom + ".";
         writeMethodComment(w, "    ", getter);
+        
         CodeWriter.writeAnnotation(w, "    ", "Field", NameUtils.toXFieldName(name));
         writeInterfaceMethod(w, "    ", getter);
         w.write("\n");
@@ -114,38 +108,52 @@ public class SpecWriter {
         w.write(";\n");
     }
     
-    static void writeMethodComment(Writer w, String indent, MethodSpec method) throws IOException {
+    static void writeMethodComment(Writer w, String indent,
+            AbstractConstructorOrMethodSpec methodOrConstructor) throws IOException {
         StringBuilder comment = new StringBuilder();
-        if(method.comment != null) {
-            comment.append(method.comment);
+        if(methodOrConstructor.comment != null) {
+            comment.append(methodOrConstructor.comment);
             comment.append("\n");
             comment.append("\n");
         }
-        for(FieldSpec p : method.params) {
+        for(FieldSpec p : methodOrConstructor.params) {
             comment.append("@param ");
             comment.append(p.getName());
             comment.append(" ");
-            comment.append(p.comment);
+            comment.append(p.comment == null ? "" : p.comment);
         }
-        if(!method.isVoid()) {
-            comment.append("@return ");
-            comment.append(method.returnType.comment == null ? "..." : method.returnType.comment);
+        if(methodOrConstructor instanceof MethodSpec) {
+            MethodSpec method = (MethodSpec)methodOrConstructor;
+            if(!method.isVoid()) {
+                comment.append("@return ");
+                comment.append(method.returnType.comment == null ? "..."
+                        : method.returnType.comment);
+            }
         }
         CodeWriter.writeJavaDocComment(w, indent, comment.toString());
     }
     
     static void writeMethodHead(Writer w, String indent, MethodSpec method) throws IOException {
+        for(AnnotationSpec<?> ann : method.annotations) {
+            CodeWriter.writeAnnotation(w, indent, ann.annot.getSimpleName(), ann.value.toString());
+        }
         w.write(indent);
         w.write(method.getReturnTypeName());
         w.write(" ");
         w.write(method.getName());
+        writeMethodParams(w, method);
+    }
+    
+    private static void writeMethodParams(Writer w, AbstractConstructorOrMethodSpec com)
+            throws IOException {
         w.write("(");
-        for(FieldSpec p : method.params) {
+        for(FieldSpec p : com.params) {
             w.write(p.getTypeName());
             w.write(" ");
             w.write(p.getName());
         }
         w.write(")");
+        
     }
     
     /**
@@ -166,17 +174,18 @@ public class SpecWriter {
                     writeCollectionGetter(w, t.getName(), fieldSpec.t, t.getComment(),
                             t.getGeneratedFrom());
                 } else {
-                    CodeWriter.writeGetterSetter(w, t.getName(), fieldSpec.getTypeName(),
+                    SpecWriter.writeGetterSetter(w, t.getName(), fieldSpec.getTypeName(),
                             t.getComment(), t.getGeneratedFrom());
                 }
+            } else if(t instanceof ConstructorSpec) {
+                ConstructorSpec constructorSpec = (ConstructorSpec)t;
+                constructorSpec.comment = combinedComment(t);
+                writeMethodComment(w, "    ", constructorSpec);
+                writeConstructor(w, "    ", constructorSpec);
             } else {
                 assert t instanceof MethodSpec;
                 MethodSpec methodSpec = (MethodSpec)t;
-                
-                String comment = (t.getComment() != null ? t.getComment() + "\n\n" : "");
-                comment += "Generated from " + t.getGeneratedFrom();
-                methodSpec.comment = comment;
-                
+                methodSpec.comment = combinedComment(t);
                 writeMethodComment(w, "    ", methodSpec);
                 if(classSpec.kind.equals("interface")) {
                     writeInterfaceMethod(w, "    ", methodSpec);
@@ -207,31 +216,90 @@ public class SpecWriter {
         
     }
     
-    public static void write(PackageSpec packageSpec, ClassSpec classSpec, File outDir)
+    private static void writeConstructor(Writer w, String indent, ConstructorSpec method)
             throws IOException {
-        File javaFile = CodeWriter.toJavaSourceFile(outDir, packageSpec.fullPackageName,
+        w.write(indent);
+        w.write("public ");
+        w.write(method.getName());
+        writeMethodParams(w, method);
+        writeMethodBody(w, indent, method);
+    }
+    
+    private static void writeMethodBody(Writer w, String indent, AbstractConstructorOrMethodSpec com)
+            throws IOException {
+        w.write(" {\n");
+        for(String line : com.sourceLines) {
+            w.write(indent + "    " + line + "\n");
+        }
+        w.write(indent + "}\n");
+    }
+    
+    private static String combinedComment(IMember t) {
+        String comment = (t.getComment() != null ? t.getComment() + "\n\n" : "");
+        comment += "Generated from " + t.getGeneratedFrom();
+        return comment;
+    }
+    
+    public static void writeClass(ClassSpec classSpec, File outDir) throws IOException {
+        if(classSpec.isBuiltIn())
+            return;
+        
+        File javaFile = CodeWriter.toJavaSourceFile(outDir, classSpec.getPackageName(),
                 classSpec.getName());
         Writer w = CodeWriter.openWriter(javaFile);
-        SpecWriter.writeClass(w, packageSpec, classSpec);
+        writeClass(w, classSpec);
         w.close();
     }
     
     public static void writePackage(PackageSpec packageSpec, File outDir) throws IOException {
-        log.info("Writing package " + packageSpec.fullPackageName + " to "
+        log.info("Writing package " + packageSpec.getFQPackageName() + " to "
                 + outDir.getAbsolutePath());
         
-        int i = 0;
-        for(ClassSpec classSpec : packageSpec.classes) {
-            ClassSpec currentClass = classSpec;
-            
-            while(currentClass != null) {
-                write(packageSpec, currentClass, outDir);
-                i++;
+        if(!packageSpec.isBuiltIn()) {
+            int i = 0;
+            for(ClassSpec classSpec : packageSpec.classes) {
+                ClassSpec currentClass = classSpec;
                 
-                currentClass = currentClass.superClass;
+                while(currentClass != null) {
+                    writeClass(currentClass, outDir);
+                    i++;
+                    
+                    currentClass = currentClass.superClass;
+                }
             }
+            log.info("Wrote " + i + " files");
         }
-        log.info("Wrote " + i + " files");
+        for(PackageSpec subPackage : packageSpec.subPackages) {
+            writePackage(subPackage, outDir);
+        }
+    }
+    
+    static void writeGetterSetter(Writer w, String name, String typeName,
+            @CanBeNull String comment, String generatedFrom) throws IOException {
+        MethodSpec getter = new MethodSpec("get" + NameUtils.toJavaName(name), typeName,
+                generatedFrom);
+        getter.returnType.comment = "the current value or null if not defined\n";
+        getter.comment = (comment == null ? "" : comment + ".\n");
+        getter.comment += "Generated from " + generatedFrom + ".";
+        writeMethodComment(w, "    ", getter);
+        getter.annotations
+                .add(new AnnotationSpec<String>(Field.class, NameUtils.toXFieldName(name)));
+        writeInterfaceMethod(w, "    ", getter);
+        w.write("\n");
+        
+        MethodSpec setter = new MethodSpec("set" + NameUtils.toJavaName(name), "void",
+                generatedFrom);
+        FieldSpec param = new FieldSpec(NameUtils.toXFieldName(name), typeName, generatedFrom);
+        param.comment = "the value to set";
+        setter.params.add(param);
+        setter.comment = "Set a value, silently overwriting existing values, if any.\n";
+        setter.comment += (comment == null ? "" : comment + ".\n");
+        setter.comment += "Generated from " + generatedFrom + ".";
+        writeMethodComment(w, "    ", setter);
+        setter.annotations
+                .add(new AnnotationSpec<String>(Field.class, NameUtils.toXFieldName(name)));
+        writeInterfaceMethod(w, "    ", setter);
+        w.write("\n");
     }
     
 }
