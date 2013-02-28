@@ -7,7 +7,7 @@ import org.xydra.core.serialize.xml.XmlSerializer;
 
 
 /**
- * A stream of XValue as occruing in serialisation formats.
+ * A stream of XValue as occurring in serialisation formats.
  * 
  * Currently not used by XML serialisation ({@link XmlSerializer}) nor by JOSN (
  * {@link JsonSerializer}).
@@ -19,30 +19,30 @@ import org.xydra.core.serialize.xml.XmlSerializer;
  * 
  * @author xamde
  */
-public interface XValueStream {
-	
-	void startValue();
-	
-	void endValue();
-	
-	void startCollection(ValueType type);
-	
-	void endCollection();
-	
-	void javaNull();
-	
-	void address(XAddress address);
-	
-	void javaBoolean(Boolean a);
-	
-	void javaDouble(Double a);
-	
-	void javaInteger(Integer a);
-	
-	void javaLong(Long a);
-	
-	void javaString(String a);
-	
-	void xid(XID a);
-	
+public interface XValueStreamHandler {
+    
+    void startValue();
+    
+    void endValue();
+    
+    void startCollection(ValueType type);
+    
+    void endCollection();
+    
+    void javaNull();
+    
+    void address(XAddress address);
+    
+    void javaBoolean(Boolean a);
+    
+    void javaDouble(Double a);
+    
+    void javaInteger(Integer a);
+    
+    void javaLong(Long a);
+    
+    void javaString(String a);
+    
+    void xid(XID a);
+    
 }
