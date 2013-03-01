@@ -2,11 +2,11 @@
 <module rename-to="XydraEditor"> <!-- this setting needs to be mirrored in the pom.xml file -->
 	
 	<!-- add gwt-log support -->
-	<inherits name='com.allen_sauer.gwt.log.gwt-log-TRACE' />
-	<!-- Set settings for specific loggers: ENABLED or DISABLED -->
-	<set-property name="log_DivLogger" value="DISABLED" />
-	<set-property name="log_FirebugLogger" value="ENABLED" />
-	<set-property name="log_GWTLogger" value="ENABLED" />
+<!--  	<inherits name='com.allen_sauer.gwt.log.gwt-log-TRACE' />  -->
+<!-- 	<set-property name="log_DivLogger" value="DISABLED" /> -->
+<!-- 	<set-property name="log_FirebugLogger" value="ENABLED" /> -->
+<!-- 	<set-property name="log_GWTLogger" value="ENABLED" /> -->
+
 	
 	<!-- Inherit the GWT-specific Xydra bits -->
 	<inherits name='org.xydra.gwt.XydraGwt'/>
