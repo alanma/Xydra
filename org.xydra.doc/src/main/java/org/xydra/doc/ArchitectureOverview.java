@@ -3,8 +3,8 @@ package org.xydra.doc;
 import java.io.Serializable;
 
 import org.xydra.base.IHasXAddress;
-import org.xydra.base.IHasXID;
-import org.xydra.base.XID;
+import org.xydra.base.IHasXId;
+import org.xydra.base.XId;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.core.change.XSendsFieldEvents;
 import org.xydra.core.change.XSendsModelEvents;
@@ -28,9 +28,9 @@ import org.xydra.core.model.XSynchronizesChanges;
  * <li>{@link XModel} <br />
  * <i>provides easy changes</i>
  * <ul>
- * <li>{@link XModel#createObject(XID)}</li>
- * <li>{@link XModel#getObject(XID)}</li>
- * <li>{@link XModel#removeObject(XID)}</li>
+ * <li>{@link XModel#createObject(XId)}</li>
+ * <li>{@link XModel#getObject(XId)}</li>
+ * <li>{@link XModel#removeObject(XId)}</li>
  * </ul>
  * <i>provides commands</i>
  * <ul>
@@ -52,8 +52,8 @@ import org.xydra.core.model.XSynchronizesChanges;
  * <b>extends</b>
  * <ul>
  * <li>{@link IHasXAddress}</li>
- * <li>{@link IHasXID}</li>
- * <li>{@link Iterable}<XID></li>
+ * <li>{@link IHasXId}</li>
+ * <li>{@link Iterable}<XId></li>
  * </ul>
  * </li>
  * <li>{@link XSendsModelEvents} <br />

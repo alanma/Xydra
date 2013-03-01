@@ -1,7 +1,7 @@
 package org.xydra.doc;
 
 import org.xydra.base.X;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XTransaction;
@@ -95,21 +95,21 @@ import org.xydra.store.impl.memory.MemoryPersistence;
  * <dt>{@link XValue}</dt>
  * <dd>The smallest unit of data. A {@link XValue} can be a string (
  * {@link XStringValue}), integer ({@link XIntegerValue}), boolean (
- * {@link XBooleanValue}) or identifier ({@link XID}). Xydra also treats
+ * {@link XBooleanValue}) or identifier ({@link XId}). Xydra also treats
  * collections such as lists ({@link XStringListValue}) and sets (
  * {@link XStringSetValue}) as values. Values are created via a
  * {@link XValueFactory} which you get from {@link X#getValueFactory()}.</dd>
  * <dt>{@link XField}</dt>
  * <dd>Fields are the variables in Xydra. One field has none or one value.
  * Fields are like fields in an object-oriented class, hence the name. A field
- * always has an identifier which is a {@link XID}.</dd>
+ * always has an identifier which is a {@link XId}.</dd>
  * <dt>{@link XObject}</dt>
  * <dd>Objects group several fields (and their values). In this respect, objects
  * are like objects in object-oriented programming. Each object has an
- * identifier which is also an {@link XID}.</dd>
+ * identifier which is also an {@link XId}.</dd>
  * <dt>{@link XModel}</dt>
  * <dd>Models are data management units and store a set of objects (and their
- * fields and values). Each model has an {@link XID} as well. Like objects and
+ * fields and values). Each model has an {@link XId} as well. Like objects and
  * fields also complete models can be serialised and sent around. Models are a
  * good unit for data sharing, e.g. each user can have its own model or several
  * users can share a model.</dd>
@@ -122,7 +122,7 @@ import org.xydra.store.impl.memory.MemoryPersistence;
  * are a hierarchical key and the {@link XValue} is the value.
  * 
  * Yet another perspective would say a {@link XRepository} is a nested map. In
- * Java Generics syntax: a Map<XID,Map<XID,Map<XID,XValue>>.
+ * Java Generics syntax: a Map<XId,Map<XId,Map<XId,XValue>>.
  * 
  * 
  * 
@@ -207,7 +207,7 @@ import org.xydra.store.impl.memory.MemoryPersistence;
  * {@link XReadableRepository} / {@link XReadableModel} /
  * {@link XReadableObject} / {@link XReadableField}. Values themselves are
  * already modelled as unchangeable value objects. The read-only variants are
- * implemented several times FIXME too many times, it seems.
+ * implemented several times for different purposes.
  * 
  * XBase{RMO} offers e.g. {@link XReadableModel#getId()},
  * {@link XReadableModel#iterator()} ,
@@ -220,8 +220,8 @@ import org.xydra.store.impl.memory.MemoryPersistence;
  * {@link XWritableObject} / {@link XWritableField}.
  * 
  * XWritable{RMOF} extends XBase{RMOF} and offers additionally e.g.
- * {@link XWritableModel#createObject(XID)} and
- * {@link XWritableModel#removeObject(XID)}. {@link XWritableField} has
+ * {@link XWritableModel#createObject(XId)} and
+ * {@link XWritableModel#removeObject(XId)}. {@link XWritableField} has
  * respectively {@link XWritableField#setValue(XValue)}. Note that XWritable...
  * does not allow to set the revision number.
  * 
@@ -281,11 +281,7 @@ import org.xydra.store.impl.memory.MemoryPersistence;
  * 
  * Persistence can be achieved via a {@link AccessControlManagerOnPersistence}
  * 
- * TODO @max: finish this....
- * 
- * 
- * 
- * 
+ * To be continued one day...
  * 
  * <h2>Document status</h2>
  * 
@@ -295,42 +291,5 @@ import org.xydra.store.impl.memory.MemoryPersistence;
  * 
  */
 public interface The_Nine_Heads_of_Xydra {
-	
+    
 }
-
-// .
-// .
-// .
-// .
-// .
-// .
-// .
-// .
-// .
-// .
-// .
-// .
-// .
-// .
-// .
-// .
-// .
-// .
-// .
-// .
-// .
-// .
-// .
-// .
-// .
-// .
-// .
-// .
-// .
-// .
-// .
-// .
-// .
-// .
-// .
-

@@ -3,7 +3,7 @@ package org.xydra.serverapi;
 import java.util.List;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 
 
 /**
@@ -21,14 +21,14 @@ public interface IVersionedStore {
 	 * @return an immutable {@link IObjectSnapshot} if the given actor has the
 	 *         right to see it
 	 */
-	IObjectSnapshot getObjectSnapshot(XID actor, XAddress modelAddress, long rev);
+	IObjectSnapshot getObjectSnapshot(XId actor, XAddress modelAddress, long rev);
 	
 	/**
 	 * @param actor
 	 * @param objectAddress
 	 * @param command which may also be a transaction
 	 */
-	void executeObjectCommand(XID actor, XAddress objectAddress, ICommand command);
+	void executeObjectCommand(XId actor, XAddress objectAddress, ICommand command);
 	
 	/**
 	 * @param actor
@@ -37,6 +37,6 @@ public interface IVersionedStore {
 	 * @return all events that happened after rev on the XEntity with the given
 	 *         address
 	 */
-	List<IEvent> getEventsSince(XID actor, XAddress address, long rev);
+	List<IEvent> getEventsSince(XId actor, XAddress address, long rev);
 	
 }
