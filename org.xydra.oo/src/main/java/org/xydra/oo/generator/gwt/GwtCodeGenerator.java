@@ -4,23 +4,38 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 
-import org.xydra.base.XID;
-import org.xydra.base.value.XIDListValue;
-import org.xydra.base.value.XIDSetValue;
-import org.xydra.base.value.XIDSortedSetValue;
-import org.xydra.oo.generator.codespec.ClassSpec;
-import org.xydra.oo.generator.codespec.FieldSpec;
-import org.xydra.oo.generator.codespec.MethodSpec;
-import org.xydra.oo.generator.codespec.PackageSpec;
+import org.xydra.base.XId;
+import org.xydra.base.XX;
+import org.xydra.base.value.ValueType;
+import org.xydra.base.value.XIdListValue;
+import org.xydra.base.value.XV;
+import org.xydra.base.value.XValueJavaUtils;
+import org.xydra.oo.generator.codespec.NameUtils;
 import org.xydra.oo.generator.codespec.SpecWriter;
+import org.xydra.oo.generator.codespec.impl.ClassSpec;
+import org.xydra.oo.generator.codespec.impl.MethodSpec;
+import org.xydra.oo.generator.codespec.impl.PackageSpec;
 import org.xydra.oo.runtime.client.GwtXydraMapped;
+import org.xydra.oo.runtime.java.JavaReflectionUtils;
+import org.xydra.oo.runtime.java.JavaTypeSpecUtils;
+import org.xydra.oo.runtime.java.KindOfMethod;
 import org.xydra.oo.runtime.java.OOJavaOnlyProxy;
-import org.xydra.oo.runtime.java.ReflectionTool;
-import org.xydra.oo.runtime.java.ReflectionTool.KindOfMethod;
+import org.xydra.oo.runtime.java.OOReflectionUtils;
+import org.xydra.oo.runtime.java.XydraReflectionUtils;
+import org.xydra.oo.runtime.shared.BaseTypeSpec;
+import org.xydra.oo.runtime.shared.CollectionProxy;
+import org.xydra.oo.runtime.shared.CollectionProxy.ITransformer;
+import org.xydra.oo.runtime.shared.ListProxy;
+import org.xydra.oo.runtime.shared.SetProxy;
+import org.xydra.oo.runtime.shared.SharedTypeMapping;
+import org.xydra.oo.runtime.shared.SharedTypeSystem;
+import org.xydra.oo.runtime.shared.SortedSetProxy;
+import org.xydra.oo.runtime.shared.TypeSpec;
 
 import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;
@@ -97,6 +112,13 @@ public class GwtCodeGenerator extends Generator {
         return gwtFqName;
     }
     
+    /**
+     * @param logger
+     * @param ctx
+     * @param javaInterfaceFqName
+     * @param gwtPackageName foo.client
+     * @param gwtSimpleName
+     */
     private static void generateSourceCode(TreeLogger logger, GeneratorContext ctx,
             String javaInterfaceFqName, String gwtPackageName, String gwtSimpleName) {
         TreeLogger logger2 = logger.branch(Type.INFO, "Generating source code to implement "
@@ -105,7 +127,8 @@ public class GwtCodeGenerator extends Generator {
         // construct
         try {
             PackageSpec packageSpec = new PackageSpec(gwtPackageName, false);
-            ClassSpec c = constructClassSpec(packageSpec, javaInterfaceFqName, gwtSimpleName);
+            ClassSpec c = constructClassSpec(packageSpec, gwtPackageName, javaInterfaceFqName,
+                    gwtSimpleName);
             // write
             PrintWriter pw = ctx.tryCreate(logger, gwtPackageName, gwtSimpleName);
             try {
@@ -119,108 +142,384 @@ public class GwtCodeGenerator extends Generator {
         }
     }
     
-    public static ClassSpec constructClassSpec(PackageSpec packageSpec, String javaInterfaceFqName,
-            String gwtSimpleName) throws ClassNotFoundException {
-        ClassSpec c = new ClassSpec(packageSpec, "class", gwtSimpleName);
+    /**
+     * @param packageSpec
+     * @param gwtPackagename
+     * @param javaInterfaceFqName
+     * @param gwtSimpleName
+     * @return ...
+     * @throws ClassNotFoundException
+     */
+    public static ClassSpec constructClassSpec(PackageSpec packageSpec, String gwtPackagename,
+            String javaInterfaceFqName, String gwtSimpleName) throws ClassNotFoundException {
+        ClassSpec c = packageSpec.addClass(gwtSimpleName);
         PackageSpec builtIn = new PackageSpec(GwtXydraMapped.class.getPackage().getName(), true);
-        c.superClass = new ClassSpec(builtIn, "class", GwtXydraMapped.class.getSimpleName());
+        c.superClass = builtIn.addClass(GwtXydraMapped.class.getSimpleName());
         Class<?> javaInterface;
         javaInterface = Class.forName(javaInterfaceFqName);
+        String generatedFrom = "" + javaInterface.getCanonicalName();
         for(Method m : javaInterface.getDeclaredMethods()) {
             String fieldId = tryToGetAnnotatedFieldId(m);
             if(fieldId != null) {
-                MethodSpec ms = new MethodSpec(m, "" + javaInterface.getCanonicalName());
-                
-                KindOfMethod kindOfMethod = ReflectionTool.extractKindOfMethod(m);
-                String line;
+                MethodSpec methodSpec = c.addMethod(m, generatedFrom);
+                KindOfMethod kindOfMethod = OOReflectionUtils.extractKindOfMethod(m);
                 switch(kindOfMethod) {
+                
                 case Get:
-                    line = "return XValueJavaUtils.get" + ms.returnType.getTypeName()
-                            + "(this.oop.getXObject(), XX.toId(\"" + fieldId + "\"));";
-                    ms.sourceLines.add(line);
+                    addGetter(gwtPackagename, c, methodSpec, fieldId, generatedFrom);
                     break;
+                
                 case Set:
                     assert m.getParameterTypes().length == 1;
                     java.lang.reflect.Type t = m.getGenericParameterTypes()[0];
-                    FieldSpec fs = new FieldSpec(fieldId, t, "" + javaInterfaceFqName);
-                    ms.params.add(fs);
-                    line = "XValueJavaUtils.set" + ms.params.get(0).getTypeName()
-                            + "(this.oop.getXObject(), XX.toId(\"" + fieldId + "\"), " + fieldId
-                            + ");";
-                    ms.sourceLines.add(line);
+                    TypeSpec type = JavaTypeSpecUtils.createTypeSpec(
+                            JavaReflectionUtils.getRawType(t),
+                            JavaReflectionUtils.getComponentType(t), generatedFrom);
+                    addSetter(gwtPackagename, c, methodSpec, fieldId, type, generatedFrom);
                     break;
+                
                 case GetCollection:
-                    // * @param <X> xydra type
-                    // * @param <T> xydra component type
-                    // * @param <J> java type
-                    // * @param <C> java component type
-                    Class<?> classJ = ms.returnType.type;
-                    Class<?> classC = ms.returnType.componentType;
-                    
-                    assert ReflectionTool.isMappedToXydra(classC) : classJ.getCanonicalName();
-                    // OOTypeMapping mapping = OOTypeMapping.getMapping(classJ,
-                    // classC);
-                    // if(mapping == null) {
-                    // throw new RuntimeException("Cannot handle type="
-                    // + classJ.getCanonicalName() + " compType="
-                    // + classC.getCanonicalName()
-                    // + " yet. Maybe you need to add an OOTypeMapping.");
-                    // }
-                    // Class<?> classX = mapping.getXydraType();
-                    // ValueType vt = ValueType.valueType(classX);
-                    // Class<?> classT = ValueType.getComponentType(vt);
-                    
-                    Class<?> classX;
-                    if(classJ.equals(Set.class)) {
-                        classX = XIDSetValue.class;
-                    } else if(classJ.equals(List.class)) {
-                        classX = XIDListValue.class;
-                    } else if(classJ.equals(SortedSet.class)) {
-                        classX = XIDSortedSetValue.class;
-                    } else {
-                        throw new IllegalArgumentException("Cannot handle collection type "
-                                + classJ.getCanonicalName());
-                    }
-                    Class<?> classT = XID.class;
-                    
-                    String gX = classX.getSimpleName();
-                    String gT = classT.getSimpleName();
-                    String gJ = classJ.getSimpleName();
-                    String gC = classC.getSimpleName();
-                    ms.sourceLines.add("ITransformer<" + gX + "," + gT + "," + gJ + "<" + gC + ">,"
-                            + gC + "> t = new CollectionProxy.ITransformer<" + gX + "," + gT + ","
-                            + gJ + "<" + gC + ">," + gC + ">() {");
-                    ms.sourceLines.add("    @Override");
-                    ms.sourceLines.add("    public " + gC + " toJavaComponent(" + gC + " xid) {");
-                    ms.sourceLines.add("        return new " + gwtSimpleName + "(" + gwtSimpleName
-                            + ".this.oop.getXModel(), xid);");
-                    ms.sourceLines.add("    }");
-                    ms.sourceLines.add("");
-                    ms.sourceLines.add("    @Override");
-                    ms.sourceLines.add("    public " + gT + " toXydraComponent(" + gC
-                            + " javaType) {");
-                    ms.sourceLines.add("        return javaType.getId();");
-                    ms.sourceLines.add("    }");
-                    ms.sourceLines.add("");
-                    ms.sourceLines.add("    @Override");
-                    ms.sourceLines.add("    public " + gX + " createCollection() {");
-                    ms.sourceLines.add("        return XV.toID" + gJ
-                            + "Value(Collections.EMPTY_LIST);");
-                    ms.sourceLines.add("    }");
-                    ms.sourceLines.add("");
-                    ms.sourceLines.add("};");
-                    ms.sourceLines.add("    ");
-                    ms.sourceLines.add("return new " + gJ + "Proxy<" + gX + "," + gT + "," + gJ
-                            + "<" + gC + ">," + gC
-                            + ">(this.oop.getXObject(), XX.toId(\"subTasks\"), t);");
+                    addCollectionGetter(gwtPackagename, gwtSimpleName, c, methodSpec, fieldId);
                     break;
+                
                 default:
                     break;
                 }
-                c.members.add(ms);
             }
         }
+        
         return c;
     }
     
+    private static void addCollectionGetter(String gwtPackagename, String gwtSimpleName,
+            ClassSpec c, MethodSpec methodSpec, String fieldId) {
+        TypeSpec returnType = methodSpec.returnType;
+        
+        /** <J> java base type */
+        /** <C> java component type */
+        BaseTypeSpec typeJ = returnType.getBaseType();
+        String gJ = typeJ.getSimpleName();
+        BaseTypeSpec typeC = returnType.getComponentType();
+        String gC = typeC.getSimpleName();
+        
+        /** <X> xydra base type, extends XCollectionValue<T> */
+        /** <T> xydra OR java component type, NOT always extends XValue */
+        Class<?> classX;
+        Class<?> classT;
+        SharedTypeMapping mapping = SharedTypeMapping.getMapping(returnType);
+        if(mapping == null) {
+            assert OOReflectionUtils.hasAnId(typeC) : "no mapping found for type="
+                    + returnType.id();
+            classX = XIdListValue.class;
+            classT = XId.class;
+        } else {
+            
+            ValueType valueTypeX = mapping.getXydraBaseValueType();
+            assert valueTypeX.isCollection() : "Should be a collection type: " + valueTypeX
+                    + " in " + c.getCanonicalName() + "." + methodSpec.getName() + "(..)";
+            // component type is already a java type
+            classX = mapping.getXydraBaseType();
+            classT = valueTypeX.getComponentType().getJavaClass();
+        }
+        c.addRequiredImports(classX);
+        c.addRequiredImports(classT);
+        BaseTypeSpec typeX = JavaTypeSpecUtils.createBaseTypeSpec(classX);
+        BaseTypeSpec typeT = JavaTypeSpecUtils.createBaseTypeSpec(classT);
+        String gX = typeX.getSimpleName();
+        String gT = typeT.getSimpleName();
+        
+        // e.g. X, T extends XValue, J, C =
+        // XIdSetValue,XAddressSetValue,Set<XAddress>,XAddress
+        
+        // CODE: ITransformer<X, T extends XValue, J, C> {
+        methodSpec.sourceLines.add("ITransformer<" + gX + "," + gT + "," + gJ + "<" + gC + ">,"
+                + gC + "> t = new CollectionProxy.ITransformer<" + gX + "," + gT + "," + gJ + "<"
+                + gC + ">," + gC + ">() {");
+        
+        // CODE: C toJavaComponent(T componentType);
+        methodSpec.sourceLines.add("    @Override");
+        methodSpec.sourceLines.add("    public " + gC + " toJavaComponent(" + gT + " x) {");
+        String x2j;
+        if(mapping != null) {
+            if(typeC.equals(typeT)) {
+                // no need to convert
+                x2j = "x";
+            } else {
+                ValueType baseValueType = mapping.getXydraBaseValueType();
+                x2j = "XValueJavaUtils.from" + baseValueType.name() + "(x)";
+                c.addRequiredImports(XValueJavaUtils.class);
+            }
+        } else {
+            String gC_basename = NameUtils.firstLetterUppercased(gC.substring(1));
+            x2j = "GwtFactory.wrap" + gC_basename + "(" + gwtSimpleName
+                    + ".this.oop.getXModel(), (XId) x)";
+            c.addRequiredImports(XId.class);
+        }
+        methodSpec.sourceLines.add("        return " + x2j + ";");
+        methodSpec.sourceLines.add("    }");
+        methodSpec.sourceLines.add("");
+        
+        // CODE: T toXydraComponent(C javaType);
+        methodSpec.sourceLines.add("    @Override");
+        methodSpec.sourceLines.add("    public " + gT + " toXydraComponent(" + gC + " javaType) {");
+        String j2x;
+        if(mapping != null) {
+            if(typeC.equals(typeT)) {
+                // no need to convert
+                j2x = "javaType";
+            } else {
+                ValueType baseValueType = mapping.getXydraBaseValueType();
+                j2x = "XValueJavaUtils.to" + baseValueType.name() + "(javaType)";
+                c.addRequiredImports(XValueJavaUtils.class);
+            }
+        } else {
+            j2x = "javaType.getId()";
+        }
+        methodSpec.sourceLines.add("        return " + j2x + ";");
+        
+        methodSpec.sourceLines.add("    }");
+        methodSpec.sourceLines.add("");
+        
+        // CODE: X createCollection();
+        methodSpec.sourceLines.add("    @Override");
+        methodSpec.sourceLines.add("    public " + gX + " createCollection() {");
+        
+        if(mapping == null) {
+            if(OOReflectionUtils.isProxyType(returnType.getComponentType())) {
+                methodSpec
+                        .addSourceLine("        return XV.toIdListValue(Collections.EMPTY_LIST);");
+                c.addRequiredImports(XV.class);
+            } else {
+                methodSpec.addSourceLine("        return (" + gX
+                        + ") SharedTypeSystem.createCollection(" + typeJ.getSimpleName()
+                        + ".class, " + typeC.getSimpleName() + ".class);");
+                c.addRequiredImports(SharedTypeSystem.class);
+            }
+        } else {
+            methodSpec.addSourceLine("        return "
+                    + mapping.getCollectionFactory().createEmptyCollection_asSourceCode() + ";");
+            c.addRequiredImports(Collections.class);
+        }
+        
+        methodSpec.sourceLines.add("    }");
+        methodSpec.sourceLines.add("");
+        methodSpec.sourceLines.add("};");
+        methodSpec.sourceLines.add("    ");
+        methodSpec.sourceLines.add("return new " + gJ + "Proxy<" + gX + "," + gT + "," + gJ + "<"
+                + gC + ">," + gC + ">(this.oop.getXObject(), XX.toId(\"" + fieldId + "\"), t);");
+        if(gJ.equals(Set.class.getSimpleName())) {
+            c.addRequiredImports(SetProxy.class);
+        } else if(gJ.equals(List.class.getSimpleName())) {
+            c.addRequiredImports(ListProxy.class);
+        } else if(gJ.equals(SortedSet.class.getSimpleName())) {
+            c.addRequiredImports(SortedSetProxy.class);
+        }
+        
+        c.addRequiredImports(gwtPackagename + ".GwtFactory");
+        c.addRequiredImports(ITransformer.class);
+        c.addRequiredImports(CollectionProxy.class);
+        c.addRequiredImports(XX.class);
+    }
+    
+    private static void addGetter(String gwtPackagename, ClassSpec classSpec, MethodSpec m,
+            String fieldId, String generatedFrom) {
+        
+        TypeSpec returnType = m.getReturnType();
+        BaseTypeSpec baseType = returnType.getBaseType();
+        SharedTypeMapping mapping = SharedTypeMapping.getMapping(returnType);
+        
+        /* 1) Mapped types */
+        if(mapping != null) {
+            ValueType valueType = mapping.getXydraBaseValueType();
+            String xydraType = valueType.getXydraInterface().getSimpleName();
+            m.addSourceLine(xydraType + " x = ((" + xydraType + ")this.oop.getValue(\"" + fieldId
+                    + "\"));");
+            m.addSourceLine("if(x == null)");
+            if(JavaReflectionUtils.isJavaPrimitiveType(baseType)) {
+                /* 1.1) Java primitive type */
+                m.addSourceLine("// Java primitive type");
+                String returnValue = JavaReflectionUtils
+                        .returnDefaultValueOfPrimitiveTypeAsSourceCodeLiteral(baseType
+                                .getSimpleName());
+                m.addSourceLine("    return " + returnValue + ";");
+                m.addSourceLine("return x.contents();");
+            } else if(JavaReflectionUtils.equalsClass(returnType, byte[].class)) {
+                /* 1.2) byte[] */
+                m.addSourceLine("// byte[]");
+                m.addSourceLine("    return null;");
+                m.addSourceLine("return x.contents();");
+            } else {
+                m.addSourceLine("    return null;");
+                
+                if(XydraReflectionUtils.isXydraValueType(baseType)) {
+                    /* 1.3) Xydra value type */
+                    m.addSourceLine("// Xydra value type");
+                    m.addSourceLine("return x;");
+                } else {
+                    
+                    /* 1.4) Extended types with a mapping */
+                    m.addSourceLine("// Extended types with a mapping");
+                    m.addSourceLine("SharedTypeMapping mapping = SharedTypeMapping.getMapping("
+                            + "new TypeSpec(new BaseTypeSpec(\"" + baseType.getPackageName()
+                            + "\", \"" + baseType.getSimpleName() + "\"), null, \"gwt\"));");
+                    m.addSourceLine("return (" + baseType.getSimpleName() + ")mapping.toJava(x);");
+                    classSpec.addRequiredImports(SharedTypeMapping.class);
+                    classSpec.addRequiredImports(TypeSpec.class);
+                    classSpec.addRequiredImports(BaseTypeSpec.class);
+                }
+            }
+            m.setComment("Mapped Xydra type");
+            return;
+        }
+        
+        /* 2) Proxy types */
+        if(OOReflectionUtils.isProxyType(returnType)) {
+            m.addSourceLine("XId id = XValueJavaUtils.getId(this.oop.getXObject(), XX.toId(\""
+                    + fieldId + "\"));");
+            classSpec.addRequiredImports(XX.class);
+            classSpec.addRequiredImports(XId.class);
+            classSpec.addRequiredImports(XValueJavaUtils.class);
+            
+            m.addSourceLine("if(id == null)");
+            m.addSourceLine("    return null;");
+            m.addSourceLine("return "
+                    + new MethodCallSpec(gwtPackagename, "GwtFactory", "wrap"
+                            + NameUtils.firstLetterUppercased(returnType.getTypeString().substring(
+                                    1))).addParam("this.oop.getXModel()").addParam("id")
+                            .toMethodCall() + ";");
+            m.setComment("Proxy type");
+            return;
+        }
+        
+        /* 3) Collections of built-in Xydra types */
+        ValueType componentValueType = returnType.getComponentType() == null ? null
+                : SharedTypeMapping.getValueType(returnType.getComponentType(), null);
+        if(JavaReflectionUtils.isJavaCollectionType(returnType) && !returnType.isArray()
+                && componentValueType != null) {
+            MethodCallSpec methodCallSpec = new MethodCallSpec(XValueJavaUtils.class, "get"
+                    + componentValueType.name()).addParam("this.oop.getXObject()").addParam(
+                    "XX.toId(\"" + fieldId + "\")");
+            m.addSourceLine("return " + methodCallSpec.toMethodCall() + ";");
+            m.setComment("Collections of built-in Xydra types");
+            return;
+        }
+        
+        /* 4) Enum types */
+        if(JavaReflectionUtils.isEnumType(returnType)) {
+            MethodCallSpec methodCallSpec = new MethodCallSpec(XValueJavaUtils.class, "getString")
+                    .addParam("this.oop.getXObject()").addParam("XX.toId(\"" + fieldId + "\")");
+            m.addSourceLine("String s = " + methodCallSpec.toMethodCall() + ";");
+            m.addSourceLine("if(s == null)");
+            m.addSourceLine("  return null;");
+            m.addSourceLine("return " + returnType.getBaseType().getSimpleName() + ".valueOf(s);");
+            m.setComment("Auto-convert enum to XStringValue");
+            classSpec.addRequiredImports(XValueJavaUtils.class);
+            return;
+        }
+        
+        /* 5) Java types corresponding to Xydra types */
+        // determine correct method in XValueJavaUtils
+        String getterMethod = "get" + getPropertyName(returnType);
+        MethodCallSpec methodCallSpec = new MethodCallSpec(XValueJavaUtils.class, getterMethod)
+                .addParam("this.oop.getXObject()").addParam("XX.toId(\"" + fieldId + "\")");
+        m.addSourceLine("return " + methodCallSpec.toMethodCall() + ";");
+        m.setComment("Java types corresponding to Xydra types");
+        classSpec.addRequiredImports(XValueJavaUtils.class);
+    }
+    
+    private static void addSetter(String gwtPackagename, ClassSpec c, MethodSpec m, String fieldId,
+            TypeSpec type, String generatedFrom) {
+        m.addParam(fieldId, type, generatedFrom);
+        SharedTypeMapping mapping = SharedTypeMapping.getMapping(type);
+        if(mapping != null) {
+            /* 1) Mapped types */
+            if(XydraReflectionUtils.isXydraValueType(type.getBaseType())) {
+                /* 1.1) xydra types */
+                m.sourceLines.add("this.oop.setValue(\"" + fieldId + "\", " + fieldId + ");");
+                m.setComment("Trivial xydra type");
+                return;
+            } else {
+                /* 1.2) Extended types with a mapping */
+                m.sourceLines.add("// non-xydra type with mapping: " + type.getTypeString());
+                m.sourceLines
+                        .add("SharedTypeMapping mapping = SharedTypeMapping.getMapping(new TypeSpec(new BaseTypeSpec(");
+                m.sourceLines.add("  \"" + "org.xydra.oo.testgen.alltypes.shared" + "\", \""
+                        + type.getTypeString() + "\"), null, \"gwt\"));");
+                m.sourceLines.add("" + mapping.getXydraBaseType().getSimpleName() + " x = ("
+                        + mapping.getXydraBaseType().getSimpleName() + ")mapping.toXydra("
+                        + fieldId + ");");
+                c.addRequiredImports(SharedTypeMapping.class);
+                c.addRequiredImports(mapping.getXydraBaseType());
+                m.sourceLines.add("this.oop.setValue(\"" + fieldId + "\", x);");
+                return;
+            }
+        }
+        String propertyName = getPropertyName(type);
+        if(OOReflectionUtils.isProxyType(type)) {
+            /* 2) Proxy types */
+            m.sourceLines.add("XValueJavaUtils.setId" + "(this.oop.getXObject(), XX.toId(\""
+                    + fieldId + "\"), " + fieldId + ".getId()" + ");");
+            c.addRequiredImports(XValueJavaUtils.class);
+            m.setComment("Proxy types");
+            return;
+        }
+        
+        /* 3) Collections of built-in Xydra types */
+        ValueType componentValueType = type.getComponentType() == null ? null : SharedTypeMapping
+                .getValueType(type.getComponentType(), null);
+        if(JavaReflectionUtils.isJavaCollectionType(type) && !type.isArray()
+                && componentValueType != null) {
+            MethodCallSpec methodCallSpec = new MethodCallSpec(XValueJavaUtils.class, "set"
+                    + componentValueType.name()).addParam("this.oop.getXObject()")
+                    .addParam("XX.toId(\"" + fieldId + "\")").addParam(fieldId);
+            m.addSourceLine("return " + methodCallSpec.toMethodCall() + ";");
+            m.setComment("Collections of built-in Xydra types");
+            c.addRequiredImports(XValueJavaUtils.class);
+            return;
+        }
+        
+        if(JavaReflectionUtils.isEnumType(type)) {
+            /* 4) Enum types */
+            m.sourceLines.add("XValueJavaUtils.setString" + "(this.oop.getXObject(), XX.toId(\""
+                    + fieldId + "\"), " + fieldId + ".name()" + ");");
+            m.setComment("Enum types");
+            c.addRequiredImports(XValueJavaUtils.class);
+            return;
+        }
+        
+        /* 5) Java types corresponding to Xydra types */
+        m.sourceLines.add("XValueJavaUtils.set" + propertyName
+                + "(this.oop.getXObject(), XX.toId(\"" + fieldId + "\"), " + fieldId + ");");
+        m.setComment("Java types corresponding to Xydra types");
+        c.addRequiredImports(XValueJavaUtils.class);
+    }
+    
+    /**
+     * @param returnType
+     * @return a name starting with "get" or throws an exception @NeverNull
+     */
+    private static String getPropertyName(TypeSpec typeSpec) {
+        String s = null;
+        ValueType valueType = XydraReflectionUtils.getValueType(typeSpec);
+        if(valueType != null) {
+            s = valueType.name();
+        }
+        
+        if(s == null && typeSpec.isArray()) {
+            valueType = XydraReflectionUtils.getValueType(typeSpec.getComponentType());
+            if(valueType != null) {
+                s = valueType.name() + "Array";
+            }
+        }
+        
+        if(s == null) {
+            s = NameUtils.firstLetterUppercased(typeSpec.getTypeString());
+        }
+        return s;
+    }
+    
+    public static void main(String[] args) {
+        assert XydraReflectionUtils.getValueType(new TypeSpec(BaseTypeSpec.ARRAY, JavaTypeSpecUtils
+                .createBaseTypeSpec(byte.class), "test")) == ValueType.Binary;
+    }
 }

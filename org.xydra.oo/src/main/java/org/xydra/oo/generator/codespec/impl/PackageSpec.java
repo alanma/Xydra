@@ -1,4 +1,4 @@
-package org.xydra.oo.generator.codespec;
+package org.xydra.oo.generator.codespec.impl;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -6,25 +6,34 @@ import java.util.List;
 import java.util.Set;
 
 
+
 public class PackageSpec {
-    
-    private String fullPackageName;
     
     public Set<ClassSpec> classes = new HashSet<>();
     
+    private String fullPackageName;
+    
     public Class<?> generatedFrom;
     
-    public List<PackageSpec> subPackages = new ArrayList<>();
-    
     private boolean isBuiltIn;
+    
+    public List<PackageSpec> subPackages = new ArrayList<>();
     
     public PackageSpec(String fullPackageName, boolean isBuiltIn) {
         this.fullPackageName = fullPackageName;
         this.isBuiltIn = isBuiltIn;
     }
     
-    public String getFQPackageName() {
-        return this.fullPackageName;
+    public ClassSpec addAbstractClass(String name) {
+        return new ClassSpec(this, "abstract class", name);
+    }
+    
+    public ClassSpec addClass(String name) {
+        return new ClassSpec(this, "class", name);
+    }
+    
+    public ClassSpec addInterface(String name) {
+        return new ClassSpec(this, "interface", name);
     }
     
     public void dump() {
@@ -35,6 +44,10 @@ public class PackageSpec {
         for(ClassSpec c : this.classes) {
             c.dump();
         }
+    }
+    
+    public String getFQPackageName() {
+        return this.fullPackageName;
     }
     
     public boolean isBuiltIn() {

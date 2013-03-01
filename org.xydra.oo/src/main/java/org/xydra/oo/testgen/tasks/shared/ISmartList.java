@@ -1,13 +1,15 @@
 package org.xydra.oo.testgen.tasks.shared;
 
-import org.xydra.oo.testgen.tasks.shared.IBaseList;
+import org.xydra.base.XId;
+import org.xydra.base.rmof.XWritableModel;
 import org.xydra.oo.Field;
+import org.xydra.oo.testgen.tasks.shared.IBaseList;
 
-/** Generated on Sun Feb 24 00:02:41 CET 2013 by SpecWriter, a part of xydra.org:oo */
+/** Generated on Fri Mar 01 21:05:48 CET 2013 by SpecWriter, a part of xydra.org:oo */
 public interface ISmartList extends IBaseList {
 
     /** 
-     * Generated from org.xydra.oo.testspecs.TasksSpec.SmartList. 
+     *  [generated from: 'org.xydra.oo.testspecs.TasksSpec.SmartList'] 
      *  
      * @return the current value or null if not defined 
      */
@@ -15,10 +17,19 @@ public interface ISmartList extends IBaseList {
     String getQuerySpec();
 
     /** 
-     * Set a value, silently overwriting existing values, if any. 
-     * Generated from org.xydra.oo.testspecs.TasksSpec.SmartList. 
+     * For GWT-internal use only [generated from: 'toClassSpec 1'] 
      *  
-     * @param querySpec the value to set 
+     * @param model  [generated from: 'toClassSpec 2'] 
+     * @param id  [generated from: 'toClassSpec 3'] 
+     */
+    void init(XWritableModel model, XId id);
+
+    /** 
+     * Set a value, silently overwriting existing values, if any. [generated from:  
+     * 'org.xydra.oo.testspecs.TasksSpec.SmartList'] 
+     *  
+     * @param querySpec the value to set [generated from:  
+     * 'org.xydra.oo.testspecs.TasksSpec.SmartList'] 
      */
     @Field("querySpec")
     void setQuerySpec(String querySpec);

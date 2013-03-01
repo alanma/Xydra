@@ -2,30 +2,33 @@ package org.xydra.oo.runtime.client;
 
 import java.io.IOException;
 
-import org.junit.Test;
 import org.xydra.base.XX;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.core.model.impl.memory.MemoryModel;
 import org.xydra.core.util.DumpUtils;
-import org.xydra.oo.faked.client.GwtFactory;
+import org.xydra.oo.testgen.tasks.client.GwtFactory;
 import org.xydra.oo.testgen.tasks.shared.ITask;
 
 
+/**
+ * TODO ask thomas for test or look in sync2
+ * 
+ * @author xamde
+ * 
+ */
 public class TestGwtRuntime {
     
     public static void main(String[] args) throws IOException {
         TestGwtRuntime t = new TestGwtRuntime();
-        t.useAllTyes();
+        t.useAllTypes();
     }
     
-    @Test
-    public void useAllTyes() throws IOException {
+    public void useAllTypes() throws IOException {
         
         // TODO how to test?
         
     }
     
-    @Test
     public void useTasks() {
         // setup
         XWritableModel model = new MemoryModel(XX.toId("actor"), "pass",

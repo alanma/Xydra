@@ -2,39 +2,64 @@ package org.xydra.oo.runtime.shared;
 
 import java.util.Iterator;
 
-import org.xydra.base.XID;
+import org.xydra.annotations.RunsInGWT;
+import org.xydra.base.XId;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.value.XCollectionValue;
-import org.xydra.base.value.XValue;
 import org.xydra.index.iterator.NoneIterator;
 import org.xydra.index.iterator.TransformingIterator;
 import org.xydra.index.iterator.TransformingIterator.Transformer;
 
 
 /**
+ * A runtime proxy object to represent a typed live collection that can be
+ * modified
+ * 
  * @author xamde
  * 
  * @param <X> xydra type
- * @param <T> xydra component type
+ * @param <T> any component type
  * @param <J> java type
  * @param <C> java component type
  */
-public class CollectionProxy<X extends XCollectionValue<T>, T extends XValue, J, C> {
+@RunsInGWT(true)
+public class CollectionProxy<X extends XCollectionValue<T>, T, J, C> {
     
-    public interface ITransformer<X extends XCollectionValue<T>, T extends XValue, J, C> {
-        C toJavaComponent(T xydraType);
+    /**
+     * Transforms Java component types to Xydra component types and vice versa.
+     * Can create empty Xydra collections.
+     * 
+     * @param <X> xydra base type, extends XCollectionValue<T>
+     * @param <T> any component type
+     * @param <J> java base type
+     * @param <C> java component type
+     */
+    public interface ITransformer<X, T, J, C> {
         
+        /**
+         * @param anyType
+         * @return Java component type
+         */
+        C toJavaComponent(T anyType);
+        
+        /**
+         * @param javaType
+         * @return Xydra component type
+         */
         T toXydraComponent(C javaType);
         
+        /**
+         * @return an empty Xydra collection
+         */
         X createCollection();
     }
     
     protected CollectionProxy.ITransformer<X,T,J,C> t;
     protected XWritableObject xo;
-    protected XID fieldId;
+    protected XId fieldId;
     
-    public CollectionProxy(XWritableObject xo, XID fieldId, CollectionProxy.ITransformer<X,T,J,C> t) {
+    public CollectionProxy(XWritableObject xo, XId fieldId, CollectionProxy.ITransformer<X,T,J,C> t) {
         this.xo = xo;
         this.fieldId = fieldId;
         this.t = t;

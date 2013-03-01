@@ -1,13 +1,15 @@
 package org.xydra.oo.testgen.alltypes.shared;
 
-import org.xydra.base.IHasXID;
+import org.xydra.base.IHasXId;
+import org.xydra.base.XId;
+import org.xydra.base.rmof.XWritableModel;
 import org.xydra.oo.Field;
 
-/** Generated on Sun Feb 24 00:02:41 CET 2013 by SpecWriter, a part of xydra.org:oo */
-public interface IPerson extends IHasXID {
+/** Generated on Fri Mar 01 21:05:48 CET 2013 by SpecWriter, a part of xydra.org:oo */
+public interface IPerson extends IHasXId {
 
     /** 
-     * Generated from org.xydra.oo.testspecs.AllTypesSpec.Person. 
+     *  [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.Person'] 
      *  
      * @return the current value or null if not defined 
      */
@@ -15,16 +17,7 @@ public interface IPerson extends IHasXID {
     int getAge();
 
     /** 
-     * Set a value, silently overwriting existing values, if any. 
-     * Generated from org.xydra.oo.testspecs.AllTypesSpec.Person. 
-     *  
-     * @param age the value to set 
-     */
-    @Field("age")
-    void setAge(int age);
-
-    /** 
-     * Generated from org.xydra.oo.testspecs.AllTypesSpec.Person. 
+     *  [generated from: 'org.xydra.oo.testspecs.AllTypesSpec.Person'] 
      *  
      * @return the current value or null if not defined 
      */
@@ -32,10 +25,29 @@ public interface IPerson extends IHasXID {
     String getName();
 
     /** 
-     * Set a value, silently overwriting existing values, if any. 
-     * Generated from org.xydra.oo.testspecs.AllTypesSpec.Person. 
+     * For GWT-internal use only [generated from: 'toClassSpec 1'] 
      *  
-     * @param name the value to set 
+     * @param model  [generated from: 'toClassSpec 2'] 
+     * @param id  [generated from: 'toClassSpec 3'] 
+     */
+    void init(XWritableModel model, XId id);
+
+    /** 
+     * Set a value, silently overwriting existing values, if any. [generated from:  
+     * 'org.xydra.oo.testspecs.AllTypesSpec.Person'] 
+     *  
+     * @param age the value to set [generated from:  
+     * 'org.xydra.oo.testspecs.AllTypesSpec.Person'] 
+     */
+    @Field("age")
+    void setAge(int age);
+
+    /** 
+     * Set a value, silently overwriting existing values, if any. [generated from:  
+     * 'org.xydra.oo.testspecs.AllTypesSpec.Person'] 
+     *  
+     * @param name the value to set [generated from:  
+     * 'org.xydra.oo.testspecs.AllTypesSpec.Person'] 
      */
     @Field("name")
     void setName(String name);

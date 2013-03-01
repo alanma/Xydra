@@ -5,7 +5,7 @@ import java.util.Set;
 import java.util.SortedSet;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.value.XAddressListValue;
 import org.xydra.base.value.XAddressSetValue;
 import org.xydra.base.value.XAddressSortedSetValue;
@@ -14,9 +14,9 @@ import org.xydra.base.value.XBooleanListValue;
 import org.xydra.base.value.XBooleanValue;
 import org.xydra.base.value.XDoubleListValue;
 import org.xydra.base.value.XDoubleValue;
-import org.xydra.base.value.XIDListValue;
-import org.xydra.base.value.XIDSetValue;
-import org.xydra.base.value.XIDSortedSetValue;
+import org.xydra.base.value.XIdListValue;
+import org.xydra.base.value.XIdSetValue;
+import org.xydra.base.value.XIdSortedSetValue;
 import org.xydra.base.value.XIntegerListValue;
 import org.xydra.base.value.XIntegerValue;
 import org.xydra.base.value.XLongListValue;
@@ -24,6 +24,8 @@ import org.xydra.base.value.XLongValue;
 import org.xydra.base.value.XStringListValue;
 import org.xydra.base.value.XStringSetValue;
 import org.xydra.base.value.XStringValue;
+import org.xydra.oo.testgen.alltypes.shared.Colors;
+import org.xydra.oo.testgen.alltypes.shared.MyLongBasedType;
 
 
 public class AllTypesSpec {
@@ -58,6 +60,8 @@ public class AllTypesSpec {
         boolean jboolean;
         
         XBinaryValue xbinary;
+        
+        /** should be recognised as a single type */
         byte[] jbinary;
         
         XDoubleListValue xdoublelist;
@@ -69,17 +73,17 @@ public class AllTypesSpec {
         Double jDouble;
         double jdouble;
         
-        XID xid;
+        XId xid;
         
-        XIDListValue xidlist;
-        List<XID> jxidlist;
-        XID[] jiddarray;
+        XIdListValue xidlist;
+        List<XId> jxidlist;
+        XId[] jiddarray;
         
-        XIDSetValue xidset;
-        Set<XID> jxidset;
+        XIdSetValue xidset;
+        Set<XId> jxidset;
         
-        XIDSortedSetValue xidsortedset;
-        SortedSet<XID> jxidsortedset;
+        XIdSortedSetValue xidsortedset;
+        SortedSet<XId> jxidsortedset;
         
         XIntegerListValue xintegerlist;
         List<Integer> jintegerlist;
@@ -117,7 +121,11 @@ public class AllTypesSpec {
         Set<Person> friends;
         List<Person> nextBirthdays;
         SortedSet<Person> bestFriends;
-        Person[] members;
+        // Person[] members;
+        
+        Colors color;
+        
+        MyLongBasedType myLongBasedType;
         
     }
     

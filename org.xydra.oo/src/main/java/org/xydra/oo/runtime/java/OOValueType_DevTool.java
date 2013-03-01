@@ -6,17 +6,16 @@ import java.util.SortedSet;
 
 import org.xydra.annotations.CanBeNull;
 import org.xydra.base.value.ValueType;
-import org.xydra.oo.runtime.shared.OOTypeBridge;
-import org.xydra.oo.runtime.shared.OOTypeMapping;
+import org.xydra.oo.runtime.shared.SharedTypeMapping;
 
 
 /**
- * Use during development of {@link OOTypeMapping}
+ * Use during development of {@link SharedTypeMapping}
  * 
  * @author xamde
  * 
  */
-public class OOValueTypeGen {
+public class OOValueType_DevTool {
     
     public static void main(String[] args) {
         System.out.println("// trivial mappings for built-in Xydra types");
@@ -27,17 +26,17 @@ public class OOValueTypeGen {
                 if(v.isSet()) {
                     if(v.isSortedCollection()) {
                         // sortedset
-                        dumpEnumValue(v.name(), SortedSet.class, ValueType.getComponentType(v),
-                                v.getXydraInterface());
+                        dumpEnumValue(v.name(), SortedSet.class, v.getComponentType()
+                                .getJavaClass(), v.getXydraInterface());
                     } else {
                         // set
-                        dumpEnumValue(v.name(), Set.class, ValueType.getComponentType(v),
+                        dumpEnumValue(v.name(), Set.class, v.getComponentType().getJavaClass(),
                                 v.getXydraInterface());
                     }
                 } else {
                     assert v.isSortedCollection();
                     // list
-                    dumpEnumValue(v.name(), List.class, ValueType.getComponentType(v),
+                    dumpEnumValue(v.name(), List.class, v.getComponentType().getJavaClass(),
                             v.getXydraInterface());
                 }
             }
@@ -50,7 +49,7 @@ public class OOValueTypeGen {
         
         @SuppressWarnings("unused")
         String javaTypeVariable = javaType.getSimpleName();
-        if(OOTypeBridge.isCollectionType(javaType)) {
+        if(XydraReflectionUtils.isCollectionType(javaType)) {
             assert javaComponentType != null;
             // System.out.println("@SuppressWarnings(\"rawtypes\")");
             // javaTypeVariable += "<" + javaComponentType.getSimpleName() +

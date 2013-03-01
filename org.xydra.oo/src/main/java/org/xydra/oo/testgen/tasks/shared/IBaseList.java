@@ -1,23 +1,25 @@
 package org.xydra.oo.testgen.tasks.shared;
 
-import org.xydra.base.IHasXID;
-import org.xydra.oo.Field;
 import java.util.Set;
+import org.xydra.base.IHasXId;
+import org.xydra.base.XId;
+import org.xydra.base.rmof.XWritableModel;
+import org.xydra.oo.Field;
+import org.xydra.oo.testgen.tasks.shared.IUser;
 
-/** Generated on Sun Feb 24 00:02:41 CET 2013 by SpecWriter, a part of xydra.org:oo */
-public interface IBaseList extends IHasXID {
+/** Generated on Fri Mar 01 21:05:48 CET 2013 by SpecWriter, a part of xydra.org:oo */
+public interface IBaseList extends IHasXId {
 
     /** 
-     * A number to be displayed in the 'badge' of the list 
-     *  
-     * Generated from org.xydra.oo.testspecs.TasksSpec.BaseList 
+     * A number to be displayed in the 'badge' of the list [generated from:  
+     * 'org.xydra.oo.testspecs.TasksSpec.BaseList'] 
      *  
      * @return ... 
      */
     int counter();
 
     /** 
-     * Generated from org.xydra.oo.testspecs.TasksSpec.BaseList. 
+     *  [generated from: 'org.xydra.oo.testspecs.TasksSpec.BaseList'] 
      *  
      * @return the current value or null if not defined 
      */
@@ -25,40 +27,7 @@ public interface IBaseList extends IHasXID {
     String getIcon();
 
     /** 
-     * Set a value, silently overwriting existing values, if any. 
-     * Generated from org.xydra.oo.testspecs.TasksSpec.BaseList. 
-     *  
-     * @param icon the value to set 
-     */
-    @Field("icon")
-    void setIcon(String icon);
-
-    /** 
-     * True if the list has no members 
-     *  
-     * Generated from org.xydra.oo.testspecs.TasksSpec.BaseList 
-     *  
-     * @return ... 
-     */
-    boolean isPrivate();
-
-    /** 
-     * Generated from org.xydra.oo.testspecs.TasksSpec.BaseList 
-     *  
-     * @return ... 
-     */
-    boolean isShared();
-
-    /** 
-     * Generated from org.xydra.oo.testspecs.TasksSpec.BaseList. 
-     *  
-     * @return a writable collection proxy, never null 
-     */
-    @Field("members")
-    Set<IUser> members();
-
-    /** 
-     * Generated from org.xydra.oo.testspecs.TasksSpec.BaseList. 
+     *  [generated from: 'org.xydra.oo.testspecs.TasksSpec.BaseList'] 
      *  
      * @return the current value or null if not defined 
      */
@@ -66,16 +35,7 @@ public interface IBaseList extends IHasXID {
     String getName();
 
     /** 
-     * Set a value, silently overwriting existing values, if any. 
-     * Generated from org.xydra.oo.testspecs.TasksSpec.BaseList. 
-     *  
-     * @param name the value to set 
-     */
-    @Field("name")
-    void setName(String name);
-
-    /** 
-     * Generated from org.xydra.oo.testspecs.TasksSpec.BaseList. 
+     *  [generated from: 'org.xydra.oo.testspecs.TasksSpec.BaseList'] 
      *  
      * @return the current value or null if not defined 
      */
@@ -83,10 +43,62 @@ public interface IBaseList extends IHasXID {
     IUser getOwner();
 
     /** 
-     * Set a value, silently overwriting existing values, if any. 
-     * Generated from org.xydra.oo.testspecs.TasksSpec.BaseList. 
+     * For GWT-internal use only [generated from: 'toClassSpec 1'] 
      *  
-     * @param owner the value to set 
+     * @param model  [generated from: 'toClassSpec 2'] 
+     * @param id  [generated from: 'toClassSpec 3'] 
+     */
+    void init(XWritableModel model, XId id);
+
+    /** 
+     * True if the list has no members [generated from:  
+     * 'org.xydra.oo.testspecs.TasksSpec.BaseList'] 
+     *  
+     * @return ... 
+     */
+    boolean isPrivate();
+
+    /** 
+     *  [generated from: 'org.xydra.oo.testspecs.TasksSpec.BaseList'] 
+     *  
+     * @return ... 
+     */
+    boolean isShared();
+
+    /** 
+     *  [generated from: 'org.xydra.oo.testspecs.TasksSpec.BaseList'] 
+     *  
+     * @return a writable collection proxy, never null 
+     */
+    @Field("members")
+    Set<IUser> members();
+
+    /** 
+     * Set a value, silently overwriting existing values, if any. [generated from:  
+     * 'org.xydra.oo.testspecs.TasksSpec.BaseList'] 
+     *  
+     * @param icon the value to set [generated from:  
+     * 'org.xydra.oo.testspecs.TasksSpec.BaseList'] 
+     */
+    @Field("icon")
+    void setIcon(String icon);
+
+    /** 
+     * Set a value, silently overwriting existing values, if any. [generated from:  
+     * 'org.xydra.oo.testspecs.TasksSpec.BaseList'] 
+     *  
+     * @param name the value to set [generated from:  
+     * 'org.xydra.oo.testspecs.TasksSpec.BaseList'] 
+     */
+    @Field("name")
+    void setName(String name);
+
+    /** 
+     * Set a value, silently overwriting existing values, if any. [generated from:  
+     * 'org.xydra.oo.testspecs.TasksSpec.BaseList'] 
+     *  
+     * @param owner the value to set [generated from:  
+     * 'org.xydra.oo.testspecs.TasksSpec.BaseList'] 
      */
     @Field("owner")
     void setOwner(IUser owner);

@@ -1,14 +1,19 @@
 package org.xydra.oo.generator.java;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
 
 import org.junit.Test;
+import org.xydra.base.value.ValueType;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.log.util.RememberLogListener;
+import org.xydra.oo.runtime.java.JavaTypeMapping;
+import org.xydra.oo.runtime.java.OOReflectionUtils;
+import org.xydra.oo.testgen.alltypes.shared.MyLongBasedType;
 import org.xydra.oo.testspecs.AllTypesSpec;
 import org.xydra.oo.testspecs.TasksSpec;
 
@@ -44,11 +49,18 @@ public class TestInterfaceGenerator {
     public void generateAllTypesInterfaces() throws IOException {
         log.info("Start");
         
+        JavaTypeMapping.addSingleTypeMapping(MyLongBasedType.class, ValueType.Long,
+                MyLongBasedType.MAPPER);
+        
         JavaCodeGenerator.generateInterfaces(AllTypesSpec.class, new File("./src/main/java"),
                 TESTGEN + ".alltypes");
         
+        assertTrue(OOReflectionUtils.isTranslatableSingleType(MyLongBasedType.class));
+        
         String logs = REMEMBER_LISTENER.getLogs();
         assertFalse("No fields should be ignored", logs.contains("Ignoring field"));
+        assertFalse("There were warnings", logs.toLowerCase().contains("warn"));
+        assertFalse("There were errors", logs.toLowerCase().contains("error"));
     }
     
 }

@@ -4,16 +4,27 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.SortedSet;
 
-import org.xydra.base.XID;
+import org.xydra.annotations.RunsInGWT;
+import org.xydra.base.XId;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.value.XCollectionValue;
-import org.xydra.base.value.XValue;
 
 
-public class SortedSetProxy<X extends XCollectionValue<T>, T extends XValue, J, C> extends
+/**
+ * A typed, modifiable Xydra-backed SortedSet
+ * 
+ * @author xamde
+ * 
+ * @param <X>
+ * @param <T>
+ * @param <J>
+ * @param <C>
+ */
+@RunsInGWT(true)
+public class SortedSetProxy<X extends XCollectionValue<T>, T, J, C> extends
         CollectionProxy<X,T,J,C> implements SortedSet<C> {
     
-    public SortedSetProxy(XWritableObject xo, XID fieldId, CollectionProxy.ITransformer<X,T,J,C> t) {
+    public SortedSetProxy(XWritableObject xo, XId fieldId, CollectionProxy.ITransformer<X,T,J,C> t) {
         super(xo, fieldId, t);
     }
     

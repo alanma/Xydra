@@ -1,13 +1,16 @@
 package org.xydra.oo.testgen.tasks.shared;
 
-import org.xydra.base.IHasXID;
+import org.xydra.base.IHasXId;
+import org.xydra.base.XId;
+import org.xydra.base.rmof.XWritableModel;
 import org.xydra.oo.Field;
+import org.xydra.oo.testgen.tasks.shared.IBaseList;
 
-/** Generated on Sun Feb 24 00:02:41 CET 2013 by SpecWriter, a part of xydra.org:oo */
-public interface IHome extends IHasXID {
+/** Generated on Fri Mar 01 21:05:48 CET 2013 by SpecWriter, a part of xydra.org:oo */
+public interface IHome extends IHasXId {
 
     /** 
-     * Generated from org.xydra.oo.testspecs.TasksSpec.Home. 
+     *  [generated from: 'org.xydra.oo.testspecs.TasksSpec.Home'] 
      *  
      * @return the current value or null if not defined 
      */
@@ -15,16 +18,7 @@ public interface IHome extends IHasXID {
     IBaseList getInbox();
 
     /** 
-     * Set a value, silently overwriting existing values, if any. 
-     * Generated from org.xydra.oo.testspecs.TasksSpec.Home. 
-     *  
-     * @param inbox the value to set 
-     */
-    @Field("inbox")
-    void setInbox(IBaseList inbox);
-
-    /** 
-     * Generated from org.xydra.oo.testspecs.TasksSpec.Home. 
+     *  [generated from: 'org.xydra.oo.testspecs.TasksSpec.Home'] 
      *  
      * @return the current value or null if not defined 
      */
@@ -32,16 +26,7 @@ public interface IHome extends IHasXID {
     IBaseList getStarred();
 
     /** 
-     * Set a value, silently overwriting existing values, if any. 
-     * Generated from org.xydra.oo.testspecs.TasksSpec.Home. 
-     *  
-     * @param starred the value to set 
-     */
-    @Field("starred")
-    void setStarred(IBaseList starred);
-
-    /** 
-     * Generated from org.xydra.oo.testspecs.TasksSpec.Home. 
+     *  [generated from: 'org.xydra.oo.testspecs.TasksSpec.Home'] 
      *  
      * @return the current value or null if not defined 
      */
@@ -49,16 +34,7 @@ public interface IHome extends IHasXID {
     IBaseList getToday();
 
     /** 
-     * Set a value, silently overwriting existing values, if any. 
-     * Generated from org.xydra.oo.testspecs.TasksSpec.Home. 
-     *  
-     * @param today the value to set 
-     */
-    @Field("today")
-    void setToday(IBaseList today);
-
-    /** 
-     * Generated from org.xydra.oo.testspecs.TasksSpec.Home. 
+     *  [generated from: 'org.xydra.oo.testspecs.TasksSpec.Home'] 
      *  
      * @return the current value or null if not defined 
      */
@@ -66,10 +42,49 @@ public interface IHome extends IHasXID {
     IBaseList getWeek();
 
     /** 
-     * Set a value, silently overwriting existing values, if any. 
-     * Generated from org.xydra.oo.testspecs.TasksSpec.Home. 
+     * For GWT-internal use only [generated from: 'toClassSpec 1'] 
      *  
-     * @param week the value to set 
+     * @param model  [generated from: 'toClassSpec 2'] 
+     * @param id  [generated from: 'toClassSpec 3'] 
+     */
+    void init(XWritableModel model, XId id);
+
+    /** 
+     * Set a value, silently overwriting existing values, if any. [generated from:  
+     * 'org.xydra.oo.testspecs.TasksSpec.Home'] 
+     *  
+     * @param inbox the value to set [generated from:  
+     * 'org.xydra.oo.testspecs.TasksSpec.Home'] 
+     */
+    @Field("inbox")
+    void setInbox(IBaseList inbox);
+
+    /** 
+     * Set a value, silently overwriting existing values, if any. [generated from:  
+     * 'org.xydra.oo.testspecs.TasksSpec.Home'] 
+     *  
+     * @param starred the value to set [generated from:  
+     * 'org.xydra.oo.testspecs.TasksSpec.Home'] 
+     */
+    @Field("starred")
+    void setStarred(IBaseList starred);
+
+    /** 
+     * Set a value, silently overwriting existing values, if any. [generated from:  
+     * 'org.xydra.oo.testspecs.TasksSpec.Home'] 
+     *  
+     * @param today the value to set [generated from:  
+     * 'org.xydra.oo.testspecs.TasksSpec.Home'] 
+     */
+    @Field("today")
+    void setToday(IBaseList today);
+
+    /** 
+     * Set a value, silently overwriting existing values, if any. [generated from:  
+     * 'org.xydra.oo.testspecs.TasksSpec.Home'] 
+     *  
+     * @param week the value to set [generated from:  
+     * 'org.xydra.oo.testspecs.TasksSpec.Home'] 
      */
     @Field("week")
     void setWeek(IBaseList week);

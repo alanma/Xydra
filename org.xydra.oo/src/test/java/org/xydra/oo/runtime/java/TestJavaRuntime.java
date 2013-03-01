@@ -11,15 +11,18 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.rmof.XWritableModel;
+import org.xydra.base.value.ValueType;
 import org.xydra.base.value.XV;
 import org.xydra.core.model.impl.memory.MemoryModel;
 import org.xydra.core.util.DumpUtils;
-import org.xydra.oo.faked.java.JavaFactory;
+import org.xydra.oo.testgen.alltypes.java.JavaFactory;
+import org.xydra.oo.testgen.alltypes.shared.Colors;
 import org.xydra.oo.testgen.alltypes.shared.IHasAllType;
 import org.xydra.oo.testgen.alltypes.shared.IPerson;
+import org.xydra.oo.testgen.alltypes.shared.MyLongBasedType;
 import org.xydra.oo.testgen.tasks.shared.ITask;
 
 
@@ -34,22 +37,37 @@ public class TestJavaRuntime {
     public void useAllTypesRuntime() throws IOException {
         
         // setup
+        JavaTypeMapping.addSingleTypeMapping(MyLongBasedType.class, ValueType.Long,
+                MyLongBasedType.MAPPER);
+        
         XWritableModel model = new MemoryModel(XX.toId("actor"), "pass",
                 XX.toAddress("/repo1/model1"));
         
-        // TODO use generated factory instead
-        XID id = XX.toId("o1");
-        IHasAllType alltypes = (IHasAllType)Proxy.newProxyInstance(
-                IHasAllType.class.getClassLoader(), new Class<?>[] { IHasAllType.class },
-                new OOJavaOnlyProxy(model, id));
-        model.createObject(id);
+        JavaFactory factory = new JavaFactory(model);
+        IHasAllType alltypes = factory.createHasAllType("o1");
+        IPerson p1 = factory.createPerson("p1");
+        IPerson p2 = factory.createPerson("p2");
+        IPerson p3 = factory.createPerson("p3");
         
-        IPerson p1 = (IPerson)Proxy.newProxyInstance(IPerson.class.getClassLoader(),
-                new Class<?>[] { IPerson.class }, new OOJavaOnlyProxy(model, XX.toId("p1")));
-        IPerson p2 = (IPerson)Proxy.newProxyInstance(IPerson.class.getClassLoader(),
-                new Class<?>[] { IPerson.class }, new OOJavaOnlyProxy(model, XX.toId("p2")));
-        IPerson p3 = (IPerson)Proxy.newProxyInstance(IPerson.class.getClassLoader(),
-                new Class<?>[] { IPerson.class }, new OOJavaOnlyProxy(model, XX.toId("p3")));
+        XId id = XX.toId("o1");
+        // IHasAllType alltypes = (IHasAllType)Proxy.newProxyInstance(
+        // IHasAllType.class.getClassLoader(), new Class<?>[] {
+        // IHasAllType.class },
+        // new OOJavaOnlyProxy(model, id));
+        // model.createObject(id);
+        //
+        // IPerson p1 =
+        // (IPerson)Proxy.newProxyInstance(IPerson.class.getClassLoader(),
+        // new Class<?>[] { IPerson.class }, new OOJavaOnlyProxy(model,
+        // XX.toId("p1")));
+        // IPerson p2 =
+        // (IPerson)Proxy.newProxyInstance(IPerson.class.getClassLoader(),
+        // new Class<?>[] { IPerson.class }, new OOJavaOnlyProxy(model,
+        // XX.toId("p2")));
+        // IPerson p3 =
+        // (IPerson)Proxy.newProxyInstance(IPerson.class.getClassLoader(),
+        // new Class<?>[] { IPerson.class }, new OOJavaOnlyProxy(model,
+        // XX.toId("p3")));
         
         // usage
         alltypes.bestFriends().add(p1);
@@ -77,7 +95,7 @@ public class TestJavaRuntime {
         alltypes.setXbooleanlist(XV.toBooleanListValue(Arrays.asList(true, true, false)));
         assertFalse(alltypes.getXbooleanlist().isEmpty());
         
-        // TODO ...
+        // IMPROVE more assertions
         
         // a 1
         alltypes.setXstringset(XV.toStringSetValue(genStrings("a", 3)));
@@ -89,11 +107,11 @@ public class TestJavaRuntime {
         // f 6
         alltypes.setXintegerlist(XV.toIntegerListValue(Arrays.asList(601, 602, 602)));
         alltypes.setXinteger(XV.toValue(7));
-        alltypes.setXidsortedset(XV.toIDSortedSetValue(Arrays.asList(XX.toId("h1"), XX.toId("h2"),
+        alltypes.setXidsortedset(XV.toIdSortedSetValue(Arrays.asList(XX.toId("h1"), XX.toId("h2"),
                 XX.toId("h3"))));
-        alltypes.setXidset(XV.toIDSetValue(Arrays.asList(XX.toId("i1"), XX.toId("i2"),
+        alltypes.setXidset(XV.toIdSetValue(Arrays.asList(XX.toId("i1"), XX.toId("i2"),
                 XX.toId("i3"))));
-        alltypes.setXidlist(XV.toIDListValue(Arrays.asList(XX.toId("j1"), XX.toId("j2"),
+        alltypes.setXidlist(XV.toIdListValue(Arrays.asList(XX.toId("j1"), XX.toId("j2"),
                 XX.toId("j3"))));
         
         // k 11
@@ -133,6 +151,10 @@ public class TestJavaRuntime {
         alltypes.setJdouble(28);
         alltypes.setJBoolean(true);
         alltypes.setJboolean(true);
+        alltypes.setColor(Colors.Green);
+        assertEquals(Colors.Green, alltypes.getColor());
+        alltypes.setMyLongBasedType(new MyLongBasedType(3));
+        assertEquals(3, alltypes.getMyLongBasedType().getInternalLong());
         
         DumpUtils.dump("filled", model);
     }
@@ -150,7 +172,8 @@ public class TestJavaRuntime {
         // setup
         XWritableModel model = new MemoryModel(XX.toId("actor"), "pass",
                 XX.toAddress("/repo1/model1"));
-        JavaFactory factory = new JavaFactory(model);
+        org.xydra.oo.testgen.tasks.java.JavaFactory factory = new org.xydra.oo.testgen.tasks.java.JavaFactory(
+                model);
         
         // usage
         ITask task = factory.createTask("o1");

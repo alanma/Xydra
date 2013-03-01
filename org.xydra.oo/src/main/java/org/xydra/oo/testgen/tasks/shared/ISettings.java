@@ -1,13 +1,15 @@
 package org.xydra.oo.testgen.tasks.shared;
 
-import org.xydra.base.IHasXID;
+import org.xydra.base.IHasXId;
+import org.xydra.base.XId;
+import org.xydra.base.rmof.XWritableModel;
 import org.xydra.oo.Field;
 
-/** Generated on Sun Feb 24 00:02:41 CET 2013 by SpecWriter, a part of xydra.org:oo */
-public interface ISettings extends IHasXID {
+/** Generated on Fri Mar 01 21:05:48 CET 2013 by SpecWriter, a part of xydra.org:oo */
+public interface ISettings extends IHasXId {
 
     /** 
-     * Generated from org.xydra.oo.testspecs.TasksSpec.Settings. 
+     *  [generated from: 'org.xydra.oo.testspecs.TasksSpec.Settings'] 
      *  
      * @return the current value or null if not defined 
      */
@@ -15,16 +17,7 @@ public interface ISettings extends IHasXID {
     String getLanguage();
 
     /** 
-     * Set a value, silently overwriting existing values, if any. 
-     * Generated from org.xydra.oo.testspecs.TasksSpec.Settings. 
-     *  
-     * @param language the value to set 
-     */
-    @Field("language")
-    void setLanguage(String language);
-
-    /** 
-     * Generated from org.xydra.oo.testspecs.TasksSpec.Settings. 
+     *  [generated from: 'org.xydra.oo.testspecs.TasksSpec.Settings'] 
      *  
      * @return the current value or null if not defined 
      */
@@ -32,16 +25,7 @@ public interface ISettings extends IHasXID {
     boolean getNewItemsAtTop();
 
     /** 
-     * Set a value, silently overwriting existing values, if any. 
-     * Generated from org.xydra.oo.testspecs.TasksSpec.Settings. 
-     *  
-     * @param newItemsAtTop the value to set 
-     */
-    @Field("newItemsAtTop")
-    void setNewItemsAtTop(boolean newItemsAtTop);
-
-    /** 
-     * Generated from org.xydra.oo.testspecs.TasksSpec.Settings. 
+     *  [generated from: 'org.xydra.oo.testspecs.TasksSpec.Settings'] 
      *  
      * @return the current value or null if not defined 
      */
@@ -49,16 +33,7 @@ public interface ISettings extends IHasXID {
     boolean getNotifyByDesktop();
 
     /** 
-     * Set a value, silently overwriting existing values, if any. 
-     * Generated from org.xydra.oo.testspecs.TasksSpec.Settings. 
-     *  
-     * @param notifyByDesktop the value to set 
-     */
-    @Field("notifyByDesktop")
-    void setNotifyByDesktop(boolean notifyByDesktop);
-
-    /** 
-     * Generated from org.xydra.oo.testspecs.TasksSpec.Settings. 
+     *  [generated from: 'org.xydra.oo.testspecs.TasksSpec.Settings'] 
      *  
      * @return the current value or null if not defined 
      */
@@ -66,16 +41,7 @@ public interface ISettings extends IHasXID {
     boolean getNotifyByEmail();
 
     /** 
-     * Set a value, silently overwriting existing values, if any. 
-     * Generated from org.xydra.oo.testspecs.TasksSpec.Settings. 
-     *  
-     * @param notifyByEmail the value to set 
-     */
-    @Field("notifyByEmail")
-    void setNotifyByEmail(boolean notifyByEmail);
-
-    /** 
-     * Generated from org.xydra.oo.testspecs.TasksSpec.Settings. 
+     *  [generated from: 'org.xydra.oo.testspecs.TasksSpec.Settings'] 
      *  
      * @return the current value or null if not defined 
      */
@@ -83,16 +49,7 @@ public interface ISettings extends IHasXID {
     boolean getNotifyByPush();
 
     /** 
-     * Set a value, silently overwriting existing values, if any. 
-     * Generated from org.xydra.oo.testspecs.TasksSpec.Settings. 
-     *  
-     * @param notifyByPush the value to set 
-     */
-    @Field("notifyByPush")
-    void setNotifyByPush(boolean notifyByPush);
-
-    /** 
-     * Generated from org.xydra.oo.testspecs.TasksSpec.Settings. 
+     *  [generated from: 'org.xydra.oo.testspecs.TasksSpec.Settings'] 
      *  
      * @return the current value or null if not defined 
      */
@@ -100,16 +57,7 @@ public interface ISettings extends IHasXID {
     int getStartOfWeek();
 
     /** 
-     * Set a value, silently overwriting existing values, if any. 
-     * Generated from org.xydra.oo.testspecs.TasksSpec.Settings. 
-     *  
-     * @param startOfWeek the value to set 
-     */
-    @Field("startOfWeek")
-    void setStartOfWeek(int startOfWeek);
-
-    /** 
-     * Generated from org.xydra.oo.testspecs.TasksSpec.Settings. 
+     *  [generated from: 'org.xydra.oo.testspecs.TasksSpec.Settings'] 
      *  
      * @return the current value or null if not defined 
      */
@@ -117,10 +65,79 @@ public interface ISettings extends IHasXID {
     int getTimeFormat();
 
     /** 
-     * Set a value, silently overwriting existing values, if any. 
-     * Generated from org.xydra.oo.testspecs.TasksSpec.Settings. 
+     * For GWT-internal use only [generated from: 'toClassSpec 1'] 
      *  
-     * @param timeFormat the value to set 
+     * @param model  [generated from: 'toClassSpec 2'] 
+     * @param id  [generated from: 'toClassSpec 3'] 
+     */
+    void init(XWritableModel model, XId id);
+
+    /** 
+     * Set a value, silently overwriting existing values, if any. [generated from:  
+     * 'org.xydra.oo.testspecs.TasksSpec.Settings'] 
+     *  
+     * @param language the value to set [generated from:  
+     * 'org.xydra.oo.testspecs.TasksSpec.Settings'] 
+     */
+    @Field("language")
+    void setLanguage(String language);
+
+    /** 
+     * Set a value, silently overwriting existing values, if any. [generated from:  
+     * 'org.xydra.oo.testspecs.TasksSpec.Settings'] 
+     *  
+     * @param newItemsAtTop the value to set [generated from:  
+     * 'org.xydra.oo.testspecs.TasksSpec.Settings'] 
+     */
+    @Field("newItemsAtTop")
+    void setNewItemsAtTop(boolean newItemsAtTop);
+
+    /** 
+     * Set a value, silently overwriting existing values, if any. [generated from:  
+     * 'org.xydra.oo.testspecs.TasksSpec.Settings'] 
+     *  
+     * @param notifyByDesktop the value to set [generated from:  
+     * 'org.xydra.oo.testspecs.TasksSpec.Settings'] 
+     */
+    @Field("notifyByDesktop")
+    void setNotifyByDesktop(boolean notifyByDesktop);
+
+    /** 
+     * Set a value, silently overwriting existing values, if any. [generated from:  
+     * 'org.xydra.oo.testspecs.TasksSpec.Settings'] 
+     *  
+     * @param notifyByEmail the value to set [generated from:  
+     * 'org.xydra.oo.testspecs.TasksSpec.Settings'] 
+     */
+    @Field("notifyByEmail")
+    void setNotifyByEmail(boolean notifyByEmail);
+
+    /** 
+     * Set a value, silently overwriting existing values, if any. [generated from:  
+     * 'org.xydra.oo.testspecs.TasksSpec.Settings'] 
+     *  
+     * @param notifyByPush the value to set [generated from:  
+     * 'org.xydra.oo.testspecs.TasksSpec.Settings'] 
+     */
+    @Field("notifyByPush")
+    void setNotifyByPush(boolean notifyByPush);
+
+    /** 
+     * Set a value, silently overwriting existing values, if any. [generated from:  
+     * 'org.xydra.oo.testspecs.TasksSpec.Settings'] 
+     *  
+     * @param startOfWeek the value to set [generated from:  
+     * 'org.xydra.oo.testspecs.TasksSpec.Settings'] 
+     */
+    @Field("startOfWeek")
+    void setStartOfWeek(int startOfWeek);
+
+    /** 
+     * Set a value, silently overwriting existing values, if any. [generated from:  
+     * 'org.xydra.oo.testspecs.TasksSpec.Settings'] 
+     *  
+     * @param timeFormat the value to set [generated from:  
+     * 'org.xydra.oo.testspecs.TasksSpec.Settings'] 
      */
     @Field("timeFormat")
     void setTimeFormat(int timeFormat);

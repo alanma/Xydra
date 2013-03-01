@@ -1,19 +1,28 @@
 package org.xydra.oo.runtime.client;
 
-import org.xydra.base.XID;
+import org.xydra.base.IHasXId;
+import org.xydra.base.XId;
 import org.xydra.base.rmof.XWritableModel;
-import org.xydra.oo.runtime.shared.OOProxy;
+import org.xydra.oo.runtime.shared.SharedProxy;
 
 
-public class GwtXydraMapped {
+public class GwtXydraMapped implements IHasXId {
     
-    protected OOProxy oop;
+    protected SharedProxy oop;
     
-    public GwtXydraMapped(XWritableModel model, XID id) {
-        this.oop = new OOProxy(model, id);
+    /** For GWT.create only */
+    public GwtXydraMapped() {
     }
     
-    public XID getId() {
+    public void init(XWritableModel model, XId id) {
+        this.oop = new SharedProxy(model, id);
+    }
+    
+    public GwtXydraMapped(XWritableModel model, XId id) {
+        this.oop = new SharedProxy(model, id);
+    }
+    
+    public XId getId() {
         return this.oop.getId();
     }
     

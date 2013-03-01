@@ -3,6 +3,7 @@ package org.xydra.oo.generator.codespec;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -10,6 +11,9 @@ import java.io.StringReader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 
 
 /**
@@ -19,6 +23,8 @@ import java.util.List;
  * @author xamde
  */
 public class CodeWriter {
+    
+    private static final Logger log = LoggerFactory.getLogger(CodeWriter.class);
     
     public static void writeJavaDocComment(Writer w, String indent, String value)
             throws IOException {
@@ -87,13 +93,25 @@ public class CodeWriter {
     
     private static final int MB1 = 1024 * 1024;
     
-    static void writeAnnotation(Writer w, String indent, String annotationName, String stringValue)
+    static void writeAnnotation(Writer w, String indent, String annotationName, Object[] values)
             throws IOException {
-        w.write("    @");
+        w.write(indent + "@");
         w.write(annotationName);
-        w.write("(\"");
-        w.write(stringValue);
-        w.write("\")\n");
+        if(values != null && values.length > 0) {
+            w.write("(");
+            for(int i = 0; i < values.length; i++) {
+                Object o = values[i];
+                if(o instanceof String) {
+                    w.write("\"" + values[i].toString() + "\"");
+                } else {
+                    throw new RuntimeException("Cannot handle annotation value of type "
+                            + o.getClass().getCanonicalName() + " yet");
+                }
+                
+            }
+            w.write(")");
+        }
+        w.write("\n");
     }
     
     public static File toJavaSourceFile(File outDir, String basePackage, String className) {
@@ -105,10 +123,24 @@ public class CodeWriter {
     
     public static Writer openWriter(File f) throws IOException {
         f.getParentFile().mkdirs();
-        FileOutputStream fos = new FileOutputStream(f);
-        OutputStreamWriter w = new OutputStreamWriter(fos, "utf-8");
-        BufferedWriter bw = new BufferedWriter(w, MB1);
-        return bw;
+        try {
+            FileOutputStream fos = new FileOutputStream(f);
+            OutputStreamWriter w = new OutputStreamWriter(fos, "utf-8");
+            BufferedWriter bw = new BufferedWriter(w, MB1);
+            return bw;
+        } catch(FileNotFoundException e) {
+            log.warn("Problem writing " + f.getAbsolutePath(), e);
+            throw e;
+        }
+    }
+    
+    public static void writeField(Writer w, String indent, String type, String name)
+            throws IOException {
+        w.write(indent);
+        w.write(type);
+        w.write(" ");
+        w.write(name);
+        w.write(";\n");
     }
     
 }

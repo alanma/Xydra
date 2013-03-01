@@ -8,23 +8,23 @@ import org.xydra.base.XAddress;
 import org.xydra.base.value.XAddressSortedSetValue;
 import org.xydra.base.value.XBooleanListValue;
 import org.xydra.base.value.XBooleanValue;
-import org.xydra.oo.runtime.shared.OOTypeBridge;
-import org.xydra.oo.runtime.shared.OOTypeMapping;
+import org.xydra.oo.runtime.java.JavaTypeSpecUtils;
+import org.xydra.oo.runtime.java.OOReflectionUtils;
 
 
 public class TestOOTypeStuff {
     
     @Test
     public void testOOTypeBridge() {
-        assertTrue(OOTypeBridge.isTranslatableSingleType(XAddress.class));
+        assertTrue(OOReflectionUtils.isTranslatableSingleType(XAddress.class));
     }
     
     @Test
     public void testOOTypeMapping() {
-        assertNotNull(OOTypeMapping.getMapping(Boolean.class, null));
-        assertNotNull(OOTypeMapping.getMapping(XBooleanValue.class, null));
-        assertNotNull(OOTypeMapping.getMapping(XBooleanListValue.class, null));
-        assertNotNull(OOTypeMapping.getMapping(XAddressSortedSetValue.class, null));
+        assertNotNull(JavaTypeSpecUtils.getMapping(Boolean.class, null));
+        assertNotNull(JavaTypeSpecUtils.getMapping(XBooleanValue.class, null));
+        assertNotNull(JavaTypeSpecUtils.getMapping(XBooleanListValue.class, null));
+        assertNotNull(JavaTypeSpecUtils.getMapping(XAddressSortedSetValue.class, null));
     }
     
 }

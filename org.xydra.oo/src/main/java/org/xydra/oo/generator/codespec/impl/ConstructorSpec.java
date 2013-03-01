@@ -1,8 +1,11 @@
-package org.xydra.oo.generator.codespec;
+package org.xydra.oo.generator.codespec.impl;
+
+import org.xydra.oo.generator.codespec.IMember;
+
 
 public class ConstructorSpec extends AbstractConstructorOrMethodSpec implements IMember {
     
-    public ConstructorSpec(ClassSpec classSpec, String generatedFrom) {
+    ConstructorSpec(ClassSpec classSpec, String generatedFrom) {
         super(classSpec.getName(), generatedFrom);
     }
     

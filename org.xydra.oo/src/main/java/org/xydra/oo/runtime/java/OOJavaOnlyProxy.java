@@ -7,26 +7,26 @@ import java.util.Set;
 import java.util.SortedSet;
 
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.value.XCollectionValue;
+import org.xydra.base.value.XStringValue;
 import org.xydra.base.value.XValue;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.oo.runtime.shared.CollectionProxy;
 import org.xydra.oo.runtime.shared.ListProxy;
-import org.xydra.oo.runtime.shared.OOProxy;
-import org.xydra.oo.runtime.shared.OOTypeBridge;
-import org.xydra.oo.runtime.shared.OOTypeMapping;
 import org.xydra.oo.runtime.shared.SetProxy;
+import org.xydra.oo.runtime.shared.SharedProxy;
+import org.xydra.oo.runtime.shared.SharedTypeMapping;
 import org.xydra.oo.runtime.shared.SortedSetProxy;
 
 
 /**
  * Java dynamic proxy representing a Java Object that is mapped to a Xydra
- * Object
+ * Object.
  * 
  * @author xamde
  */
@@ -35,10 +35,10 @@ public class OOJavaOnlyProxy implements InvocationHandler {
     
     private static final Logger log = LoggerFactory.getLogger(OOJavaOnlyProxy.class);
     
-    private OOProxy oop;
+    private SharedProxy oop;
     
-    public OOJavaOnlyProxy(XWritableModel model, XID objectId) {
-        this.oop = new OOProxy(model, objectId);
+    public OOJavaOnlyProxy(XWritableModel model, XId objectId) {
+        this.oop = new SharedProxy(model, objectId);
     }
     
     @Override
@@ -78,9 +78,10 @@ public class OOJavaOnlyProxy implements InvocationHandler {
             return this.oop.getId();
         }
         
-        ReflectionTool.KindOfMethod kindOfMethod = ReflectionTool.extractKindOfMethod(method);
+        KindOfMethod kindOfMethod = OOReflectionUtils.extractKindOfMethod(method);
         if(kindOfMethod == null) {
-            throw new RuntimeException("Cannot handle method " + ReflectionTool.toDebug(method));
+            throw new RuntimeException("Cannot handle method "
+                    + JavaReflectionUtils.toDebug(method));
         }
         
         if(!this.oop.hasXObject()) {
@@ -88,26 +89,26 @@ public class OOJavaOnlyProxy implements InvocationHandler {
         }
         
         /* Determine fieldId */
-        String fieldId = ReflectionTool.extractFieldIdFromMethod(method);
+        String fieldId = OOReflectionUtils.extractFieldIdFromMethod(method);
         assert fieldId != null;
         
         /* ================================ GET ================================ */
-        if(kindOfMethod == ReflectionTool.KindOfMethod.Get) {
+        if(kindOfMethod == KindOfMethod.Get) {
             if(args != null) {
-                throw new RuntimeException("getter " + ReflectionTool.toDebug(method)
+                throw new RuntimeException("getter " + JavaReflectionUtils.toDebug(method)
                         + " does not take arguments, has " + args.length);
             }
             Class<?> returnType = method.getReturnType();
-            if(OOTypeBridge.isTranslatableSingleType(returnType)) {
+            if(OOReflectionUtils.isTranslatableSingleType(returnType)) {
                 return _get_(returnType, null, fieldId, false);
             }
-            Class<?> componentType = TypeTool.getComponentType(method);
-            if(ReflectionTool.isKnownTranslatableCollectionType(returnType, componentType)) {
+            Class<?> componentType = JavaReflectionUtils.getComponentType(method);
+            if(OOReflectionUtils.isKnownTranslatableCollectionType(returnType, componentType)) {
                 return _get_(returnType, componentType, fieldId, false);
             }
             throw new RuntimeException("Cannot handle type " + returnType.getCanonicalName()
                     + " in setter for " + fieldId);
-        } else if(kindOfMethod == ReflectionTool.KindOfMethod.Is) {
+        } else if(kindOfMethod == KindOfMethod.Is) {
             if(args != null) {
                 throw new RuntimeException("isXXX() method does not take arguments");
             }
@@ -115,61 +116,37 @@ public class OOJavaOnlyProxy implements InvocationHandler {
             // TODO deal with old style booleans (missing field = false)
             Boolean b = (Boolean)_get_(Boolean.class, null, fieldId, false);
             return b;
-        } else if(kindOfMethod == ReflectionTool.KindOfMethod.GetCollection) {
+        } else if(kindOfMethod == KindOfMethod.GetCollection) {
             Class<?> returnType = method.getReturnType();
-            assert OOTypeBridge.isCollectionType(returnType);
-            Class<?> componentType = TypeTool.getComponentType(method);
+            assert XydraReflectionUtils.isCollectionType(returnType);
+            Class<?> componentType = JavaReflectionUtils.getComponentType(method);
             return _get_(returnType, componentType, fieldId, true);
         } else
         /* ================================ SET ================================ */
-        if(kindOfMethod == ReflectionTool.KindOfMethod.Set) {
+        if(kindOfMethod == KindOfMethod.Set) {
             if(args == null || args.length != 1) {
                 throw new RuntimeException("setXXX() method needs *1* argument, has "
                         + (args == null ? "none" : args.length));
             }
             Class<?> paramType = method.getParameterTypes()[0];
-            if(OOTypeBridge.isTranslatableSingleType(paramType)) {
+            if(OOReflectionUtils.isTranslatableSingleType(paramType)) {
                 _set_(args[0], paramType, null, fieldId);
                 return null;
             }
-            Class<?> componentType = TypeTool
-                    .getComponentType(method.getGenericParameterTypes()[0]);
-            if(ReflectionTool.isKnownTranslatableCollectionType(paramType, componentType)) {
+            Class<?> componentType = JavaReflectionUtils.getComponentType(method
+                    .getGenericParameterTypes()[0]);
+            if(OOReflectionUtils.isKnownTranslatableCollectionType(paramType, componentType)) {
                 _set_(args[0], paramType, componentType, fieldId);
                 return null;
             }
             throw new RuntimeException("Setter for type '" + paramType.getCanonicalName()
                     + "' not yet impl");
         } else {
-            // TODO impl
+            // TODO impl, .e.g "is" methods
             throw new RuntimeException("Don't know how to handle method '" + name + "' with kind '"
                     + kindOfMethod + "'");
         }
     }
-    
-    // FIXME TODO support all these types
-    
-    // // single
-    //
-    // // enum
-    // EnumFieldProperty<Enum<T>>;
-    //
-    // // generic
-    // ExtensibleFieldProperty< p,XValue>;
-    //
-    // // TODO tricky to reference outside of model
-    // XAddressFieldProperty;
-    //
-    // // generic collection
-    // SetProxy<X,J>
-    //
-    // // collection XID
-    //
-    // // TODO tricky to reference outside of model
-    // XAddressListFieldProperty;
-    // XAddressSortedSetFieldProperty;
-    
-    // ================== HERE =================
     
     /**
      * @param javaType
@@ -182,7 +159,7 @@ public class OOJavaOnlyProxy implements InvocationHandler {
             boolean returnCollectionsAsLiveViews) {
         XValue v = this.oop.getValue(fieldName);
         if(v == null) {
-            if(returnCollectionsAsLiveViews && OOTypeBridge.isCollectionType(javaType)) {
+            if(returnCollectionsAsLiveViews && XydraReflectionUtils.isCollectionType(javaType)) {
                 return liveCollection(javaType, javaComponentType, fieldName, this.oop.getXModel(),
                         this.oop.getXObject());
             } else {
@@ -215,50 +192,69 @@ public class OOJavaOnlyProxy implements InvocationHandler {
      */
     private void _set_(Object param, Class<?> paramType, Class<?> paramComponentType,
             String fieldName) {
-        XValue v = ReflectionTool.convertToXydra(param, param.getClass(), paramComponentType);
+        XValue v = OOReflectionUtils.convertToXydra(param.getClass(), paramComponentType, param);
         
         this.oop.setValue(fieldName, v);
     }
     
     /**
-     * @param fieldName
-     * @param v
-     * @param type
-     * @param componentType
-     * @param model
+     * @param fieldName @NeverNull
+     * @param v @CanBeNull ?
+     * @param type @NeverNull
+     * @param componentType @CanBeNull
+     * @param model @NeverNull
      * @param object
-     * @return ...
+     * @return null or Java type
      */
     public static Object convertToJava(String fieldName, XValue v, Class<?> type,
             Class<?> componentType, XWritableModel model, XWritableObject object) {
-        if(ReflectionTool.isMappedToXydra(type)) {
-            // mapped instance
-            assert v instanceof XID;
-            return ReflectionTool.toJavaInstance(type, model, (XID)v);
+        
+        /* 1) Proxy type */
+        if(OOReflectionUtils.isProxyType(type)) {
+            assert v instanceof XId;
+            return OOReflectionUtils.toJavaInstance(type, model, (XId)v);
         }
-        // TODO what if compType is mapped? i.e. List<IPerson>
-        if(OOTypeBridge.isCollectionType(type) && ReflectionTool.isMappedToXydra(componentType)) {
+        
+        /* 2) Collection of Proxy type, i.e. List<IPerson> */
+        if(XydraReflectionUtils.isCollectionType(type)
+                && OOReflectionUtils.isProxyType(componentType)) {
             return liveCollection(type, componentType, fieldName, model, object);
         }
         
-        // else
-        OOTypeMapping mapping = OOTypeMapping.getMapping(type, componentType);
-        if(mapping == null) {
-            throw new RuntimeException("Found no mapping for type=" + type.getCanonicalName()
-                    + " compType="
-                    + (componentType == null ? "NONE" : componentType.getCanonicalName()));
+        /* 3) Auto-convert Enum <-> String */
+        if(type.isEnum() && componentType == null) {
+            assert v instanceof XStringValue;
+            String s = ((XStringValue)v).getValue();
+            
+            @SuppressWarnings({ "unchecked", "rawtypes" })
+            Class<Enum> enumClass = (Class<Enum>)type;
+            
+            @SuppressWarnings("unchecked")
+            Object enumValue = Enum.valueOf(enumClass, s);
+            return enumValue;
         }
-        assert mapping.getJavaType().equals(type);
-        assert mapping.getJavaComponentType() == null;
-        // Class<?> x = mapping.getXydraType();
-        // assert x.isAssignableFrom(x);
-        Object o = mapping.toJava((XValue)v);
-        return o;
+        
+        /* 4) Mapped types */
+        SharedTypeMapping mapping = JavaTypeSpecUtils.getMapping(type, componentType);
+        if(mapping != null) {
+            assert JavaTypeMapping.getJavaBaseType(mapping) != null : "" + mapping;
+            assert JavaTypeMapping.getJavaBaseType(mapping).equals(type);
+            assert JavaTypeMapping.getJavaComponentType(mapping) == null;
+            // Class<?> x = mapping.getXydraType();
+            // assert x.isAssignableFrom(x);
+            Object o = mapping.toJava((XValue)v);
+            return o;
+        }
+        
+        // unknown
+        throw new RuntimeException("Found no mapping for type=" + type.getCanonicalName()
+                + " compType="
+                + (componentType == null ? "NONE" : componentType.getCanonicalName()));
     }
     
     public static <J, C> Object liveCollection(final Class<J> type, final Class<C> componentType,
             final String fieldName, final XWritableModel model, final XWritableObject object) {
-        assert OOTypeBridge.isCollectionType(type) : "type=" + type.getCanonicalName()
+        assert XydraReflectionUtils.isCollectionType(type) : "type=" + type.getCanonicalName()
                 + ", compTyp=" + componentType.getCanonicalName();
         
         CollectionProxy.ITransformer<XCollectionValue<XValue>,XValue,J,C> t
@@ -273,12 +269,12 @@ public class OOJavaOnlyProxy implements InvocationHandler {
             
             @Override
             public XValue toXydraComponent(C javaValue) {
-                return ReflectionTool.convertToXydra(javaValue, type, componentType);
+                return OOReflectionUtils.convertToXydra(type, componentType, javaValue);
             }
             
             @Override
             public XCollectionValue<XValue> createCollection() {
-                return ReflectionTool.createCollection(type, componentType);
+                return OOReflectionUtils.createCollection(type, componentType);
             }
             
         };

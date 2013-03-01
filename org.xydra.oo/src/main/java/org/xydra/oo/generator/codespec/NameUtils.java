@@ -23,4 +23,14 @@ public class NameUtils {
         return "I" + s;
     }
     
+    public static String withoutPackages(String typeName) {
+        if(typeName.equals("void"))
+            return "void";
+        
+        assert typeName.contains(".") : "typeName must be a FQ name";
+        
+        String[] s = typeName.split("[.]");
+        return s[s.length - 1];
+    }
+    
 }

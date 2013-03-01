@@ -1,7 +1,7 @@
 package org.xydra.oo.runtime.shared;
 
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableModel;
@@ -12,25 +12,25 @@ import org.xydra.log.LoggerFactory;
 
 
 /**
- * Represents a generic XObject mapped to a Java object
+ * A runtime proxy object that is backed by a generic XObject
  * 
  * @author xamde
  */
 @RunsInGWT(true)
-public class OOProxy {
+public class SharedProxy {
     
     @SuppressWarnings("unused")
-    private static final Logger log = LoggerFactory.getLogger(OOProxy.class);
+    private static final Logger log = LoggerFactory.getLogger(SharedProxy.class);
     
     private XWritableModel model;
-    private XID objectId;
+    private XId objectId;
     
-    public OOProxy(XWritableModel model, XID objectId) {
+    public SharedProxy(XWritableModel model, XId objectId) {
         this.model = model;
         this.objectId = objectId;
     }
     
-    public XID getId() {
+    public XId getId() {
         return this.objectId;
     }
     
