@@ -54,8 +54,8 @@ public class MemoryRepositoryCommand extends MemoryAtomicCommand implements XRep
      * this event applies to, if possible.
      * 
      * @param target The {@link XAddress} of the {@link XRepository} this
-     *            command applies to - repository ID must not be null, model,
-     *            object & field ID must be null
+     *            command applies to - repository Id must not be null, model,
+     *            object & field Id must be null
      * @param modelRevision Must be {@link XCommand#FORCED} or
      *            {@link XCommand#SAFE} to determine the behavior of this
      *            command.
@@ -99,7 +99,7 @@ public class MemoryRepositoryCommand extends MemoryAtomicCommand implements XRep
         return new MemoryRepositoryCommand(target, ChangeType.REMOVE, modelRevision, modelId);
     }
     
-    /** ID of the model to be added or removed */
+    /** Id of the model to be added or removed */
     private XID modelId;
     
     private MemoryRepositoryCommand(XAddress target, ChangeType changeType, long modelRevision,

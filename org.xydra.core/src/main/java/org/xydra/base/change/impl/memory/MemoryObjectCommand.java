@@ -90,7 +90,7 @@ public class MemoryObjectCommand extends MemoryAtomicCommand implements XObjectC
         return new MemoryObjectCommand(target, ChangeType.REMOVE, fieldRevision, fieldId);
     }
     
-    /** ID of the field being added or removed */
+    /** Id of the field being added or removed */
     private XID fieldId;
     
     private MemoryObjectCommand(XAddress target, ChangeType changeType, long fieldRevision,

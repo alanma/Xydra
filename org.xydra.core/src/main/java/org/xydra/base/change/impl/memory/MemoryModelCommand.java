@@ -93,7 +93,7 @@ public class MemoryModelCommand extends MemoryAtomicCommand implements XModelCom
         return new MemoryModelCommand(target, ChangeType.REMOVE, objectRevision, objectId);
     }
     
-    /** ID of the object being added or removed */
+    /** Id of the object being added or removed */
     private XID objectId;
     
     private MemoryModelCommand(XAddress target, ChangeType changeType, long objectRevision,
