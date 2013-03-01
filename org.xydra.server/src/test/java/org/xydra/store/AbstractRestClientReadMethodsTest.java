@@ -8,7 +8,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XCommandFactory;
@@ -76,11 +76,11 @@ public abstract class AbstractRestClientReadMethodsTest extends AbstractStoreRea
     
     @After
     public void after() {
-        SynchronousCallbackWithOneResult<Set<XID>> mids = new SynchronousCallbackWithOneResult<Set<XID>>();
+        SynchronousCallbackWithOneResult<Set<XId>> mids = new SynchronousCallbackWithOneResult<Set<XId>>();
         this.store.getModelIds(getCorrectUser(), getCorrectUserPasswordHash(), mids);
         assertEquals(SynchronousCallbackWithOneResult.SUCCESS, mids.waitOnCallback(Long.MAX_VALUE));
         XAddress repoAddr = XX.toAddress(getRepositoryId(), null, null, null);
-        for(XID modelId : mids.effect) {
+        for(XId modelId : mids.effect) {
             if(modelId.toString().startsWith("internal--")) {
                 continue;
             }
@@ -97,7 +97,7 @@ public abstract class AbstractRestClientReadMethodsTest extends AbstractStoreRea
     }
     
     @Override
-    protected XID getCorrectUser() {
+    protected XId getCorrectUser() {
         return getServerConfig().testerActor;
     }
     
@@ -107,7 +107,7 @@ public abstract class AbstractRestClientReadMethodsTest extends AbstractStoreRea
     }
     
     @Override
-    protected XID getIncorrectUser() {
+    protected XId getIncorrectUser() {
         return XX.toId("wrongbob");
     }
     
@@ -117,7 +117,7 @@ public abstract class AbstractRestClientReadMethodsTest extends AbstractStoreRea
     }
     
     @Override
-    protected XID getRepositoryId() {
+    protected XId getRepositoryId() {
         return getServerConfig().mainRepositoryId;
     }
     

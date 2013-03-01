@@ -1,7 +1,7 @@
 package org.xydra.server.csv.stream;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 
 
 /**
@@ -18,7 +18,7 @@ public class CsvValueStream extends AbstractValueStream {
 	}
 	
 	@Override
-	public void xid(XID a) {
+	public void xid(XId a) {
 		this.buf.append(a.toString());
 	}
 	

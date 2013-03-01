@@ -3,7 +3,7 @@ package org.xydra.server.csv.stream;
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.value.ValueType;
-import org.xydra.base.value.XValueStream;
+import org.xydra.base.value.XValueStreamHandler;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 
@@ -16,7 +16,7 @@ import org.xydra.log.LoggerFactory;
  */
 @RunsInGWT(true)
 @RequiresAppEngine(false)
-public abstract class AbstractValueStream implements XValueStream {
+public abstract class AbstractValueStream implements XValueStreamHandler {
 	
 	private static final Logger log = LoggerFactory.getLogger(AbstractValueStream.class);
 	

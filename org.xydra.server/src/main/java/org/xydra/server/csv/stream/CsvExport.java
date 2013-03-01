@@ -11,7 +11,7 @@ import java.util.Map;
 
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.rmof.XReadableField;
@@ -47,7 +47,7 @@ import org.xydra.csv.impl.memory.SingleRow;
  * XDouble     34.50
  * XString     'xxx'
  * XSringList  ['a','b']
- * XID         'john'
+ * XId         'john'
  * XAddress    '/repo1/model1/-/-'
  * null        null
  * </pre>
@@ -65,7 +65,7 @@ public class CsvExport {
 	        throws IllegalStateException, IOException {
 		rowHandler.handleHeaderRow(Arrays.asList("modelRev", "objectRev", "fieldRev", "value",
 		        "valueType"));
-		for(XID modelId : repository) {
+		for(XId modelId : repository) {
 			XReadableModel model = repository.getModel(modelId);
 			toRowHandler(model, rowHandler);
 		}
@@ -86,7 +86,7 @@ public class CsvExport {
 			rowHandler.handleRow(rowName, new SingleRow(rowName, new String[][] { new String[] {
 			        "modelRev", "" + model.getRevisionNumber() } }));
 		} else {
-			for(XID objectId : model) {
+			for(XId objectId : model) {
 				toRowHandler(model, model.getObject(objectId), rowHandler);
 			}
 		}
@@ -114,7 +114,7 @@ public class CsvExport {
 			
 			}));
 		} else {
-			for(XID fieldId : object) {
+			for(XId fieldId : object) {
 				XReadableField field = object.getField(fieldId);
 				toRowHandler(model, object, field, rowHandler);
 			}
@@ -222,9 +222,9 @@ public class CsvExport {
 		System.out.println(SimpleSyntaxUtilsTest.toXml(repository2
 		        .getModel(DemoModelUtil.PHONEBOOK_ID)));
 		
-		for(XID modelId : repository2) {
-			for(XID oid : repository2.getModel(modelId)) {
-				for(XID fid : repository2.getModel(modelId).getObject(oid)) {
+		for(XId modelId : repository2) {
+			for(XId oid : repository2.getModel(modelId)) {
+				for(XId fid : repository2.getModel(modelId).getObject(oid)) {
 					XRevWritableField field = repository2.getModel(modelId).getObject(oid)
 					        .getField(fid);
 					System.out.println(modelId + "-" + oid + "-" + fid + ": " + field.getValue()

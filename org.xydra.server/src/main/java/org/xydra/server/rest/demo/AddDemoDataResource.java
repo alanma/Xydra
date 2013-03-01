@@ -4,7 +4,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XRepositoryCommand;
@@ -34,10 +34,10 @@ public class AddDemoDataResource {
 		XydraStore store = XydraRestServer.getStore(restless);
 		
 		// TODO use a real user
-		XID actorId = XX.toId("admin");
+		XId actorId = XX.toId("admin");
 		String passwordHash = "secret";
 		
-		WaitingCallback<XID> repoAddr = new WaitingCallback<XID>();
+		WaitingCallback<XId> repoAddr = new WaitingCallback<XId>();
 		store.getRepositoryId(actorId, passwordHash, repoAddr);
 		
 		WaitingCallback<BatchedResult<Long>[]> result = new WaitingCallback<BatchedResult<Long>[]>();

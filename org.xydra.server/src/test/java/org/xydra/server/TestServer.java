@@ -9,7 +9,7 @@ import javax.servlet.ServletContext;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XRepositoryCommand;
@@ -147,7 +147,7 @@ public class TestServer {
         
         XydraStoreAdmin admin = store.getXydraStoreAdmin();
         XAuthenticationDatabase auth = admin.getAccessControlManager().getAuthenticationDatabase();
-        XID actorId = XX.toId("tester");
+        XId actorId = XX.toId("tester");
         String passwordHash = "secret";
         auth.setPasswordHash(actorId, "secret");
         XAuthorisationManager access = admin.getAccessControlManager().getAuthorisationManager();

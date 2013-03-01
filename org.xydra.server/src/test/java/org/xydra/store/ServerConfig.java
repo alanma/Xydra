@@ -2,7 +2,7 @@ package org.xydra.store;
 
 import java.net.URI;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 
 
@@ -28,8 +28,8 @@ public class ServerConfig {
 	 * @param testerPasswordHash ..
 	 * @param mainRepositoryId as configured for the server
 	 */
-	public ServerConfig(URI absoluteURI, XID testerActor, String testerPasswordHash,
-	        XID mainRepositoryId) {
+	public ServerConfig(URI absoluteURI, XId testerActor, String testerPasswordHash,
+	        XId mainRepositoryId) {
 		this.absoluteURI = absoluteURI;
 		this.testerActor = testerActor;
 		this.testerPasswordHash = testerPasswordHash;
@@ -38,10 +38,10 @@ public class ServerConfig {
 	
 	public URI absoluteURI;
 	
-	public XID testerActor;
+	public XId testerActor;
 	
 	public String testerPasswordHash;
 	
-	public XID mainRepositoryId;
+	public XId mainRepositoryId;
 	
 }

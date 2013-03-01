@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
@@ -163,12 +163,12 @@ public class XydraStoreResource {
 		return true;
 	}
 	
-	private static XID getActorId(String actorIdString) {
+	private static XId getActorId(String actorIdString) {
 		
 		try {
 			return XX.toId(actorIdString);
 		} catch(Throwable t) {
-			throw new RequestException("invalid actor XID: " + actorIdString);
+			throw new RequestException("invalid actor XId: " + actorIdString);
 		}
 		
 	}
@@ -276,7 +276,7 @@ public class XydraStoreResource {
 		XydraRuntime.startRequest();
 		
 		XydraStore store = XydraRestServer.getStore(context.getRestless());
-		XID actorId = getActorId(actorIdStr);
+		XId actorId = getActorId(actorIdStr);
 		
 		WaitingCallback<Boolean> callback = new WaitingCallback<Boolean>();
 		store.checkLogin(actorId, passwordHash, callback);
@@ -305,11 +305,11 @@ public class XydraStoreResource {
 		XydraRuntime.startRequest();
 		
 		XydraStore store = XydraRestServer.getStore(context.getRestless());
-		XID actorId = getActorId(actorIdStr);
+		XId actorId = getActorId(actorIdStr);
 		
 		EventsRequest ger = parseEventsRequest(addresses, from, to);
 		
-		WaitingCallback<XID> repoId = new WaitingCallback<XID>();
+		WaitingCallback<XId> repoId = new WaitingCallback<XId>();
 		// implicitly check security
 		store.getRepositoryId(actorId, passwordHash, repoId);
 		
@@ -439,7 +439,7 @@ public class XydraStoreResource {
 		XydraRuntime.startRequest();
 		
 		XydraStore store = XydraRestServer.getStore(context.getRestless());
-		XID actorId = getActorId(actorIdStr);
+		XId actorId = getActorId(actorIdStr);
 		
 		EventsRequest ger = parseEventsRequest(addresses, from, to);
 		
@@ -466,7 +466,7 @@ public class XydraStoreResource {
 		XydraRuntime.startRequest();
 		
 		XydraStore store = XydraRestServer.getStore(context.getRestless());
-		XID actorId = getActorId(actorIdStr);
+		XId actorId = getActorId(actorIdStr);
 		
 		StoreException[] ex = new StoreException[addresses.length];
 		GetWithAddressRequest[] modelAddressRequests = new GetWithAddressRequest[addresses.length];
@@ -502,7 +502,7 @@ public class XydraStoreResource {
 		XydraRuntime.startRequest();
 		
 		XydraStore store = XydraRestServer.getStore(context.getRestless());
-		XID actorId = getActorId(actorIdStr);
+		XId actorId = getActorId(actorIdStr);
 		
 		List<XAddress> modelAddrs = new ArrayList<XAddress>();
 		List<XAddress> objectAddrs = new ArrayList<XAddress>();
@@ -575,9 +575,9 @@ public class XydraStoreResource {
 		XydraRuntime.startRequest();
 		
 		XydraStore store = XydraRestServer.getStore(context.getRestless());
-		XID actorId = getActorId(actorIdStr);
+		XId actorId = getActorId(actorIdStr);
 		
-		WaitingCallback<Set<XID>> callback = new WaitingCallback<Set<XID>>();
+		WaitingCallback<Set<XId>> callback = new WaitingCallback<Set<XId>>();
 		store.getModelIds(actorId, passwordHash, callback);
 		
 		if(callback.getException() != null) {
@@ -600,9 +600,9 @@ public class XydraStoreResource {
 		XydraRuntime.startRequest();
 		
 		XydraStore store = XydraRestServer.getStore(context.getRestless());
-		XID actorId = getActorId(actorIdStr);
+		XId actorId = getActorId(actorIdStr);
 		
-		WaitingCallback<XID> callback = new WaitingCallback<XID>();
+		WaitingCallback<XId> callback = new WaitingCallback<XId>();
 		store.getRepositoryId(actorId, passwordHash, callback);
 		
 		if(callback.getException() != null) {

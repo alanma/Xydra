@@ -8,7 +8,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.xydra.annotations.NeverNull;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XTransactionEvent;
@@ -101,9 +101,9 @@ public class XydraHtmlUtils {
 		buf.append(xo.getRevisionNumber());
 		buf.append("</span></b>\n");
 		SortedMap<String,String> map = new TreeMap<String,String>();
-		Iterator<XID> fieldIt = xo.iterator();
+		Iterator<XId> fieldIt = xo.iterator();
 		while(fieldIt.hasNext()) {
-			XID fieldId = fieldIt.next();
+			XId fieldId = fieldIt.next();
 			XReadableField field = xo.getField(fieldId);
 			assert field != null;
 			XValue value = field.getValue();

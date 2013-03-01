@@ -11,7 +11,7 @@ import java.io.Writer;
 import java.util.Arrays;
 
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableModel;
@@ -75,10 +75,10 @@ public class CsvSerialisation {
 	 */
 	public static CsvTable toCsvTable(XReadableModel model) throws IOException {
 		CsvTable table = new CsvTable(false);
-		for(XID oid : model) {
+		for(XId oid : model) {
 			Row row = table.getOrCreateRow(oid.toString(), true);
 			XReadableObject xo = model.getObject(oid);
-			for(XID fid : xo) {
+			for(XId fid : xo) {
 				XReadableField xf = xo.getField(fid);
 				assert xf != null;
 				XValue xvalue = xf.getValue();
@@ -111,7 +111,7 @@ public class CsvSerialisation {
 		table.readFrom(r, true);
 		for(IRow row : table) {
 			String oidStr = row.getKey();
-			XID oid = XX.toId(oidStr);
+			XId oid = XX.toId(oidStr);
 			XWritableObject xo = model.createObject(oid);
 			for(String col : row.getColumnNames()) {
 				if(col.endsWith(TYPE_SUFFIX))
@@ -122,7 +122,7 @@ public class CsvSerialisation {
 				String typeStr = row.getValue(col + TYPE_SUFFIX);
 				try {
 					XValue value = ValueDeSerializer.fromStrings(typeStr, valueStr);
-					XID fid = XX.toId(col);
+					XId fid = XX.toId(col);
 					XWritableField field = xo.createField(fid);
 					field.setValue(value);
 				} catch(IllegalArgumentException e) {
