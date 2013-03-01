@@ -9,7 +9,7 @@ import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.core.model.impl.memory.UUID;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -24,7 +24,7 @@ import org.xydra.store.impl.memory.MemoryRuntime;
  * as a cache which is a different thing on Google AppEngine and on plain Java.
  * 
  * The initialisation process is triggered with the first call to
- * {@link #getMemcache()} or {@link #getPersistence(XID)}. The initialisation
+ * {@link #getMemcache()} or {@link #getPersistence(XId)}. The initialisation
  * process runs in three phases:
  * <ol>
  * <li>Let another class set a {@link XydraPlatformRuntime}</li>
@@ -59,7 +59,7 @@ public class XydraRuntime {
 	/**
 	 * For each repository Id, one {@link XydraPersistence} is cached.
 	 */
-	private static Map<XID,XydraPersistence> persistenceInstanceCache = new HashMap<XID,XydraPersistence>();
+	private static Map<XId,XydraPersistence> persistenceInstanceCache = new HashMap<XId,XydraPersistence>();
 	
 	private static boolean platformInitialised = false;
 	
@@ -106,7 +106,7 @@ public class XydraRuntime {
 	 * @param repositoryId ..
 	 * @param persistence ..
 	 */
-	public static synchronized void setPersistence(XID repositoryId, XydraPersistence persistence) {
+	public static synchronized void setPersistence(XId repositoryId, XydraPersistence persistence) {
 		initialiseRuntimeOnce();
 		persistenceInstanceCache.put(repositoryId, persistence);
 	}
@@ -148,7 +148,7 @@ public class XydraRuntime {
 	 * @return a (potentially cached) instance of a {@link XydraPersistence}
 	 *         with the given repositoryId
 	 */
-	public static synchronized XydraPersistence getPersistence(XID repositoryId) {
+	public static synchronized XydraPersistence getPersistence(XId repositoryId) {
 		initialiseRuntimeOnce();
 		XydraPersistence persistence = persistenceInstanceCache.get(repositoryId);
 		if(persistence == null) {

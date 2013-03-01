@@ -11,7 +11,7 @@ import java.util.Set;
 import org.xydra.annotations.NeverNull;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.change.ChangeType;
@@ -66,11 +66,11 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 	private MemoryModel baseModel;
 	private long revisionNumber;
 	
-	private Map<XID,InModelTransactionObject> changedObjects, transChangedObjects;
+	private Map<XId,InModelTransactionObject> changedObjects, transChangedObjects;
 	private Map<XAddress,InModelTransactionField> changedFields, transChangedFields;
 	private Map<XAddress,XValue> changedValues, transChangedValues;
 	
-	private Set<XID> removedObjects, transRemovedObjects;
+	private Set<XId> removedObjects, transRemovedObjects;
 	private Set<XAddress> removedFields, transRemovedFields;
 	
 	private LinkedList<XAtomicCommand> commands;
@@ -95,16 +95,16 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 		this.baseModel = model;
 		this.revisionNumber = model.getRevisionNumber();
 		
-		this.changedObjects = new HashMap<XID,InModelTransactionObject>();
+		this.changedObjects = new HashMap<XId,InModelTransactionObject>();
 		this.changedFields = new HashMap<XAddress,InModelTransactionField>();
 		this.changedValues = new HashMap<XAddress,XValue>();
-		this.removedObjects = new HashSet<XID>();
+		this.removedObjects = new HashSet<XId>();
 		this.removedFields = new HashSet<XAddress>();
 		
-		this.transChangedObjects = new HashMap<XID,InModelTransactionObject>();
+		this.transChangedObjects = new HashMap<XId,InModelTransactionObject>();
 		this.transChangedFields = new HashMap<XAddress,InModelTransactionField>();
 		this.transChangedValues = new HashMap<XAddress,XValue>();
-		this.transRemovedObjects = new HashSet<XID>();
+		this.transRemovedObjects = new HashSet<XId>();
 		this.transRemovedFields = new HashSet<XAddress>();
 		
 		this.commands = new LinkedList<XAtomicCommand>();
@@ -221,7 +221,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 	}
 	
 	@Override
-	public XID getId() {
+	public XId getId() {
 		return this.baseModel.getId();
 	}
 	
@@ -284,10 +284,10 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 	 * the object appears as existing for the rest of the commands which still
 	 * need to be evaluated.
 	 * 
-	 * @param objectId The {@link XID} of the object
+	 * @param objectId The {@link XId} of the object
 	 * @return true, if the specified object exists
 	 */
-	private boolean objectExists(XID objectId) {
+	private boolean objectExists(XId objectId) {
 		boolean objectExists = this.hasObject(objectId);
 		
 		if(this.inTransaction) {
@@ -313,7 +313,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 	 * appears as existing for the rest of the commands which still need to be
 	 * evaluated.
 	 * 
-	 * @param fieldId The {@link XID} of the field
+	 * @param fieldId The {@link XId} of the field
 	 * @return true, if the specified field exists
 	 */
 	private boolean fieldExists(XWritableObject object, XAddress fieldAddress) {
@@ -341,7 +341,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 	 */
 	private long handleModelCommand(XModelCommand modelCommand, XLocalChangeCallback callback) {
 		XyAssert.xyAssert(callback != null); assert callback != null;
-		XID objectId = modelCommand.getChangedEntity().getObject();
+		XId objectId = modelCommand.getChangedEntity().getObject();
 		
 		boolean objectExists = this.objectExists(objectId);
 		
@@ -431,7 +431,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 	private long handleObjectCommand(XObjectCommand objectCommand, XLocalChangeCallback callback) {
 		XyAssert.xyAssert(callback != null); assert callback != null;
 		
-		XID objectId = objectCommand.getChangedEntity().getObject();
+		XId objectId = objectCommand.getChangedEntity().getObject();
 		boolean objectExists = this.objectExists(objectId);
 		
 		if(!objectExists) {
@@ -529,7 +529,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 	private long handleFieldCommand(XFieldCommand fieldCommand, XLocalChangeCallback callback) {
 		XyAssert.xyAssert(callback != null); assert callback != null;
 		
-		XID objectId = fieldCommand.getChangedEntity().getObject();
+		XId objectId = fieldCommand.getChangedEntity().getObject();
 		
 		if(!this.objectExists(objectId)) {
 			callback.onFailure();
@@ -543,7 +543,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 		XyAssert.xyAssert(object instanceof InModelTransactionObject);
 		
 		// all commands concern fields -> check if it exists
-		XID fieldId = fieldCommand.getChangedEntity().getField();
+		XId fieldId = fieldCommand.getChangedEntity().getField();
 		XAddress fieldAddress = fieldCommand.getChangedEntity();
 		
 		if(!this.fieldExists(object, fieldAddress)) {
@@ -651,7 +651,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 			if(command instanceof XModelCommand) {
 				XModelCommand mdlCmd = (XModelCommand)command;
 				
-				XID objectId = command.getChangedEntity().getObject();
+				XId objectId = command.getChangedEntity().getObject();
 				XAddress objectAddress = command.getChangedEntity();
 				XyAssert.xyAssert(objectAddress.getAddressedType() == XType.XOBJECT);
 				
@@ -747,7 +747,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 	 *            {@link #executeCommand(XCommand)})
 	 */
 	private void addObjectToTransactionModel(InModelTransactionObject object, boolean inTransaction) {
-		XID objectId = object.getId();
+		XId objectId = object.getId();
 		
 		if(!inTransaction) {
 			// remove from list of removed object, if needed
@@ -777,10 +777,10 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 	 *            {@link #executeCommand(XCommand)})
 	 */
 	private void removeObjectFromTransactionModel(XWritableObject object, boolean inTransaction) {
-		XID objectId = object.getId();
+		XId objectId = object.getId();
 		
 		// remove all fields of the object
-		for(XID fieldId : object) {
+		for(XId fieldId : object) {
 			XAddress temp = object.getAddress();
 			XAddress fieldAddress = XX.toAddress(temp.getRepository(), temp.getModel(),
 			        temp.getObject(), fieldId);
@@ -916,10 +916,10 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 	 * the object appears as existing for the rest of the commands which still
 	 * need to be evaluated.
 	 * 
-	 * @param objectId The {@link XID} of the object
+	 * @param objectId The {@link XId} of the object
 	 * @return The specified object or null if it doesn't exist.
 	 */
-	private XWritableObject getObjectInTransaction(XID objectId) {
+	private XWritableObject getObjectInTransaction(XId objectId) {
 		/*
 		 * extra method for this is useful concerning concurrent access,
 		 * rewriting getObject would make some problems here
@@ -979,7 +979,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 	}
 	
 	@Override
-	public boolean hasObject(@NeverNull XID objectId) {
+	public boolean hasObject(@NeverNull XId objectId) {
 		/*
 		 * only return true if the object is new or if it wasn't removed and it
 		 * part of the baseModel
@@ -990,7 +990,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 	}
 	
 	@Override
-	public XWritableObject createObject(@NeverNull XID id) {
+	public XWritableObject createObject(@NeverNull XId id) {
 		XCommand addCommand = X.getCommandFactory().createSafeAddObjectCommand(
 		        this.baseModel.getAddress(), id);
 		
@@ -1002,7 +1002,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 	@Override
 	public boolean isEmpty() {
 		if(!this.baseModel.isEmpty()) {
-			for(XID id : this.baseModel) {
+			for(XId id : this.baseModel) {
 				if(!this.removedObjects.contains(id)) {
 					// field wasn't removed in the TransactionObject
 					return false;
@@ -1018,7 +1018,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 	}
 	
 	@Override
-	public XWritableObject getObject(@NeverNull XID objectId) {
+	public XWritableObject getObject(@NeverNull XId objectId) {
 		XWritableObject object = null;
 		
 		if(this.changedObjects.containsKey(objectId)) {
@@ -1041,7 +1041,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 	}
 	
 	@Override
-	public boolean removeObject(@NeverNull XID objectId) {
+	public boolean removeObject(@NeverNull XId objectId) {
 		XWritableObject object = this.getObject(objectId);
 		
 		if(object == null) {
@@ -1070,23 +1070,23 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 	}
 	
 	@Override
-	public Iterator<XID> iterator() {
+	public Iterator<XId> iterator() {
 		/*
 		 * IMPROVE this is probably not the most effective implementation of
 		 * this method
 		 */
 
 		// get all ids of objects in the baseModel that weren't removed
-		LinkedList<XID> currentIds = new LinkedList<XID>();
+		LinkedList<XId> currentIds = new LinkedList<XId>();
 		
-		for(XID id : this.baseModel) {
+		for(XId id : this.baseModel) {
 			if(!this.removedObjects.contains(id)) {
 				currentIds.add(id);
 			}
 		}
 		
 		// get all ids of newly added fields
-		for(XID id : this.changedObjects.keySet()) {
+		for(XId id : this.changedObjects.keySet()) {
 			currentIds.add(id);
 		}
 		
@@ -1192,10 +1192,10 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 	 * Checks whether the specified object is empty. Used by
 	 * {@link InModelTransactionObject}.
 	 * 
-	 * @param objectId the {@link XID} of the object
+	 * @param objectId the {@link XId} of the object
 	 * @return true, if it is empty, false otherwise
 	 */
-	protected boolean objectIsEmpty(XID objectId) {
+	protected boolean objectIsEmpty(XId objectId) {
 		XyAssert.xyAssert(this.hasObject(objectId));
 		XWritableObject object = this.baseModel.getObject(objectId);
 		
@@ -1204,7 +1204,7 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 			if(!object.isEmpty()) {
 				XAddress temp = object.getAddress();
 				
-				for(XID id : object) {
+				for(XId id : object) {
 					
 					XAddress address = XX
 					        .toAddress(temp.getObject(), temp.getModel(), objectId, id);
@@ -1227,24 +1227,24 @@ public class TransactionModel extends AbstractEntity implements XWritableModel {
 	}
 	
 	/**
-	 * Returns an iterator over the {@link XID XIDs} of the fields in the
+	 * Returns an iterator over the {@link XId XIds} of the fields in the
 	 * specified object. Used by {@link InModelTransactionObject}.
 	 * 
-	 * @param object the {@link XID} of the object
-	 * @return an iterator over the {@link XID XIDs} of the fields in the
+	 * @param object the {@link XId} of the object
+	 * @return an iterator over the {@link XId XIds} of the fields in the
 	 *         specified object
 	 */
-	protected Iterator<XID> objectIterator(XID objectId) {
+	protected Iterator<XId> objectIterator(XId objectId) {
 		XyAssert.xyAssert(this.hasObject(objectId));
 		
 		XWritableObject object = this.baseModel.getObject(objectId);
-		HashSet<XID> set = new HashSet<XID>();
+		HashSet<XId> set = new HashSet<XId>();
 		
 		// add ids of the fields of the base object which were not removed
 		if(object != null) {
 			XAddress temp = object.getAddress();
 			
-			for(XID id : object) {
+			for(XId id : object) {
 				
 				XAddress address = XX.toAddress(temp.getObject(), temp.getModel(), objectId, id);
 				if(!this.removedFields.contains(address)) {

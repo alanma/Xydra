@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
@@ -43,19 +43,19 @@ import org.xydra.sharedutils.XyAssert;
 public class ChangedObject implements XWritableObject, DeltaUtils.IObjectDiff {
     
     // Fields that are not in base and have been added.
-    // Contains no XIDs that are in removed or changed.
-    private final Map<XID,SimpleField> added = new HashMap<XID,SimpleField>(2);
+    // Contains no XIds that are in removed or changed.
+    private final Map<XId,SimpleField> added = new HashMap<XId,SimpleField>(2);
     
     private final XReadableObject base;
     
     // Fields that are in base and have not been removed.
     // While they were changed once, those changes might have been reverted.
-    // Contains no XIDs that are in added or removed.
-    private final Map<XID,ChangedField> changed = new HashMap<XID,ChangedField>(2);
+    // Contains no XIds that are in added or removed.
+    private final Map<XId,ChangedField> changed = new HashMap<XId,ChangedField>(2);
     
     // Fields that are in base but have been removed.
-    // Contains no XIDs that are in added or changed.
-    private final Set<XID> removed = new HashSet<XID>(2);
+    // Contains no XIds that are in added or changed.
+    private final Set<XId> removed = new HashSet<XId>(2);
     
     /**
      * Wrap an {@link XReadableObject} to record a set of changes made. Multiple
@@ -79,19 +79,19 @@ public class ChangedObject implements XWritableObject, DeltaUtils.IObjectDiff {
     
     private boolean checkSetInvariants() {
         
-        for(XID id : this.removed) {
+        for(XId id : this.removed) {
             XyAssert.xyAssert(!this.added.containsKey(id) && !this.changed.containsKey(id));
             XyAssert.xyAssert(this.base.hasField(id));
         }
         
-        for(XID id : this.added.keySet()) {
+        for(XId id : this.added.keySet()) {
             XyAssert.xyAssert(!this.removed.contains(id) && !this.changed.containsKey(id));
             assert !this.base.hasField(id) : "base " + this.base.getAddress()
                     + " cannot have field " + id + " which also appers in ADDED";
             XyAssert.xyAssert(id.equals(this.added.get(id).getId()));
         }
         
-        for(XID id : this.changed.keySet()) {
+        for(XId id : this.changed.keySet()) {
             XyAssert.xyAssert(!this.removed.contains(id) && !this.added.containsKey(id));
             XyAssert.xyAssert(this.base.hasField(id));
             XyAssert.xyAssert(id.equals(this.changed.get(id).getId()));
@@ -107,7 +107,7 @@ public class ChangedObject implements XWritableObject, DeltaUtils.IObjectDiff {
         
         this.added.clear();
         this.changed.clear();
-        for(XID id : this.base) {
+        for(XId id : this.base) {
             // IMPROVE maybe add a "cleared" flag to remove all fields more
             // efficiently?
             this.removed.add(id);
@@ -146,7 +146,7 @@ public class ChangedObject implements XWritableObject, DeltaUtils.IObjectDiff {
                     return n;
                 }
             }
-            for(XID fieldId : this.removed) {
+            for(XId fieldId : this.removed) {
                 XReadableField oldField = getOldField(fieldId);
                 if(oldField.getValue() != null) {
                     n++;
@@ -178,7 +178,7 @@ public class ChangedObject implements XWritableObject, DeltaUtils.IObjectDiff {
     public int countEventsNeeded(int max) {
         int n = this.removed.size() + this.added.size();
         if(n < max) {
-            for(XID fieldId : this.removed) {
+            for(XId fieldId : this.removed) {
                 // removing field itself already counted
                 XReadableField oldField = getOldField(fieldId);
                 if(!oldField.isEmpty()) {
@@ -207,7 +207,7 @@ public class ChangedObject implements XWritableObject, DeltaUtils.IObjectDiff {
     }
     
     @Override
-    public XWritableField createField(XID fieldId) {
+    public XWritableField createField(XId fieldId) {
         
         XWritableField oldField = getField(fieldId);
         if(oldField != null) {
@@ -261,7 +261,7 @@ public class ChangedObject implements XWritableObject, DeltaUtils.IObjectDiff {
     }
     
     @Override
-    public XWritableField getField(XID fieldId) {
+    public XWritableField getField(XId fieldId) {
         XyAssert.xyAssert(fieldId != null);
         assert fieldId != null;
         XyAssert.xyAssert(this.base != null);
@@ -296,7 +296,7 @@ public class ChangedObject implements XWritableObject, DeltaUtils.IObjectDiff {
     }
     
     @Override
-    public XID getId() {
+    public XId getId() {
         return this.base.getId();
     }
     
@@ -311,19 +311,19 @@ public class ChangedObject implements XWritableObject, DeltaUtils.IObjectDiff {
     
     /**
      * @param fieldId
-     * @return the {@link XReadableField} with the given {@link XID} as it
+     * @return the {@link XReadableField} with the given {@link XId} as it
      *         exists in the original {@link XReadableField}.
      */
-    public XReadableField getOldField(XID fieldId) {
+    public XReadableField getOldField(XId fieldId) {
         return this.base.getField(fieldId);
     }
     
     /**
-     * @return the {@link XID XIDs} of the {@link XReadableField XBaseFields}
+     * @return the {@link XId XIds} of the {@link XReadableField XBaseFields}
      *         that existed in the original {@link XReadableObject} but have
      *         been removed
      */
-    public Iterable<XID> getRemovedFields() {
+    public Iterable<XId> getRemovedFields() {
         return this.removed;
     }
     
@@ -340,7 +340,7 @@ public class ChangedObject implements XWritableObject, DeltaUtils.IObjectDiff {
     }
     
     @Override
-    public boolean hasField(XID fieldId) {
+    public boolean hasField(XId fieldId) {
         return this.added.containsKey(fieldId)
                 || (!this.removed.contains(fieldId) && this.base.hasField(fieldId));
     }
@@ -360,7 +360,7 @@ public class ChangedObject implements XWritableObject, DeltaUtils.IObjectDiff {
             return false;
         }
         
-        for(XID fieldId : this.base) {
+        for(XId fieldId : this.base) {
             if(!this.removed.contains(fieldId)) {
                 return false;
             }
@@ -370,20 +370,20 @@ public class ChangedObject implements XWritableObject, DeltaUtils.IObjectDiff {
     }
     
     @Override
-    public Iterator<XID> iterator() {
+    public Iterator<XId> iterator() {
         
-        Iterator<XID> filtered = new AbstractFilteringIterator<XID>(this.base.iterator()) {
+        Iterator<XId> filtered = new AbstractFilteringIterator<XId>(this.base.iterator()) {
             @Override
-            protected boolean matchesFilter(XID entry) {
+            protected boolean matchesFilter(XId entry) {
                 return !ChangedObject.this.removed.contains(entry);
             }
         };
         
-        return new BagUnionIterator<XID>(filtered, this.added.keySet().iterator());
+        return new BagUnionIterator<XId>(filtered, this.added.keySet().iterator());
     }
     
     @Override
-    public boolean removeField(XID fieldId) {
+    public boolean removeField(XId fieldId) {
         
         if(this.added.containsKey(fieldId)) {
             
@@ -461,7 +461,7 @@ public class ChangedObject implements XWritableObject, DeltaUtils.IObjectDiff {
                 baseField.setValue(field.getValue());
             }
         }
-        for(XID removed : changedObject.getRemovedFields()) {
+        for(XId removed : changedObject.getRemovedFields()) {
             baseObject.removeField(removed);
         }
     }
@@ -477,7 +477,7 @@ public class ChangedObject implements XWritableObject, DeltaUtils.IObjectDiff {
     }
     
     @Override
-    public Collection<XID> getRemoved() {
+    public Collection<XId> getRemoved() {
         return this.removed;
     }
 }

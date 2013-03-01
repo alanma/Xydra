@@ -1,6 +1,6 @@
 package org.xydra.base.change;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
 
@@ -14,15 +14,15 @@ import org.xydra.core.model.XRepository;
 public interface XRepositoryCommand extends XAtomicCommand {
 	
 	/**
-	 * @return the {@link XID} of the {@link XModel} this command will
+	 * @return the {@link XId} of the {@link XModel} this command will
 	 *         add/remove
 	 */
-	XID getModelId();
+	XId getModelId();
 	
 	/**
-	 * @return the {@link XID} of the {@link XRepository} this command refers to
+	 * @return the {@link XId} of the {@link XRepository} this command refers to
 	 */
-	XID getRepositoryId();
+	XId getRepositoryId();
 	
 	/**
 	 * @return the current revision number of the {@link XModel} which will be
@@ -33,11 +33,11 @@ public interface XRepositoryCommand extends XAtomicCommand {
 	
 	/**
 	 * A forced add will succeed even if an {@link XModel} with the specified
-	 * {@link XID} already exists, while a safe add will only succeed if no such
+	 * {@link XId} already exists, while a safe add will only succeed if no such
 	 * {@link XModel} exists.
 	 * 
 	 * A forced remove will succeed whether an {@link XModel} with the specified
-	 * {@link XID} exists or not, while a safe remove will only succeed if such
+	 * {@link XId} exists or not, while a safe remove will only succeed if such
 	 * an {@link XModel} exists.
 	 * 
 	 * Furthermore forced commands will ignore the current revision number of

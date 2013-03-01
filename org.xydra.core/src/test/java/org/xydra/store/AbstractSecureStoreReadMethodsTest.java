@@ -4,7 +4,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommandFactory;
 import org.xydra.store.access.HashUtils;
@@ -30,7 +30,7 @@ abstract public class AbstractSecureStoreReadMethodsTest extends AbstractStoreRe
 	}
 	
 	@Override
-	protected XID getCorrectUser() {
+	protected XId getCorrectUser() {
 		if(this.authenticationDb == null) {
 			this.authenticationDb = this.store.getXydraStoreAdmin().getAccessControlManager()
 			        .getAuthenticationDatabase();
@@ -40,7 +40,7 @@ abstract public class AbstractSecureStoreReadMethodsTest extends AbstractStoreRe
 		}
 		
 		// easier in the debugger
-		XID actorId = XX.toId("SecureDirk");
+		XId actorId = XX.toId("SecureDirk");
 		
 		if(!this.acm.isAuthenticated(actorId, this.getCorrectUserPasswordHash())) {
 			this.authenticationDb.setPasswordHash(actorId,
@@ -56,7 +56,7 @@ abstract public class AbstractSecureStoreReadMethodsTest extends AbstractStoreRe
 
 		this.acm.getAuthorisationManager().getGroupDatabase()
 		        .addToGroup(actorId, XGroupDatabase.ADMINISTRATOR_GROUP_ID);
-		XID modelId1 = XX.toId("TestModel1");
+		XId modelId1 = XX.toId("TestModel1");
 		XAddress model1address = XX.toAddress(this.store.getXydraStoreAdmin().getRepositoryId(),
 		        modelId1, null, null);
 		XAddress repoAddress = XX.toAddress(this.store.getXydraStoreAdmin().getRepositoryId(),
@@ -94,7 +94,7 @@ abstract public class AbstractSecureStoreReadMethodsTest extends AbstractStoreRe
 	}
 	
 	@Override
-	protected XID getIncorrectUser() {
+	protected XId getIncorrectUser() {
 		/*
 		 * By definition of createUniqueID this ID is unknown an is therefore
 		 * not registered in the accountDb
@@ -108,7 +108,7 @@ abstract public class AbstractSecureStoreReadMethodsTest extends AbstractStoreRe
 	}
 	
 	@Override
-	protected XID getRepositoryId() {
+	protected XId getRepositoryId() {
 		return XX.toId("data");
 		// repositoryId as set in the standard constructor of {@link
 		// MemoryStore}

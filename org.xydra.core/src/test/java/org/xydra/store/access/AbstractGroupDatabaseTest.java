@@ -5,7 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.core.LoggerTestHelper;
 
@@ -18,13 +18,13 @@ import org.xydra.core.LoggerTestHelper;
  */
 public abstract class AbstractGroupDatabaseTest {
 	
-	XID actorAlpha;
+	XId actorAlpha;
 	
-	XID actorBeta;
+	XId actorBeta;
 	
-	XID groupOne;
+	XId groupOne;
 	private XGroupDatabaseWithListeners groups;
-	XID groupZero;
+	XId groupZero;
 	{
 		LoggerTestHelper.init();
 	}

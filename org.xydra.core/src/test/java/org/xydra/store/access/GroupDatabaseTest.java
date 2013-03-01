@@ -6,7 +6,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.core.LoggerTestHelper;
 import org.xydra.store.access.impl.memory.MemoryGroupDatabase;
@@ -15,16 +15,16 @@ import org.xydra.store.access.impl.memory.MemoryGroupDatabase;
 // TODO make abstract and test with other impls, too
 public class GroupDatabaseTest {
 	
-	static final XID actor1 = XX.toId("actor1");
+	static final XId actor1 = XX.toId("actor1");
 	
-	static final XID group1 = XX.toId("group1");
+	static final XId group1 = XX.toId("group1");
 	
-	static final XID group2 = XX.toId("group2");
+	static final XId group2 = XX.toId("group2");
 	
-	static final XID group3 = XX.toId("group3");
-	static final XID group4 = XX.toId("group4");
-	static final XID group5 = XX.toId("group5");
-	static final XID group6 = XX.toId("group6");
+	static final XId group3 = XX.toId("group3");
+	static final XId group4 = XX.toId("group4");
+	static final XId group5 = XX.toId("group5");
+	static final XId group6 = XX.toId("group6");
 	
 	@BeforeClass
 	public static void init() {

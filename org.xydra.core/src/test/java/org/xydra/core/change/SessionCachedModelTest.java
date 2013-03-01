@@ -6,7 +6,7 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableObject;
@@ -27,7 +27,7 @@ public class SessionCachedModelTest {
 	private final XAddress MODELADDRESS = XX.toAddress(XX.toId("repo1"), XX.toId("testModel"),
 	        null, null);
 	
-	public static final XID ACTOR = XX.toId("_SessionCachedModelTest");
+	public static final XId ACTOR = XX.toId("_SessionCachedModelTest");
 	
 	@Test
 	public void testDiscardChanges() {
@@ -40,7 +40,7 @@ public class SessionCachedModelTest {
 		model.indexModel(demoModel);
 		
 		/* phase 1: check for object changes */
-		XID newObjectId = XX.toId("addedObject");
+		XId newObjectId = XX.toId("addedObject");
 		model.createObject(newObjectId);
 		
 		model.removeObject(DemoModelUtil.CLAUDIA_ID);
@@ -60,17 +60,17 @@ public class SessionCachedModelTest {
 		Assert.assertTrue(model.hasObject(DemoModelUtil.PETER_ID));
 		
 		/* phase 2: check for field changes */
-		XID newFieldID = XX.toId("newField");
+		XId newFieldID = XX.toId("newField");
 		XWritableObject existingObject = model.getObject(DemoModelUtil.JOHN_ID);
 		
 		int initialFieldCount = 0;
-		HashSet<XID> fields = new HashSet<XID>();
-		for(XID xid : existingObject) {
+		HashSet<XId> fields = new HashSet<XId>();
+		for(XId xid : existingObject) {
 			fields.add(xid);
 			initialFieldCount++;
 		}
 		
-		for(XID fieldID : fields) {
+		for(XId fieldID : fields) {
 			existingObject.removeField(fieldID);
 		}
 		

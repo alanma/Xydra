@@ -6,7 +6,7 @@ import java.util.Iterator;
 
 import org.xydra.annotations.NeverNull;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommandUtils;
@@ -106,14 +106,14 @@ public class SessionModel implements XSessionModel {
 	}
 	
 	@Override
-	public XWritableObject createObject(@NeverNull XID id) {
+	public XWritableObject createObject(@NeverNull XId id) {
 		synchronized(this.sessionCacheModel) {
 			return this.sessionCacheModel.createObject(id);
 		}
 	}
 	
 	/* id to record writes, if not readonly */
-	public XID getActorId() {
+	public XId getActorId() {
 		return this.session.getActorId();
 	}
 	
@@ -123,12 +123,12 @@ public class SessionModel implements XSessionModel {
 	}
 	
 	@Override
-	public XID getId() {
+	public XId getId() {
 		return this.sessionCacheModel.getId();
 	}
 	
 	@Override
-	public XWritableObject getObject(@NeverNull XID objectId) {
+	public XWritableObject getObject(@NeverNull XId objectId) {
 		synchronized(this.sessionCacheModel) {
 			return this.sessionCacheModel.getObject(objectId);
 		}
@@ -166,7 +166,7 @@ public class SessionModel implements XSessionModel {
 	}
 	
 	@Override
-	public boolean hasObject(@NeverNull XID objectId) {
+	public boolean hasObject(@NeverNull XId objectId) {
 		return this.sessionCacheModel.hasObject(objectId);
 	}
 	
@@ -180,10 +180,10 @@ public class SessionModel implements XSessionModel {
 	}
 	
 	@Override
-	public Iterator<XID> iterator() {
-		Collection<XID> set;
+	public Iterator<XId> iterator() {
+		Collection<XId> set;
 		synchronized(this.sessionCacheModel) {
-			set = IteratorUtils.addAll(this.sessionCacheModel.iterator(), new HashSet<XID>());
+			set = IteratorUtils.addAll(this.sessionCacheModel.iterator(), new HashSet<XId>());
 		}
 		return set.iterator();
 	}
@@ -223,7 +223,7 @@ public class SessionModel implements XSessionModel {
 	}
 	
 	@Override
-	public boolean removeObject(@NeverNull XID objectId) {
+	public boolean removeObject(@NeverNull XId objectId) {
 		synchronized(this.sessionCacheModel) {
 			return this.sessionCacheModel.removeObject(objectId);
 		}
@@ -235,7 +235,7 @@ public class SessionModel implements XSessionModel {
 	}
 	
 	@Override
-	public SessionModel loadObject(XID objectId) {
+	public SessionModel loadObject(XId objectId) {
 		XyAssert.xyAssert(objectId != null);
 		assert objectId != null;
 		// load only if not already present

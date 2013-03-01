@@ -4,7 +4,7 @@ import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.X;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.value.XBooleanValue;
 import org.xydra.base.value.XCollectionValue;
@@ -26,10 +26,10 @@ public abstract class AbstractObjectIndex {
 	/**
 	 * convert value to key
 	 * 
-	 * @param value The value to transform into an {@link XID}.
-	 * @return an XID parsed from an encoded XValue
+	 * @param value The value to transform into an {@link XId}.
+	 * @return an XId parsed from an encoded XValue
 	 */
-	public static XID valueToXID(XValue value) {
+	public static XId valueToXId(XValue value) {
 		String key;
 		if(value instanceof XStringValue) {
 			key = "" + ((XStringValue)value).contents().hashCode();
@@ -47,9 +47,9 @@ public abstract class AbstractObjectIndex {
 			key = "" + ((XBooleanValue)value).contents();
 		} else if(value instanceof XLongValue) {
 			key = "a" + ((XLongValue)value).contents();
-		} else if(value instanceof XID) {
+		} else if(value instanceof XId) {
 			// trivial
-			return ((XID)value);
+			return ((XId)value);
 		} else {
 			// collection types
 			assert (value instanceof XCollectionValue<?>) : "Support for indexing type "
@@ -57,21 +57,21 @@ public abstract class AbstractObjectIndex {
 			throw new RuntimeException("Indexing collection types such as "
 			        + value.getClass().getName() + " is not supported.");
 		}
-		XID xid = X.getIDProvider().fromString(key);
+		XId xid = X.getIDProvider().fromString(key);
 		return xid;
 	}
 	
-	protected XID actor = X.getIDProvider().fromString(CLASSNAME);
-	protected XID fieldId;
+	protected XId actor = X.getIDProvider().fromString(CLASSNAME);
+	protected XId fieldId;
 	
 	protected XWritableObject indexObject;
 	
 	/**
 	 * @param fieldId The id of the field to index.
-	 * @param indexObject see {@link NamingUtils#getIndexModelId(XID, String)}
-	 *            to obtain a suitable XID for your index object
+	 * @param indexObject see {@link NamingUtils#getIndexModelId(XId, String)}
+	 *            to obtain a suitable XId for your index object
 	 */
-	public AbstractObjectIndex(XID fieldId, XWritableObject indexObject) {
+	public AbstractObjectIndex(XId fieldId, XWritableObject indexObject) {
 		this.fieldId = fieldId;
 		this.indexObject = indexObject;
 	}

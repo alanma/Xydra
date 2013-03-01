@@ -3,7 +3,7 @@ package org.xydra.base.rmof;
 import java.util.Iterator;
 
 import org.xydra.annotations.ReadOperation;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 
 
 /**
@@ -12,33 +12,33 @@ import org.xydra.base.XID;
  * @author dscharrer
  * 
  */
-public interface XStateReadableObject extends XEntity, Iterable<XID> {
+public interface XStateReadableObject extends XEntity, Iterable<XId> {
 	
 	/**
 	 * Returns the {@link XReadableField} contained in this object with the
-	 * given {@link XID}.
+	 * given {@link XId}.
 	 * 
-	 * @param fieldId The {@link XID} of the {@link XReadableField} which is to
+	 * @param fieldId The {@link XId} of the {@link XReadableField} which is to
 	 *            be returned
-	 * @return The {@link XReadableField} with the given {@link XID} or null, if
+	 * @return The {@link XReadableField} with the given {@link XId} or null, if
 	 *         no corresponding {@link XReadableField} exists
 	 * @throws IllegalStateException if this object has already been removed
 	 */
 	@ReadOperation
-	XStateReadableField getField(XID fieldId);
+	XStateReadableField getField(XId fieldId);
 	
 	/**
 	 * Checks whether this {@link XReadableObject} contains an
-	 * {@link XReadableField} with the given {@link XID}
+	 * {@link XReadableField} with the given {@link XId}
 	 * 
-	 * @param fieldId The {@link XID} which is to be checked
+	 * @param fieldId The {@link XId} which is to be checked
 	 * @return true, if this {@link XReadableObject} contains an
-	 *         {@link XReadableField} with the given {@link XID}, false
+	 *         {@link XReadableField} with the given {@link XId}, false
 	 *         otherwise
 	 * @throws IllegalStateException if this object has already been removed
 	 */
 	@ReadOperation
-	boolean hasField(XID fieldId);
+	boolean hasField(XId fieldId);
 	
 	/**
 	 * Returns true, if this object has no child-fields
@@ -50,12 +50,12 @@ public interface XStateReadableObject extends XEntity, Iterable<XID> {
 	boolean isEmpty();
 	
 	/**
-	 * @return an iterator over the {@link XID XIDs} of the child-fields of this
+	 * @return an iterator over the {@link XId XIds} of the child-fields of this
 	 *         XBaseObject.
 	 * @throws IllegalStateException if this object has already been removed
 	 */
 	@Override
 	@ReadOperation
-	Iterator<XID> iterator();
+	Iterator<XId> iterator();
 	
 }

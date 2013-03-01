@@ -3,7 +3,7 @@ package org.xydra.store;
 import java.util.Set;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XCommand;
@@ -118,7 +118,7 @@ public interface XydraStore {
 	 *            passwordHash match. Must not be null.
 	 * @throws IllegalArgumentException if one of the given parameters is null.
 	 */
-	void checkLogin(XID actorId, String passwordHash, Callback<Boolean> callback)
+	void checkLogin(XId actorId, String passwordHash, Callback<Boolean> callback)
 	        throws IllegalArgumentException;
 	
 	/**
@@ -178,7 +178,7 @@ public interface XydraStore {
 	 *            For successful commands that changed something, the return
 	 *            value is always a revision number that can be used to retrieve
 	 *            the corresponding event using
-	 *            {@link #getEvents(XID, String, GetEventsRequest[], Callback)}.
+	 *            {@link #getEvents(XId, String, GetEventsRequest[], Callback)}.
 	 *            While this revision number is model-specific, no assumptions
 	 *            should be made about the value (even the initial value for new
 	 *            models), except that the order of the revision numbers
@@ -210,11 +210,11 @@ public interface XydraStore {
 	 *            Even after a the callback's {@link Callback#onSuccess(Object)}
 	 *            method has been called, the change may not actually be
 	 *            returned yet by
-	 *            {@link #getModelSnapshots(XID, String, GetWithAddressRequest[], Callback)}
-	 *            , {@link #getModelIds(XID, String, Callback)},
-	 *            {@link #getModelRevisions(XID, String, GetWithAddressRequest[], Callback)}
+	 *            {@link #getModelSnapshots(XId, String, GetWithAddressRequest[], Callback)}
+	 *            , {@link #getModelIds(XId, String, Callback)},
+	 *            {@link #getModelRevisions(XId, String, GetWithAddressRequest[], Callback)}
 	 *            and
-	 *            {@link #getObjectSnapshots(XID, String, GetWithAddressRequest[], Callback)}
+	 *            {@link #getObjectSnapshots(XId, String, GetWithAddressRequest[], Callback)}
 	 *            yet. The change will however eventually be returned by those
 	 *            methods, and will stay persistent once it does. Also, no
 	 *            changes with greater revision numbers will become visible
@@ -224,19 +224,19 @@ public interface XydraStore {
 	 * @throws IllegalArgumentException if one of the given parameters is null.
 	 *             Only the callback may be null.
 	 */
-	void executeCommands(XID actorId, String passwordHash, XCommand[] commands,
+	void executeCommands(XId actorId, String passwordHash, XCommand[] commands,
 	        Callback<BatchedResult<Long>[]> callback) throws IllegalArgumentException;
 	
 	/**
 	 * COMMANDS + EVENTS.
 	 * 
 	 * Redundant, network-optimised method to combine in one method call the
-	 * effects of {@link #executeCommands(XID, String, XCommand[], Callback)}
-	 * and {@link #getEvents(XID, String, GetEventsRequest[], Callback)}.
+	 * effects of {@link #executeCommands(XId, String, XCommand[], Callback)}
+	 * and {@link #getEvents(XId, String, GetEventsRequest[], Callback)}.
 	 * 
 	 * The exceptions in this methods are simply the union of the exceptions in
-	 * {@link #executeCommands(XID, String, XCommand[], Callback)} and
-	 * {@link #getEvents(XID, String, GetEventsRequest[], Callback)}.
+	 * {@link #executeCommands(XId, String, XCommand[], Callback)} and
+	 * {@link #getEvents(XId, String, GetEventsRequest[], Callback)}.
 	 * 
 	 * TODO Specify what happens first - executing the commands or getting the
 	 * requested events? This is useful to know, since if the order is
@@ -249,24 +249,24 @@ public interface XydraStore {
 	 *            network if the user uses the same password for multiple
 	 *            services.
 	 * @param commands See
-	 *            {@link #executeCommands(XID, String, XCommand[], Callback)}
+	 *            {@link #executeCommands(XId, String, XCommand[], Callback)}
 	 * @param getEventRequests See
-	 *            {@link #getEvents(XID, String, GetEventsRequest[], Callback)}
+	 *            {@link #getEvents(XId, String, GetEventsRequest[], Callback)}
 	 * @param callback Asynchronous callback to signal success or failure. On
 	 *            success, this method returns a {@link Pair} where the first
 	 *            component is the the same (including the same kind of
 	 *            exceptions) as the result of
-	 *            {@link #executeCommands(XID, String, XCommand[], Callback)}
+	 *            {@link #executeCommands(XId, String, XCommand[], Callback)}
 	 *            and the second is the same as the result of
-	 *            {@link #getEvents(XID, String, GetEventsRequest[], Callback)}
+	 *            {@link #getEvents(XId, String, GetEventsRequest[], Callback)}
 	 *            (also including the same exceptions) .
 	 * 
 	 *            This callback may not be null, because with a null callback
 	 *            this method provides no advantage over
-	 *            {@link #executeCommands(XID, String, XCommand[], Callback)}
+	 *            {@link #executeCommands(XId, String, XCommand[], Callback)}
 	 * @throws IllegalArgumentException
 	 */
-	void executeCommandsAndGetEvents(XID actorId, String passwordHash, XCommand[] commands,
+	void executeCommandsAndGetEvents(XId actorId, String passwordHash, XCommand[] commands,
 	        GetEventsRequest[] getEventRequests,
 	        Callback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> callback)
 	        throws IllegalArgumentException;
@@ -317,7 +317,7 @@ public interface XydraStore {
 	 * 
 	 * @throws IllegalArgumentException if any of the given parameters is null.
 	 */
-	void getEvents(XID actorId, String passwordHash, GetEventsRequest[] getEventsRequest,
+	void getEvents(XId actorId, String passwordHash, GetEventsRequest[] getEventsRequest,
 	        Callback<BatchedResult<XEvent[]>[]> callback) throws IllegalArgumentException;
 	
 	/**
@@ -340,12 +340,12 @@ public interface XydraStore {
 	 *            network if the user uses the same password for multiple
 	 *            services.
 	 * @param callback Asynchronous callback to signal success or failure. On
-	 *            success a Set of all {@link XID} of all {@link XModel XModels}
+	 *            success a Set of all {@link XId} of all {@link XModel XModels}
 	 *            for which the given actorId has read-access in the repository
 	 *            is returned. Must not be null.
 	 * @throws IllegalArgumentException if one of the given parameters is null.
 	 */
-	void getModelIds(XID actorId, String passwordHash, Callback<Set<XID>> callback)
+	void getModelIds(XId actorId, String passwordHash, Callback<Set<XId>> callback)
 	        throws IllegalArgumentException;
 	
 	/**
@@ -383,7 +383,7 @@ public interface XydraStore {
 	 *            Each first pair element contains the revision number of the
 	 *            addressed model as a long. The returned revision number is the
 	 *            number that can be used with
-	 *            {@link #getEvents(XID, String, GetEventsRequest[], Callback)}
+	 *            {@link #getEvents(XId, String, GetEventsRequest[], Callback)}
 	 *            to retrieve the last event that happened to this model. Models
 	 *            for which the actorId has no read-access are signalled as
 	 *            {@link XCommand#FAILED}.
@@ -398,7 +398,7 @@ public interface XydraStore {
 	 *            revision numbers.
 	 * @throws IllegalArgumentException if one of the given parameters is null.
 	 */
-	void getModelRevisions(XID actorId, String passwordHash,
+	void getModelRevisions(XId actorId, String passwordHash,
 	        GetWithAddressRequest[] modelRevisionRequests,
 	        Callback<BatchedResult<ModelRevision>[]> callback) throws IllegalArgumentException;
 	
@@ -407,7 +407,7 @@ public interface XydraStore {
 	 * 
 	 * Retrieve read-only snapshots of {@link XModel} states at the point in
 	 * time when this request is processed. Use
-	 * {@link XX#wrap(XID, String, XReadableModel)} to get a writable
+	 * {@link XX#wrap(XId, String, XReadableModel)} to get a writable
 	 * {@link XModel} instance.
 	 * 
 	 * Possible exceptions to be received via callback.onError (see class
@@ -451,7 +451,7 @@ public interface XydraStore {
 	 *             Implementation note: Implementation may choose to supply a
 	 *             lazy-loading stub only.
 	 */
-	void getModelSnapshots(XID actorId, String passwordHash,
+	void getModelSnapshots(XId actorId, String passwordHash,
 	        GetWithAddressRequest[] modelAddressRequests,
 	        Callback<BatchedResult<XReadableModel>[]> callback) throws IllegalArgumentException;
 	
@@ -496,7 +496,7 @@ public interface XydraStore {
 	 *             Implementation note: Implementation may chose to supply a
 	 *             lazy-loading stub only.
 	 */
-	void getObjectSnapshots(XID actorId, String passwordHash,
+	void getObjectSnapshots(XId actorId, String passwordHash,
 	        GetWithAddressRequest[] objectAddressRequests,
 	        Callback<BatchedResult<XReadableObject>[]> callback) throws IllegalArgumentException;
 	
@@ -531,7 +531,7 @@ public interface XydraStore {
 	 *            be null.
 	 * @throws IllegalArgumentException if any of the given parameters is null.
 	 */
-	void getRepositoryId(XID actorId, String passwordHash, Callback<XID> callback)
+	void getRepositoryId(XId actorId, String passwordHash, Callback<XId> callback)
 	        throws IllegalArgumentException;
 	
 	/**

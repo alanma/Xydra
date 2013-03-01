@@ -1,5 +1,5 @@
 XydraStore
-  setAdminAccount( XID account, String passwordHash )
+  setAdminAccount( XId account, String passwordHash )
   
   Implementierung kann AdminAccount haben
   

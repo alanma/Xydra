@@ -12,33 +12,40 @@ import org.xydra.base.rmof.XEntity;
  */
 
 public abstract class AbstractEntity implements XEntity {
-	
-	protected abstract long getRevisionNumber();
-	
-	@Override
-	public boolean equals(Object object) {
-		if(object instanceof AbstractEntity) {
-			AbstractEntity entity = (AbstractEntity)object;
-			return this.getAddress().equals(entity.getAddress())
-			        && this.getRevisionNumber() == entity.getRevisionNumber();
-		} else {
-			return false;
-		}
-	}
-	
-	protected abstract AbstractEntity getFather();
-	
-	@Override
-	public int hashCode() {
-		int hashCode = this.getId().hashCode() + (int)this.getRevisionNumber();
-		
-		// TODO this causes objects which are "equal" to have different hash
-		// codes, as equals does not check the parent revisions
-		AbstractEntity father = this.getFather();
-		if(father != null) {
-			hashCode += father.hashCode();
-		}
-		
-		return hashCode;
-	}
+    
+    protected abstract long getRevisionNumber();
+    
+    /**
+     * Compares address and revision number. Does not compare potential father
+     * objects. Thus equality works well only within the same entity.
+     * 
+     * @see java.lang.Object#equals(java.lang.Object) for full contract.
+     */
+    @Override
+    public boolean equals(Object object) {
+        if(object instanceof AbstractEntity) {
+            AbstractEntity entity = (AbstractEntity)object;
+            if(this.getAddress().equals(entity.getAddress())
+                    && this.getRevisionNumber() == entity.getRevisionNumber()) {
+                
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    protected abstract AbstractEntity getFather();
+    
+    /**
+     * Looks into address and revision number. Does not use potential father
+     * objects. Thus equality works well only within the same entity.
+     * 
+     * @see java.lang.Object#hashCode() for full contract.
+     */
+    @Override
+    public int hashCode() {
+        int hashCode = this.getId().hashCode() + (int)this.getRevisionNumber();
+        return hashCode;
+    }
+    
 }

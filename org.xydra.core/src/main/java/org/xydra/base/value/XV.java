@@ -9,18 +9,14 @@ import java.util.Set;
 import org.xydra.annotations.NeverNull;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 
 
 /**
  * Methods for creating and dealing with {@link XValue XValues}
  * 
  * @author dscharrer
- * 
- */
-/**
  * @author xamde
- * 
  */
 public class XV {
     
@@ -101,18 +97,6 @@ public class XV {
     
     /**
      * Returns the content of the given {@link Collection} as an
-     * {@link XBooleanListValue}
-     * 
-     * @param list The {@link Collection} which is to be converted into an
-     *            {@link XBooleanListValue}
-     * @return an {@link XBooleanListValue} with the content of the given list
-     */
-    public static XBooleanListValue toBooleanListValue(Collection<Boolean> list) {
-        return vf.createBooleanListValue(list);
-    }
-    
-    /**
-     * Returns the content of the given {@link Collection} as an
      * {@link XBinaryValue}
      * 
      * @param list The {@link Collection} which is to be converted into an
@@ -121,6 +105,18 @@ public class XV {
      */
     public static XBinaryValue toBinaryValue(Collection<Byte> list) {
         return vf.createBinaryValue(list);
+    }
+    
+    /**
+     * Returns the content of the given {@link Collection} as an
+     * {@link XBooleanListValue}
+     * 
+     * @param list The {@link Collection} which is to be converted into an
+     *            {@link XBooleanListValue}
+     * @return an {@link XBooleanListValue} with the content of the given list
+     */
+    public static XBooleanListValue toBooleanListValue(Collection<Boolean> list) {
+        return vf.createBooleanListValue(list);
     }
     
     /**
@@ -137,95 +133,95 @@ public class XV {
     
     /**
      * Returns the content of the given {@link Collection} as an
-     * {@link XIDListValue}
+     * {@link XIdListValue}
      * 
-     * @param list The {@link Collection} which is to be converted into an
-     *            {@link XIDListValue}
-     * @return an {@link XIDListValue} with the content of the given list
+     * @param collection The {@link Collection} which is to be converted into an
+     *            {@link XIdListValue}
+     * @return an {@link XIdListValue} with the content of the given list
      */
-    public static XIDListValue toIDListValue(Collection<XID> list) {
-        return vf.createIDListValue(list);
+    public static XIdListValue toIdListValue(Collection<XId> collection) {
+        return vf.createIdListValue(collection);
     }
     
     /**
-     * @param value may be null or {@link XIDSetValue}
-     * @return always a Set<XID>
-     * @throws IllegalArgumentException if value is not an {@link XIDSetValue}
+     * @param value may be null or {@link XIdSetValue}
+     * @return always a Set<XId>
+     * @throws IllegalArgumentException if value is not an {@link XIdSetValue}
      */
-    public static @NeverNull
-    Set<XID> toIDSet(XValue value) {
+    @NeverNull
+    public static Set<XId> toIdSet(XValue value) {
         if(value == null) {
             return Collections.emptySet();
         } else {
             try {
-                XIDSetValue idSetValue = (XIDSetValue)value;
+                XIdSetValue idSetValue = (XIdSetValue)value;
                 return idSetValue.toSet();
             } catch(ClassCastException e) {
-                throw new IllegalArgumentException("Given value is not an XIDSetValue", e);
+                throw new IllegalArgumentException("Given value is not an XIdSetValue", e);
             }
         }
     }
     
     /**
      * Returns the content of the given {@link Collection} as an
-     * {@link XIDSetValue}
+     * {@link XIdSetValue}
      * 
-     * @param list The {@link Collection} which is to be converted into an
-     *            {@link XIDSetValue}
-     * @return an {@link XIDSetValue} with the content of the given list
+     * @param collection The {@link Collection} which is to be converted into an
+     *            {@link XIdSetValue}
+     * @return an {@link XIdSetValue} with the content of the given list
      */
-    public static XIDSetValue toIDSetValue(Collection<XID> list) {
-        return vf.createIDSetValue(list);
+    public static XIdSetValue toIdSetValue(Collection<XId> collection) {
+        return vf.createIdSetValue(collection);
     }
     
     /**
      * Returns the content of the given {@link Collection} as an
-     * {@link XIDSetValue}
+     * {@link XIdSetValue}
      * 
      * @param list The {@link Collection} which is to be converted into an
-     *            {@link XIDSetValue}
-     * @return an {@link XIDSetValue} with the content of the given list
+     *            {@link XIdSetValue}
+     * @return an {@link XIdSetValue} with the content of the given list
      */
-    public static XIDSetValue toIDSetValue(Set<XID> list) {
-        return vf.createIDSetValue(list);
+    public static XIdSetValue toIdSetValue(Set<XId> list) {
+        return vf.createIdSetValue(list);
     }
     
     /**
-     * Returns the content of the given {@link XID} array as an
-     * {@link XIDSetValue}
+     * Returns the content of the given {@link XId} array as an
+     * {@link XIdSetValue}
      * 
-     * @param list The {@link XID} array which is to be converted into an
-     *            {@link XIDSetValue}
-     * @return an {@link XIDSetValue} with the content of the given list
+     * @param list The {@link XId} array which is to be converted into an
+     *            {@link XIdSetValue}
+     * @return an {@link XIdSetValue} with the content of the given list
      */
-    public static XIDSetValue toIDSetValue(XID[] list) {
-        return vf.createIDSetValue(list);
+    public static XIdSetValue toIdSetValue(XId[] list) {
+        return vf.createIdSetValue(list);
     }
     
     /**
      * Returns the content of the given {@link Collection} as an
-     * {@link XIDSortedSetValue}
+     * {@link XIdSortedSetValue}
      * 
-     * @param list The {@link Collection} which is to be converted into an
-     *            {@link XIDSortedSetValue}
-     * @return an {@link XIDSortedSetValue} with the content of the given list,
+     * @param collection The {@link Collection} which is to be converted into an
+     *            {@link XIdSortedSetValue}
+     * @return an {@link XIdSortedSetValue} with the content of the given list,
      *         preserving sort oder.
      */
-    public static XIDSortedSetValue toIDSortedSetValue(Collection<XID> list) {
-        return vf.createIDSortedSetValue(list);
+    public static XIdSortedSetValue toIdSortedSetValue(Collection<XId> collection) {
+        return vf.createIdSortedSetValue(collection);
     }
     
     /**
-     * Returns the content of the given {@link XID} array as an
-     * {@link XIDSortedSetValue}
+     * Returns the content of the given {@link XId} array as an
+     * {@link XIdSortedSetValue}
      * 
-     * @param list The {@link XID} array which is to be converted into an
-     *            {@link XIDSortedSetValue}
-     * @return an {@link XIDSortedSetValue} with the content of the given list,
+     * @param list The {@link XId} array which is to be converted into an
+     *            {@link XIdSortedSetValue}
+     * @return an {@link XIdSortedSetValue} with the content of the given list,
      *         maintaining sort oder.
      */
-    public static XIDSortedSetValue toIDSortedSetValue(XID[] list) {
-        return vf.createIDSortedSetValue(list);
+    public static XIdSortedSetValue toIdSortedSetValue(XId[] list) {
+        return vf.createIdSortedSetValue(list);
     }
     
     /**
@@ -298,6 +294,10 @@ public class XV {
      */
     public static XStringListValue toStringListValue(Collection<String> list) {
         return vf.createStringListValue(list);
+    }
+    
+    public static XStringListValue toStringListValue(String ... strings) {
+        return vf.createStringListValue(strings);
     }
     
     /**
@@ -519,23 +519,41 @@ public class XV {
     }
     
     /**
-     * Returns the content of the given {@link XID} array as an
-     * {@link XIDListValue}
+     * Returns the content of the given {@link XId} array as an
+     * {@link XIdListValue}
      * 
-     * @param list The {@link XID} array which is to be converted into an
-     *            {@link XIDListValue}
-     * @return an {@link XIDListValue} with the content of the given list
+     * @param list The {@link XId} array which is to be converted into an
+     *            {@link XIdListValue}
+     * @return an {@link XIdListValue} with the content of the given list
      */
-    public static XIDListValue toValue(XID[] list) {
-        return vf.createIDListValue(list);
+    public static XIdListValue toValue(XId[] list) {
+        return vf.createIdListValue(list);
+    }
+    
+    private static void toValueStream(XValue value, Class<?> type, XValueStreamHandler stream) {
+        if(type == XAddress.class) {
+            stream.address((XAddress)value);
+        } else if(type == Boolean.class) {
+            stream.javaBoolean(((XBooleanValue)value).contents());
+        } else if(type == Double.class) {
+            stream.javaDouble(((XDoubleValue)value).contents());
+        } else if(type == Integer.class) {
+            stream.javaInteger(((XIntegerValue)value).contents());
+        } else if(type == Long.class) {
+            stream.javaLong(((XLongValue)value).contents());
+        } else if(type == String.class) {
+            stream.javaString(((XStringValue)value).contents());
+        } else if(type == org.xydra.base.XId.class) {
+            stream.xid((XId)value);
+        }
     }
     
     @SuppressWarnings("unchecked")
-    public static void toValueStream(XValue value, XValueStream stream) {
+    public static void toValueStream(XValue value, XValueStreamHandler stream) {
         stream.startValue();
         if(value.getType().isCollection()) {
             stream.startCollection(value.getType());
-            Class<?> componentType = ValueType.getComponentType(value.getType());
+            Class<?> componentType = value.getType().getComponentType().getXydraInterface();
             for(Object a : ((XCollectionValue<? extends XValue>)value)) {
                 if(componentType == XAddress.class) {
                     stream.address((XAddress)a);
@@ -549,37 +567,15 @@ public class XV {
                     stream.javaLong((Long)a);
                 } else if(componentType == String.class) {
                     stream.javaString((String)a);
-                } else if(componentType == org.xydra.base.XID.class) {
-                    stream.xid((XID)a);
+                } else if(componentType == org.xydra.base.XId.class) {
+                    stream.xid((XId)a);
                 }
             }
             stream.endCollection();
         } else {
-            toValueStream(value, ValueType.getPrimitiveType(value.getType()), stream);
+            toValueStream(value, value.getType().getJavaClass(), stream);
         }
         stream.endValue();
-    }
-    
-    private static void toValueStream(XValue value, Class<?> type, XValueStream stream) {
-        if(type == XAddress.class) {
-            stream.address((XAddress)value);
-        } else if(type == Boolean.class) {
-            stream.javaBoolean(((XBooleanValue)value).contents());
-        } else if(type == Double.class) {
-            stream.javaDouble(((XDoubleValue)value).contents());
-        } else if(type == Integer.class) {
-            stream.javaInteger(((XIntegerValue)value).contents());
-        } else if(type == Long.class) {
-            stream.javaLong(((XLongValue)value).contents());
-        } else if(type == String.class) {
-            stream.javaString(((XStringValue)value).contents());
-        } else if(type == org.xydra.base.XID.class) {
-            stream.xid((XID)value);
-        }
-    }
-    
-    public static XStringListValue toStringListValue(String ... strings) {
-        return vf.createStringListValue(strings);
     }
     
 }

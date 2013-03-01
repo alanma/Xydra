@@ -1,6 +1,6 @@
 package org.xydra.base.change;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.rmof.XWritableModel;
 
 
@@ -13,7 +13,7 @@ public interface XSessionModel extends XWritableModel {
 	 * @param objectId
 	 * @return this instance for fluent API style
 	 */
-	XSessionModel loadObject(XID objectId);
+	XSessionModel loadObject(XId objectId);
 	
 	/**
 	 * If not all objects are already known (i.e. from a previous call to this

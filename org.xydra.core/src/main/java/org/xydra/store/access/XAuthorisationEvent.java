@@ -1,7 +1,7 @@
 package org.xydra.store.access;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.ChangeType;
 
 
@@ -20,16 +20,16 @@ public interface XAuthorisationEvent {
 	 * 
 	 * @return the type of access being modified.
 	 */
-	XID getAccessType();
+	XId getAccessType();
 	
 	/**
-	 * Returns the {@link XID} of the actor whose access definition has been
+	 * Returns the {@link XId} of the actor whose access definition has been
 	 * modified.
 	 * 
-	 * @return the {@link XID} of the actor whose access definition has been
+	 * @return the {@link XId} of the actor whose access definition has been
 	 *         modified
 	 */
-	XID getActor();
+	XId getActor();
 	
 	ChangeType getChangeType();
 	

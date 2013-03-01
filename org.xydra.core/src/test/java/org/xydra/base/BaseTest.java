@@ -17,7 +17,7 @@ public class BaseTest {
 	public void testAddRemoveModel() {
 		XydraPersistence persistence = new MemoryPersistence(XX.toId("testrepo"));
 		XWritableRepository repo = new WritableRepositoryOnPersistence(persistence, XX.toId("aaa"));
-		XID modelId = XX.toId("user");
+		XId modelId = XX.toId("user");
 		
 		repo.createModel(modelId);
 		assertTrue(repo.hasModel(modelId));

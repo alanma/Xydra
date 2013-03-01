@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.xydra.annotations.NeverNull;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.core.model.impl.memory.UUID;
@@ -29,13 +29,13 @@ public class ChangeSession {
 	
 	private static final Logger log = LoggerFactory.getLogger(ChangeSession.class);
 	
-	protected XID actorId;
+	protected XId actorId;
 	
 	protected boolean closed = false;
 	
 	protected boolean readonly;
 	
-	protected Map<XID,SessionModel> sessionModels = new HashMap<XID,SessionModel>();
+	protected Map<XId,SessionModel> sessionModels = new HashMap<XId,SessionModel>();
 	
 	protected ISessionPersistence sessionPersistence;
 	
@@ -48,7 +48,7 @@ public class ChangeSession {
 	 * @param actorId
 	 */
 	protected ChangeSession(ISessionPersistence sessionPersistence, boolean readonly,
-	        @NeverNull XID actorId) {
+	        @NeverNull XId actorId) {
 		XyAssert.xyAssert(sessionPersistence != null);
 		assert sessionPersistence != null;
 		XyAssert.xyAssert(actorId != null);
@@ -108,7 +108,7 @@ public class ChangeSession {
 		return " see console";
 	}
 	
-	public XID getActorId() {
+	public XId getActorId() {
 		return this.actorId;
 	}
 	
@@ -152,7 +152,7 @@ public class ChangeSession {
 	 * @throws SessionException if model did not exist and could not be created
 	 */
 	public static ChangeSession createSession(final ISessionPersistence sessionPersistence,
-	        boolean readonly, XID actorId) throws SessionException {
+	        boolean readonly, XId actorId) throws SessionException {
 		ChangeSession session = new ChangeSession(sessionPersistence, readonly, actorId);
 		return session;
 	}
@@ -165,7 +165,7 @@ public class ChangeSession {
 	 * @return the model representing the given modelId in this session. Might
 	 *         have something preloaded already.
 	 */
-	public SessionModel openModel(XID modelId, boolean readonly) {
+	public SessionModel openModel(XId modelId, boolean readonly) {
 		assert !(isReadonly() && !readonly) : "readonly sessions cannot have writable models. Session:"
 		        + isReadonly() + " Model:" + readonly;
 		SessionModel sessionModel = this.sessionModels.get(modelId);

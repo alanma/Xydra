@@ -1,6 +1,6 @@
 package org.xydra.store.impl.memory;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.IMemCache;
@@ -18,7 +18,7 @@ public class MemoryRuntime implements XydraPlatformRuntime {
 	}
 	
 	@Override
-	public XydraPersistence getPersistence(XID repositoryId) {
+	public XydraPersistence getPersistence(XId repositoryId) {
 		return new MemoryPersistence(repositoryId);
 	}
 	

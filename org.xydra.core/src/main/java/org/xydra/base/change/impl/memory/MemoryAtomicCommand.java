@@ -5,7 +5,7 @@ import java.io.Serializable;
 import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XAtomicCommand;
 import org.xydra.base.change.XCommand;
@@ -35,7 +35,8 @@ abstract public class MemoryAtomicCommand implements XAtomicCommand, Serializabl
         if(target == null)
             throw new NullPointerException("target must not be null");
         
-        if(revision < 0 && revision != XCommand.SAFE && revision != XCommand.FORCED)
+        if(revision < 0 && revision != XCommand.SAFE && revision != XCommand.FORCED
+                && revision != XCommand.NONEXISTANT)
             throw new RuntimeException("invalid revison: " + revision);
         
         this.target = target;
@@ -63,31 +64,31 @@ abstract public class MemoryAtomicCommand implements XAtomicCommand, Serializabl
         return this.changeType;
     }
     
-    public XID getFieldId() {
+    public XId getFieldId() {
         return this.target.getField();
     }
     
     /**
-     * @return the {@link XID} of the {@link XModel} holding the entity this
+     * @return the {@link XId} of the {@link XModel} holding the entity this
      *         command will change (may be null)
      */
-    public XID getModelId() {
+    public XId getModelId() {
         return this.target.getModel();
     }
     
     /**
-     * @return the {@link XID} of the {@link XObject} holding the entity this
+     * @return the {@link XId} of the {@link XObject} holding the entity this
      *         command will change (may be null)
      */
-    public XID getObjectId() {
+    public XId getObjectId() {
         return this.target.getObject();
     }
     
     /**
-     * @return the {@link XID} of the {@link XRepository} holding the entity
+     * @return the {@link XId} of the {@link XRepository} holding the entity
      *         this command will change (may be null)
      */
-    public XID getRepositoryId() {
+    public XId getRepositoryId() {
         return this.target.getRepository();
     }
     

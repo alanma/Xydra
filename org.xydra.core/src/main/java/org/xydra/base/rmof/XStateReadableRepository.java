@@ -3,7 +3,7 @@ package org.xydra.base.rmof;
 import java.util.Iterator;
 
 import org.xydra.annotations.ReadOperation;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 
 
 /**
@@ -11,30 +11,30 @@ import org.xydra.base.XID;
  * 
  * @author dscharrer
  */
-public interface XStateReadableRepository extends XEntity, Iterable<XID> {
+public interface XStateReadableRepository extends XEntity, Iterable<XId> {
 	
 	/**
 	 * Returns the {@link XReadableModel} contained in this repository with the
-	 * given {@link XID}
+	 * given {@link XId}
 	 * 
-	 * @param id The {@link XID} of the {@link XReadableModel} which is to be
+	 * @param id The {@link XId} of the {@link XReadableModel} which is to be
 	 *            returned
-	 * @return the {@link XReadableModel} with the given {@link XID} or null if
+	 * @return the {@link XReadableModel} with the given {@link XId} or null if
 	 *         no such {@link XReadableModel} exists in this repository.
 	 */
 	@ReadOperation
-	XStateReadableModel getModel(XID id);
+	XStateReadableModel getModel(XId id);
 	
 	/**
 	 * Checks whether this repository contains an {@link XReadableModel} with
-	 * the given {@link XID}.
+	 * the given {@link XId}.
 	 * 
-	 * @param id The {@link XID} which is to be checked
+	 * @param id The {@link XId} which is to be checked
 	 * @return true, if this repository contains an {@link XReadableModel} with
-	 *         the given {@link XID}, false otherwise
+	 *         the given {@link XId}, false otherwise
 	 */
 	@ReadOperation
-	boolean hasModel(XID id);
+	boolean hasModel(XId id);
 	
 	/**
 	 * Returns true, if this repository has no child-models
@@ -45,11 +45,11 @@ public interface XStateReadableRepository extends XEntity, Iterable<XID> {
 	boolean isEmpty();
 	
 	/**
-	 * @return an iterator over the {@link XID XIDs} of the child-models of this
+	 * @return an iterator over the {@link XId XIds} of the child-models of this
 	 *         XBaseRepository.
 	 */
 	@Override
 	@ReadOperation
-	Iterator<XID> iterator();
+	Iterator<XId> iterator();
 	
 }

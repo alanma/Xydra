@@ -2,7 +2,7 @@ package org.xydra.store.access;
 
 import org.xydra.annotations.NeverNull;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 
 
 /**
@@ -19,13 +19,13 @@ public interface XAccessRightDefinition {
 	 * @return ..
 	 */
 	@NeverNull
-	XID getAccess();
+	XId getAccess();
 	
 	/**
 	 * @return ..
 	 */
 	@NeverNull
-	XID getActor();
+	XId getActor();
 	
 	/**
 	 * @return ..

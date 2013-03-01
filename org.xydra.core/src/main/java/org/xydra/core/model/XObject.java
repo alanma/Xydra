@@ -2,7 +2,7 @@ package org.xydra.core.model;
 
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.ReadOperation;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XObjectCommand;
 import org.xydra.base.change.XObjectEvent;
@@ -30,19 +30,19 @@ public interface XObject extends XLoggedObject, XWritableObject, XSynchronizesCh
 	
 	/**
 	 * Creates a new {@link XField} and adds it to this {@link XObject} or
-	 * returns the already existing {@link XField} if the given {@link XID} was
+	 * returns the already existing {@link XField} if the given {@link XId} was
 	 * already taken.
 	 * 
-	 * @param fieldId The {@link XID} for the {@link XField} which is to be
+	 * @param fieldId The {@link XId} for the {@link XField} which is to be
 	 *            created.
 	 * 
 	 * @return the newly created {@link XField} or the already existing
-	 *         {@link XField} with this {@link XID}
+	 *         {@link XField} with this {@link XId}
 	 * @throws IllegalStateException if this object has already been removed
 	 */
 	@Override
     @ModificationOperation
-	XField createField(XID fieldId);
+	XField createField(XId fieldId);
 	
 	/**
 	 * Executes the given {@link XObjectCommand} if possible.
@@ -52,11 +52,11 @@ public interface XObject extends XLoggedObject, XWritableObject, XSynchronizesCh
 	 * <ul>
 	 * <li>Remove-type {@link XObjectCommand}: the specified {@link XField} does
 	 * not exist and therefore cannot be removed
-	 * <li>Add-type {@link XObjectCommand}: the given {@link XID} is already
-	 * taken and therefore a new {@link XField} with this {@link XID} cannot be
+	 * <li>Add-type {@link XObjectCommand}: the given {@link XId} is already
+	 * taken and therefore a new {@link XField} with this {@link XId} cannot be
 	 * created
-	 * <li>the object-{@link XID} in the {@link XObjectCommand} does not concur
-	 * with the {@link XID} of this XObject
+	 * <li>the object-{@link XId} in the {@link XObjectCommand} does not concur
+	 * with the {@link XId} of this XObject
 	 * </ul>
 	 * 
 	 * @param command The {@link XObjectCommand} which is to be executed
@@ -72,23 +72,23 @@ public interface XObject extends XLoggedObject, XWritableObject, XSynchronizesCh
 	long executeObjectCommand(XObjectCommand command);
 	
 	/**
-	 * Returns the {@link XField} with the given {@link XID} contained in this
+	 * Returns the {@link XField} with the given {@link XId} contained in this
 	 * object.
 	 * 
-	 * @param fieldId The {@link XID} of the {@link XField} which is to be
+	 * @param fieldId The {@link XId} of the {@link XField} which is to be
 	 *            returned
-	 * @return The {@link XField} with the given {@link XID} or null, if no
+	 * @return The {@link XField} with the given {@link XId} or null, if no
 	 *         corresponding {@link XField} exists
 	 * @throws IllegalStateException if this object has already been removed
 	 */
 	@Override
     @ReadOperation
-	XField getField(XID fieldId);
+	XField getField(XId fieldId);
 	
 	/**
-	 * Removes the {@link XField} with the given {@link XID} from this XObject
+	 * Removes the {@link XField} with the given {@link XId} from this XObject
 	 * 
-	 * @param fieldId The {@link XID} of the {@link XField} which is to be
+	 * @param fieldId The {@link XId} of the {@link XField} which is to be
 	 *            removed
 	 * 
 	 * @return true, if the specified {@link XField} did exist and could be
@@ -98,7 +98,7 @@ public interface XObject extends XLoggedObject, XWritableObject, XSynchronizesCh
 	 */
 	@Override
     @ModificationOperation
-	boolean removeField(XID fieldId);
+	boolean removeField(XId fieldId);
 	
 	/**
 	 * Create a consistent snapshot of this object and all contained fields.

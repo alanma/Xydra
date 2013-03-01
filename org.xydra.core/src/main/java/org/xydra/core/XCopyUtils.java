@@ -1,6 +1,6 @@
 package org.xydra.core;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
@@ -44,7 +44,7 @@ public class XCopyUtils {
 	 */
 	public static void copyData(XReadableModel sourceModel, XWritableModel targetModel) {
 		// copy model to _model
-		for(XID objectId : sourceModel) {
+		for(XId objectId : sourceModel) {
 			XReadableObject sourceObject = sourceModel.getObject(objectId);
 			XWritableObject targetObject = targetModel.createObject(objectId);
 			copyData(sourceObject, targetObject);
@@ -61,7 +61,7 @@ public class XCopyUtils {
 	 *            sourceObject is to be pasted.
 	 */
 	public static void copyData(XReadableObject sourceObject, XWritableObject targetObject) {
-		for(XID fieldId : sourceObject) {
+		for(XId fieldId : sourceObject) {
 			XReadableField sourceField = sourceObject.getField(fieldId);
 			XWritableField targetField = targetObject.createField(fieldId);
 			copyData(sourceField, targetField);
@@ -86,7 +86,7 @@ public class XCopyUtils {
 	public static void copyData(XReadableRepository sourceRepository,
 	        XWritableRepository targetRepository) {
 		// copy repository to _repository
-		for(XID modelId : sourceRepository) {
+		for(XId modelId : sourceRepository) {
 			XReadableModel sourceModel = sourceRepository.getModel(modelId);
 			XWritableModel targetModel = targetRepository.createModel(modelId);
 			copyData(sourceModel, targetModel);
@@ -105,7 +105,7 @@ public class XCopyUtils {
 	public static void copyDataAndRevisions(XReadableModel sourceModel,
 	        XRevWritableModel targetModel) {
 		targetModel.setRevisionNumber(sourceModel.getRevisionNumber());
-		for(XID objectId : sourceModel) {
+		for(XId objectId : sourceModel) {
 			XReadableObject object = sourceModel.getObject(objectId);
 			XRevWritableObject localObject = targetModel.createObject(object.getId());
 			copyDataAndRevisions(object, localObject);
@@ -124,7 +124,7 @@ public class XCopyUtils {
 	public static void copyDataAndRevisions(XReadableObject sourceObject,
 	        XRevWritableObject targetObject) {
 		targetObject.setRevisionNumber(sourceObject.getRevisionNumber());
-		for(XID fieldId : sourceObject) {
+		for(XId fieldId : sourceObject) {
 			XReadableField sourceField = sourceObject.getField(fieldId);
 			XRevWritableField targetField = targetObject.createField(fieldId);
 			copyDataAndRevisions(sourceField, targetField);
@@ -155,7 +155,7 @@ public class XCopyUtils {
 	 * @param modelSnapshot
 	 * @return a copy based on a {@link MemoryModel} instance
 	 */
-	public static XModel copyModel(XID actor, String password, XReadableModel modelSnapshot) {
+	public static XModel copyModel(XId actor, String password, XReadableModel modelSnapshot) {
 		XRevWritableModel modelState = createSnapshot(modelSnapshot);
 		return new MemoryModel(actor, password, modelState);
 	}
@@ -168,7 +168,7 @@ public class XCopyUtils {
 	 * @param objectSnapshot
 	 * @return a copy based on a {@link MemoryObject}
 	 */
-	public static XObject copyObject(XID actor, String password, XReadableObject objectSnapshot) {
+	public static XObject copyObject(XId actor, String password, XReadableObject objectSnapshot) {
 		XRevWritableObject objectState = createSnapshot(objectSnapshot);
 		return new MemoryObject(actor, password, objectState);
 	}

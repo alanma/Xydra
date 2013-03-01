@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
@@ -56,11 +56,11 @@ public class PersistenceRobot extends Thread {
 	
 	public static boolean ONLY_ADD = true;
 	
-	private XID executingActorId;
+	private XId executingActorId;
 	
 	private String id;
 	
-	public PersistenceRobot(XydraPersistence remote, XID executingActorId, String id) {
+	public PersistenceRobot(XydraPersistence remote, XId executingActorId, String id) {
 		super();
 		this.remote = remote;
 		this.executingActorId = executingActorId;
@@ -71,7 +71,7 @@ public class PersistenceRobot extends Thread {
 	
 	private XydraPersistence local;
 	
-	private XID repositoryId;
+	private XId repositoryId;
 	
 	private WritableRepositoryOnPersistence localRepo;
 	
@@ -127,7 +127,7 @@ public class PersistenceRobot extends Thread {
 		for(int i = 0; i < this.modelAddresses.size(); i++) {
 			snapshots[i] = this.remote.getModelSnapshot(new GetWithAddressRequest(
 			        this.modelAddresses.get(i), INCLUDE_TENTATIVE_STATE));
-			XID modelId = this.modelAddresses.get(i).getModel();
+			XId modelId = this.modelAddresses.get(i).getModel();
 			if(snapshots[i] == null) {
 				XRepositoryCommand cmd = X.getCommandFactory().createAddModelCommand(
 				        this.repositoryId, modelId, true);

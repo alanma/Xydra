@@ -12,7 +12,7 @@ import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.WritableUtils;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XAtomicEvent;
@@ -21,7 +21,7 @@ import org.xydra.base.change.XFieldEvent;
 import org.xydra.base.change.XModelEvent;
 import org.xydra.base.change.XTransactionEvent;
 import org.xydra.base.rmof.XWritableModel;
-import org.xydra.base.value.XIDSetValue;
+import org.xydra.base.value.XIdSetValue;
 import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
 import org.xydra.sharedutils.XyAssert;
@@ -38,7 +38,7 @@ import org.xydra.store.access.XGroupListener;
  * <pre>
  * objectId | fieldId     | value
  * ---------+-------------+----------------------------
- * groupId  | "hasMember" | {@link XIDSetValue} actors
+ * groupId  | "hasMember" | {@link XIdSetValue} actors
  * </pre>
  * 
  * @author voelkel
@@ -48,7 +48,7 @@ import org.xydra.store.access.XGroupListener;
 @RequiresAppEngine(false)
 public class PartialGroupDatabaseOnWritableModel implements XGroupListener {
 	
-	public static final XID hasMember = XX.toId("hasMember");
+	public static final XId hasMember = XX.toId("hasMember");
 	
 	/**
 	 * Apply those events with group-actor change semantics.
@@ -100,17 +100,17 @@ public class PartialGroupDatabaseOnWritableModel implements XGroupListener {
 			break;
 		case XFIELD: {
 			XFieldEvent fieldEvent = (XFieldEvent)event;
-			XID group = event.getChangedEntity().getObject();
+			XId group = event.getChangedEntity().getObject();
 			// {model}.{group}.hasMember.{value}
-			Set<XID> currentMembers = fastDatabase.getMembersOf(group);
-			Set<XID> nextMembers = XV.toIDSet(fieldEvent.getNewValue());
+			Set<XId> currentMembers = fastDatabase.getMembersOf(group);
+			Set<XId> nextMembers = XV.toIdSet(fieldEvent.getNewValue());
 			
-			for(XID currentMember : currentMembers) {
+			for(XId currentMember : currentMembers) {
 				if(!nextMembers.contains(currentMember)) {
 					fastDatabase.removeFromGroup(currentMember, group);
 				}
 			}
-			for(XID nextMember : nextMembers) {
+			for(XId nextMember : nextMembers) {
 				if(!currentMembers.contains(nextMember)) {
 					fastDatabase.addToGroup(nextMember, group);
 				}
@@ -136,11 +136,11 @@ public class PartialGroupDatabaseOnWritableModel implements XGroupListener {
 	}
 	
 	@ModificationOperation
-	public void addToGroup(XID actorId, XID groupId) {
-		XIDSetValue members = (XIDSetValue)WritableUtils.getValue(this.groupModel, groupId,
+	public void addToGroup(XId actorId, XId groupId) {
+		XIdSetValue members = (XIdSetValue)WritableUtils.getValue(this.groupModel, groupId,
 		        hasMember);
 		if(members == null) {
-			members = X.getValueFactory().createIDSetValue(new XID[] { actorId });
+			members = X.getValueFactory().createIdSetValue(new XId[] { actorId });
 		} else {
 			members = members.add(groupId);
 		}
@@ -152,26 +152,26 @@ public class PartialGroupDatabaseOnWritableModel implements XGroupListener {
 		WritableUtils.deleteAllObjects(this.groupModel);
 	}
 	
-	public Set<XID> getGroups() {
-		Set<XID> result = new HashSet<XID>();
-		for(XID xid : this.groupModel) {
+	public Set<XId> getGroups() {
+		Set<XId> result = new HashSet<XId>();
+		for(XId xid : this.groupModel) {
 			result.add(xid);
 		}
 		return result;
 	}
 	
-	public Set<XID> getMembersOf(XID group) {
+	public Set<XId> getMembersOf(XId group) {
 		XValue value = WritableUtils.getValue(this.groupModel, group, hasMember);
 		if(value == null) {
 			return Collections.emptySet();
 		} else {
-			return ((XIDSetValue)value).toSet();
+			return ((XIdSetValue)value).toSet();
 		}
 	}
 	
 	public void loadInto(XGroupDatabaseWithListeners groupDatabase) {
-		for(XID group : this.getGroups()) {
-			for(XID member : this.getMembersOf(group)) {
+		for(XId group : this.getGroups()) {
+			for(XId member : this.getMembersOf(group)) {
 				groupDatabase.addToGroup(member, group);
 			}
 		}
@@ -194,11 +194,11 @@ public class PartialGroupDatabaseOnWritableModel implements XGroupListener {
 	}
 	
 	@ModificationOperation
-	public void removeFromGroup(XID actorId, XID groupId) {
-		XIDSetValue members = (XIDSetValue)WritableUtils.getValue(this.groupModel, groupId,
+	public void removeFromGroup(XId actorId, XId groupId) {
+		XIdSetValue members = (XIdSetValue)WritableUtils.getValue(this.groupModel, groupId,
 		        hasMember);
 		if(members == null) {
-			members = X.getValueFactory().createIDSetValue(new XID[] { actorId });
+			members = X.getValueFactory().createIdSetValue(new XId[] { actorId });
 		} else {
 			members = members.remove(groupId);
 		}

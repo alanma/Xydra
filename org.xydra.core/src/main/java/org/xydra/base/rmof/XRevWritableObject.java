@@ -2,7 +2,7 @@ package org.xydra.base.rmof;
 
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.ReadOperation;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 
 
 /**
@@ -13,10 +13,10 @@ public interface XRevWritableObject extends XWritableObject {
 	
 	/**
 	 * Add an existing field to this object. Fields created using
-	 * {@link #createField(XID)} are automatically added.
+	 * {@link #createField(XId)} are automatically added.
 	 * 
 	 * This overwrites any existing field in this object with the same
-	 * {@link XID}.
+	 * {@link XId}.
 	 * 
 	 * @param field
 	 */
@@ -26,12 +26,12 @@ public interface XRevWritableObject extends XWritableObject {
 	/* More specific return type */
 	@Override
 	@ModificationOperation
-	XRevWritableField createField(XID fieldId);
+	XRevWritableField createField(XId fieldId);
 	
 	/* More specific return type */
 	@Override
 	@ReadOperation
-	XRevWritableField getField(XID fieldId);
+	XRevWritableField getField(XId fieldId);
 	
 	/**
 	 * Set the revision number of this object. Revision number of contained

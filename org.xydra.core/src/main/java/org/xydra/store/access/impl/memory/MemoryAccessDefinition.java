@@ -1,7 +1,7 @@
 package org.xydra.store.access.impl.memory;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.store.access.XAccessRightDefinition;
 
 
@@ -13,12 +13,12 @@ import org.xydra.store.access.XAccessRightDefinition;
 
 public class MemoryAccessDefinition implements XAccessRightDefinition {
 	
-	private final XID access;
-	private final XID actor;
+	private final XId access;
+	private final XId actor;
 	private final boolean allowed;
 	private final XAddress resource;
 	
-	public MemoryAccessDefinition(XID access, XAddress resource, XID actor, boolean allowed) {
+	public MemoryAccessDefinition(XId access, XAddress resource, XId actor, boolean allowed) {
 		this.access = access;
 		this.resource = resource;
 		this.actor = actor;
@@ -26,12 +26,12 @@ public class MemoryAccessDefinition implements XAccessRightDefinition {
 	}
 	
 	@Override
-    public XID getAccess() {
+    public XId getAccess() {
 		return this.access;
 	}
 	
 	@Override
-    public XID getActor() {
+    public XId getActor() {
 		return this.actor;
 	}
 	

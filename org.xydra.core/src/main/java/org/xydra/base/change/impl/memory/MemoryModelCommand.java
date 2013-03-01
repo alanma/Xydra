@@ -1,7 +1,7 @@
 package org.xydra.base.change.impl.memory;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XCommand;
@@ -25,20 +25,20 @@ public class MemoryModelCommand extends MemoryAtomicCommand implements XModelCom
     
     /**
      * Creates a new {@link XModelCommand} of the add-type. Will add a new
-     * {@link XObject} with the specified {@link XID} to the {@link XModel} this
+     * {@link XObject} with the specified {@link XId} to the {@link XModel} this
      * event applies to, if possible.
      * 
-     * @param target The target of this command - the model {@link XID} must not
-     *            be null, object & field {@link XID} must be null
+     * @param target The target of this command - the model {@link XId} must not
+     *            be null, object & field {@link XId} must be null
      * @param isForced determines whether this command will be a forced or a
      *            safe command.
-     * @param objectId The {@link XID} for the {@link XObject} which is to be
+     * @param objectId The {@link XId} for the {@link XObject} which is to be
      *            added
      * @return A new {@link XModelCommand} of the add-type
      * @throws IllegalArgumentException if the given {@link XAddress} doesn't
      *             refer to an {@link XModel} or if the given objectId is null
      */
-    public static XModelCommand createAddCommand(XAddress target, boolean isForced, XID objectId) {
+    public static XModelCommand createAddCommand(XAddress target, boolean isForced, XId objectId) {
         if(isForced) {
             return createAddCommand(target, XCommand.FORCED, objectId);
         } else {
@@ -48,15 +48,15 @@ public class MemoryModelCommand extends MemoryAtomicCommand implements XModelCom
     
     /**
      * Creates a new {@link XModelCommand} of the add-type. Will add a new
-     * {@link XObject} with the specified {@link XID} to the {@link XModel} this
+     * {@link XObject} with the specified {@link XId} to the {@link XModel} this
      * event applies to, if possible.
      * 
-     * @param target The target of this command - the model {@link XID} must not
-     *            be null, object & field {@link XID} must be null
+     * @param target The target of this command - the model {@link XId} must not
+     *            be null, object & field {@link XId} must be null
      * @param objectRevision Must be {@link XCommand#FORCED} or
      *            {@link XCommand#SAFE} to determine the behaviour of this
      *            command.
-     * @param objectId The {@link XID} for the {@link XObject} which is to be
+     * @param objectId The {@link XId} for the {@link XObject} which is to be
      *            added
      * @return A new {@link XModelCommand} of the add-type
      * @throws IllegalArgumentException if the given {@link XAddress} doesn't
@@ -64,7 +64,7 @@ public class MemoryModelCommand extends MemoryAtomicCommand implements XModelCom
      *             neither {@link XCommand#FORCED} or {@link XCommand#SAFE} or
      *             if the given objectId is null
      */
-    public static XModelCommand createAddCommand(XAddress target, long objectRevision, XID objectId) {
+    public static XModelCommand createAddCommand(XAddress target, long objectRevision, XId objectId) {
         
         if(objectRevision != XCommand.FORCED && objectRevision != XCommand.SAFE)
             throw new IllegalArgumentException(
@@ -78,26 +78,26 @@ public class MemoryModelCommand extends MemoryAtomicCommand implements XModelCom
      * specified {@link XObject} from the {@link XModel} this event applies to,
      * if possible.
      * 
-     * @param target The target of this command - the model {@link XID} must not
-     *            be null, object & field {@link XID} must be null
+     * @param target The target of this command - the model {@link XId} must not
+     *            be null, object & field {@link XId} must be null
      * @param objectRevision The current revision number of the {@link XObject}
      *            which is to be removed
-     * @param objectId The {@link XID} of the {@link XObject} which is to be
+     * @param objectId The {@link XId} of the {@link XObject} which is to be
      *            removed
      * @return A new {@link XModelCommand} of the remove-type
      * @throws IllegalArgumentException if the given {@link XAddress} doesn't
      *             refer to an {@link XModel} or if the given objectId is null
      */
     public static XModelCommand createRemoveCommand(XAddress target, long objectRevision,
-            XID objectId) {
+            XId objectId) {
         return new MemoryModelCommand(target, ChangeType.REMOVE, objectRevision, objectId);
     }
     
     /** Id of the object being added or removed */
-    private XID objectId;
+    private XId objectId;
     
     private MemoryModelCommand(XAddress target, ChangeType changeType, long objectRevision,
-            XID objectId) {
+            XId objectId) {
         super(target, changeType, objectRevision);
         
         if(target.getModel() == null)
@@ -138,7 +138,7 @@ public class MemoryModelCommand extends MemoryAtomicCommand implements XModelCom
     }
     
     @Override
-    public XID getObjectId() {
+    public XId getObjectId() {
         return this.objectId;
     }
     

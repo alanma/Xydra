@@ -2,7 +2,7 @@ package org.xydra.store.impl.delegate;
 
 import java.util.Set;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XReadableModel;
@@ -41,7 +41,7 @@ public class DelegateToBlockingStore implements XydraSingleOperationStore {
 	}
 	
 	@Override
-	public void checkLogin(XID actorId, String passwordHash, Callback<Boolean> callback)
+	public void checkLogin(XId actorId, String passwordHash, Callback<Boolean> callback)
 	        throws IllegalArgumentException {
 		XyAssert.xyAssert(actorId != null); assert actorId != null;
 		XyAssert.xyAssert(callback != null); assert callback != null;
@@ -55,7 +55,7 @@ public class DelegateToBlockingStore implements XydraSingleOperationStore {
 	}
 	
 	@Override
-	public void executeCommand(XID actorId, String passwordHash, XCommand command,
+	public void executeCommand(XId actorId, String passwordHash, XCommand command,
 	        Callback<Long> callbackOrNull) throws IllegalArgumentException {
 		XyAssert.xyAssert(actorId != null); assert actorId != null;
 		try {
@@ -72,7 +72,7 @@ public class DelegateToBlockingStore implements XydraSingleOperationStore {
 	}
 	
 	@Override
-	public void getEvents(XID actorId, String passwordHash, GetEventsRequest getEventsRequest,
+	public void getEvents(XId actorId, String passwordHash, GetEventsRequest getEventsRequest,
 	        Callback<XEvent[]> callback) throws IllegalArgumentException {
 		XyAssert.xyAssert(actorId != null); assert actorId != null;
 		XyAssert.xyAssert(callback != null); assert callback != null;
@@ -86,12 +86,12 @@ public class DelegateToBlockingStore implements XydraSingleOperationStore {
 	}
 	
 	@Override
-	public void getModelIds(XID actorId, String passwordHash, Callback<Set<XID>> callback)
+	public void getModelIds(XId actorId, String passwordHash, Callback<Set<XId>> callback)
 	        throws IllegalArgumentException {
 		XyAssert.xyAssert(actorId != null); assert actorId != null;
 		XyAssert.xyAssert(callback != null); assert callback != null;
 		try {
-			Set<XID> result = this.blockingStore.getModelIds(actorId, passwordHash);
+			Set<XId> result = this.blockingStore.getModelIds(actorId, passwordHash);
 			callback.onSuccess(result);
 		} catch(StoreException e) {
 			log.warn("Telling callback: ", e);
@@ -100,7 +100,7 @@ public class DelegateToBlockingStore implements XydraSingleOperationStore {
 	}
 	
 	@Override
-	public void getModelRevision(XID actorId, String passwordHash,
+	public void getModelRevision(XId actorId, String passwordHash,
 	        GetWithAddressRequest modelAddress, Callback<ModelRevision> callback)
 	        throws IllegalArgumentException {
 		XyAssert.xyAssert(actorId != null); assert actorId != null;
@@ -116,7 +116,7 @@ public class DelegateToBlockingStore implements XydraSingleOperationStore {
 	}
 	
 	@Override
-	public void getModelSnapshot(XID actorId, String passwordHash, GetWithAddressRequest modelAddress,
+	public void getModelSnapshot(XId actorId, String passwordHash, GetWithAddressRequest modelAddress,
 	        Callback<XReadableModel> callback) throws IllegalArgumentException {
 		XyAssert.xyAssert(actorId != null); assert actorId != null;
 		XyAssert.xyAssert(callback != null); assert callback != null;
@@ -131,7 +131,7 @@ public class DelegateToBlockingStore implements XydraSingleOperationStore {
 	}
 	
 	@Override
-	public void getObjectSnapshot(XID actorId, String passwordHash, GetWithAddressRequest objectAddressRequest,
+	public void getObjectSnapshot(XId actorId, String passwordHash, GetWithAddressRequest objectAddressRequest,
 	        Callback<XReadableObject> callback) throws IllegalArgumentException {
 		XyAssert.xyAssert(actorId != null); assert actorId != null;
 		XyAssert.xyAssert(callback != null); assert callback != null;
@@ -146,12 +146,12 @@ public class DelegateToBlockingStore implements XydraSingleOperationStore {
 	}
 	
 	@Override
-	public void getRepositoryId(XID actorId, String passwordHash, Callback<XID> callback)
+	public void getRepositoryId(XId actorId, String passwordHash, Callback<XId> callback)
 	        throws IllegalArgumentException {
 		XyAssert.xyAssert(actorId != null); assert actorId != null;
 		XyAssert.xyAssert(callback != null); assert callback != null;
 		try {
-			XID result = this.blockingStore.getRepositoryId(actorId, passwordHash);
+			XId result = this.blockingStore.getRepositoryId(actorId, passwordHash);
 			callback.onSuccess(result);
 		} catch(StoreException e) {
 			log.warn("Telling callback: ", e);

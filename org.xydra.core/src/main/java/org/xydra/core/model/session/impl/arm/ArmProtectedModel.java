@@ -1,7 +1,7 @@
 package org.xydra.core.model.session.impl.arm;
 
 import org.xydra.annotations.NeverNull;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XModelCommand;
 import org.xydra.core.change.XFieldEventListener;
@@ -31,7 +31,7 @@ public class ArmProtectedModel extends ArmProtectedBaseModel implements XProtect
     
     private final XModel model;
     
-    public ArmProtectedModel(XModel model, XAuthorisationManager arm, XID actor) {
+    public ArmProtectedModel(XModel model, XAuthorisationManager arm, XId actor) {
         super(model, arm, actor);
         this.model = model;
     }
@@ -69,7 +69,7 @@ public class ArmProtectedModel extends ArmProtectedBaseModel implements XProtect
     }
     
     @Override
-    public XProtectedObject createObject(@NeverNull XID objectId) {
+    public XProtectedObject createObject(@NeverNull XId objectId) {
         
         if(!this.arm.canWrite(this.actor, getAddress())) {
             throw new AccessException(this.actor + " cannot write to " + getAddress());
@@ -109,7 +109,7 @@ public class ArmProtectedModel extends ArmProtectedBaseModel implements XProtect
     }
     
     @Override
-    public XProtectedObject getObject(@NeverNull XID objectId) {
+    public XProtectedObject getObject(@NeverNull XId objectId) {
         
         checkCanKnowAboutObject(objectId);
         
@@ -143,7 +143,7 @@ public class ArmProtectedModel extends ArmProtectedBaseModel implements XProtect
     }
     
     @Override
-    public boolean removeObject(@NeverNull XID objectId) {
+    public boolean removeObject(@NeverNull XId objectId) {
         
         if(!this.arm.canRemoveObject(this.actor, getAddress(), objectId)) {
             throw new AccessException(this.actor + " cannot remove " + objectId + " from "

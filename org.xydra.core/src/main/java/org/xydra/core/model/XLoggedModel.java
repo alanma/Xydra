@@ -2,7 +2,7 @@ package org.xydra.core.model;
 
 import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.ReadOperation;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.core.change.XSendsFieldEvents;
@@ -27,15 +27,15 @@ public interface XLoggedModel extends XWritableModel, XSendsModelEvents, XSendsO
 	
 	/**
 	 * Returns the {@link XLoggedObject} contained in this model with the given
-	 * {@link XID}
+	 * {@link XId}
 	 * 
-	 * @param id The {@link XID} of the {@link XLoggedObject} which is to be
+	 * @param id The {@link XId} of the {@link XLoggedObject} which is to be
 	 *            returned
-	 * @return The {@link XLoggedObject} with the given {@link XID} or null, if
+	 * @return The {@link XLoggedObject} with the given {@link XId} or null, if
 	 *         no corresponding {@link XLoggedObject} exists
 	 */
 	@Override
     @ReadOperation
-	XLoggedObject getObject(@NeverNull XID objectId);
+	XLoggedObject getObject(@NeverNull XId objectId);
 	
 }

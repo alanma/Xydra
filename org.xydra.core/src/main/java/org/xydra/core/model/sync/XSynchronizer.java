@@ -3,7 +3,7 @@ package org.xydra.core.model.sync;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XAtomicCommand;
 import org.xydra.base.change.XCommand;
@@ -396,7 +396,7 @@ public class XSynchronizer {
             // Find the first local command that has not been sent to the server
             // yet.
             newChanges.clear();
-            XID actorId = null;
+            XId actorId = null;
             String psw = null;
             for(int i = 0; i < changes.length; i++) {
                 if(!changes[i].isApplied()) {

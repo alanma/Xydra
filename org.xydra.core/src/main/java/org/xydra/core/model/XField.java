@@ -3,7 +3,7 @@ package org.xydra.core.model;
 import java.io.Serializable;
 
 import org.xydra.annotations.ModificationOperation;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XFieldCommand;
@@ -37,8 +37,8 @@ public interface XField extends XLoggedField, XWritableField, Serializable {
 	 * This method will fail if,
 	 * <ul>
 	 * <li>the given {@link XCommand} cannot be executed
-	 * <li>the field-{@link XID} specified in the {@link XCommand} does not
-	 * concur with the {@link XID} of this field
+	 * <li>the field-{@link XId} specified in the {@link XCommand} does not
+	 * concur with the {@link XId} of this field
 	 * </ul>
 	 * 
 	 * @param command The {@link XCommand} which is to be executed
@@ -56,7 +56,7 @@ public interface XField extends XLoggedField, XWritableField, Serializable {
 	 *         actor that is recorded for change operations. Operations will
 	 *         only succeed if this actor has access.
 	 */
-	XID getSessionActor();
+	XId getSessionActor();
 	
 	/**
 	 * Set a new actor to be used when building commands for changes to this
@@ -64,7 +64,7 @@ public interface XField extends XLoggedField, XWritableField, Serializable {
 	 * 
 	 * @param actor for this field.
 	 */
-	void setSessionActor(XID actor);
+	void setSessionActor(XId actor);
 	
 	/**
 	 * Sets the {@link XValue} of this field to the given value.

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XAtomicEvent;
@@ -47,7 +47,7 @@ public class MemoryModelPersistence {
 		this.modelAddr = modelAddr;
 	}
 	
-	synchronized public long executeCommand(XID actorId, XCommand command) {
+	synchronized public long executeCommand(XId actorId, XCommand command) {
 		
 		long newRev = getRevisionNumber() + 1;
 		
@@ -167,7 +167,7 @@ public class MemoryModelPersistence {
 		return XCopyUtils.createSnapshot(this.model);
 	}
 	
-	synchronized public XRevWritableObject getObjectSnapshot(XID objectId) {
+	synchronized public XRevWritableObject getObjectSnapshot(XId objectId) {
 		/*
 		 * if this model has not been created yet, there cannot be an object
 		 * snapshot

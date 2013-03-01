@@ -1,7 +1,7 @@
 package org.xydra.core.change;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.rmof.XStateWritableRepository;
@@ -31,7 +31,7 @@ public abstract class AbstractDelegatingWritableRepository implements XStateWrit
 	}
 	
 	@Override
-	public XID getId() {
+	public XId getId() {
 		return this.baseRepository.getId();
 	}
 	

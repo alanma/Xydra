@@ -1,6 +1,6 @@
 package org.xydra.base.change;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.value.XValue;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
@@ -17,28 +17,28 @@ import org.xydra.core.model.XRepository;
 public interface XFieldCommand extends XAtomicCommand {
 	
 	/**
-	 * @return the {@link XID} of the {@link XField} this command will
+	 * @return the {@link XId} of the {@link XField} this command will
 	 *         add/remove
 	 */
-	XID getFieldId();
+	XId getFieldId();
 	
 	/**
-	 * @return the {@link XID} of the Parent-{@link XModel} of the
+	 * @return the {@link XId} of the Parent-{@link XModel} of the
 	 *         {@link XField} this command refers to (may be null)
 	 */
-	XID getModelId();
+	XId getModelId();
 	
 	/**
-	 * @return the {@link XID} of the Parent-{@link XObject} of the
+	 * @return the {@link XId} of the Parent-{@link XObject} of the
 	 *         {@link XField} this command refers to (may be null)
 	 */
-	XID getObjectId();
+	XId getObjectId();
 	
 	/**
-	 * @return the {@link XID} of the Parent-{@link XRepository} of the
+	 * @return the {@link XId} of the Parent-{@link XRepository} of the
 	 *         {@link XField} this command refers to (may be null)
 	 */
-	XID getRepositoryId();
+	XId getRepositoryId();
 	
 	/**
 	 * @return the current revision number of {@link XField} which value will be

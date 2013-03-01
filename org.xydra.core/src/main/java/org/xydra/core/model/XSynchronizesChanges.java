@@ -2,7 +2,7 @@ package org.xydra.core.model;
 
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.base.IHasXAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XTransaction;
@@ -52,7 +52,7 @@ public interface XSynchronizesChanges extends IHasChangeLog, XExecutesCommands, 
 	 *         actor that is recorded for change operations. Operations will
 	 *         only succeed if this actor has access.
 	 */
-	XID getSessionActor();
+	XId getSessionActor();
 	
 	String getSessionPassword();
 	
@@ -79,7 +79,7 @@ public interface XSynchronizesChanges extends IHasChangeLog, XExecutesCommands, 
 	 * @param actorId for this entity and its children, if any.
 	 * @param passwordHash the password for the given actor.
 	 */
-	void setSessionActor(XID actorId, String passwordHash);
+	void setSessionActor(XId actorId, String passwordHash);
 	
 	/**
 	 * TODO document

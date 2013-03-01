@@ -3,7 +3,7 @@ package org.xydra.base.value;
 import java.util.Collection;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 
 
 /**
@@ -47,7 +47,7 @@ public interface XValueFactory {
     /**
      * Creates an {@link XAddressSetValue}.
      * 
-     * @param values The {@link Collection} containing the {@link XID XIDs}
+     * @param values The {@link Collection} containing the {@link XId XIds}
      *            which are to be stored.
      * @return an {@link XAddressSetValue} storing the given {@link XAddress
      *         XAddresss} Returns null if given value is null.
@@ -67,7 +67,7 @@ public interface XValueFactory {
     /**
      * Creates an {@link XAddressSortedSetValue}.
      * 
-     * @param values The {@link Collection} containing the {@link XID XIDs}
+     * @param values The {@link Collection} containing the {@link XId XIds}
      *            which are to be stored.
      * @return an {@link XAddressSortedSetValue} storing the given
      *         {@link XAddress XAddresss}, keeping the given order. Returns null
@@ -188,73 +188,73 @@ public interface XValueFactory {
     XDoubleValue createDoubleValue(double value);
     
     /**
-     * Creates an {@link XIDListValue}.
+     * Creates an {@link XIdListValue}.
      * 
-     * The returned {@link XIDListValue} will contain the given {@link XID XIDs}
+     * The returned {@link XIdListValue} will contain the given {@link XId XIds}
      * in the order of their occurrence in the given {@link Collection}.
      * 
-     * @param xids The {@link Collection} containing the {@link XID XIDs} which
-     *            are to be stored by the {@link XIDListValue} this method will
+     * @param xids The {@link Collection} containing the {@link XId XIds} which
+     *            are to be stored by the {@link XIdListValue} this method will
      *            create.
-     * @return an {@link XIDListValue} storing the given {@link XID XIDs}.
+     * @return an {@link XIdListValue} storing the given {@link XId XIds}.
      *         Returns null if given value is null.
      */
-    XIDListValue createIDListValue(Collection<XID> xids);
+    XIdListValue createIdListValue(Collection<XId> xids);
     
     /**
-     * Creates an {@link XIDListValue}.
+     * Creates an {@link XIdListValue}.
      * 
-     * The returned {@link XIDListValue} will contain the given {@link XID XIDs}
+     * The returned {@link XIdListValue} will contain the given {@link XId XIds}
      * in the order of their occurrence in the given array.
      * 
-     * @param xids The array containing the {@link XID XIDs} which are to be
-     *            stored by the {@link XIDListValue} this method will create.
-     * @return an {@link XIDListValue} storing the given {@link XID XIDs}.
+     * @param xids The array containing the {@link XId XIds} which are to be
+     *            stored by the {@link XIdListValue} this method will create.
+     * @return an {@link XIdListValue} storing the given {@link XId XIds}.
      *         Returns null if given array is null.
      */
-    XIDListValue createIDListValue(XID[] xids);
+    XIdListValue createIdListValue(XId[] xids);
     
     /**
-     * Creates an {@link XIDSetValue}.
+     * Creates an {@link XIdSetValue}.
      * 
-     * @param values The {@link Collection} containing the {@link XID XIDs}
-     *            which are to be stored by the {@link XIDListValue} this method
+     * @param values The {@link Collection} containing the {@link XId XIds}
+     *            which are to be stored by the {@link XIdListValue} this method
      *            will create.
-     * @return an {@link XIDListValue} storing the given {@link XID XIDs}.
+     * @return an {@link XIdListValue} storing the given {@link XId XIds}.
      *         Returns null if given value is null.
      */
-    XIDSetValue createIDSetValue(Collection<XID> values);
+    XIdSetValue createIdSetValue(Collection<XId> values);
     
     /**
-     * Creates an {@link XIDSetValue}.
+     * Creates an {@link XIdSetValue}.
      * 
-     * @param values The array containing the {@link XID XIDs} which are to be
-     *            stored by the {@link XIDListValue} this method will create.
-     * @return an {@link XIDListValue} storing the given {@link XID XIDs}.
+     * @param values The array containing the {@link XId XIds} which are to be
+     *            stored by the {@link XIdListValue} this method will create.
+     * @return an {@link XIdListValue} storing the given {@link XId XIds}.
      *         Returns null if given array is null.
      */
-    XIDSetValue createIDSetValue(XID[] values);
+    XIdSetValue createIdSetValue(XId[] values);
     
     /**
-     * Creates an {@link XIDSortedSetValue}.
+     * Creates an {@link XIdSortedSetValue}.
      * 
-     * @param values The {@link Collection} containing the {@link XID XIDs}
-     *            which are to be stored by the {@link XIDListValue} this method
+     * @param values The {@link Collection} containing the {@link XId XIds}
+     *            which are to be stored by the {@link XIdListValue} this method
      *            will create.
-     * @return an {@link XIDSortedSetValue} storing the given {@link XID XIDs}m
+     * @return an {@link XIdSortedSetValue} storing the given {@link XId XIds}m
      *         keeping the given order. Returns null if given value is null.
      */
-    XIDSortedSetValue createIDSortedSetValue(Collection<XID> values);
+    XIdSortedSetValue createIdSortedSetValue(Collection<XId> values);
     
     /**
-     * Creates an {@link XIDSortedSetValue}.
+     * Creates an {@link XIdSortedSetValue}.
      * 
-     * @param values The array containing the {@link XID XIDs} which are to be
-     *            stored by the {@link XIDListValue} this method will create.
-     * @return an {@link XIDSortedSetValue} storing the given {@link XID XIDs},
+     * @param values The array containing the {@link XId XIds} which are to be
+     *            stored by the {@link XIdListValue} this method will create.
+     * @return an {@link XIdSortedSetValue} storing the given {@link XId XIds},
      *         keeping the given order. Returns null if given array is null.
      */
-    XIDSortedSetValue createIDSortedSetValue(XID[] values);
+    XIdSortedSetValue createIdSortedSetValue(XId[] values);
     
     /**
      * Creates an {@link XIntegerListValue}.

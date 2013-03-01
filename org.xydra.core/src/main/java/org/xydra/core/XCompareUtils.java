@@ -1,6 +1,6 @@
 package org.xydra.core;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
@@ -72,7 +72,7 @@ public class XCompareUtils {
 	}
 	
 	/**
-	 * Check if two {@link XReadableModel}s have the same {@link XID}, the same
+	 * Check if two {@link XReadableModel}s have the same {@link XId}, the same
 	 * revision and the same {@link XReadableObject}s as defined by
 	 * {@link XCompareUtils#equalState(XReadableObject, XReadableObject)}.
 	 * 
@@ -109,7 +109,7 @@ public class XCompareUtils {
 			return false;
 		}
 		
-		for(XID objectId : modelA) {
+		for(XId objectId : modelA) {
 			
 			XReadableObject objectA = modelA.getObject(objectId);
 			XReadableObject objectB = modelB.getObject(objectId);
@@ -126,7 +126,7 @@ public class XCompareUtils {
 			
 		}
 		
-		for(XID objectId : modelB) {
+		for(XId objectId : modelB) {
 			
 			if(modelA.getObject(objectId) == null) {
 				log.debug("A has no object " + objectId);
@@ -139,7 +139,7 @@ public class XCompareUtils {
 	}
 	
 	/**
-	 * Check if two {@link XReadableObject}s have the same {@link XID}, the same
+	 * Check if two {@link XReadableObject}s have the same {@link XId}, the same
 	 * revision and the same {@link XReadableField}s as defined by
 	 * {@link XCompareUtils#equalState(XReadableField, XReadableField)}.
 	 * 
@@ -175,7 +175,7 @@ public class XCompareUtils {
 			return false;
 		}
 		
-		for(XID fieldId : objectA) {
+		for(XId fieldId : objectA) {
 			
 			XReadableField fieldA = objectA.getField(fieldId);
 			XReadableField fieldB = objectB.getField(fieldId);
@@ -192,7 +192,7 @@ public class XCompareUtils {
 			
 		}
 		
-		for(XID fieldId : objectB) {
+		for(XId fieldId : objectB) {
 			if(objectA.getField(fieldId) == null) {
 				log.debug("A has no field " + fieldId);
 				return false;
@@ -203,7 +203,7 @@ public class XCompareUtils {
 	}
 	
 	/**
-	 * Check if two {@link XReadableRepository}s have the same {@link XID}, the
+	 * Check if two {@link XReadableRepository}s have the same {@link XId}, the
 	 * same revision and the same {@link XReadableModel}s as defined by
 	 * {@link XCompareUtils#equalState(XReadableModel, XReadableModel)}.
 	 * 
@@ -232,7 +232,7 @@ public class XCompareUtils {
 			return false;
 		}
 		
-		for(XID modelId : repoA) {
+		for(XId modelId : repoA) {
 			
 			XReadableModel modelA = repoA.getModel(modelId);
 			XReadableModel modelB = repoB.getModel(modelId);
@@ -249,7 +249,7 @@ public class XCompareUtils {
 			
 		}
 		
-		for(XID modelId : repoB) {
+		for(XId modelId : repoB) {
 			
 			if(repoA.getModel(modelId) == null) {
 				log.debug("A has no model " + modelId);
@@ -262,7 +262,7 @@ public class XCompareUtils {
 	}
 	
 	/**
-	 * Check if two {@link XReadableField}s have the same {@link XID} and the
+	 * Check if two {@link XReadableField}s have the same {@link XId} and the
 	 * same {@link XValue}.
 	 * 
 	 * This is similar to {@link #equalState(XReadableField, XReadableField)}
@@ -299,7 +299,7 @@ public class XCompareUtils {
 	}
 	
 	/**
-	 * Check if two {@link XReadableModel}s have the same {@link XID} and the
+	 * Check if two {@link XReadableModel}s have the same {@link XId} and the
 	 * same {@link XReadableObject}s as defined by
 	 * {@link XCompareUtils#equalTree(XReadableObject, XReadableObject)}.
 	 * 
@@ -328,7 +328,7 @@ public class XCompareUtils {
 			return false;
 		}
 		
-		for(XID objectId : modelA) {
+		for(XId objectId : modelA) {
 			
 			XReadableObject objectA = modelA.getObject(objectId);
 			XReadableObject objectB = modelB.getObject(objectId);
@@ -343,7 +343,7 @@ public class XCompareUtils {
 			
 		}
 		
-		for(XID objectId : modelB) {
+		for(XId objectId : modelB) {
 			
 			if(modelA.getObject(objectId) == null) {
 				return false;
@@ -355,7 +355,7 @@ public class XCompareUtils {
 	}
 	
 	/**
-	 * Check if two {@link XReadableObject}s have the same {@link XID} and the
+	 * Check if two {@link XReadableObject}s have the same {@link XId} and the
 	 * same {@link XReadableField}s as defined by
 	 * {@link XCompareUtils#equalTree(XReadableField, XReadableField)}.
 	 * 
@@ -385,7 +385,7 @@ public class XCompareUtils {
 			return false;
 		}
 		
-		for(XID fieldId : objectA) {
+		for(XId fieldId : objectA) {
 			
 			XReadableField fieldA = objectA.getField(fieldId);
 			XReadableField fieldB = objectB.getField(fieldId);
@@ -400,7 +400,7 @@ public class XCompareUtils {
 			
 		}
 		
-		for(XID fieldId : objectB) {
+		for(XId fieldId : objectB) {
 			
 			if(objectA.getField(fieldId) == null) {
 				return false;
@@ -412,7 +412,7 @@ public class XCompareUtils {
 	}
 	
 	/**
-	 * Check if two {@link XReadableRepository}s have the same {@link XID} and
+	 * Check if two {@link XReadableRepository}s have the same {@link XId} and
 	 * the same {@link XReadableModel}s as defined by
 	 * {@link XCompareUtils#equalTree(XReadableModel, XReadableModel)}.
 	 * 
@@ -443,7 +443,7 @@ public class XCompareUtils {
 			return false;
 		}
 		
-		for(XID modelId : repoA) {
+		for(XId modelId : repoA) {
 			
 			XReadableModel modelA = repoA.getModel(modelId);
 			XReadableModel modelB = repoB.getModel(modelId);
@@ -458,7 +458,7 @@ public class XCompareUtils {
 			
 		}
 		
-		for(XID modelId : repoB) {
+		for(XId modelId : repoB) {
 			
 			if(repoA.getModel(modelId) == null) {
 				return false;
@@ -483,7 +483,7 @@ public class XCompareUtils {
 		if(modelB == null)
 			return true;
 		// for every object: assert it is in A
-		for(XID objectId : modelB) {
+		for(XId objectId : modelB) {
 			if(!modelA.hasObject(objectId)) {
 				return false;
 			}
@@ -497,7 +497,7 @@ public class XCompareUtils {
 	
 	public static boolean containsTree(XWritableObject objectA, XWritableObject objectB) {
 		// for every field: assert it is in A
-		for(XID fieldId : objectB) {
+		for(XId fieldId : objectB) {
 			if(!objectA.hasField(fieldId)) {
 				return false;
 			}

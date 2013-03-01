@@ -1,7 +1,7 @@
 package org.xydra.core;
 
 import org.xydra.base.X;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.value.XValue;
 import org.xydra.core.model.MissingPieceException;
 import org.xydra.core.model.XField;
@@ -17,40 +17,40 @@ import org.xydra.core.model.XRepository;
 public class CoreUtils {
 	
 	/**
-	 * Tries to get the {@link XField} with {@link XID} 'fieldId' from the given
+	 * Tries to get the {@link XField} with {@link XId} 'fieldId' from the given
 	 * {@link XObject}. If the specified field does not exist, a
 	 * {@link MissingPieceException} will be thrown.
 	 * 
 	 * @param model The {@link XModel} which should contain the {@link XObject}
 	 *            specified by 'objectId'
-	 * @param objectId The {@link XID} of the {@link XObject} which should
+	 * @param objectId The {@link XId} of the {@link XObject} which should
 	 *            contain the {@link XField} specified by 'fieldId'
-	 * @param fieldId The {@link XID} of the {@link XField}
+	 * @param fieldId The {@link XId} of the {@link XField}
 	 * @return The specified {@link XField}
 	 * @throws MissingPieceException Will be thrown if the specified
 	 *             {@link XObject}/{@link XField} doesn't exist
 	 */
 	// 2010-10-27: used only in this class
-	public static XField safeGetField(XModel model, XID objectId, XID fieldId) {
+	public static XField safeGetField(XModel model, XId objectId, XId fieldId) {
 		XObject object = safeGetObject(model, objectId);
 		return safeGetField(object, fieldId);
 	}
 	
 	/**
-	 * Tries to get the {@link XField} with {@link XID} 'fieldId' from the given
+	 * Tries to get the {@link XField} with {@link XId} 'fieldId' from the given
 	 * {@link XObject}. If the specified field does not exist, a
 	 * {@link MissingPieceException} will be thrown.
 	 * 
 	 * 
 	 * @param object The {@link XObject} which should contain the {@link XField}
 	 *            specified by 'fieldId'
-	 * @param fieldId The {@link XID} of the {@link XField}
+	 * @param fieldId The {@link XId} of the {@link XField}
 	 * @return The specified {@link XField}
 	 * @throws MissingPieceException Will be thrown if the specified
 	 *             {@link XField} doesn't exist
 	 */
 	// 2010-10-27: used in this class + tests
-	public static XField safeGetField(XObject object, XID fieldId) throws MissingPieceException {
+	public static XField safeGetField(XObject object, XId fieldId) throws MissingPieceException {
 		XField field = object.getField(fieldId);
 		if(field == null) {
 			throw new MissingPieceException("No field with ID '" + fieldId
@@ -60,42 +60,42 @@ public class CoreUtils {
 	}
 	
 	/**
-	 * Tries to get the {@link XField} with {@link XID} 'fieldId' from the given
+	 * Tries to get the {@link XField} with {@link XId} 'fieldId' from the given
 	 * {@link XObject}. If the specified field does not exist, a
 	 * {@link MissingPieceException} will be thrown.
 	 * 
 	 * 
 	 * @param repository The {@link XRepository} which should contain the
 	 *            {@link XModel} specified by 'modelId'
-	 * @param modelId The {@link XID} of the {@link XModel} which should contain
+	 * @param modelId The {@link XId} of the {@link XModel} which should contain
 	 *            the {@link XObject} specified by 'objectId'
-	 * @param objectId The {@link XID} of the {@link XObject} which should
+	 * @param objectId The {@link XId} of the {@link XObject} which should
 	 *            contain the {@link XField} specified by 'fieldId'
-	 * @param fieldId The {@link XID} of the {@link XField}
+	 * @param fieldId The {@link XId} of the {@link XField}
 	 * @return The specified {@link XField}
 	 * @throws MissingPieceException Will be thrown if the specified
 	 *             {@link XModel}/{@link XObject}/{{@link XField} doesn't exist
 	 */
 	// 2010-10-27: used nowhere
-	public static XField safeGetField(XRepository repository, XID modelId, XID objectId, XID fieldId) {
+	public static XField safeGetField(XRepository repository, XId modelId, XId objectId, XId fieldId) {
 		XModel model = safeGetModel(repository, modelId);
 		return safeGetField(model, objectId, fieldId);
 	}
 	
 	/**
-	 * Tries to get the {@link XModel} with {@link XID} 'modelId' from the given
+	 * Tries to get the {@link XModel} with {@link XId} 'modelId' from the given
 	 * {@link XRepository}. If the specified model is not present, a
 	 * {@link MissingPieceException} will be thrown.
 	 * 
 	 * @param repository The {@link XRepository} which should contain the
 	 *            {@link XModel} specified by 'modelId'
-	 * @param modelId The {@link XID} of the {@link XModel}
+	 * @param modelId The {@link XId} of the {@link XModel}
 	 * @return The specified {{@link XModel}
 	 * @throws MissingPieceException Will be thrown if the specified
 	 *             {@link XModel} doesn't exist
 	 */
 	// 2010-10-27: used in this class + tests
-	public static XModel safeGetModel(XRepository repository, XID modelId) {
+	public static XModel safeGetModel(XRepository repository, XId modelId) {
 		XModel model = repository.getModel(modelId);
 		if(model == null) {
 			throw new MissingPieceException("No model with ID '" + modelId
@@ -105,19 +105,19 @@ public class CoreUtils {
 	}
 	
 	/**
-	 * Tries to get the {@link XObject} with {@link XID} 'objectId' from the
+	 * Tries to get the {@link XObject} with {@link XId} 'objectId' from the
 	 * given {@link XModel}. If the specified object is not present, a
 	 * {@link MissingPieceException} will be thrown.
 	 * 
 	 * @param model The {@link XModel} which should contain the {@link XObject}
 	 *            specified by 'objectId'
-	 * @param objectId The {@link XID} of the {@link XObject}
+	 * @param objectId The {@link XId} of the {@link XObject}
 	 * @return The specified {@link XObject}
 	 * @throws MissingPieceException Will be thrown if the specified
 	 *             {@link XObject} doesn't exist
 	 */
 	// 2010-10-27: used in this class + tests
-	public static XObject safeGetObject(XModel model, XID objectId) {
+	public static XObject safeGetObject(XModel model, XId objectId) {
 		XObject object = model.getObject(objectId);
 		if(object == null) {
 			throw new MissingPieceException("No object with ID '" + objectId
@@ -127,59 +127,59 @@ public class CoreUtils {
 	}
 	
 	/**
-	 * Tries to get the {@link XObject} with {@link XID} 'objectId' from the
+	 * Tries to get the {@link XObject} with {@link XId} 'objectId' from the
 	 * given {@link XRepository}. If the specified object is not present, a
 	 * {@link MissingPieceException} will be thrown.
 	 * 
 	 * @param repository The {@link XRepository} which should contain the
 	 *            {@link XModel} specified by 'modelId'
-	 * @param modelId The {@link XID} of the {@link XModel} which should contain
+	 * @param modelId The {@link XId} of the {@link XModel} which should contain
 	 *            the {@link XObject} specified by 'objectId'
-	 * @param objectId The {@link XID} of the {@link XObject}
+	 * @param objectId The {@link XId} of the {@link XObject}
 	 * @return The specified {@link XObject}
 	 * @throws MissingPieceException Will be thrown if the specified
 	 *             {@link XModel}/{@link XObject} doesn't exist
 	 */
 	// 2010-10-27: used in this class + tests
-	public static XObject safeGetObject(XRepository repository, XID modelId, XID objectId) {
+	public static XObject safeGetObject(XRepository repository, XId modelId, XId objectId) {
 		XModel model = safeGetModel(repository, modelId);
 		return safeGetObject(model, objectId);
 	}
 	
 	/**
-	 * Tries to get the value of the {@link XField} with {@link XID} 'fieldId'
+	 * Tries to get the value of the {@link XField} with {@link XId} 'fieldId'
 	 * from the given {@link XObject}. If the specified field does not exist, a
 	 * {@link MissingPieceException} will be thrown.
 	 * 
 	 * @param model The {@link XModel} which should contain the {@link XObject}
 	 *            specified by 'objectId'.
-	 * @param objectId The {@link XID} of the {@link XObject} which should
+	 * @param objectId The {@link XId} of the {@link XObject} which should
 	 *            contain the {@link XField}
-	 * @param fieldId The {@link XID} of the {@link XField}
+	 * @param fieldId The {@link XId} of the {@link XField}
 	 * @return The value of the specified {@link XField}
 	 * @throws MissingPieceException Will be thrown if the specified
 	 *             {@link XObject}/{@link XField} doesn't exist
 	 */
 	// 2010-10-27: used only in tests
-	public static XValue safeGetValue(XModel model, XID objectId, XID fieldId) {
+	public static XValue safeGetValue(XModel model, XId objectId, XId fieldId) {
 		XObject object = safeGetObject(model, objectId);
 		return safeGetValue(object, fieldId);
 	}
 	
 	/**
-	 * Tries to get the value of the {@link XField} with {@link XID} 'fieldId'
+	 * Tries to get the value of the {@link XField} with {@link XId} 'fieldId'
 	 * from the given {@link XObject}. If the specified field does not exist, a
 	 * {@link MissingPieceException} will be thrown.
 	 * 
 	 * @param object The {@link XObject} which should contain the specified
 	 *            {@link XField}
-	 * @param fieldId The {@link XID} of the {@link XField}
+	 * @param fieldId The {@link XId} of the {@link XField}
 	 * @return The value of the specified {@link XField}
 	 * @throws MissingPieceException Will be thrown if the specified
 	 *             {@link XField} doesn't exist
 	 */
 	// 2010-10-27: used only in this class + tests
-	public static XValue safeGetValue(XObject object, XID fieldId) throws MissingPieceException {
+	public static XValue safeGetValue(XObject object, XId fieldId) throws MissingPieceException {
 		XField field = safeGetField(object, fieldId);
 		XValue value = field.getValue();
 		if(value == null) {
@@ -190,23 +190,23 @@ public class CoreUtils {
 	}
 	
 	/**
-	 * Tries to get the value of the {@link XField} with {@link XID} 'fieldId'
+	 * Tries to get the value of the {@link XField} with {@link XId} 'fieldId'
 	 * from the given {@link XObject}. If the specified field does not exist, a
 	 * {@link MissingPieceException} will be thrown.
 	 * 
 	 * @param repository The {@link XRepository} which should contain the
 	 *            {@link XModel} specified by 'modelId'
-	 * @param modelId The {@link XID} of the {@link XModel} which should contain
+	 * @param modelId The {@link XId} of the {@link XModel} which should contain
 	 *            the {@link XObject} specified by 'objectId'
-	 * @param objectId The {@link XID} of the {@link XObject} which should
+	 * @param objectId The {@link XId} of the {@link XObject} which should
 	 *            contain the {@link XField} specified by 'fieldId'
-	 * @param fieldId The {@link XID} of the {@link XField}
+	 * @param fieldId The {@link XId} of the {@link XField}
 	 * @return The value of the specified {@link XField}
 	 * @throws MissingPieceException Will be thrown if the specified
 	 *             {@link XModel}/{@link XObject}/{@link XField} doesn't exist
 	 */
 	// 2010-10-27: used nowhere
-	public static XValue safeGetValue(XRepository repository, XID modelId, XID objectId, XID fieldId) {
+	public static XValue safeGetValue(XRepository repository, XId modelId, XId objectId, XId fieldId) {
 		XObject object = safeGetObject(repository, modelId, objectId);
 		return safeGetValue(object, fieldId);
 	}
@@ -217,13 +217,13 @@ public class CoreUtils {
 	 * 
 	 * @param model The {@link XModel} containing the {@link XObject}
 	 * @param objectId The {@link XObject} containing the {@link XField}
-	 * @param fieldId The {@link XID} of the {@link XField} which value is to be
+	 * @param fieldId The {@link XId} of the {@link XField} which value is to be
 	 *            set
 	 * @param value The new {@link XValue}
 	 * @return The {@link XField} with newly set {@link XValue}
 	 */
 	// 2010-10-27: used only in this class
-	public static XField setValue(XModel model, XID objectId, XID fieldId, XValue value) {
+	public static XField setValue(XModel model, XId objectId, XId fieldId, XValue value) {
 		XObject object = safeGetObject(model, objectId);
 		return setValue(object, fieldId, value);
 	}
@@ -233,13 +233,13 @@ public class CoreUtils {
 	 * If the given {@link XField} doesn't exist it will be created.
 	 * 
 	 * @param object The {@link XObject} containing the {@link XField}
-	 * @param fieldId The {@link XID} of the {@link XField} which value is to be
+	 * @param fieldId The {@link XId} of the {@link XField} which value is to be
 	 *            set
 	 * @param value The new {@link XValue}
 	 * @return The {@link XField} with newly set {@link XValue}
 	 */
 	// 2010-10-27: used only in tests
-	public static XField setValue(XObject object, XID fieldId, XValue value) {
+	public static XField setValue(XObject object, XId fieldId, XValue value) {
 		XField field = object.createField(fieldId);
 		field.setValue(value);
 		return field;
@@ -253,13 +253,13 @@ public class CoreUtils {
 	 *            which contains the rest
 	 * @param modelId The {@link XModel} containing the {@link XObject}
 	 * @param objectId The {@link XObject} containing the {@link XField}
-	 * @param fieldId The {@link XID} of the {@link XField} which value is to be
+	 * @param fieldId The {@link XId} of the {@link XField} which value is to be
 	 *            set
 	 * @param value The new {@link XValue}
 	 * @return The {@link XField} with newly set {@link XValue}
 	 */
 	// 2010-10-27: not used anywhere
-	public static XField setValue(XRepository repository, XID modelId, XID objectId, XID fieldId,
+	public static XField setValue(XRepository repository, XId modelId, XId objectId, XId fieldId,
 	        XValue value) {
 		XModel model = safeGetModel(repository, modelId);
 		return setValue(model, objectId, fieldId, value);

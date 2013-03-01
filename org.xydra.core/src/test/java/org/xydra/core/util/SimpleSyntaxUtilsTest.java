@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.core.LoggerTestHelper;
@@ -20,7 +20,7 @@ public class SimpleSyntaxUtilsTest {
 	
 	private static final Logger log = getLogger();
 	
-	static final XID PHONEBOOK = XX.toId("phonebook");
+	static final XId PHONEBOOK = XX.toId("phonebook");
 	
 	static String test = "# declares the XObject 'hans' and the property 'phone', sets value of hans.phone to '123'.\n"
 	        + "hans.phone=123\n"

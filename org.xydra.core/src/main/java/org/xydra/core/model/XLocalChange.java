@@ -1,6 +1,6 @@
 package org.xydra.core.model;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
 
 
@@ -12,7 +12,7 @@ import org.xydra.base.change.XCommand;
  */
 public interface XLocalChange {
 	
-	XID getActor();
+	XId getActor();
 	
 	XCommand getCommand();
 	

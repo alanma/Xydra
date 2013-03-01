@@ -6,7 +6,7 @@ import java.util.Set;
 
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
@@ -30,7 +30,7 @@ public class PersistenceOnStore implements XydraPersistence {
 	/** Default wait time for callback */
 	private static final int WAIT_TIMEOUT = 2000;
 	
-	public PersistenceOnStore(XID actorId, String passwordHash, XydraStore store) {
+	public PersistenceOnStore(XId actorId, String passwordHash, XydraStore store) {
 		super();
 		this.actorId = actorId;
 		this.passwordHash = passwordHash;
@@ -39,27 +39,27 @@ public class PersistenceOnStore implements XydraPersistence {
 	
 	private XydraStore store;
 	
-	private XID actorId;
+	private XId actorId;
 	
 	private String passwordHash;
 	
-	private XID repositoryId;
+	private XId repositoryId;
 	
 	@Override
 	public void clear() {
-		for(XID modelId : getManagedModelIds()) {
+		for(XId modelId : getManagedModelIds()) {
 			deleteModel(modelId);
 		}
 	}
 	
-	private void deleteModel(XID modelId) {
+	private void deleteModel(XId modelId) {
 		executeCommand(this.actorId,
 		        X.getCommandFactory()
 		                .createRemoveModelCommand(getRepositoryId(), modelId, -1, true));
 	}
 	
 	@Override
-	public long executeCommand(XID actorId, XCommand command) {
+	public long executeCommand(XId actorId, XCommand command) {
 		SynchronousCallbackWithOneResult<BatchedResult<Long>[]> callback = new SynchronousCallbackWithOneResult<BatchedResult<Long>[]>();
 		this.store
 		        .executeCommands(actorId, this.passwordHash, new XCommand[] { command }, callback);
@@ -101,8 +101,8 @@ public class PersistenceOnStore implements XydraPersistence {
 	}
 	
 	@Override
-	public Set<XID> getManagedModelIds() {
-		SynchronousCallbackWithOneResult<Set<XID>> callback = new SynchronousCallbackWithOneResult<Set<XID>>();
+	public Set<XId> getManagedModelIds() {
+		SynchronousCallbackWithOneResult<Set<XId>> callback = new SynchronousCallbackWithOneResult<Set<XId>>();
 		this.store.getModelIds(this.actorId, this.passwordHash, callback);
 		callback.waitOnCallbackAndThrowExceptionForProblems(WAIT_TIMEOUT);
 		{
@@ -177,9 +177,9 @@ public class PersistenceOnStore implements XydraPersistence {
 	}
 	
 	@Override
-	public XID getRepositoryId() {
+	public XId getRepositoryId() {
 		if(this.repositoryId == null) {
-			SynchronousCallbackWithOneResult<XID> callback = new SynchronousCallbackWithOneResult<XID>();
+			SynchronousCallbackWithOneResult<XId> callback = new SynchronousCallbackWithOneResult<XId>();
 			this.store.getRepositoryId(this.actorId, this.passwordHash, callback);
 			callback.waitOnCallbackAndThrowExceptionForProblems(WAIT_TIMEOUT);
 			{
@@ -194,11 +194,11 @@ public class PersistenceOnStore implements XydraPersistence {
 	}
 	
 	@Override
-	public boolean hasManagedModel(XID modelId) {
+	public boolean hasManagedModel(XId modelId) {
 		return getModelRevision(new GetWithAddressRequest(modeladdress(modelId), false)) != null;
 	}
 	
-	private XAddress modeladdress(XID modelId) {
+	private XAddress modeladdress(XId modelId) {
 		return XX.toAddress(getRepositoryId(), modelId, null, null);
 	}
 	

@@ -1,11 +1,11 @@
 package org.xydra.base.value;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 
 
 /**
- * An {@link XValue} for storing a list of {@link XID XIDs}.
+ * An {@link XValue} for storing a list of {@link XId XIds}.
  * 
  * @author Kaidel
  * 
@@ -42,12 +42,12 @@ public interface XAddressListValue extends XListValue<XAddress> {
     XAddressListValue add(XAddress entry);
 	
 	/**
-	 * Returns the {@link XID} values as an array in the order they were added
+	 * Returns the {@link XId} values as an array in the order they were added
 	 * to the list.
 	 * 
-	 * Note: Changes to the returned array will not affect the XIDListValue.
+	 * Note: Changes to the returned array will not affect the XIdListValue.
 	 * 
-	 * @return an array containing the list of {@link XID} values in the order
+	 * @return an array containing the list of {@link XId} values in the order
 	 *         they were added to the list
 	 */
 	public XAddress[] contents();

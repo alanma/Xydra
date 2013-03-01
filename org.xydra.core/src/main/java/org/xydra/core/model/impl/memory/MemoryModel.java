@@ -9,7 +9,7 @@ import java.util.Set;
 import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.ReadOperation;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.change.ChangeType;
@@ -53,7 +53,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
     /** The father-repository of this MemoryModel */
     private final MemoryRepository father;
     
-    private final Map<XID,MemoryObject> loadedObjects = new HashMap<XID,MemoryObject>();
+    private final Map<XId,MemoryObject> loadedObjects = new HashMap<XId,MemoryObject>();
     
     private final Set<XModelEventListener> modelChangeListenerCollection;
     
@@ -67,7 +67,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
      * @param father The father-{@link MemoryRepository} for this MemoryModel
      * @param modelState The initial {@link XModelState} of this MemoryModel.
      */
-    protected MemoryModel(XID actorId, String passwordHash, MemoryRepository father,
+    protected MemoryModel(XId actorId, String passwordHash, MemoryRepository father,
             XRevWritableModel modelState, XChangeLogState log) {
         super(new MemoryEventManager(actorId, passwordHash, new MemoryChangeLog(log),
                 modelState.getRevisionNumber()));
@@ -102,13 +102,13 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
     
     /**
      * Creates a new MemoryModel without father-{@link XRepository} but with a
-     * parent repository XID so it can be synchronized.
+     * parent repository XId so it can be synchronized.
      * 
      * @param actorId TODO
      * @param passwordHash
      * @param modelAddr The {@link XAddress} for this MemoryModel.
      */
-    public MemoryModel(XID actorId, String passwordHash, XAddress modelAddr) {
+    public MemoryModel(XId actorId, String passwordHash, XAddress modelAddr) {
         this(actorId, passwordHash, new SimpleModel(modelAddr));
     }
     
@@ -117,9 +117,9 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
      * 
      * @param actorId TODO
      * @param passwordHash
-     * @param modelId The {@link XID} for this MemoryModel.
+     * @param modelId The {@link XId} for this MemoryModel.
      */
-    public MemoryModel(XID actorId, String passwordHash, XID modelId) {
+    public MemoryModel(XId actorId, String passwordHash, XId modelId) {
         this(actorId, passwordHash, XX.toAddress(null, modelId, null, null));
     }
     
@@ -131,7 +131,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
      * @param modelState The initial {@link XRevWritableModel} state of this
      *            MemoryModel.
      */
-    public MemoryModel(XID actorId, String passwordHash, XRevWritableModel modelState) {
+    public MemoryModel(XId actorId, String passwordHash, XRevWritableModel modelState) {
         this(actorId, passwordHash, modelState, createChangeLog(modelState));
     }
     
@@ -144,7 +144,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
      *            MemoryModel.
      * @param log
      */
-    public MemoryModel(XID actorId, String passwordHash, XRevWritableModel modelState,
+    public MemoryModel(XId actorId, String passwordHash, XRevWritableModel modelState,
             XChangeLogState log) {
         this(actorId, passwordHash, null, modelState, log);
     }
@@ -184,7 +184,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
     }
     
     @Override
-    public MemoryObject createObject(@NeverNull XID objectId) {
+    public MemoryObject createObject(@NeverNull XId objectId) {
         
         XModelCommand command = MemoryModelCommand.createAddCommand(getAddress(), true, objectId);
         
@@ -198,7 +198,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
     }
     
     @Override
-    protected MemoryObject createObjectInternal(XID objectId) {
+    protected MemoryObject createObjectInternal(XId objectId) {
         XyAssert.xyAssert(getRevisionNumber() >= 0);
         
         XyAssert.xyAssert(!hasObject(objectId));
@@ -245,11 +245,11 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
      * persistence layer
      */
     protected void delete() {
-        for(XID objectId : this) {
+        for(XId objectId : this) {
             MemoryObject object = getObject(objectId);
             object.delete();
         }
-        for(XID objectId : this.loadedObjects.keySet()) {
+        for(XId objectId : this.loadedObjects.keySet()) {
             this.state.removeObject(objectId);
         }
         this.state.setRevisionNumber(this.state.getRevisionNumber() + 1);
@@ -257,11 +257,11 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
         this.removed = true;
     }
     
-    protected boolean enqueueModelRemoveEvents(XID actorId) {
+    protected boolean enqueueModelRemoveEvents(XId actorId) {
         
         boolean inTrans = false;
         
-        for(XID objectId : this) {
+        for(XId objectId : this) {
             MemoryObject object = getObject(objectId);
             enqueueObjectRemoveEvents(actorId, object, true, true);
             inTrans = true;
@@ -284,7 +284,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
      * XEvents} will then be enqueued into the {@link MemoryEventManager} used
      * by this MemoryModel and then be propagated to the interested listeners.
      * 
-     * @param actor The {@link XID} of the actor
+     * @param actor The {@link XId} of the actor
      * @param object The {@link MemoryObject} which is to be removed (must not
      *            be null)
      * @param inTrans true, if the removal of this {@link MemoryObject} occurs
@@ -293,14 +293,14 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
      * @throws IllegalArgumentException if the given {@link MemoryOjbect} equals
      *             null
      */
-    protected void enqueueObjectRemoveEvents(XID actor, MemoryObject object, boolean inTrans,
+    protected void enqueueObjectRemoveEvents(XId actor, MemoryObject object, boolean inTrans,
             boolean implied) {
         
         if(object == null) {
             throw new IllegalArgumentException("object must not be null");
         }
         
-        for(XID fieldId : object) {
+        for(XId fieldId : object) {
             XyAssert.xyAssert(inTrans);
             MemoryField field = object.getField(fieldId);
             object.enqueueFieldRemoveEvents(actor, field, inTrans, true);
@@ -515,7 +515,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
     }
     
     @Override
-    public XID getId() {
+    public XId getId() {
         synchronized(this.eventQueue) {
             return this.state.getId();
         }
@@ -533,7 +533,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
     }
     
     @Override
-    public MemoryObject getObject(@NeverNull XID objectId) {
+    public MemoryObject getObject(@NeverNull XId objectId) {
         synchronized(this.eventQueue) {
             checkRemoved();
             
@@ -555,10 +555,10 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
     }
     
     /**
-     * @return the {@link XID} of the father-{@link XRepository} of this
+     * @return the {@link XId} of the father-{@link XRepository} of this
      *         MemoryModel or null, if this object has no father.
      */
-    protected XID getRepositoryId() {
+    protected XId getRepositoryId() {
         return this.father == null ? null : this.father.getId();
     }
     
@@ -604,7 +604,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
     }
     
     @Override
-    public boolean hasObject(@NeverNull XID id) {
+    public boolean hasObject(@NeverNull XId id) {
         synchronized(this.eventQueue) {
             checkRemoved();
             return this.loadedObjects.containsKey(id) || this.state.hasObject(id);
@@ -627,7 +627,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
     }
     
     @Override
-    public Iterator<XID> iterator() {
+    public Iterator<XId> iterator() {
         synchronized(this.eventQueue) {
             checkRemoved();
             return this.state.iterator();
@@ -661,7 +661,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
     }
     
     @Override
-    public boolean removeObject(@NeverNull XID objectId) {
+    public boolean removeObject(@NeverNull XId objectId) {
         
         // no synchronization necessary here (except that in
         // executeModelCommand())
@@ -675,7 +675,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
     }
     
     @Override
-    protected void removeObjectInternal(XID objectId) {
+    protected void removeObjectInternal(XId objectId) {
         
         MemoryObject object = getObject(objectId);
         XyAssert.xyAssert(object != null);

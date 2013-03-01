@@ -1,6 +1,6 @@
 package org.xydra.store.impl.delegate;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.XydraStore;
@@ -22,7 +22,7 @@ public class DelegatingSecureStore extends DelegatingStore implements XydraStore
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(DelegatingSecureStore.class);
 	
-	public DelegatingSecureStore(XydraPersistence persistence, XID executingActorId) {
+	public DelegatingSecureStore(XydraPersistence persistence, XId executingActorId) {
 		super(persistence, new AccessControlManagerOnPersistence(persistence, executingActorId));
 	}
 	

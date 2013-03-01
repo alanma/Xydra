@@ -1,7 +1,7 @@
 package org.xydra.base.change.impl.memory;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XCommandFactory;
@@ -30,12 +30,12 @@ public class MemoryCommandFactory implements XCommandFactory {
      * Creates a new {@link XObjectCommand} of the add-type for adding a new
      * {@link XField} to an {@link XObject}.
      * 
-     * @param objectId The {@link XID} of the {@link XObject} to which the
+     * @param objectId The {@link XId} of the {@link XObject} to which the
      *            {@link XField} is to be added.
-     * @param fieldId The {@link XID} for the new {@link XField}.
+     * @param fieldId The {@link XId} for the new {@link XField}.
      * @return a new {@link XObjectCommand} of the add-type
      */
-    public XObjectCommand createAddFieldCommand(XID objectId, XID fieldId) {
+    public XObjectCommand createAddFieldCommand(XId objectId, XId fieldId) {
         return createAddFieldCommand(null, null, objectId, fieldId, false);
     }
     
@@ -43,14 +43,14 @@ public class MemoryCommandFactory implements XCommandFactory {
      * Creates a new {@link XObjectCommand} of the add-type for adding a new
      * {@link XField} to an {@link XObject}.
      * 
-     * @param objectId The {@link XID} of the {@link XObject} to which the
+     * @param objectId The {@link XId} of the {@link XObject} to which the
      *            {@link XField} is to be added.
-     * @param fieldId The {@link XID} for the new {@link XField}.
+     * @param fieldId The {@link XId} for the new {@link XField}.
      * @param isForced this parameter determines if the new command will be a
      *            forced command or not.
      * @return a new {@link XObjectCommand} of the add-type
      */
-    public XObjectCommand createAddFieldCommand(XID objectId, XID fieldId, boolean isForced) {
+    public XObjectCommand createAddFieldCommand(XId objectId, XId fieldId, boolean isForced) {
         return createAddFieldCommand(null, null, objectId, fieldId, isForced);
     }
     
@@ -58,14 +58,14 @@ public class MemoryCommandFactory implements XCommandFactory {
      * Creates a new {@link XObjectCommand} of the add-type for adding a new
      * {@link XField} to an {@link XObject}.
      * 
-     * @param modelId The {@link XID} of the {@link XModel} containing the
+     * @param modelId The {@link XId} of the {@link XModel} containing the
      *            {@link XObject} to which the {@link XField} is too be added.
-     * @param objectId The {@link XID} of the {@link XObject} to which the
+     * @param objectId The {@link XId} of the {@link XObject} to which the
      *            {@link XField} is to be added.
-     * @param fieldId The {@link XID} for the new {@link XField}.
+     * @param fieldId The {@link XId} for the new {@link XField}.
      * @return a new {@link XObjectCommand} of the add-type
      */
-    public XObjectCommand createAddFieldCommand(XID modelId, XID objectId, XID fieldId) {
+    public XObjectCommand createAddFieldCommand(XId modelId, XId objectId, XId fieldId) {
         return createAddFieldCommand(null, modelId, objectId, fieldId, false);
     }
     
@@ -73,16 +73,16 @@ public class MemoryCommandFactory implements XCommandFactory {
      * Creates a new {@link XObjectCommand} of the add-type for adding a new
      * {@link XField} to an {@link XObject}.
      * 
-     * @param modelId The {@link XID} of the {@link XModel} containing the
+     * @param modelId The {@link XId} of the {@link XModel} containing the
      *            {@link XObject} to which the {@link XField} is too be added.
-     * @param objectId The {@link XID} of the {@link XObject} to which the
+     * @param objectId The {@link XId} of the {@link XObject} to which the
      *            {@link XField} is to be added.
-     * @param fieldId The {@link XID} for the new {@link XField}.
+     * @param fieldId The {@link XId} for the new {@link XField}.
      * @param isForced this parameter determines if the new command will be a
      *            forced command or not.
      * @return a new {@link XObjectCommand} of the add-type
      */
-    public XObjectCommand createAddFieldCommand(XID modelId, XID objectId, XID fieldId,
+    public XObjectCommand createAddFieldCommand(XId modelId, XId objectId, XId fieldId,
             boolean isForced) {
         return createAddFieldCommand(null, modelId, objectId, fieldId, isForced);
     }
@@ -91,24 +91,24 @@ public class MemoryCommandFactory implements XCommandFactory {
      * Creates a new {@link XObjectCommand} of the add-type for adding a new
      * {@link XField} to an {@link XObject}.
      * 
-     * @param repositoryId The {@link XID} of the {@link XRepository} holding
+     * @param repositoryId The {@link XId} of the {@link XRepository} holding
      *            the the {@link XModel} which is holding the {@link XObject} to
      *            which the {@link XField} is to be added.
-     * @param modelId The {@link XID} of the {@link XModel} containing the
+     * @param modelId The {@link XId} of the {@link XModel} containing the
      *            {@link XObject} to which the {@link XField} is too be added.
-     * @param objectId The {@link XID} of the {@link XObject} to which the
+     * @param objectId The {@link XId} of the {@link XObject} to which the
      *            {@link XField} is to be added.
-     * @param fieldId The {@link XID} for the new {@link XField}.
+     * @param fieldId The {@link XId} for the new {@link XField}.
      * @return a new {@link XObjectCommand} of the add-type
      */
-    public XObjectCommand createAddFieldCommand(XID repositoryId, XID modelId, XID objectId,
-            XID fieldId) {
+    public XObjectCommand createAddFieldCommand(XId repositoryId, XId modelId, XId objectId,
+            XId fieldId) {
         return createAddFieldCommand(repositoryId, modelId, objectId, fieldId, false);
     }
     
     @Override
-    public XObjectCommand createAddFieldCommand(XID repositoryId, XID modelId, XID objectId,
-            XID fieldId, boolean isForced) {
+    public XObjectCommand createAddFieldCommand(XId repositoryId, XId modelId, XId objectId,
+            XId fieldId, boolean isForced) {
         long revNr = isForced ? XCommand.FORCED : XCommand.SAFE;
         
         XAddress target = XX.toAddress(repositoryId, modelId, objectId, null);
@@ -120,17 +120,17 @@ public class MemoryCommandFactory implements XCommandFactory {
      * Creates a new {@link XRepositoryCommand} of the add-type for adding a new
      * {@link XModel} to an {@link XRepository}
      * 
-     * @param repositoryId The {@link XID} of the {@link XRepository} to which
+     * @param repositoryId The {@link XId} of the {@link XRepository} to which
      *            the new {@link XModel} is to be added.
-     * @param modelId The {@link XID} for the new {@link XModel}.
+     * @param modelId The {@link XId} for the new {@link XModel}.
      * @return A new {@link XRepositoryCommand} of the add-type.
      */
-    public XRepositoryCommand createAddModelCommand(XID repositoryId, XID modelId) {
+    public XRepositoryCommand createAddModelCommand(XId repositoryId, XId modelId) {
         return createAddModelCommand(repositoryId, modelId, false);
     }
     
     @Override
-    public XRepositoryCommand createAddModelCommand(XID repositoryId, XID modelId, boolean isForced) {
+    public XRepositoryCommand createAddModelCommand(XId repositoryId, XId modelId, boolean isForced) {
         long revNr = isForced ? XCommand.FORCED : XCommand.SAFE;
         
         XAddress target = XX.toAddress(repositoryId, null, null, null);
@@ -142,12 +142,12 @@ public class MemoryCommandFactory implements XCommandFactory {
      * Creates a new {@link XModelCommand} of the add-type for adding a new
      * {@link XObject} to an {@link XModel}.
      * 
-     * @param modelId The {@link XID} of the {@link XModel} to which the new
+     * @param modelId The {@link XId} of the {@link XModel} to which the new
      *            {@link XObject} is to be added.
-     * @param objectId The {@link XID} for the new {@link XObject}.
+     * @param objectId The {@link XId} for the new {@link XObject}.
      * @return A new {@link XModelCommand} of the add-type.
      */
-    public XModelCommand createAddObjectCommand(XID modelId, XID objectId) {
+    public XModelCommand createAddObjectCommand(XId modelId, XId objectId) {
         return createAddObjectCommand(null, modelId, objectId, false);
     }
     
@@ -155,14 +155,14 @@ public class MemoryCommandFactory implements XCommandFactory {
      * Creates a new {@link XModelCommand} of the add-type for adding a new
      * {@link XObject} to an {@link XModel}.
      * 
-     * @param modelId The {@link XID} of the {@link XModel} to which the new
+     * @param modelId The {@link XId} of the {@link XModel} to which the new
      *            {@link XObject} is to be added.
-     * @param objectId The {@link XID} for the new {@link XObject}.
+     * @param objectId The {@link XId} for the new {@link XObject}.
      * @param isForced this parameter determines if the new command will be a
      *            forced command or not.
      * @return A new {@link XModelCommand} of the add-type.
      */
-    public XModelCommand createAddObjectCommand(XID modelId, XID objectId, boolean isForced) {
+    public XModelCommand createAddObjectCommand(XId modelId, XId objectId, boolean isForced) {
         return createAddObjectCommand(null, modelId, objectId, isForced);
     }
     
@@ -170,20 +170,20 @@ public class MemoryCommandFactory implements XCommandFactory {
      * Creates a new {@link XModelCommand} of the add-type for adding a new
      * {@link XObject} to an {@link XModel}.
      * 
-     * @param repositoryId The {@link XID} of the {@link XRepository} holding
+     * @param repositoryId The {@link XId} of the {@link XRepository} holding
      *            the {@link XModel} to which the new {@link XObject} is to be
      *            added.
-     * @param modelId The {@link XID} of the {@link XModel} to which the new
+     * @param modelId The {@link XId} of the {@link XModel} to which the new
      *            {@link XObject} is to be added.
-     * @param objectId The {@link XID} for the new {@link XObject}.
+     * @param objectId The {@link XId} for the new {@link XObject}.
      * @return A new {@link XModelCommand} of the add-type.
      */
-    public XModelCommand createAddObjectCommand(XID repositoryId, XID modelId, XID objectId) {
+    public XModelCommand createAddObjectCommand(XId repositoryId, XId modelId, XId objectId) {
         return createAddObjectCommand(repositoryId, modelId, objectId, false);
     }
     
     @Override
-    public XModelCommand createAddObjectCommand(XID repositoryId, XID modelId, XID objectId,
+    public XModelCommand createAddObjectCommand(XId repositoryId, XId modelId, XId objectId,
             boolean isForced) {
         long revNr = isForced ? XCommand.FORCED : XCommand.SAFE;
         
@@ -196,14 +196,14 @@ public class MemoryCommandFactory implements XCommandFactory {
      * Creates a new {@link XFieldCommand} of the add-type for adding an
      * {@link XValue} to an {@link XField}.
      * 
-     * @param fieldId The {@link XID} of the {@link XField} to which the
+     * @param fieldId The {@link XId} of the {@link XField} to which the
      *            {@link XValue} is to be added.
      * @param fieldRevision The current revision number of the {@link XField} to
      *            which the {@link XValue} is to be added.
      * @param value the {@link XValue} which is to be added.
      * @return A new {@link XFieldCommand} of the add-type.
      */
-    public XFieldCommand createAddValueCommand(XID fieldId, long fieldRevision, XValue value) {
+    public XFieldCommand createAddValueCommand(XId fieldId, long fieldRevision, XValue value) {
         return createAddValueCommand(null, null, null, fieldId, fieldRevision, value, false);
     }
     
@@ -211,7 +211,7 @@ public class MemoryCommandFactory implements XCommandFactory {
      * Creates a new {@link XFieldCommand} of the add-type for adding an
      * {@link XValue} to an {@link XField}.
      * 
-     * @param fieldId The {@link XID} of the {@link XField} to which the
+     * @param fieldId The {@link XId} of the {@link XField} to which the
      *            {@link XValue} is to be added.
      * @param fieldRevision The current revision number of the {@link XField} to
      *            which the {@link XValue} is to be added.
@@ -220,7 +220,7 @@ public class MemoryCommandFactory implements XCommandFactory {
      *            forced command or not.
      * @return A new {@link XFieldCommand} of the add-type.
      */
-    public XFieldCommand createAddValueCommand(XID fieldId, long fieldRevision, XValue value,
+    public XFieldCommand createAddValueCommand(XId fieldId, long fieldRevision, XValue value,
             boolean isForced) {
         return createAddValueCommand(null, null, null, fieldId, fieldRevision, value, isForced);
     }
@@ -229,16 +229,16 @@ public class MemoryCommandFactory implements XCommandFactory {
      * Creates a new {@link XFieldCommand} of the add-type for adding an
      * {@link XValue} to an {@link XField}.
      * 
-     * @param objectId The {@link XID} of the {@link XObject} holding the
+     * @param objectId The {@link XId} of the {@link XObject} holding the
      *            {@link XField} to which the {@link XValue} is to be added.
-     * @param fieldId The {@link XID} of the {@link XField} to which the
+     * @param fieldId The {@link XId} of the {@link XField} to which the
      *            {@link XValue} is to be added.
      * @param fieldRevision The current revision number of the {@link XField} to
      *            which the {@link XValue} is to be added.
      * @param value the {@link XValue} which is to be added.
      * @return A new {@link XFieldCommand} of the add-type.
      */
-    public XFieldCommand createAddValueCommand(XID objectId, XID fieldId, long fieldRevision,
+    public XFieldCommand createAddValueCommand(XId objectId, XId fieldId, long fieldRevision,
             XValue value) {
         return createAddValueCommand(null, null, objectId, fieldId, fieldRevision, value, false);
     }
@@ -247,9 +247,9 @@ public class MemoryCommandFactory implements XCommandFactory {
      * Creates a new {@link XFieldCommand} of the add-type for adding an
      * {@link XValue} to an {@link XField}.
      * 
-     * @param objectId The {@link XID} of the {@link XObject} holding the
+     * @param objectId The {@link XId} of the {@link XObject} holding the
      *            {@link XField} to which the {@link XValue} is to be added.
-     * @param fieldId The {@link XID} of the {@link XField} to which the
+     * @param fieldId The {@link XId} of the {@link XField} to which the
      *            {@link XValue} is to be added.
      * @param fieldRevision The current revision number of the {@link XField} to
      *            which the {@link XValue} is to be added.
@@ -258,7 +258,7 @@ public class MemoryCommandFactory implements XCommandFactory {
      *            forced command or not.
      * @return A new {@link XFieldCommand} of the add-type.
      */
-    public XFieldCommand createAddValueCommand(XID objectId, XID fieldId, long fieldRevision,
+    public XFieldCommand createAddValueCommand(XId objectId, XId fieldId, long fieldRevision,
             XValue value, boolean isForced) {
         return createAddValueCommand(null, null, objectId, fieldId, fieldRevision, value, isForced);
     }
@@ -267,19 +267,19 @@ public class MemoryCommandFactory implements XCommandFactory {
      * Creates a new {@link XFieldCommand} of the add-type for adding an
      * {@link XValue} to an {@link XField}.
      * 
-     * @param modelId The {@link XID} of the {@link XModel} holding the
+     * @param modelId The {@link XId} of the {@link XModel} holding the
      *            {@link XObject} holding the {@link XField} to which the
      *            {@link XValue} is to be added.
-     * @param objectId The {@link XID} of the {@link XObject} holding the
+     * @param objectId The {@link XId} of the {@link XObject} holding the
      *            {@link XField} to which the {@link XValue} is to be added.
-     * @param fieldId The {@link XID} of the {@link XField} to which the
+     * @param fieldId The {@link XId} of the {@link XField} to which the
      *            {@link XValue} is to be added.
      * @param fieldRevision The current revision number of the {@link XField} to
      *            which the {@link XValue} is to be added.
      * @param value the {@link XValue} which is to be added.
      * @return A new {@link XFieldCommand} of the add-type.
      */
-    public XFieldCommand createAddValueCommand(XID modelId, XID objectId, XID fieldId,
+    public XFieldCommand createAddValueCommand(XId modelId, XId objectId, XId fieldId,
             long fieldRevision, XValue value) {
         return createAddValueCommand(null, modelId, objectId, fieldId, fieldRevision, value, false);
     }
@@ -288,12 +288,12 @@ public class MemoryCommandFactory implements XCommandFactory {
      * Creates a new {@link XFieldCommand} of the add-type for adding an
      * {@link XValue} to an {@link XField}.
      * 
-     * @param modelId The {@link XID} of the {@link XModel} holding the
+     * @param modelId The {@link XId} of the {@link XModel} holding the
      *            {@link XObject} holding the {@link XField} to which the
      *            {@link XValue} is to be added.
-     * @param objectId The {@link XID} of the {@link XObject} holding the
+     * @param objectId The {@link XId} of the {@link XObject} holding the
      *            {@link XField} to which the {@link XValue} is to be added.
-     * @param fieldId The {@link XID} of the {@link XField} to which the
+     * @param fieldId The {@link XId} of the {@link XField} to which the
      *            {@link XValue} is to be added.
      * @param fieldRevision The current revision number of the {@link XField} to
      *            which the {@link XValue} is to be added.
@@ -302,7 +302,7 @@ public class MemoryCommandFactory implements XCommandFactory {
      *            forced command or not.
      * @return A new {@link XFieldCommand} of the add-type.
      */
-    public XFieldCommand createAddValueCommand(XID modelId, XID objectId, XID fieldId,
+    public XFieldCommand createAddValueCommand(XId modelId, XId objectId, XId fieldId,
             long fieldRevision, XValue value, boolean isForced) {
         return createAddValueCommand(null, modelId, objectId, fieldId, fieldRevision, value,
                 isForced);
@@ -312,15 +312,15 @@ public class MemoryCommandFactory implements XCommandFactory {
      * Creates a new {@link XFieldCommand} of the add-type for adding an
      * {@link XValue} to an {@link XField}.
      * 
-     * @param repositoryId The {@link XID} of the {@link XModel} holding the
+     * @param repositoryId The {@link XId} of the {@link XModel} holding the
      *            {@link XObject} holding the {@link XField} to which the
      *            {@link XValue} is to be added.
-     * @param modelId The {@link XID} of the {@link XModel} holding the
+     * @param modelId The {@link XId} of the {@link XModel} holding the
      *            {@link XObject} holding the {@link XField} to which the
      *            {@link XValue} is to be added.
-     * @param objectId The {@link XID} of the {@link XObject} holding the
+     * @param objectId The {@link XId} of the {@link XObject} holding the
      *            {@link XField} to which the {@link XValue} is to be added.
-     * @param fieldId The {@link XID} of the {@link XField} to which the
+     * @param fieldId The {@link XId} of the {@link XField} to which the
      *            {@link XValue} is to be added.
      * @param fieldRevision The current revision number of the {@link XField} to
      *            which the {@link XValue} is to be added.
@@ -328,15 +328,15 @@ public class MemoryCommandFactory implements XCommandFactory {
      * 
      * @return A new {@link XFieldCommand} of the add-type.
      */
-    public XFieldCommand createAddValueCommand(XID repositoryId, XID modelId, XID objectId,
-            XID fieldId, long fieldRevision, XValue value) {
+    public XFieldCommand createAddValueCommand(XId repositoryId, XId modelId, XId objectId,
+            XId fieldId, long fieldRevision, XValue value) {
         return createAddValueCommand(repositoryId, modelId, objectId, fieldId, fieldRevision,
                 value, false);
     }
     
     @Override
-    public XFieldCommand createAddValueCommand(XID repositoryId, XID modelId, XID objectId,
-            XID fieldId, long fieldRevision, XValue value, boolean isForced) {
+    public XFieldCommand createAddValueCommand(XId repositoryId, XId modelId, XId objectId,
+            XId fieldId, long fieldRevision, XValue value, boolean isForced) {
         if(fieldRevision == XCommand.FORCED && !isForced) {
             throw new IllegalArgumentException(
                     "Safe commands cannot have XCommand.FORCED as their revision number.");
@@ -357,7 +357,7 @@ public class MemoryCommandFactory implements XCommandFactory {
      * Creates a new {@link XFieldCommand} of the change-type for changing the
      * {@link XValue} of an {@link XField}.
      * 
-     * @param fieldId The {@link XID} of the {@link XField} of which the
+     * @param fieldId The {@link XId} of the {@link XField} of which the
      *            {@link XValue} is to be changed.
      * @param fieldRevision The current revision number of the {@link XField} of
      *            which the {@link XValue} is to be changed.
@@ -365,7 +365,7 @@ public class MemoryCommandFactory implements XCommandFactory {
      * @return A new {@link XFieldCommand} of the change-type.
      */
     
-    public XFieldCommand createChangeValueCommand(XID fieldId, long fieldRevision, XValue value) {
+    public XFieldCommand createChangeValueCommand(XId fieldId, long fieldRevision, XValue value) {
         return createChangeValueCommand(null, null, null, fieldId, fieldRevision, value, false);
     }
     
@@ -373,7 +373,7 @@ public class MemoryCommandFactory implements XCommandFactory {
      * Creates a new {@link XFieldCommand} of the change-type for changing the
      * {@link XValue} of an {@link XField}.
      * 
-     * @param fieldId The {@link XID} of the {@link XField} of which the
+     * @param fieldId The {@link XId} of the {@link XField} of which the
      *            {@link XValue} is to be changed.
      * @param fieldRevision The current revision number of the {@link XField} of
      *            which the {@link XValue} is to be changed.
@@ -382,7 +382,7 @@ public class MemoryCommandFactory implements XCommandFactory {
      *            forced command or not.
      * @return A new {@link XFieldCommand} of the change-type.
      */
-    public XFieldCommand createChangeValueCommand(XID fieldId, long fieldRevision, XValue value,
+    public XFieldCommand createChangeValueCommand(XId fieldId, long fieldRevision, XValue value,
             boolean isForced) {
         return createChangeValueCommand(null, null, null, fieldId, fieldRevision, value, isForced);
     }
@@ -391,16 +391,16 @@ public class MemoryCommandFactory implements XCommandFactory {
      * Creates a new {@link XFieldCommand} of the change-type for changing the
      * {@link XValue} of an {@link XField}.
      * 
-     * @param objectId The {@link XID} of the {@link XObject} holding the
+     * @param objectId The {@link XId} of the {@link XObject} holding the
      *            {@link XField} of which the {@link XValue} is to be changed.
-     * @param fieldId The {@link XID} of the {@link XField} of which the
+     * @param fieldId The {@link XId} of the {@link XField} of which the
      *            {@link XValue} is to be changed.
      * @param fieldRevision The current revision number of the {@link XField} of
      *            which the {@link XValue} is to be changed.
      * @param value the new {@link XValue}.
      * @return A new {@link XFieldCommand} of the change-type.
      */
-    public XFieldCommand createChangeValueCommand(XID objectId, XID fieldId, long fieldRevision,
+    public XFieldCommand createChangeValueCommand(XId objectId, XId fieldId, long fieldRevision,
             XValue value) {
         return createChangeValueCommand(null, null, objectId, fieldId, fieldRevision, value, false);
     }
@@ -409,9 +409,9 @@ public class MemoryCommandFactory implements XCommandFactory {
      * Creates a new {@link XFieldCommand} of the change-type for changing the
      * {@link XValue} of an {@link XField}.
      * 
-     * @param objectId The {@link XID} of the {@link XObject} holding the
+     * @param objectId The {@link XId} of the {@link XObject} holding the
      *            {@link XField} of which the {@link XValue} is to be changed.
-     * @param fieldId The {@link XID} of the {@link XField} of which the
+     * @param fieldId The {@link XId} of the {@link XField} of which the
      *            {@link XValue} is to be changed.
      * @param fieldRevision The current revision number of the {@link XField} of
      *            which the {@link XValue} is to be changed.
@@ -420,7 +420,7 @@ public class MemoryCommandFactory implements XCommandFactory {
      *            forced command or not.
      * @return A new {@link XFieldCommand} of the change-type.
      */
-    public XFieldCommand createChangeValueCommand(XID objectId, XID fieldId, long fieldRevision,
+    public XFieldCommand createChangeValueCommand(XId objectId, XId fieldId, long fieldRevision,
             XValue value, boolean isForced) {
         return createChangeValueCommand(null, null, objectId, fieldId, fieldRevision, value,
                 isForced);
@@ -430,19 +430,19 @@ public class MemoryCommandFactory implements XCommandFactory {
      * Creates a new {@link XFieldCommand} of the change-type for changing the
      * {@link XValue} of an {@link XField}.
      * 
-     * @param modelId The {@link XID} of the {@link XModel} holding the
+     * @param modelId The {@link XId} of the {@link XModel} holding the
      *            {@link XObject} holding the {@link XField} of which the
      *            {@link XValue} is to be changed.
-     * @param objectId The {@link XID} of the {@link XObject} holding the
+     * @param objectId The {@link XId} of the {@link XObject} holding the
      *            {@link XField} of which the {@link XValue} is to be changed.
-     * @param fieldId The {@link XID} of the {@link XField} of which the
+     * @param fieldId The {@link XId} of the {@link XField} of which the
      *            {@link XValue} is to be changed.
      * @param fieldRevision The current revision number of the {@link XField} of
      *            which the {@link XValue} is to be changed.
      * @param value the new {@link XValue}.
      * @return A new {@link XFieldCommand} of the change-type.
      */
-    public XFieldCommand createChangeValueCommand(XID modelId, XID objectId, XID fieldId,
+    public XFieldCommand createChangeValueCommand(XId modelId, XId objectId, XId fieldId,
             long fieldRevision, XValue value) {
         return createChangeValueCommand(null, modelId, objectId, fieldId, fieldRevision, value,
                 false);
@@ -452,12 +452,12 @@ public class MemoryCommandFactory implements XCommandFactory {
      * Creates a new {@link XFieldCommand} of the change-type for changing the
      * {@link XValue} of an {@link XField}.
      * 
-     * @param modelId The {@link XID} of the {@link XModel} holding the
+     * @param modelId The {@link XId} of the {@link XModel} holding the
      *            {@link XObject} holding the {@link XField} of which the
      *            {@link XValue} is to be changed.
-     * @param objectId The {@link XID} of the {@link XObject} holding the
+     * @param objectId The {@link XId} of the {@link XObject} holding the
      *            {@link XField} of which the {@link XValue} is to be changed.
-     * @param fieldId The {@link XID} of the {@link XField} of which the
+     * @param fieldId The {@link XId} of the {@link XField} of which the
      *            {@link XValue} is to be changed.
      * @param fieldRevision The current revision number of the {@link XField} of
      *            which the {@link XValue} is to be changed.
@@ -466,7 +466,7 @@ public class MemoryCommandFactory implements XCommandFactory {
      *            forced command or not.
      * @return A new {@link XFieldCommand} of the change-type.
      */
-    public XFieldCommand createChangeValueCommand(XID modelId, XID objectId, XID fieldId,
+    public XFieldCommand createChangeValueCommand(XId modelId, XId objectId, XId fieldId,
             long fieldRevision, XValue value, boolean isForced) {
         return createChangeValueCommand(null, modelId, objectId, fieldId, fieldRevision, value,
                 isForced);
@@ -476,30 +476,30 @@ public class MemoryCommandFactory implements XCommandFactory {
      * Creates a new {@link XFieldCommand} of the change-type for changing the
      * {@link XValue} of an {@link XField}.
      * 
-     * @param repositoryId The {@link XID} of the {@link XModel} holding the
+     * @param repositoryId The {@link XId} of the {@link XModel} holding the
      *            {@link XObject} holding the {@link XField} of which the
      *            {@link XValue} is to be changed.
-     * @param modelId The {@link XID} of the {@link XModel} holding the
+     * @param modelId The {@link XId} of the {@link XModel} holding the
      *            {@link XObject} holding the {@link XField} of which the
      *            {@link XValue} is to be changed.
-     * @param objectId The {@link XID} of the {@link XObject} holding the
+     * @param objectId The {@link XId} of the {@link XObject} holding the
      *            {@link XField} of which the {@link XValue} is to be changed.
-     * @param fieldId The {@link XID} of the {@link XField} of which the
+     * @param fieldId The {@link XId} of the {@link XField} of which the
      *            {@link XValue} is to be changed.
      * @param fieldRevision The current revision number of the {@link XField} of
      *            which the {@link XValue} is to be changed.
      * @param value the new {@link XValue}.
      * @return A new {@link XFieldCommand} of the change-type.
      */
-    public XFieldCommand createChangeValueCommand(XID repositoryId, XID modelId, XID objectId,
-            XID fieldId, long fieldRevision, XValue value) {
+    public XFieldCommand createChangeValueCommand(XId repositoryId, XId modelId, XId objectId,
+            XId fieldId, long fieldRevision, XValue value) {
         return createChangeValueCommand(repositoryId, modelId, objectId, fieldId, fieldRevision,
                 value, false);
     }
     
     @Override
-    public XFieldCommand createChangeValueCommand(XID repositoryId, XID modelId, XID objectId,
-            XID fieldId, long fieldRevision, XValue value, boolean isForced) {
+    public XFieldCommand createChangeValueCommand(XId repositoryId, XId modelId, XId objectId,
+            XId fieldId, long fieldRevision, XValue value, boolean isForced) {
         if(fieldRevision == XCommand.FORCED && !isForced) {
             throw new IllegalArgumentException(
                     "Safe commands cannot have XCommand.FORCED as their revision number.");
@@ -520,15 +520,15 @@ public class MemoryCommandFactory implements XCommandFactory {
      * Creates a new {@link XObjectCommand} of the remove-type for removing an
      * {@link XField} from an {@link XObject}.
      * 
-     * @param objectId The {@link XID} of the {@link XObject} from which the
+     * @param objectId The {@link XId} of the {@link XObject} from which the
      *            {@link XField} is to be removed.
-     * @param fieldId The {@link XID} for the {@link XField} which is to be
+     * @param fieldId The {@link XId} for the {@link XField} which is to be
      *            removed.
      * @param fieldRevision The current revision number of the {@link XField}
      *            which is to be removed
      * @return a new {@link XObjectCommand} of the remove-type
      */
-    public XObjectCommand createRemoveFieldCommand(XID objectId, XID fieldId, long fieldRevision) {
+    public XObjectCommand createRemoveFieldCommand(XId objectId, XId fieldId, long fieldRevision) {
         return createRemoveFieldCommand(null, null, objectId, fieldId, fieldRevision, false);
     }
     
@@ -536,9 +536,9 @@ public class MemoryCommandFactory implements XCommandFactory {
      * Creates a new {@link XObjectCommand} of the remove-type for removing an
      * {@link XField} from an {@link XObject}.
      * 
-     * @param objectId The {@link XID} of the {@link XObject} from which the
+     * @param objectId The {@link XId} of the {@link XObject} from which the
      *            {@link XField} is to be removed.
-     * @param fieldId The {@link XID} for the {@link XField} which is to be
+     * @param fieldId The {@link XId} for the {@link XField} which is to be
      *            removed.
      * @param fieldRevision The current revision number of the {@link XField}
      *            which is to be removed
@@ -546,7 +546,7 @@ public class MemoryCommandFactory implements XCommandFactory {
      *            forced command or not.
      * @return a new {@link XObjectCommand} of the remove-type
      */
-    public XObjectCommand createRemoveFieldCommand(XID objectId, XID fieldId, long fieldRevision,
+    public XObjectCommand createRemoveFieldCommand(XId objectId, XId fieldId, long fieldRevision,
             boolean isForced) {
         return createRemoveFieldCommand(null, null, objectId, fieldId, fieldRevision, isForced);
     }
@@ -555,18 +555,18 @@ public class MemoryCommandFactory implements XCommandFactory {
      * Creates a new {@link XObjectCommand} of the remove-type for removing an
      * {@link XField} from an {@link XObject}.
      * 
-     * @param modelId the {@link XID} of the {@link XModel} holding the
+     * @param modelId the {@link XId} of the {@link XModel} holding the
      *            {@link XObject} from which the {@link XField} is to be
      *            removed.
-     * @param objectId The {@link XID} of the {@link XObject} from which the
+     * @param objectId The {@link XId} of the {@link XObject} from which the
      *            {@link XField} is to be removed.
-     * @param fieldId The {@link XID} for the {@link XField} which is to be
+     * @param fieldId The {@link XId} for the {@link XField} which is to be
      *            removed.
      * @param fieldRevision The current revision number of the {@link XField}
      *            which is to be removed
      * @return a new {@link XObjectCommand} of the remove-type
      */
-    public XObjectCommand createRemoveFieldCommand(XID modelId, XID objectId, XID fieldId,
+    public XObjectCommand createRemoveFieldCommand(XId modelId, XId objectId, XId fieldId,
             long fieldRevision) {
         return createRemoveFieldCommand(null, modelId, objectId, fieldId, fieldRevision, false);
     }
@@ -575,12 +575,12 @@ public class MemoryCommandFactory implements XCommandFactory {
      * Creates a new {@link XObjectCommand} of the remove-type for removing an
      * {@link XField} from an {@link XObject}.
      * 
-     * @param modelId the {@link XID} of the {@link XModel} holding the
+     * @param modelId the {@link XId} of the {@link XModel} holding the
      *            {@link XObject} from which the {@link XField} is to be
      *            removed.
-     * @param objectId The {@link XID} of the {@link XObject} from which the
+     * @param objectId The {@link XId} of the {@link XObject} from which the
      *            {@link XField} is to be removed.
-     * @param fieldId The {@link XID} for the {@link XField} which is to be
+     * @param fieldId The {@link XId} for the {@link XField} which is to be
      *            removed.
      * @param fieldRevision The current revision number of the {@link XField}
      *            which is to be removed
@@ -588,7 +588,7 @@ public class MemoryCommandFactory implements XCommandFactory {
      *            forced command or not.
      * @return a new {@link XObjectCommand} of the remove-type
      */
-    public XObjectCommand createRemoveFieldCommand(XID modelId, XID objectId, XID fieldId,
+    public XObjectCommand createRemoveFieldCommand(XId modelId, XId objectId, XId fieldId,
             long fieldRevision, boolean isForced) {
         return createRemoveFieldCommand(null, modelId, objectId, fieldId, fieldRevision, isForced);
     }
@@ -597,29 +597,29 @@ public class MemoryCommandFactory implements XCommandFactory {
      * Creates a new {@link XObjectCommand} of the remove-type for removing an
      * {@link XField} from an {@link XObject}.
      * 
-     * @param repositoryId the {@link XID} of the {@link XRepository} holding
+     * @param repositoryId the {@link XId} of the {@link XRepository} holding
      *            the {@link XModel} holding the {@link XObject} from which the
      *            {@link XField} is to be removed.
-     * @param modelId the {@link XID} of the {@link XModel} holding the
+     * @param modelId the {@link XId} of the {@link XModel} holding the
      *            {@link XObject} from which the {@link XField} is to be
      *            removed.
-     * @param objectId The {@link XID} of the {@link XObject} from which the
+     * @param objectId The {@link XId} of the {@link XObject} from which the
      *            {@link XField} is to be removed.
-     * @param fieldId The {@link XID} for the {@link XField} which is to be
+     * @param fieldId The {@link XId} for the {@link XField} which is to be
      *            removed.
      * @param fieldRevision The current revision number of the {@link XField}
      *            which is to be removed
      * @return a new {@link XObjectCommand} of the remove-type
      */
-    public XObjectCommand createRemoveFieldCommand(XID repositoryId, XID modelId, XID objectId,
-            XID fieldId, long fieldRevision) {
+    public XObjectCommand createRemoveFieldCommand(XId repositoryId, XId modelId, XId objectId,
+            XId fieldId, long fieldRevision) {
         return createRemoveFieldCommand(repositoryId, modelId, objectId, fieldId, fieldRevision,
                 false);
     }
     
     @Override
-    public XObjectCommand createRemoveFieldCommand(XID repositoryId, XID modelId, XID objectId,
-            XID fieldId, long fieldRevision, boolean isForced) {
+    public XObjectCommand createRemoveFieldCommand(XId repositoryId, XId modelId, XId objectId,
+            XId fieldId, long fieldRevision, boolean isForced) {
         if(fieldRevision == XCommand.FORCED && !isForced) {
             throw new IllegalArgumentException(
                     "Safe commands cannot have XCommand.FORCED as their revision number.");
@@ -640,21 +640,21 @@ public class MemoryCommandFactory implements XCommandFactory {
      * Creates a new {@link XRepositoryCommand} of the remove-type for removing
      * an {@link XModel} from an {@link XRepository}.
      * 
-     * @param repositoryId The {@link XID} of the {@link XRepository} from which
+     * @param repositoryId The {@link XId} of the {@link XRepository} from which
      *            the {@link XModel} is to be removed.
-     * @param modelId The {@link XID} of the {@link XModel} which is to be
+     * @param modelId The {@link XId} of the {@link XModel} which is to be
      *            removed.
      * @param modelRevision the current revision number of the {@link XModel}
      *            which is to be removed
      * @return A new {@link XRepositoryCommand} of the remove-type.
      */
-    public XRepositoryCommand createRemoveModelCommand(XID repositoryId, XID modelId,
+    public XRepositoryCommand createRemoveModelCommand(XId repositoryId, XId modelId,
             long modelRevision) {
         return createRemoveModelCommand(repositoryId, modelId, modelRevision, false);
     }
     
     @Override
-    public XRepositoryCommand createRemoveModelCommand(XID repositoryId, XID modelId,
+    public XRepositoryCommand createRemoveModelCommand(XId repositoryId, XId modelId,
             long modelRevision, boolean isForced) {
         if(modelRevision == XCommand.FORCED && !isForced) {
             throw new IllegalArgumentException(
@@ -676,15 +676,15 @@ public class MemoryCommandFactory implements XCommandFactory {
      * Creates a new {@link XModelCommand} of the remove-type for removing an
      * {@link XObject} from an {@link XModel}.
      * 
-     * @param modelId The {@link XID} of the {@link XModel} from which the
+     * @param modelId The {@link XId} of the {@link XModel} from which the
      *            {@link XObject} is to be removed.
-     * @param objectId The {@link XID} of the {@link XObject} which is to be
+     * @param objectId The {@link XId} of the {@link XObject} which is to be
      *            removed.
      * @param objectRevision The current revision number of the {@link XObject}
      *            which is to be removed.
      * @return A new {@link XModelCommand} of the remove-type.
      */
-    public XModelCommand createRemoveObjectCommand(XID modelId, XID objectId, long objectRevision) {
+    public XModelCommand createRemoveObjectCommand(XId modelId, XId objectId, long objectRevision) {
         return createRemoveObjectCommand(null, modelId, objectId, objectRevision, false);
     }
     
@@ -692,9 +692,9 @@ public class MemoryCommandFactory implements XCommandFactory {
      * Creates a new {@link XModelCommand} of the remove-type for removing an
      * {@link XObject} from an {@link XModel}.
      * 
-     * @param modelId The {@link XID} of the {@link XModel} from which the
+     * @param modelId The {@link XId} of the {@link XModel} from which the
      *            {@link XObject} is to be removed.
-     * @param objectId The {@link XID} of the {@link XObject} which is to be
+     * @param objectId The {@link XId} of the {@link XObject} which is to be
      *            removed.
      * @param objectRevision The current revision number of the {@link XObject}
      *            which is to be removed.
@@ -702,7 +702,7 @@ public class MemoryCommandFactory implements XCommandFactory {
      *            forced command or not.
      * @return A new {@link XModelCommand} of the remove-type.
      */
-    public XModelCommand createRemoveObjectCommand(XID modelId, XID objectId, long objectRevision,
+    public XModelCommand createRemoveObjectCommand(XId modelId, XId objectId, long objectRevision,
             boolean isForced) {
         return createRemoveObjectCommand(null, modelId, objectId, objectRevision, isForced);
     }
@@ -711,24 +711,24 @@ public class MemoryCommandFactory implements XCommandFactory {
      * Creates a new {@link XModelCommand} of the remove-type for removing an
      * {@link XObject} from an {@link XModel}.
      * 
-     * @param repositoryId The {@link XID} of the {@link XRepository} holding
+     * @param repositoryId The {@link XId} of the {@link XRepository} holding
      *            the {@link XModel} from which the {@link XObject} is to be
      *            removed.
-     * @param modelId The {@link XID} of the {@link XModel} from which the
+     * @param modelId The {@link XId} of the {@link XModel} from which the
      *            {@link XObject} is to be removed.
-     * @param objectId The {@link XID} of the {@link XObject} which is to be
+     * @param objectId The {@link XId} of the {@link XObject} which is to be
      *            removed.
      * @param objectRevision The current revision number of the {@link XObject}
      *            which is to be removed.
      * @return A new {@link XModelCommand} of the remove-type.
      */
-    public XModelCommand createRemoveObjectCommand(XID repositoryId, XID modelId, XID objectId,
+    public XModelCommand createRemoveObjectCommand(XId repositoryId, XId modelId, XId objectId,
             long objectRevision) {
         return createRemoveObjectCommand(repositoryId, modelId, objectId, objectRevision, false);
     }
     
     @Override
-    public XModelCommand createRemoveObjectCommand(XID repositoryId, XID modelId, XID objectId,
+    public XModelCommand createRemoveObjectCommand(XId repositoryId, XId modelId, XId objectId,
             long objectRevision, boolean isForced) {
         if(objectRevision == XCommand.FORCED && !isForced) {
             throw new IllegalArgumentException(
@@ -750,13 +750,13 @@ public class MemoryCommandFactory implements XCommandFactory {
      * Creates a new {@link XFieldCommand} of the remove-type for removing an
      * {@link XValue} from an {@link XField}.
      * 
-     * @param fieldId The {@link XID} of the {@link XField} from which the
+     * @param fieldId The {@link XId} of the {@link XField} from which the
      *            {@link XValue} is to be removed.
      * @param fieldRevision The current revision number of the {@link XField}
      *            from which the {@link XValue} is to be removed.
      * @return A new {@link XFieldCommand} of the remove-type.
      */
-    public XFieldCommand createRemoveValueCommand(XID fieldId, long fieldRevision) {
+    public XFieldCommand createRemoveValueCommand(XId fieldId, long fieldRevision) {
         return createRemoveValueCommand(null, null, null, fieldId, fieldRevision, false);
     }
     
@@ -764,7 +764,7 @@ public class MemoryCommandFactory implements XCommandFactory {
      * Creates a new {@link XFieldCommand} of the remove-type for removing an
      * {@link XValue} from an {@link XField}.
      * 
-     * @param fieldId The {@link XID} of the {@link XField} from which the
+     * @param fieldId The {@link XId} of the {@link XField} from which the
      *            {@link XValue} is to be removed.
      * @param fieldRevision The current revision number of the {@link XField}
      *            from which the {@link XValue} is to be removed.
@@ -772,7 +772,7 @@ public class MemoryCommandFactory implements XCommandFactory {
      *            forced command or not.
      * @return A new {@link XFieldCommand} of the remove-type.
      */
-    public XFieldCommand createRemoveValueCommand(XID fieldId, long fieldRevision, boolean isForced) {
+    public XFieldCommand createRemoveValueCommand(XId fieldId, long fieldRevision, boolean isForced) {
         return createRemoveValueCommand(null, null, null, fieldId, fieldRevision, isForced);
     }
     
@@ -780,15 +780,15 @@ public class MemoryCommandFactory implements XCommandFactory {
      * Creates a new {@link XFieldCommand} of the remove-type for removing an
      * {@link XValue} from an {@link XField}.
      * 
-     * @param objectId The {@link XID} of the {@link XObject} holding the
+     * @param objectId The {@link XId} of the {@link XObject} holding the
      *            {@link XField} to which the {@link XValue} is to be added.
-     * @param fieldId The {@link XID} of the {@link XField} from which the
+     * @param fieldId The {@link XId} of the {@link XField} from which the
      *            {@link XValue} is to be removed.
      * @param fieldRevision The current revision number of the {@link XField}
      *            from which the {@link XValue} is to be removed.
      * @return A new {@link XFieldCommand} of the remove-type.
      */
-    public XFieldCommand createRemoveValueCommand(XID objectId, XID fieldId, long fieldRevision) {
+    public XFieldCommand createRemoveValueCommand(XId objectId, XId fieldId, long fieldRevision) {
         return createRemoveValueCommand(null, null, objectId, fieldId, fieldRevision, false);
     }
     
@@ -796,9 +796,9 @@ public class MemoryCommandFactory implements XCommandFactory {
      * Creates a new {@link XFieldCommand} of the remove-type for removing an
      * {@link XValue} from an {@link XField}.
      * 
-     * @param objectId The {@link XID} of the {@link XObject} holding the
+     * @param objectId The {@link XId} of the {@link XObject} holding the
      *            {@link XField} to which the {@link XValue} is to be added.
-     * @param fieldId The {@link XID} of the {@link XField} from which the
+     * @param fieldId The {@link XId} of the {@link XField} from which the
      *            {@link XValue} is to be removed.
      * @param fieldRevision The current revision number of the {@link XField}
      *            from which the {@link XValue} is to be removed.
@@ -806,7 +806,7 @@ public class MemoryCommandFactory implements XCommandFactory {
      *            forced command or not.
      * @return A new {@link XFieldCommand} of the remove-type.
      */
-    public XFieldCommand createRemoveValueCommand(XID objectId, XID fieldId, long fieldRevision,
+    public XFieldCommand createRemoveValueCommand(XId objectId, XId fieldId, long fieldRevision,
             boolean isForced) {
         return createRemoveValueCommand(null, null, objectId, fieldId, fieldRevision, isForced);
     }
@@ -815,18 +815,18 @@ public class MemoryCommandFactory implements XCommandFactory {
      * Creates a new {@link XFieldCommand} of the remove-type for removing an
      * {@link XValue} from an {@link XField}.
      * 
-     * @param modelId The {@link XID} of the {@link XModel} holding the
+     * @param modelId The {@link XId} of the {@link XModel} holding the
      *            {@link XObject} holding the {@link XField} from which the
      *            {@link XValue} is to be removed.
-     * @param objectId The {@link XID} of the {@link XObject} holding the
+     * @param objectId The {@link XId} of the {@link XObject} holding the
      *            {@link XField} to which the {@link XValue} is to be added.
-     * @param fieldId The {@link XID} of the {@link XField} from which the
+     * @param fieldId The {@link XId} of the {@link XField} from which the
      *            {@link XValue} is to be removed.
      * @param fieldRevision The current revision number of the {@link XField}
      *            from which the {@link XValue} is to be removed.
      * @return A new {@link XFieldCommand} of the remove-type.
      */
-    public XFieldCommand createRemoveValueCommand(XID modelId, XID objectId, XID fieldId,
+    public XFieldCommand createRemoveValueCommand(XId modelId, XId objectId, XId fieldId,
             long fieldRevision) {
         return createRemoveValueCommand(null, modelId, objectId, fieldId, fieldRevision, false);
     }
@@ -835,12 +835,12 @@ public class MemoryCommandFactory implements XCommandFactory {
      * Creates a new {@link XFieldCommand} of the remove-type for removing an
      * {@link XValue} from an {@link XField}.
      * 
-     * @param modelId The {@link XID} of the {@link XModel} holding the
+     * @param modelId The {@link XId} of the {@link XModel} holding the
      *            {@link XObject} holding the {@link XField} from which the
      *            {@link XValue} is to be removed.
-     * @param objectId The {@link XID} of the {@link XObject} holding the
+     * @param objectId The {@link XId} of the {@link XObject} holding the
      *            {@link XField} to which the {@link XValue} is to be added.
-     * @param fieldId The {@link XID} of the {@link XField} from which the
+     * @param fieldId The {@link XId} of the {@link XField} from which the
      *            {@link XValue} is to be removed.
      * @param fieldRevision The current revision number of the {@link XField}
      *            from which the {@link XValue} is to be removed.
@@ -848,7 +848,7 @@ public class MemoryCommandFactory implements XCommandFactory {
      *            forced command or not.
      * @return A new {@link XFieldCommand} of the remove-type.
      */
-    public XFieldCommand createRemoveValueCommand(XID modelId, XID objectId, XID fieldId,
+    public XFieldCommand createRemoveValueCommand(XId modelId, XId objectId, XId fieldId,
             long fieldRevision, boolean isForced) {
         return createRemoveValueCommand(null, modelId, objectId, fieldId, fieldRevision, isForced);
     }
@@ -857,29 +857,29 @@ public class MemoryCommandFactory implements XCommandFactory {
      * Creates a new {@link XFieldCommand} of the remove-type for removing an
      * {@link XValue} from an {@link XField}.
      * 
-     * @param repositoryId The {@link XID} of the {@link XModel} holding the
+     * @param repositoryId The {@link XId} of the {@link XModel} holding the
      *            {@link XObject} holding the {@link XField} from which the
      *            {@link XValue} is to be removed.
-     * @param modelId The {@link XID} of the {@link XModel} holding the
+     * @param modelId The {@link XId} of the {@link XModel} holding the
      *            {@link XObject} holding the {@link XField} from which the
      *            {@link XValue} is to be removed.
-     * @param objectId The {@link XID} of the {@link XObject} holding the
+     * @param objectId The {@link XId} of the {@link XObject} holding the
      *            {@link XField} to which the {@link XValue} is to be added.
-     * @param fieldId The {@link XID} of the {@link XField} from which the
+     * @param fieldId The {@link XId} of the {@link XField} from which the
      *            {@link XValue} is to be removed.
      * @param fieldRevision The current revision number of the {@link XField}
      *            from which the {@link XValue} is to be removed.
      * @return A new {@link XFieldCommand} of the remove-type.
      */
-    public XFieldCommand createRemoveValueCommand(XID repositoryId, XID modelId, XID objectId,
-            XID fieldId, long fieldRevision) {
+    public XFieldCommand createRemoveValueCommand(XId repositoryId, XId modelId, XId objectId,
+            XId fieldId, long fieldRevision) {
         return createRemoveValueCommand(repositoryId, modelId, objectId, fieldId, fieldRevision,
                 false);
     }
     
     @Override
-    public XFieldCommand createRemoveValueCommand(XID repositoryId, XID modelId, XID objectId,
-            XID fieldId, long fieldRevision, boolean isForced) {
+    public XFieldCommand createRemoveValueCommand(XId repositoryId, XId modelId, XId objectId,
+            XId fieldId, long fieldRevision, boolean isForced) {
         if(fieldRevision == XCommand.FORCED && !isForced) {
             throw new IllegalArgumentException(
                     "Safe commands cannot have XCommand.FORCED as their revision number.");
@@ -897,14 +897,14 @@ public class MemoryCommandFactory implements XCommandFactory {
     }
     
     @Override
-    public XObjectCommand createAddFieldCommand(XAddress objectAddress, XID fieldId,
+    public XObjectCommand createAddFieldCommand(XAddress objectAddress, XId fieldId,
             boolean isForced) {
         return createAddFieldCommand(objectAddress.getRepository(), objectAddress.getModel(),
                 objectAddress.getObject(), fieldId, isForced);
     }
     
     @Override
-    public XModelCommand createAddObjectCommand(XAddress modelAddress, XID objectId,
+    public XModelCommand createAddObjectCommand(XAddress modelAddress, XId objectId,
             boolean isForced) {
         return createAddObjectCommand(modelAddress.getRepository(), modelAddress.getModel(),
                 objectId, isForced);
@@ -953,55 +953,55 @@ public class MemoryCommandFactory implements XCommandFactory {
     }
     
     @Override
-    public XObjectCommand createSafeAddFieldCommand(XID repositoryId, XID modelId, XID objectId,
-            XID fieldId) {
+    public XObjectCommand createSafeAddFieldCommand(XId repositoryId, XId modelId, XId objectId,
+            XId fieldId) {
         return createAddFieldCommand(repositoryId, modelId, objectId, fieldId, false);
     }
     
     @Override
-    public XObjectCommand createForcedAddFieldCommand(XID repositoryId, XID modelId, XID objectId,
-            XID fieldId) {
+    public XObjectCommand createForcedAddFieldCommand(XId repositoryId, XId modelId, XId objectId,
+            XId fieldId) {
         return createAddFieldCommand(repositoryId, modelId, objectId, fieldId, true);
     }
     
     @Override
-    public XObjectCommand createSafeAddFieldCommand(XAddress objectAddress, XID fieldId) {
+    public XObjectCommand createSafeAddFieldCommand(XAddress objectAddress, XId fieldId) {
         return createAddFieldCommand(objectAddress, fieldId, false);
     }
     
     @Override
-    public XObjectCommand createForcedAddFieldCommand(XAddress objectAddress, XID fieldId) {
+    public XObjectCommand createForcedAddFieldCommand(XAddress objectAddress, XId fieldId) {
         return createAddFieldCommand(objectAddress, fieldId, true);
     }
     
     @Override
-    public XRepositoryCommand createSafeAddModelCommand(XID repositoryId, XID modelId) {
+    public XRepositoryCommand createSafeAddModelCommand(XId repositoryId, XId modelId) {
         return createAddModelCommand(repositoryId, modelId, false);
     }
     
     @Override
-    public XRepositoryCommand createForcedAddModelCommand(XID repositoryId, XID modelId) {
+    public XRepositoryCommand createForcedAddModelCommand(XId repositoryId, XId modelId) {
         return createAddModelCommand(repositoryId, modelId, true);
     }
     
     @Override
-    public XModelCommand createForcedAddObjectCommand(XID repositoryId, XID modelId, XID objectId) {
+    public XModelCommand createForcedAddObjectCommand(XId repositoryId, XId modelId, XId objectId) {
         return createAddObjectCommand(repositoryId, modelId, objectId, true);
     }
     
     @Override
-    public XModelCommand createSafeAddObjectCommand(XAddress modelAddress, XID objectId) {
+    public XModelCommand createSafeAddObjectCommand(XAddress modelAddress, XId objectId) {
         return createAddObjectCommand(modelAddress, objectId, false);
     }
     
     @Override
-    public XModelCommand createForcedAddObjectCommand(XAddress modelAddress, XID objectId) {
+    public XModelCommand createForcedAddObjectCommand(XAddress modelAddress, XId objectId) {
         return createAddObjectCommand(modelAddress, objectId, true);
     }
     
     @Override
-    public XFieldCommand createSafeAddValueCommand(XID repositoryId, XID modelId, XID objectId,
-            XID fieldId, long fieldRevision, XValue value) {
+    public XFieldCommand createSafeAddValueCommand(XId repositoryId, XId modelId, XId objectId,
+            XId fieldId, long fieldRevision, XValue value) {
         if(fieldRevision == XCommand.FORCED) {
             throw new IllegalArgumentException(
                     "Safe commands cannot have XCommand.FORCED as their revision number.");
@@ -1012,8 +1012,8 @@ public class MemoryCommandFactory implements XCommandFactory {
     }
     
     @Override
-    public XFieldCommand createForcedAddValueCommand(XID repositoryId, XID modelId, XID objectId,
-            XID fieldId, XValue value) {
+    public XFieldCommand createForcedAddValueCommand(XId repositoryId, XId modelId, XId objectId,
+            XId fieldId, XValue value) {
         return createAddValueCommand(repositoryId, modelId, objectId, fieldId, XCommand.FORCED,
                 value, true);
     }
@@ -1035,8 +1035,8 @@ public class MemoryCommandFactory implements XCommandFactory {
     }
     
     @Override
-    public XFieldCommand createSafeChangeValueCommand(XID repositoryId, XID modelId, XID objectId,
-            XID fieldId, long fieldRevision, XValue value) {
+    public XFieldCommand createSafeChangeValueCommand(XId repositoryId, XId modelId, XId objectId,
+            XId fieldId, long fieldRevision, XValue value) {
         if(fieldRevision == XCommand.FORCED) {
             throw new IllegalArgumentException(
                     "Safe commands cannot have XCommand.FORCED as their revision number.");
@@ -1047,8 +1047,8 @@ public class MemoryCommandFactory implements XCommandFactory {
     }
     
     @Override
-    public XFieldCommand createForcedChangeValueCommand(XID repositoryId, XID modelId,
-            XID objectId, XID fieldId, XValue value) {
+    public XFieldCommand createForcedChangeValueCommand(XId repositoryId, XId modelId,
+            XId objectId, XId fieldId, XValue value) {
         return createChangeValueCommand(repositoryId, modelId, objectId, fieldId, XCommand.FORCED,
                 value, true);
     }
@@ -1069,8 +1069,8 @@ public class MemoryCommandFactory implements XCommandFactory {
     }
     
     @Override
-    public XObjectCommand createSafeRemoveFieldCommand(XID repositoryId, XID modelId, XID objectId,
-            XID fieldId, long fieldRevision) {
+    public XObjectCommand createSafeRemoveFieldCommand(XId repositoryId, XId modelId, XId objectId,
+            XId fieldId, long fieldRevision) {
         if(fieldRevision == XCommand.FORCED) {
             throw new IllegalArgumentException(
                     "Safe commands cannot have XCommand.FORCED as their revision number.");
@@ -1081,8 +1081,8 @@ public class MemoryCommandFactory implements XCommandFactory {
     }
     
     @Override
-    public XObjectCommand createForcedRemoveFieldCommand(XID repositoryId, XID modelId,
-            XID objectId, XID fieldId) {
+    public XObjectCommand createForcedRemoveFieldCommand(XId repositoryId, XId modelId,
+            XId objectId, XId fieldId) {
         return createRemoveFieldCommand(repositoryId, modelId, objectId, fieldId, XCommand.FORCED,
                 true);
     }
@@ -1103,7 +1103,7 @@ public class MemoryCommandFactory implements XCommandFactory {
     }
     
     @Override
-    public XRepositoryCommand createSafeRemoveModelCommand(XID repositoryId, XID modelId,
+    public XRepositoryCommand createSafeRemoveModelCommand(XId repositoryId, XId modelId,
             long modelRevision) {
         if(modelRevision == XCommand.FORCED) {
             throw new IllegalArgumentException(
@@ -1113,7 +1113,7 @@ public class MemoryCommandFactory implements XCommandFactory {
     }
     
     @Override
-    public XRepositoryCommand createForcedRemoveModelCommand(XID repositoryId, XID modelId) {
+    public XRepositoryCommand createForcedRemoveModelCommand(XId repositoryId, XId modelId) {
         return createRemoveModelCommand(repositoryId, modelId, XCommand.FORCED, true);
     }
     
@@ -1133,7 +1133,7 @@ public class MemoryCommandFactory implements XCommandFactory {
     }
     
     @Override
-    public XModelCommand createSafeRemoveObjectCommand(XID repositoryId, XID modelId, XID objectId,
+    public XModelCommand createSafeRemoveObjectCommand(XId repositoryId, XId modelId, XId objectId,
             long objectRevision) {
         if(objectRevision == XCommand.FORCED) {
             throw new IllegalArgumentException(
@@ -1144,7 +1144,7 @@ public class MemoryCommandFactory implements XCommandFactory {
     }
     
     @Override
-    public XModelCommand createForcedRemoveObjectCommand(XID repositoryId, XID modelId, XID objectId) {
+    public XModelCommand createForcedRemoveObjectCommand(XId repositoryId, XId modelId, XId objectId) {
         return createRemoveObjectCommand(repositoryId, modelId, objectId, XCommand.FORCED, true);
     }
     
@@ -1163,8 +1163,8 @@ public class MemoryCommandFactory implements XCommandFactory {
     }
     
     @Override
-    public XFieldCommand createSafeRemoveValueCommand(XID repositoryId, XID modelId, XID objectId,
-            XID fieldId, long fieldRevision) {
+    public XFieldCommand createSafeRemoveValueCommand(XId repositoryId, XId modelId, XId objectId,
+            XId fieldId, long fieldRevision) {
         if(fieldRevision == XCommand.FORCED) {
             throw new IllegalArgumentException(
                     "Safe commands cannot have XCommand.FORCED as their revision number.");
@@ -1174,8 +1174,8 @@ public class MemoryCommandFactory implements XCommandFactory {
     }
     
     @Override
-    public XFieldCommand createForcedRemoveValueCommand(XID repositoryId, XID modelId,
-            XID objectId, XID fieldId) {
+    public XFieldCommand createForcedRemoveValueCommand(XId repositoryId, XId modelId,
+            XId objectId, XId fieldId) {
         return createRemoveValueCommand(repositoryId, modelId, objectId, fieldId, XCommand.FORCED,
                 true);
     }
@@ -1195,7 +1195,7 @@ public class MemoryCommandFactory implements XCommandFactory {
     }
     
     @Override
-    public XModelCommand createSafeAddObjectCommand(XID repositoryId, XID modelId, XID objectId) {
+    public XModelCommand createSafeAddObjectCommand(XId repositoryId, XId modelId, XId objectId) {
         return createAddObjectCommand(repositoryId, modelId, objectId, true);
     }
     

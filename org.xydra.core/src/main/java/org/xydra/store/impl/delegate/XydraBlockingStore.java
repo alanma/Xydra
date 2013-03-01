@@ -3,7 +3,7 @@ package org.xydra.store.impl.delegate;
 import java.util.Set;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
@@ -119,7 +119,7 @@ public interface XydraBlockingStore {
 	 *             problem, typically caused by the hosting platform, i.e. an
 	 *             I/O error.
 	 */
-	boolean checkLogin(XID actorId, String passwordHash) throws IllegalArgumentException,
+	boolean checkLogin(XId actorId, String passwordHash) throws IllegalArgumentException,
 	        QuotaException, TimeoutException, ConnectionException, RequestException,
 	        InternalStoreException;
 	
@@ -143,7 +143,7 @@ public interface XydraBlockingStore {
 	 *         For successful commands that changed something, the return value
 	 *         is always a revision number that can be used to retrieve the
 	 *         corresponding event using
-	 *         {@link #getEvents(XID, String, GetEventsRequest)}
+	 *         {@link #getEvents(XId, String, GetEventsRequest)}
 	 * 
 	 *         Like any other {@link XCommand}, {@link XTransaction}s only
 	 *         "take up" a single revision, which is the one passed to the
@@ -168,10 +168,10 @@ public interface XydraBlockingStore {
 	 *         Even after a the callback's {@link Callback#onSuccess(Object)}
 	 *         method has been called, the change may not actually be returned
 	 *         yet by
-	 *         {@link #getModelSnapshot(XID, String, GetWithAddressRequest)},
-	 *         {@link #getModelIds(XID, String)},
-	 *         {@link #getModelRevision(XID, String, GetWithAddressRequest)} and
-	 *         {@link #getObjectSnapshot(XID, String, GetWithAddressRequest)}
+	 *         {@link #getModelSnapshot(XId, String, GetWithAddressRequest)},
+	 *         {@link #getModelIds(XId, String)},
+	 *         {@link #getModelRevision(XId, String, GetWithAddressRequest)} and
+	 *         {@link #getObjectSnapshot(XId, String, GetWithAddressRequest)}
 	 *         yet. The change will however eventually be returned by those
 	 *         methods, and will stay persistent once it does. Also, no changes
 	 *         with greater revision numbers will become visible before this
@@ -198,7 +198,7 @@ public interface XydraBlockingStore {
 	 * @throws RequestException if the supplied arguments are considered
 	 *             syntactically or semantically invalid
 	 */
-	long executeCommand(XID actorId, String passwordHash, XCommand command)
+	long executeCommand(XId actorId, String passwordHash, XCommand command)
 	        throws IllegalArgumentException, QuotaException, AuthorisationException,
 	        AccessException, TimeoutException, ConnectionException, RequestException,
 	        InternalStoreException;
@@ -244,7 +244,7 @@ public interface XydraBlockingStore {
 	 *             is greater than endRevision; (b) if beginRevision or
 	 *             endRevision are negative
 	 */
-	XEvent[] getEvents(XID actorId, String passwordHash, GetEventsRequest getEventsRequest)
+	XEvent[] getEvents(XId actorId, String passwordHash, GetEventsRequest getEventsRequest)
 	        throws IllegalArgumentException, QuotaException, AuthorisationException,
 	        AccessException, TimeoutException, ConnectionException, RequestException,
 	        InternalStoreException;
@@ -257,7 +257,7 @@ public interface XydraBlockingStore {
 	 *            with "Xydra" to avoid transmitting the same string over the
 	 *            network if the user uses the same password for multiple
 	 *            services. If null, all access is granted.
-	 * @return a Set of all {@link XID} of all {@link XModel XModels} for which
+	 * @return a Set of all {@link XId} of all {@link XModel XModels} for which
 	 *         the given actorId has read-access in the repository.
 	 * @throws IllegalArgumentException if one of the given parameters is null
 	 *             (except passwordHash, which may be null).
@@ -278,7 +278,7 @@ public interface XydraBlockingStore {
 	 * @throws RequestException if the supplied arguments are considered
 	 *             syntactically or semantically invalid
 	 */
-	Set<XID> getModelIds(XID actorId, String passwordHash) throws IllegalArgumentException,
+	Set<XId> getModelIds(XId actorId, String passwordHash) throws IllegalArgumentException,
 	        QuotaException, AuthorisationException, TimeoutException, ConnectionException,
 	        RequestException, InternalStoreException;
 	
@@ -315,7 +315,7 @@ public interface XydraBlockingStore {
 	 * @throws RequestException if the supplied arguments are considered
 	 *             syntactically or semantically invalid
 	 */
-	ModelRevision getModelRevision(XID actorId, String passwordHash,
+	ModelRevision getModelRevision(XId actorId, String passwordHash,
 	        GetWithAddressRequest modelAddress) throws IllegalArgumentException, QuotaException,
 	        AuthorisationException, TimeoutException, ConnectionException, RequestException,
 	        InternalStoreException;
@@ -372,7 +372,7 @@ public interface XydraBlockingStore {
 	 *             Implementation note: Implementation may choose to supply a
 	 *             lazy-loading stub only.
 	 */
-	XReadableModel getModelSnapshot(XID actorId, String passwordHash, GetWithAddressRequest modelAddressRequest)
+	XReadableModel getModelSnapshot(XId actorId, String passwordHash, GetWithAddressRequest modelAddressRequest)
 	        throws IllegalArgumentException, QuotaException, AuthorisationException,
 	        TimeoutException, ConnectionException, RequestException, InternalStoreException;
 	
@@ -415,7 +415,7 @@ public interface XydraBlockingStore {
 	 *             Implementation note: Implementation may chose to supply a
 	 *             lazy-loading stub only.
 	 */
-	XReadableObject getObjectSnapshot(XID actorId, String passwordHash, GetWithAddressRequest objectAddressRequest)
+	XReadableObject getObjectSnapshot(XId actorId, String passwordHash, GetWithAddressRequest objectAddressRequest)
 	        throws IllegalArgumentException, QuotaException, AuthorisationException,
 	        TimeoutException, ConnectionException, RequestException, InternalStoreException;
 	
@@ -452,7 +452,7 @@ public interface XydraBlockingStore {
 	 * @throws RequestException if the supplied arguments are considered
 	 *             syntactically or semantically invalid
 	 */
-	XID getRepositoryId(XID actorId, String passwordHash) throws IllegalArgumentException,
+	XId getRepositoryId(XId actorId, String passwordHash) throws IllegalArgumentException,
 	        QuotaException, AuthorisationException, TimeoutException, ConnectionException,
 	        RequestException, InternalStoreException;
 	

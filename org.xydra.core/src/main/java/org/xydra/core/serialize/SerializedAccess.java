@@ -9,7 +9,7 @@ import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.store.access.XAccessRightDefinition;
 import org.xydra.store.access.XAuthorisationManager;
 import org.xydra.store.access.XGroupDatabaseWithListeners;
@@ -50,11 +50,11 @@ public class SerializedAccess {
 		
 		SerializingUtils.checkElementType(xml, XACCESSDEFINITION_ELEMENT);
 		
-		XID actor = SerializingUtils.toId(SerializingUtils.getRequiredAttribute(xml,
+		XId actor = SerializingUtils.toId(SerializingUtils.getRequiredAttribute(xml,
 		        ACTOR_ATTRIBUTE));
 		XAddress resource = SerializingUtils.toAddress(SerializingUtils.getRequiredAttribute(xml,
 		        RESOURCE_ATTRIBUTE));
-		XID access = SerializingUtils.toId(SerializingUtils.getRequiredAttribute(xml,
+		XId access = SerializingUtils.toId(SerializingUtils.getRequiredAttribute(xml,
 		        ACCESS_ATTRIBUTE));
 		boolean allowed = SerializingUtils.toBoolean(SerializingUtils.getRequiredAttribute(xml,
 		        ALLOWED_ATTRIBUTE));

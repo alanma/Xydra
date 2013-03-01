@@ -1,11 +1,11 @@
 package org.xydra.core.util;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 
 
 /**
- * A common super-type for {@link XID} and {@link Variable}.
+ * A common super-type for {@link XId} and {@link Variable}.
  */
-public interface XidOrVariable extends XID, Variable {
+public interface XidOrVariable extends XId, Variable {
 	
 }

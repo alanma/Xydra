@@ -1,7 +1,7 @@
 package org.xydra.valueindex;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 
 
 /**
@@ -71,14 +71,14 @@ public abstract class StringValueSimpleIndexerAdapter extends XValueIndexer {
 	}
 	
 	/**
-	 * Returns the {@link XID} appended to an empty Strings (i.e.
+	 * Returns the {@link XId} appended to an empty Strings (i.e.
 	 * ""+value.toString()).
 	 * 
-	 * @returns the {@link XID} appended to an empty Strings (i.e.
+	 * @returns the {@link XId} appended to an empty Strings (i.e.
 	 *          ""+value.toString()).
 	 */
 	@Override
-	public String getIdIndexString(XID value) {
+	public String getIdIndexString(XId value) {
 		return "" + value.toString().toLowerCase();
 	}
 	

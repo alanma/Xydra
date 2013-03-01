@@ -16,11 +16,11 @@ public class WritableUtils {
 	public static void deleteAllModels(XWritableRepository repository) {
 		// TODO if the model.iterator() support remove(), document it and change
 		// this code
-		Collection<XID> toBeDeleted = new LinkedList<XID>();
-		for(XID xid : repository) {
+		Collection<XId> toBeDeleted = new LinkedList<XId>();
+		for(XId xid : repository) {
 			toBeDeleted.add(xid);
 		}
-		for(XID xid : toBeDeleted) {
+		for(XId xid : toBeDeleted) {
 			repository.removeModel(xid);
 		}
 	}
@@ -28,16 +28,16 @@ public class WritableUtils {
 	public static void deleteAllObjects(XWritableModel model) {
 		// TODO if the model.iterator() support remove(), document it and change
 		// this code
-		Collection<XID> toBeDeleted = new LinkedList<XID>();
-		for(XID xid : model) {
+		Collection<XId> toBeDeleted = new LinkedList<XId>();
+		for(XId xid : model) {
 			toBeDeleted.add(xid);
 		}
-		for(XID xid : toBeDeleted) {
+		for(XId xid : toBeDeleted) {
 			model.removeObject(xid);
 		}
 	}
 	
-	public static XValue getValue(XWritableModel model, XID objectId, XID fieldId) {
+	public static XValue getValue(XWritableModel model, XId objectId, XId fieldId) {
 		XWritableObject object = model.getObject(objectId);
 		if(object == null) {
 			return null;
@@ -45,7 +45,7 @@ public class WritableUtils {
 		return getValue(object, fieldId);
 	}
 	
-	public static XValue getValue(XWritableObject object, XID fieldId) {
+	public static XValue getValue(XWritableObject object, XId fieldId) {
 		XWritableField field = object.getField(fieldId);
 		if(field == null) {
 			return null;
@@ -53,8 +53,8 @@ public class WritableUtils {
 		return field.getValue();
 	}
 	
-	public static XValue getValue(XWritableRepository repository, XID modelId, XID objectId,
-	        XID fieldId) {
+	public static XValue getValue(XWritableRepository repository, XId modelId, XId objectId,
+	        XId fieldId) {
 		XWritableModel model = repository.getModel(modelId);
 		if(model == null) {
 			return null;
@@ -62,7 +62,7 @@ public class WritableUtils {
 		return getValue(model, objectId, fieldId);
 	}
 	
-	public static void removeValue(XWritableModel model, XID objectId, XID fieldId) {
+	public static void removeValue(XWritableModel model, XId objectId, XId fieldId) {
 		XWritableObject object = model.getObject(objectId);
 		if(object == null) {
 			return;
@@ -70,7 +70,7 @@ public class WritableUtils {
 		removeValue(object, fieldId);
 	}
 	
-	public static void removeValue(XWritableObject object, XID fieldId) {
+	public static void removeValue(XWritableObject object, XId fieldId) {
 		XWritableField field = object.getField(fieldId);
 		if(field == null) {
 			return;
@@ -78,8 +78,8 @@ public class WritableUtils {
 		field.setValue(null);
 	}
 	
-	public static void removeValue(XWritableRepository repository, XID modelId, XID objectId,
-	        XID fieldId) {
+	public static void removeValue(XWritableRepository repository, XId modelId, XId objectId,
+	        XId fieldId) {
 		XWritableModel model = repository.getModel(modelId);
 		if(model == null) {
 			return;
@@ -87,7 +87,7 @@ public class WritableUtils {
 		removeValue(model, objectId, fieldId);
 	}
 	
-	public static boolean setValue(XWritableModel model, XID objectId, XID fieldId, XValue value) {
+	public static boolean setValue(XWritableModel model, XId objectId, XId fieldId, XValue value) {
 		XWritableObject object = model.getObject(objectId);
 		boolean changed = false;
 		if(object == null) {
@@ -98,7 +98,7 @@ public class WritableUtils {
 		return changed | setValue(object, fieldId, value);
 	}
 	
-	public static boolean setValue(XWritableObject object, XID fieldId, XValue value) {
+	public static boolean setValue(XWritableObject object, XId fieldId, XValue value) {
 		XWritableField field = object.getField(fieldId);
 		boolean changed = false;
 		if(field == null) {
@@ -117,8 +117,8 @@ public class WritableUtils {
 	 * @param value can be null
 	 * @return true if the operation changed something
 	 */
-	public static boolean setValue(XWritableRepository repository, XID modelId, XID objectId,
-	        XID fieldId, XValue value) {
+	public static boolean setValue(XWritableRepository repository, XId modelId, XId objectId,
+	        XId fieldId, XValue value) {
 		XWritableModel model = repository.getModel(modelId);
 		boolean changed = false;
 		if(model == null) {

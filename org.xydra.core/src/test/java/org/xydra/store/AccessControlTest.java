@@ -7,7 +7,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.core.LoggerTestHelper;
 import org.xydra.store.access.HashUtils;
@@ -24,13 +24,13 @@ import org.xydra.store.impl.memory.SecureMemoryStore;
  */
 public class AccessControlTest {
 	
-	static final XID groupA = XX.toId("groupA");
+	static final XId groupA = XX.toId("groupA");
 	
-	static final XID groupB = XX.toId("groupB");
+	static final XId groupB = XX.toId("groupB");
 	
-	static final XID user1 = XX.toId("user1");
+	static final XId user1 = XX.toId("user1");
 	
-	static final XID user2 = XX.toId("user2");
+	static final XId user2 = XX.toId("user2");
 	
 	@BeforeClass
 	public static void init() {

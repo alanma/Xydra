@@ -1,6 +1,6 @@
 package org.xydra.core.model.impl.memory;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XFieldCommand;
@@ -18,14 +18,14 @@ import org.xydra.sharedutils.XyAssert;
 
 public class MemoryLocalChange implements XLocalChange {
 	
-	private final XID actor;
+	private final XId actor;
 	private boolean applied = false;
 	private final XLocalChangeCallback callback;
 	private XCommand command;
 	private final String passwordHash;
 	private long result;
 	
-	public MemoryLocalChange(XID actor, String passwordHash, XCommand command,
+	public MemoryLocalChange(XId actor, String passwordHash, XCommand command,
 	        XLocalChangeCallback callback) {
 		this.actor = actor;
 		this.passwordHash = passwordHash;
@@ -34,7 +34,7 @@ public class MemoryLocalChange implements XLocalChange {
 	}
 	
 	@Override
-	public XID getActor() {
+	public XId getActor() {
 		return this.actor;
 	}
 	

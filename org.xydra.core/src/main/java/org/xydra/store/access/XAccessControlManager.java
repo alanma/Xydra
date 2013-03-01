@@ -1,6 +1,6 @@
 package org.xydra.store.access;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.core.model.XModel;
 import org.xydra.store.NamingUtils;
@@ -23,10 +23,10 @@ import org.xydra.store.impl.delegate.XModelArm;
 public interface XAccessControlManager {
 	
 	/**
-	 * XID of <em>internal</em> admin account -- see security warning in
+	 * XId of <em>internal</em> admin account -- see security warning in
 	 * interface comment
 	 */
-	public static final XID INTERNAL_ADMIN_ACCOUNT = XX.toId(NamingUtils.PREFIX_INTERNAL
+	public static final XId INTERNAL_ADMIN_ACCOUNT = XX.toId(NamingUtils.PREFIX_INTERNAL
 	        + NamingUtils.NAMESPACE_SEPARATOR + "InternalXydraAdmin");
 	
 	/**
@@ -56,6 +56,6 @@ public interface XAccessControlManager {
 	 * @return true if the (actorId/passwordHash) combination is a valid
 	 *         account.
 	 */
-	boolean isAuthenticated(XID actorId, String passwordHash);
+	boolean isAuthenticated(XId actorId, String passwordHash);
 	
 }

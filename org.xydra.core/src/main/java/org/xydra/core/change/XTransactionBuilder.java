@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XAtomicCommand;
@@ -147,56 +147,20 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
     
     /**
      * Adds an {@link XCommand} to the transaction which is being built which
-     * will add an {@link XObject} or {@link XField} according to the set
-     * {@link XID XIDs} in the given {@link XAddress}. If only the object
-     * {@link XID} is set the created {@link XCommand} will add an
-     * {@link XObject}, if the field {@link XID} is set an {@link XField} will
-     * be added. If neither are set, no {@link XCommand} will be created.
-     * 
-     * @param address The {@link XAddress} defining which kind of entity will be
-     *            added (this address will also be the {@link XAddress} of the
-     *            newly created entity after the execution of the
-     *            transaction/command).
-     * @param revision {@link XCommand#SAFE} or {@link XCommand#FORCED}, to
-     *            define whether the {@link XCommand} which is to be created
-     *            shall be a forced or a safe event.
-     * 
-     * @throws IllegalArgumentException if this builders target doesn't contain
-     *             the given {@link XAddress} or if the given revision number is
-     *             neither {@link XCommand#SAFE} or {@link XCommand#FORCED}.
-     * @deprecated Untested code, might work.
-     */
-    @Deprecated
-    public void addEntity(XAddress address, long revision) {
-        if(revision != XCommand.SAFE && revision != XCommand.FORCED) {
-            throw new IllegalArgumentException(
-                    "given revision number needs to be XCommand.SAFE or XCommand.FORCED, was "
-                            + revision);
-        }
-        
-        if(address.getField() == null) {
-            addObject(address.getParent(), revision, address.getObject());
-        } else {
-            addField(address.getParent(), revision, address.getField());
-        }
-    }
-    
-    /**
-     * Adds an {@link XCommand} to the transaction which is being built which
-     * will add and {@link XField} with the given {@link XID}.
+     * will add and {@link XField} with the given {@link XId}.
      * 
      * @param objectAddr The {@link XAddress} of the {@link XObject} to which
      *            the {@link XField} is to be added.
      * @param revision {@link XCommand#SAFE} or {@link XCommand#FORCED}, to
      *            define whether the {@link XCommand} which is to be created
      *            shall be a forced or a safe event
-     * @param fieldId The {@link XID} of the {@link XField} which will be added
+     * @param fieldId The {@link XId} of the {@link XField} which will be added
      * 
      * @throws IllegalArgumentException if this builders target doesn't contain
      *             the given {@link XAddress} or if the given revision number is
      *             neither {@link XCommand#SAFE} or {@link XCommand#FORCED}.
      */
-    public void addField(XAddress objectAddr, long revision, XID fieldId) {
+    public void addField(XAddress objectAddr, long revision, XId fieldId) {
         if(revision != XCommand.SAFE && revision != XCommand.FORCED) {
             throw new IllegalArgumentException(
                     "given revision number needs to be XCommand.SAFE or XCommand.FORCED, was "
@@ -246,21 +210,21 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
     
     /**
      * Adds an {@link XCommand} to the transaction which is being built which
-     * will will add an {@link XObject} with the given {@link XID}.
+     * will will add an {@link XObject} with the given {@link XId}.
      * 
      * @param modelAddr The {@link XAddress} of the {@link XModel} to which the
      *            {@link XObject} is to be added.
      * @param revision {@link XCommand#SAFE} or {@link XCommand#FORCED}, to
      *            define whether the {@link XCommand} which is to be created
      *            shall be a forced or a safe event
-     * @param objectId The {@link XID} for the {@link XObject} which will be
+     * @param objectId The {@link XId} for the {@link XObject} which will be
      *            added
      * 
      * @throws IllegalArgumentException if this builders target doesn't contain
      *             the given {@link XAddress} or if the given revision number is
      *             neither {@link XCommand#SAFE} or {@link XCommand#FORCED}.
      */
-    public void addObject(XAddress modelAddr, long revision, XID objectId) {
+    public void addObject(XAddress modelAddr, long revision, XId objectId) {
         if(revision != XCommand.SAFE && revision != XCommand.FORCED) {
             throw new IllegalArgumentException(
                     "given revision number needs to be XCommand.SAFE or XCommand.FORCED, was "
@@ -305,7 +269,7 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
         XAddress objectAddr = XX.resolveObject(modelAddr, newObject.getId());
         addObject(modelAddr, forced ? XCommand.FORCED : XCommand.SAFE, newObject.getId());
         assert createsNoTargetAddressTwice(newObject.getAddress()) : newObject.getAddress();
-        for(XID newFieldId : newObject) {
+        for(XId newFieldId : newObject) {
             addField(objectAddr, newObject.getField(newFieldId), forced);
             assert createsNoTargetAddressTwice(newObject.getAddress()) : newObject.getAddress();
         }
@@ -371,7 +335,7 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
         
         XyAssert.xyAssert(createsNoTargetAddressTwice(object.getAddress()));
         
-        for(XID fieldId : object.getRemovedFields()) {
+        for(XId fieldId : object.getRemovedFields()) {
             XReadableField field = object.getOldField(fieldId);
             removeField(field);
         }
@@ -413,7 +377,7 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
         XyAssert.xyAssert(model.checkSetInvariants());
         XyAssert.xyAssert(createsNoTargetAddressTwice(model.getAddress()));
         
-        for(XID objectId : model.getRemovedObjects()) {
+        for(XId objectId : model.getRemovedObjects()) {
             XReadableObject object = model.getOldObject(objectId);
             removeObject(object);
         }
@@ -485,8 +449,8 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
      * it is in while this method is being executed. Revision numbers in the new
      * {@link XField} are ignored.
      * 
-     * The {@link XRepository}, {@link XModel} and {@link XObject} {@link XID
-     * XIDs} the created {@link XCommand XCommands} will refer to will be taken
+     * The {@link XRepository}, {@link XModel} and {@link XObject} {@link XId
+     * XIds} the created {@link XCommand XCommands} will refer to will be taken
      * from the old {@link XField}.
      * 
      * @param oldField The old {@link XField} that is to be changed.
@@ -519,20 +483,20 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
      * @throws IllegalArgumentException if this builders target is not oldModel
      */
     /*
-     * FIXME 2012-02 All of the change-Methods here have the same problem: It is
-     * possible that someone will change the state of the given
+     * FIXME CONCURRENCY 2012-02 All of the change-Methods here have the same
+     * problem: It is possible that someone will change the state of the given
      * model/object/etc. while the method is being executed, which may result in
      * incoherent transformations. We'll probably need a way to lock the
      * entities while these methods are being executed. Max: Yes.
      */
     public void changeModel(XReadableModel oldModel, XReadableModel newModel)
             throws IllegalArgumentException {
-        for(XID oldObjectId : oldModel) {
+        for(XId oldObjectId : oldModel) {
             if(!newModel.hasObject(oldObjectId)) {
                 removeObject(oldModel.getObject(oldObjectId));
             }
         }
-        for(XID newObjectId : newModel) {
+        for(XId newObjectId : newModel) {
             setObject(oldModel, newModel.getObject(newObjectId));
         }
     }
@@ -546,7 +510,7 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
      * state it is in while this method is being executed. Revision numbers in
      * the new {@link XObject} are ignored.
      * 
-     * The {@link XRepository} and {@link XModel} {@link XID XIDs} the created
+     * The {@link XRepository} and {@link XModel} {@link XId XIds} the created
      * {@link XCommand XCommands} will be taken from the old {@link XObject}.
      * 
      * @param oldObject The old {@link XObject} that is to be changed.
@@ -557,12 +521,12 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
      *             oldObject or its parent {@link XModel}.
      */
     public void changeObject(XReadableObject oldObject, XReadableObject newObject) {
-        for(XID oldFieldId : oldObject) {
+        for(XId oldFieldId : oldObject) {
             if(!newObject.hasField(oldFieldId)) {
                 removeField(oldObject.getField(oldFieldId));
             }
         }
-        for(XID newFieldId : newObject) {
+        for(XId newFieldId : newObject) {
             setField(oldObject, newObject.getField(newFieldId));
         }
     }
@@ -725,46 +689,19 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
     
     /**
      * Adds an {@link XCommand} to the transaction which is being built which
-     * will remove the {@link XObject} or {@link XField} specified by the given
-     * {@link XAddress}.
-     * 
-     * @param address The {@link XAddress} of the entity which is to be removed.
-     * @param revision The old revision number of the entity or
-     *            {@link XCommand#FORCED} .
-     * 
-     * @throws IllegalArgumentException if this builders target doesn't contain
-     *             the entity with the given {@link XAddress}.
-     * @deprecated Untested code, might work.
-     */
-    @Deprecated
-    public void removeEntity(XAddress address, long revision) {
-        if(revision != XCommand.SAFE && revision != XCommand.FORCED) {
-            throw new IllegalArgumentException(
-                    "given revision number needs to be XCommand.SAFE or XCommand.FORCED, was "
-                            + revision);
-        }
-        if(address.getField() == null) {
-            removeObject(address.getParent(), revision, address.getObject());
-        } else {
-            removeField(address.getParent(), revision, address.getField());
-        }
-    }
-    
-    /**
-     * Adds an {@link XCommand} to the transaction which is being built which
      * will remove the {@link XField} specified by the given {@link XAddress}
-     * and {@link XID}.
+     * and {@link XId}.
      * 
      * @param objectAddr The {@link XAddress} of the {@link XObject} which is
      *            supposed to hold the {@link XField} which is be removed.
      * @param revision The old revision number of the {@link XField} or
      *            {@link XCommand#FORCED}
-     * @param fieldId The {@link XID} of the {@link XField} being removed.
+     * @param fieldId The {@link XId} of the {@link XField} being removed.
      * 
      * @throws IllegalArgumentException if this builders target doesn't contain
      *             the given {@link XField}.
      */
-    public void removeField(XAddress objectAddr, long revision, XID fieldId) {
+    public void removeField(XAddress objectAddr, long revision, XId fieldId) {
         addCommand(MemoryObjectCommand.createRemoveCommand(objectAddr, revision, fieldId));
     }
     
@@ -789,19 +726,19 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
     /**
      * Adds an {@link XCommand} to the transaction which is being built which
      * will remove the {@link XObject} specified by the given {@link XAddress}
-     * and {@link XID}.
+     * and {@link XId}.
      * 
      * @param modelAddr The {@link XAddress} of the {@link XModel} which is to
      *            supposed to hold the {@link XObject} which is to be removed
      * @param revision The old revision number of the {@link XObject} or
      *            {@link XCommand#FORCED}
-     * @param objectId The {@link XID} of the {@link XObject} which will be
+     * @param objectId The {@link XId} of the {@link XObject} which will be
      *            removed.
      * 
      * @throws IllegalArgumentException if this builders target doesn't contain
      *             the given {@link XObject}.
      */
-    public void removeObject(XAddress modelAddr, long revision, XID objectId) {
+    public void removeObject(XAddress modelAddr, long revision, XId objectId) {
         addCommand(MemoryModelCommand.createRemoveCommand(modelAddr, revision, objectId));
     }
     
@@ -877,8 +814,8 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
      * state it is in while this method is being executed. Revision numbers in
      * the new {@link XField} are ignored.
      * 
-     * The {@link XRepository}, {@link XModel} and {@link XObject} {@link XID
-     * XIDs} the created {@link XCommand XCommands} will refer to will be taken
+     * The {@link XRepository}, {@link XModel} and {@link XObject} {@link XId
+     * XIds} the created {@link XCommand XCommands} will refer to will be taken
      * from the old {@link XObject}.
      * 
      * @param oldObject The old {@link XObject} that is to be changed.
@@ -920,7 +857,7 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
      * it is in while this method is being executed. Revision numbers in the new
      * {@link XObject} are ignored.
      * 
-     * The {@link XRepository} and {@link XModel} {@link XID XIDs} the created
+     * The {@link XRepository} and {@link XModel} {@link XId XIds} the created
      * {@link XCommand XCommands} will refer to will be taken from the old
      * {@link XModel}.
      * 

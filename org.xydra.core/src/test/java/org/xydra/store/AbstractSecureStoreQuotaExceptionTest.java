@@ -1,6 +1,6 @@
 package org.xydra.store;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.store.access.HashUtils;
 
@@ -14,7 +14,7 @@ public abstract class AbstractSecureStoreQuotaExceptionTest extends
         AbstractStoreQuotaExceptionTest {
 	
 	@Override
-	protected XID getIncorrectUser() {
+	protected XId getIncorrectUser() {
 		/*
 		 * By definition of createUniqueID this ID is unknown and is therefore
 		 * not registered in the accountDb

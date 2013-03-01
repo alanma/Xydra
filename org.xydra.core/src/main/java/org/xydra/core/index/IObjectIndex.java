@@ -34,7 +34,7 @@ public interface IObjectIndex {
 	void index(XReadableObject xo);
 	
 	/**
-	 * @param model used to load objects from internally stored XIDs
+	 * @param model used to load objects from internally stored XIds
 	 * @param value
 	 * @return all previously indexed objects (in the given model) that have
 	 *         'value' as the value of the fieldId configured for this index

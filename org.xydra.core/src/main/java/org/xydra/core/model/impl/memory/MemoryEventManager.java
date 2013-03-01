@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.RandomAccess;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XCommand;
@@ -91,7 +91,7 @@ public class MemoryEventManager implements Serializable {
     
     private boolean sending;
     
-    private XID sessionActor;
+    private XId sessionActor;
     
     private String sessionPasswordHash;
     
@@ -112,7 +112,7 @@ public class MemoryEventManager implements Serializable {
      *            logging (may be null)
      * @param syncRev TODO
      */
-    public MemoryEventManager(XID actorId, String passwordHash, MemoryChangeLog log, long syncRev) {
+    public MemoryEventManager(XId actorId, String passwordHash, MemoryChangeLog log, long syncRev) {
         XyAssert.xyAssert(actorId != null);
         assert actorId != null;
         this.sessionActor = actorId;
@@ -285,7 +285,7 @@ public class MemoryEventManager implements Serializable {
      * specified by the given parameters. The created transaction is enqueued
      * and logged if logging is enabled.
      * 
-     * @param actor The {@link XID} of the actor
+     * @param actor The {@link XId} of the actor
      * @param model The {@link MemoryModel} in which the {@link XEvent XEvents}
      *            occurred (may be null, if 'object' is not null)
      * @param object The {@link MemoryObject} in which the {@link XEvent
@@ -295,7 +295,7 @@ public class MemoryEventManager implements Serializable {
      *        the current MemoryEventQueue (value can be retrieved from
      *        getNextPosition())
      */
-    protected void createTransactionEvent(XID actor, MemoryModel model, MemoryObject object,
+    protected void createTransactionEvent(XId actor, MemoryModel model, MemoryObject object,
             int since) {
         
         XyAssert.xyAssert(this.eventQueue instanceof RandomAccess);
@@ -350,7 +350,7 @@ public class MemoryEventManager implements Serializable {
      * Enqueues the given {@link XFieldEvent}.
      * 
      * TODO check whether the given XEntities actually fit to the XEntities
-     * specified by the XIDs in the event
+     * specified by the XIds in the event
      * 
      * @param field The {@link MemoryField} in which this event occurred.
      * @param event The {@link XFieldEvent}.
@@ -369,7 +369,7 @@ public class MemoryEventManager implements Serializable {
      * Enqueues the given {@link XModelEvent}.
      * 
      * TODO check whether the given XEntities actually fit to the XEntities
-     * specified by the XIDs in the event
+     * specified by the XIds in the event
      * 
      * @param model The {@link MemoryModel} in which this event occurred.
      * @param event The {@link XModelEvent}.
@@ -384,7 +384,7 @@ public class MemoryEventManager implements Serializable {
      * Enqueues the given {@link XObjectEvent}.
      * 
      * TODO check whether the given XEntities actually fit to the XEntities
-     * specified by the XIDs in the event
+     * specified by the XIds in the event
      * 
      * @param object The {@link MemoryObject} in which this event occurred.
      * @param event The {@link XObjectEvent}.
@@ -402,7 +402,7 @@ public class MemoryEventManager implements Serializable {
      * Enqueues the given {@link XRepositoryEvent}.
      * 
      * TODO check whether the given XEntities actually fit to the XEntities
-     * specified by the XIDs in the event
+     * specified by the XIds in the event
      * 
      * @param model The {@link MemoryModel} in which this event occurred.
      * @param event The {@link XModelEvent}.
@@ -413,7 +413,7 @@ public class MemoryEventManager implements Serializable {
         enqueueEvent(new EventQueueEntry(repo, null, null, null, event));
     }
     
-    protected XID getActor() {
+    protected XId getActor() {
         return this.sessionActor;
     }
     
@@ -430,7 +430,7 @@ public class MemoryEventManager implements Serializable {
     
     /**
      * Get the position to use for the 'since' parameter of
-     * {@link #createTransactionEvent(XID, MemoryModel, MemoryObject, int)} or
+     * {@link #createTransactionEvent(XId, MemoryModel, MemoryObject, int)} or
      * {@link #cleanEvents(int)} for using all {@link XEvent XEvents} that will
      * be enqueued after the returned value.
      * 
@@ -657,7 +657,7 @@ public class MemoryEventManager implements Serializable {
         return oldLogging;
     }
     
-    protected void setSessionActor(XID actorId, String passwordHash) {
+    protected void setSessionActor(XId actorId, String passwordHash) {
         XyAssert.xyAssert(actorId != null);
         assert actorId != null;
         this.sessionActor = actorId;

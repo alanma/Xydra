@@ -4,7 +4,7 @@ import java.util.Iterator;
 
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
@@ -46,7 +46,7 @@ public class InModelTransactionObject extends AbstractEntity implements XWritabl
 	}
 	
 	@Override
-	public XID getId() {
+	public XId getId() {
 		isValid();
 		
 		return this.address.getObject();
@@ -74,7 +74,7 @@ public class InModelTransactionObject extends AbstractEntity implements XWritabl
 	}
 	
 	@Override
-	public XWritableField createField(XID fieldId) {
+	public XWritableField createField(XId fieldId) {
 		isValid();
 		
 		XCommand fieldCommand = X.getCommandFactory().createSafeAddFieldCommand(this.address,
@@ -86,7 +86,7 @@ public class InModelTransactionObject extends AbstractEntity implements XWritabl
 	}
 	
 	@Override
-	public boolean hasField(XID fieldId) {
+	public boolean hasField(XId fieldId) {
 		isValid();
 		
 		XWritableField field = this.model.getField(XX.toAddress(this.address.getRepository(),
@@ -103,7 +103,7 @@ public class InModelTransactionObject extends AbstractEntity implements XWritabl
 	}
 	
 	@Override
-	public XWritableField getField(XID fieldId) {
+	public XWritableField getField(XId fieldId) {
 		isValid();
 		
 		XAddress fieldAddress = XX.toAddress(this.address.getRepository(), this.address.getModel(),
@@ -112,7 +112,7 @@ public class InModelTransactionObject extends AbstractEntity implements XWritabl
 	}
 	
 	@Override
-	public boolean removeField(XID fieldId) {
+	public boolean removeField(XId fieldId) {
 		isValid();
 		
 		XAddress fieldAddress = XX.toAddress(this.address.getRepository(), this.address.getModel(),
@@ -161,7 +161,7 @@ public class InModelTransactionObject extends AbstractEntity implements XWritabl
 	}
 	
 	@Override
-	public Iterator<XID> iterator() {
+	public Iterator<XId> iterator() {
 		isValid();
 		
 		return this.model.objectIterator(this.getId());

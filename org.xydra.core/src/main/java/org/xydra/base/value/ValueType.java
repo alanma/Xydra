@@ -7,7 +7,7 @@ import java.util.SortedSet;
 import org.xydra.annotations.CanBeNull;
 import org.xydra.annotations.NeverNull;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 
 
 /**
@@ -88,8 +88,8 @@ import org.xydra.base.XID;
  * <th>Xydra type</th>
  * </tr>
  * <tr>
- * <td> {@link XID}</td>
- * <td> {@link XID}</td>
+ * <td> {@link XId}</td>
+ * <td> {@link XId}</td>
  * </tr>
  * <tr>
  * <td> {@link XAddress}</td>
@@ -117,16 +117,16 @@ import org.xydra.base.XID;
  * <td> {@link XAddressSortedSetValue}</td>
  * </tr>
  * <tr>
- * <td>List&lt;XID&gt;</td>
- * <td> {@link XIDListValue}</td>
+ * <td>List&lt;XId&gt;</td>
+ * <td> {@link XIdListValue}</td>
  * </tr>
  * <tr>
- * <td>Set&lt;XID&gt;</td>
- * <td> {@link XIDSetValue}</td>
+ * <td>Set&lt;XId&gt;</td>
+ * <td> {@link XIdSetValue}</td>
  * </tr>
  * <tr>
- * <td>SortedSet&lt;XID&gt;</td>
- * <td> {@link XIDSortedSetValue}</td>
+ * <td>SortedSet&lt;XId&gt;</td>
+ * <td> {@link XIdSortedSetValue}</td>
  * </tr>
  * <tr>
  * <td>List&lt;Boolean&gt;</td>
@@ -160,7 +160,7 @@ public enum ValueType {
     
     Double(XDoubleValue.class, Double.class, null, false, false, true),
     
-    Id(org.xydra.base.XID.class, XID.class, null, false, false, false),
+    Id(org.xydra.base.XId.class, XId.class, null, false, false, false),
     
     Integer(XIntegerValue.class, Integer.class, null, false, false, true),
     
@@ -179,11 +179,11 @@ public enum ValueType {
     
     DoubleList(XDoubleListValue.class, List.class, Double, false, true, false),
     
-    IdList(XIDListValue.class, List.class, Id, false, true, false),
+    IdList(XIdListValue.class, List.class, Id, false, true, false),
     
-    IdSet(XIDSetValue.class, Set.class, Id, true, false, false),
+    IdSet(XIdSetValue.class, Set.class, Id, true, false, false),
     
-    IdSortedSet(XIDSortedSetValue.class, SortedSet.class, Id, true, true, false),
+    IdSortedSet(XIdSortedSetValue.class, SortedSet.class, Id, true, true, false),
     
     IntegerList(XIntegerListValue.class, List.class, Integer, false, true, false),
     
@@ -320,16 +320,16 @@ public enum ValueType {
         if(xydraInterface.equals(XDoubleValue.class)) {
             return Double;
         }
-        if(xydraInterface.equals(XID.class)) {
+        if(xydraInterface.equals(XId.class)) {
             return Id;
         }
-        if(xydraInterface.equals(XIDListValue.class)) {
+        if(xydraInterface.equals(XIdListValue.class)) {
             return IdList;
         }
-        if(xydraInterface.equals(XIDSetValue.class)) {
+        if(xydraInterface.equals(XIdSetValue.class)) {
             return IdSet;
         }
-        if(xydraInterface.equals(XIDSortedSetValue.class)) {
+        if(xydraInterface.equals(XIdSortedSetValue.class)) {
             return IdSortedSet;
         }
         if(xydraInterface.equals(XIntegerListValue.class)) {

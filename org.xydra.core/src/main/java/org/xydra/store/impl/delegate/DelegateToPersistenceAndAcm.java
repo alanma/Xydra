@@ -9,7 +9,7 @@ import java.util.Set;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
@@ -60,7 +60,7 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
     
     private XAccessControlManager acm;
     private XydraPersistence persistence;
-    private transient XID repoIdCached;
+    private transient XId repoIdCached;
     
     /**
      * @param persistence used to persists data (who would have guessed that :-)
@@ -75,7 +75,7 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
         this.acm = acm;
     }
     
-    private XID getRepoId() {
+    private XId getRepoId() {
         if(this.repoIdCached == null) {
             this.repoIdCached = this.persistence.getRepositoryId();
         }
@@ -86,14 +86,14 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
      * @param actorId never null.
      * @param passwordHash if null, acotrId is authorised.
      */
-    private void authorise(XID actorId, String passwordHash) {
+    private void authorise(XId actorId, String passwordHash) {
         if(!checkLogin(actorId, passwordHash)) {
             throw new AuthorisationException("Could not authorise '" + actorId + "'");
         }
     }
     
     @Override
-    public boolean checkLogin(XID actorId, String passwordHash) throws IllegalArgumentException,
+    public boolean checkLogin(XId actorId, String passwordHash) throws IllegalArgumentException,
             QuotaException, TimeoutException, ConnectionException, RequestException,
             InternalStoreException {
         /* null password -> always authorised */
@@ -154,7 +154,7 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
     }
     
     @Override
-    public long executeCommand(XID actorId, String passwordHash, XCommand command)
+    public long executeCommand(XId actorId, String passwordHash, XCommand command)
             throws AccessException {
         XyAssert.xyAssert(actorId != null);
         assert actorId != null;
@@ -177,7 +177,7 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
     }
     
     @Override
-    public XEvent[] getEvents(XID actorId, String passwordHash, GetEventsRequest getEventsRequest) {
+    public XEvent[] getEvents(XId actorId, String passwordHash, GetEventsRequest getEventsRequest) {
         
         if(getEventsRequest == null) {
             throw new RequestException("getEventsRequest must not be null");
@@ -234,7 +234,7 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
                     break;
                 }
                 case XMODEL: {
-                    XID objectId = event.getChangedEntity().getObject();
+                    XId objectId = event.getChangedEntity().getObject();
                     if(!this.acm.getAuthorisationManager().canKnowAboutObject(actorId,
                             XX.resolveModel(event.getChangedEntity()), objectId)) {
                         // filter event out
@@ -246,7 +246,7 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
                 }
                 case XOBJECT:
                 case XFIELD: {
-                    XID fieldId = event.getChangedEntity().getField();
+                    XId fieldId = event.getChangedEntity().getField();
                     // TODO is knowAboutObject enough to get the field event?
                     // ~~max
                     if(!this.acm.getAuthorisationManager().canKnowAboutField(actorId,
@@ -263,13 +263,13 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
     }
     
     @Override
-    public Set<XID> getModelIds(XID actorId, String passwordHash) {
+    public Set<XId> getModelIds(XId actorId, String passwordHash) {
         XyAssert.xyAssert(actorId != null);
         assert actorId != null;
         authorise(actorId, passwordHash);
-        Set<XID> modelIds = new HashSet<XID>();
+        Set<XId> modelIds = new HashSet<XId>();
         synchronized(this.persistence) {
-            for(XID modelId : this.persistence.getManagedModelIds()) {
+            for(XId modelId : this.persistence.getManagedModelIds()) {
                 ModelRevision modelRev = this.persistence
                         .getModelRevision(new GetWithAddressRequest(XX.resolveModel(
                                 this.getRepoId(), modelId), false));
@@ -289,7 +289,7 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
     }
     
     @Override
-    public ModelRevision getModelRevision(XID actorId, String passwordHash,
+    public ModelRevision getModelRevision(XId actorId, String passwordHash,
             GetWithAddressRequest getWithAddressRequest) {
         XyAssert.xyAssert(actorId != null);
         assert actorId != null;
@@ -309,7 +309,7 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
     }
     
     @Override
-    public XReadableModel getModelSnapshot(XID actorId, String passwordHash,
+    public XReadableModel getModelSnapshot(XId actorId, String passwordHash,
             GetWithAddressRequest addressRequest) {
         XyAssert.xyAssert(actorId != null);
         assert actorId != null;
@@ -325,27 +325,27 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
             XWritableModel modelSnapshot = this.persistence.getModelSnapshot(addressRequest);
             // filter out objects & fields which the actor may not see
             if(!triviallyAllowed(passwordHash)) {
-                List<XID> objectIdsToBeRemoved = new LinkedList<XID>();
-                for(XID objectId : modelSnapshot) {
+                List<XId> objectIdsToBeRemoved = new LinkedList<XId>();
+                for(XId objectId : modelSnapshot) {
                     XAddress objectAddress = XX.resolveObject(address, objectId);
                     if(!this.acm.getAuthorisationManager().canRead(actorId, objectAddress)) {
                         objectIdsToBeRemoved.add(objectId);
                     } else {
                         // remove fields the actorId may not READ
-                        List<XID> fieldIdsToBeRemoved = new LinkedList<XID>();
+                        List<XId> fieldIdsToBeRemoved = new LinkedList<XId>();
                         XWritableObject object = modelSnapshot.getObject(objectId);
-                        for(XID fieldId : object) {
+                        for(XId fieldId : object) {
                             if(!this.acm.getAuthorisationManager().canRead(actorId,
                                     XX.resolveField(objectAddress, fieldId))) {
                                 fieldIdsToBeRemoved.add(fieldId);
                             }
                         }
-                        for(XID fieldId : fieldIdsToBeRemoved) {
+                        for(XId fieldId : fieldIdsToBeRemoved) {
                             object.removeField(fieldId);
                         }
                     }
                 }
-                for(XID objectId : objectIdsToBeRemoved) {
+                for(XId objectId : objectIdsToBeRemoved) {
                     modelSnapshot.removeObject(objectId);
                 }
             }
@@ -358,7 +358,7 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
     }
     
     @Override
-    public XReadableObject getObjectSnapshot(XID actorId, String passwordHash,
+    public XReadableObject getObjectSnapshot(XId actorId, String passwordHash,
             GetWithAddressRequest addressRequest) {
         XyAssert.xyAssert(actorId != null);
         assert actorId != null;
@@ -374,14 +374,14 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
             XWritableObject objectSnapshot = this.persistence.getObjectSnapshot(addressRequest);
             if(passwordHash != null) {
                 /* remove fields the actorId may not read */
-                List<XID> toBeRemoved = new LinkedList<XID>();
-                for(XID fieldId : objectSnapshot) {
+                List<XId> toBeRemoved = new LinkedList<XId>();
+                for(XId fieldId : objectSnapshot) {
                     if(!this.acm.getAuthorisationManager().canRead(actorId,
                             XX.resolveField(address, fieldId))) {
                         toBeRemoved.add(fieldId);
                     }
                 }
-                for(XID fieldId : toBeRemoved) {
+                for(XId fieldId : toBeRemoved) {
                     objectSnapshot.removeField(fieldId);
                 }
             }
@@ -397,7 +397,7 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
     }
     
     @Override
-    public XID getRepositoryId(XID actorId, String passwordHash) {
+    public XId getRepositoryId(XId actorId, String passwordHash) {
         XyAssert.xyAssert(actorId != null);
         assert actorId != null;
         authorise(actorId, passwordHash);
@@ -416,7 +416,7 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
     }
     
     @Override
-    public XID getRepositoryId() {
+    public XId getRepositoryId() {
         return this.getRepoId();
     }
     

@@ -15,7 +15,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.XAtomicCommand;
 import org.xydra.base.change.XCommand;
@@ -64,7 +64,7 @@ abstract public class AbstractSynchronizerTest {
      * to have read/write access. Subclasses should initialize this before
      * {@link #setUp()} gets called.
      */
-    protected static XID actorId;
+    protected static XId actorId;
     
     /**
      * The password hash for {@link #actorId}. Subclasses should initialize this
@@ -78,7 +78,7 @@ abstract public class AbstractSynchronizerTest {
      */
     protected static XydraStore store;
     
-    private static final XID NEWMODEL_ID = XX.toId("newmodel");
+    private static final XId NEWMODEL_ID = XX.toId("newmodel");
     
     private XModel model;
     private XAddress repoAddr;
@@ -130,9 +130,9 @@ abstract public class AbstractSynchronizerTest {
     }
     
     /**
-     * Create a phonebook model with the given XID in the store.
+     * Create a phonebook model with the given XId in the store.
      */
-    private void createPhonebook(XID modelId) {
+    private void createPhonebook(XId modelId) {
         XRepositoryCommand createCommand = MemoryRepositoryCommand.createAddCommand(this.repoAddr,
                 XCommand.SAFE, modelId);
         executeCommand(createCommand);
@@ -162,7 +162,7 @@ abstract public class AbstractSynchronizerTest {
         assertTrue("Should not have failed (" + res + "): " + command, res != XCommand.FAILED);
     }
     
-    private XModel loadModel(XID modelId) {
+    private XModel loadModel(XId modelId) {
         
         XReadableModel modelSnapshot = loadModelSnapshot(modelId);
         assertNotNull(modelSnapshot);
@@ -170,7 +170,7 @@ abstract public class AbstractSynchronizerTest {
         return XX.wrap(actorId, passwordHash, modelSnapshot);
     }
     
-    private XReadableModel loadModelSnapshot(XID modelId) {
+    private XReadableModel loadModelSnapshot(XId modelId) {
         XAddress modelAddr = XX.resolveModel(this.repoAddr, modelId);
         
         SynchronousCallbackWithOneResult<BatchedResult<XReadableModel>[]> tc;
@@ -182,7 +182,7 @@ abstract public class AbstractSynchronizerTest {
         return waitForSuccessBatched(tc);
     }
     
-    private void removeModel(XID modelId) {
+    private void removeModel(XId modelId) {
         XyAssert.xyAssert(this.repoAddr != null, "this.repoAddr != null");
         assert this.repoAddr != null;
         executeCommand(MemoryRepositoryCommand.createRemoveCommand(this.repoAddr, XCommand.FORCED,
@@ -202,9 +202,9 @@ abstract public class AbstractSynchronizerTest {
         assertTrue(waitForSuccess(loginCallback));
         
         // get repository address
-        SynchronousCallbackWithOneResult<XID> repoIdCallback = new SynchronousCallbackWithOneResult<XID>();
+        SynchronousCallbackWithOneResult<XId> repoIdCallback = new SynchronousCallbackWithOneResult<XId>();
         store.getRepositoryId(actorId, passwordHash, repoIdCallback);
-        XID repoId = waitForSuccess(repoIdCallback);
+        XId repoId = waitForSuccess(repoIdCallback);
         assertNotNull(repoId);
         this.repoAddr = XX.toAddress(repoId, null, null, null);
         
@@ -314,9 +314,9 @@ abstract public class AbstractSynchronizerTest {
         
     }
     
-    static final XID bobId = XX.toId("Bob");
-    static final XID janeId = XX.toId("Jane");
-    static final XID cookiesId = XX.toId("cookies");
+    static final XId bobId = XX.toId("Bob");
+    static final XId janeId = XX.toId("Jane");
+    static final XId cookiesId = XX.toId("cookies");
     static final XValue cookiesValue = XV.toValue("gone");
     
     @Test
@@ -547,14 +547,14 @@ abstract public class AbstractSynchronizerTest {
         assertTrue(XCompareUtils.equalState(startCopy2, this.model));
         
         // make some remote changes
-        final XID cakesId = XX.toId("cakes");
+        final XId cakesId = XX.toId("cakes");
         XCommand command = MemoryObjectCommand.createAddCommand(
                 this.model.getObject(DemoModelUtil.JOHN_ID).getAddress(), false, cakesId);
         executeCommand(command);
         
         // make more remote changes
-        final XID janeId = XX.toId("Jane");
-        final XID cookiesId = XX.toId("cookies");
+        final XId janeId = XX.toId("Jane");
+        final XId cookiesId = XX.toId("cookies");
         final XValue cookiesValue = XV.toValue("gone");
         final XAddress janeAddr = XX.resolveObject(this.model.getAddress(), janeId);
         final XAddress cookiesAddr = XX.resolveField(janeAddr, cookiesId);
@@ -570,7 +570,7 @@ abstract public class AbstractSynchronizerTest {
         executeCommand(command2);
         
         // and even more remote changes
-        final XID bobId = XX.toId("Bob");
+        final XId bobId = XX.toId("Bob");
         XCommand command4 = MemoryModelCommand.createAddCommand(this.model.getAddress(), false,
                 bobId);
         executeCommand(command4);
@@ -583,7 +583,7 @@ abstract public class AbstractSynchronizerTest {
         tb2.addField(janeAddr, XCommand.SAFE, cakesId);
         assertTrue(this.model.executeCommand(tb2.buildCommand(), tlc1) >= 0);
         // should survive the sync
-        final XID newfieldId = XX.toId("newField");
+        final XId newfieldId = XX.toId("newField");
         this.model.getObject(DemoModelUtil.JOHN_ID).createField(newfieldId);
         // should be reverted on sync
         ForTestLocalChangeCallback tlc2 = new ForTestLocalChangeCallback();
@@ -682,7 +682,7 @@ abstract public class AbstractSynchronizerTest {
         ForTestSynchronizationCallback sc2 = new ForTestSynchronizationCallback();
         
         // Create a command manually.
-        final XID frankId = XX.toId("Frank");
+        final XId frankId = XX.toId("Frank");
         XCommand command = MemoryModelCommand.createAddCommand(this.model.getAddress(), false,
                 frankId);
         
@@ -701,7 +701,7 @@ abstract public class AbstractSynchronizerTest {
         ChangedModel changedModel = new ChangedModel(this.model);
         
         // Make modifications to the changed model.
-        final XID newfieldId = XX.toId("newField");
+        final XId newfieldId = XX.toId("newField");
         changedModel.getObject(DemoModelUtil.JOHN_ID).createField(newfieldId);
         assertTrue(changedModel.removeObject(DemoModelUtil.PETER_ID));
         
@@ -712,7 +712,7 @@ abstract public class AbstractSynchronizerTest {
         XCommand autoCommand = tb.buildCommand();
         
         // We can also modify the model directly.
-        final XID janeId = XX.toId("jane");
+        final XId janeId = XX.toId("jane");
         this.model.createObject(janeId);
         
         // Now apply the command locally. It should be automatically

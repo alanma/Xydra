@@ -7,7 +7,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.access.impl.memory.MemoryAuthorisationManager;
@@ -22,17 +22,17 @@ import org.xydra.store.access.impl.memory.MemoryGroupDatabase;
  */
 abstract public class AbstractAuthorisationManagerTest {
 	
-	private XID access;
+	private XId access;
 	
-	private XID access2;
+	private XId access2;
 	/** member of both groupZero and groupOne */
-	private XID actorAlpha;
+	private XId actorAlpha;
 	/** member of groupZero but not groupOne */
-	private XID actorBeta;
+	private XId actorBeta;
 	private XAuthorisationManager arm;
 	
-	private XID groupOne;
-	private XID groupZero;
+	private XId groupOne;
+	private XId groupZero;
 	private XAddress r;
 	private XAddress rA;
 	
@@ -51,7 +51,7 @@ abstract public class AbstractAuthorisationManagerTest {
 		assertEquals(XAccessRightValue.UNDEFINED, a);
 	}
 	
-	private void checkHasAllAccess(XID actor) {
+	private void checkHasAllAccess(XId actor) {
 		
 		assertAllowed(this.arm.hasAccess(actor, this.r, this.access));
 		assertAllowed(this.arm.hasAccess(actor, this.rA, this.access));
@@ -67,7 +67,7 @@ abstract public class AbstractAuthorisationManagerTest {
 		
 	}
 	
-	private void checkHasNoAccess(XID actor) {
+	private void checkHasNoAccess(XId actor) {
 		
 		assertDenied(this.arm.hasAccess(actor, this.r, this.access));
 		assertDenied(this.arm.hasAccess(actor, this.rA, this.access));
@@ -83,7 +83,7 @@ abstract public class AbstractAuthorisationManagerTest {
 		
 	}
 	
-	private void checkHasUndefinedAccess(XID actor) {
+	private void checkHasUndefinedAccess(XId actor) {
 		
 		assertUndefined(this.arm.hasAccess(actor, this.r, this.access));
 		assertUndefined(this.arm.hasAccess(actor, this.rA, this.access));

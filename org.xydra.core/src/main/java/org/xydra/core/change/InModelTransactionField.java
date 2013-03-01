@@ -2,7 +2,7 @@ package org.xydra.core.change;
 
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XFieldCommand;
@@ -61,7 +61,7 @@ public class InModelTransactionField extends AbstractEntity implements XWritable
 	}
 	
 	@Override
-	public XID getId() {
+	public XId getId() {
 		isValid();
 		
 		return this.address.getField();

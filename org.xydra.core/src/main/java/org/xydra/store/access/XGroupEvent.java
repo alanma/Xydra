@@ -1,6 +1,6 @@
 package org.xydra.store.access;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.ChangeType;
 
 
@@ -13,10 +13,10 @@ import org.xydra.base.change.ChangeType;
 public interface XGroupEvent {
 	
 	/**
-	 * @return the {@link XID} of the actor that is being added to / removed
+	 * @return the {@link XId} of the actor that is being added to / removed
 	 *         from a group
 	 */
-	XID getActor();
+	XId getActor();
 	
 	/**
 	 * Returns the type of this event.
@@ -27,9 +27,9 @@ public interface XGroupEvent {
 	ChangeType getChangeType();
 	
 	/**
-	 * @return the {@link XID} of the group to which an actor is being added /
+	 * @return the {@link XId} of the group to which an actor is being added /
 	 *         removed
 	 */
-	XID getGroup();
+	XId getGroup();
 	
 }

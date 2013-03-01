@@ -3,7 +3,7 @@ package org.xydra.core.index;
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.value.XValue;
 
 
@@ -19,16 +19,16 @@ public interface IBasicUniqueObjectIndex {
 	
 	/**
 	 * @param indexKey to be looked up
-	 * @return the currently indexed XID or null if none found.
+	 * @return the currently indexed XId or null if none found.
 	 */
-	XID lookupID(XValue indexKey);
+	XId lookupID(XValue indexKey);
 	
 	/**
 	 * @param key to be indexed
 	 * @param value to be indexed
 	 * @return the previously indexed value, if any, or null.
 	 */
-	XID index(XValue key, XID value);
+	XId index(XValue key, XId value);
 	
 	/**
 	 * @param indexKey never null
@@ -40,8 +40,8 @@ public interface IBasicUniqueObjectIndex {
 	 * De-index the given value.
 	 * 
 	 * @param key to de-index
-	 * @return the previously indexed XID or null of not found
+	 * @return the previously indexed XId or null of not found
 	 */
-	XID deindex(XValue key);
+	XId deindex(XValue key);
 	
 }

@@ -2,7 +2,7 @@ package org.xydra.store.rmof.impl.delegate;
 
 import org.xydra.base.IHasXAddress;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
 
@@ -19,7 +19,7 @@ public abstract class AbstractWritableOnPersistence implements IHasXAddress {
 		return this.address;
 	}
 	
-	public XID getExecutingActorId() {
+	public XId getExecutingActorId() {
 		return this.executingActorId;
 	}
 	
@@ -32,11 +32,11 @@ public abstract class AbstractWritableOnPersistence implements IHasXAddress {
 	 */
 	protected transient XAddress address;
 	
-	protected XID executingActorId;
+	protected XId executingActorId;
 	
 	protected XydraPersistence persistence;
 	
-	public AbstractWritableOnPersistence(XydraPersistence persistence, XID executingActorId) {
+	public AbstractWritableOnPersistence(XydraPersistence persistence, XId executingActorId) {
 		this.persistence = persistence;
 		this.executingActorId = executingActorId;
 	}

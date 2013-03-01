@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import org.xydra.annotations.CanBeNull;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.value.XAddressListValue;
 import org.xydra.base.value.XAddressSetValue;
 import org.xydra.base.value.XAddressSortedSetValue;
@@ -13,9 +13,9 @@ import org.xydra.base.value.XBooleanListValue;
 import org.xydra.base.value.XBooleanValue;
 import org.xydra.base.value.XDoubleListValue;
 import org.xydra.base.value.XDoubleValue;
-import org.xydra.base.value.XIDListValue;
-import org.xydra.base.value.XIDSetValue;
-import org.xydra.base.value.XIDSortedSetValue;
+import org.xydra.base.value.XIdListValue;
+import org.xydra.base.value.XIdSetValue;
+import org.xydra.base.value.XIdSortedSetValue;
 import org.xydra.base.value.XIntegerListValue;
 import org.xydra.base.value.XIntegerValue;
 import org.xydra.base.value.XLongListValue;
@@ -131,45 +131,45 @@ public class MemoryValueFactory implements XValueFactory {
     }
     
     @Override
-    public XIDListValue createIDListValue(Collection<XID> xids) {
+    public XIdListValue createIdListValue(Collection<XId> xids) {
         if(xids == null)
             return null;
-        return new MemoryIDListValue(xids);
+        return new MemoryIdListValue(xids);
     }
     
     @Override
-    public XIDListValue createIDListValue(XID[] xids) {
+    public XIdListValue createIdListValue(XId[] xids) {
         if(xids == null)
             return null;
-        return new MemoryIDListValue(xids);
+        return new MemoryIdListValue(xids);
     }
     
     @Override
-    public XIDSetValue createIDSetValue(Collection<XID> xids) {
+    public XIdSetValue createIdSetValue(Collection<XId> xids) {
         if(xids == null)
             return null;
-        return new MemoryIDSetValue(xids);
+        return new MemoryIdSetValue(xids);
     }
     
     @Override
-    public XIDSetValue createIDSetValue(XID[] xids) {
+    public XIdSetValue createIdSetValue(XId[] xids) {
         if(xids == null)
             return null;
-        return new MemoryIDSetValue(xids);
+        return new MemoryIdSetValue(xids);
     }
     
     @Override
-    public XIDSortedSetValue createIDSortedSetValue(Collection<XID> xids) {
+    public XIdSortedSetValue createIdSortedSetValue(Collection<XId> xids) {
         if(xids == null)
             return null;
-        return new MemoryIDSortedSetValue(xids);
+        return new MemoryIdSortedSetValue(xids);
     }
     
     @Override
-    public XIDSortedSetValue createIDSortedSetValue(XID[] xids) {
+    public XIdSortedSetValue createIdSortedSetValue(XId[] xids) {
         if(xids == null)
             return null;
-        return new MemoryIDSortedSetValue(xids);
+        return new MemoryIdSortedSetValue(xids);
     }
     
     @Override

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.value.XAddressListValue;
@@ -15,9 +15,9 @@ import org.xydra.base.value.XBooleanListValue;
 import org.xydra.base.value.XBooleanValue;
 import org.xydra.base.value.XDoubleListValue;
 import org.xydra.base.value.XDoubleValue;
-import org.xydra.base.value.XIDListValue;
-import org.xydra.base.value.XIDSetValue;
-import org.xydra.base.value.XIDSortedSetValue;
+import org.xydra.base.value.XIdListValue;
+import org.xydra.base.value.XIdSetValue;
+import org.xydra.base.value.XIdSortedSetValue;
 import org.xydra.base.value.XIntegerListValue;
 import org.xydra.base.value.XIntegerValue;
 import org.xydra.base.value.XLongListValue;
@@ -104,16 +104,16 @@ public abstract class XValueIndexer {
 				indexDoubleArray(fieldAddress, value, ((XDoubleListValue)value).contents());
 				break;
 			case Id:
-				indexId(fieldAddress, value, (XID)value);
+				indexId(fieldAddress, value, (XId)value);
 				break;
 			case IdList:
-				indexIdArray(fieldAddress, value, ((XIDListValue)value).contents());
+				indexIdArray(fieldAddress, value, ((XIdListValue)value).contents());
 				break;
 			case IdSet:
-				indexIdArray(fieldAddress, value, ((XIDSetValue)value).contents());
+				indexIdArray(fieldAddress, value, ((XIdSetValue)value).contents());
 				break;
 			case IdSortedSet:
-				indexIdArray(fieldAddress, value, ((XIDSortedSetValue)value).contents());
+				indexIdArray(fieldAddress, value, ((XIdSortedSetValue)value).contents());
 				break;
 			case Integer:
 				indexInteger(fieldAddress, value, ((XIntegerValue)value).contents());
@@ -207,22 +207,22 @@ public abstract class XValueIndexer {
 			break;
 		
 		case Id:
-			list.add(getIdIndexString((XID)value));
+			list.add(getIdIndexString((XId)value));
 			break;
 		
 		case IdList:
-			for(XID id : ((XIDListValue)value).contents()) {
+			for(XId id : ((XIdListValue)value).contents()) {
 				list.add(getIdIndexString(id));
 			}
 			break;
 		case IdSet:
-			for(XID id : ((XIDSetValue)value).contents()) {
+			for(XId id : ((XIdSetValue)value).contents()) {
 				list.add(getIdIndexString(id));
 			}
 			break;
 		
 		case IdSortedSet:
-			for(XID id : ((XIDSortedSetValue)value).contents()) {
+			for(XId id : ((XIdSortedSetValue)value).contents()) {
 				list.add(getIdIndexString(id));
 			}
 			break;
@@ -319,16 +319,16 @@ public abstract class XValueIndexer {
 				deIndexDoubleArray(fieldAddress, value, ((XDoubleListValue)value).contents());
 				break;
 			case Id:
-				deIndexId(fieldAddress, value, (XID)value);
+				deIndexId(fieldAddress, value, (XId)value);
 				break;
 			case IdList:
-				deIndexIdArray(fieldAddress, value, ((XIDListValue)value).contents());
+				deIndexIdArray(fieldAddress, value, ((XIdListValue)value).contents());
 				break;
 			case IdSet:
-				deIndexIdArray(fieldAddress, value, ((XIDSetValue)value).contents());
+				deIndexIdArray(fieldAddress, value, ((XIdSetValue)value).contents());
 				break;
 			case IdSortedSet:
-				deIndexIdArray(fieldAddress, value, ((XIDSortedSetValue)value).contents());
+				deIndexIdArray(fieldAddress, value, ((XIdSortedSetValue)value).contents());
 				break;
 			case Integer:
 				deIndexInteger(fieldAddress, value, ((XIntegerValue)value).contents());
@@ -621,10 +621,10 @@ public abstract class XValueIndexer {
 	
 	/**
 	 * Indexes the given tuple of {@link XAddress}, {@link XValue} and array of
-	 * {@link XID XIDs} according to the rules of this XValueIndexer and the
+	 * {@link XId XIds} according to the rules of this XValueIndexer and the
 	 * used {@link ValueIndex}.
 	 * 
-	 * This method assumes that the {@link XID XIDs} in the given array are part
+	 * This method assumes that the {@link XId XIds} in the given array are part
 	 * of the contents of the given {@link XValue}. If this is not the case, the
 	 * used {@link ValueIndex} will be in an inconsistent state after calling
 	 * this method.
@@ -632,25 +632,25 @@ public abstract class XValueIndexer {
 	 * @param fieldAddress the {@link XAddress} of the {@link XReadableField},
 	 *            which holds the given value.
 	 * @param value the {@link XValue} which is to be indexed.
-	 * @param ids an array of {@link XID XIDs} which are part of the given
+	 * @param ids an array of {@link XId XIds} which are part of the given
 	 *            {@link XValue}.
 	 * @throws RuntimeException if the given {@link XAddress} is no
 	 *             fieldAddress.
 	 */
-	public void indexIdArray(XAddress fieldAddress, XValue value, XID[] ids) {
+	public void indexIdArray(XAddress fieldAddress, XValue value, XId[] ids) {
 		checkAddress(fieldAddress);
 		
-		for(XID id : ids) {
+		for(XId id : ids) {
 			indexId(fieldAddress, value, id);
 		}
 	}
 	
 	/**
 	 * Deindexes the given tuple of {@link XAddress}, {@link XValue} and array
-	 * of {@link XID XIDs} according to the rules of this XValueIndexer and the
+	 * of {@link XId XIds} according to the rules of this XValueIndexer and the
 	 * used {@link ValueIndex}.
 	 * 
-	 * This method assumes that the {@link XID XIDs} in the given array are part
+	 * This method assumes that the {@link XId XIds} in the given array are part
 	 * of the contents of the given {@link XValue}. If this is not the case, the
 	 * used {@link ValueIndex} will be in an inconsistent state after calling
 	 * this method.
@@ -658,15 +658,15 @@ public abstract class XValueIndexer {
 	 * @param fieldAddress the {@link XAddress} of the {@link XReadableField},
 	 *            which holds the given value.
 	 * @param value the {@link XValue} which is to be deindexed.
-	 * @param ids an array of {@link XID XIDs} which are part of the given
+	 * @param ids an array of {@link XId XIds} which are part of the given
 	 *            {@link XValue}.
 	 * @throws RuntimeException if the given {@link XAddress} is no
 	 *             fieldAddress.
 	 */
-	public void deIndexIdArray(XAddress fieldAddress, XValue value, XID[] ids) {
+	public void deIndexIdArray(XAddress fieldAddress, XValue value, XId[] ids) {
 		checkAddress(fieldAddress);
 		
-		for(XID id : ids) {
+		for(XId id : ids) {
 			deIndexId(fieldAddress, value, id);
 		}
 	}
@@ -1023,10 +1023,10 @@ public abstract class XValueIndexer {
 	
 	/**
 	 * Indexes the given tuple of {@link XAddress}, {@link XValue} and
-	 * {@link XID} according to the rules of this XValueIndexer and the used
+	 * {@link XId} according to the rules of this XValueIndexer and the used
 	 * {@link ValueIndex}.
 	 * 
-	 * This method assumes that the given {@link XID} is part of the contents of
+	 * This method assumes that the given {@link XId} is part of the contents of
 	 * the given {@link XValue}. If this is not the case, the used
 	 * {@link ValueIndex} will be in an inconsistent state after calling this
 	 * method.
@@ -1034,11 +1034,11 @@ public abstract class XValueIndexer {
 	 * @param fieldAddress the {@link XAddress} of the {@link XReadableField},
 	 *            which holds the given value.
 	 * @param value the {@link XValue} which is to be indexed.
-	 * @param id an {@link XID} which is part of the given {@link XValue}.
+	 * @param id an {@link XId} which is part of the given {@link XValue}.
 	 * @throws RuntimeException if the given {@link XAddress} is no
 	 *             fieldAddress.
 	 */
-	public void indexId(XAddress fieldAddress, XValue value, XID id) {
+	public void indexId(XAddress fieldAddress, XValue value, XId id) {
 		checkAddress(fieldAddress);
 		
 		String key = getIdIndexString(id);
@@ -1047,10 +1047,10 @@ public abstract class XValueIndexer {
 	
 	/**
 	 * Deindexes the given tuple of {@link XAddress}, {@link XValue} and
-	 * {@link XID} according to the rules of this XValueIndexer and the used
+	 * {@link XId} according to the rules of this XValueIndexer and the used
 	 * {@link ValueIndex}.
 	 * 
-	 * This method assumes that the given {@link XID} is part of the contents of
+	 * This method assumes that the given {@link XId} is part of the contents of
 	 * the given {@link XValue}. If this is not the case, the used
 	 * {@link ValueIndex} will be in an inconsistent state after calling this
 	 * method.
@@ -1058,11 +1058,11 @@ public abstract class XValueIndexer {
 	 * @param fieldAddress the {@link XAddress} of the {@link XReadableField},
 	 *            which holds the given value.
 	 * @param value the {@link XValue} which is to be deindexed.
-	 * @param id an {@link XID} which is part of the given {@link XValue}.
+	 * @param id an {@link XId} which is part of the given {@link XValue}.
 	 * @throws RuntimeException if the given {@link XAddress} is no
 	 *             fieldAddress.
 	 */
-	public void deIndexId(XAddress fieldAddress, XValue value, XID id) {
+	public void deIndexId(XAddress fieldAddress, XValue value, XId id) {
 		checkAddress(fieldAddress);
 		
 		String key = getIdIndexString(id);
@@ -1224,12 +1224,12 @@ public abstract class XValueIndexer {
 	public abstract String[] getStringIndexStrings(String value);
 	
 	/**
-	 * Returns the String which will be used for indexing the given {@link XID}.
+	 * Returns the String which will be used for indexing the given {@link XId}.
 	 * 
-	 * @param value the {@link XID} which index string is to be returned
-	 * @return the String which will be used for indexing the given {@link XID}.
+	 * @param value the {@link XId} which index string is to be returned
+	 * @return the String which will be used for indexing the given {@link XId}.
 	 */
-	public abstract String getIdIndexString(XID value);
+	public abstract String getIdIndexString(XId value);
 	
 	/**
 	 * Returns the String which will be used for indexing the given

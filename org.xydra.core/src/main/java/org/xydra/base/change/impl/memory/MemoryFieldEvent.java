@@ -1,7 +1,7 @@
 package org.xydra.base.change.impl.memory;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XFieldEvent;
@@ -27,8 +27,8 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
      * Creates an {@link XFieldEvent} of the add-type (an {@link XValue} was
      * added to the {@link XField} this event refers to)
      * 
-     * @param actor The {@link XID} of the actor
-     * @param target The {@link XAddress} of the target - the field {@link XID}
+     * @param actor The {@link XId} of the actor
+     * @param target The {@link XAddress} of the target - the field {@link XId}
      *            of the given address must not be null.
      * @param newValue The added {@link XValue} - must not be null
      * @param objectRevision The revision number of the {@link XObject} holding
@@ -43,7 +43,7 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
      *             equals {@link XEvent#RevisionOfEntityNotSet}
      * @throws IllegalArgumentException if newValue is null
      */
-    public static XFieldEvent createAddEvent(XID actor, XAddress target, XValue newValue,
+    public static XFieldEvent createAddEvent(XId actor, XAddress target, XValue newValue,
             long objectRevision, long fieldRevision, boolean inTransaction) {
         return createAddEvent(actor, target, newValue, RevisionOfEntityNotSet, objectRevision,
                 fieldRevision, inTransaction);
@@ -61,8 +61,8 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
      * Creates an {@link XFieldEvent} of the add-type (an {@link XValue} was
      * added to the {@link XField} this event refers to)
      * 
-     * @param actor The {@link XID} of the actor
-     * @param target The {@link XAddress} of the target - the field {@link XID}
+     * @param actor The {@link XId} of the actor
+     * @param target The {@link XAddress} of the target - the field {@link XId}
      *            of the given address must not be null.
      * @param newValue The added {@link XValue} - must not be null
      * @param modelRevision The revision number of the {@link XModel} holding
@@ -80,7 +80,7 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
      *             equals {@link XEvent#RevisionOfEntityNotSet}
      * @throws IllegalArgumentException if newValue is null
      */
-    public static XFieldEvent createAddEvent(XID actor, XAddress target, XValue newValue,
+    public static XFieldEvent createAddEvent(XId actor, XAddress target, XValue newValue,
             long modelRevision, long objectRevision, long fieldRevision, boolean inTransaction) {
         if(newValue == null) {
             throw new RuntimeException("newValue must not be null for field ADD events");
@@ -101,9 +101,9 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
      * Creates an {@link XFieldEvent} of the change-type (the {@link XValue} of
      * the {@link XField} this event refers to was changed)
      * 
-     * @param actor The {@link XID} of the actor
+     * @param actor The {@link XId} of the actor
      * @param target The {@link XAddress} where this event happened - field
-     *            {@link XID} of the given address must not be null
+     *            {@link XId} of the given address must not be null
      * @param newValue The new {@link XValue} - must not be null
      * @param objectRevision The revision number of the {@link XObject} holding
      *            the {@link XField} this event refers to
@@ -117,7 +117,7 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
      *             equals {@link XEvent#RevisionOfEntityNotSet}
      * @throws IllegalArgumentException if either oldValue or newValue is null
      */
-    public static XFieldEvent createChangeEvent(XID actor, XAddress target, XValue newValue,
+    public static XFieldEvent createChangeEvent(XId actor, XAddress target, XValue newValue,
             long objectRevision, long fieldRevision, boolean inTransaction) {
         return createChangeEvent(actor, target, newValue, RevisionOfEntityNotSet, objectRevision,
                 fieldRevision, inTransaction);
@@ -127,9 +127,9 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
      * Creates an {@link XFieldEvent} of the change-type (the {@link XValue} of
      * the {@link XField} this event refers to was changed)
      * 
-     * @param actor The {@link XID} of the actor
+     * @param actor The {@link XId} of the actor
      * @param target The {@link XAddress} where this event happened - the field
-     *            {@link XID} of the given must not be null
+     *            {@link XId} of the given must not be null
      * @param newValue The new {@link XValue} - must not be null
      * @param modelRevision The revision number of the {@link XModel} holding
      *            the {@link XObject} which holds the {@link XField} this event
@@ -146,7 +146,7 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
      *             equals {@link XEvent#RevisionOfEntityNotSet}
      * @throws IllegalArgumentException if either oldValue or newValue is null
      */
-    public static XFieldEvent createChangeEvent(XID actor, XAddress target, XValue newValue,
+    public static XFieldEvent createChangeEvent(XId actor, XAddress target, XValue newValue,
             long modelRevision, long objectRevision, long fieldRevision, boolean inTransaction) {
         if(newValue == null) {
             throw new IllegalArgumentException("newValue must not be null for field CHANGE events");
@@ -160,8 +160,8 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
      * Creates an {@link XFieldEvent} of the remove-type (the {@link XValue} of
      * the {@link XField XFields} this event refers to was removed)
      * 
-     * @param actor The {@link XID} of the actor
-     * @param target The {@link XAddress} of the target - the field {@link XID}
+     * @param actor The {@link XId} of the actor
+     * @param target The {@link XAddress} of the target - the field {@link XId}
      *            of the given address must not be null.
      * @param objectRevision The revision number of the {@link XObject} holding
      *            the {@link XField} this event refers to.
@@ -178,7 +178,7 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
      *             equals {@link XEvent#RevisionOfEntityNotSet}
      * @throws IllegalArgumentException if oldValue is null
      */
-    public static XFieldEvent createRemoveEvent(XID actor, XAddress target, long objectRevision,
+    public static XFieldEvent createRemoveEvent(XId actor, XAddress target, long objectRevision,
             long fieldRevision, boolean inTransaction, boolean implied) {
         return createRemoveEvent(actor, target, RevisionOfEntityNotSet, objectRevision,
                 fieldRevision, inTransaction, implied);
@@ -188,7 +188,7 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
      * Creates an {@link XFieldEvent} of the remove-type (the {@link XValue} of
      * the {@link XField XFields} this event refers to was removed)
      * 
-     * @param actor The {@link XID} of the actor
+     * @param actor The {@link XId} of the actor
      * @param target The {@link XAddress} of the target - field Id must not be
      *            null.
      * @param modelRevision The revision number of the {@link XModel} holding
@@ -209,7 +209,7 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
      *             equals {@link XEvent#RevisionOfEntityNotSet}
      * @throws IllegalArgumentException if oldValue is null
      */
-    public static XFieldEvent createRemoveEvent(XID actor, XAddress target, long modelRevision,
+    public static XFieldEvent createRemoveEvent(XId actor, XAddress target, long modelRevision,
             long objectRevision, long fieldRevision, boolean inTransaction, boolean implied) {
         return new MemoryFieldEvent(actor, target, null, ChangeType.REMOVE, modelRevision,
                 objectRevision, fieldRevision, inTransaction, implied);
@@ -223,7 +223,7 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
     
     // private constructor, use the createEvent-methods for instantiating a
     // MemoryFieldEvent.
-    protected MemoryFieldEvent(XID actor, XAddress target, XValue newValue, ChangeType changeType,
+    protected MemoryFieldEvent(XId actor, XAddress target, XValue newValue, ChangeType changeType,
             long modelRevision, long objectRevision, long fieldRevision, boolean inTransaction,
             boolean implied) {
         super(target, changeType, actor, inTransaction, implied);

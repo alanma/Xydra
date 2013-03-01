@@ -1,6 +1,6 @@
 package org.xydra.store.impl.delegate;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 
 
 /**
@@ -12,20 +12,20 @@ import org.xydra.base.XID;
 
 public interface XModelArm {
 	
-	boolean hasFieldReadAccess(XID actorId, XID objectId, XID fieldId);
+	boolean hasFieldReadAccess(XId actorId, XId objectId, XId fieldId);
 	
-	boolean hasFieldWriteAccess(XID actorId, XID objectId, XID fieldId);
+	boolean hasFieldWriteAccess(XId actorId, XId objectId, XId fieldId);
 	
 	/**
 	 * @param actorId
 	 * @return true if the actorId has READ-access on the corresponding model or
 	 *         if the actorId is the <em>internal</em> admin account.
 	 */
-	boolean hasModelReadAccess(XID actorId);
+	boolean hasModelReadAccess(XId actorId);
 	
-	boolean hasModelWriteAccess(XID actorId);
+	boolean hasModelWriteAccess(XId actorId);
 	
-	boolean hasObjectReadAccess(XID actorId, XID objectId);
+	boolean hasObjectReadAccess(XId actorId, XId objectId);
 	
-	boolean hasObjectWriteAccess(XID actorId, XID objectId);
+	boolean hasObjectWriteAccess(XId actorId, XId objectId);
 }

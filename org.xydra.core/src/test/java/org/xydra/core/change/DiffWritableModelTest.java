@@ -8,7 +8,7 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.XAtomicCommand;
 import org.xydra.base.change.XTransaction;
@@ -31,11 +31,11 @@ public class DiffWritableModelTest {
 	private SimpleModel base;
 	private DiffWritableModel diffModel;
 	
-	public static final XID phonebook = XX.toId("phonebook");
-	public static final XID adam = XX.toId("adam");
-	public static final XID bert = XX.toId("bert");
-	public static final XID mail = XX.toId("mail");
-	public static final XID fon = XX.toId("fon");
+	public static final XId phonebook = XX.toId("phonebook");
+	public static final XId adam = XX.toId("adam");
+	public static final XId bert = XX.toId("bert");
+	public static final XId mail = XX.toId("mail");
+	public static final XId fon = XX.toId("fon");
 	
 	@Before
 	public void setUp() throws Exception {

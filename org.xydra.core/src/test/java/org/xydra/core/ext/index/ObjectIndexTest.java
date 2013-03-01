@@ -10,7 +10,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xydra.base.X;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.value.XValue;
 import org.xydra.core.LoggerTestHelper;
@@ -32,16 +32,16 @@ public class ObjectIndexTest {
 		String a = "John Doe";
 		String b = "New York";
 		String c = "Sven Väth";
-		XID id1 = X.getIDProvider().fromString("test-id1");
-		XID id2 = X.getIDProvider().fromString("test-id2");
-		XID id3 = X.getIDProvider().createUniqueId();
+		XId id1 = X.getIDProvider().fromString("test-id1");
+		XId id2 = X.getIDProvider().fromString("test-id2");
+		XId id3 = X.getIDProvider().createUniqueId();
 		LinkedList<XValue> list = new LinkedList<XValue>();
 		list.addAll(allSingleValueTypes());
 		list.add(X.getValueFactory().createBooleanListValue(new boolean[] { true, false, true }));
 		list.add(X.getValueFactory().createBinaryValue(new byte[] { 42, 23, 15 }));
 		list.add(X.getValueFactory().createDoubleListValue(new double[] { 2.3, 4.2, 1.5 }));
-		list.add(X.getValueFactory().createIDListValue(new XID[] { id1, id2, id3 }));
-		list.add(X.getValueFactory().createIDSetValue(new XID[] { id1, id2, id3 }));
+		list.add(X.getValueFactory().createIdListValue(new XId[] { id1, id2, id3 }));
+		list.add(X.getValueFactory().createIdSetValue(new XId[] { id1, id2, id3 }));
 		list.add(X.getValueFactory().createIntegerListValue(new int[] { 11, 12, 13 }));
 		list.add(X.getValueFactory().createLongListValue(new long[] { 1234567890, 12, 13 }));
 		list.add(X.getValueFactory().createStringListValue(new String[] { a, b, c }));
@@ -54,7 +54,7 @@ public class ObjectIndexTest {
 	 */
 	public static final List<XValue> allSingleValueTypes() {
 		String a = "John Doe";
-		XID id1 = X.getIDProvider().fromString("test-id1");
+		XId id1 = X.getIDProvider().fromString("test-id1");
 		LinkedList<XValue> list = new LinkedList<XValue>();
 		list.add(X.getValueFactory().createBooleanValue(true));
 		list.add(X.getValueFactory().createDoubleValue(3.1415));
@@ -70,8 +70,8 @@ public class ObjectIndexTest {
 		LoggerTestHelper.init();
 	}
 	
-	private XID actor;
-	private XID emailFieldId;
+	private XId actor;
+	private XId emailFieldId;
 	private IndexFactoryImpl indexFactory;
 	private XObject indexObject;
 	private XModel model;
@@ -132,9 +132,9 @@ public class ObjectIndexTest {
 	}
 	
 	@Test
-	public void testValueToXID() {
+	public void testValueToXId() {
 		for(XValue value : allSingleValueTypes()) {
-			XID id = ObjectIndex.valueToXID(value);
+			XId id = ObjectIndex.valueToXId(value);
 			id.toString();
 		}
 	}

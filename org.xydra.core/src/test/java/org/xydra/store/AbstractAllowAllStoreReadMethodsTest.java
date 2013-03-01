@@ -1,6 +1,6 @@
 package org.xydra.store;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.store.impl.delegate.DelegatingAllowAllStore;
 import org.xydra.store.impl.delegate.XydraPersistence;
@@ -22,7 +22,7 @@ public abstract class AbstractAllowAllStoreReadMethodsTest extends AbstractStore
 	 * We use 'DirkCanDoAll' because that is easier in the debugger.
 	 */
 	@Override
-	protected XID getCorrectUser() {
+	protected XId getCorrectUser() {
 		return XX.toId("DirkCanDoAll");
 	}
 	
@@ -36,7 +36,7 @@ public abstract class AbstractAllowAllStoreReadMethodsTest extends AbstractStore
 	 * else
 	 */
 	@Override
-	protected XID getIncorrectUser() {
+	protected XId getIncorrectUser() {
 		return null;
 	}
 	

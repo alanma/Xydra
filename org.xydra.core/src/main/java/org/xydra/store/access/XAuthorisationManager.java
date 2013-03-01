@@ -3,7 +3,7 @@ package org.xydra.store.access;
 import java.util.Set;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
@@ -42,13 +42,13 @@ public interface XAuthorisationManager {
 	 * Checks whether the specified actor is allowed to execute the given
 	 * {@link XCommand}
 	 * 
-	 * @param actor The {@link XID} of the actor
+	 * @param actor The {@link XId} of the actor
 	 * @param command The {@link XCommand} which is to be checked
 	 * @return return if the actor is allowed to execute the {@link XCommand}
 	 */
-	boolean canExecute(XID actor, XCommand command);
+	boolean canExecute(XId actor, XCommand command);
 	
-	// TODO Why not have a generic canKnowAboutEntity(XID actor, XAddress
+	// TODO Why not have a generic canKnowAboutEntity(XId actor, XAddress
 	// entity) method instead?
 	/**
 	 * @param actor
@@ -57,7 +57,7 @@ public interface XAuthorisationManager {
 	 * @return true if the actor is allowed to know about the existence of the
 	 *         specified {@link XField}
 	 */
-	public boolean canKnowAboutField(XID actor, XAddress objectAddr, XID fieldId);
+	public boolean canKnowAboutField(XId actor, XAddress objectAddr, XId fieldId);
 	
 	/**
 	 * @param actor The actor who wan'ts to access the model.
@@ -66,7 +66,7 @@ public interface XAuthorisationManager {
 	 * @return true if the actor is allowed to know about the existence of the
 	 *         specified {@link XModel}
 	 */
-	public boolean canKnowAboutModel(XID actor, XAddress repoAddr, XID modelId);
+	public boolean canKnowAboutModel(XId actor, XAddress repoAddr, XId modelId);
 	
 	/**
 	 * @param actor
@@ -75,63 +75,63 @@ public interface XAuthorisationManager {
 	 * @return true if the actor is allowed to know about the existence of the
 	 *         specified {@link XObject}
 	 */
-	public boolean canKnowAboutObject(XID actor, XAddress modelAddr, XID objectId);
+	public boolean canKnowAboutObject(XId actor, XAddress modelAddr, XId objectId);
 	
 	/**
 	 * @param actor
 	 * @param resource
 	 * @return true if the actor is allowed to read from the specified resource
 	 */
-	boolean canRead(XID actor, XAddress resource);
+	boolean canRead(XId actor, XAddress resource);
 	
 	/**
 	 * Checks whether the specified actor is allowed to remove the specified
 	 * {@link XField} from the specified {@link XObject}.
 	 * 
-	 * @param actor The {@link XID} of the actor
+	 * @param actor The {@link XId} of the actor
 	 * @param objectAddr The {@link XAddress} of the {@link XObject} for which
 	 *            the allowance of the remove-operation is to be checked.
-	 * @param fieldId The {@link XID} of the {@link XField} the actor would like
+	 * @param fieldId The {@link XId} of the {@link XField} the actor would like
 	 *            to remove
 	 * @return true if the actor is allowed to remove the {@link XField} with
-	 *         the given {@link XID} from the given {@link XObject}
+	 *         the given {@link XId} from the given {@link XObject}
 	 */
-	boolean canRemoveField(XID actor, XAddress objectAddr, XID fieldId);
+	boolean canRemoveField(XId actor, XAddress objectAddr, XId fieldId);
 	
 	/**
 	 * Checks whether the specified actor is allowed to remove the specified
 	 * {@link XModel} from the specified {@link XRepository}.
 	 * 
-	 * @param actor The {@link XID} of the actor
+	 * @param actor The {@link XId} of the actor
 	 * @param repoAddr The {@link XAddress} of the {@link XRepository} for which
 	 *            the allowance of the remove-operation is to be checked.
-	 * @param modelId The {@link XID} of the {@link XModel} the actor would like
+	 * @param modelId The {@link XId} of the {@link XModel} the actor would like
 	 *            to remove
 	 * @return true if the actor is allowed to remove the {@link XModel} with
-	 *         the given {@link XID} from the specified {@link XRepository}
+	 *         the given {@link XId} from the specified {@link XRepository}
 	 */
-	boolean canRemoveModel(XID actor, XAddress repoAddr, XID modelId);
+	boolean canRemoveModel(XId actor, XAddress repoAddr, XId modelId);
 	
 	/**
 	 * Checks whether the specified actor is allowed to remove the specified
 	 * {@link XObject} from the specified {@link XModel}.
 	 * 
-	 * @param actor The {@link XID} of the actor
+	 * @param actor The {@link XId} of the actor
 	 * @param modelAddr The {@link XAddress} of the {@link XModel} for which the
 	 *            allowance of the remove-operation is to be checked.
-	 * @param objectId The {@link XID} of the {@link XObject} the actor would
+	 * @param objectId The {@link XId} of the {@link XObject} the actor would
 	 *            like to remove
 	 * @return true if the actor is allowed to remove the {@link XObject} with
-	 *         the given {@link XID} from the given {@link XModel}
+	 *         the given {@link XId} from the given {@link XModel}
 	 */
-	boolean canRemoveObject(XID actor, XAddress modelAddr, XID objectId);
+	boolean canRemoveObject(XId actor, XAddress modelAddr, XId objectId);
 	
 	/**
 	 * @param actor
 	 * @param resource
 	 * @return true if the actor is allowed to write to the specified resource
 	 */
-	boolean canWrite(XID actor, XAddress resource);
+	boolean canWrite(XId actor, XAddress resource);
 	
 	/**
 	 * Get all actors that have access to a resource.
@@ -146,7 +146,7 @@ public interface XAuthorisationManager {
 	 *         FIXME The documentation of the return value is too unclear to be
 	 *         implemented.
 	 */
-	Pair<Set<XID>,Set<XID>> getActorsWithPermission(XAddress resource, XID access);
+	Pair<Set<XId>,Set<XId>> getActorsWithPermission(XAddress resource, XId access);
 	
 	/**
 	 * @return the internally used {@link XAuthorisationDatabase}, or null if no
@@ -163,7 +163,7 @@ public interface XAuthorisationManager {
 	/**
 	 * Get all types of access an actor has to a resource.
 	 * 
-	 * @param actor The {@link XID} of the actor of whom the access rights are
+	 * @param actor The {@link XId} of the actor of whom the access rights are
 	 *            to be returned.
 	 * @param resource The {@link XAddress} of the resource of which the access
 	 *            rights of the given actor are to be returned.
@@ -171,7 +171,7 @@ public interface XAuthorisationManager {
 	 *         explicitly allowed while permissions in the second set are
 	 *         explicitly denied.
 	 */
-	Pair<Set<XID>,Set<XID>> getPermissions(XID actor, XAddress resource);
+	Pair<Set<XId>,Set<XId>> getPermissions(XId actor, XAddress resource);
 	
 	/**
 	 * Check if an actor has access rights to a specific resource according to
@@ -192,17 +192,17 @@ public interface XAuthorisationManager {
 	 * If there are no rights defined for this actor or his groups on any
 	 * resource in hierarchy to the requested resource, null is returned.
 	 * 
-	 * @param actor The {@link XID} of the actor trying to get access.
+	 * @param actor The {@link XId} of the actor trying to get access.
 	 * @param resource The {@link XAddress} of the resource on which the access
 	 *            rights of the given actor are to be checked.
-	 * @param access The {@link XID} of the type of access being requested.
+	 * @param access The {@link XId} of the type of access being requested.
 	 *            (read, write, ...)
 	 * 
 	 * @return true if the actor has access to the model, null if access is
 	 *         undefined
 	 * 
 	 */
-	XAccessRightValue hasAccess(XID actor, XAddress resource, XID access);
+	XAccessRightValue hasAccess(XId actor, XAddress resource, XId access);
 	
 	/**
 	 * Check if an actor has access rights to any resource in a subtree.
@@ -211,11 +211,11 @@ public interface XAuthorisationManager {
 	 * in the subtree (including the rootResource) but should be much more
 	 * efficient, at least for sparse access managers.
 	 * 
-	 * @param actor The {@link XID} of the actor trying to get access.
+	 * @param actor The {@link XId} of the actor trying to get access.
 	 * @param rootResource The {@link XAddress} of the root resource of the
 	 *            subtree on which the access rights of the given actor are to
 	 *            be checked.
-	 * @param access The {@link XID} of the type of access being requested.
+	 * @param access The {@link XId} of the type of access being requested.
 	 *            (read, write, ...)
 	 * 
 	 * @return true if the actor has access to the model, null if the access is
@@ -223,7 +223,7 @@ public interface XAuthorisationManager {
 	 *         any resource
 	 * 
 	 */
-	XAccessRightValue hasAccessToSubresource(XID actor, XAddress rootResource, XID access);
+	XAccessRightValue hasAccessToSubresource(XId actor, XAddress rootResource, XId access);
 	
 	/**
 	 * Check if an actor has access rights to a whole resource subtree.
@@ -232,11 +232,11 @@ public interface XAuthorisationManager {
 	 * in the subtree but should be much more efficient, at least for sparse
 	 * access managers.
 	 * 
-	 * @param actor The {@link XID} of the actor trying to get access.
+	 * @param actor The {@link XId} of the actor trying to get access.
 	 * @param rootResource The {@link XAddress} of the root resource of the
 	 *            subtree on which the access rights of the given actor are to
 	 *            be checked.
-	 * @param access The {@link XID} of the type of access being requested.
+	 * @param access The {@link XId} of the type of access being requested.
 	 *            (read, write, ...)
 	 * 
 	 * @return true if the actor has access to the model, null if the access is
@@ -244,6 +244,6 @@ public interface XAuthorisationManager {
 	 *         any resource
 	 * 
 	 */
-	XAccessRightValue hasAccessToSubtree(XID actor, XAddress rootResource, XID access);
+	XAccessRightValue hasAccessToSubtree(XId actor, XAddress rootResource, XId access);
 	
 }

@@ -1,7 +1,7 @@
 package org.xydra.base.value;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 
 
 /**
@@ -24,11 +24,11 @@ public interface XAddressSetValue extends XSetValue<XAddress> {
     XAddressSetValue add(XAddress entry);
 	
 	/**
-	 * Returns the contents of this XIDSetValue as an array.
+	 * Returns the contents of this XIdSetValue as an array.
 	 * 
-	 * Note: Changes to the returned array will not affect the XIDSetValue.
+	 * Note: Changes to the returned array will not affect the XIdSetValue.
 	 * 
-	 * @return an array containing the {@link XID} values of this XIDSetValue.
+	 * @return an array containing the {@link XId} values of this XIdSetValue.
 	 */
 	public XAddress[] contents();
 	

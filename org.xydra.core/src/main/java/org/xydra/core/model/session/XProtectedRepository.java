@@ -2,7 +2,7 @@ package org.xydra.core.model.session;
 
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.ReadOperation;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XRepositoryCommand;
 import org.xydra.base.change.XRepositoryEvent;
@@ -23,7 +23,7 @@ import org.xydra.store.AccessException;
 /**
  * An XProtectedRepository is a wrapper (Decorator) for an {@link XRepository}
  * which links the {@link XRepository} with a specific actor (represented by its
- * {@link XID}) and automatically checks the access rights for this actor on the
+ * {@link XId}) and automatically checks the access rights for this actor on the
  * {@link XRepository}, if a method is called and only executes the method, if
  * the actor is allowed to execute it (otherwise {@link AccessException
  * XAccessExceptions} will be thrown).
@@ -39,13 +39,13 @@ public interface XProtectedRepository extends XReadableRepository, XSendsReposit
         XExecutesCommands, XWritableRepository {
 	
 	/**
-	 * Creates a new {@link XModel} with the given {@link XID} and adds it to
+	 * Creates a new {@link XModel} with the given {@link XId} and adds it to
 	 * this XProtectedRepository or returns the already existing {@link XModel}
-	 * if the given {@link XID} was already taken.
+	 * if the given {@link XId} was already taken.
 	 * 
-	 * @param id The {@link XID} for the {@link XModel} which is to be created
+	 * @param id The {@link XId} for the {@link XModel} which is to be created
 	 * @return the newly created {@link XModel} or the already existing
-	 *         {@link XModel} if the given {@link XID} was already taken (both
+	 *         {@link XModel} if the given {@link XId} was already taken (both
 	 *         as an XProtected... linked with the actor of this
 	 *         XProtectedObject)
 	 * @throws AccessException if the actor linked with this field does not have
@@ -54,7 +54,7 @@ public interface XProtectedRepository extends XReadableRepository, XSendsReposit
 	 */
 	@Override
     @ModificationOperation
-	XProtectedModel createModel(XID id);
+	XProtectedModel createModel(XId id);
 	
 	/**
 	 * Executes the given {@link XRepositoryCommand} if possible.
@@ -64,11 +64,11 @@ public interface XProtectedRepository extends XReadableRepository, XSendsReposit
 	 * <ul>
 	 * <li>Remove-type {@link XRepositoryCommand}: the specified {@link XModel}
 	 * does not exist and therefore cannot be removed
-	 * <li>Add-type {@link XRepositoryCommand}: the given {@link XID} is already
-	 * taken and therefore a new {@link XModel} with this {@link XID} cannot be
+	 * <li>Add-type {@link XRepositoryCommand}: the given {@link XId} is already
+	 * taken and therefore a new {@link XModel} with this {@link XId} cannot be
 	 * created
-	 * <li>the repository-{@link XID} in the {@link XRepositoryCommand} does not
-	 * concur with the {@link XID} of this XProtectedRepository
+	 * <li>the repository-{@link XId} in the {@link XRepositoryCommand} does not
+	 * concur with the {@link XId} of this XProtectedRepository
 	 * </ul>
 	 * 
 	 * @param command The {@link XRepositoryCommand} which is to be executed
@@ -90,15 +90,15 @@ public interface XProtectedRepository extends XReadableRepository, XSendsReposit
 	 *         actor that is recorded for change operations. Operations will
 	 *         only succeed if this actor has access.
 	 */
-	XID getActor();
+	XId getActor();
 	
 	/**
 	 * Returns the {@link XModel} contained in this repository with the given
-	 * {@link XID} as an {@link XProtectedModel} linked with the actor of this
+	 * {@link XId} as an {@link XProtectedModel} linked with the actor of this
 	 * XProtectedRepository.
 	 * 
-	 * @param id The {@link XID} of the {@link XModel} which is to be returned
-	 * @return the {@link XModel} with the given {@link XID} as an
+	 * @param id The {@link XId} of the {@link XModel} which is to be returned
+	 * @return the {@link XModel} with the given {@link XId} as an
 	 *         {@link XProtectedModel} linked with the actor of this
 	 *         XProtectedRepository or null if no such {@link XReadableModel}
 	 *         exists in this repository
@@ -108,6 +108,6 @@ public interface XProtectedRepository extends XReadableRepository, XSendsReposit
 	 */
 	@Override
     @ReadOperation
-	XProtectedModel getModel(XID id);
+	XProtectedModel getModel(XId id);
 	
 }

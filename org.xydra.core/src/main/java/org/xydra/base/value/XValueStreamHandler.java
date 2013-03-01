@@ -1,7 +1,7 @@
 package org.xydra.base.value;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.core.serialize.json.JsonSerializer;
 import org.xydra.core.serialize.xml.XmlSerializer;
 
@@ -43,6 +43,6 @@ public interface XValueStreamHandler {
     
     void javaString(String a);
     
-    void xid(XID a);
+    void xid(XId a);
     
 }

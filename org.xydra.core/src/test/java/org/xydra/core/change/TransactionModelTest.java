@@ -10,7 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.change.ChangeType;
@@ -45,11 +45,11 @@ public class TransactionModelTest {
 	
 	@Before
 	public void setup() {
-		XID modelId = XX.createUniqueId();
-		XID objectId = XX.createUniqueId();
-		XID object2Id = XX.createUniqueId();
-		XID fieldId = XX.createUniqueId();
-		XID fieldWithValueId = XX.createUniqueId();
+		XId modelId = XX.createUniqueId();
+		XId objectId = XX.createUniqueId();
+		XId object2Id = XX.createUniqueId();
+		XId fieldId = XX.createUniqueId();
+		XId fieldWithValueId = XX.createUniqueId();
 		
 		MemoryRepository repo = (MemoryRepository)X.createMemoryRepository(XX.toId("testActor"));
 		this.model = repo.createModel(modelId);
@@ -83,7 +83,7 @@ public class TransactionModelTest {
 	public void testCommitSingleModelCommands() {
 		
 		// add a new XObject
-		XID objectId = X.getIDProvider().createUniqueId();
+		XId objectId = X.getIDProvider().createUniqueId();
 		assertFalse(this.transModel.hasObject(objectId) || this.model.hasObject(objectId));
 		
 		this.transModel.createObject(objectId);
@@ -131,7 +131,7 @@ public class TransactionModelTest {
 		        .getObject(this.object.getId());
 		
 		// add a new XField
-		XID fieldId = X.getIDProvider().createUniqueId();
+		XId fieldId = X.getIDProvider().createUniqueId();
 		assertFalse(transObject.hasField(fieldId) || this.object.hasField(fieldId));
 		
 		transObject.createField(fieldId);
@@ -247,8 +247,8 @@ public class TransactionModelTest {
 	@Test
 	public void testCommitTransaction() {
 		// add some objects
-		XID objectId1 = X.getIDProvider().createUniqueId();
-		XID objectId2 = X.getIDProvider().createUniqueId();
+		XId objectId1 = X.getIDProvider().createUniqueId();
+		XId objectId2 = X.getIDProvider().createUniqueId();
 		
 		this.transModel.createObject(objectId1);
 		this.transModel.createObject(objectId2);
@@ -258,9 +258,9 @@ public class TransactionModelTest {
 		this.transModel.removeObject(objectId2);
 		
 		// add some fields
-		XID fieldId1 = X.getIDProvider().createUniqueId();
-		XID fieldId2 = X.getIDProvider().createUniqueId();
-		XID fieldId3 = X.getIDProvider().createUniqueId();
+		XId fieldId1 = X.getIDProvider().createUniqueId();
+		XId fieldId2 = X.getIDProvider().createUniqueId();
+		XId fieldId3 = X.getIDProvider().createUniqueId();
 		
 		InModelTransactionObject transObject = (InModelTransactionObject)this.transModel
 		        .getObject(this.object.getId());
@@ -386,7 +386,7 @@ public class TransactionModelTest {
 	@Test
 	public void testExecuteCommandsWrongXAddress() {
 		XCommandFactory factory = X.getCommandFactory();
-		XID newId = X.getIDProvider().createUniqueId();
+		XId newId = X.getIDProvider().createUniqueId();
 		TestCallback callback = new TestCallback();
 		XAddress randomFieldAddress = XX.toAddress(XX.createUniqueId(), XX.createUniqueId(),
 		        XX.createUniqueId(), XX.createUniqueId());
@@ -429,7 +429,7 @@ public class TransactionModelTest {
 	
 	public void executeCommandsAddObjectCommands(boolean forced) {
 		XCommandFactory factory = X.getCommandFactory();
-		XID newObjectId = X.getIDProvider().createUniqueId();
+		XId newObjectId = X.getIDProvider().createUniqueId();
 		TestCallback callback = new TestCallback();
 		
 		// make sure there is no object with this ID
@@ -489,7 +489,7 @@ public class TransactionModelTest {
 	
 	public void executeCommandsRemoveObjectCommands(boolean forced) {
 		XCommandFactory factory = X.getCommandFactory();
-		XID newObjectId = X.getIDProvider().createUniqueId();
+		XId newObjectId = X.getIDProvider().createUniqueId();
 		TestCallback callback = new TestCallback();
 		
 		// make sure there is no field with this ID
@@ -587,7 +587,7 @@ public class TransactionModelTest {
 	
 	public void executeCommandsAddFieldCommands(boolean forced) {
 		XCommandFactory factory = X.getCommandFactory();
-		XID newFieldId = X.getIDProvider().createUniqueId();
+		XId newFieldId = X.getIDProvider().createUniqueId();
 		TestCallback callback = new TestCallback();
 		InModelTransactionObject transObject = (InModelTransactionObject)this.transModel
 		        .getObject(this.object.getId());
@@ -649,7 +649,7 @@ public class TransactionModelTest {
 	
 	public void executeCommandsRemoveFieldCommands(boolean forced) {
 		XCommandFactory factory = X.getCommandFactory();
-		XID newFieldId = X.getIDProvider().createUniqueId();
+		XId newFieldId = X.getIDProvider().createUniqueId();
 		TestCallback callback = new TestCallback();
 		InModelTransactionObject transObject = (InModelTransactionObject)this.transModel
 		        .getObject(this.object.getId());
@@ -749,7 +749,7 @@ public class TransactionModelTest {
 	
 	public void executeCommandsAddValueCommands(boolean forced) {
 		XCommandFactory factory = X.getCommandFactory();
-		XID newFieldId = X.getIDProvider().createUniqueId();
+		XId newFieldId = X.getIDProvider().createUniqueId();
 		TestCallback callback = new TestCallback();
 		InModelTransactionObject transObject = (InModelTransactionObject)this.transModel
 		        .getObject(this.object.getId());
@@ -868,7 +868,7 @@ public class TransactionModelTest {
 	
 	public void executeCommandsChangeValueCommands(boolean forced) {
 		XCommandFactory factory = X.getCommandFactory();
-		XID newFieldId = X.getIDProvider().createUniqueId();
+		XId newFieldId = X.getIDProvider().createUniqueId();
 		TestCallback callback = new TestCallback();
 		InModelTransactionObject transObject = (InModelTransactionObject)this.transModel
 		        .getObject(this.object.getId());
@@ -995,7 +995,7 @@ public class TransactionModelTest {
 	
 	public void executeCommandsRemoveValueCommands(boolean forced) {
 		XCommandFactory factory = X.getCommandFactory();
-		XID newFieldId = X.getIDProvider().createUniqueId();
+		XId newFieldId = X.getIDProvider().createUniqueId();
 		TestCallback callback = new TestCallback();
 		InModelTransactionObject transObject = (InModelTransactionObject)this.transModel
 		        .getObject(this.object.getId());
@@ -1110,8 +1110,8 @@ public class TransactionModelTest {
 		XTransactionBuilder builder = new XTransactionBuilder(this.model.getAddress());
 		
 		// add some objects
-		XID objectId1 = X.getIDProvider().createUniqueId();
-		XID objectId2 = X.getIDProvider().createUniqueId();
+		XId objectId1 = X.getIDProvider().createUniqueId();
+		XId objectId2 = X.getIDProvider().createUniqueId();
 		
 		builder.addObject(this.model.getAddress(), XCommand.SAFE, objectId1);
 		builder.addObject(this.model.getAddress(), XCommand.SAFE, objectId2);
@@ -1121,14 +1121,14 @@ public class TransactionModelTest {
 		        this.object2.getId());
 		
 		// add some fields
-		XID fieldId1 = X.getIDProvider().createUniqueId();
-		XID fieldId2 = X.getIDProvider().createUniqueId();
+		XId fieldId1 = X.getIDProvider().createUniqueId();
+		XId fieldId2 = X.getIDProvider().createUniqueId();
 		
 		builder.addField(this.object.getAddress(), XCommand.SAFE, fieldId1);
 		builder.addField(this.object.getAddress(), XCommand.SAFE, fieldId2);
 		
 		// add something, remove it again
-		XID temp = X.getIDProvider().createUniqueId();
+		XId temp = X.getIDProvider().createUniqueId();
 		builder.addField(this.object.getAddress(), XCommand.SAFE, temp);
 		builder.removeField(this.object.getAddress(), XCommand.NEW, temp);
 		
@@ -1206,8 +1206,8 @@ public class TransactionModelTest {
 		XTransactionBuilder builder = new XTransactionBuilder(this.model.getAddress());
 		
 		// add some fields
-		XID fieldId1 = X.getIDProvider().createUniqueId();
-		XID fieldId2 = X.getIDProvider().createUniqueId();
+		XId fieldId1 = X.getIDProvider().createUniqueId();
+		XId fieldId2 = X.getIDProvider().createUniqueId();
 		
 		builder.addField(this.object.getAddress(), XCommand.SAFE, fieldId1);
 		builder.addField(this.object.getAddress(), XCommand.SAFE, fieldId2);
@@ -1381,7 +1381,7 @@ public class TransactionModelTest {
 		assertFalse(this.model.isEmpty());
 		
 		// add a new field, remove it, check again
-		XID newObjectId = X.getIDProvider().createUniqueId();
+		XId newObjectId = X.getIDProvider().createUniqueId();
 		this.transModel.createObject(newObjectId);
 		
 		assertTrue(this.transModel.hasObject(newObjectId));
@@ -1398,7 +1398,7 @@ public class TransactionModelTest {
 		assertTrue(this.transModel.hasObject(this.object.getId()));
 		
 		// add an object
-		XID newObjectId = XX.createUniqueId();
+		XId newObjectId = XX.createUniqueId();
 		assertFalse(this.transModel.hasObject(newObjectId));
 		
 		this.transModel.createObject(newObjectId);
@@ -1426,7 +1426,7 @@ public class TransactionModelTest {
 	// Tests for createObject()
 	@Test
 	public void testCreateObject() {
-		XID objectId = XX.createUniqueId();
+		XId objectId = XX.createUniqueId();
 		XWritableObject object = this.transModel.createObject(objectId);
 		
 		assertNotNull(object);
@@ -1448,7 +1448,7 @@ public class TransactionModelTest {
 	@Test
 	public void testRemoveField() {
 		// try to remove a not existing object
-		XID objectId = XX.createUniqueId();
+		XId objectId = XX.createUniqueId();
 		
 		assertFalse(this.transModel.removeObject(objectId));
 		
@@ -1522,7 +1522,7 @@ public class TransactionModelTest {
 		
 		InModelTransactionObject transObject = (InModelTransactionObject)temp;
 		
-		XID fieldId = X.getIDProvider().createUniqueId();
+		XId fieldId = X.getIDProvider().createUniqueId();
 		
 		XWritableField field = transObject.createField(fieldId);
 		assertNotNull(field);
@@ -1549,7 +1549,7 @@ public class TransactionModelTest {
 		InModelTransactionObject transObject = (InModelTransactionObject)temp;
 		
 		// try to remove a not existing field
-		XID fieldId = XX.createUniqueId();
+		XId fieldId = XX.createUniqueId();
 		
 		assertFalse(transObject.removeField(fieldId));
 		

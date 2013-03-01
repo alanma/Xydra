@@ -16,7 +16,7 @@ import org.xydra.core.model.XObject;
  * There are general two types of XCommands. Forced commands and normal (safe)
  * commands. The only difference is, that forced XCommands are always succeeding
  * (they do no pre-checks), whereas safe ones fail, if they cannot be executed.
- * Suppose you want to add an XModel to an XRepository, but your chosen XID is
+ * Suppose you want to add an XModel to an XRepository, but your chosen XId is
  * already taken, executing a safe XCommand will fail and return an error code,
  * whereas the same XCommand with isForced set to true will still "succeed", but
  * actually change nothing. So forced XCommands are used if you do not care if
@@ -84,9 +84,12 @@ public interface XCommand extends Serializable {
     
     /**
      * A threshold indicating that the revision number should be interpreted as
-     * that of another command a batch of commands.
+     * relative to another command in a batch of commands.
      */
     static final long RELATIVE_REV = Long.MAX_VALUE / 2;
+    
+    // TODO make revision numbers in commands stricter & document better
+    static final long NONEXISTANT = SAFE;
     
     /**
      * WHAT will be changed?

@@ -3,7 +3,7 @@ package org.xydra.store.access.impl.delegate;
 import java.util.Set;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.index.query.Pair;
 import org.xydra.store.access.XAccessListener;
 import org.xydra.store.access.XAccessRightDefinition;
@@ -45,7 +45,7 @@ public class HookAuthorisationManagerAndDb extends AbstractAuthorisationManager 
 	}
 	
 	@Override
-    public XAccessRightValue getAccessDefinition(XID actor, XAddress resource, XID access)
+    public XAccessRightValue getAccessDefinition(XId actor, XAddress resource, XId access)
 	        throws IllegalArgumentException {
 		beforeRead();
 		return this.authorisationManager.getAuthorisationDatabase().getAccessDefinition(actor,
@@ -53,7 +53,7 @@ public class HookAuthorisationManagerAndDb extends AbstractAuthorisationManager 
 	}
 	
 	@Override
-    public Pair<Set<XID>,Set<XID>> getActorsWithPermission(XAddress resource, XID access) {
+    public Pair<Set<XId>,Set<XId>> getActorsWithPermission(XAddress resource, XId access) {
 		beforeRead();
 		return this.authorisationManager.getActorsWithPermission(resource, access);
 	}
@@ -79,31 +79,31 @@ public class HookAuthorisationManagerAndDb extends AbstractAuthorisationManager 
 	}
 	
 	@Override
-    public Pair<Set<XID>,Set<XID>> getPermissions(XID actor, XAddress resource) {
+    public Pair<Set<XId>,Set<XId>> getPermissions(XId actor, XAddress resource) {
 		beforeRead();
 		return this.authorisationManager.getPermissions(actor, resource);
 	}
 	
 	@Override
-    public XAccessRightValue hasAccess(XID actor, XAddress resource, XID access) {
+    public XAccessRightValue hasAccess(XId actor, XAddress resource, XId access) {
 		beforeRead();
 		return this.authorisationManager.hasAccess(actor, resource, access);
 	}
 	
 	@Override
-    public XAccessRightValue hasAccessToSubresource(XID actor, XAddress rootResource, XID access) {
+    public XAccessRightValue hasAccessToSubresource(XId actor, XAddress rootResource, XId access) {
 		beforeRead();
 		return this.authorisationManager.hasAccessToSubresource(actor, rootResource, access);
 	}
 	
 	@Override
-    public XAccessRightValue hasAccessToSubtree(XID actor, XAddress rootResource, XID access) {
+    public XAccessRightValue hasAccessToSubtree(XId actor, XAddress rootResource, XId access) {
 		beforeRead();
 		return this.authorisationManager.hasAccessToSubtree(actor, rootResource, access);
 	}
 	
 	@Override
-    public boolean isAccessDefined(XID actor, XAddress resource, XID access) {
+    public boolean isAccessDefined(XId actor, XAddress resource, XId access) {
 		beforeRead();
 		return this.authorisationManager.getAuthorisationDatabase().isAccessDefined(actor,
 		        resource, access);
@@ -115,13 +115,13 @@ public class HookAuthorisationManagerAndDb extends AbstractAuthorisationManager 
 	}
 	
 	@Override
-    public void resetAccess(XID actor, XAddress resource, XID access) {
+    public void resetAccess(XId actor, XAddress resource, XId access) {
 		beforeWrite();
 		this.authorisationManager.getAuthorisationDatabase().resetAccess(actor, resource, access);
 	}
 	
 	@Override
-    public void setAccess(XID actor, XAddress resource, XID access, boolean allowed) {
+    public void setAccess(XId actor, XAddress resource, XId access, boolean allowed) {
 		beforeWrite();
 		this.authorisationManager.getAuthorisationDatabase().setAccess(actor, resource, access,
 		        allowed);

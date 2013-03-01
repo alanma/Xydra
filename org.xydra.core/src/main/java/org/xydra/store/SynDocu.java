@@ -10,9 +10,9 @@ import org.xydra.core.model.sync.XSynchronizer;
  * <h2>Documentation for the sync-process</h2>
  * 
  * The server provides
- * {@link XydraStore#executeCommands(org.xydra.base.XID, String, org.xydra.base.change.XCommand[], Callback)}
+ * {@link XydraStore#executeCommands(org.xydra.base.XId, String, org.xydra.base.change.XCommand[], Callback)}
  * and
- * {@link XydraStore#getEvents(org.xydra.base.XID, String, GetEventsRequest[], Callback)}
+ * {@link XydraStore#getEvents(org.xydra.base.XId, String, GetEventsRequest[], Callback)}
  * - the REST interface allows to do both in one batch command.
  * 
  * <h3>Server-side</h3> Let's take a closer look what happens here. Firs we look

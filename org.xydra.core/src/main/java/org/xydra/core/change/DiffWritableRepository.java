@@ -7,7 +7,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.XAtomicCommand;
 import org.xydra.base.rmof.XWritableModel;
@@ -35,13 +35,13 @@ public class DiffWritableRepository extends AbstractDelegatingWritableRepository
 		super(baseRepository);
 	}
 	
-	protected Map<XID,DiffWritableModel> added = new HashMap<XID,DiffWritableModel>();
-	protected Map<XID,DiffWritableModel> potentiallyChanged = new HashMap<XID,DiffWritableModel>();
-	protected Set<XID> removed = new HashSet<XID>();
+	protected Map<XId,DiffWritableModel> added = new HashMap<XId,DiffWritableModel>();
+	protected Map<XId,DiffWritableModel> potentiallyChanged = new HashMap<XId,DiffWritableModel>();
+	protected Set<XId> removed = new HashSet<XId>();
 	
 	/* make sure to return always the same DiffWritableModel references */
 	@Override
-	public XWritableModel createModel(XID modelId) {
+	public XWritableModel createModel(XId modelId) {
 		if(this.added.containsKey(modelId)) {
 			return this.added.get(modelId);
 		}
@@ -66,23 +66,23 @@ public class DiffWritableRepository extends AbstractDelegatingWritableRepository
 	}
 	
 	@Override
-	public Iterator<XID> iterator() {
+	public Iterator<XId> iterator() {
 		return modelIds().iterator();
 	}
 	
-	private Set<XID> modelIds() {
-		Set<XID> ids = IndexUtils.toSet(this.baseRepository.iterator());
-		for(XID id : this.removed) {
+	private Set<XId> modelIds() {
+		Set<XId> ids = IndexUtils.toSet(this.baseRepository.iterator());
+		for(XId id : this.removed) {
 			ids.remove(id);
 		}
-		for(XID id : this.added.keySet()) {
+		for(XId id : this.added.keySet()) {
 			ids.add(id);
 		}
 		return ids;
 	}
 	
 	@Override
-	public boolean hasModel(XID id) {
+	public boolean hasModel(XId id) {
 		return modelIds().contains(id);
 	}
 	
@@ -93,7 +93,7 @@ public class DiffWritableRepository extends AbstractDelegatingWritableRepository
 	
 	/* make sure to return always the same DiffWritableModel references */
 	@Override
-	public XWritableModel getModel(XID modelId) {
+	public XWritableModel getModel(XId modelId) {
 		XWritableModel model = this.added.get(modelId);
 		if(model == null) {
 			model = this.potentiallyChanged.get(modelId);
@@ -109,7 +109,7 @@ public class DiffWritableRepository extends AbstractDelegatingWritableRepository
 	}
 	
 	@Override
-	public boolean removeModel(XID modelId) {
+	public boolean removeModel(XId modelId) {
 		this.added.remove(modelId);
 		this.potentiallyChanged.remove(modelId);
 		return this.removed.add(modelId);
@@ -123,7 +123,7 @@ public class DiffWritableRepository extends AbstractDelegatingWritableRepository
 		return this.potentiallyChanged.values();
 	}
 	
-	public Set<XID> getRemoved() {
+	public Set<XId> getRemoved() {
 		return this.removed;
 	}
 	
@@ -141,14 +141,14 @@ public class DiffWritableRepository extends AbstractDelegatingWritableRepository
 	
 	public String changesToString() {
 		StringBuffer buf = new StringBuffer();
-		for(XID modelId : this.added.keySet()) {
+		for(XId modelId : this.added.keySet()) {
 			buf.append("=== ADDED " + modelId + " ===<br/>\n");
 			DiffWritableModel model = this.added.get(modelId);
 			for(XAtomicCommand command : model.toCommandList(true)) {
 				buf.append(" " + command + " <br/>\n");
 			}
 		}
-		for(XID modelId : this.removed) {
+		for(XId modelId : this.removed) {
 			buf.append("=== REMOVED " + modelId + " ===<br/>\n");
 		}
 		for(DiffWritableModel model : this.potentiallyChanged.values()) {

@@ -3,7 +3,7 @@ package org.xydra.core.model.impl.memory;
 import java.io.Serializable;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.value.ValueType;
 import org.xydra.core.model.XField;
@@ -24,10 +24,10 @@ public class MemoryAddress implements XAddress, Serializable {
 	private static final long serialVersionUID = -8011996037214695776L;
 	
 	// all fields are non-final, so that this can be used as GWT-DTO
-	private XID field;
-	private XID model;
-	private XID object;
-	private XID repository;
+	private XId field;
+	private XId model;
+	private XId object;
+	private XId repository;
 	
 	/** For GWT only */
 	protected MemoryAddress() {
@@ -36,22 +36,22 @@ public class MemoryAddress implements XAddress, Serializable {
 	/**
 	 * Creates a new MemoryAddress.
 	 * 
-	 * @param repository The {@link XID} of the {@link XRepository} which
+	 * @param repository The {@link XId} of the {@link XRepository} which
 	 *            holds/is the element this address refers to (may be null)
-	 * @param model The {@link XID} of the {@link XModel} which holds/is the
+	 * @param model The {@link XId} of the {@link XModel} which holds/is the
 	 *            element this address refers to (may be null)
-	 * @param object The {@link XID} of the {@link XObject} which holds/is the
+	 * @param object The {@link XId} of the {@link XObject} which holds/is the
 	 *            element this address refers to (may be null)
-	 * @param field The {@link XID} of the {@link XField} which is the element
+	 * @param field The {@link XId} of the {@link XField} which is the element
 	 *            this address refers to (may be null)
 	 * 
-	 * @throws IllegalArgumentException if the given tuple of {@link XID XIDs}
+	 * @throws IllegalArgumentException if the given tuple of {@link XId XIds}
 	 *             specify an illegal {@link XAddress}. Illegal {@link XAddress
 	 *             XAddresses} are of the form (null, null, null, null),
 	 *             (repoID, null, objectId, null or fieldId), (repoID, null,
 	 *             null, fieldId) or (repoID or null, modelId, null, fieldId)
 	 */
-	protected MemoryAddress(XID repository, XID model, XID object, XID field) {
+	protected MemoryAddress(XId repository, XId model, XId object, XId field) {
 		
 		if((repository != null || model != null) && object == null && field != null) {
 			throw new IllegalArgumentException(
@@ -221,17 +221,17 @@ public class MemoryAddress implements XAddress, Serializable {
 	}
 	
 	@Override
-	public XID getField() {
+	public XId getField() {
 		return this.field;
 	}
 	
 	@Override
-	public XID getModel() {
+	public XId getModel() {
 		return this.model;
 	}
 	
 	@Override
-	public XID getObject() {
+	public XId getObject() {
 		return this.object;
 	}
 	
@@ -276,7 +276,7 @@ public class MemoryAddress implements XAddress, Serializable {
 	}
 	
 	@Override
-	public XID getRepository() {
+	public XId getRepository() {
 		return this.repository;
 	}
 	
@@ -333,7 +333,7 @@ public class MemoryAddress implements XAddress, Serializable {
 	/**
 	 * @return a unique, complete representation of this {@link XAddress} with
 	 *         the fixed format = '/' + repoID + '/' + modelId + '/' + objectId
-	 *         + '/' + fieldId. Empty {@link XID XIDs} are represented by '-'.
+	 *         + '/' + fieldId. Empty {@link XId XIds} are represented by '-'.
 	 * 
 	 *         Always starts with '/', never ends with '/'.
 	 */

@@ -3,7 +3,7 @@ package org.xydra.base.change.impl.memory;
 import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XEvent;
@@ -20,8 +20,8 @@ abstract public class MemoryAtomicEvent implements XEvent {
     
     private static final long serialVersionUID = 4051446642240477244L;
     
-    // The XID of the actor of this event.
-    private XID actor;
+    // The XId of the actor of this event.
+    private XId actor;
     
     // The ChangeType
     private @NeverNull
@@ -35,7 +35,7 @@ abstract public class MemoryAtomicEvent implements XEvent {
     
     private XAddress target;
     
-    protected MemoryAtomicEvent(XAddress target, ChangeType changeType, XID actor, boolean inTrans,
+    protected MemoryAtomicEvent(XAddress target, ChangeType changeType, XId actor, boolean inTrans,
             boolean implied) {
         
         if(target == null) {
@@ -88,7 +88,7 @@ abstract public class MemoryAtomicEvent implements XEvent {
     }
     
     @Override
-    public XID getActor() {
+    public XId getActor() {
         return this.actor;
     }
     
@@ -98,26 +98,26 @@ abstract public class MemoryAtomicEvent implements XEvent {
     }
     
     /**
-     * @return the {@link XID} of the {@link XField} holding the entity this
+     * @return the {@link XId} of the {@link XField} holding the entity this
      *         event refers to (may be null)
      */
-    public XID getFieldId() {
+    public XId getFieldId() {
         return this.target.getField();
     }
     
     /**
-     * @return the {@link XID} of the {@link XModel} holding the entity this
+     * @return the {@link XId} of the {@link XModel} holding the entity this
      *         event refers to (may be null)
      */
-    public XID getModelId() {
+    public XId getModelId() {
         return this.target.getModel();
     }
     
     /**
-     * @return the {@link XID} of the {@link XObject} holding the entity this
+     * @return the {@link XId} of the {@link XObject} holding the entity this
      *         event refers to (may be null)
      */
-    public XID getObjectId() {
+    public XId getObjectId() {
         return this.target.getObject();
     }
     
@@ -137,10 +137,10 @@ abstract public class MemoryAtomicEvent implements XEvent {
     }
     
     /**
-     * @return the {@link XID} of the {@link XRepository} holding the entity
+     * @return the {@link XId} of the {@link XRepository} holding the entity
      *         this event refers to (may be null)
      */
-    public XID getRepositoryId() {
+    public XId getRepositoryId() {
         return this.target.getRepository();
     }
     

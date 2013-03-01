@@ -2,7 +2,7 @@ package org.xydra.store.impl.delegate;
 
 import java.util.Set;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XAtomicCommand;
 import org.xydra.base.change.XCommand;
@@ -129,7 +129,7 @@ public class DelegateToSingleOperationStore implements XydraStore {
 	}
 	
 	@Override
-	public void checkLogin(XID actorId, String passwordHash, Callback<Boolean> callback)
+	public void checkLogin(XId actorId, String passwordHash, Callback<Boolean> callback)
 	        throws IllegalArgumentException {
 		DelegationUtils.assertNonNullActorAndPassword(actorId, passwordHash);
 		DelegationUtils.assertNonNullCallback(callback);
@@ -157,7 +157,7 @@ public class DelegateToSingleOperationStore implements XydraStore {
 	private static final Callback<BatchedResult<Long>[]> defaultCommandsCallback = new DefaultCallback<Long>();
 	
 	@Override
-	public void executeCommands(XID actorId, String passwordHash, XCommand[] commands,
+	public void executeCommands(XId actorId, String passwordHash, XCommand[] commands,
 	        Callback<BatchedResult<Long>[]> callbackOrNull) throws IllegalArgumentException {
 		
 		DelegationUtils.assertNonNullActorAndPassword(actorId, passwordHash);
@@ -181,7 +181,7 @@ public class DelegateToSingleOperationStore implements XydraStore {
 		}
 	}
 	
-	private MultiOpCallback<Long> executeCommands(XID actorId, XCommand[] commands,
+	private MultiOpCallback<Long> executeCommands(XId actorId, XCommand[] commands,
 	        Callback<BatchedResult<Long>[]> callback) {
 		
 		MultiOpCallback<Long> multi = new MultiOpCallback<Long>(commands.length, callback);
@@ -296,7 +296,7 @@ public class DelegateToSingleOperationStore implements XydraStore {
 	}
 	
 	@Override
-	public void executeCommandsAndGetEvents(XID actorId, String passwordHash, XCommand[] commands,
+	public void executeCommandsAndGetEvents(XId actorId, String passwordHash, XCommand[] commands,
 	        GetEventsRequest[] getEventRequests,
 	        Callback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> callback)
 	        throws IllegalArgumentException {
@@ -325,7 +325,7 @@ public class DelegateToSingleOperationStore implements XydraStore {
 	}
 	
 	@Override
-	public void getEvents(XID actorId, String passwordHash, GetEventsRequest[] getEventsRequests,
+	public void getEvents(XId actorId, String passwordHash, GetEventsRequest[] getEventsRequests,
 	        Callback<BatchedResult<XEvent[]>[]> callback) throws IllegalArgumentException {
 		
 		DelegationUtils.assertNonNullActorAndPassword(actorId, passwordHash);
@@ -345,7 +345,7 @@ public class DelegateToSingleOperationStore implements XydraStore {
 		}
 	}
 	
-	private MultiOpCallback<XEvent[]> getEvents(XID actorId, GetEventsRequest[] getEventsRequests,
+	private MultiOpCallback<XEvent[]> getEvents(XId actorId, GetEventsRequest[] getEventsRequests,
 	        Callback<BatchedResult<XEvent[]>[]> callback) {
 		
 		MultiOpCallback<XEvent[]> multi = new MultiOpCallback<XEvent[]>(getEventsRequests.length,
@@ -369,7 +369,7 @@ public class DelegateToSingleOperationStore implements XydraStore {
 	}
 	
 	@Override
-	public void getModelIds(XID actorId, String passwordHash, Callback<Set<XID>> callback)
+	public void getModelIds(XId actorId, String passwordHash, Callback<Set<XId>> callback)
 	        throws IllegalArgumentException {
 		DelegationUtils.assertNonNullActorAndPassword(actorId, passwordHash);
 		DelegationUtils.assertNonNullCallback(callback);
@@ -377,7 +377,7 @@ public class DelegateToSingleOperationStore implements XydraStore {
 	}
 	
 	@Override
-	public void getModelRevisions(XID actorId, String passwordHash,
+	public void getModelRevisions(XId actorId, String passwordHash,
 	        GetWithAddressRequest[] modelAddresses,
 	        Callback<BatchedResult<ModelRevision>[]> callback) throws IllegalArgumentException {
 		
@@ -416,7 +416,7 @@ public class DelegateToSingleOperationStore implements XydraStore {
 	}
 	
 	@Override
-	public synchronized void getModelSnapshots(XID actorId, String passwordHash,
+	public synchronized void getModelSnapshots(XId actorId, String passwordHash,
 	        GetWithAddressRequest[] modelAddressRequests,
 	        Callback<BatchedResult<XReadableModel>[]> callback) throws IllegalArgumentException {
 		
@@ -456,7 +456,7 @@ public class DelegateToSingleOperationStore implements XydraStore {
 	}
 	
 	@Override
-	public void getObjectSnapshots(XID actorId, String passwordHash, GetWithAddressRequest[] objectAddressRequests,
+	public void getObjectSnapshots(XId actorId, String passwordHash, GetWithAddressRequest[] objectAddressRequests,
 	        Callback<BatchedResult<XReadableObject>[]> callback) throws IllegalArgumentException {
 		
 		DelegationUtils.assertNonNullActorAndPassword(actorId, passwordHash);
@@ -494,7 +494,7 @@ public class DelegateToSingleOperationStore implements XydraStore {
 	}
 	
 	@Override
-	public void getRepositoryId(XID actorId, String passwordHash, Callback<XID> callback)
+	public void getRepositoryId(XId actorId, String passwordHash, Callback<XId> callback)
 	        throws IllegalArgumentException {
 		DelegationUtils.assertNonNullActorAndPassword(actorId, passwordHash);
 		DelegationUtils.assertNonNullCallback(callback);
@@ -510,10 +510,10 @@ public class DelegateToSingleOperationStore implements XydraStore {
 	 * @param actorId
 	 * @param passwordHash
 	 * @param callback may be null if used in
-	 *            {@link #executeCommands(XID, String, XCommand[], Callback)}
+	 *            {@link #executeCommands(XId, String, XCommand[], Callback)}
 	 * @return
 	 */
-	private synchronized boolean validLogin(XID actorId, String passwordHash, Callback<?> callback) {
+	private synchronized boolean validLogin(XId actorId, String passwordHash, Callback<?> callback) {
 		
 		WaitingCallback<Boolean> loginCallback = new WaitingCallback<Boolean>();
 		this.singleOpStore.checkLogin(actorId, passwordHash, loginCallback);

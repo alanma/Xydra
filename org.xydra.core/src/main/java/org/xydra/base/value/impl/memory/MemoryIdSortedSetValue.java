@@ -7,43 +7,43 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.value.ValueType;
-import org.xydra.base.value.XIDSortedSetValue;
+import org.xydra.base.value.XIdSortedSetValue;
 
 
 /**
- * An implementation of {@link XIDSortedSetValue}
+ * An implementation of {@link XIdSortedSetValue}
  * 
  * @author dscharrer, voelkel
  * 
  */
-public class MemoryIDSortedSetValue extends MemoryIDListValue implements XIDSortedSetValue,
+public class MemoryIdSortedSetValue extends MemoryIdListValue implements XIdSortedSetValue,
         Serializable {
 	
 	private static final long serialVersionUID = -83885798275571937L;
 	
 	// empty constructor for GWT-Serializable
-	protected MemoryIDSortedSetValue() {
+	protected MemoryIdSortedSetValue() {
 	}
 	
-	public MemoryIDSortedSetValue(Collection<XID> contents) {
+	public MemoryIdSortedSetValue(Collection<XId> contents) {
 		super(contents);
 	}
 	
-	public MemoryIDSortedSetValue(XID[] contents) {
+	public MemoryIdSortedSetValue(XId[] contents) {
 		super(contents);
 	}
 	
 	@Override
-	public MemoryIDSortedSetValue add(XID entry) {
+	public MemoryIdSortedSetValue add(XId entry) {
 		if(this.contains(entry)) {
 			// no need to add it
 			return this;
 		} else {
-			XID[] newList = MemoryIDListValue.createArrayWithEntryInsertedAtPosition(
+			XId[] newList = MemoryIdListValue.createArrayWithEntryInsertedAtPosition(
 			        this.contents(), this.contents().length, entry);
-			return new MemoryIDSortedSetValue(newList);
+			return new MemoryIdSortedSetValue(newList);
 		}
 	}
 	
@@ -53,23 +53,23 @@ public class MemoryIDSortedSetValue extends MemoryIDListValue implements XIDSort
 	}
 	
 	@Override
-	public MemoryIDSortedSetValue remove(XID entry) {
+	public MemoryIdSortedSetValue remove(XId entry) {
 		// find it
 		int index = this.indexOf(entry);
 		if(index == -1) {
 			// not possible to remove it
 			return this;
 		} else {
-			XID[] newList = MemoryIDListValue.createArrayWithEntryRemovedAtPosition(
+			XId[] newList = MemoryIdListValue.createArrayWithEntryRemovedAtPosition(
 			        this.contents(), index);
-			return new MemoryIDSortedSetValue(newList);
+			return new MemoryIdSortedSetValue(newList);
 		}
 	}
 	
 	@Override
-	public Set<XID> toSet() {
-		Set<XID> copy = new HashSet<XID>();
-		XID[] list = this.contents();
+	public Set<XId> toSet() {
+		Set<XId> copy = new HashSet<XId>();
+		XId[] list = this.contents();
 		for(int i = 0; i < list.length; i++) {
 			copy.add(list[i]);
 		}
@@ -77,9 +77,9 @@ public class MemoryIDSortedSetValue extends MemoryIDListValue implements XIDSort
 	}
 	
 	@Override
-	public SortedSet<XID> toSortedSet() {
-		SortedSet<XID> copy = new TreeSet<XID>();
-		XID[] list = this.contents();
+	public SortedSet<XId> toSortedSet() {
+		SortedSet<XId> copy = new TreeSet<XId>();
+		XId[] list = this.contents();
 		for(int i = 0; i < list.length; i++) {
 			copy.add(list[i]);
 		}

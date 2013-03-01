@@ -2,7 +2,7 @@ package org.xydra.base.rmof;
 
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.ReadOperation;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 
 
 /**
@@ -14,11 +14,11 @@ public interface XWritableRepository extends XStateWritableRepository, XReadable
 	
 	/* More specific return type */
 	@ModificationOperation
-	XWritableModel createModel(XID modelId);
+	XWritableModel createModel(XId modelId);
 	
 	/* More specific return type */
 	@Override
 	@ReadOperation
-	XWritableModel getModel(XID modelId);
+	XWritableModel getModel(XId modelId);
 	
 }

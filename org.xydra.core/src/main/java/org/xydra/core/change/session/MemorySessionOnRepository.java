@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
@@ -34,7 +34,7 @@ public class MemorySessionOnRepository implements ISessionPersistence {
 	}
 	
 	@Override
-	public long createModel(XID modelId) {
+	public long createModel(XId modelId) {
 		if(this.repo.hasModel(modelId)) {
 			return XCommand.NOCHANGE;
 		} else {
@@ -45,26 +45,26 @@ public class MemorySessionOnRepository implements ISessionPersistence {
 	}
 	
 	@Override
-	public XID getRepositoryId() {
+	public XId getRepositoryId() {
 		return this.repo.getId();
 	}
 	
 	@Override
-	public long applyChangesAsTxn(SessionCachedModel changedModel, XID actorId) {
+	public long applyChangesAsTxn(SessionCachedModel changedModel, XId actorId) {
 		XWritableModel writableModel = this.repo.getModel(changedModel.getId());
 		changedModel.commitTo(writableModel);
 		return 1;
 	}
 	
 	@Override
-	public long removeModel(XID modelId) {
+	public long removeModel(XId modelId) {
 		return this.repo.removeModel(modelId) ? 1 : XCommand.NOCHANGE;
 	}
 	
-	public Collection<XReadableModel> getModelSnapshots(XID ... modelIds) {
+	public Collection<XReadableModel> getModelSnapshots(XId ... modelIds) {
 		List<XReadableModel> result = new LinkedList<XReadableModel>();
 		if(modelIds != null) {
-			for(XID modelId : modelIds) {
+			for(XId modelId : modelIds) {
 				XWritableModel model = this.repo.getModel(modelId);
 				if(model != null) {
 					result.add(model);
@@ -106,8 +106,8 @@ public class MemorySessionOnRepository implements ISessionPersistence {
 	
 	@Override
 	public void deleteAllData() {
-		Collection<XID> modelIds = IteratorUtils.addAll(this.repo.iterator(), new HashSet<XID>());
-		for(XID modelId : modelIds) {
+		Collection<XId> modelIds = IteratorUtils.addAll(this.repo.iterator(), new HashSet<XId>());
+		for(XId modelId : modelIds) {
 			this.repo.removeModel(modelId);
 		}
 	}

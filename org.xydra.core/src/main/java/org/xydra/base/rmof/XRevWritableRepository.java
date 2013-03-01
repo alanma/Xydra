@@ -2,7 +2,7 @@ package org.xydra.base.rmof;
 
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.ReadOperation;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 
 
 /**
@@ -14,19 +14,19 @@ public interface XRevWritableRepository extends XWritableRepository {
 	/* More specific return type */
 	@Override
 	@ModificationOperation
-	XRevWritableModel createModel(XID modelId);
+	XRevWritableModel createModel(XId modelId);
 	
 	/* More specific return type */
 	@Override
 	@ReadOperation
-	XRevWritableModel getModel(XID modelId);
+	XRevWritableModel getModel(XId modelId);
 	
 	/**
 	 * Add an existing model to this repository. Models created using
-	 * {@link #createModel(XID)} are automatically added.
+	 * {@link #createModel(XId)} are automatically added.
 	 * 
 	 * This overwrites any existing model in this repository with the same
-	 * {@link XID}.
+	 * {@link XId}.
 	 * 
 	 * @param model
 	 */

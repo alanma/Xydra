@@ -3,7 +3,7 @@ package org.xydra.store;
 import org.junit.Before;
 import org.junit.Test;
 import org.xydra.base.X;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommandFactory;
 import org.xydra.log.Logger;
@@ -26,7 +26,7 @@ public abstract class AbstractRemoteStoreConcurrencyConsistencyTest extends Abst
 	
 	private static final Logger log = LoggerFactory.getLogger(AbstractStoreReadMethodsTest.class);
 	
-	private XID correctUser;
+	private XId correctUser;
 	protected String correctUserPass;
 	
 	protected XCommandFactory factory;
@@ -41,7 +41,7 @@ public abstract class AbstractRemoteStoreConcurrencyConsistencyTest extends Abst
 	}
 	
 	@Override
-	protected XID getIncorrectUser() {
+	protected XId getIncorrectUser() {
 		return null;
 	}
 	
@@ -78,7 +78,7 @@ public abstract class AbstractRemoteStoreConcurrencyConsistencyTest extends Abst
 	@Test
 	public void testConnectionWorks() {
 		this.repo.createModel(XX.toId("justThere"));
-		for(XID modelId : this.repo) {
+		for(XId modelId : this.repo) {
 			log.info("Found model " + modelId);
 		}
 	}

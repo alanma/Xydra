@@ -14,7 +14,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
@@ -47,17 +47,17 @@ public class TransactionTest {
 		LoggerTestHelper.init();
 	}
 	
-	private static final XID ALIAS_ID = XX.toId("alias");
+	private static final XId ALIAS_ID = XX.toId("alias");
 	
 	private static final XValue JOHN_ALIAS = XV.toValue("Cookie Monster");
-	private static final XID JOHN_ID = XX.toId("john");
+	private static final XId JOHN_ID = XX.toId("john");
 	private static final XValue JOHN_PHONE = XV.toValue("87589-876");
 	
-	private static final XID MODEL_ID = XX.toId("model");
-	private static final XID PETER_ID = XX.toId("peter");
+	private static final XId MODEL_ID = XX.toId("model");
+	private static final XId PETER_ID = XX.toId("peter");
 	private static final XValue PETER_PHONE = XV.toValue("934-253-2");
-	private static final XID PHONE_ID = XX.toId("phone");
-	private XID actorId = XX.toId("actor");
+	private static final XId PHONE_ID = XX.toId("phone");
+	private XId actorId = XX.toId("actor");
 	
 	protected XObject john;
 	protected XModel model;

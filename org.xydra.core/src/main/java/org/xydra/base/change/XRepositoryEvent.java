@@ -1,6 +1,6 @@
 package org.xydra.base.change;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
 
@@ -17,15 +17,15 @@ public interface XRepositoryEvent extends XAtomicEvent {
 	/**
 	 * WHAT was changed?
 	 * 
-	 * @return the {@link XID} of the {@link XModel} that was added/removed.
+	 * @return the {@link XId} of the {@link XModel} that was added/removed.
 	 */
-	XID getModelId();
+	XId getModelId();
 	
 	/**
 	 * WHERE did the change happen?
 	 * 
-	 * @return the {@link XID} of the {@link XRepository} where the change
+	 * @return the {@link XId} of the {@link XRepository} where the change
 	 *         happened
 	 */
-	XID getRepositoryId();
+	XId getRepositoryId();
 }

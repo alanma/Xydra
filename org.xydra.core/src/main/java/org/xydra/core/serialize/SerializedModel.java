@@ -6,7 +6,7 @@ import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XReadableField;
@@ -130,7 +130,7 @@ public class SerializedModel {
 	 * @throws IllegalArgumentException if the given element is not a valid
 	 *             XField element.
 	 */
-	public static XField toField(XID actorId, XydraElement element) {
+	public static XField toField(XId actorId, XydraElement element) {
 		return new MemoryField(actorId, toFieldState(element, null));
 	}
 	
@@ -154,7 +154,7 @@ public class SerializedModel {
 		
 		SerializingUtils.checkElementType(element, XFIELD_ELEMENT);
 		
-		XID xid;
+		XId xid;
 		if(context != null && context.getField() != null) {
 			xid = context.getField();
 		} else {
@@ -193,7 +193,7 @@ public class SerializedModel {
 	 * @throws IllegalArgumentException if the given element is not a valid
 	 *             XModel element.
 	 */
-	public static XModel toModel(XID actorId, String passwordHash, XydraElement element) {
+	public static XModel toModel(XId actorId, String passwordHash, XydraElement element) {
 		XRevWritableModel state = toModelState(element, null, null);
 		XChangeLogState log = loadChangeLogState(element, state.getAddress());
 		if(log != null) {
@@ -227,7 +227,7 @@ public class SerializedModel {
 		
 		SerializingUtils.checkElementType(element, XMODEL_ELEMENT);
 		
-		XID xid;
+		XId xid;
 		if(context != null && context.getModel() != null) {
 			xid = context.getModel();
 		} else {
@@ -254,10 +254,10 @@ public class SerializedModel {
 		XydraElement objects = element.getChild(NAME_OBJECTS);
 		
 		Iterator<Pair<String,XydraElement>> objectElementIt = objects.getEntriesByType(
-		        SerializingUtils.XID_ATTRIBUTE, XOBJECT_ELEMENT);
+		        SerializingUtils.XId_ATTRIBUTE, XOBJECT_ELEMENT);
 		while(objectElementIt.hasNext()) {
 			Pair<String,XydraElement> objectElement = objectElementIt.next();
-			XID objectId = XX.toId(objectElement.getFirst());
+			XId objectId = XX.toId(objectElement.getFirst());
 			XAddress objectAddr = XX.resolveObject(modelAddr, objectId);
 			XRevWritableObject objectState = toObjectState(objectElement.getSecond(), modelState,
 			        objectAddr);
@@ -278,7 +278,7 @@ public class SerializedModel {
 	 * @throws IllegalArgumentException if the given element is not a valid
 	 *             XObject element.
 	 */
-	public static XObject toObject(XID actorId, String passwordHash, XydraElement element) {
+	public static XObject toObject(XId actorId, String passwordHash, XydraElement element) {
 		XRevWritableObject state = toObjectState(element, null, null);
 		XChangeLogState log = loadChangeLogState(element, state.getAddress());
 		if(log != null) {
@@ -312,7 +312,7 @@ public class SerializedModel {
 		
 		SerializingUtils.checkElementType(element, XOBJECT_ELEMENT);
 		
-		XID xid;
+		XId xid;
 		if(context != null && context.getObject() != null) {
 			xid = context.getObject();
 		} else {
@@ -340,10 +340,10 @@ public class SerializedModel {
 		XydraElement fields = element.getChild(NAME_FIELDS);
 		
 		Iterator<Pair<String,XydraElement>> fieldElementIt = fields.getEntriesByType(
-		        SerializingUtils.XID_ATTRIBUTE, XFIELD_ELEMENT);
+		        SerializingUtils.XId_ATTRIBUTE, XFIELD_ELEMENT);
 		while(fieldElementIt.hasNext()) {
 			Pair<String,XydraElement> fieldElement = fieldElementIt.next();
-			XID fieldId = XX.toId(fieldElement.getFirst());
+			XId fieldId = XX.toId(fieldElement.getFirst());
 			XAddress fieldAddr = XX.resolveField(objectAddr, fieldId);
 			XRevWritableField fieldState = toFieldState(fieldElement.getSecond(), objectState,
 			        fieldAddr);
@@ -364,7 +364,7 @@ public class SerializedModel {
 	 * @throws IllegalArgumentException if the given element is not a valid
 	 *             XRepository element.
 	 */
-	public static XRepository toRepository(XID actorId, String passwordHash, XydraElement element) {
+	public static XRepository toRepository(XId actorId, String passwordHash, XydraElement element) {
 		return new MemoryRepository(actorId, passwordHash, toRepositoryState(element));
 	}
 	
@@ -380,7 +380,7 @@ public class SerializedModel {
 		
 		SerializingUtils.checkElementType(element, XREPOSITORY_ELEMENT);
 		
-		XID xid = SerializingUtils.getRequiredXidAttribute(element);
+		XId xid = SerializingUtils.getRequiredXidAttribute(element);
 		
 		XAddress repoAddr = XX.toAddress(xid, null, null, null);
 		XRevWritableRepository repositoryState = new SimpleRepository(repoAddr);
@@ -388,10 +388,10 @@ public class SerializedModel {
 		XydraElement models = element.getChild(NAME_MODELS);
 		
 		Iterator<Pair<String,XydraElement>> modelElementIt = models.getEntriesByType(
-		        SerializingUtils.XID_ATTRIBUTE, XMODEL_ELEMENT);
+		        SerializingUtils.XId_ATTRIBUTE, XMODEL_ELEMENT);
 		while(modelElementIt.hasNext()) {
 			Pair<String,XydraElement> modelElement = modelElementIt.next();
-			XID modelId = XX.toId(modelElement.getFirst());
+			XId modelId = XX.toId(modelElement.getFirst());
 			XAddress modelAddr = XX.resolveModel(repoAddr, modelId);
 			
 			XRevWritableModel modelState = toModelState(modelElement.getSecond(), repositoryState,
@@ -471,7 +471,7 @@ public class SerializedModel {
 		
 		out.open(XFIELD_ELEMENT);
 		if(saveId) {
-			out.attribute(SerializingUtils.XID_ATTRIBUTE, xfield.getId());
+			out.attribute(SerializingUtils.XId_ATTRIBUTE, xfield.getId());
 		}
 		if(saveRevision) {
 			out.attribute(REVISION_ATTRIBUTE, rev);
@@ -532,15 +532,15 @@ public class SerializedModel {
 		
 		out.open(XMODEL_ELEMENT);
 		if(saveId) {
-			out.attribute(SerializingUtils.XID_ATTRIBUTE, xmodel.getId());
+			out.attribute(SerializingUtils.XId_ATTRIBUTE, xmodel.getId());
 		}
 		if(saveRevision) {
 			out.attribute(REVISION_ATTRIBUTE, rev);
 		}
 		
 		out.child(NAME_OBJECTS);
-		out.beginMap(SerializingUtils.XID_ATTRIBUTE, XOBJECT_ELEMENT);
-		for(XID objectId : xmodel) {
+		out.beginMap(SerializingUtils.XId_ATTRIBUTE, XOBJECT_ELEMENT);
+		for(XId objectId : xmodel) {
 			out.entry(objectId.toString());
 			try {
 				serialize(xmodel.getObject(objectId), out, saveRevision, ignoreInaccessible, false,
@@ -613,15 +613,15 @@ public class SerializedModel {
 		
 		out.open(XOBJECT_ELEMENT);
 		if(saveId) {
-			out.attribute(SerializingUtils.XID_ATTRIBUTE, xobject.getId());
+			out.attribute(SerializingUtils.XId_ATTRIBUTE, xobject.getId());
 		}
 		if(saveRevision) {
 			out.attribute(REVISION_ATTRIBUTE, rev);
 		}
 		
 		out.child(NAME_FIELDS);
-		out.beginMap(SerializingUtils.XID_ATTRIBUTE, XFIELD_ELEMENT);
-		for(XID fieldId : xobject) {
+		out.beginMap(SerializingUtils.XId_ATTRIBUTE, XFIELD_ELEMENT);
+		for(XId fieldId : xobject) {
 			out.entry(fieldId.toString());
 			try {
 				serialize(xobject.getField(fieldId), out, saveRevision, false);
@@ -679,11 +679,11 @@ public class SerializedModel {
 	        boolean saveRevision, boolean ignoreInaccessible, boolean saveChangeLog) {
 		
 		out.open(XREPOSITORY_ELEMENT);
-		out.attribute(SerializingUtils.XID_ATTRIBUTE, xrepository.getId());
+		out.attribute(SerializingUtils.XId_ATTRIBUTE, xrepository.getId());
 		
 		out.child(NAME_MODELS);
-		out.beginMap(SerializingUtils.XID_ATTRIBUTE, XMODEL_ELEMENT);
-		for(XID modelId : xrepository) {
+		out.beginMap(SerializingUtils.XId_ATTRIBUTE, XMODEL_ELEMENT);
+		for(XId modelId : xrepository) {
 			out.entry(modelId.toString());
 			try {
 				serialize(xrepository.getModel(modelId), out, saveRevision, ignoreInaccessible,

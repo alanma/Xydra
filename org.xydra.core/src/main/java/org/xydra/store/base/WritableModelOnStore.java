@@ -6,7 +6,7 @@ import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
@@ -19,9 +19,11 @@ import org.xydra.store.XydraStore;
 /**
  * Uses an internal {@link XReadableModel} snapshot.
  * 
+ * This class is mostly useful for testing purposes. For production use it has
+ * not been tested enough and performance is expected to be rather bad.
+ * 
  * @author voelkel
  */
-@Deprecated
 @RunsInGWT(false)
 public class WritableModelOnStore extends ReadableModelOnStore implements XWritableModel,
         Serializable {
@@ -33,7 +35,7 @@ public class WritableModelOnStore extends ReadableModelOnStore implements XWrita
     }
     
     @Override
-    public XWritableObject createObject(@NeverNull XID objectId) {
+    public XWritableObject createObject(@NeverNull XId objectId) {
         XCommand command = X.getCommandFactory().createAddObjectCommand(
                 this.address.getRepository(), this.address.getModel(), objectId, true);
         executeCommand(command);
@@ -58,7 +60,7 @@ public class WritableModelOnStore extends ReadableModelOnStore implements XWrita
     }
     
     @Override
-    public XWritableObject getObject(@NeverNull XID objectId) {
+    public XWritableObject getObject(@NeverNull XId objectId) {
         XReadableObject baseObject = super.getObject(objectId);
         
         if(baseObject == null) {
@@ -67,7 +69,7 @@ public class WritableModelOnStore extends ReadableModelOnStore implements XWrita
         
         WritableObjectOnStore revWritableObject = new WritableObjectOnStore(this.credentials,
                 this.store, baseObject.getAddress());
-        for(XID fieldId : baseObject) {
+        for(XId fieldId : baseObject) {
             XWritableField writabelField = revWritableObject.createField(fieldId);
             writabelField.setValue(baseObject.getField(fieldId).getValue());
         }
@@ -75,7 +77,7 @@ public class WritableModelOnStore extends ReadableModelOnStore implements XWrita
     }
     
     @Override
-    public boolean removeObject(@NeverNull XID objectId) {
+    public boolean removeObject(@NeverNull XId objectId) {
         XCommand command = X.getCommandFactory().createRemoveObjectCommand(
                 this.address.getRepository(), this.address.getModel(), objectId,
                 this.getObject(objectId).getRevisionNumber(), true);

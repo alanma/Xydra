@@ -9,7 +9,7 @@ import java.util.Set;
 
 import org.xydra.annotations.NeverNull;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.change.ChangeType;
@@ -65,7 +65,7 @@ public class ChangedModel implements XWritableModel, IModelDiff {
     private static int countChanges(XReadableObject object, int max) {
         int n = 1; // one to create the object
         if(n < max) {
-            for(XID fieldId : object) {
+            for(XId fieldId : object) {
                 n += object.getField(fieldId).isEmpty() ? 1 : 2;
                 if(n >= max) {
                     break;
@@ -76,19 +76,19 @@ public class ChangedModel implements XWritableModel, IModelDiff {
     }
     
     // Fields that are not in base and have been added.
-    // Contains no XIDs that are in removed or changed.
-    private final Map<XID,SimpleObject> added = new HashMap<XID,SimpleObject>(2);
+    // Contains no XIds that are in removed or changed.
+    private final Map<XId,SimpleObject> added = new HashMap<XId,SimpleObject>(2);
     
     private final XReadableModel base;
     
     // Fields that are in base and have not been removed.
     // While they were changed once, those changes might have been reverted.
-    // Contains no XIDs that are in added or removed.
-    private final Map<XID,ChangedObject> changed = new HashMap<XID,ChangedObject>(2);
+    // Contains no XIds that are in added or removed.
+    private final Map<XId,ChangedObject> changed = new HashMap<XId,ChangedObject>(2);
     
     // Fields that are in base but have been removed.
-    // Contains no XIDs that are in added or changed.
-    private final Set<XID> removed = new HashSet<XID>(2);
+    // Contains no XIds that are in added or changed.
+    private final Set<XId> removed = new HashSet<XId>(2);
     
     /**
      * Wrap an {@link XReadableModel} to record a set of changes made. Multiple
@@ -116,19 +116,19 @@ public class ChangedModel implements XWritableModel, IModelDiff {
      */
     public boolean checkSetInvariants() {
         
-        for(XID id : this.removed) {
+        for(XId id : this.removed) {
             XyAssert.xyAssert(!this.added.containsKey(id) && !this.changed.containsKey(id));
             XyAssert.xyAssert(this.base.hasObject(id));
         }
         
-        for(XID id : this.added.keySet()) {
+        for(XId id : this.added.keySet()) {
             XyAssert.xyAssert(!this.removed.contains(id) && !this.changed.containsKey(id));
             XyAssert.xyAssert(!this.base.hasObject(id), "baseModel contains added object '" + id
                     + "'");
             XyAssert.xyAssert(id.equals(this.added.get(id).getId()));
         }
         
-        for(XID id : this.changed.keySet()) {
+        for(XId id : this.changed.keySet()) {
             XyAssert.xyAssert(!this.removed.contains(id) && !this.added.containsKey(id));
             XyAssert.xyAssert(this.base.hasObject(id));
             XyAssert.xyAssert(id.equals(this.changed.get(id).getId()));
@@ -144,7 +144,7 @@ public class ChangedModel implements XWritableModel, IModelDiff {
         
         this.added.clear();
         this.changed.clear();
-        for(XID id : this.base) {
+        for(XId id : this.base) {
             // IMPROVE maybe add a "cleared" flag to remove all fields more
             // efficiently?
             this.removed.add(id);
@@ -185,9 +185,9 @@ public class ChangedModel implements XWritableModel, IModelDiff {
                 }
             }
             // implied removed field - expensive
-            for(XID removedObjectId : this.removed) {
+            for(XId removedObjectId : this.removed) {
                 XReadableObject removedObject = getOldObject(removedObjectId);
-                Iterator<XID> it = removedObject.iterator();
+                Iterator<XId> it = removedObject.iterator();
                 while(it.hasNext() && n < max) {
                     it.next();
                     n += 1;
@@ -226,10 +226,10 @@ public class ChangedModel implements XWritableModel, IModelDiff {
     public int countEventsNeeded(int max) {
         int n = this.removed.size() + this.added.size();
         if(n < max) {
-            for(XID objectId : this.removed) {
+            for(XId objectId : this.removed) {
                 // removing object itself already counted
                 XReadableObject oldObject = getOldObject(objectId);
-                for(XID fieldId : oldObject) {
+                for(XId fieldId : oldObject) {
                     n++; // removing the field
                     if(n >= max) {
                         return n;
@@ -262,7 +262,7 @@ public class ChangedModel implements XWritableModel, IModelDiff {
     }
     
     @Override
-    public XWritableObject createObject(@NeverNull XID objectId) {
+    public XWritableObject createObject(@NeverNull XId objectId) {
         
         XWritableObject oldObject = getObject(objectId);
         if(oldObject != null) {
@@ -383,7 +383,7 @@ public class ChangedModel implements XWritableModel, IModelDiff {
      */
     public boolean executeCommand(XModelCommand command) {
         
-        XID objectId = command.getObjectId();
+        XId objectId = command.getObjectId();
         
         switch(command.getChangeType()) {
         
@@ -442,7 +442,7 @@ public class ChangedModel implements XWritableModel, IModelDiff {
             return false;
         }
         
-        XID fieldId = command.getFieldId();
+        XId fieldId = command.getFieldId();
         
         switch(command.getChangeType()) {
         
@@ -537,7 +537,7 @@ public class ChangedModel implements XWritableModel, IModelDiff {
     }
     
     @Override
-    public XID getId() {
+    public XId getId() {
         return this.base.getId();
     }
     
@@ -558,7 +558,7 @@ public class ChangedModel implements XWritableModel, IModelDiff {
     }
     
     @Override
-    public XWritableObject getObject(@NeverNull XID objectId) {
+    public XWritableObject getObject(@NeverNull XId objectId) {
         
         XWritableObject newObject = this.added.get(objectId);
         if(newObject != null) {
@@ -590,18 +590,18 @@ public class ChangedModel implements XWritableModel, IModelDiff {
     
     /**
      * @param objectId
-     * @return the {@link XReadableObject} with the given {@link XID} as it
+     * @return the {@link XReadableObject} with the given {@link XId} as it
      *         exists in the original {@link XReadableModel}.
      */
-    public XReadableObject getOldObject(XID objectId) {
+    public XReadableObject getOldObject(XId objectId) {
         return this.base.getObject(objectId);
     }
     
     /**
-     * @return the {@link XID XIDs} of objects that existed in the original
+     * @return the {@link XId XIds} of objects that existed in the original
      *         model but have been removed from this ChangedModel
      */
-    public Iterable<XID> getRemovedObjects() {
+    public Iterable<XId> getRemovedObjects() {
         return this.removed;
     }
     
@@ -618,7 +618,7 @@ public class ChangedModel implements XWritableModel, IModelDiff {
     }
     
     @Override
-    public boolean hasObject(XID objectId) {
+    public boolean hasObject(XId objectId) {
         if(this.added.containsKey(objectId))
             return true;
         if(this.removed.contains(objectId)) {
@@ -642,7 +642,7 @@ public class ChangedModel implements XWritableModel, IModelDiff {
             return false;
         }
         
-        for(XID objectId : this.base) {
+        for(XId objectId : this.base) {
             if(!this.removed.contains(objectId)) {
                 return false;
             }
@@ -652,20 +652,20 @@ public class ChangedModel implements XWritableModel, IModelDiff {
     }
     
     @Override
-    public Iterator<XID> iterator() {
+    public Iterator<XId> iterator() {
         
-        Iterator<XID> filtered = new AbstractFilteringIterator<XID>(this.base.iterator()) {
+        Iterator<XId> filtered = new AbstractFilteringIterator<XId>(this.base.iterator()) {
             @Override
-            protected boolean matchesFilter(XID entry) {
+            protected boolean matchesFilter(XId entry) {
                 return !ChangedModel.this.removed.contains(entry);
             }
         };
         
-        return new BagUnionIterator<XID>(filtered, this.added.keySet().iterator());
+        return new BagUnionIterator<XId>(filtered, this.added.keySet().iterator());
     }
     
     @Override
-    public boolean removeObject(XID objectId) {
+    public boolean removeObject(XId objectId) {
         
         if(this.added.containsKey(objectId)) {
             
@@ -719,7 +719,7 @@ public class ChangedModel implements XWritableModel, IModelDiff {
                 ChangedObject.commitTo(changedObject, baseObject);
             }
         }
-        for(XID removed : changedModel.getRemovedObjects()) {
+        for(XId removed : changedModel.getRemovedObjects()) {
             model.removeObject(removed);
         }
     }
@@ -735,7 +735,7 @@ public class ChangedModel implements XWritableModel, IModelDiff {
     }
     
     @Override
-    public Collection<XID> getRemoved() {
+    public Collection<XId> getRemoved() {
         return this.removed;
     }
     
