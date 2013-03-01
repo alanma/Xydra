@@ -249,8 +249,8 @@ public enum ValueType {
             @CanBeNull ValueType componentValueType, boolean isSet, boolean isSortedCollection,
             boolean isNumeric) {
         assert componentValueType != null || !(isSet || isSortedCollection) : xydraInterface
-                .getCanonicalName();
-        assert !isNumeric || componentValueType == null : xydraInterface.getCanonicalName();
+                .getName();
+        assert !isNumeric || componentValueType == null : xydraInterface.getName();
         this.xydraInterface = xydraInterface;
         this.javaClass = javaClass;
         this.componentValueType = componentValueType;
