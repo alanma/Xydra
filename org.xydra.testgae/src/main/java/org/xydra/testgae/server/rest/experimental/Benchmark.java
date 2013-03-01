@@ -7,7 +7,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.restless.Restless;
@@ -55,7 +55,7 @@ public class Benchmark {
 		w.write(s1.getStats());
 		
 		// create 3 wishes
-		List<XID> wishes = wishList.addDemoData(createInitially, w);
+		List<XId> wishes = wishList.addDemoData(createInitially, w);
 		
 		// get wishes + properties
 		wishList.toHtml();

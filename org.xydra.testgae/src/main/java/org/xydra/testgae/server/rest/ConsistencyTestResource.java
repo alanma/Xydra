@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommandUtils;
 import org.xydra.base.change.XEvent;
@@ -41,12 +41,12 @@ import org.xydra.store.impl.gae.GaeTestfixer;
  */
 public class ConsistencyTestResource {
 	
-	private static final XID repoId = XX.toId("gae-data");
-	private static final XID actorId = XX.toId("gae-data");
+	private static final XId repoId = XX.toId("gae-data");
+	private static final XId actorId = XX.toId("gae-data");
 	
 	private static final Logger log = LoggerFactory.getLogger(ConsistencyTestResource.class);
 	private static HtmlWriterLogListener logListener;
-	private static final XID ctId = XX.toId("__consistencyTest");
+	private static final XId ctId = XX.toId("__consistencyTest");
 	
 	/**
 	 * Expose /consistency for read/write access and /consistency/events to help
@@ -150,7 +150,7 @@ public class ConsistencyTestResource {
 		c.stopAndStart("getRevNr");
 		w.flush();
 		int count = 0;
-		for(XID id : model) {
+		for(XId id : model) {
 			w.write("id=" + id.toString() + "<br/>\n");
 			w.flush();
 			count++;

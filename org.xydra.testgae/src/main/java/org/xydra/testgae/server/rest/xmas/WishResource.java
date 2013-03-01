@@ -6,7 +6,7 @@ import java.io.Writer;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.XTransaction;
 import org.xydra.base.rmof.XWritableModel;
@@ -200,14 +200,14 @@ public class WishResource {
 		return load(Xmas.getRepository(repoStr), XX.toId(listStr), XX.toId(wishStr));
 	}
 	
-	public static Wish load(XWritableRepository repo, XID listId, XID wishId) {
+	public static Wish load(XWritableRepository repo, XId listId, XId wishId) {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		XWritableModel model = repo.createModel(listId);
 		XWritableObject xo = model.createObject(wishId);
 		return new Wish(xo);
 	}
 	
-	public static String toRootRelativeUrl(String repoStr, String list, XID wishId) {
+	public static String toRootRelativeUrl(String repoStr, String list, XId wishId) {
 		return "/xmas/" + repoStr + "/" + list + "/" + wishId;
 	}
 	

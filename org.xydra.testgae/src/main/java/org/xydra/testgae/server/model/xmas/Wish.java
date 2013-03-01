@@ -1,7 +1,7 @@
 package org.xydra.testgae.server.model.xmas;
 
 import org.xydra.base.X;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableModel;
@@ -26,9 +26,9 @@ public class Wish {
 	
 	private XWritableObject xo;
 	
-	public static final XID TITLE = XX.toId("title");
-	public static final XID PRICE = XX.toId("price");
-	public static final XID URL = XX.toId("url");
+	public static final XId TITLE = XX.toId("title");
+	public static final XId PRICE = XX.toId("price");
+	public static final XId URL = XX.toId("url");
 	
 	/**
 	 * Create a new wish
@@ -112,8 +112,8 @@ public class Wish {
 	}
 	
 	public void delete() {
-		XID modelId = this.xo.getAddress().getModel();
-		XID repoId = this.xo.getAddress().getRepository();
+		XId modelId = this.xo.getAddress().getModel();
+		XId repoId = this.xo.getAddress().getRepository();
 		XWritableModel model = Xmas.getRepository(repoId.toString()).createModel(modelId);
 		WishList wishList = new WishList(model);
 		wishList.removeWish(this.xo.getId());

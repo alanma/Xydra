@@ -7,7 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.xydra.base.X;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
@@ -24,7 +24,7 @@ import org.xydra.restless.utils.NanoClock;
  * 
  * @author xamde
  */
-public class WishList implements Iterable<XID> {
+public class WishList implements Iterable<XId> {
 	
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(WishList.class);
@@ -38,30 +38,30 @@ public class WishList implements Iterable<XID> {
 	}
 	
 	@SuppressWarnings("unused")
-	public XID addWish(String title, int price, String url) {
-		XID id = X.getIDProvider().createUniqueId();
+	public XId addWish(String title, int price, String url) {
+		XId id = X.getIDProvider().createUniqueId();
 		XWritableObject xo = this.model.createObject(id);
 		new Wish(xo, title, price, url);
 		return id;
 	}
 	
-	public void removeWish(XID widhId) {
+	public void removeWish(XId widhId) {
 		this.model.removeObject(widhId);
 	}
 	
-	public void editWishName(XID wishId, String productName) {
+	public void editWishName(XId wishId, String productName) {
 		XWritableObject xo = this.model.getObject(wishId);
 		XWritableField title = xo.getField(Wish.TITLE);
 		title.setValue(XV.toValue(productName));
 	}
 	
-	public void editWishPrice(XID wishId, int price) {
+	public void editWishPrice(XId wishId, int price) {
 		XWritableObject xo = this.model.getObject(wishId);
 		XWritableField priceField = xo.getField(Wish.PRICE);
 		priceField.setValue(XV.toValue(price));
 	}
 	
-	public void editWishUrl(XID wishId, String url) {
+	public void editWishUrl(XId wishId, String url) {
 		XWritableObject xo = this.model.getObject(wishId);
 		XWritableField urlField = xo.getField(Wish.URL);
 		urlField.setValue(XV.toValue(url));
@@ -69,13 +69,13 @@ public class WishList implements Iterable<XID> {
 	
 	public void removeAllWishes(Writer writer) throws IOException {
 		NanoClock s1 = new NanoClock().start();
-		Iterator<XID> it = this.model.iterator();
-		LinkedList<XID> list = new LinkedList<XID>();
+		Iterator<XId> it = this.model.iterator();
+		LinkedList<XId> list = new LinkedList<XId>();
 		while(it.hasNext()) {
-			XID xid = it.next();
+			XId xid = it.next();
 			list.add(xid);
 		}
-		for(XID xid : list) {
+		for(XId xid : list) {
 			this.model.removeObject(xid);
 		}
 		
@@ -83,7 +83,7 @@ public class WishList implements Iterable<XID> {
 		writer.write(s1.getStats());
 	}
 	
-	public Wish getWish(XID wishId) {
+	public Wish getWish(XId wishId) {
 		if(this.model.hasObject(wishId)) {
 			return new Wish(this.model.getObject(wishId));
 		} else {
@@ -99,7 +99,7 @@ public class WishList implements Iterable<XID> {
 		StringBuffer buf = new StringBuffer();
 		buf.append("<b>Wishlist " + this.model.getId() + "</b>");
 		buf.append("<ol>\n");
-		for(XID wishId : this.model) {
+		for(XId wishId : this.model) {
 			Wish wish = getWish(wishId);
 			buf.append("  <li>");
 			buf.append(wish.toHtml());
@@ -122,16 +122,16 @@ public class WishList implements Iterable<XID> {
 	 * @return a list of all IDs that have just been created
 	 * @throws IOException if the writer has them
 	 */
-	public List<XID> addDemoData(int wishesCount, Writer writer) throws IOException {
+	public List<XId> addDemoData(int wishesCount, Writer writer) throws IOException {
 		NanoClock s1 = new NanoClock();
 		s1.start();
-		List<XID> wishIds = new LinkedList<XID>();
+		List<XId> wishIds = new LinkedList<XId>();
 		for(int w = 1; w <= wishesCount; w++) {
 			writer.write("Creating wish " + w + " in list " + this.model.getId() + " at "
 			        + System.currentTimeMillis() + "<br />\n");
 			String name = NameUtils.getProductName();
 			String nameInUrl = name.replace(" ", "+");
-			XID wishId = addWish("" + name, (int)Math.round(100 * Math.random()),
+			XId wishId = addWish("" + name, (int)Math.round(100 * Math.random()),
 			        "http://www.google.de/images?q=" + nameInUrl);
 			wishIds.add(wishId);
 		}
@@ -143,7 +143,7 @@ public class WishList implements Iterable<XID> {
 	}
 	
 	@Override
-	public Iterator<XID> iterator() {
+	public Iterator<XId> iterator() {
 		return this.model.iterator();
 	}
 	

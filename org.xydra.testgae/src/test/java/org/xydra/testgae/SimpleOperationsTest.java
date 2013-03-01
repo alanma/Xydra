@@ -5,7 +5,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 import org.xydra.base.X;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.XRepositoryCommand;
 import org.xydra.perf.StatsGatheringPersistenceWrapper;
@@ -21,9 +21,9 @@ import org.xydra.store.impl.gae.GaeTestfixer;
  */
 public class SimpleOperationsTest {
 	
-	private static final XID REPO_ID = XX.toId("repo");
-	private static final XID MODEL1_ID = XX.toId("model1");
-	private static final XID ACTOR_ID = XX.toId("actor");
+	private static final XId REPO_ID = XX.toId("repo");
+	private static final XId MODEL1_ID = XX.toId("model1");
+	private static final XId ACTOR_ID = XX.toId("actor");
 	
 	/**
 	 * This is required to let Gae stuff run correctly in local tests.

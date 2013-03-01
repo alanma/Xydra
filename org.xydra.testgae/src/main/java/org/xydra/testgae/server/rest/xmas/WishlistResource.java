@@ -6,7 +6,7 @@ import java.io.Writer;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.XTransaction;
 import org.xydra.base.rmof.XWritableModel;
@@ -118,7 +118,7 @@ public class WishlistResource {
 		if(format.equals("urls")) {
 			ServletUtils.headers(res, "text/plain");
 			Writer w = res.getWriter();
-			for(XID wishId : wishList) {
+			for(XId wishId : wishList) {
 				w.write(WishResource.toRootRelativeUrl(repoStr, list, wishId) + "\n");
 			}
 			// always write at least a single blank line
@@ -144,7 +144,7 @@ public class WishlistResource {
 	 * @param modelId ~ wish list id
 	 * @return a URL relative to the server root
 	 */
-	public static String toRelativeUrl(String repoId, XID modelId) {
+	public static String toRelativeUrl(String repoId, XId modelId) {
 		assert !modelId.toString().endsWith("/");
 		return "/xmas/" + repoId + "/" + modelId;
 	}

@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.XTransaction;
 import org.xydra.base.rmof.XWritableModel;
@@ -37,7 +37,7 @@ public class Xmas {
 	
 	private static final Logger log = LoggerFactory.getLogger(Xmas.class);
 	
-	private static final XID ACTOR_ID = XX.toId("_Xmas-benchmark-user");
+	private static final XId ACTOR_ID = XX.toId("_Xmas-benchmark-user");
 	
 	/**
 	 * A cached instance used to load and persist data
@@ -46,7 +46,7 @@ public class Xmas {
 	
 	private static GaePersistence persistence;
 	
-	public static XID timebasedUniqueId() {
+	public static XId timebasedUniqueId() {
 		return XX.toId("benchmark-" + System.currentTimeMillis());
 	}
 	
@@ -58,7 +58,7 @@ public class Xmas {
 	public static XWritableRepository getRepository(String repoIdStr) {
 		/* if there is no repo or the wrong one: init */
 		if(repo == null || (repoIdStr != null && !repo.getId().toString().equals(repoIdStr))) {
-			XID repoId = repoIdStr == null ? timebasedUniqueId() : XX.toId(repoIdStr);
+			XId repoId = repoIdStr == null ? timebasedUniqueId() : XX.toId(repoIdStr);
 			NanoClock c = new NanoClock().start();
 			
 			/* Create persistence */
@@ -111,12 +111,12 @@ public class Xmas {
 	
 	public static void clearRepository(String repoStr) {
 		XWritableRepository repo = getRepository(repoStr);
-		for(XID modelId : repo) {
+		for(XId modelId : repo) {
 			repo.removeModel(modelId);
 		}
 	}
 	
-	public static synchronized XWritableModel createModel(String repoIdStr, XID modelId) {
+	public static synchronized XWritableModel createModel(String repoIdStr, XId modelId) {
 		XWritableRepository repo = getRepository(repoIdStr);
 		XWritableModel model = repo.createModel(modelId);
 		return model;
@@ -158,7 +158,7 @@ public class Xmas {
 		}
 		int count = 0;
 		XWritableRepository repo = getRepository(repoStr);
-		for(XID modelId : repo) {
+		for(XId modelId : repo) {
 			count++;
 			XWritableModel model = repo.getModel(modelId);
 			writer.write(HtmlUtils.link("/xmas/" + repoStr + "/" + modelId + "", "Wish list '"

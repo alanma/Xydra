@@ -12,7 +12,7 @@ import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
 import org.xydra.base.X;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.impl.memory.MemoryRepositoryCommand;
 import org.xydra.log.Logger;
@@ -142,7 +142,7 @@ public class JunitResource {
 		w.write("Done running " + clazz.getName() + ".\n");
 	}
 	
-	XID test1_repoId = null;
+	XId test1_repoId = null;
 	
 	/**
 	 * Use no security
@@ -152,14 +152,14 @@ public class JunitResource {
 		XydraStore store = new DelegatingAllowAllStore(new GaePersistence(
 		        GaePersistence.getDefaultRepositoryId()));
 		
-		XID actorId = XX.toId("test1");
+		XId actorId = XX.toId("test1");
 		String passwordHash = HashUtils.getMD5("secret");
 		
 		log.info("Asking for repo id...");
-		store.getRepositoryId(actorId, passwordHash, new Callback<XID>() {
+		store.getRepositoryId(actorId, passwordHash, new Callback<XId>() {
 			
 			@Override
-            public void onSuccess(XID repoId) {
+            public void onSuccess(XId repoId) {
 				log.info("Success: " + repoId);
 				JunitResource.this.test1_repoId = repoId;
 			}
@@ -176,14 +176,14 @@ public class JunitResource {
 	public void test1() {
 		log.info("Setting up store");
 		XydraStore store = GaePersistence.get();
-		XID actorId = XX.toId("test1");
+		XId actorId = XX.toId("test1");
 		String passwordHash = HashUtils.getMD5("secret");
 		
 		log.info("Asking for repo id...");
-		store.getRepositoryId(actorId, passwordHash, new Callback<XID>() {
+		store.getRepositoryId(actorId, passwordHash, new Callback<XId>() {
 			
 			@Override
-            public void onSuccess(XID repoId) {
+            public void onSuccess(XId repoId) {
 				log.info("Success: " + repoId);
 				JunitResource.this.test1_repoId = repoId;
 			}
@@ -197,12 +197,12 @@ public class JunitResource {
 	}
 	
 	public void test2(Writer w) throws IOException {
-		XID repoId = XX.toId("repo1");
+		XId repoId = XX.toId("repo1");
 		XydraPersistence persistence = new GaePersistence(repoId);
 		w.write("RepoId = " + persistence.getRepositoryId() + "\n");
 		w.flush();
-		XID actorId = XX.toId("testActor");
-		XID modelId = XX.toId("model1");
+		XId actorId = XX.toId("testActor");
+		XId modelId = XX.toId("model1");
 		persistence.executeCommand(
 		        actorId,
 		        MemoryRepositoryCommand.createAddCommand(

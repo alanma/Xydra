@@ -6,7 +6,7 @@ import java.io.Writer;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.rmof.XWritableRepository;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -89,7 +89,7 @@ public class XmasResource {
 			ServletUtils.headers(res, "text/plain");
 			XWritableRepository repo = Xmas.getRepository(repoStr);
 			Writer w = res.getWriter();
-			for(XID modelId : repo) {
+			for(XId modelId : repo) {
 				String url = WishlistResource.toRelativeUrl(repoStr, modelId);
 				w.write(url + "\n");
 			}
