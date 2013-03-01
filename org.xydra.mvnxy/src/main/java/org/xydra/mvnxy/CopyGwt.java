@@ -52,6 +52,10 @@ public class CopyGwt extends AbstractMojo {
     
     /** Copy GWT stuff */
     public void copyGwt() {
+        if(this.gwtModuleNames == null) {
+            log.warn("No modules configured in <gwtModuleNames><gwtModuleName>...</gwtModuleName>gwtModuleNames");
+            return;
+        }
         for(String moduleName : this.gwtModuleNames) {
             copyCompiledGwtModule(this.warPath, moduleName);
         }
