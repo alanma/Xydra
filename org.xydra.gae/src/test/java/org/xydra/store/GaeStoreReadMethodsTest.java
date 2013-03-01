@@ -7,7 +7,7 @@ import java.util.Set;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.impl.memory.MemoryRepositoryCommand;
@@ -41,11 +41,11 @@ public class GaeStoreReadMethodsTest extends AbstractSecureStoreReadMethodsTest 
 	
 	@After
 	public void after() {
-		SynchronousCallbackWithOneResult<Set<XID>> mids = new SynchronousCallbackWithOneResult<Set<XID>>();
+		SynchronousCallbackWithOneResult<Set<XId>> mids = new SynchronousCallbackWithOneResult<Set<XId>>();
 		this.store.getModelIds(getCorrectUser(), getCorrectUserPasswordHash(), mids);
 		assertEquals(SynchronousCallbackWithOneResult.SUCCESS, mids.waitOnCallback(Long.MAX_VALUE));
 		XAddress repoAddr = XX.toAddress(getRepositoryId(), null, null, null);
-		for(XID modelId : mids.effect) {
+		for(XId modelId : mids.effect) {
 			if(modelId.toString().startsWith("internal--")) {
 				continue;
 			}
@@ -54,7 +54,7 @@ public class GaeStoreReadMethodsTest extends AbstractSecureStoreReadMethodsTest 
 			this.store.executeCommands(getCorrectUser(), getCorrectUserPasswordHash(),
 			        new XCommand[] { removeCommand }, null);
 		}
-		mids = new SynchronousCallbackWithOneResult<Set<XID>>();
+		mids = new SynchronousCallbackWithOneResult<Set<XId>>();
 		this.store.getModelIds(getCorrectUser(), getCorrectUserPasswordHash(), mids);
 		assertEquals(SynchronousCallbackWithOneResult.SUCCESS, mids.waitOnCallback(Long.MAX_VALUE));
 		assert mids.effect.size() == 0 : mids.effect.size();

@@ -13,7 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XFieldCommand;
@@ -42,7 +42,7 @@ public class GaePersistenceTest {
 	
 	private static final Logger log = LoggerFactory.getLogger(GaePersistenceTest.class);
 	
-	private static final XID ACTOR = XX.toId("tester");
+	private static final XId ACTOR = XX.toId("tester");
 	
 	@Before
 	public void setUp() {
@@ -59,11 +59,11 @@ public class GaePersistenceTest {
 	@Test
 	public void testQueryIds() {
 		LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory());
-		XID repoId = XX.toId("repo-testQueryIds");
+		XId repoId = XX.toId("repo-testQueryIds");
 		
 		XydraPersistence pers = new GaePersistence(repoId);
 		
-		XID modelId = XX.createUniqueId();
+		XId modelId = XX.createUniqueId();
 		XAddress repoAddr = XX.toAddress(pers.getRepositoryId(), null, null, null);
 		XAddress modelAddr = XX.resolveModel(repoAddr, modelId);
 		GetWithAddressRequest modelAddressRequest = new GetWithAddressRequest(modelAddr);
@@ -78,7 +78,7 @@ public class GaePersistenceTest {
 		assertTrue(pers.hasManagedModel(modelId));
 		
 		log.info("###   ADD object ");
-		XID objectId = XX.createUniqueId();
+		XId objectId = XX.createUniqueId();
 		assertFalse(pers.getModelSnapshot(modelAddressRequest).hasObject(objectId));
 		/* Create object */
 		long l = pers.executeCommand(ACTOR,
@@ -110,9 +110,9 @@ public class GaePersistenceTest {
 	
 	@Test
 	public void getEmtpyModel() {
-		XID repoId = XX.toId("repo-getEmtpyModel");
+		XId repoId = XX.toId("repo-getEmtpyModel");
 		XydraPersistence pers = new GaePersistence(repoId);
-		XID modelId = XX.toId("model-getEmtpyModel");
+		XId modelId = XX.toId("model-getEmtpyModel");
 		
 		ModelRevision modelRev = pers.getModelRevision(new GetWithAddressRequest(XX.resolveModel(
 		        repoId, modelId), true));
@@ -133,7 +133,7 @@ public class GaePersistenceTest {
 	public void testTrickyRevisionNumbersForModels() {
 		XydraPersistence pers = new GaePersistence(XX.toId("test-repo6"));
 		
-		XID modelId = XX.createUniqueId();
+		XId modelId = XX.createUniqueId();
 		XAddress repoAddr = XX.toAddress(pers.getRepositoryId(), null, null, null);
 		XAddress modelAddr = XX.resolveModel(repoAddr, modelId);
 		GetWithAddressRequest modelAddressRequest = new GetWithAddressRequest(modelAddr);
@@ -264,9 +264,9 @@ public class GaePersistenceTest {
 		assertEquals("field exists: addValue (succ), remValue (succ)", 4, result);
 	}
 	
-	static final XID model1 = XX.toId("model1");
-	static final XID object1 = XX.toId("object1");
-	static final XID field1 = XX.toId("field1");
+	static final XId model1 = XX.toId("model1");
+	static final XId object1 = XX.toId("object1");
+	static final XId field1 = XX.toId("field1");
 	
 	private static XydraPersistence preparePersistenceWithModelAndObject(String id, boolean addField) {
 		XydraPersistence p = new GaePersistence(XX.toId(id));
@@ -287,8 +287,8 @@ public class GaePersistenceTest {
 	public void testAddAndRemove() {
 		XydraPersistence pers = new GaePersistence(XX.toId("test-repo3"));
 		
-		XID modelId = XX.createUniqueId();
-		XID objectId = XX.createUniqueId();
+		XId modelId = XX.createUniqueId();
+		XId objectId = XX.createUniqueId();
 		XAddress repoAddr = XX.toAddress(pers.getRepositoryId(), null, null, null);
 		XAddress modelAddr = XX.resolveModel(repoAddr, modelId);
 		GetWithAddressRequest modelAddressRequest = new GetWithAddressRequest(modelAddr);
@@ -342,7 +342,7 @@ public class GaePersistenceTest {
 		LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory());
 		
 		XydraPersistence pers = new GaePersistence(XX.toId("test-repo4"));
-		XID modelId = XX.toId("model1");
+		XId modelId = XX.toId("model1");
 		XAddress repoAddr = XX.toAddress(pers.getRepositoryId(), null, null, null);
 		XAddress modelAdd = XX.resolveModel(repoAddr, modelId);
 		GetWithAddressRequest modelAddr = new GetWithAddressRequest(modelAdd);
@@ -381,7 +381,7 @@ public class GaePersistenceTest {
 		// System.out.println(StatsGatheringMemCacheWrapper.INSTANCE.stats());
 	}
 	
-	public XydraPersistence createPersistence(XID repositoryId) {
+	public XydraPersistence createPersistence(XId repositoryId) {
 		LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory());
 		// configureLog4j();
 		GaeTestfixer.enable();
@@ -395,9 +395,9 @@ public class GaePersistenceTest {
 	
 	@Test
 	public void testSimpleOperations() {
-		XID repositoryId = XX.toId("testSimpleOperations");
+		XId repositoryId = XX.toId("testSimpleOperations");
 		XydraPersistence persistence = createPersistence(repositoryId);
-		XID modelId = XX.toId("model1");
+		XId modelId = XX.toId("model1");
 		GetWithAddressRequest getRequest = new GetWithAddressRequest(XX.toAddress(repositoryId,
 		        modelId, null, null));
 		long modelRev;
@@ -420,7 +420,7 @@ public class GaePersistenceTest {
 		assertEquals(0, modelRev);
 		
 		/* Add object */
-		XID objectId = XX.toId("object1");
+		XId objectId = XX.toId("object1");
 		l = persistence
 		        .executeCommand(
 		                ACTOR,
@@ -434,7 +434,7 @@ public class GaePersistenceTest {
 		XWritableModel snap = persistence.getModelSnapshot(getRequest);
 		assertEquals(modelRev, snap.getRevisionNumber());
 		
-		Set<XID> set = org.xydra.index.IndexUtils.toSet(snap.iterator());
+		Set<XId> set = org.xydra.index.IndexUtils.toSet(snap.iterator());
 		assertEquals(1, set.size());
 	}
 	
@@ -443,8 +443,8 @@ public class GaePersistenceTest {
 		LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory());
 		
 		XydraPersistence pers = new GaePersistence(XX.toId("test-repo5"));
-		XID modelId = XX.toId("model1");
-		XID objectId = XX.toId("object1");
+		XId modelId = XX.toId("model1");
+		XId objectId = XX.toId("object1");
 		XAddress repoAddr = XX.toAddress(pers.getRepositoryId(), null, null, null);
 		XAddress modelAddress = XX.resolveModel(repoAddr, modelId);
 		GetWithAddressRequest modelAddressRequest = new GetWithAddressRequest(modelAddress);

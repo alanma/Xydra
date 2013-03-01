@@ -3,7 +3,7 @@ package org.xydra.store.impl.gae;
 import java.util.List;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XWritableModel;
@@ -27,13 +27,13 @@ import org.xydra.store.impl.delegate.XydraPersistence;
 public interface IGaeModelPersistence {
 	
 	/**
-	 * See {@link XydraPersistence#executeCommand(XID, XCommand)}
+	 * See {@link XydraPersistence#executeCommand(XId, XCommand)}
 	 * 
 	 * @param command
 	 * @param actorId
 	 * @return ..
 	 */
-	public long executeCommand(XCommand command, XID actorId);
+	public long executeCommand(XCommand command, XId actorId);
 	
 	/**
 	 * See {@link XydraPersistence#getEvents(XAddress, long, long)}
@@ -62,7 +62,7 @@ public interface IGaeModelPersistence {
 	 * @param includeTentative
 	 * @return ..
 	 */
-	public XWritableObject getObjectSnapshot(XID objectId, boolean includeTentative);
+	public XWritableObject getObjectSnapshot(XId objectId, boolean includeTentative);
 	
 	/**
 	 * See
@@ -76,7 +76,7 @@ public interface IGaeModelPersistence {
 	public ModelRevision getModelRevision(boolean includeTentative);
 	
 	/**
-	 * See {@link XydraPersistence#hasManagedModel(XID)}
+	 * See {@link XydraPersistence#hasManagedModel(XId)}
 	 * 
 	 * @return ..
 	 */

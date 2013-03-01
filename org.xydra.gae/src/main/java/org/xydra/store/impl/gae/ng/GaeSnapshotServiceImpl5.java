@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.Setting;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableModel;
@@ -330,11 +330,11 @@ public class GaeSnapshotServiceImpl5 extends AbstractGaeSnapshotServiceImpl {
 		long bytes = 0;
 		if(model == null)
 			return 0;
-		for(XID oid : model) {
+		for(XId oid : model) {
 			bytes += oid.toString().length() * 2;
 			XReadableObject obj = model.getObject(oid);
 			if(obj != null) {
-				for(XID fid : obj) {
+				for(XId fid : obj) {
 					bytes += fid.toString().length() * 2;
 					XReadableField field = obj.getField(fid);
 					XValue value = field.getValue();
@@ -445,7 +445,7 @@ public class GaeSnapshotServiceImpl5 extends AbstractGaeSnapshotServiceImpl {
 				break;
 			case XFIELD:
 				// maybe create object first
-				XID oid = lock.getObject();
+				XId oid = lock.getObject();
 				/*
 				 * must be partial. If there was an object lock there would not
 				 * have been a field lock in the same object. Locks are minimal.

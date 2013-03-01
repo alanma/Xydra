@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.concurrent.Future;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.change.ChangeType;
@@ -306,7 +306,7 @@ public class GaeEvents {
 	 *            of.
 	 * @param transindex The index of the event in the change as returned by
 	 *            {@link #saveEvents(XAddress, Entity, List)} or
-	 *            {@link #loadAtomicEvents(XAddress, long, XID, Entity, boolean)}
+	 *            {@link #loadAtomicEvents(XAddress, long, XId, Entity, boolean)}
 	 * @return Never null but {@link AsyncValue#get()} may return null.
 	 */
 	protected static AsyncValue getValue(XAddress modelAddr, long revisionNumber, int transindex) {
@@ -450,7 +450,7 @@ public class GaeEvents {
 	 *         entities
 	 */
 	protected static Pair<XAtomicEvent[],int[]> loadAtomicEvents(XAddress modelAddr, long rev,
-	        XID actor, Entity changeEntity) {
+	        XId actor, Entity changeEntity) {
 		
 		/*
 		 * Load the event properties that were set in saveEvents().
@@ -489,7 +489,7 @@ public class GaeEvents {
 			
 			switch(type.getTargetType()) {
 			case XREPOSITORY: {
-				XID modelId = XX.toId(values.get(i).getValue());
+				XId modelId = XX.toId(values.get(i).getValue());
 				switch(type.getChangeType()) {
 				case ADD:
 					events[i] = MemoryRepositoryEvent.createAddEvent(actor, target, modelId,
@@ -505,7 +505,7 @@ public class GaeEvents {
 				break;
 			}
 			case XMODEL: {
-				XID objectId = XX.toId(values.get(i).getValue());
+				XId objectId = XX.toId(values.get(i).getValue());
 				long objectRev = objectRevs.get(ori++).longValue();
 				switch(type.getChangeType()) {
 				case ADD:
@@ -522,7 +522,7 @@ public class GaeEvents {
 				break;
 			}
 			case XOBJECT: {
-				XID fieldId = XX.toId(values.get(i).getValue());
+				XId fieldId = XX.toId(values.get(i).getValue());
 				long objectRev = objectRevs.get(ori++).longValue();
 				long fieldRev = fieldRevs.get(fri++).longValue();
 				switch(type.getChangeType()) {

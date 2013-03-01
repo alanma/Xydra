@@ -3,7 +3,7 @@ package org.xydra.store.impl.gae;
 import java.util.List;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XWritableModel;
@@ -45,10 +45,10 @@ public class GaeModelPersistence3 implements IGaeModelPersistence {
 	 * 
 	 * @see
 	 * org.xydra.store.impl.gae.IGaeModelPersistence#executeCommand(org.xydra
-	 * .base.change.XCommand, org.xydra.base.XID)
+	 * .base.change.XCommand, org.xydra.base.XId)
 	 */
 	@Override
-	public long executeCommand(XCommand command, XID actorId) {
+	public long executeCommand(XCommand command, XId actorId) {
 		// absolutely required
 		calculateModelRevAndCacheInInstance(false);
 		return this.executionService.executeCommand(command, actorId);
@@ -102,10 +102,10 @@ public class GaeModelPersistence3 implements IGaeModelPersistence {
 	 * 
 	 * @see
 	 * org.xydra.store.impl.gae.IGaeModelPersistence#getObjectSnapshot(org.xydra
-	 * .base.XID, boolean)
+	 * .base.XId, boolean)
 	 */
 	@Override
-	public XWritableObject getObjectSnapshot(XID objectId, boolean includeTentative) {
+	public XWritableObject getObjectSnapshot(XId objectId, boolean includeTentative) {
 		calculateModelRevAndCacheInInstance(false);
 		ModelRevision currentRevision = this.instanceRevisionManager.getInstanceRevisionInfo()
 		        .getGaeModelRevision().getModelRevision();
@@ -148,7 +148,7 @@ public class GaeModelPersistence3 implements IGaeModelPersistence {
 	 * 
 	 * @see
 	 * org.xydra.store.impl.gae.IGaeModelPersistence#modelHasBeenManaged(org
-	 * .xydra.base.XID)
+	 * .xydra.base.XId)
 	 */
 	@Override
 	public boolean modelHasBeenManaged() {

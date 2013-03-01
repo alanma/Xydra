@@ -57,7 +57,7 @@ class ExecutionResult {
 	// return new ExecutionResult(Status.SuccessNochange, (XEvent)null, null);
 	// }
 	//
-	// public static ExecutionResult successCreatedField(GaeChange change, XID
+	// public static ExecutionResult successCreatedField(GaeChange change, XId
 	// fieldId,
 	// TentativeObjectState outerTos, TentativeObjectState innerTos,
 	// ContextInTxn innerContext, boolean inTransaction) {
@@ -124,7 +124,7 @@ class ExecutionResult {
 	// return new ExecutionResult(Status.SuccessExecuted, event, null);
 	// }
 	//
-	// public static ExecutionResult successRemovedField(GaeChange change, XID
+	// public static ExecutionResult successRemovedField(GaeChange change, XId
 	// fieldId,
 	//
 	// TentativeObjectState outerTos, TentativeObjectState innerTos,
@@ -169,7 +169,7 @@ class ExecutionResult {
 	// XReadableModel outerModelSnapshot = ctxBeforeCmd.getModelSnapshot();
 	//
 	// // implied events, delete all objects
-	// for(XID objectId : outerModelSnapshot) {
+	// for(XId objectId : outerModelSnapshot) {
 	//
 	// // calc events
 	// XAddress objectAddress =
@@ -178,7 +178,7 @@ class ExecutionResult {
 	// innerContext.getTentativeObjectState(objectAddress);
 	// XReadableObject outerTos =
 	// ctxBeforeCmd.getTentativeObjectState(objectAddress);
-	// for(XID fieldId : innerTos) {
+	// for(XId fieldId : innerTos) {
 	// XReadableField innerField = innerTos.getField(fieldId);
 	// XReadableField outerField = outerTos.getField(fieldId);
 	//
@@ -225,7 +225,7 @@ class ExecutionResult {
 	// inTransaction) {
 	// // calc events
 	// List<XAtomicEvent> events = new ArrayList<XAtomicEvent>();
-	// for(XID fieldId : innerTos) {
+	// for(XId fieldId : innerTos) {
 	// XReadableField outerField = outerTos.getField(fieldId);
 	// events.add(MemoryObjectEvent.createRemoveEvent(change.getActorId(),
 	// command.getChangedEntity(), fieldId, outerTos.getModelRevision(),

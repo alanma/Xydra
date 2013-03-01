@@ -3,7 +3,7 @@ package org.xydra.store.impl.gae;
 import java.util.Map;
 
 import org.xydra.annotations.Setting;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.gae.AboutAppEngine;
 import org.xydra.gae.admin.GaeConfigSettings;
 import org.xydra.gae.admin.GaeConfiguration;
@@ -132,7 +132,7 @@ public class GaePlatformRuntime implements XydraPlatformRuntime {
 	}
 	
 	@Override
-	public XydraPersistence getPersistence(XID repositoryId) {
+	public XydraPersistence getPersistence(XId repositoryId) {
 		log.info("INIT XydraPersistence instance with id '" + repositoryId + "'.");
 		return new GaePersistence(repositoryId);
 	}

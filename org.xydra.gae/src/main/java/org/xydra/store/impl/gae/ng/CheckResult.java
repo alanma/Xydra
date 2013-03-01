@@ -3,7 +3,7 @@ package org.xydra.store.impl.gae.ng;
 import org.xydra.annotations.CanBeNull;
 import org.xydra.annotations.NeverNull;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.XFieldCommand;
 import org.xydra.base.change.XModelCommand;
 import org.xydra.base.change.XObjectCommand;
@@ -130,7 +130,7 @@ public class CheckResult {
     
     private Status status;
     
-    private XID actorId;
+    private XId actorId;
     
     private boolean inTransaction;
     
@@ -141,7 +141,7 @@ public class CheckResult {
      * @param inTransaction
      * @param explanation
      */
-    public CheckResult(@NeverNull Status status, XID actorId, @CanBeNull ContextInTxn contextInTxn,
+    public CheckResult(@NeverNull Status status, XId actorId, @CanBeNull ContextInTxn contextInTxn,
             boolean inTransaction, @CanBeNull String explanation) {
         XyAssert.xyAssert(status != null);
         assert status != null;
@@ -172,7 +172,7 @@ public class CheckResult {
                 + this.actorId + " inTxn?" + this.inTransaction + " see also ctxInTxn";
     }
     
-    public XID getActorId() {
+    public XId getActorId() {
         return this.actorId;
     }
     

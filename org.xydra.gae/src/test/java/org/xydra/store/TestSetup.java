@@ -2,7 +2,7 @@ package org.xydra.store;
 
 import org.junit.Test;
 import org.xydra.base.X;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XCommandFactory;
@@ -32,7 +32,7 @@ public class TestSetup {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		XydraRuntime.init();
 		
-		XID repoId = XX.toId("repo1");
+		XId repoId = XX.toId("repo1");
 		
 		if(this.store == null) {
 			this.store = new DelegatingAllowAllStore(new GaePersistence(repoId));
@@ -40,8 +40,8 @@ public class TestSetup {
 		
 		this.factory = X.getCommandFactory();
 		
-		XID modelId1 = XX.toId("TestModel1");
-		XID objectId1 = XX.toId("TestObject1");
+		XId modelId1 = XX.toId("TestModel1");
+		XId objectId1 = XX.toId("TestObject1");
 		
 		XCommand modelCommand1 = this.factory.createAddModelCommand(repoId, modelId1, true);
 		
@@ -50,7 +50,7 @@ public class TestSetup {
 		
 		XCommand[] commands = { modelCommand1, objectCommand1 };
 		
-		XID actorId = XX.toId("actor1");
+		XId actorId = XX.toId("actor1");
 		this.store.executeCommands(actorId, "bla", commands, new CB<BatchedResult<Long>[]>());
 		XydraRuntime.finishRequest();
 	}
@@ -64,10 +64,10 @@ public class TestSetup {
 		log.debug("logtest 1-2-3");
 		XydraRuntime.init();
 		
-		XID actorId = XX.toId("actor1");
-		XID repoId = XX.toId("repo1");
-		XID modelId1 = XX.toId("TestModel1");
-		XID objectId1 = XX.toId("TestObject1");
+		XId actorId = XX.toId("actor1");
+		XId repoId = XX.toId("repo1");
+		XId modelId1 = XX.toId("TestModel1");
+		XId objectId1 = XX.toId("TestObject1");
 		GetWithAddressRequest modelAddressRequest = new GetWithAddressRequest(XX.resolveModel(
 		        repoId, modelId1));
 		
@@ -94,10 +94,10 @@ public class TestSetup {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		XydraRuntime.init();
 		
-		XID repoId = XX.toId("repo1");
-		XID actorId = XX.toId("actor1");
-		XID modelId1 = XX.toId("TestModel1");
-		XID objectId1 = XX.toId("TestObject1");
+		XId repoId = XX.toId("repo1");
+		XId actorId = XX.toId("actor1");
+		XId modelId1 = XX.toId("TestModel1");
+		XId objectId1 = XX.toId("TestObject1");
 		
 		XydraPersistence pers = new GaePersistence(repoId);
 		

@@ -3,7 +3,7 @@ package org.xydra.store.impl.gae.snapshot;
 import java.util.Iterator;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XRevWritableField;
 import org.xydra.base.rmof.XRevWritableModel;
@@ -15,7 +15,7 @@ public abstract class AbstractGaeSnapshotServiceImpl implements IGaeSnapshotServ
 	
 	@Override
 	public XRevWritableField getFieldSnapshot(long modelRevisionNumber, boolean precise,
-	        XID objectId, XID fieldId) {
+	        XId objectId, XId fieldId) {
 		
 		XRevWritableObject objectSnapshot = getObjectSnapshot(modelRevisionNumber, precise,
 		        objectId);
@@ -28,7 +28,7 @@ public abstract class AbstractGaeSnapshotServiceImpl implements IGaeSnapshotServ
 	
 	@Override
 	public XRevWritableObject getObjectSnapshot(long modelRevisionNumber, boolean precise,
-	        XID objectId) {
+	        XId objectId) {
 		/*
 		 * IMPROVE(performance, defer) generate the object snapshot directly.
 		 * While reading the change events, one could skip reading large,

@@ -5,7 +5,7 @@ import java.util.Iterator;
 
 import org.xydra.annotations.NeverNull;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XRevWritableField;
@@ -60,12 +60,12 @@ public class TentativeObjectState implements Serializable, XRevWritableObject {
 		return this.object.getAddress();
 	}
 	
-	public XRevWritableField getField(XID fieldId) {
+	public XRevWritableField getField(XId fieldId) {
 		return this.object.getField(fieldId);
 	}
 	
 	@Override
-	public XID getId() {
+	public XId getId() {
 		return this.getAddress().getObject();
 	}
 	
@@ -82,7 +82,7 @@ public class TentativeObjectState implements Serializable, XRevWritableObject {
 		return XType.XOBJECT;
 	}
 	
-	public boolean hasField(XID fieldId) {
+	public boolean hasField(XId fieldId) {
 		return this.object.hasField(fieldId);
 	}
 	
@@ -90,7 +90,7 @@ public class TentativeObjectState implements Serializable, XRevWritableObject {
 		return this.object.isEmpty();
 	}
 	
-	public Iterator<XID> iterator() {
+	public Iterator<XId> iterator() {
 		return this.object.iterator();
 	}
 	
@@ -104,7 +104,7 @@ public class TentativeObjectState implements Serializable, XRevWritableObject {
 	}
 	
 	@Override
-	public boolean removeField(XID fieldId) {
+	public boolean removeField(XId fieldId) {
 		return this.object.removeField(fieldId);
 	}
 	
@@ -114,7 +114,7 @@ public class TentativeObjectState implements Serializable, XRevWritableObject {
 	}
 	
 	@Override
-	public XRevWritableField createField(XID fieldId) {
+	public XRevWritableField createField(XId fieldId) {
 		return this.object.createField(fieldId);
 	}
 	

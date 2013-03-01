@@ -7,7 +7,7 @@ import java.util.ConcurrentModificationException;
 import java.util.concurrent.Future;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.change.XEvent;
@@ -46,7 +46,7 @@ class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeField> im
 	 * 
 	 * {@link InternalGaeObject}s are not constructed directly by
 	 * {@link IGaeChangesService} but through
-	 * {@link InternalGaeModel#getObject(XID)}.
+	 * {@link InternalGaeModel#getObject(XId)}.
 	 * 
 	 * @param locks The locks held by the current process. These are used to
 	 *            assert that we have enough locks when reading fields as well
@@ -93,7 +93,7 @@ class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeField> im
 		// There may be fields with a newer revision.
 		if(this.objectRev == XEvent.RevisionNotAvailable) {
 			
-			for(XID fieldId : this) {
+			for(XId fieldId : this) {
 				XReadableField field = getField(fieldId);
 				assert field != null;
 				long fieldRev = field.getRevisionNumber();
@@ -110,17 +110,17 @@ class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeField> im
 	}
 	
 	@Override
-	public XID getId() {
+	public XId getId() {
 		return getAddress().getObject();
 	}
 	
 	@Override
-	public InternalGaeField getField(XID fieldId) {
+	public InternalGaeField getField(XId fieldId) {
 		return getChild(fieldId);
 	}
 	
 	@Override
-	public boolean hasField(XID fieldId) {
+	public boolean hasField(XId fieldId) {
 		return hasChild(fieldId);
 	}
 	
@@ -130,7 +130,7 @@ class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeField> im
 	}
 	
 	@Override
-	protected XAddress resolveChild(XAddress addr, XID childId) {
+	protected XAddress resolveChild(XAddress addr, XId childId) {
 		return XX.resolveField(addr, childId);
 	}
 	

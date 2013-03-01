@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.change.XEvent;
 import org.xydra.store.impl.gae.SyncDatastore;
@@ -36,10 +36,10 @@ import com.google.appengine.api.datastore.Entity;
 abstract class InternalGaeContainerXEntity<C> extends InternalGaeXEntity {
 	
 	private final IGaeChangesService changesService;
-	private final Map<XID,C> cachedChildren = new HashMap<XID,C>();
+	private final Map<XId,C> cachedChildren = new HashMap<XId,C>();
 	private final XAddress addr;
-	private Set<XID> cachedIds;
-	private final Set<XID> cachedMisses = new HashSet<XID>();
+	private Set<XId> cachedIds;
+	private final Set<XId> cachedMisses = new HashSet<XId>();
 	private final GaeLocks locks;
 	private final long rev;
 	
@@ -65,11 +65,11 @@ abstract class InternalGaeContainerXEntity<C> extends InternalGaeXEntity {
 		return this.addr;
 	}
 	
-	protected abstract XAddress resolveChild(XAddress addr, XID childId);
+	protected abstract XAddress resolveChild(XAddress addr, XId childId);
 	
 	protected abstract C loadChild(XAddress childAddr, Entity childEntity);
 	
-	public C getChild(XID fieldId) {
+	public C getChild(XId fieldId) {
 		
 		// don't look in this.cachedIds, as this might contain outdated
 		// information due to being based on GAE queries
@@ -96,12 +96,12 @@ abstract class InternalGaeContainerXEntity<C> extends InternalGaeXEntity {
 		return gf;
 	}
 	
-	public boolean hasChild(XID fieldId) {
+	public boolean hasChild(XId fieldId) {
 		return this.cachedIds != null ? this.cachedIds.contains(fieldId)
 		        : getChild(fieldId) != null;
 	}
 	
-	public Iterator<XID> iterator() {
+	public Iterator<XId> iterator() {
 		
 		if(this.cachedIds == null) {
 			

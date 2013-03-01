@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.concurrent.Future;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XCommand;
@@ -81,7 +81,7 @@ public class GaeChange {
     
     /**
      * GAE Property key for the actor that is responsible for the change. The
-     * actor's {@link XID} is stored as a {@link String}.
+     * actor's {@link XId} is stored as a {@link String}.
      * 
      * Set when entering {@link STATUS_CREATING}, never removed.
      */
@@ -265,7 +265,7 @@ public class GaeChange {
     private final XAddress modelAddr;
     private Entity entity;
     private Status status;
-    private XID actor;
+    private XId actor;
     private Pair<List<XAtomicEvent>,int[]> events;
     private transient XEvent event;
     
@@ -278,7 +278,7 @@ public class GaeChange {
      * @param locks
      * @param actorId
      */
-    public GaeChange(XAddress modelAddr, long rev, GaeLocks locks, XID actorId) {
+    public GaeChange(XAddress modelAddr, long rev, GaeLocks locks, XId actorId) {
         
         this.rev = rev;
         this.locks = locks;
@@ -342,7 +342,7 @@ public class GaeChange {
     /**
      * @return the actor associated with the given change {@link Entity}.
      */
-    private XID getActor() {
+    private XId getActor() {
         if(this.actor == null) {
             synchronized(this) {
                 String actorStr = (String)this.entity.getProperty(PROP_ACTOR);
@@ -594,7 +594,7 @@ public class GaeChange {
                 + GaeDebugFormatter.toString(this.entity);
     }
     
-    public XID getActorId() {
+    public XId getActorId() {
         return this.actor;
     }
     

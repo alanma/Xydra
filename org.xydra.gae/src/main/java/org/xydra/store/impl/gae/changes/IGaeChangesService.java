@@ -3,7 +3,7 @@ package org.xydra.store.impl.gae.changes;
 import java.util.List;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.XEvent;
 import org.xydra.store.Callback;
 import org.xydra.store.GetEventsRequest;
@@ -33,7 +33,7 @@ public interface IGaeChangesService {
 	 * @param beginRevision inclusive
 	 * @param endRevision inclusive
 	 * 
-	 * @see XydraStore#getEvents(XID, String, GetEventsRequest[],
+	 * @see XydraStore#getEvents(XId, String, GetEventsRequest[],
 	 *      org.xydra.store.Callback)
 	 * 
 	 * @return a list of events or null if this model was never created. The
@@ -53,7 +53,7 @@ public interface IGaeChangesService {
 	 * 
 	 * @return ...
 	 * 
-	 * @see XydraStore#getModelRevisions(XID, String, GetWithAddressRequest[],
+	 * @see XydraStore#getModelRevisions(XId, String, GetWithAddressRequest[],
 	 *      Callback)
 	 */
 	GaeModelRevision calculateCurrentModelRevision(boolean includeTentative);
@@ -72,7 +72,7 @@ public interface IGaeChangesService {
 	 * 
 	 *         Note: Reads revCache.lastTaken
 	 */
-	GaeChange grabRevisionAndRegisterLocks(long lastTaken, GaeLocks locks, XID actorId);
+	GaeChange grabRevisionAndRegisterLocks(long lastTaken, GaeLocks locks, XId actorId);
 	
 	/**
 	 * Cache given change, if status is committed.

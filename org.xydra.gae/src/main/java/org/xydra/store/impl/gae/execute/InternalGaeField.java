@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.concurrent.Future;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.change.XFieldEvent;
 import org.xydra.base.rmof.XReadableField;
@@ -47,7 +47,7 @@ class InternalGaeField extends InternalGaeXEntity implements XReadableField {
 	 * 
 	 * {@link InternalGaeField}s are not constructed directly by
 	 * {@link IGaeChangesService} but through
-	 * {@link InternalGaeObject#getField(XID)}.
+	 * {@link InternalGaeObject#getField(XId)}.
 	 * 
 	 */
 	protected InternalGaeField(IGaeChangesService gcs, XAddress fieldAddr, Entity fieldEntity) {
@@ -83,7 +83,7 @@ class InternalGaeField extends InternalGaeXEntity implements XReadableField {
 	}
 	
 	@Override
-	public XID getId() {
+	public XId getId() {
 		return this.fieldAddr.getField();
 	}
 	

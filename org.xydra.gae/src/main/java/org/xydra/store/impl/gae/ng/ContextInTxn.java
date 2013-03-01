@@ -8,7 +8,7 @@ import java.util.List;
 
 import org.xydra.annotations.NeverNull;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.change.XAtomicEvent;
@@ -46,7 +46,7 @@ public class ContextInTxn implements XStateWritableModel {
     
     private ChangedModel changedModel;
     
-    public XStateWritableObject createObject(XID objectId) {
+    public XStateWritableObject createObject(XId objectId) {
         return this.changedModel.createObject(objectId);
     }
     
@@ -54,15 +54,15 @@ public class ContextInTxn implements XStateWritableModel {
         return this.changedModel.getAddress();
     }
     
-    public XID getId() {
+    public XId getId() {
         return this.changedModel.getId();
     }
     
-    public boolean hasObject(XID objectId) {
+    public boolean hasObject(XId objectId) {
         return this.changedModel.hasObject(objectId);
     }
     
-    public XStateWritableObject getObject(XID objectId) {
+    public XStateWritableObject getObject(XId objectId) {
         return this.changedModel.getObject(objectId);
     }
     
@@ -70,7 +70,7 @@ public class ContextInTxn implements XStateWritableModel {
         return this.changedModel.isEmpty();
     }
     
-    public Iterator<XID> iterator() {
+    public Iterator<XId> iterator() {
         return this.changedModel.iterator();
     }
     
@@ -78,7 +78,7 @@ public class ContextInTxn implements XStateWritableModel {
         return this.changedModel.getType();
     }
     
-    public boolean removeObject(XID objectId) {
+    public boolean removeObject(XId objectId) {
         return this.changedModel.removeObject(objectId);
     }
     
@@ -110,7 +110,7 @@ public class ContextInTxn implements XStateWritableModel {
     }
     
     public @NeverNull
-    List<XAtomicEvent> toEvents(XID actorId, ContextBeforeCommand ctxBeforeCommand,
+    List<XAtomicEvent> toEvents(XId actorId, ContextBeforeCommand ctxBeforeCommand,
             boolean inTransaction) {
         XyAssert.xyAssert(this.getAddress() != null);
         
@@ -128,7 +128,7 @@ public class ContextInTxn implements XStateWritableModel {
             List<XAtomicEvent> events = new ArrayList<XAtomicEvent>();
             XAddress target = this.getAddress().getParent();
             boolean hadChildren = false;
-            for(XID objectId : ctxBeforeCommand) {
+            for(XId objectId : ctxBeforeCommand) {
                 hadChildren = true;
                 addImpliedObjectRemoveEventsAndUpdateTos(events, ctxBeforeCommand, actorId,
                         ctxBeforeCommand.getRevisionNumber(), ctxBeforeCommand.getAddress(),
@@ -165,9 +165,9 @@ public class ContextInTxn implements XStateWritableModel {
      * @param object
      */
     private static void addImpliedObjectRemoveEventsAndUpdateTos(List<XAtomicEvent> events,
-            ContextBeforeCommand ctxBeforeCmd, XID actorId, long modelRev, XAddress modelAddress,
+            ContextBeforeCommand ctxBeforeCmd, XId actorId, long modelRev, XAddress modelAddress,
             XReadableObject object) {
-        for(XID fieldId : object) {
+        for(XId fieldId : object) {
             addImpliedFieldAndValueRemoveEventsAndUpdateTos(events, actorId, modelRev,
                     object.getRevisionNumber(), object.getField(fieldId));
         }
@@ -190,7 +190,7 @@ public class ContextInTxn implements XStateWritableModel {
      * @param field
      */
     private static void addImpliedFieldAndValueRemoveEventsAndUpdateTos(List<XAtomicEvent> events,
-            XID actorId, long modelRev, long objectRev, XReadableField field) {
+            XId actorId, long modelRev, long objectRev, XReadableField field) {
         if(!field.isEmpty()) {
             XFieldEvent fieldEvent = MemoryFieldEvent.createRemoveEvent(actorId,
                     field.getAddress(), modelRev, objectRev, field.getRevisionNumber(), true, true);
@@ -206,7 +206,7 @@ public class ContextInTxn implements XStateWritableModel {
         return this.changedModel.getAdded();
     }
     
-    public Collection<XID> getRemoved() {
+    public Collection<XId> getRemoved() {
         return this.changedModel.getRemoved();
     }
     

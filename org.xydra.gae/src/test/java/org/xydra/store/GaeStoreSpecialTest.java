@@ -6,7 +6,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.impl.memory.MemoryRepositoryCommand;
@@ -23,17 +23,17 @@ public class GaeStoreSpecialTest {
 	}
 	
 	private GaePersistence pers;
-	private XID actorId;
+	private XId actorId;
 	private XAddress modelAddress1;
-	private XID repoID;
-	private XID modelId1;
+	private XId repoID;
+	private XId modelId1;
 	private XAddress repoAddr;
 	
 	public void doStuff() {
 		// creating some models
-		XID objectId1 = XX.toId("TestObject1");
-		XID objectId2 = XX.toId("TestObject2");
-		XID objectId3 = XX.toId("TestObject3");
+		XId objectId1 = XX.toId("TestObject1");
+		XId objectId2 = XX.toId("TestObject2");
+		XId objectId3 = XX.toId("TestObject3");
 		
 		/*
 		 * FIXME In a secure store you need to give the correctUser the rights

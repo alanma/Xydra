@@ -2,7 +2,7 @@ package org.xydra.store.impl.gae.changes;
 
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XFieldEvent;
@@ -34,7 +34,7 @@ class GaeFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 	 */
 	private AsyncValue newValue;
 	
-	protected GaeFieldEvent(XID actor, XAddress target, AsyncValue newValue, ChangeType changeType,
+	protected GaeFieldEvent(XId actor, XAddress target, AsyncValue newValue, ChangeType changeType,
 	        long modelRevision, long objectRevision, long fieldRevision, boolean inTransaction,
 	        boolean implied) {
 		super(target, changeType, actor, inTransaction, implied);

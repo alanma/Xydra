@@ -11,7 +11,7 @@ import java.util.Set;
 
 import org.xydra.annotations.NeverNull;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XCommand;
@@ -376,7 +376,7 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 	/**
 	 * Called from: {@link #calculateCurrentModelRevision(boolean)} to determine
 	 * if a candidate is a finalRev or not;
-	 * {@link #grabRevisionAndRegisterLocks(long, GaeLocks, XID)}
+	 * {@link #grabRevisionAndRegisterLocks(long, GaeLocks, XId)}
 	 * 
 	 * @param beginRevInclusive
 	 * @param endRevInclusive
@@ -825,7 +825,7 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
 	// FIXME grabRevisionAndRegisterLocks
 	@Override
 	@GaeOperation(memcacheRead = true ,datastoreRead = true ,datastoreWrite = true ,memcacheWrite = true)
-	public GaeChange grabRevisionAndRegisterLocks(long lastTaken, GaeLocks locks, XID actorId) {
+	public GaeChange grabRevisionAndRegisterLocks(long lastTaken, GaeLocks locks, XId actorId) {
 		XyAssert.xyAssert(lastTaken >= -1);
 		long start = lastTaken + 1;
 		for(long rev = start;; rev++) {

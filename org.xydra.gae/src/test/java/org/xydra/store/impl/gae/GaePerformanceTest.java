@@ -9,7 +9,7 @@ import java.util.Properties;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.PropertyConfigurator;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.core.AbstractPersistencePerformanceTest;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -23,7 +23,7 @@ public class GaePerformanceTest extends AbstractPersistencePerformanceTest {
 	private static final Logger log = LoggerFactory.getLogger(GaePerformanceTest.class);
 	
 	@Override
-	public XydraPersistence createPersistence(XID repositoryId) {
+	public XydraPersistence createPersistence(XId repositoryId) {
 		LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory());
 		configureLog4j();
 		GaeTestfixer.enable();

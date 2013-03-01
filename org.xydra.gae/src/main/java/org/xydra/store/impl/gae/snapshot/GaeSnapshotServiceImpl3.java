@@ -14,7 +14,7 @@ import java.util.TreeMap;
 import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.Setting;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XRevWritableField;
 import org.xydra.base.rmof.XRevWritableModel;
@@ -104,12 +104,12 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 	// }
 	//
 	// @Override
-	// public XID getId() {
+	// public XId getId() {
 	// return XX.toId("_NonExistant");
 	// }
 	//
 	// @Override
-	// public XRevWritableObject getObject(XID objectId) {
+	// public XRevWritableObject getObject(XId objectId) {
 	// return null;
 	// }
 	//
@@ -124,7 +124,7 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 	// }
 	//
 	// @Override
-	// public boolean hasObject(XID objectId) {
+	// public boolean hasObject(XId objectId) {
 	// return false;
 	// }
 	//
@@ -134,7 +134,7 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 	// }
 	//
 	// @Override
-	// public Iterator<XID> iterator() {
+	// public Iterator<XId> iterator() {
 	// return Iterators.emptyIterator();
 	// }
 	//
@@ -144,7 +144,7 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 	// }
 	//
 	// @Override
-	// public XRevWritableObject createObject(XID id) {
+	// public XRevWritableObject createObject(XId id) {
 	// return null;
 	// }
 	//
@@ -154,7 +154,7 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 	// }
 	//
 	// @Override
-	// public boolean removeObject(XID objectId) {
+	// public boolean removeObject(XId objectId) {
 	// return false;
 	// }
 	//
@@ -643,7 +643,7 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
 				break;
 			case XFIELD:
 				// maybe create object first
-				XID oid = lock.getObject();
+				XId oid = lock.getObject();
 				/*
 				 * must be partial. If there was an object lock there would not
 				 * have been a field lock in the same object. Locks are minimal.

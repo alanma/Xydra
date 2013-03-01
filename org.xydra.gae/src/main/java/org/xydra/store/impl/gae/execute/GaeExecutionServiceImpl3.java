@@ -6,7 +6,7 @@ import java.util.concurrent.Future;
 import org.xydra.annotations.CanBeNull;
 import org.xydra.annotations.NeverNull;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XCommand;
@@ -94,7 +94,7 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 	 * Requires a fresh revision number to find the right base snapshot from
 	 * which to work on
 	 */
-	public long executeCommand(XCommand command, XID actorId) {
+	public long executeCommand(XCommand command, XId actorId) {
 		/**
 		 * InstanceRevisionManager should have been updated before. This is
 		 * checked in GaeModelPersistence
@@ -303,7 +303,7 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 		XRevWritableModel result = model;
 		for(XAddress lock : locks) {
 			
-			XID objectId = lock.getObject();
+			XId objectId = lock.getObject();
 			if(objectId == null) {
 				continue;
 			}
@@ -343,7 +343,7 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 	 * @return a copy of the created events or null if the command cannot be
 	 *         applied.
 	 */
-	private long checkPreconditionsAndSaveEvents(GaeChange change, XCommand command, XID actorId,
+	private long checkPreconditionsAndSaveEvents(GaeChange change, XCommand command, XId actorId,
 	        XReadableModel snapshot) {
 		Pair<ChangedModel,DeltaUtils.ModelChange> c = DeltaUtils.executeCommand(snapshot, command);
 		if(c == null) {

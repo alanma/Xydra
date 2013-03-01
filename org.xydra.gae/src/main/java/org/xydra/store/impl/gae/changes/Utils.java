@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.index.iterator.TransformingIterator;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -45,10 +45,10 @@ public class Utils {
 	 * 
 	 * @param address a repository, model or object address. Fields have no
 	 *            children.
-	 * @return the XIDs of all children
+	 * @return the XIds of all children
 	 */
 	@GaeOperation(datastoreRead = true)
-	public static Set<XID> findChildren(XAddress address) {
+	public static Set<XId> findChildren(XAddress address) {
 		assert address.getRepository() != null;
 		assert address.getField() == null;
 		
@@ -70,7 +70,7 @@ public class Utils {
 		Key first = KeyFactory.createKey(kind, uri.toString());
 		Key last = KeyFactory.createKey(kind, first.getName() + "\uFFFF");
 		
-		Set<XID> childIds = new HashSet<XID>();
+		Set<XId> childIds = new HashSet<XId>();
 		
 		Query q = new Query(kind);
 		q.setFilter(
@@ -94,7 +94,7 @@ public class Utils {
 		return childIds;
 	}
 	
-	private static XID getEntityId(XAddress address) {
+	private static XId getEntityId(XAddress address) {
 		if(address.getField() != null) {
 			return address.getField();
 		}

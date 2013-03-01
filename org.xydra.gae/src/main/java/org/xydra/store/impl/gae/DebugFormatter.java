@@ -6,7 +6,7 @@ import java.util.Map;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
 import org.xydra.sharedutils.ReflectionUtils;
 import org.xydra.store.IMemCache.IdentifiableValue;
@@ -68,7 +68,7 @@ public class DebugFormatter {
 			return "-null-";
 		} else if(value instanceof String) {
 			return (String)value;
-		} else if(value instanceof XID) {
+		} else if(value instanceof XId) {
 			return "'" + value.toString() + "'";
 		} else if(value instanceof IdentifiableValue) {
 			Object o = ((IdentifiableValue)value).getValue();

@@ -6,7 +6,7 @@ package org.xydra.store.impl.gae.execute;
 import java.util.concurrent.Future;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.change.XEvent;
@@ -40,17 +40,17 @@ class InternalGaeModel extends InternalGaeContainerXEntity<InternalGaeObject> im
 	}
 	
 	@Override
-	public XID getId() {
+	public XId getId() {
 		return getAddress().getModel();
 	}
 	
 	@Override
-	public XReadableObject getObject(XID objectId) {
+	public XReadableObject getObject(XId objectId) {
 		return getChild(objectId);
 	}
 	
 	@Override
-	public boolean hasObject(XID objectId) {
+	public boolean hasObject(XId objectId) {
 		return hasChild(objectId);
 	}
 	
@@ -60,7 +60,7 @@ class InternalGaeModel extends InternalGaeContainerXEntity<InternalGaeObject> im
 	}
 	
 	@Override
-	protected XAddress resolveChild(XAddress addr, XID childId) {
+	protected XAddress resolveChild(XAddress addr, XId childId) {
 		return XX.resolveObject(addr, childId);
 	}
 	

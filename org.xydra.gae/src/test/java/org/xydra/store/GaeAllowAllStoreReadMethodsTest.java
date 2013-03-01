@@ -3,7 +3,7 @@ package org.xydra.store;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.xydra.base.X;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommandFactory;
 import org.xydra.core.LoggerTestHelper;
@@ -23,7 +23,7 @@ public class GaeAllowAllStoreReadMethodsTest extends AbstractAllowAllStoreReadMe
 		XydraRuntime.finishRequest();
 	}
 	
-	private XID repositoryId;
+	private XId repositoryId;
 	
 	@Override
 	protected XydraStore getStore() {
@@ -43,7 +43,7 @@ public class GaeAllowAllStoreReadMethodsTest extends AbstractAllowAllStoreReadMe
 	}
 	
 	@Override
-	protected XID getRepositoryId() {
+	protected XId getRepositoryId() {
 		return this.repositoryId;
 	}
 	

@@ -14,7 +14,7 @@ import org.xydra.annotations.CanBeNull;
 import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.Setting;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.XEvent;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -172,7 +172,7 @@ public class ChangeLogManager {
 		return this.modelAddress;
 	}
 	
-	public GaeChange grabRevisionAndRegisterLocks(GaeLocks locks, XID actorId, long start,
+	public GaeChange grabRevisionAndRegisterLocks(GaeLocks locks, XId actorId, long start,
 	        @NeverNull RevisionManager revisionManager) {
 		for(long rev = start;; rev++) {
 			

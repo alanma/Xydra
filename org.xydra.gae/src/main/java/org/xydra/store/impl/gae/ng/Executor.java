@@ -4,7 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.xydra.annotations.NeverNull;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XAtomicCommand;
@@ -87,7 +87,7 @@ public class Executor {
             return CheckResult.failed("Model '" + command.getModelId() + "' does not exist");
         }
         
-        XID objectId = command.getChangedEntity().getObject();
+        XId objectId = command.getChangedEntity().getObject();
         XStateWritableObject objectInTxn = ctxInTxn.getObject(objectId);
         if(objectInTxn == null) {
             return CheckResult.failed("Object '" + objectId
@@ -197,8 +197,8 @@ public class Executor {
      * @return the field rev before a command can also be the object or model
      *         revision, depending on what existed before the command.
      */
-    private static long getFieldRevBeforeCmd(ContextBeforeCommand ctxBeforeCmd, XID objectId,
-            XID fieldId) {
+    private static long getFieldRevBeforeCmd(ContextBeforeCommand ctxBeforeCmd, XId objectId,
+            XId fieldId) {
         long fieldRevBeforeCmd;
         TentativeObjectState objectBeforeCmd = ctxBeforeCmd.getObject(objectId);
         if(objectBeforeCmd == null) {
@@ -214,7 +214,7 @@ public class Executor {
         return fieldRevBeforeCmd;
     }
     
-    private static long getObjectRevBeforeCmd(ContextBeforeCommand ctxBeforeCmd, XID objectId) {
+    private static long getObjectRevBeforeCmd(ContextBeforeCommand ctxBeforeCmd, XId objectId) {
         long objectRevBeforeCmd;
         TentativeObjectState objectBeforeCmd = ctxBeforeCmd.getObject(objectId);
         if(objectBeforeCmd == null) {
@@ -250,7 +250,7 @@ public class Executor {
             return CheckResult.failed("Model '" + command.getModelId() + "' does not exist");
         }
         
-        XID objectId = command.getChangedEntity().getObject();
+        XId objectId = command.getChangedEntity().getObject();
         
         if(command.isForced()) {
             switch(command.getChangeType()) {
@@ -332,8 +332,8 @@ public class Executor {
             return CheckResult.failed("Model '" + command.getModelId() + "' does not exist");
         }
         
-        XID objectId = command.getChangedEntity().getObject();
-        XID fieldId = command.getFieldId();
+        XId objectId = command.getChangedEntity().getObject();
+        XId fieldId = command.getFieldId();
         
         XStateWritableObject objectInTxn = ctxInTxn.getObject(objectId);
         

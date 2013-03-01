@@ -7,7 +7,7 @@ import java.util.concurrent.Future;
 
 import org.xydra.annotations.Setting;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.change.XAtomicEvent;
@@ -299,7 +299,7 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 	 * @return the resulting revision number
 	 */
 	@Override
-	public long executeCommand(XCommand command, XID actorId) throws VoluntaryTimeoutException {
+	public long executeCommand(XCommand command, XId actorId) throws VoluntaryTimeoutException {
 		log.debug("----------------------------------------- Execute "
 		        + DebugFormatter.format(command));
 		NanoClock c = new NanoClock().start();
@@ -416,14 +416,14 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 		
 		for(XReadableObject added : sourceContext.getAdded()) {
 			TentativeObjectState tos = new TentativeObjectState(added, true, changeRev);
-			for(XID fieldId : tos) {
+			for(XId fieldId : tos) {
 				XRevWritableField field = tos.getField(fieldId);
 				field.setRevisionNumber(changeRev);
 			}
 			tos.setRevisionNumber(changeRev);
 			targetContext.saveTentativeObjectState(tos);
 		}
-		for(XID removed : sourceContext.getRemoved()) {
+		for(XId removed : sourceContext.getRemoved()) {
 			TentativeObjectState tos = targetContext.getTentativeObjectState(removed);
 			XyAssert.xyAssert(tos != null);
 			assert tos != null;
@@ -617,7 +617,7 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 	}
 	
 	@Override
-	public XWritableObject getObjectSnapshot(XID objectId, boolean includeTentative) {
+	public XWritableObject getObjectSnapshot(XId objectId, boolean includeTentative) {
 		if(includeTentative) {
 			// short-cut
 			TentativeObjectState tos = this.executionContext.getObject(objectId);
@@ -698,7 +698,7 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
 	 *         Note: Reads revCache.lastTaken
 	 */
 	@GaeOperation(memcacheRead = true ,datastoreRead = true ,datastoreWrite = true ,memcacheWrite = true)
-	private GaeChange grabRevisionAndRegisterLocks(GaeModelRevInfo info, GaeLocks locks, XID actorId) {
+	private GaeChange grabRevisionAndRegisterLocks(GaeModelRevInfo info, GaeLocks locks, XId actorId) {
 		long lastTaken = info.getLastTaken();
 		XyAssert.xyAssert(lastTaken >= -1);
 		long start = lastTaken + 1;

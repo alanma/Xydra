@@ -10,7 +10,7 @@ import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.Setting;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.change.XAtomicCommand;
@@ -32,7 +32,7 @@ import org.xydra.store.impl.delegate.DelegatingSecureStore;
 import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.gae.changes.KeyStructure;
 import org.xydra.store.impl.gae.changes.Utils;
-import org.xydra.store.impl.gae.changes.XIDLengthException;
+import org.xydra.store.impl.gae.changes.XIdLengthException;
 import org.xydra.store.impl.gae.ng.GaeModelPersistenceNG;
 
 import com.google.appengine.api.datastore.CommittedButStillApplyingException;
@@ -68,9 +68,9 @@ public class GaePersistence implements XydraPersistence {
 	public static final String LAST_UNICODE_CHAR = "\uFFFF";
 	
 	@GaeOperation()
-	private static void checkIdLength(XID id) {
+	private static void checkIdLength(XId id) {
 		if(id != null && id.toString().length() > MAX_ID_LENGTH) {
-			throw new XIDLengthException(id);
+			throw new XIdLengthException(id);
 		}
 	}
 	
@@ -107,14 +107,14 @@ public class GaePersistence implements XydraPersistence {
 	 * @return the default repository id, as used e.g. by {@link #get()}
 	 */
 	@GaeOperation()
-	static public XID getDefaultRepositoryId() {
+	static public XId getDefaultRepositoryId() {
 		return XX.toId("data");
 	}
 	
-	// private Map<XID,IGaeModelPersistence> modelPersistenceMapXXXXOLD = new
-	// HashMap<XID,IGaeModelPersistence>();
+	// private Map<XId,IGaeModelPersistence> modelPersistenceMapXXXXOLD = new
+	// HashMap<XId,IGaeModelPersistence>();
 	
-	private Cache<XID,IGaeModelPersistence> modelPersistenceMap = CacheBuilder.newBuilder()
+	private Cache<XId,IGaeModelPersistence> modelPersistenceMap = CacheBuilder.newBuilder()
 	        .maximumSize(10).expireAfterAccess(5, TimeUnit.MINUTES).build();
 	
 	private final XAddress repoAddr;
@@ -125,7 +125,7 @@ public class GaePersistence implements XydraPersistence {
 	 * @param repoId repository ID
 	 */
 	@GaeOperation()
-	public GaePersistence(XID repoId) {
+	public GaePersistence(XId repoId) {
 		log.debug("static stuff done");
 		if(repoId == null) {
 			throw new IllegalArgumentException("repoId was null");
@@ -159,7 +159,7 @@ public class GaePersistence implements XydraPersistence {
 	}
 	
 	@Override
-	public synchronized long executeCommand(XID actorId, XCommand command) {
+	public synchronized long executeCommand(XId actorId, XCommand command) {
 		// FIXME log less
 		log.info(actorId + " executes command: " + DebugFormatter.format(command));
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
@@ -172,7 +172,7 @@ public class GaePersistence implements XydraPersistence {
 		checkAddress(command.getTarget());
 		checkIdLengths(command);
 		
-		XID modelId = command.getChangedEntity().getModel();
+		XId modelId = command.getChangedEntity().getModel();
 		checkIdLength(modelId);
 		
 		try {
@@ -194,7 +194,7 @@ public class GaePersistence implements XydraPersistence {
 	 */
 	@GaeOperation()
 	@Setting("decides which GAE impl is used")
-	private IGaeModelPersistence getModelPersistence(XID modelId) {
+	private IGaeModelPersistence getModelPersistence(XId modelId) {
 		synchronized(this.modelPersistenceMap) {
 			IGaeModelPersistence modelPersistence = null;
 			if(CACHE_MODEL_PERSISTENCES) {
@@ -224,13 +224,13 @@ public class GaePersistence implements XydraPersistence {
 	}
 	
 	@GaeOperation()
-	private XAddress getModelAddress(XID modelId) {
+	private XAddress getModelAddress(XId modelId) {
 		return XX.resolveModel(this.repoAddr, modelId);
 	}
 	
 	@Override
 	@GaeOperation(datastoreRead = true)
-	public synchronized Set<XID> getManagedModelIds() {
+	public synchronized Set<XId> getManagedModelIds() {
 		log.debug("getModelIds");
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		
@@ -255,7 +255,7 @@ public class GaePersistence implements XydraPersistence {
 		
 		q.setKeysOnly();
 		
-		Set<XID> managedModelIds = new HashSet<XID>();
+		Set<XId> managedModelIds = new HashSet<XId>();
 		for(Entity e : SyncDatastore.prepareQuery(q).asIterable()) {
 			Key key = e.getKey();
 			XAddress xa = KeyStructure.getAddressFromChangeKey(key);
@@ -305,12 +305,12 @@ public class GaePersistence implements XydraPersistence {
 	
 	@Override
 	@GaeOperation()
-	public XID getRepositoryId() {
+	public XId getRepositoryId() {
 		return this.repoAddr.getRepository();
 	}
 	
 	@Override
-	public synchronized boolean hasManagedModel(XID modelId) {
+	public synchronized boolean hasManagedModel(XId modelId) {
 		if(modelId == null) {
 			throw new IllegalArgumentException("modelId was null");
 		}

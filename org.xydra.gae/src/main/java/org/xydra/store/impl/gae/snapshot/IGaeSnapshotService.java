@@ -1,7 +1,7 @@
 package org.xydra.store.impl.gae.snapshot;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XRevWritableField;
@@ -41,7 +41,7 @@ public interface IGaeSnapshotService {
 	 *         {@link XChangeLog} or null if the model was not present at the
 	 *         requested revisionNumber
 	 */
-	XRevWritableObject getObjectSnapshot(long modelRevisionNumber, boolean precise, XID objectId);
+	XRevWritableObject getObjectSnapshot(long modelRevisionNumber, boolean precise, XId objectId);
 	
 	/**
 	 * @param modelRevisionNumber Revision of model the returned snapshot should
@@ -57,8 +57,8 @@ public interface IGaeSnapshotService {
 	 *         {@link XChangeLog} or null if the model was not present at the
 	 *         requested revisionNumber
 	 */
-	XRevWritableField getFieldSnapshot(long modelRevisionNumber, boolean precise, XID objectId,
-	        XID fieldId);
+	XRevWritableField getFieldSnapshot(long modelRevisionNumber, boolean precise, XId objectId,
+	        XId fieldId);
 	
 	/**
 	 * Get a snapshot that contains at least those parts specified.

@@ -9,7 +9,7 @@ import org.xydra.annotations.CanBeNull;
 import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.Setting;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.rmof.XReadableModel;
@@ -203,7 +203,7 @@ public class ContextBeforeCommand implements XRevWritableModel,
 	}
 	
 	@CanBeNull
-	TentativeObjectState getTentativeObjectState(XID objectId) {
+	TentativeObjectState getTentativeObjectState(XId objectId) {
 		// look in datastore
 		XAddress objectAddress = XX.resolveObject(this.modelAddress, objectId);
 		String key = toKey(objectAddress);
@@ -275,7 +275,7 @@ public class ContextBeforeCommand implements XRevWritableModel,
 	}
 	
 	@Override
-	public boolean hasObject(XID objectId) {
+	public boolean hasObject(XId objectId) {
 		return getObject(objectId) != null;
 	}
 	
@@ -285,7 +285,7 @@ public class ContextBeforeCommand implements XRevWritableModel,
 	}
 	
 	@Override
-	public Iterator<XID> iterator() {
+	public Iterator<XId> iterator() {
 		return this.snapshotService.getModelSnapshot(getRevisionNumber(), false).iterator();
 	}
 	
@@ -300,12 +300,12 @@ public class ContextBeforeCommand implements XRevWritableModel,
 	}
 	
 	@Override
-	public XID getId() {
+	public XId getId() {
 		return getAddress().getModel();
 	}
 	
 	@Override
-	public boolean removeObject(XID objectId) {
+	public boolean removeObject(XId objectId) {
 		TentativeObjectState tos = getTentativeObjectState(objectId);
 		tos.setObjectExists(false);
 		// FIXME which model rev?
@@ -325,7 +325,7 @@ public class ContextBeforeCommand implements XRevWritableModel,
 	}
 	
 	@Override
-	public TentativeObjectState createObject(XID objectId) {
+	public TentativeObjectState createObject(XId objectId) {
 		TentativeObjectState object = getObject(objectId);
 		if(object == null) {
 			SimpleObject simpleObject = new SimpleObject(getObjectAddress(objectId));
@@ -338,12 +338,12 @@ public class ContextBeforeCommand implements XRevWritableModel,
 		return object;
 	}
 	
-	private XAddress getObjectAddress(XID objectId) {
+	private XAddress getObjectAddress(XId objectId) {
 		return XX.resolveObject(getAddress(), objectId);
 	}
 	
 	@Override
-	public TentativeObjectState getObject(XID objectId) {
+	public TentativeObjectState getObject(XId objectId) {
 		TentativeObjectState tos = getTentativeObjectState(objectId);
 		if(tos == null) {
 			// TODO really?

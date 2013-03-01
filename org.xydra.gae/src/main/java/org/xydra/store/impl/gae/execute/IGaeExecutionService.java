@@ -1,6 +1,6 @@
 package org.xydra.store.impl.gae.execute;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XTransaction;
@@ -14,7 +14,7 @@ public interface IGaeExecutionService {
 	/**
 	 * Execute the given {@link XCommand} as a transaction.
 	 * 
-	 * // IMPROVE maybe let the caller provide an XID that can be used to check
+	 * // IMPROVE maybe let the caller provide an XId that can be used to check
 	 * // the status in case there is a GAE timeout?
 	 * 
 	 * @param command The command to execute. (can be a {@link XTransaction})
@@ -29,8 +29,8 @@ public interface IGaeExecutionService {
 	 *             timeout from GAE if TIME_CRITICAL is set to more than half
 	 *             the GAE timeout.
 	 * 
-	 * @see XydraStore#executeCommands(XID, String, XCommand[], Callback)
+	 * @see XydraStore#executeCommands(XId, String, XCommand[], Callback)
 	 */
-	long executeCommand(XCommand command, XID actorId);
+	long executeCommand(XCommand command, XId actorId);
 	
 }
