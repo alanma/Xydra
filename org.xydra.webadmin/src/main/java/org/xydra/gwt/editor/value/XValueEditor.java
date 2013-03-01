@@ -1,7 +1,7 @@
 package org.xydra.gwt.editor.value;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.value.XAddressListValue;
 import org.xydra.base.value.XAddressSetValue;
 import org.xydra.base.value.XBinaryValue;
@@ -10,8 +10,8 @@ import org.xydra.base.value.XBooleanValue;
 import org.xydra.base.value.XCollectionValue;
 import org.xydra.base.value.XDoubleListValue;
 import org.xydra.base.value.XDoubleValue;
-import org.xydra.base.value.XIDListValue;
-import org.xydra.base.value.XIDSetValue;
+import org.xydra.base.value.XIdListValue;
+import org.xydra.base.value.XIdSetValue;
 import org.xydra.base.value.XIntegerListValue;
 import org.xydra.base.value.XIntegerValue;
 import org.xydra.base.value.XListValue;
@@ -44,8 +44,8 @@ public abstract class XValueEditor extends Composite {
             if(value instanceof XListValue<?>) {
                 if(value instanceof XStringListValue) {
                     return new XStringListEditor(((XStringListValue)value).iterator(), listener);
-                } else if(value instanceof XIDListValue) {
-                    return new XIDListEditor(((XIDListValue)value).iterator(), listener);
+                } else if(value instanceof XIdListValue) {
+                    return new XIdListEditor(((XIdListValue)value).iterator(), listener);
                 } else if(value instanceof XAddressListValue) {
                     return new XAddressListEditor(((XAddressListValue)value).iterator(), listener);
                 } else if(value instanceof XBooleanListValue) {
@@ -64,8 +64,8 @@ public abstract class XValueEditor extends Composite {
             } else if(value instanceof XSetValue<?>) {
                 if(value instanceof XStringSetValue) {
                     return new XStringSetEditor(((XStringSetValue)value).iterator(), listener);
-                } else if(value instanceof XIDSetValue) {
-                    return new XIDSetEditor(((XIDSetValue)value).iterator(), listener);
+                } else if(value instanceof XIdSetValue) {
+                    return new XIdSetEditor(((XIdSetValue)value).iterator(), listener);
                 } else if(value instanceof XAddressSetValue) {
                     return new XAddressSetEditor(((XAddressSetValue)value).iterator(), listener);
                 }
@@ -76,8 +76,8 @@ public abstract class XValueEditor extends Composite {
                     + " for value " + value);
         } else if(value instanceof XStringValue) {
             return new XStringEditor(((XStringValue)value).contents(), listener);
-        } else if(value instanceof XID) {
-            return new XIDEditor(((XID)value), listener);
+        } else if(value instanceof XId) {
+            return new XIdEditor(((XId)value), listener);
         } else if(value instanceof XAddress) {
             return new XAddressEditor(((XAddress)value), listener);
         } else if(value instanceof XBinaryValue) {

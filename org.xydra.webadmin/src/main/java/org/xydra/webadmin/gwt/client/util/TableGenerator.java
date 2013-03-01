@@ -9,8 +9,8 @@ public class TableGenerator {
 	// LoggerFactory.getLogger(TableGenerator.class);
 	//
 	// List<FieldRow> rows = new ArrayList<FieldRow>();
-	// HashMap<XID,ValueType> valueTypes = new HashMap<XID,ValueType>();
-	// List<XID> columnIDs = new ArrayList<XID>();
+	// HashMap<XId,ValueType> valueTypes = new HashMap<XId,ValueType>();
+	// List<XId> columnIDs = new ArrayList<XId>();
 	//
 	// public void add(FieldRow row) {
 	// this.rows.add(row);
@@ -21,7 +21,7 @@ public class TableGenerator {
 	//
 	// for(FieldRow row : this.rows) {
 	// XReadableObject object = row.getObject();
-	// for(XID xid : object) {
+	// for(XId xid : object) {
 	// if(!this.columnIDs.contains(xid)) {
 	// this.columnIDs.add(xid);
 	// }
@@ -47,7 +47,7 @@ public class TableGenerator {
 	// widget = new RowHeaderWidget(currentObject.getAddress(), revision);
 	// }
 	// } else {
-	// XID currentColumn = this.columnIDs.get(j - 1);
+	// XId currentColumn = this.columnIDs.get(j - 1);
 	//
 	// if(i == 0) {
 	//

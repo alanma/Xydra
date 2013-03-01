@@ -22,7 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
@@ -221,7 +221,7 @@ public class ModelResource {
 		Clock c = new Clock().start();
 		
 		boolean isReplace = replaceStr != null && replaceStr.equals("true");
-		XID repoId = XX.toId(repoIdStr);
+		XId repoId = XX.toId(repoIdStr);
 		
 		w.write("Processing upload.with replace=" + isReplace + "..</br>");
 		w.flush();
@@ -266,7 +266,7 @@ public class ModelResource {
 		Utils.endPage(w);
 	}
 	
-	static final String getStorageName(XID modelId, MStyle style) {
+	static final String getStorageName(XId modelId, MStyle style) {
 		/** matches XFile.MODEL_SUFFIX for xml */
 		return modelId + ".xmodel." + style;
 	}
@@ -286,7 +286,7 @@ public class ModelResource {
 		zos.closeEntry();
 	}
 	
-	public static void writeToZipstreamDirectly(XID modelId, MStyle style, String serialisation,
+	public static void writeToZipstreamDirectly(XId modelId, MStyle style, String serialisation,
 	        ZipOutputStream zos) throws IOException {
 		XyAssert.xyAssert(serialisation != null);
 		
@@ -410,13 +410,13 @@ public class ModelResource {
 	 *            even if the same revNr is found
 	 * @return some statistical information
 	 */
-	public static SetStateResult updateStateTo(XID repoId, XReadableModel model,
+	public static SetStateResult updateStateTo(XId repoId, XReadableModel model,
 	        boolean overwriteIfSameRevPresent) {
 		log.debug("Set state from " + model.getAddress() + " to " + repoId);
 		XydraPersistence p = Utils.createPersistence(repoId);
 		SetStateResult result = new SetStateResult();
 		
-		XID actor = XX.toId("ModelResource");
+		XId actor = XX.toId("ModelResource");
 		XAddress modelAddress = XX.resolveModel(repoId, model.getId());
 		
 		ModelRevision modelRev = p.getModelRevision(new GetWithAddressRequest(modelAddress,
@@ -476,31 +476,31 @@ public class ModelResource {
 		return result;
 	}
 	
-	public static SetStateResult setStateTo(XID repoId, XReadableModel model) {
+	public static SetStateResult setStateTo(XId repoId, XReadableModel model) {
 		log.debug("Set state of model " + model.getAddress() + " non-transactionally in repo "
 		        + repoId);
 		XydraPersistence p = Utils.createPersistence(repoId);
 		SetStateResult result = new SetStateResult();
 		
-		XID actor = XX.toId("ModelResource");
-		XID modelId = model.getId();
+		XId actor = XX.toId("ModelResource");
+		XId modelId = model.getId();
 		XAddress modelAddress = XX.resolveModel(repoId, modelId);
 		
 		WritableRepositoryOnPersistence repo = new WritableRepositoryOnPersistence(p, actor);
 		if(repo.hasModel(modelId)) {
 			// avoid creating too large events
 			XWritableModel oldModel = repo.getModel(modelId);
-			Collection<XID> oldObjectsIds = IteratorUtils.addAll(oldModel.iterator(),
-			        new HashSet<XID>());
+			Collection<XId> oldObjectsIds = IteratorUtils.addAll(oldModel.iterator(),
+			        new HashSet<XId>());
 			if(oldObjectsIds.size() > 20) {
-				for(XID oldObjectID : oldObjectsIds) {
+				for(XId oldObjectID : oldObjectsIds) {
 					oldModel.removeObject(oldObjectID);
 				}
 			}
 			repo.removeModel(modelId);
 		}
 		repo.createModel(modelId);
-		for(XID o : model) {
+		for(XId o : model) {
 			XReadableObject xo = model.getObject(o);
 			
 			XTransactionBuilder tb = new XTransactionBuilder(modelAddress);

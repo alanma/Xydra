@@ -1,17 +1,17 @@
 package org.xydra.webadmin.gwt.client.datamodels;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 
 
 public class ModelDataModel {
 	
-	private XID id;
+	private XId id;
 	
-	public ModelDataModel(XID xid) {
+	public ModelDataModel(XId xid) {
 		this.id = xid;
 	}
 	
-	public XID getID() {
+	public XId getID() {
 		return this.id;
 	}
 	

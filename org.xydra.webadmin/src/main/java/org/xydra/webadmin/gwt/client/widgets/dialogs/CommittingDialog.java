@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.core.change.SessionCachedModel;
@@ -114,9 +114,9 @@ public class CommittingDialog extends DialogBox {
 			sb.append("<br><br>=== ADDED   Object '" + addedObject.getId() + "' ===<br/>\n");
 			sb.append(DumpUtils.toStringBuffer(addedObject).toString());
 		}
-		List<XID> removedList = new ArrayList<XID>(changedModel.getRemoved());
+		List<XId> removedList = new ArrayList<XId>(changedModel.getRemoved());
 		Collections.sort(removedList, XidComparator.INSTANCE);
-		for(XID removedObjectId : removedList) {
+		for(XId removedObjectId : removedList) {
 			sb.append("<br><br>=== REMOVED Object '" + removedObjectId + "' ===<br/>\n");
 		}
 		List<IObjectDiff> potentiallyChangedList = new ArrayList<IObjectDiff>(
@@ -139,9 +139,9 @@ public class CommittingDialog extends DialogBox {
 			sb.append("--- ADDED Field '" + field.getId() + "' ---<br/>\n");
 			sb.append(DumpUtils.toStringBuffer(field));
 		}
-		List<XID> removedList = new ArrayList<XID>(changedObject.getRemoved());
+		List<XId> removedList = new ArrayList<XId>(changedObject.getRemoved());
 		Collections.sort(removedList, XidComparator.INSTANCE);
-		for(XID objectId : changedObject.getRemoved()) {
+		for(XId objectId : changedObject.getRemoved()) {
 			sb.append("--- REMOVED Field '" + objectId + "' ---<br/>\n");
 		}
 		List<IFieldDiff> potentiallyChangedList = new ArrayList<IFieldDiff>(

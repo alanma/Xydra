@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.change.XCommandUtils;
 import org.xydra.base.change.XTransaction;
@@ -54,11 +54,11 @@ public class Controller {
 		this.service = service;
 	}
 	
-	public Iterator<XID> getLocallyStoredIDs(final XAddress address) {
+	public Iterator<XId> getLocallyStoredIDs(final XAddress address) {
 		
-		final XID repoId = address.getRepository();
+		final XId repoId = address.getRepository();
 		
-		Iterator<XID> iterator = null;
+		Iterator<XId> iterator = null;
 		
 		XType addressedType = address.getAddressedType();
 		if(addressedType.equals(XType.XREPOSITORY)) {
@@ -78,20 +78,20 @@ public class Controller {
 	
 	public void getIDsFromServer(final XAddress address) {
 		
-		final XID repoId = address.getRepository();
-		XID modelId = address.getModel();
+		final XId repoId = address.getRepository();
+		XId modelId = address.getModel();
 		
 		XType addressedType = address.getAddressedType();
 		
 		if(addressedType.equals(XType.XREPOSITORY)) {
 			
-			this.service.getModelIds(repoId, new AsyncCallback<Set<XID>>() {
+			this.service.getModelIds(repoId, new AsyncCallback<Set<XId>>() {
 				
 				@Override
-				public void onSuccess(Set<XID> result) {
+				public void onSuccess(Set<XId> result) {
 					log.info("Server said: " + result);
 					
-					for(XID modelID : result) {
+					for(XId modelID : result) {
 						Controller.this.dataModel.getRepo(repoId).addModelID(modelID);
 					}
 					Controller.this.notifySelectionTree(address);
@@ -123,7 +123,7 @@ public class Controller {
 		this.lastClickedElement = address;
 	}
 	
-	// public void notifySelectionTree(XAddress address, Iterator<XID> iterator)
+	// public void notifySelectionTree(XAddress address, Iterator<XId> iterator)
 	// {
 	// log.info("selectionTree notified for address " + address.toString());
 	// this.selectionTree.notifyMe(address, iterator);
@@ -145,8 +145,8 @@ public class Controller {
 	
 	public void getData(XAddress address) {
 		
-		XID repoId = address.getRepository();
-		XID modelId = address.getModel();
+		XId repoId = address.getRepository();
+		XId modelId = address.getModel();
 		
 		XType addressedType = address.getAddressedType();
 		if(addressedType.equals(XType.XMODEL)) {
@@ -270,8 +270,8 @@ public class Controller {
 			        @Override
 			        public void onSuccess(XReadableModel result) {
 				        
-				        HashSet<XID> objectIDs = new HashSet<XID>();
-				        for(XID xid : result) {
+				        HashSet<XId> objectIDs = new HashSet<XId>();
+				        for(XId xid : result) {
 					        objectIDs.add(xid);
 				        }
 				        

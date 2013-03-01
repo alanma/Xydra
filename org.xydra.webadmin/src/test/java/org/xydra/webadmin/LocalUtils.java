@@ -5,7 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.store.XydraRuntime;
 import org.xydra.store.impl.delegate.XydraPersistence;
@@ -35,7 +35,7 @@ public class LocalUtils {
 		RepositoryResource.updateFromZippedInputStream(fis, XX.toId("gae-data"), osw, true);
 		// now the data is loaded
 		XydraPersistence repo = XydraRuntime.getPersistence(XX.toId("gae-data"));
-		for(XID modelId : repo.getManagedModelIds()) {
+		for(XId modelId : repo.getManagedModelIds()) {
 			System.out.println("Managed modelId: " + modelId);
 		}
 		osw.flush();

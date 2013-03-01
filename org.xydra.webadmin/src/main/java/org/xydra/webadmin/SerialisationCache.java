@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.gae.AboutAppEngine;
@@ -112,7 +112,7 @@ public class SerialisationCache {
 	 * @return true if all models are now up-to-date in cache and no task queue
 	 *         is working on it
 	 */
-	public static boolean updateAllModels(final XID repoId, List<XID> modelIdList,
+	public static boolean updateAllModels(final XId repoId, List<XId> modelIdList,
 	        final MStyle style, boolean giveUp, boolean useTaskQueue,
 	        final boolean cacheInInstance, final boolean cacheInMemcache,
 	        final boolean cacheInDatastore) {
@@ -131,7 +131,7 @@ public class SerialisationCache {
 		 * IMPROVE by adding a batch-get-current-model-rev method to xydra-gae
 		 * this could be significantly speed-up
 		 */
-		for(final XID modelId : modelIdList) {
+		for(final XId modelId : modelIdList) {
 			log.info("Updating " + modelId);
 			
 			// first round?

@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -41,7 +41,7 @@ public class XyAdminApp {
 	
 	public static final String URL = "/xyadmin";
 	
-	public static final XID ACTOR = XX.toId("_XyAdmin");
+	public static final XId ACTOR = XX.toId("_XyAdmin");
 	
 	public static final String PAGE_NAME = "Main";
 	

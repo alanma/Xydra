@@ -1,7 +1,7 @@
 package org.xydra.gwt.editor;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
@@ -42,7 +42,7 @@ public class XydraEditor implements EntryPoint {
 	
 	private static final String PSW = "secret";
 	
-	private static final XID ACTOR = XX.toId("tester");
+	private static final XId ACTOR = XX.toId("tester");
 	
 	private static final Logger log = LoggerFactory.getLogger(XydraEditor.class);
 	
@@ -139,8 +139,8 @@ public class XydraEditor implements EntryPoint {
 		
 		this.panel.clear();
 		
-		XID modelId;
-		XID objectId;
+		XId modelId;
+		XId objectId;
 		try {
 			int p = addrStr.indexOf('/');
 			if(p >= 0) {
@@ -151,7 +151,7 @@ public class XydraEditor implements EntryPoint {
 				objectId = null;
 			}
 		} catch(Exception e) {
-			this.panel.add(new Label("invalid XID: " + e.getMessage()));
+			this.panel.add(new Label("invalid XId: " + e.getMessage()));
 			return;
 		}
 		

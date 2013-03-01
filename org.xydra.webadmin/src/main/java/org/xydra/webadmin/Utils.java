@@ -9,7 +9,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.gae.AboutAppEngine;
 import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.restless.utils.SharedHtmlUtils.HeadLinkStyle;
@@ -19,9 +19,9 @@ import org.xydra.store.impl.gae.GaePersistence;
 
 public class Utils {
     
-    private static Map<XID,XydraPersistence> pmap = new HashMap<XID,XydraPersistence>();
+    private static Map<XId,XydraPersistence> pmap = new HashMap<XId,XydraPersistence>();
     
-    public static synchronized XydraPersistence createPersistence(XID repoId) {
+    public static synchronized XydraPersistence createPersistence(XId repoId) {
         XydraPersistence p = pmap.get(repoId);
         if(p == null) {
             p = new GaePersistence(repoId);

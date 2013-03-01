@@ -1,17 +1,17 @@
 package org.xydra.webadmin.gwt.client.util;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.webadmin.gwt.client.XyAdmin;
 
 
 public class ModelConfiguration {
 	
 	public XyAdmin adminObject;
-	public XID repoId;
-	public XID modelId;
+	public XId repoId;
+	public XId modelId;
 	public long revisionNumber;
 	
-	public ModelConfiguration(XyAdmin adminObject, XID repoId, XID modelId) {
+	public ModelConfiguration(XyAdmin adminObject, XId repoId, XId modelId) {
 		
 		this.adminObject = adminObject;
 		this.repoId = repoId;

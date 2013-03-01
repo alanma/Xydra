@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableObject;
@@ -23,13 +23,13 @@ public class DataModel {
 	public static final String REPO = "REPO";
 	public static final String MODEL = "MODEL";
 	
-	private HashMap<XID,RepoDataModel> repoModels;
+	private HashMap<XId,RepoDataModel> repoModels;
 	
 	public DataModel() {
-		this.repoModels = new HashMap<XID,RepoDataModel>();
+		this.repoModels = new HashMap<XId,RepoDataModel>();
 	}
 	
-	public void addRepoID(XID repoId) {
+	public void addRepoID(XId repoId) {
 		this.repoModels.put(repoId, new RepoDataModel(repoId));
 	}
 	
@@ -37,12 +37,12 @@ public class DataModel {
 		return this.repoModels.values().iterator();
 	}
 	
-	public RepoDataModel getRepo(XID id) {
+	public RepoDataModel getRepo(XId id) {
 		
 		return this.repoModels.get(id);
 	}
 	
-	public boolean isLoaded(String type, XID id) {
+	public boolean isLoaded(String type, XId id) {
 		
 		boolean result = false;
 		if(type.equals(REPO)) {
@@ -77,7 +77,7 @@ public class DataModel {
 		
 	}
 	
-	public void addObject(XAddress modelAddress, XID objectID) {
+	public void addObject(XAddress modelAddress, XId objectID) {
 		RepoDataModel repo = this.repoModels.get(modelAddress.getRepository());
 		SessionCachedModel model = repo.getModel(modelAddress.getModel());
 		model.createObject(objectID);
@@ -89,7 +89,7 @@ public class DataModel {
 		
 	}
 	
-	public void addModel(XID repoID, XID modelID) {
+	public void addModel(XId repoID, XId modelID) {
 		RepoDataModel repo = this.repoModels.get(repoID);
 		repo.addModelID(modelID);
 		
@@ -145,7 +145,7 @@ public class DataModel {
 	
 	public void loadEntity(XAddress typedAddress) {
 		
-		XID repoID = typedAddress.getRepository();
+		XId repoID = typedAddress.getRepository();
 		RepoDataModel repoDataModel = this.repoModels.get(repoID);
 		if(repoDataModel == null) {
 			
@@ -157,7 +157,7 @@ public class DataModel {
 				log.error("no such model found!");
 				return;
 			} else {
-				XID objectID = typedAddress.getObject();
+				XId objectID = typedAddress.getObject();
 				if(objectID == null) {
 					// Controller.getInstance().openView(model);
 				} else {

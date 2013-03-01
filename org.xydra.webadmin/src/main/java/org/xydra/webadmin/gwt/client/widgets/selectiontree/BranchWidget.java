@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.log.Logger;
@@ -37,7 +37,7 @@ public class BranchWidget extends Composite implements Observable {
 	
 	private static ViewUiBinder uiBinder = GWT.create(ViewUiBinder.class);
 	
-	private HashMap<XID,BranchWidget> existingBranches;
+	private HashMap<XId,BranchWidget> existingBranches;
 	private XAddress address;
 	
 	@UiField
@@ -68,7 +68,7 @@ public class BranchWidget extends Composite implements Observable {
 		
 		initWidget(uiBinder.createAndBindUi(this));
 		
-		XID id = this.address.getModel();
+		XId id = this.address.getModel();
 		String plusButtonText = "add Object";
 		
 		if(this.address.getAddressedType().equals(XType.XREPOSITORY)) {
@@ -135,17 +135,17 @@ public class BranchWidget extends Composite implements Observable {
 	
 	private void setComponents() {
 		
-		Iterator<XID> iterator = Controller.getInstance().getLocallyStoredIDs(this.address);
+		Iterator<XId> iterator = Controller.getInstance().getLocallyStoredIDs(this.address);
 		
 		while(iterator.hasNext()) {
-			XID modelId = iterator.next();
+			XId modelId = iterator.next();
 			if(!this.existingBranches.keySet().contains(modelId)) {
 				addBranch(modelId);
 			}
 		}
 	}
 	
-	private void addBranch(XID modelId) {
+	private void addBranch(XId modelId) {
 		if(this.branches.getWidgetCount() == 0) {
 			this.buttonPanel.getElement().setAttribute("style",
 			        "border-bottom: 1px solid #009; margin-bottom: 5px");
@@ -157,7 +157,7 @@ public class BranchWidget extends Composite implements Observable {
 		this.existingBranches.put(modelId, newBranch);
 	}
 	
-	private XAddress buildChildAddress(XID childID) {
+	private XAddress buildChildAddress(XId childID) {
 		
 		XAddress address = null;
 		switch(this.address.getAddressedType()) {
@@ -174,8 +174,8 @@ public class BranchWidget extends Composite implements Observable {
 	}
 	
 	// // @Override
-	// public void notifyMe(XAddress address, Iterator<XID> iterator) {
-	// XID childID = address.getModel();
+	// public void notifyMe(XAddress address, Iterator<XId> iterator) {
+	// XId childID = address.getModel();
 	// System.out.println("my address: " + this.address + ", other address: " +
 	// address);
 	// if(this.address.equals(address)) {
@@ -193,7 +193,7 @@ public class BranchWidget extends Composite implements Observable {
 	
 	@Override
 	public void notifyMe(XAddress address) {
-		XID childID = address.getModel();
+		XId childID = address.getModel();
 		if(this.address.equals(address)) {
 			log.info("i am " + this.address.toString() + " and I contain the other address");
 			this.contract();
@@ -206,7 +206,7 @@ public class BranchWidget extends Composite implements Observable {
 	}
 	
 	private void expand() {
-		BranchWidget.this.existingBranches = new HashMap<XID,BranchWidget>();
+		BranchWidget.this.existingBranches = new HashMap<XId,BranchWidget>();
 		System.out.println("request for " + BranchWidget.this.address.toString() + " received!");
 		BranchWidget.this.expandButton.setText("-");
 		

@@ -21,7 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.rmof.XReadableModel;
@@ -64,7 +64,7 @@ public class RepositoryResource {
 	private static final String LINEEND = "<br/>\n";
 	public static String URL;
 	
-	private static XID actorId = XX.toId("_RepositoryResource");
+	private static XId actorId = XX.toId("_RepositoryResource");
 	
 	public static void restless(Restless restless, String prefix) {
 		URL = prefix + "/repo";
@@ -141,13 +141,13 @@ public class RepositoryResource {
 		
 		w.write("For-each model in repo " + repoId + " use param " + foreachmodel + "<br/>\n");
 		w.flush();
-		XID repositoryId = XX.toId(repoId);
+		XId repositoryId = XX.toId(repoId);
 		XydraPersistence p = Utils.createPersistence(repositoryId);
-		List<XID> modelIdList = new ArrayList<XID>(p.getManagedModelIds());
+		List<XId> modelIdList = new ArrayList<XId>(p.getManagedModelIds());
 		Collections.sort(modelIdList);
 		Progress progress = new Progress();
 		progress.startTime();
-		for(XID modelId : modelIdList) {
+		for(XId modelId : modelIdList) {
 			XAddress modelAddress = XX.resolveModel(repositoryId, modelId);
 			String urlStr = foreachmodel + "?modelAddress=" + modelAddress;
 			w.write("Calling " + urlStr + " ... ");
@@ -194,10 +194,10 @@ public class RepositoryResource {
 		Clock c = new Clock().start();
 		XAddress repoAddress = XX.resolveRepository(XX.toId(repoIdStr));
 		RStyle style = RStyle.valueOf(styleStr);
-		XID repoId = XX.toId(repoIdStr);
+		XId repoId = XX.toId(repoIdStr);
 		XydraPersistence p = Utils.createPersistence(repoId);
 		if(style == RStyle.xmlzip || style == RStyle.xmldump) {
-			List<XID> modelIdList = new ArrayList<XID>(p.getManagedModelIds());
+			List<XId> modelIdList = new ArrayList<XId>(p.getManagedModelIds());
 			// IMPROVE we can use paging here to split work; BUT number of
 			// models
 			// might change.
@@ -214,7 +214,7 @@ public class RepositoryResource {
 						return;
 					}
 					ZipOutputStream zos = FileDownloadUtils.toZipFileDownload(res, archivename);
-					for(XID modelId : modelIdList) {
+					for(XId modelId : modelIdList) {
 						XAddress modelAddress = XX.resolveModel(repoId, modelId);
 						String serialisation = SerialisationCache.getSerialisation(modelAddress,
 						        storeOpts);
@@ -225,7 +225,7 @@ public class RepositoryResource {
 				} else {
 					Writer w = Utils
 					        .startPage(res, PAGE_NAME, "Xyadmin XML dump of repo " + repoId);
-					for(XID modelId : modelIdList) {
+					for(XId modelId : modelIdList) {
 						XAddress modelAddress = XX.resolveModel(repoId, modelId);
 						String serialisation = SerialisationCache.getSerialisation(modelAddress,
 						        storeOpts);
@@ -270,9 +270,9 @@ public class RepositoryResource {
 			// killer
 			w.write(HtmlUtils.link(link(repoId) + "?command=deleteAllModels", "Delete all models"));
 			
-			List<XID> modelIdList = new ArrayList<XID>(p.getManagedModelIds());
+			List<XId> modelIdList = new ArrayList<XId>(p.getManagedModelIds());
 			Collections.sort(modelIdList);
-			for(XID modelId : modelIdList) {
+			for(XId modelId : modelIdList) {
 				w.write("<h2>Model: " + modelId + "</h2>\n");
 				w.flush();
 				XAddress modelAddress = XX.toAddress(repoId, modelId, null, null);
@@ -321,14 +321,14 @@ public class RepositoryResource {
 	}
 	
 	private static void doDeleteAllData(Writer w, String repoIdStr) throws IOException {
-		XID repoId = XX.toId(repoIdStr);
+		XId repoId = XX.toId(repoIdStr);
 		XydraPersistence p = Utils.createPersistence(repoId);
-		for(XID modelId : p.getManagedModelIds()) {
+		for(XId modelId : p.getManagedModelIds()) {
 			w.write("Deleting model " + modelId);
 			w.flush();
 			XWritableModel model = new WritableModelOnPersistence(p, actorId, modelId);
-			Collection<XID> objectIds = IteratorUtils.addAll(model.iterator(), new HashSet<XID>());
-			for(XID objectId : objectIds) {
+			Collection<XId> objectIds = IteratorUtils.addAll(model.iterator(), new HashSet<XId>());
+			for(XId objectId : objectIds) {
 				XCommand command = X.getCommandFactory().createForcedRemoveObjectCommand(repoId,
 				        modelId, objectId);
 				long l = p.executeCommand(actorId, command);
@@ -354,7 +354,7 @@ public class RepositoryResource {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		Writer w = Utils.startPage(res, PAGE_NAME, "Restore Repository");
 		
-		XID repoId = XX.toId(repoIdStr);
+		XId repoId = XX.toId(repoIdStr);
 		boolean replaceModels = replaceModelsStr != null
 		        && replaceModelsStr.equalsIgnoreCase("true");
 		
@@ -380,7 +380,7 @@ public class RepositoryResource {
 	 *            updated. TODO DOCU =?
 	 * @throws IOException
 	 */
-	public static void updateFromZippedInputStream(InputStream fis, XID repoId, Writer w,
+	public static void updateFromZippedInputStream(InputStream fis, XId repoId, Writer w,
 	        boolean replaceModels) throws IOException {
 		Clock c = new Clock().start();
 		ZipInputStream zis = new ZipInputStream(fis);
@@ -425,7 +425,7 @@ public class RepositoryResource {
 	 * @param repoId
 	 * @return relative admin link with no slash at the end
 	 */
-	public static String link(XID repoId) {
+	public static String link(XId repoId) {
 		return "/admin" + URL + "/" + repoId;
 	}
 	
@@ -436,9 +436,9 @@ public class RepositoryResource {
 	 */
 	public static void saveRepositoryToZipFile(XydraPersistence p, File zipFile) throws IOException {
 		FileOutputStream fos = new FileOutputStream(zipFile);
-		List<XID> modelIdList = new ArrayList<XID>(p.getManagedModelIds());
+		List<XId> modelIdList = new ArrayList<XId>(p.getManagedModelIds());
 		ZipOutputStream zos = new ZipOutputStream(fos);
-		for(XID modelId : modelIdList) {
+		for(XId modelId : modelIdList) {
 			XAddress modelAddress = XX.resolveModel(p.getRepositoryId(), modelId);
 			XWritableModel model = p.getModelSnapshot(new GetWithAddressRequest(modelAddress,
 			        ModelResource.INCLUDE_TENTATIVE));
@@ -464,7 +464,7 @@ public class RepositoryResource {
 	 *            {@link OutputStreamWriter} wrapped around System.out.
 	 * @throws IOException
 	 */
-	public static void loadRepositoryFromZipFile(File zipFile, XID repoId, Writer w)
+	public static void loadRepositoryFromZipFile(File zipFile, XId repoId, Writer w)
 	        throws IOException {
 		SyncDatastore.deleteAllEntitiesOneByOne();
 		assert SyncDatastore.getAllKinds().size() == 0;

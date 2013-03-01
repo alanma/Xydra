@@ -3,26 +3,26 @@ package org.xydra.webadmin.gwt.client.datamodels;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.core.change.SessionCachedModel;
 
 
 public class RepoDataModel {
 	
-	private XID id;
-	private HashMap<XID,SessionCachedModel> models;
+	private XId id;
+	private HashMap<XId,SessionCachedModel> models;
 	
-	public RepoDataModel(XID repoId) {
+	public RepoDataModel(XId repoId) {
 		this.id = repoId;
-		this.models = new HashMap<XID,SessionCachedModel>();
+		this.models = new HashMap<XId,SessionCachedModel>();
 	}
 	
-	public void addModelID(XID xid) {
+	public void addModelID(XId xid) {
 		this.models.put(xid, new SessionCachedModel(XX.toAddress(this.id, xid, null, null)));
 	}
 	
-	public Iterator<XID> getModelIDs() {
+	public Iterator<XId> getModelIDs() {
 		return this.models.keySet().iterator();
 	}
 	
@@ -30,7 +30,7 @@ public class RepoDataModel {
 		return this.id.toString();
 	}
 	
-	public XID getId() {
+	public XId getId() {
 		return this.id;
 	}
 	
@@ -39,12 +39,12 @@ public class RepoDataModel {
 		return this.models.isEmpty();
 	}
 	
-	public SessionCachedModel getModel(XID modelId) {
+	public SessionCachedModel getModel(XId modelId) {
 		
 		return this.models.get(modelId);
 	}
 	
-	public void removeModel(XID model) {
+	public void removeModel(XId model) {
 		this.models.remove(model);
 		
 	}

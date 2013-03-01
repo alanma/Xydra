@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -32,7 +32,7 @@ public class SelectionTree extends Composite implements Observable {
 	
 	private static ViewUiBinder uiBinder = GWT.create(ViewUiBinder.class);
 	
-	private HashMap<XID,BranchWidget> branches;
+	private HashMap<XId,BranchWidget> branches;
 	
 	@UiField
 	VerticalPanel mainPanel;
@@ -41,7 +41,7 @@ public class SelectionTree extends Composite implements Observable {
 		super();
 		initWidget(uiBinder.createAndBindUi(this));
 		
-		this.branches = new HashMap<XID,BranchWidget>();
+		this.branches = new HashMap<XId,BranchWidget>();
 		
 		Controller.getInstance().registerSelectionTree(this);
 		this.setComponents();
@@ -64,7 +64,7 @@ public class SelectionTree extends Composite implements Observable {
 	@Override
 	public void notifyMe(XAddress address) {
 		
-		XID repoId = address.getRepository();
+		XId repoId = address.getRepository();
 		this.branches.get(repoId).notifyMe(address);
 	}
 }

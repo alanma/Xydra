@@ -2,7 +2,7 @@ package org.xydra.webadmin.gwt.shared;
 
 import java.util.Set;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
@@ -16,12 +16,12 @@ public interface XyAdminService extends RemoteService {
 	
 	public String getGreeting(String name);
 	
-	public Set<XID> getModelIds(XID repoId);
+	public Set<XId> getModelIds(XId repoId);
 	
-	public XReadableModel getModelSnapshot(XID repoId, XID modelId);
+	public XReadableModel getModelSnapshot(XId repoId, XId modelId);
 	
-	public XReadableObject getObjectSnapshot(XID repoId, XID modelId, XID objectId);
+	public XReadableObject getObjectSnapshot(XId repoId, XId modelId, XId objectId);
 	
-	public long executeCommand(XID repoId, XCommand command);
+	public long executeCommand(XId repoId, XCommand command);
 	
 }

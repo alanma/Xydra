@@ -1,6 +1,6 @@
 package org.xydra.webadmin.gwt.client.widgets.tablewidgets;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.XyAdmin;
@@ -36,7 +36,7 @@ public class ColumnHeaderWidget extends Composite {
 	@UiField
 	Label idLabel;
 	
-	public ColumnHeaderWidget(XID id) {
+	public ColumnHeaderWidget(XId id) {
 		super();
 		initWidget(uiBinder.createAndBindUi(this));
 		
