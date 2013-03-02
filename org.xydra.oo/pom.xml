@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>oo</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<description>Calpano's BigData Wikipedia Tools</description>
+	<description>Xydra Mapping to Java Objects</description>
 	<parent>
 		<groupId>org.xydra</groupId>
 		<artifactId>maven-root</artifactId>
