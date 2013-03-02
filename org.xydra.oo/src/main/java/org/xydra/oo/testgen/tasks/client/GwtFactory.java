@@ -14,7 +14,7 @@ import org.xydra.oo.testgen.tasks.shared.ITaskList;
 import org.xydra.oo.testgen.tasks.shared.IUser;
 
 /** 
- * Generated on Fri Mar 01 21:05:48 CET 2013 Generated on Fri Mar 01 21:05:48 CET 2013  
+ * Generated on Fri Mar 01 21:10:13 CET 2013 Generated on Fri Mar 01 21:10:13 CET 2013  
  * by SpecWriter, a part of xydra.org:oo 
  */
 public class GwtFactory extends AbstractSharedFactory {

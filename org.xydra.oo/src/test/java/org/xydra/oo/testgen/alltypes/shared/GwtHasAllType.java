@@ -46,7 +46,7 @@ import org.xydra.oo.testgen.alltypes.shared.Colors;
 import org.xydra.oo.testgen.alltypes.shared.IPerson;
 import org.xydra.oo.testgen.alltypes.shared.MyLongBasedType;
 
-/** Generated on Fri Mar 01 21:05:48 CET 2013 by SpecWriter, a part of xydra.org:oo */
+/** Generated on Fri Mar 01 21:10:12 CET 2013 by SpecWriter, a part of xydra.org:oo */
 public class GwtHasAllType extends GwtXydraMapped {
 
     /** 
