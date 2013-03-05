@@ -10,12 +10,14 @@ import org.reflections.scanners.TypesScanner;
 import org.reflections.util.ClasspathHelper;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.Setting;
-import org.xydra.core.model.XModel;
-import org.xydra.sharedutils.ReflectionUtils;
-
-import com.google.common.base.CaseFormat;
 
 
+/**
+ * Does runtime checks, only available in Java, not in GWT.
+ * 
+ * @author xamde
+ * 
+ */
 @Setting("foo")
 @RunsInGWT(false)
 public class ConfigTool {
@@ -25,14 +27,6 @@ public class ConfigTool {
     
     public static void main(String[] args) {
         // find all @Settings
-        
-        System.out.println("hey");
-        
-        System.out.println("hey " + XModel.class.getCanonicalName());
-        
-        System.out.println("hey " + CaseFormat.class.getCanonicalName());
-        
-        System.out.println("hey " + ReflectionUtils.class.getCanonicalName());
         
         try {
             System.out.println("there is " + Reflections.class.getCanonicalName());
