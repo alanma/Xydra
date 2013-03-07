@@ -3,6 +3,8 @@ package org.xydra.mvnxy;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.AbstractMojo;
@@ -107,13 +109,9 @@ public class CopyGwt extends AbstractMojo {
         }
     }
     
-    public static void copyAllGwtModulesFoundInTarget(String warPath) {
-        File targetDir = new File(warPath);
-        if(!targetDir.exists()) {
-            log.error("Target WAR dir not found as \n" + "  " + targetDir.getAbsolutePath() + "\n"
-                    + "Compile something first, e.g. call 'mvn compile'.");
-            System.exit(1);
-        }
+    public static List<File> autoDiscoverAllGwtModulesInTarget(File targetDir) {
+        List<File> list = new ArrayList<File>();
+        
         assert targetDir.isDirectory();
         File[] subDirs = targetDir.listFiles(new FileFilter() {
             
@@ -122,7 +120,29 @@ public class CopyGwt extends AbstractMojo {
                 return pathname.isDirectory();
             }
         });
-        if(subDirs == null) {
+        
+        for(File f : subDirs) {
+            if(f.getName().contains(".gen.")) {
+                log.info("Found GWT module "
+                        + f.getAbsolutePath()
+                        + "\n"
+                        + "  but ignoring it, because it looks like an auto-generated domain model, from Xydra OO");
+            }
+            list.add(f);
+        }
+        
+        return list;
+    }
+    
+    public static void copyAllGwtModulesFoundInTarget(String warPath) {
+        File targetDir = new File(warPath);
+        if(!targetDir.exists()) {
+            log.error("Target WAR dir not found as \n" + "  " + targetDir.getAbsolutePath() + "\n"
+                    + "Compile something first, e.g. call 'mvn compile'.");
+            System.exit(1);
+        }
+        List<File> subDirs = autoDiscoverAllGwtModulesInTarget(targetDir);
+        if(subDirs.isEmpty()) {
             log.error("No subdirectories found in " + targetDir.getAbsolutePath());
             System.exit(1);
         }
