@@ -14,7 +14,7 @@ import org.xydra.oo.testgen.tasks.shared.ITask;
 import org.xydra.oo.testgen.tasks.shared.ITaskList;
 import org.xydra.oo.testgen.tasks.shared.IUser;
 
-/** Generated on Wed Mar 06 17:54:55 CET 2013 by SpecWriter, a part of xydra.org:oo */
+/** Generated on Thu Mar 07 18:40:49 CET 2013 by SpecWriter, a part of xydra.org:oo */
 public class JavaFactory extends AbstractSharedFactory {
 
     /** 

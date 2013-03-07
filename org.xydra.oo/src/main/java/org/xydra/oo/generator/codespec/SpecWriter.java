@@ -61,16 +61,16 @@ public class SpecWriter {
         
         "Generated on " + new Date() + " by " + SpecWriter.class.getSimpleName()
                 + ", a part of xydra.org:oo");
-        w.write("public " + classSpec.kind + " " + classSpec.getName() + " ");
+        w.write("public " + classSpec.kind + " " + classSpec.getName());
         if(classSpec.superClass != null) {
-            w.write("extends " + classSpec.superClass.getName());
+            w.write(" extends " + classSpec.superClass.getName());
         }
         if(!classSpec.implementedInterfaces.isEmpty()) {
-            w.write("implements ");
+            w.write(" implements ");
             for(int i = 0; i < classSpec.implementedInterfaces.size(); i++) {
                 String s = classSpec.implementedInterfaces.get(i);
                 w.write(s);
-                if(i < classSpec.implementedInterfaces.size()) {
+                if(i + 1 < classSpec.implementedInterfaces.size()) {
                     w.write(", ");
                 }
             }

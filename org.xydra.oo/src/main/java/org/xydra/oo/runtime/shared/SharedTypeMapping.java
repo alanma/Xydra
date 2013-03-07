@@ -1,7 +1,6 @@
 package org.xydra.oo.runtime.shared;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -201,12 +200,13 @@ public class SharedTypeMapping {
                 
                 @Override
                 public Object createEmptyCollection() {
-                    return XV.toAddressListValue(Collections.EMPTY_LIST);
+                    return XV.toAddressListValue(java.util.Collections.EMPTY_LIST);
                 }
                 
                 @Override
                 public java.lang.String createEmptyCollection_asSourceCode() {
-                    return TypeConstants.XV + ".toAddressListValue(Collections.EMPTY_LIST)";
+                    return TypeConstants.XV
+                            + ".toAddressListValue(java.util.Collections.EMPTY_LIST)";
                 }
             });
     
@@ -215,12 +215,13 @@ public class SharedTypeMapping {
                 
                 @Override
                 public Object createEmptyCollection() {
-                    return XV.toAddressSetValue(Collections.EMPTY_LIST);
+                    return XV.toAddressSetValue(java.util.Collections.EMPTY_LIST);
                 }
                 
                 @Override
                 public java.lang.String createEmptyCollection_asSourceCode() {
-                    return TypeConstants.XV + ".toAddressSetValue(Collections.EMPTY_LIST)";
+                    return TypeConstants.XV
+                            + ".toAddressSetValue(java.util.Collections.EMPTY_LIST)";
                 }
             });
     
@@ -230,12 +231,13 @@ public class SharedTypeMapping {
                 
                 @Override
                 public Object createEmptyCollection() {
-                    return XV.toAddressSortedSetValue(Collections.EMPTY_LIST);
+                    return XV.toAddressSortedSetValue(java.util.Collections.EMPTY_LIST);
                 }
                 
                 @Override
                 public java.lang.String createEmptyCollection_asSourceCode() {
-                    return TypeConstants.XV + ".toAddressSortedSetValue(Collections.EMPTY_LIST)";
+                    return TypeConstants.XV
+                            + ".toAddressSortedSetValue(java.util.Collections.EMPTY_LIST)";
                 }
             });
     
@@ -244,12 +246,13 @@ public class SharedTypeMapping {
                 
                 @Override
                 public Object createEmptyCollection() {
-                    return XV.toAddressListValue(Collections.EMPTY_LIST);
+                    return XV.toAddressListValue(java.util.Collections.EMPTY_LIST);
                 }
                 
                 @Override
                 public java.lang.String createEmptyCollection_asSourceCode() {
-                    return TypeConstants.XV + ".toAddressListValue(Collections.EMPTY_LIST)";
+                    return TypeConstants.XV
+                            + ".toAddressListValue(java.util.Collections.EMPTY_LIST)";
                 }
             });
     
@@ -258,12 +261,13 @@ public class SharedTypeMapping {
                 
                 @Override
                 public Object createEmptyCollection() {
-                    return XV.toAddressSetValue(Collections.EMPTY_LIST);
+                    return XV.toAddressSetValue(java.util.Collections.EMPTY_LIST);
                 }
                 
                 @Override
                 public java.lang.String createEmptyCollection_asSourceCode() {
-                    return TypeConstants.XV + ".toAddressSetValue(Collections.EMPTY_LIST)";
+                    return TypeConstants.XV
+                            + ".toAddressSetValue(java.util.Collections.EMPTY_LIST)";
                 }
             });
     
@@ -273,12 +277,13 @@ public class SharedTypeMapping {
                 
                 @Override
                 public Object createEmptyCollection() {
-                    return XV.toAddressSortedSetValue(Collections.EMPTY_LIST);
+                    return XV.toAddressSortedSetValue(java.util.Collections.EMPTY_LIST);
                 }
                 
                 @Override
                 public java.lang.String createEmptyCollection_asSourceCode() {
-                    return TypeConstants.XV + ".toAddressSortedSetValue(Collections.EMPTY_LIST)";
+                    return TypeConstants.XV
+                            + ".toAddressSortedSetValue(java.util.Collections.EMPTY_LIST)";
                 }
             });
     
@@ -293,12 +298,13 @@ public class SharedTypeMapping {
                 
                 @Override
                 public Object createEmptyCollection() {
-                    return XV.toBooleanListValue(Collections.EMPTY_LIST);
+                    return XV.toBooleanListValue(java.util.Collections.EMPTY_LIST);
                 }
                 
                 @Override
                 public java.lang.String createEmptyCollection_asSourceCode() {
-                    return TypeConstants.XV + ".toBooleanListValue(Collections.EMPTY_LIST)";
+                    return TypeConstants.XV
+                            + ".toBooleanListValue(java.util.Collections.EMPTY_LIST)";
                 }
             });
     
@@ -307,12 +313,13 @@ public class SharedTypeMapping {
                 
                 @Override
                 public Object createEmptyCollection() {
-                    return XV.toBooleanListValue(Collections.EMPTY_LIST);
+                    return XV.toBooleanListValue(java.util.Collections.EMPTY_LIST);
                 }
                 
                 @Override
                 public java.lang.String createEmptyCollection_asSourceCode() {
-                    return TypeConstants.XV + ".toBooleanListValue(Collections.EMPTY_LIST)";
+                    return TypeConstants.XV
+                            + ".toBooleanListValue(java.util.Collections.EMPTY_LIST)";
                 }
             });
     
@@ -324,12 +331,13 @@ public class SharedTypeMapping {
                 
                 @Override
                 public Object createEmptyCollection() {
-                    return XV.toDoubleListValue(Collections.EMPTY_LIST);
+                    return XV.toDoubleListValue(java.util.Collections.EMPTY_LIST);
                 }
                 
                 @Override
                 public java.lang.String createEmptyCollection_asSourceCode() {
-                    return TypeConstants.XV + ".toDoubleListValue(Collections.EMPTY_LIST)";
+                    return TypeConstants.XV
+                            + ".toDoubleListValue(java.util.Collections.EMPTY_LIST)";
                 }
             });
     
@@ -338,12 +346,13 @@ public class SharedTypeMapping {
                 
                 @Override
                 public Object createEmptyCollection() {
-                    return XV.toDoubleListValue(Collections.EMPTY_LIST);
+                    return XV.toDoubleListValue(java.util.Collections.EMPTY_LIST);
                 }
                 
                 @Override
                 public java.lang.String createEmptyCollection_asSourceCode() {
-                    return TypeConstants.XV + ".toDoubleListValue(Collections.EMPTY_LIST)";
+                    return TypeConstants.XV
+                            + ".toDoubleListValue(java.util.Collections.EMPTY_LIST)";
                 }
             });
     
@@ -355,12 +364,12 @@ public class SharedTypeMapping {
                 
                 @Override
                 public Object createEmptyCollection() {
-                    return XV.toIdListValue(Collections.EMPTY_LIST);
+                    return XV.toIdListValue(java.util.Collections.EMPTY_LIST);
                 }
                 
                 @Override
                 public java.lang.String createEmptyCollection_asSourceCode() {
-                    return TypeConstants.XV + ".toIdListValue(Collections.EMPTY_LIST)";
+                    return TypeConstants.XV + ".toIdListValue(java.util.Collections.EMPTY_LIST)";
                 }
             });
     
@@ -369,12 +378,12 @@ public class SharedTypeMapping {
                 
                 @Override
                 public Object createEmptyCollection() {
-                    return XV.toIdSetValue(Collections.EMPTY_LIST);
+                    return XV.toIdSetValue(java.util.Collections.EMPTY_LIST);
                 }
                 
                 @Override
                 public java.lang.String createEmptyCollection_asSourceCode() {
-                    return TypeConstants.XV + ".toIdSetValue(Collections.EMPTY_LIST)";
+                    return TypeConstants.XV + ".toIdSetValue(java.util.Collections.EMPTY_LIST)";
                 }
             });
     
@@ -383,12 +392,13 @@ public class SharedTypeMapping {
                 
                 @Override
                 public Object createEmptyCollection() {
-                    return XV.toIdSortedSetValue(Collections.EMPTY_LIST);
+                    return XV.toIdSortedSetValue(java.util.Collections.EMPTY_LIST);
                 }
                 
                 @Override
                 public java.lang.String createEmptyCollection_asSourceCode() {
-                    return TypeConstants.XV + ".toIdSortedSetValue(Collections.EMPTY_LIST)";
+                    return TypeConstants.XV
+                            + ".toIdSortedSetValue(java.util.Collections.EMPTY_LIST)";
                 }
             });
     
@@ -397,12 +407,12 @@ public class SharedTypeMapping {
                 
                 @Override
                 public Object createEmptyCollection() {
-                    return XV.toIdListValue(Collections.EMPTY_LIST);
+                    return XV.toIdListValue(java.util.Collections.EMPTY_LIST);
                 }
                 
                 @Override
                 public java.lang.String createEmptyCollection_asSourceCode() {
-                    return TypeConstants.XV + ".toIdListValue(Collections.EMPTY_LIST)";
+                    return TypeConstants.XV + ".toIdListValue(java.util.Collections.EMPTY_LIST)";
                 }
             });
     
@@ -411,12 +421,12 @@ public class SharedTypeMapping {
                 
                 @Override
                 public Object createEmptyCollection() {
-                    return XV.toIdSetValue(Collections.EMPTY_LIST);
+                    return XV.toIdSetValue(java.util.Collections.EMPTY_LIST);
                 }
                 
                 @Override
                 public java.lang.String createEmptyCollection_asSourceCode() {
-                    return TypeConstants.XV + ".toIdSetValue(Collections.EMPTY_LIST)";
+                    return TypeConstants.XV + ".toIdSetValue(java.util.Collections.EMPTY_LIST)";
                 }
             });
     
@@ -425,12 +435,13 @@ public class SharedTypeMapping {
                 
                 @Override
                 public Object createEmptyCollection() {
-                    return XV.toIdSortedSetValue(Collections.EMPTY_LIST);
+                    return XV.toIdSortedSetValue(java.util.Collections.EMPTY_LIST);
                 }
                 
                 @Override
                 public java.lang.String createEmptyCollection_asSourceCode() {
-                    return TypeConstants.XV + ".toIdSortedSetValue(Collections.EMPTY_LIST)";
+                    return TypeConstants.XV
+                            + ".toIdSortedSetValue(java.util.Collections.EMPTY_LIST)";
                 }
             });
     
@@ -442,12 +453,13 @@ public class SharedTypeMapping {
                 
                 @Override
                 public Object createEmptyCollection() {
-                    return XV.toIntegerListValue(Collections.EMPTY_LIST);
+                    return XV.toIntegerListValue(java.util.Collections.EMPTY_LIST);
                 }
                 
                 @Override
                 public java.lang.String createEmptyCollection_asSourceCode() {
-                    return TypeConstants.XV + ".toIntegerListValue(Collections.EMPTY_LIST)";
+                    return TypeConstants.XV
+                            + ".toIntegerListValue(java.util.Collections.EMPTY_LIST)";
                 }
             });
     
@@ -456,12 +468,13 @@ public class SharedTypeMapping {
                 
                 @Override
                 public Object createEmptyCollection() {
-                    return XV.toIntegerListValue(Collections.EMPTY_LIST);
+                    return XV.toIntegerListValue(java.util.Collections.EMPTY_LIST);
                 }
                 
                 @Override
                 public java.lang.String createEmptyCollection_asSourceCode() {
-                    return TypeConstants.XV + ".toIntegerListValue(Collections.EMPTY_LIST)";
+                    return TypeConstants.XV
+                            + ".toIntegerListValue(java.util.Collections.EMPTY_LIST)";
                 }
             });
     
@@ -474,12 +487,12 @@ public class SharedTypeMapping {
                 
                 @Override
                 public Object createEmptyCollection() {
-                    return XV.toLongListValue(Collections.EMPTY_LIST);
+                    return XV.toLongListValue(java.util.Collections.EMPTY_LIST);
                 }
                 
                 @Override
                 public java.lang.String createEmptyCollection_asSourceCode() {
-                    return TypeConstants.XV + ".toLongListValue(Collections.EMPTY_LIST)";
+                    return TypeConstants.XV + ".toLongListValue(java.util.Collections.EMPTY_LIST)";
                 }
             });
     
@@ -488,12 +501,12 @@ public class SharedTypeMapping {
                 
                 @Override
                 public Object createEmptyCollection() {
-                    return XV.toLongListValue(Collections.EMPTY_LIST);
+                    return XV.toLongListValue(java.util.Collections.EMPTY_LIST);
                 }
                 
                 @Override
                 public java.lang.String createEmptyCollection_asSourceCode() {
-                    return TypeConstants.XV + ".toLongListValue(Collections.EMPTY_LIST)";
+                    return TypeConstants.XV + ".toLongListValue(java.util.Collections.EMPTY_LIST)";
                 }
             });
     
@@ -505,12 +518,13 @@ public class SharedTypeMapping {
                 
                 @Override
                 public Object createEmptyCollection() {
-                    return XV.toStringListValue(Collections.EMPTY_LIST);
+                    return XV.toStringListValue(java.util.Collections.EMPTY_LIST);
                 }
                 
                 @Override
                 public java.lang.String createEmptyCollection_asSourceCode() {
-                    return TypeConstants.XV + ".toStringListValue(Collections.EMPTY_LIST)";
+                    return TypeConstants.XV
+                            + ".toStringListValue(java.util.Collections.EMPTY_LIST)";
                 }
             });
     
@@ -519,12 +533,12 @@ public class SharedTypeMapping {
                 
                 @Override
                 public Object createEmptyCollection() {
-                    return XV.toStringSetValue(Collections.EMPTY_LIST);
+                    return XV.toStringSetValue(java.util.Collections.EMPTY_LIST);
                 }
                 
                 @Override
                 public java.lang.String createEmptyCollection_asSourceCode() {
-                    return TypeConstants.XV + ".toStringSetValue(Collections.EMPTY_LIST)";
+                    return TypeConstants.XV + ".toStringSetValue(java.util.Collections.EMPTY_LIST)";
                 }
             });
     
@@ -533,12 +547,13 @@ public class SharedTypeMapping {
                 
                 @Override
                 public Object createEmptyCollection() {
-                    return XV.toStringListValue(Collections.EMPTY_LIST);
+                    return XV.toStringListValue(java.util.Collections.EMPTY_LIST);
                 }
                 
                 @Override
                 public java.lang.String createEmptyCollection_asSourceCode() {
-                    return TypeConstants.XV + ".toStringListValue(Collections.EMPTY_LIST)";
+                    return TypeConstants.XV
+                            + ".toStringListValue(java.util.Collections.EMPTY_LIST)";
                 }
             });
     
@@ -547,12 +562,12 @@ public class SharedTypeMapping {
                 
                 @Override
                 public Object createEmptyCollection() {
-                    return XV.toStringSetValue(Collections.EMPTY_LIST);
+                    return XV.toStringSetValue(java.util.Collections.EMPTY_LIST);
                 }
                 
                 @Override
                 public java.lang.String createEmptyCollection_asSourceCode() {
-                    return TypeConstants.XV + ".toStringSetValue(Collections.EMPTY_LIST)";
+                    return TypeConstants.XV + ".toStringSetValue(java.util.Collections.EMPTY_LIST)";
                 }
             });
     

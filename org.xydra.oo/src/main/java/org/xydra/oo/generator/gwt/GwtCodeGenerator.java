@@ -131,14 +131,27 @@ public class GwtCodeGenerator extends Generator {
                     gwtSimpleName);
             // write
             PrintWriter pw = ctx.tryCreate(logger, gwtPackageName, gwtSimpleName);
-            try {
-                SpecWriter.writeClass(pw, gwtPackageName, c);
-            } catch(IOException e) {
-                logger2.log(Type.ERROR, "IO", e);
+            if(pw == null) {
+                /*
+                 * If the named types already exists, null is returned to
+                 * indicate that no work needs to be done.
+                 */
+            } else {
+                try {
+                    SpecWriter.writeClass(pw, gwtPackageName, c);
+                } catch(IOException e) {
+                    logger2.log(Type.ERROR, "IO", e);
+                }
+                /*
+                 * The file is not committed until commit(TreeLogger,
+                 * PrintWriter) is called.
+                 */
+                ctx.commit(logger2, pw);
             }
-            ctx.commit(logger2, pw);
         } catch(ClassNotFoundException e) {
-            logger2.log(Type.ERROR, "Could not instantiate the java interface", e);
+            logger2.log(Type.ERROR, "Could not instantiate the java interface '"
+                    + javaInterfaceFqName
+                    + "'\n  Make sure your code is compiled, e.g. 'mvn compile' first.", e);
         }
     }
     
@@ -155,6 +168,7 @@ public class GwtCodeGenerator extends Generator {
         ClassSpec c = packageSpec.addClass(gwtSimpleName);
         PackageSpec builtIn = new PackageSpec(GwtXydraMapped.class.getPackage().getName(), true);
         c.superClass = builtIn.addClass(GwtXydraMapped.class.getSimpleName());
+        c.implementedInterfaces.add(javaInterfaceFqName);
         Class<?> javaInterface;
         javaInterface = Class.forName(javaInterfaceFqName);
         String generatedFrom = "" + javaInterface.getCanonicalName();
@@ -162,6 +176,7 @@ public class GwtCodeGenerator extends Generator {
             String fieldId = tryToGetAnnotatedFieldId(m);
             if(fieldId != null) {
                 MethodSpec methodSpec = c.addMethod(m, generatedFrom);
+                methodSpec.setAccess("public");
                 KindOfMethod kindOfMethod = OOReflectionUtils.extractKindOfMethod(m);
                 switch(kindOfMethod) {
                 
@@ -198,9 +213,11 @@ public class GwtCodeGenerator extends Generator {
         /** <J> java base type */
         /** <C> java component type */
         BaseTypeSpec typeJ = returnType.getBaseType();
-        String gJ = typeJ.getSimpleName();
+        String gJ = typeJ.getCanonicalName();
+        String sJ = typeJ.getSimpleName();
         BaseTypeSpec typeC = returnType.getComponentType();
-        String gC = typeC.getSimpleName();
+        String gC = typeC.getCanonicalName();
+        String sC = typeC.getSimpleName();
         
         /** <X> xydra base type, extends XCollectionValue<T> */
         /** <T> xydra OR java component type, NOT always extends XValue */
@@ -225,8 +242,8 @@ public class GwtCodeGenerator extends Generator {
         c.addRequiredImports(classT);
         BaseTypeSpec typeX = JavaTypeSpecUtils.createBaseTypeSpec(classX);
         BaseTypeSpec typeT = JavaTypeSpecUtils.createBaseTypeSpec(classT);
-        String gX = typeX.getSimpleName();
-        String gT = typeT.getSimpleName();
+        String gX = typeX.getCanonicalName();
+        String gT = typeT.getCanonicalName();
         
         // e.g. X, T extends XValue, J, C =
         // XIdSetValue,XAddressSetValue,Set<XAddress>,XAddress
@@ -250,7 +267,7 @@ public class GwtCodeGenerator extends Generator {
                 c.addRequiredImports(XValueJavaUtils.class);
             }
         } else {
-            String gC_basename = NameUtils.firstLetterUppercased(gC.substring(1));
+            String gC_basename = NameUtils.firstLetterUppercased(sC.substring(1));
             x2j = "GwtFactory.wrap" + gC_basename + "(" + gwtSimpleName
                     + ".this.oop.getXModel(), (XId) x)";
             c.addRequiredImports(XId.class);
@@ -287,7 +304,7 @@ public class GwtCodeGenerator extends Generator {
         if(mapping == null) {
             if(OOReflectionUtils.isProxyType(returnType.getComponentType())) {
                 methodSpec
-                        .addSourceLine("        return XV.toIdListValue(Collections.EMPTY_LIST);");
+                        .addSourceLine("        return XV.toIdListValue(java.util.Collections.EMPTY_LIST);");
                 c.addRequiredImports(XV.class);
             } else {
                 methodSpec.addSourceLine("        return (" + gX
@@ -305,13 +322,13 @@ public class GwtCodeGenerator extends Generator {
         methodSpec.sourceLines.add("");
         methodSpec.sourceLines.add("};");
         methodSpec.sourceLines.add("    ");
-        methodSpec.sourceLines.add("return new " + gJ + "Proxy<" + gX + "," + gT + "," + gJ + "<"
+        methodSpec.sourceLines.add("return new " + sJ + "Proxy<" + gX + "," + gT + "," + gJ + "<"
                 + gC + ">," + gC + ">(this.oop.getXObject(), XX.toId(\"" + fieldId + "\"), t);");
-        if(gJ.equals(Set.class.getSimpleName())) {
+        if(sJ.equals(Set.class.getSimpleName())) {
             c.addRequiredImports(SetProxy.class);
-        } else if(gJ.equals(List.class.getSimpleName())) {
+        } else if(sJ.equals(List.class.getSimpleName())) {
             c.addRequiredImports(ListProxy.class);
-        } else if(gJ.equals(SortedSet.class.getSimpleName())) {
+        } else if(sJ.equals(SortedSet.class.getSimpleName())) {
             c.addRequiredImports(SortedSetProxy.class);
         }
         
@@ -439,12 +456,18 @@ public class GwtCodeGenerator extends Generator {
                 m.setComment("Trivial xydra type");
                 return;
             } else {
-                /* 1.2) Extended types with a mapping */
-                m.sourceLines.add("// non-xydra type with mapping: " + type.getTypeString());
+                /* 1.2) other types with a mapping */
+                
+                m.sourceLines.add("// non-xydra type '" + type.getTypeString() + "' with mapping");
+                
                 m.sourceLines
                         .add("SharedTypeMapping mapping = SharedTypeMapping.getMapping(new TypeSpec(new BaseTypeSpec(");
-                m.sourceLines.add("  \"" + "org.xydra.oo.testgen.alltypes.shared" + "\", \""
-                        + type.getTypeString() + "\"), null, \"gwt\"));");
+                // FIXME was "org.xydra.oo.testgen.alltypes.shared"
+                String packageName = type.getBaseType().getPackageName() == null ? "null" : "\""
+                        + type.getBaseType().getPackageName() + "\"";
+                String simpleName = type.getTypeString();
+                m.sourceLines.add("  " + packageName + ", \"" + simpleName
+                        + "\"), null, \"gwt\"));");
                 m.sourceLines.add("" + mapping.getXydraBaseType().getSimpleName() + " x = ("
                         + mapping.getXydraBaseType().getSimpleName() + ")mapping.toXydra("
                         + fieldId + ");");
