@@ -373,6 +373,10 @@ public class Restless extends HttpServlet {
             
             synchronized(sc) {
                 RequestDispatcher rd = sc.getNamedDispatcher("default");
+                if(rd == null) {
+                    // for newer Google AppEngine versions
+                    rd = sc.getNamedDispatcher("_ah_default");
+                }
                 HttpServletRequest wrapped = new HttpServletRequestWrapper(req) {
                     @Override
                     public String getServletPath() {
