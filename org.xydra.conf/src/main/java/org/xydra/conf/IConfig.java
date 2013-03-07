@@ -231,4 +231,16 @@ public interface IConfig {
     
     Set<String> getStringSet(Enum<?> key);
     
+    /**
+     * @param key
+     * @throws ConfigException if given key is not defined
+     */
+    void assertDefined(String key);
+    
+    /**
+     * @param key
+     * @throws ConfigException if given key is not defined
+     */
+    void assertDefined(Enum<?> key);
+    
 }

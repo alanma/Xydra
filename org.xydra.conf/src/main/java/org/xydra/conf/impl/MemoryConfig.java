@@ -274,4 +274,18 @@ public class MemoryConfig implements IConfig {
         return getStringSet(key.name());
     }
     
+    @Override
+    public void assertDefined(String key) {
+        if(key == null)
+            throw new IllegalArgumentException("Key may not be null");
+        get(key);
+    }
+    
+    @Override
+    public void assertDefined(Enum<?> key) {
+        if(key == null)
+            throw new IllegalArgumentException("Key may not be null");
+        assertDefined(key.name());
+    }
+    
 }
