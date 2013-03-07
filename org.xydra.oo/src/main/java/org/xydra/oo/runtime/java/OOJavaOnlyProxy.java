@@ -61,7 +61,10 @@ public class OOJavaOnlyProxy implements InvocationHandler {
         
         try {
             return invoke(method, args);
-        } catch(Exception | Error e) {
+        } catch(Exception e) {
+            log.error(method.getReturnType() + " " + method.getName() + "(..)", e);
+            throw e;
+        } catch(Error e) {
             log.error(method.getReturnType() + " " + method.getName() + "(..)", e);
             throw e;
         }

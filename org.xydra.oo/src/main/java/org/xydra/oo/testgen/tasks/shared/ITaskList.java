@@ -7,7 +7,7 @@ import org.xydra.oo.Field;
 import org.xydra.oo.testgen.tasks.shared.IBaseList;
 import org.xydra.oo.testgen.tasks.shared.ITask;
 
-/** Generated on Tue Mar 05 11:13:29 CET 2013 by SpecWriter, a part of xydra.org:oo */
+/** Generated on Wed Mar 06 17:54:55 CET 2013 by SpecWriter, a part of xydra.org:oo */
 public interface ITaskList extends IBaseList {
 
     /** 

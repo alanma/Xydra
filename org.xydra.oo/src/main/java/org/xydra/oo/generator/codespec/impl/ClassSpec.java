@@ -13,15 +13,15 @@ import org.xydra.oo.runtime.shared.TypeSpec;
 public class ClassSpec extends NamedElement {
     
     /** Make sure to add also as required imports */
-    public List<String> implementedInterfaces = new ArrayList<>();
+    public List<String> implementedInterfaces = new ArrayList<String>();
     
     public String kind;
     
-    public List<IMember> members = new ArrayList<>();
+    public List<IMember> members = new ArrayList<IMember>();
     
     private PackageSpec packageSpec;
     
-    private Set<String> req = new HashSet<>();
+    private Set<String> req = new HashSet<String>();
     
     public ClassSpec superClass;
     
@@ -99,7 +99,7 @@ public class ClassSpec extends NamedElement {
     }
     
     public Set<String> getRequiredImports() {
-        Set<String> imports = new HashSet<>();
+        Set<String> imports = new HashSet<String>();
         imports.addAll(this.req);
         if(this.superClass != null) {
             imports.add(this.superClass.getCanonicalName());

@@ -66,7 +66,7 @@ public class MethodSpec extends AbstractConstructorOrMethodSpec implements IMemb
     
     @Override
     public Set<String> getRequiredImports() {
-        Set<String> req = new HashSet<>();
+        Set<String> req = new HashSet<String>();
         req.addAll(super.getRequiredImports());
         if(this.returnType != null)
             req.addAll(this.returnType.getRequiredImports());

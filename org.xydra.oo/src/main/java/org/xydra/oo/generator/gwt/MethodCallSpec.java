@@ -7,7 +7,7 @@ import java.util.List;
 public class MethodCallSpec {
     
     private String method;
-    private List<String> args = new ArrayList<>();
+    private List<String> args = new ArrayList<String>();
     private String packageName;
     private String className;
     

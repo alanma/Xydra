@@ -6,10 +6,9 @@ import java.util.List;
 import java.util.Set;
 
 
-
 public class PackageSpec {
     
-    public Set<ClassSpec> classes = new HashSet<>();
+    public Set<ClassSpec> classes = new HashSet<ClassSpec>();
     
     private String fullPackageName;
     
@@ -17,7 +16,7 @@ public class PackageSpec {
     
     private boolean isBuiltIn;
     
-    public List<PackageSpec> subPackages = new ArrayList<>();
+    public List<PackageSpec> subPackages = new ArrayList<PackageSpec>();
     
     public PackageSpec(String fullPackageName, boolean isBuiltIn) {
         this.fullPackageName = fullPackageName;

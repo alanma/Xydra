@@ -28,7 +28,7 @@ public class CodeWriter {
     
     public static void writeJavaDocComment(Writer w, String indent, String value)
             throws IOException {
-        List<String> lines = new ArrayList<>();
+        List<String> lines = new ArrayList<String>();
         BufferedReader br = new BufferedReader(new StringReader(value));
         String line = br.readLine();
         while(line != null) {
@@ -72,7 +72,7 @@ public class CodeWriter {
     public static List<String> typeset(String longline, int maxLen) {
         assert !longline.contains("\n");
         
-        List<String> shortLines = new ArrayList<>();
+        List<String> shortLines = new ArrayList<String>();
         StringBuilder current = new StringBuilder();
         int lineLen = 0;
         String[] words = longline.split(" ");

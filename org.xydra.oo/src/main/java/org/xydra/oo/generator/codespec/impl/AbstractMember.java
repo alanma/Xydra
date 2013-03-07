@@ -10,7 +10,7 @@ import org.xydra.oo.generator.codespec.IMember;
 
 public abstract class AbstractMember extends NamedElement implements IMember {
     
-    public List<AnnotationSpec<?>> annotations = new ArrayList<>();
+    public List<AnnotationSpec<?>> annotations = new ArrayList<AnnotationSpec<?>>();
     
     String comment;
     
@@ -21,9 +21,8 @@ public abstract class AbstractMember extends NamedElement implements IMember {
         this.generatedFrom = generatedFrom;
     }
     
-    @SuppressWarnings("unchecked")
     public <T> AbstractMember annotateWith(Class<?> annotationClass, T ... values) {
-        this.annotations.add(new AnnotationSpec<>(annotationClass, values));
+        this.annotations.add(new AnnotationSpec<T>(annotationClass, values));
         return this;
     }
     

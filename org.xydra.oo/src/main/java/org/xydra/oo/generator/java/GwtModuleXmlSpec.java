@@ -5,21 +5,26 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.xydra.annotations.CanBeNull;
+
 
 public class GwtModuleXmlSpec {
     
-    public GwtModuleXmlSpec(String packageName, String moduleName) {
+    public GwtModuleXmlSpec(String packageName, String moduleName, String rename_to) {
         this.packageName = packageName;
         this.moduleName = moduleName;
     }
+    
+    @CanBeNull
+    private String rename_to;
     
     private String packageName;
     
     public String moduleName;
     
-    public Set<GenerateWith> generateWith = new HashSet<>();
+    public Set<GenerateWith> generateWith = new HashSet<GenerateWith>();
     
-    public List<String> inherits = new ArrayList<>();
+    public List<String> inherits = new ArrayList<String>();
     
     public class GenerateWith {
         
@@ -59,7 +64,11 @@ public class GwtModuleXmlSpec {
     public String toString() {
         StringBuilder b = new StringBuilder();
         
-        b.append("<module>\n");
+        b.append("<module");
+        if(this.rename_to != null) {
+            b.append(" rename-to=\"" + this.rename_to + "\"");
+        }
+        b.append(">\n");
         b.append("    <!-- Inherit this module as " + this.packageName + "." + this.moduleName
                 + " -->\n");
         b.append("\n");

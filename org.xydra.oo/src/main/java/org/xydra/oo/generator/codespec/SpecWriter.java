@@ -42,7 +42,7 @@ public class SpecWriter {
         
         // import java.util.*;
         // import org.xydra.oo.*;
-        List<String> imports = new ArrayList<>();
+        List<String> imports = new ArrayList<String>();
         imports.addAll(classSpec.getRequiredImports());
         Collections.sort(imports);
         for(String imp : imports) {

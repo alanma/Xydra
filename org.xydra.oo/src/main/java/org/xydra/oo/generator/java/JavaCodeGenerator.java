@@ -104,7 +104,7 @@ public class JavaCodeGenerator {
     
     private static Set<IMember> collectMappedMembers(Class<?> clazz,
             Set<Class<?>> toBeGeneratedTypes, String sharedPackage) {
-        Set<IMember> classMemberSpecs = new HashSet<>();
+        Set<IMember> classMemberSpecs = new HashSet<IMember>();
         
         for(Field field : clazz.getDeclaredFields()) {
             Class<?> type = field.getType();
@@ -177,7 +177,7 @@ public class JavaCodeGenerator {
     private static PackageSpec convertInnerClassesToPackageSpec(String basePackage,
             String sharedPackage, Class<?> specificationCollectionClass) {
         // round 1: collect all declared inner classes
-        Set<Class<?>> toBeGeneratedTypes = new HashSet<>();
+        Set<Class<?>> toBeGeneratedTypes = new HashSet<Class<?>>();
         for(Class<?> specificationMemberClass : specificationCollectionClass.getDeclaredClasses()) {
             // don't inspect/translate inner Enum-types
             if(specificationMemberClass.isEnum())
@@ -206,7 +206,7 @@ public class JavaCodeGenerator {
      * object-types; generate method stubs for all methods;
      */
     private static void convertFieldsToGettersAndSetters(ClassSpec classSpec) {
-        List<IMember> members = new ArrayList<>(classSpec.members);
+        List<IMember> members = new ArrayList<IMember>(classSpec.members);
         for(IMember t : members) {
             if(t instanceof FieldSpec) {
                 FieldSpec fieldSpec = (FieldSpec)t;
@@ -367,7 +367,7 @@ public class JavaCodeGenerator {
     private static GwtModuleXmlSpec generateGwtModuleXmlSpec(PackageSpec packageSpec) {
         // prepare GWT module xml
         GwtModuleXmlSpec gwtSpec = new GwtModuleXmlSpec(packageSpec.getFQPackageName(),
-                "OODomainModel");
+                "OODomainModel", null);
         addGwtGenerateWith(gwtSpec, packageSpec);
         gwtSpec.inherits.add("org.xydra.oo.runtime.XydraOoRuntime");
         return gwtSpec;

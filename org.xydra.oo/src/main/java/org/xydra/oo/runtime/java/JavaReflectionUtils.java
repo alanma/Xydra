@@ -106,7 +106,7 @@ public class JavaReflectionUtils {
     }
     
     public static Set<Class<?>> getAllInterfaces(Class<?> c) {
-        Set<Class<?>> set = new HashSet<>();
+        Set<Class<?>> set = new HashSet<Class<?>>();
         for(Class<?> i : c.getInterfaces()) {
             set.add(i);
             set.addAll(getAllInterfaces(i));

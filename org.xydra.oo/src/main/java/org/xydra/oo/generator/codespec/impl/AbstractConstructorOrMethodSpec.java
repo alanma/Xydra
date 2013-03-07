@@ -16,9 +16,9 @@ public class AbstractConstructorOrMethodSpec extends AbstractMember implements I
     
     private boolean isStatic = false;
     
-    public List<FieldSpec> params = new ArrayList<>();
+    public List<FieldSpec> params = new ArrayList<FieldSpec>();
     
-    public List<String> sourceLines = new ArrayList<>();
+    public List<String> sourceLines = new ArrayList<String>();
     
     AbstractConstructorOrMethodSpec(String name, String generatedFrom) {
         super(name, generatedFrom);
@@ -45,8 +45,7 @@ public class AbstractConstructorOrMethodSpec extends AbstractMember implements I
         return this;
     }
     
-    public <T> AbstractConstructorOrMethodSpec annotateWith(Class<?> annotationClass,
-            @SuppressWarnings("unchecked") T ... values) {
+    public <T> AbstractConstructorOrMethodSpec annotateWith(Class<?> annotationClass, T ... values) {
         super.annotateWith(annotationClass, values);
         return this;
     }
@@ -86,7 +85,7 @@ public class AbstractConstructorOrMethodSpec extends AbstractMember implements I
     
     @Override
     public Set<String> getRequiredImports() {
-        Set<String> req = new HashSet<>();
+        Set<String> req = new HashSet<String>();
         for(FieldSpec p : this.params) {
             req.addAll(p.getRequiredImports());
         }
