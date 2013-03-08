@@ -7,9 +7,11 @@
 }
 
 .sessionLabelDummy {
-	background-color: cyan;
-	width: 1200px;
-	height: 75px;
+	background-color: rgba(255, 105, 0, 0.6);
+	width: 690px;
+	/* 	height: 75px; */
+	position: relative;
+	left: 350px;
 }
 
 /* selection tree  */
@@ -27,6 +29,13 @@
 	/* 	border: 0px; */
 }
 
+.treeMainPanel table {
+	padding: 1px;
+	margin: 1px;
+	border-spacing: 1px;
+	background-color: rgb(208, 208, 208);
+}
+
 .treeButtonPanelStyle td {
 	border: 0px;
 	text-align: auto;
@@ -42,10 +51,10 @@
 	height: 30px;
 }
 
-.modelControlButtonPanel {
-	height: 50px;
-	width: 800px;
-	background-color: lime;
+.modelControlButtonPanel { /* 	height: 50px; */
+	/* 	width: 800px; */
+	/* 	background-color: lime; */
+	
 }
 
 .modelPane {
@@ -56,11 +65,6 @@
 .editorPanel {
 	height: 500px;
 	/* 	width: 880px; */
-}
-
-.informationPanel {
-	height: 800px;
-	/* 	width: 800px; */
 }
 
 .headerStyle {
@@ -87,6 +91,7 @@
 .revisionLabelStyle {
 	font-style: italic;
 	font-size: 14px;
+	text-align: right;
 }
 
 .emptyFieldButtonStyle {
@@ -129,26 +134,34 @@
 
 .defaultLabelStyle {
 	width: 800px;
-	height: 800px;
+	/* 	height: 800px; */
 	font-style: italic;
 	margin: auto;
 }
 
 .noData {
+	font-size: 30px;
 	font-style: italic;
+	height: 600px;
+	width: 1000px;
+	text-align: center;
 }
 
 .fieldIDWidget td,.fieldValueInfo td {
-	border: 0px;
+	border: 0px !important;
 }
 
 .fieldIDWidget {
-	
+	text-align: center;
 }
 
-.editorStyle td {
-	border-top: 1px solid #ccc;
-	border-bottom: 1px solid #ccc;
+.editorStyle {
+	height: 24px;
+}
+
+.editorStyle td { /* 	border-top: 1px solid #ccc; */
+	/* 	border-bottom: 1px solid #ccc; */
+	
 }
 
 .editorStyle tbody {
@@ -162,13 +175,17 @@
 	border: 0px;
 }
 
+.compactTable td {
+	border: 1px solid #ccc;
+}
+
 .cellElement {
 	width: 200px;
 	height: 200px;
 }
 
 .scrollTableStyle {
-	height: 900px;
+	max-height: 870px;
 	padding: 0;
 	margin: 0;
 }
@@ -189,7 +206,8 @@
 }
 
 .rowHeaderWidth {
-	width: 200px; margin : 0;
+	width: 200px;
+	margin: 0;
 	padding: 0;
 	margin: 0;
 }
@@ -204,37 +222,80 @@
 	padding: 0px;
 }
 
-.valueLabelWidth {
+.valueLabelProperties {
 	width: 180px;
+	min-height: 80px;
 }
 
-.evenRow {
-/* background-color : rgb(187, 187, 187);} */
-		background-color : rgba(255, 105, 0, 0.6);
-
-}
-.oddRow {
-/* 		background-color : rgba(155, 155, 155, 0.23); */
-/* 		color: #FF6900; */
-		background-color : rgba(255, 105, 0, 1.0);
-	
+.valueLabelProperties td {
+	border-top: 1px solid #ccc;
+	border-bottom: 1px solid #ccc;
 }
 
-.noBorder td{
+.evenRow { /* background-color : rgb(187, 187, 187);} */
+	background-color: rgba(255, 105, 0, 0.6);
+}
+
+.oddRow { /* 		background-color : rgba(155, 155, 155, 0.23); */
+	/* 		color: #FF6900; */
+	background-color: rgba(255, 105, 0, 1.0);
+}
+
+.noBorder td {
 	border: 0;
 }
 
-.repoBranchBorder
-{
+.repoBranchBorder {
 	border: 1px solid #009;
 }
 
-.modelAnchorStyle
-{
-	font-size: 18px;
-		font-style: normal;
-		text-decoration: underline;
-		cursor: pointer;
-			margin-bottom: 5px;
-		
+.idAnchorStyle {
+	cursor: pointer;
+}
+
+.modelAnchorStyle {
+	font-size: 20px;
+	font-style: normal;
+	text-decoration: underline;
+	margin-bottom: 5px;
+}
+
+.informationPanel { /* 	height: 800px; */
+	padding: 0;
+	margin: 0;
+}
+
+.informationPanel td .informationPanel table .informationPanel tr .informationPanel div
+	{
+	padding: 0;
+	margin: 0;
+}
+
+.imageButtonStyle,.imageButtonStyle>img {
+	font-size: 0px;
+	padding: 1px;
+}
+
+.editor-xfield {
+	width: 100%;
+}
+
+.border {
+	border: 1px solid #ccc;
+}
+
+.errorLabelStyle {
+	color: red;
+	font-style: italic;
+	background-color: white;
+}
+
+.objectIDLabel {
+	width: 170px;
+	height: 96px;
+}
+
+.modelIDLabel {
+	width: 310px;
+	height: 40px;
 }

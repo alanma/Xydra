@@ -9,9 +9,9 @@
 	
 		<g:HorizontalPanel ui:field="panel">
 
-			<st:SelectionTree ui:field="selectionTree"></st:SelectionTree>
+			<st:SelectionTree ui:field="selectionTree" ></st:SelectionTree>
 
-			<ep:EditorPanel ui:field="editorPanel"></ep:EditorPanel>
+			<ep:EditorPanel ui:field="editorPanel" styleName="border"></ep:EditorPanel>
 
 		</g:HorizontalPanel>
 

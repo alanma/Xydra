@@ -7,10 +7,13 @@ import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.XyAdmin;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.MouseOutEvent;
+import com.google.gwt.event.dom.client.MouseOutHandler;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -34,8 +37,7 @@ public class FieldWidget extends Composite {
 	@UiField
 	VerticalPanel mainPanel;
 	
-	@UiField
-	Label revisionNumberLabel;
+	private XFieldEditor fieldEditor;
 	
 	public FieldWidget(XReadableField field) {
 		
@@ -43,11 +45,25 @@ public class FieldWidget extends Composite {
 		
 		initWidget(uiBinder.createAndBindUi(this));
 		
-		XFieldEditor fieldEditor = new XFieldEditor(field);
-		this.mainPanel.insert(fieldEditor, 0);
+		this.fieldEditor = new XFieldEditor(field);
+		this.mainPanel.insert(this.fieldEditor, 0);
+		this.fieldEditor.hideButtons();
+		this.addDomHandler(new MouseOverHandler() {
+			
+			@Override
+			public void onMouseOver(MouseOverEvent event) {
+				FieldWidget.this.fieldEditor.showButtons();
+				
+			}
+		}, MouseOverEvent.getType());
 		
-		this.revisionNumberLabel.setText("rev.: " + field.getRevisionNumber());
-		
+		this.addDomHandler(new MouseOutHandler() {
+			
+			@Override
+			public void onMouseOut(MouseOutEvent event) {
+				FieldWidget.this.fieldEditor.hideButtons();
+				
+			}
+		}, MouseOutEvent.getType());
 	}
-	
 }

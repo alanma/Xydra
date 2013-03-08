@@ -66,8 +66,7 @@
 					<g:Button ui:field="fetchModelsButton" styleName="{style.buttonStyle}">fetch
 						childs</g:Button>
 					<g:Button ui:field="addButton" styleName="{style.buttonStyle}"></g:Button>
-					<g:Button ui:field="removeModelButton" styleName="{style.buttonStyle}">delete
-						Model</g:Button>
+					<g:Button ui:field="commitButton" styleName="{style.buttonStyle}">commit</g:Button>
 				</g:HorizontalPanel>
 				<g:Button ui:field="expandButton" styleName="{style.expandButtonStyle}"> + </g:Button>
 			</g:VerticalPanel>

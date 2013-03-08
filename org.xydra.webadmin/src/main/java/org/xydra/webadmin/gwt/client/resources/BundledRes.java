@@ -6,21 +6,43 @@ import com.google.gwt.resources.client.ImageResource;
 
 
 /**
- * All resources used within the application
+ * All resources used within the application in addition to
+ * {@link CommonResourceBundle}
  * 
  * @author alpha
+ * 
  */
 public interface BundledRes extends ClientBundle {
-    
-    public interface Images extends ClientBundle {
-        
-        @Source("img/foo.png")
-        ImageResource foo();
-        
-    }
-    
-    public static final BundledRes INSTANCE = GWT.create(BundledRes.class);
-    
-    public Images images();
-    
+	/**
+	 * The message file used for i18n
+	 * 
+	 * @return the message file
+	 * 
+	 */
+	
+	public interface Images extends ClientBundle {
+		
+		@Source("img/table_edit.png")
+		ImageResource edit();
+		
+		@Source("img/delete.png")
+		ImageResource delete();
+		
+		@Source("img/table_save.png")
+		ImageResource save();
+		
+		@Source("img/cancel.png")
+		ImageResource cancel();
+		
+		@Source("img/table_add.png")
+		ImageResource add();
+		
+		@Source("img/foo.png")
+		ImageResource foo();
+	}
+	
+	public static final BundledRes INSTANCE = GWT.create(BundledRes.class);
+	
+	public Images images();
+	
 }

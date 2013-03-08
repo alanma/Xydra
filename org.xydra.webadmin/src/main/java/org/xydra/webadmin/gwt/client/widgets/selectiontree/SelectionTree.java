@@ -32,7 +32,7 @@ public class SelectionTree extends Composite implements Observable {
 	
 	private static ViewUiBinder uiBinder = GWT.create(ViewUiBinder.class);
 	
-	private HashMap<XId,BranchWidget> branches;
+	private HashMap<XId,RepoBranchWidget> branches;
 	
 	@UiField
 	VerticalPanel mainPanel;
@@ -41,7 +41,7 @@ public class SelectionTree extends Composite implements Observable {
 		super();
 		initWidget(uiBinder.createAndBindUi(this));
 		
-		this.branches = new HashMap<XId,BranchWidget>();
+		this.branches = new HashMap<XId,RepoBranchWidget>();
 		
 		Controller.getInstance().registerSelectionTree(this);
 		this.setComponents();
@@ -55,16 +55,29 @@ public class SelectionTree extends Composite implements Observable {
 		while(repoIDIterator.hasNext()) {
 			
 			RepoDataModel repo = repoIDIterator.next();
-			BranchWidget repoBranch = new BranchWidget(XX.toAddress(repo.getId(), null, null, null));
-			this.mainPanel.add(repoBranch);
-			this.branches.put(repo.getId(), repoBranch);
+			addRepoBranch(repo, this.mainPanel.getWidgetCount());
 		}
+		this.mainPanel.add(new AddRepoWidget());
+		
+	}
+	
+	private void addRepoBranch(RepoDataModel repo, int position) {
+		RepoBranchWidget repoBranch = new RepoBranchWidget(XX.toAddress(repo.getId(), null, null,
+		        null));
+		this.mainPanel.insert(repoBranch, position);
+		this.branches.put(repo.getId(), repoBranch);
 	}
 	
 	@Override
 	public void notifyMe(XAddress address) {
 		
 		XId repoId = address.getRepository();
-		this.branches.get(repoId).notifyMe(address);
+		RepoBranchWidget repoBranchWidget = this.branches.get(repoId);
+		if(repoBranchWidget != null) {
+			repoBranchWidget.notifyMe(address);
+		} else {
+			addRepoBranch(Controller.getInstance().getDataModel().getRepo(repoId),
+			        this.mainPanel.getWidgetCount() - 1);
+		}
 	}
 }

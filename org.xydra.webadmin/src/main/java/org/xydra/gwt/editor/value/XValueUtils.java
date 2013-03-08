@@ -30,9 +30,6 @@ import org.xydra.index.iterator.SingleValueIterator;
 /**
  * Collection of procedures to convert XValues to different types but keep as
  * much information as possible while doing so.
- * 
- * @deprecated 
- * 
  */
 abstract public class XValueUtils {
 	
@@ -94,7 +91,7 @@ abstract public class XValueUtils {
 		};
 	}
 	
-	static public XId asXId(XValue value) {
+	static public XId asXID(XValue value) {
 		
 		if(value == null) {
 			return XX.createUniqueId();
@@ -172,7 +169,7 @@ abstract public class XValueUtils {
 		try {
 			return XX.toAddress(text);
 		} catch(Exception e) {
-			return XX.toAddress("dummy");
+			return XX.toAddress("/dummy");
 		}
 	}
 	
@@ -210,7 +207,7 @@ abstract public class XValueUtils {
 		}
 	}
 	
-	static public Iterator<XId> asXIdList(XValue value) {
+	static public Iterator<XId> asXIDList(XValue value) {
 		if(value == null) {
 			return new NoneIterator<XId>();
 		} else if(value instanceof XIdListValue) {
@@ -236,7 +233,7 @@ abstract public class XValueUtils {
 				}
 			};
 		} else {
-			XId xid = asXId(value);
+			XId xid = asXID(value);
 			if(xid == null) {
 				return new NoneIterator<XId>();
 			}

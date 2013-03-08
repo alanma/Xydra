@@ -33,12 +33,11 @@ public class XyAdmin extends Composite {
 		this.service = service;
 		
 		Controller.getInstance().addService(service);
-		Controller.getInstance().getDataModel().addRepoID(XX.toId("repo1"));
-		Controller.getInstance().getDataModel().addRepoID(XX.toId("gae-repo"));
+		Controller.getInstance().addRepo(XX.toId("repo1"));
+		// Controller.getInstance().addRepo(XX.toId("gae-repo"));
 		
 		initWidget(uiBinder.createAndBindUi(this));
 		
-		// addDummyData(service);
 	}
 	
 }

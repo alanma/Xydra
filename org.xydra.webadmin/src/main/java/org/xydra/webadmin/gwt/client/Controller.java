@@ -2,12 +2,17 @@ package org.xydra.webadmin.gwt.client;
 
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.Set;
 
+import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.XType;
+import org.xydra.base.XX;
+import org.xydra.base.change.XCommandFactory;
 import org.xydra.base.change.XCommandUtils;
+import org.xydra.base.change.XRepositoryCommand;
 import org.xydra.base.change.XTransaction;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.core.change.SessionCachedModel;
@@ -15,6 +20,7 @@ import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.datamodels.DataModel;
+import org.xydra.webadmin.gwt.client.datamodels.RepoDataModel;
 import org.xydra.webadmin.gwt.client.util.TableController;
 import org.xydra.webadmin.gwt.client.util.TableController.Status;
 import org.xydra.webadmin.gwt.client.util.TempStorage;
@@ -204,14 +210,44 @@ public class Controller {
 		Controller.this.notifyEditorPanel(model);
 	}
 	
-	public void commit() {
-		XTransactionBuilder txnBuilder = new XTransactionBuilder(getSelectedModelAddress());
-		SessionCachedModel model = this.dataModel.getRepo(this.lastClickedElement.getRepository())
-		        .getModel(this.lastClickedElement.getModel());
-		model.commitTo(txnBuilder);
-		XTransaction transaction = txnBuilder.build();
+	public void commit(XId repoID) {
+		RepoDataModel repo = this.dataModel.getRepo(repoID);
 		
-		this.service.executeCommand(this.lastClickedElement.getRepository(), transaction,
+		/* add new models */
+		XTransactionBuilder txnBuilder = new XTransactionBuilder(XX.toAddress("/"
+		        + repoID.toString()));
+		XCommandFactory commandFactory = X.getCommandFactory();
+		
+		Set<XId> addedModelIDs = repo.getAddedModels();
+		for(XId addedModelID : addedModelIDs) {
+			XRepositoryCommand addModelCommand = commandFactory.createAddModelCommand(repoID,
+			        addedModelID, true);
+			txnBuilder.addCommand(addModelCommand);
+		}
+		
+		/* remove deleted Models */
+		Set<Entry<XId,SessionCachedModel>> removedModelIDs = repo.getDeletedModelIDs();
+		for(Entry<XId,SessionCachedModel> removedModelEntry : removedModelIDs) {
+			
+			XRepositoryCommand removeModelCommand = commandFactory.createSafeRemoveModelCommand(XX
+			        .toAddress(repoID, removedModelEntry.getKey(), null, null), removedModelEntry
+			        .getValue().getRevisionNumber());
+			txnBuilder.addCommand(removeModelCommand);
+		}
+		
+		/* commit model changes */
+		HashSet<SessionCachedModel> changedModels = repo.getChangedModels();
+		for(SessionCachedModel sessionCachedModel : changedModels) {
+			XAddress address = XX.toAddress(repoID, sessionCachedModel.getId(), null, null);
+			repo.getModelChanges(txnBuilder, address);
+		}
+		
+		commit(txnBuilder.build());
+	}
+	
+	public void commit(XTransaction xTransaction) {
+		
+		this.service.executeCommand(this.lastClickedElement.getRepository(), xTransaction,
 		        new AsyncCallback<Long>() {
 			        
 			        String resultString = "";
@@ -296,5 +332,10 @@ public class Controller {
 	
 	public void notifyTableController(XAddress eventLocation, Status status) {
 		this.tableController.notifyTable(eventLocation, status);
+	}
+	
+	public void addRepo(XId id) {
+		this.dataModel.addRepoID(id);
+		
 	}
 }

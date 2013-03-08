@@ -7,8 +7,6 @@
 
 	<g:VerticalPanel ui:field="mainPanel" styleName="fieldValueInfo cellHeight cellWidth">
 
-		<g:Label ui:field="revisionNumberLabel" styleName="revisionLabelStyle">set Number</g:Label>
-		
 	</g:VerticalPanel>
 
 </ui:UiBinder> 

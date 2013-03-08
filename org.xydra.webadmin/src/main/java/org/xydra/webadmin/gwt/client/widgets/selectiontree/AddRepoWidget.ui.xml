@@ -5,17 +5,23 @@
 	xsi:schemaLocation="urn:ui:com.google.gwt.uibinder http://google-web-toolkit.googlecode.com/svn-history/trunk/user/src/com/google/gwt/uibinder/resources/UiBinder.xsd"
 	xmlns:w="urn:import:org.xydra.webadmin.gwt.client.widgets" xmlns:ak="urn:import:org.xydra.webadmin.gwt.client.widgets.version2">
 
-	<ui:with field='images'
-		type="org.xydra.webadmin.gwt.client.resources.BundledRes.Images" />
+	<ui:style>
+		@external .branchWidgetStyle;
+		.branchWidgetStyle {
+		padding:
+		1px;
+		margin: 1px;
+		border-spacing: 1px;
+		/* border: 0px; */
+		}
 
-	<g:VerticalPanel ui:field="mainPanel"
-		horizontalAlignment="center" verticalAlignment="middle"
-		styleName="fieldValueInfo cellHeight cellWidth">
+	</ui:style>
 
-		<g:Button ui:field="addButton" styleName="imageButtonStyle" title="add this field to this object">
-		</g:Button>
-
+	<g:VerticalPanel ui:field="mainPanel" styleName="{style.branchWidgetStyle} ">
+		
+		<g:HorizontalPanel styleName="treeButtonPanelStyle repoBranchBorder">
+		<g:Button ui:field="addRepoButton">add Repo</g:Button>
+		</g:HorizontalPanel>
 	</g:VerticalPanel>
-
 </ui:UiBinder> 
 

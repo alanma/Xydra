@@ -32,7 +32,8 @@ public class XAddressListEditor extends XCollectionEditor<XAddress,XAddressListV
 	
 	@Override
 	public void add() {
-		add(new XAddressEditor(null, getListenerForEntry()));
+		
+		add(new XAddressEditor(this.dummyAddress, getListenerForEntry()));
 		changed();
 	}
 	

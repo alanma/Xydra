@@ -1,0 +1,40 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:c='urn:import:com.google.gwt.user.cellview.client'
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="urn:ui:com.google.gwt.uibinder http://google-web-toolkit.googlecode.com/svn-history/trunk/user/src/com/google/gwt/uibinder/resources/UiBinder.xsd"
+	xmlns:w="urn:import:org.xydra.webadmin.gwt.client.widgets" xmlns:ak="urn:import:org.xydra.webadmin.gwt.client.widgets.version2">
+
+	<ui:style>
+
+
+
+		.idLabelStyle
+		{
+		text-align: center;
+		font-size: 20px;
+		}
+
+	</ui:style>
+
+	<g:VerticalPanel ui:field="panel" verticalAlignment="middle"
+		horizontalAlignment="center">
+
+		<g:HTMLPanel ui:field="buttonPanel" styleName="editorStyle">
+
+			<g:Button ui:field="removeButton"> remove </g:Button>
+			<g:Button ui:field="addButton"> add field </g:Button>
+
+		</g:HTMLPanel>
+
+		<g:HorizontalPanel ui:field="idPanel" styleName="{style.idLabelStyle}"
+			verticalAlignment="middle" horizontalAlignment="center">
+
+			<g:Anchor ui:field="idLabel" styleName="idAnchorStyle">to be set</g:Anchor>
+		</g:HorizontalPanel>
+		<g:Label ui:field="revisionLabel" styleName="revisionLabelStyle"></g:Label>
+
+	</g:VerticalPanel>
+
+</ui:UiBinder> 
+

@@ -6,19 +6,15 @@ import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.Controller;
 import org.xydra.webadmin.gwt.client.XyAdmin;
 import org.xydra.webadmin.gwt.client.util.TableController.Status;
-import org.xydra.webadmin.gwt.client.widgets.dialogs.AddElementDialog;
-import org.xydra.webadmin.gwt.client.widgets.dialogs.RemoveElementDialog;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 
@@ -33,60 +29,34 @@ public class RowHeaderWidget extends Composite {
 	private static ViewUiBinder uiBinder = GWT.create(ViewUiBinder.class);
 	
 	@UiField
-	VerticalPanel panel;
-	
-	@UiField
-	HTML idLabel;
-	
-	@UiField
-	Label revisionLabel;
-	
-	@UiField
-	Button removeObjectButton;
-	
-	@UiField
-	Button addFieldButton;
-	
-	@UiField
 	Button expandButton;
 	
-	private XAddress address;
+	@UiField(provided = true)
+	EntityWidget entityWidget;
 	
 	private Status status;
 	
-	public RowHeaderWidget(XAddress address, long revisionNumber, Status status) {
+	private XAddress address;
+	
+	public RowHeaderWidget(XAddress address, Status status) {
 		super();
-		initWidget(uiBinder.createAndBindUi(this));
-		
 		this.address = address;
 		this.status = status;
+		this.entityWidget = new EntityWidget(address, new ClickHandler() {
+			
+			@Override
+			public void onClick(ClickEvent event) {
+				RowHeaderWidget.this.expandButton.click();
+			}
+		});
 		
-		this.idLabel.setHTML("<b>" + address.getObject().toString() + "</b>");
-		
-		this.revisionLabel.setText("rev. " + revisionNumber);
+		initWidget(uiBinder.createAndBindUi(this));
 		
 		if(this.status.equals(Status.Present)) {
 			this.expandButton.setText("o p e n");
 		} else if(this.status.equals(Status.Opened)) {
 			this.expandButton.setText("c l o s e");
 		}
-		
-	}
-	
-	@UiHandler("removeObjectButton")
-	void onClickRemove(ClickEvent event) {
-		
-		RemoveElementDialog removeDialog = new RemoveElementDialog(RowHeaderWidget.this.address);
-		removeDialog.show();
-		
-	}
-	
-	@UiHandler("addFieldButton")
-	void onClickAdd(ClickEvent event) {
-		AddElementDialog addDialog = new AddElementDialog(RowHeaderWidget.this.address,
-		        "enter Field ID");
-		addDialog.show();
-		addDialog.selectEverything();
 		
 	}
 	

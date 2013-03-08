@@ -43,17 +43,15 @@ public class XAddressEditor extends AtomicXValueEditor<XAddress> implements KeyP
 	
 	@Override
 	public XAddress getValue() {
-		XAddress xid;
-		try {
-			xid = XX.toAddress(this.editor.getText());
-		} catch(IllegalArgumentException iae) {
-			xid = XValueUtils.generateAddress(this.editor.getText());
-			if(xid == null) {
-				return null;
-			}
-			this.editor.setText(xid.toString());
+		String text = this.editor.getText();
+		if(text.equals("")) {
+			return null;
 		}
-		return xid;
+		XAddress address = XX.toAddress(text);
+		if(address == null) {
+			return null;
+		}
+		return address;
 	}
 	
 	@Override

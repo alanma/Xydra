@@ -32,7 +32,7 @@ public class XAddressSortedSetEditor extends XCollectionEditor<XAddress,XAddress
 	
 	@Override
 	public void add() {
-		add(new XAddressEditor(null, getListenerForEntry()));
+		add(new XAddressEditor(this.dummyAddress, getListenerForEntry()));
 		changed();
 	}
 	

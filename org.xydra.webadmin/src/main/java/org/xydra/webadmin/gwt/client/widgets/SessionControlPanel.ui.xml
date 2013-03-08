@@ -7,10 +7,7 @@
 
 	
 
-	<g:HTMLPanel styleName="sessionLabelDummy">
-
-		<g:Label ui:field="dummyLabel"> Hier werden sich die
-			Session-Bedienelemente befinden </g:Label>
+	<g:HTMLPanel styleName="sessionLabelDummy noBorder">
 
 		<w:AddressWidget ></w:AddressWidget>
 	</g:HTMLPanel>

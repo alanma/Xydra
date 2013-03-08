@@ -1,5 +1,8 @@
 body {
 	font-family: sans-serif;
+	background-color: rgb(238, 238, 238);
+background-image: url("/s/img/bg.jpg");
+background-repeat: repeat;
 }
 
 .rev {
@@ -96,9 +99,9 @@ li div,li div * {
 	white-space: normal;
 }
 
-th,td {
-	border: 1px solid #ccc;
-}
+/* th,td { */
+/* 	border: 1px solid #ccc; */
+/* } */
 
 .email {
 	font-weight: bolder;

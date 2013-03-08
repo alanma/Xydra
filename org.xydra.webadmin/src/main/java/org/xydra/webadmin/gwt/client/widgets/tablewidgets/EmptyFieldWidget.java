@@ -5,14 +5,20 @@ import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.Controller;
 import org.xydra.webadmin.gwt.client.XyAdmin;
+import org.xydra.webadmin.gwt.client.resources.BundledRes;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.MouseOutEvent;
+import com.google.gwt.event.dom.client.MouseOutHandler;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -46,6 +52,27 @@ public class EmptyFieldWidget extends Composite {
 		this.address = address;
 		initWidget(uiBinder.createAndBindUi(this));
 		
+		Image addImg = new Image(BundledRes.INSTANCE.images().add());
+		this.addButton.getElement().appendChild(addImg.getElement());
+		this.addButton.setVisible(false);
+		
+		this.addDomHandler(new MouseOverHandler() {
+			
+			@Override
+			public void onMouseOver(MouseOverEvent event) {
+				EmptyFieldWidget.this.addButton.setVisible(true);
+				
+			}
+		}, MouseOverEvent.getType());
+		
+		this.addDomHandler(new MouseOutHandler() {
+			
+			@Override
+			public void onMouseOut(MouseOutEvent event) {
+				EmptyFieldWidget.this.addButton.setVisible(false);
+				
+			}
+		}, MouseOutEvent.getType());
 	}
 	
 	@UiHandler("addButton")
@@ -53,4 +80,5 @@ public class EmptyFieldWidget extends Composite {
 		Controller.getInstance().getDataModel().addField(this.address, null);
 		
 	}
+	
 }

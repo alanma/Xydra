@@ -60,7 +60,11 @@ public class CommittingDialog extends DialogBox {
 			
 			@Override
 			public void onClick(ClickEvent event) {
-				Controller.getInstance().commit();
+				XAddress selectedModelAddress = Controller.getInstance().getSelectedModelAddress();
+				Controller.getInstance().commit(
+				        Controller.getInstance().getDataModel()
+				                .getRepo(selectedModelAddress.getRepository())
+				                .getModelChanges(null, selectedModelAddress).build());
 				Controller.getInstance().getTempStorage().register(CommittingDialog.this);
 				
 			}
@@ -83,6 +87,7 @@ public class CommittingDialog extends DialogBox {
 		XAddress selectedModel = controller.getSelectedModelAddress();
 		SessionCachedModel model = controller.getDataModel().getRepo(selectedModel.getRepository())
 		        .getModel(selectedModel.getModel());
+		
 		this.changesPanel.add(new HTML("Changes: " + changesToString(model).toString()));
 		
 	}
