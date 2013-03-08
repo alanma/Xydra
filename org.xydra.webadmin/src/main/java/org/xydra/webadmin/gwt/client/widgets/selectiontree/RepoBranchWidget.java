@@ -52,8 +52,6 @@ public class RepoBranchWidget extends Composite implements Observable {
 	Button fetchModelsButton;
 	@UiField
 	Button addButton;
-	@UiField
-	Button commitButton;
 	private boolean expanded = false;
 	
 	public RepoBranchWidget(XAddress address) {
@@ -110,12 +108,6 @@ public class RepoBranchWidget extends Composite implements Observable {
 		        "enter Element name");
 		addDialog.show();
 		addDialog.selectEverything();
-	}
-	
-	@UiHandler("commitButton")
-	void onClickCommit(ClickEvent event) {
-		
-		Controller.getInstance().commit(this.address.getRepository());
 	}
 	
 	private void setComponents() {

@@ -37,8 +37,6 @@ public interface BundledRes extends ClientBundle {
 		@Source("img/table_add.png")
 		ImageResource add();
 		
-		@Source("img/foo.png")
-		ImageResource foo();
 	}
 	
 	public static final BundledRes INSTANCE = GWT.create(BundledRes.class);
