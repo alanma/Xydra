@@ -293,10 +293,10 @@ public class ServletUtils {
      * @param cachingInMinutes if 0 no header is set. If -1, caching is
      *            explicitly disabled via headers (Cache-Control=no-cache;
      *            Expires=0). Positive numbers are the time to cache the
-     *            response in minutes from now on. @NeverNull
+     *            response in minutes from now on.
      * @param contentType @NeverNull
      */
-    public static void headers(@NeverNull HttpServletResponse res, @NeverNull int status,
+    public static void headers(@NeverNull HttpServletResponse res, int status,
             @NeverNull long cachingInMinutes, @CanBeNull String contentType) {
         res.setCharacterEncoding(Restless.CONTENT_TYPE_CHARSET_UTF8);
         res.setContentType(contentType);
@@ -309,6 +309,8 @@ public class ServletUtils {
             long millisSinceEpoch = System.currentTimeMillis() + (cachingInMinutes * 60 * 1000);
             // TODO test header set correctly
             res.setDateHeader("Expires", millisSinceEpoch);
+            // HTTP 1.1
+            res.setHeader("Cache-Control", "private");
         }
     }
     
@@ -348,7 +350,7 @@ public class ServletUtils {
         res.setHeader("Pragma", "no-cache");
         
         // HTTP 1.1
-        res.setHeader("Cache-Control", "no-cache");
+        res.setHeader("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate");
         /* "Fri, 01 Jan 1990 00:00:00 GMT" */
         res.setDateHeader("Expires", 0);
         res.setHeader("Expires", "Fri, 01 Jan 1990 00:00:00 GMT");
