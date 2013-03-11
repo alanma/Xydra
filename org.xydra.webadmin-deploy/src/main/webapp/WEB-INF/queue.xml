@@ -1,0 +1,47 @@
+<queue-entries>
+	<!--Change the total storage limit for all queues to 50MB -->
+	<total-storage-limit>50M</total-storage-limit>
+
+	<!-- http://code.google.com/appengine/docs/java/config/queue.html +++ Unit 
+		is s for seconds, m for minutes, h for hours, or d for days -->
+	<queue>
+		<name>default</name>
+		<!-- initial amount of tokens. Maximum bucket size is 100. -->
+		<bucket-size>100</bucket-size>
+		<!-- refill rate for tokens -->
+		<rate>10/m</rate>
+		<max-concurrent-requests>50</max-concurrent-requests>
+		<!-- tasks are retried at least seven times and for up to two days from 
+			the first execution attempt. After both limits are passed, it fails permanently. -->
+		<retry-parameters>
+			<task-retry-limit>7</task-retry-limit>
+			<task-age-limit>2d</task-age-limit>
+		</retry-parameters><!-- App Engine attempts to retry tasks, increasing 
+			the interval linearly between each retry until reaching the maximum backoff 
+			and retrying indefinitely at the maximum interval (so the intervals between 
+			requests are 10s, 20s, 30s, ..., 190s, 200s, 200s, ...). <retry-parameters> 
+			<min-backoff-seconds>10</min-backoff-seconds> <max-backoff-seconds>200</max-backoff-seconds> 
+			<max-doublings>0</max-doublings> </retry-parameters> the interval increases 
+			to twice the minimum backoff and retries indefinitely at the maximum interval 
+			(so the intervals between requests are 10s, 20s, 40s, 80s, 120s, 160s, 200s, 
+			200s, ...). <retry-parameters> <min-backoff-seconds>10</min-backoff-seconds> 
+			<max-backoff-seconds>200</max-backoff-seconds> <max-doublings>2</max-doublings> 
+			</retry-parameters> -->
+	</queue>
+
+	<queue>
+		<name>mail</name>
+		<bucket-size>20</bucket-size>
+		<rate>10/m</rate>
+		<max-concurrent-requests>50</max-concurrent-requests>
+		<retry-parameters>
+			<min-backoff-seconds>5</min-backoff-seconds>
+			<max-backoff-seconds>86400</max-backoff-seconds>
+			<max-doublings>0</max-doublings>
+		</retry-parameters>
+	</queue>
+
+</queue-entries>
+
+
+
