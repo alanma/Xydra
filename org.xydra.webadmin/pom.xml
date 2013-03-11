@@ -22,10 +22,10 @@
 		...\webadmin-0.1.5-SNAPSHOT\WEB-INF\appengine-web.xml Bad configuration: 
 		Could not locate ... Please see the logs -->
 	<name>Xydra Webadmin</name>
+	<packaging>jar</packaging>
 
 
 	<properties>
-
 		<!-- define a transient output directory for gwt -->
 		<!-- <gwt.output.directory>${project.build.directory}/war</gwt.output.directory> -->
 		<!-- the value of the rename-to attribute in your GWT module configuration -->
@@ -192,7 +192,6 @@
 				</configuration>
 			</plugin>
 
-
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>gwt-maven-plugin</artifactId>
@@ -257,5 +256,4 @@
 			</plugins>
 		</pluginManagement>
 	</build>
-	<packaging>war</packaging>
 </project>
