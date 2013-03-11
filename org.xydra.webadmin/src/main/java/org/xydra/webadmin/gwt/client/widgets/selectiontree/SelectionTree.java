@@ -18,6 +18,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -57,7 +58,10 @@ public class SelectionTree extends Composite implements Observable {
 			RepoDataModel repo = repoIDIterator.next();
 			addRepoBranch(repo, this.mainPanel.getWidgetCount());
 		}
-		this.mainPanel.add(new AddRepoWidget());
+		AddRepoWidget addRepoWidget = new AddRepoWidget();
+		this.mainPanel.add(addRepoWidget);
+		this.mainPanel.setCellHorizontalAlignment(addRepoWidget,
+		        HasHorizontalAlignment.ALIGN_CENTER);
 		
 	}
 	

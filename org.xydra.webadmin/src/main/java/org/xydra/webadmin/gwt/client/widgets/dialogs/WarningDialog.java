@@ -15,12 +15,12 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 
-public class NYIDialog extends DialogBox {
+public class WarningDialog extends DialogBox {
 	
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(XyAdmin.class);
 	
-	interface ViewUiBinder extends UiBinder<Widget,NYIDialog> {
+	interface ViewUiBinder extends UiBinder<Widget,WarningDialog> {
 	}
 	
 	private static ViewUiBinder uiBinder = GWT.create(ViewUiBinder.class);
@@ -35,7 +35,7 @@ public class NYIDialog extends DialogBox {
 	@UiField(provided = true)
 	ButtonPanel buttonPanel;
 	
-	public NYIDialog() {
+	public WarningDialog(String message) {
 		
 		super();
 		
@@ -43,7 +43,7 @@ public class NYIDialog extends DialogBox {
 			
 			@Override
 			public void onClick(ClickEvent event) {
-				NYIDialog.this.removeFromParent();
+				WarningDialog.this.removeFromParent();
 			}
 		};
 		
@@ -52,7 +52,8 @@ public class NYIDialog extends DialogBox {
 		setWidget(uiBinder.createAndBindUi(this));
 		
 		this.setStyleName("dialogStyle");
-		this.setText("add Element");
+		this.setText("Warning");
+		this.infoText.setText(message);
 		this.getElement().setId("removeDialog");
 		
 		this.center();

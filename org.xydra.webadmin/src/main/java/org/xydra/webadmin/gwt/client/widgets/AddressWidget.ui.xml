@@ -22,9 +22,9 @@
 	<g:HorizontalPanel ui:field="mainPanel">
 
 		<e:XAddressEditor ui:field="addressEditor"  styleName="{style.addressWidgetStyle}"></e:XAddressEditor>
-		<g:Button ui:field="loadLocationButton">load Object</g:Button>
-		<g:Button ui:field="addElementButton">add Object</g:Button>
-		<g:Button ui:field="deleteElementButton">delete Element</g:Button>
+		<g:Button ui:field="loadLocationButton">load Entity</g:Button>
+		<g:Button ui:field="addElementButton">add Entity</g:Button>
+		<g:Button ui:field="deleteElementButton">delete Entity</g:Button>
 		<g:Button ui:field="clearButton">clear Field</g:Button>
 
 	</g:HorizontalPanel>

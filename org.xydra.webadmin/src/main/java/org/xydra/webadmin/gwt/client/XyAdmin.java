@@ -37,7 +37,5 @@ public class XyAdmin extends Composite {
 		// Controller.getInstance().addRepo(XX.toId("gae-repo"));
 		
 		initWidget(uiBinder.createAndBindUi(this));
-		
 	}
-	
 }

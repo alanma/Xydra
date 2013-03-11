@@ -45,7 +45,7 @@ public class AddRepoWidget extends Composite {
 	void onClickAdd(ClickEvent event) {
 		
 		AddElementDialog addDialog = new AddElementDialog(XX.toAddress("/noRepo"),
-		        "enter Element name");
+		        "enter Repository ID");
 		addDialog.show();
 		addDialog.selectEverything();
 	}

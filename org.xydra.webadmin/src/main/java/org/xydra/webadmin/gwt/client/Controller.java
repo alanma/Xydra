@@ -18,6 +18,7 @@ import org.xydra.webadmin.gwt.client.util.TableController;
 import org.xydra.webadmin.gwt.client.util.TableController.Status;
 import org.xydra.webadmin.gwt.client.util.TempStorage;
 import org.xydra.webadmin.gwt.client.widgets.WarningWidget;
+import org.xydra.webadmin.gwt.client.widgets.dialogs.WarningDialog;
 import org.xydra.webadmin.gwt.client.widgets.editorpanel.EditorPanel;
 import org.xydra.webadmin.gwt.shared.XyAdminServiceAsync;
 
@@ -90,14 +91,21 @@ public class Controller {
 				public void onSuccess(Set<XId> result) {
 					log.info("Server said: " + result);
 					
-					for(XId modelID : result) {
-						Controller.this.dataModel.getRepo(repoId).addModelID(modelID);
+					if(result.isEmpty()) {
+						log.error("no models found!");
+						WarningDialog dialog = new WarningDialog("no models found!");
+						dialog.show();
+					} else {
+						for(XId modelID : result) {
+							Controller.this.dataModel.getRepo(repoId).addModelID(modelID);
+						}
+						Controller.this.notifySelectionTree(address);
 					}
-					Controller.this.notifySelectionTree(address);
 				}
 				
 				@Override
 				public void onFailure(Throwable caught) {
+					
 					log.warn("Error", caught);
 				}
 			});
@@ -295,5 +303,14 @@ public class Controller {
 	public void addRepo(XId id) {
 		this.dataModel.addRepoID(id);
 		
+	}
+	
+	public static SessionCachedModel getCurrentlySelectedModel() {
+		XId currentRepo = instance.getSelectedModelAddress().getRepository();
+		XId currenttModel = instance.getSelectedModelAddress().getModel();
+		
+		SessionCachedModel model = Controller.getInstance().getDataModel().getRepo(currentRepo)
+		        .getModel(currenttModel);
+		return model;
 	}
 }

@@ -1,11 +1,15 @@
 package org.xydra.webadmin.gwt.client.widgets;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.gwt.editor.value.XAddressEditor;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.webadmin.gwt.client.Controller;
 import org.xydra.webadmin.gwt.client.XyAdmin;
-import org.xydra.webadmin.gwt.client.widgets.dialogs.NYIDialog;
+import org.xydra.webadmin.gwt.client.datamodels.DataModel;
+import org.xydra.webadmin.gwt.client.widgets.dialogs.WarningDialog;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -59,8 +63,28 @@ public class AddressWidget extends Composite {
 	
 	@UiHandler("loadLocationButton")
 	void onClickLoad(ClickEvent e) {
-		// Controller.getInstance().getDataModel().loadEntity(this.addressEditor.getValue());
-		showNYIDialog();
+		// showNYIDialog();
+		XAddress address = null;
+		try {
+			address = this.addressEditor.getValue();
+			
+		} catch(Exception ex) {
+			showDialog(ex.getLocalizedMessage());
+		}
+		DataModel dataModel = Controller.getInstance().getDataModel();
+		
+		XId repoID = address.getRepository();
+		XAddress repoAddress = XX.resolveRepository(repoID);
+		loadRepository(repoAddress);
+		
+		if(address.getModel() != null) {
+			
+		}
+		
+	}
+	
+	private void loadRepository(XAddress repoAddress) {
+		Controller.getInstance().getIDsFromServer(repoAddress);
 	}
 	
 	@UiHandler("clearButton")
@@ -70,16 +94,16 @@ public class AddressWidget extends Composite {
 	
 	@UiHandler("addElementButton")
 	void onClickAdd(ClickEvent e) {
-		showNYIDialog();
+		showDialog("not yet Implemented");
 	}
 	
 	@UiHandler("deleteElementButton")
 	void onClickDelete(ClickEvent e) {
-		showNYIDialog();
+		showDialog("not yet Implemented");
 	}
 	
-	void showNYIDialog() {
-		NYIDialog dialog = new NYIDialog();
+	void showDialog(String message) {
+		WarningDialog dialog = new WarningDialog(message);
 		dialog.show();
 	}
 }

@@ -21,6 +21,9 @@ import org.xydra.webadmin.gwt.client.widgets.tablewidgets.EmptyFieldWidget;
 import org.xydra.webadmin.gwt.client.widgets.tablewidgets.FieldWidget;
 import org.xydra.webadmin.gwt.client.widgets.tablewidgets.RowHeaderWidget;
 
+import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.event.logical.shared.ResizeHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTMLTable.CellFormatter;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
@@ -42,7 +45,6 @@ public class TableController {
 		
 	}
 	
-	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(TableController.class);
 	
 	List<XId> columnIDs = new ArrayList<XId>();
@@ -94,9 +96,9 @@ public class TableController {
 		
 		this.scrollPanel = new ScrollPanel();
 		this.scrollPanel.add(this.table);
+		
 		this.scrollPanel.setStyleName("scrollTableStyle");
-		this.scrollPanel.getElement().setAttribute("style",
-		        "overflow-y:overlay; position:relative; zoom:1;");
+		setScrollTableHeight();
 		this.tablePanel = new VerticalPanel();
 		this.tablePanel.add(this.tableHeader);
 		this.tablePanel.add(this.scrollPanel);
@@ -123,6 +125,15 @@ public class TableController {
 		for(int i = 0; i < this.amountColumns; i++) {
 			cellFormatter.setHorizontalAlignment(0, i, HasHorizontalAlignment.ALIGN_CENTER);
 		}
+		
+		Window.addResizeHandler(new ResizeHandler() {
+			
+			@Override
+			public void onResize(ResizeEvent event) {
+				setScrollTableHeight();
+			}
+			
+		});
 		
 		return this.tablePanel;
 	}
@@ -189,6 +200,7 @@ public class TableController {
 		
 		CellFormatter formatter = this.table.getCellFormatter();
 		int position = this.rowList.indexOf(id);
+		String styleName = this.backgroundStyles[position % 2];
 		
 		XReadableObject currentObject = model.getObject(id);
 		
@@ -219,13 +231,23 @@ public class TableController {
 					} else {
 						widget = new EmptyFieldWidget(currentFieldAddress);
 					}
+					
+					this.table.getRowFormatter().setStyleName(position, styleName);
+				} else {
+					this.table.getRowFormatter().removeStyleName(position, styleName);
 				}
 			}
 			
 			this.table.setWidget(position, j, widget);
-			String styleName = this.backgroundStyles[position % 2];
-			this.table.getRowFormatter().setStyleName(position, styleName);
 		}
 		
+		this.table.getCellFormatter().setStyleName(position, 0, styleName);
+		
+	}
+	
+	private void setScrollTableHeight() {
+		String scrollTableHeight = "" + (Window.getClientHeight() - 93) + "px";
+		TableController.this.scrollPanel.getElement().setAttribute("style",
+		        "overflow-y:overlay; position:relative; zoom:1; height: " + scrollTableHeight);
 	}
 }

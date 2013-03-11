@@ -273,6 +273,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 	public void removeEditor() {
 		
 		unlockOnMouseOver();
+		removeErrorLabel();
 		
 		if(this.save == null) {
 			return;
@@ -338,7 +339,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		
 		this.add = new Button();
 		this.add.getElement().setAttribute("style", "float: left");
-		this.add.setTitle("add another element");
+		this.add.setTitle("add Collection element");
 		this.controlPanel.add(this.add);
 		this.add.addClickHandler(new ClickHandler() {
 			@Override

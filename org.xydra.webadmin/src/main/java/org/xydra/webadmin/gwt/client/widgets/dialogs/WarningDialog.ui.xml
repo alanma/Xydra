@@ -9,7 +9,7 @@
 	
 		<g:VerticalPanel ui:field="mainPanel">
 
-			<g:Label ui:field="infoText">not yet implemented! </g:Label>
+			<g:Label ui:field="infoText"></g:Label>
 			<d:ButtonPanel ui:field="buttonPanel"></d:ButtonPanel>
 		</g:VerticalPanel>
 	
