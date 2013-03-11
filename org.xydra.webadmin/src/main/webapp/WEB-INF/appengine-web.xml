@@ -7,11 +7,15 @@
 	<!-- Any file not excluded here (besides WEB-INF/** and **/*.jsp) are copied 
 		to Googles CDN. -->
 
-	<application>xydra-live</application>
-	<version>xyadmin</version>
-	<!-- Can be accessed as http://<the number here>.latest.calpano-com.appspot.com/ 
-		accessed without a certificate warning at https://checklist-dot-latest-dot-calpano-com.appspot.com/. -->
-	<!-- 1 is usually the LIVE version -->
+		<application>132915f</application>
+ <!-- 1 is usually the LIVE version -->
+ <version>webadmin</version>
+
+<!-- 	<application>xydra-live</application> -->
+<!-- 	<version>xyadmin</version> -->
+<!-- 	<!-- Can be accessed as http://<the number here>.latest.calpano-com.appspot.com/  -->
+<!-- 		accessed without a certificate warning at https://checklist-dot-latest-dot-calpano-com.appspot.com/. --> -->
+<!-- 	<!-- 1 is usually the LIVE version --> -->
 
 	<!-- Configure java.util.logging -->
 	<system-properties>

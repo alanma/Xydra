@@ -77,10 +77,11 @@ public class ModelControlPanel extends Composite {
 		
 	}
 	
+	@SuppressWarnings("unused")
 	@UiHandler("discardModelChangesButton")
 	public void onClickDiscard(ClickEvent event) {
 		
-		ConfirmationDialog dialog = new ConfirmationDialog("discard all Changes");
+		new ConfirmationDialog("discard all Changes");
 		
 	}
 	

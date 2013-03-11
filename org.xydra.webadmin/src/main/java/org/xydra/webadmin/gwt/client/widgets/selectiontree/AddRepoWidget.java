@@ -18,6 +18,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class AddRepoWidget extends Composite {
 	
+	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(AddRepoWidget.class);
 	
 	interface ViewUiBinder extends UiBinder<Widget,AddRepoWidget> {

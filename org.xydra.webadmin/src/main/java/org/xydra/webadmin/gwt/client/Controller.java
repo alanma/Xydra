@@ -277,6 +277,7 @@ public class Controller {
 					        objectIDs.add(xid);
 				        }
 				        
+				        @SuppressWarnings("unused")
 				        SessionCachedModel currentModel = Controller.this.dataModel.getRepo(
 				                Controller.this.lastClickedElement.getRepository()).getModel(
 				                result.getId());

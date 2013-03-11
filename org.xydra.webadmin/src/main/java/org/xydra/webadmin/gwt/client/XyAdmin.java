@@ -34,7 +34,7 @@ public class XyAdmin extends Composite {
 		
 		Controller.getInstance().addService(service);
 		Controller.getInstance().addRepo(XX.toId("repo1"));
-		// Controller.getInstance().addRepo(XX.toId("gae-repo"));
+		Controller.getInstance().addRepo(XX.toId("gae-repo"));
 		
 		initWidget(uiBinder.createAndBindUi(this));
 	}

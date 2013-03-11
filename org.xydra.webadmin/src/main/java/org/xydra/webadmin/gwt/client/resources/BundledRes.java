@@ -6,8 +6,6 @@ import com.google.gwt.resources.client.ImageResource;
 
 
 /**
- * All resources used within the application in addition to
- * {@link CommonResourceBundle}
  * 
  * @author alpha
  * 
@@ -15,8 +13,6 @@ import com.google.gwt.resources.client.ImageResource;
 public interface BundledRes extends ClientBundle {
 	/**
 	 * The message file used for i18n
-	 * 
-	 * @return the message file
 	 * 
 	 */
 	

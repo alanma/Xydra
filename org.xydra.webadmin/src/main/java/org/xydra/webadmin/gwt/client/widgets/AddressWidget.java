@@ -8,7 +8,6 @@ import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.Controller;
 import org.xydra.webadmin.gwt.client.XyAdmin;
-import org.xydra.webadmin.gwt.client.datamodels.DataModel;
 import org.xydra.webadmin.gwt.client.widgets.dialogs.WarningDialog;
 
 import com.google.gwt.core.client.GWT;
@@ -71,8 +70,7 @@ public class AddressWidget extends Composite {
 		} catch(Exception ex) {
 			showDialog(ex.getLocalizedMessage());
 		}
-		DataModel dataModel = Controller.getInstance().getDataModel();
-		
+		@SuppressWarnings("null")
 		XId repoID = address.getRepository();
 		XAddress repoAddress = XX.resolveRepository(repoID);
 		loadRepository(repoAddress);
@@ -83,7 +81,7 @@ public class AddressWidget extends Composite {
 		
 	}
 	
-	private void loadRepository(XAddress repoAddress) {
+	private static void loadRepository(XAddress repoAddress) {
 		Controller.getInstance().getIDsFromServer(repoAddress);
 	}
 	
