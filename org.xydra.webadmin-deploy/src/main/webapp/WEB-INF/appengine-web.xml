@@ -45,6 +45,11 @@
 		<include path="/gwt/**.gwt.rpc" expiration="60s"/>
 		<include path="/gwt/**.cache.*" expiration="365d" />
 		<include path="/gwt/**.html" expiration="1d" />
+		<include path="/xyadmin/**.*" expiration="1h" />
+		<include path="/xyadmin/**.nocache.*" expiration="60s" />
+		<include path="/xyadmin/**.xyadmin.rpc" expiration="60s"/>
+		<include path="/xyadmin/**.cache.*" expiration="365d" />
+		<include path="/xyadmin/**.html" expiration="1d" />
 		<!-- <include path="**" expiration="30d" /> -->
 		<include path="xyadmin.html" />
 	</static-files>
