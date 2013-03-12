@@ -4,10 +4,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.XType;
+import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XCommandUtils;
+import org.xydra.base.change.XRepositoryCommand;
 import org.xydra.base.change.XTransaction;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.core.change.SessionCachedModel;
@@ -20,6 +23,7 @@ import org.xydra.webadmin.gwt.client.util.TempStorage;
 import org.xydra.webadmin.gwt.client.widgets.WarningWidget;
 import org.xydra.webadmin.gwt.client.widgets.dialogs.WarningDialog;
 import org.xydra.webadmin.gwt.client.widgets.editorpanel.EditorPanel;
+import org.xydra.webadmin.gwt.client.widgets.selectiontree.SelectionTree;
 import org.xydra.webadmin.gwt.shared.XyAdminServiceAsync;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -30,7 +34,7 @@ public class Controller {
 	private static Controller instance;
 	private XyAdminServiceAsync service;
 	private DataModel dataModel;
-	private Observable selectionTree;
+	private SelectionTree selectionTree;
 	private EditorPanel editorPanel;
 	private TempStorage tempStorage;
 	private XAddress lastClickedElement;
@@ -136,9 +140,9 @@ public class Controller {
 	// this.selectionTree.notifyMe(address, iterator);
 	// }
 	
-	public void registerSelectionTree(Observable widget) {
+	public void registerSelectionTree(SelectionTree selectionTree) {
 		
-		this.selectionTree = widget;
+		this.selectionTree = selectionTree;
 	}
 	
 	public void registerEditorPanel(EditorPanel widget) {
@@ -185,10 +189,16 @@ public class Controller {
 			        
 			        @Override
 			        public void onSuccess(XReadableModel result) {
-				        Controller.this.dataModel
-				                .getRepo(Controller.this.lastClickedElement.getRepository())
-				                .getModel(result.getId()).indexModel(result);
-				        updateEditorPanel();
+				        if(result.isEmpty()) {
+					        log.error("no objects found!");
+					        WarningDialog dialog = new WarningDialog("no models found!");
+					        dialog.show();
+				        } else {
+					        Controller.this.dataModel
+					                .getRepo(Controller.this.lastClickedElement.getRepository())
+					                .getModel(result.getId()).indexModel(result);
+					        updateEditorPanel();
+				        }
 			        }
 			        
 			        @Override
@@ -211,9 +221,17 @@ public class Controller {
 		Controller.this.notifyEditorPanel(model);
 	}
 	
-	public void commit(XTransaction xTransaction) {
+	public void commit(XCommand addModelCommand, final XTransaction modelTransactions) {
 		
-		this.service.executeCommand(this.lastClickedElement.getRepository(), xTransaction,
+		if(addModelCommand != null) {
+			commitAddedModel(addModelCommand, modelTransactions);
+		} else {
+			commitModelTransactions(modelTransactions);
+		}
+	}
+	
+	private void commitAddedModel(XCommand addModelCommand, final XTransaction modelTransactions) {
+		this.service.executeCommand(this.lastClickedElement.getRepository(), addModelCommand,
 		        new AsyncCallback<Long>() {
 			        
 			        String resultString = "";
@@ -221,7 +239,7 @@ public class Controller {
 			        @Override
 			        public void onSuccess(Long result) {
 				        if(XCommandUtils.success(result)) {
-					        this.resultString = "successfully committed! New revision number: "
+					        this.resultString = "successfully committed model! New revision number: "
 					                + result;
 				        } else if(XCommandUtils.noChange(result)) {
 					        this.resultString = "no Changes!";
@@ -231,13 +249,8 @@ public class Controller {
 					        this.resultString = "i have no idea...";
 				        }
 				        
-				        SessionCachedModel model2 = Controller.this.dataModel.getRepo(
-				                Controller.this.lastClickedElement.getRepository()).getModel(
-				                Controller.this.lastClickedElement.getModel());
-				        model2.markAsCommitted();
-				        Controller.this.loadCurrentModelsObjects();
 				        Controller.this.tempStorage.notifyDialog(this.resultString);
-				        
+				        commitModelTransactions(modelTransactions);
 			        }
 			        
 			        @Override
@@ -247,7 +260,50 @@ public class Controller {
 				        
 			        }
 		        });
+	}
+	
+	private void commitModelTransactions(XTransaction modelTransactions) {
 		
+		if(modelTransactions != null) {
+			this.service.executeCommand(this.lastClickedElement.getRepository(), modelTransactions,
+			        new AsyncCallback<Long>() {
+				        
+				        String resultString = "";
+				        
+				        @Override
+				        public void onSuccess(Long result) {
+					        if(XCommandUtils.success(result)) {
+						        this.resultString = "successfully committed! New revision number: "
+						                + result;
+					        } else if(XCommandUtils.noChange(result)) {
+						        this.resultString = "no Changes!";
+					        } else if(XCommandUtils.failed(result)) {
+						        this.resultString = "commit failed!";
+					        } else {
+						        this.resultString = "i have no idea...";
+					        }
+					        
+					        SessionCachedModel model2 = Controller.this.dataModel.getRepo(
+					                Controller.this.lastClickedElement.getRepository()).getModel(
+					                Controller.this.lastClickedElement.getModel());
+					        model2.markAsCommitted();
+					        Controller.this.loadCurrentModelsObjects();
+					        Controller.this.tempStorage.notifyDialog(this.resultString);
+					        Controller.this.tempStorage.allowDialogClose();
+					        
+				        }
+				        
+				        @Override
+				        public void onFailure(Throwable caught) {
+					        Controller.this.tempStorage.notifyDialog(this.resultString
+					                + "error! \n" + caught.getMessage());
+					        
+				        }
+			        });
+			
+		} else {
+			Controller.this.tempStorage.allowDialogClose();
+		}
 	}
 	
 	public void notifySelectionTree(XAddress address) {
@@ -298,7 +354,13 @@ public class Controller {
 	}
 	
 	public void notifyTableController(XAddress eventLocation, Status status) {
-		this.tableController.notifyTable(eventLocation, status);
+		if(this.tableController == null) {
+			SessionCachedModel model = this.dataModel.getRepo(eventLocation.getRepository())
+			        .getModel(eventLocation.getModel());
+			notifyEditorPanel(model);
+		} else {
+			this.tableController.notifyTable(eventLocation, status);
+		}
 	}
 	
 	public void addRepo(XId id) {
@@ -313,5 +375,37 @@ public class Controller {
 		SessionCachedModel model = Controller.getInstance().getDataModel().getRepo(currentRepo)
 		        .getModel(currenttModel);
 		return model;
+	}
+	
+	public void removeModel(XAddress address) {
+		XRepositoryCommand command = X.getCommandFactory().createForcedRemoveModelCommand(address);
+		this.service.executeCommand(address.getRepository(), command, new AsyncCallback<Long>() {
+			
+			String resultString = "";
+			
+			@Override
+			public void onSuccess(Long result) {
+				if(XCommandUtils.success(result)) {
+					this.resultString = "successfully committed model! New revision number: "
+					        + result;
+				} else if(XCommandUtils.noChange(result)) {
+					this.resultString = "no Changes!";
+				} else if(XCommandUtils.failed(result)) {
+					this.resultString = "commit failed!";
+				} else {
+					this.resultString = "i have no idea...";
+				}
+				Controller.this.tempStorage.notifyDialog(this.resultString);
+				Controller.this.tempStorage.allowDialogClose();
+				
+			}
+			
+			@Override
+			public void onFailure(Throwable caught) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		
 	}
 }

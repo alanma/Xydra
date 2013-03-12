@@ -42,6 +42,8 @@ public class ModelBranchWidget extends Composite {
 		
 		initWidget(uiBinder.createAndBindUi(this));
 		
+		this.entityWidget.setDeleteModelDialog();
+		
 	}
 	
 }

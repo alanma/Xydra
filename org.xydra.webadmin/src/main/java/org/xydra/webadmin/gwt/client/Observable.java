@@ -1,10 +1,9 @@
 package org.xydra.webadmin.gwt.client;
 
-import org.xydra.base.XAddress;
-
-
 public interface Observable {
 	
-	public void notifyMe(XAddress address);
+	public void notifyMe(String message);
+	
+	public void addCloseOKButton();
 	
 }

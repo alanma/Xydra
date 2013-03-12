@@ -9,7 +9,6 @@ import org.xydra.base.XX;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.Controller;
-import org.xydra.webadmin.gwt.client.Observable;
 import org.xydra.webadmin.gwt.client.widgets.dialogs.AddElementDialog;
 
 import com.google.gwt.core.client.GWT;
@@ -26,7 +25,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 
-public class RepoBranchWidget extends Composite implements Observable {
+public class RepoBranchWidget extends Composite {
 	
 	private static final Logger log = LoggerFactory.getLogger(RepoBranchWidget.class);
 	
@@ -170,7 +169,6 @@ public class RepoBranchWidget extends Composite implements Observable {
 		this.addBranch(XX.toId(id));
 	}
 	
-	@Override
 	public void notifyMe(XAddress address) {
 		log.info("i am " + this.address.toString() + " and I contain the other address");
 		this.contract();

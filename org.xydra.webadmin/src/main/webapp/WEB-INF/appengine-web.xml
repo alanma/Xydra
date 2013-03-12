@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appengine-web-app xmlns="http://appengine.google.com/ns/1.0">
+
+	<sessions-enabled>false</sessions-enabled>
+
+	<!-- Documented at http://code.google.com/appengine/docs/java/config/appconfig.html -->
+	<!-- Any file not excluded here (besides WEB-INF/** and **/*.jsp) are copied 
+		to Googles CDN. -->
+
+	<application>132915f</application>
+	<version>xyadmin</version>
+	<!-- Can be accessed as http://<the number here>.latest.calpano-com.appspot.com/ 
+		accessed without a certificate warning at https://checklist-dot-latest-dot-calpano-com.appspot.com/. -->
+	<!-- 1 is usually the LIVE version -->
+
+	<!-- Configure java.util.logging -->
+	<system-properties>
+		<property name="java.util.logging.config.file" value="WEB-INF/java-util-logging.properties" />
+	</system-properties>
+
+	<!-- Enable receiving email -->
+	<inbound-services>
+		<service>mail</service>
+		<service>warmup</service>
+	</inbound-services>
+
+	<!-- Set caching to 1 day while things change frequently. Sample: '1d 1h' -->
+	<static-files>
+		<include path="/index.html" expiration="7d" />
+		<include path="/apple-touch-icon.png" expiration="7d" />
+		<include path="/apple-touch-icon_72.png" expiration="7d" />
+		<include path="/apple-touch-icon_114.png" expiration="7d" />
+		<include path="/favicon.ico" expiration="7d" />
+		<include path="/robots.txt" expiration="7d" />
+		<include path="/s/**.*" expiration="1d" />
+		<include path="/s/**.gif" expiration="1h" />
+		<include path="/s/**.jpg" expiration="1h" />
+		<include path="/s/**.png" expiration="1h" />
+		<include path="/**.ico" expiration="1h" />
+		<include path="/s/**.js" expiration="1d" />
+		<include path="/**.css" expiration="1h" />
+		<!-- GWT configuration -->
+		<include path="/gwt/**.*" expiration="1h" />
+		<include path="/gwt/**.nocache.*" expiration="60s" />
+		<include path="/gwt/**.gwt.rpc" expiration="60s"/>
+		<include path="/gwt/**.cache.*" expiration="365d" />
+		<include path="/gwt/**.html" expiration="1d" />
+		<include path="/xyadmin/**.*" expiration="1h" />
+		<include path="/xyadmin/**.nocache.*" expiration="60s" />
+		<include path="/xyadmin/**.xyadmin.rpc" expiration="60s"/>
+		<include path="/xyadmin/**.cache.*" expiration="365d" />
+		<include path="/xyadmin/**.html" expiration="1d" />
+		<!-- <include path="**" expiration="30d" /> -->
+		<include path="xyadmin.html" />
+	</static-files>
+
+	<resource-files>
+		<include path="**.utf8" />
+		<include path="**.gwt.rpc" />
+	</resource-files>
+
+	<precompilation-enabled>true</precompilation-enabled>
+
+	<threadsafe>true</threadsafe>
+
+</appengine-web-app>

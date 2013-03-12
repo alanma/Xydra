@@ -62,7 +62,7 @@ public class RemoveElementDialog extends DialogBox {
 		        + "?");
 		
 		this.setStyleName("dialogStyle");
-		this.setText("add Element");
+		this.setText("remove Entity");
 		this.getElement().setId("removeDialog");
 		
 		this.center();

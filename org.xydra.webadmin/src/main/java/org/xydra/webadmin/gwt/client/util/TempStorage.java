@@ -7,8 +7,8 @@ import org.xydra.base.XX;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.Controller;
+import org.xydra.webadmin.gwt.client.Observable;
 import org.xydra.webadmin.gwt.client.datamodels.DataModel;
-import org.xydra.webadmin.gwt.client.widgets.dialogs.CommittingDialog;
 import org.xydra.webadmin.gwt.client.widgets.selectiontree.RepoBranchWidget;
 
 
@@ -18,7 +18,7 @@ public class TempStorage {
 	
 	public RepoBranchWidget branch;
 	
-	private CommittingDialog committingDialog;
+	private Observable dialog;
 	
 	public void register(RepoBranchWidget branch) {
 		this.branch = branch;
@@ -60,12 +60,26 @@ public class TempStorage {
 		
 	}
 	
-	public void register(CommittingDialog committingDialog) {
-		this.committingDialog = committingDialog;
+	public void register(Observable committingDialog) {
+		this.dialog = committingDialog;
 		
 	}
 	
 	public void notifyDialog(String message) {
-		this.committingDialog.notifyMe(message);
+		this.dialog.notifyMe(message);
+	}
+	
+	public void allowDialogClose() {
+		this.dialog.addCloseOKButton();
+		
+	}
+	
+	public void remove(XAddress address, Boolean removeFromRepo) {
+		remove(address);
+		if(removeFromRepo) {
+			log.info("selected Delete model");
+			Controller.getInstance().removeModel(address);
+		}
+		
 	}
 }

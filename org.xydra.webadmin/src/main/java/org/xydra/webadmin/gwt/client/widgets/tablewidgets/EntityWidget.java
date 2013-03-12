@@ -12,6 +12,7 @@ import org.xydra.webadmin.gwt.client.XyAdmin;
 import org.xydra.webadmin.gwt.client.resources.BundledRes;
 import org.xydra.webadmin.gwt.client.widgets.dialogs.AddElementDialog;
 import org.xydra.webadmin.gwt.client.widgets.dialogs.RemoveElementDialog;
+import org.xydra.webadmin.gwt.client.widgets.dialogs.RemoveModelDialog;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -20,6 +21,7 @@ import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -77,6 +79,8 @@ public class EntityWidget extends Composite {
 	private String addObjectButtonTitle = "add new object";
 	private String removeObjectButtonTitle = "remove this object";
 	private String removeModelButtonTitle = "remove this model";
+	
+	private HandlerRegistration removeClickHandlerRegistration;
 	
 	public EntityWidget(XAddress address, ClickHandler anchorClickHandler) {
 		super();
@@ -153,13 +157,16 @@ public class EntityWidget extends Composite {
 		this.addButton.setVisible(false);
 		this.removeButton.setVisible(false);
 		
-	}
-	
-	@UiHandler("removeButton")
-	void onClickRemove(ClickEvent event) {
-		
-		RemoveElementDialog removeDialog = new RemoveElementDialog(EntityWidget.this.address);
-		removeDialog.show();
+		this.removeClickHandlerRegistration = this.removeButton.addClickHandler(new ClickHandler() {
+			
+			@Override
+			public void onClick(ClickEvent event) {
+				RemoveElementDialog removeDialog = new RemoveElementDialog(
+				        EntityWidget.this.address);
+				removeDialog.show();
+				
+			}
+		});
 		
 	}
 	
@@ -169,5 +176,19 @@ public class EntityWidget extends Composite {
 		addDialog.show();
 		addDialog.selectEverything();
 		
+	}
+	
+	public void setDeleteModelDialog() {
+		this.removeClickHandlerRegistration.removeHandler();
+		this.removeButton.addClickHandler(new ClickHandler() {
+			
+			@SuppressWarnings("unused")
+			@Override
+			public void onClick(ClickEvent event) {
+				
+				new RemoveModelDialog(EntityWidget.this.address);
+				
+			}
+		});
 	}
 }

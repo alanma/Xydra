@@ -96,4 +96,8 @@ public class RepoDataModel {
 		
 	}
 	
+	public boolean isAddedModel(XId model) {
+		return this.addedModels.contains(model);
+	}
+	
 }

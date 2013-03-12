@@ -4,8 +4,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
+import org.xydra.base.change.XRepositoryCommand;
+import org.xydra.base.change.XTransaction;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.core.change.SessionCachedModel;
@@ -17,6 +20,7 @@ import org.xydra.core.util.DumpUtils.XidComparator;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.Controller;
+import org.xydra.webadmin.gwt.client.Observable;
 import org.xydra.webadmin.gwt.client.XyAdmin;
 
 import com.google.gwt.core.client.GWT;
@@ -32,7 +36,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 
-public class CommittingDialog extends DialogBox {
+public class CommittingDialog extends DialogBox implements Observable {
 	
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(XyAdmin.class);
@@ -61,13 +65,29 @@ public class CommittingDialog extends DialogBox {
 			@Override
 			public void onClick(ClickEvent event) {
 				XAddress selectedModelAddress = Controller.getInstance().getSelectedModelAddress();
-				Controller.getInstance().commit(
-				        Controller.getInstance().getDataModel()
-				                .getRepo(selectedModelAddress.getRepository())
-				                .getModelChanges(null, selectedModelAddress).build());
 				Controller.getInstance().getTempStorage().register(CommittingDialog.this);
+				XRepositoryCommand addModelCommand = null;
+				if(Controller.getInstance().getDataModel()
+				        .getRepo(selectedModelAddress.getRepository())
+				        .isAddedModel(selectedModelAddress.getModel())) {
+					addModelCommand = X.getCommandFactory().createAddModelCommand(
+					        selectedModelAddress.getRepository(), selectedModelAddress.getModel(),
+					        true);
+				}
 				
+				XTransaction modelTransactions = null;
+				try {
+					modelTransactions = Controller.getInstance().getDataModel()
+					        .getRepo(selectedModelAddress.getRepository())
+					        .getModelChanges(null, selectedModelAddress).build();
+				} catch(Exception e) {
+					// just no changes
+				}
+				Controller.getInstance().commit(addModelCommand, modelTransactions);
+				
+				CommittingDialog.this.mainPanel.clear();
 			}
+			
 		};
 		
 		this.buttonPanel = new ButtonPanel(okHandler, this);
@@ -84,22 +104,27 @@ public class CommittingDialog extends DialogBox {
 	private void showChanges() {
 		
 		Controller controller = Controller.getInstance();
-		XAddress selectedModel = controller.getSelectedModelAddress();
-		SessionCachedModel model = controller.getDataModel().getRepo(selectedModel.getRepository())
-		        .getModel(selectedModel.getModel());
+		XAddress selectedModelAddress = controller.getSelectedModelAddress();
+		SessionCachedModel model = controller.getDataModel()
+		        .getRepo(selectedModelAddress.getRepository())
+		        .getModel(selectedModelAddress.getModel());
 		
-		this.changesPanel.add(new HTML("Changes: " + changesToString(model).toString()));
+		this.changesPanel.add(new HTML("Changes: <br> <br>"));
+		
+		if(controller.getDataModel().getRepo(selectedModelAddress.getRepository())
+		        .isAddedModel(selectedModelAddress.getModel())) {
+			this.changesPanel.add(new HTML("---added Model "
+			        + selectedModelAddress.getModel().toString() + "---"));
+		}
+		this.changesPanel.add(new HTML(changesToString(model).toString()));
 		
 	}
 	
 	public void notifyMe(String message) {
-		this.mainPanel.clear();
 		this.mainPanel.add(new Label(message));
-		
-		addCloseOKButton();
 	}
 	
-	private void addCloseOKButton() {
+	public void addCloseOKButton() {
 		Button okButton = new Button("ok");
 		okButton.addClickHandler(new ClickHandler() {
 			
@@ -167,4 +192,5 @@ public class CommittingDialog extends DialogBox {
 		        + "' \n");
 		return sb;
 	}
+	
 }

@@ -9,7 +9,6 @@ import org.xydra.base.XX;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.Controller;
-import org.xydra.webadmin.gwt.client.Observable;
 import org.xydra.webadmin.gwt.client.XyAdmin;
 import org.xydra.webadmin.gwt.client.datamodels.DataModel;
 import org.xydra.webadmin.gwt.client.datamodels.RepoDataModel;
@@ -23,7 +22,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 
-public class SelectionTree extends Composite implements Observable {
+public class SelectionTree extends Composite {
 	
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(XyAdmin.class);
@@ -72,7 +71,6 @@ public class SelectionTree extends Composite implements Observable {
 		this.branches.put(repo.getId(), repoBranch);
 	}
 	
-	@Override
 	public void notifyMe(XAddress address) {
 		
 		XId repoId = address.getRepository();
