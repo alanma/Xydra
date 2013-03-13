@@ -9,12 +9,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.xydra.annotations.RunsInGWT;
 import org.xydra.conf.ConfBuilder;
 import org.xydra.conf.ConfigException;
 import org.xydra.conf.IConfig;
 import org.xydra.index.impl.MapSetIndex;
 
 
+@RunsInGWT(true)
 public class MemoryConfig implements IConfig {
     
     private HashMap<String,String> docs = new HashMap<String,String>();

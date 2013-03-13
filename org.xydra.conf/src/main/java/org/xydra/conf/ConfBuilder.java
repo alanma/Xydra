@@ -1,5 +1,9 @@
 package org.xydra.conf;
 
+import org.xydra.annotations.RunsInGWT;
+
+
+@RunsInGWT(true)
 public class ConfBuilder {
     
     private final String key;

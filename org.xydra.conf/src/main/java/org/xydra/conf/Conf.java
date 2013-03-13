@@ -4,11 +4,12 @@ import org.xydra.conf.impl.MemoryConfig;
 
 
 /**
- * Configuration singleton.
+ * Configuration singleton. Use only in single-thread environments.
  * 
  * @author xamde
  * 
  */
+@Deprecated
 public class Conf {
     
     private static MemoryConfig CONFIG;

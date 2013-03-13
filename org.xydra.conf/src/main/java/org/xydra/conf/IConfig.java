@@ -4,7 +4,7 @@ import java.util.Set;
 
 import org.xydra.annotations.CanBeNull;
 import org.xydra.annotations.NeverNull;
-import org.xydra.conf.impl.ConfigTool;
+import org.xydra.annotations.RunsInGWT;
 
 
 /**
@@ -14,11 +14,12 @@ import org.xydra.conf.impl.ConfigTool;
  * 
  * Normal usage is best done with enum types to keep using consistent keys.
  * 
- * seeAlso {@link ConfigTool}
+ * seeAlso {@link org.xydra.conf.impl.ConfigTool}
  * 
  * @author xamde
  * 
  */
+@RunsInGWT(true)
 public interface IConfig {
     
     /**

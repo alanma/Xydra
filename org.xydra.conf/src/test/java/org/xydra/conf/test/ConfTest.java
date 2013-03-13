@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.xydra.conf.Conf;
 
 
+@SuppressWarnings("deprecation")
 public class ConfTest {
     
     @Test
