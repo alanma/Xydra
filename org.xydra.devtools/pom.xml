@@ -1,0 +1,129 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.xydra</groupId>
+		<artifactId>maven-root</artifactId>
+		<version>2012.11.12</version>
+	</parent>
+
+	<artifactId>devtools</artifactId>
+	<version>0.1.6-SNAPSHOT</version>
+	<name>org.xydra.devtools</name>
+	<description>Simple tools for developing Java software</description>
+
+	<dependencies>
+		<dependency>
+			<groupId>asm</groupId>
+			<artifactId>asm-analysis</artifactId>
+			<version>3.3.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.reflections</groupId>
+			<artifactId>reflections</artifactId>
+			<version>0.9.8</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.inject</groupId>
+			<artifactId>guice</artifactId>
+			<version>3.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.inject.extensions</groupId>
+			<artifactId>guice-grapher</artifactId>
+			<version>3.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>log</artifactId>
+			<!--@@ use xydra.version here -->
+			<version>0.1.6-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>annotations</artifactId>
+			<!--@@ use xydra.version here -->
+			<version>0.1.6-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>log.gae</artifactId>
+			<!--@@ use xydra.version here -->
+			<version>0.1.6-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+		</dependency>
+	</dependencies>
+
+
+	<pluginRepositories>
+		<pluginRepository>
+			<id>vt-oss-releases</id>
+			<name>Valtech Open Source Releases</name>
+			<url>http://source.valtech.com/repo/content/repositories/releases</url>
+		</pluginRepository>
+	</pluginRepositories>
+
+	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+			<resource>
+				<directory>src/test/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+		<plugins>
+			<plugin>
+				<groupId>org.coderu</groupId>
+				<artifactId>coderu-maven-plugin</artifactId>
+				<version>1.0.3</version>
+				<executions>
+					<execution>
+						<id>coderu</id>
+						<goals>
+							<goal>test</goal>
+						</goals>
+						<configuration>
+							<rootPackages>
+								<!-- <param>org.coderu.example.common</param> -->
+								<!-- <param>org.coderu.example.gui.common</param> -->
+							</rootPackages>
+							<excludedPackages></excludedPackages>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>com.valtech.source.dependometer</groupId>
+				<artifactId>maven-dependometer-plugin</artifactId>
+				<version>0.9.1</version>
+			</plugin>
+		</plugins>
+	</reporting>
+
+</project>
