@@ -25,7 +25,8 @@
 	
 	
 	<source path="">
-		<exclude name="**/Log4jUtils.java" />
+		<exclude name="util/ClassPathTool.java"/>
+		<exclude name="util/Log4jUtils.java" />
 		<exclude name="**/*Test.java" />
 	</source>
 
