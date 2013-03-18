@@ -1,11 +1,5 @@
 package org.xydra.store;
 
-import org.xydra.base.change.XCommand;
-import org.xydra.core.model.XSynchronizesChanges;
-import org.xydra.core.model.impl.memory.MemoryModel;
-import org.xydra.core.model.sync.XSynchronizer;
-
-
 /**
  * <h2>Documentation for the sync-process</h2>
  * 
@@ -15,8 +9,8 @@ import org.xydra.core.model.sync.XSynchronizer;
  * {@link XydraStore#getEvents(org.xydra.base.XId, String, GetEventsRequest[], Callback)}
  * - the REST interface allows to do both in one batch command.
  * 
- * <h3>Server-side</h3> Let's take a closer look what happens here. Firs we look
- * at it from the server's perspective:
+ * <h3>Server-side</h3> Let's take a closer look what happens here. First we
+ * look at it from the server's perspective:
  * 
  * <ol>
  * <li>The client submits a bunch of commands,</li>
@@ -25,7 +19,8 @@ import org.xydra.core.model.sync.XSynchronizer;
  * <li>For each command: The server looks if the client is authorised to do
  * this, and if so, executes the command. For each such command, the resulting
  * revision number is remembered. Error codes are also encoded as revisions
- * numbers, such as {@link XCommand#FAILED} and {@link XCommand#NOCHANGE}.</li>
+ * numbers, such as {@link org.xydra.base.change.XCommand#FAILED} and
+ * {@link org.xydra.base.change.XCommand#NOCHANGE}.</li>
  * <li>Next, the server loads the requested events and returns them to the
  * client. Only successful commands result in events. If there is no change,
  * nothing happens and there is no event in the world.</li>
@@ -37,13 +32,15 @@ import org.xydra.core.model.sync.XSynchronizer;
  * <h3>Client-side</h3> On the client-side, things are a little more
  * complicated.
  * 
- * There are two main components involved in syncing: The {@link XSynchronizer}
- * (aka "syncer") and application logic ("app" for short").
+ * There are two main components involved in syncing: The
+ * {@link org.xydra.core.model.sync.XSynchronizer} (aka "syncer") and
+ * application logic ("app" for short").
  * 
  * First start of the app: App loads a current snapshot from server, uses this
  * state as local model and runs the app from there. User makes local changes,
- * they are applied immediately on the model and the {@link MemoryModel}
- * remembers which are new and which are synced.
+ * they are applied immediately on the model and the
+ * {@link org.xydra.core.model.impl.memory.MemoryModel} remembers which are new
+ * and which are synced.
  * 
  * Each run of the app: Each command that is executed against the model has a
  * callback, which will be called later once the change is on the server. If the
@@ -55,9 +52,10 @@ import org.xydra.core.model.sync.XSynchronizer;
  * cookies or whatever. If callbacks for pending commands had been registered,
  * they need to be recreated now as well.
  * 
- * <h4>Syncing</h4> one can register add the {@link XSynchronizesChanges}
- * -enabled entities (= client-side model, object and field) and gets events
- * when an entity is currently in a fully persisted state.
+ * <h4>Syncing</h4> one can register add the
+ * {@link org.xydra.core.model.XSynchronizesChanges} -enabled entities (=
+ * client-side model, object and field) and gets events when an entity is
+ * currently in a fully persisted state.
  * 
  * During the whole sync-process the model and hence the GUI need to be locked
  * to avoid race conditions and maintain consistency. This are the steps. Lets
@@ -108,6 +106,6 @@ import org.xydra.core.model.sync.XSynchronizer;
  * @author xamde
  * 
  */
-public interface SynDocu {
+public interface SyncDocu {
     
 }

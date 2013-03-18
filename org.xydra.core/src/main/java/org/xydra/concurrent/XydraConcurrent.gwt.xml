@@ -3,14 +3,10 @@
 <module>
 	
 	<inherits name="org.xydra.annotations.XydraAnnotations" />
-	<inherits name="org.xydra.sharedutils.XydraSharedUtils" />
-	<inherits name="org.xydra.index.XydraIndex" />
 	<inherits name='org.xydra.log.Xlog'/>
 	
 	<source path="">
 		<exclude name="**/*Test.java" />
-		<exclude name="minio/MiniStreamReader.java" />
-		<exclude name="minio/MiniStreamWriter.java" />
 	</source>
 	
 </module>
