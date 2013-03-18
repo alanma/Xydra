@@ -30,7 +30,7 @@ import org.xydra.oo.testgen.alltypes.shared.Colors;
 import org.xydra.oo.testgen.alltypes.shared.IPerson;
 import org.xydra.oo.testgen.alltypes.shared.MyLongBasedType;
 
-/** Generated on Thu Mar 07 18:40:49 CET 2013 by SpecWriter, a part of xydra.org:oo */
+/** Generated on Thu Mar 07 22:05:12 CET 2013 by SpecWriter, a part of xydra.org:oo */
 public interface IHasAllType extends IHasXId {
 
     /** 

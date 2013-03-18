@@ -5,7 +5,7 @@ import org.xydra.base.rmof.XWritableModel;
 import org.xydra.oo.Field;
 import org.xydra.oo.testgen.tasks.shared.IBaseList;
 
-/** Generated on Thu Mar 07 18:40:49 CET 2013 by SpecWriter, a part of xydra.org:oo */
+/** Generated on Thu Mar 07 22:05:12 CET 2013 by SpecWriter, a part of xydra.org:oo */
 public interface ISmartList extends IBaseList {
 
     /** 
