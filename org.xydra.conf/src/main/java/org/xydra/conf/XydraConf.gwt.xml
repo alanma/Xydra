@@ -2,7 +2,7 @@
 
 	<!-- import as 'org.xydra.conf.XydraConf' -->
 
-	<source path=".">
+	<source path="">
 		<exclude name="impl/ConfigTool.java" />
 	</source>
 
