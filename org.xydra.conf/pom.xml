@@ -11,19 +11,6 @@
 		<version>2012.11.12</version>
 	</parent>
 
-	<!-- Specify hard-coded project properties here -->
-	<properties>
-
-		<!-- define a transient output directory for gwt -->
-		<!-- <gwt.output.directory>${project.build.directory}/war</gwt.output.directory> -->
-		<!-- <gwt.compiler.force>true</gwt.compiler.force> -->
-		<!-- Set your AppEngine developer account email here -->
-		<gae.email>max.at.xam.de@gmail.com</gae.email>
-		<!-- required for gae plugin to determin gae.home -->
-		<!-- @@ use gae.version here -->
-		<gae.version>1.7.5</gae.version>
-	</properties>
-
 	<dependencies>
 
 		<dependency>
@@ -62,8 +49,8 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>2.3.2</version>
 				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
+					<source>1.6</source>
+					<target>1.6</target>
 				</configuration>
 			</plugin>
 		</plugins>
