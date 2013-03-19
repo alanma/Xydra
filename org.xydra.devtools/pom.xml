@@ -72,15 +72,6 @@
 		</dependency>
 	</dependencies>
 
-
-	<pluginRepositories>
-		<pluginRepository>
-			<id>vt-oss-releases</id>
-			<name>Valtech Open Source Releases</name>
-			<url>http://source.valtech.com/repo/content/repositories/releases</url>
-		</pluginRepository>
-	</pluginRepositories>
-
 	<build>
 		<resources>
 			<resource>
@@ -92,38 +83,6 @@
 				<filtering>true</filtering>
 			</resource>
 		</resources>
-		<plugins>
-			<plugin>
-				<groupId>org.coderu</groupId>
-				<artifactId>coderu-maven-plugin</artifactId>
-				<version>1.0.3</version>
-				<executions>
-					<execution>
-						<id>coderu</id>
-						<goals>
-							<goal>test</goal>
-						</goals>
-						<configuration>
-							<rootPackages>
-								<!-- <param>org.coderu.example.common</param> -->
-								<!-- <param>org.coderu.example.gui.common</param> -->
-							</rootPackages>
-							<excludedPackages></excludedPackages>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
 	</build>
-
-	<reporting>
-		<plugins>
-			<plugin>
-				<groupId>com.valtech.source.dependometer</groupId>
-				<artifactId>maven-dependometer-plugin</artifactId>
-				<version>0.9.1</version>
-			</plugin>
-		</plugins>
-	</reporting>
 
 </project>
