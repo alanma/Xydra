@@ -34,9 +34,11 @@ public class PackageChaos {
     
     private static final Logger log = LoggerFactory.getLogger(PackageChaos.class);
     private Architecture arch;
+    private File resultFile;
     
-    public PackageChaos(Architecture arch) {
+    public PackageChaos(Architecture arch, File result) {
         this.arch = arch;
+        this.resultFile = result;
     }
     
     public void analyse(String path) throws IOException {
@@ -93,8 +95,7 @@ public class PackageChaos {
         System.out.println("--- Graph ---");
         g.dump("");
         
-        File dot = new File("/Users/xamde/_data_/_p_/2013/org.xydra.devtools/target/res.dot");
-        g.writeTo(dot);
+        g.writeTo(this.resultFile);
         
         log.info("Written " + g.size() + " edges to DOT file");
     }

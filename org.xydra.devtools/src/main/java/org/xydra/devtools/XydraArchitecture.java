@@ -1,5 +1,6 @@
 package org.xydra.devtools;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.xydra.devtools.architecture.Architecture;
@@ -51,7 +52,8 @@ public class XydraArchitecture {
         
         .ignoreForNow("org.xydra.perf");
         
-        PackageChaos pc = new PackageChaos(xydraArchitecture);
+        File dot = new File("/Users/xamde/_data_/_p_/2013/org.xydra.devtools/target/res.dot");
+        PackageChaos pc = new PackageChaos(xydraArchitecture, dot);
         pc.analyse("/Users/xamde/_data_/_p_/2010/org.xydra.core/src/main/java");
     }
     
