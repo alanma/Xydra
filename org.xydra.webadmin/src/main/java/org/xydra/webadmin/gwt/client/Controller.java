@@ -101,7 +101,7 @@ public class Controller {
 						dialog.show();
 					} else {
 						for(XId modelID : result) {
-							Controller.this.dataModel.getRepo(repoId).addModelID(modelID);
+							Controller.this.dataModel.getRepo(repoId).indexModel(modelID);
 						}
 						Controller.this.notifySelectionTree(address);
 					}
@@ -115,6 +115,7 @@ public class Controller {
 			});
 			
 		} else if(addressedType.equals(XType.XMODEL)) {
+			log.warn("hi");
 			this.service.getModelSnapshot(repoId, modelId, new AsyncCallback<XReadableModel>() {
 				
 				@Override
@@ -127,6 +128,7 @@ public class Controller {
 				
 				@Override
 				public void onFailure(Throwable caught) {
+					log.warn("hi");
 					log.warn("Error", caught);
 				}
 			});
@@ -189,16 +191,28 @@ public class Controller {
 			        
 			        @Override
 			        public void onSuccess(XReadableModel result) {
-				        if(result.isEmpty()) {
-					        log.error("no objects found!");
-					        WarningDialog dialog = new WarningDialog("no models found!");
-					        dialog.show();
-				        } else {
-					        Controller.this.dataModel
+				        if(result == null) {
+					        @SuppressWarnings("unused")
+					        WarningDialog d = new WarningDialog("model is deleted!");
+					        Controller.getInstance().getDataModel()
 					                .getRepo(Controller.this.lastClickedElement.getRepository())
-					                .getModel(result.getId()).indexModel(result);
-					        updateEditorPanel();
+					                .addDeletedModel(Controller.this.lastClickedElement.getModel());
+				        } else {
+					        if(result.isEmpty()) {
+						        log.error("no objects found!");
+						        WarningDialog dialog = new WarningDialog("no objects found!");
+						        dialog.show();
+					        } else {
+						        
+						        Controller.this.dataModel
+						                .getRepo(Controller.this.lastClickedElement.getRepository())
+						                .getModel(result.getId()).indexModel(result);
+						        updateEditorPanel();
+						        Controller.this
+						                .notifySelectionTree(Controller.this.lastClickedElement);
+					        }
 				        }
+				        Controller.this.notifySelectionTree(Controller.this.lastClickedElement);
 			        }
 			        
 			        @Override
@@ -377,8 +391,9 @@ public class Controller {
 		return model;
 	}
 	
-	public void removeModel(XAddress address) {
+	public void removeModel(final XAddress address) {
 		XRepositoryCommand command = X.getCommandFactory().createForcedRemoveModelCommand(address);
+		log.info("hi, " + address.toString());
 		this.service.executeCommand(address.getRepository(), command, new AsyncCallback<Long>() {
 			
 			String resultString = "";
@@ -386,8 +401,8 @@ public class Controller {
 			@Override
 			public void onSuccess(Long result) {
 				if(XCommandUtils.success(result)) {
-					this.resultString = "successfully committed model! New revision number: "
-					        + result;
+					this.resultString = "successfully deleted model " + address.getModel()
+					        + " from repository";
 				} else if(XCommandUtils.noChange(result)) {
 					this.resultString = "no Changes!";
 				} else if(XCommandUtils.failed(result)) {

@@ -19,17 +19,26 @@ public class RepoDataModel {
 	private HashMap<XId,SessionCachedModel> models;
 	private HashMap<XId,SessionCachedModel> deletedModels;
 	private HashSet<XId> addedModels;
+	private HashSet<XId> notExistingModels;
 	
 	public RepoDataModel(XId repoId) {
 		this.id = repoId;
 		this.models = new HashMap<XId,SessionCachedModel>();
 		this.deletedModels = new HashMap<XId,SessionCachedModel>();
 		this.addedModels = new HashSet<XId>();
+		this.notExistingModels = new HashSet<XId>();
+	}
+	
+	public void indexModel(XId xid) {
+		this.models.put(xid, new SessionCachedModel(XX.toAddress(this.id, xid, null, null)));
 	}
 	
 	public void addModelID(XId xid) {
-		this.models.put(xid, new SessionCachedModel(XX.toAddress(this.id, xid, null, null)));
+		this.indexModel(xid);
 		this.addedModels.add(xid);
+		if(this.notExistingModels.contains(xid)) {
+			this.notExistingModels.remove(xid);
+		}
 	}
 	
 	public Iterator<XId> getModelIDs() {
@@ -98,6 +107,29 @@ public class RepoDataModel {
 	
 	public boolean isAddedModel(XId model) {
 		return this.addedModels.contains(model);
+	}
+	
+	public void addDeletedModel(XId model) {
+		this.notExistingModels.add(model);
+		
+	}
+	
+	public boolean isNotExisting(XId model) {
+		boolean notExisting = false;
+		if(this.notExistingModels.contains(model)) {
+			notExisting = true;
+		}
+		return notExisting;
+	}
+	
+	public void setCommitted(XId model) {
+		if(this.isAddedModel(model)) {
+			this.addedModels.remove(model);
+		}
+		if(this.deletedModels.containsKey(model)) {
+			this.deletedModels.remove(model);
+		}
+		
 	}
 	
 }

@@ -55,8 +55,6 @@ public class TempStorage {
 		Controller.getInstance().getDataModel().removeItem(address);
 		XAddress reducedAddress = XX.toAddress(address.getRepository(), null, null, null);
 		Controller.getInstance().notifySelectionTree(reducedAddress);
-		log.info("inspecting address " + address.toString() + " which has object: "
-		        + address.getObject().toString());
 		
 	}
 	

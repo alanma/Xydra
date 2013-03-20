@@ -298,3 +298,8 @@
 	width: 310px;
 	height: 40px;
 }
+
+.deletedStyle {
+	
+	text-decoration: line-through;
+}

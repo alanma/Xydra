@@ -32,6 +32,16 @@ public class ModelBranchWidget extends Composite {
 	public ModelBranchWidget(XAddress address) {
 		
 		this.address = address;
+		buildComponents(address);
+		initWidget(uiBinder.createAndBindUi(this));
+		
+	}
+	
+	public void notifyMe(XAddress address) {
+		buildComponents(address);
+	}
+	
+	private void buildComponents(XAddress address) {
 		this.entityWidget = new EntityWidget(address, new ClickHandler() {
 			
 			@Override
@@ -40,10 +50,19 @@ public class ModelBranchWidget extends Composite {
 			}
 		});
 		
-		initWidget(uiBinder.createAndBindUi(this));
+		if(Controller.getInstance().getDataModel().getRepo(address.getRepository())
+		        .isNotExisting(address.getModel())) {
+			this.entityWidget.setStatusDeleted();
+		}
+		if(!Controller.getInstance().getDataModel().getRepo(address.getRepository())
+		        .isAddedModel(address.getModel())) {
+			if(!Controller.getInstance().getDataModel().getRepo(address.getRepository())
+			        .getModel(address.getModel()).knowsAllObjects()) {
+				
+				this.entityWidget.setRevisionUnknown();
+			}
+		}
 		
 		this.entityWidget.setDeleteModelDialog();
-		
 	}
-	
 }

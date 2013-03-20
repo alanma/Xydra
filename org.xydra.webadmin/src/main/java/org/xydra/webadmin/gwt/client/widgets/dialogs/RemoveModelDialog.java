@@ -57,13 +57,12 @@ public class RemoveModelDialog extends DialogBox implements Observable {
 			
 			@Override
 			public void onClick(ClickEvent event) {
-				RemoveModelDialog.this.removeFromParent();
+				Controller.getInstance().getTempStorage().register(RemoveModelDialog.this);
 				Controller
 				        .getInstance()
 				        .getTempStorage()
 				        .remove(RemoveModelDialog.this.address,
 				                RemoveModelDialog.this.checkBox.getValue());
-				Controller.getInstance().getTempStorage().register(RemoveModelDialog.this);
 				RemoveModelDialog.this.mainPanel.clear();
 			}
 		};
@@ -93,7 +92,7 @@ public class RemoveModelDialog extends DialogBox implements Observable {
 	
 	@Override
 	public void notifyMe(String message) {
-		this.mainPanel.add(new HTML("message"));
+		this.mainPanel.add(new HTML(message));
 		
 	}
 	

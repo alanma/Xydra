@@ -86,6 +86,10 @@ public class CommittingDialog extends DialogBox implements Observable {
 				Controller.getInstance().commit(addModelCommand, modelTransactions);
 				
 				CommittingDialog.this.mainPanel.clear();
+				
+				Controller.getInstance().getDataModel()
+				        .getRepo(selectedModelAddress.getRepository())
+				        .setCommitted(selectedModelAddress.getModel());
 			}
 			
 		};

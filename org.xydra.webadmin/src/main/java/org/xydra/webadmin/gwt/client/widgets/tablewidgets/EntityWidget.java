@@ -191,4 +191,13 @@ public class EntityWidget extends Composite {
 			}
 		});
 	}
+	
+	public void setStatusDeleted() {
+		this.idLabel.addStyleName("deletedStyle");
+		
+	}
+	
+	public void setRevisionUnknown() {
+		this.revisionLabel.setText("???");
+	}
 }

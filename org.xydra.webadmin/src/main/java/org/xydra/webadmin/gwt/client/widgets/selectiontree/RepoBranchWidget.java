@@ -5,6 +5,7 @@ import java.util.Iterator;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
+import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -170,7 +171,15 @@ public class RepoBranchWidget extends Composite {
 	}
 	
 	public void notifyMe(XAddress address) {
-		log.info("i am " + this.address.toString() + " and I contain the other address");
+		
+		if(address.getAddressedType().equals(XType.XREPOSITORY)) {
+			this.contract();
+			this.expand();
+		} else {
+			ModelBranchWidget modelBranch = this.existingBranches.get(address.getModel());
+			modelBranch.notifyMe(address);
+		}
+		
 		this.contract();
 		this.expand();
 		
