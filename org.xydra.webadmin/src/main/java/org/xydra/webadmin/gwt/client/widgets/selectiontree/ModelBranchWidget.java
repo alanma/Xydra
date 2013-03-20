@@ -65,4 +65,9 @@ public class ModelBranchWidget extends Composite {
 		
 		this.entityWidget.setDeleteModelDialog();
 	}
+	
+	public void open(XAddress address2) {
+		// Controller.getInstance().getData(ModelBranchWidget.this.address);
+		
+	}
 }

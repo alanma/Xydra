@@ -250,4 +250,8 @@ public class TableController {
 		TableController.this.scrollPanel.getElement().setAttribute("style",
 		        "overflow-y:overlay; position:relative; zoom:1; height: " + scrollTableHeight);
 	}
+	
+	public void expandObject(XAddress desiredAddress) {
+		this.notifyTable(desiredAddress, Status.Opened);
+	}
 }

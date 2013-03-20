@@ -76,8 +76,14 @@ public class AddressWidget extends Composite {
 		loadRepository(repoAddress);
 		
 		if(address.getModel() != null) {
-			
+			load(address);
 		}
+		
+	}
+	
+	private void load(XAddress address) {
+		loadRepository(address);
+		Controller.getInstance().getTempStorage().register(address);
 		
 	}
 	

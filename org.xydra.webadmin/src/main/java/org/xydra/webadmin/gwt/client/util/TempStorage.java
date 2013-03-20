@@ -11,6 +11,9 @@ import org.xydra.webadmin.gwt.client.Observable;
 import org.xydra.webadmin.gwt.client.datamodels.DataModel;
 import org.xydra.webadmin.gwt.client.widgets.selectiontree.RepoBranchWidget;
 
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.ui.RootPanel;
+
 
 public class TempStorage {
 	
@@ -20,8 +23,17 @@ public class TempStorage {
 	
 	private Observable dialog;
 	
+	private XAddress desiredAddress;
+	
 	public void register(RepoBranchWidget branch) {
 		this.branch = branch;
+		showWaitCursor();
+	}
+	
+	public void register(Observable committingDialog) {
+		this.dialog = committingDialog;
+		showWaitCursor();
+		
 	}
 	
 	public void setInformation(XAddress address, String text) {
@@ -55,16 +67,12 @@ public class TempStorage {
 		Controller.getInstance().getDataModel().removeItem(address);
 		XAddress reducedAddress = XX.toAddress(address.getRepository(), null, null, null);
 		Controller.getInstance().notifySelectionTree(reducedAddress);
-		
-	}
-	
-	public void register(Observable committingDialog) {
-		this.dialog = committingDialog;
-		
+		showDefaultCursor();
 	}
 	
 	public void notifyDialog(String message) {
 		this.dialog.notifyMe(message);
+		showDefaultCursor();
 	}
 	
 	public void allowDialogClose() {
@@ -79,5 +87,46 @@ public class TempStorage {
 			Controller.getInstance().removeModel(address);
 		}
 		
+	}
+	
+	public static void showWaitCursor() {
+		DOM.setStyleAttribute(RootPanel.getBodyElement(), "cursor", "wait");
+	}
+	
+	public static void showDefaultCursor() {
+		DOM.setStyleAttribute(RootPanel.getBodyElement(), "cursor", "default");
+	}
+	
+	public void proceed(XType xType) {
+		if(this.desiredAddress != null) {
+			
+			switch(xType) {
+			case XMODEL:
+				expandAndLoadModel();
+				break;
+			case XOBJECT:
+				// expandAndLoadModel();
+				Controller.getInstance().notifyTableController(this.desiredAddress,
+				        TableController.Status.Opened);
+				break;
+			case XFIELD:
+				break;
+			default:
+				break;
+			
+			}
+		}
+		if(xType.equals(this.desiredAddress.getAddressedType())) {
+			this.desiredAddress = null;
+		}
+	}
+	
+	private void expandAndLoadModel() {
+		// Controller.getInstance().getSelectionTree().expandEntity(this.desiredAddress);
+		Controller.getInstance().loadCurrentModelsObjects();
+	}
+	
+	public void register(XAddress address) {
+		this.desiredAddress = address;
 	}
 }

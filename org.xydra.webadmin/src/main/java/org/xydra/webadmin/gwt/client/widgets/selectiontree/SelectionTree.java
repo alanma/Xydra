@@ -82,4 +82,9 @@ public class SelectionTree extends Composite {
 			        this.mainPanel.getWidgetCount() - 1);
 		}
 	}
+	
+	public void expandEntity(XAddress address) {
+		RepoBranchWidget repoBranch = this.branches.get(address.getRepository());
+		repoBranch.openModel(address);
+	}
 }

@@ -193,6 +193,7 @@ public class RepoBranchWidget extends Composite {
 		
 		this.setComponents();
 		
+		// this.expandButton.setFocus(focused)
 		this.expanded = true;
 		
 	}
@@ -203,5 +204,10 @@ public class RepoBranchWidget extends Composite {
 		RepoBranchWidget.this.expandButton.setText("+");
 		
 		this.expanded = false;
+	}
+	
+	public void openModel(XAddress address2) {
+		this.fetchModelsButton.click();
+		this.existingBranches.get(address2.getModel()).open(address2);
 	}
 }

@@ -105,6 +105,7 @@ public class Controller {
 						}
 						Controller.this.notifySelectionTree(address);
 					}
+					Controller.this.getTempStorage().proceed(XType.XMODEL);
 				}
 				
 				@Override
@@ -115,7 +116,6 @@ public class Controller {
 			});
 			
 		} else if(addressedType.equals(XType.XMODEL)) {
-			log.warn("hi");
 			this.service.getModelSnapshot(repoId, modelId, new AsyncCallback<XReadableModel>() {
 				
 				@Override
@@ -128,7 +128,6 @@ public class Controller {
 				
 				@Override
 				public void onFailure(Throwable caught) {
-					log.warn("hi");
 					log.warn("Error", caught);
 				}
 			});
@@ -186,6 +185,7 @@ public class Controller {
 	}
 	
 	public void loadCurrentModelsObjects() {
+		TempStorage.showWaitCursor();
 		this.service.getModelSnapshot(this.lastClickedElement.getRepository(),
 		        this.lastClickedElement.getModel(), new AsyncCallback<XReadableModel>() {
 			        
@@ -213,13 +213,16 @@ public class Controller {
 					        }
 				        }
 				        Controller.this.notifySelectionTree(Controller.this.lastClickedElement);
+				        TempStorage.showDefaultCursor();
+				        Controller.this.tempStorage.proceed(XType.XOBJECT);
 			        }
 			        
 			        @Override
 			        public void onFailure(Throwable caught) {
 				        log.warn("Error", caught);
-				        
+				        TempStorage.showDefaultCursor();
 			        }
+			        
 		        });
 		
 	}
@@ -422,5 +425,10 @@ public class Controller {
 			}
 		});
 		
+	}
+	
+	public SelectionTree getSelectionTree() {
+		
+		return this.selectionTree;
 	}
 }
