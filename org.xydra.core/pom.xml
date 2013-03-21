@@ -114,6 +114,14 @@
 			<scope>test</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>devtools</artifactId>
+			<!--@@ use xydra.version here -->
+			<version>0.1.6-SNAPSHOT</version>
+			<scope>test</scope>
+		</dependency>
+
 	</dependencies>
 
 	<distributionManagement>

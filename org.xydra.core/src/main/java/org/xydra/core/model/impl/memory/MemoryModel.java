@@ -3,6 +3,7 @@ package org.xydra.core.model.impl.memory;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -30,12 +31,16 @@ import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.core.XCopyUtils;
 import org.xydra.core.change.XModelEventListener;
+import org.xydra.core.change.XModelSyncEventListener;
+import org.xydra.core.change.XSendsModelSyncEvents;
+import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XChangeLogState;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
+import org.xydra.core.model.XUndoFailedLocalChangeCallback;
 import org.xydra.sharedutils.XyAssert;
 
 
@@ -46,7 +51,7 @@ import org.xydra.sharedutils.XyAssert;
  * @author Kaidel
  * 
  */
-public class MemoryModel extends SynchronizesChangesImpl implements XModel {
+public class MemoryModel extends SynchronizesChangesImpl implements XModel, XSendsModelSyncEvents {
     
     private static final long serialVersionUID = -2969189978307340483L;
     
@@ -59,6 +64,8 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
     
     private final XRevWritableModel state;
     
+    private final Set<XModelSyncEventListener> modelSyncChangeListenerCollection;
+    
     /**
      * Creates a new MemoryModel with the given {@link MemoryRepository} as its
      * father.
@@ -69,8 +76,35 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
      */
     protected MemoryModel(XId actorId, String passwordHash, MemoryRepository father,
             XRevWritableModel modelState, XChangeLogState log) {
-        super(new MemoryEventManager(actorId, passwordHash, new MemoryChangeLog(log),
-                modelState.getRevisionNumber()));
+        this(actorId, passwordHash, father, modelState, log, modelState.getRevisionNumber(), false);
+    }
+    
+    /**
+     * Creates a new MemoryModel with the given {@link MemoryRepository} as its
+     * father, the sync revision can be set and optionally localChanges be
+     * rebuild in order to fully restore the state of a serialized MemoryModel.
+     * 
+     * @param actorId TODO
+     * @param passwordHash
+     * @param father The father-{@link MemoryRepository} for this MemoryModel
+     * @param modelState The initial {@link XChangeLogState} of this
+     *            MemoryModel.
+     * @param log
+     * @param syncRev the synchronized revision of this MemoryModel
+     * @param loadLocalChanges if true, the
+     *            {@link MemoryEventManager#localChanges} will be
+     *            initialized/rebuild from the provided {@link XChangeLog} log.
+     */
+    public MemoryModel(XId actorId, String passwordHash, MemoryRepository father,
+            XRevWritableModel modelState, XChangeLogState log, long syncRev,
+            boolean loadLocalChanges) {
+        this(actorId, passwordHash, father, modelState, log, syncRev, loadLocalChanges, null);
+    }
+    
+    public MemoryModel(XId actorId, String passwordHash, MemoryRepository father,
+            XRevWritableModel modelState, XChangeLogState log, long syncRev,
+            boolean loadLocalChanges, List<XCommand> localChangesAsCommands) {
+        super(new MemoryEventManager(actorId, passwordHash, new MemoryChangeLog(log), syncRev));
         XyAssert.xyAssert(log != null);
         assert log != null;
         
@@ -78,26 +112,46 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
         this.father = father;
         
         this.modelChangeListenerCollection = new HashSet<XModelEventListener>();
+        this.modelSyncChangeListenerCollection = new HashSet<XModelSyncEventListener>();
         
         if(father == null && getAddress().getRepository() != null
                 && this.eventQueue.getChangeLog() != null
                 && this.eventQueue.getChangeLog().getCurrentRevisionNumber() == -1) {
             XAddress repoAddr = getAddress().getParent();
-            XCommand createCommand = MemoryRepositoryCommand.createAddCommand(repoAddr, true,
-                    getId());
-            this.eventQueue.newLocalChange(createCommand, null);
+            
+            if(!loadLocalChanges) {
+                XCommand createCommand = MemoryRepositoryCommand.createAddCommand(repoAddr, true,
+                        getId());
+                this.eventQueue.newLocalChange(createCommand, null);
+            }
+            
             XRepositoryEvent createEvent = MemoryRepositoryEvent.createAddEvent(actorId, repoAddr,
                     getId());
             this.eventQueue.enqueueRepositoryEvent(null, createEvent);
             this.eventQueue.sendEvents();
         }
         
+        initLocalChanges(loadLocalChanges, localChangesAsCommands);
+    }
+    
+    private void initLocalChanges(boolean loadLocalChanges, List<XCommand> localChangesAsCommands) {
+        if(loadLocalChanges && localChangesAsCommands != null) {
+            
+            Iterator<XCommand> localCommands = localChangesAsCommands.iterator();
+            
+            while(localCommands.hasNext()) {
+                XCommand command = localCommands.next();
+                
+                this.eventQueue.newLocalChange(command, new XUndoFailedLocalChangeCallback(command,
+                        this, null));
+            }
+            
+        }
         XyAssert.xyAssert(
                 this.eventQueue.getChangeLog() == null
                         || this.eventQueue.getChangeLog().getCurrentRevisionNumber() == getRevisionNumber(),
                 "eventQueue.changeLog==null?" + (this.eventQueue.getChangeLog() == null)
                         + "; getRevisionNumber()=" + getRevisionNumber());
-        
     }
     
     /**
@@ -350,17 +404,18 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
     
     @Override
     public long executeCommand(XCommand command, XLocalChangeCallback callback) {
-        
+        XUndoFailedLocalChangeCallback wrappingCallback = new XUndoFailedLocalChangeCallback(
+                command, this, callback);
         if(command instanceof XTransaction) {
-            return executeTransaction((XTransaction)command, callback);
+            return executeTransaction((XTransaction)command, wrappingCallback);
         } else if(command instanceof XModelCommand) {
-            return executeModelCommand((XModelCommand)command, callback);
+            return executeModelCommand((XModelCommand)command, wrappingCallback);
         }
         MemoryObject object = getObject(command.getTarget().getObject());
         if(object == null) {
             return XCommand.FAILED;
         }
-        return object.executeCommand(command, callback);
+        return object.executeCommand(command, wrappingCallback);
     }
     
     @Override
@@ -740,4 +795,23 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel {
         return XType.XMODEL;
     }
     
+    @Override
+    public boolean addListenerForModelSyncEvents(XModelSyncEventListener syncListener) {
+        synchronized(this.eventQueue) {
+            return this.modelSyncChangeListenerCollection.add(syncListener);
+        }
+    }
+    
+    @Override
+    public boolean removeListenerForModelSyncEvents(XModelSyncEventListener syncListener) {
+        synchronized(this.eventQueue) {
+            return this.modelSyncChangeListenerCollection.remove(syncListener);
+        }
+    }
+    
+    public void fireModelSyncEvent(XModelEvent event) {
+        for(XModelSyncEventListener listener : this.modelSyncChangeListenerCollection) {
+            listener.onSynced(event);
+        }
+    }
 }

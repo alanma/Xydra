@@ -70,8 +70,9 @@ public class XSynchronizer {
     
     private void applyEvents(XEvent[] remoteChanges) {
         
-        if(remoteChanges.length == 0) {
+        /* FIXME !!! Thomas skipped this check and always ran this code. Why? */if(remoteChanges.length == 0) {
             // no changes to merge
+            //
             return;
         }
         
@@ -80,7 +81,7 @@ public class XSynchronizer {
         if(!success) {
             log.error("sync: error applying remote events");
         }
-        XyAssert.xyAssert(success);
+        XyAssert.xyAssert(success, "After synchronize should be success");
         
     }
     
@@ -238,10 +239,11 @@ public class XSynchronizer {
                 return;
             }
             
-            XyAssert.xyAssert(events != null, "events not null");
-            assert events != null;
-            
-            applyEvents(events);
+            if(events == null) {
+                applyEvents(new XEvent[0]);
+            } else {
+                applyEvents(events);
+            }
             requestEnded(success);
         }
     }
@@ -268,10 +270,11 @@ public class XSynchronizer {
                 return;
             }
             
-            XyAssert.xyAssert(eventsRes.getResult() != null);
-            assert eventsRes.getResult() != null;
-            
-            applyEvents(eventsRes.getResult());
+            if(eventsRes.getResult() == null) {
+                applyEvents(new XEvent[0]);
+            } else {
+                applyEvents(eventsRes.getResult());
+            }
             requestEnded(true);
         }
         
@@ -427,6 +430,12 @@ public class XSynchronizer {
                     if(i == 0) {
                         commands[i] = lc.getCommand();
                     } else {
+                        /*
+                         * FIXME !!! Horrible bug appeared for Thomas is
+                         * commands where fixed here. It seemed to run fine if
+                         * you just call 'commands[i] = lc.getCommand();' here
+                         * too. Nobody knows why.
+                         */
                         commands[i] = fixCommand(syncRev, lc.getCommand(), i);
                     }
                     i++;

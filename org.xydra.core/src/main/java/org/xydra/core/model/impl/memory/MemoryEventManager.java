@@ -37,7 +37,7 @@ import org.xydra.sharedutils.XyAssert;
 public class MemoryEventManager implements Serializable {
     
     /**
-     * Rememeber revisions numbers
+     * Remember revisions numbers
      */
     private static class EventCollision {
         
@@ -79,6 +79,20 @@ public class MemoryEventManager implements Serializable {
     private final MemoryChangeLog changeLog;
     
     private final List<EventQueueEntry> eventQueue = new ArrayList<EventQueueEntry>();
+    /**
+     * This queue contains all events that have been emitted during the
+     * sync-phase, also those that represent no real change from begin of sync
+     * to end of sync, i.e. events that cancel each other out. These events get
+     * compared to the underlying entity. If event.rev &lt;= entity.syncRev, a
+     * syncEvent is fired.
+     * 
+     * Currently these events are not de-duped, i.e. the same entity can receive
+     * multiple sync-events notifying on the same fact. See cleanEvents(..) for
+     * inspiration :-)
+     * 
+     * @author Thomas
+     */
+    private final List<EventQueueEntry> potentialSyncEventQueue = new ArrayList<EventQueueEntry>();
     private final List<MemoryLocalChange> localChanges = new ArrayList<MemoryLocalChange>();
     /**
      * Should events be logged right now?
@@ -344,6 +358,10 @@ public class MemoryEventManager implements Serializable {
         }
         
         this.eventQueue.add(entry);
+        // TODO Thomas write tests
+        if(!(entry.event instanceof XTransactionEvent)) {
+            this.potentialSyncEventQueue.add(entry);
+        }
     }
     
     /**
@@ -480,7 +498,12 @@ public class MemoryEventManager implements Serializable {
             if(first.getChangeType() == ChangeType.ADD) {
                 return last;
             }
-            XyAssert.xyAssert(first.getChangeType() == ChangeType.REMOVE);
+            if(first.getChangeType() != ChangeType.REMOVE) {
+                // oh noes
+                @SuppressWarnings("unused")
+                int i = 0;
+            }
+            // XyAssert.xyAssert(first.getChangeType() == ChangeType.REMOVE);
             // non matching REMOVE -> ADD => merge to CHANGE
             return MemoryReversibleFieldEvent.createChangeEvent(last.getActor(), last.getTarget(),
                     first.getOldValue(), last.getNewValue(), last.getOldModelRevision(),
@@ -674,4 +697,90 @@ public class MemoryEventManager implements Serializable {
         XyAssert.xyAssert(this.changeLog.getCurrentRevisionNumber() == revision);
     }
     
+    public void disabledEnqueueLocalChangeSyncedEvent(MemoryModel model, XEvent event) {
+        if(event instanceof XAtomicEvent) {
+            MemoryRepository repo = model.getFather();
+            if(model.removed) {
+                @SuppressWarnings("unused")
+                boolean aua = true;
+            }
+            MemoryObject object = event.getTarget().getObject() == null ? null : model
+                    .getObject(event.getTarget().getObject());
+            MemoryField field = object == null || event.getTarget().getField() == null ? null
+                    : object.getField(event.getTarget().getField());
+            EventQueueEntry entry = new EventQueueEntry(repo, model, object, field, event);
+            this.potentialSyncEventQueue.add(entry);
+        }
+        
+        /*
+         * unpack and enqueue enclosed XAtomicEvents, the XTransactionEvent
+         * itself is not enqueued.
+         */
+        else if(event instanceof XTransactionEvent) {
+            XTransactionEvent txEvent = (XTransactionEvent)event;
+            for(XAtomicEvent atomicEvent : txEvent) {
+                disabledEnqueueLocalChangeSyncedEvent(model, atomicEvent);
+            }
+        } else {
+            throw new AssertionError("unknown event type queued: " + event);
+        }
+    }
+    
+    public void sendSyncEvents() {
+        
+        while(!this.potentialSyncEventQueue.isEmpty()) {
+            EventQueueEntry entry = this.potentialSyncEventQueue.remove(0);
+            
+            XyAssert.xyAssert(entry != null);
+            assert entry != null;
+            XyAssert.xyAssert(entry.event != null);
+            assert entry.event != null;
+            
+            XyAssert.xyAssert(entry.event instanceof XRepositoryEvent
+                    || entry.event instanceof XModelEvent || entry.event instanceof XObjectEvent
+                    || entry.event instanceof XFieldEvent
+                    || entry.event instanceof XTransactionEvent);
+            
+            if(entry.event instanceof XRepositoryEvent) {
+                
+            } else if(entry.event instanceof XModelEvent) {
+                
+                // fire model event and propagate to fathers if necessary.
+                if(entry.model != null && entry.model.isSynchronized()) {
+                    entry.model.fireModelSyncEvent((XModelEvent)entry.event);
+                }
+                
+            } else if(entry.event instanceof XObjectEvent) {
+                
+                // fire object event and propagate to fathers if necessary.
+                if(entry.object != null && entry.object.isSynchronized()) {
+                    entry.object.fireObjectSyncEvent((XObjectEvent)entry.event);
+                    
+                    if(entry.model != null) {
+                        entry.model.fireObjectSyncEvent((XObjectEvent)entry.event);
+                        
+                    }
+                }
+            } else if(entry.event instanceof XFieldEvent) {
+                
+                // fire field event and propagate to fathers if necessary.
+                if(entry.field != null && entry.object != null && entry.field.isSynchronized()) {
+                    entry.field.fireFieldSyncEvent((XFieldEvent)entry.event);
+                    
+                    if(entry.object != null) {
+                        entry.object.fireFieldSyncEvent((XFieldEvent)entry.event);
+                        
+                        if(entry.model != null) {
+                            entry.model.fireFieldSyncEvent((XFieldEvent)entry.event);
+                            
+                        }
+                    }
+                }
+            } else if(entry.event instanceof XTransactionEvent) {
+                throw new AssertionError("Only XAtomicEvents can be sent.");
+            } else {
+                throw new AssertionError("unknown event type queued: " + entry);
+            }
+        }
+    }
 }
