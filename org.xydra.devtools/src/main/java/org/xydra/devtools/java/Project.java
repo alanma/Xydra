@@ -1,5 +1,11 @@
 package org.xydra.devtools.java;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -15,6 +21,13 @@ import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 
 
+/**
+ * Contains collected information about packages and their dependencies.
+ * 
+ * Can be rendered into a DOT graph.
+ * 
+ * @author xamde
+ */
 public class Project {
     
     private static final Logger log = LoggerFactory.getLogger(Project.class);
@@ -230,6 +243,91 @@ public class Project {
     
     public int packageCount() {
         return this.allPackages.size();
+    }
+    
+    public void scanDir(File dir) throws IOException {
+        assert dir.exists();
+        assert dir.isDirectory();
+        
+        File[] files = dir.listFiles(new FileFilter() {
+            
+            @Override
+            public boolean accept(File f) {
+                return f.isDirectory() || (f.isFile() && f.getName().endsWith(".java"));
+            }
+        });
+        
+        for(File f : files) {
+            if(f.isDirectory()) {
+                scanDir(f);
+            } else {
+                scanFile(f);
+            }
+        }
+    }
+    
+    private void scanFile(File f) throws IOException {
+        assert f.getName().endsWith(".java");
+        // parse java file
+        FileInputStream fis = new FileInputStream(f);
+        InputStreamReader r = new InputStreamReader(fis, "utf-8");
+        BufferedReader br = new BufferedReader(r);
+        String line = br.readLine();
+        
+        Package p = null;
+        while(line != null) {
+            // process line
+            if(line.startsWith("package")) {
+                String packageName = extractFromLine("package", line);
+                p = this.getOrCreatePackage(packageName);
+            } else if(line.startsWith("import")) {
+                assert p != null;
+                // TODO static imports?
+                String importName = extractFromLine("import static", line);
+                if(importName == null) {
+                    importName = extractFromLine("import", line);
+                }
+                // strip last part, the class name
+                String packageName = getPackageName(importName);
+                p.addImport(packageName,
+                        f.getName().substring(0, f.getName().length() - ".java".length()));
+            }
+            line = br.readLine();
+        }
+        br.close();
+        r.close();
+        fis.close();
+    }
+    
+    private static String extractFromLine(String keyword, String line) {
+        if(!line.startsWith(keyword))
+            return null;
+        
+        String result = line.substring((keyword + " ").length());
+        assert result.endsWith(";");
+        result = result.substring(0, result.length() - 1);
+        return result;
+    }
+    
+    private static String getPackageName(String fullyQualifiedClassName) {
+        int i = fullyQualifiedClassName.lastIndexOf('.');
+        String s = fullyQualifiedClassName.substring(0, i);
+        // might be an inner class
+        String c = getClassName(s);
+        if(Character.isUpperCase(c.charAt(0))) {
+            return getPackageName(s);
+        }
+        return s;
+    }
+    
+    private static String getClassName(String fullyQualifiedClassName) {
+        int i = fullyQualifiedClassName.lastIndexOf('.');
+        String c = fullyQualifiedClassName.substring(i + 1);
+        return c;
+    }
+    
+    public void scanDir(String pathName) throws IOException {
+        this.scanDir(new File(pathName));
     }
     
 }

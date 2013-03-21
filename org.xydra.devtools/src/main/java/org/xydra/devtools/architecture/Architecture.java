@@ -8,6 +8,11 @@ import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 
 
+/**
+ * Defines the constraints and allowed dependencies
+ * 
+ * @author xamde
+ */
 public class Architecture {
     
     private static final Logger log = LoggerFactory.getLogger(Architecture.class);

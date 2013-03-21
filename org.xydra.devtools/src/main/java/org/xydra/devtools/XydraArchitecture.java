@@ -16,8 +16,7 @@ public class XydraArchitecture {
         try {
             Log4jUtils.listConfigFromClasspath();
         } catch(IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
     
