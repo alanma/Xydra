@@ -1,7 +1,7 @@
 package org.xydra.base.change;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.value.XValue;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
@@ -28,74 +28,74 @@ public interface XCommandFactory {
 	 * specified {@link XObject}.
 	 * 
 	 * This method is for advanced users only. We recommend using
-	 * {@link #createSafeAddFieldCommand(XID, XID, XID, XID)} or
-	 * {@link #createForcedAddFieldCommand(XID, XID, XID, XID)} instead.
+	 * {@link #createSafeAddFieldCommand(XId, XId, XId, XId)} or
+	 * {@link #createForcedAddFieldCommand(XId, XId, XId, XId)} instead.
 	 * 
-	 * @param repositoryId The {@link XID} of the {@link XRepository} containing
+	 * @param repositoryId The {@link XId} of the {@link XRepository} containing
 	 *            the {@link XModel}, which contains the {@link XObject} that
 	 *            the {@link XField} shall be added to.
-	 * @param modelId The {@link XID} of the {@link XModel} containing the
+	 * @param modelId The {@link XId} of the {@link XModel} containing the
 	 *            {@link XObject} that the {@link XField} shall be added to.
-	 * @param objectId The {@link XID} of the {@link XObject} that the
+	 * @param objectId The {@link XId} of the {@link XObject} that the
 	 *            {@link XField} is to be added to.
-	 * @param fieldId The {@link XID} of the new {@link XField}.
+	 * @param fieldId The {@link XId} of the new {@link XField}.
 	 * @param isForced true, if this XCommand should be a forced command, false
 	 *            otherwise.
 	 * @return an {@link XObjectCommand} with the specified settings
 	 */
-	public XObjectCommand createAddFieldCommand(XID repositoryId, XID modelId, XID objectId,
-	        XID fieldId, boolean isForced);
+	public XObjectCommand createAddFieldCommand(XId repositoryId, XId modelId, XId objectId,
+	        XId fieldId, boolean isForced);
 	
 	/**
 	 * Creates a safe {@link XObjectCommand} that will add an {@link XField} to
 	 * the specified {@link XObject}
 	 * 
-	 * @param repositoryId The {@link XID} of the {@link XRepository} containing
+	 * @param repositoryId The {@link XId} of the {@link XRepository} containing
 	 *            the {@link XModel}, which contains the {@link XObject} that
 	 *            the {@link XField} shall be added to.
-	 * @param modelId The {@link XID} of the {@link XModel} containing the
+	 * @param modelId The {@link XId} of the {@link XModel} containing the
 	 *            {@link XObject} that the {@link XField} shall be added to.
-	 * @param objectId The {@link XID} of the {@link XObject} that the
+	 * @param objectId The {@link XId} of the {@link XObject} that the
 	 *            {@link XField} is to be added to.
-	 * @param fieldId The {@link XID} of the new {@link XField}
+	 * @param fieldId The {@link XId} of the new {@link XField}
 	 * @return an {@link XObjectCommand} with the specified settings
 	 */
-	public XObjectCommand createSafeAddFieldCommand(XID repositoryId, XID modelId, XID objectId,
-	        XID fieldId);
+	public XObjectCommand createSafeAddFieldCommand(XId repositoryId, XId modelId, XId objectId,
+	        XId fieldId);
 	
 	/**
 	 * Creates a forced {@link XObjectCommand} that will add an {@link XField}
 	 * to the specified {@link XObject}
 	 * 
-	 * @param repositoryId The {@link XID} of the {@link XRepository} containing
+	 * @param repositoryId The {@link XId} of the {@link XRepository} containing
 	 *            the {@link XModel}, which contains the {@link XObject} that
 	 *            the {@link XField} shall be added to.
-	 * @param modelId The {@link XID} of the {@link XModel} containing the
+	 * @param modelId The {@link XId} of the {@link XModel} containing the
 	 *            {@link XObject} that the {@link XField} shall be added to.
-	 * @param objectId The {@link XID} of the {@link XObject} that the
+	 * @param objectId The {@link XId} of the {@link XObject} that the
 	 *            {@link XField} is to be added to.
-	 * @param fieldId The {@link XID} of the new {@link XField}
+	 * @param fieldId The {@link XId} of the new {@link XField}
 	 * @return an {@link XObjectCommand} with the specified settings
 	 */
-	public XObjectCommand createForcedAddFieldCommand(XID repositoryId, XID modelId, XID objectId,
-	        XID fieldId);
+	public XObjectCommand createForcedAddFieldCommand(XId repositoryId, XId modelId, XId objectId,
+	        XId fieldId);
 	
 	/**
 	 * Creates an {@link XObjectCommand} that will add an {@link XField} to the
 	 * specified {@link XObject}
 	 * 
 	 * This method is for advanced users only. We recommend using
-	 * {@link #createSafeAddFieldCommand(XAddress, XID)} or
-	 * {@link #createForcedAddFieldCommand(XAddress, XID)} instead.
+	 * {@link #createSafeAddFieldCommand(XAddress, XId)} or
+	 * {@link #createForcedAddFieldCommand(XAddress, XId)} instead.
 	 * 
 	 * @param objectAddress the {@link XAddress} of the {@link XObject} to which
 	 *            the {@link XField} shall be added.
-	 * @param fieldId The {@link XID} of the new {@link XField}
+	 * @param fieldId The {@link XId} of the new {@link XField}
 	 * @param isForced true, if this XCommand should be a forced command, false
 	 *            otherwise
 	 * @return an {@link XObjectCommand} with the specified settings
 	 */
-	public XObjectCommand createAddFieldCommand(XAddress objectAddress, XID fieldId,
+	public XObjectCommand createAddFieldCommand(XAddress objectAddress, XId fieldId,
 	        boolean isForced);
 	
 	/**
@@ -104,10 +104,10 @@ public interface XCommandFactory {
 	 * 
 	 * @param objectAddress the {@link XAddress} of the {@link XObject} to which
 	 *            the {@link XField} shall be added.
-	 * @param fieldId The {@link XID} of the new {@link XField}
+	 * @param fieldId The {@link XId} of the new {@link XField}
 	 * @return an {@link XObjectCommand} with the specified settings
 	 */
-	public XObjectCommand createSafeAddFieldCommand(XAddress objectAddress, XID fieldId);
+	public XObjectCommand createSafeAddFieldCommand(XAddress objectAddress, XId fieldId);
 	
 	/**
 	 * Creates a forced {@link XObjectCommand} that will add an {@link XField}
@@ -115,112 +115,112 @@ public interface XCommandFactory {
 	 * 
 	 * @param objectAddress the {@link XAddress} of the {@link XObject} to which
 	 *            the {@link XField} shall be added.
-	 * @param fieldId The {@link XID} of the new {@link XField}
+	 * @param fieldId The {@link XId} of the new {@link XField}
 	 * @return an {@link XObjectCommand} with the specified settings
 	 */
-	public XObjectCommand createForcedAddFieldCommand(XAddress objectAddress, XID fieldId);
+	public XObjectCommand createForcedAddFieldCommand(XAddress objectAddress, XId fieldId);
 	
 	/**
 	 * Creates an {@link XRepositoryCommand} that will add an {@link XModel} to
 	 * the specified {@link XRepository}
 	 * 
 	 * This method is for advanced users only. We recommend using
-	 * {@link #createSafeAddModelCommand(XID, XID)} or
-	 * {@link #createForcedAddModelCommand(XID, XID)} instead.
+	 * {@link #createSafeAddModelCommand(XId, XId)} or
+	 * {@link #createForcedAddModelCommand(XId, XId)} instead.
 	 * 
-	 * @param repositoryId The {@link XID} of the {@link XRepository} that the
+	 * @param repositoryId The {@link XId} of the {@link XRepository} that the
 	 *            {@link XModel} shall be added to.
-	 * @param modelId The {@link XID} for the new {@link XModel}.
+	 * @param modelId The {@link XId} for the new {@link XModel}.
 	 * @param isForced true, if this XCommand should be a forced command, false
 	 *            otherwise
 	 * @return an {@link XRepositoryCommand} with the specified settings
 	 */
-	public XRepositoryCommand createAddModelCommand(XID repositoryId, XID modelId, boolean isForced);
+	public XRepositoryCommand createAddModelCommand(XId repositoryId, XId modelId, boolean isForced);
 	
 	/**
 	 * Creates a safe {@link XRepositoryCommand} that will add an {@link XModel}
 	 * to the specified {@link XRepository}
 	 * 
-	 * @param repositoryId The {@link XID} of the {@link XRepository} that the
+	 * @param repositoryId The {@link XId} of the {@link XRepository} that the
 	 *            {@link XModel} shall be added to.
-	 * @param modelId The {@link XID} for the new {@link XModel}.
+	 * @param modelId The {@link XId} for the new {@link XModel}.
 	 * @return an {@link XRepositoryCommand} with the specified settings
 	 */
-	public XRepositoryCommand createSafeAddModelCommand(XID repositoryId, XID modelId);
+	public XRepositoryCommand createSafeAddModelCommand(XId repositoryId, XId modelId);
 	
 	/**
 	 * Creates a forced {@link XRepositoryCommand} that will add an
 	 * {@link XModel} to the specified {@link XRepository}
 	 * 
-	 * @param repositoryId The {@link XID} of the {@link XRepository} that the
+	 * @param repositoryId The {@link XId} of the {@link XRepository} that the
 	 *            {@link XModel} shall be added to.
-	 * @param modelId The {@link XID} for the new {@link XModel}.
+	 * @param modelId The {@link XId} for the new {@link XModel}.
 	 * @return an {@link XRepositoryCommand} with the specified settings
 	 */
-	public XRepositoryCommand createForcedAddModelCommand(XID repositoryId, XID modelId);
+	public XRepositoryCommand createForcedAddModelCommand(XId repositoryId, XId modelId);
 	
 	/**
 	 * Creates an {@link XModelCommand} that will add an {@link XObject} to the
 	 * specified {@link XModel}
 	 * 
 	 * This method is for advanced users only. We recommend using
-	 * {@link #createSafeAddObjectCommand(XID, XID, XID)} or
-	 * {@link #createForcedAddObjectCommand(XID, XID, XID)} instead.
+	 * {@link #createSafeAddObjectCommand(XId, XId, XId)} or
+	 * {@link #createForcedAddObjectCommand(XId, XId, XId)} instead.
 	 * 
-	 * @param repositoryId The {@link XID} of the {@link XRepository} containing
+	 * @param repositoryId The {@link XId} of the {@link XRepository} containing
 	 *            the {@link XModel} that the {@link XObject} shall be added to.
-	 * @param modelId The {@link XID} of the {@link XModel} to which the
+	 * @param modelId The {@link XId} of the {@link XModel} to which the
 	 *            {@link XObject} shall be added to.
-	 * @param objectId The {@link XID} for the new {@link XObject}.
+	 * @param objectId The {@link XId} for the new {@link XObject}.
 	 * @param isForced true, if this XCommand should be a forced command, false
 	 *            otherwise
 	 * @return an {@link XModelCommand} with the specified settings
 	 */
-	public XModelCommand createAddObjectCommand(XID repositoryId, XID modelId, XID objectId,
+	public XModelCommand createAddObjectCommand(XId repositoryId, XId modelId, XId objectId,
 	        boolean isForced);
 	
 	/**
 	 * Creates a safe {@link XModelCommand} that will add an {@link XObject} to
 	 * the specified {@link XModel}
 	 * 
-	 * @param repositoryId The {@link XID} of the {@link XRepository} containing
+	 * @param repositoryId The {@link XId} of the {@link XRepository} containing
 	 *            the {@link XModel} that the {@link XObject} shall be added to.
-	 * @param modelId The {@link XID} of the {@link XModel} to which the
+	 * @param modelId The {@link XId} of the {@link XModel} to which the
 	 *            {@link XObject} shall be added to.
-	 * @param objectId The {@link XID} for the new {@link XObject}.
+	 * @param objectId The {@link XId} for the new {@link XObject}.
 	 * @return an {@link XModelCommand} with the specified settings
 	 */
-	public XModelCommand createSafeAddObjectCommand(XID repositoryId, XID modelId, XID objectId);
+	public XModelCommand createSafeAddObjectCommand(XId repositoryId, XId modelId, XId objectId);
 	
 	/**
 	 * Creates a forced {@link XModelCommand} that will add an {@link XObject}
 	 * to the specified {@link XModel}
 	 * 
-	 * @param repositoryId The {@link XID} of the {@link XRepository} containing
+	 * @param repositoryId The {@link XId} of the {@link XRepository} containing
 	 *            the {@link XModel} that the {@link XObject} shall be added to.
-	 * @param modelId The {@link XID} of the {@link XModel} to which the
+	 * @param modelId The {@link XId} of the {@link XModel} to which the
 	 *            {@link XObject} shall be added to.
-	 * @param objectId The {@link XID} for the new {@link XObject}.
+	 * @param objectId The {@link XId} for the new {@link XObject}.
 	 * @return an {@link XModelCommand} with the specified settings
 	 */
-	public XModelCommand createForcedAddObjectCommand(XID repositoryId, XID modelId, XID objectId);
+	public XModelCommand createForcedAddObjectCommand(XId repositoryId, XId modelId, XId objectId);
 	
 	/**
 	 * Creates an {@link XModelCommand} that will add an {@link XObject} to the
 	 * specified {@link XModel}
 	 * 
 	 * This method is for advanced users only. We recommend using
-	 * {@link #createSafeAddObjectCommand(XAddress, XID)} or
-	 * {@link #createForcedAddObjectCommand(XAddress, XID)} instead.
+	 * {@link #createSafeAddObjectCommand(XAddress, XId)} or
+	 * {@link #createForcedAddObjectCommand(XAddress, XId)} instead.
 	 * 
 	 * @param modelAddress The {@link XAddress} to which the {@link XModel} is
 	 *            to be added.
-	 * @param objectId The {@link XID} for the new {@link XObject}.
+	 * @param objectId The {@link XId} for the new {@link XObject}.
 	 * @param isForced true, if this XCommand should be a forced command, false
 	 *            otherwise
 	 * @return an {@link XModelCommand} with the specified settings
 	 */
-	public XModelCommand createAddObjectCommand(XAddress modelAddress, XID objectId,
+	public XModelCommand createAddObjectCommand(XAddress modelAddress, XId objectId,
 	        boolean isForced);
 	
 	/**
@@ -229,10 +229,10 @@ public interface XCommandFactory {
 	 * 
 	 * @param modelAddress The {@link XAddress} to which the {@link XModel} is
 	 *            to be added.
-	 * @param objectId The {@link XID} for the new {@link XObject}.
+	 * @param objectId The {@link XId} for the new {@link XObject}.
 	 * @return an {@link XModelCommand} with the specified settings
 	 */
-	public XModelCommand createSafeAddObjectCommand(XAddress modelAddress, XID objectId);
+	public XModelCommand createSafeAddObjectCommand(XAddress modelAddress, XId objectId);
 	
 	/**
 	 * Creates a forced {@link XModelCommand} that will add an {@link XObject}
@@ -240,27 +240,27 @@ public interface XCommandFactory {
 	 * 
 	 * @param modelAddress The {@link XAddress} to which the {@link XModel} is
 	 *            to be added.
-	 * @param objectId The {@link XID} for the new {@link XObject}.
+	 * @param objectId The {@link XId} for the new {@link XObject}.
 	 * @return an {@link XModelCommand} with the specified settings
 	 */
-	public XModelCommand createForcedAddObjectCommand(XAddress modelAddress, XID objectId);
+	public XModelCommand createForcedAddObjectCommand(XAddress modelAddress, XId objectId);
 	
 	/**
 	 * Creates an {@link XFieldCommand} that will add an {@link XValue} to the
 	 * specified {@link XField}
 	 * 
 	 * This method is for advanced users only. We recommend using
-	 * {@link #createSafeAddValueCommand(XID, XID, XID, XID, long, XValue)} or
-	 * {@link #createForcedAddValueCommand(XID, XID, XID, XID, XValue)} instead.
+	 * {@link #createSafeAddValueCommand(XId, XId, XId, XId, long, XValue)} or
+	 * {@link #createForcedAddValueCommand(XId, XId, XId, XId, XValue)} instead.
 	 * 
-	 * @param repositoryId The {@link XID} of the {@link XRepository} containing
+	 * @param repositoryId The {@link XId} of the {@link XRepository} containing
 	 *            the {@link XModel}, which contains the {@link XObject}
 	 *            containing the {@link XField} that the {@link XValue} shall be
 	 *            added to.
-	 * @param modelId The {@link XID} of the {@link XModel} containing the
+	 * @param modelId The {@link XId} of the {@link XModel} containing the
 	 *            {@link XObject} containing the {@link XField} that the
 	 *            {@link XValue} shall be added to.
-	 * @param objectId The {@link XID} of the {@link XObject} containing the
+	 * @param objectId The {@link XId} of the {@link XObject} containing the
 	 *            {@link XField} that the {@link XValue} is to be added to.
 	 * @param fieldId
 	 * @param fieldRevision The revision number of the {@link XField} that the
@@ -277,21 +277,21 @@ public interface XCommandFactory {
 	 * @throws IllegalArgumentException if {@link XCommand#FORCED} is passed as
 	 *             {#fieldRevision} and {#isForced} is set to false.
 	 */
-	public XFieldCommand createAddValueCommand(XID repositoryId, XID modelId, XID objectId,
-	        XID fieldId, long fieldRevision, XValue value, boolean isForced);
+	public XFieldCommand createAddValueCommand(XId repositoryId, XId modelId, XId objectId,
+	        XId fieldId, long fieldRevision, XValue value, boolean isForced);
 	
 	/**
 	 * Creates a safe {@link XFieldCommand} that will add an {@link XValue} to
 	 * the specified {@link XField}
 	 * 
-	 * @param repositoryId The {@link XID} of the {@link XRepository} containing
+	 * @param repositoryId The {@link XId} of the {@link XRepository} containing
 	 *            the {@link XModel}, which contains the {@link XObject}
 	 *            containing the {@link XField} that the {@link XValue} shall be
 	 *            added to.
-	 * @param modelId The {@link XID} of the {@link XModel} containing the
+	 * @param modelId The {@link XId} of the {@link XModel} containing the
 	 *            {@link XObject} containing the {@link XField} that the
 	 *            {@link XValue} shall be added to.
-	 * @param objectId The {@link XID} of the {@link XObject} containing the
+	 * @param objectId The {@link XId} of the {@link XObject} containing the
 	 *            {@link XField} that the {@link XValue} is to be added to.
 	 * @param fieldId
 	 * @param fieldRevision The revision number of the {@link XField} that the
@@ -304,28 +304,28 @@ public interface XCommandFactory {
 	 * @throws IllegalArgumentException if {@link XCommand#FORCED} is passed as
 	 *             {#fieldRevision}.
 	 */
-	public XFieldCommand createSafeAddValueCommand(XID repositoryId, XID modelId, XID objectId,
-	        XID fieldId, long fieldRevision, XValue value);
+	public XFieldCommand createSafeAddValueCommand(XId repositoryId, XId modelId, XId objectId,
+	        XId fieldId, long fieldRevision, XValue value);
 	
 	/**
 	 * Creates a forced {@link XFieldCommand} that will add an {@link XValue} to
 	 * the specified {@link XField}
 	 * 
-	 * @param repositoryId The {@link XID} of the {@link XRepository} containing
+	 * @param repositoryId The {@link XId} of the {@link XRepository} containing
 	 *            the {@link XModel}, which contains the {@link XObject}
 	 *            containing the {@link XField} that the {@link XValue} shall be
 	 *            added to.
-	 * @param modelId The {@link XID} of the {@link XModel} containing the
+	 * @param modelId The {@link XId} of the {@link XModel} containing the
 	 *            {@link XObject} containing the {@link XField} that the
 	 *            {@link XValue} shall be added to.
-	 * @param objectId The {@link XID} of the {@link XObject} containing the
+	 * @param objectId The {@link XId} of the {@link XObject} containing the
 	 *            {@link XField} that the {@link XValue} is to be added to.
 	 * @param fieldId
 	 * @param value The {@link XValue} which is to be added.
 	 * @return an {@link XFieldCommand} with the specified settings
 	 */
-	public XFieldCommand createForcedAddValueCommand(XID repositoryId, XID modelId, XID objectId,
-	        XID fieldId, XValue value);
+	public XFieldCommand createForcedAddValueCommand(XId repositoryId, XId modelId, XId objectId,
+	        XId fieldId, XValue value);
 	
 	/**
 	 * Creates an {@link XFieldCommand} that will add an {@link XValue} to the
@@ -388,18 +388,18 @@ public interface XCommandFactory {
 	 * the specified {@link XField}
 	 * 
 	 * This method is for advanced users only. We recommend using
-	 * {@link #createSafeChangeValueCommand(XID, XID, XID, XID, long, XValue)}
-	 * or {@link #createForcedChangeValueCommand(XID, XID, XID, XID, XValue)}
+	 * {@link #createSafeChangeValueCommand(XId, XId, XId, XId, long, XValue)}
+	 * or {@link #createForcedChangeValueCommand(XId, XId, XId, XId, XValue)}
 	 * instead.
 	 * 
-	 * @param repositoryId The {@link XID} of the {@link XRepository} containing
+	 * @param repositoryId The {@link XId} of the {@link XRepository} containing
 	 *            the {@link XModel}, which contains the {@link XObject}
 	 *            containing the {@link XField} which {@link XValue} shall be
 	 *            changed.
-	 * @param modelId The {@link XID} of the {@link XModel} containing the
+	 * @param modelId The {@link XId} of the {@link XModel} containing the
 	 *            {@link XObject} containing the {@link XField} which
 	 *            {@link XValue} shall be changed.
-	 * @param objectId The {@link XID} of the {@link XObject} containing the
+	 * @param objectId The {@link XId} of the {@link XObject} containing the
 	 *            {@link XField} which {@link XValue} is to be changed.
 	 * @param fieldId
 	 * @param fieldRevision The revision number of the {@link XField} which
@@ -417,21 +417,21 @@ public interface XCommandFactory {
 	 * @throws IllegalArgumentException if {@link XCommand#FORCED} is passed as
 	 *             {#fieldRevision} and {#isForced} is set to false.
 	 */
-	public XFieldCommand createChangeValueCommand(XID repositoryId, XID modelId, XID objectId,
-	        XID fieldId, long fieldRevision, XValue value, boolean isForced);
+	public XFieldCommand createChangeValueCommand(XId repositoryId, XId modelId, XId objectId,
+	        XId fieldId, long fieldRevision, XValue value, boolean isForced);
 	
 	/**
 	 * Creates a safe {@link XFieldCommand} that will change the {@link XValue}
 	 * of the specified {@link XField}
 	 * 
-	 * @param repositoryId The {@link XID} of the {@link XRepository} containing
+	 * @param repositoryId The {@link XId} of the {@link XRepository} containing
 	 *            the {@link XModel}, which contains the {@link XObject}
 	 *            containing the {@link XField} which {@link XValue} shall be
 	 *            changed.
-	 * @param modelId The {@link XID} of the {@link XModel} containing the
+	 * @param modelId The {@link XId} of the {@link XModel} containing the
 	 *            {@link XObject} containing the {@link XField} which
 	 *            {@link XValue} shall be changed.
-	 * @param objectId The {@link XID} of the {@link XObject} containing the
+	 * @param objectId The {@link XId} of the {@link XObject} containing the
 	 *            {@link XField} which {@link XValue} is to be changed.
 	 * @param fieldId
 	 * @param fieldRevision The revision number of the {@link XField} which
@@ -444,29 +444,29 @@ public interface XCommandFactory {
 	 * @throws IllegalArgumentException if {@link XCommand#FORCED} is passed as
 	 *             {#fieldRevision}.
 	 */
-	public XFieldCommand createSafeChangeValueCommand(XID repositoryId, XID modelId, XID objectId,
-	        XID fieldId, long fieldRevision, XValue value);
+	public XFieldCommand createSafeChangeValueCommand(XId repositoryId, XId modelId, XId objectId,
+	        XId fieldId, long fieldRevision, XValue value);
 	
 	/**
 	 * Creates a forced {@link XFieldCommand} that will change the
 	 * {@link XValue} of the specified {@link XField}
 	 * 
-	 * @param repositoryId The {@link XID} of the {@link XRepository} containing
+	 * @param repositoryId The {@link XId} of the {@link XRepository} containing
 	 *            the {@link XModel}, which contains the {@link XObject}
 	 *            containing the {@link XField} which {@link XValue} shall be
 	 *            changed.
-	 * @param modelId The {@link XID} of the {@link XModel} containing the
+	 * @param modelId The {@link XId} of the {@link XModel} containing the
 	 *            {@link XObject} containing the {@link XField} which
 	 *            {@link XValue} shall be changed.
-	 * @param objectId The {@link XID} of the {@link XObject} containing the
+	 * @param objectId The {@link XId} of the {@link XObject} containing the
 	 *            {@link XField} which {@link XValue} is to be changed.
 	 * @param fieldId
 	 * @param value The {@link XValue} to which the current {@link XValue} of
 	 *            the {@link XField} is to be changed to.
 	 * @return an {@link XFieldCommand} with the specified settings
 	 */
-	public XFieldCommand createForcedChangeValueCommand(XID repositoryId, XID modelId,
-	        XID objectId, XID fieldId, XValue value);
+	public XFieldCommand createForcedChangeValueCommand(XId repositoryId, XId modelId,
+	        XId objectId, XId fieldId, XValue value);
 	
 	/**
 	 * Creates an {@link XFieldCommand} that will change the {@link XValue} of
@@ -532,15 +532,15 @@ public interface XCommandFactory {
 	 * {@link XField} from the specified {@link XObject}
 	 * 
 	 * This method is for advanced users only. We recommend using
-	 * {@link #createSafeRemoveFieldCommand(XID, XID, XID, XID, long)} or
-	 * {@link #createForcedRemoveFieldCommand(XID, XID, XID, XID)} instead.
+	 * {@link #createSafeRemoveFieldCommand(XId, XId, XId, XId, long)} or
+	 * {@link #createForcedRemoveFieldCommand(XId, XId, XId, XId)} instead.
 	 * 
-	 * @param repositoryId The {@link XID} of the {@link XRepository} containing
+	 * @param repositoryId The {@link XId} of the {@link XRepository} containing
 	 *            the {@link XModel}, which contains the {@link XObject} that
 	 *            the {@link XField} shall be removed from.
-	 * @param modelId The {@link XID} of the {@link XModel} containing the
+	 * @param modelId The {@link XId} of the {@link XModel} containing the
 	 *            {@link XObject} that the {@link XField} shall be added to.
-	 * @param objectId The {@link XID} of the {@link XObject} that the
+	 * @param objectId The {@link XId} of the {@link XObject} that the
 	 *            {@link XField} is to be added to.
 	 * @param fieldId
 	 * @param fieldRevision The revision number of the {@link XField} that is to
@@ -556,19 +556,19 @@ public interface XCommandFactory {
 	 * @throws IllegalArgumentException if {@link XCommand#FORCED} is passed as
 	 *             {#fieldRevision} and {#isForced} is set to false.
 	 */
-	public XObjectCommand createRemoveFieldCommand(XID repositoryId, XID modelId, XID objectId,
-	        XID fieldId, long fieldRevision, boolean isForced);
+	public XObjectCommand createRemoveFieldCommand(XId repositoryId, XId modelId, XId objectId,
+	        XId fieldId, long fieldRevision, boolean isForced);
 	
 	/**
 	 * Creates a safe {@link XObjectCommand} that will remove the specified
 	 * {@link XField} from the specified {@link XObject}
 	 * 
-	 * @param repositoryId The {@link XID} of the {@link XRepository} containing
+	 * @param repositoryId The {@link XId} of the {@link XRepository} containing
 	 *            the {@link XModel}, which contains the {@link XObject} that
 	 *            the {@link XField} shall be removed from.
-	 * @param modelId The {@link XID} of the {@link XModel} containing the
+	 * @param modelId The {@link XId} of the {@link XModel} containing the
 	 *            {@link XObject} that the {@link XField} shall be added to.
-	 * @param objectId The {@link XID} of the {@link XObject} that the
+	 * @param objectId The {@link XId} of the {@link XObject} that the
 	 *            {@link XField} is to be added to.
 	 * @param fieldId
 	 * @param fieldRevision The revision number of the {@link XField} that is to
@@ -580,25 +580,25 @@ public interface XCommandFactory {
 	 *             {#fieldRevision}.
 	 * 
 	 */
-	public XObjectCommand createSafeRemoveFieldCommand(XID repositoryId, XID modelId, XID objectId,
-	        XID fieldId, long fieldRevision);
+	public XObjectCommand createSafeRemoveFieldCommand(XId repositoryId, XId modelId, XId objectId,
+	        XId fieldId, long fieldRevision);
 	
 	/**
 	 * Creates a forced {@link XObjectCommand} that will remove the specified
 	 * {@link XField} from the specified {@link XObject}
 	 * 
-	 * @param repositoryId The {@link XID} of the {@link XRepository} containing
+	 * @param repositoryId The {@link XId} of the {@link XRepository} containing
 	 *            the {@link XModel}, which contains the {@link XObject} that
 	 *            the {@link XField} shall be removed from.
-	 * @param modelId The {@link XID} of the {@link XModel} containing the
+	 * @param modelId The {@link XId} of the {@link XModel} containing the
 	 *            {@link XObject} that the {@link XField} shall be added to.
-	 * @param objectId The {@link XID} of the {@link XObject} that the
+	 * @param objectId The {@link XId} of the {@link XObject} that the
 	 *            {@link XField} is to be added to.
 	 * @param fieldId
 	 * @return an {@link XObjectCommand} with the specified settings
 	 */
-	public XObjectCommand createForcedRemoveFieldCommand(XID repositoryId, XID modelId,
-	        XID objectId, XID fieldId);
+	public XObjectCommand createForcedRemoveFieldCommand(XId repositoryId, XId modelId,
+	        XId objectId, XId fieldId);
 	
 	/**
 	 * Creates an {@link XObjectCommand} that will remove the specified
@@ -657,12 +657,12 @@ public interface XCommandFactory {
 	 * {@link XModel} from the specified {@link XRepository}
 	 * 
 	 * This method is for advanced users only. We recommend using
-	 * {@link #createSafeRemoveModelCommand(XID, XID, long)} or
-	 * {@link #createForcedRemoveModelCommand(XID, XID)} instead.
+	 * {@link #createSafeRemoveModelCommand(XId, XId, long)} or
+	 * {@link #createForcedRemoveModelCommand(XId, XId)} instead.
 	 * 
-	 * @param repositoryId The {@link XID} of the {@link XRepository} that the
+	 * @param repositoryId The {@link XId} of the {@link XRepository} that the
 	 *            {@link XModel} shall be removed from.
-	 * @param modelId The {@link XID} of the {@link XModel} which is to be
+	 * @param modelId The {@link XId} of the {@link XModel} which is to be
 	 *            removed.
 	 * @param modelRevision The revision number of the {@link XModel} that is to
 	 *            be removed.
@@ -677,16 +677,16 @@ public interface XCommandFactory {
 	 * @throws IllegalArgumentException if {@link XCommand#FORCED} is passed as
 	 *             {#modelRevision} and {#isForced} is set to false.
 	 */
-	public XRepositoryCommand createRemoveModelCommand(XID repositoryId, XID modelId,
+	public XRepositoryCommand createRemoveModelCommand(XId repositoryId, XId modelId,
 	        long modelRevision, boolean isForced);
 	
 	/**
 	 * Creates a safe {@link XRepositoryCommand} that will remove the specified
 	 * {@link XModel} from the specified {@link XRepository}
 	 * 
-	 * @param repositoryId The {@link XID} of the {@link XRepository} that the
+	 * @param repositoryId The {@link XId} of the {@link XRepository} that the
 	 *            {@link XModel} shall be removed from.
-	 * @param modelId The {@link XID} of the {@link XModel} which is to be
+	 * @param modelId The {@link XId} of the {@link XModel} which is to be
 	 *            removed.
 	 * @param modelRevision The revision number of the {@link XModel} that is to
 	 *            be removed. Since this method is used to create safe commands,
@@ -696,20 +696,20 @@ public interface XCommandFactory {
 	 * @throws IllegalArgumentException if {@link XCommand#FORCED} is passed as
 	 *             {#modelRevision}.
 	 */
-	public XRepositoryCommand createSafeRemoveModelCommand(XID repositoryId, XID modelId,
+	public XRepositoryCommand createSafeRemoveModelCommand(XId repositoryId, XId modelId,
 	        long modelRevision);
 	
 	/**
 	 * Creates a safe {@link XRepositoryCommand} that will remove the specified
 	 * {@link XModel} from the specified {@link XRepository}
 	 * 
-	 * @param repositoryId The {@link XID} of the {@link XRepository} that the
+	 * @param repositoryId The {@link XId} of the {@link XRepository} that the
 	 *            {@link XModel} shall be removed from.
-	 * @param modelId The {@link XID} of the {@link XModel} which is to be
+	 * @param modelId The {@link XId} of the {@link XModel} which is to be
 	 *            removed.
 	 * @return an {@link XRepositoryCommand} with the specified settings
 	 */
-	public XRepositoryCommand createForcedRemoveModelCommand(XID repositoryId, XID modelId);
+	public XRepositoryCommand createForcedRemoveModelCommand(XId repositoryId, XId modelId);
 	
 	/**
 	 * Creates an {@link XRepositoryCommand} that will remove the specified
@@ -768,15 +768,15 @@ public interface XCommandFactory {
 	 * {@link XObject} from the specified {@link XModel}
 	 * 
 	 * This method is for advanced users only. We recommend using
-	 * {@link #createSafeRemoveObjectCommand(XID, XID, XID, long)} or
-	 * {@link #createForcedRemoveObjectCommand(XID, XID, XID)} instead.
+	 * {@link #createSafeRemoveObjectCommand(XId, XId, XId, long)} or
+	 * {@link #createForcedRemoveObjectCommand(XId, XId, XId)} instead.
 	 * 
-	 * @param repositoryId The {@link XID} of the {@link XRepository} containing
+	 * @param repositoryId The {@link XId} of the {@link XRepository} containing
 	 *            the {@link XModel} that the {@link XObject} shall be removed
 	 *            from.
-	 * @param modelId The {@link XID} of the {@link XModel} that the
+	 * @param modelId The {@link XId} of the {@link XModel} that the
 	 *            {@link XObject} shall be removed from.
-	 * @param objectId The {@link XID} for the {@link XObject} which is to be
+	 * @param objectId The {@link XId} for the {@link XObject} which is to be
 	 *            removed.
 	 * @param objectRevision The revision number of the {@link XObject} that is
 	 *            to be removed.
@@ -791,19 +791,19 @@ public interface XCommandFactory {
 	 * @throws IllegalArgumentException if {@link XCommand#FORCED} is passed as
 	 *             {#objectRevision} and {#isForced} is set to false.
 	 */
-	public XModelCommand createRemoveObjectCommand(XID repositoryId, XID modelId, XID objectId,
+	public XModelCommand createRemoveObjectCommand(XId repositoryId, XId modelId, XId objectId,
 	        long objectRevision, boolean isForced);
 	
 	/**
 	 * Creates a safe {@link XModelCommand} that will remove the specified
 	 * {@link XObject} from the specified {@link XModel}
 	 * 
-	 * @param repositoryId The {@link XID} of the {@link XRepository} containing
+	 * @param repositoryId The {@link XId} of the {@link XRepository} containing
 	 *            the {@link XModel} that the {@link XObject} shall be removed
 	 *            from.
-	 * @param modelId The {@link XID} of the {@link XModel} that the
+	 * @param modelId The {@link XId} of the {@link XModel} that the
 	 *            {@link XObject} shall be removed from.
-	 * @param objectId The {@link XID} for the {@link XObject} which is to be
+	 * @param objectId The {@link XId} for the {@link XObject} which is to be
 	 *            removed.
 	 * @param objectRevision The revision number of the {@link XObject} that is
 	 *            to be removed. Since this method is used to create safe
@@ -814,24 +814,24 @@ public interface XCommandFactory {
 	 * @throws IllegalArgumentException if {@link XCommand#FORCED} is passed as
 	 *             {#objectRevision}.
 	 */
-	public XModelCommand createSafeRemoveObjectCommand(XID repositoryId, XID modelId, XID objectId,
+	public XModelCommand createSafeRemoveObjectCommand(XId repositoryId, XId modelId, XId objectId,
 	        long objectRevision);
 	
 	/**
 	 * Creates a forced {@link XModelCommand} that will remove the specified
 	 * {@link XObject} from the specified {@link XModel}
 	 * 
-	 * @param repositoryId The {@link XID} of the {@link XRepository} containing
+	 * @param repositoryId The {@link XId} of the {@link XRepository} containing
 	 *            the {@link XModel} that the {@link XObject} shall be removed
 	 *            from.
-	 * @param modelId The {@link XID} of the {@link XModel} that the
+	 * @param modelId The {@link XId} of the {@link XModel} that the
 	 *            {@link XObject} shall be removed from.
-	 * @param objectId The {@link XID} for the {@link XObject} which is to be
+	 * @param objectId The {@link XId} for the {@link XObject} which is to be
 	 *            removed.
 	 * 
 	 * @return an {@link XModelCommand} with the specified settings
 	 */
-	public XModelCommand createForcedRemoveObjectCommand(XID repositoryId, XID modelId, XID objectId);
+	public XModelCommand createForcedRemoveObjectCommand(XId repositoryId, XId modelId, XId objectId);
 	
 	/**
 	 * Creates an {@link XModelCommand} that will remove the specified
@@ -890,17 +890,17 @@ public interface XCommandFactory {
 	 * {@link XValue} from the specified {@link XField}
 	 * 
 	 * This method is for advanced users only. We recommend using
-	 * {@link #createSafeRemoveValueCommand(XID, XID, XID, XID, long)} or
-	 * {@link #createForcedRemoveValueCommand(XID, XID, XID, XID)} instead.
+	 * {@link #createSafeRemoveValueCommand(XId, XId, XId, XId, long)} or
+	 * {@link #createForcedRemoveValueCommand(XId, XId, XId, XId)} instead.
 	 * 
-	 * @param repositoryId The {@link XID} of the {@link XRepository} containing
+	 * @param repositoryId The {@link XId} of the {@link XRepository} containing
 	 *            the {@link XModel}, which contains the {@link XObject}
 	 *            containing the {@link XField} that the {@link XValue} shall be
 	 *            removed from.
-	 * @param modelId The {@link XID} of the {@link XModel} containing the
+	 * @param modelId The {@link XId} of the {@link XModel} containing the
 	 *            {@link XObject} containing the {@link XField} that the
 	 *            {@link XValue} shall be removed from.
-	 * @param objectId The {@link XID} of the {@link XObject} containing the
+	 * @param objectId The {@link XId} of the {@link XObject} containing the
 	 *            {@link XField} that the {@link XValue} is to be removed from.
 	 * @param fieldId
 	 * @param fieldRevision The revision number of the {@link XField} that the
@@ -916,21 +916,21 @@ public interface XCommandFactory {
 	 * @throws IllegalArgumentException if {@link XCommand#FORCED} is passed as
 	 *             {#fieldRevision} and {#isForced} is set to false.
 	 */
-	public XFieldCommand createRemoveValueCommand(XID repositoryId, XID modelId, XID objectId,
-	        XID fieldId, long fieldRevision, boolean isForced);
+	public XFieldCommand createRemoveValueCommand(XId repositoryId, XId modelId, XId objectId,
+	        XId fieldId, long fieldRevision, boolean isForced);
 	
 	/**
 	 * Creates a safe {@link XFieldCommand} that will remove the specified
 	 * {@link XValue} from the specified {@link XField}
 	 * 
-	 * @param repositoryId The {@link XID} of the {@link XRepository} containing
+	 * @param repositoryId The {@link XId} of the {@link XRepository} containing
 	 *            the {@link XModel}, which contains the {@link XObject}
 	 *            containing the {@link XField} that the {@link XValue} shall be
 	 *            removed from.
-	 * @param modelId The {@link XID} of the {@link XModel} containing the
+	 * @param modelId The {@link XId} of the {@link XModel} containing the
 	 *            {@link XObject} containing the {@link XField} that the
 	 *            {@link XValue} shall be removed from.
-	 * @param objectId The {@link XID} of the {@link XObject} containing the
+	 * @param objectId The {@link XId} of the {@link XObject} containing the
 	 *            {@link XField} that the {@link XValue} is to be removed from.
 	 * @param fieldId
 	 * @param fieldRevision The revision number of the {@link XField} that the
@@ -941,27 +941,27 @@ public interface XCommandFactory {
 	 * @throws IllegalArgumentException if {@link XCommand#FORCED} is passed as
 	 *             {#fieldRevision}.
 	 */
-	public XFieldCommand createSafeRemoveValueCommand(XID repositoryId, XID modelId, XID objectId,
-	        XID fieldId, long fieldRevision);
+	public XFieldCommand createSafeRemoveValueCommand(XId repositoryId, XId modelId, XId objectId,
+	        XId fieldId, long fieldRevision);
 	
 	/**
 	 * Creates a forced {@link XFieldCommand} that will remove the specified
 	 * {@link XValue} from the specified {@link XField}
 	 * 
-	 * @param repositoryId The {@link XID} of the {@link XRepository} containing
+	 * @param repositoryId The {@link XId} of the {@link XRepository} containing
 	 *            the {@link XModel}, which contains the {@link XObject}
 	 *            containing the {@link XField} that the {@link XValue} shall be
 	 *            removed from.
-	 * @param modelId The {@link XID} of the {@link XModel} containing the
+	 * @param modelId The {@link XId} of the {@link XModel} containing the
 	 *            {@link XObject} containing the {@link XField} that the
 	 *            {@link XValue} shall be removed from.
-	 * @param objectId The {@link XID} of the {@link XObject} containing the
+	 * @param objectId The {@link XId} of the {@link XObject} containing the
 	 *            {@link XField} that the {@link XValue} is to be removed from.
 	 * @param fieldId
 	 * @return an {@link XFieldCommand} with the specified settings
 	 */
-	public XFieldCommand createForcedRemoveValueCommand(XID repositoryId, XID modelId,
-	        XID objectId, XID fieldId);
+	public XFieldCommand createForcedRemoveValueCommand(XId repositoryId, XId modelId,
+	        XId objectId, XId fieldId);
 	
 	/**
 	 * Creates an {@link XFieldCommand} that will remove the specified

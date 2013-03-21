@@ -3,7 +3,7 @@ package org.xydra.core.model.session.impl.arm;
 import java.util.Iterator;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XModelEvent;
@@ -26,11 +26,11 @@ public class ArmProtectedChangeLog implements XChangeLog {
 	
 	private static final long serialVersionUID = -1236561973087579785L;
 	
-	private final XID actor;
+	private final XId actor;
 	private final XAuthorisationManager arm;
 	private final XChangeLog log;
 	
-	public ArmProtectedChangeLog(XChangeLog log, XAuthorisationManager arm, XID actor) {
+	public ArmProtectedChangeLog(XChangeLog log, XAuthorisationManager arm, XId actor) {
 		this.log = log;
 		this.arm = arm;
 		this.actor = actor;

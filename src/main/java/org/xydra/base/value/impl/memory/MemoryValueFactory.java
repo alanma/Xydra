@@ -3,7 +3,7 @@ package org.xydra.base.value.impl.memory;
 import java.util.Collection;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.value.XAddressListValue;
 import org.xydra.base.value.XAddressSetValue;
 import org.xydra.base.value.XAddressSortedSetValue;
@@ -12,9 +12,9 @@ import org.xydra.base.value.XBooleanListValue;
 import org.xydra.base.value.XBooleanValue;
 import org.xydra.base.value.XDoubleListValue;
 import org.xydra.base.value.XDoubleValue;
-import org.xydra.base.value.XIDListValue;
-import org.xydra.base.value.XIDSetValue;
-import org.xydra.base.value.XIDSortedSetValue;
+import org.xydra.base.value.XIdListValue;
+import org.xydra.base.value.XIdSetValue;
+import org.xydra.base.value.XIdSortedSetValue;
 import org.xydra.base.value.XIntegerListValue;
 import org.xydra.base.value.XIntegerValue;
 import org.xydra.base.value.XLongListValue;
@@ -106,32 +106,32 @@ public class MemoryValueFactory implements XValueFactory {
 	}
 	
 	@Override
-    public XIDListValue createIDListValue(Collection<XID> xids) {
+    public XIdListValue createIdListValue(Collection<XId> xids) {
 		return new MemoryIDListValue(xids);
 	}
 	
 	@Override
-    public XIDListValue createIDListValue(XID[] xids) {
+    public XIdListValue createIdListValue(XId[] xids) {
 		return new MemoryIDListValue(xids);
 	}
 	
 	@Override
-    public XIDSetValue createIDSetValue(Collection<XID> values) {
+    public XIdSetValue createIdSetValue(Collection<XId> values) {
 		return new MemoryIDSetValue(values);
 	}
 	
 	@Override
-    public XIDSetValue createIDSetValue(XID[] values) {
+    public XIdSetValue createIdSetValue(XId[] values) {
 		return new MemoryIDSetValue(values);
 	}
 	
 	@Override
-    public XIDSortedSetValue createIDSortedSetValue(Collection<XID> values) {
+    public XIdSortedSetValue createIdSortedSetValue(Collection<XId> values) {
 		return new MemoryIDSortedSetValue(values);
 	}
 	
 	@Override
-    public XIDSortedSetValue createIDSortedSetValue(XID[] values) {
+    public XIdSortedSetValue createIdSortedSetValue(XId[] values) {
 		return new MemoryIDSortedSetValue(values);
 	}
 	

@@ -9,7 +9,7 @@ import java.util.Map;
 
 import org.xydra.annotations.NeverNull;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
@@ -103,7 +103,7 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 		}
 		
 		@Override
-		public XID getId() {
+		public XId getId() {
 			return super.address.getField();
 		}
 		
@@ -163,15 +163,15 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 	private static class CachedObject extends CachedEntity implements XWritableObject,
 	        DeltaUtils.IObjectDiff {
 		/** FieldId -> CachedObject */
-		private Map<XID,CachedField> cachedFields;
+		private Map<XId,CachedField> cachedFields;
 		
 		public CachedObject(XAddress address, EntityState state) {
 			super(address, state);
-			this.cachedFields = new HashMap<XID,SessionCachedModel.CachedField>(2);
+			this.cachedFields = new HashMap<XId,SessionCachedModel.CachedField>(2);
 		}
 		
 		@Override
-		public CachedField createField(XID fieldId) {
+		public CachedField createField(XId fieldId) {
 			return setFieldState(fieldId, EntityState.Added, null);
 		}
 		
@@ -188,7 +188,7 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 		
 		@SuppressWarnings("unused")
 		@Override
-		public XWritableField getField(XID fieldId) {
+		public XWritableField getField(XId fieldId) {
 			CachedField cf = this.cachedFields.get(fieldId);
 			if(WARN_ON_UNCACHED_ACCESS && WARN_ON_FIELDS && cf == null) {
 				log.warn("Field '" + fieldId + "' not prefetched in " + this.getAddress()
@@ -201,7 +201,7 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 		}
 		
 		@Override
-		public XID getId() {
+		public XId getId() {
 			return super.address.getObject();
 		}
 		
@@ -217,8 +217,8 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 		}
 		
 		@Override
-		public Collection<XID> getRemoved() {
-			List<XID> list = new LinkedList<XID>();
+		public Collection<XId> getRemoved() {
+			List<XId> list = new LinkedList<XId>();
 			for(CachedField cf : this.cachedFields.values()) {
 				if(cf.isRemoved()) {
 					list.add(cf.getId());
@@ -247,7 +247,7 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 		
 		@SuppressWarnings("unused")
 		@Override
-		public boolean hasField(XID fieldId) {
+		public boolean hasField(XId fieldId) {
 			CachedField cf = this.cachedFields.get(fieldId);
 			if(cf != null) {
 				return cf.isPresent();
@@ -265,7 +265,7 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 		 * @param baseObject base object
 		 */
 		public void indexFieldsFrom(XReadableObject baseObject) {
-			for(XID fieldId : baseObject) {
+			for(XId fieldId : baseObject) {
 				CachedField cf = this.cachedFields.get(fieldId);
 				XReadableField baseField = baseObject.getField(fieldId);
 				XValue baseValue = baseField.getValue();
@@ -292,20 +292,20 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 		}
 		
 		@Override
-		public Iterator<XID> iterator() {
+		public Iterator<XId> iterator() {
 			// return all Added + Present fields only
-			return new TransformingIterator<Map.Entry<XID,CachedField>,XID>(
+			return new TransformingIterator<Map.Entry<XId,CachedField>,XId>(
 			
-			new AbstractFilteringIterator<Map.Entry<XID,CachedField>>(this.cachedFields.entrySet()
+			new AbstractFilteringIterator<Map.Entry<XId,CachedField>>(this.cachedFields.entrySet()
 			        .iterator()) {
 				@Override
-				protected boolean matchesFilter(Map.Entry<XID,CachedField> entry) {
+				protected boolean matchesFilter(Map.Entry<XId,CachedField> entry) {
 					return entry.getValue().isPresent();
 				}
-			}, new TransformingIterator.Transformer<Map.Entry<XID,CachedField>,XID>() {
+			}, new TransformingIterator.Transformer<Map.Entry<XId,CachedField>,XId>() {
 				
 				@Override
-				public XID transform(Map.Entry<XID,CachedField> entry) {
+				public XId transform(Map.Entry<XId,CachedField> entry) {
 					return entry.getKey();
 				}
 			});
@@ -313,7 +313,7 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 		
 		@SuppressWarnings("unused")
 		@Override
-		public boolean removeField(XID fieldId) {
+		public boolean removeField(XId fieldId) {
 			CachedField cf = this.cachedFields.get(fieldId);
 			if(cf == null) {
 				setFieldState(fieldId, EntityState.Removed, null);
@@ -329,7 +329,7 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 			}
 		}
 		
-		private CachedField setFieldState(XID fieldId, EntityState state, XValue initialValue) {
+		private CachedField setFieldState(XId fieldId, EntityState state, XValue initialValue) {
 			CachedField cf = new CachedField(XX.resolveField(getAddress(), fieldId), state,
 			        initialValue);
 			this.cachedFields.put(fieldId, cf);
@@ -438,13 +438,13 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 	private XAddress address;
 	
 	/** ObjectId -> CachedObject */
-	private Map<XID,CachedObject> cachedObjects;
+	private Map<XId,CachedObject> cachedObjects;
 	
 	private boolean knowsAllObjectIds = false;
 	
 	public SessionCachedModel(XAddress address) {
 		this.address = address;
-		this.cachedObjects = new HashMap<XID,SessionCachedModel.CachedObject>(2);
+		this.cachedObjects = new HashMap<XId,SessionCachedModel.CachedObject>(2);
 	}
 	
 	/**
@@ -514,7 +514,7 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 	}
 	
 	@Override
-	public XWritableObject createObject(@NeverNull XID objectId) {
+	public XWritableObject createObject(@NeverNull XId objectId) {
 		// first, consult caches
 		CachedObject co = this.cachedObjects.get(objectId);
 		if(co != null) {
@@ -549,13 +549,13 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 	}
 	
 	@Override
-	public XID getId() {
+	public XId getId() {
 		return this.address.getModel();
 	}
 	
 	@SuppressWarnings("unused")
 	@Override
-	public XWritableObject getObject(@NeverNull XID objectId) {
+	public XWritableObject getObject(@NeverNull XId objectId) {
 		XWritableObject xo = this.cachedObjects.get(objectId);
 		if(WARN_ON_UNCACHED_ACCESS && xo == null) {
 			log.warn("Object '" + objectId + "' not prefetched in " + this.getAddress()
@@ -576,8 +576,8 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 	}
 	
 	@Override
-	public Collection<XID> getRemoved() {
-		List<XID> list = new LinkedList<XID>();
+	public Collection<XId> getRemoved() {
+		List<XId> list = new LinkedList<XId>();
 		for(CachedObject co : this.cachedObjects.values()) {
 			if(co.isRemoved()) {
 				list.add(co.getId());
@@ -607,7 +607,7 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 	
 	@SuppressWarnings("unused")
 	@Override
-	public boolean hasObject(@NeverNull XID objectId) {
+	public boolean hasObject(@NeverNull XId objectId) {
 		XyAssert.xyAssert(objectId != null);
 		assert objectId != null;
 		CachedObject co = this.cachedObjects.get(objectId);
@@ -629,7 +629,7 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 	 */
 	public void indexModel(XReadableModel baseModel) {
 		long c = 0;
-		for(XID id : baseModel) {
+		for(XId id : baseModel) {
 			indexObject(baseModel.getObject(id));
 			c++;
 		}
@@ -656,7 +656,7 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 			return true;
 		}
 		// else
-		for(Map.Entry<XID,CachedObject> e : this.cachedObjects.entrySet()) {
+		for(Map.Entry<XId,CachedObject> e : this.cachedObjects.entrySet()) {
 			if(e.getValue().isPresent()) {
 				return false;
 			}
@@ -676,24 +676,24 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 	}
 	
 	@Override
-	public Iterator<XID> iterator() {
+	public Iterator<XId> iterator() {
 		// IMPROVE throw exception?
 		if(!this.knowsAllObjectIds) {
 			log.warn("We don't know all object ids - returning incomplete set for " + this.address);
 		}
 		
-		return new TransformingIterator<Map.Entry<XID,CachedObject>,XID>(
+		return new TransformingIterator<Map.Entry<XId,CachedObject>,XId>(
 		
-		new AbstractFilteringIterator<Map.Entry<XID,CachedObject>>(this.cachedObjects.entrySet()
+		new AbstractFilteringIterator<Map.Entry<XId,CachedObject>>(this.cachedObjects.entrySet()
 		        .iterator()) {
 			@Override
-			protected boolean matchesFilter(Map.Entry<XID,CachedObject> entry) {
+			protected boolean matchesFilter(Map.Entry<XId,CachedObject> entry) {
 				return entry.getValue().isPresent();
 			}
-		}, new TransformingIterator.Transformer<Map.Entry<XID,CachedObject>,XID>() {
+		}, new TransformingIterator.Transformer<Map.Entry<XId,CachedObject>,XId>() {
 			
 			@Override
-			public XID transform(Map.Entry<XID,CachedObject> entry) {
+			public XId transform(Map.Entry<XId,CachedObject> entry) {
 				return entry.getKey();
 			}
 		});
@@ -715,7 +715,7 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 	
 	@SuppressWarnings("unused")
 	@Override
-	public boolean removeObject(@NeverNull XID objectId) {
+	public boolean removeObject(@NeverNull XId objectId) {
 		CachedObject co = this.cachedObjects.get(objectId);
 		if(co == null) {
 			if(WARN_ON_UNCACHED_ACCESS && WARN_ON_REMOVES) {
@@ -745,7 +745,7 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 		this.knowsAllObjectIds = b;
 	}
 	
-	private CachedObject setObjectState(XID id, EntityState objectState) {
+	private CachedObject setObjectState(XId id, EntityState objectState) {
 		CachedObject co = new CachedObject(XX.resolveObject(getAddress(), id), objectState);
 		this.cachedObjects.put(id, co);
 		XyAssert.xyAssert(co.getId().equals(id));
@@ -759,7 +759,7 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
 		        + DumpUtils.changesToString(this).toString() + "}";
 	}
 	
-	public boolean isKnownObject(XID objectId) {
+	public boolean isKnownObject(XId objectId) {
 		CachedObject co = this.cachedObjects.get(objectId);
 		return co != null;
 	}

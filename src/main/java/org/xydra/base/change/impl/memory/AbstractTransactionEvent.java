@@ -8,7 +8,7 @@ import java.util.Set;
 import org.xydra.annotations.CanBeNull;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XEvent;
@@ -30,7 +30,7 @@ public abstract class AbstractTransactionEvent implements XTransactionEvent {
 	
 	private static final long serialVersionUID = -3997550048059538237L;
 	
-	private XID actor;
+	private XId actor;
 	
 	// the revision numbers before the event happened
 	private long modelRevision, objectRevision;
@@ -42,7 +42,7 @@ public abstract class AbstractTransactionEvent implements XTransactionEvent {
 	protected AbstractTransactionEvent() {
 	}
 	
-	protected AbstractTransactionEvent(XID actor, XAddress target, long modelRevision,
+	protected AbstractTransactionEvent(XId actor, XAddress target, long modelRevision,
 	        long objectRevision) {
 		XyAssert.xyAssert(actor != null);
 		XyAssert.xyAssert(target != null);
@@ -203,7 +203,7 @@ public abstract class AbstractTransactionEvent implements XTransactionEvent {
 	}
 	
 	@Override
-	public XID getActor() {
+	public XId getActor() {
 		return this.actor;
 	}
 	
@@ -259,11 +259,11 @@ public abstract class AbstractTransactionEvent implements XTransactionEvent {
 		result ^= size();
 		
 		// target
-		XID repoId = this.target.getRepository();
+		XId repoId = this.target.getRepository();
 		if(repoId != null) {
 			result ^= repoId.hashCode();
 		}
-		XID modelId = this.target.getModel();
+		XId modelId = this.target.getModel();
 		if(modelId != null) {
 			result ^= modelId.hashCode();
 		}

@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
@@ -33,9 +33,9 @@ import org.xydra.store.impl.delegate.XydraPersistence;
 
 public class MemoryPersistence implements XydraPersistence {
 	
-	private Map<XID,MemoryModelPersistence> models = new HashMap<XID,MemoryModelPersistence>();
+	private Map<XId,MemoryModelPersistence> models = new HashMap<XId,MemoryModelPersistence>();
 	
-	private XID repoId;
+	private XId repoId;
 	
 	/**
 	 * This method is used to instantiate the persistence via reflection in
@@ -43,7 +43,7 @@ public class MemoryPersistence implements XydraPersistence {
 	 * 
 	 * @param repositoryId repository ID
 	 */
-	public MemoryPersistence(XID repositoryId) {
+	public MemoryPersistence(XId repositoryId) {
 		this.repoId = repositoryId;
 	}
 	
@@ -55,7 +55,7 @@ public class MemoryPersistence implements XydraPersistence {
 	}
 	
 	@Override
-	public long executeCommand(XID actorId, XCommand command) {
+	public long executeCommand(XId actorId, XCommand command) {
 		XAddress address = command.getChangedEntity();
 		// caller asserts repoId matches address
 		MemoryModelPersistence modelPersistence = getModelPersistence(address.getModel());
@@ -81,10 +81,10 @@ public class MemoryPersistence implements XydraPersistence {
 	}
 	
 	@Override
-	public Set<XID> getManagedModelIds() {
-		Set<XID> modelIds = new HashSet<XID>();
+	public Set<XId> getManagedModelIds() {
+		Set<XId> modelIds = new HashSet<XId>();
 		synchronized(this.models) {
-			for(Map.Entry<XID,MemoryModelPersistence> p : this.models.entrySet()) {
+			for(Map.Entry<XId,MemoryModelPersistence> p : this.models.entrySet()) {
 				if(p.getValue().exists()) {
 					modelIds.add(p.getKey());
 				}
@@ -93,7 +93,7 @@ public class MemoryPersistence implements XydraPersistence {
 		return modelIds;
 	}
 	
-	private MemoryModelPersistence getModelPersistence(XID modelId) {
+	private MemoryModelPersistence getModelPersistence(XId modelId) {
 		if(modelId == null) {
 			throw new IllegalArgumentException("modelId must not be null");
 		}
@@ -143,12 +143,12 @@ public class MemoryPersistence implements XydraPersistence {
 	}
 	
 	@Override
-	public XID getRepositoryId() {
+	public XId getRepositoryId() {
 		return this.repoId;
 	}
 	
 	@Override
-	public boolean hasManagedModel(XID modelId) {
+	public boolean hasManagedModel(XId modelId) {
 		synchronized(this.models) {
 			MemoryModelPersistence modelPersistence = this.models.get(modelId);
 			return modelPersistence != null; // FIXME KILL &&

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XAtomicCommand;
 import org.xydra.base.change.XAtomicEvent;
@@ -692,7 +692,7 @@ public class XChanges {
 		if(!repo.getAddress().equals(event.getTarget()))
 			throw new IllegalArgumentException("repository and event don't match");
 		
-		XID modelId = event.getTarget().getModel();
+		XId modelId = event.getTarget().getModel();
 		
 		XyAssert.xyAssert(modelId != null); assert modelId != null;
 		
@@ -801,13 +801,13 @@ public class XChanges {
 			throw new IllegalArgumentException();
 		}
 		
-		XID objectId = event.getObjectId();
+		XId objectId = event.getObjectId();
 		XWritableObject object = model.getObject(objectId);
 		if(object == null) {
 			throw new IllegalStateException();
 		}
 		
-		XID fieldId = event.getFieldId();
+		XId fieldId = event.getFieldId();
 		XWritableField field = object.getField(fieldId);
 		if(field == null) {
 			throw new IllegalStateException();
@@ -839,7 +839,7 @@ public class XChanges {
 			throw new IllegalArgumentException();
 		}
 		
-		XID objectId = event.getObjectId();
+		XId objectId = event.getObjectId();
 		
 		switch(event.getChangeType()) {
 		
@@ -882,13 +882,13 @@ public class XChanges {
 			throw new IllegalArgumentException();
 		}
 		
-		XID objectId = event.getObjectId();
+		XId objectId = event.getObjectId();
 		XWritableObject object = model.getObject(objectId);
 		if(object == null) {
 			throw new IllegalStateException();
 		}
 		
-		XID fieldId = event.getFieldId();
+		XId fieldId = event.getFieldId();
 		
 		switch(event.getChangeType()) {
 		

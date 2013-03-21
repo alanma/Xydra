@@ -1,7 +1,7 @@
 package org.xydra.base.change.impl.memory;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XCommand;
@@ -24,20 +24,20 @@ public class MemoryObjectCommand extends MemoryAtomicCommand implements XObjectC
     
     /**
      * Creates a new {@link XObjectCommand} of the add-type. Will add a new
-     * {@link XField} with the specified {@link XID} to the {@link XObject} this
+     * {@link XField} with the specified {@link XId} to the {@link XObject} this
      * event applies to, if possible.
      * 
-     * @param target The target of this command - object {@link XID} must not be
-     *            null, field {@link XID} has to be null
+     * @param target The target of this command - object {@link XId} must not be
+     *            null, field {@link XId} has to be null
      * @param isForced determines whether this command will be a forced or a
      *            safe command.
-     * @param fieldId The {@link XID} for the {@link XField} which is to be
+     * @param fieldId The {@link XId} for the {@link XField} which is to be
      *            added
      * @return A new {@link XObjectCommand} of the add-type
      * @throws IllegalArgumentException if the given {@link XAddress} doesn't
      *             refer to an {@link XField} or if the given fieldId is null
      */
-    public static XObjectCommand createAddCommand(XAddress target, boolean isForced, XID fieldId) {
+    public static XObjectCommand createAddCommand(XAddress target, boolean isForced, XId fieldId) {
         if(isForced) {
             return createAddCommand(target, XCommand.FORCED, fieldId);
         } else {
@@ -47,21 +47,21 @@ public class MemoryObjectCommand extends MemoryAtomicCommand implements XObjectC
     
     /**
      * Creates a new {@link XObjectCommand} of the add-type. Will add a new
-     * {@link XField} with the specified {@link XID} to the {@link XObject} this
+     * {@link XField} with the specified {@link XId} to the {@link XObject} this
      * event applies to, if possible.
      * 
-     * @param target The target of this command - object {@link XID} must not be
-     *            null, field {@link XID} has to be null
+     * @param target The target of this command - object {@link XId} must not be
+     *            null, field {@link XId} has to be null
      * @param fieldRevision Must be {@link XCommand#FORCED} or
      *            {@link XCommand#SAFE} to determine the behaviour of this
      *            command.
-     * @param fieldId The {@link XID} for the {@link XField} which is to be
+     * @param fieldId The {@link XId} for the {@link XField} which is to be
      *            added
      * @return A new {@link XObjectCommand} of the add-type
      * @throws IllegalArgumentException if the given {@link XAddress} doesn't
      *             refer to an {@link XField} or if the given fieldId is null
      */
-    public static XObjectCommand createAddCommand(XAddress target, long fieldRevision, XID fieldId) {
+    public static XObjectCommand createAddCommand(XAddress target, long fieldRevision, XId fieldId) {
         
         if(fieldRevision != XCommand.FORCED && fieldRevision != XCommand.SAFE)
             throw new RuntimeException("invalid revision for an XObjectCommand of type ADD: "
@@ -75,26 +75,26 @@ public class MemoryObjectCommand extends MemoryAtomicCommand implements XObjectC
      * specified {@link XField} from the {@link XObject} this event applies to,
      * if possible.
      * 
-     * @param target The target of this command - object {@link XID} must not be
-     *            null, field {@link XID} has to be null
+     * @param target The target of this command - object {@link XId} must not be
+     *            null, field {@link XId} has to be null
      * @param fieldRevision The current revision number of the {@link XField}
      *            which is to be removed
-     * @param fieldId The {@link XID} of the {@link XField} which is to be
+     * @param fieldId The {@link XId} of the {@link XField} which is to be
      *            removed
      * @return A new {@link XObjectCommand} of the remove-type
      * @throws IllegalArgumentException if the given {@link XAddress} doesn't
      *             refer to an {@link XField} or if the given fieldId is null
      */
     public static XObjectCommand createRemoveCommand(XAddress target, long fieldRevision,
-            XID fieldId) {
+            XId fieldId) {
         return new MemoryObjectCommand(target, ChangeType.REMOVE, fieldRevision, fieldId);
     }
     
     /** ID of the field being added or removed */
-    private XID fieldId;
+    private XId fieldId;
     
     private MemoryObjectCommand(XAddress target, ChangeType changeType, long fieldRevision,
-            XID fieldId) {
+            XId fieldId) {
         super(target, changeType, fieldRevision);
         
         if(target.getObject() == null)
@@ -132,7 +132,7 @@ public class MemoryObjectCommand extends MemoryAtomicCommand implements XObjectC
     }
     
     @Override
-    public XID getFieldId() {
+    public XId getFieldId() {
         return this.fieldId;
     }
     

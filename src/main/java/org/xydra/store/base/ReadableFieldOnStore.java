@@ -3,7 +3,7 @@ package org.xydra.store.base;
 import java.io.Serializable;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableObject;
@@ -65,7 +65,7 @@ public class ReadableFieldOnStore implements XReadableField, Serializable {
 	}
 	
 	@Override
-	public XID getId() {
+	public XId getId() {
 		return this.address.getField();
 	}
 	

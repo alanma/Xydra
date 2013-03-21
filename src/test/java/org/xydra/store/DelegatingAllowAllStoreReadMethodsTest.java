@@ -1,14 +1,14 @@
 package org.xydra.store;
 
 import org.xydra.base.X;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommandFactory;
 import org.xydra.store.impl.memory.MemoryPersistence;
 
 
 public class DelegatingAllowAllStoreReadMethodsTest extends AbstractAllowAllStoreReadMethodsTest {
-	private XID repositoryId = XX.createUniqueId();
+	private XId repositoryId = XX.createUniqueId();
 	
 	@Override
 	protected XCommandFactory getCommandFactory() {
@@ -16,7 +16,7 @@ public class DelegatingAllowAllStoreReadMethodsTest extends AbstractAllowAllStor
 	}
 	
 	@Override
-	protected XID getRepositoryId() {
+	protected XId getRepositoryId() {
 		return this.repositoryId;
 	}
 	

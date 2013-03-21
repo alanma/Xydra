@@ -2,7 +2,7 @@ package org.xydra.core.index.impl.memory;
 
 import org.xydra.annotations.NeverNull;
 import org.xydra.base.X;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.value.XBooleanValue;
 import org.xydra.base.value.XCollectionValue;
@@ -23,22 +23,22 @@ import org.xydra.sharedutils.XyAssert;
 public class IndexUtils {
 	
 	/**
-	 * Convert non-collection XValue to a XID to be used as a object or model
+	 * Convert non-collection XValue to a XId to be used as a object or model
 	 * Id.
 	 * 
 	 * Currently handles {@link XStringValue}, {@link XDoubleValue},
 	 * {@link XIntegerValue}, {@link XBooleanValue}, {@link XLongValue},
-	 * {@link XID}.
+	 * {@link XId}.
 	 * 
-	 * @param value The value to transform into an {@link XID}.
-	 * @return an XID parsed from an encoded XValue
+	 * @param value The value to transform into an {@link XId}.
+	 * @return an XId parsed from an encoded XValue
 	 */
-	public static XID valueToXID(@NeverNull XValue value) {
+	public static XId valueToXId(@NeverNull XValue value) {
 		XyAssert.xyAssert(value != null);
 		assert value != null;
 		String key;
 		if(value instanceof XStringValue) {
-			return stringToXID(((XStringValue)value).contents());
+			return stringToXId(((XStringValue)value).contents());
 		} else if(value instanceof XDoubleValue) {
 			key = "" + ((XDoubleValue)value).contents();
 			key = "a" + key.replace('.', '-');
@@ -48,9 +48,9 @@ public class IndexUtils {
 			key = "" + ((XBooleanValue)value).contents();
 		} else if(value instanceof XLongValue) {
 			key = "a" + ((XLongValue)value).contents();
-		} else if(value instanceof XID) {
+		} else if(value instanceof XId) {
 			// trivial
-			return ((XID)value);
+			return ((XId)value);
 		} else {
 			// collection types
 			assert (value instanceof XCollectionValue<?>) : "Support for indexing type "
@@ -58,17 +58,17 @@ public class IndexUtils {
 			throw new RuntimeException("Indexing collection types such as "
 			        + value.getClass().getName() + " is not supported.");
 		}
-		XID xid = X.getIDProvider().fromString(key);
+		XId xid = X.getIDProvider().fromString(key);
 		return xid;
 	}
 	
 	/**
-	 * Create a hash XID from given string
+	 * Create a hash XId from given string
 	 * 
 	 * @param s any string
-	 * @return a valid XID
+	 * @return a valid XId
 	 */
-	public static XID stringToXID(String s) {
+	public static XId stringToXId(String s) {
 		String key = "" + s.hashCode();
 		if(key.startsWith("-")) {
 			// like 'minus'

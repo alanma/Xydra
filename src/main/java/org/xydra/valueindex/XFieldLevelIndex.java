@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.change.XFieldEvent;
@@ -55,8 +55,8 @@ public class XFieldLevelIndex {
 	 * index with wrong parameters might result in wrong behavior.
 	 */
 	private boolean defaultIncludeAll;
-	private Set<XID> includedFieldIds;
-	private Set<XID> excludedFieldIds;
+	private Set<XId> includedFieldIds;
+	private Set<XId> excludedFieldIds;
 	
 	/**
 	 * Creates a new index for the given {@link XReadableModel} using the given
@@ -64,7 +64,7 @@ public class XFieldLevelIndex {
 	 * completely indexed during the creation.
 	 * 
 	 * It is possible to specify which {@link XReadableField XReadableFields}
-	 * will be indexed by adding their {@link XID XIDs} to a white-/blacklist.
+	 * will be indexed by adding their {@link XId XIds} to a white-/blacklist.
 	 * See explanation of the parameters for instructions.
 	 * 
 	 * 
@@ -72,19 +72,19 @@ public class XFieldLevelIndex {
 	 * @param indexer The {@link XValueIndexer} which is to be used to get the
 	 *            Strings used for indexing.
 	 * @param defaultIncludeAll if set to true, all {@link XReadableField
-	 *            XReadableFields} which {@link XID} is not it excludeFieldIds
+	 *            XReadableFields} which {@link XId} is not it excludeFieldIds
 	 *            will be indexed, if set to false, only the
-	 *            {@link XReadableField XReadableFields} which {@link XID XIDs}
+	 *            {@link XReadableField XReadableFields} which {@link XId XIds}
 	 *            are in includeFieldIds will be indexed.
-	 * @param includedFieldIds set of {@link XID XIDs}, which determines which
+	 * @param includedFieldIds set of {@link XId XIds}, which determines which
 	 *            {@link XReadableField XReadableFields} will always be indexed,
 	 *            independent of how defaultIncludeAll is set.
-	 * @param excludedFieldIds set of {@link XID XIDs}, which determines which
+	 * @param excludedFieldIds set of {@link XId XIds}, which determines which
 	 *            {@link XReadableField XReadableFields} will never be indexed,
 	 *            independent of how defaultIncludeAll is set.
 	 */
 	public XFieldLevelIndex(XReadableModel model, XValueIndexer indexer, boolean defaultIncludeAll,
-	        Set<XID> includedFieldIds, Set<XID> excludedFieldIds) {
+	        Set<XId> includedFieldIds, Set<XId> excludedFieldIds) {
 		this.indexer = indexer;
 		this.index = indexer.getIndex();
 		
@@ -97,14 +97,14 @@ public class XFieldLevelIndex {
 	}
 	
 	/**
-	 * Checks for the given {@link XID} if fields with this {@link XID} are to
+	 * Checks for the given {@link XId} if fields with this {@link XId} are to
 	 * be indexed or not.
 	 * 
-	 * @param fieldId The {@link XID} which is to be checked.
-	 * @return true, if fields with the given {@link XID} are to be indexed,
+	 * @param fieldId The {@link XId} which is to be checked.
+	 * @return true, if fields with the given {@link XId} are to be indexed,
 	 *         false otherwise.
 	 */
-	private boolean isToBeIndexed(XID fieldId) {
+	private boolean isToBeIndexed(XId fieldId) {
 		
 		if(this.defaultIncludeAll) {
 			if(this.excludedFieldIds == null) {
@@ -138,7 +138,7 @@ public class XFieldLevelIndex {
 	 *            ).
 	 */
 	private void index(XReadableModel model) {
-		for(XID objectId : model) {
+		for(XId objectId : model) {
 			XReadableObject object = model.getObject(objectId);
 			
 			index(object);
@@ -159,7 +159,7 @@ public class XFieldLevelIndex {
 	 * @param object The {@link XReadableObject} which is to be indexed
 	 */
 	private void index(XReadableObject object) {
-		for(XID fieldId : object) {
+		for(XId fieldId : object) {
 			
 			if(this.isToBeIndexed(fieldId)) {
 				XReadableField field = object.getField(fieldId);
@@ -181,7 +181,7 @@ public class XFieldLevelIndex {
 	 * @param field The {@link XReadableField} which is to be indexed
 	 */
 	private void index(XReadableField field) {
-		XID fieldId = field.getId();
+		XId fieldId = field.getId();
 		
 		if(this.isToBeIndexed(fieldId)) {
 			this.indexer.indexValue(field.getAddress(), field.getValue());
@@ -245,9 +245,9 @@ public class XFieldLevelIndex {
 			 * used to remember which fields exist in both models and do not
 			 * need to be checked again later.
 			 */
-			HashSet<XID> intersection = new HashSet<XID>();
+			HashSet<XId> intersection = new HashSet<XId>();
 			
-			for(XID fieldId : oldObject) {
+			for(XId fieldId : oldObject) {
 				XReadableField oldField = oldObject.getField(fieldId);
 				boolean isToBeIndexed = this.isToBeIndexed(fieldId);
 				
@@ -271,7 +271,7 @@ public class XFieldLevelIndex {
 				}
 			}
 			
-			for(XID fieldId : newObject) {
+			for(XId fieldId : newObject) {
 				/*
 				 * TODO is there a faster way to calculate to calculate the
 				 * difference between the newObject and the intersection than
@@ -327,7 +327,7 @@ public class XFieldLevelIndex {
 	 */
 	public void updateIndex(XFieldEvent event, XValue oldValue) {
 		XAddress fieldAddress = event.getChangedEntity();
-		XID fieldId = fieldAddress.getField();
+		XId fieldId = fieldAddress.getField();
 		
 		XAddress modelAddress = XX.resolveModel(event.getRepositoryId(), event.getModelId());
 		if(!this.modelAddress.equals(modelAddress)) {
@@ -488,7 +488,7 @@ public class XFieldLevelIndex {
 			        "the given XReadableObject was no object of the XReadableModel indexed by this index.");
 		}
 		
-		for(XID fieldId : object) {
+		for(XId fieldId : object) {
 			if(this.isToBeIndexed(fieldId)) {
 				XReadableField field = object.getField(fieldId);
 				this.indexer.deIndexValue(field.getAddress(), field.getValue());

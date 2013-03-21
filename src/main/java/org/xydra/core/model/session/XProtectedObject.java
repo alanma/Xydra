@@ -2,7 +2,7 @@ package org.xydra.core.model.session;
 
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.ReadOperation;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XObjectCommand;
 import org.xydra.base.change.XObjectEvent;
@@ -16,7 +16,7 @@ import org.xydra.store.AccessException;
 /**
  * An XProtectedObject is a wrapper (Decorator) for an {@link XObject} which
  * links the {@link XObject} with a specific actor (represented by its
- * {@link XID}) and automatically checks the access rights for this actor on the
+ * {@link XId}) and automatically checks the access rights for this actor on the
  * {@link XObject}, if a method is called and only executes the method, if the
  * actor is allowed to execute it (otherwise {@link AccessException
  * XAccessExceptions} will be thrown).
@@ -31,14 +31,14 @@ public interface XProtectedObject extends XLoggedObject, XExecutesCommands {
 	
 	/**
 	 * Creates a new {@link XField} and adds it to this XProtectedObject or
-	 * returns the already existing {@link XField} if the given {@link XID} was
+	 * returns the already existing {@link XField} if the given {@link XId} was
 	 * already taken (both as an {@link XProtectedField} linked with the actor
 	 * of this XProtectedObject)
 	 * 
-	 * @param fieldId The {@link XID} for the {@link XField} which is to be
+	 * @param fieldId The {@link XId} for the {@link XField} which is to be
 	 *            created.
 	 * @return the newly created {@link XField} or the already existing
-	 *         {@link XField} with this {@link XID} (both as an
+	 *         {@link XField} with this {@link XId} (both as an
 	 *         {@link XProtectedField} linked with the actor of this
 	 *         XProtectedObject)
 	 * @throws AccessException if the actor linked with this field does not have
@@ -47,7 +47,7 @@ public interface XProtectedObject extends XLoggedObject, XExecutesCommands {
 	 */
 	@Override
     @ModificationOperation
-	XProtectedField createField(XID fieldId);
+	XProtectedField createField(XId fieldId);
 	
 	/**
 	 * Executes the given {@link XObjectCommand} if possible.
@@ -57,11 +57,11 @@ public interface XProtectedObject extends XLoggedObject, XExecutesCommands {
 	 * <ul>
 	 * <li>Remove-type {@link XObjectCommand}: the specified {@link XField} does
 	 * not exist and therefore cannot be removed
-	 * <li>Add-type {@link XObjectCommand}: the given {@link XID} is already
-	 * taken and therefore a new {@link XField} with this {@link XID} cannot be
+	 * <li>Add-type {@link XObjectCommand}: the given {@link XId} is already
+	 * taken and therefore a new {@link XField} with this {@link XId} cannot be
 	 * created
-	 * <li>the object-{@link XID} in the {@link XObjectCommand} does not concur
-	 * with the {@link XID} of this XObject
+	 * <li>the object-{@link XId} in the {@link XObjectCommand} does not concur
+	 * with the {@link XId} of this XObject
 	 * </ul>
 	 * 
 	 * @param command The {@link XObjectCommand} which is to be executed
@@ -82,16 +82,16 @@ public interface XProtectedObject extends XLoggedObject, XExecutesCommands {
 	 *         actor that is recorded for change operations. Operations will
 	 *         only succeed if this actor has access.
 	 */
-	XID getActor();
+	XId getActor();
 	
 	/**
-	 * Returns the {@link XField} with the given {@link XID} contained in this
+	 * Returns the {@link XField} with the given {@link XId} contained in this
 	 * XProtectedObject as an {@link XProtectedField} linked with the actor of
 	 * this XProtectedObject.
 	 * 
-	 * @param fieldId The {@link XID} of the {@link XField} which is to be
+	 * @param fieldId The {@link XId} of the {@link XField} which is to be
 	 *            returned
-	 * @return The {@link XField} with the given {@link XID} as an
+	 * @return The {@link XField} with the given {@link XId} as an
 	 *         {@link XProtectedField} linked with the actor of this
 	 *         XProtectedObject or null, if no corresponding {@link XField}
 	 *         exists
@@ -101,6 +101,6 @@ public interface XProtectedObject extends XLoggedObject, XExecutesCommands {
 	 */
 	@Override
     @ReadOperation
-	XProtectedField getField(XID fieldId);
+	XProtectedField getField(XId fieldId);
 	
 }

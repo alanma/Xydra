@@ -8,9 +8,9 @@ import java.util.List;
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
-import org.xydra.base.value.XIDListValue;
+import org.xydra.base.value.XIdListValue;
 import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
 import org.xydra.core.URIFormatException;
@@ -31,7 +31,7 @@ import org.xydra.sharedutils.XyAssert;
  * <li>Key-value pairs must be written as key=value</li>
  * <li>Values are written in JSON syntax
  * <dl>
- * <dt>{@link XID}</dt>
+ * <dt>{@link XId}</dt>
  * <dd>":name"</dd>
  * <dt>XString</dt>
  * <dd>"name"</dd>
@@ -103,7 +103,7 @@ public class SimpleSyntaxUtils {
 		
 	}
 	
-	private static final XID ACTOR_THIS = XX.toId("SimpleSyntaxUtils");
+	private static final XId ACTOR_THIS = XX.toId("SimpleSyntaxUtils");
 	
 	private static final String PSW_THIS = null;
 	
@@ -115,7 +115,7 @@ public class SimpleSyntaxUtils {
 	 * @throws IllegalArgumentException if the given element is not a valid
 	 *             XModel.
 	 */
-	public static XModel toModel(XID modelId, String simpleSyntax) throws IllegalArgumentException {
+	public static XModel toModel(XId modelId, String simpleSyntax) throws IllegalArgumentException {
 		PseudoBufferedReader br = new PseudoBufferedReader(simpleSyntax);
 		String line;
 		
@@ -144,23 +144,23 @@ public class SimpleSyntaxUtils {
 					        + ": Found more than one dot in key name '" + key + "'.");
 				}
 				
-				XID objectId = null;
+				XId objectId = null;
 				try {
 					objectId = XX.toId(keyComponents[0].trim());
 				} catch(URIFormatException e) {
 					throw new IllegalArgumentException("Line " + lineNo + ": Key name syntax '"
-					        + keyComponents[0].trim() + "' is not a valid XID.");
+					        + keyComponents[0].trim() + "' is not a valid XId.");
 				}
 				XObject object = model.createObject(objectId);
 				
-				XID fieldId = null;
+				XId fieldId = null;
 				XField field = null;
 				if(keyComponents.length == 2) {
 					try {
 						fieldId = XX.toId(keyComponents[1].trim());
 					} catch(URIFormatException e) {
 						throw new IllegalArgumentException("Line " + lineNo + ": Key name syntax '"
-						        + keyComponents[1].trim() + "' is not a valid XID.");
+						        + keyComponents[1].trim() + "' is not a valid XId.");
 					}
 					field = object.createField(fieldId);
 				} else {
@@ -188,7 +188,7 @@ public class SimpleSyntaxUtils {
 						if(ids.length == 1) {
 							xvalue = XX.toId(ids[0]);
 						} else {
-							XID[] xids = new XID[ids.length];
+							XId[] xids = new XId[ids.length];
 							for(int i = 0; i < xids.length; i++) {
 								xids[i] = XX.toId(ids[i].trim());
 							}
@@ -207,7 +207,7 @@ public class SimpleSyntaxUtils {
 		return model;
 	}
 	
-	public static String toSimpleSyntax(XID xid) {
+	public static String toSimpleSyntax(XId xid) {
 		StringBuffer buf = new StringBuffer();
 		buf.append("[");
 		buf.append(xid.toString());
@@ -215,7 +215,7 @@ public class SimpleSyntaxUtils {
 		return buf.toString();
 	}
 	
-	public static String toSimpleSyntax(XIDListValue xidListValue) {
+	public static String toSimpleSyntax(XIdListValue xidListValue) {
 		StringBuffer buf = new StringBuffer();
 		buf.append("[");
 		for(int i = 0; i < xidListValue.size(); i++) {
@@ -233,36 +233,36 @@ public class SimpleSyntaxUtils {
 		StringBuffer buf = new StringBuffer();
 		
 		// TODO add XModel.size() ?
-		List<XID> sortedObjectIdS = new ArrayList<XID>();
-		for(XID objectId : model) {
+		List<XId> sortedObjectIdS = new ArrayList<XId>();
+		for(XId objectId : model) {
 			sortedObjectIdS.add(objectId);
 		}
-		Collections.sort(sortedObjectIdS, new Comparator<XID>() {
+		Collections.sort(sortedObjectIdS, new Comparator<XId>() {
 			@Override
-			public int compare(XID o1, XID o2) {
+			public int compare(XId o1, XId o2) {
 				return o1.toString().compareTo(o2.toString());
 			}
 		});
 		
-		for(XID objectId : sortedObjectIdS) {
+		for(XId objectId : sortedObjectIdS) {
 			XObject object = model.getObject(objectId);
 			if(object.isEmpty()) {
 				buf.append(objectId.toString()).append("\n");
 			} else {
 				
 				// sort
-				List<XID> sortedFieldIdS = new ArrayList<XID>();
-				for(XID fieldId : object) {
+				List<XId> sortedFieldIdS = new ArrayList<XId>();
+				for(XId fieldId : object) {
 					sortedFieldIdS.add(fieldId);
 				}
-				Collections.sort(sortedFieldIdS, new Comparator<XID>() {
+				Collections.sort(sortedFieldIdS, new Comparator<XId>() {
 					@Override
-					public int compare(XID o1, XID o2) {
+					public int compare(XId o1, XId o2) {
 						return o1.toString().compareTo(o2.toString());
 					}
 				});
 				
-				for(XID fieldId : sortedFieldIdS) {
+				for(XId fieldId : sortedFieldIdS) {
 					buf.append(objectId.toString()).append(".").append(fieldId.toString())
 					        .append("=");
 					XField field = object.getField(fieldId);

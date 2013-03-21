@@ -9,7 +9,7 @@ import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.WritableUtils;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableModel;
@@ -55,7 +55,7 @@ public class ModelAccessDatabaseOnWritableModel {
 		this.rightsModel = rightsModel;
 	}
 	
-	public XAccessRightValue getAccessDefinition(XID actor, XAddress resource, XID access)
+	public XAccessRightValue getAccessDefinition(XId actor, XAddress resource, XId access)
 	        throws IllegalArgumentException {
 		XyAssert.xyAssert(resource.getAddressedType() != XType.XREPOSITORY);
 		return valueToAccessValue(WritableUtils.getValue(this.rightsModel, actor,
@@ -65,7 +65,7 @@ public class ModelAccessDatabaseOnWritableModel {
 	public Set<XAccessRightDefinition> getDefinitions() {
 		Set<XAccessRightDefinition> defs = new HashSet<XAccessRightDefinition>();
 		// each objectId is an actorId
-		for(XID actorId : this.rightsModel) {
+		for(XId actorId : this.rightsModel) {
 			defs.addAll(getDefinitionsFor(actorId));
 		}
 		return defs;
@@ -75,18 +75,18 @@ public class ModelAccessDatabaseOnWritableModel {
 	 * @param actorId Get only definitions that apply to this actor.
 	 * @return all {@link XAccessRightDefinition} defined for actorId
 	 */
-	public Set<XAccessRightDefinition> getDefinitionsFor(XID actorId) {
+	public Set<XAccessRightDefinition> getDefinitionsFor(XId actorId) {
 		Set<XAccessRightDefinition> defs = new HashSet<XAccessRightDefinition>();
 		XWritableObject actorObject = this.rightsModel.getObject(actorId);
-		for(XID fieldId : actorObject) {
+		for(XId fieldId : actorObject) {
 			XWritableField field = actorObject.getField(fieldId);
 			XValue value = field.getValue();
 			if(value != null) {
 				// parse fieldId
-				Pair<XAddress,XID> pair = PartialAuthorisationDatabaseOnWritableRepository
+				Pair<XAddress,XId> pair = PartialAuthorisationDatabaseOnWritableRepository
 				        .fromFieldId(fieldId);
 				XAddress resource = pair.getFirst();
-				XID access = pair.getSecond();
+				XId access = pair.getSecond();
 				boolean allowed = ((XBooleanValue)value).contents();
 				MemoryAccessDefinition mad = new MemoryAccessDefinition(access, resource, actorId,
 				        allowed);
@@ -96,13 +96,13 @@ public class ModelAccessDatabaseOnWritableModel {
 		return defs;
 	}
 	
-	public void resetAccess(XID actor, XAddress resource, XID access) {
-		XID fieldId = PartialAuthorisationDatabaseOnWritableRepository.toFieldId(resource, access);
+	public void resetAccess(XId actor, XAddress resource, XId access) {
+		XId fieldId = PartialAuthorisationDatabaseOnWritableRepository.toFieldId(resource, access);
 		WritableUtils.removeValue(this.rightsModel, actor, fieldId);
 	}
 	
-	public void setAccess(XID actor, XAddress resource, XID access, boolean allowed) {
-		XID fieldId = PartialAuthorisationDatabaseOnWritableRepository.toFieldId(resource, access);
+	public void setAccess(XId actor, XAddress resource, XId access, boolean allowed) {
+		XId fieldId = PartialAuthorisationDatabaseOnWritableRepository.toFieldId(resource, access);
 		WritableUtils.setValue(this.rightsModel, actor, fieldId, X.getValueFactory()
 		        .createBooleanValue(allowed));
 	}

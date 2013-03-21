@@ -3,7 +3,7 @@ package org.xydra.store.access.impl.delegate;
 import java.util.Set;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.store.access.XAccessListener;
 import org.xydra.store.access.XAccessRightDefinition;
 import org.xydra.store.access.XAccessRightValue;
@@ -36,7 +36,7 @@ public class HookAuthorisationDatabase implements XAuthorisationDatabaseWitListe
 	}
 	
 	@Override
-    public XAccessRightValue getAccessDefinition(XID actor, XAddress resource, XID access)
+    public XAccessRightValue getAccessDefinition(XId actor, XAddress resource, XId access)
 	        throws IllegalArgumentException {
 		beforeRead();
 		return this.authorisationDb.getAccessDefinition(actor, resource, access);
@@ -53,7 +53,7 @@ public class HookAuthorisationDatabase implements XAuthorisationDatabaseWitListe
 	}
 	
 	@Override
-    public boolean isAccessDefined(XID actor, XAddress resource, XID access) {
+    public boolean isAccessDefined(XId actor, XAddress resource, XId access) {
 		beforeRead();
 		return this.authorisationDb.isAccessDefined(actor, resource, access);
 	}
@@ -64,13 +64,13 @@ public class HookAuthorisationDatabase implements XAuthorisationDatabaseWitListe
 	}
 	
 	@Override
-    public void resetAccess(XID actor, XAddress resource, XID access) {
+    public void resetAccess(XId actor, XAddress resource, XId access) {
 		beforeWrite();
 		this.authorisationDb.resetAccess(actor, resource, access);
 	}
 	
 	@Override
-    public void setAccess(XID actor, XAddress resource, XID access, boolean allowed) {
+    public void setAccess(XId actor, XAddress resource, XId access, boolean allowed) {
 		beforeWrite();
 		this.authorisationDb.setAccess(actor, resource, access, allowed);
 	}

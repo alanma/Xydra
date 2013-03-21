@@ -4,7 +4,7 @@ import java.util.Iterator;
 
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.rmof.XWritableField;
@@ -18,19 +18,19 @@ import org.xydra.store.impl.delegate.XydraPersistence;
 public class WritableObjectOnPersistence extends AbstractWritableOnPersistence implements
         XWritableObject {
 	
-	private XID modelId;
+	private XId modelId;
 	
-	private XID objectId;
+	private XId objectId;
 	
-	public WritableObjectOnPersistence(XydraPersistence persistence, XID executingActorId,
-	        XID modelId, XID objectId) {
+	public WritableObjectOnPersistence(XydraPersistence persistence, XId executingActorId,
+	        XId modelId, XId objectId) {
 		super(persistence, executingActorId);
 		this.modelId = modelId;
 		this.objectId = objectId;
 	}
 	
 	@Override
-	public XWritableField createField(XID fieldId) {
+	public XWritableField createField(XId fieldId) {
 		// assume model and object exist
 		XWritableField field = this.getField(fieldId);
 		if(field != null) {
@@ -54,7 +54,7 @@ public class WritableObjectOnPersistence extends AbstractWritableOnPersistence i
 	}
 	
 	@Override
-	public XWritableField getField(XID fieldId) {
+	public XWritableField getField(XId fieldId) {
 		if(hasField(fieldId)) {
 			// make sure changes to object are reflected in persistence
 			return new WritableFieldOnPersistence(this.persistence, this.executingActorId,
@@ -65,7 +65,7 @@ public class WritableObjectOnPersistence extends AbstractWritableOnPersistence i
 	}
 	
 	@Override
-	public XID getId() {
+	public XId getId() {
 		return this.objectId;
 	}
 	
@@ -90,7 +90,7 @@ public class WritableObjectOnPersistence extends AbstractWritableOnPersistence i
 	}
 	
 	@Override
-	public boolean hasField(XID fieldId) {
+	public boolean hasField(XId fieldId) {
 		XWritableObject snapshot = getObjectSnapshot();
 		return snapshot != null && snapshot.hasField(fieldId);
 	}
@@ -102,13 +102,13 @@ public class WritableObjectOnPersistence extends AbstractWritableOnPersistence i
 	}
 	
 	@Override
-	public Iterator<XID> iterator() {
+	public Iterator<XId> iterator() {
 		XWritableObject snapshot = getObjectSnapshot();
-		return snapshot == null ? new NoneIterator<XID>() : snapshot.iterator();
+		return snapshot == null ? new NoneIterator<XId>() : snapshot.iterator();
 	}
 	
 	@Override
-	public boolean removeField(XID fieldId) {
+	public boolean removeField(XId fieldId) {
 		boolean result = hasField(fieldId);
 		XCommand command = X.getCommandFactory().createRemoveFieldCommand(
 		        this.persistence.getRepositoryId(), this.modelId, this.objectId, fieldId,
@@ -118,11 +118,11 @@ public class WritableObjectOnPersistence extends AbstractWritableOnPersistence i
 		return result;
 	}
 	
-	public XID getModelId() {
+	public XId getModelId() {
 		return this.modelId;
 	}
 	
-	public XID getObjectId() {
+	public XId getObjectId() {
 		return this.objectId;
 	}
 	

@@ -8,7 +8,7 @@ import java.util.List;
 import org.junit.Test;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XCommandFactory;
@@ -33,14 +33,14 @@ public abstract class AbstractSingleCommandTransactionTest {
 	
 	public XCommandFactory comFactory;
 	
-	public XID repoId = X.getIDProvider().fromString("testRepo");
+	public XId repoId = X.getIDProvider().fromString("testRepo");
 	public XAddress repoAddress = XX.resolveRepository(this.repoId);
-	public XID actorId = X.getIDProvider().fromString("testActor");
+	public XId actorId = X.getIDProvider().fromString("testActor");
 	
 	@Test
 	public void testSingleCommandTransactionExceptingTransactionEvent() {
 		
-		XID modelId = X.getIDProvider().fromString("singleCommandTransactionModel");
+		XId modelId = X.getIDProvider().fromString("singleCommandTransactionModel");
 		XAddress modelAddress = XX.resolveModel(this.repoId, modelId);
 		
 		XCommand addModelCommand = this.comFactory.createAddModelCommand(this.repoId, modelId,
@@ -51,7 +51,7 @@ public abstract class AbstractSingleCommandTransactionTest {
 		assertTrue("Model couldn't be added, test cannot be executed", revNr >= 0);
 		
 		XTransactionBuilder txnBuilder = new XTransactionBuilder(modelAddress);
-		XID objectId = X.getIDProvider().fromString("singleCommandTransactionObject");
+		XId objectId = X.getIDProvider().fromString("singleCommandTransactionObject");
 		XCommand addObjectCommand = this.comFactory.createAddObjectCommand(this.repoId, modelId,
 		        objectId, false);
 		

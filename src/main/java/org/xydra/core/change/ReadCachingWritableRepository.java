@@ -2,7 +2,7 @@ package org.xydra.core.change;
 
 import java.util.Iterator;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.rmof.XStateWritableModel;
 import org.xydra.base.rmof.XWritableRepository;
 import org.xydra.log.Logger;
@@ -26,25 +26,25 @@ public class ReadCachingWritableRepository extends AbstractDelegatingWritableRep
 	private static final Logger log = LoggerFactory.getLogger(ReadCachingWritableRepository.class);
 	
 	@Override
-	public XStateWritableModel createModel(XID modelId) {
+	public XStateWritableModel createModel(XId modelId) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 	
 	@Override
-	public XStateWritableModel getModel(XID modelId) {
+	public XStateWritableModel getModel(XId modelId) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 	
 	@Override
-	public boolean removeModel(XID modelId) {
+	public boolean removeModel(XId modelId) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 	
 	@Override
-	public boolean hasModel(XID id) {
+	public boolean hasModel(XId id) {
 		// TODO Auto-generated method stub
 		return false;
 	}
@@ -56,7 +56,7 @@ public class ReadCachingWritableRepository extends AbstractDelegatingWritableRep
 	}
 	
 	@Override
-	public Iterator<XID> iterator() {
+	public Iterator<XId> iterator() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -92,15 +92,15 @@ public class ReadCachingWritableRepository extends AbstractDelegatingWritableRep
 	// this.persistence = persistence;
 	// }
 	//
-	// protected Set<XID> knownExistingModelIds = new HashSet<XID>();
+	// protected Set<XId> knownExistingModelIds = new HashSet<XId>();
 	//
-	// protected Set<XID> knownNonExistingModelIds = new HashSet<XID>();
+	// protected Set<XId> knownNonExistingModelIds = new HashSet<XId>();
 	//
-	// protected Map<XID,ReadCachingWritableModel> map = new
-	// HashMap<XID,ReadCachingWritableModel>();
+	// protected Map<XId,ReadCachingWritableModel> map = new
+	// HashMap<XId,ReadCachingWritableModel>();
 	//
 	// @Override
-	// public XWritableModel createModel(XID modelId) {
+	// public XWritableModel createModel(XId modelId) {
 	// ReadCachingWritableModel readCachingModel = this.map.get(modelId);
 	// if(readCachingModel == null) {
 	// // we never read it => created it & cache it
@@ -118,11 +118,11 @@ public class ReadCachingWritableRepository extends AbstractDelegatingWritableRep
 	// }
 	//
 	// @Override
-	// public Iterator<XID> iterator() {
+	// public Iterator<XId> iterator() {
 	// return modelIds().iterator();
 	// }
 	//
-	// private Set<XID> modelIds() {
+	// private Set<XId> modelIds() {
 	// if(!this.knowsAllModelsIds) {
 	// this.knownExistingModelIds =
 	// IndexUtils.toSet(this.map.keySet().iterator());
@@ -133,7 +133,7 @@ public class ReadCachingWritableRepository extends AbstractDelegatingWritableRep
 	// }
 	//
 	// @Override
-	// public boolean hasModel(XID modelId) {
+	// public boolean hasModel(XId modelId) {
 	// return getModel(modelId) != null;
 	// /*
 	// * This impl triggers gae.changes.Utils:73 findChildren() = a query that
@@ -149,7 +149,7 @@ public class ReadCachingWritableRepository extends AbstractDelegatingWritableRep
 	// }
 	//
 	// @Override
-	// public XWritableModel getModel(XID modelId) {
+	// public XWritableModel getModel(XId modelId) {
 	// XWritableModel model = this.map.get(modelId);
 	// if(model == null) {
 	// /* prevent asking base again for models that simply don't exists */
@@ -180,7 +180,7 @@ public class ReadCachingWritableRepository extends AbstractDelegatingWritableRep
 	// }
 	//
 	// @Override
-	// public boolean removeModel(XID modelId) {
+	// public boolean removeModel(XId modelId) {
 	// this.knownExistingModelIds.remove(modelId);
 	// this.knownNonExistingModelIds.add(modelId);
 	// return this.map.remove(modelId) != null |

@@ -1,6 +1,6 @@
 package org.xydra.store.impl.memory;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.store.access.XAccessControlManager;
 import org.xydra.store.access.XAuthenticationDatabase;
 import org.xydra.store.access.XAuthorisationManager;
@@ -29,7 +29,7 @@ public class AllowAllAccessControlManager implements XAccessControlManager {
 	}
 	
 	@Override
-	public boolean isAuthenticated(XID actorId, String passwordHash) {
+	public boolean isAuthenticated(XId actorId, String passwordHash) {
 		return true;
 	}
 	

@@ -8,7 +8,7 @@ import java.util.List;
 
 import org.junit.Test;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XTransaction;
@@ -46,7 +46,7 @@ abstract public class AbstractSerializedCommandTest extends AbstractSerializingT
 	private static final XAddress model = XX.toAddress("/repo/model");
 	private static final XAddress object = XX.toAddress("/repo/model/object");
 	private static final XAddress field = XX.toAddress("/repo/model/object/field");
-	private static final XID id = XX.toId("id");
+	private static final XId id = XX.toId("id");
 	private static final XValue value = XV.toValue(42);
 	
 	// field commands

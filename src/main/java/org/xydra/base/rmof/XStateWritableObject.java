@@ -2,7 +2,7 @@ package org.xydra.base.rmof;
 
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.ReadOperation;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 
 
 /**
@@ -13,15 +13,15 @@ import org.xydra.base.XID;
 public interface XStateWritableObject extends XStateReadableObject {
 	
 	@ModificationOperation
-	XStateWritableField createField(XID fieldId);
+	XStateWritableField createField(XId fieldId);
 	
 	/* More specific return type */
 	@Override
 	@ReadOperation
-	XStateWritableField getField(XID fieldId);
+	XStateWritableField getField(XId fieldId);
 	
 	/**
-	 * Removes the {@link XWritableField} with the given {@link XID} from this
+	 * Removes the {@link XWritableField} with the given {@link XId} from this
 	 * XObject
 	 * 
 	 * @param fieldId The field which is to be removed
@@ -32,6 +32,6 @@ public interface XStateWritableObject extends XStateReadableObject {
 	 *             itself
 	 */
 	@ModificationOperation
-	boolean removeField(XID fieldId);
+	boolean removeField(XId fieldId);
 	
 }

@@ -1,6 +1,6 @@
 package org.xydra.core.model.session.impl.arm;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.XFieldCommand;
 import org.xydra.base.value.XValue;
 import org.xydra.core.change.XFieldEventListener;
@@ -21,7 +21,7 @@ public class ArmProtectedField extends ArmProtectedBaseField implements XProtect
 	
 	private final XField field;
 	
-	public ArmProtectedField(XField field, XAuthorisationManager arm, XID actor) {
+	public ArmProtectedField(XField field, XAuthorisationManager arm, XId actor) {
 		super(field, arm, actor);
 		this.field = field;
 	}

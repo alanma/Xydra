@@ -3,7 +3,7 @@ package org.xydra.core.model.session.impl.arm;
 import java.util.Iterator;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableObject;
@@ -22,11 +22,11 @@ import org.xydra.store.access.XAuthorisationManager;
  */
 public class ArmProtectedBaseObject implements XReadableObject {
 	
-	protected final XID actor;
+	protected final XId actor;
 	protected final XAuthorisationManager arm;
 	private final XReadableObject object;
 	
-	public ArmProtectedBaseObject(XReadableObject object, XAuthorisationManager arm, XID actor) {
+	public ArmProtectedBaseObject(XReadableObject object, XAuthorisationManager arm, XId actor) {
 		this.object = object;
 		this.arm = arm;
 		this.actor = actor;
@@ -35,7 +35,7 @@ public class ArmProtectedBaseObject implements XReadableObject {
 		XyAssert.xyAssert(arm != null); assert arm != null;
 	}
 	
-	protected void checkCanKnowAboutField(XID fieldId) {
+	protected void checkCanKnowAboutField(XId fieldId) {
 		if(!this.arm.canKnowAboutField(this.actor, getAddress(), fieldId)) {
 			throw new AccessException(this.actor + " cannot read field " + fieldId + " in "
 			        + getAddress());
@@ -49,7 +49,7 @@ public class ArmProtectedBaseObject implements XReadableObject {
 		}
 	}
 	
-	public XID getActor() {
+	public XId getActor() {
 		return this.actor;
 	}
 	
@@ -59,7 +59,7 @@ public class ArmProtectedBaseObject implements XReadableObject {
 	}
 	
 	@Override
-    public XReadableField getField(XID fieldId) {
+    public XReadableField getField(XId fieldId) {
 		
 		checkCanKnowAboutField(fieldId);
 		
@@ -73,7 +73,7 @@ public class ArmProtectedBaseObject implements XReadableObject {
 	}
 	
 	@Override
-    public XID getId() {
+    public XId getId() {
 		return this.object.getId();
 	}
 	
@@ -86,7 +86,7 @@ public class ArmProtectedBaseObject implements XReadableObject {
 	}
 	
 	@Override
-    public boolean hasField(XID fieldId) {
+    public boolean hasField(XId fieldId) {
 		
 		checkReadAccess();
 		
@@ -102,7 +102,7 @@ public class ArmProtectedBaseObject implements XReadableObject {
 	}
 	
 	@Override
-    public Iterator<XID> iterator() {
+    public Iterator<XId> iterator() {
 		
 		checkReadAccess();
 		

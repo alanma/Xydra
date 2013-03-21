@@ -4,7 +4,7 @@ import java.util.Iterator;
 
 import org.xydra.annotations.NeverNull;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
@@ -22,11 +22,11 @@ import org.xydra.store.access.XAuthorisationManager;
  */
 public class ArmProtectedBaseModel implements XReadableModel {
     
-    protected final XID actor;
+    protected final XId actor;
     protected final XAuthorisationManager arm;
     private final XReadableModel model;
     
-    public ArmProtectedBaseModel(XReadableModel model, XAuthorisationManager arm, XID actor) {
+    public ArmProtectedBaseModel(XReadableModel model, XAuthorisationManager arm, XId actor) {
         this.model = model;
         this.arm = arm;
         this.actor = actor;
@@ -37,7 +37,7 @@ public class ArmProtectedBaseModel implements XReadableModel {
         assert arm != null;
     }
     
-    protected void checkCanKnowAboutObject(XID objectId) {
+    protected void checkCanKnowAboutObject(XId objectId) {
         if(!this.arm.canKnowAboutObject(this.actor, getAddress(), objectId)) {
             throw new AccessException(this.actor + " cannot read object " + objectId + " in "
                     + getAddress());
@@ -51,7 +51,7 @@ public class ArmProtectedBaseModel implements XReadableModel {
         }
     }
     
-    public XID getActor() {
+    public XId getActor() {
         return this.actor;
     }
     
@@ -61,12 +61,12 @@ public class ArmProtectedBaseModel implements XReadableModel {
     }
     
     @Override
-    public XID getId() {
+    public XId getId() {
         return this.model.getId();
     }
     
     @Override
-    public XReadableObject getObject(@NeverNull XID objectId) {
+    public XReadableObject getObject(@NeverNull XId objectId) {
         
         checkCanKnowAboutObject(objectId);
         
@@ -88,7 +88,7 @@ public class ArmProtectedBaseModel implements XReadableModel {
     }
     
     @Override
-    public boolean hasObject(@NeverNull XID objectId) {
+    public boolean hasObject(@NeverNull XId objectId) {
         
         checkReadAccess();
         
@@ -104,7 +104,7 @@ public class ArmProtectedBaseModel implements XReadableModel {
     }
     
     @Override
-    public Iterator<XID> iterator() {
+    public Iterator<XId> iterator() {
         
         checkReadAccess();
         

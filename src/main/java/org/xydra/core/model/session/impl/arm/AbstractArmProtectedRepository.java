@@ -3,7 +3,7 @@ package org.xydra.core.model.session.impl.arm;
 import java.util.Iterator;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XRepositoryCommand;
 import org.xydra.core.change.XFieldEventListener;
@@ -30,11 +30,11 @@ import org.xydra.store.access.XAuthorisationManager;
  */
 abstract public class AbstractArmProtectedRepository implements XProtectedRepository {
 	
-	private final XID actor;
+	private final XId actor;
 	private final XAuthorisationManager arm;
 	private final XRepository repo;
 	
-	public AbstractArmProtectedRepository(XRepository repo, XAuthorisationManager arm, XID actor) {
+	public AbstractArmProtectedRepository(XRepository repo, XAuthorisationManager arm, XId actor) {
 		this.repo = repo;
 		this.arm = arm;
 		this.actor = actor;
@@ -90,7 +90,7 @@ abstract public class AbstractArmProtectedRepository implements XProtectedReposi
 	}
 	
 	@Override
-    public XProtectedModel createModel(XID modelId) {
+    public XProtectedModel createModel(XId modelId) {
 		
 		if(!this.arm.canWrite(this.actor, getAddress())) {
 			throw new AccessException(this.actor + " cannot write to " + getAddress());
@@ -130,7 +130,7 @@ abstract public class AbstractArmProtectedRepository implements XProtectedReposi
 	}
 	
 	@Override
-    public XID getActor() {
+    public XId getActor() {
 		return this.actor;
 	}
 	
@@ -143,15 +143,15 @@ abstract public class AbstractArmProtectedRepository implements XProtectedReposi
 		return this.arm;
 	}
 	
-	abstract protected XAuthorisationManager getArmForModel(XID modelId);
+	abstract protected XAuthorisationManager getArmForModel(XId modelId);
 	
 	@Override
-    public XID getId() {
+    public XId getId() {
 		return this.repo.getId();
 	}
 	
 	@Override
-    public XProtectedModel getModel(XID modelId) {
+    public XProtectedModel getModel(XId modelId) {
 		
 		XAuthorisationManager modelArm = getArmForModel(modelId);
 		
@@ -170,7 +170,7 @@ abstract public class AbstractArmProtectedRepository implements XProtectedReposi
 	}
 	
 	@Override
-    public boolean hasModel(XID modelId) {
+    public boolean hasModel(XId modelId) {
 		
 		checkReadAccess();
 		
@@ -186,7 +186,7 @@ abstract public class AbstractArmProtectedRepository implements XProtectedReposi
 	}
 	
 	@Override
-    public Iterator<XID> iterator() {
+    public Iterator<XId> iterator() {
 		
 		checkReadAccess();
 		
@@ -219,7 +219,7 @@ abstract public class AbstractArmProtectedRepository implements XProtectedReposi
 	}
 	
 	@Override
-    public boolean removeModel(XID modelId) {
+    public boolean removeModel(XId modelId) {
 		
 		if(!getArmForModel(modelId).canRemoveModel(this.actor, getAddress(), modelId)) {
 			throw new AccessException(this.actor + " cannot remove " + modelId + " from "

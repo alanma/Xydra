@@ -11,10 +11,10 @@ import java.util.List;
 
 import org.junit.Test;
 import org.xydra.base.X;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.value.XBooleanValue;
-import org.xydra.base.value.XIDListValue;
+import org.xydra.base.value.XIdListValue;
 import org.xydra.base.value.XStringValue;
 import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
@@ -42,11 +42,11 @@ public class APITest {
 	
 	// A wrapper for the books - A book can be modeled as an XObject
 	static class Book {
-		public static final XID authorID = XX.toId("author");
-		public static final XID copiesID = XX.toId("copies");
+		public static final XId authorID = XX.toId("author");
+		public static final XId copiesID = XX.toId("copies");
 		// we'll use XFields and XValues to store the informations about the
-		// book, so we need some XIDs for that
-		public static final XID titleID = XX.toId("title");
+		// book, so we need some XIds for that
+		public static final XId titleID = XX.toId("title");
 		
 		private XObject book;
 		
@@ -55,9 +55,9 @@ public class APITest {
 		}
 		
 		// a method for adding a copy
-		public void addCopy(XID actorID, XID copyID) {
+		public void addCopy(XId actorID, XId copyID) {
 			XField copies = this.book.getField(copiesID);
-			XIDListValue copiesList = (XIDListValue)copies.getValue();
+			XIdListValue copiesList = (XIdListValue)copies.getValue();
 			copiesList = copiesList.add(copyID);
 			copies.setValue(copiesList);
 		}
@@ -76,9 +76,9 @@ public class APITest {
 			}
 		}
 		
-		// a method for getting the XIDs of the copies of this book
-		public List<XID> getCopies() {
-			return XV.asList((XIDListValue)this.book.getField(copiesID).getValue());
+		// a method for getting the XIds of the copies of this book
+		public List<XId> getCopies() {
+			return XV.asList((XIdListValue)this.book.getField(copiesID).getValue());
 		}
 		
 		// a method for getting the title
@@ -93,17 +93,17 @@ public class APITest {
 		}
 		
 		// a method for setting the author
-		public void setAuthor(XID actorID, String author) {
+		public void setAuthor(XId actorID, String author) {
 			this.book.getField(authorID).setValue(XV.toValue(author));
 		}
 		
 		// a method for setting the title
-		public void setTitle(XID actorID, String name) {
+		public void setTitle(XId actorID, String name) {
 			this.book.getField(titleID).setValue(XV.toValue(name));
 		}
 		
 		// a little method to set up the object structure
-		public void setUp(XID actorID) {
+		public void setUp(XId actorID) {
 			this.book.createField(titleID); // create a field for the
 			// name
 			this.book.createField(authorID); // create a field for the
@@ -118,12 +118,12 @@ public class APITest {
 			// we'll set up the value here too, because wed take it for granted
 			// that setUp will only be called on "new" objects
 			// otherwise it might overwrite the already existing value
-			copiesField.setValue(XV.toValue(new XID[] {})); // the
+			copiesField.setValue(XV.toValue(new XId[] {})); // the
 			// copies
 			// have
 			// an
 			// own
-			// XID,
+			// XId,
 			// so
 			// we'll
 			// store those
@@ -133,9 +133,9 @@ public class APITest {
 	// A wrapper for a book copy - a book copy can be modeled as an XObject
 	static class BookCopy {
 		// we'll use XFields and XValues to store the informations about the
-		// book copy, so we need some XIDs for that
-		public static final XID copyOfID = XX.toId("copyOf");
-		public static final XID isBorrowedID = XX.toId("isBorrowed");
+		// book copy, so we need some XIds for that
+		public static final XId copyOfID = XX.toId("copyOf");
+		public static final XId isBorrowedID = XX.toId("isBorrowed");
 		
 		private XObject bookCopy;
 		
@@ -143,14 +143,14 @@ public class APITest {
 			this.bookCopy = bookCopy;
 		}
 		
-		// a method for getting the XID this bookCopy is a copy of
-		public XID getCopyOf() {
+		// a method for getting the XId this bookCopy is a copy of
+		public XId getCopyOf() {
 			XValue value = this.bookCopy.getField(copyOfID).getValue();
 			
-			if(value instanceof XID) {
-				return ((XID)value);
+			if(value instanceof XId) {
+				return ((XId)value);
 			} else {
-				return null; // the copyOf-Field should hold an XID
+				return null; // the copyOf-Field should hold an XId
 			}
 		}
 		
@@ -168,18 +168,18 @@ public class APITest {
 			}
 		}
 		
-		// a method for setting the XID this bookCopy is a copy of
-		public void setCopyOf(XID actorID, XID bookID) {
+		// a method for setting the XId this bookCopy is a copy of
+		public void setCopyOf(XId actorID, XId bookID) {
 			this.bookCopy.getField(copyOfID).setValue(bookID);
 		}
 		
 		// a method for setting whether this bookCopy is borrowed or not
-		public void setIsBorrowed(XID actorID, boolean isBorrowed) {
+		public void setIsBorrowed(XId actorID, boolean isBorrowed) {
 			this.bookCopy.getField(isBorrowedID).setValue(XV.toValue(isBorrowed));
 		}
 		
 		// a little method to set up the object structure
-		public void setUp(XID actorID) {
+		public void setUp(XId actorID) {
 			this.bookCopy.createField(copyOfID); // create a field for
 			// the ID of the book
 			// this object is a
@@ -192,10 +192,10 @@ public class APITest {
 	
 	// A wrapper for the library - a library can be modeled as an XRepository
 	static class Library {
-		public static final XID bookCopiesID = XX.toId("bookCopies");
+		public static final XId bookCopiesID = XX.toId("bookCopies");
 		// we'll use 2 models for books and bookCopies, so we'll need 2 unique
 		// IDs:
-		public static final XID booksID = XX.toId("books");
+		public static final XId booksID = XX.toId("books");
 		
 		// we'll interpret the library itself as an XRepository
 		private XRepository library;
@@ -205,8 +205,8 @@ public class APITest {
 		}
 		
 		// a method to add a new book to the library
-		public XID addBook(XID actorID, String title, String author) {
-			XID bookID = XX.createUniqueId();
+		public XId addBook(XId actorID, String title, String author) {
+			XId bookID = XX.createUniqueId();
 			XObject book = this.library.getModel(booksID).createObject(bookID);
 			
 			Book bookWrapper = new Book(book); // we'll use the book wrapper to
@@ -222,11 +222,11 @@ public class APITest {
 		// correctly set up
 		
 		// a method to add a copy of a specified book to the library
-		public XID addBookyCopy(XID actorID, XID bookID) {
+		public XId addBookyCopy(XId actorID, XId bookID) {
 			XObject book = this.library.getModel(booksID).getObject(bookID);
 			if(book != null) {
 				Book bookWrapper = new Book(book);
-				XID bookCopyID = XX.createUniqueId();
+				XId bookCopyID = XX.createUniqueId();
 				XObject bookCopy = this.library.getModel(bookCopiesID).createObject(bookCopyID);
 				
 				BookCopy bookCopyWrapper = new BookCopy(bookCopy); // we'll use
@@ -250,14 +250,14 @@ public class APITest {
 		
 		// a method for borrowing a book (will return null if no copy of this
 		// book is available)
-		public XID borrow(XID actorID, XID bookID) {
+		public XId borrow(XId actorID, XId bookID) {
 			XObject book = this.library.getModel(booksID).getObject(bookID);
 			
 			if(book != null) {
 				Book bookWrapper = new Book(book);
 				
 				// find an unborrowed copy
-				for(XID copyID : bookWrapper.getCopies()) {
+				for(XId copyID : bookWrapper.getCopies()) {
 					XObject unborrowedCopy = this.library.getModel(bookCopiesID).getObject(copyID);
 					
 					if(unborrowedCopy != null) {
@@ -281,14 +281,14 @@ public class APITest {
 		}
 		
 		// a method for checking whether a book has unborrowed copies
-		public boolean hasUnborrowedCopies(XID bookID) {
+		public boolean hasUnborrowedCopies(XId bookID) {
 			XObject book = this.library.getModel(booksID).getObject(bookID);
 			
 			if(book != null) {
 				Book bookWrapper = new Book(book);
 				
 				// find an unborrowed copy
-				for(XID copyID : bookWrapper.getCopies()) {
+				for(XId copyID : bookWrapper.getCopies()) {
 					XObject unborrowedCopy = this.library.getModel(bookCopiesID).getObject(copyID);
 					
 					if(unborrowedCopy != null) {
@@ -308,7 +308,7 @@ public class APITest {
 		}
 		
 		// a method for returning a copy of a book
-		public void returnCopy(XID actorID, XID copyID) {
+		public void returnCopy(XId actorID, XId copyID) {
 			XObject copy = this.library.getModel(bookCopiesID).getObject(copyID);
 			
 			if(copy != null) {
@@ -318,7 +318,7 @@ public class APITest {
 		}
 		
 		// a little method to set up the model structure
-		public void setUp(XID actorID) {
+		public void setUp(XId actorID) {
 			this.library.createModel(booksID); // create model for the
 			// books
 			this.library.createModel(bookCopiesID); // create model for
@@ -329,22 +329,22 @@ public class APITest {
 	/**
 	 * Sets the {@link XField} specified by 'fieldId' of the given
 	 * {@link XObject} to given stringValue on behalf of the actor with
-	 * {@link XID} 'actorID'
+	 * {@link XId} 'actorID'
 	 * 
 	 * @param object The {@link XObject} containing the {@link XField} specified
 	 *            by'fieldId'.
-	 * @param fieldId The {@link XID} of the {@link XField} which value is to be
+	 * @param fieldId The {@link XId} of the {@link XField} which value is to be
 	 *            set. {@link XField} will be created if it doesn't exist.
 	 * @param stringValue The new String, which will be set as the value of the
 	 *            specified {@link XField}.
 	 */
-	public static void safeSetStringValue(XObject object, XID fieldId, String stringValue) {
+	public static void safeSetStringValue(XObject object, XId fieldId, String stringValue) {
 		if(object != null) {
 			CoreUtils.setValue(object, fieldId, XV.toValue(stringValue));
 		}
 	}
 	
-	private XID actorId = XX.toId("AbstractTestAPI");
+	private XId actorId = XX.toId("AbstractTestAPI");
 	
 	private String password = null; // TODO auth: where to get this?
 	
@@ -382,7 +382,7 @@ public class APITest {
 		
 		// - do the same with a field that was created by an object -
 		XRepository repo = X.createMemoryRepository(this.actorId);
-		XID modelId = XX.createUniqueId();
+		XId modelId = XX.createUniqueId();
 		XModel model = repo.createModel(modelId);
 		XObject object = model.createObject(XX.createUniqueId());
 		field = object.createField(XX.createUniqueId());
@@ -436,7 +436,7 @@ public class APITest {
 	public void testLibrary() {
 		// Use the omnipotent X to get a repository
 		XRepository libraryRepo = X.createMemoryRepository(this.actorId);
-		XID actorID = XX.createUniqueId();
+		XId actorID = XX.createUniqueId();
 		
 		// Wrap it with the library class and set it up
 		Library library = new Library(libraryRepo);
@@ -444,15 +444,15 @@ public class APITest {
 		// as a library
 		
 		// add some books
-		XID hitchhikerID = library.addBook(actorID, "The Hitchhiker's Guide To The Galaxy",
+		XId hitchhikerID = library.addBook(actorID, "The Hitchhiker's Guide To The Galaxy",
 		        "Douglas Adams");
-		XID guardsguardsID = library.addBook(actorID, "Guards! Guards!", "Terry Pratchett");
-		XID daVinciID = library.addBook(actorID, "The Da Vinci Code", "Dan Brown");
+		XId guardsguardsID = library.addBook(actorID, "Guards! Guards!", "Terry Pratchett");
+		XId daVinciID = library.addBook(actorID, "The Da Vinci Code", "Dan Brown");
 		
 		// add some copies for the books
-		List<XID> hitchhikerCopies = new ArrayList<XID>();
-		List<XID> guardsguardsCopies = new ArrayList<XID>();
-		List<XID> daVinciCopies = new ArrayList<XID>();
+		List<XId> hitchhikerCopies = new ArrayList<XId>();
+		List<XId> guardsguardsCopies = new ArrayList<XId>();
+		List<XId> daVinciCopies = new ArrayList<XId>();
 		
 		// Add 5 copies for the Hitchhiker's Guide
 		for(int i = 0; i < 5; i++) {
@@ -468,8 +468,8 @@ public class APITest {
 		daVinciCopies.add(library.addBookyCopy(actorID, daVinciID));
 		
 		// Create some userIDs
-		XID user1 = XX.createUniqueId();
-		XID user2 = XX.createUniqueId();
+		XId user1 = XX.createUniqueId();
+		XId user2 = XX.createUniqueId();
 		
 		// borrow some books
 		assertTrue(library.hasUnborrowedCopies(hitchhikerID));
@@ -485,7 +485,7 @@ public class APITest {
 		assertNull(library.borrow(user1, hitchhikerID));
 		
 		// borrow the only copy of The Da Vinci Code
-		XID borrowedDaVinciID = library.borrow(user1, daVinciID);
+		XId borrowedDaVinciID = library.borrow(user1, daVinciID);
 		// check that all copies of The Da Vinci Code are now borrowed
 		assertFalse(library.hasUnborrowedCopies(daVinciID));
 		
@@ -494,11 +494,11 @@ public class APITest {
 		assertTrue(library.hasUnborrowedCopies(daVinciID));
 		
 		// borrow 1 copy of the Guards! Guards!
-		XID borrowedGuardsID1 = library.borrow(user1, guardsguardsID);
+		XId borrowedGuardsID1 = library.borrow(user1, guardsguardsID);
 		assertTrue(library.hasUnborrowedCopies(guardsguardsID)); // ...there's
 		// still
 		// another copy
-		XID borrowedGuardsID2 = library.borrow(user2, guardsguardsID); // borrow
+		XId borrowedGuardsID2 = library.borrow(user2, guardsguardsID); // borrow
 		// that
 		// too
 		assertFalse(library.hasUnborrowedCopies(guardsguardsID));
@@ -517,7 +517,7 @@ public class APITest {
 		assertTrue(model.getRevisionNumber() >= 0);
 		
 		// add an object to the model
-		XID objectId = XX.createUniqueId(); // create an ID for
+		XId objectId = XX.createUniqueId(); // create an ID for
 		// the object
 		XObject object = model.createObject(objectId);
 		
@@ -535,11 +535,11 @@ public class APITest {
 		// - do the same with a model that was created by a repository -
 		
 		XRepository repo = new MemoryRepository(this.actorId, this.password, XX.createUniqueId());
-		XID modelId = XX.createUniqueId();
+		XId modelId = XX.createUniqueId();
 		model = repo.createModel(modelId);
 		
 		// add an object to the model
-		XID object2ID = XX.createUniqueId(); // create an ID for
+		XId object2ID = XX.createUniqueId(); // create an ID for
 		// the object
 		XObject object2 = model.createObject(object2ID);
 		
@@ -562,7 +562,7 @@ public class APITest {
 		XObject object = new MemoryObject(this.actorId, this.password, XX.createUniqueId());
 		
 		// add a field to the object
-		XID fieldId = XX.createUniqueId(); // create an ID for
+		XId fieldId = XX.createUniqueId(); // create an ID for
 		// the field
 		XField field = object.createField(fieldId);
 		
@@ -580,12 +580,12 @@ public class APITest {
 		
 		// - do the same with an object that was created by a model -
 		XRepository repo = X.createMemoryRepository(this.actorId);
-		XID modelId = XX.createUniqueId();
+		XId modelId = XX.createUniqueId();
 		XModel model = repo.createModel(modelId);
 		object = model.createObject(XX.createUniqueId());
 		
 		// add a field to the object
-		XID field2ID = XX.createUniqueId(); // create an ID for
+		XId field2ID = XX.createUniqueId(); // create an ID for
 		// the field
 		XField field2 = object.createField(field2ID);
 		
@@ -613,7 +613,7 @@ public class APITest {
 		XRepository repo = new MemoryRepository(this.actorId, this.password, XX.createUniqueId());
 		
 		// add a model to the repository
-		XID modelId = XX.createUniqueId(); // create an ID for
+		XId modelId = XX.createUniqueId(); // create an ID for
 		// the model
 		XModel model = repo.createModel(modelId);
 		
@@ -663,15 +663,15 @@ public class APITest {
 	public void testSaveAndLoadRepository() {
 		// we'll use our library classes to create a repository with content
 		XRepository repo = X.createMemoryRepository(this.actorId);
-		XID actorID = XX.createUniqueId();
+		XId actorID = XX.createUniqueId();
 		
 		// add some books and copies
 		Library library = new Library(repo);
 		library.setUp(actorID);
-		XID hitchhikerID = library.addBook(actorID, "The Hitchhiker's Guide To The Galaxy",
+		XId hitchhikerID = library.addBook(actorID, "The Hitchhiker's Guide To The Galaxy",
 		        "Douglas Adams");
-		XID guardsguardsID = library.addBook(actorID, "Guards! Guards!", "Terry Pratchett");
-		XID daVinciID = library.addBook(actorID, "The Da Vinci Code", "Dan Brown");
+		XId guardsguardsID = library.addBook(actorID, "Guards! Guards!", "Terry Pratchett");
+		XId daVinciID = library.addBook(actorID, "The Da Vinci Code", "Dan Brown");
 		
 		library.borrow(actorID, hitchhikerID);
 		library.borrow(actorID, hitchhikerID);
@@ -714,7 +714,7 @@ public class APITest {
 	public void testXX() {
 		// This test shows how XX can be used
 		
-		// - - Method: XField setValue(XID actorID, XObject object, XID fieldId,
+		// - - Method: XField setValue(XId actorID, XObject object, XId fieldId,
 		// XValue value) - -
 		XRepository repo = X.createMemoryRepository(this.actorId);
 		XModel model = repo.createModel(XX.createUniqueId());
@@ -743,7 +743,7 @@ public class APITest {
 		assertNull(field1.getValue());
 		
 		// Add value to a not existing field (should create a fitting field)
-		XID newID = XX.createUniqueId();
+		XId newID = XX.createUniqueId();
 		field2 = CoreUtils.setValue(object, newID, value1);
 		assertTrue(object.hasField(newID)); // did it create a new field?
 		assertEquals(object.getField(newID), field2);
@@ -759,7 +759,7 @@ public class APITest {
 		assertTrue(object.getField(newID) == field2);
 		assertNull(object.getField(newID).getValue());
 		
-		// - - Method: void copy(XID actorID, XModel sourceModel, XModel
+		// - - Method: void copy(XId actorID, XModel sourceModel, XModel
 		// targetModel) - -
 		model = repo.createModel(XX.createUniqueId());
 		// add some content
@@ -787,7 +787,7 @@ public class APITest {
 		// do both models have the same content? (revision numbers may differ)
 		assertTrue(XCompareUtils.equalTree(model, copyModel));
 		
-		// - - Method: void copy(XID actorID, XObject sourceObject, XObject
+		// - - Method: void copy(XId actorID, XObject sourceObject, XObject
 		// targetObject) - -
 		model = repo.createModel(XX.createUniqueId());
 		object = model.createObject(XX.createUniqueId());
@@ -811,9 +811,9 @@ public class APITest {
 		// do both objects have the same content? (revision numbers may differ)
 		assertTrue(XCompareUtils.equalTree(object, copyObject));
 		
-		// - - Method: XValue safeGetValue(XObject object, XID fieldId) - -
+		// - - Method: XValue safeGetValue(XObject object, XId fieldId) - -
 		object = model.createObject(XX.createUniqueId());
-		XID fieldId = XX.createUniqueId();
+		XId fieldId = XX.createUniqueId();
 		field1 = object.createField(fieldId);
 		field1.setValue(XV.toValue("Test"));
 		XValue value = field1.getValue();
@@ -842,10 +842,10 @@ public class APITest {
 			assertTrue(true);
 		}
 		
-		// - - Method: XValue safeGetValue(XModel model, XID objectId, XID
+		// - - Method: XValue safeGetValue(XModel model, XId objectId, XId
 		// fieldId - -
 		model = repo.createModel(XX.createUniqueId());
-		XID objectId = XX.createUniqueId();
+		XId objectId = XX.createUniqueId();
 		object = model.createObject(objectId);
 		fieldId = XX.createUniqueId();
 		field1 = object.createField(fieldId);
@@ -887,7 +887,7 @@ public class APITest {
 			assertTrue(true);
 		}
 		
-		// - - Method: XField safeGetField(XObject object, XID fieldId) - -
+		// - - Method: XField safeGetField(XObject object, XId fieldId) - -
 		model = repo.createModel(XX.createUniqueId());
 		object = model.createObject(XX.createUniqueId());
 		fieldId = XX.createUniqueId();
@@ -922,9 +922,9 @@ public class APITest {
 			assertTrue(true);
 		}
 		
-		// - - Method: XModel safeGetModel(XRepository repository, XID modelId)
+		// - - Method: XModel safeGetModel(XRepository repository, XId modelId)
 		// - -
-		XID modelId = XX.createUniqueId();
+		XId modelId = XX.createUniqueId();
 		model = repo.createModel(modelId);
 		
 		// get an existing model of an existing object
@@ -955,7 +955,7 @@ public class APITest {
 			assertTrue(true);
 		}
 		
-		// - - Method: XObject safeGetObject(XModel model, XID objectId) - -
+		// - - Method: XObject safeGetObject(XModel model, XId objectId) - -
 		model = repo.createModel(XX.createUniqueId());
 		objectId = XX.createUniqueId();
 		object = model.createObject(objectId);
@@ -988,8 +988,8 @@ public class APITest {
 			assertTrue(true);
 		}
 		
-		// - - Method: XObject safeGetObject(XRepository repository, XID
-		// modelId, XID objectId) - -
+		// - - Method: XObject safeGetObject(XRepository repository, XId
+		// modelId, XId objectId) - -
 		repo = X.createMemoryRepository(this.actorId);
 		modelId = XX.createUniqueId();
 		model = repo.createModel(modelId);
@@ -1038,7 +1038,7 @@ public class APITest {
 			assertTrue(true);
 		}
 		
-		// - - Method: void safeSetStringValue(XID actorID, XObject object, XID
+		// - - Method: void safeSetStringValue(XId actorID, XObject object, XId
 		// fieldId, String stringValue) - -
 		object = new MemoryObject(this.actorId, this.password, XX.createUniqueId());
 		fieldId = XX.createUniqueId();
@@ -1057,22 +1057,22 @@ public class APITest {
 		assertTrue(object.getField(newID).getValue() instanceof XStringValue);
 		assertEquals("Test", ((XStringValue)object.getField(newID).getValue()).contents());
 		
-		// - - Method: XIDListValue addIDToList(XID actorID, XField field, XID
+		// - - Method: XIdListValue addIDToList(XId actorID, XField field, XId
 		// id) - -
-		// - - Method: XIDListValue removeIDFromList(XID actorID, XField field,
-		// XID id) - -
+		// - - Method: XIdListValue removeIDFromList(XId actorID, XField field,
+		// XId id) - -
 		field1 = new MemoryField(this.actorId, XX.createUniqueId());
-		field1.setValue(new MemoryIDListValue(new XID[] { XX.createUniqueId() }));
+		field1.setValue(new MemoryIDListValue(new XId[] { XX.createUniqueId() }));
 		newID = XX.createUniqueId();
 		
-		XIDListValue listValue = (XIDListValue)field1.getValue();
+		XIdListValue listValue = (XIdListValue)field1.getValue();
 		assertFalse(listValue.contains(newID));
 		// add the new id
 		listValue = listValue.add(newID);
 		field1.setValue(listValue);
 		
 		// check that the id was added
-		listValue = (XIDListValue)field1.getValue();
+		listValue = (XIdListValue)field1.getValue();
 		assertEquals(listValue.size(), 2);
 		assertTrue(listValue.contains(newID));
 		
@@ -1081,7 +1081,7 @@ public class APITest {
 		field1.setValue(listValue);
 		
 		// check that it was removed
-		listValue = (XIDListValue)field1.getValue();
+		listValue = (XIdListValue)field1.getValue();
 		assertEquals(listValue.size(), 1);
 		assertFalse(listValue.contains(newID));
 		

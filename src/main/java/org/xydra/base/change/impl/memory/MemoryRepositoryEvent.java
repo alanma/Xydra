@@ -2,7 +2,7 @@ package org.xydra.base.change.impl.memory;
 
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XEvent;
@@ -26,18 +26,18 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
 	 * Creates a new {@link XRepositoryEvent} of the add-type (an {@link XModel}
 	 * was added to the {@link XRepository} this event refers to)
 	 * 
-	 * @param actor The {@link XID} of the actor
+	 * @param actor The {@link XId} of the actor
 	 * @param target The {@link XAddress} of the {@link XRepository} which the
-	 *            {@link XModel} was added to - repository {@link XID} must not
+	 *            {@link XModel} was added to - repository {@link XId} must not
 	 *            be null
-	 * @param modelId The {@link XID} of the added {@link XModel} - must not be
+	 * @param modelId The {@link XId} of the added {@link XModel} - must not be
 	 *            null
 	 * @return An {@link XRepositoryEvent} of the add-type
 	 * @throws IllegalArgumentException if the given {@link XAddress} doesn't
 	 *             refer to an {@link XRepository} or if the given modelId is
 	 *             null
 	 */
-	public static XRepositoryEvent createAddEvent(XID actor, XAddress target, XID modelId) {
+	public static XRepositoryEvent createAddEvent(XId actor, XAddress target, XId modelId) {
 		return new MemoryRepositoryEvent(actor, target, modelId, ChangeType.ADD,
 		        RevisionOfEntityNotSet, false, false);
 	}
@@ -53,11 +53,11 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
 	 * Creates a new {@link XRepositoryEvent} of the add-type (an {@link XModel}
 	 * was added to the {@link XRepository} this event refers to)
 	 * 
-	 * @param actor The {@link XID} of the actor
+	 * @param actor The {@link XId} of the actor
 	 * @param target The {@link XAddress} of the {@link XRepository} which the
-	 *            {@link XModel} was added to - repository {@link XID} must not
+	 *            {@link XModel} was added to - repository {@link XId} must not
 	 *            be null
-	 * @param modelId The {@link XID} of the added {@link XModel} - must not be
+	 * @param modelId The {@link XId} of the added {@link XModel} - must not be
 	 *            null
 	 * @param modelRev
 	 * @param inTrans
@@ -66,7 +66,7 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
 	 *             refer to an {@link XRepository} or if the given modelId is
 	 *             null
 	 */
-	public static XRepositoryEvent createAddEvent(XID actor, XAddress target, XID modelId,
+	public static XRepositoryEvent createAddEvent(XId actor, XAddress target, XId modelId,
 	        long modelRev, boolean inTrans) {
 		return new MemoryRepositoryEvent(actor, target, modelId, ChangeType.ADD, modelRev, inTrans,
 		        false);
@@ -77,11 +77,11 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
 	 * {@link XModel} was removed from the {@link XRepository} this event refers
 	 * to)
 	 * 
-	 * @param actor The {@link XID} of the actor
+	 * @param actor The {@link XId} of the actor
 	 * @param target The {@link XAddress} of the {@link XRepository} which the
-	 *            {@link XModel} was removed from - repository {@link XID} must
+	 *            {@link XModel} was removed from - repository {@link XId} must
 	 *            not be null
-	 * @param modelId The {@link XID} of the removed {@link XModel} - must not
+	 * @param modelId The {@link XId} of the removed {@link XModel} - must not
 	 *            be null
 	 * @param modelRevison of the remove event
 	 * @param inTrans if in transaction
@@ -91,7 +91,7 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
 	 *             or if the given modelRevision equals
 	 *             {@link XEvent#RevisionOfEntityNotSet}
 	 */
-	public static XRepositoryEvent createRemoveEvent(XID actor, XAddress target, XID modelId,
+	public static XRepositoryEvent createRemoveEvent(XId actor, XAddress target, XId modelId,
 	        long modelRevison, boolean inTrans) {
 		if(modelRevison < 0) {
 			throw new IllegalArgumentException(
@@ -102,15 +102,15 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
 		        inTrans, false);
 	}
 	
-	// The XID of the model that was added/deleted
-	private XID modelId;
+	// The XId of the model that was added/deleted
+	private XId modelId;
 	
 	// the model revision before this event happened
 	private long modelRevision;
 	
 	// private constructor, use the createEvent methods for instantiating a
 	// MemoryRepositoryEvent
-	private MemoryRepositoryEvent(XID actor, XAddress target, XID modelId, ChangeType changeType,
+	private MemoryRepositoryEvent(XId actor, XAddress target, XId modelId, ChangeType changeType,
 	        long modelRevision, boolean inTrans, boolean implied) {
 		super(target, changeType, actor, inTrans, implied);
 		
@@ -166,7 +166,7 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
 	}
 	
 	@Override
-	public XID getModelId() {
+	public XId getModelId() {
 		return this.modelId;
 	}
 	

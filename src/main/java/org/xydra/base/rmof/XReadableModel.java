@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.ReadOperation;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 
 
 /**
@@ -19,7 +19,7 @@ public interface XReadableModel extends XStateReadableModel {
 	
 	/* More specific return type */
 	@ReadOperation
-	XReadableObject getObject(@NeverNull XID objectId);
+	XReadableObject getObject(@NeverNull XId objectId);
 	
 	/**
 	 * Returns the current revision number of this {@link XReadableModel}.

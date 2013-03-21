@@ -8,7 +8,7 @@ import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.ChangeType;
 import org.xydra.index.IMapMapMapIndex;
@@ -51,11 +51,11 @@ public class MemoryAuthorisationManager extends AbstractAuthorisationManager imp
 	private final XGroupDatabaseWithListeners groups;
 	private final Set<XAccessListener> listeners;
 	// map of access -> resource -> actor
-	private final IMapMapMapIndex<XID,XAddress,XID,Boolean> rights;
+	private final IMapMapMapIndex<XId,XAddress,XId,Boolean> rights;
 	
 	public MemoryAuthorisationManager(XGroupDatabaseWithListeners groups) {
 		this.groups = groups;
-		this.rights = new FastTripleMap<XID,XAddress,XID,Boolean>();
+		this.rights = new FastTripleMap<XId,XAddress,XId,Boolean>();
 		this.listeners = new HashSet<XAccessListener>();
 	}
 	
@@ -66,7 +66,7 @@ public class MemoryAuthorisationManager extends AbstractAuthorisationManager imp
 	 *            {@link XGroupDatabase#ADMINISTRATOR_GROUP_ID}
 	 * @param repositoryId for which to allow everything
 	 */
-	public void grantGroupAllAccessToRepository(XID administratorGroupId, XID repositoryId) {
+	public void grantGroupAllAccessToRepository(XId administratorGroupId, XId repositoryId) {
 		// add built-in access rights
 		this.getAuthorisationDatabase().setAccess(administratorGroupId,
 		        XX.toAddress(repositoryId, null, null, null), XA.ACCESS_WRITE, true);
@@ -82,7 +82,7 @@ public class MemoryAuthorisationManager extends AbstractAuthorisationManager imp
 	 * Get the access defined for the actor on this resource or the access
 	 * allowed for any of the actor's groups.
 	 */
-	private XAccessRightValue accessForResource(XID actor, XAddress resource, XID access) {
+	private XAccessRightValue accessForResource(XId actor, XAddress resource, XId access) {
 		
 		// check if access is specifically granted or denied for this actor
 		XAccessRightValue def = getAccessDefinition(actor, resource, access);
@@ -91,18 +91,18 @@ public class MemoryAuthorisationManager extends AbstractAuthorisationManager imp
 		}
 		
 		// check if access is granted for any of the actor's groups
-		Iterator<KeyKeyKeyEntryTuple<XID,XAddress,XID,Boolean>> it = this.rights.tupleIterator(
-		        new EqualsConstraint<XID>(access), new EqualsConstraint<XAddress>(resource),
-		        new Wildcard<XID>());
+		Iterator<KeyKeyKeyEntryTuple<XId,XAddress,XId,Boolean>> it = this.rights.tupleIterator(
+		        new EqualsConstraint<XId>(access), new EqualsConstraint<XAddress>(resource),
+		        new Wildcard<XId>());
 		while(it.hasNext()) {
-			KeyKeyKeyEntryTuple<XID,XAddress,XID,Boolean> tuple = it.next();
+			KeyKeyKeyEntryTuple<XId,XAddress,XId,Boolean> tuple = it.next();
 			
 			assert tuple.getEntry() != null : "got null entry";
 			assert XI.equals(access, tuple.getKey1()) : "got wrong access id from query";
 			assert XI.equals(resource, tuple.getKey2()) : "got wrong resource from query";
 			
 			boolean allowed = tuple.getEntry();
-			XID group = tuple.getKey3();
+			XId group = tuple.getKey3();
 			
 			if(allowed && this.groups.hasGroup(actor, group)) {
 				return XAccessRightValue.ALLOWED;
@@ -126,30 +126,30 @@ public class MemoryAuthorisationManager extends AbstractAuthorisationManager imp
 	}
 	
 	@Override
-	synchronized public XAccessRightValue getAccessDefinition(XID actor, XAddress resource,
-	        XID access) throws IllegalArgumentException {
+	synchronized public XAccessRightValue getAccessDefinition(XId actor, XAddress resource,
+	        XId access) throws IllegalArgumentException {
 		Boolean b = this.rights.lookup(access, resource, actor);
 		return toAccessValue(b);
 	}
 	
 	@Override
-	synchronized public Pair<Set<XID>,Set<XID>> getActorsWithPermission(XAddress resource,
-	        XID access) {
+	synchronized public Pair<Set<XId>,Set<XId>> getActorsWithPermission(XAddress resource,
+	        XId access) {
 		
-		Set<XID> allowed = new HashSet<XID>();
-		Set<XID> denied = new HashSet<XID>();
+		Set<XId> allowed = new HashSet<XId>();
+		Set<XId> denied = new HashSet<XId>();
 		
-		Iterator<KeyKeyKeyEntryTuple<XID,XAddress,XID,Boolean>> it = this.rights.tupleIterator(
-		        new EqualsConstraint<XID>(access), new EqualsConstraint<XAddress>(resource),
-		        new Wildcard<XID>());
+		Iterator<KeyKeyKeyEntryTuple<XId,XAddress,XId,Boolean>> it = this.rights.tupleIterator(
+		        new EqualsConstraint<XId>(access), new EqualsConstraint<XAddress>(resource),
+		        new Wildcard<XId>());
 		while(it.hasNext()) {
-			KeyKeyKeyEntryTuple<XID,XAddress,XID,Boolean> tuple = it.next();
+			KeyKeyKeyEntryTuple<XId,XAddress,XId,Boolean> tuple = it.next();
 			
 			assert tuple.getEntry() != null : "got null entry";
 			assert XI.equals(access, tuple.getKey1()) : "got wrong access type from query";
 			assert XI.equals(resource, tuple.getKey2()) : "got wrong actor from query";
 			
-			XID actor = tuple.getKey3();
+			XId actor = tuple.getKey3();
 			if(tuple.getEntry().booleanValue())
 				allowed.add(actor);
 			else if(!XI.equals(actor, XA.GROUP_ALL))
@@ -160,15 +160,15 @@ public class MemoryAuthorisationManager extends AbstractAuthorisationManager imp
 			
 			XAddress parent = resource.getParent();
 			if(parent != null) {
-				Pair<Set<XID>,Set<XID>> pair = getActorsWithPermission(parent, access);
+				Pair<Set<XId>,Set<XId>> pair = getActorsWithPermission(parent, access);
 				
 				/*
 				 * all actors that are denied access to the parent and are not
 				 * explicitly allowed access to this resource will be denied
 				 */
-				for(XID deny : pair.getSecond()) {
+				for(XId deny : pair.getSecond()) {
 					boolean overwritten = false;
-					for(XID g : allowed) {
+					for(XId g : allowed) {
 						if((deny == null ? g == null : deny.equals(g))
 						        || this.groups.hasGroup(deny, g)) {
 							overwritten = true;
@@ -191,7 +191,7 @@ public class MemoryAuthorisationManager extends AbstractAuthorisationManager imp
 			
 		}
 		
-		return new Pair<Set<XID>,Set<XID>>(allowed, denied);
+		return new Pair<Set<XId>,Set<XId>>(allowed, denied);
 	}
 	
 	@Override
@@ -201,12 +201,12 @@ public class MemoryAuthorisationManager extends AbstractAuthorisationManager imp
 	
 	@Override
 	synchronized public Set<XAccessRightDefinition> getDefinitions() {
-		AbstractTransformingIterator<KeyKeyKeyEntryTuple<XID,XAddress,XID,Boolean>,XAccessRightDefinition> it = new AbstractTransformingIterator<KeyKeyKeyEntryTuple<XID,XAddress,XID,Boolean>,XAccessRightDefinition>(
-		        this.rights.tupleIterator(new Wildcard<XID>(), new Wildcard<XAddress>(),
-		                new Wildcard<XID>())) {
+		AbstractTransformingIterator<KeyKeyKeyEntryTuple<XId,XAddress,XId,Boolean>,XAccessRightDefinition> it = new AbstractTransformingIterator<KeyKeyKeyEntryTuple<XId,XAddress,XId,Boolean>,XAccessRightDefinition>(
+		        this.rights.tupleIterator(new Wildcard<XId>(), new Wildcard<XAddress>(),
+		                new Wildcard<XId>())) {
 			
 			@Override
-			public XAccessRightDefinition transform(KeyKeyKeyEntryTuple<XID,XAddress,XID,Boolean> in) {
+			public XAccessRightDefinition transform(KeyKeyKeyEntryTuple<XId,XAddress,XId,Boolean> in) {
 				return new MemoryAccessDefinition(in.getKey1(), in.getKey2(), in.getKey3(),
 				        in.getEntry());
 			}
@@ -225,15 +225,15 @@ public class MemoryAuthorisationManager extends AbstractAuthorisationManager imp
 	}
 	
 	@Override
-	synchronized public Pair<Set<XID>,Set<XID>> getPermissions(XID actor, XAddress resource) {
+	synchronized public Pair<Set<XId>,Set<XId>> getPermissions(XId actor, XAddress resource) {
 		
-		Set<XID> allowed = new HashSet<XID>();
-		Set<XID> denied = new HashSet<XID>();
+		Set<XId> allowed = new HashSet<XId>();
+		Set<XId> denied = new HashSet<XId>();
 		
 		// iterator over defined access types
-		Iterator<XID> it = this.rights.key1Iterator();
+		Iterator<XId> it = this.rights.key1Iterator();
 		while(it.hasNext()) {
-			XID access = it.next();
+			XId access = it.next();
 			XAccessRightValue v = hasAccess(actor, resource, access);
 			if(v.isAllowed()) {
 				allowed.add(access);
@@ -243,11 +243,11 @@ public class MemoryAuthorisationManager extends AbstractAuthorisationManager imp
 		}
 		// IMPROVE can this be done more efficiently?
 		
-		return new Pair<Set<XID>,Set<XID>>(allowed, denied);
+		return new Pair<Set<XId>,Set<XId>>(allowed, denied);
 	}
 	
 	@Override
-	synchronized public XAccessRightValue hasAccess(XID actor, XAddress resource, XID access) {
+	synchronized public XAccessRightValue hasAccess(XId actor, XAddress resource, XId access) {
 		// check if access is defined for this resource
 		XAccessRightValue def = accessForResource(actor, resource, access);
 		if(def.isDefined()) {
@@ -271,7 +271,7 @@ public class MemoryAuthorisationManager extends AbstractAuthorisationManager imp
 	}
 	
 	@Override
-	public XAccessRightValue hasAccessToSubresource(XID actor, XAddress rootResource, XID access) {
+	public XAccessRightValue hasAccessToSubresource(XId actor, XAddress rootResource, XId access) {
 		
 		// check if the actor has access to the root resource
 		XAccessRightValue def = hasAccess(actor, rootResource, access);
@@ -280,11 +280,11 @@ public class MemoryAuthorisationManager extends AbstractAuthorisationManager imp
 		}
 		
 		// check if access is granted for any subresource
-		Iterator<KeyKeyKeyEntryTuple<XID,XAddress,XID,Boolean>> it = this.rights.tupleIterator(
-		        new EqualsConstraint<XID>(access), new Wildcard<XAddress>(), new Wildcard<XID>());
+		Iterator<KeyKeyKeyEntryTuple<XId,XAddress,XId,Boolean>> it = this.rights.tupleIterator(
+		        new EqualsConstraint<XId>(access), new Wildcard<XAddress>(), new Wildcard<XId>());
 		while(it.hasNext()) {
 			
-			KeyKeyKeyEntryTuple<XID,XAddress,XID,Boolean> tuple = it.next();
+			KeyKeyKeyEntryTuple<XId,XAddress,XId,Boolean> tuple = it.next();
 			
 			assert tuple.getEntry() != null : "got null entry";
 			assert XI.equals(access, tuple.getKey1()) : "got wrong access type from query";
@@ -304,7 +304,7 @@ public class MemoryAuthorisationManager extends AbstractAuthorisationManager imp
 				continue;
 			}
 			
-			XID group = tuple.getKey3();
+			XId group = tuple.getKey3();
 			if(XI.equals(actor, group) || this.groups.hasGroup(actor, group)) {
 				return XAccessRightValue.ALLOWED;
 			}
@@ -315,8 +315,8 @@ public class MemoryAuthorisationManager extends AbstractAuthorisationManager imp
 	}
 	
 	@Override
-	synchronized public XAccessRightValue hasAccessToSubtree(XID actor, XAddress rootResource,
-	        XID access) {
+	synchronized public XAccessRightValue hasAccessToSubtree(XId actor, XAddress rootResource,
+	        XId access) {
 		
 		// check if the actor has access to the root resource
 		XAccessRightValue def = hasAccess(actor, rootResource, access);
@@ -325,12 +325,12 @@ public class MemoryAuthorisationManager extends AbstractAuthorisationManager imp
 		}
 		
 		// check if access is denied for any resource
-		Iterator<KeyKeyKeyEntryTuple<XID,XAddress,XID,Boolean>> it = this.rights.tupleIterator(
-		        new EqualsConstraint<XID>(access), new Wildcard<XAddress>(),
-		        new EqualsConstraint<XID>(actor));
+		Iterator<KeyKeyKeyEntryTuple<XId,XAddress,XId,Boolean>> it = this.rights.tupleIterator(
+		        new EqualsConstraint<XId>(access), new Wildcard<XAddress>(),
+		        new EqualsConstraint<XId>(actor));
 		while(it.hasNext()) {
 			
-			KeyKeyKeyEntryTuple<XID,XAddress,XID,Boolean> tuple = it.next();
+			KeyKeyKeyEntryTuple<XId,XAddress,XId,Boolean> tuple = it.next();
 			
 			assert tuple.getEntry() != null : "got null entry";
 			assert XI.equals(access, tuple.getKey1()) : "got wrong access type from query";
@@ -351,11 +351,11 @@ public class MemoryAuthorisationManager extends AbstractAuthorisationManager imp
 		}
 		
 		// check if access has been reset for a resource and not granted again
-		it = this.rights.tupleIterator(new EqualsConstraint<XID>(access), new Wildcard<XAddress>(),
-		        new EqualsConstraint<XID>(XA.GROUP_ALL));
+		it = this.rights.tupleIterator(new EqualsConstraint<XId>(access), new Wildcard<XAddress>(),
+		        new EqualsConstraint<XId>(XA.GROUP_ALL));
 		while(it.hasNext()) {
 			
-			KeyKeyKeyEntryTuple<XID,XAddress,XID,Boolean> tuple = it.next();
+			KeyKeyKeyEntryTuple<XId,XAddress,XId,Boolean> tuple = it.next();
 			
 			assert tuple.getEntry() != null : "got null entry";
 			assert XI.equals(access, tuple.getKey1()) : "got wrong access type from query";
@@ -384,9 +384,9 @@ public class MemoryAuthorisationManager extends AbstractAuthorisationManager imp
 	}
 	
 	@Override
-	synchronized public boolean isAccessDefined(XID actor, XAddress resource, XID access) {
-		return this.rights.containsKey(new EqualsConstraint<XID>(access),
-		        new EqualsConstraint<XAddress>(resource), new EqualsConstraint<XID>(actor));
+	synchronized public boolean isAccessDefined(XId actor, XAddress resource, XId access) {
+		return this.rights.containsKey(new EqualsConstraint<XId>(access),
+		        new EqualsConstraint<XAddress>(resource), new EqualsConstraint<XId>(actor));
 	}
 	
 	@Override
@@ -395,7 +395,7 @@ public class MemoryAuthorisationManager extends AbstractAuthorisationManager imp
 	}
 	
 	@Override
-	synchronized public void resetAccess(XID actor, XAddress resource, XID access) {
+	synchronized public void resetAccess(XId actor, XAddress resource, XId access) {
 		XAccessRightValue old = getAccessDefinition(actor, resource, access);
 		if(!old.isDefined()) {
 			// no right defined => nothing to remove
@@ -407,7 +407,7 @@ public class MemoryAuthorisationManager extends AbstractAuthorisationManager imp
 	}
 	
 	@Override
-	synchronized public void setAccess(XID actor, XAddress resource, XID access, boolean allowed) {
+	synchronized public void setAccess(XId actor, XAddress resource, XId access, boolean allowed) {
 		XAccessRightValue old = getAccessDefinition(actor, resource, access);
 		XAccessRightValue na = toAccessValue(allowed);
 		if(old == na) {

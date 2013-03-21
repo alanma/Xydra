@@ -4,7 +4,7 @@ import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.ChangeType;
 import org.xydra.store.access.XAccessRightValue;
 import org.xydra.store.access.XAuthorisationEvent;
@@ -21,14 +21,14 @@ import org.xydra.store.access.XAuthorisationEvent;
 @RequiresAppEngine(false)
 public class MemoryAccessEvent implements XAuthorisationEvent {
 	
-	private final XID access;
-	private final XID actor;
+	private final XId access;
+	private final XId actor;
 	private final XAccessRightValue newAccess;
 	private final XAccessRightValue oldAccess;
 	private final XAddress resource;
 	private final ChangeType type;
 	
-	public MemoryAccessEvent(ChangeType type, XID actor, XAddress resource, XID access,
+	public MemoryAccessEvent(ChangeType type, XId actor, XAddress resource, XId access,
 	        XAccessRightValue oldAccess, XAccessRightValue newAccess) {
 		if(type != ChangeType.ADD && type != ChangeType.CHANGE && type != ChangeType.REMOVE)
 			throw new IllegalArgumentException("invalid type for access events: " + type);
@@ -41,12 +41,12 @@ public class MemoryAccessEvent implements XAuthorisationEvent {
 	}
 	
 	@Override
-    public XID getAccessType() {
+    public XId getAccessType() {
 		return this.access;
 	}
 	
 	@Override
-    public XID getActor() {
+    public XId getActor() {
 		return this.actor;
 	}
 	

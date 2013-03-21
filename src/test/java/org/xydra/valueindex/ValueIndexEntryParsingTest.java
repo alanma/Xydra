@@ -8,7 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.value.XValue;
 import org.xydra.core.DemoModelUtil;
@@ -43,7 +43,7 @@ public class ValueIndexEntryParsingTest {
 	
 	@Before
 	public void setup() {
-		XID actorId = XX.createUniqueId();
+		XId actorId = XX.createUniqueId();
 		
 		XRepository repo = X.createMemoryRepository(actorId);
 		DemoModelUtil.addPhonebookModel(repo);
@@ -57,10 +57,10 @@ public class ValueIndexEntryParsingTest {
 	 */
 	@Test
 	public void testParsingEntries() {
-		for(XID objectId : this.model) {
+		for(XId objectId : this.model) {
 			XObject object = this.model.getObject(objectId);
 			
-			for(XID fieldId : object) {
+			for(XId fieldId : object) {
 				XField field = object.getField(fieldId);
 				XValue value = field.getValue();
 				
@@ -84,10 +84,10 @@ public class ValueIndexEntryParsingTest {
 	public void testParsingEntryArrays() {
 		ArrayList<ValueIndexEntry> list = new ArrayList<ValueIndexEntry>();
 		
-		for(XID objectId : this.model) {
+		for(XId objectId : this.model) {
 			XObject object = this.model.getObject(objectId);
 			
-			for(XID fieldId : object) {
+			for(XId fieldId : object) {
 				XField field = object.getField(fieldId);
 				XValue value = field.getValue();
 				

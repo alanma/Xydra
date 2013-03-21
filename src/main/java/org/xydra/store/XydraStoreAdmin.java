@@ -1,6 +1,6 @@
 package org.xydra.store;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.store.access.XAccessControlManager;
 import org.xydra.store.access.XAuthenticationDatabase;
@@ -27,15 +27,15 @@ public interface XydraStoreAdmin {
 	 * {@link XAccessControlManager} and then call
 	 * {@link XAccessControlManager#getAuthenticationDatabase()} to get the
 	 * {@link XAuthenticationDatabase} on which can then call
-	 * {@link XAuthenticationDatabase#setPasswordHash(XID, String)} with acotrId
+	 * {@link XAuthenticationDatabase#setPasswordHash(XId, String)} with acotrId
 	 * = XYDRA_ADMIN_ID to set the administrator password. You can also retrieve
 	 * the current administrator password via
-	 * {@link XAuthenticationDatabase#getPasswordHash(XID)}.
+	 * {@link XAuthenticationDatabase#getPasswordHash(XId)}.
 	 * 
 	 * Note: A servlet-based implementation should take configuration options
 	 * set in web.xml and set the administrator password from it.
 	 */
-	public static final XID XYDRA_ADMIN_ID = XX.toId("internal--XydraAdmin");
+	public static final XId XYDRA_ADMIN_ID = XX.toId("internal--XydraAdmin");
 	
 	/**
 	 * Delete <em>all</em> data in the store. Intended to be used in unit tests.
@@ -50,8 +50,8 @@ public interface XydraStoreAdmin {
 	XAccessControlManager getAccessControlManager();
 	
 	/**
-	 * @return the XID of the repository being managed.
+	 * @return the XId of the repository being managed.
 	 */
-	XID getRepositoryId();
+	XId getRepositoryId();
 	
 }

@@ -1,6 +1,6 @@
 package org.xydra.base.change;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.value.XValue;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
@@ -20,17 +20,17 @@ public interface XFieldEvent extends XAtomicEvent {
 	/**
 	 * WHERE did the change happen?
 	 * 
-	 * @return the {@link XID} of the changed {@link XField}
+	 * @return the {@link XId} of the changed {@link XField}
 	 */
-	XID getFieldId();
+	XId getFieldId();
 	
 	/**
 	 * WHERE did the change happen?
 	 * 
-	 * @return the {@link XID} of the Parent-{@link XModel} of the
+	 * @return the {@link XId} of the Parent-{@link XModel} of the
 	 *         {@link XField} where the change happened. It may be null.
 	 */
-	XID getModelId();
+	XId getModelId();
 	
 	/**
 	 * HOW has the {@link XValue} of the {@link XField} been changed?
@@ -45,17 +45,17 @@ public interface XFieldEvent extends XAtomicEvent {
 	/**
 	 * WHERE did the change happen?
 	 * 
-	 * @return the {@link XID} of the Parent-{@link XObject} of the
+	 * @return the {@link XId} of the Parent-{@link XObject} of the
 	 *         {@link XField} where the change happened. It may be null.
 	 */
-	XID getObjectId();
+	XId getObjectId();
 	
 	/**
 	 * WHERE did the change happen?
 	 * 
-	 * @return the {@link XID} of the Parent-{@link XRepository} of the
+	 * @return the {@link XId} of the Parent-{@link XRepository} of the
 	 *         {@link XField} where the change happened. It may be null.
 	 */
-	XID getRepositoryId();
+	XId getRepositoryId();
 	
 }

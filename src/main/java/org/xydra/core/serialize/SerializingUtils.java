@@ -5,7 +5,7 @@ import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.ChangeType;
 import org.xydra.core.serialize.json.ParseNumber;
@@ -46,7 +46,7 @@ class SerializingUtils {
 		return type;
 	}
 	
-	protected static XID getOptionalXidAttribute(XydraElement element, String attributeName, XID def) {
+	protected static XId getOptionalXidAttribute(XydraElement element, String attributeName, XId def) {
 		String xidString = toString(element.getAttribute(attributeName));
 		if(xidString == null) {
 			return def;
@@ -62,7 +62,7 @@ class SerializingUtils {
 		return value;
 	}
 	
-	protected static XID getRequiredXidAttribute(XydraElement element) {
+	protected static XId getRequiredXidAttribute(XydraElement element) {
 		return XX.toId(toString(getRequiredAttribute(element, XID_ATTRIBUTE)));
 	}
 	
@@ -75,16 +75,16 @@ class SerializingUtils {
 		 * NullPointerExceptions cannot happen here because context is only
 		 * accessed, when match is true
 		 */
-		XID repoId = getOptionalXidAttribute(element, REPOSITORYID_ATTRIBUTE,
+		XId repoId = getOptionalXidAttribute(element, REPOSITORYID_ATTRIBUTE,
 		        match ? context.getRepository() : null);
 		match = match && XI.equals(repoId, context.getRepository());
-		XID modelId = getOptionalXidAttribute(element, MODELID_ATTRIBUTE,
+		XId modelId = getOptionalXidAttribute(element, MODELID_ATTRIBUTE,
 		        match ? context.getModel() : null);
 		match = match && XI.equals(modelId, context.getModel());
-		XID objectId = getOptionalXidAttribute(element, OBJECTID_ATTRIBUTE,
+		XId objectId = getOptionalXidAttribute(element, OBJECTID_ATTRIBUTE,
 		        match ? context.getObject() : null);
 		match = match && XI.equals(objectId, context.getObject());
-		XID fieldId = getOptionalXidAttribute(element, FIELDID_ATTRIBUTE,
+		XId fieldId = getOptionalXidAttribute(element, FIELDID_ATTRIBUTE,
 		        match ? context.getField() : null);
 		
 		return XX.toAddress(repoId, modelId, objectId, fieldId);
@@ -100,25 +100,25 @@ class SerializingUtils {
 		 * accessed, when match is true
 		 */
 		
-		XID repoId = target.getRepository();
+		XId repoId = target.getRepository();
 		match = match && XI.equals(repoId, context.getRepository());
 		if(repoId != null && !match) {
 			out.attribute(REPOSITORYID_ATTRIBUTE, repoId);
 		}
 		
-		XID modelId = target.getModel();
+		XId modelId = target.getModel();
 		match = match && XI.equals(modelId, context.getModel());
 		if(modelId != null && !match) {
 			out.attribute(MODELID_ATTRIBUTE, modelId);
 		}
 		
-		XID objectId = target.getObject();
+		XId objectId = target.getObject();
 		match = match && XI.equals(objectId, context.getObject());
 		if(objectId != null && !match) {
 			out.attribute(OBJECTID_ATTRIBUTE, objectId);
 		}
 		
-		XID fieldId = target.getField();
+		XId fieldId = target.getField();
 		match = match && XI.equals(fieldId, context.getField());
 		if(fieldId != null && !match) {
 			out.attribute(FIELDID_ATTRIBUTE, fieldId);
@@ -169,7 +169,7 @@ class SerializingUtils {
 		}
 	}
 	
-	protected static XID toId(Object object) {
+	protected static XId toId(Object object) {
 		return object == null ? null : XX.toId(toString(object));
 	}
 	

@@ -10,7 +10,7 @@ import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
@@ -69,7 +69,7 @@ public class SerializedStore {
 	private static final String TYPE_QUOTA = "quota";
 	private static final String TYPE_REQUEST = "request";
 	private static final String TYPE_STORE = "store";
-	private static final String NAME_XID = "xid";
+	private static final String NAME_XId = "xid";
 	private static final String TYPE_EVENTS = "xevents";
 	private static final String NAME_REVISION = "revision";
 	private static final String NAME_MODELEXISTS = "modelExists";
@@ -555,7 +555,7 @@ public class SerializedStore {
 		return results;
 	}
 	
-	public static void serializeModelIds(Set<XID> result, XydraOut out) {
+	public static void serializeModelIds(Set<XId> result, XydraOut out) {
 		
 		out.open(ELEMENT_MODEL_IDS);
 		SerializedValue.setIdListContents(result, out);
@@ -563,22 +563,22 @@ public class SerializedStore {
 		
 	}
 	
-	public static Set<XID> toModelIds(XydraElement element) {
+	public static Set<XId> toModelIds(XydraElement element) {
 		
 		SerializingUtils.checkElementType(element, ELEMENT_MODEL_IDS);
 		
-		return new HashSet<XID>(SerializedValue.getIdListContents(element));
+		return new HashSet<XId>(SerializedValue.getIdListContents(element));
 	}
 	
-	public static void serializeRepositoryId(XID result, XydraOut out) {
-		out.element(ELEMENT_REPOSITORY_ID, NAME_XID, result);
+	public static void serializeRepositoryId(XId result, XydraOut out) {
+		out.element(ELEMENT_REPOSITORY_ID, NAME_XId, result);
 	}
 	
-	public static XID toRepositoryId(XydraElement element) {
+	public static XId toRepositoryId(XydraElement element) {
 		
 		SerializingUtils.checkElementType(element, ELEMENT_REPOSITORY_ID);
 		
-		return SerializingUtils.toId(element.getContent(NAME_XID));
+		return SerializingUtils.toId(element.getContent(NAME_XId));
 	}
 	
 }

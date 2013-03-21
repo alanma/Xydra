@@ -3,7 +3,7 @@ package org.xydra.core.serialize;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.value.XValue;
 import org.xydra.core.DemoModelUtil;
@@ -23,7 +23,7 @@ public class TestValueDeSerializer {
 		DemoModelUtil.addPhonebookModel(repo);
 		XModel model = repo.getModel(DemoModelUtil.PHONEBOOK_ID);
 		XObject xo = model.getObject(DemoModelUtil.JOHN_ID);
-		for(XID fid : xo) {
+		for(XId fid : xo) {
 			XField field = xo.getField(fid);
 			XValue value = field.getValue();
 			if(value != null) {

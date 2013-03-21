@@ -2,7 +2,7 @@ package org.xydra.store.access.impl.delegate;
 
 import java.util.List;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.store.NamingUtils;
@@ -139,7 +139,7 @@ public class AccessControlManagerOnPersistence extends DelegatingAccessControlMa
 		
 	}
 	
-	public AccessControlManagerOnPersistence(XydraPersistence persistence, XID executingActorId) {
+	public AccessControlManagerOnPersistence(XydraPersistence persistence, XId executingActorId) {
 		super();
 		
 		WritableRepositoryOnPersistence repoOnPersistence = new WritableRepositoryOnPersistence(

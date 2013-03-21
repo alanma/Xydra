@@ -1,6 +1,6 @@
 package org.xydra.core.change.session;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
@@ -19,7 +19,7 @@ public interface ISessionPersistence {
 	 *         event number of the underlying {@link XydraPersistence}, if one
 	 *         is used here.
 	 */
-	long createModel(XID modelId);
+	long createModel(XId modelId);
 	
 	/**
 	 * @param modelId
@@ -29,7 +29,7 @@ public interface ISessionPersistence {
 	 *         event number of the underlying {@link XydraPersistence}, if one
 	 *         is used here.
 	 */
-	long removeModel(XID modelId);
+	long removeModel(XId modelId);
 	
 	/**
 	 * Commits the changes encoded in the {@link SessionCachedModel} to the
@@ -46,9 +46,9 @@ public interface ISessionPersistence {
 	 * @throws SessionException if model did not exist in back-end and could not
 	 *             be created
 	 */
-	long applyChangesAsTxn(SessionCachedModel changedModel, XID actorId) throws SessionException;
+	long applyChangesAsTxn(SessionCachedModel changedModel, XId actorId) throws SessionException;
 	
-	XID getRepositoryId();
+	XId getRepositoryId();
 	
 	XReadableModel getModelSnapshot(GetWithAddressRequest modelRequest);
 	

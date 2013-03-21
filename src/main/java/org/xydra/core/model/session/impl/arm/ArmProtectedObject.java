@@ -1,6 +1,6 @@
 package org.xydra.core.model.session.impl.arm;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XObjectCommand;
 import org.xydra.core.change.XFieldEventListener;
@@ -29,7 +29,7 @@ public class ArmProtectedObject extends ArmProtectedBaseObject implements XProte
 	
 	private final XObject object;
 	
-	public ArmProtectedObject(XObject object, XAuthorisationManager arm, XID actor) {
+	public ArmProtectedObject(XObject object, XAuthorisationManager arm, XId actor) {
 		super(object, arm, actor);
 		this.object = object;
 	}
@@ -59,7 +59,7 @@ public class ArmProtectedObject extends ArmProtectedBaseObject implements XProte
 	}
 	
 	@Override
-    public XProtectedField createField(XID fieldId) {
+    public XProtectedField createField(XId fieldId) {
 		
 		if(!this.arm.canWrite(this.actor, getAddress())) {
 			throw new AccessException(this.actor + " cannot write to " + getAddress());
@@ -98,7 +98,7 @@ public class ArmProtectedObject extends ArmProtectedBaseObject implements XProte
 	}
 	
 	@Override
-	public XProtectedField getField(XID fieldId) {
+	public XProtectedField getField(XId fieldId) {
 		
 		checkCanKnowAboutField(fieldId);
 		
@@ -112,7 +112,7 @@ public class ArmProtectedObject extends ArmProtectedBaseObject implements XProte
 	}
 	
 	@Override
-    public boolean removeField(XID fieldId) {
+    public boolean removeField(XId fieldId) {
 		
 		if(!this.arm.canRemoveField(this.actor, getAddress(), fieldId)) {
 			throw new AccessException(this.actor + " cannot remove " + fieldId + " from "

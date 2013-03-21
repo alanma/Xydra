@@ -3,7 +3,7 @@ package org.xydra.core.model.session;
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.ReadOperation;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XModelCommand;
 import org.xydra.base.change.XModelEvent;
@@ -17,7 +17,7 @@ import org.xydra.store.AccessException;
 
 /**
  * An XProtectedModel is a wrapper (Decorator) for an {@link XModel} which links
- * the {@link XModel} with a specific actor (represented by its {@link XID}) and
+ * the {@link XModel} with a specific actor (represented by its {@link XId}) and
  * automatically checks the access rights for this actor on the {@link XModel},
  * if a method is called and only executes the method, if the actor is allowed
  * to execute it (otherwise {@link AccessException XAccessExceptions} will be
@@ -32,13 +32,13 @@ import org.xydra.store.AccessException;
 public interface XProtectedModel extends XLoggedModel, XExecutesCommands {
     
     /**
-     * Creates a new {@link XObject} with the given {@link XID} and adds it to
+     * Creates a new {@link XObject} with the given {@link XId} and adds it to
      * this XProtecedModel or returns the already existing {@link XObject} if
-     * the given {@link XID} was already taken.
+     * the given {@link XId} was already taken.
      * 
-     * @param id The {@link XID} for the {@link XObject} which is to be created
+     * @param id The {@link XId} for the {@link XObject} which is to be created
      * @return the newly created {@link XObject} or the already existing
-     *         {@link XObject} if the given {@link XID} was already taken as an
+     *         {@link XObject} if the given {@link XId} was already taken as an
      *         {@link XProtectedObject} linked with the actor of this
      *         XProtectedModel
      * @throws AccessException if the actor linked with this field does not have
@@ -47,7 +47,7 @@ public interface XProtectedModel extends XLoggedModel, XExecutesCommands {
      */
     @Override
     @ModificationOperation
-    XProtectedObject createObject(@NeverNull XID id);
+    XProtectedObject createObject(@NeverNull XId id);
     
     /**
      * Executes the given {@link XModelCommand} if possible.
@@ -57,11 +57,11 @@ public interface XProtectedModel extends XLoggedModel, XExecutesCommands {
      * <ul>
      * <li>Remove-type {@link XModelCommand}: the specified {@link XObject} does
      * not exist and therefore cannot be removed
-     * <li>Add-type {@link XModelCommand}: the given {@link XID} is already
-     * taken and therefore a new {@link XObject} with this {@link XID} cannot be
+     * <li>Add-type {@link XModelCommand}: the given {@link XId} is already
+     * taken and therefore a new {@link XObject} with this {@link XId} cannot be
      * created
-     * <li>the model-{@link XID} in the {@link XModelCommand} does not concur
-     * with the {@link XID} of this XModel
+     * <li>the model-{@link XId} in the {@link XModelCommand} does not concur
+     * with the {@link XId} of this XModel
      * </ul>
      * 
      * @param command The {@link XModelCommand} which is to be executed
@@ -82,15 +82,15 @@ public interface XProtectedModel extends XLoggedModel, XExecutesCommands {
      *         actor that is recorded for change operations. Operations will
      *         only succeed if this actor has access.
      */
-    XID getActor();
+    XId getActor();
     
     /**
      * Returns the {@link XObject} contained in this model with the given
-     * {@link XID} wrapped as an {@link XProtectedObject} linked with the actor
+     * {@link XId} wrapped as an {@link XProtectedObject} linked with the actor
      * of this XProtectedModel.
      * 
-     * @param id The {@link XID} of the {@link XObject} which is to be returned
-     * @return The {@link XObject} with the given {@link XID} or null, if no
+     * @param id The {@link XId} of the {@link XObject} which is to be returned
+     * @return The {@link XObject} with the given {@link XId} or null, if no
      *         corresponding {@link XObject} exists
      * @throws AccessException if the actor linked with this field does not have
      *             the necessary access rights (read access) to execute this
@@ -98,6 +98,6 @@ public interface XProtectedModel extends XLoggedModel, XExecutesCommands {
      */
     @Override
     @ReadOperation
-    XProtectedObject getObject(@NeverNull XID objectId);
+    XProtectedObject getObject(@NeverNull XId objectId);
     
 }

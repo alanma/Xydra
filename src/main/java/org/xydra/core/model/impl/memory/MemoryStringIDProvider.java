@@ -3,13 +3,13 @@ package org.xydra.core.model.impl.memory;
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
-import org.xydra.base.XIDProvider;
+import org.xydra.base.XId;
+import org.xydra.base.XIdProvider;
 import org.xydra.core.URIFormatException;
 
 
 /**
- * An implementation of {@link XIDProvider}
+ * An implementation of {@link XIdProvider}
  * 
  * @author voelkel
  * @author Kaidel
@@ -17,7 +17,7 @@ import org.xydra.core.URIFormatException;
 
 @RunsInGWT(true)
 @RequiresAppEngine(false)
-public class MemoryStringIDProvider implements XIDProvider {
+public class MemoryStringIDProvider implements XIdProvider {
 	
 	private static final String nameStartChar = "A-Z_a-z\\xC0-\\xD6\\xD8-\\xF6"
 	        + "\\u00F8-\\u02FF\\u0370-\\u037D\\u037F-\\u1FFF\\u200C-\\u200D"
@@ -35,7 +35,7 @@ public class MemoryStringIDProvider implements XIDProvider {
 	 */
 	
 	@Override
-	public XID createUniqueId() {
+	public XId createUniqueId() {
 		/* leading 'a' ensures legal XML name */
 		return new MemoryStringID("a" + UUID.uuid());
 	}
@@ -59,22 +59,22 @@ public class MemoryStringIDProvider implements XIDProvider {
 			        + "\" does not start with a slash ('/').");
 		}
 		
-		XID repository = null;
+		XId repository = null;
 		if(components.length >= 2 && !components[1].equals("-")) {
 			repository = fromString(components[1]);
 		}
 		
-		XID model = null;
+		XId model = null;
 		if(components.length >= 3 && !components[2].equals("-")) {
 			model = fromString(components[2]);
 		}
 		
-		XID object = null;
+		XId object = null;
 		if(components.length >= 4 && !components[3].equals("-")) {
 			object = fromString(components[3]);
 		}
 		
-		XID field = null;
+		XId field = null;
 		if(components.length >= 5 && !components[4].equals("-")) {
 			field = fromString(components[4]);
 		}
@@ -83,18 +83,18 @@ public class MemoryStringIDProvider implements XIDProvider {
 	}
 	
 	@Override
-	public XAddress fromComponents(XID repositoryId, XID modelId, XID objectId, XID fieldId) {
+	public XAddress fromComponents(XId repositoryId, XId modelId, XId objectId, XId fieldId) {
 		return new MemoryAddress(repositoryId, modelId, objectId, fieldId);
 	}
 	
 	@Override
-	public XID fromString(String uriString) {
+	public XId fromString(String uriString) {
 		if(uriString == null) {
-			throw new IllegalArgumentException("'" + uriString + "' is null - cannot create XID");
+			throw new IllegalArgumentException("'" + uriString + "' is null - cannot create XId");
 		}
 		if(!uriString.matches(nameRegex)) {
 			throw new IllegalArgumentException("'" + uriString
-			        + "' is not a valid XML name or contains ':', cannot create XID");
+			        + "' is not a valid XML name or contains ':', cannot create XId");
 		}
 		return new MemoryStringID(uriString);
 	}

@@ -1,6 +1,6 @@
 package org.xydra.core.util;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.value.XValue;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
@@ -14,12 +14,12 @@ import org.xydra.index.query.Wildcard;
 
 public class ModelIndex {
 	
-	private ITripleIndex<XID,XID,XValue> index = new TripleIndex<XID,XID,XValue>();
+	private ITripleIndex<XId,XId,XValue> index = new TripleIndex<XId,XId,XValue>();
 	
 	public ModelIndex(XModel model) {
-		for(XID oID : model) {
+		for(XId oID : model) {
 			XObject object = model.getObject(oID);
-			for(XID fID : object) {
+			for(XId fID : object) {
 				XField field = object.getField(fID);
 				this.index.index(oID, fID, field.getValue());
 			}
@@ -63,11 +63,11 @@ public class ModelIndex {
 		// }
 	}
 	
-	private static Constraint<XID> toConstraint(XidOrVariable xidOrVariable) {
+	private static Constraint<XId> toConstraint(XidOrVariable xidOrVariable) {
 		if(xidOrVariable == Variable.ANY) {
-			return new Wildcard<XID>();
+			return new Wildcard<XId>();
 		} else {
-			return new EqualsConstraint<XID>(xidOrVariable);
+			return new EqualsConstraint<XId>(xidOrVariable);
 		}
 	}
 	

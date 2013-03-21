@@ -9,7 +9,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.xydra.base.X;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XRepositoryCommand;
@@ -29,7 +29,7 @@ public abstract class AbstractPersistencePerformanceTest {
 	private static final Logger log = LoggerFactory
 	        .getLogger(AbstractPersistencePerformanceTest.class);
 	
-	private static XID actorId = XX.toId("actor1");
+	private static XId actorId = XX.toId("actor1");
 	private static int x = 3;
 	
 	@Before
@@ -42,15 +42,15 @@ public abstract class AbstractPersistencePerformanceTest {
 		XydraRuntime.finishRequest();
 	}
 	
-	public abstract XydraPersistence createPersistence(XID repositoryId);
+	public abstract XydraPersistence createPersistence(XId repositoryId);
 	
 	@Test
 	public void testPerformanceDirect() {
 		log.info("TEST testPerformanceDirect");
-		XID repositoryId = XX.toId("testPerformanceDirect");
+		XId repositoryId = XX.toId("testPerformanceDirect");
 		XydraPersistence persistence = createPersistence(repositoryId);
 		NanoClock c = new NanoClock().start();
-		XID modelId = XX.toId("model1");
+		XId modelId = XX.toId("model1");
 		/* Add model1 */
 		XRepositoryCommand addModelCmd = X.getCommandFactory().createForcedAddModelCommand(
 		        repositoryId, modelId);
@@ -84,15 +84,15 @@ public abstract class AbstractPersistencePerformanceTest {
 		c.stopAndStart("get-modelsnapshot2");
 		assertEquals(modelRev, snap.getRevisionNumber());
 		
-		Set<XID> set = org.xydra.index.IndexUtils.toSet(snap.iterator());
+		Set<XId> set = org.xydra.index.IndexUtils.toSet(snap.iterator());
 		assertEquals(x, set.size());
 		log.info(c.getStats());
 	}
 	
-	private static void createObjects(XydraPersistence persistence, XID repositoryId, XID modelId,
+	private static void createObjects(XydraPersistence persistence, XId repositoryId, XId modelId,
 	        int ocount) {
 		for(int i = 0; i < ocount; i++) {
-			XID objectId = XX.toId("object" + i);
+			XId objectId = XX.toId("object" + i);
 			long l = persistence.executeCommand(actorId, X.getCommandFactory()
 			        .createForcedAddObjectCommand(repositoryId, modelId, objectId));
 			assertTrue(l >= 0);
@@ -102,7 +102,7 @@ public abstract class AbstractPersistencePerformanceTest {
 	@SuppressWarnings("unused")
 	private static void createObjects(XWritableModel model, int ocount) {
 		for(int i = 0; i < ocount; i++) {
-			XID objectId = XX.toId("object" + i);
+			XId objectId = XX.toId("object" + i);
 			XWritableObject object = model.createObject(objectId);
 			XyAssert.xyAssert(objectId.equals(object.getId()));
 			XyAssert.xyAssert(model.hasObject(objectId));
@@ -113,9 +113,9 @@ public abstract class AbstractPersistencePerformanceTest {
 	// TODO rewrite with sessions
 	public void testPerformanceIndirect() {
 		log.info("TEST testPerformanceIndirect");
-		// XID repositoryId = XX.toId("testPerformanceIndirect");
+		// XId repositoryId = XX.toId("testPerformanceIndirect");
 		// XydraPersistence persistence = createPersistence(repositoryId);
-		// XID modelId = XX.toId("model1");
+		// XId modelId = XX.toId("model1");
 		// XAddress modelAddress = XX.toAddress(repositoryId, modelId, null,
 		// null);
 		//
@@ -150,7 +150,7 @@ public abstract class AbstractPersistencePerformanceTest {
 		//
 		// XWritableModel snap = persistence.getModelSnapshot(modelAddress);
 		// XyAssert.xyAssert(snap != null); assert snap != null;
-		// Set<XID> set = org.xydra.index.IndexUtils.toSet(snap.iterator());
+		// Set<XId> set = org.xydra.index.IndexUtils.toSet(snap.iterator());
 		// assertEquals(x, set.size());
 		//
 		// c.stopAndStart("get-modelsnapshot");

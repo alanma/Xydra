@@ -6,7 +6,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.rmof.XRevWritableModel;
@@ -29,7 +29,7 @@ public class SimpleRepository implements XRevWritableRepository, Serializable {
 	// not final for GWT serialisation
 	private XAddress address;
 	// not final for GWT serialisation
-	private Map<XID,XRevWritableModel> models = new HashMap<XID,XRevWritableModel>();
+	private Map<XId,XRevWritableModel> models = new HashMap<XId,XRevWritableModel>();
 	
 	/* Just for GWT */
 	protected SimpleRepository() {
@@ -41,7 +41,7 @@ public class SimpleRepository implements XRevWritableRepository, Serializable {
 	}
 	
 	@Override
-	public XRevWritableModel createModel(XID modelId) {
+	public XRevWritableModel createModel(XId modelId) {
 		XRevWritableModel model = this.models.get(modelId);
 		if(model != null) {
 			return model;
@@ -57,17 +57,17 @@ public class SimpleRepository implements XRevWritableRepository, Serializable {
 	}
 	
 	@Override
-	public XID getId() {
+	public XId getId() {
 		return this.address.getRepository();
 	}
 	
 	@Override
-	public XRevWritableModel getModel(XID modelId) {
+	public XRevWritableModel getModel(XId modelId) {
 		return this.models.get(modelId);
 	}
 	
 	@Override
-	public boolean hasModel(XID modelId) {
+	public boolean hasModel(XId modelId) {
 		return this.models.containsKey(modelId);
 	}
 	
@@ -77,12 +77,12 @@ public class SimpleRepository implements XRevWritableRepository, Serializable {
 	}
 	
 	@Override
-	public Iterator<XID> iterator() {
+	public Iterator<XId> iterator() {
 		return this.models.keySet().iterator();
 	}
 	
 	@Override
-	public boolean removeModel(XID modelId) {
+	public boolean removeModel(XId modelId) {
 		if(this.models.remove(modelId) != null) {
 			return true;
 		}

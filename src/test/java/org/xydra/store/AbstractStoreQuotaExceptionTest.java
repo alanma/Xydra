@@ -9,7 +9,7 @@ import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XCommandFactory;
@@ -33,7 +33,7 @@ public abstract class AbstractStoreQuotaExceptionTest {
 	}
 	
 	protected long bfQuota;
-	private XID incorrectUser;
+	private XId incorrectUser;
 	
 	protected String incorrectUserPass;
 	
@@ -56,7 +56,7 @@ public abstract class AbstractStoreQuotaExceptionTest {
 	abstract protected XCommandFactory getCommandFactory();
 	
 	/**
-	 * Returns the {@link XID} of any account which is registered on the
+	 * Returns the {@link XId} of any account which is registered on the
 	 * {@link XydraStore} returned by {@link #getStore()}. This method works
 	 * together with {@link #getIncorrectUserPasswordHash()}. These two methods
 	 * need to return a account-passwordhash combination which is incorrect,
@@ -67,22 +67,22 @@ public abstract class AbstractStoreQuotaExceptionTest {
 	 * example if the implementation does not implement any access right
 	 * management)
 	 * 
-	 * Please note: If you return an {@link XID}, you need to make sure that the
+	 * Please note: If you return an {@link XId}, you need to make sure that the
 	 * String returned by {@link #getIncorrectUserPasswordHash()} is not the
 	 * correct password hash for this user. Otherwise some test will fail, even
 	 * though the implementation might work correctly.
 	 * 
-	 * @returns the {@link XID} of a registered account or null, if no incorrect
+	 * @returns the {@link XId} of a registered account or null, if no incorrect
 	 *          user combination could be provided (for example if your
 	 *          XydraStore implementation doesn't care about access rights at
 	 *          all)
 	 * 
 	 */
-	abstract protected XID getIncorrectUser();
+	abstract protected XId getIncorrectUser();
 	
 	/**
 	 * Returns a password hash which is not the correct password hash for the
-	 * account which {@link XID} is returned by {@link #getIncorrectUser()}.
+	 * account which {@link XId} is returned by {@link #getIncorrectUser()}.
 	 * 
 	 * Should return null, if the implementation of {@link XydraStore} which is
 	 * returned by {@link #getStore()} cannot provide such a password hash (for
@@ -90,11 +90,11 @@ public abstract class AbstractStoreQuotaExceptionTest {
 	 * management)
 	 * 
 	 * Please note: If you return a password hash}, you need to make sure that
-	 * it is not the correct password hash for the account which {@link XID} is
+	 * it is not the correct password hash for the account which {@link XId} is
 	 * returned by {@link #getIncorrectUser()}. Otherwise some test will fail,
 	 * even though the implementation might work correctly.
 	 * 
-	 * @return an incorrect password hash for the account which {@link XID} is
+	 * @return an incorrect password hash for the account which {@link XId} is
 	 *         returned by {@link #getIncorrectUser()} or null if it's not
 	 *         possible to provide such a hash
 	 */
@@ -186,12 +186,12 @@ public abstract class AbstractStoreQuotaExceptionTest {
 	// Testing the quota exception for getModelIds
 	@Test
 	public void testGetModelIdsQuotaException() {
-		SynchronousCallbackWithOneResult<Set<XID>> callback = null;
+		SynchronousCallbackWithOneResult<Set<XId>> callback = null;
 		
 		XyAssert.xyAssert(this.bfQuota > 0);
 		boolean foundQuotaException = false;
 		for(long l = 0; l < this.bfQuota + 1; l++) {
-			callback = new SynchronousCallbackWithOneResult<Set<XID>>();
+			callback = new SynchronousCallbackWithOneResult<Set<XId>>();
 			
 			log.info("logging in with wrong credentials " + l + " ...");
 			this.store.getModelIds(this.incorrectUser, this.incorrectUserPass, callback);
@@ -312,11 +312,11 @@ public abstract class AbstractStoreQuotaExceptionTest {
 	// Testing the quota exception for getRepositoryId
 	@Test
 	public void testGetRepositoryIdQuotaException() {
-		SynchronousCallbackWithOneResult<XID> callback = null;
+		SynchronousCallbackWithOneResult<XId> callback = null;
 		
 		XyAssert.xyAssert(this.bfQuota > 0);
 		for(long l = 0; l < this.bfQuota + 1; l++) {
-			callback = new SynchronousCallbackWithOneResult<XID>();
+			callback = new SynchronousCallbackWithOneResult<XId>();
 			
 			this.store.getRepositoryId(this.incorrectUser, this.incorrectUserPass, callback);
 			

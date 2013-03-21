@@ -3,7 +3,7 @@ package org.xydra.core.change;
 import java.util.Iterator;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.XAtomicCommand;
 import org.xydra.base.change.XTransaction;
 import org.xydra.base.rmof.XWritableModel;
@@ -36,12 +36,12 @@ public class RWCachingRepository extends AbstractDelegatingWritableRepository {
 	}
 	
 	@Override
-	public XID getId() {
+	public XId getId() {
 		return this.diffRepo.getId();
 	}
 	
 	@Override
-	public boolean hasModel(XID id) {
+	public boolean hasModel(XId id) {
 		return this.diffRepo.hasModel(id);
 	}
 	
@@ -51,12 +51,12 @@ public class RWCachingRepository extends AbstractDelegatingWritableRepository {
 	}
 	
 	@Override
-	public XWritableModel getModel(XID modelId) {
+	public XWritableModel getModel(XId modelId) {
 		return this.diffRepo.getModel(modelId);
 	}
 	
 	@Override
-	public boolean removeModel(XID modelId) {
+	public boolean removeModel(XId modelId) {
 		return this.diffRepo.removeModel(modelId);
 	}
 	
@@ -68,12 +68,12 @@ public class RWCachingRepository extends AbstractDelegatingWritableRepository {
 	}
 	
 	@Override
-	public XWritableModel createModel(XID modelId) {
+	public XWritableModel createModel(XId modelId) {
 		return this.diffRepo.createModel(modelId);
 	}
 	
 	@Override
-	public Iterator<XID> iterator() {
+	public Iterator<XId> iterator() {
 		return this.diffRepo.iterator();
 	}
 	
@@ -93,8 +93,8 @@ public class RWCachingRepository extends AbstractDelegatingWritableRepository {
 	 * @param actorId ..
 	 * @return the command result. 200 = OK, 500-599 = error.
 	 */
-	public synchronized static int commit(RWCachingRepository rwcRepo, XID actorId) {
-		XID repositoryId = rwcRepo.getId();
+	public synchronized static int commit(RWCachingRepository rwcRepo, XId actorId) {
+		XId repositoryId = rwcRepo.getId();
 		ChangedRepository diffRepo = rwcRepo.getDiffWritableRepository();
 		
 		XydraPersistence persistence = XydraRuntime.getPersistence(repositoryId);
@@ -102,7 +102,7 @@ public class RWCachingRepository extends AbstractDelegatingWritableRepository {
 		        actorId);
 		
 		int result = 200;
-		for(XID id : diffRepo.getRemoved()) {
+		for(XId id : diffRepo.getRemoved()) {
 			boolean partialResult = baseRepo.removeModel(id);
 			if(!partialResult) {
 				// TODO use GA?...
@@ -162,8 +162,8 @@ public class RWCachingRepository extends AbstractDelegatingWritableRepository {
 	 * @param txn may be null
 	 * @param actorId
 	 */
-	private static int executeModelTransacton(XID repositoryId, XID modelId, XTransaction txn,
-	        XID actorId) {
+	private static int executeModelTransacton(XId repositoryId, XId modelId, XTransaction txn,
+	        XId actorId) {
 		if(txn != null) {
 			long l = XydraRuntime.getPersistence(repositoryId).executeCommand(actorId, txn);
 			if(l < 0) {
@@ -176,10 +176,10 @@ public class RWCachingRepository extends AbstractDelegatingWritableRepository {
 	}
 	
 	// @Deprecated
-	// public Set<XID> getChangedModelIds() {
-	// Set<XID> changedModelIds = new HashSet<XID>();
+	// public Set<XId> getChangedModelIds() {
+	// Set<XId> changedModelIds = new HashSet<XId>();
 	// DiffWritableRepository wcRepo = this.getDiffWritableRepository();
-	// for(XID id : wcRepo.getRemoved()) {
+	// for(XId id : wcRepo.getRemoved()) {
 	// changedModelIds.add(id);
 	// }
 	// for(DiffWritableModel addedModel : wcRepo.getAdded()) {

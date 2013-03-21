@@ -3,7 +3,7 @@ package org.xydra.core.serialize;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.value.XV;
 import org.xydra.core.XCompareUtils;
@@ -18,7 +18,7 @@ public class HowToSerializeAndParseExample {
 	
 	public static void main(String[] args) {
 		// given a model1
-		XID actorId = XX.toId("actor1");
+		XId actorId = XX.toId("actor1");
 		String passwordHash = "secret";
 		MemoryRepository repo = new MemoryRepository(actorId, passwordHash, XX.toId("repo1"));
 		XModel model1 = repo.createModel(XX.toId("model1"));

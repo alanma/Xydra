@@ -2,7 +2,7 @@ package org.xydra.base.change.impl.memory;
 
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XEvent;
@@ -28,10 +28,10 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
 	 * Creates a new {@link XObjectEvent} of the add-type (an {@link XField} was
 	 * added to the {@link XObject} this event refers to)
 	 * 
-	 * @param actorId The {@link XID} of the actor
+	 * @param actorId The {@link XId} of the actor
 	 * @param target The {@link XAddress} of the {@link XObject} to which the
-	 *            {@link XField} was added - object {@link XID} must not be null
-	 * @param fieldId The {@link XID} of the added {@link XField} - must not be
+	 *            {@link XField} was added - object {@link XId} must not be null
+	 * @param fieldId The {@link XId} of the added {@link XField} - must not be
 	 *            null
 	 * @param objectRevision the revision number of the {@link XObject} this
 	 *            event refers to
@@ -43,7 +43,7 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
 	 *             if the given objectRevision equals
 	 *             {@link XEvent#RevisionOfEntityNotSet}.
 	 */
-	public static XObjectEvent createAddEvent(XID actorId, XAddress target, XID fieldId,
+	public static XObjectEvent createAddEvent(XId actorId, XAddress target, XId fieldId,
 	        long objectRevision, boolean inTransaction) {
 		return createAddEvent(actorId, target, fieldId, RevisionOfEntityNotSet, objectRevision,
 		        inTransaction);
@@ -61,10 +61,10 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
 	 * Creates a new {@link XObjectEvent} of the add-type (an {@link XField} was
 	 * added to the {@link XObject} this event refers to)
 	 * 
-	 * @param actorId The {@link XID} of the actor
+	 * @param actorId The {@link XId} of the actor
 	 * @param target The {@link XAddress} of the {@link XObject} to which the
-	 *            {@link XField}was added - object {@link XID} must not be null
-	 * @param fieldId The {@link XID} of the added {@link XField} - must not be
+	 *            {@link XField}was added - object {@link XId} must not be null
+	 * @param fieldId The {@link XId} of the added {@link XField} - must not be
 	 *            null
 	 * @param modelRevision the revision number of the {@link XModel} holding
 	 *            the {@link XObject} this event refers to
@@ -78,7 +78,7 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
 	 *             if the given objectRevision equals
 	 *             {@link XEvent#RevisionOfEntityNotSet}.
 	 */
-	public static XObjectEvent createAddEvent(XID actorId, XAddress target, XID fieldId,
+	public static XObjectEvent createAddEvent(XId actorId, XAddress target, XId fieldId,
 	        long modelRevision, long objectRevision, boolean inTransaction) {
 		
 		return new MemoryObjectEvent(actorId, target, fieldId, ChangeType.ADD, modelRevision,
@@ -96,11 +96,11 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
 	 * Creates a new {@link XObjectEvent} of the remove-type (an {@link XField}
 	 * was removed from the {@link XObject} this event refers to)
 	 * 
-	 * @param actorId The {@link XID} of the actor
+	 * @param actorId The {@link XId} of the actor
 	 * @param target The {@link XAddress} of the {@link XObject} from which the
-	 *            {@link XField} was removed - object {@link XID} must not be
+	 *            {@link XField} was removed - object {@link XId} must not be
 	 *            null
-	 * @param fieldId The {@link XID} of the removed {@link XField} - must not
+	 * @param fieldId The {@link XId} of the removed {@link XField} - must not
 	 *            be null
 	 * @param objectRevision the revision number of the {@link XObject} this
 	 *            event refers to
@@ -116,7 +116,7 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
 	 *             if the given objectRevision equals
 	 *             {@link XEvent#RevisionOfEntityNotSet}.
 	 */
-	public static XObjectEvent createRemoveEvent(XID actorId, XAddress target, XID fieldId,
+	public static XObjectEvent createRemoveEvent(XId actorId, XAddress target, XId fieldId,
 	        long objectRevision, long fieldRevision, boolean inTransaction, boolean implied) {
 		return createRemoveEvent(actorId, target, fieldId, RevisionOfEntityNotSet, objectRevision,
 		        fieldRevision, inTransaction, implied);
@@ -127,11 +127,11 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
 	 * Returns an {@link XObjectEvent} of the remove-type (an {@link XField} was
 	 * removed from the {@link XObject} this event refers to)
 	 * 
-	 * @param actorId The {@link XID} of the actor
+	 * @param actorId The {@link XId} of the actor
 	 * @param target The {@link XAddress} of the {@link XObject} from which the
-	 *            {@link XField} was removed - object {@link XID} must not be
+	 *            {@link XField} was removed - object {@link XId} must not be
 	 *            null
-	 * @param fieldId The {@link XID} of the removed {@link XField} - must not
+	 * @param fieldId The {@link XId} of the removed {@link XField} - must not
 	 *            be null
 	 * @param modelRevision the revision number of the {@link XModel} holding
 	 *            the {@link XObject} this event refers to
@@ -149,7 +149,7 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
 	 *             if the given objectRevision or fieldRevision equals
 	 *             {@link XEvent#RevisionOfEntityNotSet}.
 	 */
-	public static XObjectEvent createRemoveEvent(XID actorId, XAddress target, XID fieldId,
+	public static XObjectEvent createRemoveEvent(XId actorId, XAddress target, XId fieldId,
 	        long modelRevision, long objectRevision, long fieldRevision, boolean inTransaction,
 	        boolean implied) {
 		if(fieldRevision < 0) {
@@ -161,15 +161,15 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
 		        objectRevision, fieldRevision, inTransaction, implied);
 	}
 	
-	// The XID of field that was created/deleted
-	private XID fieldId;
+	// The XId of field that was created/deleted
+	private XId fieldId;
 	
 	// the revision numbers before the event happened
 	private long fieldRevision, objectRevision, modelRevision;
 	
 	// private constructor, use the createEvent methods for instantiating a
 	// MemObjectEvent
-	private MemoryObjectEvent(XID actor, XAddress target, XID fieldId, ChangeType changeType,
+	private MemoryObjectEvent(XId actor, XAddress target, XId fieldId, ChangeType changeType,
 	        long modelRevision, long objectRevision, long fieldRevision, boolean inTransaction,
 	        boolean implied) {
 		super(target, changeType, actor, inTransaction, implied);
@@ -240,7 +240,7 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
 	}
 	
 	@Override
-	public XID getFieldId() {
+	public XId getFieldId() {
 		return this.fieldId;
 	}
 	

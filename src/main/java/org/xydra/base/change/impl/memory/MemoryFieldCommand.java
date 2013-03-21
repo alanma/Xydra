@@ -1,7 +1,7 @@
 package org.xydra.base.change.impl.memory;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XFieldCommand;
 import org.xydra.base.value.XValue;
@@ -28,7 +28,7 @@ public class MemoryFieldCommand extends MemoryAtomicCommand implements XFieldCom
      * @param target The {@link XAddress} of the {@link XField} which value is
      *            to be set.
      * @param fieldRevision The current revision number of the {@link XField}
-     *            which {@link XValue} is to be set. The field {@link XID} of
+     *            which {@link XValue} is to be set. The field {@link XId} of
      *            the given address must not be null
      * @param newValue The new {@link XValue} for the specified {@link XField} -
      *            must not be null
@@ -55,7 +55,7 @@ public class MemoryFieldCommand extends MemoryAtomicCommand implements XFieldCom
      * @param target The {@link XAddress} of the {@link XField} which value is
      *            to be set.
      * @param fieldRevision The current revision number of the {@link XField}
-     *            which value is to be set. The field {@link XID} of the given
+     *            which value is to be set. The field {@link XId} of the given
      *            address must not be null
      * @param newValue The new {@link XValue} for the specified {@link XField} -
      *            must not be null
@@ -81,7 +81,7 @@ public class MemoryFieldCommand extends MemoryAtomicCommand implements XFieldCom
      * @param target The {@link XAddress} of the {@link XField} which value is
      *            to be set.
      * @param fieldRevision The current revision number of the {@link XField}
-     *            which {@link XValue} is to be set. The field {@link XID} of
+     *            which {@link XValue} is to be set. The field {@link XId} of
      *            the given address must not be null
      * @return Creates a new {@link XFieldCommand} of the remove-type for the
      *         specified target.

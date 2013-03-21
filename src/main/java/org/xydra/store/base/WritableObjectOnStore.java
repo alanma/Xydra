@@ -5,7 +5,7 @@ import java.io.Serializable;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableObject;
@@ -31,7 +31,7 @@ public class WritableObjectOnStore extends ReadableObjectOnStore implements XWri
 	}
 	
 	@Override
-	public XWritableField createField(XID fieldId) {
+	public XWritableField createField(XId fieldId) {
 		XCommand command = X.getCommandFactory().createAddFieldCommand(
 		        this.address.getRepository(), this.address.getModel(), this.address.getObject(),
 		        fieldId, true);
@@ -57,7 +57,7 @@ public class WritableObjectOnStore extends ReadableObjectOnStore implements XWri
 	}
 	
 	@Override
-	public XWritableField getField(XID fieldId) {
+	public XWritableField getField(XId fieldId) {
 		// this returns different instances for each call
 		XReadableField baseField = super.getField(fieldId);
 		if(baseField == null) {
@@ -70,7 +70,7 @@ public class WritableObjectOnStore extends ReadableObjectOnStore implements XWri
 	}
 	
 	@Override
-	public boolean removeField(XID fieldId) {
+	public boolean removeField(XId fieldId) {
 		XCommand command = X.getCommandFactory().createRemoveFieldCommand(
 		        this.address.getRepository(), this.address.getModel(), this.address.getObject(),
 		        fieldId, this.getField(fieldId).getRevisionNumber(), true);

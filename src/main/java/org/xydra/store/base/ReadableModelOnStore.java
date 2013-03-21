@@ -6,7 +6,7 @@ import java.util.Iterator;
 import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
@@ -55,12 +55,12 @@ public class ReadableModelOnStore implements XReadableModel, Serializable {
     }
     
     @Override
-    public XID getId() {
+    public XId getId() {
         return this.address.getField();
     }
     
     @Override
-    public XReadableObject getObject(@NeverNull XID objectId) {
+    public XReadableObject getObject(@NeverNull XId objectId) {
         if(this.baseModel == null) {
             return null;
         }
@@ -74,7 +74,7 @@ public class ReadableModelOnStore implements XReadableModel, Serializable {
     }
     
     @Override
-    public boolean hasObject(@NeverNull XID objectId) {
+    public boolean hasObject(@NeverNull XId objectId) {
         return this.baseModel.hasObject(objectId);
     }
     
@@ -84,7 +84,7 @@ public class ReadableModelOnStore implements XReadableModel, Serializable {
     }
     
     @Override
-    public Iterator<XID> iterator() {
+    public Iterator<XId> iterator() {
         return this.baseModel.iterator();
     }
     

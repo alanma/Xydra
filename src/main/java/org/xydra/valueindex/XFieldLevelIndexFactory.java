@@ -2,7 +2,7 @@ package org.xydra.valueindex;
 
 import java.util.Set;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.core.model.XModel;
 
 
@@ -34,7 +34,7 @@ public class XFieldLevelIndexFactory {
 	 * @param defaultIncludeAll determines whether the created index indexes
 	 *            every field on default or does not index every field on
 	 *            default.
-	 * @param specialFieldIds a set of {@link XID XIDs}, determining which
+	 * @param specialFieldIds a set of {@link XId XIds}, determining which
 	 *            fields will be indexed, depending on the value of
 	 *            defaultIncludeAll. If defaultIncludeAll is set to true, this
 	 *            set will determine which fields will not be indexed (i.e.
@@ -46,7 +46,7 @@ public class XFieldLevelIndexFactory {
 	 *         {@link MemoryStringMap}, according to the given parameters.
 	 */
 	public XFieldLevelIndex createIndexWithMemoryStringMap(XModel model, boolean defaultIncludeAll,
-	        Set<XID> specialFieldIds) {
+	        Set<XId> specialFieldIds) {
 		if(defaultIncludeAll) {
 			return createIndexWithMemoryStringMap(model, true, null, specialFieldIds);
 		} else {
@@ -55,7 +55,7 @@ public class XFieldLevelIndexFactory {
 	}
 	
 	private static XFieldLevelIndex createIndexWithMemoryStringMap(XModel model,
-	        boolean defaultIncludeAll, Set<XID> includedFieldIds, Set<XID> excludedFieldIds) {
+	        boolean defaultIncludeAll, Set<XId> includedFieldIds, Set<XId> excludedFieldIds) {
 		StringMap map = new MemoryStringMap();
 		StringValueIndex valueIndex = new StringValueIndex(map);
 		SimpleValueIndexer valueIndexer = new SimpleValueIndexer(valueIndex);
@@ -88,7 +88,7 @@ public class XFieldLevelIndexFactory {
 	 * @param defaultIncludeAll determines whether the created index indexes
 	 *            every field on default or does not index every field on
 	 *            default.
-	 * @param specialFieldIds a set of {@link XID XIDs}, determining which
+	 * @param specialFieldIds a set of {@link XId XIds}, determining which
 	 *            fields will be indexed, depending on the value of
 	 *            defaultIncludeAll. If defaultIncludeAll is set to true, this
 	 *            set will determine which fields will not be indexed (i.e.
@@ -100,7 +100,7 @@ public class XFieldLevelIndexFactory {
 	 *         {@link MemoryMapSetIndex}, according to the given parameters.
 	 */
 	public XFieldLevelIndex createIndexWithMemoryMapSetIndex(XModel model,
-	        boolean defaultIncludeAll, Set<XID> specialFieldIds) {
+	        boolean defaultIncludeAll, Set<XId> specialFieldIds) {
 		if(defaultIncludeAll) {
 			return createIndexWithMemoryMapSetIndex(model, true, null, specialFieldIds);
 		} else {
@@ -109,7 +109,7 @@ public class XFieldLevelIndexFactory {
 	}
 	
 	private static XFieldLevelIndex createIndexWithMemoryMapSetIndex(XModel model,
-	        boolean defaultIncludeAll, Set<XID> includedFieldIds, Set<XID> excludedFieldIds) {
+	        boolean defaultIncludeAll, Set<XId> includedFieldIds, Set<XId> excludedFieldIds) {
 		SimpleValueIndexer valueIndexer = new SimpleValueIndexer(new MemoryMapSetIndex());
 		
 		// oldModel, oldIndexer, newModel, newIndexer, excludedIds and

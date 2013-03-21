@@ -4,12 +4,12 @@ import java.io.Serializable;
 
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.value.ValueType;
 
 
 /**
- * An implementation of {@link XID} where an ID is represented by a String
+ * An implementation of {@link XId} where an ID is represented by a String
  * value.
  * 
  * @author voelkel
@@ -17,7 +17,7 @@ import org.xydra.base.value.ValueType;
 
 @RunsInGWT(true)
 @RequiresAppEngine(false)
-public class MemoryStringID implements XID, Serializable {
+public class MemoryStringID implements XId, Serializable {
 	
 	private static final long serialVersionUID = 3397013331330118533L;
 	
@@ -39,7 +39,7 @@ public class MemoryStringID implements XID, Serializable {
 	}
 	
 	@Override
-	public int compareTo(XID o) {
+	public int compareTo(XId o) {
 		return this.toString().compareTo(o.toString());
 	}
 	
@@ -47,15 +47,15 @@ public class MemoryStringID implements XID, Serializable {
 	public boolean equals(Object other) {
 		if(other instanceof MemoryStringID) {
 			return ((MemoryStringID)other).string.equals(this.string);
-		} else if(other instanceof XID) {
-			return ((XID)other).toString().equals(this.string);
+		} else if(other instanceof XId) {
+			return ((XId)other).toString().equals(this.string);
 		} else {
 			return false;
 		}
 	}
 	
 	@Override
-	public XID getId() {
+	public XId getId() {
 		return this;
 	}
 	
@@ -65,7 +65,7 @@ public class MemoryStringID implements XID, Serializable {
 	}
 	
 	@Override
-	public XID getValue() {
+	public XId getValue() {
 		return this;
 	}
 	

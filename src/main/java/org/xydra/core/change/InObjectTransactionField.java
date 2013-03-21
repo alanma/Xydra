@@ -2,7 +2,7 @@ package org.xydra.core.change;
 
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XFieldCommand;
@@ -67,7 +67,7 @@ public class InObjectTransactionField extends AbstractEntity implements XWritabl
 	}
 	
 	@Override
-	public XID getId() {
+	public XId getId() {
 		isValid();
 		
 		return this.address.getField();
@@ -108,11 +108,11 @@ public class InObjectTransactionField extends AbstractEntity implements XWritabl
 	/**
 	 * Compares the states of two {@link InObjectTransactionField
 	 * InObjectTransactionFields}. Two InObjectTransactionFields are equal if
-	 * they have the same XID, the same value and the same
+	 * they have the same XId, the same value and the same
 	 * parent-TransactionObject.
 	 * 
 	 * @param field the field to which this field is to be compared
-	 * @return true, if the given field has the same XID, the same value and the
+	 * @return true, if the given field has the same XId, the same value and the
 	 *         same parent-TransactionObject as this field
 	 */
 	public boolean equalInObjectTransactionFieldState(InObjectTransactionField field) {

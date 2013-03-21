@@ -1,6 +1,6 @@
 package org.xydra.base.change;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
@@ -19,30 +19,30 @@ public interface XObjectEvent extends XAtomicEvent {
 	/**
 	 * WHAT was changed?
 	 * 
-	 * @return the {@link XID} of the added/removed {@link XField}
+	 * @return the {@link XId} of the added/removed {@link XField}
 	 */
-	XID getFieldId();
+	XId getFieldId();
 	
 	/**
 	 * WHERE did the change happen?
 	 * 
-	 * @return the {@link XID} of the Parent-{@link XModel} of the
+	 * @return the {@link XId} of the Parent-{@link XModel} of the
 	 *         {@link XObject} where the change happened. It may be null.
 	 */
-	XID getModelId();
+	XId getModelId();
 	
 	/**
 	 * WHERE did the change happen?
 	 * 
-	 * @return the {@link XID} of the changed {@link XObject}
+	 * @return the {@link XId} of the changed {@link XObject}
 	 */
-	XID getObjectId();
+	XId getObjectId();
 	
 	/**
 	 * WHERE did the change happen?
 	 * 
-	 * @return the {@link XID} of the Parent-{@link XRepository} of the
+	 * @return the {@link XId} of the Parent-{@link XRepository} of the
 	 *         {@link XObject} where the change happened. It may be null.
 	 */
-	XID getRepositoryId();
+	XId getRepositoryId();
 }

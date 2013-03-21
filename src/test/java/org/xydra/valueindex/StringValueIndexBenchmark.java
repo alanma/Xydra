@@ -20,7 +20,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.value.XValue;
@@ -42,7 +42,7 @@ public class StringValueIndexBenchmark {
 	
 	@Before
 	public void setup() {
-		// XID repoId = XX.toId("gae-data");
+		// XId repoId = XX.toId("gae-data");
 		// XydraPersistence persistence = new MemoryPersistence(repoId);
 		//
 		// XydraRuntime.setPersistence(repoId, persistence);
@@ -60,17 +60,17 @@ public class StringValueIndexBenchmark {
 		// e.printStackTrace();
 		// }
 		//
-		// XID actorId = XX.createUniqueId();
+		// XId actorId = XX.createUniqueId();
 		// WritableRepositoryOnPersistence repo = new
 		// WritableRepositoryOnPersistence(persistence,
 		// actorId);
 		//
-		// for(XID id : repo) {
+		// for(XId id : repo) {
 		// repo.getModel(id);
 		// }
 		
 		this.models = new ArrayList<XModel>();
-		XID actorId = XX.createUniqueId();
+		XId actorId = XX.createUniqueId();
 		
 		File f = new File(this.testDataPath);
 		File[] files = f.listFiles();
@@ -117,7 +117,7 @@ public class StringValueIndexBenchmark {
 	
 	@Test
 	public void testModelIndexing() {
-		HashSet<XID> emptySet = new HashSet<XID>();
+		HashSet<XId> emptySet = new HashSet<XId>();
 		
 		for(XModel model : this.models) {
 			StringMap map = new MemoryStringMap();
@@ -128,10 +128,10 @@ public class StringValueIndexBenchmark {
 			XFieldLevelIndex fieldIndex = new XFieldLevelIndex(model, indexer, true, emptySet,
 			        emptySet);
 			
-			for(XID objectId : model) {
+			for(XId objectId : model) {
 				XObject object = model.getObject(objectId);
 				
-				for(XID fieldId : object) {
+				for(XId fieldId : object) {
 					XField field = object.getField(fieldId);
 					XValue value = field.getValue();
 					
@@ -153,7 +153,7 @@ public class StringValueIndexBenchmark {
 	@Test
 	public void benchmarkModelIndexing() {
 		String path = this.testDataPath + "CompleteModelIndexing/";
-		HashSet<XID> emptySet = new HashSet<XID>();
+		HashSet<XId> emptySet = new HashSet<XId>();
 		
 		for(int i = 0; i < 10; i++) {
 			System.out.println("ModelIndexing: " + i);
@@ -179,7 +179,7 @@ public class StringValueIndexBenchmark {
 	@Test
 	public void benchmarkSearch() {
 		String path = this.testDataPath + "Search/";
-		HashSet<XID> emptySet = new HashSet<XID>();
+		HashSet<XId> emptySet = new HashSet<XId>();
 		
 		for(int i = 0; i < 5; i++) {
 			System.out.println("BenchmarkSearch: " + i);
@@ -194,10 +194,10 @@ public class StringValueIndexBenchmark {
 				XFieldLevelIndex fieldIndex = new XFieldLevelIndex(model, indexer, true, emptySet,
 				        emptySet);
 				
-				for(XID objectId : model) {
+				for(XId objectId : model) {
 					XObject object = model.getObject(objectId);
 					
-					for(XID fieldId : object) {
+					for(XId fieldId : object) {
 						XField field = object.getField(fieldId);
 						XValue value = field.getValue();
 						
@@ -220,21 +220,21 @@ public class StringValueIndexBenchmark {
 	@Test
 	@SuppressWarnings("unused")
 	public void benchmarkIndexAndSearchLargeModel() {
-		XID actorId = XX.createUniqueId();
+		XId actorId = XX.createUniqueId();
 		XRepository repo = X.createMemoryRepository(actorId);
-		XID modelId = XX.createUniqueId();
+		XId modelId = XX.createUniqueId();
 		XModel largeModel = repo.createModel(modelId);
 		
 		int modelCount = 0;
 		for(XModel m : this.models) {
 			modelCount++;
-			for(XID oId : m) {
+			for(XId oId : m) {
 				XObject o = m.getObject(oId);
 				
-				XID objectId = XX.createUniqueId();
+				XId objectId = XX.createUniqueId();
 				XObject object = largeModel.createObject(objectId);
 				
-				for(XID fId : o) {
+				for(XId fId : o) {
 					XField f = o.getField(fId);
 					XField field = object.createField(fId);
 					
@@ -246,7 +246,7 @@ public class StringValueIndexBenchmark {
 		
 		String indexPath = this.testDataPath + "IndexLargeModel/";
 		String searchPath = this.testDataPath + "SearchInLargeModel/";
-		HashSet<XID> emptySet = new HashSet<XID>();
+		HashSet<XId> emptySet = new HashSet<XId>();
 		
 		for(int i = 0; i < 5; i++) {
 			System.out.println("BenchmarkIndexAndSearchLargeModel: " + i);
@@ -263,10 +263,10 @@ public class StringValueIndexBenchmark {
 			long end = System.currentTimeMillis();
 			writeIndexBenchmarkData(indexPath, largeModel, end - start);
 			
-			for(XID objectId : largeModel) {
+			for(XId objectId : largeModel) {
 				XObject object = largeModel.getObject(objectId);
 				
-				for(XID fieldId : object) {
+				for(XId fieldId : object) {
 					XField field = object.getField(fieldId);
 					XValue value = field.getValue();
 					
@@ -288,21 +288,21 @@ public class StringValueIndexBenchmark {
 	@Test
 	@SuppressWarnings("unused")
 	public void benchmarkIndexLargeModel() {
-		XID actorId = XX.createUniqueId();
+		XId actorId = XX.createUniqueId();
 		XRepository repo = X.createMemoryRepository(actorId);
-		XID modelId = XX.createUniqueId();
+		XId modelId = XX.createUniqueId();
 		XModel largeModel = repo.createModel(modelId);
 		
 		int modelCount = 0;
 		for(XModel m : this.models) {
 			modelCount++;
-			for(XID oId : m) {
+			for(XId oId : m) {
 				XObject o = m.getObject(oId);
 				
-				XID objectId = XX.createUniqueId();
+				XId objectId = XX.createUniqueId();
 				XObject object = largeModel.createObject(objectId);
 				
-				for(XID fId : o) {
+				for(XId fId : o) {
 					XField f = o.getField(fId);
 					XField field = object.createField(fId);
 					
@@ -314,7 +314,7 @@ public class StringValueIndexBenchmark {
 		
 		String indexPath = this.testDataPath + "IndexLargeModel/";
 		String searchPath = this.testDataPath + "SearchInLargeModel/";
-		HashSet<XID> emptySet = new HashSet<XID>();
+		HashSet<XId> emptySet = new HashSet<XId>();
 		
 		for(int i = 0; i < 50; i++) {
 			StringMap map = new MemoryStringMap();
@@ -340,11 +340,11 @@ public class StringValueIndexBenchmark {
 			int fields = 0;
 			int values = 0;
 			
-			for(XID objectId : model) {
+			for(XId objectId : model) {
 				objects++;
 				XObject object = model.getObject(objectId);
 				
-				for(XID fieldId : object) {
+				for(XId fieldId : object) {
 					fields++;
 					XField field = object.getField(fieldId);
 					if(field.getValue() != null) {

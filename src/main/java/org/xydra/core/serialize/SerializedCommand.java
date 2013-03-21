@@ -8,7 +8,7 @@ import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XAtomicCommand;
 import org.xydra.base.change.XCommand;
@@ -146,7 +146,7 @@ public class SerializedCommand {
 	 * 
 	 * @param element
 	 * 
-	 * @param context The {@link XID XIDs} of the repository, model, object and
+	 * @param context The {@link XId XIds} of the repository, model, object and
 	 *            field to fill in if not specified in the XML/JSON. If the
 	 *            given element represents a transaction, the context for the
 	 *            contained commands will be given by the transaction.
@@ -217,7 +217,7 @@ public class SerializedCommand {
 		long rev = getRevision(element, type != ChangeType.ADD);
 		
 		XAddress target = address.getParent();
-		XID objectId = address.getObject();
+		XId objectId = address.getObject();
 		
 		if(type == ChangeType.ADD) {
 			return MemoryModelCommand.createAddCommand(target, rev, objectId);
@@ -253,7 +253,7 @@ public class SerializedCommand {
 		long rev = getRevision(element, type != ChangeType.ADD);
 		
 		XAddress target = address.getParent();
-		XID fieldId = address.getField();
+		XId fieldId = address.getField();
 		
 		if(type == ChangeType.ADD) {
 			return MemoryObjectCommand.createAddCommand(target, rev, fieldId);
@@ -291,7 +291,7 @@ public class SerializedCommand {
 		long rev = getRevision(element, type != ChangeType.ADD);
 		
 		XAddress target = address.getParent();
-		XID modelId = address.getModel();
+		XId modelId = address.getModel();
 		
 		if(type == ChangeType.ADD) {
 			return MemoryRepositoryCommand.createAddCommand(target, rev, modelId);
@@ -457,7 +457,7 @@ public class SerializedCommand {
 	 * 
 	 * @param element
 	 * 
-	 * @param context The {@link XID XIDs} of the repository, model, object and
+	 * @param context The {@link XId XIds} of the repository, model, object and
 	 *            field to fill in if not specified in the XML/JSON. The context
 	 *            for the commands contained in a transaction will be given by
 	 *            the transaction.

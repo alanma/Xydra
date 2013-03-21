@@ -1,14 +1,14 @@
 package org.xydra.base.rmof;
 
 import org.xydra.annotations.ReadOperation;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 
 
 public interface XReadableObject extends XStateReadableObject {
 	
 	/* More specific return type */
 	@ReadOperation
-	XReadableField getField(XID fieldId);
+	XReadableField getField(XId fieldId);
 	
 	/**
 	 * Returns the current revision number of this object.

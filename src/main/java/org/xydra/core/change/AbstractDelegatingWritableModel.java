@@ -4,7 +4,7 @@ import java.util.Iterator;
 
 import org.xydra.annotations.NeverNull;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.rmof.XWritableField;
@@ -32,10 +32,10 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 	 */
 	class WrappedField implements XWritableField {
 		
-		private final XID fieldId;
-		private final XID objectId;
+		private final XId fieldId;
+		private final XId objectId;
 		
-		public WrappedField(final XID objectId, final XID fieldId) {
+		public WrappedField(final XId objectId, final XId fieldId) {
 			XyAssert.xyAssert(objectId != null);
 			assert objectId != null;
 			XyAssert.xyAssert(fieldId != null);
@@ -51,7 +51,7 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 		}
 		
 		@Override
-		public XID getId() {
+		public XId getId() {
 			return this.fieldId;
 		}
 		
@@ -92,16 +92,16 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 	 */
 	class WrappedObject implements XWritableObject {
 		
-		private final XID objectId;
+		private final XId objectId;
 		
-		public WrappedObject(final XID objectId) {
+		public WrappedObject(final XId objectId) {
 			XyAssert.xyAssert(objectId != null);
 			assert objectId != null;
 			this.objectId = objectId;
 		}
 		
 		@Override
-		public XWritableField createField(final XID fieldId) {
+		public XWritableField createField(final XId fieldId) {
 			XyAssert.xyAssert(fieldId != null);
 			assert fieldId != null;
 			return AbstractDelegatingWritableModel.this.object_createField(this.objectId, fieldId);
@@ -114,12 +114,12 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 		}
 		
 		@Override
-		public XWritableField getField(final XID fieldId) {
+		public XWritableField getField(final XId fieldId) {
 			return AbstractDelegatingWritableModel.this.object_getField(this.objectId, fieldId);
 		}
 		
 		@Override
-		public XID getId() {
+		public XId getId() {
 			return this.objectId;
 		}
 		
@@ -134,7 +134,7 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 		}
 		
 		@Override
-		public boolean hasField(final XID fieldId) {
+		public boolean hasField(final XId fieldId) {
 			return AbstractDelegatingWritableModel.this.object_hasField(this.objectId, fieldId);
 		}
 		
@@ -144,12 +144,12 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 		}
 		
 		@Override
-		public Iterator<XID> iterator() {
+		public Iterator<XId> iterator() {
 			return AbstractDelegatingWritableModel.this.object_iterator(this.objectId);
 		}
 		
 		@Override
-		public boolean removeField(final XID fieldId) {
+		public boolean removeField(final XId fieldId) {
 			return AbstractDelegatingWritableModel.this.object_removeField(this.objectId, fieldId);
 		}
 		
@@ -158,7 +158,7 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 			StringBuffer buf = new StringBuffer();
 			buf.append("XObject '").append(this.getAddress().toString()).append("' <br/>\n");
 			if(!this.isEmpty()) {
-				for(XID fieldId : this) {
+				for(XId fieldId : this) {
 					buf.append("* '").append(fieldId.toString()).append("' = ");
 					XWritableField field = this.getField(fieldId);
 					if(field == null) {
@@ -182,30 +182,30 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 	public static final long UNDEFINED = -2;
 	
 	@Override
-	public abstract XWritableObject createObject(@NeverNull final XID objectId);
+	public abstract XWritableObject createObject(@NeverNull final XId objectId);
 	
-	protected abstract long field_getRevisionNumber(final XID objectId, final XID fieldId);
+	protected abstract long field_getRevisionNumber(final XId objectId, final XId fieldId);
 	
-	protected abstract XValue field_getValue(final XID objectId, final XID fieldId);
+	protected abstract XValue field_getValue(final XId objectId, final XId fieldId);
 	
-	protected boolean field_isEmpty(final XID objectId, final XID fieldId) {
+	protected boolean field_isEmpty(final XId objectId, final XId fieldId) {
 		XyAssert.xyAssert(hasObject(objectId));
 		XyAssert.xyAssert(getObject(objectId).hasField(fieldId));
 		
 		return getObject(objectId).getField(fieldId).isEmpty();
 	}
 	
-	protected abstract boolean field_setValue(final XID objectId, final XID fieldId,
+	protected abstract boolean field_setValue(final XId objectId, final XId fieldId,
 	        final XValue value);
 	
 	@Override
 	public abstract XAddress getAddress();
 	
 	@Override
-	public abstract XID getId();
+	public abstract XId getId();
 	
 	@Override
-	public XWritableObject getObject(@NeverNull final XID objectId) {
+	public XWritableObject getObject(@NeverNull final XId objectId) {
 		if(hasObject(objectId)) {
 			return getObject_internal(objectId);
 		} else {
@@ -213,7 +213,7 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 		}
 	}
 	
-	protected XWritableObject getObject_internal(XID objectId) {
+	protected XWritableObject getObject_internal(XId objectId) {
 		return new WrappedObject(objectId);
 	}
 	
@@ -223,14 +223,14 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 	}
 	
 	@Override
-	public abstract boolean hasObject(@NeverNull final XID objectId);
+	public abstract boolean hasObject(@NeverNull final XId objectId);
 	
 	@Override
-	public abstract Iterator<XID> iterator();
+	public abstract Iterator<XId> iterator();
 	
-	protected abstract XWritableField object_createField(final XID objectId, final XID fieldId);
+	protected abstract XWritableField object_createField(final XId objectId, final XId fieldId);
 	
-	protected XWritableField object_getField(final XID objectId, final XID fieldId) {
+	protected XWritableField object_getField(final XId objectId, final XId fieldId) {
 		XyAssert.xyAssert(objectId != null);
 		assert objectId != null;
 		XyAssert.xyAssert(fieldId != null);
@@ -242,7 +242,7 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 		}
 	}
 	
-	protected XWritableField object_getField_internal(XID objectId, XID fieldId) {
+	protected XWritableField object_getField_internal(XId objectId, XId fieldId) {
 		return new WrappedField(objectId, fieldId);
 	}
 	
@@ -250,20 +250,20 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 	 * @param objectId
 	 * @return the revision number of the object with the given ID
 	 */
-	protected abstract long object_getRevisionNumber(final XID objectId);
+	protected abstract long object_getRevisionNumber(final XId objectId);
 	
-	protected abstract boolean object_hasField(final XID objectId, final XID fieldId);
+	protected abstract boolean object_hasField(final XId objectId, final XId fieldId);
 	
-	protected abstract boolean object_isEmpty(final XID objectId);
+	protected abstract boolean object_isEmpty(final XId objectId);
 	
-	protected abstract Iterator<XID> object_iterator(final XID objectId);
+	protected abstract Iterator<XId> object_iterator(final XId objectId);
 	
-	protected abstract boolean object_removeField(final XID objectId, final XID fieldId);
+	protected abstract boolean object_removeField(final XId objectId, final XId fieldId);
 	
 	@Override
-	public abstract boolean removeObject(@NeverNull final XID objectId);
+	public abstract boolean removeObject(@NeverNull final XId objectId);
 	
-	protected XAddress resolveField(final XID objectId, final XID fieldId) {
+	protected XAddress resolveField(final XId objectId, final XId fieldId) {
 		XyAssert.xyAssert(objectId != null);
 		assert objectId != null;
 		XyAssert.xyAssert(fieldId != null);
@@ -271,7 +271,7 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
 		return XX.toAddress(this.getAddress().getRepository(), this.getId(), objectId, fieldId);
 	}
 	
-	protected XAddress resolveObject(final XID objectId) {
+	protected XAddress resolveObject(final XId objectId) {
 		XyAssert.xyAssert(objectId != null);
 		assert objectId != null;
 		return XX.toAddress(this.getAddress().getRepository(), this.getId(), objectId, null);

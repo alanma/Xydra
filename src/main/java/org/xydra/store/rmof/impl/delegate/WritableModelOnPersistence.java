@@ -6,7 +6,7 @@ import java.util.List;
 import org.xydra.annotations.NeverNull;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
@@ -38,16 +38,16 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 	
 	private long lastRev = 0;
 	
-	private XID modelId;
+	private XId modelId;
 	
-	public WritableModelOnPersistence(XydraPersistence persistence, XID executingActorId,
-	        XID modelId) {
+	public WritableModelOnPersistence(XydraPersistence persistence, XId executingActorId,
+	        XId modelId) {
 		super(persistence, executingActorId);
 		this.modelId = modelId;
 	}
 	
 	@Override
-	public XWritableObject createObject(@NeverNull XID objectId) {
+	public XWritableObject createObject(@NeverNull XId objectId) {
 		XyAssert.xyAssert(this.persistence.hasManagedModel(this.modelId));
 		
 		XWritableObject object = this.getObject(objectId);
@@ -72,7 +72,7 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 	}
 	
 	@Override
-	public XID getId() {
+	public XId getId() {
 		return this.modelId;
 	}
 	
@@ -96,7 +96,7 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 	}
 	
 	@Override
-	public XWritableObject getObject(@NeverNull XID objectId) {
+	public XWritableObject getObject(@NeverNull XId objectId) {
 		if(hasObject(objectId)) {
 			// make sure changes to object are reflected in persistence
 			return new WritableObjectOnPersistence(this.persistence, this.executingActorId,
@@ -118,7 +118,7 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 	}
 	
 	@Override
-	public boolean hasObject(@NeverNull XID objectId) {
+	public boolean hasObject(@NeverNull XId objectId) {
 		XAddress objectAddress = XX.resolveObject(getAddress(), objectId);
 		XWritableObject objectSnapshot = this.persistence
 		        .getObjectSnapshot(new GetWithAddressRequest(objectAddress,
@@ -146,17 +146,17 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
 	}
 	
 	@Override
-	public Iterator<XID> iterator() {
+	public Iterator<XId> iterator() {
 		XWritableModel modelSnapshot = this.persistence.getModelSnapshot(new GetWithAddressRequest(
 		        this.getAddress(), WritableRepositoryOnPersistence.USE_TENTATIVE_STATE));
 		if(modelSnapshot == null || modelSnapshot.isEmpty()) {
-			return new NoneIterator<XID>();
+			return new NoneIterator<XId>();
 		}
 		return modelSnapshot.iterator();
 	}
 	
 	@Override
-	public boolean removeObject(@NeverNull XID objectId) {
+	public boolean removeObject(@NeverNull XId objectId) {
 		boolean result = hasObject(objectId);
 		XCommand command = X.getCommandFactory().createRemoveObjectCommand(
 		        this.persistence.getRepositoryId(), this.modelId, objectId, XCommand.FORCED, true);

@@ -1,6 +1,6 @@
 package org.xydra.store;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.store.impl.delegate.DelegatingAllowAllStore;
 import org.xydra.store.impl.delegate.XydraPersistence;
@@ -24,7 +24,7 @@ public abstract class AbstractAllowAllStoreWriteMethodsTest extends AbstractStor
 	 * We use 'DirkCanDoAll' because that is easier in the debugger.
 	 */
 	@Override
-	protected XID getCorrectUser() {
+	protected XId getCorrectUser() {
 		return XX.toId("DirkCanDoAll");
 	}
 	
@@ -38,7 +38,7 @@ public abstract class AbstractAllowAllStoreWriteMethodsTest extends AbstractStor
 	 * else
 	 */
 	@Override
-	protected XID getIncorrectUser() {
+	protected XId getIncorrectUser() {
 		return null;
 	}
 	
@@ -58,7 +58,7 @@ public abstract class AbstractAllowAllStoreWriteMethodsTest extends AbstractStor
 	}
 	
 	@Override
-	protected XID getRepositoryId() {
+	protected XId getRepositoryId() {
 		return XX.toId("data");
 		// repositoryId as set in the standard constructor of {@link
 		// MemoryStore}

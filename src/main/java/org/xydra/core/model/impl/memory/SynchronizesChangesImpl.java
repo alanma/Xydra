@@ -10,7 +10,7 @@ import java.util.Set;
 import org.xydra.annotations.NeverNull;
 import org.xydra.base.IHasXAddress;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XAtomicEvent;
@@ -70,7 +70,7 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 		private static final long serialVersionUID = -146971665894476381L;
 		
 		Map<XAddress,MemoryField> fields = new HashMap<XAddress,MemoryField>();
-		Map<XID,MemoryObject> objects = new HashMap<XID,MemoryObject>();
+		Map<XId,MemoryObject> objects = new HashMap<XId,MemoryObject>();
 		
 	}
 	
@@ -164,7 +164,7 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 	 * this model has not been removed and for checking that the object doesn't
 	 * already exist.
 	 */
-	protected abstract MemoryObject createObjectInternal(XID objectId);
+	protected abstract MemoryObject createObjectInternal(XId objectId);
 	
 	protected long executeTransaction(XTransaction transaction, XLocalChangeCallback callback) {
 		synchronized(this.eventQueue) {
@@ -223,13 +223,13 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 			
 			// apply changes
 			
-			for(XID objectId : model.getRemovedObjects()) {
+			for(XId objectId : model.getRemovedObjects()) {
 				removeObjectInternal(objectId);
 			}
 			
 			for(XReadableObject object : model.getNewObjects()) {
 				MemoryObject newObject = createObjectInternal(object.getId());
-				for(XID fieldId : object) {
+				for(XId fieldId : object) {
 					XReadableField field = object.getField(fieldId);
 					MemoryField newField = newObject.createFieldInternal(fieldId);
 					if(!field.isEmpty()) {
@@ -241,7 +241,7 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 			for(ChangedObject object : model.getChangedObjects()) {
 				MemoryObject oldObject = getObject(object.getId());
 				
-				for(XID fieldId : object.getRemovedFields()) {
+				for(XId fieldId : object.getRemovedFields()) {
 					oldObject.removeFieldInternal(fieldId);
 				}
 				
@@ -274,7 +274,7 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 				for(XReadableObject object : model.getNewObjects()) {
 					MemoryObject newObject = getObject(object.getId());
 					assert newObject != null : "should have been created above";
-					for(XID fieldId : object) {
+					for(XId fieldId : object) {
 						MemoryField newField = newObject.getField(fieldId);
 						assert newField != null : "should have been created above";
 						newField.setRevisionNumber(newRevision);
@@ -404,21 +404,21 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 	protected abstract MemoryObject getObject();
 	
 	/**
-	 * Get the {@link MemoryObject} with the given {@link XID}.
+	 * Get the {@link MemoryObject} with the given {@link XId}.
 	 * 
 	 * If the entity this method is called on already is an {@link MemoryObject}
-	 * the method returns this entity exactly when the given {@link XID} matches
-	 * its {@link XID} and null otherwise.
+	 * the method returns this entity exactly when the given {@link XId} matches
+	 * its {@link XId} and null otherwise.
 	 * 
-	 * @param objectId The {@link XID} of the {@link MemoryObject} which is to
+	 * @param objectId The {@link XId} of the {@link MemoryObject} which is to
 	 *            be returned
 	 * 
-	 * @return true if there is an {@link XObject} with the given {@link XID}
+	 * @return true if there is an {@link XObject} with the given {@link XId}
 	 */
-	protected abstract MemoryObject getObject(@NeverNull XID objectId);
+	protected abstract MemoryObject getObject(@NeverNull XId objectId);
 	
 	@Override
-	public XID getSessionActor() {
+	public XId getSessionActor() {
 		synchronized(this.eventQueue) {
 			return this.eventQueue.getActor();
 		}
@@ -477,7 +477,7 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 	 * this model has not been removed and for checking that the object actually
 	 * exists.
 	 */
-	protected abstract void removeObjectInternal(XID objectId);
+	protected abstract void removeObjectInternal(XId objectId);
 	
 	private long replayCommand(XCommand command) {
 		
@@ -582,7 +582,7 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 		 * The remote changes should be applied as the actor specified in the
 		 * event
 		 */
-		XID oldActor = getSessionActor();
+		XId oldActor = getSessionActor();
 		/* switch actor to the one specified in this event */
 		setSessionActor(event.getActor(), "NOTSET");
 		long result = replayCommand(replayCommand);
@@ -716,7 +716,7 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 			// TODO allow applying XModelEvents on a model-less object
 			XyAssert.xyAssert(getModel() == this);
 			XyAssert.xyAssert(event.getTarget().equals(getAddress()));
-			XID objectId = ((XModelEvent)event).getObjectId();
+			XId objectId = ((XModelEvent)event).getObjectId();
 			if(event.getChangeType() == ChangeType.REMOVE) {
 				XyAssert.xyAssert(!getModel().hasObject(objectId));
 				MemoryObject object = createObjectInternal(objectId);
@@ -743,7 +743,7 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 			
 			if(event instanceof XObjectEvent) {
 				XyAssert.xyAssert(event.getTarget().equals(object.getAddress()));
-				XID fieldId = ((XObjectEvent)event).getFieldId();
+				XId fieldId = ((XObjectEvent)event).getFieldId();
 				if(event.getChangeType() == ChangeType.REMOVE) {
 					XyAssert.xyAssert(!object.hasField(fieldId));
 					MemoryField field = object.createFieldInternal(fieldId);
@@ -787,7 +787,7 @@ public abstract class SynchronizesChangesImpl extends AbstractEntity implements 
 	protected abstract void setRevisionNumberIfModel(long modelRevisionNumber);
 	
 	@Override
-	public void setSessionActor(XID actorId, String passwordHash) {
+	public void setSessionActor(XId actorId, String passwordHash) {
 		synchronized(this.eventQueue) {
 			this.eventQueue.setSessionActor(actorId, passwordHash);
 		}

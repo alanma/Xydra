@@ -4,39 +4,39 @@ import java.util.Iterator;
 
 import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.ReadOperation;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 
 
 /**
  * A readable model that provides only state information and no revison numbers.
  */
-public interface XStateReadableModel extends XEntity, Iterable<XID> {
+public interface XStateReadableModel extends XEntity, Iterable<XId> {
 	
 	/**
 	 * Returns the {@link XReadableObject} contained in this model with the
-	 * given {@link XID}
+	 * given {@link XId}
 	 * 
-	 * @param objectId The {@link XID} of the {@link XReadableObject} which is
+	 * @param objectId The {@link XId} of the {@link XReadableObject} which is
 	 *            to be returned
-	 * @return The {@link XReadableObject} with the given {@link XID} or null,
+	 * @return The {@link XReadableObject} with the given {@link XId} or null,
 	 *         if no corresponding {@link XReadableObject} exists
 	 * @throws IllegalStateException if this model has already been removed
 	 */
 	@ReadOperation
-	XStateReadableObject getObject(@NeverNull XID objectId);
+	XStateReadableObject getObject(@NeverNull XId objectId);
 	
 	/**
 	 * Checks whether this {@link XReadableModel} already contains an
-	 * {@link XReadableObject} with the given {@link XID}.
+	 * {@link XReadableObject} with the given {@link XId}.
 	 * 
-	 * @param objectId The {@link XID} which is to be checked
+	 * @param objectId The {@link XId} which is to be checked
 	 * @return true, if this {@link XReadableModel} already contains an
-	 *         {@link XReadableObject} with the given {@link XID}, false
+	 *         {@link XReadableObject} with the given {@link XId}, false
 	 *         otherwise
 	 * @throws IllegalStateException if this model has already been removed
 	 */
 	@ReadOperation
-	boolean hasObject(@NeverNull XID objectId);
+	boolean hasObject(@NeverNull XId objectId);
 	
 	/**
 	 * Returns true, if this model has no child-objects
@@ -48,12 +48,12 @@ public interface XStateReadableModel extends XEntity, Iterable<XID> {
 	boolean isEmpty();
 	
 	/**
-	 * @return an iterator over the {@link XID XIDs} of the child-objects of
+	 * @return an iterator over the {@link XId XIds} of the child-objects of
 	 *         this XBaseModel.
 	 * @throws IllegalStateException if this model has already been removed
 	 */
 	@Override
 	@ReadOperation
-	Iterator<XID> iterator();
+	Iterator<XId> iterator();
 	
 }

@@ -10,11 +10,11 @@ import java.util.TreeSet;
 import org.xydra.base.XAddress;
 import org.xydra.base.value.ValueType;
 import org.xydra.base.value.XAddressSortedSetValue;
-import org.xydra.base.value.XIDSortedSetValue;
+import org.xydra.base.value.XIdSortedSetValue;
 
 
 /**
- * An implementation of {@link XIDSortedSetValue}
+ * An implementation of {@link XIdSortedSetValue}
  * 
  * @author dscharrer, voelkel
  * 

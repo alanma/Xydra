@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.X;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
@@ -40,7 +40,7 @@ public class WritableRepositoryOnStore extends ReadableRepositoryOnStore impleme
 	}
 	
 	@Override
-	public XWritableModel createModel(XID modelId) {
+	public XWritableModel createModel(XId modelId) {
 		XCommand command = X.getCommandFactory().createAddModelCommand(this.getId(), modelId, true);
 		long result = ExecuteCommandsUtils.executeCommand(this.credentials, this.store, command);
 		if(result >= 0) {
@@ -59,17 +59,17 @@ public class WritableRepositoryOnStore extends ReadableRepositoryOnStore impleme
 	}
 	
 	@Override
-	public XWritableModel getModel(XID modelId) {
+	public XWritableModel getModel(XId modelId) {
 		XReadableModel baseModel = super.getModel(modelId);
 		if(baseModel == null) {
 			return null;
 		}
 		WritableModelOnStore revWritableModel = new WritableModelOnStore(this.credentials,
 		        this.store, baseModel.getAddress());
-		for(XID objectId : baseModel) {
+		for(XId objectId : baseModel) {
 			XReadableObject baseObject = baseModel.getObject(objectId);
 			XWritableObject revWritableObject = revWritableModel.getObject(objectId);
-			for(XID fieldId : revWritableObject) {
+			for(XId fieldId : revWritableObject) {
 				XWritableField revWritableField = revWritableObject.createField(fieldId);
 				revWritableField.setValue(baseObject.getField(fieldId).getValue());
 			}
@@ -78,7 +78,7 @@ public class WritableRepositoryOnStore extends ReadableRepositoryOnStore impleme
 	}
 	
 	@Override
-	public boolean removeModel(XID modelId) {
+	public boolean removeModel(XId modelId) {
 		XCommand command = X.getCommandFactory().createRemoveModelCommand(this.getId(), modelId,
 		        this.getModel(modelId).getRevisionNumber(), true);
 		long result = ExecuteCommandsUtils.executeCommand(this.credentials, this.store, command);

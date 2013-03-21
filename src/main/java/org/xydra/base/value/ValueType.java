@@ -1,7 +1,7 @@
 package org.xydra.base.value;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.sharedutils.XyAssert;
 
 
@@ -23,8 +23,8 @@ public enum ValueType {
 	
 	DoubleList(XDoubleListValue.class), Double(XDoubleValue.class),
 	
-	Id(org.xydra.base.XID.class), IdList(XIDListValue.class), IdSet(XIDSetValue.class), IdSortedSet(
-	        XIDSortedSetValue.class),
+	Id(org.xydra.base.XId.class), IdList(XIdListValue.class), IdSet(XIdSetValue.class), IdSortedSet(
+	        XIdSortedSetValue.class),
 	
 	IntegerList(XIntegerListValue.class), Integer(XIntegerValue.class), LongList(
 	        XLongListValue.class), Long(XLongValue.class),
@@ -91,7 +91,7 @@ public enum ValueType {
 		case IdList:
 		case IdSet:
 		case IdSortedSet:
-			return XID.class;
+			return XId.class;
 		default:
 			return null;
 		}
@@ -115,7 +115,7 @@ public enum ValueType {
 		case String:
 			return String.class;
 		case Id:
-			return XID.class;
+			return XId.class;
 		default:
 			return null;
 		}

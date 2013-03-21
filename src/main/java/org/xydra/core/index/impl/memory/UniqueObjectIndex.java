@@ -3,7 +3,7 @@ package org.xydra.core.index.impl.memory;
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XWritableField;
@@ -17,7 +17,7 @@ import org.xydra.sharedutils.XyAssert;
 
 /**
  * Index any number of objects by a given fieldId. The value of the field is
- * converted to an internal XID key which is used as the field-ID in another
+ * converted to an internal XId key which is used as the field-ID in another
  * {@link XObject}.
  * 
  * @author voelkel
@@ -27,20 +27,20 @@ import org.xydra.sharedutils.XyAssert;
 @RequiresAppEngine(false)
 public class UniqueObjectIndex extends AbstractObjectIndex implements IUniqueObjectIndex {
 	
-	public UniqueObjectIndex(XID fieldId, XWritableObject indexObject) {
+	public UniqueObjectIndex(XId fieldId, XWritableObject indexObject) {
 		super(fieldId, indexObject);
 	}
 	
 	@Override
     public void clear() {
-		for(XID fieldId : this.indexObject) {
+		for(XId fieldId : this.indexObject) {
 			this.indexObject.removeField(fieldId);
 		}
 	}
 	
 	@Override
     public boolean contains(XValue indexKey) {
-		XID key = valueToXID(indexKey);
+		XId key = valueToXId(indexKey);
 		XWritableField indexField = this.indexObject.getField(key);
 		if(indexField == null) {
 			return false;
@@ -49,7 +49,7 @@ public class UniqueObjectIndex extends AbstractObjectIndex implements IUniqueObj
 	}
 	
 	@Override
-    public XID deindex(XReadableObject xo) {
+    public XId deindex(XReadableObject xo) {
 		XReadableField field = xo.getField(this.fieldId);
 		if(field == null) {
 			return null;
@@ -59,23 +59,23 @@ public class UniqueObjectIndex extends AbstractObjectIndex implements IUniqueObj
 	}
 	
 	@Override
-    public XID deindex(XValue key) {
-		XID xid = valueToXID(key);
+    public XId deindex(XValue key) {
+		XId xid = valueToXId(key);
 		XWritableField indexField = this.indexObject.getField(xid);
 		if(indexField == null) {
 			// nothing to do to deindex
 			return null;
 		}
-		XID indexValue = (XID)indexField.getValue();
+		XId indexValue = (XId)indexField.getValue();
 		assert indexValue != null : "IndexField " + indexField.getId()
 		        + " has a null value. Key = " + key;
-		XID previous = indexValue;
+		XId previous = indexValue;
 		this.indexObject.removeField(xid);
 		return previous;
 	}
 	
 	@Override
-    public XID index(XReadableObject xo) {
+    public XId index(XReadableObject xo) {
 		if(xo == null) {
 			throw new IllegalArgumentException("Object may not be null");
 		}
@@ -84,17 +84,17 @@ public class UniqueObjectIndex extends AbstractObjectIndex implements IUniqueObj
 		return index(keyValue, xo.getId());
 	}
 	
-	public XID index(XValue key, XID value) {
+	public XId index(XValue key, XId value) {
 		if(key == null) {
 			throw new IllegalArgumentException("key may not be null");
 		}
 		if(value == null) {
 			throw new IllegalArgumentException("value may not be null");
 		}
-		XID xid = valueToXID(key);
+		XId xid = valueToXId(key);
 		XWritableField indexField = this.indexObject.createField(xid);
-		XID indexValue = (XID)indexField.getValue();
-		XID previous;
+		XId indexValue = (XId)indexField.getValue();
+		XId previous;
 		if(indexValue == null) {
 			previous = null;
 		} else {
@@ -106,19 +106,19 @@ public class UniqueObjectIndex extends AbstractObjectIndex implements IUniqueObj
 	
 	@Override
     public XWritableObject lookup(XWritableModel model, XValue indexKey) {
-		XID id = lookupID(indexKey);
+		XId id = lookupID(indexKey);
 		XWritableObject object = model.getObject(id);
 		return object;
 	}
 	
 	@Override
-    public XID lookupID(XValue indexKey) {
-		XID key = valueToXID(indexKey);
+    public XId lookupID(XValue indexKey) {
+		XId key = valueToXId(indexKey);
 		XWritableField indexField = this.indexObject.getField(key);
 		if(indexField == null) {
 			return null;
 		}
-		XID indexValue = (XID)indexField.getValue();
+		XId indexValue = (XId)indexField.getValue();
 		XyAssert.xyAssert(indexValue != null); assert indexValue != null;
 		return indexValue;
 	}

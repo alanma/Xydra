@@ -5,7 +5,7 @@ import java.io.Serializable;
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.ReadOperation;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XModelCommand;
 import org.xydra.base.change.XModelEvent;
@@ -35,19 +35,19 @@ import org.xydra.base.rmof.XWritableModel;
 public interface XModel extends XLoggedModel, XWritableModel, Serializable, XSynchronizesChanges {
 	
 	/**
-	 * Creates a new {@link XObject} with the given {@link XID} and adds it to
+	 * Creates a new {@link XObject} with the given {@link XId} and adds it to
 	 * this XModel or returns the already existing {@link XObject} if the given
-	 * {@link XID} was already taken.
+	 * {@link XId} was already taken.
 	 * 
-	 * @param id The {@link XID} for the {@link XObject} which is to be created
+	 * @param id The {@link XId} for the {@link XObject} which is to be created
 	 * 
 	 * @return the newly created {@link XObject} or the already existing
-	 *         {@link XObject} if the given {@link XID} was already taken
+	 *         {@link XObject} if the given {@link XId} was already taken
 	 * @throws IllegalStateException if this model has already been removed
 	 */
 	@Override
     @ModificationOperation
-	XObject createObject(@NeverNull XID id);
+	XObject createObject(@NeverNull XId id);
 	
 	/**
 	 * Executes the given {@link XModelCommand} if possible.
@@ -57,11 +57,11 @@ public interface XModel extends XLoggedModel, XWritableModel, Serializable, XSyn
 	 * <ul>
 	 * <li>Remove-type {@link XModelCommand}: the specified {@link XObject} does
 	 * not exist and therefore cannot be removed
-	 * <li>Add-type {@link XModelCommand}: the given {@link XID} is already
-	 * taken and therefore a new {@link XObject} with this {@link XID} cannot be
+	 * <li>Add-type {@link XModelCommand}: the given {@link XId} is already
+	 * taken and therefore a new {@link XObject} with this {@link XId} cannot be
 	 * created
-	 * <li>the model-{@link XID} in the {@link XModelCommand} does not concur
-	 * with the {@link XID} of this XModel
+	 * <li>the model-{@link XId} in the {@link XModelCommand} does not concur
+	 * with the {@link XId} of this XModel
 	 * </ul>
 	 * 
 	 * @param command The {@link XModelCommand} which is to be executed
@@ -81,30 +81,30 @@ public interface XModel extends XLoggedModel, XWritableModel, Serializable, XSyn
 	
 	/**
 	 * Returns the {@link XObject} contained in this model with the given
-	 * {@link XID}
+	 * {@link XId}
 	 * 
-	 * @param id The {@link XID} of the {@link XObject} which is to be returned
-	 * @return The {@link XObject} with the given {@link XID} or null, if no
+	 * @param id The {@link XId} of the {@link XObject} which is to be returned
+	 * @return The {@link XObject} with the given {@link XId} or null, if no
 	 *         corresponding {@link XObject} exists
 	 * @throws IllegalStateException if this model has already been removed
 	 */
 	@Override
     @ReadOperation
-	XObject getObject(@NeverNull XID objectId);
+	XObject getObject(@NeverNull XId objectId);
 	
 	/**
-	 * Removes the {@link XObject} with the given {@link XID} from this XModel.
+	 * Removes the {@link XObject} with the given {@link XId} from this XModel.
 	 * 
-	 * @param object The {@link XID} of the {@link XObject} which is to be
+	 * @param object The {@link XId} of the {@link XObject} which is to be
 	 *            removed
 	 * 
-	 * @return true, if an {@link XObject} with the given {@link XID} did exist
+	 * @return true, if an {@link XObject} with the given {@link XId} did exist
 	 *         in this XModel and could be removed
 	 * @throws IllegalStateException if this model has already been removed
 	 */
 	@Override
     @ModificationOperation
-	boolean removeObject(@NeverNull XID objectId);
+	boolean removeObject(@NeverNull XId objectId);
 	
 	/**
 	 * Create a consistent snapshot of this model and all contained objects and

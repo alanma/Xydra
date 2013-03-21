@@ -3,7 +3,7 @@
  */
 package org.xydra.core;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.XFieldEvent;
 import org.xydra.base.change.XModelEvent;
 import org.xydra.base.change.XObjectEvent;
@@ -41,12 +41,12 @@ public class HasChanged implements XRepositoryEventListener, XModelEventListener
 		model.addListenerForObjectEvents(hc);
 		model.addListenerForFieldEvents(hc);
 		model.addListenerForTransactionEvents(hc);
-		for(XID objectId : model) {
+		for(XId objectId : model) {
 			XObject object = model.getObject(objectId);
 			object.addListenerForObjectEvents(hc);
 			object.addListenerForFieldEvents(hc);
 			object.addListenerForTransactionEvents(hc);
-			for(XID fieldId : object) {
+			for(XId fieldId : object) {
 				XField field = object.getField(fieldId);
 				field.addListenerForFieldEvents(hc);
 			}

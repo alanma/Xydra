@@ -5,7 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
@@ -141,47 +141,47 @@ abstract public class AbstractSerializedValueTest extends AbstractSerializingTes
 	
 	@Test
 	public void testIdListValue() {
-		testValue(XV.toValue(new XID[] { XX.createUniqueId(), XX.toId("cookie") }));
+		testValue(XV.toValue(new XId[] { XX.createUniqueId(), XX.toId("cookie") }));
 	}
 	
 	@Test
 	public void testIdListValueEmpty() {
-		testValue(XV.toValue(new XID[] {}));
+		testValue(XV.toValue(new XId[] {}));
 	}
 	
 	@Test
 	public void testIdListValueNull() {
-		testValue(XV.toValue(new XID[] { null }));
+		testValue(XV.toValue(new XId[] { null }));
 	}
 	
 	@Test
 	public void testIdSetValue() {
-		testValue(XV.toIDSetValue(new XID[] { XX.createUniqueId(), XX.toId("cookie") }));
+		testValue(XV.toIDSetValue(new XId[] { XX.createUniqueId(), XX.toId("cookie") }));
 	}
 	
 	@Test
 	public void testIdSetValueEmpty() {
-		testValue(XV.toIDSetValue(new XID[] {}));
+		testValue(XV.toIDSetValue(new XId[] {}));
 	}
 	
 	@Test
 	public void testIdSetValueNull() {
-		testValue(XV.toIDSetValue(new XID[] { null }));
+		testValue(XV.toIDSetValue(new XId[] { null }));
 	}
 	
 	@Test
 	public void testIdSortedSetValue() {
-		testValue(XV.toIDSortedSetValue(new XID[] { XX.createUniqueId(), XX.toId("cookie") }));
+		testValue(XV.toIDSortedSetValue(new XId[] { XX.createUniqueId(), XX.toId("cookie") }));
 	}
 	
 	@Test
 	public void testIdSortedSetValueEmpty() {
-		testValue(XV.toIDSortedSetValue(new XID[] {}));
+		testValue(XV.toIDSortedSetValue(new XId[] {}));
 	}
 	
 	@Test
 	public void testIdSortedSetValueNull() {
-		testValue(XV.toIDSortedSetValue(new XID[] { null }));
+		testValue(XV.toIDSortedSetValue(new XId[] { null }));
 	}
 	
 	@Test

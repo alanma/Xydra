@@ -1,7 +1,7 @@
 package org.xydra.core.model.session.impl.arm;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.value.XValue;
@@ -19,11 +19,11 @@ import org.xydra.store.access.XAuthorisationManager;
  */
 public class ArmProtectedBaseField implements XReadableField {
 	
-	protected final XID actor;
+	protected final XId actor;
 	protected final XAuthorisationManager arm;
 	private final XReadableField field;
 	
-	public ArmProtectedBaseField(XReadableField field, XAuthorisationManager arm, XID actor) {
+	public ArmProtectedBaseField(XReadableField field, XAuthorisationManager arm, XId actor) {
 		this.field = field;
 		this.arm = arm;
 		this.actor = actor;
@@ -39,7 +39,7 @@ public class ArmProtectedBaseField implements XReadableField {
 		}
 	}
 	
-	public XID getActor() {
+	public XId getActor() {
 		return this.actor;
 	}
 	
@@ -49,7 +49,7 @@ public class ArmProtectedBaseField implements XReadableField {
 	}
 	
 	@Override
-    public XID getId() {
+    public XId getId() {
 		return this.field.getId();
 	}
 	

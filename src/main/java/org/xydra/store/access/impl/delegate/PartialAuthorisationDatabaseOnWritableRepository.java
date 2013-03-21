@@ -12,7 +12,7 @@ import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.WritableUtils;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.change.ChangeType;
@@ -62,7 +62,7 @@ public class PartialAuthorisationDatabaseOnWritableRepository implements XAccess
 	private static final Logger log = LoggerFactory
 	        .getLogger(PartialAuthorisationDatabaseOnWritableRepository.class);
 	
-	private static boolean accessIdToBoolean(XID accessType) {
+	private static boolean accessIdToBoolean(XId accessType) {
 		XyAssert.xyAssert(accessType != null); assert accessType != null;
 		if(XA.ACCESS_ALLOW.equals(accessType)) {
 			return true;
@@ -124,13 +124,13 @@ public class PartialAuthorisationDatabaseOnWritableRepository implements XAccess
 			if(event.getChangeType() == ChangeType.REMOVE) {
 				
 				// try to decode fieldId
-				XID fieldId = event.getChangedEntity().getField();
+				XId fieldId = event.getChangedEntity().getField();
 				try {
-					Pair<XAddress,XID> pair = fromFieldId(fieldId);
+					Pair<XAddress,XId> pair = fromFieldId(fieldId);
 					fastDatabase.resetAccess(event.getChangedEntity().getObject(), pair.getFirst(),
 					        pair.getSecond());
 				} catch(IllegalArgumentException e) {
-					log.warn("Could not parse '" + fieldId + "' as encoded(XAddress/XID)");
+					log.warn("Could not parse '" + fieldId + "' as encoded(XAddress/XId)");
 				}
 			}
 		}
@@ -140,14 +140,14 @@ public class PartialAuthorisationDatabaseOnWritableRepository implements XAccess
 			// {model}.{actorId}.{enc(address)+"_."+enc(rightId)} = XBoolean
 			
 			// try to parse fieldId
-			XID fieldId = event.getChangedEntity().getField();
+			XId fieldId = event.getChangedEntity().getField();
 			try {
-				Pair<XAddress,XID> pair = fromFieldId(fieldId);
+				Pair<XAddress,XId> pair = fromFieldId(fieldId);
 				XBooleanValue newAllowed = (XBooleanValue)fieldEvent.getNewValue();
 				fastDatabase.setAccess(event.getChangedEntity().getObject(), pair.getFirst(),
 				        pair.getSecond(), newAllowed.contents());
 			} catch(IllegalArgumentException e) {
-				log.warn("Could not parse '" + fieldId + "' as encoded(XAddress/XID)");
+				log.warn("Could not parse '" + fieldId + "' as encoded(XAddress/XId)");
 			}
 		}
 			break;
@@ -158,25 +158,25 @@ public class PartialAuthorisationDatabaseOnWritableRepository implements XAccess
 	}
 	
 	/**
-	 * Parse fieldId to {@link XAddress} resource, {@link XID} access.
+	 * Parse fieldId to {@link XAddress} resource, {@link XId} access.
 	 * 
 	 * @param fieldId
 	 * 
-	 * @return XAddress resource, XID access
+	 * @return XAddress resource, XId access
 	 * @throws IllegalArgumentException if parsing failed
 	 */
-	public static final Pair<XAddress,XID> fromFieldId(XID fieldId) {
+	public static final Pair<XAddress,XId> fromFieldId(XId fieldId) {
 		String[] parts = fieldId.toString().split("_\\.");
 		if(parts.length != 2) {
 			throw new IllegalArgumentException("Could not parse '" + fieldId
-			        + "' as XAddress/XID pair.");
+			        + "' as XAddress/XId pair.");
 		}
-		return new Pair<XAddress,XID>(NamingUtils.decodeXAddress(parts[0]),
+		return new Pair<XAddress,XId>(NamingUtils.decodeXAddress(parts[0]),
 		        NamingUtils.decodeXid(parts[1]));
 	}
 	
 	// TODO make non-public
-	public static final XID toFieldId(XAddress resource, XID access) {
+	public static final XId toFieldId(XAddress resource, XId access) {
 		return XX.toId(NamingUtils.encode(resource) + NamingUtils.ENCODING_SEPARATOR
 		        + NamingUtils.encode(access));
 	}
@@ -185,7 +185,7 @@ public class PartialAuthorisationDatabaseOnWritableRepository implements XAccess
 	
 	private boolean listeningToEvents;
 	
-	private transient Map<XID,ModelAccessDatabaseOnWritableModel> modelAccessDbs = new HashMap<XID,ModelAccessDatabaseOnWritableModel>();
+	private transient Map<XId,ModelAccessDatabaseOnWritableModel> modelAccessDbs = new HashMap<XId,ModelAccessDatabaseOnWritableModel>();
 	
 	/**
 	 * @param authorisationRepository used to read and write authorisation data.
@@ -207,7 +207,7 @@ public class PartialAuthorisationDatabaseOnWritableRepository implements XAccess
 		 */
 	}
 	
-	public XAccessRightValue getAccessDefinition(XID actor, XAddress resource, XID access)
+	public XAccessRightValue getAccessDefinition(XId actor, XAddress resource, XId access)
 	        throws IllegalArgumentException {
 		return getRightsModel(resource).getAccessDefinition(actor, resource, access);
 	}
@@ -218,9 +218,9 @@ public class PartialAuthorisationDatabaseOnWritableRepository implements XAccess
 	 * 
 	 * @return all right modelIds, excluding the global one.
 	 */
-	private Set<XID> getAllRightModelIds() {
-		Set<XID> rightModelIds = new HashSet<XID>();
-		for(XID modelId : this.authorisationRepository) {
+	private Set<XId> getAllRightModelIds() {
+		Set<XId> rightModelIds = new HashSet<XId>();
+		for(XId modelId : this.authorisationRepository) {
 			if(NamingUtils.isRightsModelId(modelId)) {
 				rightModelIds.add(modelId);
 			}
@@ -231,7 +231,7 @@ public class PartialAuthorisationDatabaseOnWritableRepository implements XAccess
 	public Set<XAccessRightDefinition> getDefinitions() {
 		Set<XAccessRightDefinition> defs = new HashSet<XAccessRightDefinition>();
 		defs.addAll(getGlobalRights().getDefinitions());
-		for(XID modelId : getAllRightModelIds()) {
+		for(XId modelId : getAllRightModelIds()) {
 			defs.addAll(this.getModelAccessDatabase(modelId).getDefinitions());
 		}
 		return defs;
@@ -241,10 +241,10 @@ public class PartialAuthorisationDatabaseOnWritableRepository implements XAccess
 	 * @param actorId Get only definitions for this actor.
 	 * @return all {@link XAccessRightDefinition} defined for actorId
 	 */
-	public Set<XAccessRightDefinition> getDefinitionsFor(XID actorId) {
+	public Set<XAccessRightDefinition> getDefinitionsFor(XId actorId) {
 		Set<XAccessRightDefinition> defs = new HashSet<XAccessRightDefinition>();
 		defs.addAll(getGlobalRights().getDefinitionsFor(actorId));
-		for(XID modelId : getAllRightModelIds()) {
+		for(XId modelId : getAllRightModelIds()) {
 			defs.addAll(this.getModelAccessDatabase(modelId).getDefinitionsFor(actorId));
 		}
 		return defs;
@@ -261,7 +261,7 @@ public class PartialAuthorisationDatabaseOnWritableRepository implements XAccess
 	 * @param modelId
 	 * @return
 	 */
-	private ModelAccessDatabaseOnWritableModel getModelAccessDatabase(XID modelId) {
+	private ModelAccessDatabaseOnWritableModel getModelAccessDatabase(XId modelId) {
 		ModelAccessDatabaseOnWritableModel modelAccessDb = this.modelAccessDbs.get(modelId);
 		if(modelAccessDb == null) {
 			XWritableModel rightsModel = this.authorisationRepository.getModel(modelId);
@@ -276,7 +276,7 @@ public class PartialAuthorisationDatabaseOnWritableRepository implements XAccess
 	}
 	
 	private ModelAccessDatabaseOnWritableModel getRightsModel(XAddress resource) {
-		XID rightsModelId = null;
+		XId rightsModelId = null;
 		if(resource.getAddressedType() == XType.XREPOSITORY) {
 			rightsModelId = NamingUtils.ID_REPO_AUTHORISATION_MODEL;
 		} else {
@@ -293,7 +293,7 @@ public class PartialAuthorisationDatabaseOnWritableRepository implements XAccess
 	public void loadInto(HookAuthorisationManagerAndDb hookAuthorisationManagerAndDb) {
 		// global rights
 		loadInto(getGlobalRights());
-		for(XID modelId : getAllRightModelIds()) {
+		for(XId modelId : getAllRightModelIds()) {
 			ModelAccessDatabaseOnWritableModel rightsModelDb = this.getModelAccessDatabase(modelId);
 			loadInto(rightsModelDb);
 		}
@@ -333,11 +333,11 @@ public class PartialAuthorisationDatabaseOnWritableRepository implements XAccess
 	}
 	
 	// TODO make non-public
-	public void resetAccess(XID actor, XAddress resource, XID access) {
+	public void resetAccess(XId actor, XAddress resource, XId access) {
 		getRightsModel(resource).resetAccess(actor, resource, access);
 	}
 	
-	public void setAccess(XID actor, XAddress resource, XID access, boolean allowed) {
+	public void setAccess(XId actor, XAddress resource, XId access, boolean allowed) {
 		getRightsModel(resource).setAccess(actor, resource, access, allowed);
 	}
 	

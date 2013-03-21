@@ -1,12 +1,12 @@
 package org.xydra.base.rmof;
 
 import org.xydra.annotations.ReadOperation;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 
 
 public interface XReadableRepository extends XStateReadableRepository {
 	
 	/* More specific return type */
 	@ReadOperation
-	XReadableModel getModel(XID id);
+	XReadableModel getModel(XId id);
 }

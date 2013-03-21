@@ -4,94 +4,94 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.value.ValueType;
-import org.xydra.base.value.XIDListValue;
+import org.xydra.base.value.XIdListValue;
 import org.xydra.index.XI;
 
 
 /**
- * An implementation of {@link XIDListValue}
+ * An implementation of {@link XIdListValue}
  * 
  * @author Kaidel
  * @author voelkel
  * 
  */
-public class MemoryIDListValue extends MemoryListValue<XID> implements XIDListValue, Serializable {
+public class MemoryIDListValue extends MemoryListValue<XId> implements XIdListValue, Serializable {
 	
 	private static final long serialVersionUID = -7641986388917629097L;
 	
-	public static final XID[] createArrayWithEntryInsertedAtPosition(XID[] array, int position,
-	        XID entry) {
+	public static final XId[] createArrayWithEntryInsertedAtPosition(XId[] array, int position,
+	        XId entry) {
 		int size = array.length;
 		if(position < 0 || position > size) {
 			throw new IndexOutOfBoundsException();
 		}
-		XID[] newList = new XID[size + 1];
+		XId[] newList = new XId[size + 1];
 		System.arraycopy(array, 0, newList, 0, position);
 		newList[position] = entry;
 		System.arraycopy(array, position, newList, position + 1, size - position);
 		return newList;
 	}
 	
-	public static final XID[] createArrayWithEntryRemovedAtPosition(XID[] array, int position) {
+	public static final XId[] createArrayWithEntryRemovedAtPosition(XId[] array, int position) {
 		int size = array.length;
 		if(position < 0 || position >= size) {
 			throw new IndexOutOfBoundsException();
 		}
-		XID[] newList = new XID[size - 1];
+		XId[] newList = new XId[size - 1];
 		System.arraycopy(array, 0, newList, 0, position);
 		System.arraycopy(array, position + 1, newList, position, size - position - 1);
 		return newList;
 	}
 	
 	// non-final to be GWT-Serializable
-	private XID[] list;
+	private XId[] list;
 	
 	// empty constructor for GWT-Serializable
 	protected MemoryIDListValue() {
 	}
 	
-	public MemoryIDListValue(Collection<XID> content) {
-		this.list = content.toArray(new XID[content.size()]);
+	public MemoryIDListValue(Collection<XId> content) {
+		this.list = content.toArray(new XId[content.size()]);
 	}
 	
 	@SuppressWarnings("unused")
 	private MemoryIDListValue(int length) {
-		this.list = new XID[length];
+		this.list = new XId[length];
 	}
 	
-	public MemoryIDListValue(XID[] content) {
-		this.list = new XID[content.length];
+	public MemoryIDListValue(XId[] content) {
+		this.list = new XId[content.length];
 		System.arraycopy(content, 0, this.list, 0, content.length);
 	}
 	
 	@Override
-	public XIDListValue add(int index, XID entry) {
-		XID[] newList = createArrayWithEntryInsertedAtPosition(this.list, index, entry);
+	public XIdListValue add(int index, XId entry) {
+		XId[] newList = createArrayWithEntryInsertedAtPosition(this.list, index, entry);
 		return new MemoryIDListValue(newList);
 	}
 	
 	@Override
-	public XIDListValue add(XID entry) {
+	public XIdListValue add(XId entry) {
 		return add(this.list.length, entry);
 	}
 	
 	@Override
-	public XID[] contents() {
-		XID[] array = new XID[this.list.length];
+	public XId[] contents() {
+		XId[] array = new XId[this.list.length];
 		System.arraycopy(this.list, 0, array, 0, this.list.length);
 		return array;
 	}
 	
 	@Override
 	public boolean equals(Object other) {
-		return other instanceof XIDListValue
-		        && XI.equalsIterator(this.iterator(), ((XIDListValue)other).iterator());
+		return other instanceof XIdListValue
+		        && XI.equalsIterator(this.iterator(), ((XIdListValue)other).iterator());
 	}
 	
 	@Override
-	public XID get(int index) {
+	public XId get(int index) {
 		return this.list[index];
 	}
 	
@@ -111,13 +111,13 @@ public class MemoryIDListValue extends MemoryListValue<XID> implements XIDListVa
 	}
 	
 	@Override
-	public XIDListValue remove(int index) {
-		XID[] newList = createArrayWithEntryRemovedAtPosition(this.contents(), index);
+	public XIdListValue remove(int index) {
+		XId[] newList = createArrayWithEntryRemovedAtPosition(this.contents(), index);
 		return new MemoryIDListValue(newList);
 	}
 	
 	@Override
-	public XIDListValue remove(XID entry) {
+	public XIdListValue remove(XId entry) {
 		int index = indexOf(entry);
 		if(index < 0) {
 			return this;
@@ -131,7 +131,7 @@ public class MemoryIDListValue extends MemoryListValue<XID> implements XIDListVa
 	}
 	
 	@Override
-	public XID[] toArray() {
+	public XId[] toArray() {
 		return contents();
 	}
 	

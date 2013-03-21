@@ -3,7 +3,7 @@ package org.xydra.base.rmof.impl.memory;
 import java.io.Serializable;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.rmof.XRevWritableField;
@@ -63,7 +63,7 @@ public class SimpleField implements Serializable, XRevWritableField {
 	}
 	
 	@Override
-	public XID getId() {
+	public XId getId() {
 		return this.address.getField();
 	}
 	

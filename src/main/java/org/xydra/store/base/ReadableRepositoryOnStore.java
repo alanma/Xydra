@@ -8,7 +8,7 @@ import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.rmof.XReadableModel;
@@ -34,8 +34,8 @@ public class ReadableRepositoryOnStore implements XReadableRepository, Serializa
 	protected XAddress address;
 	protected XReadableRepository baseRepository;
 	protected Credentials credentials;
-	protected Set<XID> modelIds = null;
-	private XID repositoryId;
+	protected Set<XId> modelIds = null;
+	private XId repositoryId;
 	
 	protected XydraStore store;
 	
@@ -58,12 +58,12 @@ public class ReadableRepositoryOnStore implements XReadableRepository, Serializa
 	}
 	
 	@Override
-	public XID getId() {
+	public XId getId() {
 		return this.address.getRepository();
 	}
 	
 	@Override
-	public XReadableModel getModel(XID id) {
+	public XReadableModel getModel(XId id) {
 		ReadableModelOnStore model = new ReadableModelOnStore(this.credentials, this.store,
 		        XX.resolveModel(getAddress(), id));
 		if(model.baseModel == null) {
@@ -72,12 +72,12 @@ public class ReadableRepositoryOnStore implements XReadableRepository, Serializa
 		return model;
 	}
 	
-	private synchronized XID getRepositoryId(@NeverNull XydraStore store) {
+	private synchronized XId getRepositoryId(@NeverNull XydraStore store) {
 		XyAssert.xyAssert(store != null); assert store != null;
 		assert store != null;
 		this.repositoryId = null;
 		store.getRepositoryId(this.credentials.getActorId(), this.credentials.getPasswordHash(),
-		        new Callback<XID>() {
+		        new Callback<XId>() {
 			        
 			        @Override
 			        public void onFailure(Throwable exception) {
@@ -85,7 +85,7 @@ public class ReadableRepositoryOnStore implements XReadableRepository, Serializa
 			        }
 			        
 			        @Override
-			        public void onSuccess(XID object) {
+			        public void onSuccess(XId object) {
 				        ReadableRepositoryOnStore.this.repositoryId = object;
 			        }
 		        });
@@ -102,7 +102,7 @@ public class ReadableRepositoryOnStore implements XReadableRepository, Serializa
 	}
 	
 	@Override
-	public boolean hasModel(XID id) {
+	public boolean hasModel(XId id) {
 		initModelIds();
 		return this.modelIds.contains(id);
 	}
@@ -112,7 +112,7 @@ public class ReadableRepositoryOnStore implements XReadableRepository, Serializa
 			return;
 		}
 		this.store.getModelIds(this.credentials.getActorId(), this.credentials.getPasswordHash(),
-		        new Callback<Set<XID>>() {
+		        new Callback<Set<XId>>() {
 			        
 			        @Override
 			        public void onFailure(Throwable exception) {
@@ -120,7 +120,7 @@ public class ReadableRepositoryOnStore implements XReadableRepository, Serializa
 			        }
 			        
 			        @Override
-			        public void onSuccess(Set<XID> modelIds) {
+			        public void onSuccess(Set<XId> modelIds) {
 				        ReadableRepositoryOnStore.this.modelIds = modelIds;
 			        }
 		        });
@@ -134,7 +134,7 @@ public class ReadableRepositoryOnStore implements XReadableRepository, Serializa
 	}
 	
 	@Override
-	public Iterator<XID> iterator() {
+	public Iterator<XId> iterator() {
 		initModelIds();
 		return this.modelIds.iterator();
 	}

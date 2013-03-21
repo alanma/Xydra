@@ -9,7 +9,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.minio.MiniStreamWriter;
 import org.xydra.base.rmof.XReadableRepository;
 import org.xydra.core.model.XModel;
@@ -67,7 +67,7 @@ public class XFile {
 	 *         hold a correct XModel
 	 * @throws IOException If there was an error reading the file.
 	 */
-	public static XModel loadModel(XID actorId, String passwordHash, File file) throws IOException {
+	public static XModel loadModel(XId actorId, String passwordHash, File file) throws IOException {
 		
 		FileInputStream fin = new FileInputStream(file);
 		
@@ -88,7 +88,7 @@ public class XFile {
 	 *         hold a correct XModel
 	 * @throws IOException If there was an error reading the file.
 	 */
-	public static XModel loadModel(XID actorId, String passwordHash, String filename)
+	public static XModel loadModel(XId actorId, String passwordHash, String filename)
 	        throws IOException {
 		return loadModel(actorId, passwordHash, null, filename);
 	}
@@ -105,7 +105,7 @@ public class XFile {
 	 *         hold a correct XModel
 	 * @throws IOException If there was an error reading the file.
 	 */
-	public static XModel loadModel(XID actorId, String passwordHash, String path, String name)
+	public static XModel loadModel(XId actorId, String passwordHash, String path, String name)
 	        throws IOException {
 		return loadModel(actorId, passwordHash, getFileForModel(path, name));
 	}
@@ -121,7 +121,7 @@ public class XFile {
 	 *         hold a correct XRepository
 	 * @throws IOException If there was an error reading the file.
 	 */
-	public static XRepository loadRepository(XID actorId, String passwordHash, File file)
+	public static XRepository loadRepository(XId actorId, String passwordHash, File file)
 	        throws IOException {
 		
 		FileInputStream fin = new FileInputStream(file);
@@ -143,7 +143,7 @@ public class XFile {
 	 *         doesn't hold a correct XRepository
 	 * @throws IOException If there was an error reading the file.
 	 */
-	public static XRepository loadRepository(XID actorId, String passwordHash, String filename)
+	public static XRepository loadRepository(XId actorId, String passwordHash, String filename)
 	        throws IOException {
 		return loadRepository(actorId, passwordHash, null, filename);
 	}
@@ -160,7 +160,7 @@ public class XFile {
 	 *         doesn't hold a correct XRepository
 	 * @throws IOException If there was an error reading the file.
 	 */
-	public static XRepository loadRepository(XID actorId, String passwordHash, String path,
+	public static XRepository loadRepository(XId actorId, String passwordHash, String path,
 	        String filename) throws IOException {
 		return loadRepository(actorId, passwordHash, getFileForRepository(path, filename));
 	}

@@ -1,6 +1,6 @@
 package org.xydra.store;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.store.impl.delegate.XydraPersistence;
 
 
@@ -40,11 +40,11 @@ public interface XydraPlatformRuntime {
 	public IMemCache getMemCache();
 	
 	/**
-	 * @param repositoryId XID of new repository
+	 * @param repositoryId XId of new repository
 	 * @return a new instance of a platform specific {@link XydraPersistence}
 	 *         implementation with the given repositoryId
 	 */
-	public XydraPersistence getPersistence(XID repositoryId);
+	public XydraPersistence getPersistence(XId repositoryId);
 	
 	/**
 	 * Signals the Xydra platform that the current (web) request has been

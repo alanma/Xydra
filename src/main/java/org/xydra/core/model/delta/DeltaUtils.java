@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.xydra.base.IHasXID;
+import org.xydra.base.IHasXId;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XRepositoryCommand;
@@ -49,7 +49,7 @@ public abstract class DeltaUtils {
     
     private static void applyChanges(XRevWritableModel model, ChangedModel changedModel, long rev) {
         
-        for(XID objectId : changedModel.getRemovedObjects()) {
+        for(XId objectId : changedModel.getRemovedObjects()) {
             XyAssert.xyAssert(model.hasObject(objectId));
             model.removeObject(objectId);
         }
@@ -57,7 +57,7 @@ public abstract class DeltaUtils {
         for(XReadableObject object : changedModel.getNewObjects()) {
             XyAssert.xyAssert(!model.hasObject(object.getId()));
             XRevWritableObject newObject = model.createObject(object.getId());
-            for(XID fieldId : object) {
+            for(XId fieldId : object) {
                 applyChanges(newObject, object.getField(fieldId), rev);
             }
             newObject.setRevisionNumber(rev);
@@ -71,7 +71,7 @@ public abstract class DeltaUtils {
             XyAssert.xyAssert(object != null);
             assert object != null;
             
-            for(XID fieldId : changedObject.getRemovedFields()) {
+            for(XId fieldId : changedObject.getRemovedFields()) {
                 XyAssert.xyAssert(object.hasField(fieldId));
                 object.removeField(fieldId);
                 objectChanged = true;
@@ -162,7 +162,7 @@ public abstract class DeltaUtils {
      *         {@link #executeCommand(XReadableModel, XCommand)}
      */
     public static List<XAtomicEvent> createEvents(XAddress modelAddr,
-            Pair<ChangedModel,ModelChange> change, XID actorId, long rev, boolean forceTxnEvent) {
+            Pair<ChangedModel,ModelChange> change, XId actorId, long rev, boolean forceTxnEvent) {
         XyAssert.xyAssert(change != null);
         assert change != null;
         
@@ -256,12 +256,12 @@ public abstract class DeltaUtils {
      * @param inTrans should always be true if there are more than 1 events
      * @param implied
      */
-    public static void createEventsForChangedModel(List<XAtomicEvent> events, XID actorId,
+    public static void createEventsForChangedModel(List<XAtomicEvent> events, XId actorId,
             ChangedModel changedModel, boolean inTrans, boolean implied) {
         
         long rev = changedModel.getRevisionNumber();
         
-        for(XID objectId : changedModel.getRemovedObjects()) {
+        for(XId objectId : changedModel.getRemovedObjects()) {
             XReadableObject removedObject = changedModel.getOldObject(objectId);
             DeltaUtils.createEventsForRemovedObject(events, rev, actorId, removedObject, inTrans,
                     implied);
@@ -270,7 +270,7 @@ public abstract class DeltaUtils {
         for(XReadableObject object : changedModel.getNewObjects()) {
             events.add(MemoryModelEvent.createAddEvent(actorId, changedModel.getAddress(),
                     object.getId(), rev, inTrans));
-            for(XID fieldId : object) {
+            for(XId fieldId : object) {
                 DeltaUtils.createEventsForNewField(events, rev, actorId, object,
                         object.getField(fieldId), inTrans);
             }
@@ -280,7 +280,7 @@ public abstract class DeltaUtils {
             
             XyAssert.xyAssert(!implied);
             
-            for(XID fieldId : object.getRemovedFields()) {
+            for(XId fieldId : object.getRemovedFields()) {
                 DeltaUtils.createEventsForRemovedField(events, rev, actorId, object,
                         object.getOldField(fieldId), inTrans, false);
             }
@@ -317,7 +317,7 @@ public abstract class DeltaUtils {
         
     }
     
-    private static void createEventsForNewField(List<XAtomicEvent> events, long rev, XID actorId,
+    private static void createEventsForNewField(List<XAtomicEvent> events, long rev, XId actorId,
             XReadableObject object, XReadableField field, boolean inTrans) {
         long objectRev = object.getRevisionNumber();
         events.add(MemoryObjectEvent.createAddEvent(actorId, object.getAddress(), field.getId(),
@@ -329,7 +329,7 @@ public abstract class DeltaUtils {
     }
     
     private static void createEventsForRemovedField(List<XAtomicEvent> events, long modelRev,
-            XID actorId, XReadableObject object, XReadableField field, boolean inTrans,
+            XId actorId, XReadableObject object, XReadableField field, boolean inTrans,
             boolean implied) {
         long objectRev = object.getRevisionNumber();
         long fieldRev = field.getRevisionNumber();
@@ -342,8 +342,8 @@ public abstract class DeltaUtils {
     }
     
     private static void createEventsForRemovedObject(List<XAtomicEvent> events, long modelRev,
-            XID actorId, XReadableObject object, boolean inTrans, boolean implied) {
-        for(XID fieldId : object) {
+            XId actorId, XReadableObject object, boolean inTrans, boolean implied) {
+        for(XId fieldId : object) {
             DeltaUtils.createEventsForRemovedField(events, modelRev, actorId, object,
                     object.getField(fieldId), inTrans, true);
         }
@@ -431,23 +431,23 @@ public abstract class DeltaUtils {
         
         Collection<? extends IObjectDiff> getPotentiallyChanged();
         
-        Collection<XID> getRemoved();
+        Collection<XId> getRemoved();
     }
     
-    public static interface IObjectDiff extends IHasXID {
+    public static interface IObjectDiff extends IHasXId {
         Collection<? extends XReadableField> getAdded();
         
         Collection<? extends IFieldDiff> getPotentiallyChanged();
         
-        Collection<XID> getRemoved();
+        Collection<XId> getRemoved();
         
         boolean hasChanges();
         
         @Override
-        XID getId();
+        XId getId();
     }
     
-    public static interface IFieldDiff extends IHasXID {
+    public static interface IFieldDiff extends IHasXId {
         XValue getInitialValue();
         
         // same signature as XReadableField
@@ -456,7 +456,7 @@ public abstract class DeltaUtils {
         boolean isChanged();
         
         @Override
-        XID getId();
+        XId getId();
     }
     
 }

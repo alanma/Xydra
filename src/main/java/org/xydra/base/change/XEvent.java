@@ -3,7 +3,7 @@ package org.xydra.base.change;
 import java.io.Serializable;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
@@ -26,10 +26,10 @@ public interface XEvent extends Serializable {
 	/**
 	 * WHO executed this?
 	 * 
-	 * @return the {@link XID} of the actor who executed the change that is
+	 * @return the {@link XId} of the actor who executed the change that is
 	 *         represented by this event.
 	 */
-	XID getActor();
+	XId getActor();
 	
 	/**
 	 * WHAT has been changed?

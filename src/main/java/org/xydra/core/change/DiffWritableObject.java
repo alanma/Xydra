@@ -8,7 +8,7 @@ import java.util.Set;
 
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.change.XAtomicCommand;
@@ -39,9 +39,9 @@ public class DiffWritableObject implements XWritableObject {
 	
 	private class WrappedField implements XWritableField {
 		
-		private XID fieldId;
+		private XId fieldId;
 		
-		public WrappedField(XID fieldId) {
+		public WrappedField(XId fieldId) {
 			this.fieldId = fieldId;
 		}
 		
@@ -52,7 +52,7 @@ public class DiffWritableObject implements XWritableObject {
 		}
 		
 		@Override
-		public XID getId() {
+		public XId getId() {
 			return this.fieldId;
 		}
 		
@@ -111,7 +111,7 @@ public class DiffWritableObject implements XWritableObject {
 		this.removed = new SimpleObject(base.getAddress());
 	}
 	
-	private XValue baseGetValue(XID fieldId) {
+	private XValue baseGetValue(XId fieldId) {
 		XWritableField f = this.base.getField(fieldId);
 		if(f == null)
 			return null;
@@ -119,7 +119,7 @@ public class DiffWritableObject implements XWritableObject {
 	}
 	
 	@Override
-	public XWritableField createField(XID fieldId) {
+	public XWritableField createField(XId fieldId) {
 		XWritableField f = this.getField(fieldId);
 		if(f == null) {
 			f = this.added.createField(fieldId);
@@ -129,7 +129,7 @@ public class DiffWritableObject implements XWritableObject {
 		
 	}
 	
-	protected XValue fieldGetValue(XID fieldId) {
+	protected XValue fieldGetValue(XId fieldId) {
 		XWritableField f;
 		if(this.added.hasField(fieldId)) {
 			f = this.added.getField(fieldId);
@@ -142,7 +142,7 @@ public class DiffWritableObject implements XWritableObject {
 		return f.getValue();
 	}
 	
-	protected boolean fieldSetValue(XID fieldId, XValue value) {
+	protected boolean fieldSetValue(XId fieldId, XValue value) {
 		XyAssert.xyAssert(hasField(fieldId));
 		
 		XWritableField f;
@@ -160,7 +160,7 @@ public class DiffWritableObject implements XWritableObject {
 	}
 	
 	@Override
-	public XWritableField getField(XID fieldId) {
+	public XWritableField getField(XId fieldId) {
 		XWritableField f = getFieldInternal(fieldId);
 		if(f == null) {
 			return null;
@@ -168,7 +168,7 @@ public class DiffWritableObject implements XWritableObject {
 		return new WrappedField(f.getId());
 	}
 	
-	private XWritableField getFieldInternal(XID fieldId) {
+	private XWritableField getFieldInternal(XId fieldId) {
 		XWritableField f = this.added.getField(fieldId);
 		if(f != null) {
 			// fine
@@ -188,7 +188,7 @@ public class DiffWritableObject implements XWritableObject {
 	}
 	
 	@Override
-	public XID getId() {
+	public XId getId() {
 		return this.base.getId();
 	}
 	
@@ -198,7 +198,7 @@ public class DiffWritableObject implements XWritableObject {
 	}
 	
 	@Override
-	public boolean hasField(XID fieldId) {
+	public boolean hasField(XId fieldId) {
 		if(this.added.hasField(fieldId)) {
 			return true;
 		} else if(this.removed.hasField(fieldId)) {
@@ -213,21 +213,21 @@ public class DiffWritableObject implements XWritableObject {
 		return this.fieldIds().isEmpty();
 	}
 	
-	protected boolean isEmpty(XID objectId) {
+	protected boolean isEmpty(XId objectId) {
 		return fieldIds().isEmpty();
 	}
 	
 	@Override
-	public Iterator<XID> iterator() {
+	public Iterator<XId> iterator() {
 		return this.fieldIds().iterator();
 	}
 	
-	protected Iterator<XID> iterator(XID objectId) {
+	protected Iterator<XId> iterator(XId objectId) {
 		return fieldIds().iterator();
 	}
 	
-	protected Set<XID> fieldIds() {
-		Set<XID> set = new HashSet<XID>();
+	protected Set<XId> fieldIds() {
+		Set<XId> set = new HashSet<XId>();
 		set.addAll(toSet(this.base.iterator()));
 		set.removeAll(toSet(this.removed.iterator()));
 		set.addAll(toSet(this.added.iterator()));
@@ -236,7 +236,7 @@ public class DiffWritableObject implements XWritableObject {
 	}
 	
 	@Override
-	public boolean removeField(XID fieldId) {
+	public boolean removeField(XId fieldId) {
 		// if added, add less
 		if(this.added.hasField(fieldId)) {
 			this.added.removeField(fieldId);
@@ -262,7 +262,7 @@ public class DiffWritableObject implements XWritableObject {
 		List<XAtomicCommand> list = new LinkedList<XAtomicCommand>();
 		
 		// remove
-		for(XID fId : this.removed) {
+		for(XId fId : this.removed) {
 			XAddress fAddress = XX.resolveField(getAddress(), fId);
 			// remove field
 			if(forced) {
@@ -274,7 +274,7 @@ public class DiffWritableObject implements XWritableObject {
 		}
 		
 		// add
-		for(XID fId : this.added) {
+		for(XId fId : this.added) {
 			XWritableField f = getField(fId);
 			XyAssert.xyAssert(f != null); assert f != null;
 			// add field

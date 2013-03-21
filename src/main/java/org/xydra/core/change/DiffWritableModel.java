@@ -11,7 +11,7 @@ import java.util.Set;
 import org.xydra.annotations.NeverNull;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.XAtomicCommand;
 import org.xydra.base.change.XTransaction;
@@ -48,7 +48,7 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 	private static final Logger log = LoggerFactory.getLogger(DiffWritableModel.class);
 	
 	/** use two underscores to get sorted alphabetically even before _ids */
-	static final XID NONE = XX.toId("__NoId_DWModel");
+	static final XId NONE = XX.toId("__NoId_DWModel");
 	
 	static final XValue NOVALUE = XV.toValue("__NoValue_DWModel");
 	
@@ -64,7 +64,7 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 	 * 
 	 * A added/removed value is represented as (objectId, fieldId, value).
 	 */
-	MapMapIndex<XID,XID,XValue> added, removed;
+	MapMapIndex<XId,XId,XValue> added, removed;
 	
 	private final XWritableModel base;
 	
@@ -75,11 +75,11 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 		XyAssert.xyAssert(base != null);
 		assert base != null;
 		this.base = base;
-		this.added = new MapMapIndex<XID,XID,XValue>();
-		this.removed = new MapMapIndex<XID,XID,XValue>();
+		this.added = new MapMapIndex<XId,XId,XValue>();
+		this.removed = new MapMapIndex<XId,XId,XValue>();
 	}
 	
-	private XValue getFieldValueFromBase(XID objectId, XID fieldId) {
+	private XValue getFieldValueFromBase(XId objectId, XId fieldId) {
 		XWritableObject o = this.base.getObject(objectId);
 		if(o == null)
 			return null;
@@ -90,7 +90,7 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 	}
 	
 	@Override
-	public XWritableObject createObject(@NeverNull XID objectId) {
+	public XWritableObject createObject(@NeverNull XId objectId) {
 		if(hasObject(objectId)) {
 			return getObject(objectId);
 		}
@@ -101,7 +101,7 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 	}
 	
 	@Override
-	protected XValue field_getValue(XID objectId, XID fieldId) {
+	protected XValue field_getValue(XId objectId, XId fieldId) {
 		assert hasObject(objectId) : "Object '" + resolveObject(objectId)
 		        + "' not found when looking for field '" + fieldId + "'";
 		XyAssert.xyAssert(getObject(objectId).hasField(fieldId));
@@ -123,7 +123,7 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 	}
 	
 	@Override
-	protected boolean field_setValue(XID objectId, XID fieldId, XValue value) {
+	protected boolean field_setValue(XId objectId, XId fieldId, XValue value) {
 		XyAssert.xyAssert(objectId != null);
 		assert objectId != null;
 		XyAssert.xyAssert(fieldId != null);
@@ -159,28 +159,28 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 	}
 	
 	@Override
-	public XID getId() {
+	public XId getId() {
 		return this.base.getId();
 	}
 	
 	@Override
-	public boolean hasObject(@NeverNull XID objectId) {
-		if(this.added.containsKey(new EqualsConstraint<XID>(objectId), new Wildcard<XID>())) {
-			XyAssert.xyAssert(!this.removed.containsKey(new EqualsConstraint<XID>(objectId),
-			        new EqualsConstraint<XID>(NONE)));
+	public boolean hasObject(@NeverNull XId objectId) {
+		if(this.added.containsKey(new EqualsConstraint<XId>(objectId), new Wildcard<XId>())) {
+			XyAssert.xyAssert(!this.removed.containsKey(new EqualsConstraint<XId>(objectId),
+			        new EqualsConstraint<XId>(NONE)));
 			return true;
-		} else if(this.removed.containsKey(new EqualsConstraint<XID>(objectId),
-		        new EqualsConstraint<XID>(NONE))) {
-			XyAssert.xyAssert(!this.added.containsKey(new EqualsConstraint<XID>(objectId),
-			        new Wildcard<XID>()));
+		} else if(this.removed.containsKey(new EqualsConstraint<XId>(objectId),
+		        new EqualsConstraint<XId>(NONE))) {
+			XyAssert.xyAssert(!this.added.containsKey(new EqualsConstraint<XId>(objectId),
+			        new Wildcard<XId>()));
 			return false;
 		} else {
 			return this.base.hasObject(objectId);
 		}
 	}
 	
-	protected Set<XID> idsAsSet() {
-		Set<XID> set = IndexUtils.diff(this.base.iterator(), this.added.key1Iterator(),
+	protected Set<XId> idsAsSet() {
+		Set<XId> set = IndexUtils.diff(this.base.iterator(), this.added.key1Iterator(),
 		        this.removed.key1Iterator());
 		set.remove(NONE);
 		return set;
@@ -192,12 +192,12 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 	}
 	
 	@Override
-	public Iterator<XID> iterator() {
+	public Iterator<XId> iterator() {
 		return this.idsAsSet().iterator();
 	}
 	
 	@Override
-	protected XWritableField object_createField(XID objectId, XID fieldId) {
+	protected XWritableField object_createField(XId objectId, XId fieldId) {
 		XyAssert.xyAssert(objectId != null);
 		assert objectId != null;
 		XyAssert.xyAssert(fieldId != null);
@@ -211,17 +211,17 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 	}
 	
 	@Override
-	protected boolean object_hasField(XID objectId, XID fieldId) {
+	protected boolean object_hasField(XId objectId, XId fieldId) {
 		XyAssert.xyAssert(objectId != null);
 		assert objectId != null;
 		XyAssert.xyAssert(fieldId != null);
 		assert fieldId != null;
-		if(this.added.tupleIterator(new EqualsConstraint<XID>(objectId),
-		        new EqualsConstraint<XID>(fieldId)).hasNext()) {
+		if(this.added.tupleIterator(new EqualsConstraint<XId>(objectId),
+		        new EqualsConstraint<XId>(fieldId)).hasNext()) {
 			return true;
 		}
-		if(this.removed.tupleIterator(new EqualsConstraint<XID>(objectId),
-		        new EqualsConstraint<XID>(fieldId)).hasNext()) {
+		if(this.removed.tupleIterator(new EqualsConstraint<XId>(objectId),
+		        new EqualsConstraint<XId>(fieldId)).hasNext()) {
 			return false;
 		}
 		// else
@@ -229,29 +229,29 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 	}
 	
 	@Override
-	protected boolean object_isEmpty(XID objectId) {
+	protected boolean object_isEmpty(XId objectId) {
 		XyAssert.xyAssert(objectId != null);
 		assert objectId != null;
 		return object_idsAsSet(objectId).isEmpty();
 	}
 	
 	@Override
-	protected Iterator<XID> object_iterator(XID objectId) {
+	protected Iterator<XId> object_iterator(XId objectId) {
 		XyAssert.xyAssert(objectId != null);
 		assert objectId != null;
 		return object_idsAsSet(objectId).iterator();
 	}
 	
 	@Override
-	protected boolean object_removeField(XID objectId, XID fieldId) {
+	protected boolean object_removeField(XId objectId, XId fieldId) {
 		XyAssert.xyAssert(objectId != null);
 		assert objectId != null;
 		XyAssert.xyAssert(fieldId != null);
 		assert fieldId != null;
 		boolean hasField = object_hasField(objectId, fieldId);
 		if(hasField) {
-			if(this.added.containsKey(new EqualsConstraint<XID>(objectId),
-			        new EqualsConstraint<XID>(fieldId))) {
+			if(this.added.containsKey(new EqualsConstraint<XId>(objectId),
+			        new EqualsConstraint<XId>(fieldId))) {
 				this.added.deIndex(objectId, fieldId);
 			} else {
 				this.removed.index(objectId, fieldId, NOVALUE);
@@ -260,28 +260,28 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 		return hasField;
 	}
 	
-	protected Set<XID> object_idsAsSet(XID objectId) {
+	protected Set<XId> object_idsAsSet(XId objectId) {
 		XyAssert.xyAssert(objectId != null);
 		assert objectId != null;
 		
-		Constraint<XID> c1 = new EqualsConstraint<XID>(objectId);
-		Constraint<XID> c2 = new Wildcard<XID>();
+		Constraint<XId> c1 = new EqualsConstraint<XId>(objectId);
+		Constraint<XId> c2 = new Wildcard<XId>();
 		
 		// add all from base
-		Set<XID> set = new HashSet<XID>();
+		Set<XId> set = new HashSet<XId>();
 		if(this.base.hasObject(objectId)) {
 			set.addAll(IndexUtils.toSet(this.base.getObject(objectId).iterator()));
 		}
 		// remove all from removed
-		Iterator<KeyKeyEntryTuple<XID,XID,XValue>> it = this.removed.tupleIterator(c1, c2);
+		Iterator<KeyKeyEntryTuple<XId,XId,XValue>> it = this.removed.tupleIterator(c1, c2);
 		while(it.hasNext()) {
-			KeyKeyEntryTuple<XID,XID,XValue> entry = it.next();
+			KeyKeyEntryTuple<XId,XId,XValue> entry = it.next();
 			set.remove(entry.getKey2());
 		}
 		// add all from added
 		it = this.added.tupleIterator(c1, c2);
 		while(it.hasNext()) {
-			KeyKeyEntryTuple<XID,XID,XValue> entry = it.next();
+			KeyKeyEntryTuple<XId,XId,XValue> entry = it.next();
 			set.add(entry.getKey2());
 		}
 		// done
@@ -290,12 +290,12 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 	}
 	
 	@Override
-	public boolean removeObject(@NeverNull XID objectId) {
+	public boolean removeObject(@NeverNull XId objectId) {
 		XyAssert.xyAssert(objectId != null);
 		assert objectId != null;
 		
-		Constraint<XID> c1 = new EqualsConstraint<XID>(objectId);
-		Constraint<XID> c2 = new Wildcard<XID>();
+		Constraint<XId> c1 = new EqualsConstraint<XId>(objectId);
+		Constraint<XId> c2 = new Wildcard<XId>();
 		if(this.added.containsKey(c1, c2)) {
 			// fine
 			IndexUtils.deIndex(this.added, c1, c2);
@@ -322,10 +322,10 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 		List<XAtomicCommand> list = new LinkedList<XAtomicCommand>();
 		
 		// remove
-		Iterator<KeyKeyEntryTuple<XID,XID,XValue>> it = this.removed.tupleIterator(
-		        new Wildcard<XID>(), new Wildcard<XID>());
+		Iterator<KeyKeyEntryTuple<XId,XId,XValue>> it = this.removed.tupleIterator(
+		        new Wildcard<XId>(), new Wildcard<XId>());
 		while(it.hasNext()) {
-			KeyKeyEntryTuple<XID,XID,XValue> objectFieldValue = it.next();
+			KeyKeyEntryTuple<XId,XId,XValue> objectFieldValue = it.next();
 			if(objectFieldValue.getKey2().equals(NONE)) {
 				// remove object
 				list.add(X.getCommandFactory().createForcedRemoveObjectCommand(
@@ -338,9 +338,9 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 		}
 		
 		// add
-		it = this.added.tupleIterator(new Wildcard<XID>(), new Wildcard<XID>());
+		it = this.added.tupleIterator(new Wildcard<XId>(), new Wildcard<XId>());
 		while(it.hasNext()) {
-			KeyKeyEntryTuple<XID,XID,XValue> e = it.next();
+			KeyKeyEntryTuple<XId,XId,XValue> e = it.next();
 			if(e.getKey2().equals(NONE)) {
 				// add object
 				if(this.base.hasObject(e.getKey1())) {
@@ -429,7 +429,7 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 	}
 	
 	@Override
-	protected long object_getRevisionNumber(XID objectId) {
+	protected long object_getRevisionNumber(XId objectId) {
 		throw new UnsupportedOperationException();
 		// XWritableObject object = this.base.getObject(objectId);
 		// if(object == null) {
@@ -439,7 +439,7 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
 	}
 	
 	@Override
-	protected long field_getRevisionNumber(XID objectId, XID fieldId) {
+	protected long field_getRevisionNumber(XId objectId, XId fieldId) {
 		throw new UnsupportedOperationException();
 		// XWritableObject object = this.base.getObject(objectId);
 		// if(object == null) {

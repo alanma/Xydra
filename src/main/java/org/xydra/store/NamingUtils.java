@@ -2,7 +2,7 @@ package org.xydra.store;
 
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.sharedutils.XyAssert;
 
@@ -53,21 +53,21 @@ public class NamingUtils {
 	 * Default ID for the default model for accounts, created by store
 	 * implementation: {@value}
 	 */
-	public static final XID ID_AUTHENTICATION_MODEL = XX.toId(PREFIX_INTERNAL + NAMESPACE_SEPARATOR
+	public static final XId ID_AUTHENTICATION_MODEL = XX.toId(PREFIX_INTERNAL + NAMESPACE_SEPARATOR
 	        + "authentication");
 	
 	/**
 	 * Default ID for the default model for groups, created by store
 	 * implementation: {@value}
 	 */
-	public static final XID ID_GROUPS_MODEL = XX.toId(PREFIX_INTERNAL + NAMESPACE_SEPARATOR
+	public static final XId ID_GROUPS_MODEL = XX.toId(PREFIX_INTERNAL + NAMESPACE_SEPARATOR
 	        + "groups");
 	
 	/**
 	 * Default ID for the default model for the global authorisation model,
 	 * created by store implementation: {@value}
 	 */
-	public static final XID ID_REPO_AUTHORISATION_MODEL = XX.toId(PREFIX_INTERNAL
+	public static final XId ID_REPO_AUTHORISATION_MODEL = XX.toId(PREFIX_INTERNAL
 	        + NAMESPACE_SEPARATOR + "repositoryRights");
 	
 	private static final String NULL_ENCODED = "_N";
@@ -97,13 +97,13 @@ public class NamingUtils {
 	}
 	
 	/**
-	 * Decode back to an XID
+	 * Decode back to an XId
 	 * 
-	 * @param encodedXid a string created via {@link #encode(XID)}
-	 * @return an XID or null (if the string represented the null XID)
+	 * @param encodedXid a string created via {@link #encode(XId)}
+	 * @return an XId or null (if the string represented the null XId)
 	 * @throws IllegalArgumentException if decoding fails
 	 */
-	public static XID decodeXid(String encodedXid) {
+	public static XId decodeXid(String encodedXid) {
 		String decoded = decodeXidString(encodedXid);
 		if(decoded == null) {
 			return null;
@@ -114,7 +114,7 @@ public class NamingUtils {
 	
 	/**
 	 * @param encodedXid
-	 * @return the decoded XID string
+	 * @return the decoded XId string
 	 * @throws IllegalArgumentException if decoding fails
 	 */
 	private static String decodeXidString(String encodedXid) {
@@ -128,10 +128,10 @@ public class NamingUtils {
 	}
 	
 	/**
-	 * Encode address as XID string
+	 * Encode address as XId string
 	 * 
 	 * @param address may be null
-	 * @return a string that can be used as an XID, encoding the given address
+	 * @return a string that can be used as an XId, encoding the given address
 	 */
 	public static String encode(XAddress address) {
 		if(address == null) {
@@ -144,12 +144,12 @@ public class NamingUtils {
 	}
 	
 	/**
-	 * Encode XID to be used in a string, can handle nulls.
+	 * Encode XId to be used in a string, can handle nulls.
 	 * 
 	 * @param xid may be null
-	 * @return a string to be used as an XID or part thereof
+	 * @return a string to be used as an XId or part thereof
 	 */
-	public static String encode(XID xid) {
+	public static String encode(XId xid) {
 		if(xid == null) {
 			return NULL_ENCODED;
 		} else {
@@ -173,13 +173,13 @@ public class NamingUtils {
 	
 	/**
 	 * @param indexModelId which has been created via
-	 *            {@link #getIndexModelId(XID, String)}
+	 *            {@link #getIndexModelId(XId, String)}
 	 * @return the base model on which this index model is based. Note: Several
 	 *         indexes can be based on the same base model.
 	 */
-	public static XID getBaseModelIdForIndexModelId(XID indexModelId) {
+	public static XId getBaseModelIdForIndexModelId(XId indexModelId) {
 		String modelIdStr = parseIndexModelId(indexModelId)[0];
-		XID modelId = XX.toId(modelIdStr);
+		XId modelId = XX.toId(modelIdStr);
 		return modelId;
 	}
 	
@@ -191,12 +191,12 @@ public class NamingUtils {
 	 * Read-rights for an index model are inherited from the corresponding base
 	 * model.
 	 * 
-	 * @param modelId XID of model
+	 * @param modelId XId of model
 	 * @param indexName may not be null and not be the empty string.
-	 * @return an XID in the internal name-space following the name-space
+	 * @return an XId in the internal name-space following the name-space
 	 *         conventions for <em>index models</em>.
 	 */
-	public static XID getIndexModelId(XID modelId, String indexName) {
+	public static XId getIndexModelId(XId modelId, String indexName) {
 		if(indexName == null || indexName.length() == 0) {
 			throw new IllegalArgumentException("Indexname may not be null and not the empty string");
 		}
@@ -206,19 +206,19 @@ public class NamingUtils {
 	
 	/**
 	 * @param indexModelId which has been created via
-	 *            {@link #getIndexModelId(XID, String)}
+	 *            {@link #getIndexModelId(XId, String)}
 	 * @return the index name of this index. Different index models for a given
 	 *         base model must have different index names.
 	 */
-	public static String getIndexNameForIndexModelId(XID indexModelId) {
+	public static String getIndexNameForIndexModelId(XId indexModelId) {
 		return parseIndexModelId(indexModelId)[1];
 	}
 	
-	public static XID getRightsModelId(XID modelId) {
+	public static XId getRightsModelId(XId modelId) {
 		return XX.toId(PREFIX_RIGHTS_ID + modelId.toString());
 	}
 	
-	public static boolean isRightsModelId(XID modelId) {
+	public static boolean isRightsModelId(XId modelId) {
 		return modelId.toString().startsWith(PREFIX_RIGHTS_ID);
 	}
 	
@@ -226,7 +226,7 @@ public class NamingUtils {
 	 * @param indexModelId
 	 * @return { modelId as String, indexName as String }
 	 */
-	private static String[] parseIndexModelId(XID indexModelId) {
+	private static String[] parseIndexModelId(XId indexModelId) {
 		String s = indexModelId.toString();
 		if(s.length() <= PREFIX_INDEX_ID.length()) {
 			throw new IllegalArgumentException(

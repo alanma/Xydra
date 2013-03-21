@@ -6,7 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import org.xydra.base.X;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XCommand;
@@ -96,21 +96,21 @@ public class XModelBasics {
 		/*
 		 * If you want to do anything in Xydra you also have to specify who or
 		 * what does the action by passing a so called actor ID, which also is
-		 * an XID
+		 * an XId
 		 */
-		XID actorID = XX.toId("ExampleActor");
+		XId actorID = XX.toId("ExampleActor");
 		
 		// creating a new repository
 		XRepository repository = X.createMemoryRepository(actorID);
 		
 		/*
-		 * Every XModel needs a specific XID. You can either create an XID from
-		 * a given string or use the XIDProvider to create a random and unique
-		 * XID.
+		 * Every XModel needs a specific XId. You can either create an XId from
+		 * a given string or use the XIdProvider to create a random and unique
+		 * XId.
 		 */
 
 		// creating an ID from a string
-		XID stringID = XX.toId("ExampleModel");
+		XId stringID = XX.toId("ExampleModel");
 		
 		// creating a random & unique ID
 		XX.createUniqueId();
@@ -120,13 +120,13 @@ public class XModelBasics {
 		
 		/*
 		 * Now that we have an XModel we can start to create XObjects. Just like
-		 * XModels an XObject needs an XID. In fact, every part of the XModel
-		 * structure, except the XValues, needs an XID. Even the repository has
-		 * an XID, but we didn't have to set in manually since we used X to
+		 * XModels an XObject needs an XId. In fact, every part of the XModel
+		 * structure, except the XValues, needs an XId. Even the repository has
+		 * an XId, but we didn't have to set in manually since we used X to
 		 * create it.
 		 * 
 		 * Furthermore every entity also has an XAddress. An XAddress is just a
-		 * list of XIDs that basically specifies the path in which the entity
+		 * list of XIds that basically specifies the path in which the entity
 		 * lies. For example, consider the following situation:
 		 * 
 		 * An XRepository with ID "repo" that holds an XModel with ID "model",
@@ -137,12 +137,12 @@ public class XModelBasics {
 		 */
 
 		// creating the XObject
-		XID objectId = XX.toId("ExampleObject");
+		XId objectId = XX.toId("ExampleObject");
 		model.createObject(objectId);
 		
 		/*
 		 * We forgot to save the XObject into a variable! So how can we get a
-		 * hold of it? Simple, just use its XID!
+		 * hold of it? Simple, just use its XId!
 		 */
 
 		XObject object = model.getObject(objectId);
@@ -152,7 +152,7 @@ public class XModelBasics {
 		 * works the same as creating an XObject.
 		 */
 
-		XID fieldId = XX.toId("ExampleField");
+		XId fieldId = XX.toId("ExampleField");
 		XField field = object.createField(fieldId);
 		
 		/*
@@ -207,10 +207,10 @@ public class XModelBasics {
 	@Test
 	public void testUsingAccessRights() {
 		/* Here's a little example: */
-		XID actorID = XX.toId("ExampleActor");
-		XID user1ID = XX.toId("ExampleUser1");
-		XID user2ID = XX.toId("ExampleUser2");
-		XID user3ID = XX.toId("ExampleUser3");
+		XId actorID = XX.toId("ExampleActor");
+		XId user1ID = XX.toId("ExampleUser1");
+		XId user2ID = XX.toId("ExampleUser2");
+		XId user3ID = XX.toId("ExampleUser3");
 		
 		XRepository repo = X.createMemoryRepository(actorID);
 		XModel model = repo.createModel(XX.createUniqueId());
@@ -219,9 +219,9 @@ public class XModelBasics {
 		XGroupDatabaseWithListeners groups = new MemoryGroupDatabase();
 		XAuthorisationManager arm = new MemoryAuthorisationManager(groups);
 		
-		// granting write access to the user with the XID user1ID on model
+		// granting write access to the user with the XId user1ID on model
 		
-		// arm.setAccess(user1ID, XA.ACCESS_WRITE, true, XID...path);
+		// arm.setAccess(user1ID, XA.ACCESS_WRITE, true, XId...path);
 		
 		arm.getAuthorisationDatabase()
 		        .setAccess(user1ID, model.getAddress(), XA.ACCESS_WRITE, true);
@@ -242,7 +242,7 @@ public class XModelBasics {
 
 		// grouping user1ID, user2ID and user3ID and granting read-access to the
 		// group
-		XID groupID = XX.toId("ExampleGroup");
+		XId groupID = XX.toId("ExampleGroup");
 		groups.addToGroup(user1ID, groupID);
 		groups.addToGroup(user2ID, groupID);
 		groups.addToGroup(user3ID, groupID);
@@ -277,11 +277,11 @@ public class XModelBasics {
 	public void testUsingCommands() {
 		
 		// setting up an actor ID
-		XID actorID = XX.toId("TutorialActor");
+		XId actorID = XX.toId("TutorialActor");
 		
 		// getting an XRepository
 		XRepository repository = X.createMemoryRepository(actorID);
-		XID repositoryId = repository.getId();
+		XId repositoryId = repository.getId();
 		
 		/*
 		 * We want to add a model to our repository. We could either achieve
@@ -309,7 +309,7 @@ public class XModelBasics {
 		 * Here's how we'd to the above using XCommands:
 		 */
 
-		XID modelId = XX.createUniqueId();
+		XId modelId = XX.createUniqueId();
 		XRepositoryCommand repositoryCommand = commandFactory.createAddModelCommand(repositoryId,
 		        modelId, false);
 		
@@ -320,8 +320,8 @@ public class XModelBasics {
 		assertNotNull(model);
 		
 		// adding the objects
-		XID object1ID = XX.createUniqueId();
-		XID object2ID = XX.createUniqueId();
+		XId object1ID = XX.createUniqueId();
+		XId object2ID = XX.createUniqueId();
 		
 		XModelCommand modelCommand1 = commandFactory.createAddObjectCommand(repositoryId, modelId,
 		        object1ID, false);
@@ -368,7 +368,7 @@ public class XModelBasics {
 		assertEquals(model.getObject(object2ID), null);
 		
 		// lets add a field to object1
-		XID fieldId = XX.createUniqueId();
+		XId fieldId = XX.createUniqueId();
 		XObjectCommand objectCommand = commandFactory.createAddFieldCommand(repositoryId, modelId,
 		        object1ID, fieldId, false);
 		object1.executeCommand(objectCommand);
@@ -417,7 +417,7 @@ public class XModelBasics {
 	@Test
 	public void testUsingEventsAndListeners() {
 		
-		XID actorID = XX.toId("ExampleActor");
+		XId actorID = XX.toId("ExampleActor");
 		XRepository repository = X.createMemoryRepository(actorID);
 		XModel model = repository.createModel(XX.createUniqueId());
 		
@@ -449,8 +449,8 @@ public class XModelBasics {
 		model.addListenerForModelEvents(modelListener);
 		
 		// lets add some objects to see if our listener works
-		XID object1ID = XX.toId("Object1");
-		XID object2ID = XX.toId("Object2");
+		XId object1ID = XX.toId("Object1");
+		XId object2ID = XX.toId("Object2");
 		
 		model.createObject(object1ID);
 		model.createObject(object2ID);
@@ -509,16 +509,16 @@ public class XModelBasics {
 	public void testUsingTransactions() {
 		
 		// setting up an actor ID
-		XID actorID = XX.toId("TutorialActor");
+		XId actorID = XX.toId("TutorialActor");
 		
 		// getting an XRepository
 		XRepository repository = X.createMemoryRepository(actorID);
-		XID repositoryId = repository.getId();
+		XId repositoryId = repository.getId();
 		
 		// creating the XModel
 		XCommandFactory commandFactory = X.getCommandFactory();
 		
-		XID modelId = XX.createUniqueId();
+		XId modelId = XX.createUniqueId();
 		XRepositoryCommand repositoryCommand = commandFactory.createAddModelCommand(repositoryId,
 		        modelId, false);
 		
@@ -529,8 +529,8 @@ public class XModelBasics {
 		assertNotNull(model);
 		
 		// building the commands
-		XID objectId = XX.createUniqueId();
-		XID fieldId = XX.createUniqueId();
+		XId objectId = XX.createUniqueId();
+		XId fieldId = XX.createUniqueId();
 		XValue doubleValue = XV.toValue(3.14159);
 		
 		XModelCommand addObjectCommandCommand = commandFactory.createAddObjectCommand(repositoryId,

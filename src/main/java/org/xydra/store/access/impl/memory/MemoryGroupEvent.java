@@ -3,7 +3,7 @@ package org.xydra.store.access.impl.memory;
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.ChangeType;
 import org.xydra.store.access.XAuthorisationEvent;
 import org.xydra.store.access.XGroupEvent;
@@ -20,11 +20,11 @@ import org.xydra.store.access.XGroupEvent;
 @RequiresAppEngine(false)
 public class MemoryGroupEvent implements XGroupEvent {
 	
-	private final XID actor;
-	private final XID group;
+	private final XId actor;
+	private final XId group;
 	private final ChangeType type;
 	
-	public MemoryGroupEvent(ChangeType type, XID actor, XID group) {
+	public MemoryGroupEvent(ChangeType type, XId actor, XId group) {
 		if(type != ChangeType.ADD && type != ChangeType.REMOVE)
 			throw new IllegalArgumentException("invalid type for group events: " + type);
 		this.type = type;
@@ -33,7 +33,7 @@ public class MemoryGroupEvent implements XGroupEvent {
 	}
 	
 	@Override
-    public XID getActor() {
+    public XId getActor() {
 		return this.actor;
 	}
 	
@@ -43,7 +43,7 @@ public class MemoryGroupEvent implements XGroupEvent {
 	}
 	
 	@Override
-    public XID getGroup() {
+    public XId getGroup() {
 		return this.group;
 	}
 	

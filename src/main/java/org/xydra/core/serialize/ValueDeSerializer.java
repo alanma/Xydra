@@ -7,7 +7,7 @@ import java.util.List;
 import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.value.ValueType;
 import org.xydra.base.value.XBinaryValue;
@@ -192,13 +192,13 @@ public class ValueDeSerializer {
 			List<Double> dl = toListOfType(ValueType.Double, list);
 			return XV.toDoubleListValue(dl);
 		case IdList:
-			List<XID> idl = toListOfType(ValueType.Id, list);
+			List<XId> idl = toListOfType(ValueType.Id, list);
 			return XV.toIDListValue(idl);
 		case IdSet:
-			List<XID> ids = toListOfType(ValueType.Id, list);
+			List<XId> ids = toListOfType(ValueType.Id, list);
 			return XV.toIDSetValue(ids);
 		case IdSortedSet:
-			List<XID> idss = toListOfType(ValueType.Id, list);
+			List<XId> idss = toListOfType(ValueType.Id, list);
 			return XV.toIDSortedSetValue(idss);
 		case IntegerList:
 			List<Integer> intl = toListOfType(ValueType.Integer, list);

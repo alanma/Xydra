@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XEvent;
@@ -38,7 +38,7 @@ public class MemoryTransactionEvent extends AbstractTransactionEvent {
 	 * {@link XAtomicEvent XAtomicEvents} referring to the specified target.
 	 * Changes to the passed array will not affect the event after its creation.
 	 * 
-	 * @param actor the {@link XID} of the actor
+	 * @param actor the {@link XId} of the actor
 	 * @param target the {@link XAddress} of the {@link XModel} or
 	 *            {@link XObject} where the {@link XTransaction} represented by
 	 *            this event was executed
@@ -73,7 +73,7 @@ public class MemoryTransactionEvent extends AbstractTransactionEvent {
 	 *             XAtomicEvents} is neither an {@link XModelEvent}, an
 	 *             {@link XObjectEvent} nor an {@link XFieldEvent}
 	 */
-	public static XTransactionEvent createTransactionEvent(XID actor, XAddress target,
+	public static XTransactionEvent createTransactionEvent(XId actor, XAddress target,
 	        List<XAtomicEvent> events, long modelRevision, long objectRevision) {
 		XAtomicEvent[] eventsCopy = new XAtomicEvent[events.size()];
 		eventsCopy = events.toArray(eventsCopy);
@@ -85,7 +85,7 @@ public class MemoryTransactionEvent extends AbstractTransactionEvent {
 	 * {@link XAtomicEvent XAtomicEvents} referring to the specified target.
 	 * Changes to the passed array will not affect the event after its creation.
 	 * 
-	 * @param actor the {@link XID} of the actor
+	 * @param actor the {@link XId} of the actor
 	 * @param target the {@link XAddress} of the {@link XModel} or
 	 *            {@link XObject} where the {@link XTransaction} represented by
 	 *            this event was executed
@@ -120,7 +120,7 @@ public class MemoryTransactionEvent extends AbstractTransactionEvent {
 	 *             XAtomicEvents} is neither an {@link XModelEvent}, an
 	 *             {@link XObjectEvent} nor an {@link XFieldEvent}
 	 */
-	public static XTransactionEvent createTransactionEvent(XID actor, XAddress target,
+	public static XTransactionEvent createTransactionEvent(XId actor, XAddress target,
 	        XAtomicEvent[] events, long modelRevision, long objectRevision) {
 		// create a copy so the array can't be modified from the outside
 		XAtomicEvent[] eventsCopy = new XAtomicEvent[events.length];
@@ -135,7 +135,7 @@ public class MemoryTransactionEvent extends AbstractTransactionEvent {
 		super();
 	}
 	
-	private MemoryTransactionEvent(XID actor, XAddress target, XAtomicEvent[] events,
+	private MemoryTransactionEvent(XId actor, XAddress target, XAtomicEvent[] events,
 	        long modelRevision, long objectRevision) {
 		super(actor, target, modelRevision, objectRevision);
 		

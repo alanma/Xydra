@@ -16,7 +16,7 @@ import org.xydra.core.model.impl.memory.MemoryObject;
 
 
 /**
- * A utility class for using {@link XID} and {@link XAddress}.
+ * A utility class for using {@link XId} and {@link XAddress}.
  * 
  * @author voelkel
  * @author Kaidel
@@ -25,10 +25,10 @@ import org.xydra.core.model.impl.memory.MemoryObject;
 public class XX {
 	
 	/**
-	 * @return a new random unique {@link XID} created by the default
-	 *         {@link XIDProvider}
+	 * @return a new random unique {@link XId} created by the default
+	 *         {@link XIdProvider}
 	 */
-	public static XID createUniqueId() {
+	public static XId createUniqueId() {
 		return X.getIDProvider().createUniqueId();
 	}
 	
@@ -42,7 +42,7 @@ public class XX {
 	 * @throws IllegalArgumentException if objectAddress doesn't refer to an
 	 *             {@link XObject}
 	 */
-	public static XAddress resolveField(XAddress objectAddress, XID fieldId) {
+	public static XAddress resolveField(XAddress objectAddress, XId fieldId) {
 		if(objectAddress == null) {
 			return toAddress(null, null, null, fieldId);
 		}
@@ -64,7 +64,7 @@ public class XX {
 	 * @throws IllegalArgumentException if modelAddress doesn't refer to an
 	 *             {@link XModel}
 	 */
-	public static XAddress resolveField(XAddress modelAddress, XID objectId, XID fieldId) {
+	public static XAddress resolveField(XAddress modelAddress, XId objectId, XId fieldId) {
 		if(modelAddress == null) {
 			return toAddress(null, null, objectId, fieldId);
 		}
@@ -88,8 +88,8 @@ public class XX {
 	 * @throws IllegalArgumentException if repositoryAddress doesn't refer to an
 	 *             {@link XRepository}
 	 */
-	public static XAddress resolveField(XAddress repositoryAddress, XID modelId, XID objectId,
-	        XID fieldId) {
+	public static XAddress resolveField(XAddress repositoryAddress, XId modelId, XId objectId,
+	        XId fieldId) {
 		if(repositoryAddress == null) {
 			return toAddress(null, modelId, objectId, fieldId);
 		}
@@ -124,7 +124,7 @@ public class XX {
 	 * @throws IllegalArgumentException if repositoryAddress doesn't refer to an
 	 *             {@link XRepository}
 	 */
-	public static XAddress resolveModel(XAddress repositoryAddress, XID modelId) {
+	public static XAddress resolveModel(XAddress repositoryAddress, XId modelId) {
 		if(repositoryAddress == null) {
 			return toAddress(null, modelId, null, null);
 		}
@@ -153,7 +153,7 @@ public class XX {
 	 * @throws IllegalArgumentException if modelAddress doesn't refer to an
 	 *             {@link XModel}
 	 */
-	public static XAddress resolveObject(XAddress modelAddress, XID objectId) {
+	public static XAddress resolveObject(XAddress modelAddress, XId objectId) {
 		if(modelAddress == null) {
 			return toAddress(null, null, objectId, null);
 		}
@@ -178,7 +178,7 @@ public class XX {
 	 * @throws IllegalArgumentException if repositoryAddress doesn't refer to an
 	 *             {@link XRepository}
 	 */
-	public static XAddress resolveObject(XAddress repositoryAddress, XID modelId, XID objectId) {
+	public static XAddress resolveObject(XAddress repositoryAddress, XId modelId, XId objectId) {
 		if(repositoryAddress == null) {
 			return toAddress(null, modelId, objectId, null);
 		}
@@ -199,16 +199,16 @@ public class XX {
 	
 	/**
 	 * Creates an {@link XAddress} object from its string representation using
-	 * the default {@link XIDProvider}. Valid string representations of
+	 * the default {@link XIdProvider}. Valid string representations of
 	 * {@link XAddress XAddresses} are "modelId/objectId/fieldId",
 	 * "modelId/objectId" and "modelId" where modelId, objectId and fieldId are
-	 * valid string representations of {@link XID XIDs} (ie: allowed parameters
+	 * valid string representations of {@link XId XIds} (ie: allowed parameters
 	 * for the fromString() method).
 	 * 
 	 * @param addressString A string with the described format
 	 * @return an new {@link XAddress} object representing the specified address
 	 * @throws IllegalArgumentException if one of the given URI components is
-	 *             not a valid {@link XID} string or if the given String equals
+	 *             not a valid {@link XId} string or if the given String equals
 	 *             null
 	 * @throws URIFormatException if the given address contains too many
 	 *             components.
@@ -220,7 +220,7 @@ public class XX {
 	
 	/**
 	 * Creates a new {@link XAddress} from the given components using the
-	 * default {@link XIDProvider}. The {@link XAddress} will have the following
+	 * default {@link XIdProvider}. The {@link XAddress} will have the following
 	 * format: repositoryId/modelId/objectId/fieldId
 	 * 
 	 * Some parameters can be null. An {@link XAddress} can address an
@@ -229,42 +229,42 @@ public class XX {
 	 * (objectId not null, fieldId null, rest is set), or an {@link XField}
 	 * (fieldId not null, rest may or may not be null).
 	 * 
-	 * @param repositoryId The {@link XID} for the repository field of the
+	 * @param repositoryId The {@link XId} for the repository field of the
 	 *            {@link XAddress}
-	 * @param modelId The {@link XID} for the model field of the
+	 * @param modelId The {@link XId} for the model field of the
 	 *            {@link XAddress}
-	 * @param objectId The {@link XID} for the object field of the
+	 * @param objectId The {@link XId} for the object field of the
 	 *            {@link XAddress}
-	 * @param fieldId The {@link XID} for the field field of the
+	 * @param fieldId The {@link XId} for the field field of the
 	 *            {@link XAddress}
 	 * @return an {@link XAddress} with the given components.
-	 * @throws IllegalArgumentException if the given set of {@link XID XIDs}
+	 * @throws IllegalArgumentException if the given set of {@link XId XIds}
 	 *             does not fit into one of the patterns described above (for
 	 *             example if repositoryId is set, modelId not set and objectId
 	 *             is set)
 	 */
-	public static XAddress toAddress(XID repositoryId, XID modelId, XID objectId, XID fieldId) {
+	public static XAddress toAddress(XId repositoryId, XId modelId, XId objectId, XId fieldId) {
 		return X.getIDProvider().fromComponents(repositoryId, modelId, objectId, fieldId);
 	}
 	
 	/**
-	 * Creates an {@link XID} from a given {@link String} using the default
-	 * {@link XIDProvider}. The {@link String} must be a valid XML name and may
+	 * Creates an {@link XId} from a given {@link String} using the default
+	 * {@link XIdProvider}. The {@link String} must be a valid XML name and may
 	 * not contain any ':' characters. The string SHOULD be at most 100
 	 * characters long for maximum compatibility with all back-ends (e.g. Google
 	 * AppEngine).
 	 * 
-	 * @param idString The String which will be used to create the {@link XID}.
-	 * @return a new unique {@link XID} object calculated from the given URI
+	 * @param idString The String which will be used to create the {@link XId}.
+	 * @return a new unique {@link XId} object calculated from the given URI
 	 * @throws IllegalArgumentException if the given name is not a valid
-	 *             {@link XID} string
+	 *             {@link XId} string
 	 */
-	public static XID toId(String idString) {
+	public static XId toId(String idString) {
 		return X.getIDProvider().fromString(idString);
 	}
 	
 	/**
-	 * Use {@link XCopyUtils#copyModel(XID, String, XReadableModel)} if the
+	 * Use {@link XCopyUtils#copyModel(XId, String, XReadableModel)} if the
 	 * resulting model should not be backed by the XReadableModel.
 	 * 
 	 * @param actor The session actor to use for the returned model.
@@ -275,7 +275,7 @@ public class XX {
 	 *         XReadableModel instance, so it should no longer be modified
 	 *         directly or the behavior of the model is undefined.
 	 */
-	public static XModel wrap(XID actor, String password, XReadableModel modelSnapshot) {
+	public static XModel wrap(XId actor, String password, XReadableModel modelSnapshot) {
 		if(modelSnapshot instanceof XRevWritableModel) {
 			return new MemoryModel(actor, password, (XRevWritableModel)modelSnapshot);
 		} else {
@@ -284,7 +284,7 @@ public class XX {
 	}
 	
 	/**
-	 * Use {@link XCopyUtils#copyObject(XID, String, XReadableObject)} if the
+	 * Use {@link XCopyUtils#copyObject(XId, String, XReadableObject)} if the
 	 * resulting object should not be backed by the XReadableObject.
 	 * 
 	 * @param actor The session actor to use for the returned object.
@@ -295,7 +295,7 @@ public class XX {
 	 *         provided XReadableObject instance, so it should no longer be
 	 *         modified directly or the behavior of the model is undefined.
 	 */
-	public static XObject wrap(XID actor, String password, XReadableObject objectSnapshot) {
+	public static XObject wrap(XId actor, String password, XReadableObject objectSnapshot) {
 		if(objectSnapshot instanceof XRevWritableObject) {
 			return new MemoryObject(actor, password, (XRevWritableObject)objectSnapshot);
 		} else {
@@ -303,19 +303,19 @@ public class XX {
 		}
 	}
 	
-	public static XAddress resolveRepository(XID repositoryId) {
+	public static XAddress resolveRepository(XId repositoryId) {
 		return toAddress(repositoryId, null, null, null);
 	}
 	
-	public static XAddress resolveModel(XID repositoryId, XID modelId) {
+	public static XAddress resolveModel(XId repositoryId, XId modelId) {
 		return toAddress(repositoryId, modelId, null, null);
 	}
 	
-	public static XAddress resolveObject(XID repositoryId, XID modelId, XID objectId) {
+	public static XAddress resolveObject(XId repositoryId, XId modelId, XId objectId) {
 		return toAddress(repositoryId, modelId, objectId, null);
 	}
 	
-	public static XAddress resolveField(XID repositoryId, XID modelId, XID objectId, XID fieldId) {
+	public static XAddress resolveField(XId repositoryId, XId modelId, XId objectId, XId fieldId) {
 		return toAddress(repositoryId, modelId, objectId, fieldId);
 	}
 }

@@ -1,7 +1,7 @@
 package org.xydra.core.change.session;
 
 import org.xydra.base.X;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XCommandUtils;
 import org.xydra.base.change.XRepositoryCommand;
@@ -33,16 +33,16 @@ public class DelegatingSessionPersistence implements ISessionPersistence {
 	private static final boolean INCLUDE_TENTATIVE = true;
 	
 	private XydraPersistence persistence;
-	private XID actorId;
+	private XId actorId;
 	
-	public DelegatingSessionPersistence(XydraPersistence persistence, XID actorId) {
+	public DelegatingSessionPersistence(XydraPersistence persistence, XId actorId) {
 		this.persistence = persistence;
 		this.actorId = actorId;
 	}
 	
 	// all commands are forced
 	@Override
-	public long applyChangesAsTxn(SessionCachedModel sessionCacheModel, XID actorId)
+	public long applyChangesAsTxn(SessionCachedModel sessionCacheModel, XId actorId)
 	        throws SessionException {
 		log.debug("applyChangesAsTxn");
 		XyAssert.xyAssert(actorId != null);
@@ -83,21 +83,21 @@ public class DelegatingSessionPersistence implements ISessionPersistence {
 	}
 	
 	@Override
-	public long createModel(XID modelId) {
+	public long createModel(XId modelId) {
 		XRepositoryCommand createModelCommand = X.getCommandFactory().createForcedAddModelCommand(
 		        getRepositoryId(), modelId);
 		return this.persistence.executeCommand(this.actorId, createModelCommand);
 	}
 	
 	@Override
-	public long removeModel(XID modelId) {
+	public long removeModel(XId modelId) {
 		XRepositoryCommand createModelCommand = X.getCommandFactory()
 		        .createForcedRemoveModelCommand(getRepositoryId(), modelId);
 		return this.persistence.executeCommand(this.actorId, createModelCommand);
 	}
 	
 	@Override
-	public XID getRepositoryId() {
+	public XId getRepositoryId() {
 		return this.persistence.getRepositoryId();
 	}
 	

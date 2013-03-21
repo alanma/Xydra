@@ -8,13 +8,13 @@ import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.X;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
-import org.xydra.base.value.XIDSetValue;
+import org.xydra.base.value.XIdSetValue;
 import org.xydra.base.value.XValue;
 import org.xydra.core.index.IObjectIndex;
 import org.xydra.core.model.XObject;
@@ -23,7 +23,7 @@ import org.xydra.sharedutils.XyAssert;
 
 /**
  * Index any number of objects by a given fieldId. The value of the field is
- * converted to an internal XID key which is used as the field-ID in another
+ * converted to an internal XId key which is used as the field-ID in another
  * {@link XObject}.
  * 
  * @author voelkel
@@ -33,7 +33,7 @@ import org.xydra.sharedutils.XyAssert;
 @RequiresAppEngine(false)
 public class ObjectIndex extends AbstractObjectIndex implements IObjectIndex {
 	
-	public ObjectIndex(XID fieldId, XWritableObject indexObject) {
+	public ObjectIndex(XId fieldId, XWritableObject indexObject) {
 		super(fieldId, indexObject);
 	}
 	
@@ -44,13 +44,13 @@ public class ObjectIndex extends AbstractObjectIndex implements IObjectIndex {
 		deindex(keyValue, xo.getId());
 	}
 	
-	public void deindex(XValue key, XID value) {
-		XID xid = valueToXID(key);
+	public void deindex(XValue key, XId value) {
+		XId xid = valueToXId(key);
 		XWritableField indexField = this.indexObject.createField(xid);
 		XValue indexValue = indexField.getValue();
-		XIDSetValue indexedIds;
+		XIdSetValue indexedIds;
 		XyAssert.xyAssert(indexValue != null); assert indexValue != null;
-		XIDSetValue currentIndexedIds = (XIDSetValue)indexValue;
+		XIdSetValue currentIndexedIds = (XIdSetValue)indexValue;
 		indexedIds = currentIndexedIds.remove(value);
 		if(indexedIds.size() == 0) {
 			// remove empty field
@@ -68,15 +68,15 @@ public class ObjectIndex extends AbstractObjectIndex implements IObjectIndex {
 		index(keyValue, xo.getId());
 	}
 	
-	public void index(XValue key, XID value) {
-		XID xid = valueToXID(key);
+	public void index(XValue key, XId value) {
+		XId xid = valueToXId(key);
 		XWritableField indexField = this.indexObject.createField(xid);
 		XValue indexValue = indexField.getValue();
-		XIDSetValue indexedIds;
+		XIdSetValue indexedIds;
 		if(indexValue == null) {
-			indexedIds = X.getValueFactory().createIDSetValue(new XID[] { value });
+			indexedIds = X.getValueFactory().createIdSetValue(new XId[] { value });
 		} else {
-			XIDSetValue currentIndexedIds = (XIDSetValue)indexValue;
+			XIdSetValue currentIndexedIds = (XIdSetValue)indexValue;
 			indexedIds = currentIndexedIds.add(value);
 		}
 		indexField.setValue(indexedIds);
@@ -91,17 +91,17 @@ public class ObjectIndex extends AbstractObjectIndex implements IObjectIndex {
 	 */
 	@Override
     public Set<XWritableObject> lookup(XWritableModel model, XValue indexKey) {
-		Set<XID> ids = lookupIDs(indexKey);
+		Set<XId> ids = lookupIDs(indexKey);
 		Set<XWritableObject> objects = new HashSet<XWritableObject>();
-		for(XID id : ids) {
+		for(XId id : ids) {
 			XWritableObject object = model.getObject(id);
 			objects.add(object);
 		}
 		return objects;
 	}
 	
-	public Set<XID> lookupIDs(XValue indexKey) {
-		XID key = valueToXID(indexKey);
+	public Set<XId> lookupIDs(XValue indexKey) {
+		XId key = valueToXId(indexKey);
 		XWritableField indexField = this.indexObject.getField(key);
 		if(indexField == null) {
 			// nothing indexed
@@ -109,7 +109,7 @@ public class ObjectIndex extends AbstractObjectIndex implements IObjectIndex {
 		}
 		XValue indexValue = indexField.getValue();
 		assert indexValue != null : "otherwise field should have been removed";
-		XIDSetValue indexedIds = (XIDSetValue)indexValue;
+		XIdSetValue indexedIds = (XIdSetValue)indexValue;
 		return indexedIds.toSet();
 	}
 	

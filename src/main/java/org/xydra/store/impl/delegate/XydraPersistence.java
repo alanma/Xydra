@@ -7,7 +7,7 @@ import org.xydra.annotations.CanBeNull;
 import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
@@ -87,7 +87,7 @@ public interface XydraPersistence {
 	 *            {@link XTransaction}.
 	 * @return a number indicating the result of executing the command.
 	 */
-	long executeCommand(@NeverNull XID actorId, @NeverNull XCommand command);
+	long executeCommand(@NeverNull XId actorId, @NeverNull XCommand command);
 	
 	/**
 	 * (Documentation copied from {@link GetEventsRequest})
@@ -126,12 +126,12 @@ public interface XydraPersistence {
 	List<XEvent> getEvents(@NeverNull XAddress address, long beginRevision, long endRevision);
 	
 	/**
-	 * @return a {@link Set} containing all XIDs of {@link XModel XModels} in
+	 * @return a {@link Set} containing all XIds of {@link XModel XModels} in
 	 *         this {@link XydraPersistence}. The models do not necessarily
 	 *         exist right now, i.e. they might have been deleted already.
 	 */
 	@NeverNull
-	Set<XID> getManagedModelIds();
+	Set<XId> getManagedModelIds();
 	
 	/**
 	 * @param addressRequest of an {@link XModel} plus a flag whether to include
@@ -183,18 +183,18 @@ public interface XydraPersistence {
 	XWritableObject getObjectSnapshot(@NeverNull GetWithAddressRequest addressRequest);
 	
 	/**
-	 * @return the XID of this {@link XydraPersistence}. This helps a client to
+	 * @return the XId of this {@link XydraPersistence}. This helps a client to
 	 *         differentiate among several {@link XydraPersistence}
 	 *         implementations, e.g. when synchronising between several of them.
 	 */
 	@NeverNull
-	XID getRepositoryId();
+	XId getRepositoryId();
 	
 	/**
 	 * @param modelId
 	 * @return true if this persistence has ever managed the given modelId. This
 	 *         does not imply that the model currently exists.
 	 */
-	boolean hasManagedModel(XID modelId);
+	boolean hasManagedModel(XId modelId);
 	
 }

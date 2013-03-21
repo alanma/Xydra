@@ -8,7 +8,7 @@ import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
@@ -62,11 +62,11 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
 	
 	public abstract class Request<T> {
 		
-		final public XID actor;
+		final public XId actor;
 		final public String password;
 		final private Callback<T> callback;
 		
-		protected Request(XID actor, String password, Callback<T> callback) {
+		protected Request(XId actor, String password, Callback<T> callback) {
 			
 			this.actor = actor;
 			this.password = password;
@@ -314,13 +314,13 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
 		return null;
 	}
 	
-	protected String encodeLoginCookie(XID actorId, String passwordHash) {
+	protected String encodeLoginCookie(XId actorId, String passwordHash) {
 		return XydraStoreRestInterface.ARG_ACTOR_ID + "=" + urlencode(actorId.toString()) + "; "
 		        + XydraStoreRestInterface.ARG_PASSWORD_HASH + "="
 		        + urlencode(passwordHash.toString());
 	}
 	
-	protected String encodeLoginQuery(XID actorId, String passwordHash) {
+	protected String encodeLoginQuery(XId actorId, String passwordHash) {
 		return XydraStoreRestInterface.ARG_ACTOR_ID + "=" + urlencode(actorId.toString()) + "&"
 		        + XydraStoreRestInterface.ARG_PASSWORD_HASH + "="
 		        + urlencode(passwordHash.toString());
@@ -328,7 +328,7 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
 	
 	private class LoginRequest extends Request<Boolean> {
 		
-		protected LoginRequest(XID actor, String password, Callback<Boolean> callback) {
+		protected LoginRequest(XId actor, String password, Callback<Boolean> callback) {
 			super(actor, password, callback);
 		}
 		
@@ -344,7 +344,7 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
 	}
 	
 	@Override
-	public void checkLogin(XID actor, String password, Callback<Boolean> callback) {
+	public void checkLogin(XId actor, String password, Callback<Boolean> callback) {
 		new LoginRequest(actor, password, callback).run();
 	}
 	
@@ -364,7 +364,7 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
 		
 		private final XCommand[] commands;
 		
-		protected ExecuteRequest(XID actor, String password, XCommand[] commands,
+		protected ExecuteRequest(XId actor, String password, XCommand[] commands,
 		        Callback<BatchedResult<Long>[]> callback) {
 			super(actor, password, callback);
 			this.commands = commands;
@@ -389,7 +389,7 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
 	}
 	
 	@Override
-	public void executeCommands(XID actor, String password, XCommand[] commands,
+	public void executeCommands(XId actor, String password, XCommand[] commands,
 	        Callback<BatchedResult<Long>[]> callback) {
 		new ExecuteRequest(actor, password, commands, callback).run();
 	}
@@ -408,7 +408,7 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
 		private final GetEventsRequest[] getEventsRequests;
 		private BatchedResult<XEvent[]>[] res;
 		
-		protected EventsRequest(XID actor, String password, GetEventsRequest[] getEventsRequests,
+		protected EventsRequest(XId actor, String password, GetEventsRequest[] getEventsRequests,
 		        Callback<BatchedResult<XEvent[]>[]> callback) {
 			super(actor, password, callback);
 			this.getEventsRequests = getEventsRequests;
@@ -437,7 +437,7 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
 	}
 	
 	@Override
-	public void getEvents(XID actor, String password, GetEventsRequest[] getEventsRequests,
+	public void getEvents(XId actor, String password, GetEventsRequest[] getEventsRequests,
 	        Callback<BatchedResult<XEvent[]>[]> callback) {
 		new EventsRequest(actor, password, getEventsRequests, callback).run();
 	}
@@ -449,7 +449,7 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
 		private final GetEventsRequest[] getEventsRequests;
 		private final BatchedResult<XEvent[]>[] eventsRes;
 		
-		protected ExecuteAndEventsRequest(XID actor, String password, XCommand[] commands,
+		protected ExecuteAndEventsRequest(XId actor, String password, XCommand[] commands,
 		        GetEventsRequest[] getEventsRequests,
 		        Callback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> callback) {
 			super(actor, password, callback);
@@ -488,15 +488,15 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
 	}
 	
 	@Override
-	public void executeCommandsAndGetEvents(XID actor, String password, XCommand[] commands,
+	public void executeCommandsAndGetEvents(XId actor, String password, XCommand[] commands,
 	        GetEventsRequest[] getEventsRequests,
 	        Callback<Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]>> callback) {
 		new ExecuteAndEventsRequest(actor, password, commands, getEventsRequests, callback).run();
 	}
 	
-	private class ModelIdsRequest extends Request<Set<XID>> {
+	private class ModelIdsRequest extends Request<Set<XId>> {
 		
-		protected ModelIdsRequest(XID actor, String password, Callback<Set<XID>> callback) {
+		protected ModelIdsRequest(XId actor, String password, Callback<Set<XId>> callback) {
 			super(actor, password, callback);
 		}
 		
@@ -505,14 +505,14 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
 		}
 		
 		@Override
-		protected Set<XID> parse(XydraElement element) {
+		protected Set<XId> parse(XydraElement element) {
 			return SerializedStore.toModelIds(element);
 		}
 		
 	}
 	
 	@Override
-	public void getModelIds(XID actor, String password, Callback<Set<XID>> callback) {
+	public void getModelIds(XId actor, String password, Callback<Set<XId>> callback) {
 		new ModelIdsRequest(actor, password, callback).run();
 	}
 	
@@ -522,7 +522,7 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
 		private final BatchedResult<ModelRevision>[] res;
 		
 		@SuppressWarnings("unchecked")
-		protected RevisionsRequest(XID actor, String password,
+		protected RevisionsRequest(XId actor, String password,
 		        GetWithAddressRequest[] modelAddresses,
 		        Callback<BatchedResult<ModelRevision>[]> callback) {
 			super(actor, password, callback);
@@ -555,7 +555,7 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
 	}
 	
 	@Override
-	public void getModelRevisions(XID actor, String password,
+	public void getModelRevisions(XId actor, String password,
 	        GetWithAddressRequest[] modelRevisionRequests,
 	        Callback<BatchedResult<ModelRevision>[]> callback) {
 		new RevisionsRequest(actor, password, modelRevisionRequests, callback).run();
@@ -568,7 +568,7 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
 		private final XType type;
 		
 		@SuppressWarnings("unchecked")
-		protected SnapshotsRequest(XID actor, String password,
+		protected SnapshotsRequest(XId actor, String password,
 		        GetWithAddressRequest[] modelAddressRequests,
 		        Callback<BatchedResult<T>[]> callback, XType type) {
 			super(actor, password, callback);
@@ -608,7 +608,7 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
 	}
 	
 	@Override
-	public void getModelSnapshots(XID actor, String password,
+	public void getModelSnapshots(XId actor, String password,
 	        GetWithAddressRequest[] modelAddressRequests,
 	        Callback<BatchedResult<XReadableModel>[]> callback) {
 		new SnapshotsRequest<XReadableModel>(actor, password, modelAddressRequests, callback,
@@ -616,16 +616,16 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
 	}
 	
 	@Override
-	public void getObjectSnapshots(XID actor, String password,
+	public void getObjectSnapshots(XId actor, String password,
 	        GetWithAddressRequest[] objectAddressRequests,
 	        Callback<BatchedResult<XReadableObject>[]> callback) throws IllegalArgumentException {
 		new SnapshotsRequest<XReadableObject>(actor, password, objectAddressRequests, callback,
 		        XType.XOBJECT).run();
 	}
 	
-	private class RepositoryIdRequest extends Request<XID> {
+	private class RepositoryIdRequest extends Request<XId> {
 		
-		protected RepositoryIdRequest(XID actor, String password, Callback<XID> callback) {
+		protected RepositoryIdRequest(XId actor, String password, Callback<XId> callback) {
 			super(actor, password, callback);
 		}
 		
@@ -634,14 +634,14 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
 		}
 		
 		@Override
-		protected XID parse(XydraElement element) {
+		protected XId parse(XydraElement element) {
 			return SerializedStore.toRepositoryId(element);
 		}
 		
 	}
 	
 	@Override
-	public void getRepositoryId(XID actor, String password, Callback<XID> callback) {
+	public void getRepositoryId(XId actor, String password, Callback<XId> callback) {
 		new RepositoryIdRequest(actor, password, callback).run();
 	}
 	

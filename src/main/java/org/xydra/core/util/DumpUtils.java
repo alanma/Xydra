@@ -5,9 +5,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.xydra.base.IHasXID;
+import org.xydra.base.IHasXId;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XReadableField;
@@ -46,7 +46,7 @@ public class DumpUtils {
 		assert repo != null;
 		XyAssert.xyAssert(repo.getAddress().getAddressedType() == XType.XREPOSITORY);
 		log.info(label + " * Repo " + repo.getId() + " ...");
-		for(XID modelId : repo) {
+		for(XId modelId : repo) {
 			XReadableModel model = repo.getModel(modelId);
 			dump(label, model);
 		}
@@ -76,8 +76,8 @@ public class DumpUtils {
 		
 		StringBuffer buf = new StringBuffer();
 		buf.append("** Model   " + model.getAddress() + "\n");
-		List<XID> ids = toSortedList(model);
-		for(XID objectId : ids) {
+		List<XId> ids = toSortedList(model);
+		for(XId objectId : ids) {
 			XStateReadableObject object = model.getObject(objectId);
 			buf.append(toStringBuffer(object));
 		}
@@ -95,17 +95,17 @@ public class DumpUtils {
 		
 		StringBuffer buf = new StringBuffer();
 		buf.append("** Model   " + model.getAddress() + " [" + model.getRevisionNumber() + "]\n");
-		List<XID> ids = toSortedList(model);
-		for(XID objectId : ids) {
+		List<XId> ids = toSortedList(model);
+		for(XId objectId : ids) {
 			XReadableObject object = model.getObject(objectId);
 			buf.append(toStringBuffer(object));
 		}
 		return buf;
 	}
 	
-	private static List<XID> toSortedList(Iterable<XID> iterable) {
-		List<XID> list = new ArrayList<XID>();
-		for(XID id : iterable) {
+	private static List<XId> toSortedList(Iterable<XId> iterable) {
+		List<XId> list = new ArrayList<XId>();
+		for(XId id : iterable) {
 			list.add(id);
 		}
 		Collections.sort(list);
@@ -134,8 +134,8 @@ public class DumpUtils {
 		XyAssert.xyAssert(object.getAddress().getAddressedType() == XType.XOBJECT);
 		StringBuffer buf = new StringBuffer();
 		buf.append("*** Object " + object.getAddress() + " [" + object.getRevisionNumber() + "]\n");
-		List<XID> ids = toSortedList(object);
-		for(XID fieldId : ids) {
+		List<XId> ids = toSortedList(object);
+		for(XId fieldId : ids) {
 			XReadableField field = object.getField(fieldId);
 			buf.append(toStringBuffer(field));
 		}
@@ -152,8 +152,8 @@ public class DumpUtils {
 		XyAssert.xyAssert(object.getAddress().getAddressedType() == XType.XOBJECT);
 		StringBuffer buf = new StringBuffer();
 		buf.append("*** Object " + object.getAddress() + "\n");
-		List<XID> ids = toSortedList(object);
-		for(XID fieldId : ids) {
+		List<XId> ids = toSortedList(object);
+		for(XId fieldId : ids) {
 			XStateReadableField field = object.getField(fieldId);
 			buf.append(toStringBuffer(field));
 		}
@@ -199,10 +199,10 @@ public class DumpUtils {
 		return buf;
 	}
 	
-	public static class XidComparator implements Comparator<IHasXID> {
+	public static class XidComparator implements Comparator<IHasXId> {
 		
 		@Override
-		public int compare(IHasXID a, IHasXID b) {
+		public int compare(IHasXId a, IHasXId b) {
 			return a.getId().compareTo(b.getId());
 		}
 		
@@ -218,9 +218,9 @@ public class DumpUtils {
 			sb.append("=== ADDED   Object '" + addedObject.getId() + "' ===<br/>\n");
 			sb.append(DumpUtils.toStringBuffer(addedObject));
 		}
-		List<XID> removedList = new ArrayList<XID>(changedModel.getRemoved());
+		List<XId> removedList = new ArrayList<XId>(changedModel.getRemoved());
 		Collections.sort(removedList, XidComparator.INSTANCE);
-		for(XID removedObjectId : removedList) {
+		for(XId removedObjectId : removedList) {
 			sb.append("=== REMOVED Object '" + removedObjectId + "' ===<br/>\n");
 		}
 		List<IObjectDiff> potentiallyChangedList = new ArrayList<IObjectDiff>(
@@ -243,9 +243,9 @@ public class DumpUtils {
 			sb.append("--- ADDED Field '" + field.getId() + "' ---<br/>\n");
 			sb.append(DumpUtils.toStringBuffer(field));
 		}
-		List<XID> removedList = new ArrayList<XID>(changedObject.getRemoved());
+		List<XId> removedList = new ArrayList<XId>(changedObject.getRemoved());
 		Collections.sort(removedList, XidComparator.INSTANCE);
-		for(XID objectId : changedObject.getRemoved()) {
+		for(XId objectId : changedObject.getRemoved()) {
 			sb.append("--- REMOVED Field '" + objectId + "' ---<br/>\n");
 		}
 		List<IFieldDiff> potentiallyChangedList = new ArrayList<IFieldDiff>(

@@ -12,7 +12,7 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XCommandFactory;
@@ -43,7 +43,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
     }
     
     private static final Logger log = LoggerFactory.getLogger(AbstractStoreReadMethodsTest.class);
-    private XID correctUser, incorrectUser;
+    private XId correctUser, incorrectUser;
     
     protected String correctUserPass, incorrectUserPass;
     protected XCommandFactory factory;
@@ -80,11 +80,11 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
         this.incorrectActorExists = (this.incorrectUser != null);
         
         // creating some models
-        XID modelId1 = XX.toId("TestModel1");
-        XID modelId2 = XX.toId("TestModel2");
-        XID modelId3 = XX.toId("TestModel3");
+        XId modelId1 = XX.toId("TestModel1");
+        XId modelId2 = XX.toId("TestModel2");
+        XId modelId3 = XX.toId("TestModel3");
         
-        SynchronousCallbackWithOneResult<Set<XID>> callback = new SynchronousCallbackWithOneResult<Set<XID>>();
+        SynchronousCallbackWithOneResult<Set<XId>> callback = new SynchronousCallbackWithOneResult<Set<XId>>();
         this.store.getModelIds(this.correctUser, this.correctUserPass, callback);
         waitOnCallback(callback);
         XyAssert.xyAssert(callback != null);
@@ -93,9 +93,9 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
         assert callback.effect != null;
         XyAssert.xyAssert(!callback.effect.contains(modelId1));
         
-        XID objectId1 = XX.toId("TestObject1");
-        XID objectId2 = XX.toId("TestObject2");
-        XID objectId3 = XX.toId("TestObject3");
+        XId objectId1 = XX.toId("TestObject1");
+        XId objectId2 = XX.toId("TestObject2");
+        XId objectId3 = XX.toId("TestObject3");
         
         /*
          * TODO auth: In a secure store you need to give the correctUser the
@@ -108,7 +108,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
          * this method is allowed to execute the following commands ~Bjoern
          */
         
-        XID repoID = getRepositoryId();
+        XId repoID = getRepositoryId();
         
         XCommand modelCommand1 = this.factory.createAddModelCommand(repoID, modelId1, true);
         XCommand modelCommand2 = this.factory.createAddModelCommand(repoID, modelId2, true);
@@ -391,7 +391,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
      */
     @Test
     public void testGetModelIds() {
-        SynchronousCallbackWithOneResult<Set<XID>> callback = new SynchronousCallbackWithOneResult<Set<XID>>();
+        SynchronousCallbackWithOneResult<Set<XId>> callback = new SynchronousCallbackWithOneResult<Set<XId>>();
         
         this.store.getModelIds(this.correctUser, this.correctUserPass, callback);
         
@@ -399,12 +399,12 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
         assertNotNull(callback.getEffect());
         assertNull(callback.getException());
         
-        Set<XID> result = callback.getEffect();
+        Set<XId> result = callback.getEffect();
         
         /*
-         * check if it contains the XIDs of the XModels created by this test
-         * (the result should contain each of these XIDs, since the user with
-         * the account XID this.correctUser has access to everything in the
+         * check if it contains the XIds of the XModels created by this test
+         * (the result should contain each of these XIds, since the user with
+         * the account XId this.correctUser has access to everything in the
          * store)
          */
         for(int i = 0; i < this.modelAddressRequests.length; i++) {
@@ -429,11 +429,11 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
             return;
         }
         
-        SynchronousCallbackWithOneResult<Set<XID>> callback;
+        SynchronousCallbackWithOneResult<Set<XId>> callback;
         
         // Test if it behaves correctly for wrong account + password
         // combinations
-        callback = new SynchronousCallbackWithOneResult<Set<XID>>();
+        callback = new SynchronousCallbackWithOneResult<Set<XId>>();
         
         this.store.getModelIds(this.incorrectUser, this.incorrectUserPass, callback);
         
@@ -447,7 +447,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
     // Test IllegalArgumentException
     @Test
     public void testGetModelIdsPassingNull() {
-        SynchronousCallbackWithOneResult<Set<XID>> callback = new SynchronousCallbackWithOneResult<Set<XID>>();
+        SynchronousCallbackWithOneResult<Set<XId>> callback = new SynchronousCallbackWithOneResult<Set<XId>>();
         
         // first parameter equals null
         try {
@@ -458,7 +458,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
         }
         
         // second parameter equals null
-        callback = new SynchronousCallbackWithOneResult<Set<XID>>();
+        callback = new SynchronousCallbackWithOneResult<Set<XId>>();
         
         try {
             this.store.getModelIds(this.correctUser, null, callback);
@@ -468,7 +468,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
         }
         
         // all parameters equal null
-        callback = new SynchronousCallbackWithOneResult<Set<XID>>();
+        callback = new SynchronousCallbackWithOneResult<Set<XId>>();
         
         try {
             this.store.getModelIds(null, null, callback);
@@ -1062,10 +1062,10 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
      */
     @Test
     public void testGetRepositoryId() {
-        XID correctUser = this.getCorrectUser();
+        XId correctUser = this.getCorrectUser();
         String correctUserPass = this.getCorrectUserPasswordHash();
         
-        SynchronousCallbackWithOneResult<XID> callback = new SynchronousCallbackWithOneResult<XID>();
+        SynchronousCallbackWithOneResult<XId> callback = new SynchronousCallbackWithOneResult<XId>();
         
         this.store.getRepositoryId(correctUser, correctUserPass, callback);
         
@@ -1085,7 +1085,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
             return;
         }
         
-        SynchronousCallbackWithOneResult<XID> callback = new SynchronousCallbackWithOneResult<XID>();
+        SynchronousCallbackWithOneResult<XId> callback = new SynchronousCallbackWithOneResult<XId>();
         
         this.store.getRepositoryId(this.incorrectUser, this.incorrectUserPass, callback);
         
@@ -1098,7 +1098,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
     // Test IllegalArgumentException
     @Test
     public void testGetRepositoryIdPassingNull() {
-        SynchronousCallbackWithOneResult<XID> callback = new SynchronousCallbackWithOneResult<XID>();
+        SynchronousCallbackWithOneResult<XId> callback = new SynchronousCallbackWithOneResult<XId>();
         
         // first parameter equals null
         try {
@@ -1109,7 +1109,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
         }
         
         // second parameter equals null
-        callback = new SynchronousCallbackWithOneResult<XID>();
+        callback = new SynchronousCallbackWithOneResult<XId>();
         
         try {
             this.store.getRepositoryId(this.correctUser, null, callback);
@@ -1119,7 +1119,7 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
         }
         
         // all parameters equal null
-        callback = new SynchronousCallbackWithOneResult<XID>();
+        callback = new SynchronousCallbackWithOneResult<XId>();
         
         try {
             this.store.getRepositoryId(null, null, callback);

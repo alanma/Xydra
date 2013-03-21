@@ -1,6 +1,6 @@
 package org.xydra.store.impl.delegate;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.store.Callback;
 
 
@@ -17,7 +17,7 @@ class DelegationUtils {
 	 * @param passwordHash may be null
 	 * @throws IllegalArgumentException if a parameter is null.
 	 */
-	public static void assertNonNullActorAndPassword(XID actorId, String passwordHash) {
+	public static void assertNonNullActorAndPassword(XId actorId, String passwordHash) {
 		if(actorId == null) {
 			throw new IllegalArgumentException("actorId may not be null");
 		}

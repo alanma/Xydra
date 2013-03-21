@@ -14,7 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.change.ChangeType;
@@ -116,12 +116,12 @@ public abstract class XFieldLevelIndexTest {
 	/**
 	 * a set of Ids which are excluded from being indexed by oldIndex/newIndex
 	 */
-	public Set<XID> excludedIds;
+	public Set<XId> excludedIds;
 	
 	/**
 	 * Id of an object holding fields with ids in excludedIds.
 	 */
-	public XID excludedObjectId;
+	public XId excludedObjectId;
 	
 	/**
 	 * String which only exists as a value in fields which Id is in excludedIds.
@@ -133,12 +133,12 @@ public abstract class XFieldLevelIndexTest {
 	 * oldExcludedAllIndex/newExcludeAllIndex. Only fields which Id are in this
 	 * set will be indexed by theses indexes.
 	 */
-	public Set<XID> includedIds;
+	public Set<XId> includedIds;
 	
 	/**
 	 * the id of an object holding fields with ids in includedIds.
 	 */
-	public XID includedObjectId;
+	public XId includedObjectId;
 	
 	/**
 	 * String which only exists as a value in fields which Id is in includedIds.
@@ -160,12 +160,12 @@ public abstract class XFieldLevelIndexTest {
 	 * index(newModel) needs to be executed!) and with
 	 * {@link XFieldLevelIndexTest#newIndexer} (as the used indexer).
 	 * defaultIncludeAll needs to be set to true, includeFieldIds should be an
-	 * empty set. excludeFieldIds has to only include {@link XID XIDs} which are
+	 * empty set. excludeFieldIds has to only include {@link XId XIds} which are
 	 * NOT used in the phonebook model of {@link DemoModelUtil} (if you include
-	 * such {@link XID XIDs}, the test will not work correctly), it must not be
+	 * such {@link XId XIds}, the test will not work correctly), it must not be
 	 * empty, at least one such Id must be provided. Furthermore,
 	 * {@link XFieldLevelIndexTest#excludedIds} needs to include the same
-	 * {@link XID XIDs} as excludeFieldIds.
+	 * {@link XId XIds} as excludeFieldIds.
 	 * 
 	 * {@link XFieldLevelIndexTest#oldExcludeAllIndex} needs to be parameterized
 	 * with {@link XFieldLevelIndexTest#oldExcludeAllModel} (as the model which
@@ -176,12 +176,12 @@ public abstract class XFieldLevelIndexTest {
 	 * it indexes, index(newExcludeAllModel) needs to be executed!) and with
 	 * {@link XFieldLevelIndexTest#newIndexer} (as the used indexer).
 	 * defaultIncludeAll needs to be set to false, excludeFieldIds should be an
-	 * empty set. includeFieldIds has to only include {@link XID XIDs} which are
+	 * empty set. includeFieldIds has to only include {@link XId XIds} which are
 	 * NOT used in the phonebook model of {@link DemoModelUtil} (if you include
-	 * such {@link XID XIDs}, the test will not work correctly), it must not be
+	 * such {@link XId XIds}, the test will not work correctly), it must not be
 	 * empty, at least two such Ids must be provided. Furthermore,
 	 * {@link XFieldLevelIndexTest#includedIds} needs to include the same
-	 * {@link XID XIDs} as includeFieldIds.
+	 * {@link XId XIds} as includeFieldIds.
 	 */
 	public void initializeIndexes() {
 		// oldModel, oldIndexer, newModel, newIndexer, excludedIds and
@@ -205,11 +205,11 @@ public abstract class XFieldLevelIndexTest {
 	public abstract void initializeIndexers();
 	
 	public void initializeExcludedAndIncludedIds() {
-		this.excludedIds = new HashSet<XID>();
-		this.includedIds = new HashSet<XID>();
+		this.excludedIds = new HashSet<XId>();
+		this.includedIds = new HashSet<XId>();
 		for(int i = 0; i < 13; i++) {
-			XID excludedId = XX.toId("ToBeExcluded" + i);
-			XID includedId = XX.toId("ToBeIncluded" + i);
+			XId excludedId = XX.toId("ToBeExcluded" + i);
+			XId includedId = XX.toId("ToBeIncluded" + i);
 			
 			this.excludedIds.add(excludedId);
 			this.includedIds.add(includedId);
@@ -218,7 +218,7 @@ public abstract class XFieldLevelIndexTest {
 	
 	@Before
 	public void setup() {
-		XID actorId = XX.createUniqueId();
+		XId actorId = XX.createUniqueId();
 		
 		XRepository repo1 = X.createMemoryRepository(actorId);
 		DemoModelUtil.addPhonebookModel(repo1);
@@ -251,7 +251,7 @@ public abstract class XFieldLevelIndexTest {
 		assertNotNull("excludedIds must not be null!", this.excludedIds);
 		assertFalse("excludedIds needs to contain at least one Id!", this.excludedIds.isEmpty());
 		
-		for(XID id : this.excludedIds) {
+		for(XId id : this.excludedIds) {
 			XField oldField = oldExcludedObject.createField(id);
 			XField newField = newExcludedObject.createField(id);
 			
@@ -270,7 +270,7 @@ public abstract class XFieldLevelIndexTest {
 		assertNotNull("includedIds must not be null", this.includedIds);
 		assertFalse("includedIds needs to contain at least two Ids!", this.includedIds.size() < 2);
 		
-		for(XID id : this.includedIds) {
+		for(XId id : this.includedIds) {
 			XField oldField = oldIncludedObject.createField(id);
 			XField newField = newIncludedObject.createField(id);
 			
@@ -317,10 +317,10 @@ public abstract class XFieldLevelIndexTest {
 	@Test
 	public void testIndexingXModel() {
 		
-		for(XID objectId : this.oldModel) {
+		for(XId objectId : this.oldModel) {
 			XObject object = this.oldModel.getObject(objectId);
 			
-			for(XID fieldId : object) {
+			for(XId fieldId : object) {
 				XField field = object.getField(fieldId);
 				XValue value = field.getValue();
 				
@@ -356,10 +356,10 @@ public abstract class XFieldLevelIndexTest {
 	@Test
 	public void testIndexingExcludeAllModel() {
 		
-		for(XID objectId : this.oldExcludeAllModel) {
+		for(XId objectId : this.oldExcludeAllModel) {
 			XObject object = this.oldExcludeAllModel.getObject(objectId);
 			
-			for(XID fieldId : object) {
+			for(XId fieldId : object) {
 				XField field = object.getField(fieldId);
 				XValue value = field.getValue();
 				
@@ -402,7 +402,7 @@ public abstract class XFieldLevelIndexTest {
 		
 		// add the new value, update index and check whether an entry exists or
 		// not
-		XID id = XX.createUniqueId();
+		XId id = XX.createUniqueId();
 		XField newField = newJohn.createField(id);
 		newField.setValue(value);
 		
@@ -417,7 +417,7 @@ public abstract class XFieldLevelIndexTest {
 	 * Tests if
 	 * {@link XFieldLevelIndex#updateIndex(XReadableObject, XReadableObject)}
 	 * works correctly when a new field with a new value and gets added to the
-	 * object, where the {@link XID} of the field is one of the Ids of fields
+	 * object, where the {@link XId} of the field is one of the Ids of fields
 	 * the index will not index (i.e. the field is excluded from being indexed).
 	 */
 	@Test
@@ -427,7 +427,7 @@ public abstract class XFieldLevelIndexTest {
 		XObject oldJohn = this.oldModel.getObject(DemoModelUtil.JOHN_ID);
 		XObject newJohn = this.newModel.getObject(DemoModelUtil.JOHN_ID);
 		
-		XID id = this.excludedIds.iterator().next();
+		XId id = this.excludedIds.iterator().next();
 		XField newField = newJohn.createField(id);
 		XValue value = X.getValueFactory().createStringValue(this.excludedValueString);
 		newField.setValue(value);
@@ -459,7 +459,7 @@ public abstract class XFieldLevelIndexTest {
 		
 		// add the new value, update index and check whether an entry exists or
 		// not
-		XID fieldId;
+		XId fieldId;
 		do {
 			fieldId = XX.createUniqueId();
 		} while(this.includedIds.contains(fieldId));
@@ -474,7 +474,7 @@ public abstract class XFieldLevelIndexTest {
 		
 		// Add a value to a field with ID in includedIds ( = should be indexed)
 		
-		XID objectId = XX.createUniqueId();
+		XId objectId = XX.createUniqueId();
 		XObject oldObject = this.oldExcludeAllModel.createObject(objectId);
 		XObject newObject = this.newExcludeAllModel.createObject(objectId);
 		
@@ -540,7 +540,7 @@ public abstract class XFieldLevelIndexTest {
 		
 		// add the new value, update index and check whether an entry exists or
 		// not
-		XID id = XX.createUniqueId();
+		XId id = XX.createUniqueId();
 		
 		XField oldField = oldJohn.createField(id);
 		XField newField = newJohn.createField(id);
@@ -618,8 +618,8 @@ public abstract class XFieldLevelIndexTest {
 	}
 	
 	private void testUpdateIndexAddValueToExcludedField(TestType type) {
-		XID id = XX.createUniqueId();
-		XID fieldId = this.excludedIds.iterator().next();
+		XId id = XX.createUniqueId();
+		XId fieldId = this.excludedIds.iterator().next();
 		
 		XObject oldExcludedObject = this.oldModel.createObject(id);
 		XField oldExcludedField = oldExcludedObject.createField(fieldId);
@@ -709,8 +709,8 @@ public abstract class XFieldLevelIndexTest {
 	}
 	
 	private void testUpdateIndexAddValueToFieldOfExcludeAllModel(TestType type) {
-		XID id = XX.createUniqueId();
-		XID fieldId = XX.createUniqueId();
+		XId id = XX.createUniqueId();
+		XId fieldId = XX.createUniqueId();
 		
 		XObject oldExcludedObject = this.oldExcludeAllModel.createObject(id);
 		XField oldExcludedField = oldExcludedObject.createField(fieldId);
@@ -749,7 +749,7 @@ public abstract class XFieldLevelIndexTest {
 		
 		// add value to field which is not exlude (i.e. which id is in
 		// includedIds)
-		XID includedId = this.includedIds.iterator().next();
+		XId includedId = this.includedIds.iterator().next();
 		
 		XField oldIncludedField = oldExcludedObject.createField(includedId);
 		XField newIncludedField = newExcludedObject.createField(includedId);
@@ -829,7 +829,7 @@ public abstract class XFieldLevelIndexTest {
 		// index and check whether no entry for this value exists anymore or
 		// not
 		
-		XID testId = X.getIDProvider().createUniqueId();
+		XId testId = X.getIDProvider().createUniqueId();
 		String valueString = "Firstvaluestringwhichshoudlntexistinbothmodels";
 		XValue value = X.getValueFactory().createStringValue(valueString);
 		List<String> indexStrings = this.newIndexer.getIndexStrings(value);
@@ -911,7 +911,7 @@ public abstract class XFieldLevelIndexTest {
 	}
 	
 	private void testUpdateIndexDeleteValueFromExcludeAllModel(TestType type) {
-		XID objectId = XX.createUniqueId();
+		XId objectId = XX.createUniqueId();
 		XObject oldObject = this.oldExcludeAllModel.createObject(objectId);
 		XObject newObject = this.newExcludeAllModel.createObject(objectId);
 		
@@ -919,7 +919,7 @@ public abstract class XFieldLevelIndexTest {
 		// index and check whether no entry for this value exists anymore or
 		// not
 		
-		XID includedId = this.includedIds.iterator().next();
+		XId includedId = this.includedIds.iterator().next();
 		String valueString = "Firstvaluestringwhichshoudlntexistinbothmodels";
 		XValue value = X.getValueFactory().createStringValue(valueString);
 		List<String> indexStrings = this.newIndexer.getIndexStrings(value);
@@ -1008,8 +1008,8 @@ public abstract class XFieldLevelIndexTest {
 		XObject oldJohn = this.oldModel.getObject(DemoModelUtil.JOHN_ID);
 		XObject newJohn = this.newModel.getObject(DemoModelUtil.JOHN_ID);
 		
-		XID id1 = XX.createUniqueId();
-		XID id2 = XX.createUniqueId();
+		XId id1 = XX.createUniqueId();
+		XId id2 = XX.createUniqueId();
 		
 		XField newField1 = newJohn.createField(id1);
 		XField newField2 = newJohn.createField(id2);
@@ -1149,13 +1149,13 @@ public abstract class XFieldLevelIndexTest {
 		XValue value = X.getValueFactory().createStringValue(valueString);
 		List<String> indexStrings = this.newIndexer.getIndexStrings(value);
 		
-		XID objectId = XX.createUniqueId();
+		XId objectId = XX.createUniqueId();
 		XObject oldObject = this.oldModel.createObject(objectId);
 		XObject newObject = this.newModel.createObject(objectId);
 		
-		Iterator<XID> iterator = this.includedIds.iterator();
-		XID id1 = iterator.next();
-		XID id2 = iterator.next();
+		Iterator<XId> iterator = this.includedIds.iterator();
+		XId id1 = iterator.next();
+		XId id2 = iterator.next();
 		
 		XField newField1 = newObject.createField(id1);
 		XField newField2 = newObject.createField(id2);
@@ -1301,7 +1301,7 @@ public abstract class XFieldLevelIndexTest {
 		XObject oldJohn = this.oldModel.getObject(DemoModelUtil.JOHN_ID);
 		XObject newJohn = this.newModel.getObject(DemoModelUtil.JOHN_ID);
 		
-		XID id = X.getIDProvider().createUniqueId();
+		XId id = X.getIDProvider().createUniqueId();
 		XField oldField = oldJohn.createField(id);
 		XField newField = newJohn.createField(id);
 		
@@ -1393,7 +1393,7 @@ public abstract class XFieldLevelIndexTest {
 	}
 	
 	private void testUpdateIndexChangeValueOfExcludedField(TestType type) {
-		XID fieldId = this.excludedIds.iterator().next();
+		XId fieldId = this.excludedIds.iterator().next();
 		
 		XObject oldExcludedObject = this.oldModel.getObject(this.excludedObjectId);
 		XField oldExcludedField = oldExcludedObject.getField(fieldId);
@@ -1498,7 +1498,7 @@ public abstract class XFieldLevelIndexTest {
 		XObject oldJohn = this.oldExcludeAllModel.getObject(DemoModelUtil.JOHN_ID);
 		XObject newJohn = this.newExcludeAllModel.getObject(DemoModelUtil.JOHN_ID);
 		
-		XID id = X.getIDProvider().createUniqueId();
+		XId id = X.getIDProvider().createUniqueId();
 		XField oldField = oldJohn.createField(id);
 		XField newField = newJohn.createField(id);
 		
@@ -1536,7 +1536,7 @@ public abstract class XFieldLevelIndexTest {
 		
 		// change value of field which is indexed
 		
-		XID objectId = XX.createUniqueId();
+		XId objectId = XX.createUniqueId();
 		XObject oldObject = this.oldExcludeAllModel.createObject(objectId);
 		XObject newObject = this.newExcludeAllModel.createObject(objectId);
 		
@@ -1601,7 +1601,7 @@ public abstract class XFieldLevelIndexTest {
 		XObject oldJohn = this.oldModel.getObject(DemoModelUtil.JOHN_ID);
 		XObject newJohn = this.newModel.getObject(DemoModelUtil.JOHN_ID);
 		
-		XID id = X.getIDProvider().createUniqueId();
+		XId id = X.getIDProvider().createUniqueId();
 		newJohn.createField(id).setValue(value);
 		
 		this.newIndex.updateIndex(oldJohn, newJohn);
@@ -1633,7 +1633,7 @@ public abstract class XFieldLevelIndexTest {
 		XObject oldJohn = this.oldExcludeAllModel.getObject(DemoModelUtil.JOHN_ID);
 		XObject newJohn = this.newExcludeAllModel.getObject(DemoModelUtil.JOHN_ID);
 		
-		XID id = this.includedIds.iterator().next();
+		XId id = this.includedIds.iterator().next();
 		newJohn.createField(id).setValue(value);
 		
 		this.newExcludeAllIndex.updateIndex(oldJohn, newJohn);
@@ -1686,7 +1686,7 @@ public abstract class XFieldLevelIndexTest {
 	public void testDeIndexField() {
 		XReadableObject newJohn = this.newModel.getObject(DemoModelUtil.JOHN_ID);
 		
-		for(XID fieldId : newJohn) {
+		for(XId fieldId : newJohn) {
 			XReadableField field = newJohn.getField(fieldId);
 			this.newIndex.deIndex(field);
 		}
@@ -1705,7 +1705,7 @@ public abstract class XFieldLevelIndexTest {
 	public void testDeIndexFieldOfExcludeAllModel() {
 		XReadableObject newJohn = this.newExcludeAllModel.getObject(DemoModelUtil.JOHN_ID);
 		
-		for(XID fieldId : newJohn) {
+		for(XId fieldId : newJohn) {
 			XReadableField field = newJohn.getField(fieldId);
 			this.newExcludeAllIndex.deIndex(field);
 		}
@@ -1717,7 +1717,7 @@ public abstract class XFieldLevelIndexTest {
 	private static void testIfObjectWasDeIndexed(XReadableObject object, XFieldLevelIndex index,
 	        XValueIndexer indexer) {
 		
-		for(XID fieldId : object) {
+		for(XId fieldId : object) {
 			XReadableField field = object.getField(fieldId);
 			XAddress fieldAddress = field.getAddress();
 			

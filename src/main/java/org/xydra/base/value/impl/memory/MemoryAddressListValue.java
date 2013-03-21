@@ -7,12 +7,12 @@ import java.util.Collection;
 import org.xydra.base.XAddress;
 import org.xydra.base.value.ValueType;
 import org.xydra.base.value.XAddressListValue;
-import org.xydra.base.value.XIDListValue;
+import org.xydra.base.value.XIdListValue;
 import org.xydra.index.XI;
 
 
 /**
- * An implementation of {@link XIDListValue}
+ * An implementation of {@link XIdListValue}
  * 
  * @author Kaidel
  * @author voelkel

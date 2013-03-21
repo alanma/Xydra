@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.Iterator;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableObject;
@@ -49,12 +49,12 @@ public class ReadableObjectOnStore implements XReadableObject, Serializable {
 	}
 	
 	@Override
-	public XReadableField getField(XID fieldId) {
+	public XReadableField getField(XId fieldId) {
 		return this.baseObject.getField(fieldId);
 	}
 	
 	@Override
-	public XID getId() {
+	public XId getId() {
 		return this.address.getField();
 	}
 	
@@ -64,7 +64,7 @@ public class ReadableObjectOnStore implements XReadableObject, Serializable {
 	}
 	
 	@Override
-	public boolean hasField(XID fieldId) {
+	public boolean hasField(XId fieldId) {
 		return this.baseObject.hasField(fieldId);
 	}
 	
@@ -74,7 +74,7 @@ public class ReadableObjectOnStore implements XReadableObject, Serializable {
 	}
 	
 	@Override
-	public Iterator<XID> iterator() {
+	public Iterator<XId> iterator() {
 		return this.baseObject.iterator();
 	}
 	

@@ -2,7 +2,7 @@ package org.xydra.core.model;
 
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.ReadOperation;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XRepositoryCommand;
@@ -31,18 +31,18 @@ public interface XRepository extends XWritableRepository, XSendsRepositoryEvents
         XExecutesCommands {
 	
 	/**
-	 * Creates a new {@link XModel} with the given {@link XID} and adds it to
+	 * Creates a new {@link XModel} with the given {@link XId} and adds it to
 	 * this XRepository or returns the already existing {@link XModel} if the
-	 * given {@link XID} was already taken.
+	 * given {@link XId} was already taken.
 	 * 
-	 * @param id The {@link XID} for the {@link XModel} which is to be created
+	 * @param id The {@link XId} for the {@link XModel} which is to be created
 	 * 
 	 * @return the newly created {@link XModel} or the already existing
-	 *         {@link XModel} if the given {@link XID} was already taken
+	 *         {@link XModel} if the given {@link XId} was already taken
 	 */
 	@Override
 	@ModificationOperation
-	XModel createModel(XID id);
+	XModel createModel(XId id);
 	
 	/**
 	 * Execute the given {@link XCommand} if possible.
@@ -68,11 +68,11 @@ public interface XRepository extends XWritableRepository, XSendsRepositoryEvents
 	 * <ul>
 	 * <li>Remove-type {@link XRepositoryCommand}: the specified {@link XModel}
 	 * does not exist and therefore cannot be removed
-	 * <li>Add-type {@link XRepositoryCommand}: the given {@link XID} is already
-	 * taken and therefore a new {@link XModel} with this {@link XID} cannot be
+	 * <li>Add-type {@link XRepositoryCommand}: the given {@link XId} is already
+	 * taken and therefore a new {@link XModel} with this {@link XId} cannot be
 	 * created
-	 * <li>the repository-{@link XID} in the {@link XRepositoryCommand} does not
-	 * concur with the {@link XID} of this XRepository
+	 * <li>the repository-{@link XId} in the {@link XRepositoryCommand} does not
+	 * concur with the {@link XId} of this XRepository
 	 * </ul>
 	 * 
 	 * @param command The {@link XRepositoryCommand} which is to be executed
@@ -91,15 +91,15 @@ public interface XRepository extends XWritableRepository, XSendsRepositoryEvents
 	
 	/**
 	 * Returns the {@link XModel} contained in this repository with the given
-	 * {@link XID}
+	 * {@link XId}
 	 * 
-	 * @param id The {@link XID} of the {@link XModel} which is to be returned
-	 * @return the {@link XModel} with the given {@link XID} or null if no such
+	 * @param id The {@link XId} of the {@link XModel} which is to be returned
+	 * @return the {@link XModel} with the given {@link XId} or null if no such
 	 *         {@link XModel} exists in this repository.
 	 */
 	@Override
 	@ReadOperation
-	XModel getModel(XID id);
+	XModel getModel(XId id);
 	
 	/**
 	 * @return the actor that is represented by this interface. This is the
@@ -108,12 +108,12 @@ public interface XRepository extends XWritableRepository, XSendsRepositoryEvents
 	 * 
 	 *         TODO can this be null?
 	 */
-	XID getSessionActor();
+	XId getSessionActor();
 	
 	/**
 	 * Removes the specified {@link XModel} from this XRepository.
 	 * 
-	 * @param repository The {@link XID} of the {@link XModel} which is to be
+	 * @param repository The {@link XId} of the {@link XModel} which is to be
 	 *            removed
 	 * 
 	 * @return true, if the specified {@link XModel} could be removed, false
@@ -121,7 +121,7 @@ public interface XRepository extends XWritableRepository, XSendsRepositoryEvents
 	 */
 	@Override
 	@ModificationOperation
-	boolean removeModel(XID modelId);
+	boolean removeModel(XId modelId);
 	
 	/**
 	 * Set a new actor to be used when building commands for changes to this
@@ -133,6 +133,6 @@ public interface XRepository extends XWritableRepository, XSendsRepositoryEvents
 	 * 
 	 * @param actor for this repository and its children, if any.
 	 */
-	void setSessionActor(XID actorId, String passwordHash);
+	void setSessionActor(XId actorId, String passwordHash);
 	
 }

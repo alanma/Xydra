@@ -8,7 +8,7 @@ import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XEvent;
@@ -151,7 +151,7 @@ public class SerializedEvent {
 	 * 
 	 * @param element
 	 * 
-	 * @param context The {@link XID XIDs} of the repository, model, object and
+	 * @param context The {@link XId XIds} of the repository, model, object and
 	 *            field to fill in if not specified in the XML/JSON. If the
 	 *            given element represents a transaction, the context for the
 	 *            contained events will be given by the transaction.
@@ -175,7 +175,7 @@ public class SerializedEvent {
 	 * 
 	 * @param element
 	 * 
-	 * @param context The {@link XID XIDs} of the repository, model, object and
+	 * @param context The {@link XId XIds} of the repository, model, object and
 	 *            field to fill in if not specified in the XML/JSON. The context
 	 *            for the events contained in the transaction will be given by
 	 *            the transaction.
@@ -210,7 +210,7 @@ public class SerializedEvent {
 		long modelRev = trans != null ? trans.modelRev : getRevision(element,
 		        MODELREVISION_ATTRIBUTE, false);
 		
-		XID actor = trans != null ? trans.actor : SerializingUtils.getOptionalXidAttribute(element,
+		XId actor = trans != null ? trans.actor : SerializingUtils.getOptionalXidAttribute(element,
 		        ACTOR_ATTRIBUTE, null);
 		boolean inTransaction = trans != null || getInTransactionAttribute(element);
 		
@@ -249,7 +249,7 @@ public class SerializedEvent {
 		long modelRev = trans != null ? trans.modelRev : getRevision(element,
 		        MODELREVISION_ATTRIBUTE, false);
 		
-		XID actor = trans != null ? trans.actor : SerializingUtils.getOptionalXidAttribute(element,
+		XId actor = trans != null ? trans.actor : SerializingUtils.getOptionalXidAttribute(element,
 		        ACTOR_ATTRIBUTE, null);
 		boolean inTransaction = trans != null || getInTransactionAttribute(element);
 		
@@ -306,12 +306,12 @@ public class SerializedEvent {
 		long modelRev = trans != null ? trans.modelRev : getRevision(element,
 		        MODELREVISION_ATTRIBUTE, true);
 		
-		XID actor = trans != null ? trans.actor : SerializingUtils.getOptionalXidAttribute(element,
+		XId actor = trans != null ? trans.actor : SerializingUtils.getOptionalXidAttribute(element,
 		        ACTOR_ATTRIBUTE, null);
 		boolean inTransaction = trans != null || getInTransactionAttribute(element);
 		
 		XAddress target = address.getParent();
-		XID objectId = address.getObject();
+		XId objectId = address.getObject();
 		
 		if(type == ChangeType.ADD) {
 			return MemoryModelEvent
@@ -352,12 +352,12 @@ public class SerializedEvent {
 		long modelRev = trans != null ? trans.modelRev : getRevision(element,
 		        MODELREVISION_ATTRIBUTE, false);
 		
-		XID actor = trans != null ? trans.actor : SerializingUtils.getOptionalXidAttribute(element,
+		XId actor = trans != null ? trans.actor : SerializingUtils.getOptionalXidAttribute(element,
 		        ACTOR_ATTRIBUTE, null);
 		boolean inTransaction = trans != null || getInTransactionAttribute(element);
 		
 		XAddress target = address.getParent();
-		XID fieldId = address.getField();
+		XId fieldId = address.getField();
 		
 		if(type == ChangeType.ADD) {
 			return MemoryObjectEvent.createAddEvent(actor, target, fieldId, modelRev, objectRev,
@@ -396,12 +396,12 @@ public class SerializedEvent {
 		long modelRev = trans != null ? trans.modelRev : getRevision(element,
 		        MODELREVISION_ATTRIBUTE, type == ChangeType.REMOVE);
 		
-		XID actor = trans != null ? trans.actor : SerializingUtils.getOptionalXidAttribute(element,
+		XId actor = trans != null ? trans.actor : SerializingUtils.getOptionalXidAttribute(element,
 		        ACTOR_ATTRIBUTE, null);
 		boolean inTransaction = trans != null || getInTransactionAttribute(element);
 		
 		XAddress target = address.getParent();
-		XID modelId = address.getModel();
+		XId modelId = address.getModel();
 		
 		if(type == ChangeType.ADD) {
 			return MemoryRepositoryEvent.createAddEvent(actor, target, modelId, modelRev,
@@ -417,10 +417,10 @@ public class SerializedEvent {
 	
 	private static class TempTrans {
 		
-		final XID actor;
+		final XId actor;
 		final long modelRev;
 		
-		public TempTrans(XID actor, long modelRev) {
+		public TempTrans(XId actor, long modelRev) {
 			this.actor = actor;
 			this.modelRev = modelRev;
 		}
@@ -438,7 +438,7 @@ public class SerializedEvent {
 		long objectRev = getRevision(element, OBJECTREVISION_ATTRIBUTE, target.getObject() != null);
 		long modelRev = getRevision(element, MODELREVISION_ATTRIBUTE, target.getObject() == null);
 		
-		XID actor = SerializingUtils.getOptionalXidAttribute(element, ACTOR_ATTRIBUTE, null);
+		XId actor = SerializingUtils.getOptionalXidAttribute(element, ACTOR_ATTRIBUTE, null);
 		
 		TempTrans tt = new TempTrans(actor, modelRev);
 		

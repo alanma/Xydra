@@ -14,7 +14,7 @@ import java.util.Set;
 
 import org.junit.Test;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.change.XEvent;
@@ -774,24 +774,24 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 	
 	@Test
 	public void testModelIdsEmpty() {
-		testModelIds(new XID[] {});
+		testModelIds(new XId[] {});
 	}
 	
 	@Test
 	public void testModelIds() {
-		testModelIds(new XID[] { XX.toId("test") });
+		testModelIds(new XId[] { XX.toId("test") });
 	}
 	
-	public void testModelIds(XID[] mids) {
+	public void testModelIds(XId[] mids) {
 		
-		Set<XID> ids = new HashSet<XID>();
+		Set<XId> ids = new HashSet<XId>();
 		ids.addAll(Arrays.asList(mids));
 		
 		XydraOut out = create();
 		SerializedStore.serializeModelIds(ids, out);
 		
 		XydraElement e = parse(out.getData());
-		Set<XID> ids2 = SerializedStore.toModelIds(e);
+		Set<XId> ids2 = SerializedStore.toModelIds(e);
 		
 		assertEquals(ids, ids2);
 	}
@@ -799,13 +799,13 @@ abstract public class AbstractSerializedStoreTest extends AbstractSerializingTes
 	@Test
 	public void testRepositoryId() {
 		
-		XID repoId = XX.toId("repoId");
+		XId repoId = XX.toId("repoId");
 		
 		XydraOut out = create();
 		SerializedStore.serializeRepositoryId(repoId, out);
 		
 		XydraElement e = parse(out.getData());
-		XID repoId2 = SerializedStore.toRepositoryId(e);
+		XId repoId2 = SerializedStore.toRepositoryId(e);
 		
 		assertEquals(repoId, repoId2);
 	}

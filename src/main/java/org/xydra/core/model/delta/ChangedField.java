@@ -1,7 +1,7 @@
 package org.xydra.core.model.delta;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XWritableField;
@@ -54,7 +54,7 @@ public class ChangedField implements XWritableField, DeltaUtils.IFieldDiff {
 	}
 	
 	@Override
-	public XID getId() {
+	public XId getId() {
 		return this.base.getId();
 	}
 	

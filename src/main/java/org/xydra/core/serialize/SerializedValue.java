@@ -10,7 +10,7 @@ import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.value.ValueType;
 import org.xydra.base.value.XBinaryValue;
@@ -45,9 +45,9 @@ public class SerializedValue {
 	private static final String XDOUBLE_ELEMENT = "xdouble";
 	private static final String XDOUBLELIST_ELEMENT = "xdoubleList";
 	private static final String XID_ELEMENT = "xid";
-	private static final String XIDLIST_ELEMENT = "xidList";
-	private static final String XIDSET_ELEMENT = "xidSet";
-	private static final String XIDSORTEDSET_ELEMENT = "xidSortedSet";
+	private static final String XIdLIST_ELEMENT = "xidList";
+	private static final String XIdSET_ELEMENT = "xidSet";
+	private static final String XIdSORTEDSET_ELEMENT = "xidSortedSet";
 	private static final String XINTEGER_ELEMENT = "xinteger";
 	private static final String XINTEGERLIST_ELEMENT = "xintegerList";
 	private static final String XLONG_ELEMENT = "xlong";
@@ -69,9 +69,9 @@ public class SerializedValue {
 		return list;
 	}
 	
-	protected static List<XID> getIdListContents(XydraElement element) {
+	protected static List<XId> getIdListContents(XydraElement element) {
 		
-		List<XID> list = new ArrayList<XID>();
+		List<XId> list = new ArrayList<XId>();
 		
 		Iterator<Object> entryIterator = element.getValues(NAME_DATA, XID_ELEMENT);
 		while(entryIterator.hasNext()) {
@@ -154,11 +154,11 @@ public class SerializedValue {
 	
 	/**
 	 * @param element
-	 * @return The {@link XID} represented by the given XML/JSON element.
+	 * @return The {@link XId} represented by the given XML/JSON element.
 	 * @throws IllegalArgumentException if the given XML/JSON element is not a
-	 *             valid representation of an {@link XID}
+	 *             valid representation of an {@link XId}
 	 */
-	public static XID toId(XydraElement element) {
+	public static XId toId(XydraElement element) {
 		
 		if(element == null) {
 			return null;
@@ -171,7 +171,7 @@ public class SerializedValue {
 		try {
 			return XX.toId(data);
 		} catch(Exception e) {
-			throw new ParsingError(element, "Expected a valid XID, got " + data, e);
+			throw new ParsingError(element, "Expected a valid XId, got " + data, e);
 		}
 		
 	}
@@ -240,13 +240,13 @@ public class SerializedValue {
 			return XV.toLongListValue(getLongListContents(element));
 		} else if(elementName.equals(XSTRINGLIST_ELEMENT)) {
 			return XV.toStringListValue(getStringListContents(element));
-		} else if(elementName.equals(XIDLIST_ELEMENT)) {
+		} else if(elementName.equals(XIdLIST_ELEMENT)) {
 			return XV.toIDListValue(getIdListContents(element));
 		} else if(elementName.equals(XADDRESSLIST_ELEMENT)) {
 			return XV.toAddressListValue(getAddressListContents(element));
 		} else if(elementName.equals(XSTRINGSET_ELEMENT)) {
 			return XV.toStringSetValue(getStringListContents(element));
-		} else if(elementName.equals(XIDSET_ELEMENT)) {
+		} else if(elementName.equals(XIdSET_ELEMENT)) {
 			return XV.toIDSetValue(getIdListContents(element));
 		} else if(elementName.equals(XADDRESSSET_ELEMENT)) {
 			return XV.toAddressSetValue(getAddressListContents(element));
@@ -256,7 +256,7 @@ public class SerializedValue {
 		/* parse legacy data */
 		if(elementName.equals("xbyteList")) {
 			return XV.toValue(Base64.decode(getStringContent(element)));
-		} else if(elementName.equals(XIDSORTEDSET_ELEMENT)) {
+		} else if(elementName.equals(XIdSORTEDSET_ELEMENT)) {
 			return toIdSortedSetValue(element);
 		} else if(elementName.equals(XADDRESSSORTEDSET_ELEMENT)) {
 			return XV.toAddressSortedSetValue(getAddressListContents(element));
@@ -266,7 +266,7 @@ public class SerializedValue {
 	
 	private static XValue toIdSortedSetValue(XydraElement element) {
 		
-		List<XID> xids = getIdListContents(element);
+		List<XId> xids = getIdListContents(element);
 		
 		XValue value = XV.toIDSortedSetValue(xids);
 		
@@ -303,9 +303,9 @@ public class SerializedValue {
 				collectionElements.put(ValueType.AddressList, XADDRESSLIST_ELEMENT);
 				collectionElements.put(ValueType.AddressSet, XADDRESSSET_ELEMENT);
 				collectionElements.put(ValueType.AddressSortedSet, XADDRESSSORTEDSET_ELEMENT);
-				collectionElements.put(ValueType.IdList, XIDLIST_ELEMENT);
-				collectionElements.put(ValueType.IdSet, XIDSET_ELEMENT);
-				collectionElements.put(ValueType.IdSortedSet, XIDSORTEDSET_ELEMENT);
+				collectionElements.put(ValueType.IdList, XIdLIST_ELEMENT);
+				collectionElements.put(ValueType.IdSet, XIdSET_ELEMENT);
+				collectionElements.put(ValueType.IdSortedSet, XIdSORTEDSET_ELEMENT);
 				collectionElements.put(ValueType.StringList, XSTRINGLIST_ELEMENT);
 				collectionElements.put(ValueType.StringSet, XSTRINGSET_ELEMENT);
 				collectionElements.put(ValueType.IntegerList, XINTEGERLIST_ELEMENT);
@@ -380,7 +380,7 @@ public class SerializedValue {
 		
 	}
 	
-	protected static void setIdListContents(Iterable<XID> list, XydraOut xo) {
+	protected static void setIdListContents(Iterable<XId> list, XydraOut xo) {
 		xo.values(NAME_DATA, XID_ELEMENT, list);
 	}
 	

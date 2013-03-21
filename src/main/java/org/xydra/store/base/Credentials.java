@@ -1,6 +1,6 @@
 package org.xydra.store.base;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 
 
 /**
@@ -10,16 +10,16 @@ import org.xydra.base.XID;
  */
 public class Credentials {
 	
-	private XID actorId;
+	private XId actorId;
 	private String passwordHash;
 	
-	public Credentials(XID actorId, String passwordHash) {
+	public Credentials(XId actorId, String passwordHash) {
 		super();
 		this.setActorId(actorId);
 		this.setPasswordHash(passwordHash);
 	}
 	
-	public XID getActorId() {
+	public XId getActorId() {
 		return this.actorId;
 	}
 	
@@ -27,7 +27,7 @@ public class Credentials {
 		return this.passwordHash;
 	}
 	
-	public void setActorId(XID actorId) {
+	public void setActorId(XId actorId) {
 		this.actorId = actorId;
 	}
 	

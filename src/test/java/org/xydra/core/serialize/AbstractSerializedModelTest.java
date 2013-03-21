@@ -5,7 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableModel;
@@ -44,7 +44,7 @@ abstract public class AbstractSerializedModelTest extends AbstractSerializingTes
 		return LoggerFactory.getLogger(AbstractSerializedModelTest.class);
 	}
 	
-	private XID actorId = XX.toId("a-test-user");
+	private XId actorId = XX.toId("a-test-user");
 	
 	void checkNoRevisions(XReadableField field) {
 		assertEquals(SerializedModel.NO_REVISION, field.getRevisionNumber());
@@ -52,20 +52,20 @@ abstract public class AbstractSerializedModelTest extends AbstractSerializingTes
 	
 	void checkNoRevisions(XReadableModel model) {
 		assertEquals(SerializedModel.NO_REVISION, model.getRevisionNumber());
-		for(XID objectId : model) {
+		for(XId objectId : model) {
 			checkNoRevisions(model.getObject(objectId));
 		}
 	}
 	
 	void checkNoRevisions(XReadableObject object) {
 		assertEquals(SerializedModel.NO_REVISION, object.getRevisionNumber());
-		for(XID fieldId : object) {
+		for(XId fieldId : object) {
 			checkNoRevisions(object.getField(fieldId));
 		}
 	}
 	
 	void checkNoRevisions(XReadableRepository repo) {
-		for(XID modelId : repo) {
+		for(XId modelId : repo) {
 			checkNoRevisions(repo.getModel(modelId));
 		}
 	}

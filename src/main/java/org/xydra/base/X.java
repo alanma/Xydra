@@ -24,7 +24,7 @@ public class X {
 	
 	public static final String DEFAULT_REPOSITORY_ID = "repo";
 	
-	private static XIDProvider idProvider;
+	private static XIdProvider idProvider;
 	
 	private static XValueFactory valueFactory;
 	
@@ -35,8 +35,8 @@ public class X {
 	 * 
 	 * @return the new repository with ID = {@link X}#DEFAULT_REPOSITORY_ID.
 	 */
-	public static XRepository createMemoryRepository(XID actorId) {
-		XID repoId = getIDProvider().fromString(DEFAULT_REPOSITORY_ID);
+	public static XRepository createMemoryRepository(XId actorId) {
+		XId repoId = getIDProvider().fromString(DEFAULT_REPOSITORY_ID);
 		// TODO where to get the passwordHash?
 		return new MemoryRepository(actorId, null, repoId);
 	}
@@ -58,18 +58,18 @@ public class X {
 	}
 	
 	/**
-	 * Returns the {@link XIDProvider} instance of the Xydra Instance that is
-	 * currently being used. {@link XID}s should only be created using this
-	 * {@link XIDProvider} instance to ensure, that only unique {@link XID}s are
+	 * Returns the {@link XIdProvider} instance of the Xydra Instance that is
+	 * currently being used. {@link XId}s should only be created using this
+	 * {@link XIdProvider} instance to ensure, that only unique {@link XId}s are
 	 * being used.
 	 * 
-	 * TODO Maybe we should think about a way to persist the XIDProvider in the
+	 * TODO Maybe we should think about a way to persist the XIdProvider in the
 	 * future to really ensure unique random ids
 	 * 
-	 * @return Returns the {@link XIDProvider} instance of the Xydra Instance
+	 * @return Returns the {@link XIdProvider} instance of the Xydra Instance
 	 *         that is currently being used.
 	 */
-	public static XIDProvider getIDProvider() {
+	public static XIdProvider getIDProvider() {
 		if(idProvider == null) {
 			idProvider = new MemoryStringIDProvider();
 		}

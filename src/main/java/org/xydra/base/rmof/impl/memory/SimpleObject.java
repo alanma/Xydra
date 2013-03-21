@@ -6,7 +6,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
@@ -31,7 +31,7 @@ public class SimpleObject implements Serializable, XRevWritableObject {
 	// not final for GWT serialisation
 	private XAddress address;
 	// not final for GWT serialisation
-	private Map<XID,XRevWritableField> fields;
+	private Map<XId,XRevWritableField> fields;
 	private long revisionNumber;
 	
 	/** For GWT only! */
@@ -46,7 +46,7 @@ public class SimpleObject implements Serializable, XRevWritableObject {
 		XyAssert.xyAssert(address.getAddressedType() == XType.XOBJECT);
 		this.address = address;
 		this.revisionNumber = revisionNumber;
-		this.fields = new HashMap<XID,XRevWritableField>(2);
+		this.fields = new HashMap<XId,XRevWritableField>(2);
 	}
 	
 	@Override
@@ -57,7 +57,7 @@ public class SimpleObject implements Serializable, XRevWritableObject {
 	}
 	
 	@Override
-	public XRevWritableField createField(XID fieldId) {
+	public XRevWritableField createField(XId fieldId) {
 		XRevWritableField field = this.fields.get(fieldId);
 		if(field != null) {
 			return field;
@@ -73,12 +73,12 @@ public class SimpleObject implements Serializable, XRevWritableObject {
 	}
 	
 	@Override
-	public XRevWritableField getField(XID fieldId) {
+	public XRevWritableField getField(XId fieldId) {
 		return this.fields.get(fieldId);
 	}
 	
 	@Override
-	public XID getId() {
+	public XId getId() {
 		return this.address.getObject();
 	}
 	
@@ -88,7 +88,7 @@ public class SimpleObject implements Serializable, XRevWritableObject {
 	}
 	
 	@Override
-	public boolean hasField(XID fieldId) {
+	public boolean hasField(XId fieldId) {
 		return this.fields.containsKey(fieldId);
 	}
 	
@@ -98,12 +98,12 @@ public class SimpleObject implements Serializable, XRevWritableObject {
 	}
 	
 	@Override
-	public Iterator<XID> iterator() {
+	public Iterator<XId> iterator() {
 		return this.fields.keySet().iterator();
 	}
 	
 	@Override
-	public boolean removeField(XID fieldId) {
+	public boolean removeField(XId fieldId) {
 		XRevWritableField oldField = this.fields.remove(fieldId);
 		return oldField != null;
 	}
@@ -139,7 +139,7 @@ public class SimpleObject implements Serializable, XRevWritableObject {
 		if(object instanceof SimpleModel) {
 			result.fields.putAll(((SimpleObject)object).fields);
 		} else {
-			for(XID xid : object) {
+			for(XId xid : object) {
 				result.addField(object.getField(xid));
 			}
 		}

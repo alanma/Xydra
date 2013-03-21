@@ -11,7 +11,7 @@ import java.util.Set;
 
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.change.ChangeType;
@@ -60,10 +60,10 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 	private MemoryObject baseObject;
 	private long revisionNumber;
 	
-	private HashMap<XID,InObjectTransactionField> changedFields, transChangedFields;
-	private Map<XID,XValue> changedValues, transChangedValues;
+	private HashMap<XId,InObjectTransactionField> changedFields, transChangedFields;
+	private Map<XId,XValue> changedValues, transChangedValues;
 	
-	private Set<XID> removedFields, transRemovedFields;
+	private Set<XId> removedFields, transRemovedFields;
 	
 	private ArrayList<XAtomicCommand> commands;
 	
@@ -86,13 +86,13 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 		this.baseObject = object;
 		this.revisionNumber = object.getRevisionNumber();
 		
-		this.changedFields = new HashMap<XID,InObjectTransactionField>();
-		this.changedValues = new HashMap<XID,XValue>();
-		this.removedFields = new HashSet<XID>();
+		this.changedFields = new HashMap<XId,InObjectTransactionField>();
+		this.changedValues = new HashMap<XId,XValue>();
+		this.removedFields = new HashSet<XId>();
 		
-		this.transChangedFields = new HashMap<XID,InObjectTransactionField>();
-		this.transChangedValues = new HashMap<XID,XValue>();
-		this.transRemovedFields = new HashSet<XID>();
+		this.transChangedFields = new HashMap<XId,InObjectTransactionField>();
+		this.transChangedValues = new HashMap<XId,XValue>();
+		this.transRemovedFields = new HashSet<XId>();
 		
 		this.commands = new ArrayList<XAtomicCommand>();
 	}
@@ -204,7 +204,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 	}
 	
 	@Override
-	public XID getId() {
+	public XId getId() {
 		return this.baseObject.getId();
 	}
 	
@@ -261,10 +261,10 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 	 * appears as existing for the rest of the commands which still need to be
 	 * evaluated.
 	 * 
-	 * @param fieldId The {@link XID} of the field
+	 * @param fieldId The {@link XId} of the field
 	 * @return true, if the specified field exists
 	 */
-	private boolean fieldExists(XID fieldId) {
+	private boolean fieldExists(XId fieldId) {
 		boolean fieldExists = this.hasField(fieldId);
 		
 		if(this.inTransaction) {
@@ -290,7 +290,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 	private long handleObjectCommand(XObjectCommand objectCommand, XLocalChangeCallback callback) {
 		XyAssert.xyAssert(callback != null); assert callback != null;
 		
-		XID fieldId = objectCommand.getChangedEntity().getField();
+		XId fieldId = objectCommand.getChangedEntity().getField();
 		
 		boolean fieldExists = this.fieldExists(fieldId);
 		
@@ -389,7 +389,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 	 */
 	private long handleFieldCommand(XFieldCommand fieldCommand, XLocalChangeCallback callback) {
 		XyAssert.xyAssert(callback != null); assert callback != null;
-		XID fieldId = fieldCommand.getChangedEntity().getField();
+		XId fieldId = fieldCommand.getChangedEntity().getField();
 		
 		if(!this.fieldExists(fieldId)) {
 			callback.onFailure();
@@ -493,7 +493,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 			if(command instanceof XObjectCommand) {
 				XObjectCommand objCmd = (XObjectCommand)command;
 				
-				XID fieldId = command.getChangedEntity().getField();
+				XId fieldId = command.getChangedEntity().getField();
 				
 				if(objCmd.getChangeType() == ChangeType.ADD) {
 					if(!this.hasField(fieldId)) {
@@ -527,7 +527,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 				}
 			} else {
 				XyAssert.xyAssert(command instanceof XFieldCommand);
-				XID fieldId = command.getChangedEntity().getField();
+				XId fieldId = command.getChangedEntity().getField();
 				
 				/*
 				 * the action that has to be executed for field commands is
@@ -561,7 +561,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 	 *            {@link #executeCommand(XCommand)})
 	 */
 	private void addFieldToTransactionObject(InObjectTransactionField field, boolean inTransaction) {
-		XID fieldId = field.getId();
+		XId fieldId = field.getId();
 		
 		if(!inTransaction) {
 			// remove from list of removed fields, if needed
@@ -583,7 +583,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 	/**
 	 * Removes the specified field from this TransactionObject.
 	 * 
-	 * @param fieldId The {@link XID} of the field which is to be removed
+	 * @param fieldId The {@link XId} of the field which is to be removed
 	 * @param inTransaction true, if a transaction is being executed at the
 	 *            moment. The field will not yet be removed, but appear as
 	 *            removed for the rest of the commands of the transaction,
@@ -591,7 +591,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 	 *            can be executed (used in transaction handling of
 	 *            {@link #executeCommand(XCommand)})
 	 */
-	private void removeFieldFromTransactionObject(XID fieldId, boolean inTransaction) {
+	private void removeFieldFromTransactionObject(XId fieldId, boolean inTransaction) {
 		if(!inTransaction) {
 			// mark it as removed
 			this.removedFields.add(fieldId);
@@ -619,7 +619,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 	/**
 	 * Sets the {@link XValue} of the specified field to the given value.
 	 * 
-	 * @param fieldId The {@link XID} of the field which value is to be
+	 * @param fieldId The {@link XId} of the field which value is to be
 	 *            manipulated
 	 * @param value The new {@link XValue}
 	 * @param inTransaction true, if a transaction is being executed at the
@@ -629,7 +629,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 	 *            can be executed (used in transaction handling of
 	 *            {@link #executeCommand(XCommand)})
 	 */
-	private void manipulateValueInTransactionObject(XID fieldId, XValue value, boolean inTransaction) {
+	private void manipulateValueInTransactionObject(XId fieldId, XValue value, boolean inTransaction) {
 		if(!inTransaction) {
 			// "add"/"remove"/"change" the value
 			this.changedValues.put(fieldId, value);
@@ -653,7 +653,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 	@Override
 	public boolean isEmpty() {
 		if(!this.baseObject.isEmpty()) {
-			for(XID id : this.baseObject) {
+			for(XId id : this.baseObject) {
 				if(!this.removedFields.contains(id)) {
 					// field wasn't removed in the TransactionObject
 					return false;
@@ -665,7 +665,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 	}
 	
 	@Override
-	public boolean hasField(XID fieldId) {
+	public boolean hasField(XId fieldId) {
 		if(this.changedFields.containsKey(fieldId)) {
 			return true;
 		} else {
@@ -682,7 +682,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 	}
 	
 	@Override
-	public XWritableField createField(XID fieldId) {
+	public XWritableField createField(XId fieldId) {
 		XObjectCommand command = X.getCommandFactory().createSafeAddFieldCommand(this.getAddress(),
 		        fieldId);
 		if(!hasField(fieldId)) {
@@ -693,7 +693,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 	}
 	
 	@Override
-	public boolean removeField(XID fieldId) {
+	public boolean removeField(XId fieldId) {
 		XWritableField field = this.getField(fieldId);
 		
 		if(field == null) {
@@ -742,7 +742,7 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 	}
 	
 	@Override
-	public XWritableField getField(XID fieldId) {
+	public XWritableField getField(XId fieldId) {
 		if(this.changedFields.containsKey(fieldId)) {
 			return this.changedFields.get(fieldId);
 		} else {
@@ -771,23 +771,23 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 	}
 	
 	@Override
-	public Iterator<XID> iterator() {
+	public Iterator<XId> iterator() {
 		/*
 		 * Note: this is probably not the most effective implementation of this
 		 * method
 		 */
 
 		// get all ids of objects in the baseObject that weren't removed
-		LinkedList<XID> currentIds = new LinkedList<XID>();
+		LinkedList<XId> currentIds = new LinkedList<XId>();
 		
-		for(XID id : this.baseObject) {
+		for(XId id : this.baseObject) {
 			if(!this.removedFields.contains(id)) {
 				currentIds.add(id);
 			}
 		}
 		
 		// get all ids of newly added fields
-		for(XID id : this.changedFields.keySet()) {
+		for(XId id : this.changedFields.keySet()) {
 			currentIds.add(id);
 		}
 		
@@ -811,11 +811,11 @@ public class TransactionObject extends AbstractEntity implements XWritableObject
 	/**
 	 * Returns the value of the specified field (if it exists)
 	 * 
-	 * @param fieldId the {@link XID} which {@link XValue} is to be returned
+	 * @param fieldId the {@link XId} which {@link XValue} is to be returned
 	 * @return the {@link XValue} of the specified field (null if the field
 	 *         doesn't exist)
 	 */
-	protected XValue getValue(XID fieldId) {
+	protected XValue getValue(XId fieldId) {
 		if(this.removedFields.contains(fieldId)) {
 			return null;
 		} else if(this.changedValues.containsKey(fieldId)) {

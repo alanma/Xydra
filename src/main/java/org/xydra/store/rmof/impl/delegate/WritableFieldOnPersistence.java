@@ -2,7 +2,7 @@ package org.xydra.store.rmof.impl.delegate;
 
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.rmof.XWritableField;
@@ -19,14 +19,14 @@ public class WritableFieldOnPersistence extends AbstractWritableOnPersistence im
 	
 	private static final Logger log = LoggerFactory.getLogger(WritableFieldOnPersistence.class);
 	
-	private XID fieldId;
+	private XId fieldId;
 	
-	private XID modelId;
+	private XId modelId;
 	
-	private XID objectId;
+	private XId objectId;
 	
-	public WritableFieldOnPersistence(XydraPersistence persistence, XID executingActorId,
-	        XID modelId, XID objectId, XID fieldId) {
+	public WritableFieldOnPersistence(XydraPersistence persistence, XId executingActorId,
+	        XId modelId, XId objectId, XId fieldId) {
 		super(persistence, executingActorId);
 		this.modelId = modelId;
 		this.objectId = objectId;
@@ -77,7 +77,7 @@ public class WritableFieldOnPersistence extends AbstractWritableOnPersistence im
 	}
 	
 	@Override
-	public XID getId() {
+	public XId getId() {
 		return this.fieldId;
 	}
 	

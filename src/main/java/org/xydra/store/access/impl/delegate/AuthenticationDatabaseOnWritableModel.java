@@ -8,7 +8,7 @@ import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.WritableUtils;
 import org.xydra.base.X;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.value.XIntegerValue;
@@ -41,9 +41,9 @@ import org.xydra.store.access.XAuthenticationDatabase;
 @RequiresAppEngine(false)
 public class AuthenticationDatabaseOnWritableModel implements XAuthenticationDatabase, Serializable {
 	
-	public static final XID hasFailedLoginAttempts = XX.toId("hasFailedLoginAttempts");
+	public static final XId hasFailedLoginAttempts = XX.toId("hasFailedLoginAttempts");
 	
-	public static final XID hasPasswordHash = XX.toId("hasPasswordHash");
+	public static final XId hasPasswordHash = XX.toId("hasPasswordHash");
 	private static final long serialVersionUID = 21938374542095483L;
 	
 	protected XWritableModel authenticationModel;
@@ -63,7 +63,7 @@ public class AuthenticationDatabaseOnWritableModel implements XAuthenticationDat
 	}
 	
 	@Override
-	public int getFailedLoginAttempts(XID actorId) {
+	public int getFailedLoginAttempts(XId actorId) {
 		XyAssert.xyAssert(actorId != null); assert actorId != null;
 		XValue value = WritableUtils.getValue(this.authenticationModel, actorId,
 		        hasFailedLoginAttempts);
@@ -71,7 +71,7 @@ public class AuthenticationDatabaseOnWritableModel implements XAuthenticationDat
 	}
 	
 	@Override
-	public String getPasswordHash(XID actorId) {
+	public String getPasswordHash(XId actorId) {
 		XyAssert.xyAssert(actorId != null); assert actorId != null;
 		XValue value = WritableUtils.getValue(this.authenticationModel, actorId, hasPasswordHash);
 		return XV.toString(value);
@@ -79,7 +79,7 @@ public class AuthenticationDatabaseOnWritableModel implements XAuthenticationDat
 	
 	@Override
 	@ModificationOperation
-	public int incrementFailedLoginAttempts(XID actorId) {
+	public int incrementFailedLoginAttempts(XId actorId) {
 		int failedLoginAttempts = getFailedLoginAttempts(actorId);
 		failedLoginAttempts++;
 		XIntegerValue failedLoginAttemptsValue = X.getValueFactory().createIntegerValue(
@@ -93,19 +93,19 @@ public class AuthenticationDatabaseOnWritableModel implements XAuthenticationDat
 	
 	@Override
 	@ModificationOperation
-	public void removePasswordHash(XID actorId) {
+	public void removePasswordHash(XId actorId) {
 		WritableUtils.removeValue(this.authenticationModel, actorId, hasPasswordHash);
 	}
 	
 	@Override
 	@ModificationOperation
-	public void resetFailedLoginAttempts(XID actorId) {
+	public void resetFailedLoginAttempts(XId actorId) {
 		WritableUtils.removeValue(this.authenticationModel, actorId, hasFailedLoginAttempts);
 	}
 	
 	@Override
 	@ModificationOperation
-	public void setPasswordHash(XID actorId, String passwordHash) {
+	public void setPasswordHash(XId actorId, String passwordHash) {
 		String currentHash = getPasswordHash(actorId);
 		if(currentHash != null && currentHash.equals(passwordHash)) {
 			// prevent NOOP

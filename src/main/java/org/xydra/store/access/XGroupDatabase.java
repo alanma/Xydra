@@ -4,7 +4,7 @@ import java.util.Set;
 
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.ReadOperation;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.store.NamingUtils;
 
@@ -18,8 +18,8 @@ import org.xydra.store.NamingUtils;
  * for a single data store call on GAE. (b) 1MB Limit for size of XValue object
  * on GAE.
  * 
- * Assuming an average XID has 16 characters in a Java String, with a typical
- * Java overhead of factor 2, we can save only 32K XIDs in 1 MB.
+ * Assuming an average XId has 16 characters in a Java String, with a typical
+ * Java overhead of factor 2, we can save only 32K XIds in 1 MB.
  * 
  * @author dscharrer
  * @author voelkel
@@ -31,7 +31,7 @@ public interface XGroupDatabase {
 	 * Built-in administrator-group. All of its members are allowed to
 	 * read/write/access every resource.
 	 */
-	public static XID ADMINISTRATOR_GROUP_ID = XX.toId(NamingUtils.PREFIX_INTERNAL
+	public static XId ADMINISTRATOR_GROUP_ID = XX.toId(NamingUtils.PREFIX_INTERNAL
 	        + NamingUtils.NAMESPACE_SEPARATOR + "AdministratorGroup");
 	
 	/**
@@ -39,65 +39,65 @@ public interface XGroupDatabase {
 	 * 
 	 * The actor will become a direct member of this group.
 	 * 
-	 * @param actorId The {@link XID} of the actor to add to the group
-	 * @param groupId The {@link XID} of the group the specified actor will be
+	 * @param actorId The {@link XId} of the actor to add to the group
+	 * @param groupId The {@link XId} of the group the specified actor will be
 	 *            added to
 	 */
 	@ModificationOperation
-	void addToGroup(XID actorId, XID groupId);
+	void addToGroup(XId actorId, XId groupId);
 	
 	/**
-	 * @return returns an set containing the {@link XID XIDs} of the defined
+	 * @return returns an set containing the {@link XId XIds} of the defined
 	 *         groups. Groups are defined as long as they have at least one
 	 *         member. Never null.
 	 */
 	@ReadOperation
-	Set<XID> getGroups();
+	Set<XId> getGroups();
 	
 	/**
 	 * Get all groups an actor is part of.
 	 * 
-	 * @param actorOrGroupId The {@link XID} of the actor whose groups are to be
+	 * @param actorOrGroupId The {@link XId} of the actor whose groups are to be
 	 *            returned
-	 * @return a set with all {@link XID XIDs} of the groups the specified actor
+	 * @return a set with all {@link XId XIds} of the groups the specified actor
 	 *         is a member of. Never null.
 	 */
 	@ReadOperation
-	Set<XID> getGroupsOf(XID actorOrGroupId);
+	Set<XId> getGroupsOf(XId actorOrGroupId);
 	
 	/**
 	 * Get all actors that are a member of the given group.
 	 * 
-	 * @param groupId The {@link XID} of the group which members {@link XID
-	 *            XIDs} are to be returned
-	 * @return a set containing all {@link XID XIDs} of the members of the
+	 * @param groupId The {@link XId} of the group which members {@link XId
+	 *            XIds} are to be returned
+	 * @return a set containing all {@link XId XIds} of the members of the
 	 *         specified group. Never null.
 	 */
 	@ReadOperation
-	Set<XID> getMembersOf(XID groupId);
+	Set<XId> getMembersOf(XId groupId);
 	
 	/**
 	 * Check if the specified actor is a member of the specific group.
 	 * 
-	 * @param actorId The {@link XID} of the actor whose membership status is to
+	 * @param actorId The {@link XId} of the actor whose membership status is to
 	 *            be checked
-	 * @param groupId The {@link XID} of the group for which the membership
+	 * @param groupId The {@link XId} of the group for which the membership
 	 *            status of the specified actor is to be checked
 	 * @return true, if the specified actor is a member of the specified group
 	 */
 	@ReadOperation
-	boolean hasGroup(XID actorId, XID groupId);
+	boolean hasGroup(XId actorId, XId groupId);
 	
 	/**
 	 * Remove an actor from a group.
 	 * 
-	 * @param actorId The {@link XID} of the actor for which to revoke group
+	 * @param actorId The {@link XId} of the actor for which to revoke group
 	 *            membership.
-	 * @param groupId The {@link XID} of the group the specified actor will be
+	 * @param groupId The {@link XId} of the group the specified actor will be
 	 *            removed from
 	 */
 	@ModificationOperation
-	void removeFromGroup(XID actorId, XID groupId);
+	void removeFromGroup(XId actorId, XId groupId);
 	
 	/**
 	 * Same as removing all actors from a group but can sometimes be implemented
@@ -106,6 +106,6 @@ public interface XGroupDatabase {
 	 * @param groupId
 	 */
 	@ModificationOperation
-	void removeGroup(XID groupId);
+	void removeGroup(XId groupId);
 	
 }

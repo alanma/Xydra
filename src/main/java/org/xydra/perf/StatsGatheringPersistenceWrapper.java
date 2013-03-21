@@ -5,7 +5,7 @@ import java.util.Set;
 
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.minio.MiniIOException;
@@ -53,7 +53,7 @@ public class StatsGatheringPersistenceWrapper implements XydraPersistence {
 	}
 	
 	@Override
-	public long executeCommand(XID actorId, XCommand command) {
+	public long executeCommand(XId actorId, XCommand command) {
 		Clock c = this.stats.startClock("executeCommand");
 		long result = this.basePersistence.executeCommand(actorId, command);
 		c.stop();
@@ -69,9 +69,9 @@ public class StatsGatheringPersistenceWrapper implements XydraPersistence {
 	}
 	
 	@Override
-	public Set<XID> getManagedModelIds() {
+	public Set<XId> getManagedModelIds() {
 		Clock c = this.stats.startClock("getModelIds");
-		Set<XID> result = this.basePersistence.getManagedModelIds();
+		Set<XId> result = this.basePersistence.getManagedModelIds();
 		c.stop();
 		return result;
 	}
@@ -101,15 +101,15 @@ public class StatsGatheringPersistenceWrapper implements XydraPersistence {
 	}
 	
 	@Override
-	public XID getRepositoryId() {
+	public XId getRepositoryId() {
 		Clock c = this.stats.startClock("getRepositoryId");
-		XID result = this.basePersistence.getRepositoryId();
+		XId result = this.basePersistence.getRepositoryId();
 		c.stop();
 		return result;
 	}
 	
 	@Override
-	public boolean hasManagedModel(XID modelId) {
+	public boolean hasManagedModel(XId modelId) {
 		Clock c = this.stats.startClock("hasModel");
 		boolean result = this.basePersistence.hasManagedModel(modelId);
 		c.stop();

@@ -1,6 +1,6 @@
 package org.xydra.store.access.impl.memory;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.core.model.impl.memory.UUID;
 import org.xydra.store.XydraStoreAdmin;
@@ -61,7 +61,7 @@ public class DelegatingAccessControlManager implements XAccessControlManager {
 			// TODO @Daniel: use more general convention for admin group name,
 			// likely
 			// defined in .access package
-			XID adminGroup = XX.toId("adminGroup");
+			XId adminGroup = XX.toId("adminGroup");
 			// add to admin group
 			XGroupDatabaseWithListeners groupDb = this.authorisationManager.getGroupDatabase();
 			if(groupDb != null) {
@@ -75,7 +75,7 @@ public class DelegatingAccessControlManager implements XAccessControlManager {
 	}
 	
 	@Override
-	public boolean isAuthenticated(XID actorId, String passwordHash) {
+	public boolean isAuthenticated(XId actorId, String passwordHash) {
 		if(this.authenticationDb == null) {
 			// authenticate EVERY actor with a null password
 			return passwordHash == null;

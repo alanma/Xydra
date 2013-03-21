@@ -2,7 +2,7 @@ package org.xydra.store.access;
 
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.ReadOperation;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 
 
 /**
@@ -27,7 +27,7 @@ public interface XAuthenticationDatabase {
 	 * @return number of failed logging attempts, 0 if not defined.
 	 */
 	@ReadOperation
-	int getFailedLoginAttempts(XID actorId);
+	int getFailedLoginAttempts(XId actorId);
 	
 	/**
 	 * @param actorId never null
@@ -36,7 +36,7 @@ public interface XAuthenticationDatabase {
 	 *         {@link HashUtils#getXydraPasswordHash(String)}.
 	 */
 	@ReadOperation
-	String getPasswordHash(XID actorId);
+	String getPasswordHash(XId actorId);
 	
 	/**
 	 * Increment number of failed login attempts.
@@ -45,7 +45,7 @@ public interface XAuthenticationDatabase {
 	 * @return the number of failed login attempts, 0 if not defined
 	 */
 	@ModificationOperation
-	int incrementFailedLoginAttempts(XID actorId);
+	int incrementFailedLoginAttempts(XId actorId);
 	
 	/**
 	 * Write operation.
@@ -53,7 +53,7 @@ public interface XAuthenticationDatabase {
 	 * @param actorId never null
 	 */
 	@ModificationOperation
-	void removePasswordHash(XID actorId);
+	void removePasswordHash(XId actorId);
 	
 	/**
 	 * Set number of failed login attempts back to zero.
@@ -61,7 +61,7 @@ public interface XAuthenticationDatabase {
 	 * @param actorId never null
 	 */
 	@ModificationOperation
-	void resetFailedLoginAttempts(XID actorId);
+	void resetFailedLoginAttempts(XId actorId);
 	
 	/**
 	 * Set the passwordHash for the given actorId. From now on, this
@@ -72,6 +72,6 @@ public interface XAuthenticationDatabase {
 	 * @param passwordHash never null
 	 */
 	@ModificationOperation
-	void setPasswordHash(XID actorId, String passwordHash);
+	void setPasswordHash(XId actorId, String passwordHash);
 	
 }

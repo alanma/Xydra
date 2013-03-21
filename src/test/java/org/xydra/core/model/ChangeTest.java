@@ -8,7 +8,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xydra.base.X;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XFieldEvent;
@@ -34,26 +34,26 @@ public class ChangeTest {
 	}
 	
 	private static class DummyFieldChangeListener implements XFieldEventListener {
-		private XID field;
+		private XId field;
 		public boolean fired = false;
-		private XID model;
-		private XID object;
-		private XID repo;
+		private XId model;
+		private XId object;
+		private XId repo;
 		private ChangeType type;
 		
-		public XID getFieldId() {
+		public XId getFieldId() {
 			return this.field;
 		}
 		
-		public XID getModelId() {
+		public XId getModelId() {
 			return this.model;
 		}
 		
-		public XID getObjectId() {
+		public XId getObjectId() {
 			return this.object;
 		}
 		
-		public XID getRepositoryId() {
+		public XId getRepositoryId() {
 			return this.repo;
 		}
 		
@@ -87,15 +87,15 @@ public class ChangeTest {
 	
 	private static class DummyModelChangeListener implements XModelEventListener {
 		public boolean fired = false;
-		private XID model;
-		private XID repo;
+		private XId model;
+		private XId repo;
 		private ChangeType type;
 		
-		public XID getModel() {
+		public XId getModel() {
 			return this.model;
 		}
 		
-		public XID getRepository() {
+		public XId getRepository() {
 			return this.repo;
 		}
 		
@@ -125,20 +125,20 @@ public class ChangeTest {
 	
 	private static class DummyObjectChangeListener implements XObjectEventListener {
 		public boolean fired = false;
-		private XID modelId;
-		private XID objectId;
-		private XID repoID;
+		private XId modelId;
+		private XId objectId;
+		private XId repoID;
 		private ChangeType type;
 		
-		public XID getModelId() {
+		public XId getModelId() {
 			return this.modelId;
 		}
 		
-		public XID getObject() {
+		public XId getObject() {
 			return this.objectId;
 		}
 		
-		public XID getRepositoryId() {
+		public XId getRepositoryId() {
 			return this.repoID;
 		}
 		
@@ -170,10 +170,10 @@ public class ChangeTest {
 	
 	private static class DummyRepositoryChangeListener implements XRepositoryEventListener {
 		public boolean fired = false;
-		private XID repo;
+		private XId repo;
 		private ChangeType type;
 		
-		public XID getRepository() {
+		public XId getRepository() {
 			return this.repo;
 		}
 		
@@ -199,7 +199,7 @@ public class ChangeTest {
 		}
 	}
 	
-	private XID actorId = XX.toId("AbstractChangeTest");
+	private XId actorId = XX.toId("AbstractChangeTest");
 	
 	private String password = null; // TODO auth: where to get this?
 	

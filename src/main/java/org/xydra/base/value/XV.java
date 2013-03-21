@@ -9,7 +9,7 @@ import java.util.Set;
 import org.xydra.annotations.NeverNull;
 import org.xydra.base.X;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 
 
 /**
@@ -137,95 +137,95 @@ public class XV {
 	
 	/**
 	 * Returns the content of the given {@link Collection} as an
-	 * {@link XIDListValue}
+	 * {@link XIdListValue}
 	 * 
 	 * @param list The {@link Collection} which is to be converted into an
-	 *            {@link XIDListValue}
-	 * @return an {@link XIDListValue} with the content of the given list
+	 *            {@link XIdListValue}
+	 * @return an {@link XIdListValue} with the content of the given list
 	 */
-	public static XIDListValue toIDListValue(Collection<XID> list) {
-		return vf.createIDListValue(list);
+	public static XIdListValue toIDListValue(Collection<XId> list) {
+		return vf.createIdListValue(list);
 	}
 	
 	/**
-	 * @param value may be null or {@link XIDSetValue}
-	 * @return always a Set<XID>
-	 * @throws IllegalArgumentException if value is not an {@link XIDSetValue}
+	 * @param value may be null or {@link XIdSetValue}
+	 * @return always a Set<XId>
+	 * @throws IllegalArgumentException if value is not an {@link XIdSetValue}
 	 */
 	public static @NeverNull
-	Set<XID> toIDSet(XValue value) {
+	Set<XId> toIDSet(XValue value) {
 		if(value == null) {
 			return Collections.emptySet();
 		} else {
 			try {
-				XIDSetValue idSetValue = (XIDSetValue)value;
+				XIdSetValue idSetValue = (XIdSetValue)value;
 				return idSetValue.toSet();
 			} catch(ClassCastException e) {
-				throw new IllegalArgumentException("Given value is not an XIDSetValue", e);
+				throw new IllegalArgumentException("Given value is not an XIdSetValue", e);
 			}
 		}
 	}
 	
 	/**
 	 * Returns the content of the given {@link Collection} as an
-	 * {@link XIDSetValue}
+	 * {@link XIdSetValue}
 	 * 
 	 * @param list The {@link Collection} which is to be converted into an
-	 *            {@link XIDSetValue}
-	 * @return an {@link XIDSetValue} with the content of the given list
+	 *            {@link XIdSetValue}
+	 * @return an {@link XIdSetValue} with the content of the given list
 	 */
-	public static XIDSetValue toIDSetValue(Collection<XID> list) {
-		return vf.createIDSetValue(list);
+	public static XIdSetValue toIDSetValue(Collection<XId> list) {
+		return vf.createIdSetValue(list);
 	}
 	
 	/**
 	 * Returns the content of the given {@link Collection} as an
-	 * {@link XIDSetValue}
+	 * {@link XIdSetValue}
 	 * 
 	 * @param list The {@link Collection} which is to be converted into an
-	 *            {@link XIDSetValue}
-	 * @return an {@link XIDSetValue} with the content of the given list
+	 *            {@link XIdSetValue}
+	 * @return an {@link XIdSetValue} with the content of the given list
 	 */
-	public static XIDSetValue toIDSetValue(Set<XID> list) {
-		return vf.createIDSetValue(list);
+	public static XIdSetValue toIDSetValue(Set<XId> list) {
+		return vf.createIdSetValue(list);
 	}
 	
 	/**
-	 * Returns the content of the given {@link XID} array as an
-	 * {@link XIDSetValue}
+	 * Returns the content of the given {@link XId} array as an
+	 * {@link XIdSetValue}
 	 * 
-	 * @param list The {@link XID} array which is to be converted into an
-	 *            {@link XIDSetValue}
-	 * @return an {@link XIDSetValue} with the content of the given list
+	 * @param list The {@link XId} array which is to be converted into an
+	 *            {@link XIdSetValue}
+	 * @return an {@link XIdSetValue} with the content of the given list
 	 */
-	public static XIDSetValue toIDSetValue(XID[] list) {
-		return vf.createIDSetValue(list);
+	public static XIdSetValue toIDSetValue(XId[] list) {
+		return vf.createIdSetValue(list);
 	}
 	
 	/**
 	 * Returns the content of the given {@link Collection} as an
-	 * {@link XIDSortedSetValue}
+	 * {@link XIdSortedSetValue}
 	 * 
 	 * @param list The {@link Collection} which is to be converted into an
-	 *            {@link XIDSortedSetValue}
-	 * @return an {@link XIDSortedSetValue} with the content of the given list,
+	 *            {@link XIdSortedSetValue}
+	 * @return an {@link XIdSortedSetValue} with the content of the given list,
 	 *         preserving sort oder.
 	 */
-	public static XIDSortedSetValue toIDSortedSetValue(Collection<XID> list) {
-		return vf.createIDSortedSetValue(list);
+	public static XIdSortedSetValue toIDSortedSetValue(Collection<XId> list) {
+		return vf.createIdSortedSetValue(list);
 	}
 	
 	/**
-	 * Returns the content of the given {@link XID} array as an
-	 * {@link XIDSortedSetValue}
+	 * Returns the content of the given {@link XId} array as an
+	 * {@link XIdSortedSetValue}
 	 * 
-	 * @param list The {@link XID} array which is to be converted into an
-	 *            {@link XIDSortedSetValue}
-	 * @return an {@link XIDSortedSetValue} with the content of the given list,
+	 * @param list The {@link XId} array which is to be converted into an
+	 *            {@link XIdSortedSetValue}
+	 * @return an {@link XIdSortedSetValue} with the content of the given list,
 	 *         maintaining sort oder.
 	 */
-	public static XIDSortedSetValue toIDSortedSetValue(XID[] list) {
-		return vf.createIDSortedSetValue(list);
+	public static XIdSortedSetValue toIDSortedSetValue(XId[] list) {
+		return vf.createIdSortedSetValue(list);
 	}
 	
 	/**
@@ -519,15 +519,15 @@ public class XV {
 	}
 	
 	/**
-	 * Returns the content of the given {@link XID} array as an
-	 * {@link XIDListValue}
+	 * Returns the content of the given {@link XId} array as an
+	 * {@link XIdListValue}
 	 * 
-	 * @param list The {@link XID} array which is to be converted into an
-	 *            {@link XIDListValue}
-	 * @return an {@link XIDListValue} with the content of the given list
+	 * @param list The {@link XId} array which is to be converted into an
+	 *            {@link XIdListValue}
+	 * @return an {@link XIdListValue} with the content of the given list
 	 */
-	public static XIDListValue toValue(XID[] list) {
-		return vf.createIDListValue(list);
+	public static XIdListValue toValue(XId[] list) {
+		return vf.createIdListValue(list);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -549,8 +549,8 @@ public class XV {
 					stream.javaLong((Long)a);
 				} else if(componentType == String.class) {
 					stream.javaString((String)a);
-				} else if(componentType == org.xydra.base.XID.class) {
-					stream.xid((XID)a);
+				} else if(componentType == org.xydra.base.XId.class) {
+					stream.xid((XId)a);
 				}
 			}
 			stream.endCollection();
@@ -573,8 +573,8 @@ public class XV {
 			stream.javaLong(((XLongValue)value).contents());
 		} else if(type == String.class) {
 			stream.javaString(((XStringValue)value).contents());
-		} else if(type == org.xydra.base.XID.class) {
-			stream.xid((XID)value);
+		} else if(type == org.xydra.base.XId.class) {
+			stream.xid((XId)value);
 		}
 	}
 	

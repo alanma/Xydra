@@ -1,7 +1,7 @@
 package org.xydra.base.change;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
@@ -30,7 +30,7 @@ import org.xydra.core.model.XSynchronizesChanges;
  *         command with index 1 etc.
  * 
  *         All commands need to have the same actor, which is specified by the
- *         actor-{@link XID} set by the constructor. Trying to add commands to
+ *         actor-{@link XId} set by the constructor. Trying to add commands to
  *         the transaction that do not refer to the same actor as the
  *         transaction itself, will not do anything, such commands will not be
  *         added.

@@ -3,18 +3,18 @@ package org.xydra.base.value.impl.memory;
 import java.io.Serializable;
 import java.util.Collection;
 
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.value.ValueType;
-import org.xydra.base.value.XIDSetValue;
+import org.xydra.base.value.XIdSetValue;
 
 
 /**
- * An implementation of {@link XIDSetValue}
+ * An implementation of {@link XIdSetValue}
  * 
  * @author dscharrer
  * 
  */
-public class MemoryIDSetValue extends MemorySetValue<XID> implements XIDSetValue, Serializable {
+public class MemoryIDSetValue extends MemorySetValue<XId> implements XIdSetValue, Serializable {
 	
 	private static final long serialVersionUID = -83885798275571937L;
 	
@@ -22,29 +22,29 @@ public class MemoryIDSetValue extends MemorySetValue<XID> implements XIDSetValue
 	protected MemoryIDSetValue() {
 	}
 	
-	public MemoryIDSetValue(Collection<XID> contents) {
+	public MemoryIDSetValue(Collection<XId> contents) {
 		super(contents);
 	}
 	
-	public MemoryIDSetValue(XID[] contents) {
+	public MemoryIDSetValue(XId[] contents) {
 		super(contents);
 	}
 	
 	@Override
-	public XIDSetValue add(XID entry) {
+	public XIdSetValue add(XId entry) {
 		MemoryIDSetValue v = new MemoryIDSetValue(this.set);
 		v.set.add(entry);
 		return v;
 	}
 	
 	@Override
-	public XID[] contents() {
-		return toArray(new XID[size()]);
+	public XId[] contents() {
+		return toArray(new XId[size()]);
 	}
 	
 	@Override
 	public boolean equals(Object other) {
-		return other instanceof XIDSetValue && checkEquals((XIDSetValue)other);
+		return other instanceof XIdSetValue && checkEquals((XIdSetValue)other);
 	}
 	
 	@Override
@@ -63,14 +63,14 @@ public class MemoryIDSetValue extends MemorySetValue<XID> implements XIDSetValue
 	}
 	
 	@Override
-	public XIDSetValue remove(XID entry) {
+	public XIdSetValue remove(XId entry) {
 		MemoryIDSetValue v = new MemoryIDSetValue(this.set);
 		v.set.remove(entry);
 		return v;
 	}
 	
 	@Override
-	public XID[] toArray() {
+	public XId[] toArray() {
 		return contents();
 	}
 	

@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.rmof.XWritableModel;
@@ -40,7 +40,7 @@ public class ReadCachingWritableRepository2 implements XWritableRepository {
 	}
 	
 	@Override
-	public XID getId() {
+	public XId getId() {
 		return this.persistence.getRepositoryId();
 	}
 	
@@ -64,14 +64,14 @@ public class ReadCachingWritableRepository2 implements XWritableRepository {
 		this.persistence = persistence;
 	}
 	
-	protected Set<XID> knownExistingModelIds = new HashSet<XID>();
+	protected Set<XId> knownExistingModelIds = new HashSet<XId>();
 	
-	protected Set<XID> knownNonExistingModelIds = new HashSet<XID>();
+	protected Set<XId> knownNonExistingModelIds = new HashSet<XId>();
 	
-	protected Map<XID,XWritableModel> map = new HashMap<XID,XWritableModel>();
+	protected Map<XId,XWritableModel> map = new HashMap<XId,XWritableModel>();
 	
 	@Override
-	public XWritableModel createModel(XID modelId) {
+	public XWritableModel createModel(XId modelId) {
 		XWritableModel readCachingModel = getModel(modelId);
 		if(readCachingModel == null) {
 			throw new RuntimeException("This ReadCachingWritableRepository2 cannot create models");
@@ -80,13 +80,13 @@ public class ReadCachingWritableRepository2 implements XWritableRepository {
 	}
 	
 	@Override
-	public Iterator<XID> iterator() {
+	public Iterator<XId> iterator() {
 		return modelIds().iterator();
 	}
 	
-	private Set<XID> modelIds() {
+	private Set<XId> modelIds() {
 		if(!this.knowsAllModelsIds) {
-			for(XID potentialModelId : this.persistence.getManagedModelIds()) {
+			for(XId potentialModelId : this.persistence.getManagedModelIds()) {
 				XAddress modelAddress = XX.resolveModel(getId(), potentialModelId);
 				ModelRevision modelRev = this.persistence
 				        .getModelRevision(new GetWithAddressRequest(modelAddress, INCLUDE_TENTATIVE));
@@ -100,7 +100,7 @@ public class ReadCachingWritableRepository2 implements XWritableRepository {
 	}
 	
 	@Override
-	public boolean hasModel(XID modelId) {
+	public boolean hasModel(XId modelId) {
 		return getModel(modelId) != null;
 		/*
 		 * This impl triggers gae.changes.Utils:73 findChildren() = a query that
@@ -116,7 +116,7 @@ public class ReadCachingWritableRepository2 implements XWritableRepository {
 	}
 	
 	@Override
-	public XWritableModel getModel(XID modelId) {
+	public XWritableModel getModel(XId modelId) {
 		XWritableModel model = this.map.get(modelId);
 		if(model == null) {
 			/* prevent asking base again for models that simply don't exists */
@@ -146,7 +146,7 @@ public class ReadCachingWritableRepository2 implements XWritableRepository {
 	}
 	
 	@Override
-	public boolean removeModel(XID modelId) {
+	public boolean removeModel(XId modelId) {
 		throw new RuntimeException("This repo cannot do this");
 	}
 	

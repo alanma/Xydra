@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.xydra.annotations.NeverNull;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
@@ -34,7 +34,7 @@ public class SimpleModel implements Serializable, XRevWritableModel, XSessionMod
 	// not final for GWT serialisation
 	private XAddress address;
 	// not final for GWT serialisation
-	private Map<XID,XRevWritableObject> objects;
+	private Map<XId,XRevWritableObject> objects;
 	private long revisionNumber;
 	private boolean modelExists = true;
 	
@@ -59,10 +59,10 @@ public class SimpleModel implements Serializable, XRevWritableModel, XSessionMod
 		assert address.getAddressedType() == XType.XMODEL : address;
 		this.address = address;
 		this.revisionNumber = revisionNumber;
-		this.objects = new HashMap<XID,XRevWritableObject>(2);
+		this.objects = new HashMap<XId,XRevWritableObject>(2);
 	}
 	
-	public SimpleModel(XAddress address, long revisionNumber, Map<XID,XRevWritableObject> objects) {
+	public SimpleModel(XAddress address, long revisionNumber, Map<XId,XRevWritableObject> objects) {
 		super();
 		this.address = address;
 		this.revisionNumber = revisionNumber;
@@ -77,7 +77,7 @@ public class SimpleModel implements Serializable, XRevWritableModel, XSessionMod
 	}
 	
 	@Override
-	public XRevWritableObject createObject(@NeverNull XID objectId) {
+	public XRevWritableObject createObject(@NeverNull XId objectId) {
 		XRevWritableObject object = this.objects.get(objectId);
 		if(object != null) {
 			return object;
@@ -93,12 +93,12 @@ public class SimpleModel implements Serializable, XRevWritableModel, XSessionMod
 	}
 	
 	@Override
-	public XID getId() {
+	public XId getId() {
 		return this.address.getModel();
 	}
 	
 	@Override
-	public XRevWritableObject getObject(@NeverNull XID objectId) {
+	public XRevWritableObject getObject(@NeverNull XId objectId) {
 		return this.objects.get(objectId);
 	}
 	
@@ -108,7 +108,7 @@ public class SimpleModel implements Serializable, XRevWritableModel, XSessionMod
 	}
 	
 	@Override
-	public boolean hasObject(@NeverNull XID objectId) {
+	public boolean hasObject(@NeverNull XId objectId) {
 		return this.objects.containsKey(objectId);
 	}
 	
@@ -118,12 +118,12 @@ public class SimpleModel implements Serializable, XRevWritableModel, XSessionMod
 	}
 	
 	@Override
-	public Iterator<XID> iterator() {
+	public Iterator<XId> iterator() {
 		return this.objects.keySet().iterator();
 	}
 	
 	@Override
-	public boolean removeObject(@NeverNull XID objectId) {
+	public boolean removeObject(@NeverNull XId objectId) {
 		XRevWritableObject oldObject = this.objects.remove(objectId);
 		return oldObject != null;
 	}
@@ -170,7 +170,7 @@ public class SimpleModel implements Serializable, XRevWritableModel, XSessionMod
 		if(model instanceof SimpleModel) {
 			result.objects.putAll(((SimpleModel)model).objects);
 		} else {
-			for(XID xid : model) {
+			for(XId xid : model) {
 				result.addObject(model.getObject(xid));
 			}
 		}
@@ -179,7 +179,7 @@ public class SimpleModel implements Serializable, XRevWritableModel, XSessionMod
 	}
 	
 	@Override
-	public XSessionModel loadObject(XID objectId) {
+	public XSessionModel loadObject(XId objectId) {
 		/* A simpleModel neither can not needs to load anything after creation */
 		return this;
 	}

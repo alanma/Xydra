@@ -14,7 +14,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XCommand;
@@ -109,7 +109,7 @@ public class SynchronizeTest {
 		}
 	}
 	
-	private XID actorId = XX.toId("AbstractSynchronizeTest");
+	private XId actorId = XX.toId("AbstractSynchronizeTest");
 	private XModel localModel;
 	
 	private String password = null; // TODO auth: where to get this?
@@ -148,7 +148,7 @@ public class SynchronizeTest {
 		assertNotNull(model.getObject(DemoModelUtil.PETER_ID).createField(XX.createUniqueId()));
 		
 		XTransactionBuilder tb = new XTransactionBuilder(model.getAddress());
-		XID objId = XX.createUniqueId();
+		XId objId = XX.createUniqueId();
 		tb.addObject(model.getAddress(), XCommand.SAFE, objId);
 		XAddress objAddr = XX.resolveObject(model.getAddress(), objId);
 		tb.addField(objAddr, XCommand.SAFE, XX.createUniqueId());
@@ -214,8 +214,8 @@ public class SynchronizeTest {
 		}
 		
 		// create a set of local changes
-		XID newObjectId = XX.toId("cookiemonster");
-		XID newFieldId = XX.toId("cookies");
+		XId newObjectId = XX.toId("cookiemonster");
+		XId newFieldId = XX.toId("cookies");
 		XAddress newObjectAddr = XX.resolveObject(this.localModel.getAddress(), newObjectId);
 		XAddress newFieldAddr = XX.resolveField(newObjectAddr, newFieldId);
 		XValue newValue1 = XV.toValue("chocolate chip");

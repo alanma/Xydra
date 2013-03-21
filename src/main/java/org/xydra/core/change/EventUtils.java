@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.xydra.annotations.CanBeNull;
 import org.xydra.annotations.NeverNull;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XEvent;
@@ -172,7 +172,7 @@ public class EventUtils {
 		XyAssert.xyAssert(model != null);
 		assert model != null;
 		
-		XID objectId = atomicEvent.getTarget().getObject();
+		XId objectId = atomicEvent.getTarget().getObject();
 		if(objectId != null) {
 			// => its a field or object event
 			XRevWritableObject object = model.getObject(objectId);
@@ -188,7 +188,7 @@ public class EventUtils {
 					object = SimpleObject.shallowCopy(object);
 					model.addObject(object);
 				}
-				XID fieldId = atomicEvent.getTarget().getField();
+				XId fieldId = atomicEvent.getTarget().getField();
 				if(fieldId != null) {
 					// => its a field event
 					XRevWritableField field = object.getField(fieldId);
@@ -537,11 +537,11 @@ public class EventUtils {
 			XyAssert.xyAssert(model.getRevisionNumber() >= 0, model.getRevisionNumber());
 			model.setRevisionNumber(MODEL_DOES_NOT_EXIST);
 			// clear model
-			List<XID> ids = new LinkedList<XID>();
-			for(XID id : model) {
+			List<XId> ids = new LinkedList<XId>();
+			for(XId id : model) {
 				ids.add(id);
 			}
-			for(XID id : ids) {
+			for(XId id : ids) {
 				model.removeObject(id);
 			}
 			break;
@@ -576,11 +576,11 @@ public class EventUtils {
 		case REMOVE: {
 			XyAssert.xyAssert(model.getRevisionNumber() >= 0, model.getRevisionNumber());
 			// clear model
-			List<XID> ids = new LinkedList<XID>();
-			for(XID id : model) {
+			List<XId> ids = new LinkedList<XId>();
+			for(XId id : model) {
 				ids.add(id);
 			}
-			for(XID id : ids) {
+			for(XId id : ids) {
 				model.removeObject(id);
 			}
 			break;

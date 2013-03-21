@@ -2,7 +2,7 @@ package org.xydra.base.change.impl.memory;
 
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
-import org.xydra.base.XID;
+import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XEvent;
@@ -26,10 +26,10 @@ public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {
 	 * Creates a new {@link XModelEvent} of the add-type (an {@link XObject} was
 	 * added to the {@link XModel} this event refers to)
 	 * 
-	 * @param actor The {@link XID} of the actor
+	 * @param actor The {@link XId} of the actor
 	 * @param target The {@link XAddress} of the {@link XModel} this event
-	 *            refers to - model {@link XID} must not be null
-	 * @param objectId The {@link XID} of the added {@link XObject} - must not
+	 *            refers to - model {@link XId} must not be null
+	 * @param objectId The {@link XId} of the added {@link XObject} - must not
 	 *            be null
 	 * @param modelRevision the revision number of the {@link XModel} this event
 	 *            refers to
@@ -41,7 +41,7 @@ public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {
 	 *             given revision number equals
 	 *             {@link XEvent#RevisionOfEntityNotSet}
 	 */
-	public static XModelEvent createAddEvent(XID actor, XAddress target, XID objectId,
+	public static XModelEvent createAddEvent(XId actor, XAddress target, XId objectId,
 	        long modelRevision, boolean inTransaction) {
 		return new MemoryModelEvent(actor, target, objectId, ChangeType.ADD, modelRevision,
 		        RevisionOfEntityNotSet, inTransaction, false);
@@ -58,10 +58,10 @@ public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {
 	 * Creates a new {@link XModelEvent} of the remove-type (an {@link XObject}
 	 * was removed from the {@link XModel} this event refers to)
 	 * 
-	 * @param actor The {@link XID} of the actor
+	 * @param actor The {@link XId} of the actor
 	 * @param target The {@link XAddress} of the {@link XModel} this event
-	 *            refers to - model {@link XID} must not be null
-	 * @param objectId The {@link XID} of the removed {@link XObject}
+	 *            refers to - model {@link XId} must not be null
+	 * @param objectId The {@link XId} of the removed {@link XObject}
 	 * @param modelRevision the revision number of the {@link XModel} this event
 	 *            refers to
 	 * @param objectRevision the revision number of the {@link XObject} which
@@ -76,7 +76,7 @@ public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {
 	 *             the given revision numbers equals
 	 *             {@link XEvent#RevisionOfEntityNotSet}
 	 */
-	public static XModelEvent createRemoveEvent(XID actor, XAddress target, XID objectId,
+	public static XModelEvent createRemoveEvent(XId actor, XAddress target, XId objectId,
 	        long modelRevision, long objectRevision, boolean inTransaction, boolean implied) {
 		if(objectRevision < 0 && objectRevision != XEvent.RevisionNotAvailable) {
 			throw new IllegalArgumentException(
@@ -90,11 +90,11 @@ public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {
 	// the revision numbers before the event happened
 	private long modelRevision, objectRevision;
 	
-	// The XID of the object that was created/deleted
-	private XID objectId;
+	// The XId of the object that was created/deleted
+	private XId objectId;
 	
 	// private constructor, use the createEvent for instantiating MemModelEvents
-	private MemoryModelEvent(XID actor, XAddress target, XID objectId, ChangeType changeType,
+	private MemoryModelEvent(XId actor, XAddress target, XId objectId, ChangeType changeType,
 	        long modelRevision, long objectRevision, boolean inTransaction, boolean implied) {
 		super(target, changeType, actor, inTransaction, implied);
 		
@@ -158,7 +158,7 @@ public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {
 	}
 	
 	@Override
-	public XID getObjectId() {
+	public XId getObjectId() {
 		return this.objectId;
 	}
 	
