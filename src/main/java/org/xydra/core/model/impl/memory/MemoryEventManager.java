@@ -684,35 +684,10 @@ public class MemoryEventManager implements Serializable {
 		XyAssert.xyAssert(this.changeLog.getCurrentRevisionNumber() == revision);
 	}
 	
-	public void disabledEnqueueLocalChangeSyncedEvent(MemoryModel model, XEvent event) {
-		if(event instanceof XAtomicEvent) {
-			MemoryRepository repo = model.getFather();
-			if(model.removed) {
-				@SuppressWarnings("unused")
-				boolean aua = true;
-			}
-			MemoryObject object = event.getTarget().getObject() == null ? null : model
-			        .getObject(event.getTarget().getObject());
-			MemoryField field = object == null || event.getTarget().getField() == null ? null
-			        : object.getField(event.getTarget().getField());
-			EventQueueEntry entry = new EventQueueEntry(repo, model, object, field, event);
-			this.potentialSyncEventQueue.add(entry);
-		}
-		
-		/*
-		 * unpack and enqueue enclosed XAtomicEvents, the XTransactionEvent
-		 * itself is not enqueued.
-		 */
-		else if(event instanceof XTransactionEvent) {
-			XTransactionEvent txEvent = (XTransactionEvent)event;
-			for(XAtomicEvent atomicEvent : txEvent) {
-				disabledEnqueueLocalChangeSyncedEvent(model, atomicEvent);
-			}
-		} else {
-			throw new AssertionError("unknown event type queued: " + event);
-		}
-	}
-	
+	/**
+	 * Propagates the {@link XEvent XEvents} as SyncEvents in the
+	 * potentialSyncEventQueue {@link EventQueueEntry EventQueueEntries}.
+	 */
 	public void sendSyncEvents() {
 		
 		while(!this.potentialSyncEventQueue.isEmpty()) {
