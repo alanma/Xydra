@@ -35,10 +35,12 @@ public class PackageChaos {
     private static final Logger log = LoggerFactory.getLogger(PackageChaos.class);
     private Architecture arch;
     private File resultFile;
+    private Project project;
     
     public PackageChaos(Architecture arch, File result) {
         this.arch = arch;
         this.resultFile = result;
+        this.project = new Project();
     }
     
     public void analyse(String path) throws IOException {
@@ -50,38 +52,37 @@ public class PackageChaos {
         assert f.exists();
         assert f.isDirectory();
         
-        Project project = new Project();
-        
-        scanDir(f, project);
+        scanDir(f, this.project);
         
         // for(Package p : this.allPackages.values()) {
         // System.out.println("Indexed " + p.getName());
         // }
-        log.info("Index has " + project.packageCount() + " packages");
+        log.info("Index has " + this.project.packageCount() + " packages");
         
         Graph g = new Graph("main");
         g.setLabelRenderer(new ILabelRenderer() {
             
             @Override
             public String render(String s) {
-                String p;
-                if(s.startsWith("org.xydra")) {
-                    p = s.substring("org.xydra.".length());
-                } else {
-                    p = s;
+                String p = s;
+                for(String scope : PackageChaos.this.arch.getScopes()) {
+                    if(s.startsWith(scope)) {
+                        p = s.substring((scope + ".").length());
+                        break;
+                    }
                 }
                 return "<" + p.replace(".", ".\n") + ">";
             }
         });
         
         // pre-process
-        project.addLinksToChildren();
+        this.project.addLinksToChildPackages();
         
         System.out.println("--- Packages ---");
-        project.dump();
+        this.project.dump();
         
         // --- Graph ---
-        project.addPackagesAsSubgraphs(g, project, new IDependencyFilter() {
+        this.project.addPackagesAsSubgraphs(g, this.project, new IDependencyFilter() {
             
             @Override
             public boolean shouldBeShown(Package a, Package b) {
@@ -179,6 +180,10 @@ public class PackageChaos {
         assert result.endsWith(";");
         result = result.substring(0, result.length() - 1);
         return result;
+    }
+    
+    public void setShowCauses(boolean b) {
+        this.project.showCauses = b;
     }
     
 }

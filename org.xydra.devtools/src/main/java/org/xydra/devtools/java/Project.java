@@ -23,6 +23,8 @@ public class Project {
     
     private Map<Package,Graph> graphs = new HashMap<Package,Graph>();
     
+    public boolean showCauses;
+    
     @NeverNull
     public static String getParentPackageName(String packageName) {
         int i = packageName.lastIndexOf('.');
@@ -62,7 +64,7 @@ public class Project {
         }
     }
     
-    private static void addDependenciesAsEdge(Package p, Map<Package,Graph> graphs,
+    private void addDependenciesAsEdge(Package p, Map<Package,Graph> graphs,
             IDependencyFilter filter) {
         for(Dependency d : p.getDependesOn()) {
             assert d != null;
@@ -80,7 +82,10 @@ public class Project {
                 
                 Graph target = graphs.get(dP);
                 assert target != null;
-                target.addEdge(p.getName(), dP.getName(), 1, toLabel(d.getCauses()));
+                target.addEdge(p.getName(), dP.getName(), 1,
+                        this.showCauses ? toLabel(d.getCauses()) : null
+                
+                );
                 
                 //
                 // Graph target = graphs.get(d);
@@ -173,7 +178,7 @@ public class Project {
         log.info(hiddenEdges + " edges hidden");
     }
     
-    public void addLinksToChildren() {
+    public void addLinksToChildPackages() {
         Set<String> completePackageNames = new HashSet<String>();
         completePackageNames.add("");
         for(Package p : this.allPackages.values()) {

@@ -165,4 +165,21 @@ public class Architecture {
         // return true;
     }
     
+    public String[] getScopes() {
+        return this.scopes;
+    }
+    
+    /**
+     * All sub-packages are considered to be part of the layer and dependencied
+     * within the layer are ignored.
+     * 
+     * @param packageNamePrefix
+     * @return the layer
+     */
+    public Layer defineLayer(String packageNamePrefix) {
+        Layer layer = new Layer(packageNamePrefix, false, false);
+        Architecture.this.layers.add(layer);
+        return layer;
+    }
+    
 }
