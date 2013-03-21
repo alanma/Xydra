@@ -44,7 +44,7 @@ public class SerializedValue {
     private static final String XBINARY_ELEMENT = "xbinary";
     private static final String XDOUBLE_ELEMENT = "xdouble";
     private static final String XDOUBLELIST_ELEMENT = "xdoubleList";
-    private static final String XId_ELEMENT = "xid";
+    private static final String XID_ELEMENT = "xid";
     private static final String XIdLIST_ELEMENT = "xidList";
     private static final String XIdSET_ELEMENT = "xidSet";
     private static final String XIdSORTEDSET_ELEMENT = "xidSortedSet";
@@ -73,7 +73,7 @@ public class SerializedValue {
         
         List<XId> list = new ArrayList<XId>();
         
-        Iterator<Object> entryIterator = element.getValues(NAME_DATA, XId_ELEMENT);
+        Iterator<Object> entryIterator = element.getValues(NAME_DATA, XID_ELEMENT);
         while(entryIterator.hasNext()) {
             Object value = entryIterator.next();
             list.add(SerializingUtils.toId(value));
@@ -164,7 +164,7 @@ public class SerializedValue {
             return null;
         }
         
-        SerializingUtils.checkElementType(element, XId_ELEMENT);
+        SerializingUtils.checkElementType(element, XID_ELEMENT);
         
         String data = getStringContent(element);
         
@@ -226,7 +226,7 @@ public class SerializedValue {
             return XV.toValue(SerializingUtils.toLong(element.getContent(NAME_DATA)));
         } else if(elementName.equals(XSTRING_ELEMENT)) {
             return XV.toValue(SerializingUtils.toString(element.getContent(NAME_DATA)));
-        } else if(elementName.equals(XId_ELEMENT)) {
+        } else if(elementName.equals(XID_ELEMENT)) {
             return toId(element);
         } else if(elementName.equals(XADDRESS_ELEMENT)) {
             return toAddress(element);
@@ -283,7 +283,7 @@ public class SerializedValue {
             if(singleElements.isEmpty()) {
                 singleElements.put(ValueType.String, XSTRING_ELEMENT);
                 singleElements.put(ValueType.Address, XADDRESS_ELEMENT);
-                singleElements.put(ValueType.Id, XId_ELEMENT);
+                singleElements.put(ValueType.Id, XID_ELEMENT);
                 singleElements.put(ValueType.Integer, XINTEGER_ELEMENT);
                 singleElements.put(ValueType.Long, XLONG_ELEMENT);
                 singleElements.put(ValueType.Double, XDOUBLE_ELEMENT);
@@ -381,7 +381,7 @@ public class SerializedValue {
     }
     
     protected static void setIdListContents(Iterable<XId> list, XydraOut xo) {
-        xo.values(NAME_DATA, XId_ELEMENT, list);
+        xo.values(NAME_DATA, XID_ELEMENT, list);
     }
     
 }

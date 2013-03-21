@@ -1,6 +1,8 @@
 package org.xydra.core.serialize;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
@@ -8,6 +10,7 @@ import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.XX;
+import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableModel;
@@ -25,11 +28,13 @@ import org.xydra.base.value.XValue;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XChangeLogState;
 import org.xydra.core.model.XField;
+import org.xydra.core.model.XLocalChange;
 import org.xydra.core.model.XLoggedModel;
 import org.xydra.core.model.XLoggedObject;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
+import org.xydra.core.model.XSynchronizesChanges;
 import org.xydra.core.model.impl.memory.MemoryChangeLogState;
 import org.xydra.core.model.impl.memory.MemoryField;
 import org.xydra.core.model.impl.memory.MemoryModel;
@@ -54,15 +59,19 @@ import org.xydra.store.AccessException;
 public class SerializedModel {
 	
 	private static final String LOG_NAME = "log";
+	private static final String LOCALCHANGES_NAME = "localchanges";
 	private static final String NAME_EVENTS = "events";
+	private static final String NAME_COMMANDS = "commands";
 	private static final String NAME_VALUE = "value";
 	private static final String NAME_OBJECTS = "objects";
 	private static final String NAME_FIELDS = "fields";
 	private static final String NAME_MODELS = "models";
 	public static final long NO_REVISION = -1;
 	private static final String REVISION_ATTRIBUTE = "revision";
+	private static final String SYNC_REVISION_ATTRIBUTE = "syncRevision";
 	private static final String STARTREVISION_ATTRIBUTE = "startRevision";
 	private static final String XCHANGELOG_ELEMENT = "xlog";
+	private static final String XLOCALCHANGES_ELEMENT = "xlocalchanges";
 	private static final String XFIELD_ELEMENT = "xfield";
 	
 	private static final String XMODEL_ELEMENT = "xmodel";
@@ -81,12 +90,35 @@ public class SerializedModel {
 		return SerializingUtils.toLong(revisionString);
 	}
 	
+	public static long getSyncRevisionAttribute(XydraElement element) {
+		
+		Object revisionString = element.getAttribute(SYNC_REVISION_ATTRIBUTE);
+		
+		if(revisionString == null) {
+			return NO_REVISION;
+		}
+		
+		return SerializingUtils.toLong(revisionString);
+	}
+	
 	public static XChangeLogState loadChangeLogState(XydraElement element, XAddress baseAddr) {
 		XydraElement logElement = element.getChild(LOG_NAME, XCHANGELOG_ELEMENT);
 		if(logElement != null) {
 			XChangeLogState log = new MemoryChangeLogState(baseAddr);
 			loadChangeLogState(logElement, log);
 			return log;
+		}
+		return null;
+	}
+	
+	public static List<XCommand> loadLocalChangesAsCommands(XydraElement element, XAddress baseAddr) {
+		XydraElement localChangesElement = element.getChild(LOCALCHANGES_NAME,
+		        XLOCALCHANGES_ELEMENT);
+		if(localChangesElement != null) {
+			List<XCommand> localChangesAsCommands = new ArrayList<XCommand>();
+			
+			loadLocalChangesAsCommands(localChangesElement, localChangesAsCommands, baseAddr);
+			return localChangesAsCommands;
 		}
 		return null;
 	}
@@ -116,6 +148,33 @@ public class SerializedModel {
 			XydraElement e = eventElementIt.next();
 			XEvent event = SerializedEvent.toEvent(e, state.getBaseAddress());
 			state.appendEvent(event);
+		}
+		
+	}
+	
+	/**
+	 * Load the local changes represented by the given XML/JSON element into a
+	 * list of {@link XCommand}.
+	 * 
+	 * @param element
+	 * 
+	 * @param localChangesAsCommands The localChangesAsCommands list to load
+	 *            into.
+	 * @param context The {@link XId XIds} of the repository, model, object and
+	 *            field to fill in if not specified in the XML/JSON. If the
+	 *            given element represents a transaction, the context for the
+	 *            contained commands will be given by the transaction.
+	 */
+	public static void loadLocalChangesAsCommands(XydraElement element,
+	        List<XCommand> localChangesAsCommands, XAddress context) {
+		
+		SerializingUtils.checkElementType(element, XLOCALCHANGES_ELEMENT);
+		
+		Iterator<XydraElement> commandElementIt = element.getChildrenByName(NAME_COMMANDS);
+		while(commandElementIt.hasNext()) {
+			XydraElement e = commandElementIt.next();
+			XCommand command = SerializedCommand.toCommand(e, context);
+			localChangesAsCommands.add(command);
 		}
 		
 	}
@@ -254,7 +313,7 @@ public class SerializedModel {
 		XydraElement objects = element.getChild(NAME_OBJECTS);
 		
 		Iterator<Pair<String,XydraElement>> objectElementIt = objects.getEntriesByType(
-		        SerializingUtils.XId_ATTRIBUTE, XOBJECT_ELEMENT);
+		        SerializingUtils.XID_ATTRIBUTE, XOBJECT_ELEMENT);
 		while(objectElementIt.hasNext()) {
 			Pair<String,XydraElement> objectElement = objectElementIt.next();
 			XId objectId = XX.toId(objectElement.getFirst());
@@ -340,7 +399,7 @@ public class SerializedModel {
 		XydraElement fields = element.getChild(NAME_FIELDS);
 		
 		Iterator<Pair<String,XydraElement>> fieldElementIt = fields.getEntriesByType(
-		        SerializingUtils.XId_ATTRIBUTE, XFIELD_ELEMENT);
+		        SerializingUtils.XID_ATTRIBUTE, XFIELD_ELEMENT);
 		while(fieldElementIt.hasNext()) {
 			Pair<String,XydraElement> fieldElement = fieldElementIt.next();
 			XId fieldId = XX.toId(fieldElement.getFirst());
@@ -388,7 +447,7 @@ public class SerializedModel {
 		XydraElement models = element.getChild(NAME_MODELS);
 		
 		Iterator<Pair<String,XydraElement>> modelElementIt = models.getEntriesByType(
-		        SerializingUtils.XId_ATTRIBUTE, XMODEL_ELEMENT);
+		        SerializingUtils.XID_ATTRIBUTE, XMODEL_ELEMENT);
 		while(modelElementIt.hasNext()) {
 			Pair<String,XydraElement> modelElement = modelElementIt.next();
 			XId modelId = XX.toId(modelElement.getFirst());
@@ -400,6 +459,34 @@ public class SerializedModel {
 		}
 		
 		return repositoryState;
+	}
+	
+	/**
+	 * Encode the given array of {@link XLocalChange} as an XML/JSON element.
+	 * 
+	 * @param localChanges an array of {@link XLocalChange}
+	 * @param out the {@link XydraOut} that a partial XML/JSON document is
+	 *            written to.
+	 */
+	private static void serialize(XLocalChange[] localChanges, XydraOut out, XAddress context) {
+		
+		List<XCommand> commandList = new ArrayList<XCommand>();
+		Iterator<XCommand> commands;
+		for(XLocalChange localChange : localChanges) {
+			commandList.add(localChange.getCommand());
+		}
+		
+		commands = commandList.iterator();
+		out.open(XLOCALCHANGES_ELEMENT);
+		
+		out.child(NAME_COMMANDS);
+		out.beginArray();
+		while(commands.hasNext()) {
+			SerializedCommand.serialize(commands.next(), out, context);
+		}
+		out.endArray();
+		
+		out.close(XLOCALCHANGES_ELEMENT);
 	}
 	
 	/**
@@ -471,7 +558,7 @@ public class SerializedModel {
 		
 		out.open(XFIELD_ELEMENT);
 		if(saveId) {
-			out.attribute(SerializingUtils.XId_ATTRIBUTE, xfield.getId());
+			out.attribute(SerializingUtils.XID_ATTRIBUTE, xfield.getId());
 		}
 		if(saveRevision) {
 			out.attribute(REVISION_ATTRIBUTE, rev);
@@ -521,6 +608,12 @@ public class SerializedModel {
 	
 	public static void serialize(XReadableModel xmodel, XydraOut out, boolean saveRevision,
 	        boolean ignoreInaccessible, boolean saveChangeLog, boolean saveId) {
+		serialize(xmodel, out, saveRevision, ignoreInaccessible, saveChangeLog, saveId, false);
+	}
+	
+	public static void serialize(XReadableModel xmodel, XydraOut out, boolean saveRevision,
+	        boolean ignoreInaccessible, boolean saveChangeLog, boolean saveId,
+	        boolean saveAsSynchronizesChanges) {
 		
 		if(!saveRevision && saveChangeLog) {
 			throw new IllegalArgumentException("cannot save change log without saving revisions");
@@ -532,14 +625,20 @@ public class SerializedModel {
 		
 		out.open(XMODEL_ELEMENT);
 		if(saveId) {
-			out.attribute(SerializingUtils.XId_ATTRIBUTE, xmodel.getId());
+			out.attribute(SerializingUtils.XID_ATTRIBUTE, xmodel.getId());
 		}
 		if(saveRevision) {
 			out.attribute(REVISION_ATTRIBUTE, rev);
 		}
 		
+		if(saveAsSynchronizesChanges) {
+			assert (xmodel instanceof XSynchronizesChanges);
+			out.attribute(SYNC_REVISION_ATTRIBUTE,
+			        ((XSynchronizesChanges)xmodel).getSynchronizedRevision());
+		}
+		
 		out.child(NAME_OBJECTS);
-		out.beginMap(SerializingUtils.XId_ATTRIBUTE, XOBJECT_ELEMENT);
+		out.beginMap(SerializingUtils.XID_ATTRIBUTE, XOBJECT_ELEMENT);
 		for(XId objectId : xmodel) {
 			out.entry(objectId.toString());
 			try {
@@ -552,6 +651,17 @@ public class SerializedModel {
 			}
 		}
 		out.endMap();
+		
+		if(saveAsSynchronizesChanges && xmodel instanceof XSynchronizesChanges) {
+			XSynchronizesChanges synchronizesChanges = (XSynchronizesChanges)xmodel;
+			
+			XLocalChange[] localChanges = synchronizesChanges.getLocalChanges();
+			if(localChanges.length > 0) {
+				out.child(LOCALCHANGES_NAME);
+				out.setChildType(XLOCALCHANGES_ELEMENT);
+				serialize(localChanges, out, synchronizesChanges.getAddress());
+			}
+		}
 		
 		if(saveChangeLog && xmodel instanceof XLoggedModel) {
 			XChangeLog log = ((XLoggedModel)xmodel).getChangeLog();
@@ -613,14 +723,14 @@ public class SerializedModel {
 		
 		out.open(XOBJECT_ELEMENT);
 		if(saveId) {
-			out.attribute(SerializingUtils.XId_ATTRIBUTE, xobject.getId());
+			out.attribute(SerializingUtils.XID_ATTRIBUTE, xobject.getId());
 		}
 		if(saveRevision) {
 			out.attribute(REVISION_ATTRIBUTE, rev);
 		}
 		
 		out.child(NAME_FIELDS);
-		out.beginMap(SerializingUtils.XId_ATTRIBUTE, XFIELD_ELEMENT);
+		out.beginMap(SerializingUtils.XID_ATTRIBUTE, XFIELD_ELEMENT);
 		for(XId fieldId : xobject) {
 			out.entry(fieldId.toString());
 			try {
@@ -679,10 +789,10 @@ public class SerializedModel {
 	        boolean saveRevision, boolean ignoreInaccessible, boolean saveChangeLog) {
 		
 		out.open(XREPOSITORY_ELEMENT);
-		out.attribute(SerializingUtils.XId_ATTRIBUTE, xrepository.getId());
+		out.attribute(SerializingUtils.XID_ATTRIBUTE, xrepository.getId());
 		
 		out.child(NAME_MODELS);
-		out.beginMap(SerializingUtils.XId_ATTRIBUTE, XMODEL_ELEMENT);
+		out.beginMap(SerializingUtils.XID_ATTRIBUTE, XMODEL_ELEMENT);
 		for(XId modelId : xrepository) {
 			out.entry(modelId.toString());
 			try {

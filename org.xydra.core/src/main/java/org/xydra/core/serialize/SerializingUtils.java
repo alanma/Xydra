@@ -28,7 +28,7 @@ class SerializingUtils {
 	protected static final String OBJECTID_ATTRIBUTE = "objectId";
 	protected static final String REPOSITORYID_ATTRIBUTE = "repositoryId";
 	protected static final String TYPE_ATTRIBUTE = "type";
-	protected static final String XId_ATTRIBUTE = "xid";
+	protected static final String XID_ATTRIBUTE = "xid";
 	
 	protected static void checkElementType(@NeverNull XydraElement element, String expectedName) {
 		if(element == null || !element.getType().equals(expectedName)) {
@@ -63,7 +63,7 @@ class SerializingUtils {
 	}
 	
 	protected static XId getRequiredXidAttribute(XydraElement element) {
-		return XX.toId(toString(getRequiredAttribute(element, XId_ATTRIBUTE)));
+		return XX.toId(toString(getRequiredAttribute(element, XID_ATTRIBUTE)));
 	}
 	
 	@SuppressWarnings("null")
