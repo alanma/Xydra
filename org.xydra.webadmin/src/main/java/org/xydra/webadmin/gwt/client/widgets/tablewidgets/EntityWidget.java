@@ -6,7 +6,6 @@ import org.xydra.base.rmof.XWritableObject;
 import org.xydra.core.change.SessionCachedModel;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.sharedutils.XyAssert;
 import org.xydra.webadmin.gwt.client.Controller;
 import org.xydra.webadmin.gwt.client.XyAdmin;
 import org.xydra.webadmin.gwt.client.resources.BundledRes;
@@ -125,7 +124,7 @@ public class EntityWidget extends Composite {
 			this.idPanel.addStyleName("objectIDLabel");
 			break;
 		default:
-			XyAssert.xyAssert(false);
+			// nothing
 		}
 		
 		this.idLabel.setText(entityId.toString());

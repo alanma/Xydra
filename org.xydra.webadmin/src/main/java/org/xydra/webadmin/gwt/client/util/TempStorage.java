@@ -4,11 +4,13 @@ import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.XX;
+import org.xydra.base.rmof.XWritableObject;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.Controller;
 import org.xydra.webadmin.gwt.client.Observable;
 import org.xydra.webadmin.gwt.client.datamodels.DataModel;
+import org.xydra.webadmin.gwt.client.widgets.dialogs.WarningDialog;
 import org.xydra.webadmin.gwt.client.widgets.selectiontree.RepoBranchWidget;
 
 import com.google.gwt.user.client.DOM;
@@ -97,34 +99,36 @@ public class TempStorage {
 		DOM.setStyleAttribute(RootPanel.getBodyElement(), "cursor", "default");
 	}
 	
-	public void proceed(XType xType) {
-		if(this.desiredAddress != null) {
-			
-			switch(xType) {
-			case XMODEL:
-				expandAndLoadModel();
-				break;
-			case XOBJECT:
-				// expandAndLoadModel();
+	public void proceed() {
+		
+		XWritableObject xObject = Controller.getInstance().getDataModel()
+		        .getRepo(this.desiredAddress.getRepository())
+		        .getModel(this.desiredAddress.getModel())
+		        .getObject(this.desiredAddress.getObject());
+		if(this.desiredAddress.getObject() != null) {
+			if(xObject == null) {
+				new WarningDialog("" + this.desiredAddress.toString() + " does not exist!");
+				
+			} else {
 				Controller.getInstance().notifyTableController(this.desiredAddress,
 				        TableController.Status.Opened);
-				break;
-			case XFIELD:
-				break;
-			default:
-				break;
-			
 			}
 		}
-		if(xType.equals(this.desiredAddress.getAddressedType())) {
-			this.desiredAddress = null;
+		if(this.desiredAddress.getField() != null) {
+			if(xObject.getField(this.desiredAddress.getField()) == null) {
+				new WarningDialog("" + this.desiredAddress.toString() + " does not exist!");
+			}
+			Controller.getInstance().getTableController().scrollToField(this.desiredAddress);
 		}
+		
+		this.desiredAddress = null;
+		
 	}
 	
-	private void expandAndLoadModel() {
-		// Controller.getInstance().getSelectionTree().expandEntity(this.desiredAddress);
-		Controller.getInstance().loadCurrentModelsObjects();
-	}
+	// private void expandAndLoadModel() {
+	// Controller.getInstance().getSelectionTree().expandEntity(this.desiredAddress);
+	// // Controller.getInstance().loadCurrentModelsObjects();
+	// }
 	
 	public void register(XAddress address) {
 		this.desiredAddress = address;

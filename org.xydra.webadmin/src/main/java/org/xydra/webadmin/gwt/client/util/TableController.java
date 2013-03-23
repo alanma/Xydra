@@ -20,6 +20,7 @@ import org.xydra.webadmin.gwt.client.widgets.tablewidgets.ColumnHeaderWidget;
 import org.xydra.webadmin.gwt.client.widgets.tablewidgets.EmptyFieldWidget;
 import org.xydra.webadmin.gwt.client.widgets.tablewidgets.FieldWidget;
 import org.xydra.webadmin.gwt.client.widgets.tablewidgets.RowHeaderWidget;
+import org.xydra.webadmin.gwt.client.widgets.tablewidgets.TableFieldWidget;
 
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
@@ -50,7 +51,7 @@ public class TableController {
 	List<XId> columnIDs = new ArrayList<XId>();
 	List<XId> rowList = new ArrayList<XId>();
 	HashMap<XId,Status> objectStatus = new HashMap<XId,TableController.Status>();
-	
+	HashMap<XAddress,TableFieldWidget> scrollableFields = new HashMap<XAddress,TableFieldWidget>();
 	private int rowCount = 0;
 	
 	private VerticalPanel tablePanel;
@@ -68,29 +69,26 @@ public class TableController {
 	
 	public VerticalPanel createTable(SessionCachedModel model) {
 		
-		for(XId objectID : model) {
-			boolean isPresent = model.isKnownObject(objectID);
-			Status objectsStatus = Status.NotPresent;
-			if(isPresent) {
-				objectsStatus = Status.Present;
+		setObjectStatuses(model);
+		
+		int maxColumnsWithRowHeader = buildColumnHeaders(model);
+		
+		setTableContent(model, maxColumnsWithRowHeader);
+		
+		Window.addResizeHandler(new ResizeHandler() {
+			
+			@Override
+			public void onResize(ResizeEvent event) {
+				setScrollTableHeight();
 			}
-			this.objectStatus.put(objectID, objectsStatus);
-			this.rowCount++;
-		}
+			
+		});
 		
-		prepareColumnHeaders(model);
-		
+		return this.tablePanel;
+	}
+	
+	private void setTableContent(SessionCachedModel model, int maxColumnsWithRowHeader) {
 		int rowCountWithHeader = this.rowCount;
-		this.amountColumns = this.columnIDs.size() + 5;
-		int maxColumnsWithRowHeader = this.amountColumns + 1;
-		
-		this.tableHeader = new Grid(1, maxColumnsWithRowHeader);
-		ColumnHeaderWidget idWidget = new ColumnHeaderWidget(XX.toId("ID"));
-		idWidget.setStyleName("fieldIDWidget rowHeaderWidth");
-		this.tableHeader.setWidget(0, 0, idWidget);
-		this.tableHeader.setStyleName("compactTable");
-		this.tableHeader.getRowFormatter().setStyleName(0, "oddRow");
-		
 		this.table = new Grid(rowCountWithHeader, maxColumnsWithRowHeader);
 		this.table.setStyleName("compactTable");
 		
@@ -102,12 +100,6 @@ public class TableController {
 		this.tablePanel = new VerticalPanel();
 		this.tablePanel.add(this.tableHeader);
 		this.tablePanel.add(this.scrollPanel);
-		
-		int count = 1;
-		for(XId columnsID : this.columnIDs) {
-			this.tableHeader.setWidget(0, count, new ColumnHeaderWidget(columnsID));
-			count++;
-		}
 		
 		for(XId objectID : model) {
 			
@@ -125,20 +117,9 @@ public class TableController {
 		for(int i = 0; i < this.amountColumns; i++) {
 			cellFormatter.setHorizontalAlignment(0, i, HasHorizontalAlignment.ALIGN_CENTER);
 		}
-		
-		Window.addResizeHandler(new ResizeHandler() {
-			
-			@Override
-			public void onResize(ResizeEvent event) {
-				setScrollTableHeight();
-			}
-			
-		});
-		
-		return this.tablePanel;
 	}
 	
-	private void prepareColumnHeaders(SessionCachedModel model) {
+	private int buildColumnHeaders(SessionCachedModel model) {
 		for(XId objectId : model) {
 			XWritableObject object = model.getObject(objectId);
 			for(XId xid : object) {
@@ -149,9 +130,39 @@ public class TableController {
 			Collections.sort(this.columnIDs, XidComparator.INSTANCE);
 		}
 		
+		this.amountColumns = this.columnIDs.size();
+		int maxColumnsWithRowHeader = this.amountColumns + 1;
+		
+		this.tableHeader = new Grid(1, maxColumnsWithRowHeader);
+		ColumnHeaderWidget idWidget = new ColumnHeaderWidget(XX.toId("ID"));
+		idWidget.setStyleName("fieldIDWidget rowHeaderWidth");
+		this.tableHeader.setWidget(0, 0, idWidget);
+		this.tableHeader.setStyleName("compactTable");
+		this.tableHeader.getRowFormatter().setStyleName(0, "oddRow");
+		
+		int count = 1;
+		for(XId columnsID : this.columnIDs) {
+			this.tableHeader.setWidget(0, count, new ColumnHeaderWidget(columnsID));
+			count++;
+		}
+		
+		return maxColumnsWithRowHeader;
+	}
+	
+	private void setObjectStatuses(SessionCachedModel model) {
+		for(XId objectID : model) {
+			boolean isPresent = model.isKnownObject(objectID);
+			Status objectsStatus = Status.NotPresent;
+			if(isPresent) {
+				objectsStatus = Status.Present;
+			}
+			this.objectStatus.put(objectID, objectsStatus);
+			this.rowCount++;
+		}
 	}
 	
 	public void notifyTable(XAddress eventLocation, Status status) {
+		
 		XId objectId = eventLocation.getObject();
 		if(status.equals(Status.Deleted)) {
 			removeRow(objectId);
@@ -199,8 +210,8 @@ public class TableController {
 	private void insertRow(XId id, SessionCachedModel model) {
 		
 		CellFormatter formatter = this.table.getCellFormatter();
-		int position = this.rowList.indexOf(id);
-		String styleName = this.backgroundStyles[position % 2];
+		int rowPosition = this.rowList.indexOf(id);
+		String backGroundStyle = this.backgroundStyles[rowPosition % 2];
 		
 		XReadableObject currentObject = model.getObject(id);
 		
@@ -208,14 +219,17 @@ public class TableController {
 			Widget widget = null;
 			
 			if(j == 0) {
+				// if we have to insert a row header, insert the appropriate
+				// widget
 				
 				widget = new RowHeaderWidget(currentObject.getAddress(), this.objectStatus.get(id));
 			} else {
-				// log.info("status of object " + id.toString() + ": " +
-				// this.objectStatus.get(id));
+				
 				if(this.objectStatus.get(id).equals(Status.Opened)) {
+					// if this object is opened by the user
 					int currentColumnIndex = j - 1;
 					if(currentColumnIndex > this.columnIDs.size() - 1) {
+						// we have no column for this widget
 						continue;
 					}
 					XId currentColumn = this.columnIDs.get(currentColumnIndex);
@@ -226,22 +240,27 @@ public class TableController {
 					if(currentObject.hasField(currentColumn)) {
 						
 						XReadableField field = currentObject.getField(currentColumn);
-						widget = new FieldWidget(field);
-						formatter.setVerticalAlignment(position, j, HasVerticalAlignment.ALIGN_TOP);
+						FieldWidget widget2 = new FieldWidget(field);
+						formatter.setVerticalAlignment(rowPosition, j,
+						        HasVerticalAlignment.ALIGN_TOP);
+						
+						this.scrollableFields.put(field.getAddress(), widget2);
+						
+						widget = widget2;
 					} else {
 						widget = new EmptyFieldWidget(currentFieldAddress);
 					}
 					
-					this.table.getRowFormatter().setStyleName(position, styleName);
+					this.table.getRowFormatter().setStyleName(rowPosition, backGroundStyle);
 				} else {
-					this.table.getRowFormatter().removeStyleName(position, styleName);
+					this.table.getRowFormatter().removeStyleName(rowPosition, backGroundStyle);
 				}
 			}
 			
-			this.table.setWidget(position, j, widget);
+			this.table.setWidget(rowPosition, j, widget);
 		}
 		
-		this.table.getCellFormatter().setStyleName(position, 0, styleName);
+		this.table.getCellFormatter().setStyleName(rowPosition, 0, backGroundStyle);
 		
 	}
 	
@@ -253,5 +272,9 @@ public class TableController {
 	
 	public void expandObject(XAddress desiredAddress) {
 		this.notifyTable(desiredAddress, Status.Opened);
+	}
+	
+	public void scrollToField(XAddress fieldAddress) {
+		this.scrollableFields.get(fieldAddress).scrollToMe();
 	}
 }

@@ -303,3 +303,17 @@
 	
 	text-decoration: line-through;
 }
+
+.highlightStyle
+{
+
+	-webkit-transition: opacity 0.5s ease-in;
+    
+	opacity: 1 !important;
+	
+	
+
+	}
+	
+	.fadeOut{
+	opacity: 0;}

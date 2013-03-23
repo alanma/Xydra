@@ -105,7 +105,6 @@ public class Controller {
 						}
 						Controller.this.notifySelectionTree(address);
 					}
-					Controller.this.getTempStorage().proceed(XType.XMODEL);
 				}
 				
 				@Override
@@ -185,18 +184,23 @@ public class Controller {
 	}
 	
 	public void loadCurrentModelsObjects() {
+		loadModelsObjects(this.lastClickedElement);
+	}
+	
+	public void loadModelsObjects(final XAddress address) {
 		TempStorage.showWaitCursor();
-		this.service.getModelSnapshot(this.lastClickedElement.getRepository(),
-		        this.lastClickedElement.getModel(), new AsyncCallback<XReadableModel>() {
+		this.lastClickedElement = address;
+		this.service.getModelSnapshot(address.getRepository(), address.getModel(),
+		        new AsyncCallback<XReadableModel>() {
 			        
 			        @Override
 			        public void onSuccess(XReadableModel result) {
 				        if(result == null) {
 					        @SuppressWarnings("unused")
-					        WarningDialog d = new WarningDialog("model is deleted!");
+					        WarningDialog d = new WarningDialog("model doesn't exist!");
 					        Controller.getInstance().getDataModel()
-					                .getRepo(Controller.this.lastClickedElement.getRepository())
-					                .addDeletedModel(Controller.this.lastClickedElement.getModel());
+					                .getRepo(address.getRepository())
+					                .addDeletedModel(address.getModel());
 				        } else {
 					        if(result.isEmpty()) {
 						        log.error("no objects found!");
@@ -204,17 +208,15 @@ public class Controller {
 						        dialog.show();
 					        } else {
 						        
-						        Controller.this.dataModel
-						                .getRepo(Controller.this.lastClickedElement.getRepository())
+						        Controller.this.dataModel.getRepo(address.getRepository())
 						                .getModel(result.getId()).indexModel(result);
 						        updateEditorPanel();
-						        Controller.this
-						                .notifySelectionTree(Controller.this.lastClickedElement);
+						        Controller.this.notifySelectionTree(address);
 					        }
 				        }
-				        Controller.this.notifySelectionTree(Controller.this.lastClickedElement);
+				        Controller.this.notifySelectionTree(address);
 				        TempStorage.showDefaultCursor();
-				        Controller.this.tempStorage.proceed(XType.XOBJECT);
+				        Controller.this.tempStorage.proceed();
 			        }
 			        
 			        @Override
@@ -430,5 +432,9 @@ public class Controller {
 	public SelectionTree getSelectionTree() {
 		
 		return this.selectionTree;
+	}
+	
+	public TableController getTableController() {
+		return this.tableController;
 	}
 }

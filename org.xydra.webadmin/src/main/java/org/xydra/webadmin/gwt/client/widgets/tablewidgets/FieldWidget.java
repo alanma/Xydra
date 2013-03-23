@@ -7,12 +7,15 @@ import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.XyAdmin;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -24,7 +27,7 @@ import com.google.gwt.user.client.ui.Widget;
  * @author Andi
  * 
  */
-public class FieldWidget extends Composite {
+public class FieldWidget extends Composite implements TableFieldWidget {
 	
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(XyAdmin.class);
@@ -65,5 +68,32 @@ public class FieldWidget extends Composite {
 				
 			}
 		}, MouseOutEvent.getType());
+	}
+	
+	@Override
+	public void scrollToMe() {
+		log.info("works! : absoluteTop: " + this.getAbsoluteTop() + ", absoluteLeft: "
+		        + this.getAbsoluteLeft());
+		Document.get().setScrollLeft(this.getAbsoluteLeft() - (Window.getClientWidth() / 2 - 50));
+		this.addStyleName("fadeOut");
+		
+		Timer timer1 = new Timer() {
+			public void run() {
+				FieldWidget.this.addStyleName("highlightStyle");
+				// FieldWidget.this.removeStyleName("highlightStyle");
+			}
+		};
+		
+		timer1.schedule(500);
+		
+		Timer timer2 = new Timer() {
+			public void run() {
+				FieldWidget.this.removeStyleName("highlightStyle");
+				FieldWidget.this.removeStyleName("fadeOut");
+			}
+		};
+		
+		timer2.schedule(3000);
+		
 	}
 }

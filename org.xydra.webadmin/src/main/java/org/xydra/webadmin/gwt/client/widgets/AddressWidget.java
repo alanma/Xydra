@@ -2,6 +2,7 @@ package org.xydra.webadmin.gwt.client.widgets;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
+import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.gwt.editor.value.XAddressEditor;
 import org.xydra.log.Logger;
@@ -63,6 +64,24 @@ public class AddressWidget extends Composite {
 	@UiHandler("loadLocationButton")
 	void onClickLoad(ClickEvent e) {
 		// showNYIDialog();
+		XAddress address = getAddress();
+		openAddress(address);
+		
+	}
+	
+	private void openAddress(XAddress address) {
+		@SuppressWarnings("null")
+		XId repoID = address.getRepository();
+		XAddress repoAddress = XX.resolveRepository(repoID);
+		loadRepository(repoAddress);
+		
+		if(address.getModel() != null) {
+			loadModel(address);
+			Controller.getInstance().getTempStorage().register(address);
+		}
+	}
+	
+	private XAddress getAddress() {
 		XAddress address = null;
 		try {
 			address = this.addressEditor.getValue();
@@ -70,20 +89,11 @@ public class AddressWidget extends Composite {
 		} catch(Exception ex) {
 			showDialog(ex.getLocalizedMessage());
 		}
-		@SuppressWarnings("null")
-		XId repoID = address.getRepository();
-		XAddress repoAddress = XX.resolveRepository(repoID);
-		loadRepository(repoAddress);
-		
-		if(address.getModel() != null) {
-			load(address);
-		}
-		
+		return address;
 	}
 	
-	private void load(XAddress address) {
-		loadRepository(address);
-		Controller.getInstance().getTempStorage().register(address);
+	private static void loadModel(XAddress address) {
+		Controller.getInstance().loadModelsObjects(address);
 		
 	}
 	
@@ -98,7 +108,32 @@ public class AddressWidget extends Composite {
 	
 	@UiHandler("addElementButton")
 	void onClickAdd(ClickEvent e) {
-		showDialog("not yet Implemented");
+		XAddress enteredAddress = getAddress();
+		XAddress rootAddress = null;
+		XId value = null;
+		XType type = enteredAddress.getAddressedType();
+		switch(type) {
+		case XFIELD:
+			break;
+		case XMODEL:
+			rootAddress = XX.toAddress(enteredAddress.getRepository(), null, null, null);
+			value = enteredAddress.getModel();
+			break;
+		case XOBJECT:
+			rootAddress = XX.toAddress(enteredAddress.getRepository(), enteredAddress.getModel(),
+			        null, null);
+			value = enteredAddress.getObject();
+			openAddress(rootAddress);
+			break;
+		case XREPOSITORY:
+			rootAddress = XX.toAddress("/noRepo");
+			value = enteredAddress.getRepository();
+			break;
+		default:
+			break;
+		}
+		Controller.getInstance().getTempStorage().setInformation(rootAddress, value.toString());
+		
 	}
 	
 	@UiHandler("deleteElementButton")

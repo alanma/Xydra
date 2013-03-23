@@ -42,7 +42,7 @@ public class ModelBranchWidget extends Composite {
 	}
 	
 	private void buildComponents(XAddress address) {
-		this.entityWidget = new EntityWidget(address, new ClickHandler() {
+		this.entityWidget = new EntityWidget(this.address, new ClickHandler() {
 			
 			@Override
 			public void onClick(ClickEvent event) {
