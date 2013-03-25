@@ -444,4 +444,8 @@ public class Jetty {
         return System.currentTimeMillis() - this.startTime;
     }
     
+    public boolean isRunning() {
+        return this.server.isRunning();
+    }
+    
 }
