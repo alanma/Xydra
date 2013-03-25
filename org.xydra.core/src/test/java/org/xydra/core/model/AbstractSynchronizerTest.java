@@ -14,14 +14,12 @@ import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.base.change.XAtomicCommand;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
-import org.xydra.base.change.XObjectCommand;
 import org.xydra.base.change.XRepositoryCommand;
 import org.xydra.base.change.XTransaction;
 import org.xydra.base.change.impl.memory.MemoryModelCommand;
@@ -29,6 +27,7 @@ import org.xydra.base.change.impl.memory.MemoryObjectCommand;
 import org.xydra.base.change.impl.memory.MemoryRepositoryCommand;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
+import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
 import org.xydra.core.ChangeRecorder;
@@ -750,9 +749,12 @@ abstract public class AbstractSynchronizerTest {
 		
 	}
 	
+	/**
+	 * A test to replicate the observed client sync failures during fixCommands
+	 */
 	@Test
-	public void testSyncModelCreatedWithoutRepositoryWithSafeCommands() {
-		// FIXME this test needs to be reworked
+	public void testSyncModelCreatedWithoutRepositoryReplicateClient() {
+		
 		try {
 			
 			assertNull(loadModelSnapshot(NEWMODEL_ID));
@@ -763,24 +765,44 @@ abstract public class AbstractSynchronizerTest {
 			XModel model = new MemoryModel(actorId, passwordHash, modelAddr);
 			DemoModelUtil.setupPhonebook(model);
 			
-			XAddress johnAddr = XX.resolveObject(modelAddr, DemoModelUtil.JOHN_ID);
-			XTransactionBuilder tb = new XTransactionBuilder(model.getAddress());
+			XSynchronizer synchronizer = new XSynchronizer(model, store);
 			
-			XAddress aliasesAddr = XX.resolveField(johnAddr, DemoModelUtil.ALIASES_ID);
-			XField aliasesField = model.getObject(DemoModelUtil.JOHN_ID).getField(
-			        DemoModelUtil.ALIASES_ID);
+			XTransactionBuilder txBuilder = new XTransactionBuilder(model.getAddress());
 			
-			XAddress titleAddr = XX.resolveField(johnAddr, DemoModelUtil.TITLE_ID);
-			XField titleField = model.getObject(DemoModelUtil.JOHN_ID).getField(
-			        DemoModelUtil.TITLE_ID);
+			ChangedModel cm = new ChangedModel(model);
+			XWritableObject johnObject = cm.getObject(DemoModelUtil.JOHN_ID);
 			
-			tb.changeValue(aliasesAddr, aliasesField.getRevisionNumber(), XV.toValue("Hallo"));
-			tb.changeValue(titleAddr, titleField.getRevisionNumber(), XV.toValue("New title"));
-			model.executeCommand(tb.build());
+			johnObject.getField(DemoModelUtil.TITLE_ID).setValue(XV.toValue("A new title"));
+			
+			johnObject.getField(DemoModelUtil.ALIASES_ID).setValue(
+			        XV.toValue(new String[] { "Decoupled distributed systems", "Fries", "Bacon" }));
+			
+			txBuilder.applyChanges(cm);
+			XTransaction tx = txBuilder.build();
+			
+			model.executeCommand(tx);
+			
+			txBuilder = new XTransactionBuilder(model.getAddress());
+			
+			cm = new ChangedModel(model);
+			johnObject = cm.getObject(DemoModelUtil.JOHN_ID);
+			
+			johnObject.getField(DemoModelUtil.TITLE_ID).setValue(
+			        XV.toValue("A new title second time"));
+			
+			johnObject.getField(DemoModelUtil.ALIASES_ID)
+			        .setValue(
+			                XV.toValue(new String[] { "Highly decoupled distributed systems",
+			                        "Ham", "Eggs" }));
+			
+			txBuilder.applyChanges(cm);
+			tx = txBuilder.build();
+			
+			model.executeCommand(tx);
 			
 			XReadableModel snapshot = XCopyUtils.createSnapshot(model);
 			
-			synchronize(new XSynchronizer(model, store));
+			synchronize(synchronizer);
 			
 			assertTrue(XCompareUtils.equalTree(snapshot, model));
 			XReadableModel remoteModel = loadModelSnapshot(NEWMODEL_ID);
@@ -794,8 +816,13 @@ abstract public class AbstractSynchronizerTest {
 		
 	}
 	
+	/**
+	 * A test to replicate the observed client sync failures during fixCommands,
+	 * the difference to the previous test is that this test initially sync with
+	 * the server.
+	 */
 	@Test
-	public void testSyncModelCreatedWithoutRepositoryWithSafeCommandsSameField() {
+	public void testSyncModelCreatedWithoutRepositoryReplicateClientWithInitialSync() {
 		
 		try {
 			
@@ -807,25 +834,47 @@ abstract public class AbstractSynchronizerTest {
 			XModel model = new MemoryModel(actorId, passwordHash, modelAddr);
 			DemoModelUtil.setupPhonebook(model);
 			
-			XAddress johnAddr = XX.resolveObject(modelAddr, DemoModelUtil.JOHN_ID);
+			XSynchronizer synchronizer = new XSynchronizer(model, store);
+			// The intitial sync is the only difference to the previous test and
+			// makes this test fail. Why?
+			synchronize(synchronizer);
 			
-			XAddress aliasesAddr = XX.resolveField(johnAddr, DemoModelUtil.ALIASES_ID);
-			XField aliasesField = model.getObject(DemoModelUtil.JOHN_ID).getField(
-			        DemoModelUtil.ALIASES_ID);
-			XObjectCommand cmd1 = X.getCommandFactory().createSafeRemoveFieldCommand(aliasesAddr,
-			        aliasesField.getRevisionNumber());
-			model.executeCommand(cmd1);
+			XTransactionBuilder txBuilder = new XTransactionBuilder(model.getAddress());
 			
-			XAddress titleAddr = XX.resolveField(johnAddr, DemoModelUtil.TITLE_ID);
-			XField titleField = model.getObject(DemoModelUtil.JOHN_ID).getField(
-			        DemoModelUtil.TITLE_ID);
-			XObjectCommand cmd2 = X.getCommandFactory().createSafeRemoveFieldCommand(titleAddr,
-			        titleField.getRevisionNumber());
-			model.executeCommand(cmd2);
+			ChangedModel cm = new ChangedModel(model);
+			XWritableObject johnObject = cm.getObject(DemoModelUtil.JOHN_ID);
+			
+			johnObject.getField(DemoModelUtil.TITLE_ID).setValue(XV.toValue("A new title"));
+			
+			johnObject.getField(DemoModelUtil.ALIASES_ID).setValue(
+			        XV.toValue(new String[] { "Decoupled distributed systems", "Fries", "Bacon" }));
+			
+			txBuilder.applyChanges(cm);
+			XTransaction tx = txBuilder.build();
+			
+			model.executeCommand(tx);
+			
+			txBuilder = new XTransactionBuilder(model.getAddress());
+			
+			cm = new ChangedModel(model);
+			johnObject = cm.getObject(DemoModelUtil.JOHN_ID);
+			
+			johnObject.getField(DemoModelUtil.TITLE_ID).setValue(
+			        XV.toValue("A new title second time"));
+			
+			johnObject.getField(DemoModelUtil.ALIASES_ID)
+			        .setValue(
+			                XV.toValue(new String[] { "Highly decoupled distributed systems",
+			                        "Ham", "Eggs" }));
+			
+			txBuilder.applyChanges(cm);
+			tx = txBuilder.build();
+			
+			model.executeCommand(tx);
 			
 			XReadableModel snapshot = XCopyUtils.createSnapshot(model);
 			
-			synchronize(new XSynchronizer(model, store));
+			synchronize(synchronizer);
 			
 			assertTrue(XCompareUtils.equalTree(snapshot, model));
 			XReadableModel remoteModel = loadModelSnapshot(NEWMODEL_ID);
