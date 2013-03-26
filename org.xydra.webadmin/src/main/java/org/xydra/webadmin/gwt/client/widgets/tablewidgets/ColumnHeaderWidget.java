@@ -3,7 +3,7 @@ package org.xydra.webadmin.gwt.client.widgets.tablewidgets;
 import org.xydra.base.XId;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.webadmin.gwt.client.XyAdmin;
+import org.xydra.webadmin.gwt.client.widgets.XyAdmin;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;

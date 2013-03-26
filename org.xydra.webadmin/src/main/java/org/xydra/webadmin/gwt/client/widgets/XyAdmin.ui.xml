@@ -11,7 +11,7 @@
 
 	<g:HTMLPanel styleName="xyadmin">
 
-		<w:MainFrameWidget ui:field="mainPanel"/>
+		<w:MainFrameWidget />
 
 	</g:HTMLPanel>
 

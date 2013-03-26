@@ -4,8 +4,8 @@ import org.xydra.base.XAddress;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.Controller;
-import org.xydra.webadmin.gwt.client.XyAdmin;
 import org.xydra.webadmin.gwt.client.util.TableController.Status;
+import org.xydra.webadmin.gwt.client.widgets.XyAdmin;
 import org.xydra.webadmin.gwt.client.widgets.editorpanel.EditorPanelPresenter;
 
 import com.google.gwt.core.client.GWT;

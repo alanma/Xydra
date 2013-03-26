@@ -9,7 +9,6 @@ import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.Controller;
 import org.xydra.webadmin.gwt.client.ViewModel;
-import org.xydra.webadmin.gwt.client.XyAdmin;
 import org.xydra.webadmin.gwt.client.util.TableController;
 import org.xydra.webadmin.gwt.client.widgets.dialogs.WarningDialog;
 

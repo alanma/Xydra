@@ -2,6 +2,7 @@ package org.xydra.webadmin.gwt.client;
 
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.webadmin.gwt.client.widgets.XyAdmin;
 import org.xydra.webadmin.gwt.shared.XyAdminService;
 import org.xydra.webadmin.gwt.shared.XyAdminServiceAsync;
 

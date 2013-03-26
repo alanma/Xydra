@@ -11,6 +11,7 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.RootPanel;
 
 
+@Deprecated
 public class TempStorage {
     
     private static final Logger log = LoggerFactory.getLogger(DataModel.class);

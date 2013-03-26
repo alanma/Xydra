@@ -2,7 +2,6 @@ package org.xydra.webadmin.gwt.client.widgets;
 
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.webadmin.gwt.client.XyAdmin;
 import org.xydra.webadmin.gwt.client.widgets.editorpanel.EditorPanel;
 import org.xydra.webadmin.gwt.client.widgets.selectiontree.SelectionTree;
 

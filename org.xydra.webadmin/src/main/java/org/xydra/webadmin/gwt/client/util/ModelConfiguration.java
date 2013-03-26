@@ -1,7 +1,7 @@
 package org.xydra.webadmin.gwt.client.util;
 
 import org.xydra.base.XId;
-import org.xydra.webadmin.gwt.client.XyAdmin;
+import org.xydra.webadmin.gwt.client.widgets.XyAdmin;
 
 
 public class ModelConfiguration {
