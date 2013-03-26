@@ -5,11 +5,12 @@ import java.util.Iterator;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
-import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.Controller;
+import org.xydra.webadmin.gwt.client.ViewModel;
+import org.xydra.webadmin.gwt.client.datamodels.DataModel;
 import org.xydra.webadmin.gwt.client.widgets.dialogs.AddElementDialog;
 
 import com.google.gwt.core.client.GWT;
@@ -28,6 +29,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class RepoBranchWidget extends Composite {
 	
+	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(RepoBranchWidget.class);
 	
 	interface ViewUiBinder extends UiBinder<Widget,RepoBranchWidget> {
@@ -54,9 +56,11 @@ public class RepoBranchWidget extends Composite {
 	Button addButton;
 	private boolean expanded = false;
 	
-	public RepoBranchWidget(XAddress address) {
+	private SelectionTreePresenter presenter;
+	
+	public RepoBranchWidget(XAddress address, SelectionTreePresenter presenter) {
 		this.address = address;
-		
+		this.presenter = presenter;
 		this.buildComponents();
 	}
 	
@@ -81,29 +85,40 @@ public class RepoBranchWidget extends Composite {
 	
 	@UiHandler("expandButton")
 	void onClickExpand(ClickEvent event) {
-		if(RepoBranchWidget.this.expanded == false) {
-			RepoBranchWidget.this.expand();
-		} else {
-			RepoBranchWidget.this.contract();
-		}
+		updateViewModel();
+		Controller.getInstance().present();
 	}
 	
 	@UiHandler("fetchModelsButton")
 	void onClickFetch(ClickEvent event) {
-		System.out.println("building branches!");
-		Controller.getInstance().getIDsFromServer(RepoBranchWidget.this.address);
+		
+		fetchModelsFromServer();
+		RepoBranchWidget.this.collapse();
+		updateViewModel();
+		
+	}
+	
+	private void fetchModelsFromServer() {
+		Controller.getInstance().fetchModelIds(this.address, null);
+	}
+	
+	private void updateViewModel() {
+		if(this.expanded) {
+			ViewModel.getInstance().closeLocation(this.address);
+		} else {
+			ViewModel.getInstance().openLocation(this.address);
+		}
 	}
 	
 	@UiHandler("anchor")
 	void onClickGet(ClickEvent event) {
-		Controller.getInstance().getData(RepoBranchWidget.this.address);
+		this.expandButton.click();
 		
 	}
 	
 	@UiHandler("addButton")
 	void onClickAdd(ClickEvent event) {
 		
-		Controller.getInstance().getTempStorage().register(RepoBranchWidget.this);
 		AddElementDialog addDialog = new AddElementDialog(RepoBranchWidget.this.address,
 		        "enter Element name");
 		addDialog.show();
@@ -112,7 +127,7 @@ public class RepoBranchWidget extends Composite {
 	
 	private void setComponents() {
 		
-		Iterator<XId> iterator = Controller.getInstance().getLocallyStoredIDs(this.address);
+		Iterator<XId> iterator = DataModel.getInstance().getLocallyStoredModelIDs(this.address);
 		
 		while(iterator.hasNext()) {
 			XId modelId = iterator.next();
@@ -128,10 +143,10 @@ public class RepoBranchWidget extends Composite {
 			        "border-bottom: 1px solid #009; margin-bottom: 5px");
 		}
 		XAddress address = buildChildAddress(modelId);
-		ModelBranchWidget newBranch = new ModelBranchWidget(address);
+		ModelBranchWidget newBranch = new ModelBranchWidget(address, presenter);
 		this.branches.add(newBranch);
-		Controller.getInstance().getDataModel().getRepo(this.address.getRepository())
-		        .getModel(modelId).getRevisionNumber();
+		DataModel.getInstance().getRepo(this.address.getRepository()).getModel(modelId)
+		        .getRevisionNumber();
 		
 		this.existingBranches.put(modelId, newBranch);
 	}
@@ -152,53 +167,35 @@ public class RepoBranchWidget extends Composite {
 		return address;
 	}
 	
-	// // @Override
-	// public void notifyMe(XAddress address, Iterator<XID> iterator) {
-	// XID childID = address.getModel();
-	// System.out.println("my address: " + this.address + ", other address: " +
-	// address);
-	// if(this.address.equals(address)) {
-	// System.out.println("i contain the other address");
-	// this.setComponents(iterator);
-	// } else {
-	// BranchWidget branch = this.existingBranches.get(childID);
-	// branch.notifyMe(address, iterator);
-	// }
-	// }
-	
 	public void addElement(String id) {
 		this.addBranch(XX.toId(id));
 	}
 	
-	public void notifyMe(XAddress address) {
-		
-		if(address.getAddressedType().equals(XType.XREPOSITORY)) {
-			this.contract();
-			this.expand();
-		} else {
-			ModelBranchWidget modelBranch = this.existingBranches.get(address.getModel());
-			modelBranch.notifyMe(address);
-		}
-		
-		this.contract();
-		this.expand();
-		
-	}
+	// public void notifyMe(XAddress address) {
+	//
+	// if(address.getAddressedType().equals(XType.XREPOSITORY)) {
+	// this.collapse();
+	// this.expand();
+	// } else {
+	// ModelBranchWidget modelBranch =
+	// this.existingBranches.get(address.getModel());
+	// modelBranch.notifyMe(address);
+	// }
+	//
+	// this.collapse();
+	// this.expand();
+	//
+	// }
 	
 	private void expand() {
 		RepoBranchWidget.this.existingBranches = new HashMap<XId,ModelBranchWidget>();
-		System.out
-		        .println("request for " + RepoBranchWidget.this.address.toString() + " received!");
-		RepoBranchWidget.this.expandButton.setText("-");
-		
 		this.setComponents();
-		
-		// this.expandButton.setFocus(focused)
+		RepoBranchWidget.this.expandButton.setText("-");
 		this.expanded = true;
 		
 	}
 	
-	private void contract() {
+	private void collapse() {
 		RepoBranchWidget.this.branches.clear();
 		RepoBranchWidget.this.existingBranches = null;
 		RepoBranchWidget.this.expandButton.setText("+");
@@ -210,4 +207,18 @@ public class RepoBranchWidget extends Composite {
 		this.fetchModelsButton.click();
 		this.existingBranches.get(address2.getModel()).open(address2);
 	}
+	
+	public void assertExpanded() {
+		this.collapse();
+		this.expand();
+		
+	}
+	
+	public void assertCollapsed() {
+		if(!this.expanded) {
+			// nothing
+		} else
+			this.collapse();
+	}
+	
 }

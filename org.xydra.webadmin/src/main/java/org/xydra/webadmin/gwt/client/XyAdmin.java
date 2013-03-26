@@ -3,6 +3,7 @@ package org.xydra.webadmin.gwt.client;
 import org.xydra.base.XX;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.webadmin.gwt.client.datamodels.DataModel;
 import org.xydra.webadmin.gwt.client.widgets.MainFrameWidget;
 import org.xydra.webadmin.gwt.shared.XyAdminServiceAsync;
 
@@ -33,8 +34,8 @@ public class XyAdmin extends Composite {
 		this.service = service;
 		
 		Controller.getInstance().addService(service);
-		Controller.getInstance().addRepo(XX.toId("repo1"));
-		Controller.getInstance().addRepo(XX.toId("gae-repo"));
+		DataModel.getInstance().addRepoID(XX.toId("repo1"));
+		DataModel.getInstance().addRepoID(XX.toId("gae-repo"));
 		
 		initWidget(uiBinder.createAndBindUi(this));
 	}

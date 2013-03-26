@@ -52,8 +52,8 @@ import org.xydra.gwt.editor.value.XValueEditor;
 import org.xydra.gwt.editor.value.XValueEditor.EditListener;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.webadmin.gwt.client.Controller;
 import org.xydra.webadmin.gwt.client.XyAdmin;
+import org.xydra.webadmin.gwt.client.datamodels.DataModel;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -126,7 +126,7 @@ public class AddEditorDialog extends DialogBox {
 					eventualAddress = XX.resolveField(address, newFieldID);
 				}
 				XValue value = AddEditorDialog.this.valueEditor.getValue();
-				Controller.getInstance().getDataModel().addField(eventualAddress, value);
+				DataModel.getInstance().addField(eventualAddress, value);
 				AddEditorDialog.this.removeFromParent();
 			}
 		};

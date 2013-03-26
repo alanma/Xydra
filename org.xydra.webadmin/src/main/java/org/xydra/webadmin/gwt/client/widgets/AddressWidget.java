@@ -8,7 +8,9 @@ import org.xydra.gwt.editor.value.XAddressEditor;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.Controller;
+import org.xydra.webadmin.gwt.client.ViewModel;
 import org.xydra.webadmin.gwt.client.XyAdmin;
+import org.xydra.webadmin.gwt.client.util.TableController;
 import org.xydra.webadmin.gwt.client.widgets.dialogs.WarningDialog;
 
 import com.google.gwt.core.client.GWT;
@@ -23,6 +25,14 @@ import com.google.gwt.user.client.ui.Widget;
 
 
 public class AddressWidget extends Composite {
+	
+	public interface CompoundActionCallback {
+		
+		void presentModelAndContinue();
+		
+		void presentObjects();
+		
+	}
 	
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(XyAdmin.class);
@@ -69,16 +79,36 @@ public class AddressWidget extends Composite {
 		
 	}
 	
-	private void openAddress(XAddress address) {
+	private void openAddress(final XAddress address) {
 		@SuppressWarnings("null")
 		XId repoID = address.getRepository();
 		XAddress repoAddress = XX.resolveRepository(repoID);
-		loadRepository(repoAddress);
-		
-		if(address.getModel() != null) {
-			loadModel(address);
-			Controller.getInstance().getTempStorage().register(address);
-		}
+		// loadRepository(repoAddress);
+		//
+		// if(address.getModel() != null) {
+		// loadModel(address);
+		// Controller.getInstance().getTempStorage().register(address);
+		// }
+		ViewModel.getInstance().openLocation(address);
+		Controller.getInstance().fetchModelIds(repoAddress, new CompoundActionCallback() {
+			
+			XAddress desiredAddress = address;
+			
+			@Override
+			public void presentModelAndContinue() {
+				Controller.getInstance().presentModel(address);
+				Controller.getInstance().loadCurrentModelsObjects(this);
+			}
+			
+			@Override
+			public void presentObjects() {
+				Controller.getInstance().notifyTableController(address,
+				        TableController.Status.Opened);
+				Controller.getInstance().notifyTableController(address,
+				        TableController.Status.Opened);
+				Controller.getInstance().getTableController().scrollToField(address);
+			}
+		});
 	}
 	
 	private XAddress getAddress() {
@@ -93,12 +123,12 @@ public class AddressWidget extends Composite {
 	}
 	
 	private static void loadModel(XAddress address) {
-		Controller.getInstance().loadModelsObjects(address);
+		Controller.getInstance().loadModelsObjects(address, null);
 		
 	}
 	
 	private static void loadRepository(XAddress repoAddress) {
-		Controller.getInstance().getIDsFromServer(repoAddress);
+		
 	}
 	
 	@UiHandler("clearButton")
@@ -132,7 +162,8 @@ public class AddressWidget extends Composite {
 		default:
 			break;
 		}
-		Controller.getInstance().getTempStorage().setInformation(rootAddress, value.toString());
+		Controller.getInstance().getTempStorage()
+		        .processInputFromDialog(rootAddress, value.toString());
 		
 	}
 	

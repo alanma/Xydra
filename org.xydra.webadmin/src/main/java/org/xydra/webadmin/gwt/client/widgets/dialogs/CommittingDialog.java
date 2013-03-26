@@ -11,7 +11,6 @@ import org.xydra.base.change.XRepositoryCommand;
 import org.xydra.base.change.XTransaction;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableObject;
-import org.xydra.core.change.SessionCachedModel;
 import org.xydra.core.model.delta.DeltaUtils;
 import org.xydra.core.model.delta.DeltaUtils.IFieldDiff;
 import org.xydra.core.model.delta.DeltaUtils.IObjectDiff;
@@ -22,6 +21,7 @@ import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.Controller;
 import org.xydra.webadmin.gwt.client.Observable;
 import org.xydra.webadmin.gwt.client.XyAdmin;
+import org.xydra.webadmin.gwt.client.datamodels.DataModel;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -30,7 +30,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -67,8 +66,7 @@ public class CommittingDialog extends DialogBox implements Observable {
 				XAddress selectedModelAddress = Controller.getInstance().getSelectedModelAddress();
 				Controller.getInstance().getTempStorage().register(CommittingDialog.this);
 				XRepositoryCommand addModelCommand = null;
-				if(Controller.getInstance().getDataModel()
-				        .getRepo(selectedModelAddress.getRepository())
+				if(DataModel.getInstance().getRepo(selectedModelAddress.getRepository())
 				        .isAddedModel(selectedModelAddress.getModel())) {
 					addModelCommand = X.getCommandFactory().createAddModelCommand(
 					        selectedModelAddress.getRepository(), selectedModelAddress.getModel(),
@@ -77,7 +75,7 @@ public class CommittingDialog extends DialogBox implements Observable {
 				
 				XTransaction modelTransactions = null;
 				try {
-					modelTransactions = Controller.getInstance().getDataModel()
+					modelTransactions = DataModel.getInstance()
 					        .getRepo(selectedModelAddress.getRepository())
 					        .getModelChanges(null, selectedModelAddress).build();
 				} catch(Exception e) {
@@ -87,8 +85,7 @@ public class CommittingDialog extends DialogBox implements Observable {
 				
 				CommittingDialog.this.mainPanel.clear();
 				
-				Controller.getInstance().getDataModel()
-				        .getRepo(selectedModelAddress.getRepository())
+				DataModel.getInstance().getRepo(selectedModelAddress.getRepository())
 				        .setCommitted(selectedModelAddress.getModel());
 			}
 			
@@ -107,20 +104,20 @@ public class CommittingDialog extends DialogBox implements Observable {
 	
 	private void showChanges() {
 		
-		Controller controller = Controller.getInstance();
-		XAddress selectedModelAddress = controller.getSelectedModelAddress();
-		SessionCachedModel model = controller.getDataModel()
-		        .getRepo(selectedModelAddress.getRepository())
-		        .getModel(selectedModelAddress.getModel());
-		
-		this.changesPanel.add(new HTML("Changes: <br> <br>"));
-		
-		if(controller.getDataModel().getRepo(selectedModelAddress.getRepository())
-		        .isAddedModel(selectedModelAddress.getModel())) {
-			this.changesPanel.add(new HTML("---added Model "
-			        + selectedModelAddress.getModel().toString() + "---"));
-		}
-		this.changesPanel.add(new HTML(changesToString(model).toString()));
+		// DataModel dataModel = DataModel.getInstance();
+		// XAddress selectedModelAddress = controller.getSelectedModelAddress();
+		// SessionCachedModel model = controller.getDataModel()
+		// .getRepo(selectedModelAddress.getRepository())
+		// .getModel(selectedModelAddress.getModel());
+		//
+		// this.changesPanel.add(new HTML("Changes: <br> <br>"));
+		//
+		// if(controller.getDataModel().getRepo(selectedModelAddress.getRepository())
+		// .isAddedModel(selectedModelAddress.getModel())) {
+		// this.changesPanel.add(new HTML("---added Model "
+		// + selectedModelAddress.getModel().toString() + "---"));
+		// }
+		// this.changesPanel.add(new HTML(changesToString(model).toString()));
 		
 	}
 	

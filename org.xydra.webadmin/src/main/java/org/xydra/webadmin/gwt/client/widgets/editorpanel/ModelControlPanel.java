@@ -66,7 +66,7 @@ public class ModelControlPanel extends Composite {
 	
 	@UiHandler("loadAllObjectsButton")
 	void onClickFetchObjects(ClickEvent event) {
-		Controller.getInstance().loadCurrentModelsObjects();
+		Controller.getInstance().loadCurrentModelsObjects(null);
 		
 	}
 	

@@ -9,9 +9,9 @@ import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.Controller;
 import org.xydra.webadmin.gwt.client.Observable;
+import org.xydra.webadmin.gwt.client.ViewModel;
 import org.xydra.webadmin.gwt.client.datamodels.DataModel;
 import org.xydra.webadmin.gwt.client.widgets.dialogs.WarningDialog;
-import org.xydra.webadmin.gwt.client.widgets.selectiontree.RepoBranchWidget;
 
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -21,16 +21,9 @@ public class TempStorage {
 	
 	private static final Logger log = LoggerFactory.getLogger(DataModel.class);
 	
-	public RepoBranchWidget branch;
-	
 	private Observable dialog;
 	
 	private XAddress desiredAddress;
-	
-	public void register(RepoBranchWidget branch) {
-		this.branch = branch;
-		showWaitCursor();
-	}
 	
 	public void register(Observable committingDialog) {
 		this.dialog = committingDialog;
@@ -38,37 +31,35 @@ public class TempStorage {
 		
 	}
 	
-	public void setInformation(XAddress address, String text) {
+	public void processInputFromDialog(XAddress address, String text) {
 		XAddress newAddress = address;
 		XType addressedType = address.getAddressedType();
 		if(addressedType.equals(XType.XREPOSITORY)) {
 			if(address.getRepository().equals(XX.toId("noRepo"))) {
+				/* add a new Repository */
 				XId repoId = XX.toId(text);
 				newAddress = XX.toAddress(repoId, null, null, null);
-				Controller.getInstance().getDataModel().addRepoID(repoId);
+				DataModel.getInstance().addRepoID(repoId);
 			} else {
-				Controller.getInstance().getDataModel()
-				        .addModel(address.getRepository(), XX.toId(text));
+				/* add new Model */
+				DataModel.getInstance().addModel(address.getRepository(), XX.toId(text));
+				XId modelId = XX.toId(text);
+				newAddress = XX.toAddress(address.getRepository(), modelId, null, null);
 				log.info("model " + text + " added!");
 			}
 		} else if(addressedType.equals(XType.XMODEL)) {
-			Controller.getInstance().getDataModel().addObject(address, XX.toId(text));
+			DataModel.getInstance().addObject(address, XX.toId(text));
 		} else if(addressedType.equals(XType.XOBJECT)) {
 			XAddress fieldAddress = XX.resolveField(address, XX.toId(text));
-			Controller.getInstance().getDataModel().addField(fieldAddress, null);
-			// if(address.equals(Controller.getInstance().getSelectedModelAddress()))
-			// {
-			// Controller.getInstance().updateEditorPanel();
-			// }
+			DataModel.getInstance().addField(fieldAddress, null);
 		}
-		this.branch = null;
-		Controller.getInstance().notifySelectionTree(newAddress);
+		ViewModel.getInstance().openLocation(newAddress);
+		Controller.getInstance().present();
 	}
 	
 	public void remove(XAddress address) {
-		Controller.getInstance().getDataModel().removeItem(address);
+		DataModel.getInstance().removeItem(address);
 		XAddress reducedAddress = XX.toAddress(address.getRepository(), null, null, null);
-		Controller.getInstance().notifySelectionTree(reducedAddress);
 		showDefaultCursor();
 	}
 	
@@ -101,7 +92,7 @@ public class TempStorage {
 	
 	public void proceed() {
 		
-		XWritableObject xObject = Controller.getInstance().getDataModel()
+		XWritableObject xObject = DataModel.getInstance()
 		        .getRepo(this.desiredAddress.getRepository())
 		        .getModel(this.desiredAddress.getModel())
 		        .getObject(this.desiredAddress.getObject());

@@ -63,7 +63,7 @@ public class AddElementDialog extends DialogBox {
 				try {
 					value = AddElementDialog.this.textArea.getValue().toString();
 					Controller.getInstance().getTempStorage()
-					        .setInformation(AddElementDialog.this.address, value);
+					        .processInputFromDialog(AddElementDialog.this.address, value);
 					AddElementDialog.this.removeFromParent();
 				} catch(Exception e) {
 					

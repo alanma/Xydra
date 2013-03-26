@@ -25,7 +25,15 @@ public class DataModel {
 	
 	private HashMap<XId,RepoDataModel> repoModels;
 	
-	public DataModel() {
+	private static DataModel instance;
+	
+	public static DataModel getInstance() {
+		if(instance == null)
+			instance = new DataModel();
+		return instance;
+	}
+	
+	private DataModel() {
 		this.repoModels = new HashMap<XId,RepoDataModel>();
 	}
 	
@@ -35,6 +43,17 @@ public class DataModel {
 	
 	public Iterator<RepoDataModel> getRepoIDs() {
 		return this.repoModels.values().iterator();
+	}
+	
+	public Iterator<XId> getLocallyStoredModelIDs(final XAddress repoAddress) {
+		
+		final XId repoId = repoAddress.getRepository();
+		
+		Iterator<XId> iterator = null;
+		
+		iterator = this.getRepo(repoId).getModelIDs();
+		
+		return iterator;
 	}
 	
 	public RepoDataModel getRepo(XId id) {

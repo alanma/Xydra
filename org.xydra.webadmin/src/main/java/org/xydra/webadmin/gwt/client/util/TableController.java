@@ -16,6 +16,7 @@ import org.xydra.core.util.DumpUtils.XidComparator;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.Controller;
+import org.xydra.webadmin.gwt.client.datamodels.DataModel;
 import org.xydra.webadmin.gwt.client.widgets.tablewidgets.ColumnHeaderWidget;
 import org.xydra.webadmin.gwt.client.widgets.tablewidgets.EmptyFieldWidget;
 import org.xydra.webadmin.gwt.client.widgets.tablewidgets.FieldWidget;
@@ -178,7 +179,7 @@ public class TableController {
 			
 			this.objectStatus.put(objectId, status);
 			
-			SessionCachedModel model = Controller.getInstance().getDataModel()
+			SessionCachedModel model = DataModel.getInstance()
 			        .getRepo(eventLocation.getRepository()).getModel(eventLocation.getModel());
 			
 			XId fieldID = eventLocation.getField();

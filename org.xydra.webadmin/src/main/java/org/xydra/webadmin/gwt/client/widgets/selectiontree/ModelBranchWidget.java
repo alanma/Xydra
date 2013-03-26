@@ -3,7 +3,7 @@ package org.xydra.webadmin.gwt.client.widgets.selectiontree;
 import org.xydra.base.XAddress;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.webadmin.gwt.client.Controller;
+import org.xydra.webadmin.gwt.client.datamodels.DataModel;
 import org.xydra.webadmin.gwt.client.widgets.tablewidgets.EntityWidget;
 
 import com.google.gwt.core.client.GWT;
@@ -28,10 +28,12 @@ public class ModelBranchWidget extends Composite {
 	
 	@UiField(provided = true)
 	EntityWidget entityWidget;
+	private SelectionTreePresenter presenter;
 	
-	public ModelBranchWidget(XAddress address) {
+	public ModelBranchWidget(XAddress address, SelectionTreePresenter presenter) {
 		
 		this.address = address;
+		this.presenter = presenter;
 		buildComponents(address);
 		initWidget(uiBinder.createAndBindUi(this));
 		
@@ -46,17 +48,17 @@ public class ModelBranchWidget extends Composite {
 			
 			@Override
 			public void onClick(ClickEvent event) {
-				Controller.getInstance().getData(ModelBranchWidget.this.address);
+				ModelBranchWidget.this.presenter.presentModel(ModelBranchWidget.this.address);
 			}
 		});
 		
-		if(Controller.getInstance().getDataModel().getRepo(address.getRepository())
+		if(DataModel.getInstance().getRepo(address.getRepository())
 		        .isNotExisting(address.getModel())) {
 			this.entityWidget.setStatusDeleted();
 		}
-		if(!Controller.getInstance().getDataModel().getRepo(address.getRepository())
+		if(!DataModel.getInstance().getRepo(address.getRepository())
 		        .isAddedModel(address.getModel())) {
-			if(!Controller.getInstance().getDataModel().getRepo(address.getRepository())
+			if(!DataModel.getInstance().getRepo(address.getRepository())
 			        .getModel(address.getModel()).knowsAllObjects()) {
 				
 				this.entityWidget.setRevisionUnknown();

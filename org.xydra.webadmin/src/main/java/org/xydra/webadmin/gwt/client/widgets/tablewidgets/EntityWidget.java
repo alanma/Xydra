@@ -6,8 +6,8 @@ import org.xydra.base.rmof.XWritableObject;
 import org.xydra.core.change.SessionCachedModel;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.webadmin.gwt.client.Controller;
 import org.xydra.webadmin.gwt.client.XyAdmin;
+import org.xydra.webadmin.gwt.client.datamodels.DataModel;
 import org.xydra.webadmin.gwt.client.resources.BundledRes;
 import org.xydra.webadmin.gwt.client.widgets.dialogs.AddElementDialog;
 import org.xydra.webadmin.gwt.client.widgets.dialogs.RemoveElementDialog;
@@ -98,8 +98,8 @@ public class EntityWidget extends Composite {
 		
 		XId entityId = address.getModel();
 		long revisionNumber = -1000l;
-		SessionCachedModel model = Controller.getInstance().getDataModel()
-		        .getRepo(address.getRepository()).getModel(entityId);
+		SessionCachedModel model = DataModel.getInstance().getRepo(address.getRepository())
+		        .getModel(entityId);
 		
 		switch(address.getAddressedType()) {
 		case XMODEL:
