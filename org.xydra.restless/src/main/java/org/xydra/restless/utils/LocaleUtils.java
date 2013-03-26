@@ -150,10 +150,7 @@ public class LocaleUtils {
             List<LangDef> langDefs = parseAcceptLanguageHeader(acceptLanguageHeader);
             for(LangDef l : langDefs) {
                 Locale loc = new Locale(l.getLang());
-                String country = loc.getCountry();
-                if(country != null && !country.equals("")) {
-                    locales.add(loc);
-                }
+                locales.add(loc);
             }
         }
         
