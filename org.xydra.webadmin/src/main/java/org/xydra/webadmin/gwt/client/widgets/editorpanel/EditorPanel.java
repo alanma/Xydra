@@ -26,18 +26,22 @@ public class EditorPanel extends Composite {
 	@UiField
 	VerticalPanel mainPanel;
 	
+	private EditorPanelPresenter presenter;
+	
 	public EditorPanel() {
 		super();
 		initWidget(uiBinder.createAndBindUi(this));
 		Controller.getInstance().registerEditorPanel(this);
+		
+		this.presenter = new EditorPanelPresenter();
 	}
 	
 	public void notifyMe(SessionCachedModel result) {
 		log.info("editorPanel notified!");
 		this.mainPanel.clear();
 		
-		this.mainPanel.add(new ModelControlPanel());
-		this.mainPanel.add(new ModelInformationPanel(result));
+		this.mainPanel.add(new ModelControlPanel(presenter));
+		this.mainPanel.add(new ModelInformationPanel(presenter, result));
 		
 	}
 }

@@ -6,6 +6,7 @@ import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.Controller;
 import org.xydra.webadmin.gwt.client.XyAdmin;
 import org.xydra.webadmin.gwt.client.util.TableController.Status;
+import org.xydra.webadmin.gwt.client.widgets.editorpanel.EditorPanelPresenter;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -38,11 +39,11 @@ public class RowHeaderWidget extends Composite {
 	
 	private XAddress address;
 	
-	public RowHeaderWidget(XAddress address, Status status) {
+	public RowHeaderWidget(EditorPanelPresenter presenter, XAddress address, Status status) {
 		super();
 		this.address = address;
 		this.status = status;
-		this.entityWidget = new EntityWidget(address, new ClickHandler() {
+		this.entityWidget = new EntityWidget(presenter, address, new ClickHandler() {
 			
 			@Override
 			public void onClick(ClickEvent event) {

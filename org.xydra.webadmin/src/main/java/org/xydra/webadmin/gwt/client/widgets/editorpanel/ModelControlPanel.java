@@ -52,7 +52,7 @@ public class ModelControlPanel extends Composite {
 	@UiField
 	Button expandAllButton;
 	
-	public ModelControlPanel() {
+	public ModelControlPanel(EditorPanelPresenter presenter) {
 		super();
 		initWidget(uiBinder.createAndBindUi(this));
 	}

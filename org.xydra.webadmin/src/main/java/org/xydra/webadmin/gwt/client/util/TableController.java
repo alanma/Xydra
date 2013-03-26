@@ -17,6 +17,7 @@ import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.Controller;
 import org.xydra.webadmin.gwt.client.datamodels.DataModel;
+import org.xydra.webadmin.gwt.client.widgets.editorpanel.EditorPanelPresenter;
 import org.xydra.webadmin.gwt.client.widgets.tablewidgets.ColumnHeaderWidget;
 import org.xydra.webadmin.gwt.client.widgets.tablewidgets.EmptyFieldWidget;
 import org.xydra.webadmin.gwt.client.widgets.tablewidgets.FieldWidget;
@@ -64,8 +65,11 @@ public class TableController {
 	
 	private String[] backgroundStyles = { "evenRow", "oddRow" };
 	
-	public TableController() {
+	private EditorPanelPresenter presenter;
+	
+	public TableController(EditorPanelPresenter presenter) {
 		Controller.getInstance().registerTableController(this);
+		this.presenter = presenter;
 	}
 	
 	public VerticalPanel createTable(SessionCachedModel model) {
@@ -223,7 +227,8 @@ public class TableController {
 				// if we have to insert a row header, insert the appropriate
 				// widget
 				
-				widget = new RowHeaderWidget(currentObject.getAddress(), this.objectStatus.get(id));
+				widget = new RowHeaderWidget(this.presenter, currentObject.getAddress(),
+				        this.objectStatus.get(id));
 			} else {
 				
 				if(this.objectStatus.get(id).equals(Status.Opened)) {

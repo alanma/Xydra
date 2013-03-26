@@ -5,7 +5,6 @@ import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.XX;
 import org.xydra.log.Logger;
@@ -27,7 +26,6 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class SelectionTree extends Composite {
 	
-	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(XyAdmin.class);
 	
 	interface ViewUiBinder extends UiBinder<Widget,SelectionTree> {
@@ -64,7 +62,7 @@ public class SelectionTree extends Composite {
 			RepoDataModel repo = repoIDIterator.next();
 			addRepoBranch(repo, this.mainPanel.getWidgetCount());
 		}
-		AddRepoWidget addRepoWidget = new AddRepoWidget();
+		AddRepoWidget addRepoWidget = new AddRepoWidget(this.presenter);
 		this.mainPanel.add(addRepoWidget);
 		this.mainPanel.setCellHorizontalAlignment(addRepoWidget,
 		        HasHorizontalAlignment.ALIGN_CENTER);
@@ -76,23 +74,6 @@ public class SelectionTree extends Composite {
 		        null), this.presenter);
 		this.mainPanel.insert(repoBranch, position);
 		this.branches.put(repo.getId(), repoBranch);
-	}
-	
-	// public void notifyMe(XAddress address) {
-	//
-	// XId repoId = address.getRepository();
-	// RepoBranchWidget repoBranchWidget = this.branches.get(repoId);
-	// if(repoBranchWidget != null) {
-	// repoBranchWidget.notifyMe(address);
-	// } else {
-	// addRepoBranch(DataModel.getInstance().getRepo(repoId),
-	// this.mainPanel.getWidgetCount() - 1);
-	// }
-	// }
-	
-	public void expandEntity(XAddress address) {
-		RepoBranchWidget repoBranch = this.branches.get(address.getRepository());
-		repoBranch.openModel(address);
 	}
 	
 	public void build() {

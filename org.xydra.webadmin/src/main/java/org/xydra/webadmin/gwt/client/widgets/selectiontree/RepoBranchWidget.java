@@ -38,7 +38,7 @@ public class RepoBranchWidget extends Composite {
 	private static ViewUiBinder uiBinder = GWT.create(ViewUiBinder.class);
 	
 	private HashMap<XId,ModelBranchWidget> existingBranches;
-	private XAddress address;
+	XAddress address;
 	
 	@UiField
 	VerticalPanel mainPanel;
@@ -92,14 +92,10 @@ public class RepoBranchWidget extends Composite {
 	@UiHandler("fetchModelsButton")
 	void onClickFetch(ClickEvent event) {
 		
-		fetchModelsFromServer();
+		this.presenter.fetchModelsFromServer(this.address);
 		RepoBranchWidget.this.collapse();
 		updateViewModel();
 		
-	}
-	
-	private void fetchModelsFromServer() {
-		Controller.getInstance().fetchModelIds(this.address, null);
 	}
 	
 	private void updateViewModel() {
@@ -119,8 +115,8 @@ public class RepoBranchWidget extends Composite {
 	@UiHandler("addButton")
 	void onClickAdd(ClickEvent event) {
 		
-		AddElementDialog addDialog = new AddElementDialog(RepoBranchWidget.this.address,
-		        "enter Element name");
+		AddElementDialog addDialog = new AddElementDialog(this.presenter,
+		        RepoBranchWidget.this.address, "enter Element name");
 		addDialog.show();
 		addDialog.selectEverything();
 	}

@@ -7,8 +7,8 @@ import org.xydra.gwt.editor.value.XIdEditor;
 import org.xydra.gwt.editor.value.XValueEditor.EditListener;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.webadmin.gwt.client.Controller;
 import org.xydra.webadmin.gwt.client.XyAdmin;
+import org.xydra.webadmin.gwt.client.util.Presenter;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -49,7 +49,7 @@ public class AddElementDialog extends DialogBox {
 	
 	private XAddress address;
 	
-	public AddElementDialog(XAddress address, String text) {
+	public AddElementDialog(final Presenter presenter, XAddress address, String text) {
 		
 		super();
 		
@@ -62,8 +62,7 @@ public class AddElementDialog extends DialogBox {
 				String value = "";
 				try {
 					value = AddElementDialog.this.textArea.getValue().toString();
-					Controller.getInstance().getTempStorage()
-					        .processInputFromDialog(AddElementDialog.this.address, value);
+					presenter.processInput(AddElementDialog.this.address, value);
 					AddElementDialog.this.removeFromParent();
 				} catch(Exception e) {
 					

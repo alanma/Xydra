@@ -31,8 +31,11 @@ public class AddRepoWidget extends Composite {
 	@UiField
 	Button addRepoButton;
 	
-	public AddRepoWidget() {
+	private SelectionTreePresenter presenter;
+	
+	public AddRepoWidget(SelectionTreePresenter presenter) {
 		
+		this.presenter = presenter;
 		this.buildComponents();
 	}
 	
@@ -45,7 +48,7 @@ public class AddRepoWidget extends Composite {
 	@UiHandler("addRepoButton")
 	void onClickAdd(ClickEvent event) {
 		
-		AddElementDialog addDialog = new AddElementDialog(XX.toAddress("/noRepo"),
+		AddElementDialog addDialog = new AddElementDialog(this.presenter, XX.toAddress("/noRepo"),
 		        "enter Repository ID");
 		addDialog.show();
 		addDialog.selectEverything();

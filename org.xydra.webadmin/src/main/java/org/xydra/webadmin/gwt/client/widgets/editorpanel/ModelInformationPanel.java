@@ -33,10 +33,12 @@ public class ModelInformationPanel extends Composite {
 	@UiField
 	HTMLPanel tablePanel;
 	
-	public ModelInformationPanel(SessionCachedModel result) {
+	private EditorPanelPresenter presenter;
+	
+	public ModelInformationPanel(EditorPanelPresenter presenter, SessionCachedModel result) {
 		super();
 		initWidget(uiBinder.createAndBindUi(this));
-		
+		this.presenter = presenter;
 		buildComponents(result);
 		
 	}
@@ -50,7 +52,7 @@ public class ModelInformationPanel extends Composite {
 	
 	public void setTableData(SessionCachedModel model) {
 		if(!model.isEmpty()) {
-			TableController tableController = new TableController();
+			TableController tableController = new TableController(this.presenter);
 			this.tablePanel.add(tableController.createTable(model));
 			log.info("new table controller created!");
 		} else {

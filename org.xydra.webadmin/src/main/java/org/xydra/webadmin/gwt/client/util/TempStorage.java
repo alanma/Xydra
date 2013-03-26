@@ -1,15 +1,12 @@
 package org.xydra.webadmin.gwt.client.util;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XId;
-import org.xydra.base.XType;
 import org.xydra.base.XX;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.Controller;
 import org.xydra.webadmin.gwt.client.Observable;
-import org.xydra.webadmin.gwt.client.ViewModel;
 import org.xydra.webadmin.gwt.client.datamodels.DataModel;
 import org.xydra.webadmin.gwt.client.widgets.dialogs.WarningDialog;
 
@@ -29,32 +26,6 @@ public class TempStorage {
 		this.dialog = committingDialog;
 		showWaitCursor();
 		
-	}
-	
-	public void processInputFromDialog(XAddress address, String text) {
-		XAddress newAddress = address;
-		XType addressedType = address.getAddressedType();
-		if(addressedType.equals(XType.XREPOSITORY)) {
-			if(address.getRepository().equals(XX.toId("noRepo"))) {
-				/* add a new Repository */
-				XId repoId = XX.toId(text);
-				newAddress = XX.toAddress(repoId, null, null, null);
-				DataModel.getInstance().addRepoID(repoId);
-			} else {
-				/* add new Model */
-				DataModel.getInstance().addModel(address.getRepository(), XX.toId(text));
-				XId modelId = XX.toId(text);
-				newAddress = XX.toAddress(address.getRepository(), modelId, null, null);
-				log.info("model " + text + " added!");
-			}
-		} else if(addressedType.equals(XType.XMODEL)) {
-			DataModel.getInstance().addObject(address, XX.toId(text));
-		} else if(addressedType.equals(XType.XOBJECT)) {
-			XAddress fieldAddress = XX.resolveField(address, XX.toId(text));
-			DataModel.getInstance().addField(fieldAddress, null);
-		}
-		ViewModel.getInstance().openLocation(newAddress);
-		Controller.getInstance().present();
 	}
 	
 	public void remove(XAddress address) {

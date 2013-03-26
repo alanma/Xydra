@@ -162,8 +162,8 @@ public class AddressWidget extends Composite {
 		default:
 			break;
 		}
-		Controller.getInstance().getTempStorage()
-		        .processInputFromDialog(rootAddress, value.toString());
+		// Controller.getInstance().getTempStorage()
+		// .processInputFromDialog(rootAddress, value.toString());
 		
 	}
 	

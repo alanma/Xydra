@@ -3,7 +3,9 @@ package org.xydra.webadmin.gwt.client.widgets.selectiontree;
 import org.xydra.base.XAddress;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.webadmin.gwt.client.Controller;
 import org.xydra.webadmin.gwt.client.datamodels.DataModel;
+import org.xydra.webadmin.gwt.client.util.TableController;
 import org.xydra.webadmin.gwt.client.widgets.tablewidgets.EntityWidget;
 
 import com.google.gwt.core.client.GWT;
@@ -44,11 +46,13 @@ public class ModelBranchWidget extends Composite {
 	}
 	
 	private void buildComponents(XAddress address) {
-		this.entityWidget = new EntityWidget(this.address, new ClickHandler() {
+		this.entityWidget = new EntityWidget(this.presenter, this.address, new ClickHandler() {
 			
 			@Override
 			public void onClick(ClickEvent event) {
-				ModelBranchWidget.this.presenter.presentModel(ModelBranchWidget.this.address);
+				// ModelBranchWidget.this.presenter.presentModel(ModelBranchWidget.this.address);
+				Controller.getInstance().notifyTableController(ModelBranchWidget.this.address,
+				        TableController.Status.Opened);
 			}
 		});
 		

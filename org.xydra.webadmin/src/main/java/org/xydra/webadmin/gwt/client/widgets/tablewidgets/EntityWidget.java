@@ -9,6 +9,7 @@ import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.XyAdmin;
 import org.xydra.webadmin.gwt.client.datamodels.DataModel;
 import org.xydra.webadmin.gwt.client.resources.BundledRes;
+import org.xydra.webadmin.gwt.client.util.Presenter;
 import org.xydra.webadmin.gwt.client.widgets.dialogs.AddElementDialog;
 import org.xydra.webadmin.gwt.client.widgets.dialogs.RemoveElementDialog;
 import org.xydra.webadmin.gwt.client.widgets.dialogs.RemoveModelDialog;
@@ -81,9 +82,12 @@ public class EntityWidget extends Composite {
 	
 	private HandlerRegistration removeClickHandlerRegistration;
 	
-	public EntityWidget(XAddress address, ClickHandler anchorClickHandler) {
+	private Presenter presenter;
+	
+	public EntityWidget(Presenter presenter, XAddress address, ClickHandler anchorClickHandler) {
 		super();
 		
+		this.presenter = presenter;
 		this.address = address;
 		initWidget(uiBinder.createAndBindUi(this));
 		
@@ -171,7 +175,8 @@ public class EntityWidget extends Composite {
 	
 	@UiHandler("addButton")
 	void onClickAdd(ClickEvent event) {
-		AddElementDialog addDialog = new AddElementDialog(EntityWidget.this.address, this.addText);
+		AddElementDialog addDialog = new AddElementDialog(this.presenter,
+		        EntityWidget.this.address, this.addText);
 		addDialog.show();
 		addDialog.selectEverything();
 		
