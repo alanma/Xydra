@@ -27,6 +27,7 @@ import org.xydra.base.change.impl.memory.MemoryObjectCommand;
 import org.xydra.base.change.impl.memory.MemoryRepositoryCommand;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
+import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
@@ -848,6 +849,141 @@ abstract public class AbstractSynchronizerTest {
 			
 			johnObject.getField(DemoModelUtil.ALIASES_ID).setValue(
 			        XV.toValue(new String[] { "Decoupled distributed systems", "Fries", "Bacon" }));
+			
+			txBuilder.applyChanges(cm);
+			XTransaction tx = txBuilder.build();
+			
+			model.executeCommand(tx);
+			
+			txBuilder = new XTransactionBuilder(model.getAddress());
+			
+			cm = new ChangedModel(model);
+			johnObject = cm.getObject(DemoModelUtil.JOHN_ID);
+			
+			johnObject.getField(DemoModelUtil.TITLE_ID).setValue(
+			        XV.toValue("A new title second time"));
+			
+			johnObject.getField(DemoModelUtil.ALIASES_ID)
+			        .setValue(
+			                XV.toValue(new String[] { "Highly decoupled distributed systems",
+			                        "Ham", "Eggs" }));
+			
+			txBuilder.applyChanges(cm);
+			tx = txBuilder.build();
+			
+			model.executeCommand(tx);
+			
+			XReadableModel snapshot = XCopyUtils.createSnapshot(model);
+			
+			synchronize(synchronizer);
+			
+			assertTrue(XCompareUtils.equalTree(snapshot, model));
+			XReadableModel remoteModel = loadModelSnapshot(NEWMODEL_ID);
+			assertNotNull(remoteModel);
+			assertTrue(XCompareUtils.equalState(model, remoteModel));
+			checkEvents(model);
+			
+		} finally {
+			removeModel(NEWMODEL_ID);
+		}
+		
+	}
+	
+	@Test
+	public void testSyncModelCreatedWithoutRepositoryMinimalReplicateClient() {
+		
+		try {
+			removeModel(NEWMODEL_ID);
+			assertNull(loadModelSnapshot(NEWMODEL_ID));
+			
+			// create a local model
+			XAddress modelAddr = XX.resolveModel(this.repoAddr, NEWMODEL_ID);
+			// must be created with a repository ID to be synchronized
+			XModel model = new MemoryModel(actorId, passwordHash, modelAddr);
+			
+			XSynchronizer synchronizer = new XSynchronizer(model, store);
+			
+			XTransactionBuilder txBuilder = new XTransactionBuilder(model.getAddress());
+			
+			ChangedModel cm = new ChangedModel(model);
+			XWritableObject johnObject = cm.createObject(DemoModelUtil.JOHN_ID);
+			XWritableField titleField = johnObject.createField(DemoModelUtil.TITLE_ID);
+			titleField.setValue(XV.toValue("A new title"));
+			XWritableField aliasesField = johnObject.createField(DemoModelUtil.ALIASES_ID);
+			
+			aliasesField.setValue(XV.toValue(new String[] { "Decoupled distributed systems",
+			        "Fries", "Bacon" }));
+			
+			txBuilder.applyChanges(cm);
+			XTransaction tx = txBuilder.build();
+			
+			model.executeCommand(tx);
+			
+			txBuilder = new XTransactionBuilder(model.getAddress());
+			
+			cm = new ChangedModel(model);
+			johnObject = cm.getObject(DemoModelUtil.JOHN_ID);
+			
+			johnObject.getField(DemoModelUtil.TITLE_ID).setValue(
+			        XV.toValue("A new title second time"));
+			
+			johnObject.getField(DemoModelUtil.ALIASES_ID)
+			        .setValue(
+			                XV.toValue(new String[] { "Highly decoupled distributed systems",
+			                        "Ham", "Eggs" }));
+			
+			txBuilder.applyChanges(cm);
+			tx = txBuilder.build();
+			
+			model.executeCommand(tx);
+			
+			XReadableModel snapshot = XCopyUtils.createSnapshot(model);
+			
+			synchronize(synchronizer);
+			
+			assertTrue(XCompareUtils.equalTree(snapshot, model));
+			XReadableModel remoteModel = loadModelSnapshot(NEWMODEL_ID);
+			assertNotNull(remoteModel);
+			assertTrue(XCompareUtils.equalState(model, remoteModel));
+			checkEvents(model);
+			
+		} finally {
+			removeModel(NEWMODEL_ID);
+		}
+		
+	}
+	
+	/**
+	 * A minimal test to replicate the observed client sync failures during
+	 * fixCommands.
+	 */
+	@Test
+	public void testSyncModelCreatedWithoutRepositoryMinimalReplicateClientWithInitialSync() {
+		
+		try {
+			
+			assertNull(loadModelSnapshot(NEWMODEL_ID));
+			
+			// create a local model
+			XAddress modelAddr = XX.resolveModel(this.repoAddr, NEWMODEL_ID);
+			// must be created with a repository ID to be synchronized
+			XModel model = new MemoryModel(actorId, passwordHash, modelAddr);
+			
+			XSynchronizer synchronizer = new XSynchronizer(model, store);
+			// The intitial sync is the only difference to the previous test and
+			// makes this test fail. Why?
+			synchronize(synchronizer);
+			
+			XTransactionBuilder txBuilder = new XTransactionBuilder(model.getAddress());
+			
+			ChangedModel cm = new ChangedModel(model);
+			XWritableObject johnObject = cm.createObject(DemoModelUtil.JOHN_ID);
+			XWritableField titleField = johnObject.createField(DemoModelUtil.TITLE_ID);
+			titleField.setValue(XV.toValue("A new title"));
+			XWritableField aliasesField = johnObject.createField(DemoModelUtil.ALIASES_ID);
+			
+			aliasesField.setValue(XV.toValue(new String[] { "Decoupled distributed systems",
+			        "Fries", "Bacon" }));
 			
 			txBuilder.applyChanges(cm);
 			XTransaction tx = txBuilder.build();
