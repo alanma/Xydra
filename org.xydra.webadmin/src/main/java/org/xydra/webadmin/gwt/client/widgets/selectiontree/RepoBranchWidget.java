@@ -139,7 +139,7 @@ public class RepoBranchWidget extends Composite {
 			        "border-bottom: 1px solid #009; margin-bottom: 5px");
 		}
 		XAddress address = buildChildAddress(modelId);
-		ModelBranchWidget newBranch = new ModelBranchWidget(address, presenter);
+		ModelBranchWidget newBranch = new ModelBranchWidget(address, this.presenter);
 		this.branches.add(newBranch);
 		DataModel.getInstance().getRepo(this.address.getRepository()).getModel(modelId)
 		        .getRevisionNumber();

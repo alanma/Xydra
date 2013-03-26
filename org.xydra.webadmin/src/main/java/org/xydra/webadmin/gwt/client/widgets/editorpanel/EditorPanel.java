@@ -40,8 +40,8 @@ public class EditorPanel extends Composite {
 		log.info("editorPanel notified!");
 		this.mainPanel.clear();
 		
-		this.mainPanel.add(new ModelControlPanel(presenter));
-		this.mainPanel.add(new ModelInformationPanel(presenter, result));
+		this.mainPanel.add(new ModelControlPanel(this.presenter));
+		this.mainPanel.add(new ModelInformationPanel(this.presenter, result));
 		
 	}
 }

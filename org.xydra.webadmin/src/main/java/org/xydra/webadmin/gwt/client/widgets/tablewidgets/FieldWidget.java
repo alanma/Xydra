@@ -28,72 +28,71 @@ import com.google.gwt.user.client.ui.Widget;
  * 
  */
 public class FieldWidget extends Composite implements TableFieldWidget {
-	
-	@SuppressWarnings("unused")
-	private static final Logger log = LoggerFactory.getLogger(XyAdmin.class);
-	
-	interface ViewUiBinder extends UiBinder<Widget,FieldWidget> {
-	}
-	
-	private static ViewUiBinder uiBinder = GWT.create(ViewUiBinder.class);
-	
-	@UiField
-	VerticalPanel mainPanel;
-	
-	private XFieldEditor fieldEditor;
-	
-	public FieldWidget(XReadableField field) {
-		
-		super();
-		
-		initWidget(uiBinder.createAndBindUi(this));
-		
-		this.fieldEditor = new XFieldEditor(field);
-		this.mainPanel.insert(this.fieldEditor, 0);
-		this.fieldEditor.hideButtons();
-		this.addDomHandler(new MouseOverHandler() {
-			
-			@Override
-			public void onMouseOver(MouseOverEvent event) {
-				FieldWidget.this.fieldEditor.showButtons();
-				
-			}
-		}, MouseOverEvent.getType());
-		
-		this.addDomHandler(new MouseOutHandler() {
-			
-			@Override
-			public void onMouseOut(MouseOutEvent event) {
-				FieldWidget.this.fieldEditor.hideButtons();
-				
-			}
-		}, MouseOutEvent.getType());
-	}
-	
-	@Override
-	public void scrollToMe() {
-		log.info("works! : absoluteTop: " + this.getAbsoluteTop() + ", absoluteLeft: "
-		        + this.getAbsoluteLeft());
-		Document.get().setScrollLeft(this.getAbsoluteLeft() - (Window.getClientWidth() / 2 - 50));
-		this.addStyleName("fadeOut");
-		
-		Timer timer1 = new Timer() {
-			public void run() {
-				FieldWidget.this.addStyleName("highlightStyle");
-				// FieldWidget.this.removeStyleName("highlightStyle");
-			}
-		};
-		
-		timer1.schedule(500);
-		
-		Timer timer2 = new Timer() {
-			public void run() {
-				FieldWidget.this.removeStyleName("highlightStyle");
-				FieldWidget.this.removeStyleName("fadeOut");
-			}
-		};
-		
-		timer2.schedule(3000);
-		
-	}
+    
+    private static final Logger log = LoggerFactory.getLogger(XyAdmin.class);
+    
+    interface ViewUiBinder extends UiBinder<Widget,FieldWidget> {
+    }
+    
+    private static ViewUiBinder uiBinder = GWT.create(ViewUiBinder.class);
+    
+    @UiField
+    VerticalPanel mainPanel;
+    
+    private XFieldEditor fieldEditor;
+    
+    public FieldWidget(XReadableField field) {
+        
+        super();
+        
+        initWidget(uiBinder.createAndBindUi(this));
+        
+        this.fieldEditor = new XFieldEditor(field);
+        this.mainPanel.insert(this.fieldEditor, 0);
+        this.fieldEditor.hideButtons();
+        this.addDomHandler(new MouseOverHandler() {
+            
+            @Override
+            public void onMouseOver(MouseOverEvent event) {
+                FieldWidget.this.fieldEditor.showButtons();
+                
+            }
+        }, MouseOverEvent.getType());
+        
+        this.addDomHandler(new MouseOutHandler() {
+            
+            @Override
+            public void onMouseOut(MouseOutEvent event) {
+                FieldWidget.this.fieldEditor.hideButtons();
+                
+            }
+        }, MouseOutEvent.getType());
+    }
+    
+    @Override
+    public void scrollToMe() {
+        log.info("works! : absoluteTop: " + this.getAbsoluteTop() + ", absoluteLeft: "
+                + this.getAbsoluteLeft());
+        Document.get().setScrollLeft(this.getAbsoluteLeft() - (Window.getClientWidth() / 2 - 50));
+        this.addStyleName("fadeOut");
+        
+        Timer timer1 = new Timer() {
+            public void run() {
+                FieldWidget.this.addStyleName("highlightStyle");
+                // FieldWidget.this.removeStyleName("highlightStyle");
+            }
+        };
+        
+        timer1.schedule(500);
+        
+        Timer timer2 = new Timer() {
+            public void run() {
+                FieldWidget.this.removeStyleName("highlightStyle");
+                FieldWidget.this.removeStyleName("fadeOut");
+            }
+        };
+        
+        timer2.schedule(3000);
+        
+    }
 }

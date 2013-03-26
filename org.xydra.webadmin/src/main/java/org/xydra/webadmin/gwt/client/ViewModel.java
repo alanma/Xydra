@@ -31,7 +31,7 @@ public class ViewModel {
 	public void openLocation(XAddress entityAddress) {
 		this.entityTree.add(entityAddress);
 		
-		log.info(entityTree.toString());
+		log.info(this.entityTree.toString());
 	}
 	
 	public void closeLocation(XAddress entityAddress) {
