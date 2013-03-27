@@ -40,7 +40,7 @@ import org.xydra.oo.testgen.alltypes.client.GwtFactory;
 
 
 /**
- * Generated on Thu Mar 07 22:05:11 CET 2013 by SpecWriter, a part of
+ * Generated on Wed Mar 27 15:34:50 CET 2013 by SpecWriter, a part of
  * xydra.org:oo
  */
 public class GwtHasAllType extends GwtXydraMapped implements

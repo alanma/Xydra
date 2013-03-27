@@ -27,9 +27,12 @@ public class TestGwtGenerator {
     public void generateGwtClasses() throws IOException, ClassNotFoundException {
         
         // setup
+        
+        // optional: adding extended types
         JavaTypeMapping.addSingleTypeMapping(MyLongBasedType.class, ValueType.Long,
                 MyLongBasedType.MAPPER);
         
+        // required setup
         PackageSpec ps = new PackageSpec(IHasAllType.class.getPackage().getName(), false);
         
         ClassSpec c = GwtCodeGenerator.constructClassSpec(ps,
