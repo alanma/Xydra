@@ -1,12 +1,5 @@
 package org.xydra.mvnxy;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.xydra.log.Logger;
@@ -14,7 +7,9 @@ import org.xydra.log.LoggerFactory;
 
 
 /**
- * Copy compiled GWT javascript to the webapp folder so that it gets deployed
+ * A Maven Mojo.
+ * 
+ * Copy compiled GWT javascript to the webapp folder so that it gets deployed.
  * 
  * @goal copygwt
  */
@@ -61,7 +56,7 @@ public class CopyGwt extends AbstractMojo {
             return;
         }
         for(String moduleName : this.gwtModuleNames) {
-            copyCompiledGwtModule(this.warPath, moduleName);
+            GwtBuildHelper.copyCompiledGwtModule(this.warPath, moduleName);
         }
     }
     
@@ -80,94 +75,6 @@ public class CopyGwt extends AbstractMojo {
                 "    </gwtModuleNames>\n" + // .
                 "  </configuration>\n" + // .
                 "</plugin>\n"); // .
-    }
-    
-    /**
-     * Copy from target dir to src, so that local Jetty works
-     * 
-     * @param warPath e.g. './target/myname-0.1.2-SNAPSHOT'
-     * @param moduleName e.g. 'mygwtmodule'
-     */
-    public static void copyCompiledGwtModule(String warPath, String moduleName) {
-        File targetGwt = new File(warPath + "/" + moduleName);
-        if(!targetGwt.exists()) {
-            log.error("GWT data not found in " + targetGwt.getAbsolutePath()
-                    + ". Some AJAX will not work. \n Please run 'mvn gwt:compile' first"
-                    + "Or make sure your module has the correct rename-to entry.");
-            System.exit(1);
-        }
-        assert targetGwt.isDirectory();
-        File sourceWebAppGwt = new File("./src/main/webapp/" + moduleName);
-        assert sourceWebAppGwt.getParentFile().exists();
-        log.info("Copying GWT files temporarily to " + sourceWebAppGwt.getAbsolutePath());
-        FileUtils.deleteQuietly(sourceWebAppGwt);
-        sourceWebAppGwt.mkdirs();
-        try {
-            FileUtils.copyDirectory(targetGwt, sourceWebAppGwt);
-        } catch(IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-    
-    public static List<File> autoDiscoverAllGwtModulesInTarget(File targetDir) {
-        List<File> list = new ArrayList<File>();
-        
-        assert targetDir.isDirectory();
-        File[] subDirs = targetDir.listFiles(new FileFilter() {
-            
-            @Override
-            public boolean accept(File pathname) {
-                return pathname.isDirectory();
-            }
-        });
-        
-        for(File f : subDirs) {
-            if(f.getName().contains(".gen.")) {
-                log.info("Found GWT module "
-                        + f.getAbsolutePath()
-                        + "\n"
-                        + "  but ignoring it, because it looks like an auto-generated domain model, from Xydra OO");
-            }
-            list.add(f);
-        }
-        
-        return list;
-    }
-    
-    public static void copyAllGwtModulesFoundInTarget(String warPath) {
-        File targetDir = new File(warPath);
-        if(!targetDir.exists()) {
-            log.error("Target WAR dir not found as \n" + "  " + targetDir.getAbsolutePath() + "\n"
-                    + "Compile something first, e.g. call 'mvn compile'.");
-            System.exit(1);
-        }
-        List<File> subDirs = autoDiscoverAllGwtModulesInTarget(targetDir);
-        if(subDirs.isEmpty()) {
-            log.error("No subdirectories found in " + targetDir.getAbsolutePath());
-            System.exit(1);
-        }
-        assert subDirs != null;
-        for(File subDir : subDirs) {
-            if(looksLikeGwtDir(subDir)) {
-                copyCompiledGwtModule(warPath, subDir.getName());
-            }
-        }
-    }
-    
-    private static boolean looksLikeGwtDir(File subDir) {
-        File clearCache = new File(subDir, "clear.cache.gif");
-        File hosted = new File(subDir, "hosted.html");
-        return clearCache.exists() && hosted.exists();
-    }
-    
-    public static void copyFile(String srcFile, String targetFile) {
-        File src = new File(srcFile);
-        File target = new File(targetFile);
-        try {
-            FileUtils.copyFile(src, target);
-        } catch(IOException e) {
-            log.error("Could not copy from '" + srcFile + "' to '" + targetFile + "'", e);
-        }
     }
     
 }
