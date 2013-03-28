@@ -82,8 +82,8 @@ public class MemoryConfig implements IConfig {
     public String get(String key) {
         String value = tryToGet(key);
         if(value == null) {
-            throw new ConfigException("Setting '" + key
-                    + "' requested but not set and no default set either. " + idStr());
+            throw new ConfigException("Config key '" + key
+                    + "' requested but not defined - and no default defined either. " + idStr());
         }
         return value;
     }
@@ -227,7 +227,7 @@ public class MemoryConfig implements IConfig {
         if(key == null)
             throw new IllegalArgumentException("Key may not be null");
         if(!initial && this.defaults.containsKey(key))
-            throw new ConfigException("Setting '" + initial + "' had already a default value "
+            throw new ConfigException("Config key '" + initial + "' had already a default value "
                     + idStr());
         this.defaults.put(key, value);
         if(traceOrigins) {
