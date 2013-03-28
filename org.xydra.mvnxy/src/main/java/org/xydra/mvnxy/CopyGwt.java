@@ -2,6 +2,7 @@ package org.xydra.mvnxy;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.xydra.gwttools.GwtBuildHelper;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 

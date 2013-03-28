@@ -9,7 +9,6 @@
 		<version>2012.11.12</version>
 	</parent>
 
-	<groupId>org.xydra</groupId>
 	<artifactId>xydra-maven-plugin</artifactId>
 	<version>1.0-SNAPSHOT</version>
 	
@@ -30,9 +29,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-			<version>2.1</version>
+			<groupId>org.xydra</groupId>
+			<artifactId>gwttools</artifactId>
+			<version>0.1.6-SNAPSHOT</version>
 		</dependency>
 
 	</dependencies>
