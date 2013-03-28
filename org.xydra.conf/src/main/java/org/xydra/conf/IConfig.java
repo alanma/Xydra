@@ -30,7 +30,29 @@ public interface IConfig {
      * @param key
      * @param caller
      */
+    void addRequiredSetting(Enum<?> key, Class<?> caller);
+    
+    /**
+     * Allows a class to register a required key. A call to
+     * {@link #isComplete()} reveals if all such required keys have been
+     * satisfied.
+     * 
+     * @param key
+     * @param caller
+     */
     void addRequiredSetting(String key, Class<?> caller);
+    
+    /**
+     * @param key
+     * @throws ConfigException if given key is not defined
+     */
+    void assertDefined(Enum<?> key);
+    
+    /**
+     * @param key
+     * @throws ConfigException if given key is not defined
+     */
+    void assertDefined(String key);
     
     /**
      * @param key @NeverNull
@@ -71,6 +93,12 @@ public interface IConfig {
      * @param key
      * @return human-readable documentation for a key
      */
+    String getDocumentation(Enum<?> key);
+    
+    /**
+     * @param key
+     * @return human-readable documentation for a key
+     */
     String getDocumentation(String key);
     
     /**
@@ -78,6 +106,12 @@ public interface IConfig {
      *         those with only a default value
      */
     Iterable<String> getExplicitlyDefinedKeys();
+    
+    /**
+     * @return an id string that helps distinguish several config instances at
+     *         runtime from each other. Mostly to fix instantiation bugs.
+     */
+    public String getInternalId();
     
     /**
      * @param key
@@ -106,13 +140,22 @@ public interface IConfig {
     
     /**
      * @param key
-     * @return null or string array
+     * @return the defined value for a key as a string array or null, if key not
+     *         set
      */
     String[] getStringArray(String key);
     
     /**
      * @param key
-     * @return @NeverNull
+     * @return the value of this key as a Set of Strings, or an empty set, if
+     *         key not set @NeverNull
+     */
+    Set<String> getStringSet(Enum<?> key);
+    
+    /**
+     * @param key
+     * @return the value of this key as a Set of Strings, or an empty set, if
+     *         key not set @NeverNull
      */
     Set<String> getStringSet(String key);
     
@@ -121,6 +164,14 @@ public interface IConfig {
      *         {@link #addRequiredSetting(String, Class)} ) are defined
      */
     boolean isComplete();
+    
+    /**
+     * Revert a key to its default value, if defined. Undefined behaviour
+     * otherwise.
+     * 
+     * @param key
+     */
+    void revertToDefault(Enum<?> key);
     
     /**
      * Revert a key to its default value, if defined. Undefined behaviour
@@ -155,7 +206,7 @@ public interface IConfig {
      * @param b
      * @return a {@link ConfBuilder} for a fluent API style
      */
-    ConfBuilder setBoolean(String key, boolean b);
+    ConfBuilder setBoolean(Enum<?> key, boolean b);
     
     /**
      * Set the current value for a keys as a boolean
@@ -164,7 +215,21 @@ public interface IConfig {
      * @param b
      * @return a {@link ConfBuilder} for a fluent API style
      */
-    ConfBuilder setBoolean(Enum<?> key, boolean b);
+    ConfBuilder setBoolean(String key, boolean b);
+    
+    /**
+     * Set the default value for a key, which is used, if no explicit value is
+     * set.
+     * 
+     * @param key
+     * @param value
+     * @param initial is true, when you set the value initially. If another
+     *            default value was already set, you get an
+     *            {@link ConfigException}. If you set initial to false, silent
+     *            overwrite mode is active.
+     * @return a {@link ConfBuilder} for a fluent API style
+     */
+    ConfBuilder setDefault(Enum<?> key, String value, boolean initial);
     
     /**
      * Set the default value for a key, which is used, if no explicit value is
@@ -205,6 +270,15 @@ public interface IConfig {
      * @param l
      * @return a {@link ConfBuilder} for a fluent API style
      */
+    ConfBuilder setLong(Enum<?> key, long l);
+    
+    /**
+     * Set the current value for a keys as a long
+     * 
+     * @param key
+     * @param l
+     * @return a {@link ConfBuilder} for a fluent API style
+     */
     ConfBuilder setLong(String key, long l);
     
     /**
@@ -226,28 +300,12 @@ public interface IConfig {
      * @return value or null
      */
     @CanBeNull
+    String tryToGet(Enum<?> key);
+    
+    /**
+     * @param key @NeverNull
+     * @return value or null
+     */
+    @CanBeNull
     String tryToGet(String key);
-    
-    ConfBuilder setLong(Enum<?> key, long value);
-    
-    Set<String> getStringSet(Enum<?> key);
-    
-    /**
-     * @param key
-     * @throws ConfigException if given key is not defined
-     */
-    void assertDefined(String key);
-    
-    /**
-     * @param key
-     * @throws ConfigException if given key is not defined
-     */
-    void assertDefined(Enum<?> key);
-    
-    /**
-     * @return an id string that helps distinguish several config instances at
-     *         runtime from each other. Mostly to fix instantiation bugs.
-     */
-    public String getInternalId();
-    
 }

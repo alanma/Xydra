@@ -242,6 +242,13 @@ public class MemoryConfig implements IConfig {
     }
     
     @Override
+    public ConfBuilder setDefault(Enum<?> key, String value, boolean initial) {
+        if(key == null)
+            throw new IllegalArgumentException("Key may not be null");
+        return setDefault(key.name(), value, initial);
+    }
+    
+    @Override
     public IConfig setDocumentation(Enum<?> key, String documentation) {
         if(key == null)
             throw new IllegalArgumentException("Key may not be null");
@@ -307,6 +314,34 @@ public class MemoryConfig implements IConfig {
             value = this.defaults.get(key);
         }
         return value;
+    }
+    
+    @Override
+    public void addRequiredSetting(Enum<?> key, Class<?> caller) {
+        if(key == null)
+            throw new IllegalArgumentException("Key may not be null");
+        addRequiredSetting(key.name(), caller);
+    }
+    
+    @Override
+    public String getDocumentation(Enum<?> key) {
+        if(key == null)
+            throw new IllegalArgumentException("Key may not be null");
+        return getDocumentation(key.name());
+    }
+    
+    @Override
+    public void revertToDefault(Enum<?> key) {
+        if(key == null)
+            throw new IllegalArgumentException("Key may not be null");
+        revertToDefault(key.name());
+    }
+    
+    @Override
+    public String tryToGet(Enum<?> key) {
+        if(key == null)
+            throw new IllegalArgumentException("Key may not be null");
+        return tryToGet(key.name());
     }
     
 }
