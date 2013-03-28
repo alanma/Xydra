@@ -29,6 +29,8 @@ public class Delay {
     }
     
     public static void delay(String cause, int ms) {
+        if(ms == 0)
+            return;
         log.info("~~~ Artificial delay of " + ms + " ms while doing '" + cause + "'");
         try {
             Thread.sleep(ms);
