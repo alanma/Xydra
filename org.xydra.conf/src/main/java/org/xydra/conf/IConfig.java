@@ -244,4 +244,10 @@ public interface IConfig {
      */
     void assertDefined(Enum<?> key);
     
+    /**
+     * @return an id string that helps distinguish several config instances at
+     *         runtime from each other. Mostly to fix instantiation bugs.
+     */
+    public String getInternalId();
+    
 }
