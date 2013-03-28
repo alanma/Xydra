@@ -1,7 +1,16 @@
 package org.xydra.devtools.java;
 
+import java.util.Set;
+
+
 public interface IDependencyFilter {
     
-    boolean shouldBeShown(Package a, Package b);
+    /**
+     * @param a
+     * @param b
+     * @param causes i.e. fully qualified class names
+     * @return true if edge should be in graph
+     */
+    boolean shouldBeShown(Package a, Package b, Set<String> causes);
     
 }

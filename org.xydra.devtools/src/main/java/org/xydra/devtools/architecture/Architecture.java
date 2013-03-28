@@ -1,6 +1,7 @@
 package org.xydra.devtools.architecture;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 import org.xydra.devtools.java.Package;
@@ -18,7 +19,10 @@ public class Architecture {
     private static final Logger log = LoggerFactory.getLogger(Architecture.class);
     
     private Set<Layer> layers = new HashSet<Layer>();
+    
     private String[] scopes;
+    
+    private Set<Class<?>> ignoredTypes = new HashSet<Class<?>>();
     
     /**
      * @param a
@@ -132,9 +136,10 @@ public class Architecture {
     /**
      * @param a
      * @param b
+     * @param causes TODO
      * @return true iff dependency from a to b should be in the graph
      */
-    public boolean toBeShown(Package a, Package b) {
+    public boolean toBeShown(Package a, Package b, Set<String> causes) {
         
         // no self-loops
         if(a.equals(b)) {
@@ -145,6 +150,22 @@ public class Architecture {
         // exclude some libs completely
         if(!isWithinScope(a, b)) {
             log.debug("Not both in scope " + a + " and " + b);
+            return false;
+        }
+        
+        // hide explicitly excluded causes
+        assert causes != null;
+        assert causes.size() > 0;
+        Iterator<String> it = causes.iterator();
+        while(it.hasNext()) {
+            String cause = it.next();
+            for(Class<?> ignored : this.ignoredTypes) {
+                if(ignored.getCanonicalName().equals(cause))
+                    it.remove();
+            }
+        }
+        if(causes.isEmpty()) {
+            log.debug("No relevant causes to show " + a + " to " + b);
             return false;
         }
         
@@ -185,6 +206,10 @@ public class Architecture {
         Layer layer = new Layer(packageNamePrefix, false, false);
         Architecture.this.layers.add(layer);
         return layer;
+    }
+    
+    public void ignoreType(Class<?> type) {
+        this.ignoredTypes.add(type);
     }
     
 }

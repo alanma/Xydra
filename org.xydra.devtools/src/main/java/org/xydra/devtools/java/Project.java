@@ -82,7 +82,7 @@ public class Project {
         for(Dependency d : p.getDependesOn()) {
             assert d != null;
             Package dP = d.getPackage();
-            if(filter.shouldBeShown(p, dP)) {
+            if(filter.shouldBeShown(p, dP, d.getCauses())) {
                 String commonPackagePrefix = getCommonParentPackage(p.getName(), dP.getName());
                 
                 log.info("+ Adding in '" + commonPackagePrefix + "' edge " + p.getName() + " -> "
@@ -167,7 +167,7 @@ public class Project {
                 Package pB = d.getPackage();
                 log.debug(pn + " dependsOn " + pB.getName());
                 
-                if(filter.shouldBeShown(pA, pB)) {
+                if(filter.shouldBeShown(pA, pB, d.getCauses())) {
                     int weight = 1;
                     String a = pn;
                     String b = pB.getName();

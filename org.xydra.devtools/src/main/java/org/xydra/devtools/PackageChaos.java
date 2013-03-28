@@ -2,6 +2,7 @@ package org.xydra.devtools;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Set;
 
 import org.xydra.devtools.architecture.Architecture;
 import org.xydra.devtools.dot.Graph;
@@ -87,8 +88,8 @@ public class PackageChaos {
         this.project.addPackagesAsSubgraphs(g, this.project, new IDependencyFilter() {
             
             @Override
-            public boolean shouldBeShown(Package a, Package b) {
-                return PackageChaos.this.arch.toBeShown(a, b);
+            public boolean shouldBeShown(Package a, Package b, Set<String> causes) {
+                return PackageChaos.this.arch.toBeShown(a, b, causes);
             }
         });
         
