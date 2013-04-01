@@ -10,10 +10,10 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import org.xydra.annotations.RunsInGWT;
+import org.xydra.base.id.UUID;
 import org.xydra.conf.ConfBuilder;
 import org.xydra.conf.ConfigException;
 import org.xydra.conf.IConfig;
-import org.xydra.core.model.impl.memory.UUID;
 import org.xydra.index.impl.MapSetIndex;
 
 
