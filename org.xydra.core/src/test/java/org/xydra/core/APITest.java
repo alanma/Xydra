@@ -10,9 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
-import org.xydra.base.X;
+import org.xydra.base.XCompareUtils;
 import org.xydra.base.XId;
-import org.xydra.base.XX;
 import org.xydra.base.value.XBooleanValue;
 import org.xydra.base.value.XIdListValue;
 import org.xydra.base.value.XStringValue;

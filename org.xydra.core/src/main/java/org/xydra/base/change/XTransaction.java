@@ -2,10 +2,6 @@ package org.xydra.base.change;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
-import org.xydra.core.model.XField;
-import org.xydra.core.model.XModel;
-import org.xydra.core.model.XObject;
-import org.xydra.core.model.XSynchronizesChanges;
 
 
 /**
@@ -20,10 +16,11 @@ import org.xydra.core.model.XSynchronizesChanges;
  *         commands that were already executed need to be undone). The
  *         Transaction itself is not responsible that it will or can be executed
  *         in this manner. Classes that implement the
- *         {@link XSynchronizesChanges} interfaces provide an
- *         {@link XSynchronizesChanges#executeCommand(XCommand)} method that
- *         needs to be implemented in such a way that this behavior is
- *         guaranteed, if an XTransaction is passed as the argument.
+ *         {@link org.xydra.core.model.XSynchronizesChanges} interfaces provide
+ *         an
+ *         {@link org.xydra.core.model.XSynchronizesChanges#executeCommand(XCommand)}
+ *         method that needs to be implemented in such a way that this behaviour
+ *         is guaranteed, if an XTransaction is passed as the argument.
  * 
  *         The added commands will be executed in the order of the underlying
  *         list, the command with index 0 will be executed first, then the
@@ -38,11 +35,10 @@ import org.xydra.core.model.XSynchronizesChanges;
  *         Concerning revision numbers, {@link XCommand XCommands} added to the
  *         transaction need to refer to the revision number of the entity they
  *         want to change BEFORE any command in the transaction is executed. For
- *         example, suppose you want to add 2 {@link XObject XObjects} to an
- *         {@link XModel} with the current revision number 78. Then you'll need
- *         to add two commands that refer to the revision number 78 (and not in
- *         a way, that the first command refers to 78 and the second one to 79 -
- *         this is wrong).
+ *         example, suppose you want to add 2 objects to an model with the
+ *         current revision number 78. Then you'll need to add two commands that
+ *         refer to the revision number 78 (and not in a way, that the first
+ *         command refers to 78 and the second one to 79 - this is wrong).
  * 
  *         XTransaction is a subclass of {@link XCommand}, so it is possible to
  *         add a Transaction to a Transaction. Adding a Transaction to another
@@ -61,8 +57,7 @@ import org.xydra.core.model.XSynchronizesChanges;
  *         actually wraps a set of (logically linked) {@link XCommand}s.
  * 
  *         {@link XRepositoryCommand}s cannot be added to a Transaction,
- *         Transactions only operate on {@link XModel}s, {@link XObject}s and
- *         {@link XField}s.
+ *         Transactions only operate on models, objects and fields.
  * 
  *         The {@link XAddress} of a transaction is address of the model or
  *         object that contains all the objects/fields modified by the
@@ -70,22 +65,22 @@ import org.xydra.core.model.XSynchronizesChanges;
  * 
  */
 public interface XTransaction extends XCommand, Iterable<XAtomicCommand> {
-	
-	/**
-	 * @param index
-	 * @return The {@link XCommand} at the given index in this transaction.
-	 */
-	XAtomicCommand getCommand(int index);
-	
-	/**
-	 * @return the number of {@link XCommand XCommands} in this Transaction.
-	 */
-	int size();
-	
-	/**
-	 * @return always {@link ChangeType#TRANSACTION}
-	 */
-	@Override
-	ChangeType getChangeType();
-	
+    
+    /**
+     * @param index
+     * @return The {@link XCommand} at the given index in this transaction.
+     */
+    XAtomicCommand getCommand(int index);
+    
+    /**
+     * @return the number of {@link XCommand XCommands} in this Transaction.
+     */
+    int size();
+    
+    /**
+     * @return always {@link ChangeType#TRANSACTION}
+     */
+    @Override
+    ChangeType getChangeType();
+    
 }

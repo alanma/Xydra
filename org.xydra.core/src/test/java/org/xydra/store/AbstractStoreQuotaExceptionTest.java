@@ -10,16 +10,19 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import org.xydra.base.XId;
-import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XCommandFactory;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
+import org.xydra.core.XX;
 import org.xydra.index.query.Pair;
 import org.xydra.log.DefaultLoggerFactorySPI;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.persistence.GetEventsRequest;
+import org.xydra.persistence.GetWithAddressRequest;
+import org.xydra.persistence.ModelRevision;
 import org.xydra.sharedutils.XyAssert;
 
 

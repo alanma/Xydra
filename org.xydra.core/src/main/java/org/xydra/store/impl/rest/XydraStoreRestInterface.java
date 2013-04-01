@@ -1,6 +1,6 @@
 package org.xydra.store.impl.rest;
 
-import org.xydra.store.GetEventsRequest;
+import org.xydra.persistence.GetEventsRequest;
 
 
 /**

@@ -16,9 +16,9 @@ import org.xydra.base.rmof.XWritableObject;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.perf.Stats.Clock;
-import org.xydra.store.GetWithAddressRequest;
-import org.xydra.store.ModelRevision;
-import org.xydra.store.impl.delegate.XydraPersistence;
+import org.xydra.persistence.GetWithAddressRequest;
+import org.xydra.persistence.ModelRevision;
+import org.xydra.persistence.XydraPersistence;
 
 
 /**

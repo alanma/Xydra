@@ -10,12 +10,12 @@ import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XId;
-import org.xydra.core.model.impl.memory.UUID;
+import org.xydra.base.id.UUID;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.perf.StatsGatheringPersistenceWrapper;
+import org.xydra.persistence.XydraPersistence;
 import org.xydra.sharedutils.ReflectionUtils;
-import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.memory.MemoryRuntime;
 
 

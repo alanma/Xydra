@@ -1,17 +1,17 @@
 package org.xydra.store.rmof.impl.delegate;
 
-import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.value.XValue;
+import org.xydra.core.X;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.persistence.GetWithAddressRequest;
+import org.xydra.persistence.XydraPersistence;
 import org.xydra.sharedutils.XyAssert;
-import org.xydra.store.GetWithAddressRequest;
-import org.xydra.store.impl.delegate.XydraPersistence;
 
 
 public class WritableFieldOnPersistence extends AbstractWritableOnPersistence implements

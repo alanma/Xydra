@@ -19,8 +19,8 @@ import org.xydra.core.model.delta.DeltaUtils;
 import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.persistence.ModelRevision;
 import org.xydra.sharedutils.XyAssert;
-import org.xydra.store.ModelRevision;
 
 
 /**

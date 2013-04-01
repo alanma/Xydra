@@ -1,5 +1,7 @@
 package org.xydra.store;
 
+import org.xydra.core.StoreException;
+
 /**
  * Too many requests have been issued in a too short period of time. Exact
  * conditions can vary between implementations and may depend on payment or just

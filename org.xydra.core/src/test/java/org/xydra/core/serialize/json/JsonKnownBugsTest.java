@@ -1,9 +1,9 @@
 package org.xydra.core.serialize.json;
 
 import org.junit.Test;
-import org.xydra.base.XX;
 import org.xydra.base.rmof.impl.memory.SimpleObject;
 import org.xydra.base.value.XV;
+import org.xydra.core.XX;
 import org.xydra.core.model.XObject;
 import org.xydra.core.serialize.LineBreaks;
 import org.xydra.core.serialize.SerializedModel;

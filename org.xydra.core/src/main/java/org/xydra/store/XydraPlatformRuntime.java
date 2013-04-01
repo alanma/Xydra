@@ -1,7 +1,7 @@
 package org.xydra.store;
 
 import org.xydra.base.XId;
-import org.xydra.store.impl.delegate.XydraPersistence;
+import org.xydra.persistence.XydraPersistence;
 
 
 /**

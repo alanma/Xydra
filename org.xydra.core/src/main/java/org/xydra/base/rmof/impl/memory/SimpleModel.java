@@ -5,17 +5,17 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.xydra.annotations.NeverNull;
+import org.xydra.base.Base;
 import org.xydra.base.XAddress;
+import org.xydra.base.XCompareUtils;
 import org.xydra.base.XId;
 import org.xydra.base.XType;
-import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XSessionModel;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.base.rmof.XWritableModel;
-import org.xydra.core.XCompareUtils;
 import org.xydra.sharedutils.XyAssert;
 
 
@@ -73,7 +73,7 @@ public class SimpleModel extends SimpleEntity implements XRevWritableModel, XSes
         if(object != null) {
             return object;
         }
-        XRevWritableObject newObject = new SimpleObject(XX.resolveObject(this.address, objectId));
+        XRevWritableObject newObject = new SimpleObject(Base.resolveObject(this.address, objectId));
         this.objects.put(objectId, newObject);
         return newObject;
     }

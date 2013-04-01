@@ -3,13 +3,13 @@ package org.xydra.store.base;
 import java.io.Serializable;
 
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.impl.memory.SimpleField;
 import org.xydra.base.value.XValue;
+import org.xydra.core.X;
 import org.xydra.store.XydraStore;
 
 

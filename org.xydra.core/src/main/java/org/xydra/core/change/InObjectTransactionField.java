@@ -1,6 +1,5 @@
 package org.xydra.core.change;
 
-import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.XType;
@@ -8,6 +7,7 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XFieldCommand;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.value.XValue;
+import org.xydra.core.X;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.impl.memory.AbstractEntity;
 

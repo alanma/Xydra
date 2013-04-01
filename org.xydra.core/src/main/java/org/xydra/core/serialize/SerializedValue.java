@@ -11,13 +11,13 @@ import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
-import org.xydra.base.XX;
 import org.xydra.base.value.ValueType;
 import org.xydra.base.value.XBinaryValue;
 import org.xydra.base.value.XCollectionValue;
 import org.xydra.base.value.XSingleValue;
 import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
+import org.xydra.core.XX;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 
@@ -69,7 +69,7 @@ public class SerializedValue {
         return list;
     }
     
-    protected static List<XId> getIdListContents(XydraElement element) {
+    public static List<XId> getIdListContents(XydraElement element) {
         
         List<XId> list = new ArrayList<XId>();
         
@@ -380,7 +380,7 @@ public class SerializedValue {
         
     }
     
-    protected static void setIdListContents(Iterable<XId> list, XydraOut xo) {
+    public static void setIdListContents(Iterable<XId> list, XydraOut xo) {
         xo.values(NAME_DATA, XID_ELEMENT, list);
     }
     

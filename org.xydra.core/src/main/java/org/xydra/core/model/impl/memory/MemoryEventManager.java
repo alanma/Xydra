@@ -75,9 +75,11 @@ public class MemoryEventManager implements Serializable {
     }
     
     private static final long serialVersionUID = -4839276542320739074L;
+    
     private final MemoryChangeLog changeLog;
     
     private final List<EventQueueEntry> eventQueue = new ArrayList<EventQueueEntry>();
+    
     /**
      * This queue contains all events that have been emitted during the
      * sync-phase, also those that represent no real change from begin of sync
@@ -92,13 +94,16 @@ public class MemoryEventManager implements Serializable {
      * @author Thomas
      */
     private final List<EventQueueEntry> potentialSyncEventQueue = new ArrayList<EventQueueEntry>();
+    
     private final List<MemoryLocalChange> localChanges = new ArrayList<MemoryLocalChange>();
     /**
      * Should events be logged right now?
      */
     private boolean logging;
+    
     /**
-     * A list of temporarily removed orphans.
+     * A list of temporarily (during sync-rollback) removed orphans - to keep
+     * registered listeners
      */
     protected Orphans orphans;
     

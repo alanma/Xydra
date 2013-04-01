@@ -50,7 +50,7 @@ package org.xydra.store.impl.delegate;
  * <td>Blocking (synchronous)</td>
  * <td>No</td>
  * <td>No</td>
- * <td> {@link org.xydra.store.impl.delegate.XydraPersistence XydraPersistence}</td>
+ * <td> {@link org.xydra.persistence.XydraPersistence XydraPersistence}</td>
  * <td>in-memory and on GAE</td>
  * </tr>
  * 

@@ -32,7 +32,7 @@ public class XydraCoreArchitecture {
         client.mayAccess(shared);
         server.mayAccess(shared);
         
-        File dot = new File("./target/res.dot");
+        File dot = new File("./target/core.dot");
         PackageChaos pc = new PackageChaos(a, dot);
         pc.setShowCauses(true);
         pc.analyse("./src/main/java");

@@ -8,7 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
-import org.xydra.base.XX;
+import org.xydra.core.XX;
 import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.access.impl.memory.MemoryAuthorisationManager;
 import org.xydra.store.access.impl.memory.MemoryGroupDatabase;

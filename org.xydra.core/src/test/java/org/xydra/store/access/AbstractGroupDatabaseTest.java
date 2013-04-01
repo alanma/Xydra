@@ -6,8 +6,8 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 import org.xydra.base.XId;
-import org.xydra.base.XX;
 import org.xydra.core.LoggerTestHelper;
+import org.xydra.core.XX;
 
 
 /**

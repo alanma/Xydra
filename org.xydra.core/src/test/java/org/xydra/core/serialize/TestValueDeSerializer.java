@@ -4,9 +4,9 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 import org.xydra.base.XId;
-import org.xydra.base.XX;
 import org.xydra.base.value.XValue;
 import org.xydra.core.DemoModelUtil;
+import org.xydra.core.XX;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;

@@ -1,5 +1,7 @@
 package org.xydra.store;
 
+import org.xydra.core.StoreException;
+
 /**
  * This exception signals that the supplied authorisation credentials (i.e.
  * actorId and passwordHash) do not match.

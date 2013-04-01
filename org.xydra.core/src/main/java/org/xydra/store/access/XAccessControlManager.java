@@ -1,7 +1,7 @@
 package org.xydra.store.access;
 
 import org.xydra.base.XId;
-import org.xydra.base.XX;
+import org.xydra.core.XX;
 import org.xydra.core.model.XModel;
 import org.xydra.store.NamingUtils;
 import org.xydra.store.XydraStoreAdmin;

@@ -2,12 +2,12 @@ package org.xydra.core.model;
 
 import static org.junit.Assert.assertNotNull;
 
-import org.xydra.base.XX;
+import org.xydra.core.XX;
 import org.xydra.core.model.impl.memory.SynchronizesChangesImpl;
-import org.xydra.core.model.sync.XSynchronizer;
+import org.xydra.persistence.XydraPersistence;
 import org.xydra.store.XydraStore;
 import org.xydra.store.impl.delegate.DelegatingAllowAllStore;
-import org.xydra.store.impl.delegate.XydraPersistence;
+import org.xydra.store.sync.XSynchronizer;
 
 
 /**

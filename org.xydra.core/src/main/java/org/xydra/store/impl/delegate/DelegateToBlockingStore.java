@@ -7,14 +7,14 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
+import org.xydra.core.StoreException;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.persistence.GetEventsRequest;
+import org.xydra.persistence.GetWithAddressRequest;
+import org.xydra.persistence.ModelRevision;
 import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.Callback;
-import org.xydra.store.GetEventsRequest;
-import org.xydra.store.GetWithAddressRequest;
-import org.xydra.store.ModelRevision;
-import org.xydra.store.StoreException;
 import org.xydra.store.XydraStoreAdmin;
 
 

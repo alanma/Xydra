@@ -4,7 +4,6 @@ import java.io.Serializable;
 
 import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
@@ -13,6 +12,7 @@ import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
+import org.xydra.core.X;
 import org.xydra.store.XydraStore;
 
 

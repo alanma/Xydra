@@ -4,15 +4,15 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.xydra.base.Base;
 import org.xydra.base.XAddress;
+import org.xydra.base.XCompareUtils;
 import org.xydra.base.XId;
 import org.xydra.base.XType;
-import org.xydra.base.XX;
 import org.xydra.base.rmof.XReadableRepository;
 import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableRepository;
 import org.xydra.base.rmof.XWritableRepository;
-import org.xydra.core.XCompareUtils;
 import org.xydra.sharedutils.XyAssert;
 
 
@@ -48,7 +48,7 @@ public class SimpleRepository extends SimpleEntity implements XRevWritableReposi
         if(model != null) {
             return model;
         }
-        SimpleModel newModel = new SimpleModel(XX.resolveModel(this.address, modelId));
+        SimpleModel newModel = new SimpleModel(Base.resolveModel(this.address, modelId));
         this.models.put(modelId, newModel);
         return newModel;
     }

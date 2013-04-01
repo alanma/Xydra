@@ -1,8 +1,8 @@
 package org.xydra.store;
 
-import org.xydra.base.X;
-import org.xydra.base.XX;
 import org.xydra.base.change.XCommandFactory;
+import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.store.impl.memory.MemoryPersistence;
 
 

@@ -1,5 +1,7 @@
 package org.xydra.store;
 
+import org.xydra.core.StoreException;
+
 /**
  * An exception that indicates that there was a problem reaching the Xydra
  * Server.

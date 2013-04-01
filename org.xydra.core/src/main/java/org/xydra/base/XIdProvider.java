@@ -1,11 +1,6 @@
 package org.xydra.base;
 
 import org.xydra.annotations.NeverNull;
-import org.xydra.core.URIFormatException;
-import org.xydra.core.model.XField;
-import org.xydra.core.model.XModel;
-import org.xydra.core.model.XObject;
-import org.xydra.core.model.XRepository;
 
 
 /**
@@ -44,9 +39,9 @@ public interface XIdProvider {
 	 * repositoryId/modelId/objectId/fieldId
 	 * 
 	 * Some parameters can be null. An {@link XAddress} can address an
-	 * {@link XRepository} (repositoryId set, the rest null) {@link XModel}
-	 * (modelId set, repositoryId may be set, rest null), a {@link XObject}
-	 * (objectId not null, fieldId null, rest is set), or an {@link XField}
+	 * repository (repositoryId set, the rest null) model
+	 * (modelId set, repositoryId may be set, rest null), a object
+	 * (objectId not null, fieldId null, rest is set), or an field
 	 * (fieldId not null, rest may or may not be null).
 	 * 
 	 * @param repositoryId The {@link XId} for the repository field of the

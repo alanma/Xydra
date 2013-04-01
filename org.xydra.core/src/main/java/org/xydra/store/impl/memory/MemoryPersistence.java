@@ -9,15 +9,15 @@ import java.util.Set;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.XType;
-import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
-import org.xydra.store.GetWithAddressRequest;
-import org.xydra.store.ModelRevision;
+import org.xydra.core.XX;
+import org.xydra.persistence.GetWithAddressRequest;
+import org.xydra.persistence.ModelRevision;
+import org.xydra.persistence.XydraPersistence;
 import org.xydra.store.RequestException;
-import org.xydra.store.impl.delegate.XydraPersistence;
 
 
 /**

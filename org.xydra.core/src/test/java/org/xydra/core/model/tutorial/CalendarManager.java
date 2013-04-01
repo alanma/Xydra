@@ -1,13 +1,13 @@
 package org.xydra.core.model.tutorial;
 
-import org.xydra.base.X;
 import org.xydra.base.XId;
-import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XCommandFactory;
 import org.xydra.base.value.XIntegerValue;
 import org.xydra.base.value.XStringValue;
 import org.xydra.base.value.XV;
+import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;

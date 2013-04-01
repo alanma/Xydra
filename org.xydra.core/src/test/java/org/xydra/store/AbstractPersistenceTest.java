@@ -17,11 +17,9 @@ import java.util.Random;
 import java.util.Set;
 
 import org.junit.Test;
-import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.XType;
-import org.xydra.base.XX;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XCommandFactory;
@@ -44,6 +42,8 @@ import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.value.XStringValue;
 import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
+import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
@@ -55,7 +55,9 @@ import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.log.gae.Log4jLoggerFactory;
-import org.xydra.store.impl.delegate.XydraPersistence;
+import org.xydra.persistence.GetWithAddressRequest;
+import org.xydra.persistence.ModelRevision;
+import org.xydra.persistence.XydraPersistence;
 import org.xydra.store.rmof.impl.delegate.WritableRepositoryOnPersistence;
 
 

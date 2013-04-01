@@ -14,9 +14,9 @@ import java.util.Set;
 
 import org.junit.Test;
 import org.xydra.base.XAddress;
+import org.xydra.base.XCompareUtils;
 import org.xydra.base.XId;
 import org.xydra.base.XType;
-import org.xydra.base.XX;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.impl.memory.MemoryFieldEvent;
 import org.xydra.base.rmof.XReadableModel;
@@ -24,23 +24,24 @@ import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.base.rmof.impl.memory.SimpleObject;
 import org.xydra.base.value.XV;
+import org.xydra.core.AccessException;
 import org.xydra.core.LoggerTestHelper;
-import org.xydra.core.XCompareUtils;
-import org.xydra.core.serialize.SerializedStore.EventsRequest;
+import org.xydra.core.StoreException;
+import org.xydra.core.XX;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.persistence.GetEventsRequest;
+import org.xydra.persistence.ModelRevision;
 import org.xydra.sharedutils.XyAssert;
-import org.xydra.store.AccessException;
 import org.xydra.store.AuthorisationException;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.ConnectionException;
-import org.xydra.store.GetEventsRequest;
 import org.xydra.store.InternalStoreException;
-import org.xydra.store.ModelRevision;
 import org.xydra.store.QuotaException;
 import org.xydra.store.RequestException;
-import org.xydra.store.StoreException;
 import org.xydra.store.TimeoutException;
+import org.xydra.store.serialize.SerializedStore;
+import org.xydra.store.serialize.SerializedStore.EventsRequest;
 
 
 abstract public class AbstractSerializedStoreTest extends AbstractSerializingTest {

@@ -5,6 +5,7 @@ import java.util.List;
 import org.xydra.base.XId;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XWritableModel;
+import org.xydra.persistence.XydraPersistence;
 import org.xydra.store.NamingUtils;
 import org.xydra.store.access.XAuthenticationDatabase;
 import org.xydra.store.access.XGroupDatabase;
@@ -12,7 +13,6 @@ import org.xydra.store.access.impl.memory.CachingOrMemoryAuthenticationDatabase;
 import org.xydra.store.access.impl.memory.DelegatingAccessControlManager;
 import org.xydra.store.access.impl.memory.MemoryAuthorisationManager;
 import org.xydra.store.access.impl.memory.MemoryGroupDatabase;
-import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.rmof.impl.delegate.WritableModelOnPersistence;
 import org.xydra.store.rmof.impl.delegate.WritableRepositoryOnPersistence;
 

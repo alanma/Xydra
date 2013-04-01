@@ -2,7 +2,6 @@ package org.xydra.store.access.impl;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
-import org.xydra.base.XX;
 import org.xydra.base.change.XAtomicCommand;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XFieldCommand;
@@ -10,6 +9,7 @@ import org.xydra.base.change.XModelCommand;
 import org.xydra.base.change.XObjectCommand;
 import org.xydra.base.change.XRepositoryCommand;
 import org.xydra.base.change.XTransaction;
+import org.xydra.core.XX;
 import org.xydra.store.access.XA;
 import org.xydra.store.access.XAuthorisationManager;
 

@@ -4,17 +4,17 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.xydra.base.Base;
 import org.xydra.base.XAddress;
+import org.xydra.base.XCompareUtils;
 import org.xydra.base.XId;
 import org.xydra.base.XType;
-import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XRevWritableField;
 import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.base.rmof.XWritableObject;
-import org.xydra.core.XCompareUtils;
-import org.xydra.core.util.DumpUtils;
+import org.xydra.base.util.DumpUtilsBase;
 import org.xydra.sharedutils.XyAssert;
 
 
@@ -65,7 +65,7 @@ public class SimpleObject extends SimpleEntity implements XRevWritableObject {
         if(field != null) {
             return field;
         }
-        SimpleField newField = new SimpleField(XX.resolveField(this.address, fieldId));
+        SimpleField newField = new SimpleField(Base.resolveField(this.address, fieldId));
         this.fields.put(fieldId, newField);
         return newField;
     }
@@ -123,7 +123,7 @@ public class SimpleObject extends SimpleEntity implements XRevWritableObject {
     
     @Override
     public String toString() {
-        return DumpUtils.toStringBuffer(this).toString();
+        return DumpUtilsBase.toStringBuffer(this).toString();
     }
     
     /**

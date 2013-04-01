@@ -1,7 +1,7 @@
 package org.xydra.store;
 
 import org.xydra.base.XId;
-import org.xydra.base.XX;
+import org.xydra.core.XX;
 import org.xydra.store.access.XAccessControlManager;
 import org.xydra.store.access.XAuthenticationDatabase;
 

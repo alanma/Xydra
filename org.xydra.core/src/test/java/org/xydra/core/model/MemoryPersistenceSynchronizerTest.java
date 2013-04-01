@@ -1,12 +1,12 @@
 package org.xydra.core.model;
 
 import org.junit.BeforeClass;
-import org.xydra.base.XX;
 import org.xydra.core.LoggerTestHelper;
+import org.xydra.core.XX;
 import org.xydra.core.model.impl.memory.SynchronizesChangesImpl;
-import org.xydra.core.model.sync.XSynchronizer;
-import org.xydra.store.impl.delegate.XydraPersistence;
+import org.xydra.persistence.XydraPersistence;
 import org.xydra.store.impl.memory.MemoryPersistence;
+import org.xydra.store.sync.XSynchronizer;
 
 
 /**

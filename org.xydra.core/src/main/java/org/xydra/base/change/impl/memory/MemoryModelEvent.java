@@ -1,15 +1,13 @@
 package org.xydra.base.change.impl.memory;
 
 import org.xydra.annotations.RunsInGWT;
+import org.xydra.base.Base;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
-import org.xydra.base.XX;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XModelEvent;
 import org.xydra.base.change.XTransaction;
-import org.xydra.core.model.XModel;
-import org.xydra.core.model.XObject;
 
 
 /**
@@ -23,21 +21,21 @@ public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {
     private static final long serialVersionUID = -598246000186155639L;
     
     /**
-     * Creates a new {@link XModelEvent} of the add-type (an {@link XObject} was
-     * added to the {@link XModel} this event refers to)
+     * Creates a new {@link XModelEvent} of the add-type (an object was
+     * added to the model this event refers to)
      * 
      * @param actor The {@link XId} of the actor
-     * @param target The {@link XAddress} of the {@link XModel} this event
+     * @param target The {@link XAddress} of the model this event
      *            refers to - model {@link XId} must not be null
-     * @param objectId The {@link XId} of the added {@link XObject} - must not
+     * @param objectId The {@link XId} of the added object - must not
      *            be null
-     * @param modelRevision the revision number of the {@link XModel} this event
+     * @param modelRevision the revision number of the model this event
      *            refers to
      * @param inTransaction sets whether this event occurred during an
      *            {@link XTransaction} or not
      * @return An {@link XModelEvent} of the add-type
      * @throws IllegalArgumentException if the given {@link XAddress} does not
-     *             specify an {@link XModel}, if objectId is null or if the
+     *             specify an model, if objectId is null or if the
      *             given revision number equals
      *             {@link XEvent#RevisionOfEntityNotSet}
      */
@@ -55,16 +53,16 @@ public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {
     }
     
     /**
-     * Creates a new {@link XModelEvent} of the remove-type (an {@link XObject}
-     * was removed from the {@link XModel} this event refers to)
+     * Creates a new {@link XModelEvent} of the remove-type (an object
+     * was removed from the model this event refers to)
      * 
      * @param actor The {@link XId} of the actor
-     * @param target The {@link XAddress} of the {@link XModel} this event
+     * @param target The {@link XAddress} of the model this event
      *            refers to - model {@link XId} must not be null
-     * @param objectId The {@link XId} of the removed {@link XObject}
-     * @param modelRevision the revision number of the {@link XModel} this event
+     * @param objectId The {@link XId} of the removed object
+     * @param modelRevision the revision number of the model this event
      *            refers to
-     * @param objectRevision the revision number of the {@link XObject} which
+     * @param objectRevision the revision number of the object which
      *            was removed
      * @param inTransaction sets whether this event occurred during an
      *            {@link XTransaction} or not
@@ -72,7 +70,7 @@ public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {
      *            containing model is also removed in the same transaction
      * @return An XModelEvent of the remove-type
      * @throws IllegalArgumentException if the given {@link XAddress} does not
-     *             specify an {@link XModel}, if objectId is null or if one of
+     *             specify an model, if objectId is null or if one of
      *             the given revision numbers equals
      *             {@link XEvent#RevisionOfEntityNotSet}
      */
@@ -154,7 +152,7 @@ public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {
     
     @Override
     public XAddress getChangedEntity() {
-        return XX.resolveObject(getTarget(), getObjectId());
+        return Base.resolveObject(getTarget(), getObjectId());
     }
     
     @Override

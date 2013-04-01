@@ -7,12 +7,12 @@ import java.util.Set;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.XType;
-import org.xydra.base.XX;
 import org.xydra.base.change.XFieldEvent;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.value.XValue;
+import org.xydra.core.XX;
 import org.xydra.index.query.EqualsConstraint;
 import org.xydra.index.query.Pair;
 

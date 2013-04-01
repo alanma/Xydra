@@ -2,15 +2,14 @@ package org.xydra.base.value;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
-import org.xydra.core.serialize.json.JsonSerializer;
-import org.xydra.core.serialize.xml.XmlSerializer;
 
 
 /**
  * A stream of XValue as occurring in serialisation formats.
  * 
- * Currently not used by XML serialisation ({@link XmlSerializer}) nor by JOSN (
- * {@link JsonSerializer}).
+ * Currently not used by XML serialisation (
+ * {@link org.xydra.core.serialize.xml.XmlSerializer}) nor by JOSN (
+ * {@link org.xydra.core.serialize.json.JsonSerializer}).
  * 
  * Currently only used for serialising values <em>to</em> CSV format. Not used
  * for parsing yet.

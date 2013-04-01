@@ -4,7 +4,6 @@ import java.util.Set;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
-import org.xydra.base.XX;
 import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
@@ -15,10 +14,15 @@ import org.xydra.base.change.XTransaction;
 import org.xydra.base.change.XTransactionEvent;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
+import org.xydra.core.AccessException;
+import org.xydra.core.XX;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
 import org.xydra.index.query.Pair;
+import org.xydra.persistence.GetEventsRequest;
+import org.xydra.persistence.GetWithAddressRequest;
+import org.xydra.persistence.ModelRevision;
 
 
 /**

@@ -3,15 +3,12 @@ package org.xydra.base.change;
 import java.io.Serializable;
 
 import org.xydra.base.XAddress;
-import org.xydra.core.model.XField;
-import org.xydra.core.model.XModel;
-import org.xydra.core.model.XObject;
 
 
 /**
  * XCommands are objects, that represent future change operations on entities,
- * for example on an {@link XModel}. They can be used to add new entities,
- * remove entities, execute transactions, change values etc.
+ * for example on an {@link org.xydra.core.model.XModel}. They can be used to
+ * add new entities, remove entities, execute transactions, change values etc.
  * 
  * There are general two types of XCommands. Forced commands and normal (safe)
  * commands. The only difference is, that forced XCommands are always succeeding
@@ -94,10 +91,11 @@ public interface XCommand extends Serializable {
     /**
      * WHAT will be changed?
      * 
-     * @return the {@link XAddress} of the {@link XModel}, {@link XObject} or
-     *         {@link XField} that will be added or removed -- or the
-     *         {@link XField} which value was changed; same as getTarget() for
-     *         transactions
+     * @return the {@link XAddress} of the {@link org.xydra.core.model.XModel},
+     *         {@link org.xydra.core.model.XObject} or
+     *         {@link org.xydra.core.model.XField} that will be added or removed
+     *         -- or the {@link org.xydra.core.model.XField} which value was
+     *         changed; same as getTarget() for transactions
      */
     XAddress getChangedEntity();
     

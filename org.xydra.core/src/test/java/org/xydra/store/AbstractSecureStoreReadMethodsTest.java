@@ -2,11 +2,11 @@ package org.xydra.store;
 
 import static org.junit.Assert.assertTrue;
 
-import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
-import org.xydra.base.XX;
 import org.xydra.base.change.XCommandFactory;
+import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.store.access.HashUtils;
 import org.xydra.store.access.XA;
 import org.xydra.store.access.XAccessControlManager;

@@ -1,14 +1,12 @@
 package org.xydra.base.change.impl.memory;
 
 import org.xydra.annotations.RunsInGWT;
+import org.xydra.base.Base;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
-import org.xydra.base.XX;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XRepositoryEvent;
-import org.xydra.core.model.XModel;
-import org.xydra.core.model.XRepository;
 
 
 /**
@@ -23,18 +21,18 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
     private static final long serialVersionUID = 4709068915672914712L;
     
     /**
-     * Creates a new {@link XRepositoryEvent} of the add-type (an {@link XModel}
-     * was added to the {@link XRepository} this event refers to)
+     * Creates a new {@link XRepositoryEvent} of the add-type (an model
+     * was added to the repository this event refers to)
      * 
      * @param actor The {@link XId} of the actor
-     * @param target The {@link XAddress} of the {@link XRepository} which the
-     *            {@link XModel} was added to - repository {@link XId} must not
+     * @param target The {@link XAddress} of the repository which the
+     *            model was added to - repository {@link XId} must not
      *            be null
-     * @param modelId The {@link XId} of the added {@link XModel} - must not be
+     * @param modelId The {@link XId} of the added model - must not be
      *            null
      * @return An {@link XRepositoryEvent} of the add-type
      * @throws IllegalArgumentException if the given {@link XAddress} doesn't
-     *             refer to an {@link XRepository} or if the given modelId is
+     *             refer to an repository or if the given modelId is
      *             null
      */
     public static XRepositoryEvent createAddEvent(XId actor, XAddress target, XId modelId) {
@@ -50,20 +48,20 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
     }
     
     /**
-     * Creates a new {@link XRepositoryEvent} of the add-type (an {@link XModel}
-     * was added to the {@link XRepository} this event refers to)
+     * Creates a new {@link XRepositoryEvent} of the add-type (an model
+     * was added to the repository this event refers to)
      * 
      * @param actor The {@link XId} of the actor
-     * @param target The {@link XAddress} of the {@link XRepository} which the
-     *            {@link XModel} was added to - repository {@link XId} must not
+     * @param target The {@link XAddress} of the repository which the
+     *            model was added to - repository {@link XId} must not
      *            be null
-     * @param modelId The {@link XId} of the added {@link XModel} - must not be
+     * @param modelId The {@link XId} of the added model - must not be
      *            null
      * @param modelRev
      * @param inTrans
      * @return An {@link XRepositoryEvent} of the add-type
      * @throws IllegalArgumentException if the given {@link XAddress} doesn't
-     *             refer to an {@link XRepository} or if the given modelId is
+     *             refer to an repository or if the given modelId is
      *             null
      */
     public static XRepositoryEvent createAddEvent(XId actor, XAddress target, XId modelId,
@@ -74,20 +72,20 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
     
     /**
      * Creates a new {@link XRepositoryEvent} of the remove-type (an
-     * {@link XModel} was removed from the {@link XRepository} this event refers
+     * model was removed from the repository this event refers
      * to)
      * 
      * @param actor The {@link XId} of the actor
-     * @param target The {@link XAddress} of the {@link XRepository} which the
-     *            {@link XModel} was removed from - repository {@link XId} must
+     * @param target The {@link XAddress} of the repository which the
+     *            model was removed from - repository {@link XId} must
      *            not be null
-     * @param modelId The {@link XId} of the removed {@link XModel} - must not
+     * @param modelId The {@link XId} of the removed model - must not
      *            be null
      * @param modelRevison of the remove event
      * @param inTrans if in transaction
      * @return An {@link XRepositoryEvent} of the add-type
      * @throws IllegalArgumentException if the given {@link XAddress} doesn't
-     *             refer to an {@link XRepository}, if the given modelId is null
+     *             refer to an repository, if the given modelId is null
      *             or if the given modelRevision equals
      *             {@link XEvent#RevisionOfEntityNotSet}
      */
@@ -162,7 +160,7 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
     
     @Override
     public XAddress getChangedEntity() {
-        return XX.resolveModel(getTarget(), getModelId());
+        return Base.resolveModel(getTarget(), getModelId());
     }
     
     @Override

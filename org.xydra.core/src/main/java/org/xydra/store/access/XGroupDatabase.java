@@ -5,7 +5,7 @@ import java.util.Set;
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.ReadOperation;
 import org.xydra.base.XId;
-import org.xydra.base.XX;
+import org.xydra.core.XX;
 import org.xydra.store.NamingUtils;
 
 

@@ -1,6 +1,5 @@
 package org.xydra.core;
 
-import org.xydra.base.X;
 import org.xydra.base.XId;
 import org.xydra.base.value.XValue;
 import org.xydra.core.model.MissingPieceException;

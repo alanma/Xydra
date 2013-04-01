@@ -4,7 +4,7 @@
  * and {@link org.xydra.core.model.XField}s
  * 
  * These are used internally by some {@link org.xydra.core.model.XModel} and
- * {@link org.xydra.store.impl.delegate.XydraPersistence} implementations to
+ * {@link org.xydra.persistence.XydraPersistence} implementations to
  * evaluate transactions.
  * 
  * They can also be used to construct transactions together with

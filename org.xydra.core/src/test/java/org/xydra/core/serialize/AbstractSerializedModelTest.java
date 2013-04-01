@@ -5,8 +5,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+import org.xydra.base.XCompareUtils;
 import org.xydra.base.XId;
-import org.xydra.base.XX;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
@@ -14,7 +14,7 @@ import org.xydra.base.rmof.XReadableRepository;
 import org.xydra.base.value.XV;
 import org.xydra.core.DemoModelUtil;
 import org.xydra.core.LoggerTestHelper;
-import org.xydra.core.XCompareUtils;
+import org.xydra.core.XX;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;

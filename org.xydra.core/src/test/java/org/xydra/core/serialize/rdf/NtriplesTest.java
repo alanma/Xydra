@@ -2,10 +2,10 @@ package org.xydra.core.serialize.rdf;
 
 import org.junit.Test;
 import org.xydra.base.XId;
-import org.xydra.base.XX;
 import org.xydra.base.minio.MiniStreamWriter;
 import org.xydra.base.minio.MiniWriter;
 import org.xydra.base.value.XV;
+import org.xydra.core.XX;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;

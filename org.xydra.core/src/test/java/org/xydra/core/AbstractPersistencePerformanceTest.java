@@ -8,20 +8,18 @@ import java.util.Set;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.xydra.base.X;
 import org.xydra.base.XId;
-import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XRepositoryCommand;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.persistence.GetWithAddressRequest;
+import org.xydra.persistence.XydraPersistence;
 import org.xydra.restless.utils.NanoClock;
 import org.xydra.sharedutils.XyAssert;
-import org.xydra.store.GetWithAddressRequest;
 import org.xydra.store.XydraRuntime;
-import org.xydra.store.impl.delegate.XydraPersistence;
 
 
 public abstract class AbstractPersistencePerformanceTest {

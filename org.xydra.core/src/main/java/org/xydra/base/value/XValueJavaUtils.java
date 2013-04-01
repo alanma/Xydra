@@ -12,7 +12,7 @@ import java.util.TreeSet;
 import org.xydra.annotations.CanBeNull;
 import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.base.X;
+import org.xydra.base.BaseRuntime;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.rmof.XReadableField;
@@ -866,7 +866,7 @@ public class XValueJavaUtils {
             @NeverNull XId fieldId, @CanBeNull XAddress[] values) {
         XAddressListValue v = null;
         if(values != null) {
-            v = X.getValueFactory().createAddressListValue(values);
+            v = BaseRuntime.getValueFactory().createAddressListValue(values);
         }
         XWritableField f = _getOrCreateField(writableObject, fieldId);
         f.setValue(v);
@@ -963,7 +963,7 @@ public class XValueJavaUtils {
             @NeverNull XId fieldId, @CanBeNull boolean[] values) {
         XBooleanListValue v = null;
         if(values != null) {
-            v = X.getValueFactory().createBooleanListValue(values);
+            v = BaseRuntime.getValueFactory().createBooleanListValue(values);
         }
         XWritableField f = _getOrCreateField(writableObject, fieldId);
         f.setValue(v);
@@ -1010,7 +1010,7 @@ public class XValueJavaUtils {
             @NeverNull XId fieldId, @CanBeNull double[] values) {
         XDoubleListValue v = null;
         if(values != null) {
-            v = X.getValueFactory().createDoubleListValue(values);
+            v = BaseRuntime.getValueFactory().createDoubleListValue(values);
         }
         XWritableField f = _getOrCreateField(writableObject, fieldId);
         f.setValue(v);
@@ -1053,7 +1053,7 @@ public class XValueJavaUtils {
             @NeverNull XId fieldId, @CanBeNull XId[] values) {
         XIdListValue v = null;
         if(values != null) {
-            v = X.getValueFactory().createIdListValue(values);
+            v = BaseRuntime.getValueFactory().createIdListValue(values);
         }
         XWritableField f = _getOrCreateField(writableObject, fieldId);
         f.setValue(v);
@@ -1132,7 +1132,7 @@ public class XValueJavaUtils {
             @NeverNull XId fieldId, @CanBeNull int[] values) {
         XIntegerListValue v = null;
         if(values != null) {
-            v = X.getValueFactory().createIntegerListValue(values);
+            v = BaseRuntime.getValueFactory().createIntegerListValue(values);
         }
         XWritableField f = _getOrCreateField(writableObject, fieldId);
         f.setValue(v);
@@ -1177,7 +1177,7 @@ public class XValueJavaUtils {
             @NeverNull XId fieldId, @CanBeNull long[] values) {
         XLongListValue v = null;
         if(values != null) {
-            v = X.getValueFactory().createLongListValue(values);
+            v = BaseRuntime.getValueFactory().createLongListValue(values);
         }
         XWritableField f = _getOrCreateField(writableObject, fieldId);
         f.setValue(v);
@@ -1222,7 +1222,7 @@ public class XValueJavaUtils {
             @NeverNull XId fieldId, @CanBeNull String[] values) {
         XStringListValue v = null;
         if(values != null) {
-            v = X.getValueFactory().createStringListValue(values);
+            v = BaseRuntime.getValueFactory().createStringListValue(values);
         }
         XWritableField f = _getOrCreateField(writableObject, fieldId);
         f.setValue(v);

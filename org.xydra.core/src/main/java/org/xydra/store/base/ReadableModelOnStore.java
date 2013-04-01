@@ -10,10 +10,10 @@ import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
+import org.xydra.core.StoreException;
+import org.xydra.persistence.GetWithAddressRequest;
 import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.BatchedResult;
-import org.xydra.store.GetWithAddressRequest;
-import org.xydra.store.StoreException;
 import org.xydra.store.WaitingCallback;
 import org.xydra.store.XydraStore;
 

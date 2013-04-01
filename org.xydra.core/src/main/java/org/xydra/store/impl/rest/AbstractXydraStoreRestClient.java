@@ -16,24 +16,24 @@ import org.xydra.base.rmof.XEntity;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.core.serialize.SerializedCommand;
-import org.xydra.core.serialize.SerializedStore;
 import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.XydraOut;
 import org.xydra.core.serialize.XydraParser;
 import org.xydra.core.serialize.XydraSerializer;
 import org.xydra.index.query.Pair;
+import org.xydra.persistence.GetEventsRequest;
+import org.xydra.persistence.GetWithAddressRequest;
+import org.xydra.persistence.ModelRevision;
 import org.xydra.sharedutils.URLUtils;
 import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.Callback;
 import org.xydra.store.ConnectionException;
-import org.xydra.store.GetEventsRequest;
-import org.xydra.store.GetWithAddressRequest;
 import org.xydra.store.InternalStoreException;
-import org.xydra.store.ModelRevision;
 import org.xydra.store.RequestException;
 import org.xydra.store.XydraStore;
 import org.xydra.store.XydraStoreAdmin;
+import org.xydra.store.serialize.SerializedStore;
 
 
 /**

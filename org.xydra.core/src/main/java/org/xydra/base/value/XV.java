@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.xydra.annotations.NeverNull;
-import org.xydra.base.X;
+import org.xydra.base.BaseRuntime;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 
@@ -20,7 +20,7 @@ import org.xydra.base.XId;
  */
 public class XV {
     
-    private final static XValueFactory vf = X.getValueFactory();
+    private final static XValueFactory vf = BaseRuntime.getValueFactory();
     
     /**
      * Returns the content of the given {@link XListValue} as a {@link List}

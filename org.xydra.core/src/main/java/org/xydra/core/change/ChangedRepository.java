@@ -8,12 +8,12 @@ import java.util.Map;
 import java.util.Set;
 
 import org.xydra.base.XId;
-import org.xydra.base.XX;
 import org.xydra.base.change.XAtomicCommand;
 import org.xydra.base.change.XTransaction;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableRepository;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
+import org.xydra.core.XX;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.index.IndexUtils;
 import org.xydra.log.Logger;

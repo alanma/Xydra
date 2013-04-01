@@ -3,9 +3,9 @@ package org.xydra.store.impl.memory;
 import org.xydra.base.XId;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.persistence.XydraPersistence;
 import org.xydra.store.IMemCache;
 import org.xydra.store.XydraPlatformRuntime;
-import org.xydra.store.impl.delegate.XydraPersistence;
 
 
 public class MemoryRuntime implements XydraPlatformRuntime {

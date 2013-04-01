@@ -3,6 +3,7 @@ package org.xydra.store.impl.delegate;
 import org.xydra.base.XId;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.persistence.XydraPersistence;
 import org.xydra.store.XydraStore;
 import org.xydra.store.access.impl.delegate.AccessControlManagerOnPersistence;
 

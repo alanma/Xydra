@@ -1,5 +1,8 @@
 package org.xydra.store;
 
+import org.xydra.persistence.GetEventsRequest;
+
+
 /**
  * <h2>Documentation for the sync-process</h2>
  * 
@@ -33,8 +36,8 @@ package org.xydra.store;
  * complicated.
  * 
  * There are two main components involved in syncing: The
- * {@link org.xydra.core.model.sync.XSynchronizer} (aka "syncer") and
- * application logic ("app" for short").
+ * {@link org.xydra.store.sync.XSynchronizer} (aka "syncer") and application
+ * logic ("app" for short").
  * 
  * First start of the app: App loads a current snapshot from server, uses this
  * state as local model and runs the app from there. User makes local changes,

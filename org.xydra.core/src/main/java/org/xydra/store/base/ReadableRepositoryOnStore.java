@@ -6,16 +6,16 @@ import java.util.Set;
 
 import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.XType;
-import org.xydra.base.XX;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableRepository;
+import org.xydra.core.StoreException;
+import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.Callback;
-import org.xydra.store.StoreException;
 import org.xydra.store.XydraStore;
 
 

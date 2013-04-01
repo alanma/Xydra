@@ -4,7 +4,7 @@ import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XId;
-import org.xydra.base.XX;
+import org.xydra.core.XX;
 
 
 /**

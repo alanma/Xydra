@@ -1,5 +1,7 @@
 package org.xydra.store;
 
+import org.xydra.core.StoreException;
+
 /**
  * A simple {@link Callback} implementation that supports waiting for results
  * 

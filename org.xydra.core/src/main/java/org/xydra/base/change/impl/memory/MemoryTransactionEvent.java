@@ -16,8 +16,6 @@ import org.xydra.base.change.XObjectEvent;
 import org.xydra.base.change.XRepositoryEvent;
 import org.xydra.base.change.XTransaction;
 import org.xydra.base.change.XTransactionEvent;
-import org.xydra.core.model.XModel;
-import org.xydra.core.model.XObject;
 import org.xydra.index.XI;
 import org.xydra.sharedutils.XyAssert;
 
@@ -39,31 +37,31 @@ public class MemoryTransactionEvent extends AbstractTransactionEvent {
 	 * Changes to the passed array will not affect the event after its creation.
 	 * 
 	 * @param actor the {@link XId} of the actor
-	 * @param target the {@link XAddress} of the {@link XModel} or
-	 *            {@link XObject} where the {@link XTransaction} represented by
+	 * @param target the {@link XAddress} of the model or
+	 *            object where the {@link XTransaction} represented by
 	 *            this event was executed
 	 * @param events the {@link XAtomicEvent XAtomicEvens} which were executed
 	 *            by the {@link XTransaction} this event represents
-	 * @param modelRevision the revision number of the {@link XModel} this event
+	 * @param modelRevision the revision number of the model this event
 	 *            refers to - must be set if this event represents an
-	 *            {@link XTransaction} which was executed on an {@link XModel}
-	 * @param objectRevision the revision number of the {@link XObject} this
+	 *            {@link XTransaction} which was executed on an model
+	 * @param objectRevision the revision number of the object this
 	 *            event refers to - must be set if this event represents an
-	 *            {@link XTransaction} which was executed on an {@link XObject}
+	 *            {@link XTransaction} which was executed on an object
 	 * @return a new transaction with the specified target and events. Changes
 	 *         to the passed array will not affect the transaction.
 	 * @throws IllegalArgumentException if the given {@link XAddress} does not
-	 *             specify an {@link XModel} or {@link XObject}.
+	 *             specify an model or object.
 	 * @throws IllegalArgumentException if the given list of
 	 *             {@link XAtomicEvent XAtomicEvents} was empty
 	 * @throws IllegalArgumentException if the event represents an
-	 *             {@link XTransaction} which was executed on an {@link XModel}
+	 *             {@link XTransaction} which was executed on an model
 	 *             and the given modelRevision equals
 	 *             {@link XEvent#RevisionOfEntityNotSet} or the given
 	 *             objectRevision does not equal
 	 *             {@link XEvent#RevisionOfEntityNotSet}
 	 * @throws IllegalArgumentException if the event represents an
-	 *             {@link XTransaction} which was executed on an {@link XObject}
+	 *             {@link XTransaction} which was executed on an object
 	 *             and the given objectRevision equals
 	 *             {@link XEvent#RevisionOfEntityNotSet}
 	 * @throws IllegalArgumentException if one of the targets of the given
@@ -86,31 +84,31 @@ public class MemoryTransactionEvent extends AbstractTransactionEvent {
 	 * Changes to the passed array will not affect the event after its creation.
 	 * 
 	 * @param actor the {@link XId} of the actor
-	 * @param target the {@link XAddress} of the {@link XModel} or
-	 *            {@link XObject} where the {@link XTransaction} represented by
+	 * @param target the {@link XAddress} of the model or
+	 *            object where the {@link XTransaction} represented by
 	 *            this event was executed
 	 * @param events the {@link XAtomicEvent XAtomicEvens} which were executed
 	 *            by the {@link XTransaction} this event represents
-	 * @param modelRevision the revision number of the {@link XModel} this event
+	 * @param modelRevision the revision number of the model this event
 	 *            refers to - must be set if this event represents an
-	 *            {@link XTransaction} which was executed on an {@link XModel}
-	 * @param objectRevision the revision number of the {@link XObject} this
+	 *            {@link XTransaction} which was executed on an model
+	 * @param objectRevision the revision number of the object this
 	 *            event refers to - must be set if this event represents an
-	 *            {@link XTransaction} which was executed on an {@link XObject}
+	 *            {@link XTransaction} which was executed on an object
 	 * @return a new transaction with the specified target and events. Changes
 	 *         to the passed array will not affect the transaction.
 	 * @throws IllegalArgumentException if the given {@link XAddress} does not
-	 *             specify an {@link XModel} or {@link XObject}.
+	 *             specify an model or object.
 	 * @throws IllegalArgumentException if the given array of
 	 *             {@link XAtomicEvent XAtomicEvents} was empty
 	 * @throws IllegalArgumentException if the event represents an
-	 *             {@link XTransaction} which was executed on an {@link XModel}
+	 *             {@link XTransaction} which was executed on an model
 	 *             and the given modelRevision equals
 	 *             {@link XEvent#RevisionOfEntityNotSet} or the given
 	 *             objectRevision does not equal
 	 *             {@link XEvent#RevisionOfEntityNotSet}
 	 * @throws IllegalArgumentException if the event represents an
-	 *             {@link XTransaction} which was executed on an {@link XObject}
+	 *             {@link XTransaction} which was executed on an object
 	 *             and the given objectRevision equals
 	 *             {@link XEvent#RevisionOfEntityNotSet}
 	 * @throws IllegalArgumentException if one of the targets of the given

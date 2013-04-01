@@ -3,10 +3,10 @@ package org.xydra.core.serialize;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import org.xydra.base.XCompareUtils;
 import org.xydra.base.XId;
-import org.xydra.base.XX;
 import org.xydra.base.value.XV;
-import org.xydra.core.XCompareUtils;
+import org.xydra.core.XX;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.impl.memory.MemoryRepository;

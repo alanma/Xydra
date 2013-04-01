@@ -1,5 +1,6 @@
 package org.xydra.store.impl.delegate;
 
+import org.xydra.persistence.XydraPersistence;
 import org.xydra.store.XydraStore;
 import org.xydra.store.access.XAccessControlManager;
 

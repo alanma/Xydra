@@ -7,10 +7,6 @@ import org.xydra.base.XId;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XEvent;
-import org.xydra.core.model.XField;
-import org.xydra.core.model.XModel;
-import org.xydra.core.model.XObject;
-import org.xydra.core.model.XRepository;
 import org.xydra.index.XI;
 import org.xydra.sharedutils.XyAssert;
 
@@ -98,7 +94,7 @@ abstract public class MemoryAtomicEvent implements XEvent {
     }
     
     /**
-     * @return the {@link XId} of the {@link XField} holding the entity this
+     * @return the {@link XId} of the field holding the entity this
      *         event refers to (may be null)
      */
     public XId getFieldId() {
@@ -106,7 +102,7 @@ abstract public class MemoryAtomicEvent implements XEvent {
     }
     
     /**
-     * @return the {@link XId} of the {@link XModel} holding the entity this
+     * @return the {@link XId} of the model holding the entity this
      *         event refers to (may be null)
      */
     public XId getModelId() {
@@ -114,7 +110,7 @@ abstract public class MemoryAtomicEvent implements XEvent {
     }
     
     /**
-     * @return the {@link XId} of the {@link XObject} holding the entity this
+     * @return the {@link XId} of the object holding the entity this
      *         event refers to (may be null)
      */
     public XId getObjectId() {
@@ -137,7 +133,7 @@ abstract public class MemoryAtomicEvent implements XEvent {
     }
     
     /**
-     * @return the {@link XId} of the {@link XRepository} holding the entity
+     * @return the {@link XId} of the repository holding the entity
      *         this event refers to (may be null)
      */
     public XId getRepositoryId() {

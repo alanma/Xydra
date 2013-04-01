@@ -8,11 +8,11 @@ import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
-import org.xydra.base.XX;
 import org.xydra.base.value.ValueType;
 import org.xydra.base.value.XBinaryValue;
 import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
+import org.xydra.core.XX;
 import org.xydra.core.serialize.json.ParseNumber;
 import org.xydra.index.query.Pair;
 

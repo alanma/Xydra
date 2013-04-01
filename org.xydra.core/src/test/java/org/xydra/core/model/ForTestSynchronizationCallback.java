@@ -3,7 +3,7 @@
  */
 package org.xydra.core.model;
 
-import org.xydra.core.model.sync.XSynchronizationCallback;
+import org.xydra.store.sync.XSynchronizationCallback;
 
 
 /**

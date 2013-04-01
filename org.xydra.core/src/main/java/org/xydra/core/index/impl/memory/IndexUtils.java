@@ -1,9 +1,7 @@
 package org.xydra.core.index.impl.memory;
 
 import org.xydra.annotations.NeverNull;
-import org.xydra.base.X;
 import org.xydra.base.XId;
-import org.xydra.base.XX;
 import org.xydra.base.value.XBooleanValue;
 import org.xydra.base.value.XCollectionValue;
 import org.xydra.base.value.XDoubleValue;
@@ -11,6 +9,8 @@ import org.xydra.base.value.XIntegerValue;
 import org.xydra.base.value.XLongValue;
 import org.xydra.base.value.XStringValue;
 import org.xydra.base.value.XValue;
+import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.sharedutils.XyAssert;
 
 

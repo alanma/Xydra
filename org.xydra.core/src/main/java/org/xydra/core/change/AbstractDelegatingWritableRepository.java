@@ -3,9 +3,9 @@ package org.xydra.core.change;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.XType;
-import org.xydra.base.XX;
 import org.xydra.base.rmof.XStateWritableRepository;
 import org.xydra.base.rmof.XWritableRepository;
+import org.xydra.core.XX;
 
 
 /**

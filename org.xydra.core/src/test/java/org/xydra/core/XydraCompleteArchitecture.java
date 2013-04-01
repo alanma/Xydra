@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import org.xydra.devtools.PackageChaos;
 import org.xydra.devtools.architecture.Architecture;
+import org.xydra.devtools.architecture.Layer;
 import org.xydra.devtools.java.Project;
 import org.xydra.log.LoggerFactory;
 import org.xydra.log.gae.Log4jLoggerFactory;
@@ -26,21 +27,33 @@ public class XydraCompleteArchitecture {
         String scope = "org.xydra";
         
         Architecture a = new Architecture(scope);
+        a.allowAcessFromEveryPackage("org.xydra.annotation");
+        a.allowAcessFromEveryPackage("org.xydra.log");
+        a.allowAcessFromEveryPackage("org.xydra.index");
+        // IMPROVE architect cleaner
+        a.ignoreForNow("org.xydra.perf");
         
-        // // step 1: check for violation of GWT layers
-        // Architecture a = new Architecture(scope);
-        // Layer shared = a.defineLayer(scope + ".shared");
-        // Layer client = a.defineLayer(scope + ".client");
-        // Layer server = a.defineLayer(scope + ".server");
-        // client.mayAccess(shared);
-        // server.mayAccess(shared);
+        Layer sharedutils = a.defineLayer("org.xydra.sharedutils");
+        Layer vi = a.defineLayer("org.xydra.valueindex");
         
-        File dot = new File("./target/res.dot");
+        Layer base = a.defineLayer("org.xydra.base");
+        Layer core = a.defineLayer("org.xydra.core");
+        Layer persistence = a.defineLayer("org.xydra.persistence");
+        Layer store = a.defineLayer("org.xydra.store");
+        
+        vi.mayAccess(base, core, sharedutils);
+        
+        base.mayAccess(vi, sharedutils);
+        core.mayAccess(base, vi, sharedutils);
+        persistence.mayAccess(core, base, vi, sharedutils);
+        store.mayAccess(persistence, core, base, vi, sharedutils);
+        
+        File dot = new File("./target/corebaseetc.dot");
         PackageChaos pc = new PackageChaos(a, dot);
         pc.setShowCauses(true);
         
         Project p = pc.getProject();
-        p.scanDir("/Users/xamde/_data_/_p_/2013/org.xydra.oo");
+        p.scanDir("src/main/java");
         
         pc.renderDotGraph();
     }

@@ -3,7 +3,7 @@ package org.xydra.store.rmof.impl.delegate;
 import org.xydra.base.IHasXAddress;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
-import org.xydra.store.impl.delegate.XydraPersistence;
+import org.xydra.persistence.XydraPersistence;
 
 
 /**

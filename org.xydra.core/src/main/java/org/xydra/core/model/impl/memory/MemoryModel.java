@@ -12,7 +12,6 @@ import org.xydra.annotations.ReadOperation;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.XType;
-import org.xydra.base.XX;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
@@ -30,6 +29,7 @@ import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.core.XCopyUtils;
+import org.xydra.core.XX;
 import org.xydra.core.change.XModelEventListener;
 import org.xydra.core.change.XModelSyncEventListener;
 import org.xydra.core.change.XSendsModelSyncEvents;
@@ -147,11 +147,16 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, XSen
             }
             
         }
-        XyAssert.xyAssert(
-                this.eventQueue.getChangeLog() == null
-                        || this.eventQueue.getChangeLog().getCurrentRevisionNumber() == getRevisionNumber(),
-                "eventQueue.changeLog==null?" + (this.eventQueue.getChangeLog() == null)
-                        + "; getRevisionNumber()=" + getRevisionNumber());
+        XyAssert.xyAssert(this.eventQueue.getChangeLog() == null
+        
+        || this.eventQueue.getChangeLog().getCurrentRevisionNumber()
+        
+        == getRevisionNumber(),
+        
+        "eventQueue.changeLog==null?" + (this.eventQueue.getChangeLog() == null)
+                + "; getRevisionNumber()=" + getRevisionNumber()
+                + " this.eventQueue.getChangeLog().getCurrentRevisionNumber()="
+                + this.eventQueue.getChangeLog().getCurrentRevisionNumber());
     }
     
     /**
@@ -205,12 +210,17 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, XSen
     
     private static XChangeLogState createChangeLog(XRevWritableModel modelState) {
         XChangeLogState log = new MemoryChangeLogState(modelState.getAddress());
-        if(modelState.getRevisionNumber() != 0 || modelState.getAddress().getRepository() == null) {
-            // Bump the log revision.
-            log.setFirstRevisionNumber(modelState.getRevisionNumber() + 1);
-        } else {
-            XyAssert.xyAssert(log.getCurrentRevisionNumber() == -1);
-        }
+        
+        // FIXME MONKEY PATCHED
+        // if(modelState.getRevisionNumber() != 0 ||
+        // modelState.getAddress().getRepository() == null) {
+        // // Bump the log revision.
+        // log.setBaseRevisionNumber(modelState.getRevisionNumber() + 1);
+        // } else {
+        // XyAssert.xyAssert(log.getCurrentRevisionNumber() == -1);
+        // }
+        log.setBaseRevisionNumber(modelState.getRevisionNumber());
+        
         return log;
     }
     
@@ -592,6 +602,7 @@ public class MemoryModel extends SynchronizesChangesImpl implements XModel, XSen
         synchronized(this.eventQueue) {
             checkRemoved();
             
+            // lazy loading of MemoryObjects
             MemoryObject object = this.loadedObjects.get(objectId);
             if(object != null) {
                 return object;

@@ -1,8 +1,8 @@
 package org.xydra.store.access.impl.memory;
 
 import org.xydra.base.XId;
-import org.xydra.base.XX;
-import org.xydra.core.model.impl.memory.UUID;
+import org.xydra.base.id.UUID;
+import org.xydra.core.XX;
 import org.xydra.store.XydraStoreAdmin;
 import org.xydra.store.access.HashUtils;
 import org.xydra.store.access.XAccessControlManager;

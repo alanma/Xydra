@@ -9,9 +9,6 @@ import org.xydra.base.XId;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XAtomicCommand;
 import org.xydra.base.change.XCommand;
-import org.xydra.core.model.XModel;
-import org.xydra.core.model.XObject;
-import org.xydra.core.model.XRepository;
 
 
 @RunsInGWT(true)
@@ -69,7 +66,7 @@ abstract public class MemoryAtomicCommand implements XAtomicCommand, Serializabl
     }
     
     /**
-     * @return the {@link XId} of the {@link XModel} holding the entity this
+     * @return the {@link XId} of the model holding the entity this
      *         command will change (may be null)
      */
     public XId getModelId() {
@@ -77,7 +74,7 @@ abstract public class MemoryAtomicCommand implements XAtomicCommand, Serializabl
     }
     
     /**
-     * @return the {@link XId} of the {@link XObject} holding the entity this
+     * @return the {@link XId} of the object holding the entity this
      *         command will change (may be null)
      */
     public XId getObjectId() {
@@ -85,7 +82,7 @@ abstract public class MemoryAtomicCommand implements XAtomicCommand, Serializabl
     }
     
     /**
-     * @return the {@link XId} of the {@link XRepository} holding the entity
+     * @return the {@link XId} of the repository holding the entity
      *         this command will change (may be null)
      */
     public XId getRepositoryId() {

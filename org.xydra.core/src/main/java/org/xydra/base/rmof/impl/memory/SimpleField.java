@@ -7,8 +7,8 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XRevWritableField;
 import org.xydra.base.rmof.XWritableField;
+import org.xydra.base.util.DumpUtilsBase;
 import org.xydra.base.value.XValue;
-import org.xydra.core.util.DumpUtils;
 import org.xydra.index.XI;
 import org.xydra.sharedutils.XyAssert;
 
@@ -102,7 +102,7 @@ public class SimpleField extends SimpleEntity implements XRevWritableField {
     
     @Override
     public String toString() {
-        return DumpUtils.toStringBuffer(this).toString();
+        return DumpUtilsBase.toStringBuffer(this).toString();
     }
     
     boolean sameState(XReadableField o) {

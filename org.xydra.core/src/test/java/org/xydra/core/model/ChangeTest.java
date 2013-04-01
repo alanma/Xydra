@@ -7,9 +7,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.xydra.base.X;
 import org.xydra.base.XId;
-import org.xydra.base.XX;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XFieldEvent;
 import org.xydra.base.change.XModelEvent;
@@ -17,6 +15,8 @@ import org.xydra.base.change.XObjectEvent;
 import org.xydra.base.change.XRepositoryEvent;
 import org.xydra.base.value.impl.memory.MemoryStringValue;
 import org.xydra.core.LoggerTestHelper;
+import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.core.change.XFieldEventListener;
 import org.xydra.core.change.XModelEventListener;
 import org.xydra.core.change.XObjectEventListener;

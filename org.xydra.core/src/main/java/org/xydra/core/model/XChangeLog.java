@@ -51,7 +51,7 @@ public interface XChangeLog extends Serializable {
 	 * 
 	 * @param beginRevision the beginning revision number of the interval from
 	 *            which all {@link XEvent XEvents} are to be returned - can be
-	 *            less than {@link #getFirstRevisionNumber()} to get all
+	 *            less than {@link #getBaseRevisionNumber()} to get all
 	 *            {@link XEvent XEvents} up to endRevision
 	 * @param endRevision the end revision number of the interval from which all
 	 *            {@link XEvent XEvents} are to be returned - can be greater
@@ -96,6 +96,6 @@ public interface XChangeLog extends Serializable {
 	 * @return the revision number the logged {@link XModel} had at the time
 	 *         when this change log began logging
 	 */
-	long getFirstRevisionNumber();
+	long getBaseRevisionNumber();
 	
 }

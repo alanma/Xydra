@@ -2,17 +2,17 @@ package org.xydra.store.rmof.impl.delegate;
 
 import java.util.Iterator;
 
-import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableObject;
+import org.xydra.core.X;
 import org.xydra.index.iterator.NoneIterator;
+import org.xydra.persistence.GetWithAddressRequest;
+import org.xydra.persistence.XydraPersistence;
 import org.xydra.sharedutils.XyAssert;
-import org.xydra.store.GetWithAddressRequest;
-import org.xydra.store.impl.delegate.XydraPersistence;
 
 
 public class WritableObjectOnPersistence extends AbstractWritableOnPersistence implements

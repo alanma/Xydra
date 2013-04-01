@@ -1,5 +1,7 @@
 package org.xydra.store;
 
+import org.xydra.core.StoreException;
+
 /**
  * An exception that indicates that the Xydra Server did not understand the
  * request it received. Possible causes might be an API incompatibility or wrong

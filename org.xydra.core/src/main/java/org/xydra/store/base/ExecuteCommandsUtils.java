@@ -1,9 +1,9 @@
 package org.xydra.store.base;
 
 import org.xydra.base.change.XCommand;
+import org.xydra.core.StoreException;
 import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.BatchedResult;
-import org.xydra.store.StoreException;
 import org.xydra.store.WaitingCallback;
 import org.xydra.store.XydraStore;
 

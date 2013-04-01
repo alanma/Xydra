@@ -6,12 +6,12 @@ import java.util.ArrayList;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
-import org.xydra.base.XX;
 import org.xydra.base.value.XValue;
 import org.xydra.core.DemoModelUtil;
+import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;

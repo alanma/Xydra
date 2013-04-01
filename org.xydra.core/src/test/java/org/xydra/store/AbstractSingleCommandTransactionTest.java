@@ -6,19 +6,19 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 
 import org.junit.Test;
-import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
-import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XCommandFactory;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XTransaction;
+import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.log.gae.Log4jLoggerFactory;
-import org.xydra.store.impl.delegate.XydraPersistence;
+import org.xydra.persistence.XydraPersistence;
 
 
 public abstract class AbstractSingleCommandTransactionTest {
