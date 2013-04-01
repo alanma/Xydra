@@ -16,7 +16,7 @@
     <inherits name='org.xydra.log.Xlog'/>
 
 	<!-- Inherit the Xydra Core -->
-	<inherits name='org.xydra.core.XydraCore'/>
+	<inherits name='org.xydra.store.XydraStore'/>
 	
 	<source path="">
 		<exclude name="**/*Test.java" />
