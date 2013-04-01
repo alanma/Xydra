@@ -5,9 +5,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XX;
 import org.xydra.base.value.XCollectionValue;
 import org.xydra.base.value.XValue;
+import org.xydra.core.XX;
 import org.xydra.index.iterator.AbstractTransformingIterator;
 
 import com.google.gwt.event.dom.client.ClickEvent;

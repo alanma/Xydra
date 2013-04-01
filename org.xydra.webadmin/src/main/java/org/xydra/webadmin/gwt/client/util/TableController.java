@@ -7,12 +7,12 @@ import java.util.List;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
-import org.xydra.base.XX;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XWritableObject;
+import org.xydra.base.util.DumpUtilsBase.XidComparator;
+import org.xydra.core.XX;
 import org.xydra.core.change.SessionCachedModel;
-import org.xydra.core.util.DumpUtils.XidComparator;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.Controller;

@@ -6,7 +6,6 @@ import java.util.SortedSet;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
-import org.xydra.base.XX;
 import org.xydra.base.value.XAddressListValue;
 import org.xydra.base.value.XAddressSetValue;
 import org.xydra.base.value.XAddressSortedSetValue;
@@ -27,6 +26,7 @@ import org.xydra.base.value.XStringSetValue;
 import org.xydra.base.value.XStringValue;
 import org.xydra.base.value.XV;
 import org.xydra.base.value.XValueJavaUtils;
+import org.xydra.core.XX;
 import org.xydra.oo.runtime.client.GwtXydraMapped;
 import org.xydra.oo.runtime.shared.BaseTypeSpec;
 import org.xydra.oo.runtime.shared.CollectionProxy;

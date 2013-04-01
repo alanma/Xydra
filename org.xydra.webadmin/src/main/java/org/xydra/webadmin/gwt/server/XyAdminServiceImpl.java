@@ -3,14 +3,14 @@ package org.xydra.webadmin.gwt.server;
 import java.util.Set;
 
 import org.xydra.base.XId;
-import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
-import org.xydra.store.GetWithAddressRequest;
-import org.xydra.store.impl.delegate.XydraPersistence;
+import org.xydra.core.XX;
+import org.xydra.persistence.GetWithAddressRequest;
+import org.xydra.persistence.XydraPersistence;
 import org.xydra.webadmin.Utils;
 import org.xydra.webadmin.gwt.shared.XyAdminService;
 

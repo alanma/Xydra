@@ -5,10 +5,10 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 
 import org.xydra.base.XId;
-import org.xydra.base.XX;
 import org.xydra.base.change.XTransaction;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableRepository;
+import org.xydra.core.XX;
 import org.xydra.core.change.DiffWritableModel;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;

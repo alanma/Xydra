@@ -10,11 +10,11 @@ import java.util.Set;
 import java.util.SortedSet;
 
 import org.xydra.base.XId;
-import org.xydra.base.XX;
 import org.xydra.base.value.ValueType;
 import org.xydra.base.value.XIdListValue;
 import org.xydra.base.value.XV;
 import org.xydra.base.value.XValueJavaUtils;
+import org.xydra.core.XX;
 import org.xydra.oo.generator.codespec.NameUtils;
 import org.xydra.oo.generator.codespec.SpecWriter;
 import org.xydra.oo.generator.codespec.impl.ClassSpec;

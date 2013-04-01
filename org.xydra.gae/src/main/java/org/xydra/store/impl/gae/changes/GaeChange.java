@@ -6,12 +6,12 @@ import java.util.concurrent.Future;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
-import org.xydra.base.XX;
 import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XTransaction;
 import org.xydra.base.change.impl.memory.MemoryTransactionEvent;
+import org.xydra.core.XX;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.gae.AboutAppEngine;
 import org.xydra.index.query.Pair;

@@ -10,11 +10,11 @@ import org.xydra.gae.admin.GaeConfiguration;
 import org.xydra.gae.admin.GaeConfigurationManager;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.persistence.XydraPersistence;
 import org.xydra.store.IMemCache;
 import org.xydra.store.XydraConfigUtils;
 import org.xydra.store.XydraPlatformRuntime;
 import org.xydra.store.XydraRuntime;
-import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.memory.LocalMemcache;
 
 

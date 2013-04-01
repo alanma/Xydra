@@ -1,5 +1,5 @@
 /**
- * Core implementation of {@link org.xydra.store.impl.delegate.XydraPersistence}
+ * Core implementation of {@link org.xydra.persistence.XydraPersistence}
  * with GAE datastore using our own concurrent transaction and locking concepts
  * to avoid datastore contention.
  * 

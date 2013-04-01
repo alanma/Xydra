@@ -5,14 +5,14 @@ import java.util.List;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
-import org.xydra.base.XX;
 import org.xydra.base.rmof.XWritableModel;
+import org.xydra.core.XX;
 import org.xydra.gae.AboutAppEngine;
 import org.xydra.gae.UniversalTaskQueue;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.store.GetWithAddressRequest;
-import org.xydra.store.impl.delegate.XydraPersistence;
+import org.xydra.persistence.GetWithAddressRequest;
+import org.xydra.persistence.XydraPersistence;
 import org.xydra.store.impl.gae.GaeConstants;
 import org.xydra.store.impl.gae.UniCache;
 import org.xydra.store.impl.gae.UniCache.StorageOptions;

@@ -1,8 +1,8 @@
 package org.xydra.oo.testgen.tasks.client;
 
-import org.xydra.base.X;
 import org.xydra.base.XId;
-import org.xydra.base.XX;
+import org.xydra.core.X;
+import org.xydra.core.XX;
 
 import com.google.gwt.core.client.EntryPoint;
 

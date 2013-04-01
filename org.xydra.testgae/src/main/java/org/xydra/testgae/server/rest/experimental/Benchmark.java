@@ -8,8 +8,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 import org.xydra.base.XId;
-import org.xydra.base.XX;
 import org.xydra.base.rmof.XWritableModel;
+import org.xydra.core.XX;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
 import org.xydra.restless.utils.NanoClock;

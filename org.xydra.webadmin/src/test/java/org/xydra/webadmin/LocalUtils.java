@@ -6,9 +6,9 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 
 import org.xydra.base.XId;
-import org.xydra.base.XX;
+import org.xydra.core.XX;
+import org.xydra.persistence.XydraPersistence;
 import org.xydra.store.XydraRuntime;
-import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.gae.GaeTestfixer;
 import org.xydra.store.impl.gae.InstanceContext;
 import org.xydra.store.impl.gae.SyncDatastore;

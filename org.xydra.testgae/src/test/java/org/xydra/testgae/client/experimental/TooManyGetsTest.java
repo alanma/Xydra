@@ -4,10 +4,10 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 
 import org.junit.Test;
-import org.xydra.base.XX;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.rmof.XWritableRepository;
+import org.xydra.core.XX;
 import org.xydra.testgae.server.model.xmas.Xmas;
 
 

@@ -14,13 +14,13 @@ import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.persistence.XydraPersistence;
 import org.xydra.restless.Restless;
 import org.xydra.restless.utils.Delay;
 import org.xydra.server.XydraServerApp;
 import org.xydra.server.rest.log.LogTestResource;
 import org.xydra.store.InternalStoreException;
 import org.xydra.store.XydraStore;
-import org.xydra.store.impl.delegate.XydraPersistence;
 
 
 /**

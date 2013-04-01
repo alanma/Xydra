@@ -1,16 +1,18 @@
 package org.xydra.store;
 
 import org.junit.Test;
-import org.xydra.base.X;
 import org.xydra.base.XId;
-import org.xydra.base.XX;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XCommandFactory;
+import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.log.gae.Log4jLoggerFactory;
+import org.xydra.persistence.GetWithAddressRequest;
+import org.xydra.persistence.ModelRevision;
+import org.xydra.persistence.XydraPersistence;
 import org.xydra.store.impl.delegate.DelegatingAllowAllStore;
-import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.gae.GaePersistence;
 import org.xydra.store.impl.gae.GaeTestfixer;
 

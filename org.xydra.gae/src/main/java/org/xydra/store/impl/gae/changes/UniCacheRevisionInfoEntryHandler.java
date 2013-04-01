@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.store.ModelRevision;
+import org.xydra.persistence.ModelRevision;
 import org.xydra.store.impl.gae.DebugFormatter;
 import org.xydra.store.impl.gae.UniCache;
 

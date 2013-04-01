@@ -2,23 +2,23 @@ package org.xydra.gwt.editor;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
-import org.xydra.base.XX;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
+import org.xydra.core.StoreException;
+import org.xydra.core.XX;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XSynchronizesChanges;
-import org.xydra.core.model.sync.XSynchronizer;
 import org.xydra.core.serialize.json.JsonParser;
 import org.xydra.core.serialize.json.JsonSerializer;
 import org.xydra.gwt.store.GwtXydraStoreRestClient;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.persistence.GetWithAddressRequest;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.Callback;
-import org.xydra.store.GetWithAddressRequest;
-import org.xydra.store.StoreException;
 import org.xydra.store.XydraStore;
+import org.xydra.store.sync.XSynchronizer;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;

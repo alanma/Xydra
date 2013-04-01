@@ -4,7 +4,7 @@ import org.xydra.base.XAddress;
 import org.xydra.core.model.XModel;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.store.ModelRevision;
+import org.xydra.persistence.ModelRevision;
 import org.xydra.store.impl.gae.changes.GaeModelRevision;
 import org.xydra.store.impl.gae.changes.RevisionInfo;
 

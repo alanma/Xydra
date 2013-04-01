@@ -1,8 +1,8 @@
 package org.xydra.webadmin.gwt.client.widgets.dialogs;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XX;
 import org.xydra.base.value.XValue;
+import org.xydra.core.XX;
 import org.xydra.gwt.editor.value.XIdEditor;
 import org.xydra.gwt.editor.value.XValueEditor.EditListener;
 import org.xydra.log.Logger;

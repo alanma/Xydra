@@ -12,10 +12,10 @@ import java.util.List;
 
 import org.junit.Test;
 import org.xydra.base.XId;
-import org.xydra.base.XX;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.value.ValueType;
 import org.xydra.base.value.XV;
+import org.xydra.core.XX;
 import org.xydra.core.model.impl.memory.MemoryModel;
 import org.xydra.core.util.DumpUtils;
 import org.xydra.oo.testgen.alltypes.java.JavaFactory;

@@ -11,9 +11,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.xydra.base.XId;
 import org.xydra.gae.AboutAppEngine;
+import org.xydra.persistence.XydraPersistence;
 import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.restless.utils.SharedHtmlUtils.HeadLinkStyle;
-import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.gae.GaePersistence;
 
 

@@ -11,12 +11,13 @@ import javax.servlet.http.HttpServletResponse;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
-import org.xydra.base.X;
 import org.xydra.base.XId;
-import org.xydra.base.XX;
 import org.xydra.base.change.impl.memory.MemoryRepositoryCommand;
+import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.persistence.XydraPersistence;
 import org.xydra.restless.Restless;
 import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.restless.utils.ServletUtils;
@@ -26,7 +27,6 @@ import org.xydra.store.GaeStoreReadMethodsTest;
 import org.xydra.store.XydraStore;
 import org.xydra.store.access.HashUtils;
 import org.xydra.store.impl.delegate.DelegatingAllowAllStore;
-import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.gae.GaePersistence;
 
 

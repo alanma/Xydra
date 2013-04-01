@@ -1,7 +1,7 @@
 package org.xydra.store.impl.gae;
 
 import org.xydra.base.XId;
-import org.xydra.base.XX;
+import org.xydra.core.XX;
 import org.xydra.store.impl.delegate.DelegatingAllowAllStore;
 
 

@@ -7,7 +7,7 @@ import java.util.Set;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
-import org.xydra.base.XX;
+import org.xydra.core.XX;
 
 
 public class EntityTree {

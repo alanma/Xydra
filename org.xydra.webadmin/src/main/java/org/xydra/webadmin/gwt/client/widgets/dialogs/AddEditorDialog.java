@@ -6,7 +6,6 @@ import java.util.HashSet;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
-import org.xydra.base.XX;
 import org.xydra.base.value.ValueType;
 import org.xydra.base.value.XAddressListValue;
 import org.xydra.base.value.XAddressSetValue;
@@ -28,6 +27,7 @@ import org.xydra.base.value.XStringSetValue;
 import org.xydra.base.value.XStringValue;
 import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
+import org.xydra.core.XX;
 import org.xydra.gwt.editor.value.XAddressEditor;
 import org.xydra.gwt.editor.value.XAddressListEditor;
 import org.xydra.gwt.editor.value.XAddressSetEditor;

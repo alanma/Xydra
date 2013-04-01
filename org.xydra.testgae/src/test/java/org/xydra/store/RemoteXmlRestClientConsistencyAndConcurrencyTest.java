@@ -5,7 +5,7 @@ import org.xydra.core.serialize.xml.XmlParser;
 import org.xydra.core.serialize.xml.XmlSerializer;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.store.impl.delegate.XydraPersistence;
+import org.xydra.persistence.XydraPersistence;
 import org.xydra.store.impl.rest.XydraStoreRestClient;
 
 

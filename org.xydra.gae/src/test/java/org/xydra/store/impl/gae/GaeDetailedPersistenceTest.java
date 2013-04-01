@@ -3,7 +3,7 @@ package org.xydra.store.impl.gae;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.xydra.base.X;
+import org.xydra.core.X;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.store.AbstractPersistenceTest;

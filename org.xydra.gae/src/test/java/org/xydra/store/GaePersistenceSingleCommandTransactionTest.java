@@ -1,7 +1,7 @@
 package org.xydra.store;
 
 import org.junit.Before;
-import org.xydra.base.X;
+import org.xydra.core.X;
 import org.xydra.store.impl.gae.GaePersistence;
 import org.xydra.store.impl.gae.GaeTestFixer_LocalPart;
 import org.xydra.store.impl.gae.GaeTestfixer;

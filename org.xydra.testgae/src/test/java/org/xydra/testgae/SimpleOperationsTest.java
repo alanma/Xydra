@@ -4,13 +4,13 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.xydra.base.X;
 import org.xydra.base.XId;
-import org.xydra.base.XX;
 import org.xydra.base.change.XRepositoryCommand;
+import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.perf.StatsGatheringPersistenceWrapper;
+import org.xydra.persistence.XydraPersistence;
 import org.xydra.store.XydraRuntime;
-import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.gae.GaeTestfixer;
 
 

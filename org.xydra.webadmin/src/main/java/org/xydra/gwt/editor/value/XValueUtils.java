@@ -4,7 +4,6 @@ import java.util.Iterator;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
-import org.xydra.base.XX;
 import org.xydra.base.value.XAddressListValue;
 import org.xydra.base.value.XBinaryValue;
 import org.xydra.base.value.XBooleanListValue;
@@ -21,6 +20,7 @@ import org.xydra.base.value.XLongValue;
 import org.xydra.base.value.XStringListValue;
 import org.xydra.base.value.XStringSetValue;
 import org.xydra.base.value.XValue;
+import org.xydra.core.XX;
 import org.xydra.index.iterator.AbstractFilteringIterator;
 import org.xydra.index.iterator.AbstractTransformingIterator;
 import org.xydra.index.iterator.NoneIterator;

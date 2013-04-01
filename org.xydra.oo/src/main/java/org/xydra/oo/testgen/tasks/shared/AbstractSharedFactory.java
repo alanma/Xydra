@@ -1,8 +1,8 @@
 package org.xydra.oo.testgen.tasks.shared;
 
 import org.xydra.base.XId;
-import org.xydra.base.XX;
 import org.xydra.base.rmof.XWritableModel;
+import org.xydra.core.XX;
 import org.xydra.oo.runtime.shared.AbstractFactory;
 import org.xydra.oo.testgen.tasks.shared.IBaseList;
 import org.xydra.oo.testgen.tasks.shared.IHome;

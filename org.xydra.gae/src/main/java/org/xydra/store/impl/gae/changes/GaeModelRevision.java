@@ -2,7 +2,7 @@ package org.xydra.store.impl.gae.changes;
 
 import java.io.Serializable;
 
-import org.xydra.store.ModelRevision;
+import org.xydra.persistence.ModelRevision;
 
 
 /**

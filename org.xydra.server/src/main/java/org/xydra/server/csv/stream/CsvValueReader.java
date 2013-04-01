@@ -6,15 +6,15 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
-import org.xydra.base.XX;
 import org.xydra.base.value.ValueType;
 import org.xydra.base.value.XBinaryValue;
 import org.xydra.base.value.XCollectionValue;
 import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
+import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.core.serialize.SerializedValue;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;

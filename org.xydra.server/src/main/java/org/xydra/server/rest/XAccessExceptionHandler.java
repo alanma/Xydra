@@ -4,9 +4,9 @@ import java.io.IOException;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.xydra.core.AccessException;
 import org.xydra.restless.IRestlessContext;
 import org.xydra.restless.RestlessExceptionHandler;
-import org.xydra.store.AccessException;
 
 
 /**

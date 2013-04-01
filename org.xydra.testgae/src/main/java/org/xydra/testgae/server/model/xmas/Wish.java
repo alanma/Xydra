@@ -1,14 +1,14 @@
 package org.xydra.testgae.server.model.xmas;
 
-import org.xydra.base.X;
 import org.xydra.base.XId;
-import org.xydra.base.XX;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.value.XIntegerValue;
 import org.xydra.base.value.XStringValue;
 import org.xydra.base.value.XV;
+import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.restless.utils.HtmlUtils;

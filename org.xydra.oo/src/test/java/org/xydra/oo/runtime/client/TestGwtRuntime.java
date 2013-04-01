@@ -2,8 +2,8 @@ package org.xydra.oo.runtime.client;
 
 import java.io.IOException;
 
-import org.xydra.base.XX;
 import org.xydra.base.rmof.XWritableModel;
+import org.xydra.core.XX;
 import org.xydra.core.model.impl.memory.MemoryModel;
 import org.xydra.core.util.DumpUtils;
 import org.xydra.oo.testgen.tasks.client.GwtFactory;

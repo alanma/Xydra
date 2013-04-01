@@ -1,10 +1,10 @@
 package org.xydra.store.impl.gae;
 
 import org.xydra.base.XId;
-import org.xydra.base.XX;
+import org.xydra.core.XX;
+import org.xydra.persistence.XydraPersistence;
 import org.xydra.store.XydraStoreAdmin;
 import org.xydra.store.impl.delegate.DelegatingSecureStore;
-import org.xydra.store.impl.delegate.XydraPersistence;
 
 
 public class GaeSecureStore extends DelegatingSecureStore {

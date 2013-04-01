@@ -2,7 +2,6 @@ package org.xydra.webadmin.gwt.client;
 
 import java.util.Set;
 
-import org.xydra.base.X;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
@@ -10,6 +9,7 @@ import org.xydra.base.change.XCommandUtils;
 import org.xydra.base.change.XRepositoryCommand;
 import org.xydra.base.change.XTransaction;
 import org.xydra.base.rmof.XReadableModel;
+import org.xydra.core.X;
 import org.xydra.core.change.SessionCachedModel;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;

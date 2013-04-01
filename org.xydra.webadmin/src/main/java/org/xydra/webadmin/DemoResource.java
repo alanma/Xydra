@@ -5,15 +5,15 @@ import java.io.Writer;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.xydra.base.XX;
 import org.xydra.core.DemoModelUtil;
 import org.xydra.core.XCopyUtils;
+import org.xydra.core.XX;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.impl.memory.MemoryRepository;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.persistence.XydraPersistence;
 import org.xydra.restless.Restless;
-import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.gae.GaeTestfixer;
 import org.xydra.store.rmof.impl.delegate.WritableRepositoryOnPersistence;
 

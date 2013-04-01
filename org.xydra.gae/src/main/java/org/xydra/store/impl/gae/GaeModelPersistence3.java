@@ -10,7 +10,7 @@ import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.store.ModelRevision;
+import org.xydra.persistence.ModelRevision;
 import org.xydra.store.impl.gae.changes.GaeChangesServiceImpl3;
 import org.xydra.store.impl.gae.changes.GaeModelRevision;
 import org.xydra.store.impl.gae.changes.IGaeChangesService;

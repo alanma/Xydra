@@ -3,7 +3,7 @@ package org.xydra.webadmin.gwt.client.widgets;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.XType;
-import org.xydra.base.XX;
+import org.xydra.core.XX;
 import org.xydra.gwt.editor.value.XAddressEditor;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;

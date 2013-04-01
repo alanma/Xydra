@@ -6,7 +6,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.xydra.core.model.impl.memory.UUID;
+import org.xydra.base.id.UUID;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.testgae.server.rest.ConsistencyTestResource;

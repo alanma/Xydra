@@ -4,7 +4,7 @@ import java.io.File;
 import java.net.URI;
 
 import org.xydra.base.XAddress;
-import org.xydra.base.XX;
+import org.xydra.core.XX;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.server.TestServer;
