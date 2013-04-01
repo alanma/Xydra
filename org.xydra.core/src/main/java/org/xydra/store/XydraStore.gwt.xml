@@ -4,7 +4,8 @@
 	
 	<super-source path="gwtemul" />
 	
-	<inherits name="org.xydra.base.XydraBase" />
+	<inherits name="org.xydra.perf.XydraPerformanceUtils" />
+	<inherits name="org.xydra.persistence.XydraPersistence" />
 	
 	<source path="">
 		<exclude name="**/*Test.java" />

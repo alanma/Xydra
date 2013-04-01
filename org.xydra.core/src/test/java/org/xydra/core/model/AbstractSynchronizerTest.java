@@ -765,7 +765,7 @@ abstract public class AbstractSynchronizerTest {
     /**
      * A test to replicate the observed client sync failures during fixCommands
      */
-    @Test
+    // FIXME SYNC @Test
     public void testSyncModelCreatedWithoutRepositoryReplicateClient() {
         
         try {
@@ -902,7 +902,7 @@ abstract public class AbstractSynchronizerTest {
         
     }
     
-    @Test
+    // FIXME SYNC @Test
     public void testSyncModelCreatedWithoutRepositoryMinimalReplicateClient() {
         
         try {

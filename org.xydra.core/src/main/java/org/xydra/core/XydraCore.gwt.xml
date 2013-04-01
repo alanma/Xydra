@@ -6,7 +6,6 @@
 	<!-- inherit as 'org.xydra.core.XydraCore' -->
 	
 	<inherits name="org.xydra.base.XydraBase" />
-	<inherits name="org.xydra.store.XydraStore" />
 	<inherits name="org.xydra.sharedutils.XydraSharedUtils" />
 	<inherits name="org.xydra.perf.XydraPerformanceUtils" />
 	

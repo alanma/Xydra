@@ -3,7 +3,7 @@ package org.xydra.store.impl.memory;
 import org.xydra.base.XId;
 import org.xydra.store.IMemCache;
 import org.xydra.store.XydraPlatformRuntime;
-import org.xydra.store.impl.delegate.XydraPersistence;
+import org.xydra.persistence.XydraPersistence;
 
 
 public class MemoryRuntime implements XydraPlatformRuntime {

@@ -3,9 +3,8 @@
 <module>
 	
 	<super-source path="gwtemul" />
-
-	<inherits name="org.xydra.annotations.XydraAnnotations" />
-	<inherits name='org.xydra.log.Xlog'/>
+	
+	<inherits name="org.xydra.core.XydraCore" />
 	
 	<source path="">
 		<exclude name="**/*Test.java" />
