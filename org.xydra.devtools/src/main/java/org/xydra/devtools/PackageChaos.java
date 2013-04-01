@@ -99,7 +99,9 @@ public class PackageChaos {
         System.out.println("--- Graph ---");
         g.dump("");
         
-        g.writeTo(this.resultFile);
+        File temp = new File(this.resultFile.getAbsoluteFile() + ".temp");
+        g.writeTo(temp);
+        temp.renameTo(this.resultFile);
         
         log.info("Written " + g.size() + " edges to DOT file");
     }

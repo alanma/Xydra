@@ -31,8 +31,10 @@ public class Layer {
                 && ((Layer)o).commonPackagePrefix.equals(this.commonPackagePrefix);
     }
     
-    public void mayAccess(Layer lower) {
-        this.lowerLayers.add(lower);
+    public void mayAccess(Layer ... lower) {
+        if(lower != null)
+            for(Layer l : lower)
+                this.lowerLayers.add(l);
     }
     
     public boolean contains(Package p) {
