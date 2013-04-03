@@ -52,7 +52,7 @@ public abstract class AbstractSingleCommandTransactionTest {
 		
 		XTransactionBuilder txnBuilder = new XTransactionBuilder(modelAddress);
 		XId objectId = X.getIDProvider().fromString("singleCommandTransactionObject");
-		XCommand addObjectCommand = this.comFactory.createAddObjectCommand(this.repoId, modelId,
+		XCommand addObjectCommand = this.comFactory.createAddObjectCommand(XX.resolveModel(this.repoId, modelId),
 		        objectId, false);
 		
 		txnBuilder.addCommand(addObjectCommand);

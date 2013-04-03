@@ -37,12 +37,10 @@ public class WritableFieldOnStore extends ReadableFieldOnStore implements XWrita
         // send change command
         XCommand command;
         if(value != null) {
-            command = X.getCommandFactory().createAddValueCommand(this.address.getRepository(),
-                    this.address.getModel(), this.address.getObject(), this.address.getField(),
+            command = X.getCommandFactory().createAddValueCommand(this.address,
                     this.getRevisionNumber(), value, true);
         } else {
-            command = X.getCommandFactory().createRemoveValueCommand(this.address.getRepository(),
-                    this.address.getModel(), this.address.getObject(), this.address.getField(),
+            command = X.getCommandFactory().createRemoveValueCommand(this.address,
                     this.getRevisionNumber(), true);
         }
         long result = ExecuteCommandsUtils.executeCommand(this.credentials, this.store, command);

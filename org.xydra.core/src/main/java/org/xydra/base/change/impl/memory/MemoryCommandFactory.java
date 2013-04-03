@@ -32,7 +32,7 @@ public class MemoryCommandFactory implements XCommandFactory {
      * @return a new {@link XObjectCommand} of the add-type
      */
     public XObjectCommand createAddFieldCommand(XId objectId, XId fieldId) {
-        return createAddFieldCommand(null, null, objectId, fieldId, false);
+        return createAddFieldCommand(Base.resolveObject((XId)null, null, objectId), fieldId, false);
     }
     
     /**
@@ -47,7 +47,8 @@ public class MemoryCommandFactory implements XCommandFactory {
      * @return a new {@link XObjectCommand} of the add-type
      */
     public XObjectCommand createAddFieldCommand(XId objectId, XId fieldId, boolean isForced) {
-        return createAddFieldCommand(null, null, objectId, fieldId, isForced);
+        return createAddFieldCommand(Base.resolveObject((XId)null, (XId)null, objectId), fieldId,
+                isForced);
     }
     
     /**
@@ -62,7 +63,8 @@ public class MemoryCommandFactory implements XCommandFactory {
      * @return a new {@link XObjectCommand} of the add-type
      */
     public XObjectCommand createAddFieldCommand(XId modelId, XId objectId, XId fieldId) {
-        return createAddFieldCommand(null, modelId, objectId, fieldId, false);
+        return createAddFieldCommand(Base.resolveObject((XId)null, modelId, objectId), fieldId,
+                false);
     }
     
     /**
@@ -80,7 +82,8 @@ public class MemoryCommandFactory implements XCommandFactory {
      */
     public XObjectCommand createAddFieldCommand(XId modelId, XId objectId, XId fieldId,
             boolean isForced) {
-        return createAddFieldCommand(null, modelId, objectId, fieldId, isForced);
+        return createAddFieldCommand(Base.resolveObject((XId)null, modelId, objectId), fieldId,
+                isForced);
     }
     
     /**
@@ -99,7 +102,8 @@ public class MemoryCommandFactory implements XCommandFactory {
      */
     public XObjectCommand createAddFieldCommand(XId repositoryId, XId modelId, XId objectId,
             XId fieldId) {
-        return createAddFieldCommand(repositoryId, modelId, objectId, fieldId, false);
+        return createAddFieldCommand(Base.resolveObject(repositoryId, modelId, objectId), fieldId,
+                false);
     }
     
     @Override
@@ -144,7 +148,7 @@ public class MemoryCommandFactory implements XCommandFactory {
      * @return A new {@link XModelCommand} of the add-type.
      */
     public XModelCommand createAddObjectCommand(XId modelId, XId objectId) {
-        return createAddObjectCommand(null, modelId, objectId, false);
+        return createAddObjectCommand(Base.resolveModel((XId)null, modelId), objectId, false);
     }
     
     /**
@@ -159,7 +163,7 @@ public class MemoryCommandFactory implements XCommandFactory {
      * @return A new {@link XModelCommand} of the add-type.
      */
     public XModelCommand createAddObjectCommand(XId modelId, XId objectId, boolean isForced) {
-        return createAddObjectCommand(null, modelId, objectId, isForced);
+        return createAddObjectCommand(Base.resolveModel((XId)null, modelId), objectId, isForced);
     }
     
     /**
@@ -174,7 +178,7 @@ public class MemoryCommandFactory implements XCommandFactory {
      * @return A new {@link XModelCommand} of the add-type.
      */
     public XModelCommand createAddObjectCommand(XId repositoryId, XId modelId, XId objectId) {
-        return createAddObjectCommand(repositoryId, modelId, objectId, false);
+        return createAddObjectCommand(Base.resolveModel(repositoryId, modelId), objectId, false);
     }
     
     @Override
@@ -199,7 +203,8 @@ public class MemoryCommandFactory implements XCommandFactory {
      * @return A new {@link XFieldCommand} of the add-type.
      */
     public XFieldCommand createAddValueCommand(XId fieldId, long fieldRevision, XValue value) {
-        return createAddValueCommand(null, null, null, fieldId, fieldRevision, value, false);
+        return createAddValueCommand(Base.resolveField((XId)null, (XId)null, (XId)null, fieldId),
+                fieldRevision, value, false);
     }
     
     /**
@@ -217,7 +222,8 @@ public class MemoryCommandFactory implements XCommandFactory {
      */
     public XFieldCommand createAddValueCommand(XId fieldId, long fieldRevision, XValue value,
             boolean isForced) {
-        return createAddValueCommand(null, null, null, fieldId, fieldRevision, value, isForced);
+        return createAddValueCommand(Base.resolveField((XId)null, (XId)null, (XId)null, fieldId),
+                fieldRevision, value, isForced);
     }
     
     /**
@@ -235,7 +241,8 @@ public class MemoryCommandFactory implements XCommandFactory {
      */
     public XFieldCommand createAddValueCommand(XId objectId, XId fieldId, long fieldRevision,
             XValue value) {
-        return createAddValueCommand(null, null, objectId, fieldId, fieldRevision, value, false);
+        return createAddValueCommand(Base.resolveField((XId)null, (XId)null, objectId, fieldId),
+                fieldRevision, value, false);
     }
     
     /**
@@ -255,7 +262,8 @@ public class MemoryCommandFactory implements XCommandFactory {
      */
     public XFieldCommand createAddValueCommand(XId objectId, XId fieldId, long fieldRevision,
             XValue value, boolean isForced) {
-        return createAddValueCommand(null, null, objectId, fieldId, fieldRevision, value, isForced);
+        return createAddValueCommand(Base.resolveField((XId)null, (XId)null, objectId, fieldId),
+                fieldRevision, value, isForced);
     }
     
     /**
@@ -275,7 +283,8 @@ public class MemoryCommandFactory implements XCommandFactory {
      */
     public XFieldCommand createAddValueCommand(XId modelId, XId objectId, XId fieldId,
             long fieldRevision, XValue value) {
-        return createAddValueCommand(null, modelId, objectId, fieldId, fieldRevision, value, false);
+        return createAddValueCommand(Base.resolveField((XId)null, modelId, objectId, fieldId),
+                fieldRevision, value, false);
     }
     
     /**
@@ -297,8 +306,8 @@ public class MemoryCommandFactory implements XCommandFactory {
      */
     public XFieldCommand createAddValueCommand(XId modelId, XId objectId, XId fieldId,
             long fieldRevision, XValue value, boolean isForced) {
-        return createAddValueCommand(null, modelId, objectId, fieldId, fieldRevision, value,
-                isForced);
+        return createAddValueCommand(Base.resolveField((XId)null, modelId, objectId, fieldId),
+                fieldRevision, value, isForced);
     }
     
     /**
@@ -321,8 +330,8 @@ public class MemoryCommandFactory implements XCommandFactory {
      */
     public XFieldCommand createAddValueCommand(XId repositoryId, XId modelId, XId objectId,
             XId fieldId, long fieldRevision, XValue value) {
-        return createAddValueCommand(repositoryId, modelId, objectId, fieldId, fieldRevision,
-                value, false);
+        return createAddValueCommand(Base.resolveField(repositoryId, modelId, objectId, fieldId),
+                fieldRevision, value, false);
     }
     
     @Override
@@ -926,13 +935,15 @@ public class MemoryCommandFactory implements XCommandFactory {
     @Override
     public XObjectCommand createSafeAddFieldCommand(XId repositoryId, XId modelId, XId objectId,
             XId fieldId) {
-        return createAddFieldCommand(repositoryId, modelId, objectId, fieldId, false);
+        return createAddFieldCommand(Base.resolveObject(repositoryId, modelId, objectId), fieldId,
+                false);
     }
     
     @Override
     public XObjectCommand createForcedAddFieldCommand(XId repositoryId, XId modelId, XId objectId,
             XId fieldId) {
-        return createAddFieldCommand(repositoryId, modelId, objectId, fieldId, true);
+        return createAddFieldCommand(Base.resolveObject(repositoryId, modelId, objectId), fieldId,
+                true);
     }
     
     @Override
@@ -957,7 +968,7 @@ public class MemoryCommandFactory implements XCommandFactory {
     
     @Override
     public XModelCommand createForcedAddObjectCommand(XId repositoryId, XId modelId, XId objectId) {
-        return createAddObjectCommand(repositoryId, modelId, objectId, true);
+        return createAddObjectCommand(Base.resolveModel(repositoryId, modelId), objectId, true);
     }
     
     @Override
@@ -978,15 +989,15 @@ public class MemoryCommandFactory implements XCommandFactory {
                     "Safe commands cannot have XCommand.FORCED as their revision number.");
         }
         
-        return createAddValueCommand(repositoryId, modelId, objectId, fieldId, fieldRevision,
-                value, false);
+        return createAddValueCommand(Base.resolveField(repositoryId, modelId, objectId, fieldId),
+                fieldRevision, value, false);
     }
     
     @Override
     public XFieldCommand createForcedAddValueCommand(XId repositoryId, XId modelId, XId objectId,
             XId fieldId, XValue value) {
-        return createAddValueCommand(repositoryId, modelId, objectId, fieldId, XCommand.FORCED,
-                value, true);
+        return createAddValueCommand(Base.resolveField(repositoryId, modelId, objectId, fieldId),
+                XCommand.FORCED, value, true);
     }
     
     @Override
@@ -1167,7 +1178,7 @@ public class MemoryCommandFactory implements XCommandFactory {
     
     @Override
     public XModelCommand createSafeAddObjectCommand(XId repositoryId, XId modelId, XId objectId) {
-        return createAddObjectCommand(repositoryId, modelId, objectId, true);
+        return createAddObjectCommand(Base.resolveModel(repositoryId, modelId), objectId, true);
     }
     
 }

@@ -116,11 +116,11 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
         XCommand modelCommand2 = this.factory.createAddModelCommand(repoID, modelId2, true);
         XCommand modelCommand3 = this.factory.createAddModelCommand(repoID, modelId3, true);
         
-        XCommand objectCommand1 = this.factory.createAddObjectCommand(repoID, modelId1, objectId1,
+        XCommand objectCommand1 = this.factory.createAddObjectCommand(XX.resolveModel(repoID, modelId1), objectId1,
                 true);
-        XCommand objectCommand2 = this.factory.createAddObjectCommand(repoID, modelId1, objectId2,
+        XCommand objectCommand2 = this.factory.createAddObjectCommand(XX.resolveModel(repoID, modelId1), objectId2,
                 true);
-        XCommand objectCommand3 = this.factory.createAddObjectCommand(repoID, modelId1, objectId3,
+        XCommand objectCommand3 = this.factory.createAddObjectCommand(XX.resolveModel(repoID, modelId1), objectId3,
                 true);
         
         XCommand[] commands = { modelCommand1, modelCommand2, modelCommand3, objectCommand1,

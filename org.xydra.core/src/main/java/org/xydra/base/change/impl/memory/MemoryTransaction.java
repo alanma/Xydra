@@ -53,7 +53,7 @@ public class MemoryTransaction implements XTransaction {
     private XAtomicCommand[] commands;
     
     /** The XAddress of the model or object this transaction applies to */
-    // impl note: made non-final for GWT
+    // Impl. note: made non-final for GWT serialisation
     private XAddress target;
     
     /** WARN: For GWT only. Do not use. */

@@ -34,9 +34,7 @@ public class WritableObjectOnStore extends ReadableObjectOnStore implements XWri
     
     @Override
     public XWritableField createField(XId fieldId) {
-        XCommand command = X.getCommandFactory().createAddFieldCommand(
-                this.address.getRepository(), this.address.getModel(), this.address.getObject(),
-                fieldId, true);
+        XCommand command = X.getCommandFactory().createAddFieldCommand(this.address, fieldId, true);
         executeCommand(command);
         return this.getField(fieldId);
     }

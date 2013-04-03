@@ -36,8 +36,8 @@ public class WritableModelOnStore extends ReadableModelOnStore implements XWrita
     
     @Override
     public XWritableObject createObject(@NeverNull XId objectId) {
-        XCommand command = X.getCommandFactory().createAddObjectCommand(
-                this.address.getRepository(), this.address.getModel(), objectId, true);
+        XCommand command = X.getCommandFactory().createAddObjectCommand(this.address, objectId,
+                true);
         executeCommand(command);
         return this.getObject(objectId);
     }

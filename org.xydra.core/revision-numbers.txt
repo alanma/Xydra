@@ -1,0 +1,37 @@
+Revision numbers start at 0.
+
+A versioned model is backed by a changelog that records all events.
+
+The first event of a model changelog is always the create-model-event,
+which is a RepositoryEvent.
+
+
+
+
+=== Commands ===
+
+Commands are atomic change requests.
+A command can {add,remove} a {(1) field, (2) object, (3) model} to a 
+{(1) object, (2) model, (3) repository} OR it can {change} the value of a field.
+
+Executing a command results in a new revision number or 'NO_CHANGE' or 'FAILED'.
+
+Commands can be executed in 3 modes:
+
+FORCED 
+* 
+
+SAFE revision-bound
+
+SAFE pre-condition bound
+
+
+=== Transaction ===
+A transaction is a command.
+A transaction is a list of commands, that are executed in an atomic fashion.
+A transaction must contain at least 1 command.
+Transactions are not required to be minimal, i.e. it is allowed to have a 
+transaction that just adds and removes a field.
+
+A transaction is scoped, it is either a model transaction, an object transaction,
+
