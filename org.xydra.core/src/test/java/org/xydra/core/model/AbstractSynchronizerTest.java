@@ -765,7 +765,7 @@ abstract public class AbstractSynchronizerTest {
     /**
      * A test to replicate the observed client sync failures during fixCommands
      */
-    // FIXME SYNC @Test
+    @Test
     public void testSyncModelCreatedWithoutRepositoryReplicateClient() {
         
         try {
@@ -834,8 +834,7 @@ abstract public class AbstractSynchronizerTest {
      * the difference to the previous test is that this test initially sync with
      * the server.
      */
-    // @Test
-    // FIXME MONKEY
+    @Test
     public void testSyncModelCreatedWithoutRepositoryReplicateClientWithInitialSync() {
         
         try {
@@ -902,7 +901,7 @@ abstract public class AbstractSynchronizerTest {
         
     }
     
-    // FIXME SYNC @Test
+    @Test
     public void testSyncModelCreatedWithoutRepositoryMinimalReplicateClient() {
         
         try {
@@ -970,7 +969,7 @@ abstract public class AbstractSynchronizerTest {
      * A minimal test to replicate the observed client sync failures during
      * fixCommands. No txn used.
      */
-    // FIXME MONKEY @Test
+    @Test
     public void testSyncModelCreatedWithoutRepositoryMinimalReplicateClientWithInitialSyncNoTxn() {
         
         try {
@@ -1030,7 +1029,7 @@ abstract public class AbstractSynchronizerTest {
      * A minimal test to replicate the observed client sync failures during
      * fixCommands. No txn used.
      */
-    // FIXME MONKEY @Test
+    @Test
     public void testSyncModelCreatedWithoutRepositoryMinimalReplicateClientWithInitialSyncNoTxnSafeCmd() {
         
         try {
@@ -1122,11 +1121,10 @@ abstract public class AbstractSynchronizerTest {
      * A minimal test to replicate the observed client sync failures during
      * fixCommands.
      */
-    // FIXME MONKEY @Test
+    @Test
     public void testSyncModelCreatedWithoutRepositoryMinimalReplicateClientWithInitialSyncWithTxn() {
         
         try {
-            
             assertNull(loadModelSnapshot(NEWMODEL_ID));
             
             // create a local model
@@ -1189,7 +1187,7 @@ abstract public class AbstractSynchronizerTest {
         
     }
     
-    // FIXME @Test
+    @Test
     public void testSyncModelCreatedWithoutRepository() {
         
         try {

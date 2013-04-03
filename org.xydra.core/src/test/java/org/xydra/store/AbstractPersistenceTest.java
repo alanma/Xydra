@@ -5146,7 +5146,7 @@ public abstract class AbstractPersistenceTest {
         builder2.addField(objectAddress, XCommand.SAFE, XX.toId("object0field0"));
         builder2.addField(objectAddress, XCommand.SAFE, XX.toId("object0field1"));
         builder2.addField(objectAddress, XCommand.SAFE, XX.toId("object0field21"));
-        // FIXME was r0
+        // FIXME was revision 0 instead of SAFE
         builder2.addValue(XX.resolveField(objectAddress, XX.toId("object0field21")), XCommand.SAFE,
                 XV.toValue(false));
         XTransaction txn2 = builder2.build();
