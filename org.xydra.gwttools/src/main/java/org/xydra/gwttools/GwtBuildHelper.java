@@ -17,7 +17,7 @@ import org.xydra.log.LoggerFactory;
  * @author xamde
  * 
  */
-public class GwtBuildHelper {
+public class GwtBuildHelper implements Runnable {
     
     private static final Logger log = LoggerFactory.getLogger(GwtBuildHelper.class);
     
@@ -130,6 +130,18 @@ public class GwtBuildHelper {
                 copyCompiledGwtModule(warPath, subDir.getName());
             }
         }
+    }
+    
+    public GwtBuildHelper(String warPath) {
+        super();
+        this.warPath = warPath;
+    }
+    
+    private String warPath;
+    
+    @Override
+    public void run() {
+        copyAllGwtModulesFoundInTarget(this.warPath);
     }
     
 }
