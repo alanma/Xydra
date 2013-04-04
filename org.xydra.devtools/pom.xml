@@ -13,6 +13,20 @@
 	<name>org.xydra.devtools</name>
 	<description>Simple tools for developing Java software</description>
 
+	<repositories>
+		<repository>
+			<id>xydra-repo</id>
+			<url>
+				https://xydra.googlecode.com/svn/repository
+			</url>
+			<releases>
+				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+				<checksumPolicy>fail</checksumPolicy>
+			</releases>
+		</repository>
+	</repositories>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.maven</groupId>
