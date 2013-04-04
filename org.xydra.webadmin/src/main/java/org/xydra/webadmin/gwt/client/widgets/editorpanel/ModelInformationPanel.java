@@ -3,7 +3,11 @@ package org.xydra.webadmin.gwt.client.widgets.editorpanel;
 import org.xydra.core.change.SessionCachedModel;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.webadmin.gwt.client.util.TableController;
+import org.xydra.webadmin.gwt.client.EventHelper;
+import org.xydra.webadmin.gwt.client.events.EntityStatus;
+import org.xydra.webadmin.gwt.client.events.ModelChangedEvent;
+import org.xydra.webadmin.gwt.client.events.ModelChangedEvent.IModelChangedEventHandler;
+import org.xydra.webadmin.gwt.client.util.TablePresenter;
 import org.xydra.webadmin.gwt.client.widgets.XyAdmin;
 
 import com.google.gwt.core.client.GWT;
@@ -41,6 +45,19 @@ public class ModelInformationPanel extends Composite {
 		this.presenter = presenter;
 		buildComponents(result);
 		
+		EventHelper.addModelChangeListener(presenter.getCurrentModelAddress(),
+		        new IModelChangedEventHandler() {
+			        
+			        @Override
+			        public void onModelChange(ModelChangedEvent event) {
+				        
+				        if(event.getStatus().equals(EntityStatus.INDEXED)) {
+					        ModelInformationPanel.this.presenter
+					                .presentNewInformation(ModelInformationPanel.this);
+				        }
+			        }
+		        });
+		
 	}
 	
 	private void buildComponents(SessionCachedModel result) {
@@ -51,12 +68,19 @@ public class ModelInformationPanel extends Composite {
 	}
 	
 	public void setTableData(SessionCachedModel model) {
+		this.tablePanel.clear();
 		if(!model.isEmpty()) {
-			TableController tableController = new TableController(this.presenter);
-			this.tablePanel.add(tableController.createTable(model));
+			TablePresenter tablePresenter = new TablePresenter(this.presenter);
+			this.tablePanel.add(tablePresenter.createTable(model));
 			log.info("new table controller created!");
 		} else {
-			Label noObjectsLabel = new Label("no Objects present!");
+			String problemText = "";
+			if(!model.knowsAllObjects()) {
+				problemText = "no Objects locally present!";
+			} else {
+				problemText = "no objects existing at all!";
+			}
+			Label noObjectsLabel = new Label(problemText);
 			VerticalPanel dummyPanel = new VerticalPanel();
 			dummyPanel.setStyleName("noData");
 			dummyPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
@@ -66,7 +90,4 @@ public class ModelInformationPanel extends Composite {
 		}
 	}
 	
-	public void notifyMe(SessionCachedModel model) {
-		
-	}
 }

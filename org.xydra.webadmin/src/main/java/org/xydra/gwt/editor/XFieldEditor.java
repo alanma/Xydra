@@ -53,8 +53,8 @@ import org.xydra.gwt.editor.value.XValueUtils;
 import org.xydra.index.XI;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.webadmin.gwt.client.datamodels.DataModel;
 import org.xydra.webadmin.gwt.client.resources.BundledRes;
+import org.xydra.webadmin.gwt.client.widgets.XyAdmin;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -186,7 +186,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 	}
 	
 	protected void delete() {
-		DataModel.getInstance().removeItem(this.field.getAddress());
+		XyAdmin.getInstance().getModel().removeItem(this.field.getAddress());
 	}
 	
 	protected void changeValue(XValue value) {
@@ -477,12 +477,12 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		}
 		
 		if(this.field.isEmpty()) {
-			DataModel.getInstance().changeValue(this.field.getAddress(), newValue);
+			XyAdmin.getInstance().getModel().changeValue(this.field.getAddress(), newValue);
 		} else {
 			if(newValue == null) {
-				DataModel.getInstance().removeItem(this.field.getAddress());
+				XyAdmin.getInstance().getModel().removeItem(this.field.getAddress());
 			} else {
-				DataModel.getInstance().changeValue(this.field.getAddress(), newValue);
+				XyAdmin.getInstance().getModel().changeValue(this.field.getAddress(), newValue);
 			}
 		}
 	}

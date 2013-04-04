@@ -3,7 +3,7 @@ package org.xydra.webadmin.gwt.client.widgets.dialogs;
 import org.xydra.base.XAddress;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.webadmin.gwt.client.Controller;
+import org.xydra.webadmin.gwt.client.util.Presenter;
 import org.xydra.webadmin.gwt.client.widgets.XyAdmin;
 
 import com.google.gwt.core.client.GWT;
@@ -39,7 +39,7 @@ public class RemoveElementDialog extends DialogBox {
 	
 	private XAddress address;
 	
-	public RemoveElementDialog(XAddress address) {
+	public RemoveElementDialog(final Presenter presenter, XAddress address) {
 		
 		super();
 		
@@ -50,7 +50,7 @@ public class RemoveElementDialog extends DialogBox {
 			@Override
 			public void onClick(ClickEvent event) {
 				RemoveElementDialog.this.removeFromParent();
-				Controller.getInstance().getTempStorage().remove(RemoveElementDialog.this.address);
+				presenter.remove(RemoveElementDialog.this.address);
 			}
 		};
 		

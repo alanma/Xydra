@@ -3,7 +3,6 @@ package org.xydra.webadmin.gwt.client.widgets.tablewidgets;
 import org.xydra.base.XAddress;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.webadmin.gwt.client.datamodels.DataModel;
 import org.xydra.webadmin.gwt.client.resources.BundledRes;
 import org.xydra.webadmin.gwt.client.widgets.XyAdmin;
 
@@ -45,6 +44,7 @@ public class EmptyFieldWidget extends Composite {
 	@UiField
 	Button addButton;
 	
+	@SuppressWarnings("unused")
 	private XAddress address;
 	
 	public EmptyFieldWidget(XAddress address) {
@@ -77,7 +77,7 @@ public class EmptyFieldWidget extends Composite {
 	
 	@UiHandler("addButton")
 	void onClick(ClickEvent event) {
-		DataModel.getInstance().addField(this.address, null);
+		// DataModel.getInstance().addField(this.address, null);
 		
 	}
 	

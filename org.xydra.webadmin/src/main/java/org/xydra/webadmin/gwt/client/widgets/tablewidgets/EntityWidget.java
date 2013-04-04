@@ -6,7 +6,6 @@ import org.xydra.base.rmof.XWritableObject;
 import org.xydra.core.change.SessionCachedModel;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.webadmin.gwt.client.datamodels.DataModel;
 import org.xydra.webadmin.gwt.client.resources.BundledRes;
 import org.xydra.webadmin.gwt.client.util.Presenter;
 import org.xydra.webadmin.gwt.client.widgets.XyAdmin;
@@ -102,8 +101,8 @@ public class EntityWidget extends Composite {
 		
 		XId entityId = address.getModel();
 		long revisionNumber = -1000l;
-		SessionCachedModel model = DataModel.getInstance().getRepo(address.getRepository())
-		        .getModel(entityId);
+		SessionCachedModel model = XyAdmin.getInstance().getModel()
+		        .getRepo(address.getRepository()).getModel(entityId);
 		
 		switch(address.getAddressedType()) {
 		case XMODEL:
@@ -165,7 +164,7 @@ public class EntityWidget extends Composite {
 			@Override
 			public void onClick(ClickEvent event) {
 				RemoveElementDialog removeDialog = new RemoveElementDialog(
-				        EntityWidget.this.address);
+				        EntityWidget.this.presenter, EntityWidget.this.address);
 				removeDialog.show();
 				
 			}
@@ -190,7 +189,7 @@ public class EntityWidget extends Composite {
 			@Override
 			public void onClick(ClickEvent event) {
 				
-				new RemoveModelDialog(EntityWidget.this.address);
+				new RemoveModelDialog(EntityWidget.this.presenter, EntityWidget.this.address);
 				
 			}
 		});
@@ -203,5 +202,10 @@ public class EntityWidget extends Composite {
 	
 	public void setRevisionUnknown() {
 		this.revisionLabel.setText("???");
+	}
+	
+	public void setRevisionNumber(long modelsRevisionNumber) {
+		this.revisionLabel.setText("Rev. " + modelsRevisionNumber);
+		
 	}
 }

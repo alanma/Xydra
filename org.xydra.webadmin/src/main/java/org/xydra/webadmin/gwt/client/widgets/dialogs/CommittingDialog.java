@@ -4,24 +4,20 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.change.XRepositoryCommand;
 import org.xydra.base.change.XTransaction;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.util.DumpUtilsBase.XidComparator;
-import org.xydra.core.X;
 import org.xydra.core.model.delta.DeltaUtils;
 import org.xydra.core.model.delta.DeltaUtils.IFieldDiff;
 import org.xydra.core.model.delta.DeltaUtils.IObjectDiff;
 import org.xydra.core.util.DumpUtils;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.webadmin.gwt.client.Controller;
-import org.xydra.webadmin.gwt.client.Observable;
-import org.xydra.webadmin.gwt.client.datamodels.DataModel;
 import org.xydra.webadmin.gwt.client.widgets.XyAdmin;
+import org.xydra.webadmin.gwt.client.widgets.editorpanel.EditorPanelPresenter;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -35,7 +31,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 
-public class CommittingDialog extends DialogBox implements Observable {
+public class CommittingDialog extends DialogBox {
 	
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(XyAdmin.class);
@@ -55,7 +51,7 @@ public class CommittingDialog extends DialogBox implements Observable {
 	@UiField(provided = true)
 	ButtonPanel buttonPanel;
 	
-	public CommittingDialog() {
+	public CommittingDialog(EditorPanelPresenter presenter) {
 		
 		super();
 		
@@ -63,30 +59,34 @@ public class CommittingDialog extends DialogBox implements Observable {
 			
 			@Override
 			public void onClick(ClickEvent event) {
-				XAddress selectedModelAddress = Controller.getInstance().getSelectedModelAddress();
-				Controller.getInstance().getTempStorage().register(CommittingDialog.this);
+				// XAddress selectedModelAddress =
+				// XyAdmin.getInstance().getController()
+				// .getSelectedModelAddress();
+				// XyAdmin.getInstance().getController().getTempStorage().register(CommittingDialog.this);
 				XRepositoryCommand addModelCommand = null;
-				if(DataModel.getInstance().getRepo(selectedModelAddress.getRepository())
-				        .isAddedModel(selectedModelAddress.getModel())) {
-					addModelCommand = X.getCommandFactory().createAddModelCommand(
-					        selectedModelAddress.getRepository(), selectedModelAddress.getModel(),
-					        true);
-				}
+				// if(DataModel.getInstance().getRepo(selectedModelAddress.getRepository())
+				// .isAddedModel(selectedModelAddress.getModel())) {
+				// addModelCommand =
+				// X.getCommandFactory().createAddModelCommand(
+				// selectedModelAddress.getRepository(),
+				// selectedModelAddress.getModel(),
+				// true);
+				// }
 				
 				XTransaction modelTransactions = null;
 				try {
-					modelTransactions = DataModel.getInstance()
-					        .getRepo(selectedModelAddress.getRepository())
-					        .getModelChanges(null, selectedModelAddress).build();
+					// modelTransactions = DataModel.getInstance()
+					// .getRepo(selectedModelAddress.getRepository())
+					// .getModelChanges(null, selectedModelAddress).build();
 				} catch(Exception e) {
 					// just no changes
 				}
-				Controller.getInstance().commit(addModelCommand, modelTransactions);
+				XyAdmin.getInstance().getController().commit(addModelCommand, modelTransactions);
 				
 				CommittingDialog.this.mainPanel.clear();
 				
-				DataModel.getInstance().getRepo(selectedModelAddress.getRepository())
-				        .setCommitted(selectedModelAddress.getModel());
+				// DataModel.getInstance().getRepo(selectedModelAddress.getRepository())
+				// .setCommitted(selectedModelAddress.getModel());
 			}
 			
 		};

@@ -37,8 +37,4 @@ public class BrowsingPanel extends Composite {
 		initWidget(uiBinder.createAndBindUi(this));
 		
 	}
-	
-	public SelectionTree getSelectionTree() {
-		return this.selectionTree;
-	}
 }

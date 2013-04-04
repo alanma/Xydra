@@ -3,8 +3,11 @@ package org.xydra.webadmin.gwt.client.widgets.dialogs;
 import org.xydra.base.XAddress;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.webadmin.gwt.client.Controller;
-import org.xydra.webadmin.gwt.client.Observable;
+import org.xydra.webadmin.gwt.client.EventHelper;
+import org.xydra.webadmin.gwt.client.events.CommittingEvent;
+import org.xydra.webadmin.gwt.client.events.CommittingEvent.CommitStatus;
+import org.xydra.webadmin.gwt.client.events.CommittingEvent.ICommitEventHandler;
+import org.xydra.webadmin.gwt.client.util.Presenter;
 import org.xydra.webadmin.gwt.client.widgets.XyAdmin;
 
 import com.google.gwt.core.client.GWT;
@@ -23,7 +26,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 
-public class RemoveModelDialog extends DialogBox implements Observable {
+public class RemoveModelDialog extends DialogBox {
 	
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(XyAdmin.class);
@@ -47,7 +50,7 @@ public class RemoveModelDialog extends DialogBox implements Observable {
 	private CheckBox checkBox;
 	private HorizontalPanel panel;
 	
-	public RemoveModelDialog(XAddress address) {
+	public RemoveModelDialog(final Presenter presenter, XAddress address) {
 		
 		super();
 		
@@ -57,13 +60,13 @@ public class RemoveModelDialog extends DialogBox implements Observable {
 			
 			@Override
 			public void onClick(ClickEvent event) {
-				Controller.getInstance().getTempStorage().register(RemoveModelDialog.this);
-				Controller
-				        .getInstance()
-				        .getTempStorage()
-				        .remove(RemoveModelDialog.this.address,
-				                RemoveModelDialog.this.checkBox.getValue());
-				RemoveModelDialog.this.mainPanel.clear();
+				Boolean deleteFromRepo = RemoveModelDialog.this.checkBox.getValue();
+				presenter.remove(RemoveModelDialog.this.address, deleteFromRepo);
+				if(deleteFromRepo) {
+					RemoveModelDialog.this.mainPanel.clear();
+				} else {
+					RemoveModelDialog.this.removeFromParent();
+				}
 			}
 		};
 		
@@ -88,15 +91,35 @@ public class RemoveModelDialog extends DialogBox implements Observable {
 		this.getElement().setId("removeDialog");
 		
 		this.center();
+		
+		EventHelper.addCommittingListener(address, new ICommitEventHandler() {
+			
+			@Override
+			public void onCommit(CommittingEvent event) {
+				processCommitResponse(event.getModelAddress(), event.getStatus(),
+				        event.getNewRevision());
+				
+			}
+		});
 	}
 	
-	@Override
-	public void notifyMe(String message) {
-		this.mainPanel.add(new HTML(message));
+	protected void processCommitResponse(XAddress modelAddress, CommitStatus status,
+	        long newRevision) {
+		String resultString = "successfully deleted model " + modelAddress.toString();
+		switch(status) {
+		case FAILED:
+			resultString = "error!";
+			break;
+		case SUCCESS:
+			break;
+		default:
+			break;
+		}
+		this.mainPanel.add(new Label(resultString));
+		this.addCloseOKButton();
 		
 	}
 	
-	@Override
 	public void addCloseOKButton() {
 		Button okButton = new Button("ok");
 		okButton.addClickHandler(new ClickHandler() {

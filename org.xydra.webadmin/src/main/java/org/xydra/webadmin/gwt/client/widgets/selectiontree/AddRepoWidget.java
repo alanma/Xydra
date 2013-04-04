@@ -3,7 +3,6 @@ package org.xydra.webadmin.gwt.client.widgets.selectiontree;
 import org.xydra.core.XX;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.webadmin.gwt.client.widgets.dialogs.AddElementDialog;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -48,9 +47,6 @@ public class AddRepoWidget extends Composite {
 	@UiHandler("addRepoButton")
 	void onClickAdd(ClickEvent event) {
 		
-		AddElementDialog addDialog = new AddElementDialog(this.presenter, XX.toAddress("/noRepo"),
-		        "enter Repository ID");
-		addDialog.show();
-		addDialog.selectEverything();
+		this.presenter.openAddElementDialog(XX.toAddress("/noRepo"), "enter Repository ID");
 	}
 }

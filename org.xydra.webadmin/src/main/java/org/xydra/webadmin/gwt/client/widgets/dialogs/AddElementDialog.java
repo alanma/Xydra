@@ -8,7 +8,6 @@ import org.xydra.gwt.editor.value.XValueEditor.EditListener;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.util.Presenter;
-import org.xydra.webadmin.gwt.client.widgets.XyAdmin;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -27,7 +26,7 @@ import com.google.gwt.user.client.ui.Widget;
 public class AddElementDialog extends DialogBox {
 	
 	@SuppressWarnings("unused")
-	private static final Logger log = LoggerFactory.getLogger(XyAdmin.class);
+	private static final Logger log = LoggerFactory.getLogger(AddElementDialog.class);
 	
 	interface ViewUiBinder extends UiBinder<Widget,AddElementDialog> {
 	}
@@ -62,7 +61,7 @@ public class AddElementDialog extends DialogBox {
 				String value = "";
 				try {
 					value = AddElementDialog.this.textArea.getValue().toString();
-					presenter.processInput(AddElementDialog.this.address, value);
+					Presenter.processUserInput(AddElementDialog.this.address, value);
 					AddElementDialog.this.removeFromParent();
 				} catch(Exception e) {
 					

@@ -1,10 +1,7 @@
 package org.xydra.webadmin.gwt.client.widgets.dialogs;
 
-import org.xydra.core.change.SessionCachedModel;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.webadmin.gwt.client.Controller;
-import org.xydra.webadmin.gwt.client.datamodels.DataModel;
 import org.xydra.webadmin.gwt.client.widgets.XyAdmin;
 
 import com.google.gwt.core.client.GWT;
@@ -44,13 +41,17 @@ public class ConfirmationDialog extends DialogBox {
 			
 			@Override
 			public void onClick(ClickEvent event) {
-				ConfirmationDialog.this.removeFromParent();
-				SessionCachedModel model = DataModel
-				        .getInstance()
-				        .getRepo(Controller.getInstance().getSelectedModelAddress().getRepository())
-				        .getModel(Controller.getInstance().getSelectedModelAddress().getModel());
-				model.discardAllChanges();
-				Controller.getInstance().updateEditorPanel();
+				// ConfirmationDialog.this.removeFromParent();
+				// SessionCachedModel model = XyAdmin
+				// .getInstance()
+				// .getModel()
+				// .getRepo(
+				// XyAdmin.getInstance().getController().getSelectedModelAddress()
+				// .getRepository())
+				// .getModel(
+				// XyAdmin.getInstance().getController().getSelectedModelAddress()
+				// .getModel());
+				// model.discardAllChanges();
 			}
 		};
 		

@@ -2,7 +2,6 @@ package org.xydra.webadmin.gwt.client.widgets;
 
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.webadmin.gwt.client.Controller;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -36,7 +35,7 @@ public class WarningWidget extends Composite {
 		
 		initWidget(uiBinder.createAndBindUi(this));
 		
-		Controller.getInstance().registerWarningWidget(this);
+		XyAdmin.getInstance().getController().registerWarningWidget(this);
 	}
 	
 	public void display(String message) {

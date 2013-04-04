@@ -3,8 +3,8 @@ package org.xydra.webadmin.gwt.client.widgets.tablewidgets;
 import org.xydra.base.XAddress;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.webadmin.gwt.client.Controller;
-import org.xydra.webadmin.gwt.client.util.TableController.Status;
+import org.xydra.webadmin.gwt.client.util.TablePresenter;
+import org.xydra.webadmin.gwt.client.util.TablePresenter.Status;
 import org.xydra.webadmin.gwt.client.widgets.XyAdmin;
 import org.xydra.webadmin.gwt.client.widgets.editorpanel.EditorPanelPresenter;
 
@@ -39,10 +39,14 @@ public class RowHeaderWidget extends Composite {
 	
 	private XAddress address;
 	
-	public RowHeaderWidget(EditorPanelPresenter presenter, XAddress address, Status status) {
+	private TablePresenter presenter;
+	
+	public RowHeaderWidget(EditorPanelPresenter presenter, TablePresenter tablePresenter,
+	        XAddress address, Status status) {
 		super();
 		this.address = address;
 		this.status = status;
+		this.presenter = tablePresenter;
 		this.entityWidget = new EntityWidget(presenter, address, new ClickHandler() {
 			
 			@Override
@@ -63,6 +67,7 @@ public class RowHeaderWidget extends Composite {
 	
 	@UiHandler("expandButton")
 	void onClickExpand(ClickEvent e) {
+		
 		if(this.status.equals(Status.Present)) {
 			this.status = Status.Opened;
 			this.expandButton.setText("c l o s e");
@@ -70,6 +75,6 @@ public class RowHeaderWidget extends Composite {
 			this.status = Status.Present;
 			this.expandButton.setText("o p e n");
 		}
-		Controller.getInstance().notifyTableController(this.address, this.status);
+		this.presenter.notifyTable(this.address, this.status);
 	}
 }

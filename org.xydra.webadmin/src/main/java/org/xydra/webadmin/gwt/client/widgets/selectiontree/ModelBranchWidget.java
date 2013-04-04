@@ -3,9 +3,11 @@ package org.xydra.webadmin.gwt.client.widgets.selectiontree;
 import org.xydra.base.XAddress;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.webadmin.gwt.client.Controller;
-import org.xydra.webadmin.gwt.client.datamodels.DataModel;
-import org.xydra.webadmin.gwt.client.util.TableController;
+import org.xydra.webadmin.gwt.client.EventHelper;
+import org.xydra.webadmin.gwt.client.events.EntityStatus;
+import org.xydra.webadmin.gwt.client.events.ModelChangedEvent;
+import org.xydra.webadmin.gwt.client.events.ModelChangedEvent.IModelChangedEventHandler;
+import org.xydra.webadmin.gwt.client.widgets.XyAdmin;
 import org.xydra.webadmin.gwt.client.widgets.tablewidgets.EntityWidget;
 
 import com.google.gwt.core.client.GWT;
@@ -32,12 +34,44 @@ public class ModelBranchWidget extends Composite {
 	EntityWidget entityWidget;
 	private SelectionTreePresenter presenter;
 	
-	public ModelBranchWidget(XAddress address, SelectionTreePresenter presenter) {
+	public ModelBranchWidget(XAddress address) {
 		
 		this.address = address;
-		this.presenter = presenter;
+		// this.presenter = presenter;
 		buildComponents(address);
 		initWidget(uiBinder.createAndBindUi(this));
+		
+		checkStatus();
+		
+		EventHelper.addModelChangeListener(address, new IModelChangedEventHandler() {
+			
+			@Override
+			public void onModelChange(ModelChangedEvent event) {
+				ModelBranchWidget.this.processChanges(event.getModelAddress(), event.getStatus());
+				
+			}
+		});
+	}
+	
+	protected void processChanges(XAddress modelAddress, EntityStatus status) {
+		switch(status) {
+		case CHANGED:
+			this.buildComponents(modelAddress);
+			break;
+		case DELETED:
+			this.removeFromParent();
+			break;
+		case INDEXED:
+			long modelsRevisionNumber = this.presenter.getModelsRevisionNumber(this.address);
+			this.entityWidget.setRevisionNumber(modelsRevisionNumber);
+			break;
+		case EXTENDED:
+			this.presenter.presentModel(this.address);
+			break;
+		default:
+			break;
+		
+		}
 		
 	}
 	
@@ -51,25 +85,28 @@ public class ModelBranchWidget extends Composite {
 			@Override
 			public void onClick(ClickEvent event) {
 				// ModelBranchWidget.this.presenter.presentModel(ModelBranchWidget.this.address);
-				Controller.getInstance().notifyTableController(ModelBranchWidget.this.address,
-				        TableController.Status.Opened);
+				ModelBranchWidget.this.presenter.presentModel(ModelBranchWidget.this.address);
 			}
 		});
 		
-		if(DataModel.getInstance().getRepo(address.getRepository())
-		        .isNotExisting(address.getModel())) {
+		checkStatus();
+		
+		this.entityWidget.setDeleteModelDialog();
+	}
+	
+	private void checkStatus() {
+		if(XyAdmin.getInstance().getModel().getRepo(this.address.getRepository())
+		        .isNotExisting(this.address.getModel())) {
 			this.entityWidget.setStatusDeleted();
 		}
-		if(!DataModel.getInstance().getRepo(address.getRepository())
-		        .isAddedModel(address.getModel())) {
-			if(!DataModel.getInstance().getRepo(address.getRepository())
-			        .getModel(address.getModel()).knowsAllObjects()) {
+		if(!XyAdmin.getInstance().getModel().getRepo(this.address.getRepository())
+		        .isAddedModel(this.address.getModel())) {
+			if(!XyAdmin.getInstance().getModel().getRepo(this.address.getRepository())
+			        .getModel(this.address.getModel()).knowsAllObjects()) {
 				
 				this.entityWidget.setRevisionUnknown();
 			}
 		}
-		
-		this.entityWidget.setDeleteModelDialog();
 	}
 	
 	public void open(XAddress address2) {
