@@ -11,8 +11,8 @@ import org.xydra.webadmin.gwt.client.events.EntityStatus;
 import org.xydra.webadmin.gwt.client.events.RepoChangedEvent;
 import org.xydra.webadmin.gwt.client.events.RepoChangedEvent.IRepoChangedEventHandler;
 import org.xydra.webadmin.gwt.client.widgets.XyAdmin;
-import org.xydra.webadmin.gwt.client.widgets.selectiontree.ModelBranchWidget;
 import org.xydra.webadmin.gwt.client.widgets.selectiontree.SelectionTreePresenter;
+import org.xydra.webadmin.gwt.client.widgets.selectiontree.modelbranches.ModelBranchWidget;
 
 
 public class RepoBranchPresenter extends SelectionTreePresenter {
@@ -39,9 +39,19 @@ public class RepoBranchPresenter extends SelectionTreePresenter {
 	}
 	
 	private void processRepoDataChanges(EntityStatus status) {
-		if(status.equals(EntityStatus.REGISTERED)) {
+		if(status.equals(EntityStatus.INDEXED)) {
 			this.collapse();
 			this.expand();
+		} else if(status.equals(EntityStatus.EXTENDED)) {
+			// TODO test
+			Iterator<XId> iterator = XyAdmin.getInstance().getModel()
+			        .getLocallyStoredModelIDs(this.repoAddress);
+			while(iterator.hasNext()) {
+				XId xId = (XId)iterator.next();
+				if(!this.existingBranches.containsKey(xId)) {
+					this.addModelBranch(xId);
+				}
+			}
 		}
 		
 	}
@@ -66,15 +76,19 @@ public class RepoBranchPresenter extends SelectionTreePresenter {
 			XId modelId = iterator.next();
 			if(!this.existingBranches.keySet().contains(modelId)) {
 				
-				XAddress modelAddress = XX.resolveModel(this.repoAddress, modelId);
-				ModelBranchWidget newBranch = new ModelBranchWidget(modelAddress);
-				this.widget.addBranch(newBranch);
-				// XyAdmin.getInstance().getModel().getRepo(this.repoAddress.getRepository())
-				// .getModel(modelId).getRevisionNumber();
-				
-				this.existingBranches.put(modelId, newBranch);
+				addModelBranch(modelId);
 			}
 		}
+	}
+	
+	private void addModelBranch(XId modelId) {
+		XAddress modelAddress = XX.resolveModel(this.repoAddress, modelId);
+		ModelBranchWidget newBranch = new ModelBranchWidget(modelAddress);
+		this.widget.addBranch(newBranch);
+		// XyAdmin.getInstance().getModel().getRepo(this.repoAddress.getRepository())
+		// .getModel(modelId).getRevisionNumber();
+		
+		this.existingBranches.put(modelId, newBranch);
 	}
 	
 	void handleExpand(IRepoBranchWidget repoBranchWidget) {

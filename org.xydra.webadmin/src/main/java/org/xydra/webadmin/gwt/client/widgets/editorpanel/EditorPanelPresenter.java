@@ -10,17 +10,58 @@ import org.xydra.webadmin.gwt.client.widgets.dialogs.ConfirmationDialog;
 
 public class EditorPanelPresenter extends Presenter {
 	
-	private EditorPanel editorPanel;
+	private IEditorPanel editorPanel;
 	private XAddress currentModelAddress;
 	
-	public EditorPanelPresenter(EditorPanel editorPanel) {
+	public EditorPanelPresenter(IEditorPanel editorPanel) {
 		this.editorPanel = editorPanel;
+		
+		init();
+	}
+	
+	private void init() {
+		this.editorPanel.init();
+		XyAdmin.getInstance().getController().registerEditorPanelPresenter(this);
 	}
 	
 	public void presentModel(XAddress address) {
 		this.currentModelAddress = address;
 		
-		this.editorPanel.buildModelView(getCurrentModel());
+		this.buildModelView();
+	}
+	
+	public void buildModelView() {
+		
+		SessionCachedModel selectedModel = getCurrentModel();
+		
+		// this.editorPanel.
+		// this.mainPanel.clear();
+		// do we need this???
+		// this.mainPanel.add(new ModelControlPanel(this.presenter));
+		// final ModelInformationPanel modelInformationPanel = new
+		// ModelInformationPanel(this);
+		// this.mainPanel.add(modelInformationPanel);
+		
+		// EventHelper.addModelChangeListener(this.currentModelAddress,
+		// new IModelChangedEventHandler() {
+		//
+		// @Override
+		// public void onModelChange(ModelChangedEvent event) {
+		// if(event.getStatus().equals(EntityStatus.DELETED)) {
+		// resetView();
+		//
+		// } else if(event.getStatus().equals(EntityStatus.EXTENDED)) {
+		// EditorPanelPresenter.this.presentNewInformation();
+		// }
+		// }
+		//
+		// });
+		// }
+		//
+		// private void resetView() {
+		// this.mainPanel.clear();
+		// this.mainPanel.add(new Label("choose model via selection tree"));
+		//
 	}
 	
 	public void loadModelsObjectsFromPersistence() {
@@ -75,8 +116,8 @@ public class EditorPanelPresenter extends Presenter {
 		return this.currentModelAddress;
 	}
 	
-	public void presentNewInformation(ModelInformationPanel modelInformationPanel) {
-		modelInformationPanel.setTableData(getCurrentModel());
+	public void presentNewInformation() {
+		// modelInformationPanel.setTableData(getCurrentModel());
 		
 	}
 	

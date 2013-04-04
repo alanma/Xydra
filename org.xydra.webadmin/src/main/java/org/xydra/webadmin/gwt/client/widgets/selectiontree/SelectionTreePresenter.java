@@ -64,19 +64,6 @@ public class SelectionTreePresenter extends Presenter {
 		this.repoBranches.put(repo.getId(), repoBranch);
 	}
 	
-	public void presentModel(XAddress address) {
-		XyAdmin.getInstance().getController().presentModel(address);
-		
-	}
-	
-	public long getModelsRevisionNumber(XAddress address) {
-		long revisionNumber = XyAdmin.getInstance().getModel().getRepo(address.getRepository())
-		        .getModel(address.getModel()).getRevisionNumber();
-		
-		return revisionNumber;
-		
-	}
-	
 	public void openAddElementDialog(XAddress address, String message) {
 		AddElementDialog addDialog = new AddElementDialog(this, address, message);
 		addDialog.show();

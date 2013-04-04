@@ -1,6 +1,6 @@
 package org.xydra.webadmin.gwt.client.widgets.selectiontree.repobranches;
 
-import org.xydra.webadmin.gwt.client.widgets.selectiontree.ModelBranchWidget;
+import org.xydra.webadmin.gwt.client.widgets.selectiontree.modelbranches.ModelBranchWidget;
 
 
 public interface IRepoBranchWidget {

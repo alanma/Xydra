@@ -52,8 +52,8 @@ public class ModelInformationPanel extends Composite {
 			        public void onModelChange(ModelChangedEvent event) {
 				        
 				        if(event.getStatus().equals(EntityStatus.INDEXED)) {
-					        ModelInformationPanel.this.presenter
-					                .presentNewInformation(ModelInformationPanel.this);
+					        // ModelInformationPanel.this.presenter
+					        // .presentNewInformation(ModelInformationPanel.this);
 				        }
 			        }
 		        });

@@ -56,11 +56,11 @@ public class ServiceConnection {
 					dialog.show();
 				} else {
 					for(XId modelID : result) {
-						XyAdmin.getInstance().getModel().getRepo(repoId).registerModel(modelID);
+						XyAdmin.getInstance().getModel().getRepo(repoId).indexModel(modelID);
 						
 					}
 					EventHelper.fireRepoChangeEvent(XX.toAddress(repoId, null, null, null),
-					        EntityStatus.REGISTERED);
+					        EntityStatus.INDEXED);
 					if(compoundActionCallback != null) {
 						compoundActionCallback.presentModelAndContinue();
 					} else

@@ -21,11 +21,11 @@ import org.xydra.webadmin.gwt.client.events.ModelChangedEvent;
 import org.xydra.webadmin.gwt.client.events.ModelChangedEvent.IModelChangedEventHandler;
 import org.xydra.webadmin.gwt.client.widgets.XyAdmin;
 import org.xydra.webadmin.gwt.client.widgets.editorpanel.EditorPanelPresenter;
-import org.xydra.webadmin.gwt.client.widgets.tablewidgets.ColumnHeaderWidget;
-import org.xydra.webadmin.gwt.client.widgets.tablewidgets.EmptyFieldWidget;
-import org.xydra.webadmin.gwt.client.widgets.tablewidgets.FieldWidget;
-import org.xydra.webadmin.gwt.client.widgets.tablewidgets.RowHeaderWidget;
-import org.xydra.webadmin.gwt.client.widgets.tablewidgets.TableFieldWidget;
+import org.xydra.webadmin.gwt.client.widgets.editorpanel.tableWidgets.ColumnHeaderWidget;
+import org.xydra.webadmin.gwt.client.widgets.editorpanel.tableWidgets.EmptyFieldWidget;
+import org.xydra.webadmin.gwt.client.widgets.editorpanel.tableWidgets.FieldWidget;
+import org.xydra.webadmin.gwt.client.widgets.editorpanel.tableWidgets.RowHeaderWidget;
+import org.xydra.webadmin.gwt.client.widgets.editorpanel.tableWidgets.TableFieldWidget;
 
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;

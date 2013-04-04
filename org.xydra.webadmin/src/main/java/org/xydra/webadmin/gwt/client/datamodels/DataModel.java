@@ -102,7 +102,7 @@ public class DataModel {
 		RepoDataModel repo = this.repoModels.get(repoId);
 		repo.addModelID(modelID);
 		EventHelper.fireRepoChangeEvent(XX.toAddress(repoId, null, null, null),
-		        EntityStatus.REGISTERED);
+		        EntityStatus.EXTENDED);
 	}
 	
 	public void removeItem(XAddress address) {

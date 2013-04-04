@@ -1,4 +1,4 @@
-package org.xydra.webadmin.gwt.client.widgets.tablewidgets;
+package org.xydra.webadmin.gwt.client.widgets.editorpanel.tableWidgets;
 
 public interface TableFieldWidget {
 	

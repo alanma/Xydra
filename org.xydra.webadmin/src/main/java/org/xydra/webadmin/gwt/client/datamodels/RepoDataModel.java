@@ -29,13 +29,13 @@ public class RepoDataModel {
 		this.notExistingModels = new HashSet<XId>();
 	}
 	
-	public void registerModel(XId modelId) {
+	public void indexModel(XId modelId) {
 		this.models.put(modelId,
 		        new SessionCachedModel(XX.toAddress(this.repoId, modelId, null, null)));
 	}
 	
 	public void addModelID(XId xid) {
-		this.registerModel(xid);
+		this.indexModel(xid);
 		this.addedModels.add(xid);
 		if(this.notExistingModels.contains(xid)) {
 			this.notExistingModels.remove(xid);
