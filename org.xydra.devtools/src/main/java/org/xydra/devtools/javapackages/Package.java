@@ -1,4 +1,4 @@
-package org.xydra.devtools.java;
+package org.xydra.devtools.javapackages;
 
 import java.util.HashSet;
 import java.util.Set;

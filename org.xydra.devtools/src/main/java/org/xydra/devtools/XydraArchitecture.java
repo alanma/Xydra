@@ -3,7 +3,8 @@ package org.xydra.devtools;
 import java.io.File;
 import java.io.IOException;
 
-import org.xydra.devtools.architecture.Architecture;
+import org.xydra.devtools.javapackages.PackageChaos;
+import org.xydra.devtools.javapackages.architecture.Architecture;
 import org.xydra.log.LoggerFactory;
 import org.xydra.log.gae.Log4jLoggerFactory;
 import org.xydra.log.util.Log4jUtils;

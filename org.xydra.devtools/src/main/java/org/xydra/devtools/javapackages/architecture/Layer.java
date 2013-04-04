@@ -1,9 +1,9 @@
-package org.xydra.devtools.architecture;
+package org.xydra.devtools.javapackages.architecture;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import org.xydra.devtools.java.Package;
+import org.xydra.devtools.javapackages.Package;
 
 
 public class Layer {

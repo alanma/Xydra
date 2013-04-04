@@ -5,4 +5,4 @@
  * @author xamde
  * 
  */
-package org.xydra.devtools.java;
+package org.xydra.devtools.javapackages;

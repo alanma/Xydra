@@ -1,4 +1,4 @@
-package org.xydra.devtools.java;
+package org.xydra.devtools.javapackages;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -16,7 +16,7 @@ import java.util.Set;
 
 import org.xydra.annotations.NeverNull;
 import org.xydra.devtools.dot.Graph;
-import org.xydra.devtools.java.Package.Dependency;
+import org.xydra.devtools.javapackages.Package.Dependency;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 

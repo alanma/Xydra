@@ -3,4 +3,4 @@
  * 
  * @author xamde
  */
-package org.xydra.devtools.architecture;
+package org.xydra.devtools.javapackages.architecture;

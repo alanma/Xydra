@@ -1,15 +1,13 @@
-package org.xydra.devtools;
+package org.xydra.devtools.javapackages;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Set;
 
-import org.xydra.devtools.architecture.Architecture;
+import org.xydra.devtools.XydraArchitecture;
 import org.xydra.devtools.dot.Graph;
 import org.xydra.devtools.dot.Graph.ILabelRenderer;
-import org.xydra.devtools.java.IDependencyFilter;
-import org.xydra.devtools.java.Package;
-import org.xydra.devtools.java.Project;
+import org.xydra.devtools.javapackages.architecture.Architecture;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 

@@ -1,10 +1,10 @@
-package org.xydra.devtools.architecture;
+package org.xydra.devtools.javapackages.architecture;
 
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.xydra.devtools.java.Package;
+import org.xydra.devtools.javapackages.Package;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 
