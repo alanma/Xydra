@@ -5,6 +5,9 @@ import java.io.FileFilter;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.maven.model.Model;
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
+
 
 public class PomFinder {
     
@@ -39,9 +42,14 @@ public class PomFinder {
         }
         
         for(File f : list) {
-            System.out.println(f.getAbsolutePath());
+            parse(f);
         }
-        
     }
     
+    private static void parse(File f) {
+        System.out.println(f.getAbsolutePath());
+        
+        MavenXpp3Reader mavenReader = new MavenXpp3Reader();
+        Model mavenModel = mavenReader.read(r);
+    }
 }
