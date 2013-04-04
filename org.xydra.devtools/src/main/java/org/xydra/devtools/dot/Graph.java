@@ -65,11 +65,23 @@ public class Graph implements Comparable<Graph> {
         return g;
     }
     
-    public void writeAsMainGraph(Writer w) throws IOException {
+    public boolean concentrateEdges = false;
+    
+    private void writeAsMainGraph(Writer w) throws IOException {
         w.write("digraph " + getLabel() + " {\n");
-        w.write("size=\"" + "10,10" + "\"\n");
+        writeGraphAttribute(w, "size", "10,10");
+        // concentrate edges
+        writeGraphAttribute(w, "concentrate", "" + this.concentrateEdges);
+        // portrait or landscape
+        // writeGraphAttribute(w, "orientation", "landscape");
+        writeGraphAttribute(w, "remincross", "true");
+        writeGraphAttribute(w, "searchsize", "100");
         writeContent(w);
         w.write("}");
+    }
+    
+    private static void writeGraphAttribute(Writer w, String key, String value) throws IOException {
+        w.write(key + "=\"" + value + "\"\n");
     }
     
     private void writeContent(Writer w) throws IOException {
@@ -93,7 +105,9 @@ public class Graph implements Comparable<Graph> {
     }
     
     private void writeAsSubGraph(Writer w) throws IOException {
-        w.write("subgraph " + getLabel() + " { \n");
+        w.write("subgraph " + getLabel() + " { \n" + "label=" + getLabel() + "\n");
+        
+        // writeGraphAttribute(w, "rankdir", "TB");
         writeContent(w);
         w.write("}\n");
     }
