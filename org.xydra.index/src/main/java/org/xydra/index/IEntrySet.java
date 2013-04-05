@@ -17,9 +17,17 @@ public interface IEntrySet<E> extends IIndex, Iterable<E> {
     @Override
     public Iterator<E> iterator();
     
-    void deIndex(E entry);
+    /**
+     * @param entry
+     * @return true if entry was in the set
+     */
+    boolean deIndex(E entry);
     
-    void index(E entry);
+    /**
+     * @param entry
+     * @return true if entry was not in the set yet
+     */
+    boolean index(E entry);
     
     IEntrySetDiff<E> computeDiff(IEntrySet<E> other);
     

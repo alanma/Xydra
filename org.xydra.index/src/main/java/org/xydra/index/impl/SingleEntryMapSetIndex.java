@@ -20,148 +20,150 @@ import org.xydra.index.query.KeyEntryTuple;
  * @param <E> entry type
  */
 public class SingleEntryMapSetIndex<K, E> extends KeyEntryTuple<K,E> implements IMapSetIndex<K,E> {
-	
-	private static final long serialVersionUID = 3040641314902060159L;
-	
-	boolean empty = false;
-	
-	public SingleEntryMapSetIndex(K key, E value) {
-		super(key, value);
-	}
-	
-	@Override
+    
+    private static final long serialVersionUID = 3040641314902060159L;
+    
+    boolean empty = false;
+    
+    public SingleEntryMapSetIndex(K key, E value) {
+        super(key, value);
+    }
+    
+    @Override
     public void clear() {
-		this.empty = true;
-	}
-	
-	@Override
+        this.empty = true;
+    }
+    
+    @Override
     public boolean containsKey(K key) {
-		return !this.empty && XI.equals(key, getKey());
-	}
-	
-	public boolean containsValue(E value) {
-		return !this.empty && XI.equals(value, getEntry());
-	}
-	
-	public E get(K key) {
-		if(containsKey(key)) {
-			return getEntry();
-		} else
-			return null;
-	}
-	
-	@Override
+        return !this.empty && XI.equals(key, getKey());
+    }
+    
+    public boolean containsValue(E value) {
+        return !this.empty && XI.equals(value, getEntry());
+    }
+    
+    public E get(K key) {
+        if(containsKey(key)) {
+            return getEntry();
+        } else
+            return null;
+    }
+    
+    @Override
     public boolean isEmpty() {
-		return this.empty;
-	}
-	
-	public int size() {
-		return isEmpty() ? 0 : 1;
-	}
-	
-	@Override
+        return this.empty;
+    }
+    
+    public int size() {
+        return isEmpty() ? 0 : 1;
+    }
+    
+    @Override
     public Iterator<E> constraintIterator(Constraint<K> c1) {
-		if(!isEmpty() && c1.matches(getKey())) {
-			return new SingleValueIterator<E>(getEntry());
-		} else {
-			return new NoneIterator<E>();
-		}
-	}
-	
-	@Override
+        if(!isEmpty() && c1.matches(getKey())) {
+            return new SingleValueIterator<E>(getEntry());
+        } else {
+            return new NoneIterator<E>();
+        }
+    }
+    
+    @Override
     public boolean contains(Constraint<K> c1, Constraint<E> entryConstraint) {
-		
-		if(isEmpty()) {
-			return false;
-		}
-		
-		// 1. component
-		if(!c1.matches(getKey())) {
-			return false;
-		}
-		
-		// 2nd component
-		return entryConstraint.matches(getEntry());
-	}
-	
-	@Override
-    public void deIndex(K key1, E entry) {
-		this.clear();
-	}
-	
-	@Override
+        
+        if(isEmpty()) {
+            return false;
+        }
+        
+        // 1. component
+        if(!c1.matches(getKey())) {
+            return false;
+        }
+        
+        // 2nd component
+        return entryConstraint.matches(getEntry());
+    }
+    
+    @Override
+    public boolean deIndex(K key1, E entry) {
+        boolean contains = this.getKey() == key1 && this.getEntry() == entry;
+        this.clear();
+        return contains;
+    }
+    
+    @Override
     public void deIndex(K key1) {
-		/*
-		 * This implementation can at most store a single entry, so clear is
-		 * correct
-		 */
-		this.clear();
-	}
-	
-	@Override
-    public void index(K key1, E entry) {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
+        /*
+         * This implementation can at most store a single entry, so clear is
+         * correct
+         */
+        this.clear();
+    }
+    
+    @Override
+    public boolean index(K key1, E entry) {
+        throw new UnsupportedOperationException();
+    }
+    
+    @Override
     public Iterator<KeyEntryTuple<K,E>> tupleIterator(Constraint<K> c1,
-	        Constraint<E> entryConstraint) {
-		if(contains(c1, entryConstraint)) {
-			return new SingleValueIterator<KeyEntryTuple<K,E>>(this);
-		} else {
-			return new NoneIterator<KeyEntryTuple<K,E>>();
-		}
-	}
-	
-	@Override
+            Constraint<E> entryConstraint) {
+        if(contains(c1, entryConstraint)) {
+            return new SingleValueIterator<KeyEntryTuple<K,E>>(this);
+        } else {
+            return new NoneIterator<KeyEntryTuple<K,E>>();
+        }
+    }
+    
+    @Override
     public IMapSetDiff<K,E> computeDiff(IMapSetIndex<K,E> otherFuture) {
-		SingleEntryMapSetDiff<K,E> diff = new SingleEntryMapSetDiff<K,E>();
-		
-		if(this.getKey() == null) {
-			diff.added = otherFuture;
-			diff.removed = new NoEntryMapSetIndex<K,E>();
-		} else {
-			// if not null, the Key-Value is either
-			
-			// a) still present => no removes
-			// b) no longer present => one remove
-			
-			// c) many other values might have been added
-			diff.added = otherFuture;
-			
-			if(otherFuture.contains(new EqualsConstraint<K>(getKey()), new EqualsConstraint<E>(
-			        getEntry()))) {
-				// still present => no adds, no removes
-				diff.removed = new NoEntryMapSetIndex<K,E>();
-				diff.added.deIndex(getKey(), getEntry());
-			} else {
-				// missing? so everything besides this has been added
-				diff.removed = this;
-			}
-		}
-		
-		return diff;
-	}
-	
-	public static class SingleEntryMapSetDiff<K, E> implements IMapSetDiff<K,E> {
-		
-		protected IMapSetIndex<K,E> added, removed;
-		
-		@Override
+        SingleEntryMapSetDiff<K,E> diff = new SingleEntryMapSetDiff<K,E>();
+        
+        if(this.getKey() == null) {
+            diff.added = otherFuture;
+            diff.removed = new NoEntryMapSetIndex<K,E>();
+        } else {
+            // if not null, the Key-Value is either
+            
+            // a) still present => no removes
+            // b) no longer present => one remove
+            
+            // c) many other values might have been added
+            diff.added = otherFuture;
+            
+            if(otherFuture.contains(new EqualsConstraint<K>(getKey()), new EqualsConstraint<E>(
+                    getEntry()))) {
+                // still present => no adds, no removes
+                diff.removed = new NoEntryMapSetIndex<K,E>();
+                diff.added.deIndex(getKey(), getEntry());
+            } else {
+                // missing? so everything besides this has been added
+                diff.removed = this;
+            }
+        }
+        
+        return diff;
+    }
+    
+    public static class SingleEntryMapSetDiff<K, E> implements IMapSetDiff<K,E> {
+        
+        protected IMapSetIndex<K,E> added, removed;
+        
+        @Override
         public IMapSetIndex<K,E> getAdded() {
-			return this.added;
-		}
-		
-		@Override
+            return this.added;
+        }
+        
+        @Override
         public IMapSetIndex<K,E> getRemoved() {
-			return this.removed;
-		}
-		
-	}
-	
-	@Override
+            return this.removed;
+        }
+        
+    }
+    
+    @Override
     public Iterator<K> keyIterator() {
-		return new SingleValueIterator<K>(getKey());
-	}
-	
+        return new SingleValueIterator<K>(getKey());
+    }
+    
 }

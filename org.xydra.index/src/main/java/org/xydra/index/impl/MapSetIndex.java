@@ -186,13 +186,16 @@ public class MapSetIndex<K, E> implements IMapSetIndex<K,E> {
     }
     
     @Override
-    public void deIndex(K key1, E entry) {
+    public boolean deIndex(K key1, E entry) {
         IEntrySet<E> index0 = this.map.get(key1);
-        if(index0 != null) {
-            index0.deIndex(entry);
+        if(index0 == null) {
+            return false;
+        } else {
+            boolean removed = index0.deIndex(entry);
             if(index0.isEmpty()) {
                 this.map.remove(key1);
             }
+            return removed;
         }
     }
     
@@ -202,13 +205,13 @@ public class MapSetIndex<K, E> implements IMapSetIndex<K,E> {
     }
     
     @Override
-    public void index(K key1, E entry) {
+    public boolean index(K key1, E entry) {
         IEntrySet<E> index0 = this.map.get(key1);
         if(index0 == null) {
             index0 = this.entrySetFactory.createInstance();
             this.map.put(key1, index0);
         }
-        index0.index(entry);
+        return index0.index(entry);
     }
     
     @Override
