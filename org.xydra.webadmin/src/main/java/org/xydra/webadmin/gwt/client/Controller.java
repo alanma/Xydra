@@ -38,23 +38,15 @@ public class Controller {
 		this.service.loadModelsObjects(address, compoundActionCallback);
 	}
 	
-	public void commit(XCommand addModelCommand, final XTransaction modelTransactions) {
+	public void commit(XAddress modelAddress, XCommand addModelCommand,
+	        final XTransaction modelTransactions) {
 		
-		// if(addModelCommand != null) {
-		// this.service.commitAddedModel(this.lastClickedElement,
-		// addModelCommand,
-		// modelTransactions);
-		// } else {
-		// this.service.commitModelTransactions(this.lastClickedElement,
-		// modelTransactions);
-		// }
+		if(addModelCommand != null) {
+			this.service.commitAddedModel(modelAddress, addModelCommand, modelTransactions);
+		} else {
+			this.service.commitModelTransactions(modelAddress, modelTransactions);
+		}
 	}
-	
-	// public void notifySelectionTree(XAddress address) {
-	// log.info("selection tree notified for address " + address.toString());
-	// this.selectionTree.notifyMe(address);
-	//
-	// }
 	
 	public void displayError(String message) {
 		this.warningWidget.display(message);

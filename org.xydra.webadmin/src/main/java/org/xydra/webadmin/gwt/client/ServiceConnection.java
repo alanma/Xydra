@@ -11,7 +11,6 @@ import org.xydra.base.change.XTransaction;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.core.X;
 import org.xydra.core.XX;
-import org.xydra.core.change.SessionCachedModel;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.events.CommittingEvent.CommitStatus;
@@ -98,7 +97,7 @@ public class ServiceConnection {
 						        
 						        XyAdmin.getInstance().getModel().getRepo(address.getRepository())
 						                .getModel(result.getId()).indexModel(result);
-						        EventHelper.fireModelChangeEvent(address, EntityStatus.INDEXED,
+						        EventHelper.fireModelChangedEvent(address, EntityStatus.INDEXED,
 						                XX.toId("dummy"));
 						        if(compoundActionCallback != null) {
 							        compoundActionCallback.presentObjects();
@@ -149,42 +148,25 @@ public class ServiceConnection {
 	
 	public void commitModelTransactions(final XAddress modelAddress, XTransaction modelTransactions) {
 		
+		Controller.showWaitCursor();
+		
 		if(modelTransactions != null) {
 			this.service.executeCommand(modelAddress.getRepository(), modelTransactions,
 			        new AsyncCallback<Long>() {
 				        
-				        @SuppressWarnings("unused")
-				        String resultString = "";
-				        
 				        @Override
 				        public void onSuccess(Long result) {
-					        if(XCommandUtils.success(result)) {
-						        this.resultString = "successfully committed! New revision number: "
-						                + result;
-					        } else if(XCommandUtils.noChange(result)) {
-						        this.resultString = "no Changes!";
-					        } else if(XCommandUtils.failed(result)) {
-						        this.resultString = "commit failed!";
-					        } else {
-						        this.resultString = "i have no idea...";
-					        }
 					        
-					        SessionCachedModel model2 = XyAdmin.getInstance().getModel()
-					                .getRepo(modelAddress.getRepository())
-					                .getModel(modelAddress.getModel());
-					        model2.markAsCommitted();
-					        ServiceConnection.this.loadModelsObjects(modelAddress, null);
+					        EventHelper.fireCommitEvent(modelAddress, CommitStatus.SUCCESS, result);
 					        
 				        }
 				        
 				        @Override
 				        public void onFailure(Throwable caught) {
-					        
+					        EventHelper.fireCommitEvent(modelAddress, CommitStatus.FAILED, -1l);
 				        }
 			        });
 			
-		} else {
-			// ServiceConnection.this.tempStorage.allowDialogClose();
 		}
 	}
 	
@@ -198,22 +180,13 @@ public class ServiceConnection {
 			
 			@Override
 			public void onSuccess(Long result) {
-				if(XCommandUtils.success(result)) {
-					this.resultString = "successfully deleted model " + address.getModel()
-					        + " from repository";
-				} else if(XCommandUtils.noChange(result)) {
-					this.resultString = "no Changes!";
-				} else if(XCommandUtils.failed(result)) {
-					this.resultString = "commit failed!";
-				} else {
-					this.resultString = "i have no idea...";
-				}
-				EventHelper.fireCommitEvent(address, CommitStatus.SUCCESS);
+				
+				EventHelper.fireCommitEvent(address, CommitStatus.SUCCESS, result);
 			}
 			
 			@Override
 			public void onFailure(Throwable caught) {
-				// TODO Auto-generated method stub
+				EventHelper.fireCommitEvent(address, CommitStatus.FAILED, -1l);
 				
 			}
 		});

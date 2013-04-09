@@ -1,6 +1,7 @@
 package org.xydra.webadmin.gwt.client.widgets.editorpanel.tableWidgets;
 
 import org.xydra.base.XAddress;
+import org.xydra.base.XId;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.resources.BundledRes;
@@ -47,10 +48,16 @@ public class EmptyFieldWidget extends Composite {
 	@SuppressWarnings("unused")
 	private XAddress address;
 	
-	public EmptyFieldWidget(XAddress address) {
+	private RowPresenter presenter;
+	
+	private XId id;
+	
+	public EmptyFieldWidget(RowPresenter rowPresenter, XId fieldId) {
 		super();
-		this.address = address;
-		initWidget(uiBinder.createAndBindUi(this));
+		this.presenter = rowPresenter;
+		this.id = fieldId;
+		
+		this.initWidget(uiBinder.createAndBindUi(this));
 		
 		Image addImg = new Image(BundledRes.INSTANCE.images().add());
 		this.addButton.getElement().appendChild(addImg.getElement());
@@ -77,7 +84,7 @@ public class EmptyFieldWidget extends Composite {
 	
 	@UiHandler("addButton")
 	void onClick(ClickEvent event) {
-		// DataModel.getInstance().addField(this.address, null);
+		this.presenter.addField(this.id);
 		
 	}
 	

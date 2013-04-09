@@ -5,8 +5,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.xydra.base.XId;
-import org.xydra.base.change.XRepositoryCommand;
-import org.xydra.base.change.XTransaction;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.util.DumpUtilsBase.XidComparator;
@@ -51,7 +49,7 @@ public class CommittingDialog extends DialogBox {
 	@UiField(provided = true)
 	ButtonPanel buttonPanel;
 	
-	public CommittingDialog(EditorPanelPresenter presenter) {
+	public CommittingDialog(final EditorPanelPresenter presenter) {
 		
 		super();
 		
@@ -59,34 +57,11 @@ public class CommittingDialog extends DialogBox {
 			
 			@Override
 			public void onClick(ClickEvent event) {
-				// XAddress selectedModelAddress =
-				// XyAdmin.getInstance().getController()
-				// .getSelectedModelAddress();
-				// XyAdmin.getInstance().getController().getTempStorage().register(CommittingDialog.this);
-				XRepositoryCommand addModelCommand = null;
-				// if(DataModel.getInstance().getRepo(selectedModelAddress.getRepository())
-				// .isAddedModel(selectedModelAddress.getModel())) {
-				// addModelCommand =
-				// X.getCommandFactory().createAddModelCommand(
-				// selectedModelAddress.getRepository(),
-				// selectedModelAddress.getModel(),
-				// true);
-				// }
 				
-				XTransaction modelTransactions = null;
-				try {
-					// modelTransactions = DataModel.getInstance()
-					// .getRepo(selectedModelAddress.getRepository())
-					// .getModelChanges(null, selectedModelAddress).build();
-				} catch(Exception e) {
-					// just no changes
-				}
-				XyAdmin.getInstance().getController().commit(addModelCommand, modelTransactions);
+				presenter.commit(CommittingDialog.this);
 				
 				CommittingDialog.this.mainPanel.clear();
 				
-				// DataModel.getInstance().getRepo(selectedModelAddress.getRepository())
-				// .setCommitted(selectedModelAddress.getModel());
 			}
 			
 		};

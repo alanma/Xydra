@@ -84,6 +84,7 @@ public class DataModel {
 		        + field.getRevisionNumber() + ")";
 		log.warn(beforeString + afterString);
 		
+		EventHelper.fireObjectChangedEvent(XX.resolveObject(address), EntityStatus.CHANGED, null);
 	}
 	
 	public void addObject(XAddress modelAddress, XId objectID) {
@@ -92,7 +93,7 @@ public class DataModel {
 		SessionCachedModel model = repo.getModel(modelAddress.getModel());
 		model.createObject(objectID);
 		
-		EventHelper.fireModelChangeEvent(modelAddress, EntityStatus.EXTENDED, objectID);
+		EventHelper.fireModelChangedEvent(modelAddress, EntityStatus.EXTENDED, objectID);
 		
 		log.info("object " + objectID.toString() + " added to " + modelAddress.toString());
 		
@@ -119,12 +120,14 @@ public class DataModel {
 		case XMODEL:
 			repo.removeModel(address.getModel());
 			log.info("deleted model " + address.getModel().toString());
-			EventHelper.fireModelChangeEvent(address, EntityStatus.DELETED, XX.toId("dummy"));
+			EventHelper.fireModelChangedEvent(address, EntityStatus.DELETED, XX.toId("dummy"));
 			break;
 		case XFIELD:
 			XWritableObject object = model.getObject(address.getObject());
 			object.removeField(address.getField());
 			log.info("deleted field " + address.getField().toString());
+			EventHelper.fireObjectChangedEvent(XX.resolveObject(address), EntityStatus.DELETED,
+			        null);
 			break;
 		case XOBJECT:
 			log.info("object to be removed: " + model.getObject(address.getObject()).toString());
@@ -143,9 +146,10 @@ public class DataModel {
 		XWritableObject object = model.getObject(address.getObject());
 		object.createField(address.getField());
 		
-		log.info("added field " + address.toString());
+		EventHelper.fireObjectChangedEvent(XX.resolveObject(address), EntityStatus.EXTENDED,
+		        address.getField());
 		
-		// changeValue(address, value);
+		log.info("added field " + address.toString());
 		
 	}
 	

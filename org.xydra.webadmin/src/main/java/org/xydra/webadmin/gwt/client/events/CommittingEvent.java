@@ -8,9 +8,9 @@ import com.google.gwt.event.shared.GwtEvent;
 
 
 /**
- * Model has been added or removed
+ * Model has been committed
  * 
- * @author xamde
+ * @author Andreas
  */
 public class CommittingEvent extends GwtEvent<ICommitEventHandler> {
 	
@@ -30,9 +30,10 @@ public class CommittingEvent extends GwtEvent<ICommitEventHandler> {
 		void onCommit(CommittingEvent event);
 	}
 	
-	public CommittingEvent(XAddress modelAddress, CommitStatus status) {
+	public CommittingEvent(XAddress modelAddress, CommitStatus status, Long revisionNumber) {
 		this.modelAddress = modelAddress;
 		this.status = status;
+		this.newRevisionnumber = revisionNumber;
 	}
 	
 	public XAddress getModelAddress() {
@@ -55,6 +56,10 @@ public class CommittingEvent extends GwtEvent<ICommitEventHandler> {
 	
 	public long getNewRevision() {
 		return this.newRevisionnumber;
+	}
+	
+	public String getErrorMessage() {
+		return "error messages are not very smart yet...";
 	}
 	
 }

@@ -3,6 +3,7 @@ package org.xydra.webadmin.gwt.client.widgets.dialogs;
 import org.xydra.base.XAddress;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.webadmin.gwt.client.Controller;
 import org.xydra.webadmin.gwt.client.EventHelper;
 import org.xydra.webadmin.gwt.client.events.CommittingEvent;
 import org.xydra.webadmin.gwt.client.events.CommittingEvent.CommitStatus;
@@ -117,6 +118,7 @@ public class RemoveModelDialog extends DialogBox {
 		}
 		this.mainPanel.add(new Label(resultString));
 		this.addCloseOKButton();
+		Controller.showDefaultCursor();
 		
 	}
 	

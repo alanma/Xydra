@@ -24,8 +24,6 @@ public class EventHelper {
 		bus.addHandlerToSource(RepoChangedEvent.TYPE, repoAddress, handler);
 	}
 	
-	// TODO presenters/views? should listen
-	
 	public static void addModelChangeListener(XAddress modelAddress,
 	        IModelChangedEventHandler handler) {
 		EventBus bus = XyAdmin.getInstance().getEventBus();
@@ -43,8 +41,7 @@ public class EventHelper {
 		bus.addHandlerToSource(ObjectChangedEvent.TYPE, objectAddress, handler);
 	}
 	
-	// TODO fire whenever the model has changed/appeared/removed
-	public static void fireModelChangeEvent(XAddress modelAddress, EntityStatus status,
+	public static void fireModelChangedEvent(XAddress modelAddress, EntityStatus status,
 	        XId moreInfos) {
 		EventBus bus = XyAdmin.getInstance().getEventBus();
 		ModelChangedEvent event = new ModelChangedEvent(modelAddress, status, moreInfos);
@@ -64,9 +61,10 @@ public class EventHelper {
 		bus.fireEventFromSource(event, objectAddress);
 	}
 	
-	public static void fireCommitEvent(XAddress modelAddress, CommitStatus status) {
+	public static void fireCommitEvent(XAddress modelAddress, CommitStatus status,
+	        Long revisionNumber) {
 		EventBus bus = XyAdmin.getInstance().getEventBus();
-		CommittingEvent event = new CommittingEvent(modelAddress, status);
+		CommittingEvent event = new CommittingEvent(modelAddress, status, revisionNumber);
 		bus.fireEventFromSource(event, modelAddress);
 	}
 	

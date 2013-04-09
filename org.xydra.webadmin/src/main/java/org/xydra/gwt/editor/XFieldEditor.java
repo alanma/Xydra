@@ -3,7 +3,6 @@ package org.xydra.gwt.editor;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.change.XFieldEvent;
-import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.value.XAddressListValue;
 import org.xydra.base.value.XAddressSetValue;
 import org.xydra.base.value.XAddressSortedSetValue;
@@ -27,6 +26,7 @@ import org.xydra.base.value.XStringSetValue;
 import org.xydra.base.value.XStringValue;
 import org.xydra.base.value.XValue;
 import org.xydra.core.change.XFieldEventListener;
+import org.xydra.core.model.XField;
 import org.xydra.gwt.editor.value.XAddressEditor;
 import org.xydra.gwt.editor.value.XAddressListEditor;
 import org.xydra.gwt.editor.value.XAddressSetEditor;
@@ -54,7 +54,7 @@ import org.xydra.index.XI;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.resources.BundledRes;
-import org.xydra.webadmin.gwt.client.widgets.XyAdmin;
+import org.xydra.webadmin.gwt.client.widgets.editorpanel.tableWidgets.RowPresenter;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -98,7 +98,6 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 	private static final int IDX_SET_ADDRESS_SORTED = 19;
 	private static final int IDX_SET_ID_SORTED = 20;
 	
-	private final XReadableField field;
 	private final Label revision = new Label();
 	private final Button delete = new Button();
 	private final HTML contents = new HTML();
@@ -119,9 +118,14 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 	
 	private boolean locked;
 	
-	public XFieldEditor(XReadableField field2) {
+	private RowPresenter presenter;
+	
+	private XId id;
+	
+	public XFieldEditor(RowPresenter rowPresenter, XId fieldId) {
 		
-		this.field = field2;
+		this.presenter = rowPresenter;
+		this.id = fieldId;
 		
 		this.add(this.controlPanel);
 		this.add(this.contentTable);
@@ -154,7 +158,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		this.delete.getElement().appendChild(deleteImg.getElement());
 		this.delete.setStyleName("imageButtonStyle");
 		
-		this.revision.setText("rev.: " + this.field.getRevisionNumber());
+		this.revision.setText("rev.: " + this.presenter.getFieldRevisionNumber(this.id));
 		this.revision.setStyleName("revisionLabelStyle");
 		this.contentTable.add(this.revision);
 		this.contentTable.setCellHorizontalAlignment(this.revision,
@@ -179,14 +183,18 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		
 		this.setStyleName("editor-xfield");
 		
-		changeValue(field2.getValue());
+		changeValue(rowPresenter.getFieldValue(this.id));
 		
 		this.delete.setTitle("remove this field");
 		this.edit.setTitle("edit this field");
 	}
 	
+	public XFieldEditor(XField field) {
+		// TODO Auto-generated constructor stub
+	}
+	
 	protected void delete() {
-		XyAdmin.getInstance().getModel().removeItem(this.field.getAddress());
+		this.presenter.deleteField(this.id);
 	}
 	
 	protected void changeValue(XValue value) {
@@ -389,7 +397,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 			}
 		});
 		
-		XValue value = this.field.getValue();
+		XValue value = this.presenter.getFieldValue(this.id);
 		if(value == null) {
 			this.type.setSelectedIndex(IDX_NOVALUE);
 			this.add.setVisible(false);
@@ -471,18 +479,18 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		log.info("editor: saving changed value: " + newValue);
 		removeEditor();
 		
-		if(XI.equals(newValue, this.field.getValue())) {
+		if(XI.equals(newValue, this.presenter.getFieldValue(this.id))) {
 			// nothing changed
 			return;
 		}
 		
-		if(this.field.isEmpty()) {
-			XyAdmin.getInstance().getModel().changeValue(this.field.getAddress(), newValue);
+		if(this.presenter.getFieldValue(this.id) == null) {
+			this.presenter.changeFieldValue(this.id, newValue);
 		} else {
 			if(newValue == null) {
-				XyAdmin.getInstance().getModel().removeItem(this.field.getAddress());
+				this.presenter.remove(this.id);
 			} else {
-				XyAdmin.getInstance().getModel().changeValue(this.field.getAddress(), newValue);
+				this.presenter.changeFieldValue(this.id, newValue);
 			}
 		}
 	}

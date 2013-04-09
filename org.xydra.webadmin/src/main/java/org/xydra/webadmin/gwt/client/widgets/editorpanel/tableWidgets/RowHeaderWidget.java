@@ -1,12 +1,8 @@
 package org.xydra.webadmin.gwt.client.widgets.editorpanel.tableWidgets;
 
-import org.xydra.base.XAddress;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.webadmin.gwt.client.util.TablePresenter;
-import org.xydra.webadmin.gwt.client.util.TablePresenter.Status;
 import org.xydra.webadmin.gwt.client.widgets.XyAdmin;
-import org.xydra.webadmin.gwt.client.widgets.editorpanel.EditorPanelPresenter;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -35,19 +31,11 @@ public class RowHeaderWidget extends Composite {
 	@UiField(provided = true)
 	EntityWidget entityWidget;
 	
-	private Status status;
+	private RowPresenter presenter;
 	
-	private XAddress address;
-	
-	private TablePresenter presenter;
-	
-	public RowHeaderWidget(EditorPanelPresenter presenter, TablePresenter tablePresenter,
-	        XAddress address, Status status) {
-		super();
-		this.address = address;
-		this.status = status;
-		this.presenter = tablePresenter;
-		this.entityWidget = new EntityWidget(presenter, address, new ClickHandler() {
+	public RowHeaderWidget(RowPresenter presenter, String expandButtonText) {
+		this.presenter = presenter;
+		this.entityWidget = new EntityWidget(presenter, presenter.getAddress(), new ClickHandler() {
 			
 			@Override
 			public void onClick(ClickEvent event) {
@@ -57,24 +45,13 @@ public class RowHeaderWidget extends Composite {
 		
 		initWidget(uiBinder.createAndBindUi(this));
 		
-		if(this.status.equals(Status.Present)) {
-			this.expandButton.setText("o p e n");
-		} else if(this.status.equals(Status.Opened)) {
-			this.expandButton.setText("c l o s e");
-		}
+		this.expandButton.setText(expandButtonText);
 		
 	}
 	
 	@UiHandler("expandButton")
 	void onClickExpand(ClickEvent e) {
 		
-		if(this.status.equals(Status.Present)) {
-			this.status = Status.Opened;
-			this.expandButton.setText("c l o s e");
-		} else if(this.status.equals(Status.Opened)) {
-			this.status = Status.Present;
-			this.expandButton.setText("o p e n");
-		}
-		this.presenter.notifyTable(this.address, this.status);
+		this.presenter.handleExpandOrCollapse();
 	}
 }

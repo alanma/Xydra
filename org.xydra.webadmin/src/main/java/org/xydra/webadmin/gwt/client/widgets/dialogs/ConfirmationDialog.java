@@ -3,6 +3,7 @@ package org.xydra.webadmin.gwt.client.widgets.dialogs;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.widgets.XyAdmin;
+import org.xydra.webadmin.gwt.client.widgets.editorpanel.EditorPanelPresenter;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -31,7 +32,7 @@ public class ConfirmationDialog extends DialogBox {
 	@UiField(provided = true)
 	ButtonPanel buttonPanel;
 	
-	public ConfirmationDialog(String text) {
+	public ConfirmationDialog(final EditorPanelPresenter editorPanelPresenter, String text) {
 		
 		super();
 		
@@ -41,17 +42,8 @@ public class ConfirmationDialog extends DialogBox {
 			
 			@Override
 			public void onClick(ClickEvent event) {
-				// ConfirmationDialog.this.removeFromParent();
-				// SessionCachedModel model = XyAdmin
-				// .getInstance()
-				// .getModel()
-				// .getRepo(
-				// XyAdmin.getInstance().getController().getSelectedModelAddress()
-				// .getRepository())
-				// .getModel(
-				// XyAdmin.getInstance().getController().getSelectedModelAddress()
-				// .getModel());
-				// model.discardAllChanges();
+				editorPanelPresenter.discardChanges();
+				ConfirmationDialog.this.removeFromParent();
 			}
 		};
 		

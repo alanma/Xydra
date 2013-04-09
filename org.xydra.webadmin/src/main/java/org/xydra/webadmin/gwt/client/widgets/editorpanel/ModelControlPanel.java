@@ -64,20 +64,30 @@ public class ModelControlPanel extends Composite {
 	
 	@UiHandler("commitModelChangesButton")
 	public void onClickCommit(ClickEvent event) {
-		this.presenter.commit(this);
+		this.presenter.openCommitDialog(this);
 		
 	}
 	
 	@UiHandler("discardModelChangesButton")
 	public void onClickDiscard(ClickEvent event) {
 		
-		this.presenter.discardChanges();
+		this.presenter.openDdiscardChangesDialog();
 		
 	}
 	
 	@UiHandler("expandAllButton")
 	public void onClickExpand(ClickEvent event) {
 		
-		this.presenter.expandAll();
+		String expandButtonText = this.expandAllButton.getText();
+		if(expandButtonText.equals("expand all objects")) {
+			
+			this.expandAllButton.setText("close all objects");
+		} else {
+			
+			this.expandAllButton.setText("expand all objects");
+		}
+		
+		this.presenter.expandAll(expandButtonText);
+		
 	}
 }

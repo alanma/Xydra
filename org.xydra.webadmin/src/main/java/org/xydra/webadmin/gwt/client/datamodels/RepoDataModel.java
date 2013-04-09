@@ -131,6 +131,9 @@ public class RepoDataModel {
 			this.deletedModels.remove(model);
 		}
 		
+		SessionCachedModel model2 = this.models.get(model);
+		model2.markAsCommitted();
+		
 	}
 	
 }
