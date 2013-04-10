@@ -291,7 +291,7 @@ public abstract class AbstractTransactionEvent implements XTransactionEvent {
     
     @Override
     public String toString() {
-        String str = "TransactionEvent by " + this.actor + " @" + this.target + " r";
+        String str = "TransactionEvent by actor '" + this.actor + "' @" + this.target + " r";
         str += (this.modelRevision < 0 ? "-" : this.modelRevision);
         if(this.objectRevision >= 0) {
             str += "/" + this.objectRevision;

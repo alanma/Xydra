@@ -22,22 +22,21 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
     private static final long serialVersionUID = 6129548600082005223L;
     
     /**
-     * Creates a new {@link XObjectEvent} of the add-type (an field was
-     * added to the object this event refers to)
+     * Creates a new {@link XObjectEvent} of the add-type (an field was added to
+     * the object this event refers to)
      * 
      * @param actorId The {@link XId} of the actor
-     * @param target The {@link XAddress} of the object to which the
-     *            field was added - object {@link XId} must not be null
-     * @param fieldId The {@link XId} of the added field - must not be
-     *            null
-     * @param objectRevision the revision number of the object this
-     *            event refers to
+     * @param target The {@link XAddress} of the object to which the field was
+     *            added - object {@link XId} must not be null
+     * @param fieldId The {@link XId} of the added field - must not be null
+     * @param objectRevision the revision number of the object this event refers
+     *            to
      * @param inTransaction sets whether this event occurred during an
      *            {@link XTransaction} or not
      * @return an {@link XObjectEvent} of the add-type
      * @throws IllegalArgumentException if the given {@link XAddress} doesn't
-     *             refer to an object, if the given fieldId is null or
-     *             if the given objectRevision equals
+     *             refer to an object, if the given fieldId is null or if the
+     *             given objectRevision equals
      *             {@link XEvent#RevisionOfEntityNotSet}.
      */
     public static XObjectEvent createAddEvent(XId actorId, XAddress target, XId fieldId,
@@ -55,24 +54,23 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
     }
     
     /**
-     * Creates a new {@link XObjectEvent} of the add-type (an field was
-     * added to the object this event refers to)
+     * Creates a new {@link XObjectEvent} of the add-type (an field was added to
+     * the object this event refers to)
      * 
      * @param actorId The {@link XId} of the actor
-     * @param target The {@link XAddress} of the object to which the
-     *            fieldwas added - object {@link XId} must not be null
-     * @param fieldId The {@link XId} of the added field - must not be
-     *            null
-     * @param modelRevision the revision number of the model holding
-     *            the object this event refers to
-     * @param objectRevision the revision number of the object this
-     *            event refers to
+     * @param target The {@link XAddress} of the object to which the field was
+     *            added - object {@link XId} must not be null
+     * @param fieldId The {@link XId} of the added field - must not be null
+     * @param modelRevision the revision number of the model holding the object
+     *            this event refers to
+     * @param objectRevision the revision number of the object this event refers
+     *            to
      * @param inTransaction sets whether this event occurred during an
      *            {@link XTransaction} or not
      * @return an {@link XObjectEvent} of the add-type
      * @throws IllegalArgumentException if the given {@link XAddress} doesn't
-     *             refer to an object, if the given fieldId is null or
-     *             if the given objectRevision equals
+     *             refer to an object, if the given fieldId is null or if the
+     *             given objectRevision equals
      *             {@link XEvent#RevisionOfEntityNotSet}.
      */
     public static XObjectEvent createAddEvent(XId actorId, XAddress target, XId fieldId,
@@ -90,27 +88,24 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
     }
     
     /**
-     * Creates a new {@link XObjectEvent} of the remove-type (an field
-     * was removed from the object this event refers to)
+     * Creates a new {@link XObjectEvent} of the remove-type (an field was
+     * removed from the object this event refers to)
      * 
      * @param actorId The {@link XId} of the actor
-     * @param target The {@link XAddress} of the object from which the
-     *            field was removed - object {@link XId} must not be
-     *            null
-     * @param fieldId The {@link XId} of the removed field - must not
-     *            be null
-     * @param objectRevision the revision number of the object this
-     *            event refers to
-     * @param fieldRevision the revision number of the field which was
-     *            removed
+     * @param target The {@link XAddress} of the object from which the field was
+     *            removed - object {@link XId} must not be null
+     * @param fieldId The {@link XId} of the removed field - must not be null
+     * @param objectRevision the revision number of the object this event refers
+     *            to
+     * @param fieldRevision the revision number of the field which was removed
      * @param inTransaction sets whether this event occurred during an
      *            {@link XTransaction} or not
      * @param implied sets whether this event describes removing a field whose
      *            containing object is also removed in the same transaction
      * @return an {@link XObjectEvent} of the remove-type
      * @throws IllegalArgumentException if the given {@link XAddress} doesn't
-     *             refer to an object, if the given fieldId is null or
-     *             if the given objectRevision equals
+     *             refer to an object, if the given fieldId is null or if the
+     *             given objectRevision equals
      *             {@link XEvent#RevisionOfEntityNotSet}.
      */
     public static XObjectEvent createRemoveEvent(XId actorId, XAddress target, XId fieldId,
@@ -121,29 +116,26 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
     }
     
     /**
-     * Returns an {@link XObjectEvent} of the remove-type (an field was
-     * removed from the object this event refers to)
+     * Returns an {@link XObjectEvent} of the remove-type (an field was removed
+     * from the object this event refers to)
      * 
      * @param actorId The {@link XId} of the actor
-     * @param target The {@link XAddress} of the object from which the
-     *            field was removed - object {@link XId} must not be
-     *            null
-     * @param fieldId The {@link XId} of the removed field - must not
-     *            be null
-     * @param modelRevision the revision number of the model holding
-     *            the object this event refers to
-     * @param objectRevision the revision number of the object this
-     *            event refers to
-     * @param fieldRevision the revision number of the field which was
-     *            removed
+     * @param target The {@link XAddress} of the object from which the field was
+     *            removed - object {@link XId} must not be null
+     * @param fieldId The {@link XId} of the removed field - must not be null
+     * @param modelRevision the revision number of the model holding the object
+     *            this event refers to
+     * @param objectRevision the revision number of the object this event refers
+     *            to
+     * @param fieldRevision the revision number of the field which was removed
      * @param inTransaction sets whether this event occurred during an
      *            {@link XTransaction} or not
      * @param implied sets whether this event describes removing a field whose
      *            containing object is also removed in the same transaction
      * @return an {@link XObjectEvent} of the remove-type
      * @throws IllegalArgumentException if the given {@link XAddress} doesn't
-     *             refer to an object, if the given fieldId is null or
-     *             if the given objectRevision or fieldRevision equals
+     *             refer to an object, if the given fieldId is null or if the
+     *             given objectRevision or fieldRevision equals
      *             {@link XEvent#RevisionOfEntityNotSet}.
      */
     public static XObjectEvent createRemoveEvent(XId actorId, XAddress target, XId fieldId,
