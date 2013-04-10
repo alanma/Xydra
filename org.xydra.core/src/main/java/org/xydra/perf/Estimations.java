@@ -1,4 +1,4 @@
-package org.xydra.core;
+package org.xydra.perf;
 
 import java.util.ArrayList;
 import java.util.Arrays;
