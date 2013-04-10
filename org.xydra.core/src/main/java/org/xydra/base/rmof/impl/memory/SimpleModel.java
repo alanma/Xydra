@@ -47,6 +47,7 @@ public class SimpleModel extends SimpleEntity implements XRevWritableModel, XSes
     }
     
     public SimpleModel(XAddress address, long revisionNumber) {
+        assert address != null;
         assert address.getAddressedType() == XType.XMODEL : address;
         this.address = address;
         this.revisionNumber = revisionNumber;
@@ -140,13 +141,11 @@ public class SimpleModel extends SimpleEntity implements XRevWritableModel, XSes
      *         but not the same object list or revision number.
      */
     public static XRevWritableModel shallowCopy(XRevWritableModel model) {
-        
         if(model == null) {
             return null;
         }
         
         SimpleModel result = new SimpleModel(model.getAddress());
-        
         if(model instanceof SimpleModel) {
             result.objects.putAll(((SimpleModel)model).objects);
         } else {
@@ -154,7 +153,6 @@ public class SimpleModel extends SimpleEntity implements XRevWritableModel, XSes
                 result.addObject(model.getObject(xid));
             }
         }
-        
         return result;
     }
     
