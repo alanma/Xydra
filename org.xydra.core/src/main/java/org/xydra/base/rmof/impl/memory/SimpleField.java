@@ -106,7 +106,15 @@ public class SimpleField extends SimpleEntity implements XRevWritableField {
     }
     
     boolean sameState(XReadableField o) {
-        return o.getValue().equals(getValue());
+        return o != null &&
+        
+        (
+        
+        (o.getValue() == null && this.getValue() == null)
+        
+        || (o.getValue().equals(getValue()))
+        
+        );
     }
     
     @Override
