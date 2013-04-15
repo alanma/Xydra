@@ -4,7 +4,7 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 
 
-public class LocalCommand {
+public class LocalChange {
     
     /**
      * To sync semantics of safe/forced correctly, a local command is kept
