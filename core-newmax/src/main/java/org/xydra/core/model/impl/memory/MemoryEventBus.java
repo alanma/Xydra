@@ -19,20 +19,18 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XFieldEvent;
 import org.xydra.base.change.XModelEvent;
 import org.xydra.base.change.XObjectEvent;
 import org.xydra.base.change.XRepositoryEvent;
+import org.xydra.base.change.XSyncEvent;
 import org.xydra.base.change.XTransactionEvent;
 import org.xydra.base.rmof.XEntity;
 import org.xydra.core.change.XFieldEventListener;
-import org.xydra.core.change.XFieldSyncEventListener;
 import org.xydra.core.change.XModelEventListener;
-import org.xydra.core.change.XModelSyncEventListener;
 import org.xydra.core.change.XObjectEventListener;
-import org.xydra.core.change.XObjectSyncEventListener;
 import org.xydra.core.change.XRepositoryEventListener;
+import org.xydra.core.change.XSyncEventListener;
 import org.xydra.core.change.XTransactionEventListener;
 import org.xydra.index.IMapMapSetIndex;
 import org.xydra.index.impl.MapMapSetIndex;
@@ -53,35 +51,33 @@ import org.xydra.index.query.Wildcard;
 public class MemoryEventBus {
     
     public static enum EventType {
-        FieldChange, FieldSync, ModelChange, ModelSync, ObjectChange, ObjectSync, RepositoryChange, TransactionChange
+        FieldChange, ModelChange, ObjectChange, RepositoryChange, TransactionChange, Sync,
     }
     
-    private static void fireEvent(EventType eventType, XEntity source, XEvent event, Object o) {
+    /**
+     * @param eventType @NeverNull
+     * @param event @NeverNull
+     * @param listener @NeverNull
+     */
+    private static void fireEventToListener(EventType eventType, Object event, Object listener) {
         switch(eventType) {
         case FieldChange:
-            ((XFieldEventListener)o).onChangeEvent((XFieldEvent)event);
-            break;
-        case FieldSync:
-            ((XFieldSyncEventListener)o).onSynced((XFieldEvent)event);
+            ((XFieldEventListener)listener).onChangeEvent((XFieldEvent)event);
             break;
         case ObjectChange:
-            ((XObjectEventListener)o).onChangeEvent((XObjectEvent)event);
-            break;
-        case ObjectSync:
-            ((XObjectSyncEventListener)o).onSynced((XObjectEvent)event);
+            ((XObjectEventListener)listener).onChangeEvent((XObjectEvent)event);
             break;
         case ModelChange:
-            ((XModelEventListener)o).onChangeEvent((XModelEvent)event);
-            break;
-        case ModelSync:
-            ((XModelSyncEventListener)o).onSynced((XModelEvent)event);
+            ((XModelEventListener)listener).onChangeEvent((XModelEvent)event);
             break;
         case RepositoryChange:
-            ((XRepositoryEventListener)o).onChangeEvent((XRepositoryEvent)event);
+            ((XRepositoryEventListener)listener).onChangeEvent((XRepositoryEvent)event);
             break;
         case TransactionChange:
-            ((XTransactionEventListener)o).onChangeEvent((XTransactionEvent)event);
+            ((XTransactionEventListener)listener).onChangeEvent((XTransactionEvent)event);
             break;
+        case Sync:
+            ((XSyncEventListener)listener).onSynced((XSyncEvent)event);
         }
     }
     
@@ -118,10 +114,10 @@ public class MemoryEventBus {
      * 
      * @param eventType @NeverNull
      * @param source @NeverNull
-     * @param event The {@link XFieldEvent} which will be propagated to the
-     *            registered listeners.
+     * @param event The, e.g., {@link XFieldEvent} which will be propagated to
+     *            the registered listeners.
      */
-    public void fireEvent(EventType eventType, XEntity source, XEvent event) {
+    public void fireEvent(EventType eventType, XEntity source, Object event) {
         assert eventType != null;
         if(event == null) {
             throw new NullPointerException("Cannot fire null event");
@@ -131,11 +127,17 @@ public class MemoryEventBus {
             this.fireCalls++;
             try {
                 Iterator<KeyKeyEntryTuple<EventType,XEntity,Object>> it = this.map.tupleIterator(
-                        new EqualsConstraint<MemoryEventBus.EventType>(eventType),
-                        new EqualsConstraint<XEntity>(source), new Wildcard<Object>());
+                
+                new EqualsConstraint<MemoryEventBus.EventType>(eventType),
+                
+                source == null ? new Wildcard<XEntity>() : new EqualsConstraint<XEntity>(source),
+                
+                new Wildcard<Object>()
+                
+                );
                 while(it.hasNext()) {
                     Object o = it.next().getEntry();
-                    fireEvent(eventType, source, event, o);
+                    fireEventToListener(eventType, event, o);
                 }
             } finally {
                 this.fireCalls--;

@@ -38,10 +38,4 @@ public interface IMemoryModel extends XModel, IMemoryEntity, IMemoryMOFEntity {
     
     void fireTransactionEvent(XTransactionEvent event);
     
-    void fireModelSyncEvent(XModelEvent event);
-    
-    void fireObjectSyncEvent(XObjectEvent event);
-    
-    void fireFieldSyncEvent(XFieldEvent event);
-    
 }

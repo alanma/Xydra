@@ -22,8 +22,6 @@ import org.xydra.base.value.XValue;
 import org.xydra.core.XCopyUtils;
 import org.xydra.core.XX;
 import org.xydra.core.change.XFieldEventListener;
-import org.xydra.core.change.XFieldSyncEventListener;
-import org.xydra.core.change.XSendsFieldSyncEvents;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.XObject;
@@ -38,7 +36,7 @@ import org.xydra.sharedutils.XyAssert;
  * @author Kaidel
  */
 public class MemoryField extends AbstractMOFEntity implements XField, IMemoryField, Serializable,
-        XSendsFieldSyncEvents, Synchronizable {
+        Synchronizable {
     
     private static final long serialVersionUID = -4390811955475742528L;
     
@@ -131,11 +129,6 @@ public class MemoryField extends AbstractMOFEntity implements XField, IMemoryFie
     @Override
     public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
         return this.root.addListenerForFieldEvents(this, changeListener);
-    }
-    
-    @Override
-    public boolean addListenerForFieldSyncEvents(XFieldSyncEventListener syncListener) {
-        return this.root.addListenerForFieldSyncEvents(this, syncListener);
     }
     
     @Override
@@ -281,12 +274,6 @@ public class MemoryField extends AbstractMOFEntity implements XField, IMemoryFie
     @Override
     public void fireFieldEvent(XFieldEvent event) {
         this.root.fireFieldEvent(this, event);
-    }
-    
-    // implement IMemoryField
-    @Override
-    public void fireFieldSyncEvent(XFieldEvent event) {
-        this.root.fireFieldSyncEvent(this, event);
     }
     
     @Override
@@ -449,11 +436,6 @@ public class MemoryField extends AbstractMOFEntity implements XField, IMemoryFie
     @Override
     public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
         return this.root.removeListenerForFieldEvents(this, changeListener);
-    }
-    
-    @Override
-    public boolean removeListenerForFieldSyncEvents(XFieldSyncEventListener syncListener) {
-        return this.root.removeListenerForFieldSyncEvents(this, syncListener);
     }
     
     // implement IMemoryField

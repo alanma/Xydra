@@ -17,8 +17,6 @@ public interface IMemoryField extends XField, IMemoryEntity, IMemoryMOFEntity {
     
     void fireFieldEvent(XFieldEvent event);
     
-    void fireFieldSyncEvent(XFieldEvent event);
-    
     IMemoryObject getObject();
     
     XRevWritableField getState();

@@ -34,9 +34,7 @@ import org.xydra.base.rmof.impl.memory.SimpleObject;
 import org.xydra.core.XCopyUtils;
 import org.xydra.core.XX;
 import org.xydra.core.change.XFieldEventListener;
-import org.xydra.core.change.XFieldSyncEventListener;
 import org.xydra.core.change.XObjectEventListener;
-import org.xydra.core.change.XObjectSyncEventListener;
 import org.xydra.core.change.XSendsFieldEvents;
 import org.xydra.core.change.XSendsObjectEvents;
 import org.xydra.core.change.XSendsTransactionEvents;
@@ -932,14 +930,6 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
     
     // implement IMemoryObject
     @Override
-    public void fireObjectSyncEvent(XObjectEvent event) {
-        synchronized(this.root) {
-            this.root.fireObjectEvent(this, event);
-        }
-    }
-    
-    // implement IMemoryObject
-    @Override
     public void fireFieldEvent(XFieldEvent event) {
         synchronized(this.root) {
             this.root.fireFieldEvent(this, event);
@@ -948,45 +938,9 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
     
     // implement IMemoryObject
     @Override
-    public void fireFieldSyncEvent(XFieldEvent event) {
-        synchronized(this.root) {
-            this.root.fireFieldSyncEvent(this, event);
-        }
-    }
-    
-    // implement IMemoryObject
-    @Override
     public void fireTransactionEvent(XTransactionEvent event) {
         synchronized(this.root) {
             this.root.fireTransactionEvent(this, event);
-        }
-    }
-    
-    @Override
-    public boolean addListenerForObjectSyncEvents(XObjectSyncEventListener syncListener) {
-        synchronized(this.root) {
-            return this.root.addListenerForObjectSyncEvents(this, syncListener);
-        }
-    }
-    
-    @Override
-    public boolean removeListenerForObjectSyncEvents(XObjectSyncEventListener syncListener) {
-        synchronized(this.root) {
-            return this.root.removeListenerForObjectSyncEvents(this, syncListener);
-        }
-    }
-    
-    @Override
-    public boolean addListenerForFieldSyncEvents(XFieldSyncEventListener syncListener) {
-        synchronized(this.root) {
-            return this.root.addListenerForFieldSyncEvents(this, syncListener);
-        }
-    }
-    
-    @Override
-    public boolean removeListenerForFieldSyncEvents(XFieldSyncEventListener syncListener) {
-        synchronized(this.root) {
-            return this.root.removeListenerForFieldSyncEvents(this, syncListener);
         }
     }
     

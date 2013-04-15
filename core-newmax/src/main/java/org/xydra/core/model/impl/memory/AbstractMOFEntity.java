@@ -2,6 +2,8 @@ package org.xydra.core.model.impl.memory;
 
 import org.xydra.annotations.CanBeNull;
 import org.xydra.annotations.ReadOperation;
+import org.xydra.base.change.XSyncEvent;
+import org.xydra.core.change.XSyncEventListener;
 
 
 public abstract class AbstractMOFEntity extends AbstractEntity implements IMemoryMOFEntity {
@@ -61,6 +63,21 @@ public abstract class AbstractMOFEntity extends AbstractEntity implements IMemor
                 throw new IllegalStateException("this entity has been removed: " + getAddress());
             }
         }
+    }
+    
+    @Override
+    public boolean addListenerForSyncEvents(XSyncEventListener syncListener) {
+        return this.root.addListenerForSyncEvents(this, syncListener);
+    }
+    
+    @Override
+    public boolean removeListenerForSyncEvents(XSyncEventListener syncListener) {
+        return this.root.removeListenerForSyncEvents(this, syncListener);
+    }
+    
+    @Override
+    public void fireSyncEvent(XSyncEvent event) {
+        this.root.fireSyncEvent(this, event);
     }
     
 }

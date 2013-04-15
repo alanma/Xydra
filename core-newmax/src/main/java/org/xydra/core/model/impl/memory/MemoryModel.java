@@ -34,13 +34,9 @@ import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.core.XCopyUtils;
 import org.xydra.core.XX;
 import org.xydra.core.change.XFieldEventListener;
-import org.xydra.core.change.XFieldSyncEventListener;
 import org.xydra.core.change.XModelEventListener;
-import org.xydra.core.change.XModelSyncEventListener;
 import org.xydra.core.change.XObjectEventListener;
-import org.xydra.core.change.XObjectSyncEventListener;
 import org.xydra.core.change.XSendsFieldEvents;
-import org.xydra.core.change.XSendsModelSyncEvents;
 import org.xydra.core.change.XSendsObjectEvents;
 import org.xydra.core.change.XSendsTransactionEvents;
 import org.xydra.core.change.XTransactionEventListener;
@@ -80,7 +76,7 @@ public class MemoryModel extends AbstractMOFEntity implements IMemoryModel, XMod
 
 IHasXAddress, IHasChangeLog, XSynchronizesChanges, XExecutesCommands,
 
-XSendsModelSyncEvents, XSendsObjectEvents, XSendsFieldEvents, XSendsTransactionEvents,
+XSendsObjectEvents, XSendsFieldEvents, XSendsTransactionEvents,
 
 Serializable {
     
@@ -177,28 +173,6 @@ Serializable {
     }
     
     @Override
-    public boolean addListenerForModelSyncEvents(XModelSyncEventListener syncListener) {
-        synchronized(this.root) {
-            return this.root.addListenerForModelSyncEvents(this, syncListener);
-        }
-    }
-    
-    @Override
-    public boolean removeListenerForModelSyncEvents(XModelSyncEventListener syncListener) {
-        synchronized(this.root) {
-            return this.root.removeListenerForModelSyncEvents(this, syncListener);
-        }
-    }
-    
-    // implement IMemoryModel
-    @Override
-    public void fireModelSyncEvent(XModelEvent event) {
-        synchronized(this.root) {
-            this.root.fireModelSyncEvent(this, event);
-        }
-    }
-    
-    @Override
     public boolean addListenerForModelEvents(XModelEventListener changeListener) {
         synchronized(this.root) {
             return this.root.addListenerForModelEvents(this, changeListener);
@@ -236,14 +210,6 @@ Serializable {
     
     // implement IMemoryModel
     @Override
-    public void fireObjectSyncEvent(XObjectEvent event) {
-        synchronized(this.root) {
-            this.root.fireObjectEvent(this, event);
-        }
-    }
-    
-    // implement IMemoryModel
-    @Override
     public void fireFieldEvent(XFieldEvent event) {
         synchronized(this.root) {
             this.root.fireFieldEvent(this, event);
@@ -252,45 +218,9 @@ Serializable {
     
     // implement IMemoryModel
     @Override
-    public void fireFieldSyncEvent(XFieldEvent event) {
-        synchronized(this.root) {
-            this.root.fireFieldSyncEvent(this, event);
-        }
-    }
-    
-    // implement IMemoryModel
-    @Override
     public void fireTransactionEvent(XTransactionEvent event) {
         synchronized(this.root) {
             this.root.fireTransactionEvent(this, event);
-        }
-    }
-    
-    @Override
-    public boolean addListenerForObjectSyncEvents(XObjectSyncEventListener syncListener) {
-        synchronized(this.root) {
-            return this.root.addListenerForObjectSyncEvents(this, syncListener);
-        }
-    }
-    
-    @Override
-    public boolean removeListenerForObjectSyncEvents(XObjectSyncEventListener syncListener) {
-        synchronized(this.root) {
-            return this.root.removeListenerForObjectSyncEvents(this, syncListener);
-        }
-    }
-    
-    @Override
-    public boolean addListenerForFieldSyncEvents(XFieldSyncEventListener syncListener) {
-        synchronized(this.root) {
-            return this.root.addListenerForFieldSyncEvents(this, syncListener);
-        }
-    }
-    
-    @Override
-    public boolean removeListenerForFieldSyncEvents(XFieldSyncEventListener syncListener) {
-        synchronized(this.root) {
-            return this.root.removeListenerForFieldSyncEvents(this, syncListener);
         }
     }
     

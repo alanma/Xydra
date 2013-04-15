@@ -24,19 +24,25 @@ public class EventSequenceMapper {
      * @param localChanges
      * @return the {@link Result}
      */
-    public Result map(XEvent[] serverEvents, List<LocalChange> localChanges) {
+    public static Result map(XEvent[] serverEvents, LocalChanges localChanges) {
         return null;
     }
     
     public static class Result {
         
         /**
-         * List of true remote events
+         * List of true remote events = not seen yet on client
          */
-        List<XEvent> nonMapped;
+        List<XEvent> nonMappedServerEvents;
         
         /**
-         * 
+         * List of local events that were not mapped = not executed on server
+         */
+        List<LocalChange> nonMappedLocalEvents;
+        
+        /**
+         * Mapping between local changes and remove events = events originated
+         * locally and successfully executed on server
          */
         List<Pair<XEvent,LocalChange>> mapped;
         

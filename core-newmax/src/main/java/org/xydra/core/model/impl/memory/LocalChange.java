@@ -13,4 +13,12 @@ public class LocalChange {
     
     private XEvent event;
     
+    public XEvent getEvent() {
+        return this.event;
+    }
+    
+    public XCommand getCommand() {
+        return this.command;
+    }
+    
 }

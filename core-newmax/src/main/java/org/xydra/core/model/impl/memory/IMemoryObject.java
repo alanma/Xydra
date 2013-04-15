@@ -17,10 +17,6 @@ public interface IMemoryObject extends XObject, IMemoryEntity, IMemoryMOFEntity 
     
     void fireTransactionEvent(XTransactionEvent event);
     
-    void fireObjectSyncEvent(XObjectEvent event);
-    
-    void fireFieldSyncEvent(XFieldEvent event);
-    
     SynchronisationState getSyncState();
     
     IMemoryModel getFather();

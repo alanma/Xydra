@@ -660,60 +660,62 @@ class MemoryEventQueue implements Serializable {
     
     void sendSyncEvents() {
         
-        while(!this.potentialSyncEventQueue.isEmpty()) {
-            EventQueueEntry entry = this.potentialSyncEventQueue.remove(0);
-            
-            XyAssert.xyAssert(entry != null);
-            assert entry != null;
-            XyAssert.xyAssert(entry.event != null);
-            assert entry.event != null;
-            
-            XyAssert.xyAssert(entry.event instanceof XRepositoryEvent
-                    || entry.event instanceof XModelEvent || entry.event instanceof XObjectEvent
-                    || entry.event instanceof XFieldEvent
-                    || entry.event instanceof XTransactionEvent);
-            
-            if(entry.event instanceof XRepositoryEvent) {
-                
-            } else if(entry.event instanceof XModelEvent) {
-                
-                // fire model event and propagate to fathers if necessary.
-                if(entry.model != null && entry.model.isSynchronized()) {
-                    entry.model.fireModelSyncEvent((XModelEvent)entry.event);
-                }
-                
-            } else if(entry.event instanceof XObjectEvent) {
-                
-                // fire object event and propagate to fathers if necessary.
-                if(entry.object != null && entry.object.isSynchronized()) {
-                    entry.object.fireObjectSyncEvent((XObjectEvent)entry.event);
-                    
-                    if(entry.model != null) {
-                        entry.model.fireObjectSyncEvent((XObjectEvent)entry.event);
-                        
-                    }
-                }
-            } else if(entry.event instanceof XFieldEvent) {
-                
-                // fire field event and propagate to fathers if necessary.
-                if(entry.field != null && entry.object != null && entry.field.isSynchronized()) {
-                    entry.field.fireFieldSyncEvent((XFieldEvent)entry.event);
-                    
-                    if(entry.object != null) {
-                        entry.object.fireFieldSyncEvent((XFieldEvent)entry.event);
-                        
-                        if(entry.model != null) {
-                            entry.model.fireFieldSyncEvent((XFieldEvent)entry.event);
-                            
-                        }
-                    }
-                }
-            } else if(entry.event instanceof XTransactionEvent) {
-                throw new AssertionError("Only XAtomicEvents can be sent.");
-            } else {
-                throw new AssertionError("unknown event type queued: " + entry);
-            }
-        }
+        // while(!this.potentialSyncEventQueue.isEmpty()) {
+        // EventQueueEntry entry = this.potentialSyncEventQueue.remove(0);
+        //
+        // XyAssert.xyAssert(entry != null);
+        // assert entry != null;
+        // XyAssert.xyAssert(entry.event != null);
+        // assert entry.event != null;
+        //
+        // XyAssert.xyAssert(entry.event instanceof XRepositoryEvent
+        // || entry.event instanceof XModelEvent || entry.event instanceof
+        // XObjectEvent
+        // || entry.event instanceof XFieldEvent
+        // || entry.event instanceof XTransactionEvent);
+        //
+        // if(entry.event instanceof XRepositoryEvent) {
+        //
+        // } else if(entry.event instanceof XModelEvent) {
+        //
+        // // fire model event and propagate to fathers if necessary.
+        // if(entry.model != null && entry.model.isSynchronized()) {
+        // entry.model.fireModelSyncEvent((XModelEvent)entry.event);
+        // }
+        //
+        // } else if(entry.event instanceof XObjectEvent) {
+        //
+        // // fire object event and propagate to fathers if necessary.
+        // if(entry.object != null && entry.object.isSynchronized()) {
+        // entry.object.fireObjectSyncEvent((XObjectEvent)entry.event);
+        //
+        // if(entry.model != null) {
+        // entry.model.fireObjectSyncEvent((XObjectEvent)entry.event);
+        //
+        // }
+        // }
+        // } else if(entry.event instanceof XFieldEvent) {
+        //
+        // // fire field event and propagate to fathers if necessary.
+        // if(entry.field != null && entry.object != null &&
+        // entry.field.isSynchronized()) {
+        // entry.field.fireFieldSyncEvent((XFieldEvent)entry.event);
+        //
+        // if(entry.object != null) {
+        // entry.object.fireFieldSyncEvent((XFieldEvent)entry.event);
+        //
+        // if(entry.model != null) {
+        // entry.model.fireFieldSyncEvent((XFieldEvent)entry.event);
+        //
+        // }
+        // }
+        // }
+        // } else if(entry.event instanceof XTransactionEvent) {
+        // throw new AssertionError("Only XAtomicEvents can be sent.");
+        // } else {
+        // throw new AssertionError("unknown event type queued: " + entry);
+        // }
+        // }
     }
     
     /**

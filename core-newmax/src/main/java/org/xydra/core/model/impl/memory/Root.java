@@ -4,15 +4,14 @@ import org.xydra.base.change.XFieldEvent;
 import org.xydra.base.change.XModelEvent;
 import org.xydra.base.change.XObjectEvent;
 import org.xydra.base.change.XRepositoryEvent;
+import org.xydra.base.change.XSyncEvent;
 import org.xydra.base.change.XTransactionEvent;
 import org.xydra.base.rmof.XEntity;
 import org.xydra.core.change.XFieldEventListener;
-import org.xydra.core.change.XFieldSyncEventListener;
 import org.xydra.core.change.XModelEventListener;
-import org.xydra.core.change.XModelSyncEventListener;
 import org.xydra.core.change.XObjectEventListener;
-import org.xydra.core.change.XObjectSyncEventListener;
 import org.xydra.core.change.XRepositoryEventListener;
+import org.xydra.core.change.XSyncEventListener;
 import org.xydra.core.change.XTransactionEventListener;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.impl.memory.MemoryEventBus.EventType;
@@ -37,23 +36,9 @@ public class Root {
         }
     }
     
-    public boolean addListenerForFieldSyncEvents(XEntity entity,
-            XFieldSyncEventListener syncListener) {
-        synchronized(this.eventBus) {
-            return this.eventBus.addListener(EventType.FieldSync, entity, syncListener);
-        }
-    }
-    
     public boolean addListenerForModelEvents(XEntity entity, XModelEventListener changeListener) {
         synchronized(this.eventBus) {
             return this.eventBus.addListener(EventType.ModelChange, entity, changeListener);
-        }
-    }
-    
-    public boolean addListenerForModelSyncEvents(XEntity entity,
-            XModelSyncEventListener syncListener) {
-        synchronized(this.eventBus) {
-            return this.eventBus.addListener(EventType.ModelSync, entity, syncListener);
         }
     }
     
@@ -63,17 +48,16 @@ public class Root {
         }
     }
     
-    public boolean addListenerForObjectSyncEvents(XEntity entity,
-            XObjectSyncEventListener syncListener) {
-        synchronized(this.eventBus) {
-            return this.eventBus.addListener(EventType.ObjectSync, entity, syncListener);
-        }
-    }
-    
     public boolean addListenerForRepositoryEvents(XEntity entity,
             XRepositoryEventListener changeListener) {
         synchronized(this.eventBus) {
             return this.eventBus.addListener(EventType.RepositoryChange, entity, changeListener);
+        }
+    }
+    
+    public boolean addListenerForSyncEvents(XEntity entity, XSyncEventListener syncListener) {
+        synchronized(this.eventBus) {
+            return this.eventBus.addListener(EventType.Sync, entity, syncListener);
         }
     }
     
@@ -90,21 +74,9 @@ public class Root {
         }
     }
     
-    public void fireFieldSyncEvent(XEntity entity, XFieldEvent event) {
-        synchronized(this.eventBus) {
-            this.eventBus.fireEvent(EventType.FieldSync, entity, event);
-        }
-    }
-    
     public void fireModelEvent(XEntity entity, XModelEvent event) {
         synchronized(this.eventBus) {
             this.eventBus.fireEvent(EventType.ModelChange, entity, event);
-        }
-    }
-    
-    public void fireModelSyncEvent(XEntity entity, XModelEvent event) {
-        synchronized(this.eventBus) {
-            this.eventBus.fireEvent(EventType.ModelSync, entity, event);
         }
     }
     
@@ -114,15 +86,15 @@ public class Root {
         }
     }
     
-    public void fireObjectSyncEvent(XEntity entity, XObjectEvent event) {
-        synchronized(this.eventBus) {
-            this.eventBus.fireEvent(EventType.ObjectSync, entity, event);
-        }
-    }
-    
     public void fireRepositoryEvent(XRepository entity, XRepositoryEvent event) {
         synchronized(this.eventBus) {
             this.eventBus.fireEvent(EventType.RepositoryChange, entity, event);
+        }
+    }
+    
+    public void fireSyncEvent(XEntity entity, XSyncEvent event) {
+        synchronized(this.eventBus) {
+            this.eventBus.fireEvent(EventType.Sync, entity, event);
         }
     }
     
@@ -136,23 +108,9 @@ public class Root {
         }
     }
     
-    public boolean removeListenerForFieldSyncEvents(XEntity entity,
-            XFieldSyncEventListener syncListener) {
-        synchronized(this.eventBus) {
-            return this.eventBus.removeListener(EventType.FieldSync, entity, syncListener);
-        }
-    }
-    
     public boolean removeListenerForModelEvents(XEntity entity, XModelEventListener changeListener) {
         synchronized(this.eventBus) {
             return this.eventBus.removeListener(EventType.ModelChange, entity, changeListener);
-        }
-    }
-    
-    public boolean removeListenerForModelSyncEvents(XEntity entity,
-            XModelSyncEventListener syncListener) {
-        synchronized(this.eventBus) {
-            return this.eventBus.removeListener(EventType.ModelSync, entity, syncListener);
         }
     }
     
@@ -162,17 +120,16 @@ public class Root {
         }
     }
     
-    public boolean removeListenerForObjectSyncEvents(XEntity entity,
-            XObjectSyncEventListener syncListener) {
-        synchronized(this.eventBus) {
-            return this.eventBus.removeListener(EventType.ObjectSync, entity, syncListener);
-        }
-    }
-    
     public boolean removeListenerForRepositoryEvents(XRepository entity,
             XRepositoryEventListener changeListener) {
         synchronized(this.eventBus) {
             return this.eventBus.removeListener(EventType.RepositoryChange, entity, changeListener);
+        }
+    }
+    
+    public boolean removeListenerForSyncEvents(XEntity entity, XSyncEventListener syncListener) {
+        synchronized(this.eventBus) {
+            return this.eventBus.removeListener(EventType.Sync, entity, syncListener);
         }
     }
     
