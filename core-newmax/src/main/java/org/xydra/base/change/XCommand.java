@@ -86,6 +86,7 @@ public interface XCommand extends Serializable {
     static final long RELATIVE_REV = Long.MAX_VALUE / 2;
     
     // TODO make revision numbers in commands stricter & document better
+    // TODO use -1 for NONEXISTANT
     static final long NONEXISTANT = SAFE;
     
     /**

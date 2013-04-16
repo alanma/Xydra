@@ -35,8 +35,10 @@ public class ModelRevision implements Serializable {
     
     /** model exists unknown for tentative */
     private final long tentativeRevision;
+    
     /** About the standard revision */
     private final boolean modelExists;
+    
     private final long revision;
     
     /**
