@@ -1,4 +1,4 @@
-package org.xydra.core.model.impl.memory;
+package org.xydra.store.sync;
 
 import java.util.ArrayList;
 
@@ -11,7 +11,14 @@ import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
+import org.xydra.core.model.impl.memory.EventDelta;
+import org.xydra.core.model.impl.memory.EventSequenceMapper;
 import org.xydra.core.model.impl.memory.EventSequenceMapper.Result;
+import org.xydra.core.model.impl.memory.LocalChange;
+import org.xydra.core.model.impl.memory.LocalChanges;
+import org.xydra.core.model.impl.memory.MemoryChangeLog;
+import org.xydra.core.model.impl.memory.ModelUtils;
+import org.xydra.core.model.impl.memory.Root;
 import org.xydra.index.query.Pair;
 import org.xydra.persistence.GetEventsRequest;
 import org.xydra.store.BatchedResult;

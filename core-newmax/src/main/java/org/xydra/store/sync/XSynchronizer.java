@@ -40,6 +40,7 @@ import org.xydra.store.XydraStore;
  * @author dscharrer
  * 
  */
+@Deprecated
 public class XSynchronizer {
     
     static private final Logger log = LoggerFactory.getLogger(XSynchronizer.class);
@@ -70,7 +71,10 @@ public class XSynchronizer {
     
     private void applyEvents(XEvent[] remoteChanges) {
         
-        /* FIXME !!! Thomas skipped this check and always ran this code. Why? */if(remoteChanges.length == 0) {
+        /*
+         * FIXME deprecated !!! Thomas skipped this check and always ran this
+         * code. Why?
+         */if(remoteChanges.length == 0) {
             // no changes to merge
             //
             return;
@@ -440,10 +444,10 @@ public class XSynchronizer {
                         commands[i] = lc.getCommand();
                     } else {
                         /*
-                         * FIXME !!! Horrible bug appeared for Thomas is
-                         * commands where fixed here. It seemed to run fine if
-                         * you just call 'commands[i] = lc.getCommand();' here
-                         * too. Nobody knows why.
+                         * FIXME deprecated !!! Horrible bug appeared for Thomas
+                         * is commands where fixed here. It seemed to run fine
+                         * if you just call 'commands[i] = lc.getCommand();'
+                         * here too. Nobody knows why.
                          */
                         commands[i] = fixCommand(syncRev, lc.getCommand(), i);
                     }
@@ -459,7 +463,7 @@ public class XSynchronizer {
                 EventsCallback ec = new EventsCallback(sc);
                 callback = ec;
                 
-                // FIXME where to get the passwordHash?
+                // FIXME deprecated where to get the passwordHash?
                 this.store.getEvents(this.entity.getSessionActor(), this.entity
                         .getSessionPassword(), new GetEventsRequest[] { new GetEventsRequest(
                         this.entity.getAddress(), syncRev + 1, Long.MAX_VALUE) }, ec);

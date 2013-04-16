@@ -109,7 +109,7 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
         if(this.acm.getAuthenticationDatabase() == null) {
             // we cannot log
             // return true;
-            // FIXME DO:
+            // FIXME SECURITY DO:
             return authenticated;
         }
         int failedLoginAttempts = this.acm.getAuthenticationDatabase().getFailedLoginAttempts(
@@ -196,7 +196,7 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
                     + "," + endRevision + "]");
         }
         
-        // FIXME see fixme below
+        // FIXME SECURITY see fixme below
         if(!triviallyAllowed(passwordHash)
                 && !this.acm.getAuthorisationManager().canKnowAboutModel(actorId,
                         this.getRepositoryAddress(), address.getModel())) {
@@ -213,9 +213,10 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
         }
         
         /*
-         * FIXME why are the access rights not checked if passwordHash == null?
-         * passwordHash == null only indicates that the actor is already
-         * authenticated, not that he is authorized to view all requested info
+         * FIXME SECURITY why are the access rights not checked if passwordHash
+         * == null? passwordHash == null only indicates that the actor is
+         * already authenticated, not that he is authorized to view all
+         * requested info
          */
         if(!triviallyAllowed(passwordHash)) {
             XyAssert.xyAssert(this.acm.getAuthorisationManager() != null);

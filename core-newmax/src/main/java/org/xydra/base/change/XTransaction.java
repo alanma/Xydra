@@ -32,10 +32,8 @@ import org.xydra.base.XAddress;
  * This also means that a Transaction is an {@link XCommand} that actually wraps
  * a set of (logically linked) {@link XCommand}s.
  * 
- * FIXME CHANGE SEMANTICS allow this
- * 
- * {@link XRepositoryCommand}s cannot be added to a Transaction, Transactions
- * only operate on models, objects and fields.
+ * {@link XRepositoryCommand}s can be added to a Transaction, only if they try
+ * to add or remove the model on which the transaction is executed.
  * 
  * The {@link XAddress} of a transaction is address of the model or object that
  * contains all the objects/fields modified by the transaction.

@@ -419,7 +419,7 @@ abstract class SynchronizesChangesImpl extends AbstractEntity implements IHasXAd
     // * @return the revision number to return when executing {@link XCommand
     // * XCommands}.
     // */
-    // // FIXME !!! unify with getRevisionNumber
+    // // FIXME deprecated !!! unify with getRevisionNumber
     // protected abstract long getCurrentRevisionNumber();
     //
     // @Override

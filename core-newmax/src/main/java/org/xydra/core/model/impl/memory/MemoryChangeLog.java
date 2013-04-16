@@ -16,7 +16,7 @@ import org.xydra.sharedutils.XyAssert;
  */
 @Deprecated
 // FIXME move functionality into ChangeLogState & ChangeLogUtils
-class MemoryChangeLog extends AbstractChangeLog implements XChangeLog {
+public class MemoryChangeLog extends AbstractChangeLog implements XChangeLog {
     
     private static final long serialVersionUID = -3242936915355886858L;
     
@@ -35,8 +35,7 @@ class MemoryChangeLog extends AbstractChangeLog implements XChangeLog {
      * @param event the {@link XEvent} which is to be appended @CanBeNull during
      *            play-back when synchronising
      */
-    synchronized protected void appendEvent(@CanBeNull XEvent event) {
-        // TODO
+    public synchronized void appendEvent(@CanBeNull XEvent event) {
         assert event == null || (event.getRevisionNumber() == getCurrentRevisionNumber() + 1) : "cannot append event with rev "
                 + event.getRevisionNumber()
                 + " to model change log at event "
@@ -102,7 +101,7 @@ class MemoryChangeLog extends AbstractChangeLog implements XChangeLog {
      *         number was smaller than the current revision number and greater
      *         than zero.
      */
-    synchronized protected boolean truncateToRevision(long revisionNumber) {
+    public synchronized boolean truncateToRevision(long revisionNumber) {
         return this.state.truncateToRevision(revisionNumber);
     }
     

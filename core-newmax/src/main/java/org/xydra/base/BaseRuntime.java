@@ -41,9 +41,6 @@ public class BaseRuntime {
      * {@link XIdProvider} instance to ensure, that only unique {@link XId}s are
      * being used.
      * 
-     * IMPROVE Maybe we should think about a way to persist the XIdProvider in
-     * the future to really ensure unique random Ids
-     * 
      * @return Returns the {@link XIdProvider} instance of the Xydra Instance
      *         that is currently being used.
      */

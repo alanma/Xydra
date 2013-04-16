@@ -36,6 +36,8 @@ public interface XCommand extends Serializable {
     
     /**
      * Returned when executing commands to indicate that the command failed.
+     * 
+     * Impl note: This revision is also persisted on the server-side.
      */
     static final long FAILED = -1;
     
@@ -49,7 +51,7 @@ public interface XCommand extends Serializable {
      * strongly advise to NOT use this revision number in manually created
      * commands!
      */
-    static final long FORCED = -1;
+    static final long FORCED = -10;
     
     /**
      * The returned revision of new models, objects and fields, before they are
@@ -77,7 +79,7 @@ public interface XCommand extends Serializable {
      * strongly advise NOT use this revision number in manually created
      * commands!
      */
-    static final long SAFE = -2;
+    static final long SAFE = -11;
     
     /**
      * A threshold indicating that the revision number should be interpreted as
@@ -86,8 +88,7 @@ public interface XCommand extends Serializable {
     static final long RELATIVE_REV = Long.MAX_VALUE / 2;
     
     // TODO make revision numbers in commands stricter & document better
-    // TODO use -1 for NONEXISTANT
-    static final long NONEXISTANT = SAFE;
+    static final long NONEXISTANT = -1;
     
     /**
      * WHAT will be changed?

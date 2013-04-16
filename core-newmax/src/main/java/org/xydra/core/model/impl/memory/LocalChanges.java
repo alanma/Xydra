@@ -17,15 +17,15 @@ public class LocalChanges {
         this.list = list;
     }
     
-    void lock() {
+    public void lock() {
         this.locked = true;
     }
     
-    void unlock() {
+    public void unlock() {
         this.locked = false;
     }
     
-    boolean isLocked() {
+    public boolean isLocked() {
         return this.locked;
     }
     
