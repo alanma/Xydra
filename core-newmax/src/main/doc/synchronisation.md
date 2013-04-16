@@ -101,7 +101,11 @@ The core algorithm:
    to change it so that it equals the state the server has after all
    ServerChanges are applied.
 1. Fire sync-events.
-   * If a sync-success event is fired, this implies the @@ 
+   * If a sync-success event is fired, this implies the current revision of 
+     the entity equals its syncRevision. 
+   * If a sync-failed event is fired, this implies the desired event never happened
+     on the server. This is an opportunity for the client to deal with failed
+     commands. TODO Changes to the model are still allowed.  
 1. Copy ServerChanges into local ChangeLog
 1. Let EventDelta update the state of CurrentState
 1. Update the revision numbers of CurrentState using all events in ServerChanges
@@ -109,55 +113,48 @@ The core algorithm:
 1. Release App-lock.    
 
 
+## The Old Synchronizer
+To compare this with the old way, here we describe the old Synchronizer code:
  
+During the whole sync-process the model and hence the GUI need to be locked
+to avoid race conditions and maintain consistency. This are the steps. Lets
+assume the last time we sync'ed from the server was 33 and now we are locally
+at revision 52. Thus we have 19 uncommitted changes. Some of these might be
+transactions, containing several commands each. This process happens in
+several phases:
+
+* Syncer calls executeCommandsAndGetEvents on server with all locally
+  pending commands
+* For each command, the corresponding callback is called: onSuccess or
+  onFaillure. This is an opportunity for the client to deal with failed
+  commands. Changes to the model are still allowed.
+* Now the model is locked. 
+* Syncer does a roll-back for the locally pending
+  changes. This is simply executing the pending changes in reverse. More
+  precisely, its executing commands which have the opposite effect of the
+  events that happended already. I.e. if an object was added locally, there is
+  an add-object-command in the local changes. Additionally, the local model
+  contains an add-object-event. By executing a remove-object-event the effect
+  of the add-object-command can be neutralized. Of course, if the local
+  sequence of uncommited events is A, B, C, then the syncer executes anti-C,
+  anti-B and anti-A in this order. During the whole rollback, sending events is
+  stopped. 
+  The whole purpose is a memory efficient way to get a complete
+  picture of the state of the model as it was at revision 33 (the
+  sync-revisions).
+* Syncer applies the events from the server. These include the events that
+  result from executing successful commands, but contain additionally the
+  events caused by other users.
+* Syncer remembers which events had happened locally already and suppresses
+  sending them again. All other new events are called at the respective change
+  listeners.
+* For each entity that was changed, the syncer observes if the entities
+  local revision is currently the same as the server-side revisions, indicating
+  that there are no pending changes on the client. If this is the case, the
+  persistence change listener is called. The app can now remove the
+  "in progress" spinners or other such GUI elements and indicate to the user
+  that her changes have in fact been persisted successfully on the server.
  
- <h4>Syncing</h4> one can register add the
- {@link org.xydra.core.model.XSynchronizesChanges} -enabled entities (=
- client-side model, object and field) and gets events when an entity is
- currently in a fully persisted state.
- 
- During the whole sync-process the model and hence the GUI need to be locked
- to avoid race conditions and maintain consistency. This are the steps. Lets
- assume the last time we sync'ed from the server was 33 and now we are locally
- at revision 52. Thus we have 19 uncommitted changes. Some of these might be
- transactions, containing several commands each. This process happens in
- several phase:
- <ol>
- <li>Syncer calls executeCommandsAndGetEvents on server with all locally
- pending commands</li>
- <li>For each command, the corresponding callback is called: onSuccess or
- onFaillure. This is an opportunity for the client to deal with failed
- commands. Changes to the model are still allowed.</li>
- <li>Now the model is locked. Syncer does a roll-back for the locally pending
- changes. This is simply executing the pending changes in reverse. More
- precisely, its executing commands which have the opposite effect of the
- events that happended already. I.e. if an object was added locally, there is
- an add-object-command in the local changes. Additionally, the local model
- contains an add-object-event. By executing a remove-object-event the effect
- of the add-object-command can be neutralized. Of course, if the local
- sequence of uncommited events is A, B, C, then the syncer executes anti-C,
- anti-B and anti-A in this order. During the whole rollback sending events is
- stopped. The whole purpose is a memory efficient way to get a complete
- picture of the state of the model as it was at revision 33 (the
- sync-revisions).</li>
- <li>Syncer applies the events from the server. These include the events that
- result from executing successful commands, but contain additionally the
- events caused by other users.</li>
- <li>Syncer remembers which events had happened locally already and suppresses
- sending them again. All other new events are called at the respective change
- listeners.</li>
- <li>For each entity that was changed, the syncer observes if the entities
- local revision is currently the same as the server-side revisions, indicating
- that there are no pending changes on the client. If this is the case, the
- persistence change listener is called. The app can now remove the
- "in progress" spinners or other such GUI elements and indicate to the user
- that her changes have in fact been persisted successfully on the server.</li>
- </ol>
- 
- 
- <ol>
- <li></li>
- </ol>
- 
- TODO Role of relative revision numbers
+
+TODO Role of relative revision numbers
  
