@@ -285,9 +285,10 @@ public class MapMapSetIndex<K, L, E> implements IMapMapSetIndex<K,L,E> {
                 E e = ((SingleEntryMapSetIndex<L,E>)index1).getEntry();
                 index1 = new MapSetIndex<L,E>(this.entrySetFactory);
                 this.map.put(key1, index1);
-                // add existing single entry
-                return index1.index(k, e);
+                // add existing single entry.
+                index1.index(k, e);
             }
+            // always index the new stuff
             return index1.index(key2, entry);
         }
     }
