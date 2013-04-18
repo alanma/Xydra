@@ -15,11 +15,14 @@ import org.xydra.base.XAddress;
 import org.xydra.base.XCompareUtils;
 import org.xydra.base.XId;
 import org.xydra.base.change.XFieldEvent;
+import org.xydra.base.change.XModelEvent;
 import org.xydra.base.change.XObjectEvent;
 import org.xydra.base.change.impl.memory.MemoryFieldEvent;
+import org.xydra.base.change.impl.memory.MemoryModelEvent;
 import org.xydra.base.change.impl.memory.MemoryObjectEvent;
 import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.value.XV;
+import org.xydra.base.value.XValue;
 import org.xydra.core.DemoModelUtil;
 import org.xydra.core.LoggerTestHelper;
 import org.xydra.core.XCopyUtils;
@@ -52,6 +55,9 @@ public class EventDeltaTest {
 	XId dummyModelId = XX.toId("dummyModel");
 	XId o1Id = XX.toId("object1");
 	XId o2Id = XX.toId("object2");
+	XId o3Id = XX.toId("object3");
+	XId o4Id = XX.toId("object4");
+	XId o5Id = XX.toId("object5");
 	XId f1Id = XX.toId("f1");
 	XId f2Id = XX.toId("f2");
 	XId f3Id = XX.toId("f3");
@@ -86,15 +92,23 @@ public class EventDeltaTest {
 	 * inverse to both one object - and one field-event. Then apply everything
 	 * to an dummy model [2 objects and one has 3 fields] and check the results
 	 * 
-	 * object1: 0 fields object2: fields f2, f3, f4; f4 has value "false"
+	 * add 4 object-events: remove object 3, add object 4, add object 5 and
+	 * remove object 5
+	 * 
+	 * basis dummyModel: object1: 0 fields; object2: fields f2, f3, f4; f4 has
+	 * value "false"; object3
 	 * 
 	 * Expected result:
 	 * 
-	 * object1: 0 fields object 2: fields f3, f4; f3 has value "false"; F4 has
-	 * value "false"
+	 * object1: 0 fields object2: fields f3, f4; f3 has value "true"; F4 has
+	 * value "false";; object4
+	 * 
+	 * TODO currently doesn't test for repository events
 	 */
 	@Test
 	public void testAddEvent() {
+		
+		XAddress modelAddress = this.dummyModel.getAddress();
 		XAddress o1Ad = XX.toAddress(this.repo, this.dummyModelId, this.o1Id, null);
 		XAddress o2Ad = XX.toAddress(this.repo, this.dummyModelId, this.o2Id, null);
 		
@@ -111,7 +125,17 @@ public class EventDeltaTest {
 		        this.f1Id, 0, 0, false, false);
 		XFieldEvent field4InverseEvent = MemoryFieldEvent.createAddEvent(this.actorId,
 		        XX.resolveField(o2Ad, this.f4Id), XV.toValue(false), 0, 0, false);
-		// XX.resolveField(o1Ad, this.f1Id)
+		
+		XModelEvent object3Event = MemoryModelEvent.createRemoveEvent(this.actorId, modelAddress,
+		        this.o3Id, 0, 0, false, false);
+		XModelEvent object4Event = MemoryModelEvent.createAddEvent(this.actorId, modelAddress,
+		        this.o4Id, 0, false);
+		XModelEvent object5Event = MemoryModelEvent.createAddEvent(this.actorId, modelAddress,
+		        this.o5Id, 0, false);
+		
+		XModelEvent object5InverseEvent = MemoryModelEvent.createRemoveEvent(this.actorId,
+		        modelAddress, this.o5Id, 0, 0, false, false);
+		
 		EventDelta eventDelta = new EventDelta();
 		eventDelta.addEvent(object1Event);
 		eventDelta.addEvent(object2Event);
@@ -119,6 +143,10 @@ public class EventDeltaTest {
 		eventDelta.addEvent(field4Event);
 		eventDelta.addEvent(object1InverseEvent);
 		eventDelta.addEvent(field4InverseEvent);
+		eventDelta.addEvent(object3Event);
+		eventDelta.addEvent(object4Event);
+		eventDelta.addEvent(object5Event);
+		eventDelta.addEvent(object5InverseEvent);
 		
 		XRevWritableModel revWritableDummyModel = XCopyUtils.createSnapshot(this.dummyModel);
 		
@@ -150,10 +178,53 @@ public class EventDeltaTest {
 		Assert.assertTrue(o2Fields.contains(this.f3Id));
 		Assert.assertTrue(o2Fields.contains(this.f4Id));
 		
-		Assert.assertTrue(revWritableDummyModel.getObject(this.o2Id).getField(this.f3Id).getValue()
-		        .equals(XV.toValue(false)));
-		Assert.assertTrue(revWritableDummyModel.getObject(this.o2Id).getField(this.f4Id).getValue()
-		        .equals(XV.toValue(false)));
+		XValue f3Value = revWritableDummyModel.getObject(this.o2Id).getField(this.f3Id).getValue();
+		Assert.assertTrue(f3Value.equals(XV.toValue(true)));
+		XValue f4Value = revWritableDummyModel.getObject(this.o2Id).getField(this.f4Id).getValue();
+		Assert.assertTrue(f4Value.equals(XV.toValue(false)));
 		
+		Assert.assertTrue(!revWritableDummyModel.hasObject(this.o3Id));
+		Assert.assertTrue(revWritableDummyModel.hasObject(this.o4Id));
+		Assert.assertTrue(!revWritableDummyModel.hasObject(this.o5Id));
+		
+	}
+	
+	/**
+	 * add 3 fieldChange-Events to field 4: true,false,true and make sure, the
+	 * latest one's (Nr.1's) revisions are taken with the value of the newest
+	 * one's value
+	 * 
+	 * basis dummyModel: object1: 0 fields; object2: fields f2, f3, f4; f4 has
+	 * value "false"; object3
+	 * 
+	 * Expected result:
+	 * 
+	 * object1: 0 fields object2: fields f3, f4; f3 has value "true"; F4 has
+	 * value "true" and revision numbers
+	 * 
+	 * TODO currently doesn't test for repository events
+	 */
+	@Test
+	public void testAddEvent_MultipleFieldChanges() {
+		
+		XAddress o2Ad = XX.toAddress(this.repo, this.dummyModelId, this.o2Id, null);
+		
+		XFieldEvent changeEvent1 = MemoryFieldEvent.createChangeEvent(this.actorId,
+		        XX.resolveField(o2Ad, this.f4Id), XV.toValue(true), 4, 4, 4, false);
+		XFieldEvent changeEvent2 = MemoryFieldEvent.createChangeEvent(this.actorId,
+		        XX.resolveField(o2Ad, this.f4Id), XV.toValue(false), 5, 5, 5, false);
+		XFieldEvent changeEvent3 = MemoryFieldEvent.createChangeEvent(this.actorId,
+		        XX.resolveField(o2Ad, this.f4Id), XV.toValue(true), 6, 6, 6, false);
+		
+		EventDelta eventDelta = new EventDelta();
+		eventDelta.addEvent(changeEvent1);
+		eventDelta.addEvent(changeEvent2);
+		eventDelta.addEvent(changeEvent3);
+		
+		XRevWritableModel revWritableDummyModel = XCopyUtils.createSnapshot(this.dummyModel);
+		eventDelta.applyTo(revWritableDummyModel);
+		
+		Assert.assertTrue(revWritableDummyModel.getObject(this.o2Id).getField(this.f4Id).getValue()
+		        .equals(XV.toValue(true)));
 	}
 }
