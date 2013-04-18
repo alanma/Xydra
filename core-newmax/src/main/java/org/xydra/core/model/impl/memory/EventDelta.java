@@ -4,7 +4,6 @@ import java.util.Iterator;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
-import org.xydra.base.XType;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XFieldEvent;
@@ -13,7 +12,6 @@ import org.xydra.base.change.impl.memory.MemoryFieldEvent;
 import org.xydra.base.change.impl.memory.MemoryObjectEvent;
 import org.xydra.base.rmof.XRevWritableField;
 import org.xydra.base.rmof.XRevWritableModel;
-import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.base.value.XValue;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XModel;
@@ -26,6 +24,7 @@ import org.xydra.index.impl.MapSetIndex;
 import org.xydra.index.query.EqualsConstraint;
 import org.xydra.index.query.KeyEntryTuple;
 import org.xydra.index.query.KeyKeyEntryTuple;
+import org.xydra.index.query.Wildcard;
 
 
 /**
@@ -38,16 +37,16 @@ import org.xydra.index.query.KeyKeyEntryTuple;
  * 
  *         IMPROVE Do same for objects?
  * 
- *         TODO Max fragen: Methoden zu lang?
+ *         TODO Max fragen: Methoden zu lang? FIXME auch für model-events?
  */
 public class EventDelta {
 	
 	/**
 	 * Map: objectID -> Map: fieldId -> Set<events>
 	 */
-	IMapMapSetIndex<XId,XId,XFieldEvent> fieldEventMap = new MapMapSetIndex<XId,XId,XFieldEvent>(
+	private IMapMapSetIndex<XId,XId,XFieldEvent> fieldEventMap = new MapMapSetIndex<XId,XId,XFieldEvent>(
 	        new FastEntrySetFactory<XFieldEvent>());
-	IMapSetIndex<XId,XObjectEvent> objectEventMap = new MapSetIndex<XId,XObjectEvent>(
+	private IMapSetIndex<XId,XObjectEvent> objectEventMap = new MapSetIndex<XId,XObjectEvent>(
 	        new FastEntrySetFactory<XObjectEvent>());
 	
 	/**
@@ -59,7 +58,6 @@ public class EventDelta {
 	 */
 	public void addEvent(XEvent rawEvent) {
 		XAddress changedEntityAddress = rawEvent.getChangedEntity();
-		XType changedEntityType = changedEntityAddress.getAddressedType();
 		XId objectId = changedEntityAddress.getObject();
 		ChangeType changeType = rawEvent.getChangeType();
 		ChangeType inverseChangeType = null;
@@ -68,33 +66,42 @@ public class EventDelta {
 			inverseChangeType = ChangeType.REMOVE;
 		} else
 			inverseChangeType = ChangeType.ADD;
+		// TODO what, if 2 change-events?
 		
 		Iterator<? extends XEvent> alreadyIndexedEventsForAddressSet = null;
 		XEvent contradictoryEvent = null;
-		if(changedEntityType.equals(XType.XOBJECT)) {
+		if(rawEvent instanceof XObjectEvent) {
 			XObjectEvent event = (XObjectEvent)rawEvent;
 			
 			alreadyIndexedEventsForAddressSet = this.objectEventMap
 			        .constraintIterator(new EqualsConstraint<XId>(objectId));
-			contradictoryEvent = isContradictoryEventExistingAndDeleted(inverseChangeType,
+			contradictoryEvent = lookForContradictoryEvents(inverseChangeType,
 			        alreadyIndexedEventsForAddressSet);
 			if(contradictoryEvent == null) {
 				this.objectEventMap.index(objectId, event);
 			}
-		} else if(changedEntityType.equals(XType.XFIELD)) {
+		} else if(rawEvent instanceof XFieldEvent) {
 			XFieldEvent event = (XFieldEvent)rawEvent;
 			XId fieldId = changedEntityAddress.getField();
 			alreadyIndexedEventsForAddressSet = this.fieldEventMap.constraintIterator(
 			        new EqualsConstraint<XId>(objectId), new EqualsConstraint<XId>(
 			                changedEntityAddress.getField()));
 			
-			contradictoryEvent = isContradictoryEventExistingAndDeleted(inverseChangeType,
+			contradictoryEvent = lookForContradictoryEvents(inverseChangeType,
 			        alreadyIndexedEventsForAddressSet);
 			
 			if(contradictoryEvent == null) {
 				this.fieldEventMap.index(objectId, fieldId, event);
+				// if(!this.fieldEventMap.contains(new
+				// EqualsConstraint<XId>(objectId),
+				// new EqualsConstraint<XId>(fieldId),
+				// new EqualsConstraint<XFieldEvent>(event))) {
+				// throw new RuntimeException("IMapMapSetIndex doesn't work!");
+				// }
+				// TODO why does this not work?
 			}
-		}
+		} else
+			throw new RuntimeException("event could not be casted!");
 		if(contradictoryEvent != null) {
 			deleteContradictoryEvent(contradictoryEvent);
 		}
@@ -108,7 +115,7 @@ public class EventDelta {
 	 * @param alreadyIndexedEventsForAddressSet
 	 * @return the contradictory event
 	 */
-	private static XEvent isContradictoryEventExistingAndDeleted(ChangeType inverseChangeType,
+	private static XEvent lookForContradictoryEvents(ChangeType inverseChangeType,
 	        Iterator<? extends XEvent> alreadyIndexedEventsForAddressSet) {
 		XEvent eventToBeRemoved = null;
 		
@@ -127,9 +134,9 @@ public class EventDelta {
 	
 	private void deleteContradictoryEvent(XEvent event) {
 		XAddress changedEntity = event.getChangedEntity();
-		if(changedEntity.getAddressedType() == XType.XOBJECT) {
+		if(event instanceof XObjectEvent) {
 			this.objectEventMap.deIndex(changedEntity.getObject(), (XObjectEvent)event);
-		} else if(changedEntity.getAddressedType() == XType.XFIELD) {
+		} else if(event instanceof XFieldEvent) {
 			this.fieldEventMap.deIndex(changedEntity.getObject(), changedEntity.getField(),
 			        (XFieldEvent)event);
 		}
@@ -146,10 +153,9 @@ public class EventDelta {
 	public void addInverseEvent(XEvent event, long syncRevision, XChangeLog changeLog) {
 		XAddress changedEntityAddress = event.getChangedEntity();
 		XId objectId = changedEntityAddress.getObject();
-		XType changedEntityType = changedEntityAddress.getAddressedType();
 		ChangeType changeType = event.getChangeType();
 		
-		if(changedEntityType.equals(XType.XOBJECT)) {
+		if(event instanceof XObjectEvent) {
 			XObjectEvent resultingEvent = null;
 			switch(changeType) {
 			case ADD:
@@ -166,7 +172,7 @@ public class EventDelta {
 			}
 			
 			this.objectEventMap.index(objectId, resultingEvent);
-		} else if(changedEntityType == XType.XFIELD) {
+		} else if(event instanceof XObjectEvent) {
 			XFieldEvent resultingEvent = null;
 			
 			XEvent oldRevisionsEvent = changeLog.getEventAt(event.getOldFieldRevision());
@@ -208,7 +214,8 @@ public class EventDelta {
 			}
 			
 			this.fieldEventMap.index(objectId, changedEntityAddress.getField(), resultingEvent);
-		}
+		} else
+			throw new RuntimeException("event could not be casted!");
 	}
 	
 	/**
@@ -219,50 +226,54 @@ public class EventDelta {
 	 */
 	public void applyTo(XRevWritableModel model) {
 		
-		/* for all events concerning newly created objects: */
+		// TODO what do to with double entitys??? (when the model / object
+		// already contained an entity...)
+		
+		/* for all events concerning newly created fields: */
 		Iterator<KeyEntryTuple<XId,XObjectEvent>> objectEventIterator = this.objectEventMap
-		        .tupleIterator(null, null);
+		        .tupleIterator(new Wildcard<XId>(), new Wildcard<XObjectEvent>());
 		while(objectEventIterator.hasNext()) {
 			KeyEntryTuple<org.xydra.base.XId,org.xydra.base.change.XObjectEvent> keyEntryTuple = (KeyEntryTuple<org.xydra.base.XId,org.xydra.base.change.XObjectEvent>)objectEventIterator
 			        .next();
 			XEvent currentEvent = keyEntryTuple.getSecond();
 			if(currentEvent.getChangeType() == ChangeType.ADD) {
-				XRevWritableObject newObject = model.createObject(currentEvent.getChangedEntity()
-				        .getObject());
+				@SuppressWarnings("unused")
+				XRevWritableField newField = model.getObject(keyEntryTuple.getFirst()).createField(
+				        currentEvent.getChangedEntity().getField());
 				
-				model.addObject(newObject);
 			}
 			
 		}
 		
-		/* for all events concerning newly created fields */
+		/* for all events concerning newly created values */
 		Iterator<KeyKeyEntryTuple<XId,XId,XFieldEvent>> fieldEventIterator = this.fieldEventMap
-		        .tupleIterator(null, null, null);
+		        .tupleIterator(new Wildcard<XId>(), new Wildcard<XId>(),
+		                new Wildcard<XFieldEvent>());
 		while(fieldEventIterator.hasNext()) {
 			KeyKeyEntryTuple<org.xydra.base.XId,org.xydra.base.XId,org.xydra.base.change.XFieldEvent> keyKeyEntryTuple = (KeyKeyEntryTuple<org.xydra.base.XId,org.xydra.base.XId,org.xydra.base.change.XFieldEvent>)fieldEventIterator
 			        .next();
 			XId fieldId = keyKeyEntryTuple.getKey2();
 			XFieldEvent currentEvent = keyKeyEntryTuple.getEntry();
-			XRevWritableObject currentObject = model.getObject(keyKeyEntryTuple.getKey1());
-			if(currentEvent.getChangeType() == ChangeType.ADD) {
-				currentObject.createField(fieldId);
-				currentObject.getField(fieldId).setValue(currentEvent.getNewValue());
-			} else if(currentEvent.getChangeType() == ChangeType.CHANGE) {
-				XRevWritableField field = currentObject.getField(fieldId);
-				field.setValue(currentEvent.getNewValue());
+			XRevWritableField currentField = model.getObject(keyKeyEntryTuple.getKey1()).getField(
+			        fieldId);
+			if(currentEvent.getChangeType() == ChangeType.ADD
+			        || currentEvent.getChangeType() == ChangeType.CHANGE) {
+				currentField.setValue(currentEvent.getNewValue());
 			} else if(currentEvent.getChangeType() == ChangeType.REMOVE) {
-				currentObject.removeField(fieldId);
+				currentField.setValue(null);
 			}
 		}
 		
-		/* for all events concerning objects to be removed */
-		objectEventIterator = this.objectEventMap.tupleIterator(null, null);
+		/* for all events concerning fields to be removed */
+		objectEventIterator = this.objectEventMap.tupleIterator(new Wildcard<XId>(),
+		        new Wildcard<XObjectEvent>());
 		while(objectEventIterator.hasNext()) {
 			KeyEntryTuple<org.xydra.base.XId,org.xydra.base.change.XObjectEvent> keyEntryTuple = (KeyEntryTuple<org.xydra.base.XId,org.xydra.base.change.XObjectEvent>)objectEventIterator
 			        .next();
 			XEvent currentEvent = keyEntryTuple.getSecond();
 			if(currentEvent.getChangeType() == ChangeType.REMOVE) {
-				model.removeObject(currentEvent.getChangedEntity().getObject());
+				model.getObject(keyEntryTuple.getFirst()).removeField(
+				        (currentEvent.getChangedEntity().getField()));
 			}
 			
 		}
@@ -292,7 +303,7 @@ public class EventDelta {
 			}
 		}
 		
-		/* remove objects */
+		/* remove fields */
 		Iterator<KeyEntryTuple<XId,XObjectEvent>> objectEventIterator = this.objectEventMap
 		        .tupleIterator(null, null);
 		while(objectEventIterator.hasNext()) {
@@ -304,7 +315,7 @@ public class EventDelta {
 			}
 		}
 		
-		/* add objects */
+		/* add fields */
 		objectEventIterator = this.objectEventMap.tupleIterator(null, null);
 		while(objectEventIterator.hasNext()) {
 			KeyEntryTuple<org.xydra.base.XId,org.xydra.base.change.XObjectEvent> keyEntryTuple = (KeyEntryTuple<org.xydra.base.XId,org.xydra.base.change.XObjectEvent>)objectEventIterator
@@ -315,15 +326,13 @@ public class EventDelta {
 			}
 		}
 		
-		/* add fields */
+		// change values
 		fieldEventIterator = this.fieldEventMap.tupleIterator(null, null, null);
 		while(fieldEventIterator.hasNext()) {
 			KeyKeyEntryTuple<org.xydra.base.XId,org.xydra.base.XId,org.xydra.base.change.XFieldEvent> keyKeyEntryTuple = (KeyKeyEntryTuple<org.xydra.base.XId,org.xydra.base.XId,org.xydra.base.change.XFieldEvent>)fieldEventIterator
 			        .next();
 			XFieldEvent currentEvent = keyKeyEntryTuple.getEntry();
-			if(currentEvent.getChangeType() == ChangeType.ADD) {
-				root.fireFieldEvent(model, currentEvent);
-			}
+			root.fireFieldEvent(model, currentEvent);
 		}
 	}
 }
