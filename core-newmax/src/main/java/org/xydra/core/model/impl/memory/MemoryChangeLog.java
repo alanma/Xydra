@@ -14,9 +14,7 @@ import org.xydra.sharedutils.XyAssert;
  * 
  * @author Kaidel
  */
-@Deprecated
-// FIXME move functionality into ChangeLogState & ChangeLogUtils
-public class MemoryChangeLog extends AbstractChangeLog implements XChangeLog {
+public class MemoryChangeLog extends AbstractChangeLog implements XWritableChangeLog {
     
     private static final long serialVersionUID = -3242936915355886858L;
     
@@ -29,12 +27,6 @@ public class MemoryChangeLog extends AbstractChangeLog implements XChangeLog {
         this.state = state;
     }
     
-    /**
-     * Appends an {@link XEvent} to the end of this MemoryChangeLog
-     * 
-     * @param event the {@link XEvent} which is to be appended @CanBeNull during
-     *            play-back when synchronising
-     */
     public synchronized void appendEvent(@CanBeNull XEvent event) {
         assert event == null || (event.getRevisionNumber() == getCurrentRevisionNumber() + 1) : "cannot append event with rev "
                 + event.getRevisionNumber()
@@ -90,17 +82,6 @@ public class MemoryChangeLog extends AbstractChangeLog implements XChangeLog {
         return this.state.toString();
     }
     
-    /**
-     * Removes all {@link XEvent XEvents} that occurred after the given revision
-     * number from this MemoryChangeLog, excluding the {@link XEvent} that
-     * occurred at the given revision number
-     * 
-     * @param revisionNumber the revision number from which on the
-     *            {@link XEvent XEvents} are to be removed
-     * @return true, if the operation could be executed, i.e. the given revision
-     *         number was smaller than the current revision number and greater
-     *         than zero.
-     */
     public synchronized boolean truncateToRevision(long revisionNumber) {
         return this.state.truncateToRevision(revisionNumber);
     }
@@ -108,6 +89,10 @@ public class MemoryChangeLog extends AbstractChangeLog implements XChangeLog {
     @Override
     public XChangeLogState getChangeLogState() {
         return this.state;
+    }
+    
+    public static XWritableChangeLog create(XAddress baseAddress) {
+        return new MemoryChangeLog(new MemoryChangeLogState(baseAddress));
     }
     
 }

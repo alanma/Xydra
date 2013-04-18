@@ -14,13 +14,13 @@ import org.xydra.base.change.XFieldEvent;
  * @author Kaidel
  */
 
-public interface XFieldEventListener {
-	
-	/**
-	 * Invoked when an {@link XFieldEvent} occurs on the entity this listener is
-	 * registered on.
-	 * 
-	 * @param event
-	 */
-	void onChangeEvent(XFieldEvent event);
+public interface XFieldEventListener extends XChangeEventListener {
+    
+    /**
+     * Invoked when an {@link XFieldEvent} occurs on the entity this listener is
+     * registered on.
+     * 
+     * @param event
+     */
+    void onChangeEvent(XFieldEvent event);
 }

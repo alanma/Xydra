@@ -8,8 +8,8 @@ import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XTransaction;
 import org.xydra.core.change.XSendsSyncEvents;
 import org.xydra.core.model.impl.memory.LocalChanges;
-import org.xydra.core.model.impl.memory.MemoryChangeLog;
 import org.xydra.core.model.impl.memory.Synchronizable;
+import org.xydra.core.model.impl.memory.XWritableChangeLog;
 import org.xydra.store.sync.XSynchronizer;
 
 
@@ -61,10 +61,7 @@ Synchronizable {
      *         XEvents} which happen on this XSynchronizeChanges
      */
     @Override
-    XChangeLog getChangeLog();
-    
-    // TODO kill and switch back to getChangeLog()
-    MemoryChangeLog getMemoryChangeLog();
+    XWritableChangeLog getChangeLog();
     
     // note: used by XSynchronized TODO document
     @Deprecated
@@ -84,7 +81,7 @@ Synchronizable {
      * @return the password used by {@link XSynchronizer} to talk to the
      *         back-end
      */
-    String getSessionPassword();
+    String getSessionPasswordHash();
     
     /**
      * @return the highest known revision number for which the client got a

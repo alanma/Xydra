@@ -1,5 +1,7 @@
 package org.xydra.core.model.impl.memory;
 
+import org.xydra.base.XAddress;
+import org.xydra.base.XId;
 import org.xydra.base.change.XFieldEvent;
 import org.xydra.base.change.XModelEvent;
 import org.xydra.base.change.XObjectEvent;
@@ -28,7 +30,35 @@ import org.xydra.core.model.impl.memory.MemoryEventBus.EventType;
  */
 public class Root {
     
-    private MemoryEventBus eventBus = new MemoryEventBus();
+    /**
+     * @param eventBus
+     * @param writableChangeLog
+     * @param localChanges
+     * @param sessionActor
+     */
+    public Root(MemoryEventBus eventBus, XWritableChangeLog writableChangeLog,
+            LocalChanges localChanges, XId sessionActor) {
+        this.eventBus = eventBus;
+        this.writableChangeLog = writableChangeLog;
+        this.localChanges = localChanges;
+        this.sessionActor = sessionActor;
+        this.isTransactionInProgress = false;
+    }
+    
+    private final MemoryEventBus eventBus;
+    private XId sessionActor;
+    private boolean isTransactionInProgress;
+    private final XWritableChangeLog writableChangeLog;
+    private final LocalChanges localChanges;
+    private String sessionPasswordHash;
+    
+    public String getSessionPasswordHash() {
+        return this.sessionPasswordHash;
+    }
+    
+    public void setSessionPasswordHash(String sessionPasswordHash) {
+        this.sessionPasswordHash = sessionPasswordHash;
+    }
     
     public boolean addListenerForFieldEvents(XEntity entity, XFieldEventListener changeListener) {
         synchronized(this.eventBus) {
@@ -139,6 +169,49 @@ public class Root {
             return this.eventBus
                     .removeListener(EventType.TransactionChange, entity, changeListener);
         }
+    }
+    
+    public boolean isTransactionInProgess() {
+        return this.isTransactionInProgress;
+    }
+    
+    public void setTransactionInProgress(boolean b) {
+        this.isTransactionInProgress = b;
+    }
+    
+    public XId getSessionActor() {
+        return this.sessionActor;
+    }
+    
+    /**
+     * Set a new actor to be used when building commands for changes.
+     * 
+     * @param actor for this field.
+     */
+    void setSessionActor(XId actor) {
+        this.sessionActor = actor;
+    }
+    
+    /**
+     * @param baseAddress
+     * @param actorId
+     * @return
+     */
+    public static Root createWithActor(XAddress baseAddress, XId actorId) {
+        return new Root(new MemoryEventBus(), MemoryChangeLog.create(baseAddress),
+                LocalChanges.create(), actorId);
+    }
+    
+    public XWritableChangeLog getWritableChangeLog() {
+        return this.writableChangeLog;
+    }
+    
+    public int countUnappliedLocalChanges() {
+        return this.localChanges.countUnappliedLocalChanges();
+    }
+    
+    public LocalChanges getLocalChanges() {
+        return this.localChanges;
     }
     
 }

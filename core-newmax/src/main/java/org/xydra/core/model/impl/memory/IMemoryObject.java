@@ -27,8 +27,10 @@ public interface IMemoryObject extends XObject, IMemoryEntity, IMemoryMOFEntity 
     
     void delete();
     
+    @Deprecated
     IMemoryField createFieldInternal(XId fieldId);
     
+    @Deprecated
     void removeFieldInternal(XId fieldId);
     
     void setRevisionNumber(long newRevision);
@@ -38,4 +40,6 @@ public interface IMemoryObject extends XObject, IMemoryEntity, IMemoryMOFEntity 
     void incrementRevision();
     
     void removeInternal();
+    
+    long getModelRevisionNumber();
 }

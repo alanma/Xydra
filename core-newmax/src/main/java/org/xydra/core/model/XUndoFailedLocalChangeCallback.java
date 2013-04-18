@@ -1,13 +1,13 @@
 package org.xydra.core.model;
 
 import org.xydra.base.change.XCommand;
-import org.xydra.core.model.impl.memory.MemoryModel;
+import org.xydra.core.model.impl.memory.IMemoryModel;
 
 
 public class XUndoFailedLocalChangeCallback implements XLocalChangeCallback {
     private XLocalChangeCallback wrappedOriginalCallback;
     private XCommand command;
-    private MemoryModel model;
+    private IMemoryModel model;
     
     /**
      * @return the callback that we need to call
@@ -19,7 +19,7 @@ public class XUndoFailedLocalChangeCallback implements XLocalChangeCallback {
     /**
      * @return the model in which the undo must take place
      */
-    public MemoryModel getModel() {
+    public IMemoryModel getModel() {
         return this.model;
     }
     
@@ -35,7 +35,7 @@ public class XUndoFailedLocalChangeCallback implements XLocalChangeCallback {
      * @param model
      * @param wrappedOriginalCallback
      */
-    public XUndoFailedLocalChangeCallback(XCommand command, MemoryModel model,
+    public XUndoFailedLocalChangeCallback(XCommand command, IMemoryModel model,
             XLocalChangeCallback wrappedOriginalCallback) {
         this.command = command;
         this.model = model;

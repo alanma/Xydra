@@ -1,6 +1,10 @@
 package org.xydra.core.model.impl.memory;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import org.xydra.base.change.XCommand;
+import org.xydra.base.change.XEvent;
 
 
 /**
@@ -35,6 +39,19 @@ public class LocalChanges {
     
     public void clear() {
         this.list.clear();
+    }
+    
+    public void append(XCommand command, XEvent event) {
+        LocalChange lc = new LocalChange(command, event);
+        this.list.add(lc);
+    }
+    
+    public static LocalChanges create() {
+        return new LocalChanges(new ArrayList<LocalChange>());
+    }
+    
+    public int countUnappliedLocalChanges() {
+        return this.list.size();
     }
     
 }

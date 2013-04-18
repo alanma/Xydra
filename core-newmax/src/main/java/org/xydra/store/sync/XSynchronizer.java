@@ -465,7 +465,7 @@ public class XSynchronizer {
                 
                 // FIXME deprecated where to get the passwordHash?
                 this.store.getEvents(this.entity.getSessionActor(), this.entity
-                        .getSessionPassword(), new GetEventsRequest[] { new GetEventsRequest(
+                        .getSessionPasswordHash(), new GetEventsRequest[] { new GetEventsRequest(
                         this.entity.getAddress(), syncRev + 1, Long.MAX_VALUE) }, ec);
             }
             

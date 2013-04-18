@@ -477,7 +477,7 @@ class MemoryEventQueue implements Serializable {
      * @param model The {@link MemoryModel} in which this event occurred.
      * @param event The {@link XModelEvent}.
      */
-    protected void enqueueModelEvent(MemoryModel model, XModelEvent event) {
+    protected void enqueueModelEvent(IMemoryModel model, XModelEvent event) {
         assert model != null && event != null : "Neither model nor event may be null!";
         
         enqueueEvent(new EventQueueEntry(model.getFather(), model, null, null, event));
@@ -523,7 +523,7 @@ class MemoryEventQueue implements Serializable {
     /**
      * @return the {@link MemoryChangeLog} being used for logging.
      */
-    protected XChangeLog getChangeLog() {
+    protected XWritableChangeLog getChangeLog() {
         return this.changeLog;
     }
     

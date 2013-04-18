@@ -11,22 +11,30 @@ import org.xydra.core.model.XLocalChangeCallback;
 // FIXME MAX set to default access
 public interface IMemoryField extends XField, IMemoryEntity, IMemoryMOFEntity {
     
-    void delete();
-    
-    long executeFieldCommand(XFieldCommand command, XLocalChangeCallback callback);
-    
-    void fireFieldEvent(XFieldEvent event);
-    
-    IMemoryObject getObject();
-    
-    XRevWritableField getState();
-    
-    void incrementRevision();
-    
     boolean isSynchronized();
     
+    @Deprecated
+    void delete();
+    
+    @Deprecated
+    long executeFieldCommand(XFieldCommand command, XLocalChangeCallback callback);
+    
+    @Deprecated
+    void fireFieldEvent(XFieldEvent event);
+    
+    @Deprecated
+    IMemoryObject getObject();
+    
+    @Deprecated
+    XRevWritableField getState();
+    
+    @Deprecated
+    void incrementRevision();
+    
+    @Deprecated
     void setRevisionNumber(long newRevision);
     
+    @Deprecated
     void setValueInternal(XValue value);
     
     /**

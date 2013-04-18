@@ -12,6 +12,7 @@ public abstract class AbstractMOFEntity extends AbstractEntity implements IMemor
      * @return the father entity or null if this entity is the root
      */
     @CanBeNull
+    // TODO deprecate?
     protected abstract IMemoryEntity getFather();
     
     /**
@@ -44,6 +45,7 @@ public abstract class AbstractMOFEntity extends AbstractEntity implements IMemor
         return this.root;
     }
     
+    // TODO deprecate?
     public long getFatherRevisionNumber() {
         if(this.getFather() != null)
             return this.getFather().getRevisionNumber();

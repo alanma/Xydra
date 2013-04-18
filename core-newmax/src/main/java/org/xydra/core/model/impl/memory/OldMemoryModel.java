@@ -71,7 +71,7 @@ import org.xydra.sharedutils.XyAssert;
  * @author voelkel
  * @author Kaidel
  */
-public class MemoryModel extends AbstractMOFEntity implements IMemoryModel, XModel,
+public class OldMemoryModel extends AbstractMOFEntity implements IMemoryModel, XModel,
 
 IHasXAddress, IHasChangeLog, XSynchronizesChanges, XExecutesCommands,
 
@@ -81,7 +81,7 @@ Serializable {
     
     private static final long serialVersionUID = -2969189978307340483L;
     
-    private static final Logger log = LoggerFactory.getLogger(MemoryModel.class);
+    private static final Logger log = LoggerFactory.getLogger(OldMemoryModel.class);
     
     /**
      * The father-repository of this MemoryModel
@@ -282,11 +282,11 @@ Serializable {
     @Override
     @ReadOperation
     public boolean equals(Object o) {
-        if(!(o instanceof MemoryModel)) {
+        if(!(o instanceof OldMemoryModel)) {
             return false;
         }
         
-        MemoryModel other = (MemoryModel)o;
+        OldMemoryModel other = (OldMemoryModel)o;
         synchronized(this.root) {
             // compare revision number, repositoryId & modelId
             return XCompareUtils.equalId(this.father, other.getFather())
@@ -579,8 +579,7 @@ Serializable {
     @Override
     @ModificationOperation
     public long executeCommand(XCommand command, XLocalChangeCallback callback) {
-        return executeCommandWithActor(command, getSessionActor(), getSessionPasswordHash(),
-                callback);
+        return executeCommandWithActor(command, getSessionActor(), getSessionPasswordHash(), callback);
     }
     
     /**
@@ -821,6 +820,127 @@ Serializable {
         }
     }
     
+    // FIXME HERE ===========================================
+    void fixme_________________here() {
+    }
+    
+    // public void createModelInternal(XId modelId, XCommand command,
+    // XLocalChangeCallback callback) {
+    //
+    // XRepositoryEvent event =
+    // MemoryRepositoryEvent.createAddEvent(this.sessionActor,
+    // getAddress(), modelId);
+    //
+    // XRevWritableModel modelState = this.state.createModel(modelId);
+    // assert modelState.getRevisionNumber() == 0;
+    //
+    // XChangeLogState ls = new MemoryChangeLogState(modelState.getAddress());
+    // ls.setBaseRevisionNumber(-1);
+    //
+    // ls.appendEvent(event);
+    //
+    // MemoryModel model = new MemoryModel(this.sessionActor,
+    // this.sessionPasswordHash, this,
+    // modelState, ls);
+    // XyAssert.xyAssert(model.getRevisionNumber() == 0);
+    //
+    // // in memory
+    // this.loadedModels.put(model.getId(), model);
+    //
+    // boolean oldLogging = model.eventQueue.setLogging(false);
+    // model.eventQueue.enqueueRepositoryEvent(this, event);
+    // model.eventQueue.setLogging(oldLogging);
+    //
+    // XyAssert.xyAssert(model.eventQueue.getLocalChanges().isEmpty());
+    // model.eventQueue.newLocalChange(command, callback);
+    //
+    // model.eventQueue.setSyncRevision(-1);
+    //
+    // model.eventQueue.sendEvents();
+    //
+    // }
+    //
+    // private void XXXexecuteCommand(XCommand command, XLocalChangeCallback
+    // callback) {
+    // // add or remove model?
+    // if(command instanceof XRepositoryCommand) {
+    // return executeRepositoryCommand((XRepositoryCommand)command, callback);
+    // }
+    // // if model currently exists, we just delegate to it
+    // MemoryModel model = getModel(command.getTarget().getModel());
+    // if(model == null) {
+    // return XCommand.FAILED;
+    // }
+    // synchronized(model.eventQueue) {
+    // if(model.isRemoved) {
+    // return XCommand.FAILED;
+    // }
+    // XId modelActor = model.eventQueue.getActor();
+    // String modelPsw = model.eventQueue.getPasswordHash();
+    // model.eventQueue.setSessionActor(this.sessionActor,
+    // this.sessionPasswordHash);
+    //
+    // long res = model.executeCommand(command, callback);
+    // // FIXME model commands executed by listeners will use the
+    // // repository actor
+    //
+    // model.eventQueue.setSessionActor(modelActor, modelPsw);
+    // return res;
+    // }
+    // }
+    
+    // private synchronized long executeRepositoryCommand(XRepositoryCommand
+    // command,
+    // XLocalChangeCallback callback) {
+    // /*
+    // * find out which model should handle it, defer all execution and error
+    // * checking there
+    // */
+    // XId repoId = command.getRepositoryId();
+    // XId modelId = command.getModelId();
+    // MemoryModel model = this.getModel(modelId);
+    // if(model == null) {
+    // // might be a create-model
+    // model = MemoryModel.createNonExistantModel(this.sessionActor,
+    // this.sessionPasswordHash,
+    // repoId, modelId);
+    // }
+    // return model.executeCommandWithActor(command, this.sessionActor,
+    // this.sessionPasswordHash,
+    // callback);
+    // }
+    
+    // private long removeModelInternal(MemoryModel model, XCommand command,
+    // XLocalChangeCallback callback) {
+    // synchronized(model.eventQueue) {
+    //
+    // XId modelId = model.getId();
+    //
+    // long rev = model.getRevisionNumber() + 1;
+    //
+    // int since = model.eventQueue.getNextPosition();
+    // boolean inTrans = model.enqueueModelRemoveEvents(this.sessionActor);
+    // if(inTrans) {
+    // model.eventQueue.createTransactionEvent(this.sessionActor, model, null,
+    // since);
+    // }
+    //
+    // model.delete();
+    // this.state.removeModel(modelId);
+    // this.loadedModels.remove(modelId);
+    //
+    // model.eventQueue.newLocalChange(command, callback);
+    //
+    // model.eventQueue.sendEvents();
+    // model.eventQueue.setBlockSending(true);
+    //
+    // return rev;
+    // }
+    // }
+    
+    void _______constr__________() {
+    }
+    
     private final boolean canBeSynced;
     
     /**
@@ -837,10 +957,10 @@ Serializable {
      * @param createModel If no modelState was given and if true, an initial
      *            create-this-model command is added
      */
-    private MemoryModel(Root root, IMemoryRepository father, XId actorId, String passwordHash,
+    private OldMemoryModel(IMemoryRepository father, XId actorId, String passwordHash,
             XAddress modelAddress, XRevWritableModel modelState, XChangeLogState changeLogState,
             boolean createModel) {
-        super(root, createModel || modelState != null);
+        super(null, createModel || modelState != null);
         this.father = father;
         if(father != null) {
             assert father.getAddress().equals(modelAddress.getParent());
@@ -895,15 +1015,13 @@ Serializable {
      * @param passwordHash
      * @param modelId
      */
-    public MemoryModel(XId actorId, String passwordHash, XId modelId) {
-        this(Root.createWithActor(XX.resolveModel((XId)null, modelId), actorId), null, actorId,
-                passwordHash, XX.resolveModel((XId)null, modelId), null, null, true);
+    public OldMemoryModel(XId actorId, String passwordHash, XId modelId) {
+        this(null, actorId, passwordHash, XX.resolveModel((XId)null, modelId), null, null, true);
     }
     
     // tests
-    public MemoryModel(XId actorId, String passwordHash, XAddress modelAddress) {
-        this(Root.createWithActor(modelAddress, actorId), null, actorId, passwordHash,
-                modelAddress, null, null, true);
+    public OldMemoryModel(XId actorId, String passwordHash, XAddress modelAddress) {
+        this(null, actorId, passwordHash, modelAddress, null, null, true);
     }
     
     /**
@@ -915,10 +1033,9 @@ Serializable {
      * @param modelState @NeverNull
      * @param log @CanBeNull
      */
-    public MemoryModel(IMemoryRepository father, XId actorId, String passwordHash,
+    public OldMemoryModel(MemoryRepository father, XId actorId, String passwordHash,
             XRevWritableModel modelState, XChangeLogState log) {
-        this(Root.createWithActor(modelState.getAddress(), actorId), father, actorId, passwordHash,
-                modelState.getAddress(), modelState, log, true);
+        this(father, actorId, passwordHash, modelState.getAddress(), modelState, log, true);
     }
     
     /**
@@ -928,16 +1045,14 @@ Serializable {
      * @param log @CanBeNull
      */
     // de-serialisation
-    public MemoryModel(XId actorId, String passwordHash, XRevWritableModel modelState,
+    public OldMemoryModel(XId actorId, String passwordHash, XRevWritableModel modelState,
             XChangeLogState log) {
-        this(Root.createWithActor(modelState.getAddress(), actorId), null, actorId, passwordHash,
-                modelState.getAddress(), modelState, log, false);
+        this(null, actorId, passwordHash, modelState.getAddress(), modelState, log, false);
     }
     
     // copy
-    public MemoryModel(XId actorId, String passwordHash, XRevWritableModel modelState) {
-        this(Root.createWithActor(modelState.getAddress(), actorId), null, actorId, passwordHash,
-                modelState.getAddress(), modelState, null, false);
+    public OldMemoryModel(XId actorId, String passwordHash, XRevWritableModel modelState) {
+        this(null, actorId, passwordHash, modelState.getAddress(), modelState, null, false);
     }
     
     /**
@@ -949,21 +1064,63 @@ Serializable {
      * @return a MemoryModel that represents a model that does not exist and
      *         never existed before
      */
-    static MemoryModel createNonExistantModel(IMemoryRepository father, XId actorId,
+    static OldMemoryModel createNonExistantModel(MemoryRepository father, XId actorId,
             String passwordHash, XId repoId, XId modelId) {
         assert actorId != null;
         assert modelId != null;
         
         XAddress modelAddress = XX.resolveModel(father.getId(), modelId);
-        MemoryModel nonExistingModel = new MemoryModel(Root.createWithActor(modelAddress, actorId),
-                father, actorId, passwordHash, modelAddress, null, null, false);
+        OldMemoryModel nonExistingModel = new OldMemoryModel(father, actorId, passwordHash,
+                modelAddress, null, null, false);
         return nonExistingModel;
     }
     
-    public MemoryModel(IMemoryRepository father, XId actorId, String passwordHash,
+    // /**
+    // * Creates a new MemoryModel with the given {@link MemoryRepository} as
+    // its
+    // * father.
+    // *
+    // * @param actorId TODO
+    // * @param father The father-{@link MemoryRepository} for this MemoryModel
+    // * @param modelState The initial {@link XModelState} of this MemoryModel.
+    // */
+    // protected MemoryModel(XId actorId, String passwordHash, MemoryRepository
+    // father,
+    // XRevWritableModel modelState, XChangeLogState log) {
+    // this(actorId, passwordHash, father, modelState, log,
+    // modelState.getRevisionNumber(), false);
+    // }
+    
+    // /**
+    // * Creates a new MemoryModel with the given {@link MemoryRepository} as
+    // its
+    // * father, the sync revision can be set and optionally localChanges be
+    // * rebuild in order to fully restore the state of a serialized
+    // MemoryModel.
+    // *
+    // * @param actorId TODO
+    // * @param passwordHash
+    // * @param father The father-{@link MemoryRepository} for this MemoryModel
+    // * @param modelState The initial {@link XChangeLogState} of this
+    // * MemoryModel.
+    // * @param log
+    // * @param syncRev the synchronized revision of this MemoryModel
+    // * @param loadLocalChanges if true, the
+    // * {@link MemoryEventManager#localChanges} will be
+    // * initialized/rebuild from the provided {@link XChangeLog} log.
+    // */
+    // private MemoryModel(XId actorId, String passwordHash, MemoryRepository
+    // father,
+    // XRevWritableModel modelState, XChangeLogState log, long syncRev,
+    // boolean loadLocalChanges) {
+    // this(actorId, passwordHash, father, modelState, log, syncRev,
+    // loadLocalChanges, null);
+    // }
+    
+    public OldMemoryModel(IMemoryRepository father, XId actorId, String passwordHash,
             XRevWritableModel modelState, XChangeLogState log, long syncRev,
             boolean loadLocalChanges, List<XCommand> localChangesAsCommands) {
-        super(Root.createWithActor(modelState.getAddress(), actorId), modelState != null);
+        super(null, modelState != null);
         this.syncState = new SynchronisationState(this.syncProvider, new MemoryEventQueue(actorId,
                 passwordHash, new MemoryChangeLog(log), syncRev), this, null, this);
         
@@ -977,8 +1134,82 @@ Serializable {
         
         this.canBeSynced = this.father != null;
         
+        //
+        // if(father == null && getAddress().getRepository() != null
+        // && this.syncState.eventQueue.getChangeLog() != null
+        // &&
+        // this.syncState.eventQueue.getChangeLog().getCurrentRevisionNumber()
+        // == -1) {
+        // XAddress repoAddr = getAddress().getParent();
+        //
+        // if(!loadLocalChanges) {
+        // XCommand createCommand =
+        // MemoryRepositoryCommand.createAddCommand(repoAddr, true,
+        // getId());
+        // this.syncState.eventQueue.newLocalChange(createCommand, null);
+        // }
+        //
+        // XRepositoryEvent createEvent =
+        // MemoryRepositoryEvent.createAddEvent(actorId, repoAddr,
+        // getId());
+        // this.syncState.eventQueue.enqueueRepositoryEvent(null, createEvent);
+        // this.syncState.eventQueue.sendEvents();
+        // }
+        
         initLocalChanges(loadLocalChanges, localChangesAsCommands);
     }
+    
+    // /**
+    // * Creates a new MemoryModel without father-{@link XRepository} but with a
+    // * parent repository XId so it can be synchronized.
+    // *
+    // * @param actorId TODO
+    // * @param passwordHash
+    // * @param modelAddr The {@link XAddress} for this MemoryModel.
+    // */
+    // public MemoryModel(XId actorId, String passwordHash, XAddress modelAddr)
+    // {
+    // this(actorId, passwordHash, new SimpleModel(modelAddr));
+    // }
+    
+    // /**
+    // * Creates a new MemoryModel without father-{@link XRepository}.
+    // *
+    // * @param actorId TODO
+    // * @param passwordHash
+    // * @param modelId The {@link XId} for this MemoryModel.
+    // */
+    // public MemoryModel(XId actorId, String passwordHash, XId modelId) {
+    // this(actorId, passwordHash, XX.toAddress(null, modelId, null, null));
+    // }
+    //
+    // /**
+    // * Creates a new MemoryModel without father-{@link XRepository}.
+    // *
+    // * @param actorId TODO
+    // * @param passwordHash
+    // * @param modelState The initial {@link XRevWritableModel} state of this
+    // * MemoryModel.
+    // */
+    // public MemoryModel(XId actorId, String passwordHash, XRevWritableModel
+    // modelState) {
+    // this(actorId, passwordHash, modelState, createChangeLog(modelState));
+    // }
+    //
+    // /**
+    // * Creates a new MemoryModel without father-{@link XRepository}.
+    // *
+    // * @param actorId TODO
+    // * @param passwordHash
+    // * @param modelState The initial {@link XRevWritableModel} state of this
+    // * MemoryModel.
+    // * @param log
+    // */
+    // public MemoryModel(XId actorId, String passwordHash, XRevWritableModel
+    // modelState,
+    // XChangeLogState log) {
+    // this(actorId, passwordHash, null, modelState, log);
+    // }
     
     /**
      * @param loadLocalChanges
@@ -1031,6 +1262,9 @@ Serializable {
         return log;
     }
     
+    void ___________rev_nr___() {
+    }
+    
     /**
      * Internal provider for a {@link SynchronisationState}, delegates all calls
      */
@@ -1038,18 +1272,18 @@ Serializable {
         
         @Override
         public XAddress getAddress() {
-            return MemoryModel.this.getAddress();
+            return OldMemoryModel.this.getAddress();
         }
         
         @Override
         public void setRevisionNumberIfModel(long modelRevisionNumber) {
-            MemoryModel.this.state.setRevisionNumber(modelRevisionNumber);
+            OldMemoryModel.this.state.setRevisionNumber(modelRevisionNumber);
         }
         
         @Override
         @ModificationOperation
         public IMemoryObject createObjectInternal(XId objectId) {
-            return MemoryModel.this.createObjectInternal(objectId);
+            return OldMemoryModel.this.createObjectInternal(objectId);
         }
         
         @Override
@@ -1059,17 +1293,17 @@ Serializable {
             XyAssert.xyAssert(object != null);
             assert object != null;
             
-            boolean inTrans = MemoryModel.this.syncState.eventQueue.transactionInProgess;
+            boolean inTrans = OldMemoryModel.this.syncState.eventQueue.transactionInProgess;
             boolean makeTrans = !object.isEmpty();
-            int since = MemoryModel.this.syncState.eventQueue.getNextPosition();
-            enqueueObjectRemoveEvents(MemoryModel.this.syncState.eventQueue.getActor(), object,
+            int since = OldMemoryModel.this.syncState.eventQueue.getNextPosition();
+            enqueueObjectRemoveEvents(OldMemoryModel.this.syncState.eventQueue.getActor(), object,
                     makeTrans || inTrans, false);
             
             // remove the object
-            MemoryModel.this.loadedObjects.remove(object.getId());
-            MemoryModel.this.state.removeObject(object.getId());
+            OldMemoryModel.this.loadedObjects.remove(object.getId());
+            OldMemoryModel.this.state.removeObject(object.getId());
             
-            Orphans orphans = MemoryModel.this.syncState.eventQueue.orphans;
+            Orphans orphans = OldMemoryModel.this.syncState.eventQueue.orphans;
             if(orphans != null) {
                 object.removeInternal();
             } else {
@@ -1082,42 +1316,42 @@ Serializable {
              */
             if(!inTrans) {
                 if(makeTrans) {
-                    MemoryModel.this.syncState.eventQueue.createTransactionEvent(
-                            MemoryModel.this.syncState.eventQueue.getActor(), MemoryModel.this,
-                            null, since);
+                    OldMemoryModel.this.syncState.eventQueue.createTransactionEvent(
+                            OldMemoryModel.this.syncState.eventQueue.getActor(),
+                            OldMemoryModel.this, null, since);
                 }
                 incrementRevision();
                 
                 // propagate events
-                MemoryModel.this.syncState.eventQueue.sendEvents();
+                OldMemoryModel.this.syncState.eventQueue.sendEvents();
             }
         }
         
         @Override
         public void incrementRevision() {
-            MemoryModel.this.incrementRevision();
+            OldMemoryModel.this.incrementRevision();
         }
         
         @Override
         @ReadOperation
         public XReadableModel getTransactionTarget() {
-            return MemoryModel.this;
+            return OldMemoryModel.this;
         }
         
         @Override
         public IMemoryObject getObject(XId objectId) {
-            return MemoryModel.this.getObject(objectId);
+            return OldMemoryModel.this.getObject(objectId);
         }
         
         @Override
         @ReadOperation
         public long getRevisionNumber() {
-            return MemoryModel.this.getRevisionNumber();
+            return OldMemoryModel.this.getRevisionNumber();
         }
         
         @Override
         public long executeCommand(XCommand command) {
-            return MemoryModel.this.executeCommand(command);
+            return OldMemoryModel.this.executeCommand(command);
         }
         
     };
@@ -1126,33 +1360,33 @@ Serializable {
         XyAssert.xyAssert(getRevisionNumber() >= 0, "modelRev=" + getRevisionNumber());
         XyAssert.xyAssert(!hasObject(objectId));
         
-        boolean inTrans = MemoryModel.this.syncState.eventQueue.transactionInProgess;
+        boolean inTrans = OldMemoryModel.this.syncState.eventQueue.transactionInProgess;
         
         IMemoryObject object = null;
-        Orphans orphans = MemoryModel.this.syncState.eventQueue.orphans;
+        Orphans orphans = OldMemoryModel.this.syncState.eventQueue.orphans;
         if(orphans != null) {
             object = orphans.objects.remove(objectId);
         }
         if(object == null) {
             // create in modelState
-            XRevWritableObject objectState = MemoryModel.this.state.createObject(objectId);
+            XRevWritableObject objectState = OldMemoryModel.this.state.createObject(objectId);
             XyAssert.xyAssert(getAddress().contains(objectState.getAddress()));
-            object = new MemoryObject(MemoryModel.this, MemoryModel.this.syncState.eventQueue,
-                    objectState);
+            object = new MemoryObject(OldMemoryModel.this,
+                    OldMemoryModel.this.syncState.eventQueue, objectState);
         } else {
-            MemoryModel.this.state.addObject(object.getState());
+            OldMemoryModel.this.state.addObject(object.getState());
         }
         // XyAssert.xyAssert(object.model.syncProvider == this);
         
-        MemoryModel.this.loadedObjects.put(object.getId(), object);
+        OldMemoryModel.this.loadedObjects.put(object.getId(), object);
         
         // create in modelSyncState
         XModelEvent event = MemoryModelEvent.createAddEvent(
-                MemoryModel.this.syncState.eventQueue.getActor(), getAddress(), objectId,
-                MemoryModel.this.syncState.getChangeLog().getCurrentRevisionNumber()
+                OldMemoryModel.this.syncState.eventQueue.getActor(), getAddress(), objectId,
+                OldMemoryModel.this.syncState.getChangeLog().getCurrentRevisionNumber()
                 // FIXME WAS: MemoryModel.this.nextRevisionNumber()
                 , inTrans);
-        MemoryModel.this.syncState.eventQueue.enqueueModelEvent(MemoryModel.this, event);
+        OldMemoryModel.this.syncState.eventQueue.enqueueModelEvent(OldMemoryModel.this, event);
         
         /*
          * event propagation and revision number increasing happens after all
@@ -1162,7 +1396,7 @@ Serializable {
             object.incrementRevision();
             
             // propagate events
-            MemoryModel.this.syncState.eventQueue.sendEvents();
+            OldMemoryModel.this.syncState.eventQueue.sendEvents();
         }
         
         return object;
@@ -1183,7 +1417,7 @@ Serializable {
     }
     
     private long nextRevisionNumber() {
-        return MemoryModel.this.syncState.getChangeLog().getCurrentRevisionNumber();
+        return OldMemoryModel.this.syncState.getChangeLog().getCurrentRevisionNumber();
     }
     
     // implements IMemoryModel
@@ -1196,7 +1430,7 @@ Serializable {
         // FIXME MONKEY
         // XyAssert.xyAssert(!MemoryModel.this.syncState.eventQueue.transactionInProgess);
         long newRevision = nextRevisionNumber();
-        MemoryModel.this.state.setRevisionNumber(newRevision);
+        OldMemoryModel.this.state.setRevisionNumber(newRevision);
     }
     
     @Override

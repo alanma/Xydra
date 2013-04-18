@@ -7,12 +7,10 @@ import org.xydra.base.XId;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XCommand;
-import org.xydra.base.change.XFieldCommand;
 import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.delta.DeltaUtils;
-import org.xydra.index.XI;
 import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -92,121 +90,6 @@ public class CommandExecutor {
         if(localChangeCallback != null)
             localChangeCallback.onSuccess(nextRev);
         return nextRev;
-    }
-    
-    /**
-     * @throws IllegalStateException if this method is called after this
-     *             MemoryField was already removed
-     */
-    private static void assertExists(IMemoryMOFEntity entity) throws IllegalStateException {
-        if(!entity.exists()) {
-            throw new IllegalStateException("this entity has been removed");
-        }
-    }
-    
-    /**
-     * @param field
-     * @param command
-     * @param callback
-     * @return ...
-     * @throws IllegalStateException if this method is called after this
-     *             MemoryField was already removed
-     */
-    public long executeFieldCommand(IMemoryField field, XFieldCommand command,
-            XLocalChangeCallback callback) {
-        synchronized(field.getRoot()) {
-            assertExists(field);
-            
-            // FIXME MONKEY
-            // XyAssert.xyAssert(!field.eventQueue.transactionInProgess);
-            
-            // check whether the given event actually refers to this field
-            if(!field.getAddress().equals(command.getTarget())) {
-                if(callback != null) {
-                    callback.onFailure();
-                }
-                return XCommand.FAILED;
-            }
-            
-            if(!command.isForced() && field.getRevisionNumber() != command.getRevisionNumber()) {
-                if(callback != null) {
-                    callback.onFailure();
-                }
-                return XCommand.FAILED;
-            }
-            
-            long oldRev = field.getFatherRevisionNumber();
-            
-            if(command.getChangeType() == ChangeType.ADD) {
-                if(field.getValue() != null) {
-                    /*
-                     * the forced event only cares about the postcondition -
-                     * that there is the given value set, not about that there
-                     * was no value before
-                     */
-                    if(!command.isForced()) {
-                        // value already set
-                        if(callback != null) {
-                            callback.onFailure();
-                        }
-                        return XCommand.FAILED;
-                    }
-                }
-                
-            } else if(command.getChangeType() == ChangeType.REMOVE) {
-                if(field.getValue() == null) {
-                    /*
-                     * the forced event only cares about the postcondition -
-                     * that there is no value set, not about that there was a
-                     * value before
-                     */
-                    if(!command.isForced()) {
-                        // value is not set and can not be removed or the given
-                        // value is not current anymore
-                        if(callback != null) {
-                            callback.onFailure();
-                        }
-                        return XCommand.FAILED;
-                    }
-                }
-                
-                XyAssert.xyAssert(command.getValue() == null);
-                
-            } else if(command.getChangeType() == ChangeType.CHANGE) {
-                if(field.getValue() == null) {
-                    /*
-                     * the forced event only cares about the postcondition -
-                     * that there is the given value set, not about that there
-                     * was no value before
-                     */
-                    if(!command.isForced()) {
-                        // given old value does not concur with the current
-                        // value
-                        if(callback != null) {
-                            callback.onFailure();
-                        }
-                        return XCommand.FAILED;
-                    }
-                }
-                
-            } else {
-                throw new IllegalArgumentException("Unknown field command type: " + command);
-            }
-            
-            if(XI.equals(field.getValue(), command.getValue())) {
-                if(callback != null) {
-                    callback.onSuccess(XCommand.NOCHANGE);
-                }
-                return XCommand.NOCHANGE;
-            }
-            
-            // FIXME BIG MONKEY field.eventQueue.newLocalChange(command,
-            // callback);
-            
-            field.setValueInternal(command.getValue());
-            
-            return oldRev + 1;
-        }
     }
     
 }

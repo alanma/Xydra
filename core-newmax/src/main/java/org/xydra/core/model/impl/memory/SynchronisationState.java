@@ -303,7 +303,7 @@ class SynchronisationState implements Serializable {
         }
     }
     
-    public XChangeLog getChangeLog() {
+    public XWritableChangeLog getChangeLog() {
         return this.eventQueue.getChangeLog();
     }
     
@@ -804,12 +804,12 @@ class SynchronisationState implements Serializable {
     }
     
     public MemoryChangeLog getMemoryChangeLog() {
-        // TODO Auto-generated method stub
+        // FIXME !!! Auto-generated method stub
         return null;
     }
     
     public LocalChanges getLocalChangesImpl() {
-        // TODO Auto-generated method stub
+        // FIXME !!! Auto-generated method stub
         return null;
     }
 }

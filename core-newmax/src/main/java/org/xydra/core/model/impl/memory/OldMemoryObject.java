@@ -12,6 +12,7 @@ import org.xydra.base.IHasXAddress;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.XType;
+import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XFieldCommand;
@@ -19,7 +20,6 @@ import org.xydra.base.change.XFieldEvent;
 import org.xydra.base.change.XModelEvent;
 import org.xydra.base.change.XObjectCommand;
 import org.xydra.base.change.XObjectEvent;
-import org.xydra.base.change.XRepositoryEvent;
 import org.xydra.base.change.XReversibleFieldEvent;
 import org.xydra.base.change.XTransaction;
 import org.xydra.base.change.XTransactionEvent;
@@ -35,7 +35,6 @@ import org.xydra.core.XCopyUtils;
 import org.xydra.core.XX;
 import org.xydra.core.change.XFieldEventListener;
 import org.xydra.core.change.XObjectEventListener;
-import org.xydra.core.change.XRMOFChangeListener;
 import org.xydra.core.change.XSendsFieldEvents;
 import org.xydra.core.change.XSendsObjectEvents;
 import org.xydra.core.change.XSendsTransactionEvents;
@@ -63,7 +62,7 @@ import org.xydra.sharedutils.XyAssert;
  * @author Kaidel
  * 
  */
-public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XObject,
+public class OldMemoryObject extends AbstractMOFEntity implements IMemoryObject, XObject,
         IHasXAddress, IHasChangeLog, XSynchronizesChanges, XExecutesCommands, XSendsObjectEvents,
         XSendsFieldEvents, XSendsTransactionEvents, Serializable {
     
@@ -74,34 +73,43 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
     private final IMemoryModel father;
     
     /** The snapshot-like runtime state */
-    private final XRevWritableObject objectState;
+    private final XRevWritableObject state;
     
     private final Map<XId,IMemoryField> loadedFields = new HashMap<XId,IMemoryField>();
     
-    // nice for sync algos
+    public SynchronisationState syncState;
+    
     public int countUnappliedLocalChanges() {
-        return this.getRoot().countUnappliedLocalChanges();
+        return this.syncState.countUnappliedLocalChanges();
     }
     
     public XWritableChangeLog getChangeLog() {
-        return this.getRoot().getWritableChangeLog();
+        return this.syncState.getChangeLog();
+    }
+    
+    public XLocalChange[] getLocalChanges() {
+        return this.syncState.getLocalChanges();
     }
     
     public XId getSessionActor() {
-        return this.getRoot().getSessionActor();
+        return this.syncState.getSessionActor();
     }
     
     public String getSessionPasswordHash() {
-        return this.getRoot().getSessionPasswordHash();
+        return this.syncState.getSessionPassword();
     }
     
     public long getSynchronizedRevision() {
-        // FIXME ... manage this also for objects with a parent
         return this.syncState.getSynchronizedRevision();
     }
     
     public boolean isSynchronized() {
         return this.syncState.isSynchronized();
+    }
+    
+    public void rollback(long revision) {
+        assertCanBeSynced();
+        this.syncState.rollback(revision);
     }
     
     /**
@@ -110,21 +118,88 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
      * @throws IllegalStateException if entity can not be synchronised
      */
     private void assertCanBeSynced() throws IllegalStateException {
-        if(MemoryObject.this.father != null) {
+        if(OldMemoryObject.this.father != null) {
             throw new IllegalStateException(
                     "an object that is part of a model cannot be rolled abck / synchronized individualy");
         }
     }
     
     public void setSessionActor(XId actorId, String passwordHash) {
-        getRoot().setSessionActor(actorId);
-        getRoot().setSessionPasswordHash(passwordHash);
+        this.syncState.setSessionActor(actorId, passwordHash);
     }
     
     public boolean synchronize(XEvent[] remoteChanges) {
         assertCanBeSynced();
         return this.syncState.synchronize(remoteChanges);
     }
+    
+    ISyncProvider syncProvider = new ISyncProvider() {
+        
+        @Override
+        public XAddress getAddress() {
+            return OldMemoryObject.this.getAddress();
+        }
+        
+        // /**
+        // * Sets the revision number of this MemoryObject
+        // *
+        // * @param newRevision the new revision number
+        // */
+        // public void setRevisionNumber(long newRevision) {
+        // MemoryObject.this.setRevisionNumber(newRevision);
+        // }
+        
+        @Override
+        public void removeObjectInternal(XId objectId) {
+            throw new AssertionError("object transactions cannot remove objects");
+        }
+        
+        @Override
+        public void incrementRevision() {
+            OldMemoryObject.this.incrementRevision();
+        }
+        
+        @Override
+        public XReadableModel getTransactionTarget() {
+            if(OldMemoryObject.this.father != null) {
+                return OldMemoryObject.this.father;
+            } else {
+                return new ReadableModelWithOneObject(OldMemoryObject.this);
+            }
+        }
+        
+        @Override
+        public OldMemoryObject getObject(@NeverNull XId objectId) {
+            if(getId().equals(objectId)) {
+                return OldMemoryObject.this;
+            }
+            return null;
+        }
+        
+        @Override
+        public long getRevisionNumber() {
+            if(OldMemoryObject.this.father != null)
+                return OldMemoryObject.this.father.getRevisionNumber();
+            else
+                return getRevisionNumber();
+        }
+        
+        @Override
+        public long executeCommand(XCommand command) {
+            return OldMemoryObject.this.executeCommand(command);
+        }
+        
+        @Override
+        public OldMemoryObject createObjectInternal(XId objectId) {
+            throw new AssertionError("object transactions cannot create objects");
+        }
+        
+        @Override
+        public void setRevisionNumberIfModel(long modelRevisionNumber) {
+            // not a model, so nothing to do here
+        }
+        
+    };
     
     private final boolean canBeSynced;
     
@@ -135,9 +210,10 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
      * @param queue
      * @param objectState
      */
-    public MemoryObject(IMemoryModel father, MemoryEventQueue queue, XRevWritableObject objectState) {
-        this(father.getRoot(), father, queue.getActor(), queue.getPasswordHash(), objectState
-                .getAddress(), objectState, queue.getChangeLog().getChangeLogState(), false);
+    public OldMemoryObject(IMemoryModel father, MemoryEventQueue queue,
+            XRevWritableObject objectState) {
+        this(father, queue.getActor(), queue.getPasswordHash(), objectState.getAddress(),
+                objectState, queue.getChangeLog().getChangeLogState(), false);
     }
     
     /**
@@ -150,10 +226,9 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
      * @param state
      * @param log @CanBeNull
      */
-    public MemoryObject(XId actorId, String passwordHash, XRevWritableObject state,
+    public OldMemoryObject(XId actorId, String passwordHash, XRevWritableObject state,
             XChangeLogState log) {
-        this(Root.createWithActor(state.getAddress(), actorId), null, actorId, passwordHash, state
-                .getAddress(), state, log, true);
+        this(null, actorId, passwordHash, state.getAddress(), state, log, true);
     }
     
     /**
@@ -165,9 +240,8 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
      * @param passwordHash
      * @param objectAddress
      */
-    public MemoryObject(XId actorId, String passwordHash, XAddress objectAddress) {
-        this(Root.createWithActor(objectAddress, actorId), null, actorId, passwordHash,
-                objectAddress, null, null, true);
+    public OldMemoryObject(XId actorId, String passwordHash, XAddress objectAddress) {
+        this(null, actorId, passwordHash, objectAddress, null, null, true);
     }
     
     /**
@@ -179,14 +253,13 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
      * @param passwordHash
      * @param objectId
      */
-    public MemoryObject(XId actorId, String passwordHash, XId objectId) {
-        this(Root.createWithActor(XX.toAddress(null, null, objectId, null), actorId), null,
-                actorId, passwordHash, XX.toAddress(null, null, objectId, null), null, null, true);
+    public OldMemoryObject(XId actorId, String passwordHash, XId objectId) {
+        this(null, actorId, passwordHash, XX.resolveObject((XId)null, null, objectId), null, null,
+                true);
     }
     
     /**
-     * @param root @CanBeNull if father is defined
-     * @param father @CanBeNull if root is defined
+     * @param father @CanBeNull
      * @param actorId
      * @param passwordHash
      * @param objectAddress
@@ -195,18 +268,17 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
      * @param createObject Can only be true if state & log are null. If true, an
      *            initial create-this-object-event is added.
      */
-    private MemoryObject(Root root, IMemoryModel father, XId actorId, String passwordHash,
+    private OldMemoryObject(IMemoryModel father, XId actorId, String passwordHash,
             XAddress objectAddress, XRevWritableObject state, XChangeLogState log,
             boolean createObject) {
-        super(father == null ? root : father.getRoot(), createObject || state != null);
-        assert father != null || root != null;
+        super(null, createObject || state != null);
         this.father = father;
         assert state == null || state.getAddress().equals(objectAddress);
         this.canBeSynced = objectAddress.getRepository() != null
                 && objectAddress.getModel() != null;
         if(state == null) {
             // create new object
-            this.objectState = new SimpleObject(objectAddress);
+            this.state = new SimpleObject(objectAddress);
             assert log == null;
             XChangeLogState changeLogState = new MemoryChangeLogState(objectAddress);
             MemoryChangeLog changeLog = new MemoryChangeLog(changeLogState);
@@ -227,7 +299,7 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
                     this, this);
         } else {
             // re-use existing state
-            this.objectState = state;
+            this.state = state;
             XChangeLogState changeLogState;
             if(log == null) {
                 changeLogState = new MemoryChangeLogState(objectAddress);
@@ -242,8 +314,137 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
         }
     }
     
+    // implement IMemoryField
+    @Override
+    public void setRevisionNumber(long newRevision) {
+        OldMemoryObject.this.state.setRevisionNumber(newRevision);
+    }
+    
+    // implement IMemoryObject
+    @Override
+    public void incrementRevision() {
+        XyAssert.xyAssert(!OldMemoryObject.this.syncState.eventQueue.transactionInProgess);
+        if(OldMemoryObject.this.father != null) {
+            // this increments the revisionNumber of the father and sets
+            // this revNr to the revNr of the father
+            OldMemoryObject.this.father.incrementRevision();
+            setRevisionNumber(OldMemoryObject.this.father.getRevisionNumber());
+        } else {
+            XChangeLog log = OldMemoryObject.this.syncState.eventQueue.getChangeLog();
+            if(log != null) {
+                XyAssert.xyAssert(log.getCurrentRevisionNumber() > getRevisionNumber());
+                setRevisionNumber(log.getCurrentRevisionNumber());
+            } else {
+                setRevisionNumber(getRevisionNumber() + 1);
+            }
+        }
+    }
+    
+    // /**
+    // * Creates a new MemoryObject with the given {@link MemoryModel} as its
+    // * father.
+    // *
+    // * @param father The father-{@link MemoryModel} of this MemoryObject.
+    // * @param eventQueue The {@link MemoryEventManager} which will be used by
+    // * this MemoryObject.
+    // * @param objectState A {@link XRevWritableObject} representing the
+    // initial
+    // * state of this object. The {@link XObject} will continue using
+    // * this state object, so it must not be modified directly after
+    // * wrapping it in an {@link XObject}.
+    // */
+    // protected MemoryObject(MemoryModel father, MemoryEventManager eventQueue,
+    // XRevWritableObject objectState) {
+    // // TODO super(eventQueue);
+    // XyAssert.xyAssert(eventQueue != null);
+    // assert eventQueue != null;
+    //
+    // if(objectState == null) {
+    // throw new IllegalArgumentException("objectState may not be null");
+    // }
+    // this.state = objectState;
+    //
+    // if(father == null && objectState.getAddress().getModel() != null) {
+    // throw new
+    // IllegalArgumentException("must load object through containing model");
+    // }
+    // this.father = father;
+    // }
+    //
+    // /**
+    // * Creates a new MemoryObject without a father-{@link XModel}.
+    // *
+    // * @param actorId The actor to be used in events generated by this object.
+    // * @param passwordHash
+    // * @param objectId The {@link XId} for this MemoryObject
+    // */
+    // // 2013-4: only used in tests
+    // public MemoryObject(XId actorId, String passwordHash, XId objectId) {
+    // this(actorId, passwordHash, new SimpleObject(XX.toAddress(null, null,
+    // objectId, null)));
+    // }
+    //
+    // /**
+    // * Creates a new MemoryObject without a father-{@link XModel}.
+    // *
+    // * @param actorId The actor to be used in events generated by this object.
+    // * @param passwordHash
+    // * @param objectState A {@link XRevWritableObject} representing the
+    // initial
+    // * state of this object. The {@link XObject} will continue using
+    // * this state object, so it must not be modified directly after
+    // * wrapping it in an {@link XObject}.
+    // */
+    // public MemoryObject(XId actorId, String passwordHash, XRevWritableObject
+    // objectState) {
+    // this(actorId, passwordHash, objectState, createChangeLog(objectState));
+    // }
+    // /**
+    // * Creates a new MemoryObject without a father-{@link XModel}.
+    // *
+    // * @param actorId The actor to be used in events generated by this object.
+    // * @param passwordHash
+    // * @param objectState A {@link XRevWritableObject} representing the
+    // initial
+    // * state of this object. The {@link XObject} will continue using
+    // * this state object, so it must not be modified directly after
+    // * wrapping it in an {@link XObject}.
+    // * @param log
+    // */
+    // public MemoryObject(XId actorId, String passwordHash, XRevWritableObject
+    // objectState,
+    // XChangeLogState log) {
+    // this(null, createEventQueue(actorId, passwordHash, objectState, log),
+    // objectState);
+    // }
+    
+    // private static XChangeLogState createChangeLog(XRevWritableObject
+    // objectState) {
+    // XChangeLogState log = new MemoryChangeLogState(objectState.getAddress());
+    //
+    // // FIXME MONKEY PATCHED
+    // // log.setBaseRevisionNumber(objectState.getRevisionNumber() + 1);
+    // log.setBaseRevisionNumber(objectState.getRevisionNumber());
+    //
+    // return log;
+    // }
+    
+    // private static MemoryEventManager createEventQueue(XId actorId, String
+    // passwordHash,
+    // XRevWritableObject objectState, XChangeLogState logState) {
+    // if(logState.getCurrentRevisionNumber() !=
+    // objectState.getRevisionNumber()) {
+    // throw new
+    // IllegalArgumentException("object state and log revision mismatch");
+    // }
+    // MemoryChangeLog log = new MemoryChangeLog(logState);
+    // return new MemoryEventManager(actorId, passwordHash, log,
+    // objectState.getRevisionNumber());
+    // }
+    
     @Override
     public IMemoryField createField(XId fieldId) {
+        
         XObjectCommand command = MemoryObjectCommand.createAddCommand(getAddress(), true, fieldId);
         
         // synchronize so that return is never null if command succeeded
@@ -253,6 +454,114 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
             XyAssert.xyAssert(result == XCommand.FAILED || field != null);
             return field;
         }
+    }
+    
+    /**
+     * Create a new field, increase revision (if not in a transaction) and
+     * enqueue the corresponding event.
+     * 
+     * The caller is responsible for handling synchronization, for checking that
+     * this object has not been removed and for checking that the field doesn't
+     * already exist.
+     */
+    // implement IMemoryField
+    @Override
+    public IMemoryField createFieldInternal(XId fieldId) {
+        
+        XyAssert.xyAssert(!hasField(fieldId));
+        
+        boolean inTrans = this.syncState.eventQueue.transactionInProgess;
+        
+        IMemoryField field = null;
+        Orphans orphans = this.syncState.eventQueue.orphans;
+        if(orphans != null) {
+            XAddress fieldAddr = XX.resolveField(getAddress(), fieldId);
+            field = orphans.fields.remove(fieldAddr);
+        }
+        if(field == null) {
+            XRevWritableField fieldState = this.state.createField(fieldId);
+            XyAssert.xyAssert(getAddress().contains(fieldState.getAddress()));
+            field = new OldMemoryField(this, this.syncState.eventQueue, fieldState);
+        } else {
+            this.state.addField(field.getState());
+        }
+        
+        XyAssert.xyAssert(field.getObject() == this);
+        
+        this.loadedFields.put(field.getId(), field);
+        long eventRev = this.syncState.getChangeLog().getCurrentRevisionNumber();
+        XObjectEvent event = MemoryObjectEvent.createAddEvent(this.syncState.eventQueue.getActor(),
+                getAddress(), field.getId(), eventRev, eventRev, inTrans);
+        
+        this.syncState.eventQueue.enqueueObjectEvent(this, event);
+        
+        /*
+         * event propagation and revision number increasing happens after all
+         * events were successful
+         */
+        if(!inTrans) {
+            
+            field.incrementRevision();
+            
+            // propagate events
+            this.syncState.eventQueue.sendEvents();
+            
+        }
+        
+        return field;
+    }
+    
+    /**
+     * Deletes the state information of this MemoryObject from the currently
+     * used persistence layer
+     */
+    // implement IMemoryField
+    @Override
+    public void delete() {
+        for(XId fieldId : this) {
+            IMemoryField field = getField(fieldId);
+            field.delete();
+        }
+        for(XId fieldId : this.loadedFields.keySet()) {
+            this.state.removeField(fieldId);
+        }
+        this.loadedFields.clear();
+        this.exists = true;
+    }
+    
+    /**
+     * Builds a transaction that first removes the value of the given field and
+     * then the given field itself.
+     * 
+     * @param actor The actor for this transaction
+     * @param field The field which should be removed by the transaction
+     * @param inTrans true, if the removal of this {@link MemoryField} occurs
+     *            during an {@link XTransaction}.
+     * @param implied true if this object is also removed in the same
+     *            transaction
+     */
+    public void enqueueFieldRemoveEvents(XId actor, IMemoryField field, boolean inTrans,
+            boolean implied) {
+        
+        if(field == null) {
+            throw new NullPointerException("field must not be null");
+        }
+        
+        long modelRev = getModelRevisionNumber();
+        
+        if(field.getValue() != null) {
+            XyAssert.xyAssert(inTrans);
+            XReversibleFieldEvent event = MemoryReversibleFieldEvent.createRemoveEvent(actor,
+                    field.getAddress(), field.getValue(), modelRev, getRevisionNumber(),
+                    field.getRevisionNumber(), inTrans, true);
+            this.syncState.eventQueue.enqueueFieldEvent(field, event);
+        }
+        
+        XObjectEvent event = MemoryObjectEvent.createRemoveEvent(actor, getAddress(),
+                field.getId(), modelRev, getRevisionNumber(), field.getRevisionNumber(), inTrans,
+                implied);
+        this.syncState.eventQueue.enqueueObjectEvent(this, event);
+        
     }
     
     @ReadOperation
@@ -268,7 +577,6 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
         return executeCommand(command, null);
     }
     
-    @SuppressWarnings("deprecation")
     @Override
     public long executeCommand(XCommand command, XLocalChangeCallback callback) {
         if(command instanceof XTransaction) {
@@ -299,37 +607,87 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
         synchronized(this.root) {
             assertThisEntityExists();
             
-            return Executor.executeObjectCommand(getRoot().getSessionActor(), command,
-                    this.father.getState(), this.objectState, getRoot(), new XRMOFChangeListener() {
-                        
-                        @Override
-                        public void onChangeEvent(XRepositoryEvent event) {
-                        }
-                        
-                        @Override
-                        public void onChangeEvent(XModelEvent event) {
-                        }
-                        
-                        @Override
-                        public void onChangeEvent(XObjectEvent event) {
-                        }
-                        
-                        @Override
-                        public void onChangeEvent(XFieldEvent event) {
-                            // remove field internally
-                            XId fieldId = event.getFieldId();
-                            MemoryObject.this.loadedFields.remove(fieldId);
-                            MemoryObject.this.objectState.removeField(fieldId);
-                        }
-                    });
+            XyAssert.xyAssert(!this.syncState.eventQueue.transactionInProgess);
             
+            if(!getAddress().equals(command.getTarget())) {
+                if(callback != null) {
+                    callback.onFailure();
+                }
+                return XCommand.FAILED;
+            }
+            
+            long oldRev = getRevisionNumber();
+            
+            if(command.getChangeType() == ChangeType.ADD) {
+                if(hasField(command.getFieldId())) {
+                    // ID already taken
+                    if(command.isForced()) {
+                        /*
+                         * the forced event only cares about the postcondition -
+                         * that there is a field with the given ID, not about
+                         * that there was no such field before
+                         */
+                        if(callback != null) {
+                            callback.onSuccess(XCommand.NOCHANGE);
+                        }
+                        return XCommand.NOCHANGE;
+                    }
+                    if(callback != null) {
+                        callback.onFailure();
+                    }
+                    return XCommand.FAILED;
+                }
+                
+                this.syncState.eventQueue.newLocalChange(command, callback);
+                
+                createFieldInternal(command.getFieldId());
+                
+            } else if(command.getChangeType() == ChangeType.REMOVE) {
+                XField oldField = getField(command.getFieldId());
+                
+                if(oldField == null) {
+                    // ID not taken
+                    if(command.isForced()) {
+                        /*
+                         * the forced event only cares about the postcondition -
+                         * that there is no field with the given ID, not about
+                         * that there was such a field before
+                         */
+                        if(callback != null) {
+                            callback.onSuccess(XCommand.NOCHANGE);
+                        }
+                        return XCommand.NOCHANGE;
+                    }
+                    if(callback != null) {
+                        callback.onFailure();
+                    }
+                    return XCommand.FAILED;
+                }
+                
+                if(!command.isForced()
+                        && oldField.getRevisionNumber() != command.getRevisionNumber()) {
+                    if(callback != null) {
+                        callback.onFailure();
+                    }
+                    return XCommand.FAILED;
+                }
+                
+                this.syncState.eventQueue.newLocalChange(command, callback);
+                
+                removeFieldInternal(command.getFieldId());
+                
+            } else {
+                throw new IllegalArgumentException("Unknown object command type: " + command);
+            }
+            
+            return oldRev + 1;
         }
     }
     
     @Override
     public XAddress getAddress() {
         synchronized(this.root) {
-            return this.objectState.getAddress();
+            return this.state.getAddress();
         }
     }
     
@@ -343,12 +701,12 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
                 return field;
             }
             
-            XRevWritableField fieldState = this.objectState.getField(fieldId);
+            XRevWritableField fieldState = this.state.getField(fieldId);
             if(fieldState == null) {
                 return null;
             }
             
-            field = new MemoryField(this, this.syncState.eventQueue, fieldState);
+            field = new OldMemoryField(this, this.syncState.eventQueue, fieldState);
             this.loadedFields.put(fieldId, field);
             
             return field;
@@ -358,7 +716,7 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
     @Override
     public XId getId() {
         synchronized(this.root) {
-            return this.objectState.getId();
+            return this.state.getId();
         }
     }
     
@@ -377,7 +735,6 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
      *         this MemoryObject has no father.
      */
     // implement IMemoryObject
-    @Deprecated
     public long getModelRevisionNumber() {
         if(this.father != null)
             return this.father.getRevisionNumber();
@@ -390,7 +747,6 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
      *         MemoryObject or null, if this object has no father.
      */
     @SuppressWarnings("unused")
-    @Deprecated
     private XId getRepositoryId() {
         return this.father == null ? null : this.father.getAddress().getRepository();
     }
@@ -398,21 +754,21 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
     @Override
     public long getRevisionNumber() {
         synchronized(this.root) {
-            return this.objectState.getRevisionNumber();
+            return this.state.getRevisionNumber();
         }
     }
     
     // implement IMemoryObject
     @Override
     public XRevWritableObject getState() {
-        return this.objectState;
+        return this.state;
     }
     
     @Override
     public boolean hasField(XId id) {
         synchronized(this.root) {
             assertThisEntityExists();
-            return this.loadedFields.containsKey(id) || this.objectState.hasField(id);
+            return this.loadedFields.containsKey(id) || this.state.hasField(id);
         }
     }
     
@@ -438,7 +794,7 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
     public boolean isEmpty() {
         synchronized(this.root) {
             assertThisEntityExists();
-            return this.objectState.isEmpty();
+            return this.state.isEmpty();
         }
     }
     
@@ -446,7 +802,7 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
     public Iterator<XId> iterator() {
         synchronized(this.root) {
             assertThisEntityExists();
-            return this.objectState.iterator();
+            return this.state.iterator();
         }
     }
     
@@ -474,7 +830,6 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
      */
     // implement IMemoryField
     @Override
-    @Deprecated
     public void removeFieldInternal(XId fieldId) {
         
         XyAssert.xyAssert(hasField(fieldId));
@@ -490,7 +845,7 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
                 false);
         
         // actually remove the field
-        this.objectState.removeField(field.getId());
+        this.state.removeField(field.getId());
         this.loadedFields.remove(field.getId());
         
         Orphans orphans = this.syncState.eventQueue.orphans;
@@ -526,7 +881,6 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
      */
     // implement IMemoryObject
     @Override
-    @Deprecated
     public void removeInternal() {
         // all fields are already loaded for creating events
         
@@ -535,7 +889,7 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
             XyAssert.xyAssert(!this.syncState.eventQueue.orphans.fields.containsKey(field
                     .getAddress()));
             this.syncState.eventQueue.orphans.fields.put(field.getAddress(), field);
-            this.objectState.removeField(field.getId());
+            this.state.removeField(field.getId());
         }
         
         this.loadedFields.clear();
@@ -549,7 +903,7 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
     @Override
     public String toString() {
         return this.getId() + " rev[" + this.getRevisionNumber() + "]" + " "
-                + this.objectState.toString();
+                + this.state.toString();
     }
     
     @Override
@@ -636,234 +990,17 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
     
     // implement IMemoryObject
     @Override
-    @Deprecated
     public SynchronisationState getSyncState() {
         return this.syncState;
     }
     
     @Override
-    @Deprecated
     public Object getStateLock() {
-        return this.objectState;
+        return this.state;
     }
     
     @Override
-    @Deprecated
     public LocalChanges getLocalChangesImpl() {
         return this.syncState.getLocalChangesImpl();
     }
-    
-    @Deprecated
-    public SynchronisationState syncState;
-    
-    @Deprecated
-    public XLocalChange[] getLocalChanges() {
-        return this.syncState.getLocalChanges();
-    }
-    
-    @Deprecated
-    public void rollback(long revision) {
-        assertCanBeSynced();
-        this.syncState.rollback(revision);
-    }
-    
-    @Deprecated
-    ISyncProvider syncProvider = new ISyncProvider() {
-        
-        @Override
-        public XAddress getAddress() {
-            return MemoryObject.this.getAddress();
-        }
-        
-        @Override
-        public void removeObjectInternal(XId objectId) {
-            throw new AssertionError("object transactions cannot remove objects");
-        }
-        
-        @Override
-        public void incrementRevision() {
-            MemoryObject.this.incrementRevision();
-        }
-        
-        @Override
-        public XReadableModel getTransactionTarget() {
-            if(MemoryObject.this.father != null) {
-                return MemoryObject.this.father;
-            } else {
-                return new ReadableModelWithOneObject(MemoryObject.this);
-            }
-        }
-        
-        @Override
-        public MemoryObject getObject(@NeverNull XId objectId) {
-            if(getId().equals(objectId)) {
-                return MemoryObject.this;
-            }
-            return null;
-        }
-        
-        @Override
-        public long getRevisionNumber() {
-            if(MemoryObject.this.father != null)
-                return MemoryObject.this.father.getRevisionNumber();
-            else
-                return getRevisionNumber();
-        }
-        
-        @Override
-        public long executeCommand(XCommand command) {
-            return MemoryObject.this.executeCommand(command);
-        }
-        
-        @Override
-        public MemoryObject createObjectInternal(XId objectId) {
-            throw new AssertionError("object transactions cannot create objects");
-        }
-        
-        @Override
-        public void setRevisionNumberIfModel(long modelRevisionNumber) {
-            // not a model, so nothing to do here
-        }
-        
-    };
-    
-    // implement IMemoryObject
-    @Override
-    @Deprecated
-    public void setRevisionNumber(long newRevision) {
-        MemoryObject.this.objectState.setRevisionNumber(newRevision);
-    }
-    
-    // implement IMemoryObject
-    @Override
-    @Deprecated
-    public void incrementRevision() {
-        XyAssert.xyAssert(!MemoryObject.this.syncState.eventQueue.transactionInProgess);
-        if(MemoryObject.this.father != null) {
-            // this increments the revisionNumber of the father and sets
-            // this revNr to the revNr of the father
-            MemoryObject.this.father.incrementRevision();
-            setRevisionNumber(MemoryObject.this.father.getRevisionNumber());
-        } else {
-            XChangeLog log = MemoryObject.this.syncState.eventQueue.getChangeLog();
-            if(log != null) {
-                XyAssert.xyAssert(log.getCurrentRevisionNumber() > getRevisionNumber());
-                setRevisionNumber(log.getCurrentRevisionNumber());
-            } else {
-                setRevisionNumber(getRevisionNumber() + 1);
-            }
-        }
-    }
-    
-    /**
-     * Create a new field, increase revision (if not in a transaction) and
-     * enqueue the corresponding event.
-     * 
-     * The caller is responsible for handling synchronization, for checking that
-     * this object has not been removed and for checking that the field doesn't
-     * already exist.
-     */
-    // implement IMemoryField
-    @Override
-    @Deprecated
-    public IMemoryField createFieldInternal(XId fieldId) {
-        
-        XyAssert.xyAssert(!hasField(fieldId));
-        
-        boolean inTrans = this.syncState.eventQueue.transactionInProgess;
-        
-        IMemoryField field = null;
-        Orphans orphans = this.syncState.eventQueue.orphans;
-        if(orphans != null) {
-            XAddress fieldAddr = XX.resolveField(getAddress(), fieldId);
-            field = orphans.fields.remove(fieldAddr);
-        }
-        if(field == null) {
-            XRevWritableField fieldState = this.objectState.createField(fieldId);
-            XyAssert.xyAssert(getAddress().contains(fieldState.getAddress()));
-            field = new MemoryField(this, this.syncState.eventQueue, fieldState);
-        } else {
-            this.objectState.addField(field.getState());
-        }
-        
-        XyAssert.xyAssert(field.getObject() == this);
-        
-        this.loadedFields.put(field.getId(), field);
-        long eventRev = this.syncState.getChangeLog().getCurrentRevisionNumber();
-        XObjectEvent event = MemoryObjectEvent.createAddEvent(this.syncState.eventQueue.getActor(),
-                getAddress(), field.getId(), eventRev, eventRev, inTrans);
-        
-        this.syncState.eventQueue.enqueueObjectEvent(this, event);
-        
-        /*
-         * event propagation and revision number increasing happens after all
-         * events were successful
-         */
-        if(!inTrans) {
-            
-            field.incrementRevision();
-            
-            // propagate events
-            this.syncState.eventQueue.sendEvents();
-            
-        }
-        
-        return field;
-    }
-    
-    /**
-     * Deletes the state information of this MemoryObject from the currently
-     * used persistence layer
-     */
-    // implement IMemoryField
-    @Override
-    @Deprecated
-    public void delete() {
-        for(XId fieldId : this) {
-            IMemoryField field = getField(fieldId);
-            field.delete();
-        }
-        for(XId fieldId : this.loadedFields.keySet()) {
-            this.objectState.removeField(fieldId);
-        }
-        this.loadedFields.clear();
-        this.exists = true;
-    }
-    
-    /**
-     * Builds a transaction that first removes the value of the given field and
-     * then the given field itself.
-     * 
-     * @param actor The actor for this transaction
-     * @param field The field which should be removed by the transaction
-     * @param inTrans true, if the removal of this {@link MemoryField} occurs
-     *            during an {@link XTransaction}.
-     * @param implied true if this object is also removed in the same
-     *            transaction
-     */
-    @Deprecated
-    public void enqueueFieldRemoveEvents(XId actor, IMemoryField field, boolean inTrans,
-            boolean implied) {
-        
-        if(field == null) {
-            throw new NullPointerException("field must not be null");
-        }
-        
-        long modelRev = getModelRevisionNumber();
-        
-        if(field.getValue() != null) {
-            XyAssert.xyAssert(inTrans);
-            XReversibleFieldEvent event = MemoryReversibleFieldEvent.createRemoveEvent(actor,
-                    field.getAddress(), field.getValue(), modelRev, getRevisionNumber(),
-                    field.getRevisionNumber(), inTrans, true);
-            this.syncState.eventQueue.enqueueFieldEvent(field, event);
-        }
-        
-        XObjectEvent event = MemoryObjectEvent.createRemoveEvent(actor, getAddress(),
-                field.getId(), modelRev, getRevisionNumber(), field.getRevisionNumber(), inTrans,
-                implied);
-        this.syncState.eventQueue.enqueueObjectEvent(this, event);
-        
-    }
-    
 }

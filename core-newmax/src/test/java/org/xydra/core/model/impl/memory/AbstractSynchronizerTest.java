@@ -219,7 +219,7 @@ abstract public class AbstractSynchronizerTest {
     
     private NewSyncer createSyncer(XydraStore store, IMemoryModel model) {
         return new NewSyncer(this.store, this.model, this.model.getState(), this.model.getRoot(),
-                this.model.getMemoryChangeLog(), this.model.getLocalChangesImpl(), this.actorId,
+                this.model.getChangeLog(), this.model.getLocalChangesImpl(), this.actorId,
                 this.passwordHash, this.model.getSynchronizedRevision());
     }
     

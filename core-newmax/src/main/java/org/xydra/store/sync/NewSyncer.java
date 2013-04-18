@@ -9,16 +9,16 @@ import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XSyncEvent;
 import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.core.model.XField;
-import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.impl.memory.EventDelta;
 import org.xydra.core.model.impl.memory.EventSequenceMapper;
 import org.xydra.core.model.impl.memory.EventSequenceMapper.Result;
+import org.xydra.core.model.impl.memory.IMemoryModel;
 import org.xydra.core.model.impl.memory.LocalChange;
 import org.xydra.core.model.impl.memory.LocalChanges;
-import org.xydra.core.model.impl.memory.MemoryChangeLog;
 import org.xydra.core.model.impl.memory.ModelUtils;
 import org.xydra.core.model.impl.memory.Root;
+import org.xydra.core.model.impl.memory.XWritableChangeLog;
 import org.xydra.index.query.Pair;
 import org.xydra.persistence.GetEventsRequest;
 import org.xydra.store.BatchedResult;
@@ -34,7 +34,7 @@ public class NewSyncer {
     
     private XRevWritableModel modelState;
     
-    private MemoryChangeLog changeLog;
+    private XWritableChangeLog changeLog;
     
     /**
      * @param store to send commands and get events
@@ -42,11 +42,11 @@ public class NewSyncer {
      * @param root
      * @param changeLog
      */
-    public NewSyncer(XydraStore store, XModel modelWithListeners,
+    public NewSyncer(XydraStore store, IMemoryModel modelWithListeners,
     
     XRevWritableModel modelState, Root root,
     
-    MemoryChangeLog changeLog, LocalChanges localChanges,
+    XWritableChangeLog changeLog, LocalChanges localChanges,
     
     XId actorId, String passwordHash, long syncRev) {
         this.store = store;
@@ -102,7 +102,7 @@ public class NewSyncer {
     
     private Root root;
     
-    private XModel modelWithListeners;
+    private IMemoryModel modelWithListeners;
     
     public void onServerFailure(Throwable exception) {
         // TODO stop syncing
@@ -162,7 +162,8 @@ public class NewSyncer {
         // end atomic section ----
         
         // send change events
-        eventDelta.sendChangeEvents(this.root, this.modelWithListeners);
+        eventDelta.sendChangeEvents(this.root, this.modelWithListeners,
+                this.modelWithListeners.getFather());
     }
     
     /**
