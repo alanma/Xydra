@@ -802,4 +802,14 @@ class SynchronisationState implements Serializable {
         }
         return executeTransactionWorker(transaction, callback);
     }
+    
+    public MemoryChangeLog getMemoryChangeLog() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    public LocalChanges getLocalChangesImpl() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

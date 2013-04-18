@@ -7,6 +7,8 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XTransaction;
 import org.xydra.core.change.XSendsSyncEvents;
+import org.xydra.core.model.impl.memory.LocalChanges;
+import org.xydra.core.model.impl.memory.MemoryChangeLog;
 import org.xydra.core.model.impl.memory.Synchronizable;
 import org.xydra.store.sync.XSynchronizer;
 
@@ -61,8 +63,15 @@ Synchronizable {
     @Override
     XChangeLog getChangeLog();
     
+    // TODO kill and switch back to getChangeLog()
+    MemoryChangeLog getMemoryChangeLog();
+    
     // note: used by XSynchronized TODO document
+    @Deprecated
     XLocalChange[] getLocalChanges();
+    
+    // TODO change into X..something and remove Impl-suffix
+    LocalChanges getLocalChangesImpl();
     
     /**
      * @return the actor that is represented by this interface. This is the

@@ -130,7 +130,7 @@ public class NewSyncer {
         
         for(LocalChange lc : result.nonMappedLocalEvents) {
             XEvent e = lc.getEvent();
-            eventDelta.addInverseEvent(e);
+            eventDelta.addInverseEvent(e, this.syncRev, this.changeLog);
         }
         
         // send sync events, let app see state before sync

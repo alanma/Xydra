@@ -1444,5 +1444,15 @@ Serializable {
         return this.state;
     }
     
+    @Override
+    public MemoryChangeLog getMemoryChangeLog() {
+        return this.syncState.getMemoryChangeLog();
+    }
+    
+    @Override
+    public LocalChanges getLocalChangesImpl() {
+        return this.syncState.getLocalChangesImpl();
+    }
+    
     // FIXME this.state.setRevisionNumber(this.state.getRevisionNumber() + 1);
 }

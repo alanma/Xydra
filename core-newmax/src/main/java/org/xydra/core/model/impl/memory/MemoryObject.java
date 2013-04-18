@@ -996,4 +996,14 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
     public Object getStateLock() {
         return this.state;
     }
+    
+    @Override
+    public MemoryChangeLog getMemoryChangeLog() {
+        return this.syncState.getMemoryChangeLog();
+    }
+    
+    @Override
+    public LocalChanges getLocalChangesImpl() {
+        return this.syncState.getLocalChangesImpl();
+    }
 }

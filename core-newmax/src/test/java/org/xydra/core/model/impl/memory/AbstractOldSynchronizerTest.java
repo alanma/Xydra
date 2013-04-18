@@ -55,12 +55,12 @@ import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.SynchronousCallbackWithOneResult;
 import org.xydra.store.XydraStore;
-import org.xydra.store.sync.NewSyncer;
+import org.xydra.store.sync.XSynchronizer;
 
 
 /**
- * Test for {@link NewSyncer} and {@link SynchronizesChangesImpl} that uses an
- * arbitrary {@link XydraStore}.
+ * Test for {@link XSynchronizer} and {@link SynchronizesChangesImpl} that uses
+ * an arbitrary {@link XydraStore}.
  * 
  * Subclasses should implement the abstract methods and set protected members
  * {@link #actorId} and {@link #passwordHash}.
@@ -69,7 +69,7 @@ import org.xydra.store.sync.NewSyncer;
  * 
  * @author dscharrer
  */
-abstract public class AbstractSynchronizerTest {
+abstract public class AbstractOldSynchronizerTest {
     
     /**
      * The actor ID used to interact with the {@link #store}. This actor needs
@@ -94,9 +94,9 @@ abstract public class AbstractSynchronizerTest {
     
     private static final XId NEWMODEL_ID = XX.toId("newmodel");
     
-    private IMemoryModel model;
+    private XModel model;
     private XAddress repoAddr;
-    private NewSyncer sync;
+    private XSynchronizer sync;
     
     {
         LoggerTestHelper.init();
@@ -125,6 +125,22 @@ abstract public class AbstractSynchronizerTest {
         }
         assertFalse(localEvents.hasNext());
         
+    }
+    
+    /**
+     * Wait for the given callback and check that there were no errors.
+     */
+    private static void checkSyncCallback(ForTestSynchronizationCallback sc) {
+        if(sc.getRequestError() != null) {
+            throw new RuntimeException(sc.getRequestError());
+        }
+        if(sc.getCommandError() != null) {
+            throw new RuntimeException(sc.getCommandError());
+        }
+        if(sc.getEventsError() != null) {
+            throw new RuntimeException(sc.getEventsError());
+        }
+        assertTrue(sc.isSuccess());
     }
     
     /**
@@ -160,12 +176,12 @@ abstract public class AbstractSynchronizerTest {
         assertTrue("Should not have failed (" + res + "): " + command, res != XCommand.FAILED);
     }
     
-    private IMemoryModel loadModel(XId modelId) {
+    private XModel loadModel(XId modelId) {
         
         XReadableModel modelSnapshot = loadModelSnapshot(modelId);
         assertNotNull(modelSnapshot);
         
-        return (IMemoryModel)XX.wrap(this.actorId, this.passwordHash, modelSnapshot);
+        return XX.wrap(this.actorId, this.passwordHash, modelSnapshot);
     }
     
     private XReadableModel loadModelSnapshot(XId modelId) {
@@ -211,23 +227,19 @@ abstract public class AbstractSynchronizerTest {
         createPhonebook(DemoModelUtil.PHONEBOOK_ID);
         
         this.model = loadModel(DemoModelUtil.PHONEBOOK_ID);
-        this.sync = createSyncer(this.store, this.model);
+        this.sync = new XSynchronizer(this.model, this.store);
         
         XyAssert.xyAssert(this.repoAddr != null);
         assert this.repoAddr != null;
     }
     
-    private NewSyncer createSyncer(XydraStore store, IMemoryModel model) {
-        return new NewSyncer(this.store, this.model, this.model.getState(), this.model.getRoot(),
-                this.model.getMemoryChangeLog(), this.model.getLocalChangesImpl(), this.actorId,
-                this.passwordHash, this.model.getSynchronizedRevision());
-    }
-    
     /**
      * Synchronize and check that there were no errors.
      */
-    private static void synchronize(NewSyncer sync) {
-        sync.startSync();
+    private static void synchronize(XSynchronizer sync) {
+        ForTestSynchronizationCallback sc = new ForTestSynchronizationCallback();
+        sync.synchronize(sc);
+        checkSyncCallback(sc);
     }
     
     @After
@@ -245,8 +257,8 @@ abstract public class AbstractSynchronizerTest {
             XRepository repo = new MemoryRepository(this.actorId, this.passwordHash,
                     this.repoAddr.getRepository());
             
-            IMemoryModel model = (IMemoryModel)repo.createModel(NEWMODEL_ID);
-            NewSyncer sync = createSyncer(this.store, model);
+            XModel model = repo.createModel(NEWMODEL_ID);
+            XSynchronizer sync = new XSynchronizer(model, this.store);
             XObject object = model.createObject(XX.toId("bob"));
             XField field = object.createField(XX.toId("cookies"));
             field.setValue(XV.toValue("yummy"));
@@ -291,13 +303,13 @@ abstract public class AbstractSynchronizerTest {
                 // worked
             }
             
-            model = (IMemoryModel)repo.createModel(NEWMODEL_ID);
+            model = repo.createModel(NEWMODEL_ID);
             model.createObject(XX.toId("john"));
             modelRev = model.getRevisionNumber();
             HasChanged hc2 = HasChanged.listen(model);
             testModel = XCopyUtils.createSnapshot(model);
             
-            sync = createSyncer(this.store, model);
+            sync = new XSynchronizer(model, this.store);
             synchronize(sync);
             
             remoteModel = loadModelSnapshot(NEWMODEL_ID);
@@ -401,10 +413,10 @@ abstract public class AbstractSynchronizerTest {
             // create a model
             XRepository repo = new MemoryRepository(this.actorId, this.passwordHash,
                     this.repoAddr.getRepository());
-            IMemoryModel model = (IMemoryModel)repo.createModel(NEWMODEL_ID);
-            NewSyncer sync = createSyncer(this.store, model);
+            XModel model = repo.createModel(NEWMODEL_ID);
+            XSynchronizer sync = new XSynchronizer(model, this.store);
             synchronize(sync);
-            IMemoryModel modelCopy = loadModel(NEWMODEL_ID);
+            XModel modelCopy = loadModel(NEWMODEL_ID);
             assertTrue(XCompareUtils.equalState(model, modelCopy));
             long modelRev = model.getRevisionNumber();
             HasChanged hc2 = HasChanged.listen(model);
@@ -436,7 +448,7 @@ abstract public class AbstractSynchronizerTest {
             model.createObject(XX.toId("jane"));
             
             // test synchronizing the model without repository
-            NewSyncer sync2 = createSyncer(this.store, modelCopy);
+            XSynchronizer sync2 = new XSynchronizer(modelCopy, this.store);
             synchronize(sync2);
             assertEquals(modelRev + 2, modelCopy.getRevisionNumber());
             assertEquals(modelRev + 2, modelCopy.getSynchronizedRevision());
@@ -462,13 +474,13 @@ abstract public class AbstractSynchronizerTest {
             // create a model
             XRepository repo = new MemoryRepository(this.actorId, this.passwordHash,
                     this.repoAddr.getRepository());
-            IMemoryModel model = (IMemoryModel)repo.createModel(NEWMODEL_ID);
+            XModel model = repo.createModel(NEWMODEL_ID);
             XObject object = model.createObject(XX.toId("bob"));
             XField field = object.createField(XX.toId("cookies"));
             field.setValue(XV.toValue("yummy"));
-            NewSyncer sync = createSyncer(this.store, model);
+            XSynchronizer sync = new XSynchronizer(model, this.store);
             synchronize(sync);
-            IMemoryModel modelCopy = loadModel(NEWMODEL_ID);
+            XModel modelCopy = loadModel(NEWMODEL_ID);
             assertTrue(XCompareUtils.equalState(model, modelCopy));
             long modelRev = model.getRevisionNumber();
             HasChanged hc3 = HasChanged.listen(model);
@@ -496,7 +508,7 @@ abstract public class AbstractSynchronizerTest {
             }
             
             // test synchronizing the model without repository
-            NewSyncer sync2 = createSyncer(this.store, modelCopy);
+            XSynchronizer sync2 = new XSynchronizer(modelCopy, this.store);
             synchronize(sync2);
             assertEquals(modelRev + 1, modelCopy.getRevisionNumber());
             assertEquals(modelRev + 1, modelCopy.getSynchronizedRevision());
@@ -682,6 +694,9 @@ abstract public class AbstractSynchronizerTest {
         ForTestLocalChangeCallback c1 = new ForTestLocalChangeCallback();
         ForTestLocalChangeCallback c2 = new ForTestLocalChangeCallback();
         
+        ForTestSynchronizationCallback sc1 = new ForTestSynchronizationCallback();
+        ForTestSynchronizationCallback sc2 = new ForTestSynchronizationCallback();
+        
         // Create a command manually.
         final XId frankId = XX.toId("Frank");
         XCommand command = MemoryModelCommand.createAddCommand(this.model.getAddress(), false,
@@ -693,7 +708,7 @@ abstract public class AbstractSynchronizerTest {
         assertTrue(this.model.hasObject(frankId));
         
         // Now synchronize with the server.
-        this.sync.startSync();
+        this.sync.synchronize(sc1);
         
         // command may not be applied remotely yet!
         
@@ -726,12 +741,14 @@ abstract public class AbstractSynchronizerTest {
         assertFalse(this.model.hasObject(DemoModelUtil.PETER_ID));
         assertTrue(this.model.hasObject(janeId));
         
-        this.sync.startSync();
+        this.sync.synchronize(sc2);
         
         // both commands may still not be applied remotely
         
         assertTrue(c1.waitForResult() >= 0);
         assertTrue(c2.waitForResult() >= 0);
+        checkSyncCallback(sc1);
+        checkSyncCallback(sc2);
         
         // check model state
         assertTrue(this.model.hasObject(frankId));
@@ -760,10 +777,10 @@ abstract public class AbstractSynchronizerTest {
             // create a local model
             XAddress modelAddr = XX.resolveModel(this.repoAddr, NEWMODEL_ID);
             // must be created with a repository ID to be synchronized
-            IMemoryModel model = new MemoryModel(this.actorId, this.passwordHash, modelAddr);
+            XModel model = new MemoryModel(this.actorId, this.passwordHash, modelAddr);
             DemoModelUtil.setupPhonebook(model);
             
-            NewSyncer synchronizer = createSyncer(this.store, model);
+            XSynchronizer synchronizer = new XSynchronizer(model, this.store);
             
             XTransactionBuilder txBuilder = new XTransactionBuilder(model.getAddress());
             
@@ -829,10 +846,10 @@ abstract public class AbstractSynchronizerTest {
             // create a local model
             XAddress modelAddr = XX.resolveModel(this.repoAddr, NEWMODEL_ID);
             // must be created with a repository ID to be synchronized
-            IMemoryModel model = new MemoryModel(this.actorId, this.passwordHash, modelAddr);
+            XModel model = new MemoryModel(this.actorId, this.passwordHash, modelAddr);
             DemoModelUtil.setupPhonebook(model);
             
-            NewSyncer synchronizer = createSyncer(this.store, model);
+            XSynchronizer synchronizer = new XSynchronizer(model, this.store);
             // The intitial sync is the only difference to the previous test and
             // makes this test fail. Why?
             synchronize(synchronizer);
@@ -896,9 +913,9 @@ abstract public class AbstractSynchronizerTest {
             // create a local model
             XAddress modelAddr = XX.resolveModel(this.repoAddr, NEWMODEL_ID);
             // must be created with a repository ID to be synchronized
-            IMemoryModel model = new MemoryModel(this.actorId, this.passwordHash, modelAddr);
+            XModel model = new MemoryModel(this.actorId, this.passwordHash, modelAddr);
             
-            NewSyncer synchronizer = createSyncer(this.store, model);
+            XSynchronizer synchronizer = new XSynchronizer(model, this.store);
             
             XTransactionBuilder txBuilder = new XTransactionBuilder(model.getAddress());
             
@@ -964,9 +981,9 @@ abstract public class AbstractSynchronizerTest {
             // create a local model
             XAddress modelAddr = XX.resolveModel(this.repoAddr, NEWMODEL_ID);
             // must be created with a repository ID to be synchronized
-            IMemoryModel model = new MemoryModel(this.actorId, this.passwordHash, modelAddr);
+            XModel model = new MemoryModel(this.actorId, this.passwordHash, modelAddr);
             
-            NewSyncer synchronizer = createSyncer(this.store, model);
+            XSynchronizer synchronizer = new XSynchronizer(model, this.store);
             // The intitial sync is the only difference to the previous test and
             // makes this test fail. Why?
             synchronize(synchronizer);
@@ -1024,9 +1041,9 @@ abstract public class AbstractSynchronizerTest {
             // create a local model
             XAddress modelAddr = XX.resolveModel(this.repoAddr, NEWMODEL_ID);
             // must be created with a repository ID to be synchronized
-            IMemoryModel model = new MemoryModel(this.actorId, this.passwordHash, modelAddr);
+            XModel model = new MemoryModel(this.actorId, this.passwordHash, modelAddr);
             
-            NewSyncer synchronizer = createSyncer(this.store, model);
+            XSynchronizer synchronizer = new XSynchronizer(model, this.store);
             // The intitial sync is the only difference to the previous test and
             // makes this test fail. Why?
             synchronize(synchronizer);
@@ -1115,9 +1132,9 @@ abstract public class AbstractSynchronizerTest {
             // create a local model
             XAddress modelAddr = XX.resolveModel(this.repoAddr, NEWMODEL_ID);
             // must be created with a repository ID to be synchronized
-            IMemoryModel model = new MemoryModel(this.actorId, this.passwordHash, modelAddr);
+            XModel model = new MemoryModel(this.actorId, this.passwordHash, modelAddr);
             
-            NewSyncer synchronizer = createSyncer(this.store, model);
+            XSynchronizer synchronizer = new XSynchronizer(model, this.store);
             // The intitial sync is the only difference to the previous test and
             // makes this test fail. Why?
             synchronize(synchronizer);
@@ -1182,12 +1199,12 @@ abstract public class AbstractSynchronizerTest {
             // create a local model
             XAddress modelAddr = XX.resolveModel(this.repoAddr, NEWMODEL_ID);
             // must be created with a repository ID to be synchronized
-            IMemoryModel model = new MemoryModel(this.actorId, this.passwordHash, modelAddr);
+            XModel model = new MemoryModel(this.actorId, this.passwordHash, modelAddr);
             DemoModelUtil.setupPhonebook(model);
             
             XReadableModel snapshot = XCopyUtils.createSnapshot(model);
             
-            synchronize(createSyncer(this.store, model));
+            synchronize(new XSynchronizer(model, this.store));
             
             assertTrue(XCompareUtils.equalTree(snapshot, model));
             XReadableModel remoteModel = loadModelSnapshot(NEWMODEL_ID);
