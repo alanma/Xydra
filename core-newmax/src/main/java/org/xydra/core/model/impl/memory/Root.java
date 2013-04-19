@@ -8,7 +8,6 @@ import org.xydra.base.change.XObjectEvent;
 import org.xydra.base.change.XRepositoryEvent;
 import org.xydra.base.change.XSyncEvent;
 import org.xydra.base.change.XTransactionEvent;
-import org.xydra.base.rmof.XEntity;
 import org.xydra.core.change.XFieldEventListener;
 import org.xydra.core.change.XModelEventListener;
 import org.xydra.core.change.XObjectEventListener;
@@ -60,114 +59,127 @@ public class Root {
         this.sessionPasswordHash = sessionPasswordHash;
     }
     
-    public boolean addListenerForFieldEvents(XEntity entity, XFieldEventListener changeListener) {
+    public boolean addListenerForFieldEvents(XAddress entityAddress,
+            XFieldEventListener changeListener) {
         synchronized(this.eventBus) {
-            return this.eventBus.addListener(EventType.FieldChange, entity, changeListener);
+            return this.eventBus.addListener(EventType.FieldChange, entityAddress, changeListener);
         }
     }
     
-    public boolean addListenerForModelEvents(XEntity entity, XModelEventListener changeListener) {
+    public boolean addListenerForModelEvents(XAddress entityAddress,
+            XModelEventListener changeListener) {
         synchronized(this.eventBus) {
-            return this.eventBus.addListener(EventType.ModelChange, entity, changeListener);
+            return this.eventBus.addListener(EventType.ModelChange, entityAddress, changeListener);
         }
     }
     
-    public boolean addListenerForObjectEvents(XEntity entity, XObjectEventListener changeListener) {
+    public boolean addListenerForObjectEvents(XAddress entityAddress,
+            XObjectEventListener changeListener) {
         synchronized(this.eventBus) {
-            return this.eventBus.addListener(EventType.ObjectChange, entity, changeListener);
+            return this.eventBus.addListener(EventType.ObjectChange, entityAddress, changeListener);
         }
     }
     
-    public boolean addListenerForRepositoryEvents(XEntity entity,
+    public boolean addListenerForRepositoryEvents(XAddress entityAddress,
             XRepositoryEventListener changeListener) {
         synchronized(this.eventBus) {
-            return this.eventBus.addListener(EventType.RepositoryChange, entity, changeListener);
+            return this.eventBus.addListener(EventType.RepositoryChange, entityAddress,
+                    changeListener);
         }
     }
     
-    public boolean addListenerForSyncEvents(XEntity entity, XSyncEventListener syncListener) {
+    public boolean addListenerForSyncEvents(XAddress entityAddress, XSyncEventListener syncListener) {
         synchronized(this.eventBus) {
-            return this.eventBus.addListener(EventType.Sync, entity, syncListener);
+            return this.eventBus.addListener(EventType.Sync, entityAddress, syncListener);
         }
     }
     
-    public boolean addListenerForTransactionEvents(XEntity entity,
+    public boolean addListenerForTransactionEvents(XAddress entityAddress,
             XTransactionEventListener changeListener) {
         synchronized(this.eventBus) {
-            return this.eventBus.addListener(EventType.TransactionChange, entity, changeListener);
+            return this.eventBus.addListener(EventType.TransactionChange, entityAddress,
+                    changeListener);
         }
     }
     
-    public void fireFieldEvent(XEntity entity, XFieldEvent event) {
+    public void fireFieldEvent(XAddress entityAddress, XFieldEvent event) {
         synchronized(this.eventBus) {
-            this.eventBus.fireEvent(EventType.FieldChange, entity, event);
+            this.eventBus.fireEvent(EventType.FieldChange, entityAddress, event);
         }
     }
     
-    public void fireModelEvent(XEntity entity, XModelEvent event) {
+    public void fireModelEvent(XAddress entityAddress, XModelEvent event) {
         synchronized(this.eventBus) {
-            this.eventBus.fireEvent(EventType.ModelChange, entity, event);
+            this.eventBus.fireEvent(EventType.ModelChange, entityAddress, event);
         }
     }
     
-    public void fireObjectEvent(XEntity entity, XObjectEvent event) {
+    public void fireObjectEvent(XAddress entityAddress, XObjectEvent event) {
         synchronized(this.eventBus) {
-            this.eventBus.fireEvent(EventType.ObjectChange, entity, event);
+            this.eventBus.fireEvent(EventType.ObjectChange, entityAddress, event);
         }
     }
     
-    public void fireRepositoryEvent(XRepository entity, XRepositoryEvent event) {
+    public void fireRepositoryEvent(XAddress entityAddress, XRepositoryEvent event) {
         synchronized(this.eventBus) {
-            this.eventBus.fireEvent(EventType.RepositoryChange, entity, event);
+            this.eventBus.fireEvent(EventType.RepositoryChange, entityAddress, event);
         }
     }
     
-    public void fireSyncEvent(XEntity entity, XSyncEvent event) {
+    public void fireSyncEvent(XAddress entityAddress, XSyncEvent event) {
         synchronized(this.eventBus) {
-            this.eventBus.fireEvent(EventType.Sync, entity, event);
+            this.eventBus.fireEvent(EventType.Sync, entityAddress, event);
         }
     }
     
-    public void fireTransactionEvent(XEntity entity, XTransactionEvent event) {
-        this.eventBus.fireEvent(EventType.TransactionChange, entity, event);
+    public void fireTransactionEvent(XAddress entityAddress, XTransactionEvent event) {
+        this.eventBus.fireEvent(EventType.TransactionChange, entityAddress, event);
     }
     
-    public boolean removeListenerForFieldEvents(XEntity entity, XFieldEventListener changeListener) {
+    public boolean removeListenerForFieldEvents(XAddress entityAddress,
+            XFieldEventListener changeListener) {
         synchronized(this.eventBus) {
-            return this.eventBus.removeListener(EventType.FieldChange, entity, changeListener);
+            return this.eventBus.removeListener(EventType.FieldChange, entityAddress,
+                    changeListener);
         }
     }
     
-    public boolean removeListenerForModelEvents(XEntity entity, XModelEventListener changeListener) {
+    public boolean removeListenerForModelEvents(XAddress entityAddress,
+            XModelEventListener changeListener) {
         synchronized(this.eventBus) {
-            return this.eventBus.removeListener(EventType.ModelChange, entity, changeListener);
+            return this.eventBus.removeListener(EventType.ModelChange, entityAddress,
+                    changeListener);
         }
     }
     
-    public boolean removeListenerForObjectEvents(XEntity entity, XObjectEventListener changeListener) {
+    public boolean removeListenerForObjectEvents(XAddress entityAddress,
+            XObjectEventListener changeListener) {
         synchronized(this.eventBus) {
-            return this.eventBus.removeListener(EventType.ObjectChange, entity, changeListener);
+            return this.eventBus.removeListener(EventType.ObjectChange, entityAddress,
+                    changeListener);
         }
     }
     
-    public boolean removeListenerForRepositoryEvents(XRepository entity,
+    public boolean removeListenerForRepositoryEvents(XAddress entityAddress,
             XRepositoryEventListener changeListener) {
         synchronized(this.eventBus) {
-            return this.eventBus.removeListener(EventType.RepositoryChange, entity, changeListener);
+            return this.eventBus.removeListener(EventType.RepositoryChange, entityAddress,
+                    changeListener);
         }
     }
     
-    public boolean removeListenerForSyncEvents(XEntity entity, XSyncEventListener syncListener) {
+    public boolean removeListenerForSyncEvents(XAddress entityAddress,
+            XSyncEventListener syncListener) {
         synchronized(this.eventBus) {
-            return this.eventBus.removeListener(EventType.Sync, entity, syncListener);
+            return this.eventBus.removeListener(EventType.Sync, entityAddress, syncListener);
         }
     }
     
-    public boolean removeListenerForTransactionEvents(XEntity entity,
+    public boolean removeListenerForTransactionEvents(XAddress entityAddress,
             XTransactionEventListener changeListener) {
         synchronized(this.eventBus) {
-            return this.eventBus
-                    .removeListener(EventType.TransactionChange, entity, changeListener);
+            return this.eventBus.removeListener(EventType.TransactionChange, entityAddress,
+                    changeListener);
         }
     }
     
@@ -195,7 +207,7 @@ public class Root {
     /**
      * @param baseAddress
      * @param actorId
-     * @return
+     * @return ...
      */
     public static Root createWithActor(XAddress baseAddress, XId actorId) {
         return new Root(new MemoryEventBus(), MemoryChangeLog.create(baseAddress),

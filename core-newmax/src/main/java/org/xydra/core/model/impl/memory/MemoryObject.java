@@ -268,8 +268,8 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
         return executeCommand(command, null);
     }
     
-    @SuppressWarnings("deprecation")
     @Override
+    @Deprecated
     public long executeCommand(XCommand command, XLocalChangeCallback callback) {
         if(command instanceof XTransaction) {
             synchronized(this.root) {
@@ -295,6 +295,7 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
         return executeObjectCommand(command, null);
     }
     
+    @Deprecated
     private long executeObjectCommand(XObjectCommand command, XLocalChangeCallback callback) {
         synchronized(this.root) {
             assertThisEntityExists();
@@ -348,7 +349,7 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
                 return null;
             }
             
-            field = new MemoryField(this, this.syncState.eventQueue, fieldState);
+            field = new MemoryField(this, fieldState);
             this.loadedFields.put(fieldId, field);
             
             return field;
@@ -412,7 +413,7 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
     public boolean hasField(XId id) {
         synchronized(this.root) {
             assertThisEntityExists();
-            return this.loadedFields.containsKey(id) || this.objectState.hasField(id);
+            return this.objectState.hasField(id);
         }
     }
     
@@ -430,6 +431,7 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
     }
     
     @SuppressWarnings("unused")
+    @Deprecated
     private boolean hasObject(XId objectId) {
         return getId().equals(objectId);
     }
@@ -453,8 +455,10 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
     @Override
     public boolean removeField(XId fieldId) {
         
-        // no synchronization necessary here (except that in
-        // executeObjectCommand())
+        /*
+         * no synchronization necessary here (except that in
+         * executeObjectCommand())
+         */
         
         XObjectCommand command = MemoryObjectCommand.createRemoveCommand(getAddress(),
                 XCommand.FORCED, fieldId);
@@ -572,7 +576,7 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
     @Override
     public void fireObjectEvent(XObjectEvent event) {
         synchronized(this.root) {
-            this.root.fireObjectEvent(this, event);
+            this.root.fireObjectEvent(getAddress(), event);
         }
     }
     
@@ -580,7 +584,7 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
     @Override
     public void fireFieldEvent(XFieldEvent event) {
         synchronized(this.root) {
-            this.root.fireFieldEvent(this, event);
+            this.root.fireFieldEvent(getAddress(), event);
         }
     }
     
@@ -588,49 +592,49 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
     @Override
     public void fireTransactionEvent(XTransactionEvent event) {
         synchronized(this.root) {
-            this.root.fireTransactionEvent(this, event);
+            this.root.fireTransactionEvent(getAddress(), event);
         }
     }
     
     @Override
     public boolean addListenerForTransactionEvents(XTransactionEventListener changeListener) {
         synchronized(this.root) {
-            return this.root.addListenerForTransactionEvents(this, changeListener);
+            return this.root.addListenerForTransactionEvents(getAddress(), changeListener);
         }
     }
     
     @Override
     public boolean removeListenerForTransactionEvents(XTransactionEventListener changeListener) {
         synchronized(this.root) {
-            return this.root.removeListenerForTransactionEvents(this, changeListener);
+            return this.root.removeListenerForTransactionEvents(getAddress(), changeListener);
         }
     }
     
     @Override
     public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
         synchronized(this.root) {
-            return this.root.addListenerForFieldEvents(this, changeListener);
+            return this.root.addListenerForFieldEvents(getAddress(), changeListener);
         }
     }
     
     @Override
     public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
         synchronized(this.root) {
-            return this.root.removeListenerForFieldEvents(this, changeListener);
+            return this.root.removeListenerForFieldEvents(getAddress(), changeListener);
         }
     }
     
     @Override
     public boolean addListenerForObjectEvents(XObjectEventListener changeListener) {
         synchronized(this.root) {
-            return this.root.addListenerForObjectEvents(this, changeListener);
+            return this.root.addListenerForObjectEvents(getAddress(), changeListener);
         }
     }
     
     @Override
     public boolean removeListenerForObjectEvents(XObjectEventListener changeListener) {
         synchronized(this.root) {
-            return this.root.removeListenerForObjectEvents(this, changeListener);
+            return this.root.removeListenerForObjectEvents(getAddress(), changeListener);
         }
     }
     

@@ -69,17 +69,17 @@ public abstract class AbstractMOFEntity extends AbstractEntity implements IMemor
     
     @Override
     public boolean addListenerForSyncEvents(XSyncEventListener syncListener) {
-        return this.root.addListenerForSyncEvents(this, syncListener);
+        return this.root.addListenerForSyncEvents(getAddress(), syncListener);
     }
     
     @Override
     public boolean removeListenerForSyncEvents(XSyncEventListener syncListener) {
-        return this.root.removeListenerForSyncEvents(this, syncListener);
+        return this.root.removeListenerForSyncEvents(getAddress(), syncListener);
     }
     
     @Override
     public void fireSyncEvent(XSyncEvent event) {
-        this.root.fireSyncEvent(this, event);
+        this.root.fireSyncEvent(getAddress(), event);
     }
     
 }

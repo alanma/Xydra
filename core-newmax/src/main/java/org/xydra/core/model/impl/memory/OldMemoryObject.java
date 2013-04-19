@@ -926,7 +926,7 @@ public class OldMemoryObject extends AbstractMOFEntity implements IMemoryObject,
     @Override
     public void fireObjectEvent(XObjectEvent event) {
         synchronized(this.root) {
-            this.root.fireObjectEvent(this, event);
+            this.root.fireObjectEvent(getAddress(), event);
         }
     }
     
@@ -934,7 +934,7 @@ public class OldMemoryObject extends AbstractMOFEntity implements IMemoryObject,
     @Override
     public void fireFieldEvent(XFieldEvent event) {
         synchronized(this.root) {
-            this.root.fireFieldEvent(this, event);
+            this.root.fireFieldEvent(getAddress(), event);
         }
     }
     
@@ -942,49 +942,49 @@ public class OldMemoryObject extends AbstractMOFEntity implements IMemoryObject,
     @Override
     public void fireTransactionEvent(XTransactionEvent event) {
         synchronized(this.root) {
-            this.root.fireTransactionEvent(this, event);
+            this.root.fireTransactionEvent(getAddress(), event);
         }
     }
     
     @Override
     public boolean addListenerForTransactionEvents(XTransactionEventListener changeListener) {
         synchronized(this.root) {
-            return this.root.addListenerForTransactionEvents(this, changeListener);
+            return this.root.addListenerForTransactionEvents(getAddress(), changeListener);
         }
     }
     
     @Override
     public boolean removeListenerForTransactionEvents(XTransactionEventListener changeListener) {
         synchronized(this.root) {
-            return this.root.removeListenerForTransactionEvents(this, changeListener);
+            return this.root.removeListenerForTransactionEvents(getAddress(), changeListener);
         }
     }
     
     @Override
     public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
         synchronized(this.root) {
-            return this.root.addListenerForFieldEvents(this, changeListener);
+            return this.root.addListenerForFieldEvents(getAddress(), changeListener);
         }
     }
     
     @Override
     public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
         synchronized(this.root) {
-            return this.root.removeListenerForFieldEvents(this, changeListener);
+            return this.root.removeListenerForFieldEvents(getAddress(), changeListener);
         }
     }
     
     @Override
     public boolean addListenerForObjectEvents(XObjectEventListener changeListener) {
         synchronized(this.root) {
-            return this.root.addListenerForObjectEvents(this, changeListener);
+            return this.root.addListenerForObjectEvents(getAddress(), changeListener);
         }
     }
     
     @Override
     public boolean removeListenerForObjectEvents(XObjectEventListener changeListener) {
         synchronized(this.root) {
-            return this.root.removeListenerForObjectEvents(this, changeListener);
+            return this.root.removeListenerForObjectEvents(getAddress(), changeListener);
         }
     }
     

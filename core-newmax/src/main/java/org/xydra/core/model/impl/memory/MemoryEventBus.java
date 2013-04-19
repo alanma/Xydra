@@ -19,13 +19,13 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.xydra.base.XAddress;
 import org.xydra.base.change.XFieldEvent;
 import org.xydra.base.change.XModelEvent;
 import org.xydra.base.change.XObjectEvent;
 import org.xydra.base.change.XRepositoryEvent;
 import org.xydra.base.change.XSyncEvent;
 import org.xydra.base.change.XTransactionEvent;
-import org.xydra.base.rmof.XEntity;
 import org.xydra.core.change.XFieldEventListener;
 import org.xydra.core.change.XModelEventListener;
 import org.xydra.core.change.XObjectEventListener;
@@ -88,23 +88,23 @@ public class MemoryEventBus {
     
     private int fireCalls = 0;
     
-    IMapMapSetIndex<EventType,XEntity,Object> map = new MapMapSetIndex<EventType,XEntity,Object>(
+    IMapMapSetIndex<EventType,XAddress,Object> map = new MapMapSetIndex<EventType,XAddress,Object>(
             new SmallEntrySetFactory<Object>());
     
-    public boolean addListener(final EventType eventType, final XEntity sourceEntity,
+    public boolean addListener(final EventType eventType, final XAddress sourceAddress,
             final Object listener) {
         if(this.fireCalls > 0) {
             this.deferredDeltas.add(new Runnable() {
                 
                 @Override
                 public void run() {
-                    addListener(eventType, sourceEntity, listener);
+                    addListener(eventType, sourceAddress, listener);
                 }
             });
             // we can just assume it will work
             return true;
         } else {
-            return this.map.index(eventType, sourceEntity, listener);
+            return this.map.index(eventType, sourceAddress, listener);
         }
     }
     
@@ -117,7 +117,7 @@ public class MemoryEventBus {
      * @param event The, e.g., {@link XFieldEvent} which will be propagated to
      *            the registered listeners.
      */
-    public void fireEvent(EventType eventType, XEntity source, Object event) {
+    public void fireEvent(EventType eventType, XAddress source, Object event) {
         assert eventType != null;
         if(event == null) {
             throw new NullPointerException("Cannot fire null event");
@@ -126,11 +126,11 @@ public class MemoryEventBus {
         synchronized(this.map) {
             this.fireCalls++;
             try {
-                Iterator<KeyKeyEntryTuple<EventType,XEntity,Object>> it = this.map.tupleIterator(
+                Iterator<KeyKeyEntryTuple<EventType,XAddress,Object>> it = this.map.tupleIterator(
                 
                 new EqualsConstraint<MemoryEventBus.EventType>(eventType),
                 
-                source == null ? new Wildcard<XEntity>() : new EqualsConstraint<XEntity>(source),
+                source == null ? new Wildcard<XAddress>() : new EqualsConstraint<XAddress>(source),
                 
                 new Wildcard<Object>()
                 
@@ -158,20 +158,20 @@ public class MemoryEventBus {
         }
     }
     
-    public boolean removeListener(final EventType eventType, final XEntity sourceEntity,
+    public boolean removeListener(final EventType eventType, final XAddress sourceAddress,
             final Object listener) {
         if(this.fireCalls > 0) {
             this.deferredDeltas.add(new Runnable() {
                 
                 @Override
                 public void run() {
-                    removeListener(eventType, sourceEntity, listener);
+                    removeListener(eventType, sourceAddress, listener);
                 }
             });
             // we can just assume it will work
             return true;
         } else {
-            return this.map.deIndex(eventType, sourceEntity, listener);
+            return this.map.deIndex(eventType, sourceAddress, listener);
         }
     }
     

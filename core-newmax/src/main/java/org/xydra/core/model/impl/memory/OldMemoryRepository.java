@@ -98,35 +98,37 @@ public class OldMemoryRepository extends AbstractEntity implements IMemoryReposi
     @Override
     public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
         synchronized(this.eventBus) {
-            return this.eventBus.addListener(EventType.FieldChange, this, changeListener);
+            return this.eventBus.addListener(EventType.FieldChange, getAddress(), changeListener);
         }
     }
     
     @Override
     public boolean addListenerForModelEvents(XModelEventListener changeListener) {
         synchronized(this.eventBus) {
-            return this.eventBus.addListener(EventType.ModelChange, this, changeListener);
+            return this.eventBus.addListener(EventType.ModelChange, getAddress(), changeListener);
         }
     }
     
     @Override
     public boolean addListenerForObjectEvents(XObjectEventListener changeListener) {
         synchronized(this.eventBus) {
-            return this.eventBus.addListener(EventType.ObjectChange, this, changeListener);
+            return this.eventBus.addListener(EventType.ObjectChange, getAddress(), changeListener);
         }
     }
     
     @Override
     public boolean addListenerForRepositoryEvents(XRepositoryEventListener changeListener) {
         synchronized(this.eventBus) {
-            return this.eventBus.addListener(EventType.RepositoryChange, this, changeListener);
+            return this.eventBus.addListener(EventType.RepositoryChange, getAddress(),
+                    changeListener);
         }
     }
     
     @Override
     public boolean addListenerForTransactionEvents(XTransactionEventListener changeListener) {
         synchronized(this.eventBus) {
-            return this.eventBus.addListener(EventType.TransactionChange, this, changeListener);
+            return this.eventBus.addListener(EventType.TransactionChange, getAddress(),
+                    changeListener);
         }
     }
     
@@ -223,7 +225,7 @@ public class OldMemoryRepository extends AbstractEntity implements IMemoryReposi
     @Override
     public void fireFieldEvent(XFieldEvent event) {
         synchronized(this.eventBus) {
-            this.eventBus.fireEvent(EventType.FieldChange, this, event);
+            this.eventBus.fireEvent(EventType.FieldChange, getAddress(), event);
         }
     }
     
@@ -239,7 +241,7 @@ public class OldMemoryRepository extends AbstractEntity implements IMemoryReposi
     @Override
     public void fireModelEvent(XModelEvent event) {
         synchronized(this.eventBus) {
-            this.eventBus.fireEvent(EventType.ModelChange, this, event);
+            this.eventBus.fireEvent(EventType.ModelChange, getAddress(), event);
         }
         
     }
@@ -256,7 +258,7 @@ public class OldMemoryRepository extends AbstractEntity implements IMemoryReposi
     @Override
     public void fireObjectEvent(XObjectEvent event) {
         synchronized(this.eventBus) {
-            this.eventBus.fireEvent(EventType.ObjectChange, this, event);
+            this.eventBus.fireEvent(EventType.ObjectChange, getAddress(), event);
         }
     }
     
@@ -272,7 +274,7 @@ public class OldMemoryRepository extends AbstractEntity implements IMemoryReposi
     @Override
     public void fireRepositoryEvent(XRepositoryEvent event) {
         synchronized(this.eventBus) {
-            this.eventBus.fireEvent(EventType.RepositoryChange, this, event);
+            this.eventBus.fireEvent(EventType.RepositoryChange, getAddress(), event);
         }
     }
     
@@ -289,7 +291,7 @@ public class OldMemoryRepository extends AbstractEntity implements IMemoryReposi
     @Override
     public void fireTransactionEvent(XTransactionEvent event) {
         synchronized(this.eventBus) {
-            this.eventBus.fireEvent(EventType.TransactionChange, this, event);
+            this.eventBus.fireEvent(EventType.TransactionChange, getAddress(), event);
         }
     }
     
@@ -374,35 +376,40 @@ public class OldMemoryRepository extends AbstractEntity implements IMemoryReposi
     @Override
     public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
         synchronized(this.eventBus) {
-            return this.eventBus.removeListener(EventType.FieldChange, this, changeListener);
+            return this.eventBus
+                    .removeListener(EventType.FieldChange, getAddress(), changeListener);
         }
     }
     
     @Override
     public boolean removeListenerForModelEvents(XModelEventListener changeListener) {
         synchronized(this.eventBus) {
-            return this.eventBus.removeListener(EventType.ModelChange, this, changeListener);
+            return this.eventBus
+                    .removeListener(EventType.ModelChange, getAddress(), changeListener);
         }
     }
     
     @Override
     public boolean removeListenerForObjectEvents(XObjectEventListener changeListener) {
         synchronized(this.eventBus) {
-            return this.eventBus.removeListener(EventType.ObjectChange, this, changeListener);
+            return this.eventBus.removeListener(EventType.ObjectChange, getAddress(),
+                    changeListener);
         }
     }
     
     @Override
     public boolean removeListenerForRepositoryEvents(XRepositoryEventListener changeListener) {
         synchronized(this.eventBus) {
-            return this.eventBus.removeListener(EventType.RepositoryChange, this, changeListener);
+            return this.eventBus.removeListener(EventType.RepositoryChange, getAddress(),
+                    changeListener);
         }
     }
     
     @Override
     public boolean removeListenerForTransactionEvents(XTransactionEventListener changeListener) {
         synchronized(this.eventBus) {
-            return this.eventBus.removeListener(EventType.TransactionChange, this, changeListener);
+            return this.eventBus.removeListener(EventType.TransactionChange, getAddress(),
+                    changeListener);
         }
     }
     

@@ -110,7 +110,7 @@ public class MemoryField extends AbstractMOFEntity implements XField, IMemoryFie
      */
     @Override
     public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
-        return this.root.addListenerForFieldEvents(this, changeListener);
+        return this.root.addListenerForFieldEvents(getAddress(), changeListener);
     }
     
     @Override
@@ -232,7 +232,7 @@ public class MemoryField extends AbstractMOFEntity implements XField, IMemoryFie
     
     @Override
     public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
-        return this.root.removeListenerForFieldEvents(this, changeListener);
+        return this.root.removeListenerForFieldEvents(getAddress(), changeListener);
     }
     
     @Override
@@ -425,7 +425,7 @@ public class MemoryField extends AbstractMOFEntity implements XField, IMemoryFie
     @Override
     @Deprecated
     public void fireFieldEvent(XFieldEvent event) {
-        this.root.fireFieldEvent(this, event);
+        this.root.fireFieldEvent(getAddress(), event);
     }
     
     /**

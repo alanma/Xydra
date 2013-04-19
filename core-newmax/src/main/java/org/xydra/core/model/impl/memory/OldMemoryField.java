@@ -128,7 +128,7 @@ public class OldMemoryField extends AbstractMOFEntity implements XField, IMemory
     
     @Override
     public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
-        return this.root.addListenerForFieldEvents(this, changeListener);
+        return this.root.addListenerForFieldEvents(getAddress(), changeListener);
     }
     
     @Override
@@ -273,7 +273,7 @@ public class OldMemoryField extends AbstractMOFEntity implements XField, IMemory
     // implement IMemoryField
     @Override
     public void fireFieldEvent(XFieldEvent event) {
-        this.root.fireFieldEvent(this, event);
+        this.root.fireFieldEvent(getAddress(), event);
     }
     
     @Override
@@ -435,7 +435,7 @@ public class OldMemoryField extends AbstractMOFEntity implements XField, IMemory
     
     @Override
     public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
-        return this.root.removeListenerForFieldEvents(this, changeListener);
+        return this.root.removeListenerForFieldEvents(getAddress(), changeListener);
     }
     
     // implement IMemoryField

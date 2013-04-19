@@ -174,7 +174,7 @@ Serializable {
     @Override
     public boolean addListenerForModelEvents(XModelEventListener changeListener) {
         synchronized(this.root) {
-            return this.root.addListenerForModelEvents(this, changeListener);
+            return this.root.addListenerForModelEvents(getAddress(), changeListener);
         }
     }
     
@@ -188,14 +188,14 @@ Serializable {
     // implement IMemoryModel
     @Override
     public void fireModelEvent(XModelEvent event) {
-        this.root.fireModelEvent(this, event);
+        this.root.fireModelEvent(getAddress(), event);
     }
     
     // implement IMemoryModel
     @Override
     public boolean removeListenerForModelEvents(XModelEventListener changeListener) {
         synchronized(this.root) {
-            return this.root.removeListenerForModelEvents(this, changeListener);
+            return this.root.removeListenerForModelEvents(getAddress(), changeListener);
         }
     }
     
@@ -203,7 +203,7 @@ Serializable {
     @Override
     public void fireObjectEvent(XObjectEvent event) {
         synchronized(this.root) {
-            this.root.fireObjectEvent(this, event);
+            this.root.fireObjectEvent(getAddress(), event);
         }
     }
     
@@ -211,7 +211,7 @@ Serializable {
     @Override
     public void fireFieldEvent(XFieldEvent event) {
         synchronized(this.root) {
-            this.root.fireFieldEvent(this, event);
+            this.root.fireFieldEvent(getAddress(), event);
         }
     }
     
@@ -219,49 +219,49 @@ Serializable {
     @Override
     public void fireTransactionEvent(XTransactionEvent event) {
         synchronized(this.root) {
-            this.root.fireTransactionEvent(this, event);
+            this.root.fireTransactionEvent(getAddress(), event);
         }
     }
     
     @Override
     public boolean addListenerForTransactionEvents(XTransactionEventListener changeListener) {
         synchronized(this.root) {
-            return this.root.addListenerForTransactionEvents(this, changeListener);
+            return this.root.addListenerForTransactionEvents(getAddress(), changeListener);
         }
     }
     
     @Override
     public boolean removeListenerForTransactionEvents(XTransactionEventListener changeListener) {
         synchronized(this.root) {
-            return this.root.removeListenerForTransactionEvents(this, changeListener);
+            return this.root.removeListenerForTransactionEvents(getAddress(), changeListener);
         }
     }
     
     @Override
     public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
         synchronized(this.root) {
-            return this.root.addListenerForFieldEvents(this, changeListener);
+            return this.root.addListenerForFieldEvents(getAddress(), changeListener);
         }
     }
     
     @Override
     public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
         synchronized(this.root) {
-            return this.root.removeListenerForFieldEvents(this, changeListener);
+            return this.root.removeListenerForFieldEvents(getAddress(), changeListener);
         }
     }
     
     @Override
     public boolean addListenerForObjectEvents(XObjectEventListener changeListener) {
         synchronized(this.root) {
-            return this.root.addListenerForObjectEvents(this, changeListener);
+            return this.root.addListenerForObjectEvents(getAddress(), changeListener);
         }
     }
     
     @Override
     public boolean removeListenerForObjectEvents(XObjectEventListener changeListener) {
         synchronized(this.root) {
-            return this.root.removeListenerForObjectEvents(this, changeListener);
+            return this.root.removeListenerForObjectEvents(getAddress(), changeListener);
         }
     }
     
@@ -579,7 +579,8 @@ Serializable {
     @Override
     @ModificationOperation
     public long executeCommand(XCommand command, XLocalChangeCallback callback) {
-        return executeCommandWithActor(command, getSessionActor(), getSessionPasswordHash(), callback);
+        return executeCommandWithActor(command, getSessionActor(), getSessionPasswordHash(),
+                callback);
     }
     
     /**

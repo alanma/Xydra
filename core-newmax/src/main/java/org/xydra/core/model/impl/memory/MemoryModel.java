@@ -107,26 +107,24 @@ Serializable {
     /**
      * Changelog & Co
      */
+    @Deprecated
     SynchronisationState syncState;
-    
-    @SuppressWarnings("unused")
-    private static final void ___implement_XSynchronizesChanges__() {
-    }
     
     // implement XSynchronizesChanges
     @Override
     public int countUnappliedLocalChanges() {
-        return this.syncState.countUnappliedLocalChanges();
+        return this.getRoot().countUnappliedLocalChanges();
     }
     
     // implement XSynchronizesChanges
     @Override
     public XWritableChangeLog getChangeLog() {
-        return this.syncState.getChangeLog();
+        return this.getRoot().getWritableChangeLog();
     }
     
     // implement XSynchronizesChanges
     @Override
+    @Deprecated
     public XLocalChange[] getLocalChanges() {
         return this.syncState.getLocalChanges();
     }
@@ -134,23 +132,25 @@ Serializable {
     // implement XSynchronizesChanges
     @Override
     public XId getSessionActor() {
-        return this.syncState.getSessionActor();
+        return getRoot().getSessionActor();
     }
     
     // implement XSynchronizesChanges
     @Override
     public String getSessionPasswordHash() {
-        return this.syncState.getSessionPassword();
+        return getRoot().getSessionPasswordHash();
     }
     
     // implement XSynchronizesChanges
     @Override
     public long getSynchronizedRevision() {
+        // FIXME !!!!!
         return this.syncState.getSynchronizedRevision();
     }
     
     // implement XSynchronizesChanges
     @Override
+    @Deprecated
     public void rollback(long revision) {
         this.syncState.rollback(revision);
     }
@@ -158,23 +158,21 @@ Serializable {
     // implement XSynchronizesChanges
     @Override
     public void setSessionActor(XId actorId, String passwordHash) {
-        this.syncState.setSessionActor(actorId, passwordHash);
+        getRoot().setSessionActor(actorId);
+        getRoot().setSessionPasswordHash(passwordHash);
     }
     
     // implement XSynchronizesChanges
     @Override
+    @Deprecated
     public boolean synchronize(XEvent[] remoteChanges) {
         return this.syncState.synchronize(remoteChanges);
-    }
-    
-    @SuppressWarnings("unused")
-    private static final void ___event_listening__() {
     }
     
     @Override
     public boolean addListenerForModelEvents(XModelEventListener changeListener) {
         synchronized(this.root) {
-            return this.root.addListenerForModelEvents(this, changeListener);
+            return this.root.addListenerForModelEvents(getAddress(), changeListener);
         }
     }
     
@@ -188,14 +186,14 @@ Serializable {
     // implement IMemoryModel
     @Override
     public void fireModelEvent(XModelEvent event) {
-        this.root.fireModelEvent(this, event);
+        this.root.fireModelEvent(getAddress(), event);
     }
     
     // implement IMemoryModel
     @Override
     public boolean removeListenerForModelEvents(XModelEventListener changeListener) {
         synchronized(this.root) {
-            return this.root.removeListenerForModelEvents(this, changeListener);
+            return this.root.removeListenerForModelEvents(getAddress(), changeListener);
         }
     }
     
@@ -203,7 +201,7 @@ Serializable {
     @Override
     public void fireObjectEvent(XObjectEvent event) {
         synchronized(this.root) {
-            this.root.fireObjectEvent(this, event);
+            this.root.fireObjectEvent(getAddress(), event);
         }
     }
     
@@ -211,7 +209,7 @@ Serializable {
     @Override
     public void fireFieldEvent(XFieldEvent event) {
         synchronized(this.root) {
-            this.root.fireFieldEvent(this, event);
+            this.root.fireFieldEvent(getAddress(), event);
         }
     }
     
@@ -219,54 +217,50 @@ Serializable {
     @Override
     public void fireTransactionEvent(XTransactionEvent event) {
         synchronized(this.root) {
-            this.root.fireTransactionEvent(this, event);
+            this.root.fireTransactionEvent(getAddress(), event);
         }
     }
     
     @Override
     public boolean addListenerForTransactionEvents(XTransactionEventListener changeListener) {
         synchronized(this.root) {
-            return this.root.addListenerForTransactionEvents(this, changeListener);
+            return this.root.addListenerForTransactionEvents(getAddress(), changeListener);
         }
     }
     
     @Override
     public boolean removeListenerForTransactionEvents(XTransactionEventListener changeListener) {
         synchronized(this.root) {
-            return this.root.removeListenerForTransactionEvents(this, changeListener);
+            return this.root.removeListenerForTransactionEvents(getAddress(), changeListener);
         }
     }
     
     @Override
     public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
         synchronized(this.root) {
-            return this.root.addListenerForFieldEvents(this, changeListener);
+            return this.root.addListenerForFieldEvents(getAddress(), changeListener);
         }
     }
     
     @Override
     public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
         synchronized(this.root) {
-            return this.root.removeListenerForFieldEvents(this, changeListener);
+            return this.root.removeListenerForFieldEvents(getAddress(), changeListener);
         }
     }
     
     @Override
     public boolean addListenerForObjectEvents(XObjectEventListener changeListener) {
         synchronized(this.root) {
-            return this.root.addListenerForObjectEvents(this, changeListener);
+            return this.root.addListenerForObjectEvents(getAddress(), changeListener);
         }
     }
     
     @Override
     public boolean removeListenerForObjectEvents(XObjectEventListener changeListener) {
         synchronized(this.root) {
-            return this.root.removeListenerForObjectEvents(this, changeListener);
+            return this.root.removeListenerForObjectEvents(getAddress(), changeListener);
         }
-    }
-    
-    @SuppressWarnings("unused")
-    private static final void ___STUFF__() {
     }
     
     @Override
@@ -465,6 +459,7 @@ Serializable {
      * Caller must synchronize access!
      */
     @ModificationOperation
+    @Deprecated
     private void delete() {
         // delete from memory
         for(XId objectId : this) {
@@ -519,6 +514,7 @@ Serializable {
      *             null
      */
     @ModificationOperation
+    @Deprecated
     private void enqueueObjectRemoveEvents(XId actor, IMemoryObject object, boolean inTrans,
             boolean implied) {
         if(object == null) {
@@ -553,6 +549,7 @@ Serializable {
      * @return ...
      */
     @ModificationOperation
+    @Deprecated
     public long executeCommandWithActor(XCommand command, XId givenActorId,
             String givenPasswordHash, XLocalChangeCallback callback) {
         XUndoFailedLocalChangeCallback wrappingCallback = new XUndoFailedLocalChangeCallback(
@@ -578,6 +575,7 @@ Serializable {
     
     @Override
     @ModificationOperation
+    @Deprecated
     public long executeCommand(XCommand command, XLocalChangeCallback callback) {
         return executeCommandWithActor(command, getSessionActor(), getSessionPasswordHash(),
                 callback);
@@ -590,6 +588,7 @@ Serializable {
     @ModificationOperation
     // implement IMemoryModel
     @Override
+    @Deprecated
     public void removeInternal() {
         // all objects are already loaded for creating events
         for(IMemoryObject object : this.loadedObjects.values()) {
@@ -609,6 +608,7 @@ Serializable {
      * @return
      */
     @ModificationOperation
+    @Deprecated
     private long executeModelCommand(XModelCommand command, XLocalChangeCallback callback) {
         assert command != null;
         return executeModelCommandWithActor(command, getSessionActor(), getSessionPasswordHash(),
@@ -623,6 +623,7 @@ Serializable {
      * @return
      */
     @ModificationOperation
+    @Deprecated
     private long executeModelCommandWithActor(XModelCommand command, XId actorId,
             String passwordHash, XLocalChangeCallback callback) {
         synchronized(this.root) {
@@ -713,6 +714,7 @@ Serializable {
      * @param callback @CanBeNull
      * @return the resulting revision number or error code
      */
+    @Deprecated
     private long executeRepositoryCommandWithActor(XRepositoryCommand command, XId givenActorId,
             String givenPasswordHash, XLocalChangeCallback callback) {
         assert command != null;
@@ -985,6 +987,7 @@ Serializable {
      * @param localChangesAsCommands
      */
     @ModificationOperation
+    @Deprecated
     private void initLocalChanges(boolean loadLocalChanges, List<XCommand> localChangesAsCommands) {
         if(loadLocalChanges && localChangesAsCommands != null) {
             
@@ -1015,6 +1018,7 @@ Serializable {
      * @return
      */
     @ModificationOperation
+    @Deprecated
     private static XChangeLogState createChangeLog(XRevWritableModel modelState) {
         XChangeLogState log = new MemoryChangeLogState(modelState.getAddress());
         
@@ -1034,6 +1038,7 @@ Serializable {
     /**
      * Internal provider for a {@link SynchronisationState}, delegates all calls
      */
+    @Deprecated
     private ISyncProvider syncProvider = new ISyncProvider() {
         
         @Override
@@ -1122,6 +1127,7 @@ Serializable {
         
     };
     
+    @Deprecated
     private IMemoryObject createObjectInternal(XId objectId) {
         XyAssert.xyAssert(getRevisionNumber() >= 0, "modelRev=" + getRevisionNumber());
         XyAssert.xyAssert(!hasObject(objectId));
@@ -1182,6 +1188,7 @@ Serializable {
         }
     }
     
+    @Deprecated
     private long nextRevisionNumber() {
         return MemoryModel.this.syncState.getChangeLog().getCurrentRevisionNumber();
     }
@@ -1192,6 +1199,7 @@ Serializable {
         return this.state;
     }
     
+    @Deprecated
     public void incrementRevision() {
         // FIXME MONKEY
         // XyAssert.xyAssert(!MemoryModel.this.syncState.eventQueue.transactionInProgess);
@@ -1200,16 +1208,19 @@ Serializable {
     }
     
     @Override
+    @Deprecated
     public SynchronisationState getSyncState() {
         return this.syncState;
     }
     
     @Override
+    @Deprecated
     public Object getStateLock() {
         return this.state;
     }
     
     @Override
+    @Deprecated
     public LocalChanges getLocalChangesImpl() {
         return this.syncState.getLocalChangesImpl();
     }
