@@ -1,11 +1,13 @@
 package org.xydra.core.model.impl.memory;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.change.XEvent;
 import org.xydra.core.model.XChangeLogState;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 import org.xydra.sharedutils.XyAssert;
 
 
@@ -21,8 +23,8 @@ public class MemoryChangeLogState implements XChangeLogState {
     /** the ID of the model this change log refers to **/
     private XAddress baseAddr;
     
-    /** the event list **/
-    private List<XEvent> events = new ArrayList<XEvent>();
+    /** the event map: revNR -> event **/
+    private SortedMap<Long,XEvent> eventMap = new TreeMap<Long,XEvent>();
     
     /**
      * the revision number the model had when this changelog was created.
@@ -41,16 +43,19 @@ public class MemoryChangeLogState implements XChangeLogState {
         this.baseAddr = baseAddr;
     }
     
+    private static final Logger log = LoggerFactory.getLogger(MemoryChangeLogState.class);
+    
     @Override
     public void appendEvent(XEvent event) {
         if(event == null) {
-            this.events.add(null);
+            // TODO throw exception once all data is migrated; for now: do
+            // nothing, just complain a little
+            log.warn("Skipping null-event");
         } else {
             XyAssert.xyAssert(this.baseAddr.equalsOrContains(event.getChangedEntity()));
-            XyAssert.xyAssert(event.getRevisionNumber() == getCurrentRevisionNumber() + 1);
+            XyAssert.xyAssert(event.getRevisionNumber() > getCurrentRevisionNumber());
             XyAssert.xyAssert(!event.inTransaction());
-            
-            this.events.add(event);
+            this.eventMap.put(event.getRevisionNumber(), event);
         }
     }
     
@@ -61,13 +66,18 @@ public class MemoryChangeLogState implements XChangeLogState {
     
     @Override
     public long getCurrentRevisionNumber() {
-        return this.baseRevisionNumber + this.events.size();
+        if(this.eventMap.isEmpty()) {
+            return this.baseRevisionNumber;
+        } else {
+            return getEvent(this.eventMap.lastKey()).getRevisionNumber();
+        }
     }
     
     @Override
     public XEvent getEvent(long revisionNumber) {
-        XEvent event = this.events.get((int)(revisionNumber - this.baseRevisionNumber - 1));
-        XyAssert.xyAssert(event == null || event.getRevisionNumber() == revisionNumber);
+        XEvent event = this.eventMap.get(revisionNumber);
+        XyAssert.xyAssert(event == null || event.getRevisionNumber() == revisionNumber, "event="
+                + event);
         return event;
     }
     
@@ -78,7 +88,7 @@ public class MemoryChangeLogState implements XChangeLogState {
     
     @Override
     public void setBaseRevisionNumber(long rev) {
-        if(!this.events.isEmpty()) {
+        if(!this.eventMap.isEmpty()) {
             throw new IllegalStateException(
                     "cannot set start revision number of non-empty change log");
         }
@@ -88,7 +98,8 @@ public class MemoryChangeLogState implements XChangeLogState {
     @Override
     public String toString() {
         return "change log for " + getBaseAddress() + ": baseRev=" + this.baseRevisionNumber
-                + " currentRev=" + getCurrentRevisionNumber() + " events=" + this.events.toString();
+                + " currentRev=" + getCurrentRevisionNumber() + " events="
+                + this.eventMap.toString();
     }
     
     @Override
@@ -101,9 +112,7 @@ public class MemoryChangeLogState implements XChangeLogState {
             return false;
         }
         
-        while(revisionNumber < getCurrentRevisionNumber()) {
-            this.events.remove(this.events.size() - 1); // remove last element
-        }
+        this.eventMap = this.eventMap.headMap(revisionNumber);
         
         XyAssert.xyAssert(revisionNumber == getCurrentRevisionNumber());
         

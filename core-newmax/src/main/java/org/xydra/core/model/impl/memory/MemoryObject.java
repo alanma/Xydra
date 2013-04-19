@@ -29,6 +29,7 @@ import org.xydra.base.change.impl.memory.MemoryObjectEvent;
 import org.xydra.base.change.impl.memory.MemoryReversibleFieldEvent;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XRevWritableField;
+import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.base.rmof.impl.memory.SimpleObject;
 import org.xydra.core.XCopyUtils;
@@ -300,8 +301,13 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
         synchronized(this.root) {
             assertThisEntityExists();
             
-            return Executor.executeObjectCommand(getRoot().getSessionActor(), command,
-                    this.father.getState(), this.objectState, getRoot(), new XRMOFChangeListener() {
+            XRevWritableModel modelState = null;
+            if(this.father != null) {
+                modelState = this.father.getState();
+            }
+            
+            return Executor.executeObjectCommand(getRoot().getSessionActor(), command, modelState,
+                    this.objectState, getRoot(), new XRMOFChangeListener() {
                         
                         @Override
                         public void onChangeEvent(XRepositoryEvent event) {

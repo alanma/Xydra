@@ -181,11 +181,7 @@ public class Executor {
         root.getWritableChangeLog().appendEvent(event);
         root.getLocalChanges().append(command, event);
         // event sending
-        changeEventListener.onChangeEvent(event);
-        // FIXME use XField, XModel etc objects to fire events
-        // these events here will never arrive. ALTERNATIVE: let listener
-        // re-fire the events
-        root.fireFieldEvent(fieldState.getAddress(), event);
+        fireEvents(root, changeEventListener, event);
         
         return newFieldRev;
     }
@@ -325,15 +321,22 @@ public class Executor {
             XAtomicEvent atomicEvent = (XAtomicEvent)event;
             
             // event sending
-            changeEventListener.onChangeEvent((XObjectEvent)atomicEvent);
             
             if(atomicEvent instanceof XFieldEvent) {
+                if(changeEventListener != null)
+                    changeEventListener.onChangeEvent((XFieldEvent)atomicEvent);
                 root.fireFieldEvent(event.getTarget(), (XFieldEvent)event);
             } else if(atomicEvent instanceof XObjectEvent) {
+                if(changeEventListener != null)
+                    changeEventListener.onChangeEvent((XObjectEvent)atomicEvent);
                 root.fireObjectEvent(event.getTarget(), (XObjectEvent)event);
             } else if(atomicEvent instanceof XModelEvent) {
+                if(changeEventListener != null)
+                    changeEventListener.onChangeEvent((XModelEvent)atomicEvent);
                 root.fireModelEvent(event.getTarget(), (XModelEvent)event);
             } else if(atomicEvent instanceof XRepositoryEvent) {
+                if(changeEventListener != null)
+                    changeEventListener.onChangeEvent((XRepositoryEvent)atomicEvent);
                 root.fireRepositoryEvent(event.getTarget(), (XRepositoryEvent)event);
             }
         }
@@ -493,6 +496,7 @@ public class Executor {
             repositoryState.createModel(modelId);
             // TODO or re-use some higher number via root?
             currentModelRev = 0;
+            break;
         }
         case REMOVE: {
             

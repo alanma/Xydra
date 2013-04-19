@@ -16,6 +16,8 @@ import org.xydra.base.change.XReversibleFieldEvent;
 import org.xydra.base.change.impl.memory.MemoryFieldCommand;
 import org.xydra.base.change.impl.memory.MemoryReversibleFieldEvent;
 import org.xydra.base.rmof.XRevWritableField;
+import org.xydra.base.rmof.XRevWritableModel;
+import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.base.rmof.impl.memory.SimpleField;
 import org.xydra.base.value.XValue;
 import org.xydra.core.XCopyUtils;
@@ -45,7 +47,7 @@ public class MemoryField extends AbstractMOFEntity implements XField, IMemoryFie
     private final IMemoryObject father;
     
     /** The internal runtime state, like a snapshot */
-    private final XRevWritableField state;
+    private final XRevWritableField fieldState;
     
     /**
      * Create a stand-alone field that exists
@@ -61,7 +63,7 @@ public class MemoryField extends AbstractMOFEntity implements XField, IMemoryFie
      */
     public MemoryField(XId actorId, XRevWritableField fieldState) {
         super(Root.createWithActor(fieldState.getAddress(), actorId), true);
-        this.state = fieldState;
+        this.fieldState = fieldState;
         this.father = null;
     }
     
@@ -82,7 +84,7 @@ public class MemoryField extends AbstractMOFEntity implements XField, IMemoryFie
         if(fieldState.getAddress().getObject() != null) {
             throw new IllegalArgumentException("must load field through containing object");
         }
-        this.state = fieldState;
+        this.fieldState = fieldState;
         this.father = father;
     }
     
@@ -131,13 +133,27 @@ public class MemoryField extends AbstractMOFEntity implements XField, IMemoryFie
     
     @Override
     public long executeFieldCommand(XFieldCommand command) {
-        return executeFieldCommand(command, null);
+        synchronized(this.root) {
+            assertThisEntityExists();
+            
+            XRevWritableObject objectState = null;
+            XRevWritableModel modelState = null;
+            if(this.father != null) {
+                objectState = this.father.getState();
+                if(this.father.getFather() != null) {
+                    modelState = this.father.getFather().getState();
+                }
+            }
+            
+            return Executor.executeFieldCommand(getRoot().getSessionActor(), command, modelState,
+                    objectState, this.fieldState, this.getRoot(), null);
+        }
     }
     
     @Override
     public XAddress getAddress() {
         synchronized(this.root) {
-            return this.state.getAddress();
+            return this.fieldState.getAddress();
         }
     }
     
@@ -154,7 +170,7 @@ public class MemoryField extends AbstractMOFEntity implements XField, IMemoryFie
     @ReadOperation
     public XId getId() {
         synchronized(this.root) {
-            return this.state.getId();
+            return this.fieldState.getId();
         }
     }
     
@@ -166,7 +182,7 @@ public class MemoryField extends AbstractMOFEntity implements XField, IMemoryFie
     @ReadOperation
     public long getRevisionNumber() {
         synchronized(this.root) {
-            return this.state.getRevisionNumber();
+            return this.fieldState.getRevisionNumber();
         }
     }
     
@@ -191,7 +207,7 @@ public class MemoryField extends AbstractMOFEntity implements XField, IMemoryFie
     public XValue getValue() {
         synchronized(this.root) {
             assertThisEntityExists();
-            return this.state.getValue();
+            return this.fieldState.getValue();
         }
     }
     
@@ -247,10 +263,10 @@ public class MemoryField extends AbstractMOFEntity implements XField, IMemoryFie
     @Override
     @ModificationOperation
     public boolean setValue(XValue newValue) {
-        
-        // no synchronization necessary here (except that in
-        // executeFieldCommand())
-        
+        /*
+         * no synchronization necessary here (except that in
+         * executeFieldCommand())
+         */
         XFieldCommand command;
         if(newValue == null) {
             command = MemoryFieldCommand.createRemoveCommand(getAddress(), XCommand.FORCED);
@@ -275,7 +291,7 @@ public class MemoryField extends AbstractMOFEntity implements XField, IMemoryFie
     
     @Override
     public Object getStateLock() {
-        return this.state;
+        return this.fieldState;
     }
     
     // ------------- DEP
@@ -284,7 +300,8 @@ public class MemoryField extends AbstractMOFEntity implements XField, IMemoryFie
     @Deprecated
     @Override
     public void setRevisionNumber(long newRevision) {
-        this.state.setRevisionNumber(newRevision);
+        this.fieldState.setRevisionNumber(newRevision);
+        throw new RuntimeException("OUTDATED");
     }
     
     // implement IMemoryField
@@ -301,6 +318,7 @@ public class MemoryField extends AbstractMOFEntity implements XField, IMemoryFie
         } else {
             setRevisionNumber(getRevisionNumber() + 1);
         }
+        throw new RuntimeException("OUTDATED");
     }
     
     /**
@@ -322,7 +340,7 @@ public class MemoryField extends AbstractMOFEntity implements XField, IMemoryFie
         
         boolean inTrans = this.eventQueue.transactionInProgess;
         
-        this.state.setValue(newValue);
+        this.fieldState.setValue(newValue);
         
         // check for field event type
         long modelRev = getModelRevisionNumber();
@@ -364,6 +382,7 @@ public class MemoryField extends AbstractMOFEntity implements XField, IMemoryFie
             this.eventQueue.sendEvents();
             
         }
+        throw new RuntimeException("OUTDATED");
     }
     
     /**
@@ -398,8 +417,9 @@ public class MemoryField extends AbstractMOFEntity implements XField, IMemoryFie
         }
         
         this.eventQueue = eventQueue;
-        this.state = fieldState;
+        this.fieldState = fieldState;
         this.father = father;
+        throw new RuntimeException("OUTDATED");
     }
     
     /**
@@ -409,8 +429,9 @@ public class MemoryField extends AbstractMOFEntity implements XField, IMemoryFie
     @Override
     @Deprecated
     public void delete() {
-        this.state.setValue(null);
+        this.fieldState.setValue(null);
         this.exists = false;
+        throw new RuntimeException("OUTDATED");
     }
     
     /**
@@ -426,6 +447,7 @@ public class MemoryField extends AbstractMOFEntity implements XField, IMemoryFie
     @Deprecated
     public void fireFieldEvent(XFieldEvent event) {
         this.root.fireFieldEvent(getAddress(), event);
+        throw new RuntimeException("OUTDATED");
     }
     
     /**
@@ -485,6 +507,6 @@ public class MemoryField extends AbstractMOFEntity implements XField, IMemoryFie
     @Override
     @Deprecated
     public XRevWritableField getState() {
-        return this.state;
+        return this.fieldState;
     }
 }

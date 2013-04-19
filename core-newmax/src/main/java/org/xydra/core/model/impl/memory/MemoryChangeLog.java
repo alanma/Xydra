@@ -13,6 +13,7 @@ import org.xydra.sharedutils.XyAssert;
  * {@link MemoryObject} and {@link MemoryField}.
  * 
  * @author Kaidel
+ * @author xamde
  */
 public class MemoryChangeLog extends AbstractChangeLog implements XWritableChangeLog {
     
@@ -21,6 +22,9 @@ public class MemoryChangeLog extends AbstractChangeLog implements XWritableChang
     /** serialisable state */
     private XChangeLogState state;
     
+    /**
+     * @param state @NeverNull
+     */
     MemoryChangeLog(XChangeLogState state) {
         if(state == null)
             throw new IllegalArgumentException("state may not be null");
@@ -28,15 +32,11 @@ public class MemoryChangeLog extends AbstractChangeLog implements XWritableChang
     }
     
     public synchronized void appendEvent(@CanBeNull XEvent event) {
-        assert event == null || (event.getRevisionNumber() == getCurrentRevisionNumber() + 1) : "cannot append event with rev "
-                + event.getRevisionNumber()
-                + " to model change log at event "
-                + getCurrentRevisionNumber() + ": " + event;
-        
         XyAssert.xyAssert(event == null || !event.inTransaction());
-        // "else": event is part of a transaction and will therefore only be
-        // recorded as part of the transaction
-        
+        /*
+         * "else": event is part of a transaction and will therefore only be
+         * recorded as part of the transaction
+         */
         this.state.appendEvent(event);
     }
     
