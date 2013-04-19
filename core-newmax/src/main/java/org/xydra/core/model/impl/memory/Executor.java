@@ -306,6 +306,7 @@ public class Executor {
         return newObjectRev;
     }
     
+    // TODO fire txn correctly: fire atomic events + the txn event itself
     private static void fireEvents(Root root, XRMOFChangeListener changeEventListener, XEvent event) {
         if(event instanceof XTransactionEvent) {
             XTransactionEvent txnEvent = (XTransactionEvent)event;
@@ -313,7 +314,7 @@ public class Executor {
             // event sending
             for(int i = 0; i < txnEvent.size(); i++) {
                 XAtomicEvent ae = txnEvent.getEvent(i);
-                
+                // TODO ... fire!
             }
             
         } else {
@@ -378,6 +379,9 @@ public class Executor {
         }
             break;
         case REMOVE: {
+            
+            // TODO create txn event if the object had fields ...
+            
             currentObjectState = modelState.getObject(objectId);
             if(currentObjectState == null) {
                 // ID not taken
@@ -491,6 +495,9 @@ public class Executor {
             currentModelRev = 0;
         }
         case REMOVE: {
+            
+            // TODO create txn event if the model had objects ...
+            
             modelState = repositoryState.getModel(modelId);
             if(modelState == null) {
                 if(command.isForced()) {
