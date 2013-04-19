@@ -162,8 +162,8 @@ public class NewSyncer {
         // end atomic section ----
         
         // send change events
-        eventDelta.sendChangeEvents(this.root, this.modelWithListeners,
-                this.modelWithListeners.getFather());
+        eventDelta.sendChangeEvents(this.root, this.modelWithListeners.getAddress(),
+                this.modelWithListeners.getFather().getAddress());
     }
     
     /**
@@ -177,15 +177,15 @@ public class NewSyncer {
         
         switch(e.getTarget().getAddressedType()) {
         case XMODEL:
-            this.root.fireSyncEvent(this.modelWithListeners, syncEvent);
+            this.root.fireSyncEvent(this.modelWithListeners.getAddress(), syncEvent);
             break;
         case XOBJECT:
             XObject object = ModelUtils.getObject(this.modelWithListeners, target);
-            this.root.fireSyncEvent(object, syncEvent);
+            this.root.fireSyncEvent(object.getAddress(), syncEvent);
             break;
         case XFIELD:
             XField field = ModelUtils.getField(this.modelWithListeners, target);
-            this.root.fireSyncEvent(field, syncEvent);
+            this.root.fireSyncEvent(field.getAddress(), syncEvent);
             break;
         case XREPOSITORY:
         default:

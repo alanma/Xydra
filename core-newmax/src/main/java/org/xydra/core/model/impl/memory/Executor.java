@@ -43,6 +43,10 @@ import org.xydra.sharedutils.XyAssert;
  * 
  * @author xamde
  * 
+ * 
+ *         TODO add inTransaction boolean flag to execute methods, maybe to
+ *         private versions
+ * 
  */
 public class Executor {
     
@@ -438,12 +442,8 @@ public class Executor {
         // FIXME why log here?
         root.getWritableChangeLog().appendEvent(event);
         root.getLocalChanges().append(command, event);
-        // event sending
-        changeEventListener.onChangeEvent(event);
-        // FIXME use XField, XModel etc objects to fire events
-        // these events here will never arrive. ALTERNATIVE: let listener
-        // re-fire the events
-        root.fireModelEvent(modelState, event);
+        
+        fireEvents(root, changeEventListener, event);
         
         return newModelRev;
     }
@@ -565,34 +565,6 @@ public class Executor {
         root.fireRepositoryEvent(null, event);
         
         return newModelRev;
-        
-        // --------
-        
-        // execute!
-        synchronized(this.root) {
-            int since = this.syncState.eventQueue.getNextPosition();
-            boolean inTrans = enqueueModelRemoveEvents(givenActorId);
-            if(inTrans) {
-                this.syncState.eventQueue.createTransactionEvent(givenActorId, this, null, since);
-            }
-            
-            delete();
-            
-            this.syncState.eventQueue.newLocalChange(command, callback);
-            this.syncState.eventQueue.sendEvents();
-            this.syncState.eventQueue.setBlockSending(true);
-            
-            // change local rev
-            this.state.setRevisionNumber(this.syncState.getChangeLog().getCurrentRevisionNumber());
-            
-            // change father
-            if(this.father != null) {
-                this.father.removeModelInternal(getId());
-            }
-            
-            return getRevisionNumber();
-        }
-        
     }
     
 }
