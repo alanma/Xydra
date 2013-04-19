@@ -7,7 +7,6 @@ import org.xydra.base.XId;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.util.EntityTree;
-import org.xydra.webadmin.gwt.client.widgets.XyAdmin;
 
 
 /**
@@ -17,7 +16,7 @@ import org.xydra.webadmin.gwt.client.widgets.XyAdmin;
  */
 public class ViewModel {
 	
-	private static final Logger log = LoggerFactory.getLogger(XyAdmin.class);
+	private static final Logger log = LoggerFactory.getLogger(ViewModel.class);
 	
 	private EntityTree entityTree;
 	
@@ -28,7 +27,7 @@ public class ViewModel {
 	public void openLocation(XAddress entityAddress) {
 		this.entityTree.add(entityAddress);
 		
-		log.info(this.entityTree.toString());
+		// log.info(this.entityTree.toString());
 	}
 	
 	public void closeLocation(XAddress entityAddress) {

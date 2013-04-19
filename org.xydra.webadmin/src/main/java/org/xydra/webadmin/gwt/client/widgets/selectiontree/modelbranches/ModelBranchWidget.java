@@ -3,7 +3,7 @@ package org.xydra.webadmin.gwt.client.widgets.selectiontree.modelbranches;
 import org.xydra.base.XAddress;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.webadmin.gwt.client.widgets.editorpanel.tableWidgets.EntityWidget;
+import org.xydra.webadmin.gwt.client.widgets.editorpanel.tablewidgets.EntityWidget;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -25,25 +25,27 @@ public class ModelBranchWidget extends Composite implements IModelBranchWidget {
 	
 	@UiField(provided = true)
 	EntityWidget entityWidget;
+	@SuppressWarnings("unused")
 	private ModelBranchPresenter presenter;
 	
-	public ModelBranchWidget(XAddress address) {
+	public ModelBranchWidget(ModelBranchPresenter modelBranchPresenter) {
 		
-		this.presenter = new ModelBranchPresenter(address, this);
+		this.presenter = modelBranchPresenter;
 		
 	}
 	
-	public void init(XAddress address, ClickHandler anchorClickHandler) {
+	public void init(ModelBranchPresenter presenter, XAddress address,
+	        ClickHandler anchorClickHandler) {
+		this.entityWidget = new EntityWidget(presenter, address, anchorClickHandler);
+		this.entityWidget.setDeleteModelDialog();
 		initWidget(uiBinder.createAndBindUi(this));
 		
-		this.entityWidget = new EntityWidget(this.presenter, address, anchorClickHandler);
-		
-		this.entityWidget.setDeleteModelDialog();
 	}
 	
 	@Override
 	public void setStatusDeleted() {
 		this.entityWidget.setStatusDeleted();
+		
 	}
 	
 	@Override
@@ -61,6 +63,16 @@ public class ModelBranchWidget extends Composite implements IModelBranchWidget {
 	@Override
 	public void setRevisionNumber(long revisionNumber) {
 		this.entityWidget.setRevisionNumber(revisionNumber);
+		
+	}
+	
+	public ModelBranchWidget asWidget() {
+		return this;
+	}
+	
+	@Override
+	public void removeStatusDeleted() {
+		this.entityWidget.removeStatusDeleted();
 		
 	}
 }

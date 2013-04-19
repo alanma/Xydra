@@ -54,7 +54,7 @@ import org.xydra.index.XI;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.resources.BundledRes;
-import org.xydra.webadmin.gwt.client.widgets.editorpanel.tableWidgets.RowPresenter;
+import org.xydra.webadmin.gwt.client.widgets.editorpanel.tablewidgets.RowPresenter;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;

@@ -43,13 +43,13 @@ public class CommittingDialog extends DialogBox {
 	@UiField
 	VerticalPanel mainPanel;
 	
-	@UiField
+	@UiField(provided = true)
 	VerticalPanel changesPanel;
 	
 	@UiField(provided = true)
 	ButtonPanel buttonPanel;
 	
-	public CommittingDialog(final EditorPanelPresenter presenter) {
+	public CommittingDialog(final EditorPanelPresenter presenter, VerticalPanel changes) {
 		
 		super();
 		
@@ -61,47 +61,28 @@ public class CommittingDialog extends DialogBox {
 				presenter.commit(CommittingDialog.this);
 				
 				CommittingDialog.this.mainPanel.clear();
+				CommittingDialog.this.setText("committing...");
 				
 			}
 			
 		};
 		
 		this.buttonPanel = new ButtonPanel(okHandler, this);
+		this.changesPanel = changes;
 		
 		setWidget(uiBinder.createAndBindUi(this));
 		this.setStyleName("dialogStyle");
 		this.setText("check changes before committing");
 		this.center();
-		
-		this.showChanges();
-		
 	}
 	
-	private void showChanges() {
-		
-		// DataModel dataModel = DataModel.getInstance();
-		// XAddress selectedModelAddress = controller.getSelectedModelAddress();
-		// SessionCachedModel model = controller.getDataModel()
-		// .getRepo(selectedModelAddress.getRepository())
-		// .getModel(selectedModelAddress.getModel());
-		//
-		// this.changesPanel.add(new HTML("Changes: <br> <br>"));
-		//
-		// if(controller.getDataModel().getRepo(selectedModelAddress.getRepository())
-		// .isAddedModel(selectedModelAddress.getModel())) {
-		// this.changesPanel.add(new HTML("---added Model "
-		// + selectedModelAddress.getModel().toString() + "---"));
-		// }
-		// this.changesPanel.add(new HTML(changesToString(model).toString()));
-		
-	}
-	
-	public void notifyMe(String message) {
+	public void addText(String message) {
 		this.mainPanel.add(new Label(message));
 	}
 	
 	public void addCloseOKButton() {
 		Button okButton = new Button("ok");
+		CommittingDialog.this.setText("commit ended");
 		okButton.addClickHandler(new ClickHandler() {
 			
 			@Override

@@ -71,7 +71,7 @@ public class ModelControlPanel extends Composite {
 	@UiHandler("discardModelChangesButton")
 	public void onClickDiscard(ClickEvent event) {
 		
-		this.presenter.openDdiscardChangesDialog();
+		this.presenter.openDiscardChangesDialog();
 		
 	}
 	

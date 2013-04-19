@@ -20,7 +20,7 @@
 	<g:VerticalPanel ui:field="mainPanel" styleName="{style.branchWidgetStyle} ">
 		
 		<g:HorizontalPanel styleName="treeButtonPanelStyle repoBranchBorder">
-		<g:Button ui:field="addRepoButton">add Repo</g:Button>
+		<g:Button ui:field="addRepoButton">Add Repository</g:Button>
 		</g:HorizontalPanel>
 	</g:VerticalPanel>
 </ui:UiBinder> 

@@ -58,4 +58,5 @@ public class ModelChangedEvent extends GwtEvent<IModelChangedEventHandler> {
 	public XId getMoreInfos() {
 		return this.moreInfos;
 	}
+	
 }

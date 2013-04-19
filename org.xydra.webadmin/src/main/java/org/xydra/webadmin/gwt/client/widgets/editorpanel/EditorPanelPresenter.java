@@ -5,7 +5,10 @@ import org.xydra.base.change.XCommandUtils;
 import org.xydra.base.change.XRepositoryCommand;
 import org.xydra.base.change.XTransaction;
 import org.xydra.core.X;
+import org.xydra.core.XX;
 import org.xydra.core.change.SessionCachedModel;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.Controller;
 import org.xydra.webadmin.gwt.client.EventHelper;
 import org.xydra.webadmin.gwt.client.events.CommittingEvent;
@@ -18,16 +21,25 @@ import org.xydra.webadmin.gwt.client.widgets.XyAdmin;
 import org.xydra.webadmin.gwt.client.widgets.dialogs.CommittingDialog;
 import org.xydra.webadmin.gwt.client.widgets.dialogs.ConfirmationDialog;
 import org.xydra.webadmin.gwt.client.widgets.dialogs.WarningDialog;
-import org.xydra.webadmin.gwt.client.widgets.editorpanel.tableWidgets.TablePresenter;
+import org.xydra.webadmin.gwt.client.widgets.editorpanel.tablewidgets.TablePresenter;
 
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
 
 public class EditorPanelPresenter extends Presenter {
 	
+	private static final Logger log = LoggerFactory.getLogger(EditorPanelPresenter.class);
+	
 	private IEditorPanel editorPanel;
 	private XAddress currentModelAddress;
 	private TablePresenter tablePresenter;
+	
+	private HandlerRegistration handlerRegistration;
+	
+	private HandlerRegistration commitHandlerRegistration;
 	
 	public EditorPanelPresenter(IEditorPanel editorPanel) {
 		this.editorPanel = editorPanel;
@@ -48,6 +60,8 @@ public class EditorPanelPresenter extends Presenter {
 	
 	public void buildModelView() {
 		
+		XyAdmin.getInstance().getController().unregistrateAllHandlers();
+		
 		this.editorPanel.clear();
 		
 		ModelControlPanel modelControlPanel = new ModelControlPanel(this);
@@ -59,7 +73,7 @@ public class EditorPanelPresenter extends Presenter {
 		this.editorPanel.add(modelControlPanel);
 		this.editorPanel.add(modelInformationPanel);
 		
-		EventHelper.addModelChangeListener(this.currentModelAddress,
+		this.handlerRegistration = EventHelper.addModelChangedListener(this.currentModelAddress,
 		        new IModelChangedEventHandler() {
 			        
 			        @Override
@@ -73,12 +87,17 @@ public class EditorPanelPresenter extends Presenter {
 				        }
 				        
 				        else if(event.getStatus().equals(EntityStatus.INDEXED)) {
-					        EditorPanelPresenter.this.tablePresenter
-					                .generateTableOrShowInformation();
+					        if(event.getMoreInfos().equals(XX.toId("removed"))) {
+						        resetView();
+					        } else {
+						        EditorPanelPresenter.this.tablePresenter
+						                .generateTableOrShowInformation();
+					        }
 				        }
 			        }
 			        
 		        });
+		XyAdmin.getInstance().getController().addRegistration(this.handlerRegistration);
 	}
 	
 	private void resetView() {
@@ -88,7 +107,7 @@ public class EditorPanelPresenter extends Presenter {
 	}
 	
 	public void loadModelsObjectsFromPersistence() {
-		XyAdmin.getInstance().getController().loadModelsObjects(this.currentModelAddress, null);
+		XyAdmin.getInstance().getController().loadModelsObjects(this.currentModelAddress);
 	}
 	
 	public void handleFetchIDs() {
@@ -97,12 +116,25 @@ public class EditorPanelPresenter extends Presenter {
 	}
 	
 	void openCommitDialog(ModelControlPanel modelControlPanel) {
-		CommittingDialog committingDialog = new CommittingDialog(this);
+		
+		SessionCachedModel model = this.getCurrentModel();
+		VerticalPanel changesPanel = new VerticalPanel();
+		
+		changesPanel.add(new HTML("Changes: <br> <br>"));
+		
+		if(XyAdmin.getInstance().getModel().getRepo(this.currentModelAddress.getRepository())
+		        .isAddedModel(this.currentModelAddress.getModel())) {
+			changesPanel.add(new HTML("---added Model "
+			        + this.currentModelAddress.getModel().toString() + "---"));
+		}
+		changesPanel.add(new HTML(CommittingDialog.changesToString(model).toString()));
+		
+		CommittingDialog committingDialog = new CommittingDialog(this, changesPanel);
 		committingDialog.show();
 	}
 	
 	@SuppressWarnings("unused")
-	void openDdiscardChangesDialog() {
+	void openDiscardChangesDialog() {
 		new ConfirmationDialog(this, "discard all Changes");
 	}
 	
@@ -141,13 +173,14 @@ public class EditorPanelPresenter extends Presenter {
 		XyAdmin.getInstance().getController()
 		        .commit(this.currentModelAddress, addModelCommand, modelTransactions);
 		
-		EventHelper.addCommittingListener(this.currentModelAddress, new ICommitEventHandler() {
-			
-			@Override
-			public void onCommit(CommittingEvent event) {
-				processCommitResponse(committingDialog, event);
-			}
-		});
+		this.commitHandlerRegistration = EventHelper.addCommittingListener(
+		        this.currentModelAddress, new ICommitEventHandler() {
+			        
+			        @Override
+			        public void onCommit(CommittingEvent event) {
+				        processCommitResponse(committingDialog, event);
+			        }
+		        });
 	}
 	
 	private void processCommitResponse(final CommittingDialog committingDialog,
@@ -155,13 +188,26 @@ public class EditorPanelPresenter extends Presenter {
 		String message = "";
 		long responseRevisionNumber = event.getNewRevision();
 		
-		if(event.getStatus().equals(CommittingEvent.CommitStatus.SUCCESS)) {
+		if(event.getStatus().equals(CommittingEvent.CommitStatus.SUCCESSANDPROCEED)) {
+			
 			if(XCommandUtils.success(responseRevisionNumber)) {
-				message = "successfully committed! New revision number: " + event.getNewRevision();
+				message = "successfully committed model! New revision number: "
+				        + responseRevisionNumber;
+			} else if(XCommandUtils.noChange(responseRevisionNumber)) {
+				message = "no Changes!";
+			} else if(XCommandUtils.failed(responseRevisionNumber)) {
+				message = "commit failed!";
+			} else {
+				message = "i have no idea...";
+			}
+			
+		} else if(event.getStatus().equals(CommittingEvent.CommitStatus.SUCCESS)) {
+			if(XCommandUtils.success(responseRevisionNumber)) {
+				message = "successfully committed model changes! New revision number: "
+				        + event.getNewRevision();
 				XyAdmin.getInstance().getModel().getRepo(event.getModelAddress().getRepository())
 				        .setCommitted(event.getModelAddress().getModel());
-				XyAdmin.getInstance().getController()
-				        .loadModelsObjects(this.currentModelAddress, null);
+				XyAdmin.getInstance().getController().loadModelsObjects(this.currentModelAddress);
 			} else if(XCommandUtils.noChange(responseRevisionNumber)) {
 				message = "no Changes!";
 			} else if(XCommandUtils.failed(responseRevisionNumber)) {
@@ -170,16 +216,27 @@ public class EditorPanelPresenter extends Presenter {
 				message = "i have no idea...";
 			}
 		} else {
-			message = "commit failed!";
+			message = "committing changes failed!";
 		}
-		committingDialog.setText(message);
-		committingDialog.addCloseOKButton();
-		Controller.showDefaultCursor();
+		
+		committingDialog.addText(message);
+		
+		if(!event.getStatus().equals(CommittingEvent.CommitStatus.SUCCESSANDPROCEED)) {
+			committingDialog.addCloseOKButton();
+			Controller.showDefaultCursor();
+			this.commitHandlerRegistration.removeHandler();
+		}
 	}
 	
 	public void discardChanges() {
+		log.info("now discarding all changes and building a new model view!");
 		this.getCurrentModel().discardAllChanges();
 		this.buildModelView();
+		
+	}
+	
+	public void showObjectAndField(XAddress desiredAddress) {
+		this.tablePresenter.showObjectAndField(desiredAddress);
 		
 	}
 }

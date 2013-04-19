@@ -4,7 +4,7 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="urn:ui:com.google.gwt.uibinder http://google-web-toolkit.googlecode.com/svn-history/trunk/user/src/com/google/gwt/uibinder/resources/UiBinder.xsd"
 	xmlns:w="urn:import:org.xydra.webadmin.gwt.client.widgets" xmlns:ak="urn:import:org.xydra.webadmin.gwt.client.widgets.version2"
-xmlns:tw="urn:import:org.xydra.webadmin.gwt.client.widgets.tablewidgets">
+xmlns:tw="urn:import:org.xydra.webadmin.gwt.client.widgets.editorpanel.tablewidgets">
 	
 	<tw:EntityWidget ui:field="entityWidget" />
 	

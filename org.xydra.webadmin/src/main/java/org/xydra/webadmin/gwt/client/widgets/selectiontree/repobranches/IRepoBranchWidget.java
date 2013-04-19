@@ -15,4 +15,6 @@ public interface IRepoBranchWidget {
 	
 	abstract void addBranch(ModelBranchWidget newBranch);
 	
+	abstract RepoBranchWidget asWidget();
+	
 }

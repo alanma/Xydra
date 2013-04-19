@@ -11,15 +11,26 @@ import org.xydra.base.XId;
 import org.xydra.core.XX;
 import org.xydra.core.change.SessionCachedModel;
 import org.xydra.core.change.XTransactionBuilder;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
+import org.xydra.webadmin.gwt.client.widgets.XyAdmin;
 
 
 public class RepoDataModel {
+	
+	@SuppressWarnings("unused")
+	private static final Logger log = LoggerFactory.getLogger(XyAdmin.class);
+	
+	public static final int SUCCESS = 0;
+	public static final int ALREADYEXISTING = 1;
 	
 	private XId repoId;
 	private HashMap<XId,SessionCachedModel> models;
 	private HashMap<XId,SessionCachedModel> deletedModels;
 	private HashSet<XId> addedModels;
 	private HashSet<XId> notExistingModels;
+	
+	private boolean knowsAllModels = false;
 	
 	public RepoDataModel(XId repoId) {
 		this.repoId = repoId;
@@ -30,15 +41,22 @@ public class RepoDataModel {
 	}
 	
 	public void indexModel(XId modelId) {
+		// TODO install proper data state checking
 		this.models.put(modelId,
 		        new SessionCachedModel(XX.toAddress(this.repoId, modelId, null, null)));
+		// log.info("indexed model " + modelId.toString());
 	}
 	
-	public void addModelID(XId xid) {
-		this.indexModel(xid);
-		this.addedModels.add(xid);
-		if(this.notExistingModels.contains(xid)) {
-			this.notExistingModels.remove(xid);
+	public int addModelID(XId xid) {
+		if(this.models.containsKey(xid)) {
+			return RepoDataModel.ALREADYEXISTING;
+		} else {
+			this.indexModel(xid);
+			this.addedModels.add(xid);
+			if(this.notExistingModels.contains(xid)) {
+				this.notExistingModels.remove(xid);
+			}
+			return RepoDataModel.SUCCESS;
 		}
 	}
 	
@@ -134,6 +152,15 @@ public class RepoDataModel {
 		SessionCachedModel model2 = this.models.get(model);
 		model2.markAsCommitted();
 		
+	}
+	
+	public boolean knowsAllModels() {
+		
+		return this.knowsAllModels;
+	}
+	
+	public void setKnowsAllModels() {
+		this.knowsAllModels = true;
 	}
 	
 }

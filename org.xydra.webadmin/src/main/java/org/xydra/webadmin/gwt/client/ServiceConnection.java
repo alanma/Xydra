@@ -5,7 +5,6 @@ import java.util.Set;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
-import org.xydra.base.change.XCommandUtils;
 import org.xydra.base.change.XRepositoryCommand;
 import org.xydra.base.change.XTransaction;
 import org.xydra.base.rmof.XReadableModel;
@@ -15,7 +14,6 @@ import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.events.CommittingEvent.CommitStatus;
 import org.xydra.webadmin.gwt.client.events.EntityStatus;
-import org.xydra.webadmin.gwt.client.widgets.AddressWidget.CompoundActionCallback;
 import org.xydra.webadmin.gwt.client.widgets.XyAdmin;
 import org.xydra.webadmin.gwt.client.widgets.dialogs.WarningDialog;
 import org.xydra.webadmin.gwt.shared.XyAdminServiceAsync;
@@ -38,8 +36,7 @@ public class ServiceConnection {
 		this.service = service;
 	}
 	
-	public void getModelIdsFromServer(final XAddress address,
-	        final CompoundActionCallback compoundActionCallback) {
+	public void getModelIdsFromServer(final XAddress address) {
 		
 		Controller.showWaitCursor();
 		final XId repoId = address.getRepository();
@@ -58,12 +55,13 @@ public class ServiceConnection {
 						XyAdmin.getInstance().getModel().getRepo(repoId).indexModel(modelID);
 						
 					}
+					XyAdmin.getInstance().getModel().getRepo(repoId).setKnowsAllModels();
+					log.info("indexed " + result.size()
+					        + " models, now firing RepoChangedEvent: Indexed!");
 					EventHelper.fireRepoChangeEvent(XX.toAddress(repoId, null, null, null),
-					        EntityStatus.INDEXED);
-					if(compoundActionCallback != null) {
-						compoundActionCallback.presentModelAndContinue();
-					} else
-						Controller.showDefaultCursor();
+					        EntityStatus.INDEXED, null);
+					
+					Controller.showDefaultCursor();
 				}
 			}
 			
@@ -76,39 +74,36 @@ public class ServiceConnection {
 		
 	}
 	
-	public void loadModelsObjects(final XAddress address,
-	        final CompoundActionCallback compoundActionCallback) {
+	public void loadModelsObjects(final XAddress address) {
 		this.service.getModelSnapshot(address.getRepository(), address.getModel(),
 		        new AsyncCallback<XReadableModel>() {
 			        
 			        @Override
 			        public void onSuccess(XReadableModel result) {
+				        String info = "dummy";
 				        if(result == null) {
 					        @SuppressWarnings("unused")
-					        WarningDialog d = new WarningDialog("model doesn't exist!");
+					        WarningDialog d = new WarningDialog(
+					                "model doesn't exist on repository!");
 					        XyAdmin.getInstance().getModel().getRepo(address.getRepository())
 					                .addDeletedModel(address.getModel());
+					        info = "removed";
 				        } else {
-					        if(result.isEmpty()) {
-						        log.error("no objects found!");
-						        WarningDialog dialog = new WarningDialog("no objects found!");
-						        dialog.show();
-					        } else {
-						        
-						        XyAdmin.getInstance().getModel().getRepo(address.getRepository())
-						                .getModel(result.getId()).indexModel(result);
-						        EventHelper.fireModelChangedEvent(address, EntityStatus.INDEXED,
-						                XX.toId("dummy"));
-						        if(compoundActionCallback != null) {
-							        compoundActionCallback.presentObjects();
-						        }
-					        }
+					        XyAdmin.getInstance().getModel().getRepo(address.getRepository())
+					                .getModel(result.getId()).indexModel(result);
+					        
 				        }
+				        log.info("loaded model " + address.toString()
+				                + " from repository, now firing ModelChangedEvent: INDEXED");
+				        EventHelper.fireModelChangedEvent(address, EntityStatus.INDEXED,
+				                XX.toId(info));
+				        Controller.showDefaultCursor();
 			        }
 			        
 			        @Override
 			        public void onFailure(Throwable caught) {
 				        log.warn("Error", caught);
+				        Controller.showDefaultCursor();
 			        }
 			        
 		        });
@@ -125,16 +120,13 @@ public class ServiceConnection {
 			        
 			        @Override
 			        public void onSuccess(Long result) {
-				        if(XCommandUtils.success(result)) {
-					        this.resultString = "successfully committed model! New revision number: "
-					                + result;
-				        } else if(XCommandUtils.noChange(result)) {
-					        this.resultString = "no Changes!";
-				        } else if(XCommandUtils.failed(result)) {
-					        this.resultString = "commit failed!";
-				        } else {
-					        this.resultString = "i have no idea...";
-				        }
+				        
+				        CommitStatus status = CommitStatus.SUCCESSANDPROCEED;
+				        
+				        if(modelTransactions == null)
+					        status = CommitStatus.SUCCESS;
+				        
+				        EventHelper.fireCommitEvent(modelAddress, status, result);
 				        
 				        commitModelTransactions(modelAddress, modelTransactions);
 			        }

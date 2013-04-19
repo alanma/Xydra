@@ -22,10 +22,10 @@
 	<g:HorizontalPanel ui:field="mainPanel">
 
 		<e:XAddressEditor ui:field="addressEditor"  styleName="{style.addressWidgetStyle}"></e:XAddressEditor>
-		<g:Button ui:field="loadLocationButton">load Entity</g:Button>
-		<g:Button ui:field="addElementButton">add Entity</g:Button>
-		<g:Button ui:field="deleteElementButton">delete Entity</g:Button>
-		<g:Button ui:field="clearButton">clear Field</g:Button>
+		<g:Button ui:field="loadLocationButton">Load Entity</g:Button>
+		<g:Button ui:field="addElementButton">Add Entity</g:Button>
+		<g:Button ui:field="deleteElementButton">Delete Entity</g:Button>
+		<g:Button ui:field="clearButton">Clear Field</g:Button>
 
 	</g:HorizontalPanel>
 </ui:UiBinder> 

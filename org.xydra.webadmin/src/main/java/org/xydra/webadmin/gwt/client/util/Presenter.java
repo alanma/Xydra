@@ -34,13 +34,15 @@ public abstract class Presenter {
 				        .addModel(entityAddress.getRepository(), XX.toId(idString));
 				XId modelId = XX.toId(idString);
 				newAddress = XX.toAddress(entityAddress.getRepository(), modelId, null, null);
-				log.info("model " + idString + " added!");
+				log.info("attempting to add model " + idString);
 			}
 		} else if(addressedType.equals(XType.XMODEL)) {
+			log.info("attempting to add object " + idString);
 			XyAdmin.getInstance().getModel().addObject(entityAddress, XX.toId(idString));
 		} else if(addressedType.equals(XType.XOBJECT)) {
 			XAddress fieldAddress = XX.resolveField(entityAddress, XX.toId(idString));
 			XyAdmin.getInstance().getModel().addField(fieldAddress, null);
+			log.info("attempting to add field " + idString);
 		}
 		XyAdmin.getInstance().getViewModel().openLocation(newAddress);
 	}

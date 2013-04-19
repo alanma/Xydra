@@ -1,6 +1,5 @@
 package org.xydra.webadmin.gwt.client.widgets.selectiontree.repobranches;
 
-import org.xydra.base.XAddress;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.widgets.selectiontree.modelbranches.ModelBranchWidget;
@@ -46,8 +45,8 @@ public class RepoBranchWidget extends Composite implements IRepoBranchWidget {
 	
 	private RepoBranchPresenter presenter;
 	
-	public RepoBranchWidget(XAddress address) {
-		this.presenter = new RepoBranchPresenter(address, this);
+	public RepoBranchWidget(RepoBranchPresenter repoBranchPresenter) {
+		this.presenter = repoBranchPresenter;
 	}
 	
 	@UiHandler("expandButton")
@@ -85,7 +84,7 @@ public class RepoBranchWidget extends Composite implements IRepoBranchWidget {
 		initWidget(uiBinder.createAndBindUi(this));
 		this.mainPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
 		this.mainPanel.addStyleName("repoBranchBorder");
-		String plusButtonText = "add Model";
+		String plusButtonText = "Add Model";
 		this.addButton.setText(plusButtonText);
 		
 		this.mainPanel
@@ -128,7 +127,12 @@ public class RepoBranchWidget extends Composite implements IRepoBranchWidget {
 			this.buttonPanel.getElement().setAttribute("style",
 			        "border-bottom: 1px solid #009; margin-bottom: 5px");
 		}
+		this.branches.add(newBranch);
 		
+	}
+	
+	public RepoBranchWidget asWidget() {
+		return this;
 	}
 	
 }

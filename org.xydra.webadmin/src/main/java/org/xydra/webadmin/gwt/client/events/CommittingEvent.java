@@ -15,7 +15,7 @@ import com.google.gwt.event.shared.GwtEvent;
 public class CommittingEvent extends GwtEvent<ICommitEventHandler> {
 	
 	public enum CommitStatus {
-		SUCCESS, FAILED;
+		SUCCESS, SUCCESSANDPROCEED, FAILED;
 	}
 	
 	private XAddress modelAddress;

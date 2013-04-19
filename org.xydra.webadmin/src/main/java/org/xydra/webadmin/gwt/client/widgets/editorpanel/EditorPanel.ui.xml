@@ -7,7 +7,7 @@
 
 		<g:VerticalPanel ui:field="mainPanel" styleName="editorPanel">
 
-			<g:Label styleName="defaultLabelStyle">choose model via selection tree</g:Label>
+			<g:Label styleName="defaultLabelStyle">Choose model via selection tree</g:Label>
 
 		</g:VerticalPanel>
 

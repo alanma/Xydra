@@ -7,7 +7,8 @@ import com.google.gwt.event.dom.client.ClickHandler;
 
 public interface IModelBranchWidget {
 	
-	void init(XAddress address, ClickHandler anchorClickHandler);
+	void init(ModelBranchPresenter modelBranchPresenter, XAddress address,
+	        ClickHandler anchorClickHandler);
 	
 	void setStatusDeleted();
 	
@@ -16,5 +17,9 @@ public interface IModelBranchWidget {
 	void delete();
 	
 	void setRevisionNumber(long revisionNumber);
+	
+	ModelBranchWidget asWidget();
+	
+	void removeStatusDeleted();
 	
 }
