@@ -1,19 +1,16 @@
 package org.xydra.core.model.impl.memory;
 
-import static org.junit.Assert.assertTrue;
-
 import java.util.HashSet;
 import java.util.Iterator;
 
 import junit.framework.Assert;
 
 import org.junit.After;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xydra.base.XAddress;
-import org.xydra.base.XCompareUtils;
 import org.xydra.base.XId;
+import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XFieldEvent;
 import org.xydra.base.change.XModelEvent;
 import org.xydra.base.change.XObjectEvent;
@@ -27,6 +24,7 @@ import org.xydra.core.DemoModelUtil;
 import org.xydra.core.LoggerTestHelper;
 import org.xydra.core.XCopyUtils;
 import org.xydra.core.XX;
+import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
 
@@ -63,18 +61,9 @@ public class EventDeltaTest {
 	XId f3Id = XX.toId("f3");
 	XId f4Id = XX.toId("f4");
 	
-	@Before
-	public void setUp() {
+	private void setUp() {
 		
-		// create two identical phonebook models
 		XRepository remoteRepo = new MemoryRepository(this.actorId, this.password, this.repo);
-		DemoModelUtil.addPhonebookModel(remoteRepo);
-		this.remoteModel = remoteRepo.getModel(DemoModelUtil.PHONEBOOK_ID);
-		
-		this.localModel = XCopyUtils.copyModel(this.actorId, this.password, this.remoteModel);
-		
-		assertTrue(XCompareUtils.equalState(this.localModel, this.remoteModel));
-		
 		this.dummyModel = remoteRepo.createModel(this.dummyModelId);
 		this.dummyModel.createObject(this.o1Id);
 		this.dummyModel.createObject(this.o2Id);
@@ -107,6 +96,8 @@ public class EventDeltaTest {
 	 */
 	@Test
 	public void testAddEvent() {
+		
+		setUp();
 		
 		XAddress modelAddress = this.dummyModel.getAddress();
 		XAddress o1Ad = XX.toAddress(this.repo, this.dummyModelId, this.o1Id, null);
@@ -207,6 +198,8 @@ public class EventDeltaTest {
 	@Test
 	public void testAddEvent_MultipleFieldChanges() {
 		
+		setUp();
+		
 		XAddress o2Ad = XX.toAddress(this.repo, this.dummyModelId, this.o2Id, null);
 		
 		XFieldEvent changeEvent1 = MemoryFieldEvent.createChangeEvent(this.actorId,
@@ -226,5 +219,35 @@ public class EventDeltaTest {
 		
 		Assert.assertTrue(revWritableDummyModel.getObject(this.o2Id).getField(this.f4Id).getValue()
 		        .equals(XV.toValue(true)));
+	}
+	
+	@Test
+	public void testWithNewDemoData() {
+		EventDelta eventDelta = new EventDelta();
+		
+		XRepository serverRepo = new MemoryRepository(this.actorId, this.password, this.repo);
+		DemoModelUtil.addPhonebookModel(serverRepo);
+		
+		XRevWritableModel dummy = DemoLocalChangesAndServerEvents
+		        .getResultingClientState(serverRepo);
+		
+		Iterator<XEvent> serverEvents = DemoLocalChangesAndServerEvents
+		        .getServerChanges(serverRepo);
+		while(serverEvents.hasNext()) {
+			XEvent serverEvent = (XEvent)serverEvents.next();
+			eventDelta.addEvent(serverEvent);
+		}
+		XRepository localRepo = new MemoryRepository(this.actorId, this.password, this.repo);
+		DemoModelUtil.addPhonebookModel(localRepo);
+		XChangeLog localChangeLog = DemoLocalChangesAndServerEvents.getLocalChanges(localRepo);
+		
+		Iterator<XEvent> localEventIterator = localChangeLog
+		        .getEventsSince(DemoLocalChangesAndServerEvents.SYNCREVISION);
+		while(localEventIterator.hasNext()) {
+			XEvent localEvent = (XEvent)localEventIterator.next();
+			eventDelta.addAdverseEvent(localEvent, DemoLocalChangesAndServerEvents.SYNCREVISION,
+			        localChangeLog);
+		}
+		
 	}
 }

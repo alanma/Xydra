@@ -4,9 +4,12 @@ import java.util.Iterator;
 
 import org.xydra.base.XId;
 import org.xydra.base.change.XEvent;
+import org.xydra.base.rmof.XRevWritableModel;
+import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
 import org.xydra.core.DemoModelUtil;
+import org.xydra.core.XCopyUtils;
 import org.xydra.core.XX;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XModel;
@@ -189,8 +192,75 @@ public class DemoLocalChangesAndServerEvents {
 		XObject objectKerstin = phonebook.createObject(KERSTIN_ID);
 		objectKerstin.createField(PHONE_ID).setValue(KERSTIN_PHONE);
 		
-		Iterator<XEvent> localChangeEvents = phonebook.getChangeLog().getEventsSince(SYNCREVISION);
-		return localChangeEvents;
+		Iterator<XEvent> changeEvents = phonebook.getChangeLog().getEventsSince(SYNCREVISION);
+		return changeEvents;
+	}
+	
+	/**
+	 * <ul>
+	 * 
+	 * <li>model events:
+	 * <ul>
+	 * <li>add "kerstin"
+	 * </ul>
+	 * 
+	 * <li>object events: "peter"
+	 * <ul>
+	 * <li>add "phone"
+	 * <li>remove "phone"
+	 * </ul>
+	 * 
+	 * <li>object events: "john"
+	 * <ul>
+	 * <li>change "phone" - 56789
+	 * <li>add "bDay" - "01.02.03"
+	 * <li>change "bDay" - null
+	 * <li>add "birthday" - "01.02.03"
+	 * <li>add "cups" - "fishing"
+	 * <li>change "flags" - null
+	 * </ul>
+	 * <li>object events: "claudia"
+	 * <ul>
+	 * <li>add "car" - "911S"
+	 * </ul>
+	 * 
+	 * <li>object events: "kerstin"
+	 * <ul>
+	 * <li>add "phone" - "Canada"
+	 * </ul>
+	 * </ul>
+	 * 
+	 * @param repo a repository
+	 * 
+	 * @return all events from local Change Log
+	 */
+	public static Iterator<XEvent> getOtherClientsChanges(XRepository repo) {
+		XModel phonebook = repo.getModel(DemoModelUtil.PHONEBOOK_ID);
+		SYNCREVISION = phonebook.getRevisionNumber() + 1;
+		
+		phonebook.createObject(KERSTIN_ID);
+		
+		// to change peter's revision number */
+		XObject objectPeter = phonebook.getObject(PETER_ID);
+		objectPeter.createField(PHONE_ID);
+		objectPeter.removeField(PHONE_ID);
+		
+		XObject objectJohn = phonebook.getObject(JOHN_ID);
+		objectJohn.getField(PHONE_ID).setValue(JOHN_PHONE);
+		objectJohn.createField(BDAY_ID).setValue(BDAY_ID);
+		objectJohn.getField(BDAY_ID).setValue(null);
+		objectJohn.createField(BIRTHDAY_ID).setValue(JOHN_BIRTHDAY);
+		objectJohn.createField(CUPS_ID).setValue(JOHN_CUPS);
+		objectJohn.getField(FLAGS_ID).setValue(null);
+		
+		XObject objectClaudia = phonebook.getObject(CLAUDIA_ID);
+		objectClaudia.createField(CAR_ID).setValue(CLAUDIA_CAR_TRUE);
+		
+		XObject objectKerstin = phonebook.createObject(KERSTIN_ID);
+		objectKerstin.createField(PHONE_ID).setValue(KERSTIN_PHONE);
+		
+		Iterator<XEvent> changeEvents = phonebook.getChangeLog().getEventsSince(SYNCREVISION);
+		return changeEvents;
 	}
 	
 	/**
@@ -202,7 +272,7 @@ public class DemoLocalChangesAndServerEvents {
 	 * 
 	 * <li>objects:
 	 * <ul>
-	 * <li>"peter"-r[maybe 0?]
+	 * <li>"peter"-r2
 	 * <li>"john" -r57
 	 * <li>"claudia" -r61
 	 * <li>"jenny" -r63
@@ -245,9 +315,62 @@ public class DemoLocalChangesAndServerEvents {
 	 * </ul>
 	 * </ul>
 	 * 
+	 * @param repo
+	 * 
+	 * @return a model with the current state
+	 * 
 	 */
-	public void resultingClientState() {
+	public static XRevWritableModel getResultingClientState(XRepository repo) {
+		XModel otherPhonebook = repo.getModel(DemoModelUtil.PHONEBOOK_ID);
+		XRevWritableModel phonebook = XCopyUtils.createSnapshot(otherPhonebook);
+		SYNCREVISION = phonebook.getRevisionNumber() + 1;
 		
+		// apply server changes:
+		phonebook.createObject(JENNY_ID);
+		phonebook.createObject(KERSTIN_ID);
+		
+		XRevWritableObject objectPeter = phonebook.getObject(PETER_ID);
+		objectPeter.setRevisionNumber(2);
+		
+		XRevWritableObject objectJohn = phonebook.getObject(JOHN_ID);
+		objectJohn.getField(PHONE_ID).setValue(JOHN_PHONE);
+		objectJohn.getField(PHONE_ID).setRevisionNumber(48);
+		objectJohn.removeField(SCORES_ID);
+		objectJohn.createField(CAR_ID).setValue(JOHN_CAR);
+		objectJohn.getField(CAR_ID).setRevisionNumber(51);
+		objectJohn.createField(BDAY_ID).setRevisionNumber(52);
+		objectJohn.createField(BIRTHDAY_ID).setValue(JOHN_BIRTHDAY);
+		objectJohn.getField(BIRTHDAY_ID).setRevisionNumber(54);
+		objectJohn.createField(CUPS_ID).setValue(JOHN_CUPS);
+		objectJohn.getField(CUPS_ID).setRevisionNumber(56);
+		objectJohn.getField(FLAGS_ID).setValue(null);
+		objectJohn.getField(FLAGS_ID).setRevisionNumber(57);
+		objectJohn.setRevisionNumber(57);
+		
+		XRevWritableObject objectClaudia = phonebook.getObject(CLAUDIA_ID);
+		objectClaudia.createField(PHONE_ID);
+		objectClaudia.getField(PHONE_ID).setValue(CLAUDIA_PHONE);
+		objectClaudia.getField(PHONE_ID).setRevisionNumber(59);
+		objectClaudia.createField(CAR_ID).setValue(CLAUDIA_CAR_TRUE);
+		objectClaudia.getField(CAR_ID).setRevisionNumber(61);
+		objectClaudia.setRevisionNumber(61);
+		
+		XRevWritableObject objectJenny = phonebook.getObject(JENNY_ID);
+		objectJenny.createField(PHONE_ID).setValue(JENNY_PHONE);
+		objectJenny.getField(PHONE_ID).setRevisionNumber(63);
+		objectJenny.setRevisionNumber(63);
+		
+		XRevWritableObject objectKerstin = phonebook.createObject(KERSTIN_ID);
+		objectKerstin.createField(PHONE_ID).setValue(KERSTIN_PHONE);
+		objectKerstin.getField(PHONE_ID).setRevisionNumber(65);
+		objectKerstin.setRevisionNumber(65);
+		
+		phonebook.setRevisionNumber(65);
+		
+		System.out.println("phonebook: " + phonebook.toString() + ", rev: "
+		        + phonebook.getRevisionNumber());
+		
+		return phonebook;
 	}
 	
 }

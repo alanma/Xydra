@@ -4,10 +4,12 @@ import java.util.ArrayList;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
+import org.xydra.base.XType;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XSyncEvent;
 import org.xydra.base.rmof.XRevWritableModel;
+import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.impl.memory.EventDelta;
@@ -148,7 +150,7 @@ public class NewSyncer {
 		
 		for(LocalChange lc : this.localChanges.getList()) {
 			XEvent e = lc.getEvent();
-			eventDelta.addInverseEvent(e, this.syncRev, this.changeLog);
+			eventDelta.addAdverseEvent(e, this.syncRev, this.changeLog);
 		}
 		
 		// send sync events, let app see state before sync
@@ -166,6 +168,7 @@ public class NewSyncer {
 		
 		// change state
 		eventDelta.applyTo(this.modelState);
+		this.applyEntityRevisionsToModel(serverEvents);
 		
 		long newSyncRev = serverEvents[serverEvents.length - 1].getRevisionNumber();
 		
@@ -184,6 +187,59 @@ public class NewSyncer {
 		// send change events
 		eventDelta.sendChangeEvents(this.root, this.modelWithListeners.getAddress(),
 		        this.modelWithListeners.getFather().getAddress());
+	}
+	
+	/**
+	 * Inserts the correct revision Numbers to all entities. The changes were
+	 * already inserted via the EventDelta
+	 * 
+	 * @param serverEvents expected to be sorted: changes with the highest
+	 *            revision numbers are latest
+	 */
+	private void applyEntityRevisionsToModel(XEvent[] serverEvents) {
+		
+		for(XEvent anyEntityEvent : serverEvents) {
+			XAddress targetAddress = anyEntityEvent.getTarget();
+			try {
+				
+				long newRev = anyEntityEvent.getRevisionNumber();
+				
+				XType targetedType = targetAddress.getAddressedType();
+				// happens always
+				this.modelState.setRevisionNumber(newRev);
+				switch(targetedType) {
+				case XREPOSITORY:
+					// TODO what to do here?
+					// XRepositoryEvent repoEvent =
+					// (XRepositoryEvent)anyEntityEvent;
+					break;
+				case XMODEL:
+					// an object was added / removed
+					break;
+				case XOBJECT:
+					// a field was added / removed
+					this.modelState.getObject(anyEntityEvent.getTarget().getObject())
+					        .setRevisionNumber(newRev);
+					break;
+				case XFIELD:
+					// a value was changed
+					XRevWritableObject object = this.modelState.getObject(anyEntityEvent
+					        .getTarget().getObject());
+					object.setRevisionNumber(newRev);
+					object.getField(anyEntityEvent.getTarget().getField())
+					        .setRevisionNumber(newRev);
+					break;
+				default:
+					break;
+				}
+				
+			} catch(Exception e) {
+				// TODO Max fragen, ob das so orthodox
+				throw new RuntimeException("could not apply the revision number of entity "
+				        + targetAddress.toString());
+			}
+		}
+		
 	}
 	
 	/**
