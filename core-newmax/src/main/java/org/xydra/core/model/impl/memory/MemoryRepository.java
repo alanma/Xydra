@@ -59,7 +59,7 @@ public class MemoryRepository extends AbstractEntity implements IMemoryRepositor
     @SuppressWarnings("unused")
     private String sessionPasswordHash;
     
-    private final XRevWritableRepository state;
+    private final XRevWritableRepository repositoryState;
     
     /**
      * Creates a new MemoryRepository.
@@ -90,7 +90,7 @@ public class MemoryRepository extends AbstractEntity implements IMemoryRepositor
         assert actorId != null;
         this.sessionActor = actorId;
         this.sessionPasswordHash = passwordHash;
-        this.state = repositoryState;
+        this.repositoryState = repositoryState;
     }
     
     @Override
@@ -134,8 +134,7 @@ public class MemoryRepository extends AbstractEntity implements IMemoryRepositor
     public IMemoryModel createModel(XId modelId) {
         XRepositoryCommand command = MemoryRepositoryCommand.createAddCommand(getAddress(), true,
                 modelId);
-        
-        // synchronize so that return is never null if command succeeded
+        // synchronise so that return is never null if command succeeded
         synchronized(this) {
             long result = executeRepositoryCommand(command);
             IMemoryModel model = getModel(modelId);
@@ -163,14 +162,19 @@ public class MemoryRepository extends AbstractEntity implements IMemoryRepositor
          */
         XAddress modelAddress = command.getChangedEntity();
         XId repoId = modelAddress.getRepository();
-        assert repoId != null : "executing a command on a repo imlpies a repoId is there";
+        assert repoId != null : "executing a command on a repo implies a repoId is there";
+        
         XId modelId = modelAddress.getModel();
         assert modelId != null : "all commands have a modelId";
+        
         IMemoryModel model = getModel(modelId);
         if(model == null) {
             // id is not taken yet
             model = MemoryModel.createNonExistantModel(getSessionActor(), this, modelId);
         }
+        assert model != null;
+        assert model.getState() != null;
+        
         long result = model.executeCommand(command);
         assert XCommandUtils.success(result);
         
@@ -178,10 +182,11 @@ public class MemoryRepository extends AbstractEntity implements IMemoryRepositor
             // change repo state
             switch(command.getChangeType()) {
             case ADD:
-                this.state.createModel(modelId);
+                this.repositoryState.createModel(modelId);
                 break;
             case REMOVE:
-                this.state.removeModel(modelId);
+                this.loadedModels.remove(modelId);
+                this.repositoryState.removeModel(modelId);
                 break;
             default:
                 assert false;
@@ -213,7 +218,7 @@ public class MemoryRepository extends AbstractEntity implements IMemoryRepositor
     @Override
     public void addModel(IMemoryModel model) {
         // link pure state
-        this.state.addModel(model.getState());
+        this.repositoryState.addModel(model.getState());
         
         // in memory
         this.loadedModels.put(model.getId(), model);
@@ -303,12 +308,12 @@ public class MemoryRepository extends AbstractEntity implements IMemoryRepositor
     
     @Override
     public XAddress getAddress() {
-        return this.state.getAddress();
+        return this.repositoryState.getAddress();
     }
     
     @Override
     public synchronized XId getId() {
-        return this.state.getId();
+        return this.repositoryState.getId();
     }
     
     @Override
@@ -321,8 +326,12 @@ public class MemoryRepository extends AbstractEntity implements IMemoryRepositor
         }
         
         // try to wrap modelState, if present
-        XRevWritableModel modelState = this.state.getModel(modelId);
+        XRevWritableModel modelState = this.repositoryState.getModel(modelId);
         if(modelState == null) {
+            return null;
+        }
+        
+        if(!modelState.exists()) {
             return null;
         }
         
@@ -362,18 +371,18 @@ public class MemoryRepository extends AbstractEntity implements IMemoryRepositor
     
     @Override
     public synchronized boolean hasModel(XId id) {
-        return this.loadedModels.containsKey(id) || this.state.hasModel(id);
+        return this.loadedModels.containsKey(id) || this.repositoryState.hasModel(id);
     }
     
     @Override
     public synchronized boolean isEmpty() {
-        return this.state.isEmpty();
+        return this.repositoryState.isEmpty();
     }
     
     @Override
     @ReadOperation
     public synchronized Iterator<XId> iterator() {
-        return this.state.iterator();
+        return this.repositoryState.iterator();
     }
     
     @Override
@@ -443,7 +452,7 @@ public class MemoryRepository extends AbstractEntity implements IMemoryRepositor
     
     @Override
     public XRevWritableRepository getState() {
-        return this.state;
+        return this.repositoryState;
     }
     
 }

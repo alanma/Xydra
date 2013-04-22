@@ -1,5 +1,101 @@
 # Xydra Synchronisation
 
+## Event mapping
+Task: Find a mapping from localChanges (pairs of command-event) to serverEvents to determine
+which events should be considered "happened on server" and which "failed".
+
+A serverEvent can be: 
+
+* atomicEvent, 
+* txnEvent caused from REMOVE (n implied events, followed by 1 non-implied),
+* txnEvent caused from txnCommand.
+ 
+Define: A **ChangeOperation** has a **Condition** and an **Effect**.
+Every command can be transformed into a ChangeOperation.
+
+* The **Condition** is a set of AtomicConditions; each AtomicCondition can:
+
+  * a certain entity must be present or absent.
+  * a certain entity must have a certain revision, i.e. the one to be REMOVEd or CHANGEd.
+  
+  A condition matches if all entities that are bound by the condition 
+  have the desired revision number.
+  
+  **Note:** *The algorithm described below does not use the conditions.*  
+
+
+* The **Effect** consists of AtomicEffects, each AtomicEffect is:
+
+  * add an entity
+  * remove an entity
+  * set the value of a field
+  
+  Effects have no version number.
+  
+  An effect matches an entity state if
+   
+  * all child entities that should have been ADDed are present,
+  * all child entities that should be REMOVEd are absent, and
+  * all fields have the value they should have (as stated by the effect).
+  
+A **ChangeOperation** contains 1-n **AtomicChangeOperations**.
+An AtomicChangeOperation has
+
+* 0-1 AtomicCondition
+* 1-n AtomicEffects
+ 
+FORCEd commands result in an empty condition.
+
+### Algorithm
+
+The algorithm uses these classes:
+
+ChangeOperation
+* Set<AtomicEffect> = new HashSet()
+* Long latestTimeWhereEffectFulfilled = null
+* Set<XEvent> takenEvents = new HashSet()
+* Boolean success = null;
+
+AtomicEffect
+* XAddress entity (that was added, removed or changed; must be a field for CHANGE effect)
+* ChangeType (ADD, REMOVE, CHANGE) -- no TRANSACTION here 
+* XValue (the new value for a CHANGE effect, or null for other effects)
+
+Set<XEvent> allTakenEvents = new HashSe();
+
+Algorithm:
+* Start with the sync-state, i.e. the state with the revision = syncRevision.
+* for each state(t) resulting from applying a serverEvent(t) (starting with none):
+  * for each ChangeOperation co
+    * if (co.effect.matches(state(t))
+      * co.latestTimeWhereEffectFulfilled = t;
+
+* for each ChangeOperation:
+  * if (co.latestTimeWhereEffectFulfilled)
+    * // cool
+  * else: mark as failed; remove from list; cannot have happened.
+
+// greedy:
+* sort ChangeOperations by number of atomicEffects (= atomicEvents required), largest first
+* for each cool ChangeOperation:
+  * for each atomicEffect : co.atomicOperations:
+    * for t = 0; t <= co.latestTimeWhereEffectFulfilled; t++:
+      * for serverEvent in state(t).events:  (atomic events)
+        * if atomicEffect.matches(serverEvent):
+          * co.takenEvents.add(serverEvent)
+          * allTakenEvents.add(serverEvents)
+      * if all effects matched: // keep events marked and success
+        * co.success = True
+      * else: mark events as not-taken and fail
+        * allTakenEvents.removeAll( co.takenEvents );
+        * co.takenEvents.clear();
+        * co.success = False
+
+define: effect.matches(event):
+* if the desired entity was ADDed or REMOVEd or a field has now the desired value => match
+
+## -----------------------
+
 ## The Sync Process
 
 ### Server
@@ -157,4 +253,4 @@ several phases:
  
 
 TODO Role of relative revision numbers
- 
+

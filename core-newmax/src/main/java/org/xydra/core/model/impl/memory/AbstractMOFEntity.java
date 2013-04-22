@@ -7,25 +7,9 @@ import org.xydra.core.change.XSyncEventListener;
 
 public abstract class AbstractMOFEntity extends AbstractEntity implements IMemoryMOFEntity {
     
-    /**
-     * @return true if the entity currently exists
-     */
-    public boolean exists() {
-        return this.exists;
-    }
-    
-    public AbstractMOFEntity(Root root, boolean exists) {
+    public AbstractMOFEntity(Root root) {
         assert root != null;
-        
         this.root = root;
-        this.exists = exists;
-    }
-    
-    private boolean exists;
-    
-    @Override
-    public void setExists(boolean exists) {
-        this.exists = exists;
     }
     
     /**

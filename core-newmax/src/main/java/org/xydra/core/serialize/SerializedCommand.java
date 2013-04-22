@@ -270,11 +270,13 @@ public class SerializedCommand {
         SerializingUtils.checkElementType(element, XREPOSITORYCOMMAND_ELEMENT);
         
         // FIXME BIG MONKEY
-        if(context != null
-                && (context.getModel() != null || context.getObject() != null || context.getField() != null)) {
-            throw new IllegalArgumentException("invalid context for repository commands: "
-                    + context);
-        }
+        // if(context != null
+        // && (context.getModel() != null || context.getObject() != null ||
+        // context.getField() != null)) {
+        // throw new
+        // IllegalArgumentException("invalid context for repository commands: "
+        // + context);
+        // }
         
         XAddress address = SerializingUtils.getAddress(element, context);
         

@@ -78,6 +78,7 @@ abstract public class AbstractSerializedModelTest extends AbstractSerializingTes
     @Test
     public void testEmptyModel() {
         MemoryModel empty = new MemoryModel(this.actorId, null, DemoModelUtil.PHONEBOOK_ID);
+        assert empty.exists();
         testModel(empty);
     }
     

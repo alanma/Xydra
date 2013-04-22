@@ -116,6 +116,7 @@ public class XModelBasics {
         
         // actually creating the model
         XModel model = repository.createModel(stringID);
+        // TODO Andi? Thomas?
         assertEquals(0, model.getRevisionNumber());
         
         /*

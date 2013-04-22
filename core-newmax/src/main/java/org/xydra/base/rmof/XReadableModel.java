@@ -13,21 +13,11 @@ import org.xydra.base.XId;
  * Some implementations are also {@link Serializable}.
  * 
  * @author dscharrer
- * 
  */
-public interface XReadableModel extends XStateReadableModel {
-	
-	/* More specific return type */
-	@ReadOperation
-	XReadableObject getObject(@NeverNull XId objectId);
-	
-	/**
-	 * Returns the current revision number of this {@link XReadableModel}.
-	 * 
-	 * @return The current revision number of this {@link XReadableModel}.
-	 * @throws IllegalStateException if this model has already been removed
-	 */
-	@ReadOperation
-	long getRevisionNumber();
-	
+public interface XReadableModel extends XStateReadableModel, XRevisionReadable {
+    
+    /* More specific return type */
+    @ReadOperation
+    XReadableObject getObject(@NeverNull XId objectId);
+    
 }

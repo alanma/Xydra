@@ -101,13 +101,14 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
      * @param objectState @NeverNull
      */
     public MemoryObject(IMemoryModel father, XRevWritableObject objectState) {
-        super(father.getRoot(), true);
+        super(father.getRoot());
         assert objectState != null;
         assert objectState.getAddress().getRepository() != null;
         assert objectState.getAddress().getModel() != null;
         
         this.father = father;
         this.objectState = objectState;
+        this.objectState.setExists(true);
     }
     
     /**
@@ -124,7 +125,7 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
     private MemoryObject(Root root, IMemoryModel father, XId actorId, String passwordHash,
             XAddress objectAddress, XRevWritableObject objectState, XChangeLogState log,
             boolean createObject) {
-        super(father == null ? root : father.getRoot(), createObject || objectState != null);
+        super(father == null ? root : father.getRoot());
         assert father != null || root != null;
         
         if(objectState == null) {
@@ -141,6 +142,7 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
             this.objectState = objectState;
         }
         assert this.objectState != null;
+        this.objectState.setExists(createObject || objectState != null);
         assert this.objectState.getAddress().getRepository() != null;
         assert this.objectState.getAddress().getModel() != null;
         assert this.objectState.getAddress().equals(objectAddress);
@@ -501,6 +503,16 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
     public String toString() {
         return this.getId() + " rev[" + this.getRevisionNumber() + "]" + " "
                 + this.objectState.toString();
+    }
+    
+    @Override
+    public boolean exists() {
+        return this.objectState.exists();
+    }
+    
+    @Override
+    public void setExists(boolean entityExists) {
+        this.objectState.setExists(entityExists);
     }
     
 }

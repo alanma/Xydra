@@ -92,6 +92,7 @@ Serializable {
         assert modelId != null;
         
         XAddress modelAddress = XX.resolveModel(father.getAddress(), modelId);
+        
         MemoryModel nonExistingModel = new MemoryModel(modelAddress, Root.createWithActor(
                 modelAddress, actorId), father);
         return nonExistingModel;
@@ -152,7 +153,7 @@ Serializable {
      * A model with revision numbers is required to let e.g. each object know
      * its current revision number.
      */
-    final XRevWritableModel state;
+    final XRevWritableModel modelState;
     
     /**
      * A model with the given initial state
@@ -189,7 +190,7 @@ Serializable {
     private MemoryModel(Root root, IMemoryRepository father, XId actorId, String passwordHash,
             XAddress modelAddress, XRevWritableModel modelState, XChangeLogState changeLogState,
             boolean createModel) {
-        super(root, createModel || modelState != null);
+        super(root);
         
         this.father = father;
         if(father != null) {
@@ -202,17 +203,21 @@ Serializable {
         assert modelState == null || modelState.getAddress().equals(modelAddress);
         
         if(modelState == null) {
-            this.state = new SimpleModel(modelAddress);
-            this.state.setRevisionNumber(XCommand.NONEXISTANT);
+            this.modelState = new SimpleModel(modelAddress);
+            this.modelState.setRevisionNumber(XCommand.NONEXISTANT);
         } else {
-            this.state = modelState;
+            this.modelState = modelState;
+        }
+        this.modelState.setExists(false);
+        
+        if(createModel) {
+            createThisModel();
+            assert getRevisionNumber() >= 0;
+            assert getChangeLog().getCurrentRevisionNumber() >= 0;
+            assert this.modelState.exists();
         }
         
-        createThisModel();
-        
-        assert getRevisionNumber() >= 0;
-        assert getChangeLog().getCurrentRevisionNumber() >= 0;
-        
+        // TODO Andi? Thomas?
         assert getRevisionNumber() == getChangeLog().getCurrentRevisionNumber() : "rev="
                 + getRevisionNumber() + " change.rev=" + getChangeLog().getCurrentRevisionNumber();
     }
@@ -224,9 +229,16 @@ Serializable {
      * @param father @CanBenull
      */
     private MemoryModel(XAddress modelAddress, Root root, IMemoryRepository father) {
-        super(root, false);
+        super(root);
         this.father = father;
-        this.state = new SimpleModel(modelAddress);
+        if(father == null) {
+            this.modelState = new SimpleModel(modelAddress);
+        } else {
+            XId modelId = modelAddress.getModel();
+            assert father.getState().getModel(modelId) == null;
+            this.modelState = father.getState().createModel(modelId);
+        }
+        this.modelState.setExists(false);
     }
     
     /**
@@ -237,12 +249,13 @@ Serializable {
      * @param modelState
      */
     public MemoryModel(XId actorId, IMemoryRepository father, XRevWritableModel modelState) {
-        super(Root.createWithActor(modelState.getAddress(), actorId), true);
+        super(Root.createWithActor(modelState.getAddress(), actorId));
         
         assert modelState != null;
         
         this.father = father;
-        this.state = modelState;
+        this.modelState = modelState;
+        this.modelState.setExists(true);
     }
     
     /**
@@ -281,7 +294,7 @@ Serializable {
      */
     public MemoryModel(XId actorId, String passwordHash, XRevWritableModel modelState) {
         this(Root.createWithActor(modelState.getAddress(), actorId), null, actorId, passwordHash,
-                modelState.getAddress(), modelState, null, false);
+                modelState.getAddress(), modelState, null, modelState.exists());
     }
     
     /**
@@ -295,7 +308,7 @@ Serializable {
     public MemoryModel(XId actorId, String passwordHash, XRevWritableModel modelState,
             XChangeLogState changeLogState) {
         this(Root.createWithActor(modelState.getAddress(), actorId), null, actorId, passwordHash,
-                modelState.getAddress(), modelState, changeLogState, false);
+                modelState.getAddress(), modelState, changeLogState, modelState.exists());
     }
     
     @Override
@@ -371,9 +384,10 @@ Serializable {
         // Synchronised so that return is never null if command succeeded
         synchronized(getRoot()) {
             long result = Executor.executeRepositoryCommand_complex(getSessionActor(), command,
-                    getFatherState(), null, getState(), getRoot(), null);
+                    getFatherState(), getState(), getRoot(), null);
             assert XCommandUtils.success(result);
             assert XCommandUtils.changedSomething(result);
+            assert getState().exists();
         }
     }
     
@@ -394,6 +408,9 @@ Serializable {
     
     @Override
     public long executeCommand(XCommand command) {
+        assert this.modelState != null;
+        assert getState() == this.modelState;
+        
         if(command instanceof XTransaction) {
             return Executor.executeModelTransaction(getSessionActor(), (XTransaction)command,
                     getFatherState(), getState(), getRoot(), this.changeListener);
@@ -401,10 +418,9 @@ Serializable {
         
         switch(command.getTarget().getAddressedType()) {
         case XREPOSITORY:
-            XRevWritableModel modelState = exists() ? getState() : null;
             return Executor.executeRepositoryCommand_complex(getSessionActor(),
-                    (XRepositoryCommand)command, getFatherState(), modelState, modelState,
-                    getRoot(), this.changeListener);
+                    (XRepositoryCommand)command, getFatherState(), getState(), getRoot(),
+                    this.changeListener);
         case XMODEL:
             return executeModelCommand((XModelCommand)command);
         case XOBJECT:
@@ -474,7 +490,7 @@ Serializable {
     @Override
     @ReadOperation
     public XAddress getAddress() {
-        return this.state.getAddress();
+        return this.modelState.getAddress();
     }
     
     @Override
@@ -501,7 +517,7 @@ Serializable {
     @Override
     @ReadOperation
     public XId getId() {
-        return this.state.getId();
+        return this.modelState.getId();
     }
     
     @Override
@@ -516,7 +532,7 @@ Serializable {
                 return object;
             }
             
-            XRevWritableObject objectState = this.state.getObject(objectId);
+            XRevWritableObject objectState = this.modelState.getObject(objectId);
             if(objectState == null) {
                 return null;
             }
@@ -548,7 +564,7 @@ Serializable {
             // this.state.getRevisionNumber()
             // + " syncStateRev=" +
             // this.syncState.getChangeLog().getCurrentRevisionNumber();
-            return this.state.getRevisionNumber();
+            return this.modelState.getRevisionNumber();
         }
     }
     
@@ -567,7 +583,7 @@ Serializable {
     // implements IMemoryModel
     @Override
     public XRevWritableModel getState() {
-        return this.state;
+        return this.modelState;
     }
     
     // implement XSynchronizesChanges
@@ -611,7 +627,7 @@ Serializable {
     public boolean hasObject(@NeverNull XId id) {
         synchronized(getRoot()) {
             assertThisEntityExists();
-            return this.state.hasObject(id);
+            return this.modelState.hasObject(id);
         }
     }
     
@@ -620,7 +636,7 @@ Serializable {
     public boolean isEmpty() {
         synchronized(getRoot()) {
             assertThisEntityExists();
-            return this.state.isEmpty();
+            return this.modelState.isEmpty();
         }
     }
     
@@ -634,7 +650,7 @@ Serializable {
     public Iterator<XId> iterator() {
         synchronized(getRoot()) {
             assertThisEntityExists();
-            return this.state.iterator();
+            return this.modelState.iterator();
         }
     }
     
@@ -692,5 +708,15 @@ Serializable {
     @ReadOperation
     public String toString() {
         return this.getId() + " rev[" + this.getRevisionNumber() + "]";
+    }
+    
+    @Override
+    public boolean exists() {
+        return this.modelState.exists();
+    }
+    
+    @Override
+    public void setExists(boolean entityExists) {
+        this.modelState.setExists(entityExists);
     }
 }

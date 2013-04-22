@@ -55,7 +55,7 @@ public class MemoryField extends AbstractMOFEntity implements XField, IMemoryFie
      *            wrapping it in an {@link XField} @NeverNull
      */
     public MemoryField(IMemoryObject father, XRevWritableField fieldState) {
-        super(father.getRoot(), true);
+        super(father.getRoot());
         if(fieldState == null) {
             throw new IllegalArgumentException("fieldState may not be null");
         }
@@ -63,6 +63,7 @@ public class MemoryField extends AbstractMOFEntity implements XField, IMemoryFie
         assert fieldState.getAddress().getModel() != null;
         assert fieldState.getAddress().getObject() != null;
         this.fieldState = fieldState;
+        this.fieldState.setExists(true);
         this.father = father;
     }
     
@@ -92,11 +93,12 @@ public class MemoryField extends AbstractMOFEntity implements XField, IMemoryFie
      *            wrapping it in an {@link XField} @NeverNull
      */
     public MemoryField(XId actorId, XRevWritableField fieldState) {
-        super(Root.createWithActor(fieldState.getAddress(), actorId), true);
+        super(Root.createWithActor(fieldState.getAddress(), actorId));
         assert fieldState.getAddress().getRepository() != null;
         assert fieldState.getAddress().getModel() != null;
         assert fieldState.getAddress().getObject() != null;
         this.fieldState = fieldState;
+        this.fieldState.setExists(true);
         this.father = null;
     }
     
@@ -281,6 +283,16 @@ public class MemoryField extends AbstractMOFEntity implements XField, IMemoryFie
     @Override
     public String toString() {
         return this.getId() + " rev[" + this.getRevisionNumber() + "]";
+    }
+    
+    @Override
+    public boolean exists() {
+        return this.fieldState.exists();
+    }
+    
+    @Override
+    public void setExists(boolean entityExists) {
+        this.fieldState.setExists(entityExists);
     }
     
 }
