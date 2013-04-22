@@ -153,6 +153,7 @@ public class XModelBasics {
          */
         XId fieldId = XX.toId("ExampleField");
         XField field = object.createField(fieldId);
+        assert field != null;
         
         /*
          * Setting the value of a field is just as simple, but first we have to
@@ -372,7 +373,7 @@ public class XModelBasics {
         // lets see if the field was actually added
         XField field = object1.getField(fieldId);
         
-        assertNotNull(field);
+        assertNotNull("field should not be null now", field);
         
         // and, finally, lets set the value of the field
         XValue doubleValue = XV.toValue(3.14159);
@@ -530,11 +531,8 @@ public class XModelBasics {
         XId fieldId = XX.createUniqueId();
         XValue doubleValue = XV.toValue(3.14159);
         
-        XModelCommand addObjectCommandCommand = commandFactory
-        
-        .createAddObjectCommand(XX.resolveModel(repositoryId,
-        
-        modelId), objectId, false);
+        XModelCommand addObjectCommand = commandFactory.createAddObjectCommand(
+                XX.resolveModel(repositoryId, modelId), objectId, false);
         
         XObjectCommand addFieldCommand = commandFactory.createAddFieldCommand(
                 XX.resolveObject(repositoryId, modelId, objectId), fieldId, false);
@@ -556,7 +554,7 @@ public class XModelBasics {
          */
         
         XTransactionBuilder transBuilder = new XTransactionBuilder(model.getAddress());
-        transBuilder.addCommand(addObjectCommandCommand);
+        transBuilder.addCommand(addObjectCommand);
         transBuilder.addCommand(addFieldCommand);
         transBuilder.addCommand(addValueCommand);
         

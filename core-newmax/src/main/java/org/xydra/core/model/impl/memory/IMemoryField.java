@@ -1,41 +1,12 @@
 package org.xydra.core.model.impl.memory;
 
-import org.xydra.base.change.XFieldCommand;
-import org.xydra.base.change.XFieldEvent;
-import org.xydra.base.rmof.XRevWritableField;
-import org.xydra.base.value.XValue;
 import org.xydra.core.model.XField;
-import org.xydra.core.model.XLocalChangeCallback;
 
 
 // FIXME MAX set to default access
 public interface IMemoryField extends XField, IMemoryEntity, IMemoryMOFEntity {
     
-    boolean isSynchronized();
-    
-    @Deprecated
-    void delete();
-    
-    @Deprecated
-    long executeFieldCommand(XFieldCommand command, XLocalChangeCallback callback);
-    
-    @Deprecated
-    void fireFieldEvent(XFieldEvent event);
-    
-    @Deprecated
-    IMemoryObject getObject();
-    
-    @Deprecated
-    XRevWritableField getState();
-    
-    @Deprecated
-    void incrementRevision();
-    
-    @Deprecated
-    void setRevisionNumber(long newRevision);
-    
-    @Deprecated
-    void setValueInternal(XValue value);
+    // boolean isSynchronized();
     
     /**
      * Current snapshot-like state is handled locally, change log and event

@@ -48,7 +48,7 @@ import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
-import org.xydra.core.model.XSynchronizesChanges;
+import org.xydra.core.model.OldXSynchronizesChanges;
 import org.xydra.core.model.XUndoFailedLocalChangeCallback;
 import org.xydra.core.model.impl.memory.SynchronisationState.Orphans;
 import org.xydra.log.Logger;
@@ -73,7 +73,7 @@ import org.xydra.sharedutils.XyAssert;
  */
 public class OldMemoryModel extends AbstractMOFEntity implements IMemoryModel, XModel,
 
-IHasXAddress, IHasChangeLog, XSynchronizesChanges, XExecutesCommands,
+IHasXAddress, IHasChangeLog, OldXSynchronizesChanges, XExecutesCommands,
 
 XSendsObjectEvents, XSendsFieldEvents, XSendsTransactionEvents,
 
@@ -94,7 +94,7 @@ Serializable {
     /**
      * Current state as a snapshot in augmented form.
      */
-    private final transient Map<XId,IMemoryObject> loadedObjects = new HashMap<XId,IMemoryObject>();
+    private final transient Map<XId,OldIMemoryObject> loadedObjects = new HashMap<XId,OldIMemoryObject>();
     
     /**
      * Represents the current state as a snapshot.
@@ -173,8 +173,8 @@ Serializable {
     
     @Override
     public boolean addListenerForModelEvents(XModelEventListener changeListener) {
-        synchronized(this.root) {
-            return this.root.addListenerForModelEvents(getAddress(), changeListener);
+        synchronized(getRoot()) {
+            return getRoot().addListenerForModelEvents(getAddress(), changeListener);
         }
     }
     
@@ -188,80 +188,80 @@ Serializable {
     // implement IMemoryModel
     @Override
     public void fireModelEvent(XModelEvent event) {
-        this.root.fireModelEvent(getAddress(), event);
+        getRoot().fireModelEvent(getAddress(), event);
     }
     
     // implement IMemoryModel
     @Override
     public boolean removeListenerForModelEvents(XModelEventListener changeListener) {
-        synchronized(this.root) {
-            return this.root.removeListenerForModelEvents(getAddress(), changeListener);
+        synchronized(getRoot()) {
+            return getRoot().removeListenerForModelEvents(getAddress(), changeListener);
         }
     }
     
     // implement IMemoryModel
     @Override
     public void fireObjectEvent(XObjectEvent event) {
-        synchronized(this.root) {
-            this.root.fireObjectEvent(getAddress(), event);
+        synchronized(getRoot()) {
+            getRoot().fireObjectEvent(getAddress(), event);
         }
     }
     
     // implement IMemoryModel
     @Override
     public void fireFieldEvent(XFieldEvent event) {
-        synchronized(this.root) {
-            this.root.fireFieldEvent(getAddress(), event);
+        synchronized(getRoot()) {
+            getRoot().fireFieldEvent(getAddress(), event);
         }
     }
     
     // implement IMemoryModel
     @Override
     public void fireTransactionEvent(XTransactionEvent event) {
-        synchronized(this.root) {
-            this.root.fireTransactionEvent(getAddress(), event);
+        synchronized(getRoot()) {
+            getRoot().fireTransactionEvent(getAddress(), event);
         }
     }
     
     @Override
     public boolean addListenerForTransactionEvents(XTransactionEventListener changeListener) {
-        synchronized(this.root) {
-            return this.root.addListenerForTransactionEvents(getAddress(), changeListener);
+        synchronized(getRoot()) {
+            return getRoot().addListenerForTransactionEvents(getAddress(), changeListener);
         }
     }
     
     @Override
     public boolean removeListenerForTransactionEvents(XTransactionEventListener changeListener) {
-        synchronized(this.root) {
-            return this.root.removeListenerForTransactionEvents(getAddress(), changeListener);
+        synchronized(getRoot()) {
+            return getRoot().removeListenerForTransactionEvents(getAddress(), changeListener);
         }
     }
     
     @Override
     public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
-        synchronized(this.root) {
-            return this.root.addListenerForFieldEvents(getAddress(), changeListener);
+        synchronized(getRoot()) {
+            return getRoot().addListenerForFieldEvents(getAddress(), changeListener);
         }
     }
     
     @Override
     public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
-        synchronized(this.root) {
-            return this.root.removeListenerForFieldEvents(getAddress(), changeListener);
+        synchronized(getRoot()) {
+            return getRoot().removeListenerForFieldEvents(getAddress(), changeListener);
         }
     }
     
     @Override
     public boolean addListenerForObjectEvents(XObjectEventListener changeListener) {
-        synchronized(this.root) {
-            return this.root.addListenerForObjectEvents(getAddress(), changeListener);
+        synchronized(getRoot()) {
+            return getRoot().addListenerForObjectEvents(getAddress(), changeListener);
         }
     }
     
     @Override
     public boolean removeListenerForObjectEvents(XObjectEventListener changeListener) {
-        synchronized(this.root) {
-            return this.root.removeListenerForObjectEvents(getAddress(), changeListener);
+        synchronized(getRoot()) {
+            return getRoot().removeListenerForObjectEvents(getAddress(), changeListener);
         }
     }
     
@@ -287,7 +287,7 @@ Serializable {
         }
         
         OldMemoryModel other = (OldMemoryModel)o;
-        synchronized(this.root) {
+        synchronized(getRoot()) {
             // compare revision number, repositoryId & modelId
             return XCompareUtils.equalId(this.father, other.getFather())
                     && XCompareUtils.equalState(this.getState(), other.getState());
@@ -308,7 +308,7 @@ Serializable {
     @Override
     @ReadOperation
     public int hashCode() {
-        synchronized(this.root) {
+        synchronized(getRoot()) {
             int hashCode = getId().hashCode() + (int)getRevisionNumber();
             
             if(this.father != null) {
@@ -328,7 +328,7 @@ Serializable {
     @Override
     @ReadOperation
     public boolean isEmpty() {
-        synchronized(this.root) {
+        synchronized(getRoot()) {
             assertThisEntityExists();
             return this.state.isEmpty();
         }
@@ -337,7 +337,7 @@ Serializable {
     @Override
     @ReadOperation
     public Iterator<XId> iterator() {
-        synchronized(this.root) {
+        synchronized(getRoot()) {
             assertThisEntityExists();
             return this.state.iterator();
         }
@@ -368,12 +368,12 @@ Serializable {
     
     @Override
     @ReadOperation
-    public IMemoryObject getObject(@NeverNull XId objectId) {
-        synchronized(this.root) {
+    public OldIMemoryObject getObject(@NeverNull XId objectId) {
+        synchronized(getRoot()) {
             assertThisEntityExists();
             
             // lazy loading of MemoryObjects
-            IMemoryObject object = this.loadedObjects.get(objectId);
+            OldIMemoryObject object = this.loadedObjects.get(objectId);
             if(object != null) {
                 return object;
             }
@@ -404,7 +404,7 @@ Serializable {
     @Override
     @ReadOperation
     public XRevWritableModel createSnapshot() {
-        synchronized(this.root) {
+        synchronized(getRoot()) {
             if(exists()) {
                 return XCopyUtils.createSnapshot(this.getState());
             } else {
@@ -416,7 +416,7 @@ Serializable {
     @Override
     @ReadOperation
     public boolean hasObject(@NeverNull XId id) {
-        synchronized(this.root) {
+        synchronized(getRoot()) {
             assertThisEntityExists();
             return this.state.hasObject(id);
         }
@@ -424,13 +424,13 @@ Serializable {
     
     @Override
     @ModificationOperation
-    public IMemoryObject createObject(@NeverNull XId objectId) {
+    public OldIMemoryObject createObject(@NeverNull XId objectId) {
         XModelCommand command = MemoryModelCommand.createAddCommand(getAddress(), true, objectId);
         
         // Synchronised so that return is never null if command succeeded
-        synchronized(this.root) {
+        synchronized(getRoot()) {
             long result = executeModelCommand(command);
-            IMemoryObject object = getObject(objectId);
+            OldIMemoryObject object = getObject(objectId);
             XyAssert.xyAssert(result == XCommand.FAILED || object != null);
             return object;
         }
@@ -468,7 +468,7 @@ Serializable {
     private void delete() {
         // delete from memory
         for(XId objectId : this) {
-            IMemoryObject object = getObject(objectId);
+            OldIMemoryObject object = getObject(objectId);
             object.delete();
         }
         // delete from state
@@ -478,7 +478,7 @@ Serializable {
         // clear cache
         this.loadedObjects.clear();
         // mark as deleted
-        this.exists = false;
+        // this.exists = false;
     }
     
     @ModificationOperation
@@ -488,7 +488,7 @@ Serializable {
         boolean inTrans = false;
         
         for(XId objectId : this) {
-            IMemoryObject object = getObject(objectId);
+            OldIMemoryObject object = getObject(objectId);
             enqueueObjectRemoveEvents(actorId, object, true, true);
             inTrans = true;
         }
@@ -519,7 +519,7 @@ Serializable {
      *             null
      */
     @ModificationOperation
-    private void enqueueObjectRemoveEvents(XId actor, IMemoryObject object, boolean inTrans,
+    private void enqueueObjectRemoveEvents(XId actor, OldIMemoryObject object, boolean inTrans,
             boolean implied) {
         if(object == null) {
             throw new IllegalArgumentException("object must not be null");
@@ -562,14 +562,14 @@ Serializable {
                     givenPasswordHash, callback);
         } else if(command instanceof XTransaction) {
             // TODO give Actor & Pwhash to each individual command
-            synchronized(this.root) {
+            synchronized(getRoot()) {
                 return this.syncState.executeTransaction((XTransaction)command, wrappingCallback);
             }
         } else if(command instanceof XModelCommand) {
             return executeModelCommandWithActor((XModelCommand)command, givenActorId,
                     givenPasswordHash, wrappingCallback);
         }
-        IMemoryObject object = getObject(command.getTarget().getObject());
+        OldIMemoryObject object = getObject(command.getTarget().getObject());
         if(object == null) {
             return XCommand.FAILED;
         }
@@ -592,13 +592,13 @@ Serializable {
     @Override
     public void removeInternal() {
         // all objects are already loaded for creating events
-        for(IMemoryObject object : this.loadedObjects.values()) {
+        for(OldIMemoryObject object : this.loadedObjects.values()) {
             object.removeInternal();
             this.state.removeObject(object.getId());
         }
         this.state.setRevisionNumber(nextRevisionNumber());
         this.loadedObjects.clear();
-        this.exists = true;
+        // this.exists = true;
     }
     
     /**
@@ -625,7 +625,7 @@ Serializable {
     @ModificationOperation
     private long executeModelCommandWithActor(XModelCommand command, XId actorId,
             String passwordHash, XLocalChangeCallback callback) {
-        synchronized(this.root) {
+        synchronized(getRoot()) {
             assertThisEntityExists();
             XyAssert.xyAssert(!this.syncState.eventQueue.transactionInProgess);
             
@@ -790,7 +790,7 @@ Serializable {
             }
             
             // execute!
-            synchronized(this.root) {
+            synchronized(getRoot()) {
                 int since = this.syncState.eventQueue.getNextPosition();
                 boolean inTrans = enqueueModelRemoveEvents(givenActorId);
                 if(inTrans) {
@@ -1283,14 +1283,14 @@ Serializable {
         
         @Override
         @ModificationOperation
-        public IMemoryObject createObjectInternal(XId objectId) {
+        public OldIMemoryObject createObjectInternal(XId objectId) {
             return OldMemoryModel.this.createObjectInternal(objectId);
         }
         
         @Override
         @ModificationOperation
         public void removeObjectInternal(XId objectId) {
-            IMemoryObject object = getObject(objectId);
+            OldIMemoryObject object = getObject(objectId);
             XyAssert.xyAssert(object != null);
             assert object != null;
             
@@ -1340,7 +1340,7 @@ Serializable {
         }
         
         @Override
-        public IMemoryObject getObject(XId objectId) {
+        public OldIMemoryObject getObject(XId objectId) {
             return OldMemoryModel.this.getObject(objectId);
         }
         
@@ -1357,13 +1357,13 @@ Serializable {
         
     };
     
-    private IMemoryObject createObjectInternal(XId objectId) {
+    private OldIMemoryObject createObjectInternal(XId objectId) {
         XyAssert.xyAssert(getRevisionNumber() >= 0, "modelRev=" + getRevisionNumber());
         XyAssert.xyAssert(!hasObject(objectId));
         
         boolean inTrans = OldMemoryModel.this.syncState.eventQueue.transactionInProgess;
         
-        IMemoryObject object = null;
+        OldIMemoryObject object = null;
         Orphans orphans = OldMemoryModel.this.syncState.eventQueue.orphans;
         if(orphans != null) {
             object = orphans.objects.remove(objectId);
@@ -1406,7 +1406,7 @@ Serializable {
     @Override
     @ReadOperation
     public long getRevisionNumber() {
-        synchronized(this.root) {
+        synchronized(getRoot()) {
             // assert this.state.getRevisionNumber() ==
             // this.syncState.getChangeLog()
             // .getCurrentRevisionNumber() : "stateRev=" +

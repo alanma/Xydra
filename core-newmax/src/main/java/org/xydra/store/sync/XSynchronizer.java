@@ -20,7 +20,7 @@ import org.xydra.base.change.impl.memory.MemoryRepositoryCommand;
 import org.xydra.base.change.impl.memory.MemoryTransaction;
 import org.xydra.core.model.XLocalChange;
 import org.xydra.core.model.XModel;
-import org.xydra.core.model.XSynchronizesChanges;
+import org.xydra.core.model.OldXSynchronizesChanges;
 import org.xydra.index.XI;
 import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
@@ -45,7 +45,7 @@ public class XSynchronizer {
     
     static private final Logger log = LoggerFactory.getLogger(XSynchronizer.class);
     
-    private final XSynchronizesChanges entity;
+    private final OldXSynchronizesChanges entity;
     private boolean requestRunning = false;
     
     private final XydraStore store;
@@ -58,7 +58,7 @@ public class XSynchronizer {
      * @param entity
      * @param store
      */
-    public XSynchronizer(XSynchronizesChanges entity, XydraStore store) {
+    public XSynchronizer(OldXSynchronizesChanges entity, XydraStore store) {
         log.info("sync: init with entity " + entity.getAddress() + " | " + entity.getAddress());
         if(entity.getAddress().getRepository() == null || entity.getAddress().getModel() == null) {
             throw new IllegalArgumentException(

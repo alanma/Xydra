@@ -28,7 +28,7 @@ public interface ISyncProvider extends IHasXAddress {
      * @param objectId
      * @return ...
      */
-    IMemoryObject createObjectInternal(XId objectId);
+    OldIMemoryObject createObjectInternal(XId objectId);
     
     /**
      * Get the {@link MemoryObject} with the given {@link XId}.
@@ -42,7 +42,7 @@ public interface ISyncProvider extends IHasXAddress {
      * 
      * @return true if there is an {@link XObject} with the given {@link XId}
      */
-    IMemoryObject getObject(@NeverNull XId objectId);
+    OldIMemoryObject getObject(@NeverNull XId objectId);
     
     /**
      * @return Return the proxy for reading the current state.

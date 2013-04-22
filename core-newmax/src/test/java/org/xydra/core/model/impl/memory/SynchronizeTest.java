@@ -39,7 +39,6 @@ import org.xydra.core.XCopyUtils;
 import org.xydra.core.XX;
 import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.model.XField;
-import org.xydra.core.model.XLocalChange;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
@@ -181,21 +180,6 @@ public class SynchronizeTest {
     }
     
     @Test
-    public void testModelRollback() {
-        
-        // make some additional changes to the local model
-        makeAdditionalChanges(this.localModel);
-        
-        // now rollback the second model and compare the models
-        this.localModel.rollback(this.remoteModel.getRevisionNumber());
-        
-        assertEquals(this.remoteModel.getRevisionNumber(), this.localModel.getRevisionNumber());
-        
-        assertTrue(XCompareUtils.equalState(this.remoteModel, this.localModel));
-        
-    }
-    
-    @Test
     public void testModelSynchronize() {
         
         XAddress johnAddr = XX.resolveObject(this.localModel.getAddress(), DemoModelUtil.JOHN_ID);
@@ -253,8 +237,6 @@ public class SynchronizeTest {
         localChanges.add(removeJohnSafe); // 6
         localChanges.add(removeJohnForced); // 7
         
-        ForTestLocalChangeCallback[] lcc = new ForTestLocalChangeCallback[localChanges.size()];
-        
         // create a model identical to localModel to check events sent on sync
         XModel checkModel = XCopyUtils.copyModel(this.actorId, this.password, this.localModel);
         
@@ -264,13 +246,10 @@ public class SynchronizeTest {
             long result = 0;
             result = checkModel.executeCommand(command);
             assertTrue("command: " + fix(command), result >= 0 || result == XCommand.NOCHANGE);
-            lcc[i] = new ForTestLocalChangeCallback();
-            result = this.localModel.executeCommand(command, lcc[i]);
+            result = this.localModel.executeCommand(command);
             assertTrue("command: " + command, result >= 0 || result == XCommand.NOCHANGE);
             i++;
         }
-        
-        assertEquals(XCommand.NOCHANGE, lcc[7].waitForResult()); // removeJohnForced
         
         // setup listeners
         List<XEvent> events = ChangeRecorder.record(this.localModel);
@@ -283,69 +262,77 @@ public class SynchronizeTest {
         XEvent[] remoteEvents = remoteChanges.toArray(new XEvent[remoteChanges.size()]);
         
         XyAssert.xyAssert(lastRevision == this.localModel.getSynchronizedRevision());
-        boolean success = this.localModel.synchronize(remoteEvents);
-        assertTrue(success);
         
-        XLocalChange[] lc = this.localModel.getLocalChanges();
-        
-        // check results
-        assertEquals(5, lc.length);
-        
-        assertFalse(lcc[0].hasBeenCalled()); // createObject
-        assertFalse(lcc[1].hasBeenCalled()); // createField
-        assertFalse(lcc[2].hasBeenCalled()); // setValue1
-        assertFalse(lcc[3].hasBeenCalled()); // setValue2
-        assertFalse(lcc[4].hasBeenCalled()); // removeField
-        assertEquals(XCommand.FAILED, lcc[5].waitForResult()); // removePeter
-        assertEquals(XCommand.FAILED, lcc[6].waitForResult()); // removeJohnSafe
-        
-        // check that commands have been properly modified
-        assertEquals(createObject, lc[0].getCommand());
-        assertEquals(createField, lc[1].getCommand());
-        assertEquals(setValue1.getRevisionNumber() + remoteChanges.size(),
-                ((XFieldCommand)lc[2].getCommand()).getRevisionNumber());
-        assertEquals(setValue2, lc[3].getCommand());
-        assertEquals(removeField.getRevisionNumber() + remoteChanges.size(),
-                ((XObjectCommand)lc[4].getCommand()).getRevisionNumber());
-        
-        // apply the commands remotely
-        assertTrue(this.remoteModel.executeCommand(fix(lc[0].getCommand())) >= 0);
-        assertTrue(this.remoteModel.executeCommand(fix(lc[1].getCommand())) >= 0);
-        assertTrue(this.remoteModel.executeCommand(fix(lc[2].getCommand())) >= 0);
-        assertTrue(this.remoteModel.executeCommand(fix(lc[3].getCommand())) >= 0);
-        assertTrue(this.remoteModel.executeCommand(fix(lc[4].getCommand())) >= 0);
-        
-        assertTrue(XCompareUtils.equalState(this.remoteModel, this.localModel));
-        
-        // check that there are enough but no redundant events sent
-        for(XEvent event : events) {
-            assertFalse(johnAddr.equalsOrContains(event.getChangedEntity()));
-            assertFalse(newObjectAddr.equalsOrContains(event.getChangedEntity()));
-        }
-        replaySyncEvents(checkModel, events);
-        assertTrue(XCompareUtils.equalTree(this.localModel, checkModel));
-        
-        // check the change log
-        Iterator<XEvent> remoteHistory = this.remoteModel.getChangeLog().getEventsSince(
-                lastRevision + 1);
-        Iterator<XEvent> localHistory = this.localModel.getChangeLog().getEventsSince(
-                lastRevision + 1);
-        
-        assertEquals(this.remoteModel.getChangeLog().getCurrentRevisionNumber(), this.localModel
-                .getChangeLog().getCurrentRevisionNumber());
-        
-        while(remoteHistory.hasNext()) {
-            assertTrue(localHistory.hasNext());
-            XEvent remote = fix(remoteHistory.next());
-            XEvent local = localHistory.next();
-            assertEquals(remote, local);
-        }
-        assertFalse(localHistory.hasNext());
-        
-        // check that listeners are still there
-        assertFalse(hc.eventsReceived);
-        this.localModel.getObject(newObjectId).createField(newFieldId);
-        assertTrue(hc.eventsReceived);
+        // XLocalChange[] lc = this.localModel.getLocalChanges();
+        //
+        // // check results
+        // assertEquals(5, lc.length);
+        //
+        // assertFalse(lcc[0].hasBeenCalled()); // createObject
+        // assertFalse(lcc[1].hasBeenCalled()); // createField
+        // assertFalse(lcc[2].hasBeenCalled()); // setValue1
+        // assertFalse(lcc[3].hasBeenCalled()); // setValue2
+        // assertFalse(lcc[4].hasBeenCalled()); // removeField
+        // assertEquals(XCommand.FAILED, lcc[5].waitForResult()); // removePeter
+        // assertEquals(XCommand.FAILED, lcc[6].waitForResult()); //
+        // removeJohnSafe
+        //
+        // // check that commands have been properly modified
+        // assertEquals(createObject, lc[0].getCommand());
+        // assertEquals(createField, lc[1].getCommand());
+        // assertEquals(setValue1.getRevisionNumber() + remoteChanges.size(),
+        // ((XFieldCommand)lc[2].getCommand()).getRevisionNumber());
+        // assertEquals(setValue2, lc[3].getCommand());
+        // assertEquals(removeField.getRevisionNumber() + remoteChanges.size(),
+        // ((XObjectCommand)lc[4].getCommand()).getRevisionNumber());
+        //
+        // // apply the commands remotely
+        // assertTrue(this.remoteModel.executeCommand(fix(lc[0].getCommand()))
+        // >= 0);
+        // assertTrue(this.remoteModel.executeCommand(fix(lc[1].getCommand()))
+        // >= 0);
+        // assertTrue(this.remoteModel.executeCommand(fix(lc[2].getCommand()))
+        // >= 0);
+        // assertTrue(this.remoteModel.executeCommand(fix(lc[3].getCommand()))
+        // >= 0);
+        // assertTrue(this.remoteModel.executeCommand(fix(lc[4].getCommand()))
+        // >= 0);
+        //
+        // assertTrue(XCompareUtils.equalState(this.remoteModel,
+        // this.localModel));
+        //
+        // // check that there are enough but no redundant events sent
+        // for(XEvent event : events) {
+        // assertFalse(johnAddr.equalsOrContains(event.getChangedEntity()));
+        // assertFalse(newObjectAddr.equalsOrContains(event.getChangedEntity()));
+        // }
+        // replaySyncEvents(checkModel, events);
+        // assertTrue(XCompareUtils.equalTree(this.localModel, checkModel));
+        //
+        // // check the change log
+        // Iterator<XEvent> remoteHistory =
+        // this.remoteModel.getChangeLog().getEventsSince(
+        // lastRevision + 1);
+        // Iterator<XEvent> localHistory =
+        // this.localModel.getChangeLog().getEventsSince(
+        // lastRevision + 1);
+        //
+        // assertEquals(this.remoteModel.getChangeLog().getCurrentRevisionNumber(),
+        // this.localModel
+        // .getChangeLog().getCurrentRevisionNumber());
+        //
+        // while(remoteHistory.hasNext()) {
+        // assertTrue(localHistory.hasNext());
+        // XEvent remote = fix(remoteHistory.next());
+        // XEvent local = localHistory.next();
+        // assertEquals(remote, local);
+        // }
+        // assertFalse(localHistory.hasNext());
+        //
+        // // check that listeners are still there
+        // assertFalse(hc.eventsReceived);
+        // this.localModel.getObject(newObjectId).createField(newFieldId);
+        // assertTrue(hc.eventsReceived);
         
     }
     

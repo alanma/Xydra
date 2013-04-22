@@ -2,6 +2,7 @@ package org.xydra.core.model.impl.memory;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
+import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XFieldEvent;
 import org.xydra.base.change.XModelEvent;
 import org.xydra.base.change.XObjectEvent;
@@ -214,6 +215,10 @@ public class Root {
                 LocalChanges.create(), actorId);
     }
     
+    /**
+     * @return the {@link XWritableChangeLog} which is logging the
+     *         {@link XEvent XEvents}
+     */
     public XWritableChangeLog getWritableChangeLog() {
         return this.writableChangeLog;
     }
@@ -226,4 +231,21 @@ public class Root {
         return this.localChanges;
     }
     
+    public void startExecutingTransaction() {
+        this.isTransactionInProgress = true;
+    }
+    
+    public void stopExecutingTransaction() {
+        this.isTransactionInProgress = false;
+    }
+    
+    public void setSyncRevision(long syncRevision) {
+        this.syncRevision = syncRevision;
+    }
+    
+    private long syncRevision;
+    
+    public long getSynchronizedRevision() {
+        return this.syncRevision;
+    }
 }

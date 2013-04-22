@@ -26,6 +26,7 @@ import org.xydra.base.rmof.impl.memory.SimpleRepository;
 import org.xydra.base.value.XValue;
 import org.xydra.core.AccessException;
 import org.xydra.core.XX;
+import org.xydra.core.model.OldXSynchronizesChanges;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XChangeLogState;
 import org.xydra.core.model.XField;
@@ -35,7 +36,6 @@ import org.xydra.core.model.XLoggedObject;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
-import org.xydra.core.model.XSynchronizesChanges;
 import org.xydra.core.model.impl.memory.MemoryChangeLogState;
 import org.xydra.core.model.impl.memory.MemoryField;
 import org.xydra.core.model.impl.memory.MemoryModel;
@@ -230,7 +230,7 @@ public class SerializedModel {
         
         XRevWritableField fieldState;
         if(parent == null) {
-            XAddress fieldAddr = XX.toAddress(null, null, null, xid);
+            XAddress fieldAddr = XX.toAddress(XId.DEFAULT, XId.DEFAULT, XId.DEFAULT, xid);
             fieldState = new SimpleField(fieldAddr);
         } else {
             fieldState = parent.createField(xid);
@@ -297,7 +297,7 @@ public class SerializedModel {
             if(context != null) {
                 modelAddr = XX.toAddress(context.getRepository(), xid, null, null);
             } else {
-                modelAddr = XX.toAddress(null, xid, null, null);
+                modelAddr = XX.toAddress(XId.DEFAULT, xid, null, null);
             }
             modelState = new SimpleModel(modelAddr);
         } else {
@@ -378,7 +378,7 @@ public class SerializedModel {
             if(context != null) {
                 objectAddr = XX.toAddress(context.getRepository(), context.getModel(), xid, null);
             } else {
-                objectAddr = XX.toAddress(null, null, xid, null);
+                objectAddr = XX.toAddress(XId.DEFAULT, XId.DEFAULT, xid, null);
             }
             objectState = new SimpleObject(objectAddr);
         } else {
@@ -624,9 +624,9 @@ public class SerializedModel {
         }
         
         if(saveAsSynchronizesChanges) {
-            assert (xmodel instanceof XSynchronizesChanges);
+            assert (xmodel instanceof OldXSynchronizesChanges);
             out.attribute(SYNC_REVISION_ATTRIBUTE,
-                    ((XSynchronizesChanges)xmodel).getSynchronizedRevision());
+                    ((OldXSynchronizesChanges)xmodel).getSynchronizedRevision());
         }
         
         out.child(NAME_OBJECTS);
@@ -644,8 +644,8 @@ public class SerializedModel {
         }
         out.endMap();
         
-        if(saveAsSynchronizesChanges && xmodel instanceof XSynchronizesChanges) {
-            XSynchronizesChanges synchronizesChanges = (XSynchronizesChanges)xmodel;
+        if(saveAsSynchronizesChanges && xmodel instanceof OldXSynchronizesChanges) {
+            OldXSynchronizesChanges synchronizesChanges = (OldXSynchronizesChanges)xmodel;
             
             XLocalChange[] localChanges = synchronizesChanges.getLocalChanges();
             if(localChanges.length > 0) {

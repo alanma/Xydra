@@ -53,7 +53,8 @@ public class MemoryChangeLog extends AbstractChangeLog implements XWritableChang
     @Override
     synchronized public XEvent getEventAt(long revisionNumber) {
         if(revisionNumber < 0) {
-            throw new IllegalArgumentException("revisionNumber may not be less than zero");
+            throw new IllegalArgumentException("revisionNumber may not be less than zero: "
+                    + revisionNumber);
         }
         
         if(revisionNumber <= getBaseRevisionNumber()) {
@@ -92,6 +93,7 @@ public class MemoryChangeLog extends AbstractChangeLog implements XWritableChang
     }
     
     public static XWritableChangeLog create(XAddress baseAddress) {
+        assert baseAddress.getRepository() != null;
         return new MemoryChangeLog(new MemoryChangeLogState(baseAddress));
     }
     

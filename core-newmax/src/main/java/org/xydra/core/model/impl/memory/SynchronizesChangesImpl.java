@@ -11,7 +11,7 @@ import org.xydra.core.model.IHasChangeLog;
 import org.xydra.core.model.XExecutesCommands;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
-import org.xydra.core.model.XSynchronizesChanges;
+import org.xydra.core.model.OldXSynchronizesChanges;
 
 
 /**
@@ -26,7 +26,7 @@ import org.xydra.core.model.XSynchronizesChanges;
 @SuppressWarnings("serial")
 @Deprecated
 abstract class SynchronizesChangesImpl extends AbstractEntity implements IHasXAddress,
-        IHasChangeLog, XSynchronizesChanges, XExecutesCommands, XSendsObjectEvents,
+        IHasChangeLog, OldXSynchronizesChanges, XExecutesCommands, XSendsObjectEvents,
         XSendsFieldEvents, XSendsTransactionEvents, Serializable {
     
     public SynchronizesChangesImpl(boolean exists) {

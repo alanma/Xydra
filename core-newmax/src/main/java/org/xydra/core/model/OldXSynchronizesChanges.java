@@ -7,7 +7,10 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XTransaction;
 import org.xydra.core.change.XSendsSyncEvents;
+import org.xydra.core.model.impl.memory.LocalChanges;
 import org.xydra.core.model.impl.memory.Synchronizable;
+import org.xydra.core.model.impl.memory.XWritableChangeLog;
+import org.xydra.store.sync.XSynchronizer;
 
 
 /**
@@ -18,7 +21,7 @@ import org.xydra.core.model.impl.memory.Synchronizable;
  * @author dscharrer
  * 
  */
-public interface XSynchronizesChanges extends IHasChangeLog,
+public interface OldXSynchronizesChanges extends IHasChangeLog,
 
 XExecutesCommands,
 
@@ -30,9 +33,10 @@ Synchronizable {
     
     /**
      * @return the number of local changes that have not been synced with the
-     *         server yet. Can be used to estimate the duration of the sync
+     *         server yet. Can be used to estimate the durection of the sync
      *         process or to devise heuristics when to sync.
      */
+    // note: seems unused
     int countUnappliedLocalChanges();
     
     /**
@@ -41,6 +45,7 @@ Synchronizable {
      * Not all implementations will be able to execute all commands.
      * 
      * @param command The {@link XCommand} which is to be executed
+     * @param callback
      * 
      * @return {@link XCommand#FAILED} if the command failed,
      *         {@link XCommand#NOCHANGE} if the command didn't change anything
@@ -49,7 +54,22 @@ Synchronizable {
      * @throws IllegalStateException if this entity has already been removed
      */
     @ModificationOperation
-    // long executeCommand(XCommand command);
+    long executeCommand(XCommand command, XLocalChangeCallback callback);
+    
+    /**
+     * @return the {@link XChangeLog} which is logging the {@link XEvent
+     *         XEvents} which happen on this XSynchronizeChanges
+     */
+    @Override
+    XWritableChangeLog getChangeLog();
+    
+    // note: used by XSynchronized TODO document
+    @Deprecated
+    XLocalChange[] getLocalChanges();
+    
+    // TODO change into X..something and remove Impl-suffix
+    LocalChanges getLocalChangesImpl();
+    
     /**
      * @return the actor that is represented by this interface. This is the
      *         actor that is recorded for change operations. Operations will
@@ -58,7 +78,8 @@ Synchronizable {
     XId getSessionActor();
     
     /**
-     * @return the password used by Synchronizer to talk to the back-end
+     * @return the password used by {@link XSynchronizer} to talk to the
+     *         back-end
      */
     String getSessionPasswordHash();
     
@@ -72,7 +93,7 @@ Synchronizable {
     /**
      * Roll back the state (including revisions) to a specific revision. This
      * will erase all {@link XEvent XEvents} following this revision from the
-     * {@link XChangeLog} of this {@link XSynchronizesChanges}. Listeners that
+     * {@link XChangeLog} of this {@link OldXSynchronizesChanges}. Listeners that
      * were/are registered to the entities that are manipulated by this
      * roll-back are not automatically restored or removed, but {@link XEvent
      * XEvents} are sent out for all changes made.
@@ -80,7 +101,7 @@ Synchronizable {
      * @param revision The revision number to which will be rolled back
      * @throws IllegalStateException if this entity has already been removed
      */
-    // void rollback(long revision);
+    void rollback(long revision);
     
     /**
      * Set a new actor to be used when building commands for changes to this
@@ -99,6 +120,6 @@ Synchronizable {
      *            remotely.
      * @return true iff synchronisation was a success
      */
-    // boolean synchronize(XEvent[] remoteChanges);
+    boolean synchronize(XEvent[] remoteChanges);
     
 }

@@ -38,23 +38,24 @@ public class NewSyncer {
     
     /**
      * @param store to send commands and get events
+     * @param modelWithListeners
      * @param modelState
      * @param root
-     * @param changeLog
+     * @param actorId
+     * @param passwordHash
+     * @param syncRev
      */
     public NewSyncer(XydraStore store, IMemoryModel modelWithListeners,
     
     XRevWritableModel modelState, Root root,
-    
-    XWritableChangeLog changeLog, LocalChanges localChanges,
     
     XId actorId, String passwordHash, long syncRev) {
         this.store = store;
         this.modelWithListeners = modelWithListeners;
         this.modelState = modelState;
         this.root = root;
-        this.changeLog = changeLog;
-        this.localChanges = localChanges;
+        this.changeLog = root.getWritableChangeLog();
+        this.localChanges = root.getLocalChanges();
         this.actorId = actorId;
         this.passwordHash = passwordHash;
         this.syncRev = syncRev;
@@ -158,6 +159,8 @@ public class NewSyncer {
         }
         
         this.localChanges.clear();
+        
+        this.root.setSyncRevision(newSyncRev);
         
         // end atomic section ----
         

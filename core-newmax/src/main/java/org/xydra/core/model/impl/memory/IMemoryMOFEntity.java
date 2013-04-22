@@ -14,11 +14,15 @@ public interface IMemoryMOFEntity extends XSendsSyncEvents {
      */
     boolean exists();
     
-    Root getRoot();
-    
-    long getFatherRevisionNumber();
-    
+    /**
+     * @param exists
+     */
     void setExists(boolean exists);
+    
+    /**
+     * @return the root managing event listener registration/firing
+     */
+    Root getRoot();
     
     /**
      * @param event if this entity receives a sync-event; look inside to find

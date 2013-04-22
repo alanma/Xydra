@@ -27,66 +27,65 @@ import org.xydra.base.value.XValue;
  * 
  * @author voelkel
  * @author kaidel
- * 
  */
 public interface XField extends XLoggedField, XWritableField, Serializable {
-	
-	/**
-	 * Executes the given {@link XCommand} if possible.
-	 * 
-	 * This method will fail if,
-	 * <ul>
-	 * <li>the given {@link XCommand} cannot be executed
-	 * <li>the field-{@link XId} specified in the {@link XCommand} does not
-	 * concur with the {@link XId} of this field
-	 * </ul>
-	 * 
-	 * @param command The {@link XCommand} which is to be executed
-	 * 
-	 * @return {@link XCommand#FAILED} if the {@link XCommand} failed,
-	 *         {@link XCommand#NOCHANGE} if the {@link XCommand} didn't change
-	 *         anything or the revision number of the {@link XEvent} caused by
-	 *         the {@link XCommand}.
-	 */
-	@ModificationOperation
-	long executeFieldCommand(XFieldCommand command);
-	
-	/**
-	 * @return the actor that is represented by this interface. This is the
-	 *         actor that is recorded for change operations. Operations will
-	 *         only succeed if this actor has access.
-	 */
-	XId getSessionActor();
-	
-	/**
-	 * Set a new actor to be used when building commands for changes to this
-	 * field. This method cannot be used if this field has a parent.
-	 * 
-	 * @param actor for this field.
-	 */
-	void setSessionActor(XId actor);
-	
-	/**
-	 * Sets the {@link XValue} of this field to the given value.
-	 * 
-	 * Passing "null" as the 'value' arguments implies an remove operation (will
-	 * remove the current {@link XValue})
-	 * 
-	 * @param value The new {@link XValue}
-	 * 
-	 * @return true, if this operation actually changed the current
-	 *         {@link XValue} of this field, false otherwise
-	 */
-	@Override
+    
+    /**
+     * Executes the given {@link XCommand} if possible.
+     * 
+     * This method will fail if,
+     * <ul>
+     * <li>the given {@link XCommand} cannot be executed
+     * <li>the field-{@link XId} specified in the {@link XCommand} does not
+     * concur with the {@link XId} of this field
+     * </ul>
+     * 
+     * @param command The {@link XCommand} which is to be executed
+     * 
+     * @return {@link XCommand#FAILED} if the {@link XCommand} failed,
+     *         {@link XCommand#NOCHANGE} if the {@link XCommand} didn't change
+     *         anything or the revision number of the {@link XEvent} caused by
+     *         the {@link XCommand}.
+     */
     @ModificationOperation
-	boolean setValue(XValue value);
-	
-	/**
-	 * Create a consistent snapshot of this field.
-	 * 
-	 * @return null if this field has been removed, a consistent snapshot
-	 *         otherwise.
-	 */
-	XRevWritableField createSnapshot();
-	
+    long executeFieldCommand(XFieldCommand command);
+    
+    /**
+     * @return the actor that is represented by this interface. This is the
+     *         actor that is recorded for change operations. Operations will
+     *         only succeed if this actor has access.
+     */
+    XId getSessionActor();
+    
+    /**
+     * Set a new actor to be used when building commands for changes to this
+     * field. This method cannot be used if this field has a parent.
+     * 
+     * @param actor for this field.
+     */
+    void setSessionActor(XId actor);
+    
+    /**
+     * Sets the {@link XValue} of this field to the given value.
+     * 
+     * Passing "null" as the 'value' arguments implies an remove operation (will
+     * remove the current {@link XValue})
+     * 
+     * @param value The new {@link XValue}
+     * 
+     * @return true, if this operation actually changed the current
+     *         {@link XValue} of this field, false otherwise
+     */
+    @Override
+    @ModificationOperation
+    boolean setValue(XValue value);
+    
+    /**
+     * Create a consistent snapshot of this field.
+     * 
+     * @return null if this field has been removed, a consistent snapshot
+     *         otherwise.
+     */
+    XRevWritableField createSnapshot();
+    
 }

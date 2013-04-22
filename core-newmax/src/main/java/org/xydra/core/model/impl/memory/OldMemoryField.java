@@ -53,7 +53,7 @@ public class OldMemoryField extends AbstractMOFEntity implements XField, IMemory
      * the father-object which is holding this field (may be null)
      */
     @CanBeNull
-    private final IMemoryObject father;
+    private final OldIMemoryObject father;
     
     /** The internal runtime state, like a snapshot */
     private final XRevWritableField state;
@@ -68,7 +68,7 @@ public class OldMemoryField extends AbstractMOFEntity implements XField, IMemory
      *            this state object, so it must not be modified directly after
      *            wrapping it in an {@link XField} @NeverNull
      */
-    protected OldMemoryField(IMemoryObject father, MemoryEventQueue eventQueue,
+    protected OldMemoryField(OldIMemoryObject father, MemoryEventQueue eventQueue,
             XRevWritableField fieldState) {
         super(null, true);
         if(eventQueue == null) {
@@ -128,7 +128,7 @@ public class OldMemoryField extends AbstractMOFEntity implements XField, IMemory
     
     @Override
     public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
-        return this.root.addListenerForFieldEvents(getAddress(), changeListener);
+        return getRoot().addListenerForFieldEvents(getAddress(), changeListener);
     }
     
     @Override
@@ -146,13 +146,13 @@ public class OldMemoryField extends AbstractMOFEntity implements XField, IMemory
     @Override
     public void delete() {
         this.state.setValue(null);
-        this.exists = false;
+        // this.exists = false;
     }
     
     @Override
     @ReadOperation
     public boolean equals(Object object) {
-        synchronized(this.root) {
+        synchronized(getRoot()) {
             return super.equals(object);
         }
     }
@@ -169,7 +169,7 @@ public class OldMemoryField extends AbstractMOFEntity implements XField, IMemory
     // implement IMemoryField
     @Override
     public long executeFieldCommand(XFieldCommand command, XLocalChangeCallback callback) {
-        synchronized(this.root) {
+        synchronized(getRoot()) {
             assertThisEntityExists();
             
             XyAssert.xyAssert(!this.eventQueue.transactionInProgess);
@@ -273,18 +273,18 @@ public class OldMemoryField extends AbstractMOFEntity implements XField, IMemory
     // implement IMemoryField
     @Override
     public void fireFieldEvent(XFieldEvent event) {
-        this.root.fireFieldEvent(getAddress(), event);
+        getRoot().fireFieldEvent(getAddress(), event);
     }
     
     @Override
     public XAddress getAddress() {
-        synchronized(this.root) {
+        synchronized(getRoot()) {
             return this.state.getAddress();
         }
     }
     
     @Override
-    public IMemoryObject getFather() {
+    public OldIMemoryObject getFather() {
         return this.father;
     }
     
@@ -295,7 +295,7 @@ public class OldMemoryField extends AbstractMOFEntity implements XField, IMemory
     @Override
     @ReadOperation
     public XId getId() {
-        synchronized(this.root) {
+        synchronized(getRoot()) {
             return this.state.getId();
         }
     }
@@ -319,7 +319,7 @@ public class OldMemoryField extends AbstractMOFEntity implements XField, IMemory
     @ReadOperation
     // implement IMemoryField
     @Override
-    public IMemoryObject getObject() {
+    public OldIMemoryObject getObject() {
         return this.father;
     }
     
@@ -343,14 +343,14 @@ public class OldMemoryField extends AbstractMOFEntity implements XField, IMemory
     @Override
     @ReadOperation
     public long getRevisionNumber() {
-        synchronized(this.root) {
+        synchronized(getRoot()) {
             return this.state.getRevisionNumber();
         }
     }
     
     @Override
     public XId getSessionActor() {
-        synchronized(this.root) {
+        synchronized(getRoot()) {
             return this.eventQueue.getActor();
         }
     }
@@ -377,7 +377,7 @@ public class OldMemoryField extends AbstractMOFEntity implements XField, IMemory
     @Override
     @ReadOperation
     public XValue getValue() {
-        synchronized(this.root) {
+        synchronized(getRoot()) {
             assertThisEntityExists();
             return this.state.getValue();
         }
@@ -385,7 +385,7 @@ public class OldMemoryField extends AbstractMOFEntity implements XField, IMemory
     
     @Override
     public int hashCode() {
-        synchronized(this.root) {
+        synchronized(getRoot()) {
             return super.hashCode();
         }
     }
@@ -407,7 +407,7 @@ public class OldMemoryField extends AbstractMOFEntity implements XField, IMemory
     
     @Override
     public boolean isEmpty() {
-        synchronized(this.root) {
+        synchronized(getRoot()) {
             assertThisEntityExists();
             return this.getValue() == null;
         }
@@ -435,7 +435,7 @@ public class OldMemoryField extends AbstractMOFEntity implements XField, IMemory
     
     @Override
     public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
-        return this.root.removeListenerForFieldEvents(getAddress(), changeListener);
+        return getRoot().removeListenerForFieldEvents(getAddress(), changeListener);
     }
     
     // implement IMemoryField
@@ -446,7 +446,7 @@ public class OldMemoryField extends AbstractMOFEntity implements XField, IMemory
     
     @Override
     public void setSessionActor(XId actorId) {
-        synchronized(this.root) {
+        synchronized(getRoot()) {
             if(this.father != null) {
                 throw new IllegalStateException("cannot set actor on field with a parent");
             }
@@ -547,7 +547,7 @@ public class OldMemoryField extends AbstractMOFEntity implements XField, IMemory
     
     @Override
     public Root getRoot() {
-        return this.root;
+        return getRoot();
     }
     
     @Override

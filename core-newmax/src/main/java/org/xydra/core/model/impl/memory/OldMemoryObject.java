@@ -49,7 +49,7 @@ import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
-import org.xydra.core.model.XSynchronizesChanges;
+import org.xydra.core.model.OldXSynchronizesChanges;
 import org.xydra.core.model.delta.ReadableModelWithOneObject;
 import org.xydra.core.model.impl.memory.SynchronisationState.Orphans;
 import org.xydra.sharedutils.XyAssert;
@@ -62,8 +62,8 @@ import org.xydra.sharedutils.XyAssert;
  * @author Kaidel
  * 
  */
-public class OldMemoryObject extends AbstractMOFEntity implements IMemoryObject, XObject,
-        IHasXAddress, IHasChangeLog, XSynchronizesChanges, XExecutesCommands, XSendsObjectEvents,
+public class OldMemoryObject extends AbstractMOFEntity implements OldIMemoryObject, XObject,
+        IHasXAddress, IHasChangeLog, OldXSynchronizesChanges, XExecutesCommands, XSendsObjectEvents,
         XSendsFieldEvents, XSendsTransactionEvents, Serializable {
     
     private static final long serialVersionUID = -808702139986657842L;
@@ -448,7 +448,7 @@ public class OldMemoryObject extends AbstractMOFEntity implements IMemoryObject,
         XObjectCommand command = MemoryObjectCommand.createAddCommand(getAddress(), true, fieldId);
         
         // synchronize so that return is never null if command succeeded
-        synchronized(this.root) {
+        synchronized(getRoot()) {
             long result = executeObjectCommand(command);
             IMemoryField field = getField(fieldId);
             XyAssert.xyAssert(result == XCommand.FAILED || field != null);
@@ -526,7 +526,7 @@ public class OldMemoryObject extends AbstractMOFEntity implements IMemoryObject,
             this.state.removeField(fieldId);
         }
         this.loadedFields.clear();
-        this.exists = true;
+        // this.exists = true;
     }
     
     /**
@@ -567,7 +567,7 @@ public class OldMemoryObject extends AbstractMOFEntity implements IMemoryObject,
     @ReadOperation
     @Override
     public boolean equals(Object object) {
-        synchronized(this.root) {
+        synchronized(getRoot()) {
             return super.equals(object);
         }
     }
@@ -580,7 +580,7 @@ public class OldMemoryObject extends AbstractMOFEntity implements IMemoryObject,
     @Override
     public long executeCommand(XCommand command, XLocalChangeCallback callback) {
         if(command instanceof XTransaction) {
-            synchronized(this.root) {
+            synchronized(getRoot()) {
                 return this.syncState.executeTransaction((XTransaction)command, callback);
             }
         }
@@ -604,7 +604,7 @@ public class OldMemoryObject extends AbstractMOFEntity implements IMemoryObject,
     }
     
     private long executeObjectCommand(XObjectCommand command, XLocalChangeCallback callback) {
-        synchronized(this.root) {
+        synchronized(getRoot()) {
             assertThisEntityExists();
             
             XyAssert.xyAssert(!this.syncState.eventQueue.transactionInProgess);
@@ -686,14 +686,14 @@ public class OldMemoryObject extends AbstractMOFEntity implements IMemoryObject,
     
     @Override
     public XAddress getAddress() {
-        synchronized(this.root) {
+        synchronized(getRoot()) {
             return this.state.getAddress();
         }
     }
     
     @Override
     public IMemoryField getField(XId fieldId) {
-        synchronized(this.root) {
+        synchronized(getRoot()) {
             assertThisEntityExists();
             
             IMemoryField field = this.loadedFields.get(fieldId);
@@ -715,7 +715,7 @@ public class OldMemoryObject extends AbstractMOFEntity implements IMemoryObject,
     
     @Override
     public XId getId() {
-        synchronized(this.root) {
+        synchronized(getRoot()) {
             return this.state.getId();
         }
     }
@@ -753,7 +753,7 @@ public class OldMemoryObject extends AbstractMOFEntity implements IMemoryObject,
     
     @Override
     public long getRevisionNumber() {
-        synchronized(this.root) {
+        synchronized(getRoot()) {
             return this.state.getRevisionNumber();
         }
     }
@@ -766,7 +766,7 @@ public class OldMemoryObject extends AbstractMOFEntity implements IMemoryObject,
     
     @Override
     public boolean hasField(XId id) {
-        synchronized(this.root) {
+        synchronized(getRoot()) {
             assertThisEntityExists();
             return this.loadedFields.containsKey(id) || this.state.hasField(id);
         }
@@ -780,7 +780,7 @@ public class OldMemoryObject extends AbstractMOFEntity implements IMemoryObject,
     @ReadOperation
     @Override
     public int hashCode() {
-        synchronized(this.root) {
+        synchronized(getRoot()) {
             return super.hashCode();
         }
     }
@@ -792,7 +792,7 @@ public class OldMemoryObject extends AbstractMOFEntity implements IMemoryObject,
     
     @Override
     public boolean isEmpty() {
-        synchronized(this.root) {
+        synchronized(getRoot()) {
             assertThisEntityExists();
             return this.state.isEmpty();
         }
@@ -800,7 +800,7 @@ public class OldMemoryObject extends AbstractMOFEntity implements IMemoryObject,
     
     @Override
     public Iterator<XId> iterator() {
-        synchronized(this.root) {
+        synchronized(getRoot()) {
             assertThisEntityExists();
             return this.state.iterator();
         }
@@ -908,7 +908,7 @@ public class OldMemoryObject extends AbstractMOFEntity implements IMemoryObject,
     
     @Override
     public XRevWritableObject createSnapshot() {
-        synchronized(this.root) {
+        synchronized(getRoot()) {
             if(exists()) {
                 return XCopyUtils.createSnapshot(this);
             } else {
@@ -925,66 +925,66 @@ public class OldMemoryObject extends AbstractMOFEntity implements IMemoryObject,
     // implement IMemoryObject
     @Override
     public void fireObjectEvent(XObjectEvent event) {
-        synchronized(this.root) {
-            this.root.fireObjectEvent(getAddress(), event);
+        synchronized(getRoot()) {
+            getRoot().fireObjectEvent(getAddress(), event);
         }
     }
     
     // implement IMemoryObject
     @Override
     public void fireFieldEvent(XFieldEvent event) {
-        synchronized(this.root) {
-            this.root.fireFieldEvent(getAddress(), event);
+        synchronized(getRoot()) {
+            getRoot().fireFieldEvent(getAddress(), event);
         }
     }
     
     // implement IMemoryObject
     @Override
     public void fireTransactionEvent(XTransactionEvent event) {
-        synchronized(this.root) {
-            this.root.fireTransactionEvent(getAddress(), event);
+        synchronized(getRoot()) {
+            getRoot().fireTransactionEvent(getAddress(), event);
         }
     }
     
     @Override
     public boolean addListenerForTransactionEvents(XTransactionEventListener changeListener) {
-        synchronized(this.root) {
-            return this.root.addListenerForTransactionEvents(getAddress(), changeListener);
+        synchronized(getRoot()) {
+            return getRoot().addListenerForTransactionEvents(getAddress(), changeListener);
         }
     }
     
     @Override
     public boolean removeListenerForTransactionEvents(XTransactionEventListener changeListener) {
-        synchronized(this.root) {
-            return this.root.removeListenerForTransactionEvents(getAddress(), changeListener);
+        synchronized(getRoot()) {
+            return getRoot().removeListenerForTransactionEvents(getAddress(), changeListener);
         }
     }
     
     @Override
     public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
-        synchronized(this.root) {
-            return this.root.addListenerForFieldEvents(getAddress(), changeListener);
+        synchronized(getRoot()) {
+            return getRoot().addListenerForFieldEvents(getAddress(), changeListener);
         }
     }
     
     @Override
     public boolean removeListenerForFieldEvents(XFieldEventListener changeListener) {
-        synchronized(this.root) {
-            return this.root.removeListenerForFieldEvents(getAddress(), changeListener);
+        synchronized(getRoot()) {
+            return getRoot().removeListenerForFieldEvents(getAddress(), changeListener);
         }
     }
     
     @Override
     public boolean addListenerForObjectEvents(XObjectEventListener changeListener) {
-        synchronized(this.root) {
-            return this.root.addListenerForObjectEvents(getAddress(), changeListener);
+        synchronized(getRoot()) {
+            return getRoot().addListenerForObjectEvents(getAddress(), changeListener);
         }
     }
     
     @Override
     public boolean removeListenerForObjectEvents(XObjectEventListener changeListener) {
-        synchronized(this.root) {
-            return this.root.removeListenerForObjectEvents(getAddress(), changeListener);
+        synchronized(getRoot()) {
+            return getRoot().removeListenerForObjectEvents(getAddress(), changeListener);
         }
     }
     

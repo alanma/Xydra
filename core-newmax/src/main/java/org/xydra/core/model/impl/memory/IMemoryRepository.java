@@ -1,11 +1,11 @@
 package org.xydra.core.model.impl.memory;
 
-import org.xydra.base.XId;
 import org.xydra.base.change.XFieldEvent;
 import org.xydra.base.change.XModelEvent;
 import org.xydra.base.change.XObjectEvent;
 import org.xydra.base.change.XRepositoryEvent;
 import org.xydra.base.change.XTransactionEvent;
+import org.xydra.base.rmof.XRevWritableRepository;
 import org.xydra.core.model.XRepository;
 
 
@@ -22,10 +22,9 @@ public interface IMemoryRepository extends XRepository, IMemoryEntity {
     
     void fireTransactionEvent(XTransactionEvent event);
     
+    // TODO add this to other IMem also?
     void addModel(IMemoryModel memoryModel);
     
-    boolean removeModelInternal(XId id);
-    
-    void updateRemoved(IMemoryModel model);
+    XRevWritableRepository getState();
     
 }

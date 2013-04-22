@@ -1,19 +1,11 @@
 package org.xydra.core.model.impl.memory;
 
-import org.xydra.annotations.CanBeNull;
 import org.xydra.annotations.ReadOperation;
 import org.xydra.base.change.XSyncEvent;
 import org.xydra.core.change.XSyncEventListener;
 
 
 public abstract class AbstractMOFEntity extends AbstractEntity implements IMemoryMOFEntity {
-    
-    /**
-     * @return the father entity or null if this entity is the root
-     */
-    @CanBeNull
-    // TODO deprecate?
-    protected abstract IMemoryEntity getFather();
     
     /**
      * @return true if the entity currently exists
@@ -23,11 +15,13 @@ public abstract class AbstractMOFEntity extends AbstractEntity implements IMemor
     }
     
     public AbstractMOFEntity(Root root, boolean exists) {
+        assert root != null;
+        
         this.root = root;
         this.exists = exists;
     }
     
-    protected boolean exists;
+    private boolean exists;
     
     @Override
     public void setExists(boolean exists) {
@@ -38,21 +32,12 @@ public abstract class AbstractMOFEntity extends AbstractEntity implements IMemor
      * Handles all registered event listeners. Also the lock for synchronising
      * change operations.
      */
-    protected final Root root;
+    private final Root root;
     
     @Override
     public Root getRoot() {
         return this.root;
     }
-    
-    // TODO deprecate?
-    public long getFatherRevisionNumber() {
-        if(this.getFather() != null)
-            return this.getFather().getRevisionNumber();
-        return getRevisionNumber();
-    }
-    
-    public abstract Object getStateLock();
     
     /**
      * @throws IllegalStateException if this method is called after this
@@ -60,10 +45,9 @@ public abstract class AbstractMOFEntity extends AbstractEntity implements IMemor
      */
     @ReadOperation
     public void assertThisEntityExists() throws IllegalStateException {
-        synchronized(getStateLock()) {
-            if(!exists()) {
-                throw new IllegalStateException("this entity has been removed: " + getAddress());
-            }
+        // TODO synchronize?
+        if(!exists()) {
+            throw new IllegalStateException("this entity has been removed: " + getAddress());
         }
     }
     

@@ -36,6 +36,7 @@ import org.xydra.sharedutils.XyAssert;
  * XObjectEvents} and {@link XFieldEvent XFieldEvents} which are to be
  * dispatched after all current change operations are completed.
  */
+@Deprecated
 class MemoryEventQueue implements Serializable {
     
     /**
@@ -63,7 +64,7 @@ class MemoryEventQueue implements Serializable {
         private XEvent event;
         private IMemoryField field;
         private IMemoryModel model;
-        private IMemoryObject object;
+        private OldIMemoryObject object;
         @CanBeNull
         private IMemoryRepository repo;
         
@@ -74,8 +75,8 @@ class MemoryEventQueue implements Serializable {
          * @param field
          * @param event
          */
-        private EventQueueEntry(IMemoryRepository repo, IMemoryModel model, IMemoryObject object,
-                IMemoryField field, XEvent event) {
+        private EventQueueEntry(IMemoryRepository repo, IMemoryModel model,
+                OldIMemoryObject object, IMemoryField field, XEvent event) {
             this.repo = repo;
             this.model = model;
             this.object = object;
@@ -392,7 +393,7 @@ class MemoryEventQueue implements Serializable {
      *        the current MemoryEventQueue (value can be retrieved from
      *        getNextPosition())
      */
-    protected void createTransactionEvent(XId actor, IMemoryModel model, IMemoryObject object,
+    protected void createTransactionEvent(XId actor, IMemoryModel model, OldIMemoryObject object,
             int since) {
         
         XyAssert.xyAssert(this.eventQueue instanceof RandomAccess);
@@ -461,7 +462,7 @@ class MemoryEventQueue implements Serializable {
     protected void enqueueFieldEvent(IMemoryField field, XReversibleFieldEvent event) {
         assert field != null && event != null : "Neither field nor event may be null!";
         
-        IMemoryObject object = field.getObject();
+        OldIMemoryObject object = field.getObject();
         IMemoryModel model = object == null ? null : object.getFather();
         IMemoryRepository repo = model == null ? null : model.getFather();
         
@@ -492,7 +493,7 @@ class MemoryEventQueue implements Serializable {
      * @param object The {@link MemoryObject} in which this event occurred.
      * @param event The {@link XObjectEvent}.
      */
-    protected void enqueueObjectEvent(IMemoryObject object, XObjectEvent event) {
+    protected void enqueueObjectEvent(OldIMemoryObject object, XObjectEvent event) {
         assert object != null && event != null : "Neither object nor event may be null!";
         
         IMemoryModel model = object.getFather();

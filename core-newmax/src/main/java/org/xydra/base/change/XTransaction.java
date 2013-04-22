@@ -12,8 +12,8 @@ import org.xydra.base.XAddress;
  * being executed, the whole Transaction will be rolled back (all commands that
  * were already executed are undone). The Transaction itself is not responsible
  * that it will or can be executed in this manner. Classes that implement the
- * {@link org.xydra.core.model.XSynchronizesChanges} interfaces provide an
- * {@link org.xydra.core.model.XSynchronizesChanges#executeCommand(XCommand)}
+ * {@link org.xydra.core.model.OldXSynchronizesChanges} interfaces provide an
+ * {@link org.xydra.core.model.OldXSynchronizesChanges#executeCommand(XCommand)}
  * method that needs to be implemented in such a way that this behaviour is
  * guaranteed, if an XTransaction is passed as the argument.
  * 

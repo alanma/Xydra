@@ -61,7 +61,7 @@ class SynchronisationState implements Serializable {
      */
     private IMemoryModel model;
     
-    private IMemoryObject object;
+    private OldIMemoryObject object;
     
     private final IMemoryMOFEntity syncRoot;
     
@@ -75,7 +75,7 @@ class SynchronisationState implements Serializable {
      * @param syncRoot The entity handling the synchronisation
      */
     public SynchronisationState(ISyncProvider syncProvider, MemoryEventQueue queue,
-            IMemoryModel model, IMemoryObject object, IMemoryMOFEntity syncRoot) {
+            IMemoryModel model, OldIMemoryObject object, IMemoryMOFEntity syncRoot) {
         this.syncProvider = syncProvider;
         this.eventQueue = queue;
         this.model = model;
@@ -93,7 +93,7 @@ class SynchronisationState implements Serializable {
         
         Map<XAddress,IMemoryField> fields = new HashMap<XAddress,IMemoryField>();
         
-        Map<XId,IMemoryObject> objects = new HashMap<XId,IMemoryObject>();
+        Map<XId,OldIMemoryObject> objects = new HashMap<XId,OldIMemoryObject>();
         
     }
     
@@ -108,7 +108,7 @@ class SynchronisationState implements Serializable {
         Orphans orphans = this.eventQueue.orphans;
         this.eventQueue.orphans = null;
         
-        for(IMemoryObject object : orphans.objects.values()) {
+        for(OldIMemoryObject object : orphans.objects.values()) {
             object.delete();
         }
         
@@ -196,7 +196,7 @@ class SynchronisationState implements Serializable {
             }
             
             for(XReadableObject object : model.getNewObjects()) {
-                IMemoryObject newObject = this.syncProvider.createObjectInternal(object.getId());
+                OldIMemoryObject newObject = this.syncProvider.createObjectInternal(object.getId());
                 for(XId fieldId : object) {
                     XReadableField field = object.getField(fieldId);
                     IMemoryField newField = newObject.createFieldInternal(fieldId);
@@ -207,7 +207,7 @@ class SynchronisationState implements Serializable {
             }
             
             for(ChangedObject object : model.getChangedObjects()) {
-                IMemoryObject oldObject = this.syncProvider.getObject(object.getId());
+                OldIMemoryObject oldObject = this.syncProvider.getObject(object.getId());
                 
                 for(XId fieldId : object.getRemovedFields()) {
                     oldObject.removeFieldInternal(fieldId);
@@ -240,7 +240,7 @@ class SynchronisationState implements Serializable {
                 
                 // new objects
                 for(XReadableObject object : model.getNewObjects()) {
-                    IMemoryObject newObject = this.syncProvider.getObject(object.getId());
+                    OldIMemoryObject newObject = this.syncProvider.getObject(object.getId());
                     assert newObject != null : "should have been created above";
                     for(XId fieldId : object) {
                         IMemoryField newField = newObject.getField(fieldId);
@@ -252,7 +252,7 @@ class SynchronisationState implements Serializable {
                 
                 // changed objects
                 for(ChangedObject object : model.getChangedObjects()) {
-                    IMemoryObject oldObject = this.syncProvider.getObject(object.getId());
+                    OldIMemoryObject oldObject = this.syncProvider.getObject(object.getId());
                     assert oldObject != null : "should have existed already and not been removed";
                     
                     boolean changed = object.getRemovedFields().iterator().hasNext();
@@ -574,7 +574,7 @@ class SynchronisationState implements Serializable {
             XId objectId = ((XModelEvent)event).getObjectId();
             if(event.getChangeType() == ChangeType.REMOVE) {
                 XyAssert.xyAssert(!this.model.hasObject(objectId));
-                IMemoryObject object = this.syncProvider.createObjectInternal(objectId);
+                OldIMemoryObject object = this.syncProvider.createObjectInternal(objectId);
                 XyAssert.xyAssert(event.getOldObjectRevision() >= 0);
                 object.setRevisionNumber(event.getOldObjectRevision());
             } else {
@@ -589,7 +589,7 @@ class SynchronisationState implements Serializable {
             
         } else {
             XyAssert.xyAssert(event instanceof XObjectEvent || event instanceof XFieldEvent);
-            IMemoryObject object = this.syncProvider.getObject(event.getTarget().getObject());
+            OldIMemoryObject object = this.syncProvider.getObject(event.getTarget().getObject());
             XyAssert.xyAssert(object != null);
             assert object != null;
             XyAssert.xyAssert(event.getRevisionNumber() == object.getRevisionNumber()
@@ -781,7 +781,7 @@ class SynchronisationState implements Serializable {
             /*
              * try to get the object the given transaction actually refers to
              */
-            IMemoryObject object = this.syncProvider.getObject(transaction.getTarget().getObject());
+            OldIMemoryObject object = this.syncProvider.getObject(transaction.getTarget().getObject());
             
             if(object == null) {
                 // object does not exist -> transaction fails

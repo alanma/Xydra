@@ -611,9 +611,8 @@ public class APITest {
         // create a repository
         XRepository repo = new MemoryRepository(this.actorId, this.password, XX.createUniqueId());
         
-        // add a model to the repository
-        XId modelId = XX.createUniqueId(); // create an ID for
-        // the model
+        // add a model to the repository; create an ID for the model
+        XId modelId = XX.createUniqueId();
         XModel model = repo.createModel(modelId);
         
         // check whether it was really added

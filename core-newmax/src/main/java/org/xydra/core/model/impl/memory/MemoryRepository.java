@@ -28,8 +28,6 @@ import org.xydra.core.change.XModelEventListener;
 import org.xydra.core.change.XObjectEventListener;
 import org.xydra.core.change.XRepositoryEventListener;
 import org.xydra.core.change.XTransactionEventListener;
-import org.xydra.core.model.XChangeLogState;
-import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.impl.memory.MemoryEventBus.EventType;
@@ -58,6 +56,7 @@ public class MemoryRepository extends AbstractEntity implements IMemoryRepositor
     
     private XId sessionActor;
     
+    @SuppressWarnings("unused")
     private String sessionPasswordHash;
     
     private final XRevWritableRepository state;
@@ -152,39 +151,47 @@ public class MemoryRepository extends AbstractEntity implements IMemoryRepositor
     }
     
     @Override
-    public long executeCommand(XCommand command) {
-        return executeCommand(command, null);
-    }
-    
-    @Override
     public long executeRepositoryCommand(XRepositoryCommand command) {
-        return executeCommand(command, null);
+        return executeCommand(command);
     }
     
     @Override
-    public long executeCommand(XCommand command, XLocalChangeCallback callback) {
+    public long executeCommand(XCommand command) {
         /*
          * find out which model should handle it, defer all execution and error
          * checking there
          */
-        XAddress changed = command.getChangedEntity();
-        XId repoId = changed.getRepository();
+        XAddress modelAddress = command.getChangedEntity();
+        XId repoId = modelAddress.getRepository();
         assert repoId != null : "executing a command on a repo imlpies a repoId is there";
-        XId modelId = changed.getModel();
+        XId modelId = modelAddress.getModel();
         assert modelId != null : "all commands have a modelId";
-        IMemoryModel model = this.getModel(modelId);
+        IMemoryModel model = getModel(modelId);
         if(model == null) {
             // id is not taken yet
-            model = MemoryModel.createNonExistantModel(this, this.sessionActor,
-                    this.sessionPasswordHash, repoId, modelId);
+            model = MemoryModel.createNonExistantModel(getSessionActor(), this, modelId);
         }
-        long result = model.executeCommandWithActor(command, this.sessionActor,
-                this.sessionPasswordHash, callback);
+        long result = model.executeCommand(command);
         assert XCommandUtils.success(result);
         
-        // fire events
-        XEvent event = model.getChangeLog().getEventAt(result);
-        fireEvent(event);
+        if(XCommandUtils.changedSomething(result)) {
+            // change repo state
+            switch(command.getChangeType()) {
+            case ADD:
+                this.state.createModel(modelId);
+                break;
+            case REMOVE:
+                this.state.removeModel(modelId);
+                break;
+            default:
+                assert false;
+            }
+            
+            // fire events
+            XEvent event = model.getChangeLog().getEventAt(result);
+            fireEvent(event);
+        }
+        
         return result;
     }
     
@@ -319,10 +326,7 @@ public class MemoryRepository extends AbstractEntity implements IMemoryRepositor
             return null;
         }
         
-        XChangeLogState log = new MemoryChangeLogState(modelState.getAddress());
-        log.setBaseRevisionNumber(modelState.getRevisionNumber());
-        
-        model = new MemoryModel(this, this.sessionActor, this.sessionPasswordHash, modelState, log);
+        model = new MemoryModel(getSessionActor(), this, modelState);
         this.loadedModels.put(modelId, model);
         
         return model;
@@ -426,13 +430,6 @@ public class MemoryRepository extends AbstractEntity implements IMemoryRepositor
         return result != XCommand.NOCHANGE;
     }
     
-    // implement IMemoryRepository
-    @Override
-    public boolean removeModelInternal(XId modelId) {
-        this.loadedModels.remove(modelId);
-        return this.state.removeModel(modelId);
-    }
-    
     @Override
     public void setSessionActor(XId actorId, String passwordHash) {
         XyAssert.xyAssert(actorId != null);
@@ -444,23 +441,9 @@ public class MemoryRepository extends AbstractEntity implements IMemoryRepositor
         }
     }
     
-    // implement IMemoryRepository
     @Override
-    public synchronized void updateRemoved(IMemoryModel model) {
-        XyAssert.xyAssert(model != null);
-        assert model != null;
-        synchronized(model.getRoot()) {
-            XId modelId = model.getId();
-            boolean hasModel = hasModel(modelId);
-            if(!model.exists() && hasModel) {
-                this.state.removeModel(modelId);
-                this.loadedModels.remove(modelId);
-            } else if(model.exists() && !hasModel) {
-                this.state.addModel(model.getState());
-                this.loadedModels.put(model.getId(), model);
-            }
-            model.getSyncState().eventQueue.sendEvents();
-        }
+    public XRevWritableRepository getState() {
+        return this.state;
     }
     
 }

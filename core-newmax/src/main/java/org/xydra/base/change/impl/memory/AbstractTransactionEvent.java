@@ -78,6 +78,7 @@ public abstract class AbstractTransactionEvent implements XTransactionEvent {
      */
     protected boolean assertIsCorrect() {
         
+        /** false = remove, true = add ???????? */
         Map<XAddress,Boolean> entities = new HashMap<XAddress,Boolean>();
         
         for(XAtomicEvent event : this) {
@@ -111,13 +112,14 @@ public abstract class AbstractTransactionEvent implements XTransactionEvent {
             for(XAddress addr = event.getTarget(); addr != null; addr = addr.getParent()) {
                 if(Boolean.FALSE.equals(entities.get(addr))) {
                     implied = true;
-                    assert b : "removed the an entity but not all children";
+                    assert b : "removed an entity but not all children";
                 } else {
                     b = false;
                 }
             }
             
-            assert event.isImplied() == implied : "event has incorrect implied flag: " + event;
+            assert event.isImplied() == implied : "event has incorrect implied flag: " + event
+                    + " expected=" + implied;
         }
         
         return true;

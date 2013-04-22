@@ -52,7 +52,8 @@ public class MemoryChangeLogState implements XChangeLogState {
             // nothing, just complain a little
             log.warn("Skipping null-event");
         } else {
-            XyAssert.xyAssert(this.baseAddr.equalsOrContains(event.getChangedEntity()));
+            XyAssert.xyAssert(this.baseAddr.equalsOrContains(event.getChangedEntity()), "baseAddr="
+                    + this.baseAddr + " does not contain " + event.getChangedEntity());
             XyAssert.xyAssert(event.getRevisionNumber() > getCurrentRevisionNumber());
             XyAssert.xyAssert(!event.inTransaction());
             this.eventMap.put(event.getRevisionNumber(), event);

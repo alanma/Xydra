@@ -16,7 +16,15 @@ import org.xydra.base.XId;
  */
 public interface XEvent extends Serializable {
     
+    /**
+     * The revision cannot be efficiently calculated.
+     */
     public static long RevisionNotAvailable = -2;
+    
+    /**
+     * A revision number has not been set for this entity. E.g. if this XEvent
+     * has no such father-entity.
+     */
     public static long RevisionOfEntityNotSet = -1;
     
     /**

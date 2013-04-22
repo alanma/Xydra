@@ -46,7 +46,7 @@ public class SimpleObject extends SimpleEntity implements XRevWritableObject {
     }
     
     public SimpleObject(XAddress address, long revisionNumber) {
-        XyAssert.xyAssert(address.getAddressedType() == XType.XOBJECT);
+        XyAssert.xyAssert(address.getAddressedType() == XType.XOBJECT, "Adress=" + address);
         this.address = address;
         this.revisionNumber = revisionNumber;
         this.fields = new HashMap<XId,XRevWritableField>(2);

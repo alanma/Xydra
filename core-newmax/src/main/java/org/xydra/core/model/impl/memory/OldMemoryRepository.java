@@ -464,4 +464,8 @@ public class OldMemoryRepository extends AbstractEntity implements IMemoryReposi
         }
     }
     
+    @Override
+    public XRevWritableRepository getState() {
+        return this.state;
+    }
 }

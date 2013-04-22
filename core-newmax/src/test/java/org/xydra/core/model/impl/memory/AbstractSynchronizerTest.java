@@ -219,8 +219,7 @@ abstract public class AbstractSynchronizerTest {
     
     private NewSyncer createSyncer(XydraStore store, IMemoryModel model) {
         return new NewSyncer(this.store, this.model, this.model.getState(), this.model.getRoot(),
-                this.model.getChangeLog(), this.model.getLocalChangesImpl(), this.actorId,
-                this.passwordHash, this.model.getSynchronizedRevision());
+                this.actorId, this.passwordHash, this.model.getSynchronizedRevision());
     }
     
     /**
@@ -581,11 +580,10 @@ abstract public class AbstractSynchronizerTest {
         
         // also make some local changes
         // should be reverted on sync because of conflicting remote changes
-        ForTestLocalChangeCallback tlc1 = new ForTestLocalChangeCallback();
         XTransactionBuilder tb2 = new XTransactionBuilder(this.model.getAddress());
         tb2.addObject(this.model.getAddress(), XCommand.SAFE, janeId);
         tb2.addField(janeAddr, XCommand.SAFE, cakesId);
-        assertTrue(this.model.executeCommand(tb2.buildCommand(), tlc1) >= 0);
+        assertTrue(this.model.executeCommand(tb2.buildCommand()) >= 0);
         // should survive the sync
         final XId newfieldId = XX.toId("newField");
         this.model.getObject(DemoModelUtil.JOHN_ID).createField(newfieldId);
@@ -594,12 +592,12 @@ abstract public class AbstractSynchronizerTest {
         XCommand command3 = MemoryModelCommand.createRemoveCommand(this.model.getAddress(),
                 this.model.getObject(DemoModelUtil.PETER_ID).getRevisionNumber(),
                 DemoModelUtil.PETER_ID);
-        assertTrue(this.model.executeCommand(command3, tlc2) >= 0);
+        assertTrue(this.model.executeCommand(command3) >= 0);
         // should sync to XCommand#NOCHANGE
         ForTestLocalChangeCallback tlc3 = new ForTestLocalChangeCallback();
         XCommand command5 = MemoryModelCommand.createAddCommand(this.model.getAddress(), false,
                 bobId);
-        assertTrue(this.model.executeCommand(command5, tlc3) >= 0);
+        assertTrue(this.model.executeCommand(command5) >= 0);
         
         // check the local model
         XObject localJane = this.model.getObject(janeId);
@@ -669,9 +667,6 @@ abstract public class AbstractSynchronizerTest {
         SynchronizeTest.replaySyncEvents(midCopy, midEvents);
         assertTrue(XCompareUtils.equalTree(midCopy, this.model));
         
-        assertEquals(XCommand.FAILED, tlc1.waitForResult());
-        assertEquals(XCommand.FAILED, tlc2.waitForResult());
-        
         checkEvents(this.model);
         
     }
@@ -679,16 +674,13 @@ abstract public class AbstractSynchronizerTest {
     @Test
     public void testSendLocalChanges() {
         
-        ForTestLocalChangeCallback c1 = new ForTestLocalChangeCallback();
-        ForTestLocalChangeCallback c2 = new ForTestLocalChangeCallback();
-        
         // Create a command manually.
         final XId frankId = XX.toId("Frank");
         XCommand command = MemoryModelCommand.createAddCommand(this.model.getAddress(), false,
                 frankId);
         
         // Apply the command locally.
-        assertTrue(this.model.executeCommand(command, c1) >= 0);
+        assertTrue(this.model.executeCommand(command) >= 0);
         
         assertTrue(this.model.hasObject(frankId));
         
@@ -718,7 +710,7 @@ abstract public class AbstractSynchronizerTest {
         
         // Now apply the command locally. It should be automatically
         // sent to the server.
-        this.model.executeCommand(autoCommand, c2);
+        this.model.executeCommand(autoCommand);
         long finalRev = this.model.getRevisionNumber();
         
         assertTrue(this.model.hasObject(frankId));
@@ -729,9 +721,6 @@ abstract public class AbstractSynchronizerTest {
         this.sync.startSync();
         
         // both commands may still not be applied remotely
-        
-        assertTrue(c1.waitForResult() >= 0);
-        assertTrue(c2.waitForResult() >= 0);
         
         // check model state
         assertTrue(this.model.hasObject(frankId));

@@ -21,19 +21,16 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
     private static final long serialVersionUID = 4709068915672914712L;
     
     /**
-     * Creates a new {@link XRepositoryEvent} of the add-type (an model
-     * was added to the repository this event refers to)
+     * Creates a new {@link XRepositoryEvent} of the add-type (an model was
+     * added to the repository this event refers to)
      * 
      * @param actor The {@link XId} of the actor
-     * @param target The {@link XAddress} of the repository which the
-     *            model was added to - repository {@link XId} must not
-     *            be null
-     * @param modelId The {@link XId} of the added model - must not be
-     *            null
+     * @param target The {@link XAddress} of the repository which the model was
+     *            added to - repository {@link XId} must not be null
+     * @param modelId The {@link XId} of the added model - must not be null
      * @return An {@link XRepositoryEvent} of the add-type
      * @throws IllegalArgumentException if the given {@link XAddress} doesn't
-     *             refer to an repository or if the given modelId is
-     *             null
+     *             refer to an repository or if the given modelId is null
      */
     public static XRepositoryEvent createAddEvent(XId actor, XAddress target, XId modelId) {
         return new MemoryRepositoryEvent(actor, target, modelId, ChangeType.ADD,
@@ -48,21 +45,18 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
     }
     
     /**
-     * Creates a new {@link XRepositoryEvent} of the add-type (an model
-     * was added to the repository this event refers to)
+     * Creates a new {@link XRepositoryEvent} of the add-type (an model was
+     * added to the repository this event refers to)
      * 
      * @param actor The {@link XId} of the actor
-     * @param target The {@link XAddress} of the repository which the
-     *            model was added to - repository {@link XId} must not
-     *            be null
-     * @param modelId The {@link XId} of the added model - must not be
-     *            null
-     * @param modelRev
+     * @param target The {@link XAddress} of the repository which the model was
+     *            added to - repository {@link XId} must not be null
+     * @param modelId The {@link XId} of the added model - must not be null
+     * @param modelRev the model revision before this event happened
      * @param inTrans
      * @return An {@link XRepositoryEvent} of the add-type
      * @throws IllegalArgumentException if the given {@link XAddress} doesn't
-     *             refer to an repository or if the given modelId is
-     *             null
+     *             refer to an repository or if the given modelId is null
      */
     public static XRepositoryEvent createAddEvent(XId actor, XAddress target, XId modelId,
             long modelRev, boolean inTrans) {
@@ -71,43 +65,50 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
     }
     
     /**
-     * Creates a new {@link XRepositoryEvent} of the remove-type (an
-     * model was removed from the repository this event refers
-     * to)
+     * Creates a new {@link XRepositoryEvent} of the remove-type (an model was
+     * removed from the repository this event refers to)
      * 
      * @param actor The {@link XId} of the actor
-     * @param target The {@link XAddress} of the repository which the
-     *            model was removed from - repository {@link XId} must
-     *            not be null
-     * @param modelId The {@link XId} of the removed model - must not
-     *            be null
-     * @param modelRevison of the remove event
+     * @param target The {@link XAddress} of the repository which the model was
+     *            removed from - repository {@link XId} must not be null
+     * @param modelId The {@link XId} of the removed model - must not be null
+     * @param oldModelRevison of the remove event
      * @param inTrans if in transaction
      * @return An {@link XRepositoryEvent} of the add-type
      * @throws IllegalArgumentException if the given {@link XAddress} doesn't
-     *             refer to an repository, if the given modelId is null
-     *             or if the given modelRevision equals
+     *             refer to an repository, if the given modelId is null or if
+     *             the given modelRevision equals
      *             {@link XEvent#RevisionOfEntityNotSet}
      */
     public static XRepositoryEvent createRemoveEvent(XId actor, XAddress target, XId modelId,
-            long modelRevison, boolean inTrans) {
-        if(modelRevison < 0) {
+            long oldModelRevison, boolean inTrans) {
+        if(oldModelRevison < 0) {
             throw new IllegalArgumentException(
                     "model revision must be set for repository REMOVE events");
         }
         
-        return new MemoryRepositoryEvent(actor, target, modelId, ChangeType.REMOVE, modelRevison,
+        return new MemoryRepositoryEvent(actor, target, modelId, ChangeType.REMOVE, oldModelRevison,
                 inTrans, false);
     }
     
-    // The XId of the model that was added/deleted
+    /* The XId of the model that was added/deleted */
     private XId modelId;
     
-    // the model revision before this event happened
+    /* the model revision before this event happened */
     private long modelRevision;
     
-    // private constructor, use the createEvent methods for instantiating a
-    // MemoryRepositoryEvent
+    /**
+     * private constructor, use the createEvent methods for instantiating a
+     * MemoryRepositoryEvent
+     * 
+     * @param actor
+     * @param target
+     * @param modelId
+     * @param changeType
+     * @param modelRevision the model revision before this event happened
+     * @param inTrans
+     * @param implied
+     */
     private MemoryRepositoryEvent(XId actor, XAddress target, XId modelId, ChangeType changeType,
             long modelRevision, boolean inTrans, boolean implied) {
         super(target, changeType, actor, inTrans, implied);
