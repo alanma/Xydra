@@ -20,4 +20,23 @@ public abstract class SimpleEntity implements Serializable, XEntity {
     
     public abstract long getRevisionNumber();
     
+    private transient boolean entityExists;
+    
+    /**
+     * @return at runtime if the entity currently exists or not. This flag is
+     *         not persisted.
+     */
+    public boolean exists() {
+        return this.entityExists;
+    }
+    
+    /**
+     * Set if this entity exists or not. This flag is not persisted.
+     * 
+     * @param b
+     */
+    public void setExists(boolean b) {
+        this.entityExists = b;
+    }
+    
 }
