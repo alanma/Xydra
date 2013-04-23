@@ -83,6 +83,11 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
                     value);
         }
         
+        @Override
+        public boolean exists() {
+            return AbstractDelegatingWritableModel.this.field_exists(this.objectId, this.fieldId);
+        }
+        
     }
     
     /**
@@ -171,6 +176,12 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
             }
             return buf.toString();
         }
+        
+        @Override
+        public boolean exists() {
+            return AbstractDelegatingWritableModel.this.object_exists(this.objectId);
+        }
+        
     }
     
     @SuppressWarnings("unused")
@@ -181,6 +192,10 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
     
     @Override
     public abstract XWritableObject createObject(@NeverNull final XId objectId);
+    
+    protected abstract boolean object_exists(XId objectId);
+    
+    protected abstract boolean field_exists(XId objectId, XId fieldId);
     
     protected abstract long field_getRevisionNumber(final XId objectId, final XId fieldId);
     

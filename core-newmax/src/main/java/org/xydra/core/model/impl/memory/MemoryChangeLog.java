@@ -92,9 +92,16 @@ public class MemoryChangeLog extends AbstractChangeLog implements XWritableChang
         return this.state;
     }
     
-    public static XWritableChangeLog create(XAddress baseAddress) {
+    public static XWritableChangeLog create(XAddress baseAddress, long changeLogBaseRevision) {
         assert baseAddress.getRepository() != null;
-        return new MemoryChangeLog(new MemoryChangeLogState(baseAddress));
+        MemoryChangeLogState changeLogState = new MemoryChangeLogState(baseAddress);
+        changeLogState.setBaseRevisionNumber(changeLogBaseRevision);
+        return new MemoryChangeLog(changeLogState);
+    }
+    
+    @Override
+    public XEvent getLastEvent() {
+        return this.state.getLastEvent();
     }
     
 }

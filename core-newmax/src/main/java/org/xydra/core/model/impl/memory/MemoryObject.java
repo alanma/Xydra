@@ -170,8 +170,8 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
      * @param objectAddress @NeverNull
      */
     public MemoryObject(XId actorId, String passwordHash, XAddress objectAddress) {
-        this(Root.createWithActor(objectAddress, actorId), null, actorId, passwordHash,
-                objectAddress, null, null, true);
+        this(Root.createWithActor(objectAddress, actorId, XCommand.NONEXISTANT), null, actorId,
+                passwordHash, objectAddress, null, null, true);
         
         assert objectAddress.getRepository() != null;
         assert objectAddress.getModel() != null;
@@ -208,8 +208,9 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
      */
     public MemoryObject(XId actorId, String passwordHash, XRevWritableObject objectState,
             XChangeLogState log) {
-        this(Root.createWithActor(objectState.getAddress(), actorId), null, actorId, passwordHash,
-                objectState.getAddress(), objectState, log, true);
+        this(Root.createWithActor(objectState.getAddress(), actorId,
+                objectState.getRevisionNumber()), null, actorId, passwordHash, objectState
+                .getAddress(), objectState, log, true);
         
         assert objectState != null;
         assert objectState.getAddress().getRepository() != null;

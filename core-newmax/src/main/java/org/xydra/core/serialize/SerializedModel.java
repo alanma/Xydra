@@ -66,7 +66,8 @@ public class SerializedModel {
     private static final String NAME_OBJECTS = "objects";
     private static final String NAME_FIELDS = "fields";
     private static final String NAME_MODELS = "models";
-    public static final long NO_REVISION = -1;
+    /** revision number returned by parser if no revision number was found */
+    public static final long NO_REVISION = -2;
     private static final String REVISION_ATTRIBUTE = "revision";
     private static final String SYNC_REVISION_ATTRIBUTE = "syncRevision";
     private static final String STARTREVISION_ATTRIBUTE = "startRevision";
@@ -255,6 +256,7 @@ public class SerializedModel {
     public static XModel toModel(XId actorId, String passwordHash, XydraElement element) {
         XRevWritableModel state = toModelState(element, null, null);
         XChangeLogState log = loadChangeLogState(element, state.getAddress());
+        assert log == null || state.getRevisionNumber() == log.getCurrentRevisionNumber();
         return new MemoryModel(actorId, passwordHash, state, log);
     }
     
@@ -304,7 +306,9 @@ public class SerializedModel {
             modelState = parent.createModel(xid);
             modelAddr = modelState.getAddress();
         }
-        modelState.setRevisionNumber(revision);
+        if(revision != NO_REVISION) {
+            modelState.setRevisionNumber(revision);
+        }
         
         XydraElement objects = element.getChild(NAME_OBJECTS);
         
@@ -318,6 +322,9 @@ public class SerializedModel {
                     objectAddr);
             XyAssert.xyAssert(modelState.getObject(objectState.getId()) == objectState);
         }
+        
+        if(!modelState.isEmpty())
+            modelState.setExists(true);
         
         return modelState;
     }

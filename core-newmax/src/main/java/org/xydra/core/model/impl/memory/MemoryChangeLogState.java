@@ -70,7 +70,7 @@ public class MemoryChangeLogState implements XChangeLogState {
         if(this.eventMap.isEmpty()) {
             return this.baseRevisionNumber;
         } else {
-            return getEvent(this.eventMap.lastKey()).getRevisionNumber();
+            return getLastEvent().getRevisionNumber();
         }
     }
     
@@ -118,5 +118,16 @@ public class MemoryChangeLogState implements XChangeLogState {
         XyAssert.xyAssert(revisionNumber == getCurrentRevisionNumber());
         
         return true;
+    }
+    
+    @Override
+    public XEvent getLastEvent() {
+        if(this.eventMap.isEmpty()) {
+            return null;
+        } else {
+            Long lastKey = this.eventMap.lastKey();
+            XEvent event = getEvent(lastKey);
+            return event;
+        }
     }
 }

@@ -16,6 +16,7 @@ import org.xydra.base.XType;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XCommandUtils;
+import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XFieldEvent;
 import org.xydra.base.change.XModelCommand;
 import org.xydra.base.change.XModelEvent;
@@ -94,7 +95,7 @@ Serializable {
         XAddress modelAddress = XX.resolveModel(father.getAddress(), modelId);
         
         MemoryModel nonExistingModel = new MemoryModel(modelAddress, Root.createWithActor(
-                modelAddress, actorId), father);
+                modelAddress, actorId, XCommand.NONEXISTANT), father);
         return nonExistingModel;
     }
     
@@ -166,8 +167,10 @@ Serializable {
      */
     public MemoryModel(IMemoryRepository father, XId actorId, String passwordHash,
             XRevWritableModel modelState, XChangeLogState changeLogState) {
-        this(Root.createWithActor(modelState.getAddress(), actorId), father, actorId, passwordHash,
-                modelState.getAddress(), modelState, changeLogState, true);
+        this(
+                Root.createWithActorAndChangeLogState(actorId, modelState.getAddress(),
+                        changeLogState), father, actorId, passwordHash, modelState.getAddress(),
+                modelState, true);
         
         assert modelState != null;
         assert changeLogState != null;
@@ -188,8 +191,7 @@ Serializable {
      *            create-this-model command is added
      */
     private MemoryModel(Root root, IMemoryRepository father, XId actorId, String passwordHash,
-            XAddress modelAddress, XRevWritableModel modelState, XChangeLogState changeLogState,
-            boolean createModel) {
+            XAddress modelAddress, XRevWritableModel modelState, boolean createModel) {
         super(root);
         
         this.father = father;
@@ -204,11 +206,24 @@ Serializable {
         
         if(modelState == null) {
             this.modelState = new SimpleModel(modelAddress);
-            this.modelState.setRevisionNumber(XCommand.NONEXISTANT);
+            
+            long currentModelRev = root.getWritableChangeLog().getCurrentRevisionNumber();
+            this.modelState.setRevisionNumber(currentModelRev);
+            XEvent event = root.getWritableChangeLog().getLastEvent();
+            boolean modelExists = false;
+            if(event != null) {
+                if(event instanceof XModelEvent) {
+                    XModelEvent modelEvent = (XModelEvent)event;
+                    modelExists = modelEvent.getChangeType() != ChangeType.REMOVE;
+                } else
+                    // another event happened, so model must be there
+                    modelExists = true;
+            }
+            this.modelState.setExists(modelExists);
         } else {
             this.modelState = modelState;
+            this.modelState.setExists(modelState.exists());
         }
-        this.modelState.setExists(false);
         
         if(createModel) {
             createThisModel();
@@ -239,6 +254,7 @@ Serializable {
             this.modelState = father.getState().createModel(modelId);
         }
         this.modelState.setExists(false);
+        this.modelState.setRevisionNumber(XCommand.NONEXISTANT);
     }
     
     /**
@@ -246,10 +262,11 @@ Serializable {
      * 
      * @param actorId
      * @param father
-     * @param modelState
+     * @param modelState @NeverNull
      */
     public MemoryModel(XId actorId, IMemoryRepository father, XRevWritableModel modelState) {
-        super(Root.createWithActor(modelState.getAddress(), actorId));
+        super(Root
+                .createWithActor(modelState.getAddress(), actorId, modelState.getRevisionNumber()));
         
         assert modelState != null;
         
@@ -268,8 +285,8 @@ Serializable {
      * @param modelAddress
      */
     public MemoryModel(XId actorId, String passwordHash, XAddress modelAddress) {
-        this(Root.createWithActor(modelAddress, actorId), null, actorId, passwordHash,
-                modelAddress, null, null, true);
+        this(Root.createWithActor(modelAddress, actorId, XCommand.NONEXISTANT), null, actorId,
+                passwordHash, modelAddress, null, true);
     }
     
     /**
@@ -293,8 +310,10 @@ Serializable {
      * @param modelState @NeverNull
      */
     public MemoryModel(XId actorId, String passwordHash, XRevWritableModel modelState) {
-        this(Root.createWithActor(modelState.getAddress(), actorId), null, actorId, passwordHash,
-                modelState.getAddress(), modelState, null, modelState.exists());
+        this(
+                Root.createWithActor(modelState.getAddress(), actorId,
+                        modelState.getRevisionNumber()), null, actorId, passwordHash, modelState
+                        .getAddress(), modelState, modelState.exists());
     }
     
     /**
@@ -307,8 +326,10 @@ Serializable {
      */
     public MemoryModel(XId actorId, String passwordHash, XRevWritableModel modelState,
             XChangeLogState changeLogState) {
-        this(Root.createWithActor(modelState.getAddress(), actorId), null, actorId, passwordHash,
-                modelState.getAddress(), modelState, changeLogState, modelState.exists());
+        this(
+                Root.createWithActorAndChangeLogState(actorId, modelState.getAddress(),
+                        changeLogState), null, actorId, passwordHash, modelState.getAddress(),
+                modelState, false);
     }
     
     @Override

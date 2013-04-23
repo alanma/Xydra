@@ -452,4 +452,19 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
         // return field.getRevisionNumber();
     }
     
+    @Override
+    public boolean exists() {
+        return this.base.exists();
+    }
+    
+    @Override
+    protected boolean object_exists(XId objectId) {
+        return hasObject(objectId);
+    }
+    
+    @Override
+    protected boolean field_exists(XId objectId, XId fieldId) {
+        return getObject(objectId) != null && getObject(objectId).hasField(fieldId);
+    }
+    
 }

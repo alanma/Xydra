@@ -5,7 +5,6 @@ import java.util.Iterator;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.change.XEvent;
-import org.xydra.base.value.XValue;
 
 
 /**
@@ -15,7 +14,10 @@ import org.xydra.base.value.XValue;
  * 
  * @author Kaidel
  */
-
+/**
+ * @author xamde
+ * 
+ */
 public interface XChangeLog extends Serializable {
     
     /**
@@ -23,7 +25,7 @@ public interface XChangeLog extends Serializable {
      *         this change log refers to. All contained events have been
      *         produced by this entity or a descendant.
      */
-    public XAddress getBaseAddress();
+    XAddress getBaseAddress();
     
     /**
      * @return the current revision number of the logged {@link XModel} as seen
@@ -43,7 +45,7 @@ public interface XChangeLog extends Serializable {
      *             than the first revision number or greater than or equal to
      *             the current revision number of this change log
      */
-    public XEvent getEventAt(long revisionNumber);
+    XEvent getEventAt(long revisionNumber);
     
     /**
      * Returns an iterator over all {@link XEvent XEvents} that occurred after
@@ -64,7 +66,7 @@ public interface XChangeLog extends Serializable {
      * @throws IllegalArgumentException if beginRevision is greater than
      *             endRevision
      */
-    public Iterator<XEvent> getEventsBetween(long beginRevision, long endRevision);
+    Iterator<XEvent> getEventsBetween(long beginRevision, long endRevision);
     
     /**
      * Returns a list of all {@link XEvent XEvents} that occurred after (and
@@ -77,7 +79,7 @@ public interface XChangeLog extends Serializable {
      *         including) the given revision number.
      * @throws IndexOutOfBoundsException if revisionNumber is negative
      */
-    public Iterator<XEvent> getEventsSince(long revisionNumber);
+    Iterator<XEvent> getEventsSince(long revisionNumber);
     
     /**
      * Returns a list of all {@link XEvent XEvents} that occurred until (but not
@@ -90,7 +92,7 @@ public interface XChangeLog extends Serializable {
      *         including) the given revision number.
      * @throws IndexOutOfBoundsException if revisionNumber is negative
      */
-    public Iterator<XEvent> getEventsUntil(long revisionNumber);
+    Iterator<XEvent> getEventsUntil(long revisionNumber);
     
     /**
      * @return the revision number the logged {@link XModel} had at the time
@@ -101,6 +103,11 @@ public interface XChangeLog extends Serializable {
     /**
      * @return the internal, serialisable state holder
      */
-    public XChangeLogState getChangeLogState();
+    XChangeLogState getChangeLogState();
+    
+    /**
+     * @return the last event or null; convenience method
+     */
+    XEvent getLastEvent();
     
 }

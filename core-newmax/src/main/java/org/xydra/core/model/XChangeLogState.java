@@ -124,4 +124,9 @@ public interface XChangeLogState extends Serializable {
     
     boolean truncateToRevision(long revisionNumber);
     
+    /**
+     * @return the last event or null if empty; convenience method
+     */
+    XEvent getLastEvent();
+    
 }

@@ -15,6 +15,7 @@ import org.xydra.core.change.XObjectEventListener;
 import org.xydra.core.change.XRepositoryEventListener;
 import org.xydra.core.change.XSyncEventListener;
 import org.xydra.core.change.XTransactionEventListener;
+import org.xydra.core.model.XChangeLogState;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.impl.memory.MemoryEventBus.EventType;
 
@@ -208,11 +209,34 @@ public class Root {
     /**
      * @param baseAddress
      * @param actorId
+     * @param changeLogBaseRevision
      * @return ...
      */
-    public static Root createWithActor(XAddress baseAddress, XId actorId) {
-        return new Root(new MemoryEventBus(), MemoryChangeLog.create(baseAddress),
-                LocalChanges.create(), actorId);
+    public static Root createWithActor(XAddress baseAddress, XId actorId, long changeLogBaseRevision) {
+        return new Root(new MemoryEventBus(), MemoryChangeLog.create(baseAddress,
+                changeLogBaseRevision), LocalChanges.create(), actorId);
+    }
+    
+    /**
+     * @param actorId
+     * @param baseAddress TODO
+     * @param changeLogState @CanBeNull
+     * @return ...
+     */
+    public static Root createWithActorAndChangeLogState(XId actorId, XAddress baseAddress,
+            XChangeLogState changeLogState) {
+        XChangeLogState usedChangeLogState = changeLogState == null ? new MemoryChangeLogState(
+                baseAddress) : changeLogState;
+        
+        return new Root(
+        
+        new MemoryEventBus(),
+        
+        new MemoryChangeLog(usedChangeLogState),
+        
+        LocalChanges.create(),
+        
+        actorId);
     }
     
     /**
@@ -248,4 +272,5 @@ public class Root {
     public long getSynchronizedRevision() {
         return this.syncRevision;
     }
+    
 }
