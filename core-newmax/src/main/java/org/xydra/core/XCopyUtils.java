@@ -105,6 +105,7 @@ public class XCopyUtils {
     public static void copyDataAndRevisions(XReadableModel sourceModel,
             XRevWritableModel targetModel) {
         targetModel.setRevisionNumber(sourceModel.getRevisionNumber());
+        targetModel.setExists(sourceModel.exists());
         for(XId objectId : sourceModel) {
             XReadableObject object = sourceModel.getObject(objectId);
             XRevWritableObject localObject = targetModel.createObject(object.getId());

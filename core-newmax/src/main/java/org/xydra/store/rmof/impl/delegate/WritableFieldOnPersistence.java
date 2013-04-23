@@ -132,4 +132,9 @@ public class WritableFieldOnPersistence extends AbstractWritableOnPersistence im
         return XType.XFIELD;
     }
     
+    // TODO maybe vary
+    @Override
+    public boolean exists() {
+        return true;
+    }
 }

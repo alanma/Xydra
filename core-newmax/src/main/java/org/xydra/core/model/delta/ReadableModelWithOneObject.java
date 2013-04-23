@@ -70,4 +70,8 @@ public class ReadableModelWithOneObject implements XReadableModel {
         return XType.XOBJECT;
     }
     
+    @Override
+    public boolean exists() {
+        return true;
+    }
 }

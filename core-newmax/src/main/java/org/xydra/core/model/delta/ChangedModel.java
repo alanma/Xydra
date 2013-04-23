@@ -764,4 +764,9 @@ public class ChangedModel implements XWritableModel, IModelDiff {
         this.changed.clear();
     }
     
+    // TODO maybe vary this
+    @Override
+    public boolean exists() {
+        return true;
+    }
 }

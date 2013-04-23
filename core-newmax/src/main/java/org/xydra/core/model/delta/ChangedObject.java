@@ -480,4 +480,9 @@ public class ChangedObject implements XWritableObject, DeltaUtils.IObjectDiff {
     public Collection<XId> getRemoved() {
         return this.removed;
     }
+    
+    @Override
+    public boolean exists() {
+        return true;
+    }
 }

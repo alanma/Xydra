@@ -313,7 +313,7 @@ Serializable {
         this(
                 Root.createWithActor(modelState.getAddress(), actorId,
                         modelState.getRevisionNumber()), null, actorId, passwordHash, modelState
-                        .getAddress(), modelState, modelState.exists());
+                        .getAddress(), modelState, false);
     }
     
     /**
