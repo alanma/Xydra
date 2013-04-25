@@ -6,8 +6,8 @@
 		xmlns:ep="urn:import:org.xydra.webadmin.gwt.client.widgets.editorpanel"
 	xmlns:st="urn:import:org.xydra.webadmin.gwt.client.widgets.selectiontree"
 	xmlns:d="urn:import:org.xydra.webadmin.gwt.client.widgets.dialogs">
-		<g:VerticalPanel ui:field="mainPanel" >
-
+		<g:VerticalPanel ui:field="mainPanel" horizontalAlignment="CENTER">
+			<g:HTML><br></br></g:HTML>
 			<g:VerticalPanel ui:field="changesPanel"/>
 			<d:ButtonPanel ui:field="buttonPanel" ></d:ButtonPanel>
 		</g:VerticalPanel>

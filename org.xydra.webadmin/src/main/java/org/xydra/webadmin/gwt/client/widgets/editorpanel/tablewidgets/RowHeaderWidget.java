@@ -1,7 +1,8 @@
-package org.xydra.webadmin.gwt.client.widgets.editorpanel.tablewidgets;
+package org.xydra.webadmin.gwt.client.widgets.editorpanel.tableWidgets;
 
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.webadmin.gwt.client.widgets.XyAdmin;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -17,7 +18,7 @@ import com.google.gwt.user.client.ui.Widget;
 public class RowHeaderWidget extends Composite {
 	
 	@SuppressWarnings("unused")
-	private static final Logger log = LoggerFactory.getLogger(RowHeaderWidget.class);
+	private static final Logger log = LoggerFactory.getLogger(XyAdmin.class);
 	
 	interface ViewUiBinder extends UiBinder<Widget,RowHeaderWidget> {
 	}

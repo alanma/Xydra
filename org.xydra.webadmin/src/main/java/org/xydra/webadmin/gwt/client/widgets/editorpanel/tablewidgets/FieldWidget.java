@@ -1,4 +1,4 @@
-package org.xydra.webadmin.gwt.client.widgets.editorpanel.tablewidgets;
+package org.xydra.webadmin.gwt.client.widgets.editorpanel.tableWidgets;
 
 import org.xydra.base.XId;
 import org.xydra.gwt.editor.XFieldEditor;

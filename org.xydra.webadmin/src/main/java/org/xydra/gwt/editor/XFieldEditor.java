@@ -2,6 +2,7 @@ package org.xydra.gwt.editor;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
+import org.xydra.base.XType;
 import org.xydra.base.change.XFieldEvent;
 import org.xydra.base.value.XAddressListValue;
 import org.xydra.base.value.XAddressSetValue;
@@ -25,6 +26,7 @@ import org.xydra.base.value.XStringListValue;
 import org.xydra.base.value.XStringSetValue;
 import org.xydra.base.value.XStringValue;
 import org.xydra.base.value.XValue;
+import org.xydra.core.XX;
 import org.xydra.core.change.XFieldEventListener;
 import org.xydra.core.model.XField;
 import org.xydra.gwt.editor.value.XAddressEditor;
@@ -54,6 +56,7 @@ import org.xydra.index.XI;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.resources.BundledRes;
+import org.xydra.webadmin.gwt.client.widgets.dialogs.AddressDialog;
 import org.xydra.webadmin.gwt.client.widgets.editorpanel.tablewidgets.RowPresenter;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -102,6 +105,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 	private final Button delete = new Button();
 	private final HTML contents = new HTML();
 	private final Button edit = new Button();
+	private final Button showAddressButton = new Button();
 	private final VerticalPanel contentTable = new VerticalPanel();
 	
 	private HTMLPanel controlPanel = new HTMLPanel("");
@@ -122,7 +126,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 	
 	private XId id;
 	
-	public XFieldEditor(RowPresenter rowPresenter, XId fieldId) {
+	public XFieldEditor(RowPresenter rowPresenter, final XId fieldId) {
 		
 		this.presenter = rowPresenter;
 		this.id = fieldId;
@@ -146,6 +150,13 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		this.controlPanel.add(this.delete);
 		this.delete.getElement().setAttribute("style", "float: right");
 		this.edit.getElement().setAttribute("style", "float: left");
+		Image textImage = new Image(BundledRes.INSTANCE.images().list());
+		this.showAddressButton.getElement().appendChild(textImage.getElement());
+		this.showAddressButton.setStyleName("imageButtonStyle");
+		this.showAddressButton.getElement().setAttribute("style",
+		        "float: right; position: relative; right: 30% ");
+		this.controlPanel.add(this.showAddressButton);
+		
 		this.controlPanel.add(this.edit);
 		this.contentTable.add(this.contents);
 		this.contentTable.setCellHorizontalAlignment(this.contents,
@@ -181,10 +192,39 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 			}
 		});
 		
+		this.showAddressButton.addClickHandler(new ClickHandler() {
+			
+			@Override
+			public void onClick(ClickEvent event) {
+				String entityIdString = "";
+				XType entitysType = XFieldEditor.this.presenter.getAddress().getAddressedType();
+				switch(entitysType) {
+				case XFIELD:
+					entityIdString = " field " + fieldId.toString();
+					break;
+				case XMODEL:
+					entityIdString = " model "
+					        + XFieldEditor.this.presenter.getAddress().getModel().toString();
+					break;
+				case XOBJECT:
+					entityIdString = " object "
+					        + XFieldEditor.this.presenter.getAddress().getObject().toString();
+					break;
+				default:
+					break;
+				}
+				AddressDialog addressDialog = new AddressDialog(entityIdString, XX.resolveField(
+				        XFieldEditor.this.presenter.getAddress(), fieldId).toString());
+				addressDialog.show();
+				addressDialog.selectEverything();
+			}
+		});
+		
 		this.setStyleName("editor-xfield");
 		
 		changeValue(rowPresenter.getFieldValue(this.id));
 		
+		this.showAddressButton.setTitle("show this field's whole address");
 		this.delete.setTitle("remove this field");
 		this.edit.setTitle("edit this field");
 	}
@@ -296,6 +336,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		this.save.removeFromParent();
 		this.cancel.removeFromParent();
 		this.type.removeFromParent();
+		this.showAddressButton.setVisible(true);
 		this.edit.setVisible(true);
 		this.contents.setVisible(true);
 		this.revision.setVisible(true);
@@ -320,6 +361,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 		}
 		
 		this.edit.setVisible(false);
+		this.showAddressButton.setVisible(false);
 		this.contentTable.setVisible(false);
 		this.editorPanel.setVisible(true);
 		
@@ -618,6 +660,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 	
 	public void hideButtons() {
 		if(!this.locked) {
+			this.showAddressButton.setVisible(false);
 			this.delete.setVisible(false);
 			this.edit.setVisible(false);
 		}
@@ -625,6 +668,7 @@ public class XFieldEditor extends VerticalPanel implements XFieldEventListener, 
 	
 	public void showButtons() {
 		if(!this.locked) {
+			this.showAddressButton.setVisible(true);
 			this.delete.setVisible(true);
 			this.edit.setVisible(true);
 		}

@@ -19,6 +19,7 @@
 	width: 320px;
 	/* 	height: 1000px; */
 	margin: 1px;
+	
 }
 
 .treeMainPanel td,.treeMainPanel tr,.treeMainPanel div,.treeMainPanel table
@@ -105,6 +106,7 @@
 .dialogStyle {
 	background-color: lightgrey;
 	border: 1px solid #009;
+	
 }
 
 .dialogStyle .Caption {
@@ -299,9 +301,29 @@
 	height: 40px;
 }
 
-.deletedStyle {
+.deletedEntityStyle {
 	
 	text-decoration: line-through;
+}
+
+.changesPanelStyle {
+	
+	min-width: 300px;
+}
+
+.addedEntityStyle {
+	font-style: italic;
+	color: green;
+	
+	
+}
+
+.breakStyle
+{
+	font-size: 7px;
+}
+.removedEntityStyle {
+	color: red;
 }
 
 .highlightStyle

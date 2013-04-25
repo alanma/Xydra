@@ -2,6 +2,7 @@ package org.xydra.webadmin.gwt.client.widgets.editorpanel.tablewidgets;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
+import org.xydra.base.XType;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.core.change.SessionCachedModel;
 import org.xydra.log.Logger;
@@ -10,6 +11,7 @@ import org.xydra.webadmin.gwt.client.resources.BundledRes;
 import org.xydra.webadmin.gwt.client.util.Presenter;
 import org.xydra.webadmin.gwt.client.widgets.XyAdmin;
 import org.xydra.webadmin.gwt.client.widgets.dialogs.AddElementDialog;
+import org.xydra.webadmin.gwt.client.widgets.dialogs.AddressDialog;
 import org.xydra.webadmin.gwt.client.widgets.dialogs.RemoveElementDialog;
 import org.xydra.webadmin.gwt.client.widgets.dialogs.RemoveModelDialog;
 
@@ -66,6 +68,9 @@ public class EntityWidget extends Composite {
 	@UiField
 	Button addButton;
 	
+	@UiField
+	Button showAddressButton;
+	
 	private XAddress address;
 	
 	private String addText;
@@ -96,8 +101,17 @@ public class EntityWidget extends Composite {
 		Image addImg = new Image(BundledRes.INSTANCE.images().add());
 		this.addButton.getElement().appendChild(addImg.getElement());
 		this.addButton.setStyleName("imageButtonStyle");
+		Image textImage = new Image(BundledRes.INSTANCE.images().list());
+		this.showAddressButton.getElement().appendChild(textImage.getElement());
+		this.showAddressButton.setStyleName("imageButtonStyle");
 		this.removeButton.getElement().setAttribute("style", "float: right");
 		this.addButton.getElement().setAttribute("style", "float: left");
+		int rightPosition = 37;
+		if(this.address.getObject() != null) {
+			rightPosition = 28;
+		}
+		this.showAddressButton.getElement().setAttribute("style",
+		        "float: right; position: relative; right: " + rightPosition + "% ");
 		
 		XId entityId = address.getModel();
 		long revisionNumber = -1000l;
@@ -135,6 +149,7 @@ public class EntityWidget extends Composite {
 		this.revisionLabel.setText("rev. " + revisionNumber);
 		this.addButton.setTitle(this.addTitle);
 		this.removeButton.setTitle(this.removeTitle);
+		this.showAddressButton.setTitle("show entity's address");
 		
 		this.addDomHandler(new MouseOverHandler() {
 			
@@ -142,7 +157,7 @@ public class EntityWidget extends Composite {
 			public void onMouseOver(MouseOverEvent event) {
 				EntityWidget.this.addButton.setVisible(true);
 				EntityWidget.this.removeButton.setVisible(true);
-				
+				EntityWidget.this.showAddressButton.setVisible(true);
 			}
 		}, MouseOverEvent.getType());
 		
@@ -152,12 +167,14 @@ public class EntityWidget extends Composite {
 			public void onMouseOut(MouseOutEvent event) {
 				EntityWidget.this.addButton.setVisible(false);
 				EntityWidget.this.removeButton.setVisible(false);
+				EntityWidget.this.showAddressButton.setVisible(false);
 				
 			}
 		}, MouseOutEvent.getType());
 		
 		this.addButton.setVisible(false);
 		this.removeButton.setVisible(false);
+		this.showAddressButton.setVisible(false);
 		
 		this.removeClickHandlerRegistration = this.removeButton.addClickHandler(new ClickHandler() {
 			
@@ -169,8 +186,7 @@ public class EntityWidget extends Composite {
 				
 			}
 		});
-		// log.info("entityWidget for address " + address.toString() +
-		// " build!");
+		
 	}
 	
 	@UiHandler("addButton")
@@ -179,6 +195,29 @@ public class EntityWidget extends Composite {
 		        EntityWidget.this.address, this.addText);
 		addDialog.show();
 		addDialog.selectEverything();
+		
+	}
+	
+	@UiHandler("showAddressButton")
+	void onClickShow(ClickEvent event) {
+		String entityIdString = "";
+		XType entitysType = this.address.getAddressedType();
+		switch(entitysType) {
+		case XFIELD:
+			entityIdString = " field " + this.address.getField().toString();
+			break;
+		case XMODEL:
+			entityIdString = " model " + this.address.getModel().toString();
+			break;
+		case XOBJECT:
+			entityIdString = " object " + this.address.getObject().toString();
+			break;
+		default:
+			break;
+		}
+		AddressDialog addressDialog = new AddressDialog(entityIdString, this.address.toString());
+		addressDialog.show();
+		addressDialog.selectEverything();
 		
 	}
 	

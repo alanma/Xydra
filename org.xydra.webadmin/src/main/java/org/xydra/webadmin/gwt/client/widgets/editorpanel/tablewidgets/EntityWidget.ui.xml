@@ -20,12 +20,15 @@
 	<g:VerticalPanel ui:field="panel" verticalAlignment="middle"
 		horizontalAlignment="center">
 
-		<g:HTMLPanel ui:field="buttonPanel" styleName="editorStyle">
+		<g:HorizontalPanel styleName="editorStyle">
+			<g:HTMLPanel ui:field="buttonPanel">
 
-			<g:Button ui:field="removeButton"> remove </g:Button>
-			<g:Button ui:field="addButton"> add field </g:Button>
+				<g:Button ui:field="removeButton"> remove </g:Button>
+				<g:Button ui:field="showAddressButton"> show Address </g:Button>
+				<g:Button ui:field="addButton"> add field </g:Button>
 
-		</g:HTMLPanel>
+			</g:HTMLPanel>
+		</g:HorizontalPanel>
 
 		<g:HorizontalPanel ui:field="idPanel" styleName="{style.idLabelStyle}"
 			verticalAlignment="middle" horizontalAlignment="center">

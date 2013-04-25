@@ -1,10 +1,11 @@
-package org.xydra.webadmin.gwt.client.widgets.editorpanel.tablewidgets;
+package org.xydra.webadmin.gwt.client.widgets.editorpanel.tableWidgets;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.resources.BundledRes;
+import org.xydra.webadmin.gwt.client.widgets.XyAdmin;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -31,7 +32,7 @@ import com.google.gwt.user.client.ui.Widget;
 public class EmptyFieldWidget extends Composite {
 	
 	@SuppressWarnings("unused")
-	private static final Logger log = LoggerFactory.getLogger(EmptyFieldWidget.class);
+	private static final Logger log = LoggerFactory.getLogger(XyAdmin.class);
 	
 	interface ViewUiBinder extends UiBinder<Widget,EmptyFieldWidget> {
 	}

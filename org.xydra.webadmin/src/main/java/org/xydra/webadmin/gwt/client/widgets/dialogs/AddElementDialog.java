@@ -64,7 +64,11 @@ public class AddElementDialog extends DialogBox {
 					Presenter.processUserInput(AddElementDialog.this.address, value);
 					AddElementDialog.this.removeFromParent();
 				} catch(Exception e) {
-					
+					String errorMessage = e.getMessage();
+					for(int i = 0; i < e.getStackTrace().length; i++) {
+						errorMessage += e.getStackTrace()[i] + "\n";
+					}
+					log.error(errorMessage);
 					AddElementDialog.this.errorLabel.setText(e.getMessage());
 				}
 				

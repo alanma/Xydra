@@ -86,6 +86,7 @@ public class TablePresenter {
 	        ModelInformationPanel modelInformationPanel) {
 		this.presenter = editorPanelPresenter;
 		this.panel = modelInformationPanel;
+		
 	}
 	
 	public void generateTableOrShowInformation() {
@@ -128,6 +129,18 @@ public class TablePresenter {
 			this.panel.setData(dummyPanel);
 		}
 		
+		this.handlerRegistration = EventHelper.addModelChangedListener(
+		        this.presenter.getCurrentModelAddress(), new IModelChangedEventHandler() {
+			        
+			        @Override
+			        public void onModelChange(ModelChangedEvent event) {
+				        handleModelChanges(event.getStatus(), event.getMoreInfos());
+			        }
+			        
+		        });
+		XyAdmin.getInstance().getController().addRegistration(this.handlerRegistration);
+		log.info("handler registrated!");
+		
 	}
 	
 	private VerticalPanel createTable(SessionCachedModel model) {
@@ -144,17 +157,6 @@ public class TablePresenter {
 			}
 			
 		});
-		
-		this.handlerRegistration = EventHelper.addModelChangedListener(
-		        this.presenter.getCurrentModelAddress(), new IModelChangedEventHandler() {
-			        
-			        @Override
-			        public void onModelChange(ModelChangedEvent event) {
-				        processModelChanges(event.getStatus(), event.getMoreInfos());
-			        }
-			        
-		        });
-		XyAdmin.getInstance().getController().addRegistration(this.handlerRegistration);
 		
 		return this.tablePanel;
 	}
@@ -224,9 +226,16 @@ public class TablePresenter {
 		return verticalRowPosition;
 	}
 	
-	private void processModelChanges(EntityStatus status, XId moreInfos) {
+	private void handleModelChanges(EntityStatus status, XId moreInfos) {
 		if(status.equals(EntityStatus.EXTENDED)) {
-			this.extendByRow(XX.resolveObject(this.presenter.getCurrentModelAddress(), moreInfos));
+			if(this.contentTable == null) {
+				log.info("here we are!");
+				this.generateTableOrShowInformation();
+				
+			} else {
+				this.extendByRow(XX.resolveObject(this.presenter.getCurrentModelAddress(),
+				        moreInfos));
+			}
 		}
 		
 	}
@@ -234,6 +243,7 @@ public class TablePresenter {
 	private void extendByRow(XAddress newObjectsAddress) {
 		this.rowList.add(newObjectsAddress.getObject());
 		int position = this.rowList.size() - 1;
+		log.info("position: " + position);
 		this.contentTable.insertRow(position);
 		SessionCachedModel model = this.presenter.getCurrentModel();
 		log.info("adding row for object " + newObjectsAddress.toString());
@@ -293,6 +303,7 @@ public class TablePresenter {
 					// nothing
 				} else {
 					// insert EmptyFieldWidget
+					log.info("we come here...!");
 					row.getValue().addEmptyFieldWidget(newFieldId);
 				}
 			}

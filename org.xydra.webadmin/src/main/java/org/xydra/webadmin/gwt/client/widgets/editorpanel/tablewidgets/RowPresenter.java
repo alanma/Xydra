@@ -67,7 +67,7 @@ public class RowPresenter extends Presenter {
 		
 		CellFormatter formatter = table.getCellFormatter();
 		
-		for(int j = 0; j <= amountColumns + 1; j++) {
+		for(int j = 0; j < amountColumns + 1; j++) {
 			Widget widget = null;
 			if(j == 0) {
 				// if we have to insert a row header, insert the appropriate
@@ -229,9 +229,8 @@ public class RowPresenter extends Presenter {
 		int columnCount = table.getColumnCount() - 1;
 		
 		if(this.status.equals(Status.Opened)) {
-			// log.info("adding EmptyFieldWidget to row " +
-			// this.objectAddress.toString()
-			// + " at position " + columnCount);
+//			log.info("adding EmptyFieldWidget to row " + this.objectAddress.toString()
+//			        + " at position " + columnCount);
 			table.setWidget(this.verticalPositionInTable, columnCount, new EmptyFieldWidget(this,
 			        newFieldId));
 		}

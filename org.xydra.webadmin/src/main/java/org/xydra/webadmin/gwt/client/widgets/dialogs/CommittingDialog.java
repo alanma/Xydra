@@ -14,6 +14,7 @@ import org.xydra.core.model.delta.DeltaUtils.IObjectDiff;
 import org.xydra.core.util.DumpUtils;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.webadmin.gwt.client.resources.BundledRes;
 import org.xydra.webadmin.gwt.client.widgets.XyAdmin;
 import org.xydra.webadmin.gwt.client.widgets.editorpanel.EditorPanelPresenter;
 
@@ -24,6 +25,8 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -60,8 +63,14 @@ public class CommittingDialog extends DialogBox {
 				
 				presenter.commit(CommittingDialog.this);
 				
-				CommittingDialog.this.mainPanel.clear();
 				CommittingDialog.this.setText("committing...");
+				CommittingDialog.this.mainPanel.clear();
+				CommittingDialog.this.mainPanel.add(new HTML("<br>"));
+				CommittingDialog.this.mainPanel.add(new Image(BundledRes.INSTANCE.images()
+				        .spinner()));
+				CommittingDialog.this.mainPanel.add(new HTML("<br> "));
+				CommittingDialog.this.mainPanel.getElement().setAttribute("style",
+				        "min-width: 700px");
 				
 			}
 			
@@ -72,7 +81,8 @@ public class CommittingDialog extends DialogBox {
 		
 		setWidget(uiBinder.createAndBindUi(this));
 		this.setStyleName("dialogStyle");
-		this.setText("check changes before committing");
+		this.setText("check changes of model "
+		        + presenter.getCurrentModelAddress().getModel().toString());
 		this.center();
 	}
 	
@@ -148,6 +158,13 @@ public class CommittingDialog extends DialogBox {
 		sb.append("'" + changedField.getInitialValue() + "' ==> '" + changedField.getValue()
 		        + "' \n");
 		return sb;
+	}
+	
+	public void removeWaitingElements() {
+		this.mainPanel.remove(0);
+		this.mainPanel.remove(0);
+		this.mainPanel.remove(0);
+		
 	}
 	
 }

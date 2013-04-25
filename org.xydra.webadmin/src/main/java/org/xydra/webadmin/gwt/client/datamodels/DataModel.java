@@ -99,7 +99,7 @@ public class DataModel {
 		String logMessage = "";
 		RepoDataModel repo = this.repoModels.get(modelAddress.getRepository());
 		SessionCachedModel model = repo.getModel(modelAddress.getModel());
-		log.info("attempting to create already existing object " + objectID.toString());
+		log.info("attempting to create object " + objectID.toString());
 		if(model.hasObject(objectID)) {
 			logMessage = "" + objectID.toString() + " already existed in model "
 			        + modelAddress.toString();
@@ -111,7 +111,7 @@ public class DataModel {
 		} else {
 			model.createObject(objectID);
 			log.info("object " + objectID.toString() + " added to " + modelAddress.toString()
-			        + ", now firing ModelChangedEvent");
+			        + ", now firing ModelChangedEvent: EXTENDED");
 			
 			EventHelper.fireModelChangedEvent(modelAddress, EntityStatus.EXTENDED, objectID);
 			
