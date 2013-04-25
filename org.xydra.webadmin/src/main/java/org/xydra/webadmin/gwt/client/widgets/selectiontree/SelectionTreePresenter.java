@@ -22,6 +22,13 @@ import org.xydra.webadmin.gwt.client.widgets.selectiontree.repobranches.RepoBran
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 
 
+/**
+ * Performs logic for the building {@link RepoBranchWidget}s and adding new
+ * repositories. Also holds a presenter to for each {@link RepoBranchWidget}
+ * 
+ * @author Andi_Ka
+ * 
+ */
 public class SelectionTreePresenter extends Presenter {
 	
 	private static final Logger log = LoggerFactory.getLogger(RepoBranchWidget.class);
@@ -34,26 +41,13 @@ public class SelectionTreePresenter extends Presenter {
 		this.selectionTreeWidget = selectionTree;
 		this.repoBranches = new HashMap<XId,RepoBranchPresenter>();
 		
-		XyAdmin.getInstance().getController().registerSelectionTreePresenter(this);
-		this.buildSelectionTree();
-		
-		EventHelper.addRepoChangeListener(XX.resolveRepository(XX.toId("newRepo")),
-		        new IRepoChangedEventHandler() {
-			        
-			        @Override
-			        public void onRepoChange(RepoChangedEvent event) {
-				        SelectionTreePresenter.this.addRepoBranch(event.getMoreInfos());
-				        
-			        }
-		        });
-		
 	}
 	
 	public SelectionTreePresenter() {
 		
 	}
 	
-	private void buildSelectionTree() {
+	public void present() {
 		
 		DataModel dataModel = XyAdmin.getInstance().getModel();
 		Iterator<RepoDataModel> repoIDIterator = dataModel.getRepoIDs();
@@ -66,6 +60,16 @@ public class SelectionTreePresenter extends Presenter {
 			RepoDataModel repo = repoIDIterator.next();
 			addRepoBranch(repo);
 		}
+		
+		EventHelper.addRepoChangeListener(XX.resolveRepository(XX.toId("newRepo")),
+		        new IRepoChangedEventHandler() {
+			        
+			        @Override
+			        public void onRepoChange(RepoChangedEvent event) {
+				        SelectionTreePresenter.this.addRepoBranch(event.getMoreInfos());
+				        
+			        }
+		        });
 		
 		log.info("selection tree build!");
 	}

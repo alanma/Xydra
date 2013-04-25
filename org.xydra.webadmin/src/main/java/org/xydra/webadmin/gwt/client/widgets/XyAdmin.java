@@ -4,18 +4,48 @@ import org.xydra.core.XX;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.Controller;
-import org.xydra.webadmin.gwt.client.ViewModel;
 import org.xydra.webadmin.gwt.client.datamodels.DataModel;
+import org.xydra.webadmin.gwt.client.widgets.editorpanel.EditorPanel;
+import org.xydra.webadmin.gwt.client.widgets.editorpanel.EditorPanelPresenter;
+import org.xydra.webadmin.gwt.client.widgets.selectiontree.SelectionTree;
+import org.xydra.webadmin.gwt.client.widgets.selectiontree.SelectionTreePresenter;
 import org.xydra.webadmin.gwt.shared.XyAdminServiceAsync;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
 
+/**
+ * Main Class. Singleton, that holds references to the most important global
+ * objects:
+ * 
+ * <ul>
+ * <li> {@link Controller}
+ * <li> {@link DataModel}
+ * 
+ * </ul>
+ * from this entity on the UI gets built. It builds the
+ * 
+ * <ul>
+ * <li> {@link SelectionTree} and instantiates its presenter, the
+ * <li> {@link EditorPanel} and instantiates its presenter, and the
+ * <li> {@link AddressWidget} and instantiates its presenter.
+ * </ul>
+ * 
+ * Starts the presenters.
+ * 
+ * Puts some default-repository-id-widgets to the UI.
+ * 
+ * 
+ * 
+ * @author Andi_Ka
+ * 
+ */
 public class XyAdmin extends Composite {
 	
 	interface ViewUiBinder extends UiBinder<Widget,XyAdmin> {
@@ -25,9 +55,17 @@ public class XyAdmin extends Composite {
 	
 	private Controller controller;
 	private DataModel model;
-	private ViewModel viewModel;
 	
 	private EventBus eventbus;
+	
+	@UiField
+	SelectionTree selectionTree;
+	
+	@UiField
+	EditorPanel editorPanel;
+	
+	@UiField
+	AddressWidget addressWidget;
 	
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(XyAdmin.class);
@@ -37,10 +75,20 @@ public class XyAdmin extends Composite {
 	public XyAdmin(XyAdminServiceAsync service) {
 		instance = this;
 		
-		this.getController().addService(service);
 		this.getModel().addRepoID(XX.toId("repo1"));
 		this.getModel().addRepoID(XX.toId("gae-repo"));
 		initWidget(uiBinder.createAndBindUi(this));
+		
+		SelectionTreePresenter selectionTreePresenter = new SelectionTreePresenter(
+		        this.selectionTree);
+		EditorPanelPresenter editorPanelPresenter = new EditorPanelPresenter(this.editorPanel);
+		AddressWidgetPresenter addressWidgetPresenter = new AddressWidgetPresenter(
+		        this.addressWidget);
+		
+		this.controller = new Controller(service, selectionTreePresenter, editorPanelPresenter,
+		        addressWidgetPresenter);
+		
+		this.getController().startPresenting();
 		
 	}
 	
@@ -51,9 +99,7 @@ public class XyAdmin extends Composite {
 	}
 	
 	public synchronized Controller getController() {
-		if(this.controller == null) {
-			this.controller = new Controller();
-		}
+		
 		return this.controller;
 	}
 	
@@ -62,13 +108,6 @@ public class XyAdmin extends Composite {
 			this.model = new DataModel();
 		}
 		return this.model;
-	}
-	
-	public synchronized ViewModel getViewModel() {
-		if(this.viewModel == null) {
-			this.viewModel = new ViewModel();
-		}
-		return this.viewModel;
 	}
 	
 	public EventBus getEventBus() {

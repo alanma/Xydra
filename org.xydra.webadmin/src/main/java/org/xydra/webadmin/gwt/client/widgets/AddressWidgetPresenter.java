@@ -30,14 +30,17 @@ public class AddressWidgetPresenter extends Presenter {
 		void executeCommand();
 	}
 	
-	@SuppressWarnings("unused")
 	private AddressWidget widget;
 	private HandlerRegistration currentPresentingRegistration;
 	protected HandlerRegistration currentChangeRegistration;
 	
 	public AddressWidgetPresenter(AddressWidget addressWidget) {
 		this.widget = addressWidget;
-		XyAdmin.getInstance().getController().registerAddressWidgetPresenter(this);
+		
+	}
+	
+	public void present() {
+		this.widget.init();
 	}
 	
 	/**
@@ -47,8 +50,6 @@ public class AddressWidgetPresenter extends Presenter {
 	 */
 	void openAddress(final XAddress desiredAddress) {
 		log.info("ordered to open address " + desiredAddress.toString());
-		// TODO handle case where model only exists locally
-		// TODO new rows don't have background color...
 		
 		XId repoID = desiredAddress.getRepository();
 		XAddress repoAddress = XX.resolveRepository(repoID);

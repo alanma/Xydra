@@ -9,7 +9,6 @@ import org.xydra.base.change.XTransaction;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.webadmin.gwt.client.widgets.AddressWidgetPresenter;
-import org.xydra.webadmin.gwt.client.widgets.WarningWidget;
 import org.xydra.webadmin.gwt.client.widgets.XyAdmin;
 import org.xydra.webadmin.gwt.client.widgets.editorpanel.EditorPanelPresenter;
 import org.xydra.webadmin.gwt.client.widgets.selectiontree.SelectionTreePresenter;
@@ -20,24 +19,37 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.RootPanel;
 
 
+/**
+ * Unit that holds some regularly needed objects and has the ability to start /
+ * stop processes.
+ * 
+ * @author Andi_Ka
+ * 
+ */
 public class Controller {
 	
-	// TODO nochmal mit Max durchsprechen, wie das Ganze funktioniert (boot
-	// etc.)
 	private ServiceConnection service;
 	private SelectionTreePresenter selectionTreePresenter;
 	private EditorPanelPresenter editorPanelPresenter;
-	private WarningWidget warningWidget;
 	private Set<HandlerRegistration> registrations = new HashSet<HandlerRegistration>();
 	private AddressWidgetPresenter addressWidgetPresenter;
 	
 	private static final Logger log = LoggerFactory.getLogger(XyAdmin.class);
 	
-	public Controller() {
+	public Controller(XyAdminServiceAsync service2, SelectionTreePresenter selectionTreePresenter2,
+	        EditorPanelPresenter editorPanelPresenter2,
+	        AddressWidgetPresenter addressWidgetPresenter2) {
+		
+		this.service = new ServiceConnection(service2);
+		this.selectionTreePresenter = selectionTreePresenter2;
+		this.editorPanelPresenter = editorPanelPresenter2;
+		this.addressWidgetPresenter = addressWidgetPresenter2;
 	}
 	
-	public void addService(XyAdminServiceAsync service) {
-		this.service = new ServiceConnection(service);
+	public void startPresenting() {
+		this.selectionTreePresenter.present();
+		this.editorPanelPresenter.present();
+		this.addressWidgetPresenter.present();
 	}
 	
 	public void loadModelsObjects(XAddress address) {
@@ -52,15 +64,6 @@ public class Controller {
 		} else {
 			this.service.commitModelTransactions(modelAddress, modelTransactions);
 		}
-	}
-	
-	public void displayError(String message) {
-		this.warningWidget.display(message);
-		
-	}
-	
-	public void registerWarningWidget(WarningWidget warningWidget) {
-		this.warningWidget = warningWidget;
 	}
 	
 	public void removeModel(final XAddress address) {
@@ -85,14 +88,6 @@ public class Controller {
 	
 	public static void showDefaultCursor() {
 		DOM.setStyleAttribute(RootPanel.getBodyElement(), "cursor", "default");
-	}
-	
-	public void registerSelectionTreePresenter(SelectionTreePresenter presenter) {
-		this.selectionTreePresenter = presenter;
-	}
-	
-	public void registerEditorPanelPresenter(EditorPanelPresenter presenter) {
-		this.editorPanelPresenter = presenter;
 	}
 	
 	public XAddress getCurrentlyOpenedModelAddress() {
@@ -128,10 +123,6 @@ public class Controller {
 	
 	public AddressWidgetPresenter getAddressWidgetPresenter() {
 		return this.addressWidgetPresenter;
-	}
-	
-	public void registerAddressWidgetPresenter(AddressWidgetPresenter addressWidgetPresenter2) {
-		this.addressWidgetPresenter = addressWidgetPresenter2;
 	}
 	
 }

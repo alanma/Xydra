@@ -24,6 +24,28 @@ import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.shared.HandlerRegistration;
 
 
+/**
+ * Performs all the logic for {@link RepoBranchWidget}s.
+ * 
+ * So it
+ * 
+ * <ul>
+ * <li>fetches Model IDs from the server (and deactivates the option afterwards)
+ * <li>adds new Models
+ * <li>builds {@link ModelBranchWidget}s
+ * <li>registers listeners for {@link RepoChangedEvent}s which
+ * </ul>
+ * 
+ * The listeners react, when
+ * <ul>
+ * <li>models from the persistence are indexed (IDs fetched from the server and
+ * locally indexed) and
+ * <li>when a new model is created
+ * </ul>
+ * 
+ * @author Andi_Ka
+ * 
+ */
 public class RepoBranchPresenter extends SelectionTreePresenter {
 	
 	private static final Logger log = LoggerFactory.getLogger(RepoBranchPresenter.class);
@@ -37,6 +59,24 @@ public class RepoBranchPresenter extends SelectionTreePresenter {
 	public RepoBranchPresenter(XAddress address) {
 		this.repoAddress = address;
 		
+	}
+	
+	public RepoBranchWidget presentWidget() {
+		log.info("presenting repoBranch for " + this.repoAddress.toString());
+		this.widget = new RepoBranchWidget(this);
+		this.widget.init();
+		build();
+		
+		EventHelper.addRepoChangeListener(this.repoAddress, new IRepoChangedEventHandler() {
+			
+			public void onRepoChange(RepoChangedEvent event) {
+				processRepoDataChanges(event.getStatus());
+			}
+			
+		});
+		log.info("new repoBranchPresenter - Handler build!");
+		
+		return this.widget.asWidget();
 	}
 	
 	private void processRepoDataChanges(EntityStatus status) {
@@ -94,7 +134,6 @@ public class RepoBranchPresenter extends SelectionTreePresenter {
 	}
 	
 	void handleExpand(IRepoBranchWidget repoBranchWidget) {
-		updateViewModel();
 		if(this.expanded) {
 			collapse();
 		} else {
@@ -133,38 +172,12 @@ public class RepoBranchPresenter extends SelectionTreePresenter {
 	public void fetchModels() {
 		XyAdmin.getInstance().getController().fetchModelIds(this.repoAddress);
 		this.collapse();
-		updateViewModel();
-	}
-	
-	void updateViewModel() {
-		if(this.expanded) {
-			XyAdmin.getInstance().getViewModel().closeLocation(this.repoAddress);
-		} else {
-			XyAdmin.getInstance().getViewModel().openLocation(this.repoAddress);
-		}
+		this.widget.deActivateFetchChilds();
 	}
 	
 	public void openAddElementDialog(String string) {
 		super.openAddElementDialog(this.repoAddress, string);
 		
-	}
-	
-	public RepoBranchWidget presentWidget() {
-		log.info("presenting repoBranch for " + this.repoAddress.toString());
-		this.widget = new RepoBranchWidget(this);
-		this.widget.init();
-		build();
-		
-		EventHelper.addRepoChangeListener(this.repoAddress, new IRepoChangedEventHandler() {
-			
-			public void onRepoChange(RepoChangedEvent event) {
-				processRepoDataChanges(event.getStatus());
-			}
-			
-		});
-		log.info("new repoBranchPresenter - Handler build!");
-		
-		return this.widget.asWidget();
 	}
 	
 	public void addRegistration(HandlerRegistration handler) {

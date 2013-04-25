@@ -61,8 +61,8 @@ public class ServiceConnection {
 					EventHelper.fireRepoChangeEvent(XX.toAddress(repoId, null, null, null),
 					        EntityStatus.INDEXED, null);
 					
-					Controller.showDefaultCursor();
 				}
+				Controller.showDefaultCursor();
 			}
 			
 			@Override

@@ -135,4 +135,9 @@ public class RepoBranchWidget extends Composite implements IRepoBranchWidget {
 		return this;
 	}
 	
+	@Override
+	public void deActivateFetchChilds() {
+		this.fetchModelsButton.setEnabled(false);
+	}
+	
 }

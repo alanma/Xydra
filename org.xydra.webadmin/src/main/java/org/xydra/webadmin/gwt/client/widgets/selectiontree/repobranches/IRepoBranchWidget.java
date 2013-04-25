@@ -17,4 +17,6 @@ public interface IRepoBranchWidget {
 	
 	abstract RepoBranchWidget asWidget();
 	
+	abstract void deActivateFetchChilds();
+	
 }

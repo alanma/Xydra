@@ -263,7 +263,7 @@ public class TablePresenter {
 	}
 	
 	private void initUIComponents(int maxColumnsWithRowHeader, int rowCount) {
-		this.contentTable = new Grid(rowCount, maxColumnsWithRowHeader);
+		this.contentTable = new Grid(rowCount, maxColumnsWithRowHeader - 1);
 		this.contentTable.setStyleName("compactTable");
 		this.scrollPanel = new ScrollPanel();
 		this.scrollPanel.add(this.contentTable);

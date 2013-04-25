@@ -12,6 +12,7 @@ import org.xydra.webadmin.gwt.client.events.ModelChangedEvent.IModelChangedEvent
 import org.xydra.webadmin.gwt.client.events.RepoChangedEvent;
 import org.xydra.webadmin.gwt.client.events.RepoChangedEvent.IRepoChangedEventHandler;
 import org.xydra.webadmin.gwt.client.widgets.XyAdmin;
+import org.xydra.webadmin.gwt.client.widgets.editorpanel.EditorPanel;
 import org.xydra.webadmin.gwt.client.widgets.selectiontree.SelectionTreePresenter;
 import org.xydra.webadmin.gwt.client.widgets.selectiontree.repobranches.RepoBranchPresenter;
 
@@ -20,6 +21,29 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 
 
+/**
+ * Performs all the logic for {@link ModelBranchWidget}s. So it:
+ * 
+ * <ul>
+ * <li>triggers the presentation of models in the {@link EditorPanel}
+ * <li>triggers requests to add objects
+ * <li>triggers the removal of the underlying model (locally and if demanded
+ * from the persistence)
+ * <li>has listeners for {@link ModelChangedEvent}s
+ * </ul>
+ * 
+ * The listeners react, when
+ * <ul>
+ * <li>a model with the appropriate address is indexed (fetched from the server
+ * and locally indexed),
+ * <li>when the model is removed and,
+ * <li>when the model is extended by an object (asserts the model is presented
+ * then)
+ * </ul>
+ * 
+ * @author Andi_Ka
+ * 
+ */
 public class ModelBranchPresenter extends SelectionTreePresenter {
 	
 	@SuppressWarnings("unused")
@@ -44,7 +68,7 @@ public class ModelBranchPresenter extends SelectionTreePresenter {
 	protected void processChanges(XAddress modelAddress, final EntityStatus status, XId info) {
 		switch(status) {
 		case CHANGED:
-			// TODO check, when this happens
+			// doesn't happen...
 			break;
 		case DELETED:
 			this.widget.delete();
@@ -104,14 +128,6 @@ public class ModelBranchPresenter extends SelectionTreePresenter {
 		        .getRevisionNumber());
 		this.widget.removeStatusDeleted();
 		
-	}
-	
-	void updateViewModel() {
-		if(this.expanded) {
-			XyAdmin.getInstance().getViewModel().closeLocation(this.modelAddress);
-		} else {
-			XyAdmin.getInstance().getViewModel().openLocation(this.modelAddress);
-		}
 	}
 	
 	public void openAddElementDialog(String string) {

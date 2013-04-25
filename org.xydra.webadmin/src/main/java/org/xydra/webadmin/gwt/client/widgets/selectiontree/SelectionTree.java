@@ -25,13 +25,9 @@ public class SelectionTree extends Composite {
 	@UiField
 	VerticalPanel mainPanel;
 	
-	@SuppressWarnings("unused")
-	private SelectionTreePresenter presenter;
-	
 	public SelectionTree() {
 		super();
 		initWidget(uiBinder.createAndBindUi(this));
 		
-		this.presenter = new SelectionTreePresenter(this);
 	}
 }

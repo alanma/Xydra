@@ -25,18 +25,13 @@ public class EditorPanel extends Composite implements IEditorPanel {
 	@UiField
 	VerticalPanel mainPanel;
 	
-	@SuppressWarnings("unused")
-	private EditorPanelPresenter presenter;
-	
 	public EditorPanel() {
-		
-		this.presenter = new EditorPanelPresenter(this);
+		initWidget(uiBinder.createAndBindUi(this));
 		
 	}
 	
 	@Override
 	public void init() {
-		initWidget(uiBinder.createAndBindUi(this));
 		
 	}
 	

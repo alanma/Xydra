@@ -20,20 +20,16 @@ public abstract class Presenter {
 	 * @param idString the new id
 	 */
 	public static void processUserInput(XAddress entityAddress, String idString) {
-		XAddress newAddress = entityAddress;
 		XType addressedType = entityAddress.getAddressedType();
 		if(addressedType.equals(XType.XREPOSITORY)) {
 			if(entityAddress.getRepository().equals(XX.toId("noRepo"))) {
 				/* add a new Repository */
 				XId repoId = XX.toId(idString);
-				newAddress = XX.toAddress(repoId, null, null, null);
 				XyAdmin.getInstance().getModel().addRepoID(repoId);
 			} else {
 				/* add new Model */
 				XyAdmin.getInstance().getModel()
 				        .addModel(entityAddress.getRepository(), XX.toId(idString));
-				XId modelId = XX.toId(idString);
-				newAddress = XX.toAddress(entityAddress.getRepository(), modelId, null, null);
 				log.info("attempting to add model " + idString);
 			}
 		} else if(addressedType.equals(XType.XMODEL)) {
@@ -44,7 +40,6 @@ public abstract class Presenter {
 			XyAdmin.getInstance().getModel().addField(fieldAddress, null);
 			log.info("attempting to add field " + idString);
 		}
-		XyAdmin.getInstance().getViewModel().openLocation(newAddress);
 	}
 	
 	public void remove(XAddress address) {

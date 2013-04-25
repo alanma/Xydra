@@ -95,6 +95,11 @@
 	text-align: right;
 }
 
+.addRepoStyle {
+	font-size: 15px;
+height: 25px;
+width: 300px;
+}
 .emptyFieldButtonStyle {
 	
 }
@@ -105,18 +110,18 @@
 
 .dialogStyle {
 	background-color: lightgrey;
-	border: 1px solid #009;
+	border: 1px solid grey;
 	
 }
 
 .dialogStyle .Caption {
-	background-color: #ff0;
+	background-color: rgba(255, 105, 0, 0.8);
 	font-size: 90%;
 	font-weight: bold;
-	border-bottom: 3px solid #009;
+	border-bottom: 3px solid grey;
 	padding: 5px;
 	text-align: center;
-	cursor: pointermove;
+	cursor: move;
 }
 
 .dialogStyle td,.dialogStyle div,.dialogStyle table {

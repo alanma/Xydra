@@ -47,12 +47,13 @@ public class AddressWidget extends Composite {
 		
 		super();
 		
-		this.presenter = new AddressWidgetPresenter(this);
-		
 		this.addressEditor = new XAddressEditor(XX.toAddress(XX.toId("repo1"), null, null, null),
 		        null);
-		
 		initWidget(uiBinder.createAndBindUi(this));
+	}
+	
+	void init() {
+		
 	}
 	
 	@UiHandler("loadLocationButton")

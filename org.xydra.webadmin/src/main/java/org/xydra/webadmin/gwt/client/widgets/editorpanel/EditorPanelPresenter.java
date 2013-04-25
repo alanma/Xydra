@@ -65,11 +65,9 @@ public class EditorPanelPresenter extends Presenter {
 	public EditorPanelPresenter(IEditorPanel editorPanel) {
 		this.editorPanel = editorPanel;
 		
-		init();
 	}
 	
-	private void init() {
-		XyAdmin.getInstance().getController().registerEditorPanelPresenter(this);
+	public void present() {
 		this.editorPanel.init();
 	}
 	

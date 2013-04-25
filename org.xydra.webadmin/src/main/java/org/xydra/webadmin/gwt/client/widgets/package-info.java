@@ -1,5 +1,5 @@
 /**
- * 
+ * global Widgets
  */
 /**
  * @author Andi

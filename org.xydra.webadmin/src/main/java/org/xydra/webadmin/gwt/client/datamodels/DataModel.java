@@ -18,6 +18,15 @@ import org.xydra.webadmin.gwt.client.widgets.XyAdmin;
 import org.xydra.webadmin.gwt.client.widgets.dialogs.WarningDialog;
 
 
+/**
+ * Stores all data via {@link RepoDataModel}s that store
+ * {@link SessionCachedModel}s. <br>
+ * <font color=RED> Performs all add- and remove-requests (does some checks
+ * first and fires the appropriate events) </font>
+ * 
+ * @author Andi_Ka
+ * 
+ */
 public class DataModel {
 	
 	private static final Logger log = LoggerFactory.getLogger(DataModel.class);
