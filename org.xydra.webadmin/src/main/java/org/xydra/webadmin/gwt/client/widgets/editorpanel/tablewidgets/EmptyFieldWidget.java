@@ -1,4 +1,4 @@
-package org.xydra.webadmin.gwt.client.widgets.editorpanel.tableWidgets;
+package org.xydra.webadmin.gwt.client.widgets.editorpanel.tablewidgets;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
