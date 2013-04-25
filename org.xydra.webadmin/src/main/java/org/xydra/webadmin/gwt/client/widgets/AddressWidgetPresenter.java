@@ -299,6 +299,7 @@ public class AddressWidgetPresenter extends Presenter {
 		
 		switch(address.getAddressedType()) {
 		case XREPOSITORY:
+			@SuppressWarnings("unused")
 			WarningDialog warning = new WarningDialog("not implemented!");
 			break;
 		case XMODEL:

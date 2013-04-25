@@ -16,6 +16,7 @@ import org.xydra.webadmin.gwt.client.util.EntityTree;
  */
 public class ViewModel {
 	
+	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(ViewModel.class);
 	
 	private EntityTree entityTree;
