@@ -11,7 +11,6 @@ import org.xydra.base.value.XValue;
 import org.xydra.core.DemoModelUtil;
 import org.xydra.core.XCopyUtils;
 import org.xydra.core.XX;
-import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
@@ -39,7 +38,7 @@ public class DemoLocalChangesAndServerEvents {
 	static XValue JOHN_BDAY = XV.toValue("01.02.03");
 	static XValue CLAUDIA_PHONE = XV.toValue(456);
 	static XValue CLAUDIA_CAR = XV.toValue("911");
-	static XValue JENNY_PHONE = XV.toValue(8575309);
+	static XValue JENNY_PHONE = XV.toValue(8675309);
 	
 	// Server Values
 	static XId KERSTIN_ID = XX.toId("Kerstin");
@@ -84,15 +83,13 @@ public class DemoLocalChangesAndServerEvents {
 	 * </ul>
 	 * </ul>
 	 * 
-	 * @param repo a repository
+	 * @param localModel a phonebook-Model
 	 * 
 	 * @return all events from local Change Log
 	 */
-	public static XChangeLog getLocalChanges(XRepository repo) {
+	public static void addLocalChangesToModel(XModel localModel) {
 		
-		DemoModelUtil.addPhonebookModel(repo);
-		
-		XModel phonebook = repo.getModel(DemoModelUtil.PHONEBOOK_ID);
+		XModel phonebook = localModel;
 		SYNCREVISION = phonebook.getRevisionNumber() + 1;
 		
 		// apply local changes:
@@ -115,7 +112,6 @@ public class DemoLocalChangesAndServerEvents {
 		XObject objectJenny = phonebook.getObject(JENNY_ID);
 		objectJenny.createField(PHONE_ID).setValue(JENNY_PHONE);
 		
-		return phonebook.getChangeLog();
 	}
 	
 	/**
@@ -315,7 +311,7 @@ public class DemoLocalChangesAndServerEvents {
 	 * </ul>
 	 * </ul>
 	 * 
-	 * @param repo
+	 * @param repo repository with phonebook-model
 	 * 
 	 * @return a model with the current state
 	 * 
@@ -334,43 +330,79 @@ public class DemoLocalChangesAndServerEvents {
 		
 		XRevWritableObject objectJohn = phonebook.getObject(JOHN_ID);
 		objectJohn.getField(PHONE_ID).setValue(JOHN_PHONE);
-		objectJohn.getField(PHONE_ID).setRevisionNumber(48);
+		objectJohn.getField(PHONE_ID).setRevisionNumber(49);
 		objectJohn.removeField(SCORES_ID);
 		objectJohn.createField(CAR_ID).setValue(JOHN_CAR);
-		objectJohn.getField(CAR_ID).setRevisionNumber(51);
-		objectJohn.createField(BDAY_ID).setRevisionNumber(52);
+		objectJohn.getField(CAR_ID).setRevisionNumber(52);
+		objectJohn.createField(BDAY_ID).setRevisionNumber(53);
 		objectJohn.createField(BIRTHDAY_ID).setValue(JOHN_BIRTHDAY);
-		objectJohn.getField(BIRTHDAY_ID).setRevisionNumber(54);
+		objectJohn.getField(BIRTHDAY_ID).setRevisionNumber(55);
 		objectJohn.createField(CUPS_ID).setValue(JOHN_CUPS);
-		objectJohn.getField(CUPS_ID).setRevisionNumber(56);
+		objectJohn.getField(CUPS_ID).setRevisionNumber(57);
 		objectJohn.getField(FLAGS_ID).setValue(null);
-		objectJohn.getField(FLAGS_ID).setRevisionNumber(57);
-		objectJohn.setRevisionNumber(57);
+		objectJohn.getField(FLAGS_ID).setRevisionNumber(58);
+		objectJohn.setRevisionNumber(58);
 		
 		XRevWritableObject objectClaudia = phonebook.getObject(CLAUDIA_ID);
 		objectClaudia.createField(PHONE_ID);
 		objectClaudia.getField(PHONE_ID).setValue(CLAUDIA_PHONE);
-		objectClaudia.getField(PHONE_ID).setRevisionNumber(59);
+		objectClaudia.getField(PHONE_ID).setRevisionNumber(60);
 		objectClaudia.createField(CAR_ID).setValue(CLAUDIA_CAR_TRUE);
-		objectClaudia.getField(CAR_ID).setRevisionNumber(61);
-		objectClaudia.setRevisionNumber(61);
+		objectClaudia.getField(CAR_ID).setRevisionNumber(62);
+		objectClaudia.setRevisionNumber(62);
 		
 		XRevWritableObject objectJenny = phonebook.getObject(JENNY_ID);
 		objectJenny.createField(PHONE_ID).setValue(JENNY_PHONE);
-		objectJenny.getField(PHONE_ID).setRevisionNumber(63);
-		objectJenny.setRevisionNumber(63);
+		objectJenny.getField(PHONE_ID).setRevisionNumber(64);
+		objectJenny.setRevisionNumber(64);
 		
 		XRevWritableObject objectKerstin = phonebook.createObject(KERSTIN_ID);
 		objectKerstin.createField(PHONE_ID).setValue(KERSTIN_PHONE);
-		objectKerstin.getField(PHONE_ID).setRevisionNumber(65);
-		objectKerstin.setRevisionNumber(65);
+		objectKerstin.getField(PHONE_ID).setRevisionNumber(66);
+		objectKerstin.setRevisionNumber(66);
 		
-		phonebook.setRevisionNumber(65);
+		phonebook.setRevisionNumber(66);
 		
 		System.out.println("phonebook: " + phonebook.toString() + ", rev: "
 		        + phonebook.getRevisionNumber());
 		
 		return phonebook;
+	}
+	
+	/**
+	 * What the EventDelta should contain after adding the server events and the
+	 * inverted local Change Events
+	 * 
+	 * <ul>
+	 * <li>model events:
+	 * <ul>
+	 * <li>add "peter" </i>
+	 * <li>add "kerstin" <font color=BLUE>extern</font><br>
+	 * </ul>
+	 * 
+	 * <li>object events: "john"
+	 * <ul>
+	 * <li>add "phone" - add value "56789" <font color=RED>adverse</font><br>
+	 * <li>change "bDay" - change value to null <font color=RED>set value
+	 * failed</font><br>
+	 * <li>add "birthday" - "01.02.03" <font color=BLUE>extern</font><br>
+	 * <li>add "cups" - "fishing" <font color=BLUE>extern</font><br>
+	 * <li>change "flags" - null <font color=BLUE>extern</font><br>
+	 * </ul>
+	 * <li>object events: "claudia"
+	 * <ul>
+	 * <li>change "car" - "911S" <font color=RED>adverse</font><br>
+	 * </ul>
+	 * 
+	 * <li>object events: "kerstin"
+	 * <ul>
+	 * <li>add "phone" - "Canada" <font color=BLUE>extern</font><br>
+	 * </ul>
+	 * </ul>
+	 * 
+	 */
+	public void getResultingEventDelta() {
+		// only for documentation
 	}
 	
 }

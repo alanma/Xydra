@@ -9,6 +9,7 @@ import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xydra.base.XAddress;
+import org.xydra.base.XCompareUtils;
 import org.xydra.base.XId;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XFieldEvent;
@@ -27,6 +28,7 @@ import org.xydra.core.XX;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
+import org.xydra.store.sync.NewSyncer;
 
 
 /**
@@ -42,10 +44,8 @@ public class EventDeltaTest {
 	}
 	
 	private XId actorId = XX.toId("EventDeltaTest");
-	private XModel localModel;
 	
 	private String password = null; // TODO auth: where to get this?
-	private XModel remoteModel;
 	
 	private XModel dummyModel;
 	
@@ -225,21 +225,38 @@ public class EventDeltaTest {
 	public void testWithNewDemoData() {
 		EventDelta eventDelta = new EventDelta();
 		
+		/* add server changes to the EventDelta */
 		XRepository serverRepo = new MemoryRepository(this.actorId, this.password, this.repo);
 		DemoModelUtil.addPhonebookModel(serverRepo);
-		
-		XRevWritableModel dummy = DemoLocalChangesAndServerEvents
-		        .getResultingClientState(serverRepo);
-		
 		Iterator<XEvent> serverEvents = DemoLocalChangesAndServerEvents
 		        .getServerChanges(serverRepo);
+		int count = 0;
 		while(serverEvents.hasNext()) {
 			XEvent serverEvent = (XEvent)serverEvents.next();
 			eventDelta.addEvent(serverEvent);
+			count++;
 		}
+		serverRepo.removeModel(DemoModelUtil.PHONEBOOK_ID);
+		DemoModelUtil.addPhonebookModel(serverRepo);
+		XEvent[] serverEventArray = new XEvent[count];
+		
+		serverEvents = DemoLocalChangesAndServerEvents.getServerChanges(serverRepo);
+		count = 0;
+		while(serverEvents.hasNext()) {
+			XEvent xEvent = (XEvent)serverEvents.next();
+			serverEventArray[count] = xEvent;
+			count++;
+		}
+		
+		/* add local changes to the EventDelta */
 		XRepository localRepo = new MemoryRepository(this.actorId, this.password, this.repo);
+		localRepo.createModel(XX.toId("trial"));
+		XModel secondModel = localRepo.getModel(XX.toId("trial"));
 		DemoModelUtil.addPhonebookModel(localRepo);
-		XChangeLog localChangeLog = DemoLocalChangesAndServerEvents.getLocalChanges(localRepo);
+		XModel localModel = localRepo.getModel(DemoModelUtil.PHONEBOOK_ID);
+		XCopyUtils.copyData(localModel, secondModel);
+		DemoLocalChangesAndServerEvents.addLocalChangesToModel(localModel);
+		XChangeLog localChangeLog = localModel.getChangeLog();
 		
 		Iterator<XEvent> localEventIterator = localChangeLog
 		        .getEventsSince(DemoLocalChangesAndServerEvents.SYNCREVISION);
@@ -249,5 +266,16 @@ public class EventDeltaTest {
 			        localChangeLog);
 		}
 		
+		/* check, if the Delta is just as it should be */
+		
+		XRepository referenceRepo = new MemoryRepository(this.actorId, this.password, this.repo);
+		DemoModelUtil.addPhonebookModel(referenceRepo);
+		XRevWritableModel referenceModel = DemoLocalChangesAndServerEvents
+		        .getResultingClientState(referenceRepo);
+		eventDelta.applyTo(localModel);
+		XRevWritableModel localModelWithRevisions = XCopyUtils.createSnapshot(localModel);
+		NewSyncer.applyEntityRevisionsToModel(serverEventArray, localModelWithRevisions);
+		
+		Assert.assertTrue(XCompareUtils.equalState(localModelWithRevisions, referenceModel));
 	}
 }

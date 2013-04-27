@@ -89,7 +89,8 @@ public class EventDelta {
 			if(rawEvent instanceof XRepositoryEvent) {
 				XRepositoryEvent event = (XRepositoryEvent)rawEvent;
 				alreadyIndexedEventsForAddressSet = this.repoEvents.iterator();
-				contradictoryEvent = lookForContradictoryEvents(inverseChangeType,
+				contradictoryEvent = lookForContradictoryEvents(
+				        event.getChangedEntity().getModel(), inverseChangeType,
 				        alreadyIndexedEventsForAddressSet);
 				if(contradictoryEvent == null) {
 					this.repoEvents.add(event);
@@ -109,7 +110,8 @@ public class EventDelta {
 				
 				alreadyIndexedEventsForAddressSet = this.objectEventMap
 				        .constraintIterator(new EqualsConstraint<XId>(objectId));
-				contradictoryEvent = lookForContradictoryEvents(inverseChangeType,
+				contradictoryEvent = lookForContradictoryEvents(
+				        event.getChangedEntity().getField(), inverseChangeType,
 				        alreadyIndexedEventsForAddressSet);
 				if(contradictoryEvent == null) {
 					this.objectEventMap.index(objectId, event);
@@ -126,8 +128,31 @@ public class EventDelta {
 				} else {
 					contradictoryEvent = lookForContradictoryEvents(inverseChangeType,
 					        alreadyIndexedEventsForAddressSet);
+					XFieldEvent contradictoryFieldEvent = (XFieldEvent)contradictoryEvent;
+					
+					if(contradictoryFieldEvent != null) {
+						/*
+						 * TODO there is a thing here: if the server and the
+						 * client added different values, you cannot find this
+						 * out here. So you have to find out which one is newer
+						 * and fire a Change Event, even though it could be
+						 * unnecessary
+						 */
+						XFieldEvent newEvent = event;
+						if(event.getRevisionNumber() < contradictoryEvent.getRevisionNumber()) {
+							
+							newEvent = contradictoryFieldEvent;
+						}
+						if(newEvent.getNewValue() != null) {
+							XFieldEvent resultingEvent = MemoryFieldEvent.createChangeEvent(
+							        newEvent.getActor(), newEvent.getTarget(),
+							        newEvent.getNewValue(), newEvent.getOldModelRevision(),
+							        newEvent.getOldObjectRevision(),
+							        newEvent.getOldFieldRevision(), newEvent.inTransaction());
+							this.fieldEventMap.index(objectId, fieldId, resultingEvent);
+						}
+					}
 				}
-				
 				if(contradictoryEvent == null) {
 					this.fieldEventMap.index(objectId, fieldId, event);
 				}
@@ -178,14 +203,26 @@ public class EventDelta {
 		return eventToBeRemoved;
 	}
 	
-	private static XEvent lookForContradictoryEvents(XId objectId, ChangeType inverseChangeType,
+	@SuppressWarnings("null")
+	private static XEvent lookForContradictoryEvents(XId entityId, ChangeType inverseChangeType,
 	        Iterator<? extends XEvent> alreadyIndexedEventsForAddressSet) {
 		
 		Set<XEvent> affectedEvents = new HashSet<XEvent>();
+		
 		while(alreadyIndexedEventsForAddressSet.hasNext()) {
+			XId idToBeCompared = null;
 			XEvent xEvent = (XEvent)alreadyIndexedEventsForAddressSet.next();
-			if(xEvent.getChangedEntity().getObject().equals(objectId)) {
+			XAddress changedEntityAddress = xEvent.getChangedEntity();
+			if(xEvent instanceof XRepositoryEvent) {
+				idToBeCompared = changedEntityAddress.getModel();
+			} else if(xEvent instanceof XModelEvent) {
+				idToBeCompared = changedEntityAddress.getObject();
+			} else if(xEvent instanceof XObjectEvent) {
+				idToBeCompared = changedEntityAddress.getField();
+			}
+			if(idToBeCompared.equals(entityId)) {
 				affectedEvents.add(xEvent);
+				break;
 			}
 			
 		}
@@ -253,17 +290,15 @@ public class EventDelta {
 	public void addAdverseEvent(XEvent event, long syncRevision, XChangeLog changeLog) {
 		XAddress changedEntityAddress = event.getChangedEntity();
 		ChangeType changeType = event.getChangeType();
-		long number = event.getRevisionNumber();
 		
 		if(event instanceof XTransactionEvent) {
 			XTransactionEvent transactionEvent = (XTransactionEvent)event;
 			for(XAtomicEvent xAtomicEvent : transactionEvent) {
-				this.addEvent(xAtomicEvent);
+				this.addAdverseEvent(xAtomicEvent, syncRevision, changeLog);
 			}
 		} else {
-			
+			XEvent resultingEvent = null;
 			if(event instanceof XRepositoryEvent) {
-				XRepositoryEvent resultingEvent = null;
 				switch(changeType) {
 				case ADD:
 					resultingEvent = MemoryRepositoryEvent.createRemoveEvent(event.getActor(),
@@ -278,9 +313,7 @@ public class EventDelta {
 				default:
 					break;
 				}
-				this.repoEvents.add(resultingEvent);
 			} else if(event instanceof XModelEvent) {
-				XModelEvent resultingEvent = null;
 				
 				switch(changeType) {
 				case ADD:
@@ -297,9 +330,7 @@ public class EventDelta {
 					break;
 				}
 				
-				this.modelEvents.add(resultingEvent);
 			} else if(event instanceof XObjectEvent) {
-				XObjectEvent resultingEvent = null;
 				switch(changeType) {
 				case ADD:
 					resultingEvent = MemoryObjectEvent.createRemoveEvent(event.getActor(),
@@ -315,9 +346,7 @@ public class EventDelta {
 					break;
 				}
 				
-				this.objectEventMap.index(changedEntityAddress.getObject(), resultingEvent);
 			} else if(event instanceof XFieldEvent) {
-				XFieldEvent resultingEvent = null;
 				
 				XEvent oldRevisionsEvent = changeLog.getEventAt(event.getOldFieldRevision());
 				XValue oldValue = null;
@@ -358,10 +387,10 @@ public class EventDelta {
 					throw new RuntimeException("unable to inverse event " + event.toString());
 				}
 				
-				this.fieldEventMap.index(changedEntityAddress.getObject(),
-				        changedEntityAddress.getField(), resultingEvent);
-			} else
+			} else {
 				throw new RuntimeException("event could not be casted!");
+			}
+			this.addEvent(resultingEvent);
 		}
 	}
 	
@@ -370,6 +399,10 @@ public class EventDelta {
 	 * Throws runtime exceptions when encountering anomalies
 	 * 
 	 * @param model
+	 * 
+	 *            TODO handle peter: object was locally removed, but commit
+	 *            failed - now the again added object has the wrong revision
+	 *            number (since we cannot take one from the server change log)
 	 */
 	public void applyTo(XWritableModel model) {
 		
