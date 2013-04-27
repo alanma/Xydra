@@ -39,9 +39,21 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 
 /**
- * Manages collapse/expand of table object-field-value
+ * Performs logic for table. So it:
  * 
- * @author andi
+ * <ul>
+ * <li>controls the table representing the model
+ * <li>fulfills requests given via the {@link RowHeaderWidget}
+ * <li>has Listeners to {@link ModelChangedEvent}
+ * </ul>
+ * 
+ * The listeners react, when
+ * <ul>
+ * <li>a model is extended by an object: A new row gets added
+ * </ul>
+ * 
+ * @author Andi_Ka
+ * 
  */
 public class TablePresenter {
 	
@@ -193,6 +205,7 @@ public class TablePresenter {
 	
 	private void buildTableContent(SessionCachedModel model, int maxColumnsWithRowHeader) {
 		
+		this.rowList.clear();
 		int rowCount = 0;
 		
 		for(XId objectID : model) {
@@ -229,7 +242,6 @@ public class TablePresenter {
 	private void handleModelChanges(EntityStatus status, XId moreInfos) {
 		if(status.equals(EntityStatus.EXTENDED)) {
 			if(this.contentTable == null) {
-				log.info("here we are!");
 				this.generateTableOrShowInformation();
 				
 			} else {
@@ -243,7 +255,7 @@ public class TablePresenter {
 	private void extendByRow(XAddress newObjectsAddress) {
 		this.rowList.add(newObjectsAddress.getObject());
 		int position = this.rowList.size() - 1;
-		log.info("position: " + position);
+		log.info("rowListSize: " + this.rowList.size() + ", position: " + position);
 		this.contentTable.insertRow(position);
 		SessionCachedModel model = this.presenter.getCurrentModel();
 		log.info("adding row for object " + newObjectsAddress.toString());
@@ -313,10 +325,10 @@ public class TablePresenter {
 	
 	public void expandAll(String expandButtonText) {
 		
-		Status status = Status.Opened;
+		Status status = Status.Present;
 		if(expandButtonText.equals("expand all objects")) {
 		} else {
-			status = Status.Present;
+			status = Status.Opened;
 		}
 		Set<Entry<XAddress,RowPresenter>> rows = this.rowsMap.entrySet();
 		for(Entry<XAddress,RowPresenter> row : rows) {

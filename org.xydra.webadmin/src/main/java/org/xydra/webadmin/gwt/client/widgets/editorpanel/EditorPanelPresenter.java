@@ -46,6 +46,26 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 
+/**
+ * Performs logic for {@link EditorPanel}s. So it:
+ * 
+ * <ul>
+ * <li>processes the presentation of models via starting the
+ * {@link TablePresenter}
+ * <li>fulfills requests given via the {@link ModelControlPanel}
+ * <li>has Listeners to {@link ModelChangedEvent}s and {@link CommittingEvent}s
+ * </ul>
+ * 
+ * The listeners react, when
+ * <ul>
+ * <li>a model with the appropriate address is indexed (fetched from the server
+ * and locally indexed),
+ * <li>the model is removed
+ * </ul>
+ * 
+ * @author Andi_Ka
+ * 
+ */
 public class EditorPanelPresenter extends Presenter {
 	
 	private final String ADDED = "ADDED";

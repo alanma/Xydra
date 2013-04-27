@@ -30,6 +30,26 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.Widget;
 
 
+/**
+ * Performs logic for rows in the table. So it:
+ * 
+ * <ul>
+ * <li>builds the row
+ * <li>fulfills requests given via the {@link FieldWidget}s and
+ * {@link EmptyFieldWidget}s in the row
+ * <li>has Listeners to {@link ObjectChangedEvent}
+ * </ul>
+ * 
+ * The listeners react, when
+ * <ul>
+ * <li>an object is extended by a field,
+ * <li>an object is removed,
+ * <li>an object is changed (field removed / value changed)
+ * </ul>
+ * 
+ * @author Andi_Ka
+ * 
+ */
 public class RowPresenter extends Presenter {
 	
 	private static final Logger log = LoggerFactory.getLogger(RowPresenter.class);
@@ -64,7 +84,6 @@ public class RowPresenter extends Presenter {
 		Grid table = this.tablePresenter.getContentTable();
 		List<XId> columnIds = this.tablePresenter.getColumnIds();
 		int amountColumns = columnIds.size();
-		
 		CellFormatter formatter = table.getCellFormatter();
 		
 		for(int j = 0; j < amountColumns + 1; j++) {
@@ -229,8 +248,9 @@ public class RowPresenter extends Presenter {
 		int columnCount = table.getColumnCount() - 1;
 		
 		if(this.status.equals(Status.Opened)) {
-//			log.info("adding EmptyFieldWidget to row " + this.objectAddress.toString()
-//			        + " at position " + columnCount);
+			// log.info("adding EmptyFieldWidget to row " +
+			// this.objectAddress.toString()
+			// + " at position " + columnCount);
 			table.setWidget(this.verticalPositionInTable, columnCount, new EmptyFieldWidget(this,
 			        newFieldId));
 		}

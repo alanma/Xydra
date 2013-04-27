@@ -95,4 +95,9 @@ public class AddressWidget extends Composite {
 		WarningDialog dialog = new WarningDialog(message);
 		dialog.show();
 	}
+	
+	public void registerPresenter(AddressWidgetPresenter addressWidgetPresenter) {
+		this.presenter = addressWidgetPresenter;
+		
+	}
 }

@@ -17,6 +17,14 @@ import org.xydra.webadmin.gwt.client.widgets.dialogs.WarningDialog;
 import com.google.gwt.event.shared.HandlerRegistration;
 
 
+/**
+ * Processes requests via the {@link AddressWidget}
+ * 
+ * handles callbacks and listens to {@link ViewBuiltEvent}s to proceed requests.
+ * 
+ * @author Andi_Ka
+ * 
+ */
 public class AddressWidgetPresenter extends Presenter {
 	
 	private static final Logger log = LoggerFactory.getLogger(AddressWidgetPresenter.class);
@@ -36,7 +44,7 @@ public class AddressWidgetPresenter extends Presenter {
 	
 	public AddressWidgetPresenter(AddressWidget addressWidget) {
 		this.widget = addressWidget;
-		
+		this.widget.registerPresenter(this);
 	}
 	
 	public void present() {
@@ -60,7 +68,6 @@ public class AddressWidgetPresenter extends Presenter {
 				
 				@Override
 				public void presentObjects() {
-					// TODO Auto-generated method stub
 					
 				}
 				
