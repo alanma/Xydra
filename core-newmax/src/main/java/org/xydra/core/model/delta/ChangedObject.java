@@ -481,8 +481,4 @@ public class ChangedObject implements XWritableObject, DeltaUtils.IObjectDiff {
         return this.removed;
     }
     
-    @Override
-    public boolean exists() {
-        return true;
-    }
 }

@@ -67,7 +67,7 @@ public class SerializedModel {
     private static final String NAME_FIELDS = "fields";
     private static final String NAME_MODELS = "models";
     /** revision number returned by parser if no revision number was found */
-    public static final long NO_REVISION = -2;
+    public static final long NO_REVISION = -1;
     private static final String REVISION_ATTRIBUTE = "revision";
     private static final String SYNC_REVISION_ATTRIBUTE = "syncRevision";
     private static final String STARTREVISION_ATTRIBUTE = "startRevision";
@@ -323,8 +323,7 @@ public class SerializedModel {
             XyAssert.xyAssert(modelState.getObject(objectState.getId()) == objectState);
         }
         
-        if(!modelState.isEmpty())
-            modelState.setExists(true);
+        modelState.setExists(true);
         
         return modelState;
     }

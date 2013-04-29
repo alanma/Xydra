@@ -14,11 +14,4 @@ public interface XRevisionWritable {
     @ModificationOperation
     void setRevisionNumber(long rev);
     
-    /**
-     * Set if this entity exists or not. This flag is not persisted.
-     * 
-     * @param entityExists
-     */
-    void setExists(boolean entityExists);
-    
 }

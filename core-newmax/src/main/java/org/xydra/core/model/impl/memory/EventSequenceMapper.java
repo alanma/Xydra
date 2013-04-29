@@ -28,13 +28,13 @@ public class EventSequenceMapper {
      * @param localChanges
      * @return the {@link Result}
      */
-    public static Result map(XEvent[] serverEvents, LocalChanges localChanges) {
+    public static Result map(XEvent[] serverEvents, XLocalChanges localChanges) {
         List<XEvent> unpackedServerEvents = unpackImpliedTxEvents(serverEvents);
         return mapServerEventsToLocalChanges(unpackedServerEvents, localChanges);
     }
     
     private static Result mapServerEventsToLocalChanges(List<XEvent> unpackedServerEvents,
-            LocalChanges localChanges) {
+            XLocalChanges localChanges) {
         
         List<LocalChange> nonMappedLocalEvents = new ArrayList<LocalChange>();
         List<XEvent> nonMappedServerEvents = new ArrayList<XEvent>();
@@ -76,7 +76,7 @@ public class EventSequenceMapper {
         return new Result(nonMappedServerEvents, nonMappedLocalEvents, mapped);
     }
     
-    private static int[][] calcMatches(List<XEvent> unpackedServerEvents, LocalChanges localChanges) {
+    private static int[][] calcMatches(List<XEvent> unpackedServerEvents, XLocalChanges localChanges) {
         
         int numServerEvents = unpackedServerEvents.size();
         int numLocalChanges = localChanges.getList().size();

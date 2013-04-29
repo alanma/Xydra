@@ -29,7 +29,8 @@ import org.xydra.base.change.impl.memory.MemoryModelCommand;
 import org.xydra.base.change.impl.memory.MemoryRepositoryCommand;
 import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
-import org.xydra.base.rmof.XRevWritableRepository;
+import org.xydra.base.rmof.impl.XExistsRevWritableModel;
+import org.xydra.base.rmof.impl.XExistsRevWritableRepository;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.core.XCopyUtils;
 import org.xydra.core.XX;
@@ -154,7 +155,7 @@ Serializable {
      * A model with revision numbers is required to let e.g. each object know
      * its current revision number.
      */
-    final XRevWritableModel modelState;
+    final XExistsRevWritableModel modelState;
     
     /**
      * A model with the given initial state
@@ -166,7 +167,7 @@ Serializable {
      * @param changeLogState @CanBeNull
      */
     public MemoryModel(IMemoryRepository father, XId actorId, String passwordHash,
-            XRevWritableModel modelState, XChangeLogState changeLogState) {
+            XExistsRevWritableModel modelState, XChangeLogState changeLogState) {
         this(
                 Root.createWithActorAndChangeLogState(actorId, modelState.getAddress(),
                         changeLogState), father, actorId, passwordHash, modelState.getAddress(),
@@ -191,7 +192,7 @@ Serializable {
      *            create-this-model command is added
      */
     private MemoryModel(Root root, IMemoryRepository father, XId actorId, String passwordHash,
-            XAddress modelAddress, XRevWritableModel modelState, boolean createModel) {
+            XAddress modelAddress, XExistsRevWritableModel modelState, boolean createModel) {
         super(root);
         
         this.father = father;
@@ -230,6 +231,8 @@ Serializable {
             assert getRevisionNumber() >= 0;
             assert getChangeLog().getCurrentRevisionNumber() >= 0;
             assert this.modelState.exists();
+        } else {
+            this.modelState.setRevisionNumber(getChangeLog().getCurrentRevisionNumber());
         }
         
         // TODO Andi? Thomas?
@@ -264,7 +267,7 @@ Serializable {
      * @param father
      * @param modelState @NeverNull
      */
-    public MemoryModel(XId actorId, IMemoryRepository father, XRevWritableModel modelState) {
+    public MemoryModel(XId actorId, IMemoryRepository father, XExistsRevWritableModel modelState) {
         super(Root
                 .createWithActor(modelState.getAddress(), actorId, modelState.getRevisionNumber()));
         
@@ -309,7 +312,7 @@ Serializable {
      * @param passwordHash
      * @param modelState @NeverNull
      */
-    public MemoryModel(XId actorId, String passwordHash, XRevWritableModel modelState) {
+    public MemoryModel(XId actorId, String passwordHash, XExistsRevWritableModel modelState) {
         this(
                 Root.createWithActor(modelState.getAddress(), actorId,
                         modelState.getRevisionNumber()), null, actorId, passwordHash, modelState
@@ -324,7 +327,7 @@ Serializable {
      * @param modelState @NeverNull
      * @param changeLogState @CanBeNull
      */
-    public MemoryModel(XId actorId, String passwordHash, XRevWritableModel modelState,
+    public MemoryModel(XId actorId, String passwordHash, XExistsRevWritableModel modelState,
             XChangeLogState changeLogState) {
         this(
                 Root.createWithActorAndChangeLogState(actorId, modelState.getAddress(),
@@ -530,7 +533,7 @@ Serializable {
         return this.father;
     }
     
-    private XRevWritableRepository getFatherState() {
+    private XExistsRevWritableRepository getFatherState() {
         IMemoryRepository father = getFather();
         return father == null ? null : father.getState();
     }
@@ -603,14 +606,14 @@ Serializable {
     
     // implements IMemoryModel
     @Override
-    public XRevWritableModel getState() {
+    public XExistsRevWritableModel getState() {
         return this.modelState;
     }
     
     // implement XSynchronizesChanges
     @Override
     public long getSynchronizedRevision() {
-        return getRoot().getSynchronizedRevision();
+        return getRoot().getLocalChanges().getSynchronizedRevision();
     }
     
     @Override

@@ -10,9 +10,9 @@ import org.xydra.base.XCompareUtils;
 import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.rmof.XReadableRepository;
-import org.xydra.base.rmof.XRevWritableModel;
-import org.xydra.base.rmof.XRevWritableRepository;
 import org.xydra.base.rmof.XWritableRepository;
+import org.xydra.base.rmof.impl.XExistsRevWritableModel;
+import org.xydra.base.rmof.impl.XExistsRevWritableRepository;
 import org.xydra.sharedutils.XyAssert;
 
 
@@ -23,7 +23,7 @@ import org.xydra.sharedutils.XyAssert;
  * 
  * @author voelkel
  */
-public class SimpleRepository extends SimpleEntity implements XRevWritableRepository {
+public class SimpleRepository extends SimpleEntity implements XExistsRevWritableRepository {
     
     private static final long serialVersionUID = 5593443685935758227L;
     
@@ -31,7 +31,7 @@ public class SimpleRepository extends SimpleEntity implements XRevWritableReposi
     private XAddress address;
     
     // not final for GWT serialisation
-    private Map<XId,XRevWritableModel> models = new HashMap<XId,XRevWritableModel>();
+    private Map<XId,XExistsRevWritableModel> models = new HashMap<XId,XExistsRevWritableModel>();
     
     /* Just for GWT */
     protected SimpleRepository() {
@@ -43,8 +43,8 @@ public class SimpleRepository extends SimpleEntity implements XRevWritableReposi
     }
     
     @Override
-    public XRevWritableModel createModel(XId modelId) {
-        XRevWritableModel model = this.models.get(modelId);
+    public XExistsRevWritableModel createModel(XId modelId) {
+        XExistsRevWritableModel model = this.models.get(modelId);
         if(model != null) {
             return model;
         }
@@ -64,7 +64,7 @@ public class SimpleRepository extends SimpleEntity implements XRevWritableReposi
     }
     
     @Override
-    public XRevWritableModel getModel(XId modelId) {
+    public XExistsRevWritableModel getModel(XId modelId) {
         return this.models.get(modelId);
     }
     
@@ -92,7 +92,7 @@ public class SimpleRepository extends SimpleEntity implements XRevWritableReposi
     }
     
     @Override
-    public void addModel(XRevWritableModel model) {
+    public void addModel(XExistsRevWritableModel model) {
         this.models.put(model.getId(), model);
     }
     

@@ -12,35 +12,25 @@ import org.xydra.base.change.XEvent;
  * 
  * @author xamde
  */
-public class LocalChanges {
+public class LocalChanges implements XLocalChanges {
     
     private List<LocalChange> list;
-    private boolean locked;
     
     public LocalChanges(List<LocalChange> list) {
         this.list = list;
     }
     
-    public void lock() {
-        this.locked = true;
-    }
-    
-    public void unlock() {
-        this.locked = false;
-    }
-    
-    public boolean isLocked() {
-        return this.locked;
-    }
-    
+    @Override
     public List<LocalChange> getList() {
         return this.list;
     }
     
+    @Override
     public void clear() {
         this.list.clear();
     }
     
+    @Override
     public void append(XCommand command, XEvent event) {
         LocalChange lc = new LocalChange(command, event);
         this.list.add(lc);
@@ -50,8 +40,19 @@ public class LocalChanges {
         return new LocalChanges(new ArrayList<LocalChange>());
     }
     
+    @Override
     public int countUnappliedLocalChanges() {
         return this.list.size();
+    }
+    
+    public void setSyncRevision(long syncRevision) {
+        this.syncRevision = syncRevision;
+    }
+    
+    private long syncRevision;
+    
+    public long getSynchronizedRevision() {
+        return this.syncRevision;
     }
     
 }

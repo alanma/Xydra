@@ -116,9 +116,4 @@ public class ChangedField implements XWritableField, DeltaUtils.IFieldDiff {
         return this.getOldValue();
     }
     
-    @Override
-    public boolean exists() {
-        return true;
-    }
-    
 }

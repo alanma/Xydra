@@ -808,7 +808,7 @@ class SynchronisationState implements Serializable {
         return null;
     }
     
-    public LocalChanges getLocalChangesImpl() {
+    public XLocalChanges getLocalChangesImpl() {
         // FIXME !!! Auto-generated method stub
         return null;
     }

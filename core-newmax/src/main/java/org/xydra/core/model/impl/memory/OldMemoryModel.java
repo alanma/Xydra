@@ -1445,7 +1445,7 @@ Serializable {
     }
     
     @Override
-    public LocalChanges getLocalChangesImpl() {
+    public XLocalChanges getLocalChangesImpl() {
         return this.syncState.getLocalChangesImpl();
     }
     

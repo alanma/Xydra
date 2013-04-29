@@ -20,7 +20,7 @@ public abstract class SimpleEntity implements Serializable, XEntity {
     
     public abstract long getRevisionNumber();
     
-    private transient boolean entityExists;
+    private transient boolean entityExists = true;
     
     /**
      * @return at runtime if the entity currently exists or not. This flag is

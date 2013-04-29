@@ -1000,7 +1000,7 @@ public class OldMemoryObject extends AbstractMOFEntity implements OldIMemoryObje
     }
     
     @Override
-    public LocalChanges getLocalChangesImpl() {
+    public XLocalChanges getLocalChangesImpl() {
         return this.syncState.getLocalChangesImpl();
     }
 }

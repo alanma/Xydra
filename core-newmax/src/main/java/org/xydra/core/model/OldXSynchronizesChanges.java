@@ -7,8 +7,8 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XTransaction;
 import org.xydra.core.change.XSendsSyncEvents;
-import org.xydra.core.model.impl.memory.LocalChanges;
 import org.xydra.core.model.impl.memory.Synchronizable;
+import org.xydra.core.model.impl.memory.XLocalChanges;
 import org.xydra.core.model.impl.memory.XWritableChangeLog;
 import org.xydra.store.sync.XSynchronizer;
 
@@ -68,7 +68,7 @@ Synchronizable {
     XLocalChange[] getLocalChanges();
     
     // TODO change into X..something and remove Impl-suffix
-    LocalChanges getLocalChangesImpl();
+    XLocalChanges getLocalChangesImpl();
     
     /**
      * @return the actor that is represented by this interface. This is the

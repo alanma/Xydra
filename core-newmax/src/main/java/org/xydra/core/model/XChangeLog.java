@@ -5,6 +5,7 @@ import java.util.Iterator;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.change.XEvent;
+import org.xydra.base.value.XValue;
 
 
 /**
@@ -13,10 +14,7 @@ import org.xydra.base.change.XEvent;
  * {@link XValue XValues}.
  * 
  * @author Kaidel
- */
-/**
  * @author xamde
- * 
  */
 public interface XChangeLog extends Serializable {
     

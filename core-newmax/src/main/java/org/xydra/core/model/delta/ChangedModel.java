@@ -25,6 +25,7 @@ import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
+import org.xydra.base.rmof.impl.XExistsReadableModel;
 import org.xydra.base.rmof.impl.memory.SimpleObject;
 import org.xydra.core.XCopyUtils;
 import org.xydra.core.XX;
@@ -54,7 +55,7 @@ import org.xydra.sharedutils.XyAssert;
  * @author dscharrer
  * 
  */
-public class ChangedModel implements XWritableModel, IModelDiff {
+public class ChangedModel implements XWritableModel, IModelDiff, XExistsReadableModel {
     
     private static final Logger log = LoggerFactory.getLogger(ChangedModel.class);
     

@@ -16,6 +16,7 @@ import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.base.rmof.XWritableModel;
+import org.xydra.base.rmof.impl.XExistsRevWritableModel;
 import org.xydra.sharedutils.XyAssert;
 
 
@@ -26,7 +27,8 @@ import org.xydra.sharedutils.XyAssert;
  * 
  * @author voelkel
  */
-public class SimpleModel extends SimpleEntity implements XRevWritableModel, XSessionModel {
+public class SimpleModel extends SimpleEntity implements XRevWritableModel, XSessionModel,
+        XExistsRevWritableModel {
     
     private static final long serialVersionUID = 5593443685935758227L;
     

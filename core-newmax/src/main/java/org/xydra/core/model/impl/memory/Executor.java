@@ -34,10 +34,12 @@ import org.xydra.base.rmof.XReadableRepository;
 import org.xydra.base.rmof.XRevWritableField;
 import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
-import org.xydra.base.rmof.XRevWritableRepository;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
+import org.xydra.base.rmof.impl.XExistsReadableModel;
+import org.xydra.base.rmof.impl.XExistsRevWritableModel;
+import org.xydra.base.rmof.impl.XExistsRevWritableRepository;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.base.value.XValue;
 import org.xydra.core.XX;
@@ -610,7 +612,7 @@ public class Executor {
     
     @SuppressWarnings("unused")
     private static void applyModelEventOrTransaction(XEvent event,
-            XRevWritableRepository repositoryState, XRevWritableModel modelState) {
+            XExistsRevWritableRepository repositoryState, XExistsRevWritableModel modelState) {
         if(event instanceof XModelEvent) {
             applyModelEvent((XModelEvent)event, modelState);
         } else {
@@ -625,7 +627,7 @@ public class Executor {
      * @param modelState
      */
     private static void applyModelTransaction(XTransactionEvent txn,
-            XRevWritableRepository repositoryState, XRevWritableModel modelState) {
+            XExistsRevWritableRepository repositoryState, XExistsRevWritableModel modelState) {
         for(int i = 0; i < txn.size(); i++) {
             XAtomicEvent atomicEvent = txn.getEvent(i);
             switch(atomicEvent.getTarget().getAddressedType()) {
@@ -661,7 +663,7 @@ public class Executor {
     }
     
     private static void applyRepositoryEvent(XRepositoryEvent repositoryEvent,
-            XRevWritableRepository repositoryState, XRevWritableModel currentModelState) {
+            XExistsRevWritableRepository repositoryState, XExistsRevWritableModel currentModelState) {
         applyRepositoryEvent(repositoryEvent, repositoryState);
         if(currentModelState != null) {
             switch(repositoryEvent.getChangeType()) {
@@ -683,13 +685,13 @@ public class Executor {
      * @param repositoryState @CanBeNull
      */
     private static void applyRepositoryEvent(XRepositoryEvent repositoryEvent,
-            XRevWritableRepository repositoryState) {
+            XExistsRevWritableRepository repositoryState) {
         if(repositoryState == null)
             return;
         
         switch(repositoryEvent.getChangeType()) {
         case ADD:
-            XRevWritableModel modelState = repositoryState.createModel(repositoryEvent
+            XExistsRevWritableModel modelState = repositoryState.createModel(repositoryEvent
                     .getChangedEntity().getModel());
             modelState.setRevisionNumber(repositoryEvent.getRevisionNumber());
             modelState.setExists(true);
@@ -763,9 +765,9 @@ public class Executor {
     }
     
     public static long executeRepositoryCommand(XId actorId, XRepositoryCommand command,
-            XRevWritableRepository repositoryState, Root root,
+            XExistsRevWritableRepository repositoryState, Root root,
             XRMOFChangeListener changeEventListener) {
-        XRevWritableModel modelState = repositoryState.getModel(command.getModelId());
+        XExistsRevWritableModel modelState = repositoryState.getModel(command.getModelId());
         return executeRepositoryCommand_complex(actorId, command, repositoryState, modelState,
                 root, changeEventListener);
     }
@@ -794,8 +796,8 @@ public class Executor {
      */
     @ModificationOperation
     public static long executeRepositoryCommand_complex(XId actorId, XRepositoryCommand command,
-            XRevWritableRepository repositoryState, XRevWritableModel modelState, Root root,
-            XRMOFChangeListener changeEventListener) {
+            XExistsRevWritableRepository repositoryState, XExistsRevWritableModel modelState,
+            Root root, XRMOFChangeListener changeEventListener) {
         assert command != null;
         XId modelId = command.getModelId();
         if(repositoryState != null)
@@ -813,7 +815,7 @@ public class Executor {
         
         // create event
         XyAssert.xyAssert(!root.isTransactionInProgess());
-        XRevWritableModel currentModelState;
+        XExistsRevWritableModel currentModelState;
         if(repositoryState != null) {
             currentModelState = repositoryState.getModel(modelId);
             assert modelState == currentModelState;
@@ -861,7 +863,7 @@ public class Executor {
      * @return
      */
     private static EventResult createEventFromRepositoryCommand(XId actorId,
-            XRepositoryCommand command, XReadableModel currentModelState, Root root,
+            XRepositoryCommand command, XExistsReadableModel currentModelState, Root root,
             XRMOFChangeListener changeEventListener, boolean inTransaction) {
         XId modelId = command.getModelId();
         assert currentModelState != null;
@@ -944,8 +946,8 @@ public class Executor {
      * @return ...
      */
     public static long executeModelTransaction(XId actorId, XTransaction txn,
-            XRevWritableRepository repositoryState, XRevWritableModel modelState, Root root,
-            XRMOFChangeListener changeEventListener) {
+            XExistsRevWritableRepository repositoryState, XExistsRevWritableModel modelState,
+            Root root, XRMOFChangeListener changeEventListener) {
         assert modelState != null;
         synchronized(root) {
             root.startExecutingTransaction();

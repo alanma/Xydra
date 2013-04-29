@@ -19,8 +19,9 @@ import org.xydra.base.change.XRepositoryCommand;
 import org.xydra.base.change.XRepositoryEvent;
 import org.xydra.base.change.XTransactionEvent;
 import org.xydra.base.change.impl.memory.MemoryRepositoryCommand;
-import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableRepository;
+import org.xydra.base.rmof.impl.XExistsRevWritableModel;
+import org.xydra.base.rmof.impl.XExistsRevWritableRepository;
 import org.xydra.base.rmof.impl.memory.SimpleRepository;
 import org.xydra.core.XX;
 import org.xydra.core.change.XFieldEventListener;
@@ -59,7 +60,7 @@ public class MemoryRepository extends AbstractEntity implements IMemoryRepositor
     @SuppressWarnings("unused")
     private String sessionPasswordHash;
     
-    private final XRevWritableRepository repositoryState;
+    private final XExistsRevWritableRepository repositoryState;
     
     /**
      * Creates a new MemoryRepository.
@@ -81,7 +82,8 @@ public class MemoryRepository extends AbstractEntity implements IMemoryRepositor
      * @param repositoryState The initial {@link XRevWritableRepository} state
      *            of this MemoryRepository.
      */
-    public MemoryRepository(XId actorId, String passwordHash, XRevWritableRepository repositoryState) {
+    public MemoryRepository(XId actorId, String passwordHash,
+            XExistsRevWritableRepository repositoryState) {
         super();
         XyAssert.xyAssert(repositoryState != null);
         assert repositoryState != null;
@@ -326,7 +328,7 @@ public class MemoryRepository extends AbstractEntity implements IMemoryRepositor
         }
         
         // try to wrap modelState, if present
-        XRevWritableModel modelState = this.repositoryState.getModel(modelId);
+        XExistsRevWritableModel modelState = this.repositoryState.getModel(modelId);
         if(modelState == null) {
             return null;
         }
@@ -451,7 +453,7 @@ public class MemoryRepository extends AbstractEntity implements IMemoryRepositor
     }
     
     @Override
-    public XRevWritableRepository getState() {
+    public XExistsRevWritableRepository getState() {
         return this.repositoryState;
     }
     

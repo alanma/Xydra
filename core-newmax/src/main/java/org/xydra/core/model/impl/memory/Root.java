@@ -46,11 +46,17 @@ public class Root {
         this.isTransactionInProgress = false;
     }
     
+    /** for registering listeners and firing events */
     private final MemoryEventBus eventBus;
+    
     private XId sessionActor;
+    
     private boolean isTransactionInProgress;
+    
     private final XWritableChangeLog writableChangeLog;
+    
     private final LocalChanges localChanges;
+    
     private String sessionPasswordHash;
     
     public String getSessionPasswordHash() {
@@ -263,14 +269,18 @@ public class Root {
         this.isTransactionInProgress = false;
     }
     
-    public void setSyncRevision(long syncRevision) {
-        this.syncRevision = syncRevision;
+    private boolean locked = false;
+    
+    public void lock() {
+        this.locked = true;
     }
     
-    private long syncRevision;
+    public void unlock() {
+        this.locked = false;
+    }
     
-    public long getSynchronizedRevision() {
-        return this.syncRevision;
+    public boolean isLocked() {
+        return this.locked;
     }
     
 }

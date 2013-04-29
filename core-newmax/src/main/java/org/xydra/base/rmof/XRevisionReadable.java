@@ -14,12 +14,4 @@ public interface XRevisionReadable {
     @ReadOperation
     long getRevisionNumber();
     
-    /**
-     * @return at runtime if the entity currently exists or not. This flag is
-     *         not persisted.
-     * @throws IllegalStateException if this object has already been removed
-     */
-    @ReadOperation
-    boolean exists();
-    
 }
