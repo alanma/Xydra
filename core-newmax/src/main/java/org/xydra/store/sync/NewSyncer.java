@@ -30,6 +30,12 @@ import org.xydra.store.Callback;
 import org.xydra.store.XydraStore;
 
 
+/**
+ * TODO andi: fix if possible; probably not possible
+ * 
+ * @author xamde
+ * 
+ */
 public class NewSyncer {
     
     private String passwordHash;

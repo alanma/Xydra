@@ -10,6 +10,11 @@ import org.xydra.core.model.XChangeLogState;
 import com.google.gwt.dev.jjs.impl.gflow.Analysis;
 
 
+/**
+ * TODO andi implement
+ * 
+ * @author xamde
+ */
 public class MemorySyncLog extends AbstractSyncLog implements ISyncLog {
     
     private static final long serialVersionUID = -7008700708157729184L;
