@@ -19,11 +19,10 @@ import org.xydra.core.model.impl.memory.EventDelta;
 import org.xydra.core.model.impl.memory.EventSequenceMapper;
 import org.xydra.core.model.impl.memory.EventSequenceMapper.Result;
 import org.xydra.core.model.impl.memory.IMemoryModel;
-import org.xydra.core.model.impl.memory.LocalChange;
-import org.xydra.core.model.impl.memory.LocalChanges;
 import org.xydra.core.model.impl.memory.ModelUtils;
-import org.xydra.core.model.impl.memory.Root;
-import org.xydra.core.model.impl.memory.XWritableChangeLog;
+import org.xydra.core.model.impl.memory.garbage.LocalChange;
+import org.xydra.core.model.impl.memory.sync.ISyncLog;
+import org.xydra.core.model.impl.memory.sync.Root;
 import org.xydra.index.query.Pair;
 import org.xydra.persistence.GetEventsRequest;
 import org.xydra.store.BatchedResult;
@@ -39,7 +38,7 @@ public class NewSyncer {
     
     private XRevWritableModel modelState;
     
-    private XWritableChangeLog changeLog;
+    private ISyncLog syncLog;
     
     /**
      * @param store to send commands and get events
@@ -59,14 +58,11 @@ public class NewSyncer {
         this.modelWithListeners = modelWithListeners;
         this.modelState = modelState;
         this.root = root;
-        this.changeLog = root.getWritableChangeLog();
-        this.localChanges = root.getLocalChanges();
+        this.syncLog = root.getSyncLog();
         this.actorId = actorId;
         this.passwordHash = passwordHash;
         this.syncRev = syncRev;
     }
-    
-    private LocalChanges localChanges;
     
     private XydraStore store;
     
@@ -174,14 +170,15 @@ public class NewSyncer {
         long newSyncRev = serverEvents[serverEvents.length - 1].getRevisionNumber();
         
         // change changeLog
-        this.changeLog.truncateToRevision(this.syncRev);
+        this.syncLog.truncateToRevision(this.syncRev);
         for(XEvent e : serverEvents) {
-            this.changeLog.appendEvent(e);
+            this.syncLog.appendEvent(e);
         }
         
+        // FIXME remove all local commands from syncLog
         this.localChanges.clear();
         
-        this.localChanges.setSyncRevision(newSyncRev);
+        this.syncLog.setSynchronizedRevision(newSyncRev);
         
         // end atomic section ----
         

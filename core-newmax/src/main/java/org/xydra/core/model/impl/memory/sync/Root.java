@@ -1,8 +1,7 @@
-package org.xydra.core.model.impl.memory;
+package org.xydra.core.model.impl.memory.sync;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
-import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XFieldEvent;
 import org.xydra.base.change.XModelEvent;
 import org.xydra.base.change.XObjectEvent;
@@ -17,6 +16,8 @@ import org.xydra.core.change.XSyncEventListener;
 import org.xydra.core.change.XTransactionEventListener;
 import org.xydra.core.model.XChangeLogState;
 import org.xydra.core.model.XRepository;
+import org.xydra.core.model.impl.memory.MemoryChangeLogState;
+import org.xydra.core.model.impl.memory.MemoryEventBus;
 import org.xydra.core.model.impl.memory.MemoryEventBus.EventType;
 
 
@@ -33,15 +34,12 @@ public class Root {
     
     /**
      * @param eventBus
-     * @param writableChangeLog
-     * @param localChanges
+     * @param syncLog
      * @param sessionActor
      */
-    public Root(MemoryEventBus eventBus, XWritableChangeLog writableChangeLog,
-            LocalChanges localChanges, XId sessionActor) {
+    public Root(MemoryEventBus eventBus, ISyncLog syncLog, XId sessionActor) {
         this.eventBus = eventBus;
-        this.writableChangeLog = writableChangeLog;
-        this.localChanges = localChanges;
+        this.syncLog = syncLog;
         this.sessionActor = sessionActor;
         this.isTransactionInProgress = false;
     }
@@ -53,11 +51,9 @@ public class Root {
     
     private boolean isTransactionInProgress;
     
-    private final XWritableChangeLog writableChangeLog;
-    
-    private final LocalChanges localChanges;
-    
     private String sessionPasswordHash;
+    
+    private ISyncLog syncLog;
     
     public String getSessionPasswordHash() {
         return this.sessionPasswordHash;
@@ -208,7 +204,7 @@ public class Root {
      * 
      * @param actor for this field.
      */
-    void setSessionActor(XId actor) {
+    public void setSessionActor(XId actor) {
         this.sessionActor = actor;
     }
     
@@ -219,8 +215,8 @@ public class Root {
      * @return ...
      */
     public static Root createWithActor(XAddress baseAddress, XId actorId, long changeLogBaseRevision) {
-        return new Root(new MemoryEventBus(), MemoryChangeLog.create(baseAddress,
-                changeLogBaseRevision), LocalChanges.create(), actorId);
+        return new Root(new MemoryEventBus(), MemorySyncLog.create(baseAddress,
+                changeLogBaseRevision), actorId);
     }
     
     /**
@@ -238,27 +234,13 @@ public class Root {
         
         new MemoryEventBus(),
         
-        new MemoryChangeLog(usedChangeLogState),
-        
-        LocalChanges.create(),
+        new MemorySyncLog(usedChangeLogState),
         
         actorId);
     }
     
-    /**
-     * @return the {@link XWritableChangeLog} which is logging the
-     *         {@link XEvent XEvents}
-     */
-    public XWritableChangeLog getWritableChangeLog() {
-        return this.writableChangeLog;
-    }
-    
     public int countUnappliedLocalChanges() {
-        return this.localChanges.countUnappliedLocalChanges();
-    }
-    
-    public LocalChanges getLocalChanges() {
-        return this.localChanges;
+        return this.syncLog.countUnappliedLocalChanges();
     }
     
     public void startExecutingTransaction() {
@@ -281,6 +263,14 @@ public class Root {
     
     public boolean isLocked() {
         return this.locked;
+    }
+    
+    public ISyncLog getSyncLog() {
+        return this.syncLog;
+    }
+    
+    public long getSynchronizedRevision() {
+        return this.syncLog.getSynchronizedRevision();
     }
     
 }

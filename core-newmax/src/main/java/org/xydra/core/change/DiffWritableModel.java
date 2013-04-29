@@ -453,11 +453,6 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
     }
     
     @Override
-    public boolean exists() {
-        return this.base.exists();
-    }
-    
-    @Override
     protected boolean object_exists(XId objectId) {
         return hasObject(objectId);
     }

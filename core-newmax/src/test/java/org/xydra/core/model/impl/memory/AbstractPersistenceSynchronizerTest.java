@@ -6,12 +6,11 @@ import org.xydra.core.XX;
 import org.xydra.persistence.XydraPersistence;
 import org.xydra.store.XydraStore;
 import org.xydra.store.impl.delegate.DelegatingAllowAllStore;
-import org.xydra.store.sync.XSynchronizer;
+import org.xydra.store.sync.NewSyncer;
 
 
 /**
- * Test for {@link XSynchronizer} and {@link SynchronisationState} that uses a
- * {@link XydraPersistence}.
+ * Test for {@link NewSyncer} that uses a {@link XydraPersistence}.
  * 
  * Subclasses should set protected member to a concrete implementation.
  * 

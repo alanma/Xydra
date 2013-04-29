@@ -24,6 +24,7 @@ import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.value.XValue;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.delta.ChangedModel;
+import org.xydra.core.model.impl.memory.sync.Root;
 import org.xydra.index.IMapMapSetIndex;
 import org.xydra.index.IMapSetIndex;
 import org.xydra.index.impl.FastEntrySetFactory;

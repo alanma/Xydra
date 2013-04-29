@@ -11,6 +11,8 @@ import org.xydra.base.change.impl.memory.MemoryObjectEvent;
 import org.xydra.base.id.MemoryStringIDProvider;
 import org.xydra.core.XX;
 import org.xydra.core.model.impl.memory.EventSequenceMapper.Result;
+import org.xydra.core.model.impl.memory.garbage.LocalChange;
+import org.xydra.core.model.impl.memory.garbage.LocalChanges;
 import org.xydra.index.query.Pair;
 
 

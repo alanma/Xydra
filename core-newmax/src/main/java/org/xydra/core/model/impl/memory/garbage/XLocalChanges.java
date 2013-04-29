@@ -1,4 +1,4 @@
-package org.xydra.core.model.impl.memory;
+package org.xydra.core.model.impl.memory.garbage;
 
 import java.util.List;
 

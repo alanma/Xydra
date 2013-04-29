@@ -170,9 +170,4 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
         return XType.XMODEL;
     }
     
-    // TODO maybe vary
-    @Override
-    public boolean exists() {
-        return true;
-    }
 }

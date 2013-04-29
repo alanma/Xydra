@@ -1,4 +1,4 @@
-package org.xydra.core.model.impl.memory;
+package org.xydra.core.model.impl.memory.garbage;
 
 import org.xydra.base.XId;
 import org.xydra.base.change.XFieldEvent;
@@ -6,6 +6,10 @@ import org.xydra.base.change.XObjectEvent;
 import org.xydra.base.change.XTransactionEvent;
 import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.core.model.XObject;
+import org.xydra.core.model.impl.memory.IMemoryEntity;
+import org.xydra.core.model.impl.memory.IMemoryField;
+import org.xydra.core.model.impl.memory.IMemoryMOFEntity;
+import org.xydra.core.model.impl.memory.IMemoryModel;
 
 
 // FIXME MAX set to default access

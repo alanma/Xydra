@@ -14,6 +14,7 @@ import org.xydra.base.change.impl.memory.MemoryFieldCommand;
 import org.xydra.base.rmof.XRevWritableField;
 import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
+import org.xydra.base.rmof.impl.XExistsRevWritableField;
 import org.xydra.base.rmof.impl.memory.SimpleField;
 import org.xydra.base.value.XValue;
 import org.xydra.core.XCopyUtils;
@@ -21,6 +22,7 @@ import org.xydra.core.XX;
 import org.xydra.core.change.XFieldEventListener;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XObject;
+import org.xydra.core.model.impl.memory.sync.Root;
 import org.xydra.sharedutils.XyAssert;
 
 
@@ -43,7 +45,7 @@ public class MemoryField extends AbstractMOFEntity implements XField, IMemoryFie
     private final IMemoryObject father;
     
     /** The internal runtime state, like a snapshot */
-    private final XRevWritableField fieldState;
+    private final XExistsRevWritableField fieldState;
     
     /**
      * Creates a new MemoryField with a father-{@link XObject}.
@@ -62,9 +64,17 @@ public class MemoryField extends AbstractMOFEntity implements XField, IMemoryFie
         assert fieldState.getAddress().getRepository() != null;
         assert fieldState.getAddress().getModel() != null;
         assert fieldState.getAddress().getObject() != null;
-        this.fieldState = fieldState;
-        this.fieldState.setExists(true);
+        
+        this.fieldState = convert(fieldState);
         this.father = father;
+    }
+    
+    private XExistsRevWritableField convert(XRevWritableField fieldState) {
+        if(fieldState instanceof XExistsRevWritableField) {
+            return (XExistsRevWritableField)fieldState;
+        } else {
+            return XCopyUtils.createSnapshot(fieldState);
+        }
     }
     
     /**
@@ -97,7 +107,7 @@ public class MemoryField extends AbstractMOFEntity implements XField, IMemoryFie
         assert fieldState.getAddress().getRepository() != null;
         assert fieldState.getAddress().getModel() != null;
         assert fieldState.getAddress().getObject() != null;
-        this.fieldState = fieldState;
+        this.fieldState = convert(fieldState);
         this.fieldState.setExists(true);
         this.father = null;
     }

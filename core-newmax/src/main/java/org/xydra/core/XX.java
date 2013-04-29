@@ -5,8 +5,8 @@ import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
-import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
+import org.xydra.base.rmof.impl.XExistsRevWritableModel;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.impl.memory.MemoryModel;
@@ -55,8 +55,8 @@ public class XX extends Base {
      *         behavior of the model is undefined.
      */
     public static XModel wrap(XId actor, String password, XReadableModel modelSnapshot) {
-        if(modelSnapshot instanceof XRevWritableModel) {
-            return new MemoryModel(actor, password, (XRevWritableModel)modelSnapshot);
+        if(modelSnapshot instanceof XExistsRevWritableModel) {
+            return new MemoryModel(actor, password, (XExistsRevWritableModel)modelSnapshot);
         } else {
             return XCopyUtils.copyModel(actor, password, modelSnapshot);
         }

@@ -165,11 +165,6 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
             this.current = this.initial;
         }
         
-        @Override
-        public boolean exists() {
-            return true;
-        }
-        
     }
     
     private static class CachedObject extends CachedEntity implements XWritableObject,
@@ -380,11 +375,6 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
             }
         }
         
-        @Override
-        public boolean exists() {
-            return true;
-        }
-        
     }
     
     /**
@@ -485,9 +475,6 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
     private Map<XId,CachedObject> cachedObjects;
     
     private boolean knowsAllObjectIds = false;
-    
-    // FIXME maybe allow to change
-    private boolean exists = true;
     
     public SessionCachedModel(XAddress address) {
         this.address = address;
@@ -844,11 +831,6 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
         for(XId xid : objectsToDelete) {
             this.cachedObjects.remove(xid);
         }
-    }
-    
-    @Override
-    public boolean exists() {
-        return this.exists;
     }
     
 }

@@ -5,12 +5,11 @@ import org.xydra.core.LoggerTestHelper;
 import org.xydra.core.XX;
 import org.xydra.persistence.XydraPersistence;
 import org.xydra.store.impl.memory.MemoryPersistence;
-import org.xydra.store.sync.XSynchronizer;
+import org.xydra.store.sync.NewSyncer;
 
 
 /**
- * Test for {@link XSynchronizer} and {@link SynchronisationState} that uses the
- * {@link MemoryPersistence}.
+ * Test for {@link NewSyncer} that uses the {@link MemoryPersistence}.
  * 
  * @author dscharrer
  * 

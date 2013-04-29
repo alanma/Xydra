@@ -43,11 +43,15 @@ import org.xydra.core.change.XSendsObjectEvents;
 import org.xydra.core.change.XSendsTransactionEvents;
 import org.xydra.core.change.XTransactionEventListener;
 import org.xydra.core.model.IHasChangeLog;
+import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XChangeLogState;
 import org.xydra.core.model.XExecutesCommands;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.XSynchronizesChanges;
+import org.xydra.core.model.impl.memory.sync.ISyncLog;
+import org.xydra.core.model.impl.memory.sync.ISyncLogState;
+import org.xydra.core.model.impl.memory.sync.Root;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.sharedutils.XyAssert;
@@ -56,8 +60,7 @@ import org.xydra.sharedutils.XyAssert;
 /**
  * The core state information is represented in two ways, which must be kept in
  * sync: (a) a {@link XRevWritableModel} representing the current snapshot, and
- * (b) a {@link MemoryEventQueue} which represents the change history. This one
- * is contained in the {@link SynchronizesChangesImpl}.
+ * (b) a {@link ISyncLog} which represents the change history.
  * 
  * 
  * Update strategy:
@@ -208,9 +211,9 @@ Serializable {
         if(modelState == null) {
             this.modelState = new SimpleModel(modelAddress);
             
-            long currentModelRev = root.getWritableChangeLog().getCurrentRevisionNumber();
+            long currentModelRev = root.getSyncLog().getCurrentRevisionNumber();
             this.modelState.setRevisionNumber(currentModelRev);
-            XEvent event = root.getWritableChangeLog().getLastEvent();
+            XEvent event = root.getSyncLog().getLastEvent();
             boolean modelExists = false;
             if(event != null) {
                 if(event instanceof XModelEvent) {
@@ -260,22 +263,21 @@ Serializable {
         this.modelState.setRevisionNumber(XCommand.NONEXISTANT);
     }
     
-    /**
-     * Wrap existing modelState
-     * 
-     * @param actorId
-     * @param father
-     * @param modelState @NeverNull
-     */
-    public MemoryModel(XId actorId, IMemoryRepository father, XExistsRevWritableModel modelState) {
+    public MemoryModel(XId actorId, IMemoryRepository father, XRevWritableModel modelState) {
         super(Root
                 .createWithActor(modelState.getAddress(), actorId, modelState.getRevisionNumber()));
         
         assert modelState != null;
         
         this.father = father;
-        this.modelState = modelState;
-        this.modelState.setExists(true);
+        if(modelState instanceof XExistsRevWritableModel) {
+            this.modelState = (XExistsRevWritableModel)modelState;
+        } else {
+            SimpleModel simpleModel = new SimpleModel(modelState.getAddress());
+            XCopyUtils.copyDataAndRevisions(modelState, simpleModel);
+            this.modelState = simpleModel;
+            this.modelState.setExists(true);
+        }
     }
     
     /**
@@ -325,14 +327,12 @@ Serializable {
      * @param actorId
      * @param passwordHash
      * @param modelState @NeverNull
-     * @param changeLogState @CanBeNull
+     * @param syncLogState @CanBeNull
      */
     public MemoryModel(XId actorId, String passwordHash, XExistsRevWritableModel modelState,
-            XChangeLogState changeLogState) {
-        this(
-                Root.createWithActorAndChangeLogState(actorId, modelState.getAddress(),
-                        changeLogState), null, actorId, passwordHash, modelState.getAddress(),
-                modelState, false);
+            ISyncLogState syncLogState) {
+        this(Root.createWithActorAndChangeLogState(actorId, modelState.getAddress(), syncLogState),
+                null, actorId, passwordHash, modelState.getAddress(), modelState, false);
     }
     
     @Override
@@ -518,8 +518,8 @@ Serializable {
     }
     
     @Override
-    public XWritableChangeLog getChangeLog() {
-        return this.getRoot().getWritableChangeLog();
+    public XChangeLog getChangeLog() {
+        return this.getRoot().getSyncLog();
     }
     
     /**
@@ -613,7 +613,7 @@ Serializable {
     // implement XSynchronizesChanges
     @Override
     public long getSynchronizedRevision() {
-        return getRoot().getLocalChanges().getSynchronizedRevision();
+        return getRoot().getSyncLog().getSynchronizedRevision();
     }
     
     @Override

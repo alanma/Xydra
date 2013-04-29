@@ -3,6 +3,7 @@ package org.xydra.core.model.impl.memory;
 import org.xydra.base.change.XSyncEvent;
 import org.xydra.core.change.XSendsSyncEvents;
 import org.xydra.core.change.XSyncEventListener;
+import org.xydra.core.model.impl.memory.sync.Root;
 
 
 // FIXME MAX set to default access

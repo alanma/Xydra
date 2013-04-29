@@ -99,6 +99,8 @@ public interface XChangeLog extends Serializable {
     long getBaseRevisionNumber();
     
     /**
+     * FIXME make this internal???
+     * 
      * @return the internal, serialisable state holder
      */
     XChangeLogState getChangeLogState();

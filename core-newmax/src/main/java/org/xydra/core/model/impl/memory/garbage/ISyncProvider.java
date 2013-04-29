@@ -1,4 +1,4 @@
-package org.xydra.core.model.impl.memory;
+package org.xydra.core.model.impl.memory.garbage;
 
 import org.xydra.annotations.NeverNull;
 import org.xydra.base.IHasXAddress;
@@ -7,6 +7,7 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
+import org.xydra.core.model.impl.memory.MemoryObject;
 
 
 /**

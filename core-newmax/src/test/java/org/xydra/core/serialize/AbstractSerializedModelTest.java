@@ -156,7 +156,6 @@ abstract public class AbstractSerializedModelTest extends AbstractSerializingTes
         log.info(data);
         XydraElement e = parse(data);
         XModel modelAgain = SerializedModel.toModel(this.actorId, null, e);
-        assertEquals(model.exists(), modelAgain.exists());
         assertTrue(XCompareUtils.equalState(model, modelAgain));
         
         // check that there is a change log

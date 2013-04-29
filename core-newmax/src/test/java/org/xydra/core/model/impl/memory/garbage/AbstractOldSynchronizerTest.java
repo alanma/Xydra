@@ -1,4 +1,4 @@
-package org.xydra.core.model.impl.memory;
+package org.xydra.core.model.impl.memory.garbage;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -49,6 +49,12 @@ import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.delta.ChangedModel;
+import org.xydra.core.model.impl.memory.ForTestLocalChangeCallback;
+import org.xydra.core.model.impl.memory.ForTestSynchronizationCallback;
+import org.xydra.core.model.impl.memory.MemoryModel;
+import org.xydra.core.model.impl.memory.MemoryRepository;
+import org.xydra.core.model.impl.memory.SynchronizeTest;
+import org.xydra.core.model.impl.memory.SynchronizesChangesImpl;
 import org.xydra.persistence.GetEventsRequest;
 import org.xydra.persistence.GetWithAddressRequest;
 import org.xydra.sharedutils.XyAssert;

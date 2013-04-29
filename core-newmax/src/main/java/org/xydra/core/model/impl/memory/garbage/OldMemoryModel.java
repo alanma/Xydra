@@ -1,4 +1,4 @@
-package org.xydra.core.model.impl.memory;
+package org.xydra.core.model.impl.memory.garbage;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -50,7 +50,16 @@ import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.OldXSynchronizesChanges;
 import org.xydra.core.model.XUndoFailedLocalChangeCallback;
-import org.xydra.core.model.impl.memory.SynchronisationState.Orphans;
+import org.xydra.core.model.impl.memory.AbstractMOFEntity;
+import org.xydra.core.model.impl.memory.IMemoryField;
+import org.xydra.core.model.impl.memory.IMemoryModel;
+import org.xydra.core.model.impl.memory.IMemoryRepository;
+import org.xydra.core.model.impl.memory.MemoryChangeLog;
+import org.xydra.core.model.impl.memory.MemoryChangeLogState;
+import org.xydra.core.model.impl.memory.MemoryObject;
+import org.xydra.core.model.impl.memory.MemoryRepository;
+import org.xydra.core.model.impl.memory.SynchronizesChangesImpl;
+import org.xydra.core.model.impl.memory.garbage.SynchronisationState.Orphans;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.sharedutils.XyAssert;

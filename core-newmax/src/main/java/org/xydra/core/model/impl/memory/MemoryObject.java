@@ -27,6 +27,7 @@ import org.xydra.base.change.impl.memory.MemoryObjectCommand;
 import org.xydra.base.rmof.XRevWritableField;
 import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
+import org.xydra.base.rmof.impl.XExistsRevWritableObject;
 import org.xydra.base.rmof.impl.memory.SimpleObject;
 import org.xydra.core.XCopyUtils;
 import org.xydra.core.XX;
@@ -38,11 +39,13 @@ import org.xydra.core.change.XSendsObjectEvents;
 import org.xydra.core.change.XSendsTransactionEvents;
 import org.xydra.core.change.XTransactionEventListener;
 import org.xydra.core.model.IHasChangeLog;
+import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XChangeLogState;
 import org.xydra.core.model.XExecutesCommands;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XSynchronizesChanges;
+import org.xydra.core.model.impl.memory.sync.Root;
 import org.xydra.sharedutils.XyAssert;
 
 
@@ -92,7 +95,7 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
     private final Map<XId,IMemoryField> loadedFields = new HashMap<XId,IMemoryField>();
     
     /** The snapshot-like runtime state */
-    private final XRevWritableObject objectState;
+    private final XExistsRevWritableObject objectState;
     
     /**
      * Wrap an existing objectState.
@@ -107,8 +110,11 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
         assert objectState.getAddress().getModel() != null;
         
         this.father = father;
-        this.objectState = objectState;
-        this.objectState.setExists(true);
+        if(objectState instanceof XExistsRevWritableObject) {
+            this.objectState = (XExistsRevWritableObject)objectState;
+        } else {
+            this.objectState = XCopyUtils.createSnapshot(objectState);
+        }
     }
     
     /**
@@ -129,7 +135,7 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
         assert father != null || root != null;
         
         if(objectState == null) {
-            XRevWritableObject newObjectState = new SimpleObject(objectAddress);
+            XExistsRevWritableObject newObjectState = new SimpleObject(objectAddress);
             if(father != null) {
                 // TODO good idea?
                 newObjectState.setRevisionNumber(father.getRevisionNumber());
@@ -139,7 +145,11 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
             }
             this.objectState = newObjectState;
         } else {
-            this.objectState = objectState;
+            if(objectState instanceof XExistsRevWritableObject) {
+                this.objectState = (XExistsRevWritableObject)objectState;
+            } else {
+                this.objectState = XCopyUtils.createSnapshot(objectState);
+            }
         }
         assert this.objectState != null;
         this.objectState.setExists(createObject || objectState != null);
@@ -344,8 +354,8 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
         }
     }
     
-    public XWritableChangeLog getChangeLog() {
-        return this.getRoot().getWritableChangeLog();
+    public XChangeLog getChangeLog() {
+        return this.getRoot().getSyncLog();
     }
     
     @Override

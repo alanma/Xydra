@@ -19,6 +19,8 @@ import org.xydra.base.rmof.XRevWritableField;
 import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.base.rmof.XRevWritableRepository;
+import org.xydra.base.rmof.impl.XExistsRevWritableModel;
+import org.xydra.base.rmof.impl.XExistsRevWritableRepository;
 import org.xydra.base.rmof.impl.memory.SimpleField;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.base.rmof.impl.memory.SimpleObject;
@@ -41,6 +43,8 @@ import org.xydra.core.model.impl.memory.MemoryField;
 import org.xydra.core.model.impl.memory.MemoryModel;
 import org.xydra.core.model.impl.memory.MemoryObject;
 import org.xydra.core.model.impl.memory.MemoryRepository;
+import org.xydra.core.model.impl.memory.sync.ISyncLogState;
+import org.xydra.core.model.impl.memory.sync.MemorySyncLogState;
 import org.xydra.index.query.Pair;
 import org.xydra.sharedutils.XyAssert;
 
@@ -254,10 +258,20 @@ public class SerializedModel {
      *             XModel element.
      */
     public static XModel toModel(XId actorId, String passwordHash, XydraElement element) {
-        XRevWritableModel state = toModelState(element, null, null);
+        XExistsRevWritableModel state = toModelState(element, null, null);
         XChangeLogState log = loadChangeLogState(element, state.getAddress());
+        
+        // TODO andi: deal with XChangeLogState OR XSyncState
+        ISyncLogState syncLog = null; // TODO load...
+        assert log == null || syncLog == null;
+        
+        // legacy support
+        if(syncLog == null && log != null) {
+            syncLog = new MemorySyncLogState(log);
+        }
+        
         assert log == null || state.getRevisionNumber() == log.getCurrentRevisionNumber();
-        return new MemoryModel(actorId, passwordHash, state, log);
+        return new MemoryModel(actorId, passwordHash, state, syncLog);
     }
     
     /**
@@ -271,7 +285,8 @@ public class SerializedModel {
      *            of parent.
      * @return the created {@link XRevWritableModel}
      */
-    public static XRevWritableModel toModelState(XydraElement element, XRevWritableRepository parent) {
+    public static XRevWritableModel toModelState(XydraElement element,
+            XExistsRevWritableRepository parent) {
         return toModelState(element, parent, null);
     }
     
@@ -279,8 +294,14 @@ public class SerializedModel {
         return toModelState(element, null, context);
     }
     
-    private static XRevWritableModel toModelState(XydraElement element,
-            XRevWritableRepository parent, XAddress context) {
+    /**
+     * @param element
+     * @param parent
+     * @param context
+     * @return @NeverNull
+     */
+    private static XExistsRevWritableModel toModelState(XydraElement element,
+            XExistsRevWritableRepository parent, XAddress context) {
         
         SerializingUtils.checkElementType(element, XMODEL_ELEMENT);
         
@@ -293,7 +314,7 @@ public class SerializedModel {
         
         long revision = getRevisionAttribute(element);
         
-        XRevWritableModel modelState;
+        XExistsRevWritableModel modelState;
         XAddress modelAddr;
         if(parent == null) {
             if(context != null) {
@@ -322,8 +343,6 @@ public class SerializedModel {
                     objectAddr);
             XyAssert.xyAssert(modelState.getObject(objectState.getId()) == objectState);
         }
-        
-        modelState.setExists(true);
         
         return modelState;
     }
@@ -440,7 +459,7 @@ public class SerializedModel {
         XId xid = SerializingUtils.getRequiredXidAttribute(element);
         
         XAddress repoAddr = XX.toAddress(xid, null, null, null);
-        XRevWritableRepository repositoryState = new SimpleRepository(repoAddr);
+        XExistsRevWritableRepository repositoryState = new SimpleRepository(repoAddr);
         
         XydraElement models = element.getChild(NAME_MODELS);
         
@@ -451,8 +470,8 @@ public class SerializedModel {
             XId modelId = XX.toId(modelElement.getFirst());
             XAddress modelAddr = XX.resolveModel(repoAddr, modelId);
             
-            XRevWritableModel modelState = toModelState(modelElement.getSecond(), repositoryState,
-                    modelAddr);
+            XExistsRevWritableModel modelState = toModelState(modelElement.getSecond(),
+                    repositoryState, modelAddr);
             XyAssert.xyAssert(repositoryState.getModel(modelState.getId()) == modelState);
         }
         
@@ -652,6 +671,8 @@ public class SerializedModel {
         
         if(saveAsSynchronizesChanges && xmodel instanceof OldXSynchronizesChanges) {
             OldXSynchronizesChanges synchronizesChanges = (OldXSynchronizesChanges)xmodel;
+            
+            // TODO persist syncLog instead
             
             XLocalChange[] localChanges = synchronizesChanges.getLocalChanges();
             if(localChanges.length > 0) {

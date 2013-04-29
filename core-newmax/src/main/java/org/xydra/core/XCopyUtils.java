@@ -12,9 +12,14 @@ import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.rmof.XWritableRepository;
+import org.xydra.base.rmof.impl.XExistsRevWritableField;
+import org.xydra.base.rmof.impl.XExistsRevWritableModel;
+import org.xydra.base.rmof.impl.XExistsRevWritableObject;
+import org.xydra.base.rmof.impl.XExistsRevWritableRepository;
 import org.xydra.base.rmof.impl.memory.SimpleField;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.base.rmof.impl.memory.SimpleObject;
+import org.xydra.base.rmof.impl.memory.SimpleRepository;
 import org.xydra.base.value.XValue;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
@@ -93,19 +98,31 @@ public class XCopyUtils {
         }
     }
     
+    public static void copyDataAndRevisions(XReadableRepository sourceRepository,
+            SimpleRepository targetRepository) {
+        assert sourceRepository != null;
+        targetRepository.setExists(true);
+        for(XId modelId : sourceRepository) {
+            XReadableModel model = sourceRepository.getModel(modelId);
+            XExistsRevWritableModel localModel = targetRepository.createModel(model.getId());
+            copyDataAndRevisions(model, localModel);
+        }
+    }
+    
     /**
      * Copy all state information from sourceModel to targetModel. Possibly
      * overwriting some data in targetModel. Existing data in targetModel is not
      * deleted.
      * 
-     * @param sourceModel The {@link XReadableModel} which is to be copied
+     * @param sourceModel The {@link XReadableModel} which is to be copied @NeverNull
      * @param targetModel The {@link XRevWritableModel} in which the data of
      *            sourceModel is to be pasted.
      */
     public static void copyDataAndRevisions(XReadableModel sourceModel,
-            XRevWritableModel targetModel) {
+            XExistsRevWritableModel targetModel) {
+        assert sourceModel != null;
         targetModel.setRevisionNumber(sourceModel.getRevisionNumber());
-        targetModel.setExists(sourceModel.exists());
+        targetModel.setExists(true);
         for(XId objectId : sourceModel) {
             XReadableObject object = sourceModel.getObject(objectId);
             XRevWritableObject localObject = targetModel.createObject(object.getId());
@@ -157,7 +174,7 @@ public class XCopyUtils {
      * @return a copy based on a {@link MemoryModel} instance
      */
     public static XModel copyModel(XId actor, String password, XReadableModel modelSnapshot) {
-        XRevWritableModel modelState = createSnapshot(modelSnapshot);
+        XExistsRevWritableModel modelState = createSnapshot(modelSnapshot);
         return new MemoryModel(actor, password, modelState);
     }
     
@@ -180,11 +197,11 @@ public class XCopyUtils {
      * @param sourceModel The {@link XReadableModel} which is to be copied
      * @return the snapshot or null
      */
-    public static XRevWritableModel createSnapshot(XReadableModel sourceModel) {
+    public static XExistsRevWritableModel createSnapshot(XReadableModel sourceModel) {
         if(sourceModel == null) {
             return null;
         }
-        XRevWritableModel targetModel = new SimpleModel(sourceModel.getAddress());
+        XExistsRevWritableModel targetModel = new SimpleModel(sourceModel.getAddress());
         copyDataAndRevisions(sourceModel, targetModel);
         XyAssert.xyAssert(sourceModel.getRevisionNumber() == targetModel.getRevisionNumber());
         return targetModel;
@@ -196,11 +213,11 @@ public class XCopyUtils {
      * @param sourceObject The {@link XReadableObject} which is to be copied
      * @return a copy based on a new {@link SimpleObject} instance
      */
-    public static XRevWritableObject createSnapshot(XReadableObject sourceObject) {
+    public static XExistsRevWritableObject createSnapshot(XReadableObject sourceObject) {
         if(sourceObject == null) {
             return null;
         }
-        XRevWritableObject targetObject = new SimpleObject(sourceObject.getAddress());
+        XExistsRevWritableObject targetObject = new SimpleObject(sourceObject.getAddress());
         copyDataAndRevisions(sourceObject, targetObject);
         return targetObject;
     }
@@ -211,13 +228,23 @@ public class XCopyUtils {
      * @param sourceField The {@link XReadableField} which is to be copied
      * @return a copy based on a {@link SimpleField} instance
      */
-    public static XRevWritableField createSnapshot(XReadableField sourceField) {
+    public static XExistsRevWritableField createSnapshot(XReadableField sourceField) {
         if(sourceField == null) {
             return null;
         }
-        XRevWritableField targetField = new SimpleField(sourceField.getAddress());
+        XExistsRevWritableField targetField = new SimpleField(sourceField.getAddress());
         copyDataAndRevisions(sourceField, targetField);
         return targetField;
+    }
+    
+    /**
+     * @param repository @NeverNull
+     * @return @NeverNull
+     */
+    public static XExistsRevWritableRepository cloneRepository(XReadableRepository repository) {
+        SimpleRepository targetRepository = new SimpleRepository(repository.getAddress());
+        copyDataAndRevisions(repository, targetRepository);
+        return targetRepository;
     }
     
 }

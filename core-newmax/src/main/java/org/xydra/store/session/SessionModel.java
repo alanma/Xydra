@@ -266,9 +266,4 @@ public class SessionModel implements XSessionModel {
         return this;
     }
     
-    // TODO maybe vary
-    @Override
-    public boolean exists() {
-        return true;
-    }
 }

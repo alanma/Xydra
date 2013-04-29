@@ -3,6 +3,7 @@ package org.xydra.core.model.impl.memory;
 import org.xydra.annotations.ReadOperation;
 import org.xydra.base.change.XSyncEvent;
 import org.xydra.core.change.XSyncEventListener;
+import org.xydra.core.model.impl.memory.sync.Root;
 
 
 public abstract class AbstractMOFEntity extends AbstractEntity implements IMemoryMOFEntity {

@@ -1,4 +1,4 @@
-package org.xydra.core.model.impl.memory;
+package org.xydra.core.model.impl.memory.garbage;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -33,6 +33,12 @@ import org.xydra.core.model.XObject;
 import org.xydra.core.model.delta.ChangedField;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.delta.ChangedObject;
+import org.xydra.core.model.impl.memory.IMemoryField;
+import org.xydra.core.model.impl.memory.IMemoryMOFEntity;
+import org.xydra.core.model.impl.memory.IMemoryModel;
+import org.xydra.core.model.impl.memory.MemoryChangeLog;
+import org.xydra.core.model.impl.memory.MemoryModel;
+import org.xydra.core.model.impl.memory.MemoryObject;
 import org.xydra.index.XI;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;

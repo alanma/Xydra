@@ -130,9 +130,4 @@ public class WritableObjectOnPersistence extends AbstractWritableOnPersistence i
         return XType.XOBJECT;
     }
     
-    // TODO maybe vary
-    @Override
-    public boolean exists() {
-        return true;
-    }
 }

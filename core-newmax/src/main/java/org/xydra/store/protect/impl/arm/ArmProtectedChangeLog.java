@@ -102,6 +102,21 @@ public class ArmProtectedChangeLog implements XChangeLog {
     }
     
     @Override
+    public XEvent getLastEvent() {
+        XEvent event = this.log.getLastEvent();
+        
+        if(event == null) {
+            return null;
+        }
+        
+        if(!canSee(event)) {
+            return null;
+        }
+        
+        return event;
+    }
+    
+    @Override
     public Iterator<XEvent> getEventsBetween(long beginRevision, long endRevision) {
         return new AbstractTransformingIterator<XEvent,XEvent>(this.log.getEventsBetween(
                 beginRevision, endRevision)) {

@@ -19,10 +19,12 @@ import org.xydra.base.change.XRepositoryCommand;
 import org.xydra.base.change.XRepositoryEvent;
 import org.xydra.base.change.XTransactionEvent;
 import org.xydra.base.change.impl.memory.MemoryRepositoryCommand;
+import org.xydra.base.rmof.XReadableRepository;
 import org.xydra.base.rmof.XRevWritableRepository;
 import org.xydra.base.rmof.impl.XExistsRevWritableModel;
 import org.xydra.base.rmof.impl.XExistsRevWritableRepository;
 import org.xydra.base.rmof.impl.memory.SimpleRepository;
+import org.xydra.core.XCopyUtils;
 import org.xydra.core.XX;
 import org.xydra.core.change.XFieldEventListener;
 import org.xydra.core.change.XModelEventListener;
@@ -82,8 +84,7 @@ public class MemoryRepository extends AbstractEntity implements IMemoryRepositor
      * @param repositoryState The initial {@link XRevWritableRepository} state
      *            of this MemoryRepository.
      */
-    public MemoryRepository(XId actorId, String passwordHash,
-            XExistsRevWritableRepository repositoryState) {
+    public MemoryRepository(XId actorId, String passwordHash, XReadableRepository repositoryState) {
         super();
         XyAssert.xyAssert(repositoryState != null);
         assert repositoryState != null;
@@ -92,7 +93,12 @@ public class MemoryRepository extends AbstractEntity implements IMemoryRepositor
         assert actorId != null;
         this.sessionActor = actorId;
         this.sessionPasswordHash = passwordHash;
-        this.repositoryState = repositoryState;
+        if(repositoryState instanceof XExistsRevWritableRepository) {
+            this.repositoryState = (XExistsRevWritableRepository)repositoryState;
+        } else {
+            this.repositoryState = XCopyUtils.cloneRepository(repositoryState);
+        }
+        
     }
     
     @Override

@@ -5,6 +5,7 @@ import org.xydra.base.XAddress;
 import org.xydra.base.change.XEvent;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XChangeLogState;
+import org.xydra.core.model.impl.memory.garbage.XWritableChangeLog;
 import org.xydra.sharedutils.XyAssert;
 
 

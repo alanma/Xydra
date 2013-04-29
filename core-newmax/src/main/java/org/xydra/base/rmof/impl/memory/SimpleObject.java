@@ -14,6 +14,7 @@ import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XRevWritableField;
 import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.base.rmof.XWritableObject;
+import org.xydra.base.rmof.impl.XExistsRevWritableObject;
 import org.xydra.base.util.DumpUtilsBase;
 import org.xydra.sharedutils.XyAssert;
 
@@ -25,7 +26,7 @@ import org.xydra.sharedutils.XyAssert;
  * 
  * @author voelkel
  */
-public class SimpleObject extends SimpleEntity implements XRevWritableObject {
+public class SimpleObject extends SimpleEntity implements XExistsRevWritableObject {
     
     private static final long serialVersionUID = 5593443685935758227L;
     

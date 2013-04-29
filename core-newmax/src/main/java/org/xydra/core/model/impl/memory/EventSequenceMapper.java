@@ -7,6 +7,8 @@ import java.util.List;
 import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XTransactionEvent;
+import org.xydra.core.model.impl.memory.garbage.LocalChange;
+import org.xydra.core.model.impl.memory.garbage.XLocalChanges;
 import org.xydra.index.query.Pair;
 
 

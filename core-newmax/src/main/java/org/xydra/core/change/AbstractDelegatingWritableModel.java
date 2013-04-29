@@ -83,11 +83,6 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
                     value);
         }
         
-        @Override
-        public boolean exists() {
-            return AbstractDelegatingWritableModel.this.field_exists(this.objectId, this.fieldId);
-        }
-        
     }
     
     /**
@@ -175,11 +170,6 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
                 }
             }
             return buf.toString();
-        }
-        
-        @Override
-        public boolean exists() {
-            return AbstractDelegatingWritableModel.this.object_exists(this.objectId);
         }
         
     }

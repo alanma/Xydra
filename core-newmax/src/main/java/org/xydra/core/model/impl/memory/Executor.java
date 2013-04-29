@@ -45,6 +45,7 @@ import org.xydra.base.value.XValue;
 import org.xydra.core.XX;
 import org.xydra.core.change.XRMOFChangeListener;
 import org.xydra.core.model.delta.ChangedModel;
+import org.xydra.core.model.impl.memory.sync.Root;
 import org.xydra.index.XI;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -106,8 +107,7 @@ public class Executor {
         // apply event
         XEvent event = eventResult.getEvent();
         applyFieldEvent((XFieldEvent)event, modelState, objectState, fieldState);
-        root.getWritableChangeLog().appendEvent(event);
-        root.getLocalChanges().append(command, event);
+        root.getSyncLog().appendSyncLogEntry(command, event);
         fireEvents(root, changeEventListener, event);
         
         return event.getRevisionNumber();
@@ -377,8 +377,7 @@ public class Executor {
         // apply event
         XEvent event = eventResult.getEvent();
         applyObjectEventOrTransaction(event, modelState, objectState);
-        root.getWritableChangeLog().appendEvent(event);
-        root.getLocalChanges().append(command, event);
+        root.getSyncLog().appendSyncLogEntry(command, event);
         fireEvents(root, changeEventListener, event);
         
         return event.getRevisionNumber();
@@ -463,8 +462,7 @@ public class Executor {
         XEvent event = eventResult.getEvent();
         assert event != null;
         applyModelEvent((XModelEvent)event, modelState);
-        root.getWritableChangeLog().appendEvent(event);
-        root.getLocalChanges().append(command, event);
+        root.getSyncLog().appendSyncLogEntry(command, event);
         fireEvents(root, changeEventListener, event);
         
         return event.getRevisionNumber();
@@ -837,8 +835,7 @@ public class Executor {
         
         // apply event
         XEvent event = eventResult.getEvent();
-        root.getWritableChangeLog().appendEvent(event);
-        root.getLocalChanges().append(command, event);
+        root.getSyncLog().appendSyncLogEntry(command, event);
         if(event instanceof XTransactionEvent) {
             applyModelTransaction((XTransactionEvent)event, repositoryState, currentModelState);
         } else {
@@ -962,8 +959,7 @@ public class Executor {
             XEvent event = eventResult.getEvent();
             assert event != null;
             applyModelTransaction((XTransactionEvent)event, repositoryState, modelState);
-            root.getWritableChangeLog().appendEvent(event);
-            root.getLocalChanges().append(txn, event);
+            root.getSyncLog().appendSyncLogEntry(txn, event);
             fireEvents(root, changeEventListener, event);
             
             root.stopExecutingTransaction();

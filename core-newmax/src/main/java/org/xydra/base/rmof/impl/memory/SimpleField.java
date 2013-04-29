@@ -5,8 +5,8 @@ import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.rmof.XReadableField;
-import org.xydra.base.rmof.XRevWritableField;
 import org.xydra.base.rmof.XWritableField;
+import org.xydra.base.rmof.impl.XExistsRevWritableField;
 import org.xydra.base.util.DumpUtilsBase;
 import org.xydra.base.value.XValue;
 import org.xydra.index.XI;
@@ -20,7 +20,7 @@ import org.xydra.sharedutils.XyAssert;
  * 
  * @author voelkel
  */
-public class SimpleField extends SimpleEntity implements XRevWritableField {
+public class SimpleField extends SimpleEntity implements XExistsRevWritableField {
     
     private static final long serialVersionUID = -4704907115751969328L;
     

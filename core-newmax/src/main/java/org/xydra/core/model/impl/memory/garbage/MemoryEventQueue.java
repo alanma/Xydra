@@ -1,4 +1,4 @@
-package org.xydra.core.model.impl.memory;
+package org.xydra.core.model.impl.memory.garbage;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -24,7 +24,15 @@ import org.xydra.base.change.impl.memory.MemoryReversibleFieldEvent;
 import org.xydra.base.change.impl.memory.MemoryTransactionEvent;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XLocalChangeCallback;
-import org.xydra.core.model.impl.memory.SynchronisationState.Orphans;
+import org.xydra.core.model.impl.memory.IMemoryField;
+import org.xydra.core.model.impl.memory.IMemoryModel;
+import org.xydra.core.model.impl.memory.IMemoryRepository;
+import org.xydra.core.model.impl.memory.MemoryChangeLog;
+import org.xydra.core.model.impl.memory.MemoryField;
+import org.xydra.core.model.impl.memory.MemoryModel;
+import org.xydra.core.model.impl.memory.MemoryObject;
+import org.xydra.core.model.impl.memory.MemoryRepository;
+import org.xydra.core.model.impl.memory.garbage.SynchronisationState.Orphans;
 import org.xydra.index.XI;
 import org.xydra.sharedutils.XyAssert;
 

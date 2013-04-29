@@ -17,57 +17,59 @@ import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.delta.ChangedModel;
+import org.xydra.core.model.impl.memory.sync.ISyncLog;
+import org.xydra.core.model.impl.memory.sync.MemorySyncLog;
 
 import com.google.gwt.dev.util.collect.HashMap;
 
 
 public class SyncLogTest {
-	
-	@BeforeClass
-	public static void init() {
-		LoggerTestHelper.init();
-	}
-	
-	private XId actorId = XX.toId("EventDeltaTest");
-	private String password = null; // TODO auth: where to get this?
-	
-	XId repo = XX.toId("remoteRepo");
-	
-	@Test
-	public void testBasicFunctionality() {
-		
-		XAddress modelAddress = XX.resolveModel(this.repo, DemoModelUtil.PHONEBOOK_ID);
-		MemorySyncLogState syncLog = new MemorySyncLogState(modelAddress);
-		
-		XRepository repo = new MemoryRepository(this.actorId, this.password, this.repo);
-		DemoModelUtil.addPhonebookModel(repo);
-		
-		syncLog.setSyncRevisionNumber(DemoLocalChangesAndServerEvents.SYNCREVISION);
-		
-		XModel localModel = repo.getModel(DemoModelUtil.PHONEBOOK_ID);
-		ChangedModel changedModel = new ChangedModel(localModel);
-		DemoLocalChangesAndServerEvents.addLocalChangesToModel(changedModel);
-		XTransactionBuilder builder = new XTransactionBuilder(modelAddress);
-		builder.applyChanges(changedModel);
-		
-		XTransaction transaction = builder.build();
-		HashMap<Long,XCommand> commandMap = new HashMap<Long,XCommand>();
-		for(XAtomicCommand xAtomicCommand : transaction) {
-			
-			localModel.executeCommand(xAtomicCommand);
-			commandMap.put(xAtomicCommand.getRevisionNumber(), xAtomicCommand);
-		}
-		
-		Iterator<XEvent> modelChangeEvents = localModel.getChangeLog().getEventsSince(
-		        DemoLocalChangesAndServerEvents.SYNCREVISION);
-		
-		while(modelChangeEvents.hasNext()) {
-			XEvent xEvent = (XEvent)modelChangeEvents.next();
-			
-			XCommand command = commandMap.get(xEvent.getRevisionNumber());
-			syncLog.appendCommandEventPair(command, xEvent);
-		}
-		
-	}
-	
+    
+    @BeforeClass
+    public static void init() {
+        LoggerTestHelper.init();
+    }
+    
+    private XId actorId = XX.toId("EventDeltaTest");
+    private String password = null; // TODO auth: where to get this?
+    
+    XId repo = XX.toId("remoteRepo");
+    
+    @Test
+    public void testBasicFunctionality() {
+        
+        XAddress modelAddress = XX.resolveModel(this.repo, DemoModelUtil.PHONEBOOK_ID);
+        ISyncLog syncLog = new MemorySyncLog(modelAddress);
+        
+        XRepository repo = new MemoryRepository(this.actorId, this.password, this.repo);
+        DemoModelUtil.addPhonebookModel(repo);
+        
+        syncLog.setSynchronizedRevision(DemoLocalChangesAndServerEvents.SYNCREVISION);
+        
+        XModel localModel = repo.getModel(DemoModelUtil.PHONEBOOK_ID);
+        ChangedModel changedModel = new ChangedModel(localModel);
+        DemoLocalChangesAndServerEvents.addLocalChangesToModel(changedModel);
+        XTransactionBuilder builder = new XTransactionBuilder(modelAddress);
+        builder.applyChanges(changedModel);
+        
+        XTransaction transaction = builder.build();
+        HashMap<Long,XCommand> commandMap = new HashMap<Long,XCommand>();
+        for(XAtomicCommand xAtomicCommand : transaction) {
+            
+            localModel.executeCommand(xAtomicCommand);
+            commandMap.put(xAtomicCommand.getRevisionNumber(), xAtomicCommand);
+        }
+        
+        Iterator<XEvent> modelChangeEvents = localModel.getChangeLog().getEventsSince(
+                DemoLocalChangesAndServerEvents.SYNCREVISION);
+        
+        while(modelChangeEvents.hasNext()) {
+            XEvent xEvent = (XEvent)modelChangeEvents.next();
+            
+            XCommand command = commandMap.get(xEvent.getRevisionNumber());
+            syncLog.appendSyncLogEntry(command, xEvent);
+        }
+        
+    }
+    
 }
