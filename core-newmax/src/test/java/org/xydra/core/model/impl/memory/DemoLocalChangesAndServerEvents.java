@@ -6,6 +6,8 @@ import org.xydra.base.XId;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
+import org.xydra.base.rmof.XWritableModel;
+import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
 import org.xydra.core.DemoModelUtil;
@@ -53,7 +55,7 @@ public class DemoLocalChangesAndServerEvents {
 	static XValue CLAUDIA_CAR_TRUE = XV.toValue("911S");
 	static XValue KERSTIN_PHONE = XV.toValue("Canada");
 	
-	static long SYNCREVISION;
+	static long SYNCREVISION = 47;
 	
 	/**
 	 * <ul>
@@ -87,16 +89,16 @@ public class DemoLocalChangesAndServerEvents {
 	 * 
 	 * @return all events from local Change Log
 	 */
-	public static void addLocalChangesToModel(XModel localModel) {
+	public static void addLocalChangesToModel(XWritableModel localModel) {
 		
-		XModel phonebook = localModel;
+		XWritableModel phonebook = localModel;
 		SYNCREVISION = phonebook.getRevisionNumber() + 1;
 		
 		// apply local changes:
 		phonebook.removeObject(PETER_ID);
 		phonebook.createObject(JENNY_ID);
 		
-		XObject objectJohn = phonebook.getObject(JOHN_ID);
+		XWritableObject objectJohn = phonebook.getObject(JOHN_ID);
 		objectJohn.removeField(PHONE_ID);
 		objectJohn.removeField(SCORES_ID);
 		objectJohn.createField(CAR_ID);
@@ -104,12 +106,12 @@ public class DemoLocalChangesAndServerEvents {
 		objectJohn.createField(BDAY_ID);
 		objectJohn.getField(BDAY_ID).setValue(JOHN_BDAY);
 		
-		XObject objectClaudia = phonebook.getObject(CLAUDIA_ID);
+		XWritableObject objectClaudia = phonebook.getObject(CLAUDIA_ID);
 		objectClaudia.createField(PHONE_ID);
 		objectClaudia.getField(PHONE_ID).setValue(CLAUDIA_PHONE);
 		objectClaudia.createField(CAR_ID).setValue(CLAUDIA_CAR);
 		
-		XObject objectJenny = phonebook.getObject(JENNY_ID);
+		XWritableObject objectJenny = phonebook.getObject(JENNY_ID);
 		objectJenny.createField(PHONE_ID).setValue(JENNY_PHONE);
 		
 	}

@@ -113,6 +113,7 @@ public class SerializedEvent {
 			}
 			
 			if(event.getOldModelRevision() != XEvent.RevisionOfEntityNotSet) {
+				// FIXME here is the problem
 				out.attribute(MODELREVISION_ATTRIBUTE, event.getOldModelRevision());
 			}
 			
@@ -218,7 +219,8 @@ public class SerializedEvent {
 		XValue newValue = null;
 		if(type != ChangeType.REMOVE) {
 			newValue = SerializedValue.toValue(element.getElement(NAME_VALUE, 0));
-			XyAssert.xyAssert(newValue != null); assert newValue != null;
+			XyAssert.xyAssert(newValue != null);
+			assert newValue != null;
 		}
 		
 		if(type == ChangeType.ADD) {
@@ -259,11 +261,13 @@ public class SerializedEvent {
 		if(type != ChangeType.ADD) {
 			oldValue = SerializedValue.toValue(element.getElement(NAME_OLD_VALUE, idx));
 			idx++;
-			XyAssert.xyAssert(oldValue != null); assert oldValue != null;
+			XyAssert.xyAssert(oldValue != null);
+			assert oldValue != null;
 		}
 		if(type != ChangeType.REMOVE) {
 			newValue = SerializedValue.toValue(element.getElement(NAME_VALUE, idx));
-			XyAssert.xyAssert(newValue != null); assert newValue != null;
+			XyAssert.xyAssert(newValue != null);
+			assert newValue != null;
 		}
 		
 		if(type == ChangeType.ADD) {
@@ -603,7 +607,8 @@ public class SerializedEvent {
 		out.child(NAME_EVENTS);
 		out.beginArray();
 		for(XAtomicEvent event : trans) {
-			XyAssert.xyAssert(event != null); assert event != null;
+			XyAssert.xyAssert(event != null);
+			assert event != null;
 			serialize(event, out, newContext, true);
 		}
 		out.endArray();

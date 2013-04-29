@@ -6,11 +6,12 @@ import org.xydra.annotations.CanBeNull;
 import org.xydra.base.XAddress;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
+import org.xydra.core.model.XSyncLog;
 import org.xydra.core.model.XSyncLogState;
 import org.xydra.sharedutils.XyAssert;
 
 
-public class MemorySyncLog extends AbstractSyncLog implements XWritableSyncLog {
+public class MemorySyncLog extends AbstractSyncLog implements XSyncLog {
 	
 	/**
 	 * 
@@ -95,7 +96,7 @@ public class MemorySyncLog extends AbstractSyncLog implements XWritableSyncLog {
 		return this.state;
 	}
 	
-	public static XWritableSyncLog create(XAddress baseAddress, long syncRevision) {
+	public static XSyncLog create(XAddress baseAddress, long syncRevision) {
 		assert baseAddress.getRepository() != null;
 		MemorySyncLogState syncLogState = new MemorySyncLogState(baseAddress);
 		syncLogState.setSyncRevisionNumber(syncRevision);
