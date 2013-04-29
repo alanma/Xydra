@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xydra.annotations.NeverNull;
@@ -131,7 +132,8 @@ public class XmlElement extends AbstractXmlElement {
 	}
 	
 	@Override
-	public @NeverNull String getType() {
+	public @NeverNull
+	String getType() {
 		return this.element.getNodeName();
 	}
 	
@@ -176,7 +178,44 @@ public class XmlElement extends AbstractXmlElement {
 	
 	@Override
 	public String toString() {
-		return this.element.toString();
+		String returnString = "";
+		
+		Element element = this.element;
+		returnString = examineNode(returnString, element);
+		
+		return returnString;
+		
+	}
+	
+	public static String examineNode(String returnString, Node element) {
+		String returnString2 = returnString;
+		returnString2 += "tagName: " + element.getNodeName();
+		returnString2 += "\nattributes: ";
+		NamedNodeMap attributes = element.getAttributes();
+		for(int i = 0; i < attributes.getLength(); i++) {
+			returnString2 += ", " + attributes.item(i);
+		}
+		NodeList childNodes = element.getChildNodes();
+		returnString2 += "\n\nnodes: " + childNodes.getLength();
+		for(int i = 0; i < childNodes.getLength(); i++) {
+			Node childNode = childNodes.item(i);
+			returnString2 += "\n nodeName: " + childNode.getNodeName() + ", value: "
+			        + childNode.getNodeValue();
+			// somehow doesn't work...
+			// returnString2 += examineNode(returnString2, childNode);
+			
+			returnString2 += "\n.attributes: ";
+			
+			attributes = childNode.getAttributes();
+			if(attributes != null) {
+				for(int j = 0; j < attributes.getLength(); j++) {
+					returnString2 += ", " + attributes.item(j);
+				}
+				
+			}
+			returnString2 += "\n";
+		}
+		return returnString2;
 	}
 	
 	@Override

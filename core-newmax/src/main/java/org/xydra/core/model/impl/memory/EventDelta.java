@@ -43,8 +43,6 @@ import org.xydra.index.query.Wildcard;
  * 
  * @author xamde
  * 
- *         IMPROVE Do same for objects?
- * 
  *         TODO Max fragen: Methoden zu lang?
  */
 public class EventDelta {
