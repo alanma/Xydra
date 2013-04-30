@@ -27,6 +27,10 @@ import org.xydra.index.query.Pair;
  * have not been applied aka failed. In addition, the serverEvents that have
  * originated remotely and are yet unknown locally are determined.
  * 
+ * Warning: This code has not been used in production and is of prototypical
+ * nature on a work-in-progress towards a new synchronizer. It needs tests and
+ * work when dealing with Transactions.
+ * 
  * @author Thomas
  * 
  */
