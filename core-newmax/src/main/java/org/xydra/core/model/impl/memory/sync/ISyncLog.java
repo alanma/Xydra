@@ -108,4 +108,16 @@ public interface ISyncLog extends XChangeLog {
     
     void appendEvent(XEvent event);
     
+    /**
+     * Convenience method
+     * 
+     * @return all {@link ISyncLogEntry} >= syncRevision
+     */
+    Iterator<ISyncLogEntry> getLocalChanges();
+    
+    /**
+     * remove all local commands from syncLog
+     */
+    void clearLocalChanges();
+    
 }

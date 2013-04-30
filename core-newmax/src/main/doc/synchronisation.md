@@ -1,101 +1,5 @@
 # Xydra Synchronisation
 
-## Event mapping
-Task: Find a mapping from localChanges (pairs of command-event) to serverEvents to determine
-which events should be considered "happened on server" and which "failed".
-
-A serverEvent can be: 
-
-* atomicEvent, 
-* txnEvent caused from REMOVE (n implied events, followed by 1 non-implied),
-* txnEvent caused from txnCommand.
- 
-Define: A **ChangeOperation** has a **Condition** and an **Effect**.
-Every command can be transformed into a ChangeOperation.
-
-* The **Condition** is a set of AtomicConditions; each AtomicCondition can:
-
-  * a certain entity must be present or absent.
-  * a certain entity must have a certain revision, i.e. the one to be REMOVEd or CHANGEd.
-  
-  A condition matches if all entities that are bound by the condition 
-  have the desired revision number.
-  
-  **Note:** *The algorithm described below does not use the conditions.*  
-
-
-* The **Effect** consists of AtomicEffects, each AtomicEffect is:
-
-  * add an entity
-  * remove an entity
-  * set the value of a field
-  
-  Effects have no version number.
-  
-  An effect matches an entity state if
-   
-  * all child entities that should have been ADDed are present,
-  * all child entities that should be REMOVEd are absent, and
-  * all fields have the value they should have (as stated by the effect).
-  
-A **ChangeOperation** contains 1-n **AtomicChangeOperations**.
-An AtomicChangeOperation has
-
-* 0-1 AtomicCondition
-* 1-n AtomicEffects
- 
-FORCEd commands result in an empty condition.
-
-### Algorithm
-
-The algorithm uses these classes:
-
-ChangeOperation
-* Set<AtomicEffect> = new HashSet()
-* Long latestTimeWhereEffectFulfilled = null
-* Set<XEvent> takenEvents = new HashSet()
-* Boolean success = null;
-
-AtomicEffect
-* XAddress entity (that was added, removed or changed; must be a field for CHANGE effect)
-* ChangeType (ADD, REMOVE, CHANGE) -- no TRANSACTION here 
-* XValue (the new value for a CHANGE effect, or null for other effects)
-
-Set<XEvent> allTakenEvents = new HashSe();
-
-Algorithm:
-* Start with the sync-state, i.e. the state with the revision = syncRevision.
-* for each state(t) resulting from applying a serverEvent(t) (starting with none):
-  * for each ChangeOperation co
-    * if (co.effect.matches(state(t))
-      * co.latestTimeWhereEffectFulfilled = t;
-
-* for each ChangeOperation:
-  * if (co.latestTimeWhereEffectFulfilled)
-    * // cool
-  * else: mark as failed; remove from list; cannot have happened.
-
-// greedy:
-* sort ChangeOperations by number of atomicEffects (= atomicEvents required), largest first
-* for each cool ChangeOperation:
-  * for each atomicEffect : co.atomicOperations:
-    * for t = 0; t <= co.latestTimeWhereEffectFulfilled; t++:
-      * for serverEvent in state(t).events:  (atomic events)
-        * if atomicEffect.matches(serverEvent):
-          * co.takenEvents.add(serverEvent)
-          * allTakenEvents.add(serverEvents)
-      * if all effects matched: // keep events marked and success
-        * co.success = True
-      * else: mark events as not-taken and fail
-        * allTakenEvents.removeAll( co.takenEvents );
-        * co.takenEvents.clear();
-        * co.success = False
-
-define: effect.matches(event):
-* if the desired entity was ADDed or REMOVEd or a field has now the desired value => match
-
-## -----------------------
-
 ## The Sync Process
 
 ### Server
@@ -207,6 +111,166 @@ The core algorithm:
 1. Update the revision numbers of CurrentState using all events in ServerChanges
 1. Fire change events from EventDelta   
 1. Release App-lock.    
+
+## Event mapping
+The core part of a sync algorithm is the event mapping, that is, given the set of locally
+executed events and the set of remotely executed events, which local events should be
+considered as 'happened' and which as 'failed'. In other words the task is:
+Find a mapping from localChanges (pairs of command and event) to serverEvents to determine
+which events should be considered "happened on server" and which "failed".
+
+A serverEvent can be: 
+
+* atomicEvent, 
+* txnEvent caused from REMOVE (n implied events, followed by 1 non-implied),
+* txnEvent caused from txnCommand.
+ 
+Define: A **ChangeOperation** has a **Condition** and an **Effect**.
+Every command can be transformed into a ChangeOperation. 
+A ChangeOperation by the nature of its constructions eliminates redundant parts.
+E.g. add(x), remove(x), add(x) has a combined effect of add(x).
+Another example: A txn with two SAFE change commands change(x->y) and change(y->z) 
+result in a change operation with condition value=x and effect value=z.
+
+* The **Condition** is a set of AtomicConditions; each AtomicCondition can:
+
+  * a certain entity must be present or absent.
+  * a certain entity must have a certain revision, i.e. the one to be REMOVEd or CHANGEd.
+  
+  A condition matches if all entities that are bound by the condition 
+  have the desired revision number.
+  
+  **Note:** *The algorithm described below does not use the conditions.*  The server 
+  respects the clients command semantics and conditions under all circumstances. If, however,
+  the client requested a SAFE remove, it might match a FORCED removed issued by another client.
+  The end result is: The clients condition was honored, and the entity is removed.
+
+
+* The **Effect** consists of AtomicEffects, each AtomicEffect is:
+
+  * add an entity
+  * remove an entity
+  * set the value of a field
+  
+  Effects have no version number.
+  
+  An effect matches an entity state if
+   
+  * all child entities that should have been ADDed are present,
+  * all child entities that should be REMOVEd are absent, and
+  * all fields have the value they should have (as stated by the effect).
+  
+A **ChangeOperation** contains 1-n **AtomicChangeOperations**.
+An AtomicChangeOperation has
+
+* 0-1 AtomicCondition
+* 1-n AtomicEffects
+ 
+FORCEd commands result in an empty condition, as they have no case in which they fail
+due to an unmatched pre-condition.
+
+### Desired Properties of Sync Algorithms
+There are several, sometimes mutually exclusive properties of sync algorithms that are
+desirable:
+
+* All local commands (atomic and transactions) should happen on the server
+  * All or none
+  * In the same sequence
+  * Without any other commands coming in its way
+  * No other events ever occurring in the change log except 'my own'
+  
+These strict properties can only work if a remote repository is used exclusively for
+one user with one device. As soon as multiple clients are involved, the fulfilled properties
+can at best be:
+
+* All local commands (atomic and transactions) should happen on the server
+  * All or none
+  * In the same sequence
+  * Without any other commands coming in its way
+
+In order to minimize sync conflicts we can demand from the client that all commands that
+must be executed together must be in the same transaction. Then the relaxed properties
+of the sync algorithm itself are:
+
+* All local commands (atomic and transactions) should happen on the server
+  * All, some, or none
+  * In the same sequence
+
+Let's call this variant **sequence-stable + partial**. Partial, because we now allow
+some local commands to succeed and others to fail.
+This version guarantees that of all states that were experienced on the client, those that
+were executed successfully on the server too, happened in the same order in the change log.
+Hence, later executed undo commands can travel back in time in the same order as experienced
+by the user that executed the commands initially.
+
+To implement this algorithm one can use variants of minimum-edit-distance.
+
+If we demand only that all states and values can be found in the change log - but ignoring 
+the order in which they happen - we can further relax the constraints. This would guarantee
+that a long document stored in a value of a field can always be retrieved from the change log,
+but the overall state of an object probably not. The relaxed constraints are:
+
+* All local commands (atomic and transactions) should happen on the server
+  * All, some, or none
+
+Let's call this version the **unordered + partial** version. It's easy to implement.
+
+
+
+### Algorithm Common Data Structures
+
+The algorithm uses these classes:
+
+ChangeOperation
+
+* Set<AtomicEffect> = new HashSet()
+* Long latestTimeWhereEffectFulfilled = null
+* Set<XEvent> takenEvents = new HashSet()
+* Boolean success = null;
+
+AtomicEffect
+
+* XAddress entity (that was added, removed or changed; must be a field for CHANGE effect)
+* ChangeType (ADD, REMOVE, CHANGE) -- no TRANSACTION here 
+* XValue (the new value for a CHANGE effect, or null for other effects)
+
+Set<XEvent> allTakenEvents = new HashSe();
+
+Algorithm:
+
+* Start with the sync-state, i.e. the state with the revision = syncRevision.
+* for each state(t) resulting from applying a serverEvent(t) (starting with none):
+  * for each ChangeOperation co
+    * if (co.effect.matches(state(t))
+      * co.latestTimeWhereEffectFulfilled = t;
+
+* for each ChangeOperation:
+  * if (co.latestTimeWhereEffectFulfilled)
+    * // cool
+  * else: mark as failed; remove from list; cannot have happened.
+
+### Algorithm for Unordered + Partial
+
+// greedy:
+
+* sort ChangeOperations by number of atomicEffects (= atomicEvents required), largest first
+* for each cool ChangeOperation:
+  * for each atomicEffect : co.atomicOperations:
+    * for t = 0; t <= co.latestTimeWhereEffectFulfilled; t++:
+      * for serverEvent in state(t).events:  (atomic events)
+        * if atomicEffect.matches(serverEvent):
+          * co.takenEvents.add(serverEvent)
+          * allTakenEvents.add(serverEvents)
+      * if all effects matched: // keep events marked and success
+        * co.success = True
+      * else: mark events as not-taken and fail
+        * allTakenEvents.removeAll( co.takenEvents );
+        * co.takenEvents.clear();
+        * co.success = False
+
+define: effect.matches(event):
+
+* if the desired entity was ADDed or REMOVEd or a field has now the desired value => match
 
 
 ## The Old Synchronizer

@@ -1,6 +1,7 @@
 package org.xydra.store.sync;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
@@ -22,6 +23,7 @@ import org.xydra.core.model.impl.memory.IMemoryModel;
 import org.xydra.core.model.impl.memory.ModelUtils;
 import org.xydra.core.model.impl.memory.garbage.LocalChange;
 import org.xydra.core.model.impl.memory.sync.ISyncLog;
+import org.xydra.core.model.impl.memory.sync.ISyncLogEntry;
 import org.xydra.core.model.impl.memory.sync.Root;
 import org.xydra.index.query.Pair;
 import org.xydra.persistence.GetEventsRequest;
@@ -79,10 +81,13 @@ public class NewSyncer {
         
         this.root.lock();
         
-        // create commands to be sent from localChanges
+        // create commands to be sent to server from syncLog/localChanges
         ArrayList<XCommand> commands = new ArrayList<XCommand>();
-        for(LocalChange lc : this.localChanges.getList()) {
-            XCommand cmd = lc.getCommand();
+        
+        Iterator<ISyncLogEntry> localChanges = this.syncLog.getLocalChanges();
+        while(localChanges.hasNext()) {
+            ISyncLogEntry sle = localChanges.next();
+            XCommand cmd = sle.getCommand();
             commands.add(cmd);
         }
         GetEventsRequest getEventRequest = new GetEventsRequest(this.modelState.getAddress(),
@@ -131,30 +136,36 @@ public class NewSyncer {
      * Continue the sync process. Means:
      * <ol>
      * <li>Add all server events to the Event Delta
-     * <li>Add all Local Change-events (inversed) to the Event Delta -> so the
+     * <li>Add all Local Change-events (inverted) to the Event Delta -> so the
      * Event Delta represents the integration of server state and local state
-     * <li>Fire sync events: The ones that concern locally triggered changes and
-     * the ones that concern changes received from the server
-     * <li>Apply the Event Delta to the Model State
-     * <li>update the Change Log, clear all local changes
-     * <li>send change events
+     * 
+     * <li>Event mapping: Find out which local commands to consider as success
+     * and which as failed. Depends on chosen sync algorithm.
+     * 
+     * <li>Fire sync events</li>
+     * <li>Apply the Event Delta to the Model State</li>
+     * <li>update the Change Log, clear all local changes</li>
+     * <li>Send change events</li>
      * </ol>
      * 
      * @param serverEvents
      */
     private void continueSync(XEvent[] serverEvents) {
-        // on callback:
-        Result result = EventSequenceMapper.map(serverEvents, this.localChanges);
         
+        /* calculated event delta */
         EventDelta eventDelta = new EventDelta();
         for(XEvent e : serverEvents) {
             eventDelta.addEvent(e);
         }
-        
-        for(LocalChange lc : this.localChanges.getList()) {
-            XEvent e = lc.getEvent();
-            eventDelta.addAdverseEvent(e, this.syncRev, this.changeLog);
+        Iterator<ISyncLogEntry> localChanges = this.syncLog.getLocalChanges();
+        while(localChanges.hasNext()) {
+            ISyncLogEntry sle = localChanges.next();
+            XEvent e = sle.getEvent();
+            eventDelta.addAdverseEvent(e, this.syncRev, this.syncLog);
         }
+        
+        /* event mapping */
+        Result result = EventSequenceMapper.map(serverEvents, this.localChanges);
         
         // send sync events, let app see state before sync
         for(Pair<XEvent,LocalChange> p : result.mapped) {
@@ -181,8 +192,7 @@ public class NewSyncer {
             this.syncLog.appendEvent(e);
         }
         
-        // FIXME remove all local commands from syncLog
-        this.localChanges.clear();
+        this.syncLog.clearLocalChanges();
         
         this.syncLog.setSynchronizedRevision(newSyncRev);
         
