@@ -27,6 +27,7 @@ public class ModelUtils {
         return object;
     }
     
+    @SuppressWarnings("unused")
     public static void main(String[] args) {
         SimpleModel sm = new SimpleModel(XX.resolveModel(XX.toId("r1"), XX.toId("m1")));
         XRevWritableField field = sm.createObject(XX.toId("o1")).createField(XX.toId("f1"));
@@ -38,7 +39,6 @@ public class ModelUtils {
         SimpleField field3 = getField(sm, XX.toAddress("/r1/m1/o1/f2"));
         SimpleField field4 = getField(sm, XX.toAddress("/r1/m1/o2/f1"));
         SimpleField field5 = getField(sm, XX.toAddress("/r1/m2/o1/f1"));
-        
     }
     
 }

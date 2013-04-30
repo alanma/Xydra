@@ -69,7 +69,7 @@ public class MemoryField extends AbstractMOFEntity implements XField, IMemoryFie
         this.father = father;
     }
     
-    private XExistsRevWritableField convert(XRevWritableField fieldState) {
+    private static XExistsRevWritableField convert(XRevWritableField fieldState) {
         if(fieldState instanceof XExistsRevWritableField) {
             return (XExistsRevWritableField)fieldState;
         } else {

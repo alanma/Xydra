@@ -13,6 +13,8 @@ import org.xydra.base.change.XEvent;
 public interface ISyncLogEntry {
     
     /**
+     * To sync semantics of safe/forced correctly, a local command is kept
+     * 
      * @return @CanBeNull
      */
     XCommand getCommand();

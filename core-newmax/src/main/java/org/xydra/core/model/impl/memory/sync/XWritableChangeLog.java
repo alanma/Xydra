@@ -1,4 +1,4 @@
-package org.xydra.core.model.impl.memory.garbage;
+package org.xydra.core.model.impl.memory.sync;
 
 import org.xydra.base.change.XEvent;
 import org.xydra.core.model.XChangeLog;

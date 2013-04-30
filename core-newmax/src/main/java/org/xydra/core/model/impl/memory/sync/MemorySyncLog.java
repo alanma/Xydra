@@ -184,4 +184,16 @@ public class MemorySyncLog extends AbstractSyncLog implements ISyncLog {
         
     }
     
+    @Override
+    public Iterator<ISyncLogEntry> getLocalChanges() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    @Override
+    public void clearLocalChanges() {
+        // TODO Auto-generated method stub
+        
+    }
+    
 }

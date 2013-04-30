@@ -17,14 +17,14 @@ import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.impl.memory.EventDelta;
-import org.xydra.core.model.impl.memory.EventSequenceMapper;
-import org.xydra.core.model.impl.memory.EventSequenceMapper.Result;
 import org.xydra.core.model.impl.memory.IMemoryModel;
 import org.xydra.core.model.impl.memory.ModelUtils;
-import org.xydra.core.model.impl.memory.garbage.LocalChange;
+import org.xydra.core.model.impl.memory.sync.IEventMapper;
+import org.xydra.core.model.impl.memory.sync.IEventMapper.IMappingResult;
 import org.xydra.core.model.impl.memory.sync.ISyncLog;
 import org.xydra.core.model.impl.memory.sync.ISyncLogEntry;
 import org.xydra.core.model.impl.memory.sync.Root;
+import org.xydra.core.model.impl.memory.sync.UnorderedEventMapper;
 import org.xydra.index.query.Pair;
 import org.xydra.persistence.GetEventsRequest;
 import org.xydra.store.BatchedResult;
@@ -165,17 +165,19 @@ public class NewSyncer {
         }
         
         /* event mapping */
-        Result result = EventSequenceMapper.map(serverEvents, this.localChanges);
+        // choose your event mapper here
+        IEventMapper eventMapper = new UnorderedEventMapper();
+        IMappingResult mapping = eventMapper.mapEvents(this.syncLog, serverEvents);
         
         // send sync events, let app see state before sync
-        for(Pair<XEvent,LocalChange> p : result.mapped) {
-            LocalChange lc = p.getSecond();
+        for(Pair<XEvent,ISyncLogEntry> p : mapping.getMapped()) {
+            ISyncLogEntry sle = p.getSecond();
             // send sync-success events
-            fireSyncEvent(lc, true);
+            fireSyncEvent(sle, true);
         }
-        for(LocalChange lc : result.nonMappedLocalEvents) {
+        for(ISyncLogEntry sle : mapping.getUnmappedLocalEvents()) {
             // TODO send sync-failed events
-            fireSyncEvent(lc, false);
+            fireSyncEvent(sle, false);
         }
         
         // start atomic section -----
@@ -280,8 +282,8 @@ public class NewSyncer {
      * @param lc @NeverNull
      * @param result true iff sync-success, false if sync-error
      */
-    private void fireSyncEvent(LocalChange lc, boolean result) {
-        XEvent e = lc.getEvent();
+    private void fireSyncEvent(ISyncLogEntry sle, boolean result) {
+        XEvent e = sle.getEvent();
         XAddress target = e.getTarget();
         XSyncEvent syncEvent = new XSyncEvent(target, result);
         

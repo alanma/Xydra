@@ -9,7 +9,7 @@ import org.xydra.base.change.XTransaction;
 import org.xydra.core.change.XSendsSyncEvents;
 import org.xydra.core.model.impl.memory.Synchronizable;
 import org.xydra.core.model.impl.memory.garbage.XLocalChanges;
-import org.xydra.core.model.impl.memory.garbage.XWritableChangeLog;
+import org.xydra.core.model.impl.memory.sync.XWritableChangeLog;
 import org.xydra.store.sync.XSynchronizer;
 
 
