@@ -2,6 +2,8 @@ package org.xydra.core.model.impl.memory.sync;
 
 import java.util.Iterator;
 
+import org.xydra.base.change.XEvent;
+import org.xydra.index.iterator.AbstractTransformingIterator;
 import org.xydra.index.iterator.NoneIterator;
 
 
@@ -13,13 +15,15 @@ import org.xydra.index.iterator.NoneIterator;
  */
 abstract public class AbstractSyncLog implements ISyncLog {
     
-    class CommandEventPairIterator implements Iterator<ISyncLogEntry> {
+    class SyncLogEntryIterator implements Iterator<ISyncLogEntry> {
         
         private final long end;
+        
         private long i;
+        
         private ISyncLogEntry next;
         
-        public CommandEventPairIterator(long begin, long end) {
+        public SyncLogEntryIterator(long begin, long end) {
             this.i = begin;
             this.end = end;
         }
@@ -39,10 +43,10 @@ abstract public class AbstractSyncLog implements ISyncLog {
         
         @Override
         public ISyncLogEntry next() {
-            ISyncLogEntry commandEventPair = this.next;
+            ISyncLogEntry syncLogEntry = this.next;
             this.next = null;
             getNext();
-            return commandEventPair;
+            return syncLogEntry;
         }
         
         @Override
@@ -86,7 +90,7 @@ abstract public class AbstractSyncLog implements ISyncLog {
         long begin = beginRevision < firstRev ? firstRev : beginRevision;
         long end = endRevision > curRev ? curRev + 1 : endRevision;
         
-        return new CommandEventPairIterator(begin, end);
+        return new SyncLogEntryIterator(begin, end);
     }
     
     @Override
@@ -97,6 +101,36 @@ abstract public class AbstractSyncLog implements ISyncLog {
     @Override
     public Iterator<ISyncLogEntry> getSyncLogEntriesUntil(long revisionNumber) {
         return getSyncLogEntriesBetween(0, revisionNumber);
+    }
+    
+    class ExtractEventTransformer extends AbstractTransformingIterator<ISyncLogEntry,XEvent> {
+        
+        public ExtractEventTransformer(Iterator<? extends ISyncLogEntry> base) {
+            super(base);
+        }
+        
+        @Override
+        public XEvent transform(ISyncLogEntry in) {
+            if(in == null)
+                return null;
+            return in.getEvent();
+        }
+        
+    }
+    
+    @Override
+    public Iterator<XEvent> getEventsBetween(long beginRevision, long endRevision) {
+        return new ExtractEventTransformer(getSyncLogEntriesBetween(beginRevision, endRevision));
+    }
+    
+    @Override
+    public Iterator<XEvent> getEventsSince(long revisionNumber) {
+        return new ExtractEventTransformer(getSyncLogEntriesSince(revisionNumber));
+    }
+    
+    @Override
+    public Iterator<XEvent> getEventsUntil(long revisionNumber) {
+        return new ExtractEventTransformer(getSyncLogEntriesUntil(revisionNumber));
     }
     
 }

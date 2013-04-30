@@ -1,11 +1,14 @@
 package org.xydra.core.model.impl.memory.sync;
 
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.core.model.XChangeLogState;
+import org.xydra.index.iterator.AbstractFilteringIterator;
 
 import com.google.gwt.dev.jjs.impl.gflow.Analysis;
 
@@ -120,44 +123,22 @@ public class MemorySyncLog extends AbstractSyncLog implements ISyncLog {
     
     @Override
     public XEvent getEventAt(long revisionNumber) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-    
-    @Override
-    public Iterator<XEvent> getEventsBetween(long beginRevision, long endRevision) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-    
-    @Override
-    public Iterator<XEvent> getEventsSince(long revisionNumber) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-    
-    @Override
-    public Iterator<XEvent> getEventsUntil(long revisionNumber) {
-        // TODO Auto-generated method stub
-        return null;
+        return this.state.getEvent(revisionNumber);
     }
     
     @Override
     public long getBaseRevisionNumber() {
-        // TODO Auto-generated method stub
-        return 0;
+        return this.state.getBaseRevisionNumber();
     }
     
     @Override
     public XChangeLogState getChangeLogState() {
-        // TODO Auto-generated method stub
-        return null;
+        return this.state;
     }
     
     @Override
     public XEvent getLastEvent() {
-        // TODO Auto-generated method stub
-        return null;
+        return this.state.getLastEvent();
     }
     
     @Override
@@ -174,26 +155,43 @@ public class MemorySyncLog extends AbstractSyncLog implements ISyncLog {
     
     @Override
     public void setSynchronizedRevision(long syncronizedRevision) {
-        // TODO Auto-generated method stub
-        
+        this.state.setSyncRevisionNumber(syncronizedRevision);
     }
     
     @Override
     public void appendEvent(XEvent event) {
-        // TODO Auto-generated method stub
+        this.state.appendEvent(event);
+    }
+    
+    class LocalChangesIterator extends AbstractFilteringIterator<ISyncLogEntry> {
+        
+        public LocalChangesIterator(Iterator<ISyncLogEntry> base) {
+            super(base);
+        }
+        
+        @Override
+        protected boolean matchesFilter(ISyncLogEntry entry) {
+            return entry.getCommand() != null;
+        }
         
     }
     
     @Override
     public Iterator<ISyncLogEntry> getLocalChanges() {
-        // TODO Auto-generated method stub
-        return null;
+        return new LocalChangesIterator(getSyncLogEntriesSince(getSynchronizedRevision()));
     }
     
     @Override
     public void clearLocalChanges() {
-        // TODO Auto-generated method stub
-        
+        List<Long> toRemove = new LinkedList<Long>();
+        Iterator<ISyncLogEntry> it = getLocalChanges();
+        while(it.hasNext()) {
+            ISyncLogEntry sle = it.next();
+            toRemove.add(sle.getEvent().getRevisionNumber());
+        }
+        for(Long l : toRemove) {
+            this.state.removeSyncLogEntryAt(l);
+        }
     }
     
 }

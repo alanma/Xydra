@@ -4,6 +4,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.xydra.base.XAddress;
+import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.core.model.XChangeLogState;
 import org.xydra.core.model.impl.memory.MemoryChangeLogState;
@@ -25,9 +26,11 @@ public class MemorySyncLogState implements ISyncLogState {
     private SortedMap<Long,ISyncLogEntry> eventMap = new TreeMap<Long,ISyncLogEntry>();
     
     /**
-     * the revision number the model had when this synclog was created.
+     * the revision number the model had when this sync log was created.
      **/
-    private long syncRevisionNumber = -1;
+    private long syncRevisionNumber = XCommand.NEW;
+    
+    private long baseRevisionNumber;
     
     /**
      * Creates a new MemorySyncLogState. Make sure to set the
@@ -44,8 +47,23 @@ public class MemorySyncLogState implements ISyncLogState {
      * @param changeLogState
      */
     public MemorySyncLogState(XChangeLogState changeLogState) {
-        // TODO Auto-generated constructor stub
-        // TODO this should be possible
+        if(changeLogState instanceof MemorySyncLogState) {
+            MemorySyncLogState msl = (MemorySyncLogState)changeLogState;
+            this.baseAddr = msl.baseAddr;
+            this.baseRevisionNumber = msl.baseRevisionNumber;
+            this.syncRevisionNumber = msl.syncRevisionNumber;
+            this.eventMap = msl.eventMap;
+        } else {
+            long baseRev = changeLogState.getBaseRevisionNumber();
+            long currentRev = changeLogState.getCurrentRevisionNumber();
+            this.baseAddr = changeLogState.getBaseAddress();
+            this.baseRevisionNumber = baseRev;
+            this.syncRevisionNumber = baseRev;
+            for(long i = baseRev + 1; i <= currentRev; i++) {
+                XEvent event = changeLogState.getEvent(i);
+                this.appendEvent(event);
+            }
+        }
     }
     
     @Override
@@ -77,8 +95,7 @@ public class MemorySyncLogState implements ISyncLogState {
     
     @Override
     public long getBaseRevisionNumber() {
-        // TODO Auto-generated method stub
-        return 0;
+        return this.baseRevisionNumber;
     }
     
     @Override
@@ -93,14 +110,20 @@ public class MemorySyncLogState implements ISyncLogState {
     
     @Override
     public XEvent getEvent(long revisionNumber) {
-        // TODO Auto-generated method stub
-        return null;
+        ISyncLogEntry entry = this.eventMap.get(revisionNumber);
+        if(entry == null)
+            return null;
+        return entry.getEvent();
     }
     
     @Override
     public XEvent getLastEvent() {
-        // TODO Auto-generated method stub
-        return null;
+        long last = getLast();
+        return getEvent(last);
+    }
+    
+    private long getLast() {
+        return this.eventMap.lastKey();
     }
     
     @Override
@@ -118,9 +141,8 @@ public class MemorySyncLogState implements ISyncLogState {
     }
     
     @Override
-    public void setBaseRevisionNumber(long rev) {
-        // TODO Auto-generated method stub
-        
+    public void setBaseRevisionNumber(long baseRevisionNumber) {
+        this.baseRevisionNumber = baseRevisionNumber;
     }
     
     @Override
@@ -155,6 +177,11 @@ public class MemorySyncLogState implements ISyncLogState {
         XyAssert.xyAssert(revisionNumber == getCurrentRevisionNumber());
         
         return true;
+    }
+    
+    @Override
+    public void removeSyncLogEntryAt(Long l) {
+        this.eventMap.remove(l);
     }
     
 }

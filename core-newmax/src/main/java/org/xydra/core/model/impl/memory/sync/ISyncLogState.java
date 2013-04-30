@@ -42,4 +42,6 @@ public interface ISyncLogState extends XChangeLogState {
      */
     void setSyncRevisionNumber(long rev);
     
+    void removeSyncLogEntryAt(Long l);
+    
 }
