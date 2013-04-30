@@ -66,10 +66,12 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>core</artifactId>
-			<!--@@ use xydra.version here -->
+			<!-- @@ use xydra.version here -->
 			<version>0.1.6-SNAPSHOT</version>
 			<type>test-jar</type>
+			<scope>compile</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>server</artifactId>
