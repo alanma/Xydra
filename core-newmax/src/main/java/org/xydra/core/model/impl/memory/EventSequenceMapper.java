@@ -22,30 +22,62 @@ import org.xydra.core.model.impl.memory.garbage.XLocalChanges;
 import org.xydra.index.query.Pair;
 
 
+/**
+ * Determines which {@link XLocalChanges} have been applied remotely and which
+ * have not been applied aka failed. In addition, the serverEvents that have
+ * originated remotely and are yet unknown locally are determined.
+ * 
+ * @author Thomas
+ * 
+ */
 public class EventSequenceMapper {
 	
 	/**
-	 * Find the first, longest sub-sequence of events from localChanges in the
-	 * sequence serverEvents. As many as possible events from localChanges
-	 * should appear. Additional events can appear between any two events from
-	 * localChanges. E.g. if the serverEvents is ABCDEFGHIJKLM and localChanges
-	 * is CEGXL the longest sequence is CEGL.
+	 * FIXME Transactions in serverEvents are not yet considered as a whole only
+	 * their contained events are mapped.
 	 * 
-	 * Transactions are compared as-is, i.e. they are different from the list of
-	 * their atomic events. This holds from both sides. I.e. a transaction on
-	 * the server-side can only ever be mapped to an equivalent transaction on
-	 * the client side.
-	 * 
-	 * @param serverEvents
-	 * @param localChanges
-	 * @return the {@link Result}
+	 * @param serverEvents - an array of serverEvents returned from
+	 *            synchronization
+	 * @param localChanges - the localChanges that happened on the client since
+	 *            last synchronization
+	 * @return the {@link Result} - the mapping result, including mapped events,
+	 *         non-mapped localChanges and non-mapped serverEvents
 	 */
 	public static Result map(XEvent[] serverEvents, XLocalChanges localChanges) {
 		List<XEvent> unpackedServerEvents = unpackImpliedTxEvents(serverEvents);
-		
+		/*
+		 * FIXME Transactions in serverEvents are not yet considered as a whole
+		 * only their contained events are mapped.
+		 */
 		return mapServerEventsToLocalChanges(unpackedServerEvents, localChanges);
 	}
 	
+	/**
+	 * Find a longest sub-sequence of events from the specified
+	 * {@link XLocalChanges} in the sequence of the specified {@link XEvent}
+	 * serverEvents.
+	 * 
+	 * Find a longest sub-sequence of events from the specified
+	 * {@link XLocalChanges} in the sequence of the specified {@link XEvent}
+	 * serverEvents. As many events from localChanges as possible should appear.
+	 * Additional events can appear between any two events from localChanges.
+	 * E.g. if the serverEvents is ABCDEFGHIJKLM and localChanges is CEGXL the
+	 * longest sequence is CEGL. The problem is know as the Longest common
+	 * subsequence problem.
+	 * 
+	 * The implementation is using an algorithm similar to the one described
+	 * here: http://rosettacode.org/wiki/Longest_common_subsequence#
+	 * Dynamic_Programming_2
+	 * 
+	 * @param unpackedServerEvents - the serverEvents in which transaction that
+	 *            only contain implied events and one non-implied event (those
+	 *            tx resulting from a remove {@link XCommand})are replaced with
+	 *            the events they contain
+	 * @param localChanges - the localchanges that happened on the client since
+	 *            last synchronization
+	 * @return the {@link Result} - the mapping result, including mapped events,
+	 *         non-mapped localChanges and non-mapped serverEvents
+	 */
 	private static Result mapServerEventsToLocalChanges(List<XEvent> unpackedServerEvents,
 	        XLocalChanges localChanges) {
 		
@@ -57,7 +89,11 @@ public class EventSequenceMapper {
 		
 		int numServerEvents = unpackedServerEvents.size();
 		int numLocalChanges = localChanges.getList().size();
-		
+		/*
+		 * Backtrack through the matches matrix to find a longest sequence,
+		 * there can be multiple equally long sequences, but the algorithm
+		 * deterministically finds only one
+		 */
 		for(int x = numServerEvents, y = numLocalChanges; x > 0 || y > 0;) {
 			if(x > 0 && matches[x][y] == matches[x - 1][y]) {
 				XEvent serverEvent = unpackedServerEvents.get(x - 1);
@@ -68,16 +104,17 @@ public class EventSequenceMapper {
 				y--;
 			} else if(x > 0 && y > 0) {
 				XEvent serverEvent = unpackedServerEvents.get(x - 1);
-				XEvent localEvent = localChanges.getList().get(y - 1).getEvent();
-				assert isEqual(serverEvent, localEvent);
+				LocalChange localChange = localChanges.getList().get(y - 1);
+				assert isEqual(serverEvent, localChange);
 				Pair<XEvent,LocalChange> pair = new Pair<XEvent,LocalChange>(serverEvent,
-				        localChanges.getList().get(y - 1));
+				        localChange);
 				mapped.add(pair);
 				x--;
 				y--;
 			}
 		}
 		
+		// The backtrack result needs to be reversed into the right order
 		Collections.reverse(nonMappedLocalEvents);
 		Collections.reverse(nonMappedServerEvents);
 		Collections.reverse(mapped);
@@ -88,6 +125,21 @@ public class EventSequenceMapper {
 		return new Result(nonMappedServerEvents, nonMappedLocalEvents, mapped);
 	}
 	
+	/**
+	 * Calculates the matrix of matching pairs. The implementation is using an
+	 * algorithm similar to the one described here:
+	 * http://rosettacode.org/wiki/Longest_common_subsequence#
+	 * Dynamic_Programming_2
+	 * 
+	 * @param unpackedServerEvents - the serverEvents in which transactions that
+	 *            only contain implied events and one non-implied event (those
+	 *            tx resulting from a remove {@link XCommand}) are replaced with
+	 *            the events they contain
+	 * 
+	 * @param localChanges - the localChanges that happened on the client since
+	 *            last synchronization
+	 * @return an matrix which contains counts of matching pairs
+	 */
 	private static int[][] calcMatches(List<XEvent> unpackedServerEvents, XLocalChanges localChanges) {
 		
 		int numServerEvents = unpackedServerEvents.size();
@@ -96,8 +148,8 @@ public class EventSequenceMapper {
 		for(int x = 0; x < numServerEvents; x++) {
 			XEvent serverEvent = unpackedServerEvents.get(x);
 			for(int y = 0; y < numLocalChanges; y++) {
-				XEvent localEvent = localChanges.getList().get(y).getEvent();
-				if(isEqual(serverEvent, localEvent)) {
+				LocalChange localChange = localChanges.getList().get(y);
+				if(isEqual(serverEvent, localChange)) {
 					matches[x + 1][y + 1] = matches[x][y] + 1;
 				} else {
 					matches[x + 1][y + 1] = Math.max(matches[x + 1][y], matches[x][y + 1]);
@@ -179,7 +231,8 @@ public class EventSequenceMapper {
 				
 				if(serverEvent instanceof XAtomicEvent) {
 					assert serverEvent instanceof XAtomicEvent;
-					if(equals((XAtomicCommand)lCmd, (XAtomicEvent)lEvent, (XAtomicEvent)serverEvent)) {
+					if(isLocalEventFromLocalCommandEqualToServerEvent((XAtomicCommand)lCmd,
+					        (XAtomicEvent)lEvent, (XAtomicEvent)serverEvent)) {
 						return true;
 					}
 				} else {
@@ -188,7 +241,8 @@ public class EventSequenceMapper {
 					XTransactionEvent serverTxEvent = (XTransactionEvent)serverEvent;
 					if(isTxEventResultingFromRemove(serverTxEvent)) {
 						XAtomicEvent lastServerEvent = serverTxEvent.getLastEvent();
-						if(equals((XAtomicCommand)lCmd, (XAtomicEvent)lEvent, lastServerEvent)) {
+						if(isLocalEventFromLocalCommandEqualToServerEvent((XAtomicCommand)lCmd,
+						        (XAtomicEvent)lEvent, lastServerEvent)) {
 							return true;
 						}
 					}
@@ -203,7 +257,8 @@ public class EventSequenceMapper {
 				
 				if(serverEvent instanceof XAtomicEvent) {
 					assert serverEvent instanceof XAtomicEvent;
-					if(equals((XAtomicCommand)lCmd, lastLocalEvent, (XAtomicEvent)serverEvent)) {
+					if(isLocalEventFromLocalCommandEqualToServerEvent((XAtomicCommand)lCmd,
+					        lastLocalEvent, (XAtomicEvent)serverEvent)) {
 						return true;
 					}
 					
@@ -213,7 +268,8 @@ public class EventSequenceMapper {
 					XTransactionEvent rTxEvent = (XTransactionEvent)serverEvent;
 					assert isTxEventResultingFromRemove(rTxEvent);
 					XAtomicEvent lastRemoteEvent = rTxEvent.getLastEvent();
-					if(equals((XAtomicCommand)lCmd, lastLocalEvent, (XAtomicEvent)lastRemoteEvent)) {
+					if(isLocalEventFromLocalCommandEqualToServerEvent((XAtomicCommand)lCmd,
+					        lastLocalEvent, (XAtomicEvent)lastRemoteEvent)) {
 						return true;
 					}
 				}
@@ -221,26 +277,25 @@ public class EventSequenceMapper {
 		} else {
 			assert lCmd instanceof XTransaction;
 			// could be 3, 4
+			// TODO
 		}
 		
 		// 4
 		return false;
 	}
 	
-	@Deprecated
-	private static boolean isEqual(XEvent serverEvent, XEvent localEvent) {
-		if(serverEvent.getChangeType().equals(localEvent.getChangeType())
-		        && serverEvent.getChangedEntity().equals(localEvent.getChangedEntity())
-		        && serverEvent.getTarget().equals(localEvent.getTarget())) {
-			return true;
-		} else {
-			// TODO Transactions
-			return false;
-		}
-		
-	}
-	
-	private static boolean equals(XAtomicCommand lCmd, XAtomicEvent lEvent, XAtomicEvent rEvent) {
+	/**
+	 * Tests the equality of a local event and a remote event. If the local
+	 * {@link XCommand} that caused the local event is a revision bound SAFE
+	 * command the revisions are also compared.
+	 * 
+	 * @param lCmd - the local {@link XCommand}
+	 * @param lEvent - the local {@link XEvent}
+	 * @param rEvent - the remote {@link XEvent}
+	 * @return
+	 */
+	private static boolean isLocalEventFromLocalCommandEqualToServerEvent(XAtomicCommand lCmd,
+	        XAtomicEvent lEvent, XAtomicEvent rEvent) {
 		long lCmdRev = lCmd.getRevisionNumber();
 		if(rEvent.getChangeType().equals(lEvent.getChangeType())
 		        && rEvent.getChangedEntity().equals(lEvent.getChangedEntity())
@@ -271,6 +326,17 @@ public class EventSequenceMapper {
 		return false;
 	}
 	
+	/**
+	 * Extract the contained events within transactions that only contain
+	 * implied events and one non-implied event (those tx resulting from a
+	 * remove {@link XCommand}). Keeps AtmocEvents within the serverEvent
+	 * untouched.
+	 * 
+	 * @param serverEvents - an array of remote events with can contain
+	 *            transactions
+	 * @return a list of {@link XEvent} with implied tx replaced with their
+	 *         contained events
+	 */
 	private static List<XEvent> unpackImpliedTxEvents(XEvent[] serverEvents) {
 		List<XEvent> unpackedServerEvents = new ArrayList<XEvent>();
 		for(XEvent event : serverEvents) {
@@ -286,6 +352,15 @@ public class EventSequenceMapper {
 		return unpackedServerEvents;
 	}
 	
+	/**
+	 * Returns a list of XEvents where transactions that only contain implied
+	 * events and one non-implied event (those tx resulting from a remove
+	 * {@link XCommand}) are unpacked.
+	 * 
+	 * @param txEvent - the {@link XTransactionEvent} that may be unpacked
+	 * @return a list of {@link XEvent} with implied tx replaced with their
+	 *         contained events
+	 */
 	private static List<XEvent> unpackTxEvents(XTransactionEvent txEvent) {
 		List<XEvent> unpackedTxEvents = new ArrayList<XEvent>();
 		if(isTxEventResultingFromRemove(txEvent)) {
@@ -297,6 +372,14 @@ public class EventSequenceMapper {
 		return unpackedTxEvents;
 	}
 	
+	/**
+	 * Tests whether a {@link XTransactionEvent} is a transaction that only
+	 * contain implied events and one non-implied event (those tx resulting from
+	 * a remove {@link XCommand}) are unpacked.
+	 * 
+	 * @param txEvent
+	 * @return
+	 */
 	private static boolean isTxEventResultingFromRemove(XTransactionEvent txEvent) {
 		for(int i = 0; i < txEvent.size() - 1; i++) {
 			if(!txEvent.getEvent(i).isImplied())
@@ -311,6 +394,13 @@ public class EventSequenceMapper {
 		return true;
 	}
 	
+	/**
+	 * Utility method to get the {@link XAtomicEvent}s within a
+	 * {@link XTransactionEvent}
+	 * 
+	 * @param txEvent
+	 * @return
+	 */
 	private static List<XEvent> getContainedEventsFromTx(XTransactionEvent txEvent) {
 		List<XEvent> containedEvents = new ArrayList<XEvent>();
 		for(int i = 0; i < txEvent.size(); i++) {
