@@ -32,6 +32,7 @@ import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.core.XCopyUtils;
 import org.xydra.core.change.XModelEventListener;
 import org.xydra.core.change.XModelSyncEventListener;
+import org.xydra.core.change.XSendsModelSyncEvents;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XChangeLogState;
 import org.xydra.core.model.XField;

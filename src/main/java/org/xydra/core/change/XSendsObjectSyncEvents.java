@@ -1,7 +1,5 @@
-package org.xydra.core.model.impl.memory;
+package org.xydra.core.change;
 
-import org.xydra.core.change.XModelSyncEventListener;
-import org.xydra.core.change.XObjectSyncEventListener;
 
 
 /**
@@ -10,7 +8,7 @@ import org.xydra.core.change.XObjectSyncEventListener;
  * 
  * @author alpha
  */
-public interface XSendsModelSyncEvents {
+public interface XSendsObjectSyncEvents {
 	
 	/**
 	 * Adds an {@link XObjectSyncEventListener}.
@@ -19,7 +17,7 @@ public interface XSendsModelSyncEvents {
 	 * @return true, if adding the given listener was successful, false
 	 *         otherwise.
 	 */
-	public boolean addListenerForModelSyncEvents(XModelSyncEventListener syncListener);
+	public boolean addListenerForObjectSyncEvents(XObjectSyncEventListener syncListener);
 	
 	/**
 	 * Removes the specified {@link XObjectSyncEventListener}.
@@ -29,5 +27,5 @@ public interface XSendsModelSyncEvents {
 	 *         otherwise.
 	 */
 	
-	public boolean removeListenerForModelSyncEvents(XModelSyncEventListener syncListener);
+	public boolean removeListenerForObjectSyncEvents(XObjectSyncEventListener syncListener);
 }

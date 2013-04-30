@@ -1,7 +1,5 @@
-package org.xydra.core.model.impl.memory;
+package org.xydra.core.change;
 
-import org.xydra.core.change.XFieldSyncEventListener;
-import org.xydra.core.change.XObjectSyncEventListener;
 
 
 /**

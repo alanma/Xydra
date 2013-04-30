@@ -6,9 +6,9 @@ import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XTransaction;
+import org.xydra.core.change.XSendsFieldSyncEvents;
+import org.xydra.core.change.XSendsObjectSyncEvents;
 import org.xydra.core.model.impl.memory.Synchronizable;
-import org.xydra.core.model.impl.memory.XSendsFieldSyncEvents;
-import org.xydra.core.model.impl.memory.XSendsObjectSyncEvents;
 
 
 /**
