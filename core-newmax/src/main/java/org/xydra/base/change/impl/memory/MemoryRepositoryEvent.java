@@ -34,7 +34,7 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
 	 */
 	public static XRepositoryEvent createAddEvent(XId actor, XAddress target, XId modelId) {
 		return new MemoryRepositoryEvent(actor, target, modelId, ChangeType.ADD,
-		        RevisionOfEntityNotSet, false, false);
+		        REVISIONOFENTITYNOTSET, false, false);
 	}
 	
 	public static XRepositoryEvent createFrom(XRepositoryEvent re) {
@@ -78,7 +78,7 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
 	 * @throws IllegalArgumentException if the given {@link XAddress} doesn't
 	 *             refer to an repository, if the given modelId is null or if
 	 *             the given modelRevision equals
-	 *             {@link XEvent#RevisionOfEntityNotSet}
+	 *             {@link XEvent#REVISIONOFENTITYNOTSET}
 	 */
 	public static XRepositoryEvent createRemoveEvent(XId actor, XAddress target, XId modelId,
 	        long oldModelRevison, boolean inTrans) {
@@ -122,7 +122,7 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
 		}
 		
 		// TODO this right???
-		if(modelRevision < -1 && modelRevision != RevisionOfEntityNotSet) {
+		if(modelRevision < -1 && modelRevision != REVISIONOFENTITYNOTSET) {
 			throw new IllegalArgumentException("invalid modelRevision: " + modelRevision);
 		}
 		

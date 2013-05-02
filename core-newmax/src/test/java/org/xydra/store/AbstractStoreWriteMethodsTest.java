@@ -1636,7 +1636,7 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
             assertEquals("event " + event, revision - 1, event.getOldFieldRevision());
             //$FALL-THROUGH$
         case XOBJECT:
-            if(event.getOldObjectRevision() != XEvent.RevisionNotAvailable) {
+            if(event.getOldObjectRevision() != XEvent.REVISIONNOTAVAILABLE) {
                 assertEquals("event " + event, revision - 1, event.getOldObjectRevision());
             }
             //$FALL-THROUGH$

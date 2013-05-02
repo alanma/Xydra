@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
+import org.xydra.core.change.RevisionConstants;
 
 
 /**
@@ -19,13 +20,13 @@ public interface XEvent extends Serializable {
 	/**
 	 * The revision cannot be efficiently calculated.
 	 */
-	public static long RevisionNotAvailable = -2;
+	public static long REVISIONNOTAVAILABLE = RevisionConstants.REVISIONNOTAVAILABLE;
 	
 	/**
 	 * A revision number has not been set for this entity. E.g. if this XEvent
 	 * has no such father-entity.
 	 */
-	public static long RevisionOfEntityNotSet = -4;
+	public static long REVISIONOFENTITYNOTSET = RevisionConstants.REVISIONOFENTITYNOTSET;
 	
 	/**
 	 * WHO executed this?
@@ -52,7 +53,7 @@ public interface XEvent extends Serializable {
 	/**
 	 * @return The revision number of the field holding the changed entity (or
 	 *         which is the changed entity) at the time when this event happened
-	 *         (may be {@link #RevisionOfEntityNotSet} if this XEvent refers to
+	 *         (may be {@link #REVISIONOFENTITYNOTSET} if this XEvent refers to
 	 *         something that is not a field)
 	 */
 	long getOldFieldRevision();
@@ -60,7 +61,7 @@ public interface XEvent extends Serializable {
 	/**
 	 * @return The revision number of the model holding the changed entity (or
 	 *         which is the changed entity) before this event happened (may be
-	 *         {@link #RevisionOfEntityNotSet} if this XEvent refers to
+	 *         {@link #REVISIONOFENTITYNOTSET} if this XEvent refers to
 	 *         something that is not a model or has no father-model)
 	 */
 	long getOldModelRevision();
@@ -70,11 +71,11 @@ public interface XEvent extends Serializable {
 	 *         which is the changed entity) at the time when this event
 	 *         happened.
 	 * 
-	 *         The returned value may be {@link #RevisionOfEntityNotSet} if this
+	 *         The returned value may be {@link #REVISIONOFENTITYNOTSET} if this
 	 *         XEvent is not an object event, e.g. if the event is an
 	 *         {@link XTransactionEvent}, or if it has no father-object.
 	 * 
-	 *         The returned value may be {@link #RevisionNotAvailable} if the
+	 *         The returned value may be {@link #REVISIONNOTAVAILABLE} if the
 	 *         object revision cannot be efficiently calculated)
 	 */
 	long getOldObjectRevision();

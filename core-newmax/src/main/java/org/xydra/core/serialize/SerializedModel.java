@@ -28,6 +28,7 @@ import org.xydra.base.rmof.impl.memory.SimpleRepository;
 import org.xydra.base.value.XValue;
 import org.xydra.core.AccessException;
 import org.xydra.core.XX;
+import org.xydra.core.change.RevisionConstants;
 import org.xydra.core.model.OldXSynchronizesChanges;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XChangeLogState;
@@ -71,7 +72,7 @@ public class SerializedModel {
 	private static final String NAME_FIELDS = "fields";
 	private static final String NAME_MODELS = "models";
 	/** revision number returned by parser if no revision number was found */
-	public static final long NO_REVISION = -1;
+	public static final long NO_REVISION = RevisionConstants.NO_REVISION;
 	private static final String REVISION_ATTRIBUTE = "revision";
 	private static final String SYNC_REVISION_ATTRIBUTE = "syncRevision";
 	private static final String STARTREVISION_ATTRIBUTE = "startRevision";
@@ -328,6 +329,8 @@ public class SerializedModel {
 			modelAddr = modelState.getAddress();
 		}
 		if(revision != NO_REVISION) {
+			modelState.setRevisionNumber(revision);
+		} else {
 			modelState.setRevisionNumber(revision);
 		}
 		

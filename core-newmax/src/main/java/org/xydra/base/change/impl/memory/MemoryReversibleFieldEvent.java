@@ -43,12 +43,12 @@ public class MemoryReversibleFieldEvent extends MemoryFieldEvent implements XRev
      * @return An {@link XReversibleFieldEvent} of the add-type
      * @throws IllegalArgumentException if the given {@link XAddress} does not
      *             specify an field or if the given revision number equals
-     *             {@link XEvent#RevisionOfEntityNotSet}
+     *             {@link XEvent#REVISIONOFENTITYNOTSET}
      * @throws IllegalArgumentException if newValue is null
      */
     public static XReversibleFieldEvent createAddEvent(XId actor, XAddress target, XValue newValue,
             long objectRevision, long fieldRevision, boolean inTransaction) {
-        return createAddEvent(actor, target, newValue, RevisionOfEntityNotSet, objectRevision,
+        return createAddEvent(actor, target, newValue, REVISIONOFENTITYNOTSET, objectRevision,
                 fieldRevision, inTransaction);
     }
     
@@ -71,7 +71,7 @@ public class MemoryReversibleFieldEvent extends MemoryFieldEvent implements XRev
      * @return An {@link XReversibleFieldEvent} of the add-type
      * @throws IllegalArgumentException if the given {@link XAddress} does not
      *             specify an field or if the given revision number equals
-     *             {@link XEvent#RevisionOfEntityNotSet}
+     *             {@link XEvent#REVISIONOFENTITYNOTSET}
      * @throws IllegalArgumentException if newValue is null
      */
     public static XReversibleFieldEvent createAddEvent(XId actor, XAddress target, XValue newValue,
@@ -102,13 +102,13 @@ public class MemoryReversibleFieldEvent extends MemoryFieldEvent implements XRev
      * @return an {@link XReversibleFieldEvent} of the change-type
      * @throws IllegalArgumentException if the given {@link XAddress} does not
      *             specify an field or if the given revision number equals
-     *             {@link XEvent#RevisionOfEntityNotSet}
+     *             {@link XEvent#REVISIONOFENTITYNOTSET}
      * @throws IllegalArgumentException if either oldValue or newValue is null
      */
     public static XReversibleFieldEvent createChangeEvent(XId actor, XAddress target,
             XValue oldValue, XValue newValue, long objectRevision, long fieldRevision,
             boolean inTransaction) {
-        return createChangeEvent(actor, target, oldValue, newValue, RevisionOfEntityNotSet,
+        return createChangeEvent(actor, target, oldValue, newValue, REVISIONOFENTITYNOTSET,
                 objectRevision, fieldRevision, inTransaction);
     }
     
@@ -132,7 +132,7 @@ public class MemoryReversibleFieldEvent extends MemoryFieldEvent implements XRev
      * @return an {@link XReversibleFieldEvent} of the change-type
      * @throws IllegalArgumentException if the given {@link XAddress} does not
      *             specify an field or if the given revision number equals
-     *             {@link XEvent#RevisionOfEntityNotSet}
+     *             {@link XEvent#REVISIONOFENTITYNOTSET}
      * @throws IllegalArgumentException if either oldValue or newValue is null
      */
     public static XReversibleFieldEvent createChangeEvent(XId actor, XAddress target,
@@ -167,13 +167,13 @@ public class MemoryReversibleFieldEvent extends MemoryFieldEvent implements XRev
      * @return An {@link XReversibleFieldEvent} of the remove-type
      * @throws IllegalArgumentException if the given {@link XAddress} does not
      *             specify an field or if the given revision number equals
-     *             {@link XEvent#RevisionOfEntityNotSet}
+     *             {@link XEvent#REVISIONOFENTITYNOTSET}
      * @throws IllegalArgumentException if oldValue is null
      */
     public static XReversibleFieldEvent createRemoveEvent(XId actor, XAddress target,
             XValue oldValue, long objectRevision, long fieldRevision, boolean inTransaction,
             boolean implied) {
-        return createRemoveEvent(actor, target, oldValue, RevisionOfEntityNotSet, objectRevision,
+        return createRemoveEvent(actor, target, oldValue, REVISIONOFENTITYNOTSET, objectRevision,
                 fieldRevision, inTransaction, implied);
     }
     
@@ -199,7 +199,7 @@ public class MemoryReversibleFieldEvent extends MemoryFieldEvent implements XRev
      * @return An {@link XReversibleFieldEvent} of the remove-type
      * @throws IllegalArgumentException if the given {@link XAddress} does not
      *             specify an field or if the given revision number equals
-     *             {@link XEvent#RevisionOfEntityNotSet}
+     *             {@link XEvent#REVISIONOFENTITYNOTSET}
      * @throws IllegalArgumentException if oldValue is null
      */
     public static XReversibleFieldEvent createRemoveEvent(XId actor, XAddress target,

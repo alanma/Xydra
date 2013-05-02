@@ -34,6 +34,7 @@ import org.xydra.base.rmof.impl.XExistsRevWritableRepository;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.core.XCopyUtils;
 import org.xydra.core.XX;
+import org.xydra.core.change.RevisionConstants;
 import org.xydra.core.change.XFieldEventListener;
 import org.xydra.core.change.XModelEventListener;
 import org.xydra.core.change.XObjectEventListener;
@@ -235,7 +236,9 @@ Serializable {
 			assert getChangeLog().getCurrentRevisionNumber() >= 0;
 			assert this.modelState.exists();
 		} else {
-			this.modelState.setRevisionNumber(getChangeLog().getCurrentRevisionNumber());
+			if(this.modelState.getRevisionNumber() != RevisionConstants.NO_REVISION) {
+				this.modelState.setRevisionNumber(getChangeLog().getCurrentRevisionNumber());
+			}
 		}
 		
 		// TODO Andi? Thomas?

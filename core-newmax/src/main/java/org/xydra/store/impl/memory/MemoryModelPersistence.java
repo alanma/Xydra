@@ -90,12 +90,12 @@ public class MemoryModelPersistence {
 				 */
 				
 				event = MemoryTransactionEvent.createTransactionEvent(actorId, this.modelAddr,
-				        events, getRevisionNumber(), XEvent.RevisionOfEntityNotSet);
+				        events, getRevisionNumber(), XEvent.REVISIONOFENTITYNOTSET);
 			} else {
 				assert command.getTarget().getAddressedType() == XType.XOBJECT;
 				
 				event = MemoryTransactionEvent.createTransactionEvent(actorId, command.getTarget(),
-				        events, XEvent.RevisionOfEntityNotSet, getRevisionNumber());
+				        events, XEvent.REVISIONOFENTITYNOTSET, getRevisionNumber());
 			}
 			
 		} else {

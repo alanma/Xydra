@@ -37,12 +37,12 @@ public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {
      * @throws IllegalArgumentException if the given {@link XAddress} does not
      *             specify an model, if objectId is null or if the
      *             given revision number equals
-     *             {@link XEvent#RevisionOfEntityNotSet}
+     *             {@link XEvent#REVISIONOFENTITYNOTSET}
      */
     public static XModelEvent createAddEvent(XId actor, XAddress target, XId objectId,
             long modelRevision, boolean inTransaction) {
         return new MemoryModelEvent(actor, target, objectId, ChangeType.ADD, modelRevision,
-                RevisionOfEntityNotSet, inTransaction, false);
+                REVISIONOFENTITYNOTSET, inTransaction, false);
     }
     
     public static XModelEvent createFrom(XModelEvent me) {
@@ -72,11 +72,11 @@ public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {
      * @throws IllegalArgumentException if the given {@link XAddress} does not
      *             specify an model, if objectId is null or if one of
      *             the given revision numbers equals
-     *             {@link XEvent#RevisionOfEntityNotSet}
+     *             {@link XEvent#REVISIONOFENTITYNOTSET}
      */
     public static XModelEvent createRemoveEvent(XId actor, XAddress target, XId objectId,
             long modelRevision, long objectRevision, boolean inTransaction, boolean implied) {
-        if(objectRevision < 0 && objectRevision != XEvent.RevisionNotAvailable) {
+        if(objectRevision < 0 && objectRevision != XEvent.REVISIONNOTAVAILABLE) {
             throw new IllegalArgumentException(
                     "object revision must be set for model REMOVE events");
         }
@@ -107,7 +107,7 @@ public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {
             throw new IllegalArgumentException("modelRevision must be set for model events");
         }
         
-        if(objectRevision < 0 && objectRevision != RevisionOfEntityNotSet) {
+        if(objectRevision < 0 && objectRevision != REVISIONOFENTITYNOTSET) {
             throw new IllegalArgumentException("invalid objectRevision: " + objectRevision);
         }
         

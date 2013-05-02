@@ -75,7 +75,7 @@ public class SerializedEvent {
 			if(required) {
 				throw new ParsingError(element, "Missing attribute '" + attribute + "'");
 			}
-			return XEvent.RevisionOfEntityNotSet;
+			return XEvent.REVISIONOFENTITYNOTSET;
 		}
 		
 		return SerializingUtils.toLong(revisionString);
@@ -112,18 +112,18 @@ public class SerializedEvent {
 				out.attribute(ACTOR_ATTRIBUTE, event.getActor());
 			}
 			
-			if(event.getOldModelRevision() != XEvent.RevisionOfEntityNotSet) {
+			if(event.getOldModelRevision() != XEvent.REVISIONOFENTITYNOTSET) {
 				// FIXME here is the problem
 				out.attribute(MODELREVISION_ATTRIBUTE, event.getOldModelRevision());
 			}
 			
 		}
 		
-		if(event.getOldObjectRevision() != XEvent.RevisionOfEntityNotSet) {
+		if(event.getOldObjectRevision() != XEvent.REVISIONOFENTITYNOTSET) {
 			out.attribute(OBJECTREVISION_ATTRIBUTE, event.getOldObjectRevision());
 		}
 		
-		if(event.getOldFieldRevision() != XEvent.RevisionOfEntityNotSet) {
+		if(event.getOldFieldRevision() != XEvent.REVISIONOFENTITYNOTSET) {
 			out.attribute(FIELDREVISION_ATTRIBUTE, event.getOldFieldRevision());
 		}
 		

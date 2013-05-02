@@ -65,7 +65,7 @@ abstract public class AbstractSerializedEventTest extends AbstractSerializingTes
     @Test
     public void testFieldEventAddNoObjectRev() {
         testEvent(MemoryFieldEvent.createAddEvent(actor, field, value, 33,
-                XEvent.RevisionNotAvailable, 2, false));
+                XEvent.REVISIONNOTAVAILABLE, 2, false));
     }
     
     @Test
@@ -86,7 +86,7 @@ abstract public class AbstractSerializedEventTest extends AbstractSerializingTes
     @Test
     public void testFieldEventChangeNoObjectRev() {
         testEvent(MemoryFieldEvent.createChangeEvent(actor, field, value, 33,
-                XEvent.RevisionNotAvailable, 2, false));
+                XEvent.REVISIONNOTAVAILABLE, 2, false));
     }
     
     @Test
@@ -106,7 +106,7 @@ abstract public class AbstractSerializedEventTest extends AbstractSerializingTes
     
     @Test
     public void testFieldEventRemoveNoObjectRev() {
-        testEvent(MemoryFieldEvent.createRemoveEvent(actor, field, 33, XEvent.RevisionNotAvailable,
+        testEvent(MemoryFieldEvent.createRemoveEvent(actor, field, 33, XEvent.REVISIONNOTAVAILABLE,
                 2, false, false));
     }
     
@@ -135,7 +135,7 @@ abstract public class AbstractSerializedEventTest extends AbstractSerializingTes
     @Test
     public void testReversibleFieldEventAddNoObjectRev() {
         testEvent(MemoryReversibleFieldEvent.createAddEvent(actor, field, value, 33,
-                XEvent.RevisionNotAvailable, 2, false));
+                XEvent.REVISIONNOTAVAILABLE, 2, false));
     }
     
     @Test
@@ -157,7 +157,7 @@ abstract public class AbstractSerializedEventTest extends AbstractSerializingTes
     @Test
     public void testReversibleFieldEventChangeNoObjectRev() {
         testEvent(MemoryReversibleFieldEvent.createChangeEvent(actor, field, value, 33,
-                XEvent.RevisionNotAvailable, 2, false));
+                XEvent.REVISIONNOTAVAILABLE, 2, false));
     }
     
     @Test
@@ -186,7 +186,7 @@ abstract public class AbstractSerializedEventTest extends AbstractSerializingTes
     @Test
     public void testReversibleFieldEventRemoveNoObjectRev() {
         testEvent(MemoryReversibleFieldEvent.createRemoveEvent(actor, field, 33,
-                XEvent.RevisionNotAvailable, 2, false, false));
+                XEvent.REVISIONNOTAVAILABLE, 2, false, false));
     }
     
     @Test
@@ -215,12 +215,12 @@ abstract public class AbstractSerializedEventTest extends AbstractSerializingTes
     @Test
     public void testObjectEventAddNoObjectRev() {
         testEvent(MemoryObjectEvent.createAddEvent(actor, object, id, 463,
-                XEvent.RevisionNotAvailable, false));
+                XEvent.REVISIONNOTAVAILABLE, false));
     }
     
     @Test
     public void testObjectEventAddNoModelObjectRev() {
-        testEvent(MemoryObjectEvent.createAddEvent(actor, object, id, XEvent.RevisionNotAvailable,
+        testEvent(MemoryObjectEvent.createAddEvent(actor, object, id, XEvent.REVISIONNOTAVAILABLE,
                 false));
     }
     
@@ -242,13 +242,13 @@ abstract public class AbstractSerializedEventTest extends AbstractSerializingTes
     @Test
     public void testObjectEventRemoveNoObjectRev() {
         testEvent(MemoryObjectEvent.createRemoveEvent(actor, object, id, 463,
-                XEvent.RevisionNotAvailable, 20, false, false));
+                XEvent.REVISIONNOTAVAILABLE, 20, false, false));
     }
     
     @Test
     public void testObjectEventRemoveNoModelObjectRev() {
         testEvent(MemoryObjectEvent.createRemoveEvent(actor, object, id,
-                XEvent.RevisionNotAvailable, 20, false, false));
+                XEvent.REVISIONNOTAVAILABLE, 20, false, false));
     }
     
     @Test

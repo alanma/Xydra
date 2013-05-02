@@ -90,9 +90,9 @@ public class Executor {
         if(!fieldState.getAddress().equals(command.getTarget())) {
             return XCommand.FAILED;
         }
-        long currentModelRev = modelState == null ? XEvent.RevisionOfEntityNotSet : modelState
+        long currentModelRev = modelState == null ? XEvent.REVISIONOFENTITYNOTSET : modelState
                 .getRevisionNumber();
-        long currentObjectRev = objectState == null ? XEvent.RevisionOfEntityNotSet : objectState
+        long currentObjectRev = objectState == null ? XEvent.REVISIONOFENTITYNOTSET : objectState
                 .getRevisionNumber();
         long currentFieldRev = fieldState.getRevisionNumber();
         XValue currentValue = fieldState.getValue();
@@ -363,7 +363,7 @@ public class Executor {
         }
         
         // create event
-        long currentModelRev = modelState == null ? XEvent.RevisionOfEntityNotSet : modelState
+        long currentModelRev = modelState == null ? XEvent.REVISIONOFENTITYNOTSET : modelState
                 .getRevisionNumber();
         long currentObjectRev = objectState.getRevisionNumber();
         XRevWritableField currentFieldState = objectState.getField(command.getFieldId());
@@ -1094,7 +1094,7 @@ public class Executor {
         // create txn event
         XTransactionEvent txnEvent = MemoryTransactionEvent.createTransactionEvent(actorId,
                 txn.getTarget(), changingEvents, tempModelState.getRevisionNumber(),
-                XEvent.RevisionNotAvailable);
+                XEvent.REVISIONNOTAVAILABLE);
         return EventResult.success(txnEvent);
     }
     
