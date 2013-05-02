@@ -5,29 +5,29 @@ import org.xydra.base.change.XEvent;
 
 
 class MemorySyncLogEntry implements ISyncLogEntry {
-    
-    XCommand command;
-    
-    XEvent event;
-    
-    public MemorySyncLogEntry(XCommand command, XEvent event) {
-        this.command = command;
-        this.event = event;
-    }
-    
-    @Override
-    public String toString() {
-        return this.command.toString() + ", " + this.event.toString();
-    }
-    
-    @Override
-    public XCommand getCommand() {
-        return this.command;
-    }
-    
-    @Override
-    public XEvent getEvent() {
-        return this.event;
-    }
-    
+	
+	XCommand command;
+	
+	XEvent event;
+	
+	public MemorySyncLogEntry(XCommand command, XEvent event) {
+		this.command = command;
+		this.event = event;
+	}
+	
+	@Override
+	public String toString() {
+		return this.event.toString();
+	}
+	
+	@Override
+	public XCommand getCommand() {
+		return this.command;
+	}
+	
+	@Override
+	public XEvent getEvent() {
+		return this.event;
+	}
+	
 }
