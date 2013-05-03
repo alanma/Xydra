@@ -31,6 +31,7 @@ import org.xydra.base.rmof.impl.XExistsRevWritableObject;
 import org.xydra.base.rmof.impl.memory.SimpleObject;
 import org.xydra.core.XCopyUtils;
 import org.xydra.core.XX;
+import org.xydra.core.change.RevisionConstants;
 import org.xydra.core.change.XFieldEventListener;
 import org.xydra.core.change.XObjectEventListener;
 import org.xydra.core.change.XRMOFChangeListener;
@@ -167,7 +168,9 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
 				        null);
 			}
 			setExists(true);
-			this.objectState.setRevisionNumber(root.getSyncLog().getCurrentRevisionNumber());
+			if(this.objectState.getRevisionNumber() != RevisionConstants.NO_REVISION) {
+				this.objectState.setRevisionNumber(root.getSyncLog().getCurrentRevisionNumber());
+			}
 		}
 		
 		this.father = father;
