@@ -57,13 +57,13 @@ public class MemoryTransactionEvent extends AbstractTransactionEvent {
 	 * @throws IllegalArgumentException if the event represents an
 	 *             {@link XTransaction} which was executed on an model
 	 *             and the given modelRevision equals
-	 *             {@link XEvent#REVISIONOFENTITYNOTSET} or the given
+	 *             {@link XEvent#REVISION_OF_ENTITY_NOT_SET} or the given
 	 *             objectRevision does not equal
-	 *             {@link XEvent#REVISIONOFENTITYNOTSET}
+	 *             {@link XEvent#REVISION_OF_ENTITY_NOT_SET}
 	 * @throws IllegalArgumentException if the event represents an
 	 *             {@link XTransaction} which was executed on an object
 	 *             and the given objectRevision equals
-	 *             {@link XEvent#REVISIONOFENTITYNOTSET}
+	 *             {@link XEvent#REVISION_OF_ENTITY_NOT_SET}
 	 * @throws IllegalArgumentException if one of the targets of the given
 	 *             {@link XAtomicEvent XAtomicEvents} is not contained by the
 	 *             entity specified by the given {@link XAddress} 'target'
@@ -104,13 +104,13 @@ public class MemoryTransactionEvent extends AbstractTransactionEvent {
 	 * @throws IllegalArgumentException if the event represents an
 	 *             {@link XTransaction} which was executed on an model
 	 *             and the given modelRevision equals
-	 *             {@link XEvent#REVISIONOFENTITYNOTSET} or the given
+	 *             {@link XEvent#REVISION_OF_ENTITY_NOT_SET} or the given
 	 *             objectRevision does not equal
-	 *             {@link XEvent#REVISIONOFENTITYNOTSET}
+	 *             {@link XEvent#REVISION_OF_ENTITY_NOT_SET}
 	 * @throws IllegalArgumentException if the event represents an
 	 *             {@link XTransaction} which was executed on an object
 	 *             and the given objectRevision equals
-	 *             {@link XEvent#REVISIONOFENTITYNOTSET}
+	 *             {@link XEvent#REVISION_OF_ENTITY_NOT_SET}
 	 * @throws IllegalArgumentException if one of the targets of the given
 	 *             {@link XAtomicEvent XAtomicEvents} is not contained by the
 	 *             entity specified by the given {@link XAddress} 'target'

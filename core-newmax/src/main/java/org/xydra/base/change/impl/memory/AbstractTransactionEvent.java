@@ -219,7 +219,7 @@ public abstract class AbstractTransactionEvent implements XTransactionEvent {
     
     @Override
     public long getOldFieldRevision() {
-        return XEvent.REVISIONOFENTITYNOTSET;
+        return XEvent.REVISION_OF_ENTITY_NOT_SET;
     }
     
     @Override
@@ -273,7 +273,7 @@ public abstract class AbstractTransactionEvent implements XTransactionEvent {
         
         // old revisions
         result += this.modelRevision;
-        if(this.modelRevision == XEvent.REVISIONOFENTITYNOTSET) {
+        if(this.modelRevision == XEvent.REVISION_OF_ENTITY_NOT_SET) {
             result += this.objectRevision;
         }
         

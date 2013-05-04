@@ -20,13 +20,13 @@ public interface XEvent extends Serializable {
 	/**
 	 * The revision cannot be efficiently calculated.
 	 */
-	public static long REVISIONNOTAVAILABLE = RevisionConstants.REVISIONNOTAVAILABLE;
+	public static long REVISION_NOT_AVAILABLE = RevisionConstants.REVISION_NOT_AVAILABLE;
 	
 	/**
 	 * A revision number has not been set for this entity. E.g. if this XEvent
 	 * has no such father-entity.
 	 */
-	public static long REVISIONOFENTITYNOTSET = RevisionConstants.REVISIONOFENTITYNOTSET;
+	public static long REVISION_OF_ENTITY_NOT_SET = RevisionConstants.REVISION_OF_ENTITY_NOT_SET;
 	
 	/**
 	 * WHO executed this?
@@ -53,7 +53,7 @@ public interface XEvent extends Serializable {
 	/**
 	 * @return The revision number of the field holding the changed entity (or
 	 *         which is the changed entity) at the time when this event happened
-	 *         (may be {@link #REVISIONOFENTITYNOTSET} if this XEvent refers to
+	 *         (may be {@link #REVISION_OF_ENTITY_NOT_SET} if this XEvent refers to
 	 *         something that is not a field)
 	 */
 	long getOldFieldRevision();
@@ -61,7 +61,7 @@ public interface XEvent extends Serializable {
 	/**
 	 * @return The revision number of the model holding the changed entity (or
 	 *         which is the changed entity) before this event happened (may be
-	 *         {@link #REVISIONOFENTITYNOTSET} if this XEvent refers to
+	 *         {@link #REVISION_OF_ENTITY_NOT_SET} if this XEvent refers to
 	 *         something that is not a model or has no father-model)
 	 */
 	long getOldModelRevision();
@@ -71,11 +71,11 @@ public interface XEvent extends Serializable {
 	 *         which is the changed entity) at the time when this event
 	 *         happened.
 	 * 
-	 *         The returned value may be {@link #REVISIONOFENTITYNOTSET} if this
+	 *         The returned value may be {@link #REVISION_OF_ENTITY_NOT_SET} if this
 	 *         XEvent is not an object event, e.g. if the event is an
 	 *         {@link XTransactionEvent}, or if it has no father-object.
 	 * 
-	 *         The returned value may be {@link #REVISIONNOTAVAILABLE} if the
+	 *         The returned value may be {@link #REVISION_NOT_AVAILABLE} if the
 	 *         object revision cannot be efficiently calculated)
 	 */
 	long getOldObjectRevision();

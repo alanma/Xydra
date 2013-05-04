@@ -119,17 +119,17 @@ abstract public class MemoryAtomicEvent implements XEvent {
 	
 	@Override
 	public long getOldFieldRevision() {
-		return XEvent.REVISIONOFENTITYNOTSET;
+		return XEvent.REVISION_OF_ENTITY_NOT_SET;
 	}
 	
 	@Override
 	public long getOldModelRevision() {
-		return XEvent.REVISIONOFENTITYNOTSET;
+		return XEvent.REVISION_OF_ENTITY_NOT_SET;
 	}
 	
 	@Override
 	public long getOldObjectRevision() {
-		return XEvent.REVISIONOFENTITYNOTSET;
+		return XEvent.REVISION_OF_ENTITY_NOT_SET;
 	}
 	
 	/**
@@ -193,9 +193,9 @@ abstract public class MemoryAtomicEvent implements XEvent {
 	}
 	
 	protected String rev2str(long rev) {
-		if(rev == XEvent.REVISIONOFENTITYNOTSET) {
+		if(rev == XEvent.REVISION_OF_ENTITY_NOT_SET) {
 			return "-";
-		} else if(rev == XEvent.REVISIONNOTAVAILABLE) {
+		} else if(rev == XEvent.REVISION_NOT_AVAILABLE) {
 			return "?";
 		} else {
 			XyAssert.xyAssert(rev >= -1);

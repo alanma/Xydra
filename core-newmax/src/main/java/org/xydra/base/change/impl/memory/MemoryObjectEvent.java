@@ -38,11 +38,11 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
      * @throws IllegalArgumentException if the given {@link XAddress} doesn't
      *             refer to an object, if the given fieldId is null or if the
      *             given objectRevision equals
-     *             {@link XEvent#REVISIONOFENTITYNOTSET}.
+     *             {@link XEvent#REVISION_OF_ENTITY_NOT_SET}.
      */
     public static XObjectEvent createAddEvent(XId actorId, XAddress target, XId fieldId,
             long objectRevision, boolean inTransaction) {
-        return createAddEvent(actorId, target, fieldId, REVISIONOFENTITYNOTSET, objectRevision,
+        return createAddEvent(actorId, target, fieldId, REVISION_OF_ENTITY_NOT_SET, objectRevision,
                 inTransaction);
     }
     
@@ -72,13 +72,13 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
      * @throws IllegalArgumentException if the given {@link XAddress} doesn't
      *             refer to an object, if the given fieldId is null or if the
      *             given objectRevision equals
-     *             {@link XEvent#REVISIONOFENTITYNOTSET}.
+     *             {@link XEvent#REVISION_OF_ENTITY_NOT_SET}.
      */
     public static XObjectEvent createAddEvent(XId actorId, XAddress target, XId fieldId,
             long modelRevision, long objectRevision, boolean inTransaction) {
         
         return new MemoryObjectEvent(actorId, target, fieldId, ChangeType.ADD, modelRevision,
-                objectRevision, REVISIONOFENTITYNOTSET, inTransaction, false);
+                objectRevision, REVISION_OF_ENTITY_NOT_SET, inTransaction, false);
     }
     
     /**
@@ -107,11 +107,11 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
      * @throws IllegalArgumentException if the given {@link XAddress} doesn't
      *             refer to an object, if the given fieldId is null or if the
      *             given objectRevision equals
-     *             {@link XEvent#REVISIONOFENTITYNOTSET}.
+     *             {@link XEvent#REVISION_OF_ENTITY_NOT_SET}.
      */
     public static XObjectEvent createRemoveEvent(XId actorId, XAddress target, XId fieldId,
             long objectRevision, long fieldRevision, boolean inTransaction, boolean implied) {
-        return createRemoveEvent(actorId, target, fieldId, REVISIONOFENTITYNOTSET, objectRevision,
+        return createRemoveEvent(actorId, target, fieldId, REVISION_OF_ENTITY_NOT_SET, objectRevision,
                 fieldRevision, inTransaction, implied);
         
     }
@@ -137,7 +137,7 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
      * @throws IllegalArgumentException if the given {@link XAddress} doesn't
      *             refer to an object, if the given fieldId is null or if the
      *             given objectRevision or fieldRevision equals
-     *             {@link XEvent#REVISIONOFENTITYNOTSET}.
+     *             {@link XEvent#REVISION_OF_ENTITY_NOT_SET}.
      */
     public static XObjectEvent createRemoveEvent(XId actorId, XAddress target, XId fieldId,
             long modelRevision, long objectRevision, long fieldRevision, boolean inTransaction,
@@ -172,17 +172,17 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
             throw new IllegalArgumentException("field Id must be set for object events");
         }
         
-        if(objectRevision < 0 && objectRevision != REVISIONNOTAVAILABLE
+        if(objectRevision < 0 && objectRevision != REVISION_NOT_AVAILABLE
                 && objectRevision != XCommand.NONEXISTANT) {
             throw new IllegalArgumentException(
                     "object revision must be set for object events, was:" + objectRevision);
         }
         
-        if(fieldRevision < 0 && fieldRevision != REVISIONOFENTITYNOTSET) {
+        if(fieldRevision < 0 && fieldRevision != REVISION_OF_ENTITY_NOT_SET) {
             throw new IllegalArgumentException("invalid fieldRevision: " + fieldRevision);
         }
         
-        if(modelRevision < 0 && modelRevision != REVISIONOFENTITYNOTSET) {
+        if(modelRevision < 0 && modelRevision != REVISION_OF_ENTITY_NOT_SET) {
             throw new IllegalArgumentException("invalid modelRevision: " + modelRevision);
         }
         
@@ -214,7 +214,7 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
         
         long otherObjectRev = event.getOldObjectRevision();
         if(this.objectRevision != otherObjectRev) {
-            if((this.objectRevision != XEvent.REVISIONNOTAVAILABLE && otherObjectRev != XEvent.REVISIONNOTAVAILABLE)) {
+            if((this.objectRevision != XEvent.REVISION_NOT_AVAILABLE && otherObjectRev != XEvent.REVISION_NOT_AVAILABLE)) {
                 return false;
             }
         }
@@ -261,7 +261,7 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
         
         // old revisions
         result += this.modelRevision;
-        if(this.objectRevision != XEvent.REVISIONOFENTITYNOTSET) {
+        if(this.objectRevision != XEvent.REVISION_OF_ENTITY_NOT_SET) {
             result += 0x3472089;
         }
         result += this.fieldRevision;

@@ -4104,7 +4104,7 @@ public abstract class AbstractPersistenceTest {
         assertEquals("The returned event was not of add-type.", ChangeType.ADD,
                 modelAddEvent.getChangeType());
         assertEquals("The event didn't refer to the correct old revision number.",
-                XEvent.REVISIONOFENTITYNOTSET, modelAddEvent.getOldModelRevision());
+                XEvent.REVISION_OF_ENTITY_NOT_SET, modelAddEvent.getOldModelRevision());
         assertEquals("The event didn't refer to the correct revision number.", revNr,
                 modelAddEvent.getRevisionNumber());
         assertEquals("Event doesn't refer to the correct target.", this.repoAddress,

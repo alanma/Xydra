@@ -37,12 +37,12 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
      * @return An {@link XFieldEvent} of the add-type
      * @throws IllegalArgumentException if the given {@link XAddress} does not
      *             specify an field or if the given revision number equals
-     *             {@link XEvent#REVISIONOFENTITYNOTSET}
+     *             {@link XEvent#REVISION_OF_ENTITY_NOT_SET}
      * @throws IllegalArgumentException if newValue is null
      */
     public static XFieldEvent createAddEvent(XId actor, XAddress target, XValue newValue,
             long objectRevision, long fieldRevision, boolean inTransaction) {
-        return createAddEvent(actor, target, newValue, REVISIONOFENTITYNOTSET, objectRevision,
+        return createAddEvent(actor, target, newValue, REVISION_OF_ENTITY_NOT_SET, objectRevision,
                 fieldRevision, inTransaction);
     }
     
@@ -73,7 +73,7 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
      * @return An {@link XFieldEvent} of the add-type
      * @throws IllegalArgumentException if the given {@link XAddress} does not
      *             specify an field or if the given revision number equals
-     *             {@link XEvent#REVISIONOFENTITYNOTSET}
+     *             {@link XEvent#REVISION_OF_ENTITY_NOT_SET}
      * @throws IllegalArgumentException if newValue is null
      */
     public static XFieldEvent createAddEvent(XId actor, XAddress target, XValue newValue,
@@ -110,12 +110,12 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
      * @return an {@link XFieldEvent} of the change-type
      * @throws IllegalArgumentException if the given {@link XAddress} does not
      *             specify an field or if the given revision number equals
-     *             {@link XEvent#REVISIONOFENTITYNOTSET}
+     *             {@link XEvent#REVISION_OF_ENTITY_NOT_SET}
      * @throws IllegalArgumentException if either oldValue or newValue is null
      */
     public static XFieldEvent createChangeEvent(XId actor, XAddress target, XValue newValue,
             long objectRevision, long fieldRevision, boolean inTransaction) {
-        return createChangeEvent(actor, target, newValue, REVISIONOFENTITYNOTSET, objectRevision,
+        return createChangeEvent(actor, target, newValue, REVISION_OF_ENTITY_NOT_SET, objectRevision,
                 fieldRevision, inTransaction);
     }
     
@@ -138,7 +138,7 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
      * @return an {@link XFieldEvent} of the change-type
      * @throws IllegalArgumentException if the given {@link XAddress} does not
      *             specify an field or if the given revision number equals
-     *             {@link XEvent#REVISIONOFENTITYNOTSET}
+     *             {@link XEvent#REVISION_OF_ENTITY_NOT_SET}
      * @throws IllegalArgumentException if either oldValue or newValue is null
      */
     public static XFieldEvent createChangeEvent(XId actor, XAddress target, XValue newValue,
@@ -170,12 +170,12 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
      * @return An {@link XFieldEvent} of the remove-type
      * @throws IllegalArgumentException if the given {@link XAddress} does not
      *             specify an field or if the given revision number equals
-     *             {@link XEvent#REVISIONOFENTITYNOTSET}
+     *             {@link XEvent#REVISION_OF_ENTITY_NOT_SET}
      * @throws IllegalArgumentException if oldValue is null
      */
     public static XFieldEvent createRemoveEvent(XId actor, XAddress target, long objectRevision,
             long fieldRevision, boolean inTransaction, boolean implied) {
-        return createRemoveEvent(actor, target, REVISIONOFENTITYNOTSET, objectRevision,
+        return createRemoveEvent(actor, target, REVISION_OF_ENTITY_NOT_SET, objectRevision,
                 fieldRevision, inTransaction, implied);
     }
     
@@ -200,7 +200,7 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
      * @return An {@link XFieldEvent} of the remove-type
      * @throws IllegalArgumentException if the given {@link XAddress} does not
      *             specify an field or if the given revision number equals
-     *             {@link XEvent#REVISIONOFENTITYNOTSET}
+     *             {@link XEvent#REVISION_OF_ENTITY_NOT_SET}
      * @throws IllegalArgumentException if oldValue is null
      */
     public static XFieldEvent createRemoveEvent(XId actor, XAddress target, long modelRevision,
@@ -226,12 +226,12 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
             throw new IllegalArgumentException("field Id and revision must be set for field events");
         }
         
-        if(objectRevision < 0 && objectRevision != REVISIONOFENTITYNOTSET
-                && objectRevision != REVISIONNOTAVAILABLE) {
+        if(objectRevision < 0 && objectRevision != REVISION_OF_ENTITY_NOT_SET
+                && objectRevision != REVISION_NOT_AVAILABLE) {
             throw new IllegalArgumentException("invalid objectRevision: " + objectRevision);
         }
         
-        if(modelRevision < 0 && modelRevision != REVISIONOFENTITYNOTSET) {
+        if(modelRevision < 0 && modelRevision != REVISION_OF_ENTITY_NOT_SET) {
             throw new IllegalArgumentException("invalid modelRevision: " + modelRevision);
         }
         
@@ -264,7 +264,7 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
         
         long otherObjectRev = event.getOldObjectRevision();
         if(this.objectRevision != otherObjectRev) {
-            if((this.objectRevision != XEvent.REVISIONNOTAVAILABLE && otherObjectRev != XEvent.REVISIONNOTAVAILABLE)) {
+            if((this.objectRevision != XEvent.REVISION_NOT_AVAILABLE && otherObjectRev != XEvent.REVISION_NOT_AVAILABLE)) {
                 return false;
             }
         }
@@ -311,7 +311,7 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
         
         // old revisions
         result += this.modelRevision;
-        if(this.objectRevision != XEvent.REVISIONOFENTITYNOTSET) {
+        if(this.objectRevision != XEvent.REVISION_OF_ENTITY_NOT_SET) {
             result += 0x3472089;
         }
         result += this.fieldRevision;
