@@ -1,0 +1,604 @@
+{ "$t": "xmodel",
+	"xid": "phonebook",
+	"revision": 46,
+	"objects": {
+		"claudia": {
+			"revision": 2,
+			"fields": { }
+		},
+		"john": {
+			"revision": 46,
+			"fields": {
+				"addressList": {
+					"revision": 40,
+					"value": { "$t": "xaddressList",
+						"data": [ "/hello/world/-/-", null ]
+					}
+				},
+				"emptyfield": {
+					"revision": 30
+				},
+				"phone": {
+					"revision": 7,
+					"value": { "$t": "xstring",
+						"data": "3463-2346"
+					}
+				},
+				"flags": {
+					"revision": 17,
+					"value": { "$t": "xbooleanList",
+						"data": [ true, false, true, true, false ]
+					}
+				},
+				"lastCallTime": {
+					"revision": 29,
+					"value": { "$t": "xlongList",
+						"data": [ 32456, 7664, 56 ]
+					}
+				},
+				"idSortedSet": {
+					"revision": 44,
+					"value": { "$t": "xidSortedSet",
+						"data": [ "b", "a" ]
+					}
+				},
+				"aliases": {
+					"revision": 9,
+					"value": { "$t": "xstringList",
+						"data": [ "Johnny", "John the Man", "Cookie Monster" ]
+					}
+				},
+				"cookienames": {
+					"revision": 36,
+					"value": { "$t": "xstringSet",
+						"data": [ "Almond", "Chocolate Chip" ]
+					}
+				},
+				"title": {
+					"revision": 5,
+					"value": { "$t": "xstring",
+						"data": "Dr. John Doe"
+					}
+				},
+				"friends": {
+					"revision": 11,
+					"value": { "$t": "xidList",
+						"data": [ "claudia", "peter" ]
+					}
+				},
+				"height": {
+					"revision": 19,
+					"value": { "$t": "xdouble",
+						"data": 121.3
+					}
+				},
+				"scores": {
+					"revision": 25,
+					"value": { "$t": "xintegerList",
+						"data": [ 34, 234, 34 ]
+					}
+				},
+				"addressSet": {
+					"revision": 42,
+					"value": { "$t": "xaddressSet",
+						"data": [ null, "/hello/world/-/-" ]
+					}
+				},
+				"address": {
+					"revision": 38,
+					"value": { "$t": "xaddress",
+						"data": "/hello/world/-/-"
+					}
+				},
+				"maxCallTime": {
+					"revision": 27,
+					"value": { "$t": "xlong",
+						"data": 675874678478467
+					}
+				},
+				"hidden": {
+					"revision": 15,
+					"value": { "$t": "xboolean",
+						"data": false
+					}
+				},
+				"spouse": {
+					"revision": 13,
+					"value": { "$t": "xid",
+						"data": "claudia"
+					}
+				},
+				"age": {
+					"revision": 23,
+					"value": { "$t": "xinteger",
+						"data": 42
+					}
+				},
+				"addressSortedSet": {
+					"revision": 46,
+					"value": { "$t": "xaddressSortedSet",
+						"data": [ "/hello/b/-/-", "/hello/a/-/-" ]
+					}
+				},
+				"cookies": {
+					"revision": 34,
+					"value": { "$t": "xidSet",
+						"data": [ "cookie2", "cookie1" ]
+					}
+				},
+				"signature": {
+					"revision": 32,
+					"value": { "$t": "xbinary",
+						"data": "AAECAwQFBgcICQoLDA0ODxD9/v8="
+					}
+				},
+				"coordinates": {
+					"revision": 21,
+					"value": { "$t": "xdoubleList",
+						"data": [ 32.465, 19.34 ]
+					}
+				}
+			}
+		},
+		"peter": {
+			"revision": 3,
+			"fields": { }
+		}
+	},
+	"log": {
+		"startRevision": -1,
+		"events": [
+			{ "$t": "xrepositoryEvent",
+				"type": "ADD",
+				"actor": "a-test-user",
+				"modelRevision": -1
+			},
+			{ "$t": "xmodelEvent",
+				"type": "ADD",
+				"objectId": "john",
+				"actor": "a-test-user",
+				"modelRevision": 0
+			},
+			{ "$t": "xmodelEvent",
+				"type": "ADD",
+				"objectId": "claudia",
+				"actor": "a-test-user",
+				"modelRevision": 1
+			},
+			{ "$t": "xmodelEvent",
+				"type": "ADD",
+				"objectId": "peter",
+				"actor": "a-test-user",
+				"modelRevision": 2
+			},
+			{ "$t": "xobjectEvent",
+				"type": "ADD",
+				"objectId": "john",
+				"fieldId": "title",
+				"actor": "a-test-user",
+				"modelRevision": 3,
+				"objectRevision": 1
+			},
+			{ "$t": "xfieldEvent",
+				"type": "ADD",
+				"objectId": "john",
+				"fieldId": "title",
+				"actor": "a-test-user",
+				"modelRevision": 4,
+				"objectRevision": 4,
+				"fieldRevision": 4,
+				"value": { "$t": "xstring",
+					"data": "Dr. John Doe"
+				}
+			},
+			{ "$t": "xobjectEvent",
+				"type": "ADD",
+				"objectId": "john",
+				"fieldId": "phone",
+				"actor": "a-test-user",
+				"modelRevision": 5,
+				"objectRevision": 5
+			},
+			{ "$t": "xfieldEvent",
+				"type": "ADD",
+				"objectId": "john",
+				"fieldId": "phone",
+				"actor": "a-test-user",
+				"modelRevision": 6,
+				"objectRevision": 6,
+				"fieldRevision": 6,
+				"value": { "$t": "xstring",
+					"data": "3463-2346"
+				}
+			},
+			{ "$t": "xobjectEvent",
+				"type": "ADD",
+				"objectId": "john",
+				"fieldId": "aliases",
+				"actor": "a-test-user",
+				"modelRevision": 7,
+				"objectRevision": 7
+			},
+			{ "$t": "xfieldEvent",
+				"type": "ADD",
+				"objectId": "john",
+				"fieldId": "aliases",
+				"actor": "a-test-user",
+				"modelRevision": 8,
+				"objectRevision": 8,
+				"fieldRevision": 8,
+				"value": { "$t": "xstringList",
+					"data": [ "Johnny", "John the Man", "Cookie Monster" ]
+				}
+			},
+			{ "$t": "xobjectEvent",
+				"type": "ADD",
+				"objectId": "john",
+				"fieldId": "friends",
+				"actor": "a-test-user",
+				"modelRevision": 9,
+				"objectRevision": 9
+			},
+			{ "$t": "xfieldEvent",
+				"type": "ADD",
+				"objectId": "john",
+				"fieldId": "friends",
+				"actor": "a-test-user",
+				"modelRevision": 10,
+				"objectRevision": 10,
+				"fieldRevision": 10,
+				"value": { "$t": "xidList",
+					"data": [ "claudia", "peter" ]
+				}
+			},
+			{ "$t": "xobjectEvent",
+				"type": "ADD",
+				"objectId": "john",
+				"fieldId": "spouse",
+				"actor": "a-test-user",
+				"modelRevision": 11,
+				"objectRevision": 11
+			},
+			{ "$t": "xfieldEvent",
+				"type": "ADD",
+				"objectId": "john",
+				"fieldId": "spouse",
+				"actor": "a-test-user",
+				"modelRevision": 12,
+				"objectRevision": 12,
+				"fieldRevision": 12,
+				"value": { "$t": "xid",
+					"data": "claudia"
+				}
+			},
+			{ "$t": "xobjectEvent",
+				"type": "ADD",
+				"objectId": "john",
+				"fieldId": "hidden",
+				"actor": "a-test-user",
+				"modelRevision": 13,
+				"objectRevision": 13
+			},
+			{ "$t": "xfieldEvent",
+				"type": "ADD",
+				"objectId": "john",
+				"fieldId": "hidden",
+				"actor": "a-test-user",
+				"modelRevision": 14,
+				"objectRevision": 14,
+				"fieldRevision": 14,
+				"value": { "$t": "xboolean",
+					"data": false
+				}
+			},
+			{ "$t": "xobjectEvent",
+				"type": "ADD",
+				"objectId": "john",
+				"fieldId": "flags",
+				"actor": "a-test-user",
+				"modelRevision": 15,
+				"objectRevision": 15
+			},
+			{ "$t": "xfieldEvent",
+				"type": "ADD",
+				"objectId": "john",
+				"fieldId": "flags",
+				"actor": "a-test-user",
+				"modelRevision": 16,
+				"objectRevision": 16,
+				"fieldRevision": 16,
+				"value": { "$t": "xbooleanList",
+					"data": [ true, false, true, true, false ]
+				}
+			},
+			{ "$t": "xobjectEvent",
+				"type": "ADD",
+				"objectId": "john",
+				"fieldId": "height",
+				"actor": "a-test-user",
+				"modelRevision": 17,
+				"objectRevision": 17
+			},
+			{ "$t": "xfieldEvent",
+				"type": "ADD",
+				"objectId": "john",
+				"fieldId": "height",
+				"actor": "a-test-user",
+				"modelRevision": 18,
+				"objectRevision": 18,
+				"fieldRevision": 18,
+				"value": { "$t": "xdouble",
+					"data": 121.3
+				}
+			},
+			{ "$t": "xobjectEvent",
+				"type": "ADD",
+				"objectId": "john",
+				"fieldId": "coordinates",
+				"actor": "a-test-user",
+				"modelRevision": 19,
+				"objectRevision": 19
+			},
+			{ "$t": "xfieldEvent",
+				"type": "ADD",
+				"objectId": "john",
+				"fieldId": "coordinates",
+				"actor": "a-test-user",
+				"modelRevision": 20,
+				"objectRevision": 20,
+				"fieldRevision": 20,
+				"value": { "$t": "xdoubleList",
+					"data": [ 32.465, 19.34 ]
+				}
+			},
+			{ "$t": "xobjectEvent",
+				"type": "ADD",
+				"objectId": "john",
+				"fieldId": "age",
+				"actor": "a-test-user",
+				"modelRevision": 21,
+				"objectRevision": 21
+			},
+			{ "$t": "xfieldEvent",
+				"type": "ADD",
+				"objectId": "john",
+				"fieldId": "age",
+				"actor": "a-test-user",
+				"modelRevision": 22,
+				"objectRevision": 22,
+				"fieldRevision": 22,
+				"value": { "$t": "xinteger",
+					"data": 42
+				}
+			},
+			{ "$t": "xobjectEvent",
+				"type": "ADD",
+				"objectId": "john",
+				"fieldId": "scores",
+				"actor": "a-test-user",
+				"modelRevision": 23,
+				"objectRevision": 23
+			},
+			{ "$t": "xfieldEvent",
+				"type": "ADD",
+				"objectId": "john",
+				"fieldId": "scores",
+				"actor": "a-test-user",
+				"modelRevision": 24,
+				"objectRevision": 24,
+				"fieldRevision": 24,
+				"value": { "$t": "xintegerList",
+					"data": [ 34, 234, 34 ]
+				}
+			},
+			{ "$t": "xobjectEvent",
+				"type": "ADD",
+				"objectId": "john",
+				"fieldId": "maxCallTime",
+				"actor": "a-test-user",
+				"modelRevision": 25,
+				"objectRevision": 25
+			},
+			{ "$t": "xfieldEvent",
+				"type": "ADD",
+				"objectId": "john",
+				"fieldId": "maxCallTime",
+				"actor": "a-test-user",
+				"modelRevision": 26,
+				"objectRevision": 26,
+				"fieldRevision": 26,
+				"value": { "$t": "xlong",
+					"data": 675874678478467
+				}
+			},
+			{ "$t": "xobjectEvent",
+				"type": "ADD",
+				"objectId": "john",
+				"fieldId": "lastCallTime",
+				"actor": "a-test-user",
+				"modelRevision": 27,
+				"objectRevision": 27
+			},
+			{ "$t": "xfieldEvent",
+				"type": "ADD",
+				"objectId": "john",
+				"fieldId": "lastCallTime",
+				"actor": "a-test-user",
+				"modelRevision": 28,
+				"objectRevision": 28,
+				"fieldRevision": 28,
+				"value": { "$t": "xlongList",
+					"data": [ 32456, 7664, 56 ]
+				}
+			},
+			{ "$t": "xobjectEvent",
+				"type": "ADD",
+				"objectId": "john",
+				"fieldId": "emptyfield",
+				"actor": "a-test-user",
+				"modelRevision": 29,
+				"objectRevision": 29
+			},
+			{ "$t": "xobjectEvent",
+				"type": "ADD",
+				"objectId": "john",
+				"fieldId": "signature",
+				"actor": "a-test-user",
+				"modelRevision": 30,
+				"objectRevision": 30
+			},
+			{ "$t": "xfieldEvent",
+				"type": "ADD",
+				"objectId": "john",
+				"fieldId": "signature",
+				"actor": "a-test-user",
+				"modelRevision": 31,
+				"objectRevision": 31,
+				"fieldRevision": 31,
+				"value": { "$t": "xbinary",
+					"data": "AAECAwQFBgcICQoLDA0ODxD9/v8="
+				}
+			},
+			{ "$t": "xobjectEvent",
+				"type": "ADD",
+				"objectId": "john",
+				"fieldId": "cookies",
+				"actor": "a-test-user",
+				"modelRevision": 32,
+				"objectRevision": 32
+			},
+			{ "$t": "xfieldEvent",
+				"type": "ADD",
+				"objectId": "john",
+				"fieldId": "cookies",
+				"actor": "a-test-user",
+				"modelRevision": 33,
+				"objectRevision": 33,
+				"fieldRevision": 33,
+				"value": { "$t": "xidSet",
+					"data": [ "cookie2", "cookie1" ]
+				}
+			},
+			{ "$t": "xobjectEvent",
+				"type": "ADD",
+				"objectId": "john",
+				"fieldId": "cookienames",
+				"actor": "a-test-user",
+				"modelRevision": 34,
+				"objectRevision": 34
+			},
+			{ "$t": "xfieldEvent",
+				"type": "ADD",
+				"objectId": "john",
+				"fieldId": "cookienames",
+				"actor": "a-test-user",
+				"modelRevision": 35,
+				"objectRevision": 35,
+				"fieldRevision": 35,
+				"value": { "$t": "xstringSet",
+					"data": [ "Almond", "Chocolate Chip" ]
+				}
+			},
+			{ "$t": "xobjectEvent",
+				"type": "ADD",
+				"objectId": "john",
+				"fieldId": "address",
+				"actor": "a-test-user",
+				"modelRevision": 36,
+				"objectRevision": 36
+			},
+			{ "$t": "xfieldEvent",
+				"type": "ADD",
+				"objectId": "john",
+				"fieldId": "address",
+				"actor": "a-test-user",
+				"modelRevision": 37,
+				"objectRevision": 37,
+				"fieldRevision": 37,
+				"value": { "$t": "xaddress",
+					"data": "/hello/world/-/-"
+				}
+			},
+			{ "$t": "xobjectEvent",
+				"type": "ADD",
+				"objectId": "john",
+				"fieldId": "addressList",
+				"actor": "a-test-user",
+				"modelRevision": 38,
+				"objectRevision": 38
+			},
+			{ "$t": "xfieldEvent",
+				"type": "ADD",
+				"objectId": "john",
+				"fieldId": "addressList",
+				"actor": "a-test-user",
+				"modelRevision": 39,
+				"objectRevision": 39,
+				"fieldRevision": 39,
+				"value": { "$t": "xaddressList",
+					"data": [ "/hello/world/-/-", null ]
+				}
+			},
+			{ "$t": "xobjectEvent",
+				"type": "ADD",
+				"objectId": "john",
+				"fieldId": "addressSet",
+				"actor": "a-test-user",
+				"modelRevision": 40,
+				"objectRevision": 40
+			},
+			{ "$t": "xfieldEvent",
+				"type": "ADD",
+				"objectId": "john",
+				"fieldId": "addressSet",
+				"actor": "a-test-user",
+				"modelRevision": 41,
+				"objectRevision": 41,
+				"fieldRevision": 41,
+				"value": { "$t": "xaddressSet",
+					"data": [ null, "/hello/world/-/-" ]
+				}
+			},
+			{ "$t": "xobjectEvent",
+				"type": "ADD",
+				"objectId": "john",
+				"fieldId": "idSortedSet",
+				"actor": "a-test-user",
+				"modelRevision": 42,
+				"objectRevision": 42
+			},
+			{ "$t": "xfieldEvent",
+				"type": "ADD",
+				"objectId": "john",
+				"fieldId": "idSortedSet",
+				"actor": "a-test-user",
+				"modelRevision": 43,
+				"objectRevision": 43,
+				"fieldRevision": 43,
+				"value": { "$t": "xidSortedSet",
+					"data": [ "b", "a" ]
+				}
+			},
+			{ "$t": "xobjectEvent",
+				"type": "ADD",
+				"objectId": "john",
+				"fieldId": "addressSortedSet",
+				"actor": "a-test-user",
+				"modelRevision": 44,
+				"objectRevision": 44
+			},
+			{ "$t": "xfieldEvent",
+				"type": "ADD",
+				"objectId": "john",
+				"fieldId": "addressSortedSet",
+				"actor": "a-test-user",
+				"modelRevision": 45,
+				"objectRevision": 45,
+				"fieldRevision": 45,
+				"value": { "$t": "xaddressSortedSet",
+					"data": [ "/hello/b/-/-", "/hello/a/-/-" ]
+				}
+			}
+		]
+	}
+}

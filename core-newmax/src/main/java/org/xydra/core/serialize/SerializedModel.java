@@ -29,22 +29,24 @@ import org.xydra.base.value.XValue;
 import org.xydra.core.AccessException;
 import org.xydra.core.XX;
 import org.xydra.core.change.RevisionConstants;
-import org.xydra.core.model.OldXSynchronizesChanges;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XChangeLogState;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XLocalChange;
-import org.xydra.core.model.XLoggedModel;
 import org.xydra.core.model.XLoggedObject;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
+import org.xydra.core.model.XSynchronizesChanges;
 import org.xydra.core.model.impl.memory.MemoryChangeLogState;
 import org.xydra.core.model.impl.memory.MemoryField;
 import org.xydra.core.model.impl.memory.MemoryModel;
 import org.xydra.core.model.impl.memory.MemoryObject;
 import org.xydra.core.model.impl.memory.MemoryRepository;
+import org.xydra.core.model.impl.memory.sync.ISyncLog;
+import org.xydra.core.model.impl.memory.sync.ISyncLogEntry;
 import org.xydra.core.model.impl.memory.sync.ISyncLogState;
+import org.xydra.core.model.impl.memory.sync.MemorySyncLogEntry;
 import org.xydra.core.model.impl.memory.sync.MemorySyncLogState;
 import org.xydra.index.query.Pair;
 import org.xydra.sharedutils.XyAssert;
@@ -65,8 +67,10 @@ public class SerializedModel {
 	
 	private static final String LOG_NAME = "log";
 	private static final String LOCALCHANGES_NAME = "localchanges";
+	private static final String SYNCLOG_NAME = "synclog";
 	private static final String NAME_EVENTS = "events";
 	private static final String NAME_COMMANDS = "commands";
+	private static final String NAME_SYNCLOGENTRY = "synclogentry";
 	private static final String NAME_VALUE = "value";
 	private static final String NAME_OBJECTS = "objects";
 	private static final String NAME_FIELDS = "fields";
@@ -78,12 +82,15 @@ public class SerializedModel {
 	private static final String STARTREVISION_ATTRIBUTE = "startRevision";
 	private static final String XCHANGELOG_ELEMENT = "xlog";
 	private static final String XLOCALCHANGES_ELEMENT = "xlocalchanges";
+	private static final String ISYNCLOG_ELEMENT = "isynclog";
 	private static final String XFIELD_ELEMENT = "xfield";
 	
 	private static final String XMODEL_ELEMENT = "xmodel";
 	private static final String XOBJECT_ELEMENT = "xobject";
 	
 	private static final String XREPOSITORY_ELEMENT = "xrepository";
+	private static final String NAME_EVENTLIST = "eventlist";
+	private static final String NAME_COMMANDLIST = "commandlist";
 	
 	private static long getRevisionAttribute(XydraElement element) {
 		
@@ -108,7 +115,13 @@ public class SerializedModel {
 	}
 	
 	public static XChangeLogState loadChangeLogState(XydraElement element, XAddress baseAddr) {
-		XydraElement logElement = element.getChild(LOG_NAME, XCHANGELOG_ELEMENT);
+		XydraElement logElement = element.getChild(SYNCLOG_NAME, ISYNCLOG_ELEMENT);
+		if(logElement != null) {
+			ISyncLogState log = new MemorySyncLogState(baseAddr);
+			loadSyncLogState(logElement, log);
+			return log;
+		}
+		logElement = element.getChild(LOG_NAME, XCHANGELOG_ELEMENT);
 		if(logElement != null) {
 			XChangeLogState log = new MemoryChangeLogState(baseAddr);
 			loadChangeLogState(logElement, log);
@@ -127,6 +140,48 @@ public class SerializedModel {
 			return localChangesAsCommands;
 		}
 		return null;
+	}
+	
+	/**
+	 * Load the change log represented by the given XML/JSON element into an
+	 * {@link XChangeLogState}.
+	 * 
+	 * @param element
+	 * 
+	 * @param state The change log state to load into.
+	 */
+	public static void loadSyncLogState(XydraElement element, ISyncLogState state) {
+		
+		SerializingUtils.checkElementType(element, ISYNCLOG_ELEMENT);
+		
+		long startRev = 0L;
+		Object revisionString = element.getAttribute(STARTREVISION_ATTRIBUTE);
+		if(revisionString != null) {
+			startRev = SerializingUtils.toLong(revisionString);
+		}
+		
+		state.setBaseRevisionNumber(startRev);
+		XydraElement eventListElement = element.getChild(NAME_EVENTLIST, NAME_EVENTS);
+		Iterator<XydraElement> iterator = eventListElement.getChildrenByName(NAME_EVENTS);
+		List<XEvent> eventList = new ArrayList<XEvent>();
+		while(iterator.hasNext()) {
+			XydraElement e = iterator.next();
+			XEvent event = SerializedEvent.toEvent(e, state.getBaseAddress());
+			eventList.add(event);
+		}
+		
+		XydraElement commandList = element.getChild(NAME_COMMANDLIST, NAME_COMMANDS);
+		iterator = commandList.getChildrenByName(NAME_COMMANDS);
+		int count = 0;
+		while(iterator.hasNext()) {
+			XydraElement e = iterator.next();
+			XCommand command = SerializedCommand.toCommand(e, state.getBaseAddress());
+			MemorySyncLogEntry syncLogEntry = new MemorySyncLogEntry(command, eventList.get(count));
+			
+			state.appendSyncLogEntry(syncLogEntry);
+			count++;
+		}
+		
 	}
 	
 	/**
@@ -482,12 +537,66 @@ public class SerializedModel {
 	}
 	
 	/**
+	 * Encode the given synclog {@link ISyncLog} as an XML/JSON element.
+	 * 
+	 * @param syncLog the non-empty sync log
+	 * @param out the {@link XydraOut} that a partial XML/JSON document is
+	 *            written to.
+	 */
+	private static void serialize(ISyncLog syncLog, XydraOut out, XAddress context) {
+		
+		List<XCommand> commandList = new ArrayList<XCommand>();
+		Iterator<XCommand> commands;
+		
+		long rev = syncLog.getBaseRevisionNumber();
+		
+		out.open(ISYNCLOG_ELEMENT);
+		if(rev != 0) {
+			out.attribute(STARTREVISION_ATTRIBUTE, rev);
+		}
+		
+		// TODO Max hierwegen fragen
+		out.child(NAME_EVENTLIST);
+		out.open(NAME_EVENTS);
+		out.child(NAME_EVENTS);
+		out.beginArray();
+		Iterator<ISyncLogEntry> syncLogEntryIterator = syncLog.getSyncLogEntriesSince(rev + 1);
+		while(syncLogEntryIterator.hasNext()) {
+			ISyncLogEntry entry = syncLogEntryIterator.next();
+			XEvent event = entry.getEvent();
+			
+			/* handle event */
+			SerializedEvent.serialize(event, out, context);
+			
+			/* handle command */
+			XCommand command = entry.getCommand();
+			commandList.add(command);
+		}
+		out.endArray();
+		out.close(NAME_EVENTS);
+		
+		commands = commandList.iterator();
+		out.child(NAME_COMMANDLIST);
+		out.open(NAME_COMMANDS);
+		out.child(NAME_COMMANDS);
+		out.beginArray();
+		while(commands.hasNext()) {
+			SerializedCommand.serialize(commands.next(), out, context);
+		}
+		out.endArray();
+		out.close(NAME_COMMANDS);
+		out.close(ISYNCLOG_ELEMENT);
+	}
+	
+	/**
 	 * Encode the given array of {@link XLocalChange} as an XML/JSON element.
 	 * 
 	 * @param localChanges an array of {@link XLocalChange}
 	 * @param out the {@link XydraOut} that a partial XML/JSON document is
 	 *            written to.
+	 * @deprecated
 	 */
+	@SuppressWarnings("unused")
 	private static void serialize(XLocalChange[] localChanges, XydraOut out, XAddress context) {
 		
 		List<XCommand> commandList = new ArrayList<XCommand>();
@@ -628,7 +737,8 @@ public class SerializedModel {
 	
 	public static void serialize(XReadableModel xmodel, XydraOut out, boolean saveRevision,
 	        boolean ignoreInaccessible, boolean saveChangeLog, boolean saveId) {
-		serialize(xmodel, out, saveRevision, ignoreInaccessible, saveChangeLog, saveId, false);
+		// TODO check whether this is always desired
+		serialize(xmodel, out, saveRevision, ignoreInaccessible, saveChangeLog, saveId, true);
 	}
 	
 	public static void serialize(XReadableModel xmodel, XydraOut out, boolean saveRevision,
@@ -652,9 +762,9 @@ public class SerializedModel {
 		}
 		
 		if(saveAsSynchronizesChanges) {
-			assert (xmodel instanceof OldXSynchronizesChanges);
+			assert (xmodel instanceof XSynchronizesChanges);
 			out.attribute(SYNC_REVISION_ATTRIBUTE,
-			        ((OldXSynchronizesChanges)xmodel).getSynchronizedRevision());
+			        ((XSynchronizesChanges)xmodel).getSynchronizedRevision());
 		}
 		
 		out.child(NAME_OBJECTS);
@@ -671,31 +781,33 @@ public class SerializedModel {
 			}
 		}
 		out.endMap();
-		
-		if(saveAsSynchronizesChanges && xmodel instanceof OldXSynchronizesChanges) {
-			OldXSynchronizesChanges synchronizesChanges = (OldXSynchronizesChanges)xmodel;
+		if(saveAsSynchronizesChanges && xmodel instanceof XSynchronizesChanges) {
+			XSynchronizesChanges synchronizesChanges = (XSynchronizesChanges)xmodel;
 			
-			// TODO persist syncLog instead
+			XChangeLog changeLog = synchronizesChanges.getChangeLog();
+			assert (changeLog instanceof ISyncLog);
+			ISyncLog syncLog = (ISyncLog)changeLog;
 			
-			XLocalChange[] localChanges = synchronizesChanges.getLocalChanges();
-			if(localChanges.length > 0) {
-				out.child(LOCALCHANGES_NAME);
-				out.setChildType(XLOCALCHANGES_ELEMENT);
-				serialize(localChanges, out, synchronizesChanges.getAddress());
+			if(syncLog.getLastEvent() != null) {
+				out.child(SYNCLOG_NAME);
+				out.setChildType(ISYNCLOG_ELEMENT);
+				serialize(syncLog, out, synchronizesChanges.getAddress());
 			}
+			
 		}
 		
-		if(saveChangeLog && xmodel instanceof XLoggedModel) {
-			XChangeLog log = ((XLoggedModel)xmodel).getChangeLog();
-			if(log != null) {
-				out.child(LOG_NAME);
-				out.setChildType(XCHANGELOG_ELEMENT);
-				serialize(log, out);
-				XyAssert.xyAssert(log.getCurrentRevisionNumber() == xmodel.getRevisionNumber(),
-				        "log.rev=%s,modelRev=%s,", log.getCurrentRevisionNumber(),
-				        xmodel.getRevisionNumber());
-			}
-		}
+		// if(saveChangeLog && xmodel instanceof XLoggedModel) {
+		// XChangeLog log = ((XLoggedModel)xmodel).getChangeLog();
+		// if(log != null) {
+		// out.child(LOG_NAME);
+		// out.setChildType(XCHANGELOG_ELEMENT);
+		// serialize(log, out);
+		// XyAssert.xyAssert(log.getCurrentRevisionNumber() ==
+		// xmodel.getRevisionNumber(),
+		// "log.rev=%s,modelRev=%s,", log.getCurrentRevisionNumber(),
+		// xmodel.getRevisionNumber());
+		// }
+		// }
 		
 		out.close(XMODEL_ELEMENT);
 		

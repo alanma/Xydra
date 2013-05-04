@@ -4,7 +4,7 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 
 
-class MemorySyncLogEntry implements ISyncLogEntry {
+public class MemorySyncLogEntry implements ISyncLogEntry {
 	
 	XCommand command;
 	
@@ -13,6 +13,7 @@ class MemorySyncLogEntry implements ISyncLogEntry {
 	public MemorySyncLogEntry(XCommand command, XEvent event) {
 		this.command = command;
 		this.event = event;
+		
 	}
 	
 	@Override
