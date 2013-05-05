@@ -310,15 +310,11 @@ public class ChangeTest {
         
         // Test add-event
         XObject addObject = model.createObject(XX.createUniqueId());
-        assertTrue(modelListener.hasFired()); // check if the listener has fired
-        assertTrue(modelListener.getType() == ChangeType.ADD); // check if the
-        // event
-        // has the right
-        // type
-        assertEquals(model.getId(), modelListener.getModel()); // check if the
-        // model of
-        // the event is the
-        // right one
+        assertTrue("check if the listener has fired", modelListener.hasFired());
+        assertTrue("check if the event has the right type",
+                modelListener.getType() == ChangeType.ADD);
+        assertEquals("check if the model of the event is the right one", model.getId(),
+                modelListener.getModel());
         assertNull(modelListener.getRepository());
         modelListener.reset();
         
