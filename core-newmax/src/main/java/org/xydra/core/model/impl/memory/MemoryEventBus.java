@@ -101,7 +101,7 @@ public class MemoryEventBus {
                     addListener(eventType, sourceAddress, listener);
                 }
             });
-            // we can just assume it will work
+            // we can just hope it will work
             return true;
         } else {
             return this.map.index(eventType, sourceAddress, listener);

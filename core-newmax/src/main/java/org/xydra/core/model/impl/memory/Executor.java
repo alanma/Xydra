@@ -92,8 +92,8 @@ public class Executor {
         }
         long currentModelRev = modelState == null ? XEvent.REVISION_OF_ENTITY_NOT_SET : modelState
                 .getRevisionNumber();
-        long currentObjectRev = objectState == null ? XEvent.REVISION_OF_ENTITY_NOT_SET : objectState
-                .getRevisionNumber();
+        long currentObjectRev = objectState == null ? XEvent.REVISION_OF_ENTITY_NOT_SET
+                : objectState.getRevisionNumber();
         long currentFieldRev = fieldState.getRevisionNumber();
         XValue currentValue = fieldState.getValue();
         
@@ -386,6 +386,10 @@ public class Executor {
     /**
      * Fires the transaction events correctly: fires first atomic events, then
      * the transaction event itself
+     * 
+     * @param root
+     * @param changeEventListener @CanBeNull An additional changeEventListener
+     * @param event
      */
     private static void fireEvents(Root root, XRMOFChangeListener changeEventListener, XEvent event) {
         if(event instanceof XTransactionEvent) {
@@ -409,20 +413,24 @@ public class Executor {
     private static void fireAtomicEvent(Root root, XRMOFChangeListener changeEventListener,
             XAtomicEvent atomicEvent) {
         if(atomicEvent instanceof XFieldEvent) {
-            if(changeEventListener != null)
+            if(changeEventListener != null) {
                 changeEventListener.onChangeEvent((XFieldEvent)atomicEvent);
+            }
             root.fireFieldEvent(atomicEvent.getTarget(), (XFieldEvent)atomicEvent);
         } else if(atomicEvent instanceof XObjectEvent) {
-            if(changeEventListener != null)
+            if(changeEventListener != null) {
                 changeEventListener.onChangeEvent((XObjectEvent)atomicEvent);
+            }
             root.fireObjectEvent(atomicEvent.getTarget(), (XObjectEvent)atomicEvent);
         } else if(atomicEvent instanceof XModelEvent) {
-            if(changeEventListener != null)
+            if(changeEventListener != null) {
                 changeEventListener.onChangeEvent((XModelEvent)atomicEvent);
+            }
             root.fireModelEvent(atomicEvent.getTarget(), (XModelEvent)atomicEvent);
         } else if(atomicEvent instanceof XRepositoryEvent) {
-            if(changeEventListener != null)
+            if(changeEventListener != null) {
                 changeEventListener.onChangeEvent((XRepositoryEvent)atomicEvent);
+            }
             root.fireRepositoryEvent(atomicEvent.getTarget(), (XRepositoryEvent)atomicEvent);
         }
     }

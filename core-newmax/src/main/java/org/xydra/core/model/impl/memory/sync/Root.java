@@ -2,6 +2,7 @@ package org.xydra.core.model.impl.memory.sync;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
+import org.xydra.base.XType;
 import org.xydra.base.change.XFieldEvent;
 import org.xydra.base.change.XModelEvent;
 import org.xydra.base.change.XObjectEvent;
@@ -108,19 +109,40 @@ public class Root {
     
     public void fireFieldEvent(XAddress entityAddress, XFieldEvent event) {
         synchronized(this.eventBus) {
+            assert entityAddress.getAddressedType() == XType.XFIELD;
             this.eventBus.fireEvent(EventType.FieldChange, entityAddress, event);
+            // object
+            XAddress parent = entityAddress.getParent();
+            this.eventBus.fireEvent(EventType.FieldChange, parent, event);
+            // model
+            parent = parent.getParent();
+            this.eventBus.fireEvent(EventType.FieldChange, parent, event);
+            // repository
+            parent = parent.getParent();
+            this.eventBus.fireEvent(EventType.FieldChange, parent, event);
         }
     }
     
     public void fireModelEvent(XAddress entityAddress, XModelEvent event) {
         synchronized(this.eventBus) {
+            assert entityAddress.getAddressedType() == XType.XMODEL;
             this.eventBus.fireEvent(EventType.ModelChange, entityAddress, event);
+            // repository
+            XAddress parent = entityAddress.getParent();
+            this.eventBus.fireEvent(EventType.ModelChange, parent, event);
         }
     }
     
     public void fireObjectEvent(XAddress entityAddress, XObjectEvent event) {
         synchronized(this.eventBus) {
+            assert entityAddress.getAddressedType() == XType.XOBJECT;
             this.eventBus.fireEvent(EventType.ObjectChange, entityAddress, event);
+            // model
+            XAddress parent = entityAddress.getParent();
+            this.eventBus.fireEvent(EventType.ObjectChange, parent, event);
+            // repository
+            parent = parent.getParent();
+            this.eventBus.fireEvent(EventType.ObjectChange, parent, event);
         }
     }
     
