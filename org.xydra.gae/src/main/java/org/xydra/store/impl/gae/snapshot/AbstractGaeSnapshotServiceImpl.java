@@ -73,7 +73,7 @@ public abstract class AbstractGaeSnapshotServiceImpl implements IGaeSnapshotServ
 				if(field != null) {
 					if(object == null) {
 						object = model.createObject(lock.getObject());
-						object.setRevisionNumber(XEvent.RevisionNotAvailable);
+						object.setRevisionNumber(XEvent.REVISION_NOT_AVAILABLE);
 					}
 					if(object.hasField(lock.getField())) {
 						continue;

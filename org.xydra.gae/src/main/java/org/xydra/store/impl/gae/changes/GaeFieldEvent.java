@@ -40,9 +40,9 @@ class GaeFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 		super(target, changeType, actor, inTransaction, implied);
 		
 		assert target.getField() != null && fieldRevision >= 0;
-		assert objectRevision >= 0 || objectRevision == RevisionOfEntityNotSet
-		        || objectRevision == RevisionNotAvailable;
-		assert modelRevision >= 0 || modelRevision == RevisionOfEntityNotSet;
+		assert objectRevision >= 0 || objectRevision == REVISION_OF_ENTITY_NOT_SET
+		        || objectRevision == REVISION_NOT_AVAILABLE;
+		assert modelRevision >= 0 || modelRevision == REVISION_OF_ENTITY_NOT_SET;
 		
 		assert newValue != null;
 		this.newValue = newValue;
@@ -102,7 +102,7 @@ class GaeFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 		
 		long otherObjectRev = event.getOldObjectRevision();
 		if(this.objectRevision != otherObjectRev) {
-			if((this.objectRevision != XEvent.RevisionNotAvailable && otherObjectRev != XEvent.RevisionNotAvailable)) {
+			if((this.objectRevision != XEvent.REVISION_NOT_AVAILABLE && otherObjectRev != XEvent.REVISION_NOT_AVAILABLE)) {
 				return false;
 			}
 		}
@@ -124,7 +124,7 @@ class GaeFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
 		
 		// old revisions
 		result += this.modelRevision;
-		if(this.objectRevision != XEvent.RevisionOfEntityNotSet) {
+		if(this.objectRevision != XEvent.REVISION_OF_ENTITY_NOT_SET) {
 			result += 0x3472089;
 		}
 		result += this.fieldRevision;

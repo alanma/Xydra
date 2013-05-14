@@ -74,7 +74,7 @@ class InternalGaeModel extends InternalGaeContainerXEntity<InternalGaeObject> im
 	 *            assert that we have enough locks when reading fields or
 	 *            objects as well as to determine if we can calculate object
 	 *            revisions or if we have to return
-	 *            {@link XEvent#RevisionNotAvailable} instead.
+	 *            {@link XEvent#REVISION_NOT_AVAILABLE} instead.
 	 * @return A {@link XModel} interface or null if the model doesn't exist.
 	 */
 	static InternalGaeModel get(IGaeChangesService changesService, long modelRev, GaeLocks locks) {

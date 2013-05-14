@@ -451,7 +451,7 @@ public class GaeSnapshotServiceImpl5 extends AbstractGaeSnapshotServiceImpl {
 				 * have been a field lock in the same object. Locks are minimal.
 				 */
 				XRevWritableObject partialObject = partialModel.createObject(oid);
-				partialObject.setRevisionNumber(XEvent.RevisionNotAvailable);
+				partialObject.setRevisionNumber(XEvent.REVISION_NOT_AVAILABLE);
 				// copy field
 				XRevWritableField fullField = fullModel.getObject(oid).getField(lock.getField());
 				if(fullField == null) {

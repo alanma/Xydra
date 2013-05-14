@@ -38,7 +38,7 @@ class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeField> im
 	
 	private static final Logger log = LoggerFactory.getLogger(InternalGaeObject.class);
 	
-	private long objectRev = XEvent.RevisionNotAvailable;
+	private long objectRev = XEvent.REVISION_NOT_AVAILABLE;
 	
 	/**
 	 * Construct a read-only interface to an {@link XObject} in the GAE
@@ -51,7 +51,7 @@ class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeField> im
 	 * @param locks The locks held by the current process. These are used to
 	 *            assert that we have enough locks when reading fields as well
 	 *            as to determine if we can calculate the object revision or if
-	 *            we have to return {@link XEvent#RevisionNotAvailable} instead.
+	 *            we have to return {@link XEvent#REVISION_NOT_AVAILABLE} instead.
 	 */
 	protected InternalGaeObject(IGaeChangesService changesService, XAddress objectAddr,
 	        Entity objectEntity, GaeLocks locks) {
@@ -69,7 +69,7 @@ class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeField> im
 		} else {
 			// The saved objectRev may not be up to date / too far ahead, so it
 			// can't be used here.
-			objectRev = XEvent.RevisionNotAvailable;
+			objectRev = XEvent.REVISION_NOT_AVAILABLE;
 			
 			/*
 			 * Note: we don't always have the locks to get the objectRev this
@@ -85,13 +85,13 @@ class InternalGaeObject extends InternalGaeContainerXEntity<InternalGaeField> im
 		
 		long rev = super.getRevisionNumber();
 		
-		if(rev == XEvent.RevisionNotAvailable) {
+		if(rev == XEvent.REVISION_NOT_AVAILABLE) {
 			// We don't have enough locks to get the objectRev.
-			return XEvent.RevisionNotAvailable;
+			return XEvent.REVISION_NOT_AVAILABLE;
 		}
 		
 		// There may be fields with a newer revision.
-		if(this.objectRev == XEvent.RevisionNotAvailable) {
+		if(this.objectRev == XEvent.REVISION_NOT_AVAILABLE) {
 			
 			for(XId fieldId : this) {
 				XReadableField field = getField(fieldId);

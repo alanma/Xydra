@@ -578,7 +578,7 @@ public class GaeChange {
             } else {
                 // FIXME could also be an object Txn
                 this.event = MemoryTransactionEvent.createTransactionEvent(getActor(),
-                        this.modelAddr, events, this.rev - 1, XEvent.RevisionOfEntityNotSet);
+                        this.modelAddr, events, this.rev - 1, XEvent.REVISION_OF_ENTITY_NOT_SET);
             }
             
             // Not needed anymore.

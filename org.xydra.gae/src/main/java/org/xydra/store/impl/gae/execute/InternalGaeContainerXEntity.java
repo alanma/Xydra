@@ -46,7 +46,7 @@ abstract class InternalGaeContainerXEntity<C> extends InternalGaeXEntity {
 	protected InternalGaeContainerXEntity(IGaeChangesService changesService, XAddress addr,
 	        long rev, GaeLocks locks) {
 		assert rev >= 0
-		        || (rev == XEvent.RevisionNotAvailable && addr.getAddressedType() == XType.XOBJECT) : "rev="
+		        || (rev == XEvent.REVISION_NOT_AVAILABLE && addr.getAddressedType() == XType.XOBJECT) : "rev="
 		        + rev + " adressedType=" + addr.getAddressedType();
 		this.changesService = changesService;
 		assert addr.getAddressedType() == XType.XMODEL || addr.getAddressedType() == XType.XOBJECT;

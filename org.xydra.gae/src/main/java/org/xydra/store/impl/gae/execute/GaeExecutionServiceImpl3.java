@@ -323,7 +323,7 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
 				result.addObject(object);
 			}
 			
-			object.setRevisionNumber(XEvent.RevisionNotAvailable);
+			object.setRevisionNumber(XEvent.REVISION_NOT_AVAILABLE);
 		}
 		
 		return result;
