@@ -241,7 +241,6 @@ Serializable {
 			}
 		}
 		
-		// TODO Andi? Thomas?
 		assert getRevisionNumber() == getChangeLog().getCurrentRevisionNumber() : "rev="
 		        + getRevisionNumber() + " change.rev=" + getChangeLog().getCurrentRevisionNumber();
 	}

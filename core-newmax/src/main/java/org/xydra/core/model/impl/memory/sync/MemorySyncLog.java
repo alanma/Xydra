@@ -72,26 +72,7 @@ public class MemorySyncLog extends AbstractSyncLog implements ISyncLog {
 	
 	@Override
 	synchronized public ISyncLogEntry getSyncLogEntryAt(long revisionNumber) {
-		if(revisionNumber < 0) {
-			throw new IllegalArgumentException("revisionNumber may not be less than zero: "
-			        + revisionNumber);
-		}
-		
-		if(revisionNumber <= getSynchronizedRevision()) {
-			throw new IndexOutOfBoundsException("revisionNumber (" + revisionNumber
-			        + ") may not be <= than the first revision number of this log ("
-			        + getSynchronizedRevision() + ")");
-		}
-		
-		if(revisionNumber > this.state.getCurrentRevisionNumber()) {
-			throw new IndexOutOfBoundsException(
-			        "revisionNumber may not be greater than or equal to the current revision"
-			                + "number of this log");
-		}
-		ISyncLogEntry syncLogEntry = this.state.getSyncLogEntry(revisionNumber);
-		// TODO what to assert? || syncLogEntry.getValue().getRevisionNumber()
-		// == revisionNumber);
-		return syncLogEntry;
+		return this.state.getSyncLogEntryAt(revisionNumber);
 	}
 	
 	@Override
@@ -195,4 +176,65 @@ public class MemorySyncLog extends AbstractSyncLog implements ISyncLog {
 		}
 	}
 	
+	@Override
+	public boolean equals(Object b) {
+		
+		boolean equal = true;
+		MemorySyncLog syncLogB = (MemorySyncLog)b;
+		
+		if(!this.getBaseAddress().equals(syncLogB.getBaseAddress())
+		        || !(this.getBaseRevisionNumber() == syncLogB.getBaseRevisionNumber())
+		        || !(this.getSynchronizedRevision() == syncLogB.getSynchronizedRevision())) {
+			equal = false;
+			return equal;
+		}
+		
+		if(this.getCurrentRevisionNumber() < 0)
+			return true;
+		
+		Iterator<ISyncLogEntry> iteratorA = this.getSyncLogEntriesBetween(
+		        getBaseRevisionNumber() + 1, getCurrentRevisionNumber());
+		Iterator<ISyncLogEntry> iteratorB = syncLogB.getSyncLogEntriesBetween(
+		        getBaseRevisionNumber() + 1, getCurrentRevisionNumber());
+		
+		try {
+			while(iteratorA.hasNext() && iteratorB.hasNext()) {
+				ISyncLogEntry itemA = iteratorA.next();
+				ISyncLogEntry itemB = iteratorB.next();
+				
+				XEvent eventA = itemA.getEvent();
+				XEvent eventB = itemB.getEvent();
+				
+				XCommand commandA = itemA.getCommand();
+				XCommand commandB = itemB.getCommand();
+				equal = (eventA.equals(eventB) && commandA.equals(commandB));
+				if(!equal)
+					return false;
+				
+			}
+			
+			if(iteratorA.hasNext() || iteratorA.hasNext()) {
+				equal = false;
+			}
+		} catch(NullPointerException e) {
+			equal = false;
+		}
+		
+		return equal;
+	}
+	
+	@Override
+	public Iterator<ISyncLogEntry> getSyncLogEntriesBetween(long beginRevision, long endRevision) {
+		return this.state.getSyncLogEntriesBetween(beginRevision, endRevision);
+	}
+	
+	@Override
+	public Iterator<ISyncLogEntry> getSyncLogEntriesSince(long revisionNumber) {
+		return this.state.getSyncLogEntriesSince(revisionNumber);
+	}
+	
+	@Override
+	public Iterator<ISyncLogEntry> getSyncLogEntriesUntil(long revisionNumber) {
+		return this.state.getSyncLogEntriesUntil(revisionNumber);
+	}
 }

@@ -1,15 +1,9 @@
 package org.xydra.core.serialize;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
-import java.nio.charset.Charset;
 
 import org.junit.Test;
 import org.xydra.base.XCompareUtils;
@@ -152,6 +146,48 @@ abstract public class AbstractSerializedModelTest extends AbstractSerializingTes
 		testRepository(repo);
 	}
 	
+	@Test
+	public void testFullModelWithNoSyncLog() {
+		XModel model = new MemoryModel(this.actorId, null, DemoModelUtil.PHONEBOOK_ID);
+		DemoModelUtil.setupPhonebook(model);
+		
+		// test serializing with revisions
+		XydraOut out = create();
+		out.enableWhitespace(true, true);
+		SerializedModel.serialize(model, out, true, false, false);
+		assertTrue(out.isClosed());
+		String data = out.getData();
+		log.info(data);
+		XydraElement e = parse(data);
+		XModel modelAgain = SerializedModel.toModel(this.actorId, null, e);
+		assertTrue(XCompareUtils.equalState(model, modelAgain));
+		assertFalse(XCompareUtils.equalHistory(model, modelAgain));
+		
+		// check that there is a change log
+		XChangeLog changeLog = modelAgain.getChangeLog();
+		assertNotNull(changeLog);
+	}
+	
+	@Test
+	public void testEmptyModelWithNoSyncLog() {
+		MemoryModel model = new MemoryModel(this.actorId, null, DemoModelUtil.PHONEBOOK_ID);
+		
+		// test serializing with revisions
+		XydraOut out = create();
+		out.enableWhitespace(true, true);
+		SerializedModel.serialize(model, out, true, false, false);
+		assertTrue(out.isClosed());
+		String data = out.getData();
+		log.info(data);
+		XydraElement e = parse(data);
+		XModel modelAgain = SerializedModel.toModel(this.actorId, null, e);
+		assertTrue(XCompareUtils.equalState(model, modelAgain));
+		
+		// check that there is a change log
+		XChangeLog changeLog = modelAgain.getChangeLog();
+		assertNotNull(changeLog);
+	}
+	
 	private void testModel(XReadableModel model) {
 		
 		// test serializing with revisions
@@ -164,6 +200,7 @@ abstract public class AbstractSerializedModelTest extends AbstractSerializingTes
 		XydraElement e = parse(data);
 		XModel modelAgain = SerializedModel.toModel(this.actorId, null, e);
 		assertTrue(XCompareUtils.equalState(model, modelAgain));
+		assertTrue(XCompareUtils.equalHistory(model, modelAgain));
 		
 		// check that there is a change log
 		XChangeLog changeLog = modelAgain.getChangeLog();
@@ -193,6 +230,7 @@ abstract public class AbstractSerializedModelTest extends AbstractSerializingTes
 		XydraElement e = parse(data);
 		XObject objectAgain = SerializedModel.toObject(this.actorId, null, e);
 		assertTrue(XCompareUtils.equalState(object, objectAgain));
+		assertTrue(XCompareUtils.equalHistory(object, objectAgain));
 		
 		// check that there is a change log
 		XChangeLog changeLog = objectAgain.getChangeLog();
@@ -211,6 +249,11 @@ abstract public class AbstractSerializedModelTest extends AbstractSerializingTes
 		
 	}
 	
+	/**
+	 * DESERIALIZED REPOSITORIES DO NOT CONTAIN SYNCLOG
+	 * 
+	 * @param repo
+	 */
 	private void testRepository(XReadableRepository repo) {
 		
 		// test serializing with revisions
@@ -222,6 +265,7 @@ abstract public class AbstractSerializedModelTest extends AbstractSerializingTes
 		XydraElement e = parse(data);
 		XRepository repoAgain = SerializedModel.toRepository(this.actorId, null, e);
 		assertTrue(XCompareUtils.equalState(repo, repoAgain));
+		// assertTrue(XCompareUtils.equalHistory(repo, repoAgain));
 		
 		// test serializing without revisions
 		out = create();
@@ -235,44 +279,5 @@ abstract public class AbstractSerializedModelTest extends AbstractSerializingTes
 		checkNoRevisions(repoAgain);
 		
 	}
-	
-	@Test
-	public void testSerializedModelWithOldLog() {
-		
-		XModel model = new MemoryModel(this.actorId, null, DemoModelUtil.PHONEBOOK_ID);
-		DemoModelUtil.setupPhonebook(model);
-		
-		try {
-			
-			String data = getModelWithOldLog();
-			XydraElement e = parse(data);
-			XModel modelAgain = SerializedModel.toModel(this.actorId, null, e);
-			assertTrue(XCompareUtils.equalState(model, modelAgain));
-			
-			// serialize again
-			XydraOut out = create();
-			SerializedModel.serialize(modelAgain, out);
-			assertTrue(out.isClosed());
-			
-		} catch(IOException e) {
-			e.printStackTrace();
-		}
-		
-	}
-	
-	private String getModelWithOldLog() throws IOException {
-		File file = new File(getFileLocation());
-		FileInputStream fileInputStream = new FileInputStream(file);
-		try {
-			FileChannel fc = fileInputStream.getChannel();
-			MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
-			/* Instead of using default, pass in a decoder. */
-			return Charset.defaultCharset().decode(bb).toString();
-		} finally {
-			fileInputStream.close();
-		}
-	}
-	
-	abstract protected String getFileLocation() throws IOException;
 	
 }

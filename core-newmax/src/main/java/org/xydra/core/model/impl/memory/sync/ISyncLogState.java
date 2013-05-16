@@ -9,39 +9,39 @@ import org.xydra.core.model.XChangeLogState;
  * @author xamde
  * @author andreask
  */
-public interface ISyncLogState extends XChangeLogState {
-    
-    /**
-     * @param syncLogEntry The {@link ISyncLogEntry} which is to be logged
-     */
-    void appendSyncLogEntry(ISyncLogEntry syncLogEntry);
-    
-    /**
-     * Returns the {@link ISyncLogEntry} this sync log logged at the given
-     * revision number
-     * 
-     * @param revisionNumber for which to return an {@link ISyncLogEntry}
-     * @return the {@link ISyncLogEntry} that was logged at the given revision
-     *         number or null if the {@link ISyncLogEntry} cannot be accessed.
-     * @throws IndexOutOfBoundsException if the given revision number is less
-     *             than the first revision number or greater than or equal to
-     *             the current revision number of this change log
-     */
-    ISyncLogEntry getSyncLogEntry(long revisionNumber);
-    
-    /**
-     * @return the revision number up to which the log has been synchronised
-     *         successfully with the server
-     */
-    long getSyncRevisionNumber();
-    
-    /**
-     * Set the sync revision number.
-     * 
-     * @param rev
-     */
-    void setSyncRevisionNumber(long rev);
-    
-    void removeSyncLogEntryAt(Long l);
-    
+public interface ISyncLogState extends XChangeLogState, IBrowsableSyncLog {
+	
+	/**
+	 * @param syncLogEntry The {@link ISyncLogEntry} which is to be logged
+	 */
+	void appendSyncLogEntry(ISyncLogEntry syncLogEntry);
+	
+	/**
+	 * Returns the {@link ISyncLogEntry} this sync log logged at the given
+	 * revision number
+	 * 
+	 * @param revisionNumber for which to return an {@link ISyncLogEntry}
+	 * @return the {@link ISyncLogEntry} that was logged at the given revision
+	 *         number or null if the {@link ISyncLogEntry} cannot be accessed.
+	 * @throws IndexOutOfBoundsException if the given revision number is less
+	 *             than the first revision number or greater than or equal to
+	 *             the current revision number of this change log
+	 */
+	ISyncLogEntry getSyncLogEntry(long revisionNumber);
+	
+	/**
+	 * @return the revision number up to which the log has been synchronised
+	 *         successfully with the server
+	 */
+	long getSyncRevisionNumber();
+	
+	/**
+	 * Set the sync revision number.
+	 * 
+	 * @param rev
+	 */
+	void setSyncRevisionNumber(long rev);
+	
+	void removeSyncLogEntryAt(Long l);
+	
 }

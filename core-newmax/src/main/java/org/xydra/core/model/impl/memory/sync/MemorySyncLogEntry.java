@@ -18,7 +18,7 @@ public class MemorySyncLogEntry implements ISyncLogEntry {
 	
 	@Override
 	public String toString() {
-		return this.event.toString();
+		return this.event.toString() + ", " + this.command.toString();
 	}
 	
 	@Override
