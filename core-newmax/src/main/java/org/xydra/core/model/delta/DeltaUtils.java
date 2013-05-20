@@ -10,6 +10,7 @@ import org.xydra.base.XId;
 import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XRepositoryCommand;
+import org.xydra.base.change.XRepositoryEvent;
 import org.xydra.base.change.impl.memory.MemoryFieldEvent;
 import org.xydra.base.change.impl.memory.MemoryModelEvent;
 import org.xydra.base.change.impl.memory.MemoryObjectEvent;
@@ -209,10 +210,14 @@ public abstract class DeltaUtils {
         XyAssert.xyAssert(nChanges > 0);
         
         if(modelChangeOperation == ModelChange.CREATED) {
-            events.add(MemoryRepositoryEvent.createAddEvent(actorId, modelAddr.getParent(),
-                    modelAddr.getModel(), rev - 1,
+            long previousRev = rev - 1;
+            if(previousRev < 0)
+                previousRev = XCommand.NONEXISTANT;
+            XRepositoryEvent repositoryEvent = MemoryRepositoryEvent.createAddEvent(actorId,
+                    modelAddr.getParent(), modelAddr.getModel(), rev - 1,
                     /* creating a model is never part of a txn */
-                    false));
+                    false);
+            events.add(repositoryEvent);
         }
         
         /*

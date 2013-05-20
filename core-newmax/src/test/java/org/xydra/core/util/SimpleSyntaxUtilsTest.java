@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+import org.xydra.base.XCompareUtils;
 import org.xydra.base.XId;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.core.LoggerTestHelper;
@@ -72,9 +73,8 @@ public class SimpleSyntaxUtilsTest {
         XModel model = SimpleSyntaxUtils.toModel(PHONEBOOK, test);
         String syntax = SimpleSyntaxUtils.toSimpleSyntax(model);
         XModel model2 = SimpleSyntaxUtils.toModel(PHONEBOOK, syntax);
-        assertTrue(model.equals(model2));
-        assertEquals(model, model2);
-        assertEquals(model2, model);
+        /* John has rev 10 in one model and rev 11 in the other one */
+        assertTrue(XCompareUtils.equalTree(model, model2));
         assertEquals(syntax, SimpleSyntaxUtils.toSimpleSyntax(model2));
     }
     

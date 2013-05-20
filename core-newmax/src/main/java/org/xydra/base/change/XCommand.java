@@ -3,6 +3,7 @@ package org.xydra.base.change;
 import java.io.Serializable;
 
 import org.xydra.base.XAddress;
+import org.xydra.core.change.RevisionConstants;
 
 
 /**
@@ -35,16 +36,16 @@ import org.xydra.base.XAddress;
 public interface XCommand extends Serializable {
     
     /**
-     * Returned when executing commands to indicate that the command failed.
+     * Command result code. Returned when executing commands to indicate that
+     * the command failed.
      * 
-     * Impl note: This revision is also persisted on the server-side.
      */
-    static final long FAILED = -1;
+    static final long FAILED = RevisionConstants.COMMAND_FAILED;
     
     /**
-     * A special revision that is returned for commands that should be executed
-     * no matter what the current revision of the entity that is to be changed
-     * is.
+     * Command request code. A special revision that is returned for commands
+     * that should be executed no matter what the current revision of the entity
+     * that is to be changed is.
      * 
      * Commands with this revision number were (most likely) created by a
      * createForced...Command method of {@XCommandFactory}. We
@@ -54,25 +55,26 @@ public interface XCommand extends Serializable {
     static final long FORCED = -10;
     
     /**
-     * The returned revision of new models, objects and fields, before they are
-     * assigned a proper revision number (for example during a transaction).
+     * Command result code. The returned revision of new models, objects and
+     * fields, before they are assigned a proper revision number (for example
+     * during a transaction).
      * 
      * New models always have revision number 0 when created.
      */
-    static final long NEW = 0;
+    static final long NEW = RevisionConstants.JUST_CREATED_ENTITY;
     
     /**
-     * Returned when executing commands to indicate that the command succeeded
-     * but nothing actually changed.
+     * Command result code. Returned when executing commands to indicate that
+     * the command succeeded but nothing actually changed.
      */
-    static final long NOCHANGE = -2;
+    static final long NOCHANGE = RevisionConstants.NOCHANGE;
     
     /**
-     * The returned revision of ADD-type XCommands for XModels and XObjects
-     * (since these commands do not necessarily refer to a specific revision of
-     * the targeted entity). Only used in XCommands as a marker that the
-     * XCommand is a safe command and not a forced command and never used as the
-     * revision number of any entity or event.
+     * Command request code. The returned revision of ADD-type XCommands for
+     * XModels and XObjects (since these commands do not necessarily refer to a
+     * specific revision of the targeted entity). Only used in XCommands as a
+     * marker that the XCommand is a safe command and not a forced command and
+     * never used as the revision number of any entity or event.
      * 
      * Commands with this revision number were (most likely) created by a
      * createSafe...Command method of {@XCommandFactory}. We
@@ -88,7 +90,8 @@ public interface XCommand extends Serializable {
     static final long RELATIVE_REV = Long.MAX_VALUE / 2;
     
     // TODO make revision numbers in commands stricter & document better
-    static final long NONEXISTANT = -1;
+    /** The entity with this revision number does not exist yet */
+    static final long NONEXISTANT = RevisionConstants.NOT_EXISTING;
     
     /**
      * WHAT will be changed?
