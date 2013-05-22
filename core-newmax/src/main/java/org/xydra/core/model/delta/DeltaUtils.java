@@ -214,7 +214,7 @@ public abstract class DeltaUtils {
             if(previousRev < 0)
                 previousRev = XCommand.NONEXISTANT;
             XRepositoryEvent repositoryEvent = MemoryRepositoryEvent.createAddEvent(actorId,
-                    modelAddr.getParent(), modelAddr.getModel(), rev - 1,
+                    modelAddr.getParent(), modelAddr.getModel(), previousRev,
                     /* creating a model is never part of a txn */
                     false);
             events.add(repositoryEvent);
