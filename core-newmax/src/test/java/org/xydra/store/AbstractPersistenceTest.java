@@ -3862,10 +3862,10 @@ public abstract class AbstractPersistenceTest {
                 
             } else {
                 XCommand failAddCom = this.comFactory.createAddFieldCommand(
-                        failObject.getAddress(), fieldId, false);
+                        failObject.getAddress(), fieldId, true);
                 
                 XCommand succAddCom = this.comFactory.createAddFieldCommand(
-                        succObject.getAddress(), fieldId, false);
+                        succObject.getAddress(), fieldId, true);
                 
                 failTxnBuilder.addCommand(failAddCom);
                 succTxnBuilder.addCommand(succAddCom);
@@ -4012,9 +4012,9 @@ public abstract class AbstractPersistenceTest {
             XValue value = X.getValueFactory().createStringValue("" + rand.nextInt());
             
             XCommand failAddValueCom = this.comFactory.createAddValueCommand(failFieldAddress,
-                    fieldRevNr, value, false);
+                    fieldRevNr, value, true);
             XCommand succAddValueCom = this.comFactory.createAddValueCommand(succFieldAddress,
-                    fieldRevNr, value, false);
+                    fieldRevNr, value, true);
             
             failTxnBuilder.addCommand(failAddValueCom);
             succTxnBuilder.addCommand(succAddValueCom);

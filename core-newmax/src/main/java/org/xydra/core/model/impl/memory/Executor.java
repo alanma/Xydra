@@ -606,7 +606,8 @@ public class Executor {
         XId fieldId = event.getFieldId();
         switch(event.getChangeType()) {
         case ADD:
-            assert !objectState.hasField(fieldId);
+            assert !objectState.hasField(fieldId) : "objectState " + objectState.getAddress()
+                    + " has field " + fieldId;
             XWritableField fieldState = objectState.createField(fieldId);
             if(fieldState instanceof XRevWritableField) {
                 ((XRevWritableField)fieldState).setRevisionNumber(event.getRevisionNumber());
@@ -1054,6 +1055,7 @@ public class Executor {
                 XObjectCommand objectCommand = (XObjectCommand)atomicCommand;
                 long currentModelRev = currentModelState.getRevisionNumber();
                 XId objectId = objectCommand.getObjectId();
+                XId fieldId = objectCommand.getFieldId();
                 XWritableObject tempObjectState = tempModelState.getObject(objectId);
                 if(tempObjectState == null) {
                     eventResult = EventResult.failed();
@@ -1061,7 +1063,7 @@ public class Executor {
                     XReadableObject currentObjectState = currentModelState.getObject(objectId);
                     long currentObjectRev = currentObjectState == null ? currentModelRev
                             : currentObjectState.getRevisionNumber();
-                    XWritableField tempFieldState = tempObjectState.getField(objectId);
+                    XWritableField tempFieldState = tempObjectState.getField(fieldId);
                     eventResult = createEventFromObjectCommand(actorId, objectCommand,
                             currentModelRev, currentObjectRev, tempFieldState, null, true);
                     if(eventResult.changedSomething()) {

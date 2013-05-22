@@ -71,53 +71,56 @@ public abstract class AbstractTransactionEvent implements XTransactionEvent {
         this.objectRevision = objectRevision;
     }
     
+    private static enum TxnChangeType {
+        REMOVE, ADD_OR_CHANGE
+    }
+    
     /**
-     * @return true if this transaction event cannot be the result of a valid
-     *         model / object transaction. Throws an {@link AssertionError}
-     *         otherwise. Assumes the transaction is minimal.
+     * @return true if this transaction event is the result of a valid model /
+     *         object transaction. Throws an {@link AssertionError} otherwise.
+     *         Assumes the transaction is minimal.
      */
     protected boolean assertIsCorrect() {
         
-        /** false = remove, true = add ???????? */
-        Map<XAddress,Boolean> entities = new HashMap<XAddress,Boolean>();
-        
+        /**
+         * Verify that no entity is added/changed AND removed in the same txn.
+         * false = remove, true = add or change
+         */
+        Map<XAddress,TxnChangeType> entities = new HashMap<XAddress,TxnChangeType>();
         for(XAtomicEvent event : this) {
-            
             for(XAddress addr = event.getTarget(); addr != null; addr = addr.getParent()) {
                 if(Boolean.FALSE.equals(entities.get(addr))) {
                     assert false : "modified entity after remove";
                 }
-                entities.put(addr, true);
+                entities.put(addr, TxnChangeType.ADD_OR_CHANGE);
             }
-            
             if(!(event instanceof XFieldEvent)) {
-                Boolean value;
+                TxnChangeType value;
                 XAddress entity = event.getChangedEntity();
                 if(event.getChangeType() == ChangeType.REMOVE) {
-                    value = Boolean.FALSE;
+                    value = TxnChangeType.REMOVE;
                 } else {
-                    value = Boolean.TRUE;
+                    value = TxnChangeType.ADD_OR_CHANGE;
                     assert entities.get(entity) == null : "adding already touched entity";
                 }
                 entities.put(entity, value);
             }
-            
         }
         
-        // check if implied events are marked correctly
+        /* check if implied events are marked correctly */
         for(XAtomicEvent event : this) {
+            System.out.println("TRACE. " + event);
             
             boolean implied = false;
-            boolean b = true;
+            boolean lowestInMofHierarchy = true;
             for(XAddress addr = event.getTarget(); addr != null; addr = addr.getParent()) {
-                if(Boolean.FALSE.equals(entities.get(addr))) {
+                if(TxnChangeType.REMOVE.equals(entities.get(addr))) {
                     implied = true;
-                    assert b : "removed an entity but not all children";
+                    assert lowestInMofHierarchy : "removed an entity but not all children";
                 } else {
-                    b = false;
+                    lowestInMofHierarchy = false;
                 }
             }
-            
             assert event.isImplied() == implied : "event has incorrect implied flag: " + event
                     + " expected=" + implied;
         }

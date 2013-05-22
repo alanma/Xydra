@@ -115,8 +115,8 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
      */
     public static XFieldEvent createChangeEvent(XId actor, XAddress target, XValue newValue,
             long objectRevision, long fieldRevision, boolean inTransaction) {
-        return createChangeEvent(actor, target, newValue, REVISION_OF_ENTITY_NOT_SET, objectRevision,
-                fieldRevision, inTransaction);
+        return createChangeEvent(actor, target, newValue, REVISION_OF_ENTITY_NOT_SET,
+                objectRevision, fieldRevision, inTransaction);
     }
     
     /**
@@ -321,7 +321,7 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
     
     @Override
     public String toString() {
-        String prefix = "MFieldEvent by actor: '" + getActor() + "' ";
+        String prefix = "FieldEvent  by actor: '" + getActor() + "' ";
         String suffix = " @" + getTarget() + " r" + rev2str(this.modelRevision) + "/"
                 + rev2str(this.objectRevision) + "/" + rev2str(this.fieldRevision);
         if(inTransaction()) {

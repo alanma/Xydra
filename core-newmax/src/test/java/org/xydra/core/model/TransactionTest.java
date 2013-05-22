@@ -228,15 +228,16 @@ public class TransactionTest {
         tb.addField(johnAddr, XCommand.FORCED, ALIAS_ID);
         // should succeed and set john/alias to JOHN_ALIAS
         XAddress aliasAddr = XX.resolveField(johnAddr, ALIAS_ID);
-        tb.addValue(aliasAddr, XCommand.NEW, JOHN_ALIAS);
+        tb.addValue(aliasAddr, XCommand.FORCED, JOHN_ALIAS);
         // should succeed and reset everything
-        tb.removeField(johnAddr, XCommand.NEW, ALIAS_ID);
+        tb.removeField(johnAddr, XCommand.FORCED, ALIAS_ID);
         
         // record any changes and check that everything has been changed
         // correctly when the first event is executed
         HasChanged hc = HasChanged.listen(this.model);
         
-        long result = this.model.executeCommand(tb.build());
+        XTransaction txn = tb.build();
+        long result = this.model.executeCommand(txn);
         
         assertEquals(XCommand.NOCHANGE, result);
         
