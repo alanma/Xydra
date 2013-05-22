@@ -62,7 +62,7 @@ public abstract class AbstractTransactionEvent implements XTransactionEvent {
             }
         } else if(objectRevision < 0) {
             throw new IllegalArgumentException(
-                    "object revision must be set for object transactions");
+                    "object revision must be set for object transactions, was " + objectRevision);
         }
         
         this.actor = actor;
