@@ -27,7 +27,9 @@ import org.xydra.base.change.impl.memory.MemoryObjectCommand;
 import org.xydra.base.rmof.XRevWritableField;
 import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
+import org.xydra.base.rmof.impl.XExistsRevWritableModel;
 import org.xydra.base.rmof.impl.XExistsRevWritableObject;
+import org.xydra.base.rmof.impl.XExistsRevWritableRepository;
 import org.xydra.base.rmof.impl.memory.SimpleObject;
 import org.xydra.core.XCopyUtils;
 import org.xydra.core.XX;
@@ -186,7 +188,7 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
      * @param objectAddress @NeverNull
      */
     public MemoryObject(XId actorId, String passwordHash, XAddress objectAddress) {
-        this(Root.createWithActor(objectAddress, actorId, XCommand.NONEXISTANT), null, actorId,
+        this(Root.createWithActor(objectAddress, actorId, XCommand.NEW), null, actorId,
                 passwordHash, objectAddress, null, null, true);
         
         assert objectAddress.getRepository() != null;
@@ -297,8 +299,20 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
     public long executeCommand(XCommand command) {
         if(command instanceof XTransaction) {
             synchronized(getRoot()) {
-                long result = Executor.executeObjectTransaction(getRoot().getSessionActor(),
-                        (XTransaction)command, getState(), getRoot(), this.changeListener);
+                XId actorId = getRoot().getSessionActor();
+                long result;
+                if(getFather() != null) {
+                    XExistsRevWritableModel modelState = getFather().getState();
+                    IMemoryRepository repo = getFather().getFather();
+                    XExistsRevWritableRepository repositoryState = null;
+                    if(repo != null)
+                        repositoryState = repo.getState();
+                    result = Executor.executeModelTransaction(actorId, (XTransaction)command,
+                            repositoryState, modelState, getRoot(), this.changeListener);
+                } else {
+                    result = Executor.executeObjectTransaction(actorId, (XTransaction)command,
+                            getState(), getRoot(), this.changeListener);
+                }
                 return result;
             }
         }
@@ -426,7 +440,7 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
     
     // implement IMemoryObject
     @Override
-    public XRevWritableObject getState() {
+    public XExistsRevWritableObject getState() {
         return this.objectState;
     }
     
