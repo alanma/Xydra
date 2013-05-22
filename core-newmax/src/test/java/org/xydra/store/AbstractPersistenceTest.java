@@ -44,6 +44,7 @@ import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
 import org.xydra.core.X;
 import org.xydra.core.XX;
+import org.xydra.core.change.RevisionConstants;
 import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
@@ -4104,7 +4105,7 @@ public abstract class AbstractPersistenceTest {
         assertEquals("The returned event was not of add-type.", ChangeType.ADD,
                 modelAddEvent.getChangeType());
         assertEquals("The event didn't refer to the correct old revision number.",
-                XEvent.REVISION_OF_ENTITY_NOT_SET, modelAddEvent.getOldModelRevision());
+                RevisionConstants.NOT_EXISTING, modelAddEvent.getOldModelRevision());
         assertEquals("The event didn't refer to the correct revision number.", revNr,
                 modelAddEvent.getRevisionNumber());
         assertEquals("Event doesn't refer to the correct target.", this.repoAddress,
