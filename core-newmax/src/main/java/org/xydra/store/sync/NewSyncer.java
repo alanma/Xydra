@@ -161,7 +161,7 @@ public class NewSyncer {
         while(localChanges.hasNext()) {
             ISyncLogEntry sle = localChanges.next();
             XEvent e = sle.getEvent();
-            eventDelta.addAdverseEvent(e, this.syncRev, this.syncLog);
+            eventDelta.addInverseEvent(e, this.syncRev, this.syncLog);
         }
         
         /* event mapping */

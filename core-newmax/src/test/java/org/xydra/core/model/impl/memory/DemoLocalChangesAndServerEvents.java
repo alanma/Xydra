@@ -270,7 +270,7 @@ public class DemoLocalChangesAndServerEvents {
 	 * 
 	 * <li>objects:
 	 * <ul>
-	 * <li>"peter"-r2
+	 * <li>"peter"-r3
 	 * <li>"john" -r57
 	 * <li>"claudia" -r61
 	 * <li>"jenny" -r63
@@ -328,7 +328,7 @@ public class DemoLocalChangesAndServerEvents {
 		phonebook.createObject(KERSTIN_ID);
 		
 		XRevWritableObject objectPeter = phonebook.getObject(PETER_ID);
-		objectPeter.setRevisionNumber(2);
+		objectPeter.setRevisionNumber(3);
 		
 		XRevWritableObject objectJohn = phonebook.getObject(JOHN_ID);
 		objectJohn.getField(PHONE_ID).setValue(JOHN_PHONE);

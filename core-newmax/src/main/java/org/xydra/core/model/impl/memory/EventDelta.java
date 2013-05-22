@@ -18,8 +18,8 @@ import org.xydra.base.change.impl.memory.MemoryFieldEvent;
 import org.xydra.base.change.impl.memory.MemoryModelEvent;
 import org.xydra.base.change.impl.memory.MemoryObjectEvent;
 import org.xydra.base.change.impl.memory.MemoryRepositoryEvent;
+import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XWritableField;
-import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.value.XValue;
 import org.xydra.core.model.XChangeLog;
@@ -286,14 +286,14 @@ public class EventDelta {
 	 * @param syncRevision of the last synchronized state
 	 * @param changeLog of this client
 	 */
-	public void addAdverseEvent(XEvent event, long syncRevision, XChangeLog changeLog) {
+	public void addInverseEvent(XEvent event, long syncRevision, XChangeLog changeLog) {
 		XAddress changedEntityAddress = event.getChangedEntity();
 		ChangeType changeType = event.getChangeType();
 		
 		if(event instanceof XTransactionEvent) {
 			XTransactionEvent transactionEvent = (XTransactionEvent)event;
 			for(XAtomicEvent xAtomicEvent : transactionEvent) {
-				this.addAdverseEvent(xAtomicEvent, syncRevision, changeLog);
+				this.addInverseEvent(xAtomicEvent, syncRevision, changeLog);
 			}
 		} else {
 			XEvent resultingEvent = null;
@@ -307,7 +307,7 @@ public class EventDelta {
 				case REMOVE:
 					resultingEvent = MemoryRepositoryEvent.createAddEvent(event.getActor(),
 					        event.getTarget(), ((XRepositoryEvent)event).getModelId(),
-					        syncRevision, event.inTransaction());
+					        event.getOldModelRevision(), event.inTransaction());
 					break;
 				default:
 					break;
@@ -317,13 +317,22 @@ public class EventDelta {
 				switch(changeType) {
 				case ADD:
 					resultingEvent = MemoryModelEvent.createRemoveEvent(event.getActor(),
-					        event.getTarget(), changedEntityAddress.getObject(), syncRevision,
-					        syncRevision, event.inTransaction(), event.isImplied());
+					        event.getTarget(), changedEntityAddress.getObject(),
+					        event.getOldModelRevision(), syncRevision, event.inTransaction(),
+					        event.isImplied());
 					break;
 				case REMOVE:
-					resultingEvent = MemoryModelEvent.createAddEvent(event.getActor(),
-					        event.getTarget(), changedEntityAddress.getObject(), syncRevision,
-					        event.inTransaction());
+					/*
+					 * this is necessary because elsewise we couldn't restore
+					 * the right revision to this formerly locally deleted
+					 * entity
+					 */
+					long adaptedObjectRevisionToReachRightRevision = event.getOldObjectRevision() - 1;
+					resultingEvent = MemoryModelEvent.createInternalAddEvent(event.getActor(),
+					        event.getTarget(), changedEntityAddress.getObject(),
+					        adaptedObjectRevisionToReachRightRevision,
+					        adaptedObjectRevisionToReachRightRevision, event.inTransaction());
+					
 					break;
 				default:
 					break;
@@ -333,13 +342,22 @@ public class EventDelta {
 				switch(changeType) {
 				case ADD:
 					resultingEvent = MemoryObjectEvent.createRemoveEvent(event.getActor(),
-					        event.getTarget(), changedEntityAddress.getField(), syncRevision,
-					        syncRevision, event.inTransaction(), event.isImplied());
+					        event.getTarget(), changedEntityAddress.getField(),
+					        event.getOldObjectRevision(), syncRevision, event.inTransaction(),
+					        event.isImplied());
 					break;
 				case REMOVE:
-					resultingEvent = MemoryObjectEvent.createAddEvent(event.getActor(),
-					        event.getTarget(), changedEntityAddress.getField(), syncRevision,
-					        event.inTransaction());
+					/*
+					 * this is necessary because elsewise we couldn't restore
+					 * the right revision to this formerly locally deleted
+					 * entity
+					 */
+					long adaptedObjectRevisionToReachRightRevision = event.getOldFieldRevision() - 1;
+					
+					resultingEvent = MemoryObjectEvent.createInternalAddEvent(event.getActor(),
+					        event.getTarget(), changedEntityAddress.getField(),
+					        adaptedObjectRevisionToReachRightRevision,
+					        adaptedObjectRevisionToReachRightRevision, event.inTransaction());
 					break;
 				default:
 					break;
@@ -357,7 +375,8 @@ public class EventDelta {
 				switch(changeType) {
 				case ADD:
 					resultingEvent = MemoryFieldEvent.createRemoveEvent(event.getActor(),
-					        event.getTarget(), syncRevision, syncRevision, syncRevision,
+					        event.getTarget(), event.getOldModelRevision(),
+					        event.getOldObjectRevision(), event.getOldFieldRevision(),
 					        event.inTransaction(), event.isImplied());
 					break;
 				case REMOVE:
@@ -366,7 +385,8 @@ public class EventDelta {
 						        + event.toString() + " could not be restored!");
 					}
 					resultingEvent = MemoryFieldEvent.createAddEvent(event.getActor(),
-					        event.getTarget(), oldValue, syncRevision, syncRevision, syncRevision,
+					        event.getTarget(), oldValue, event.getOldModelRevision(),
+					        event.getOldObjectRevision(), event.getOldFieldRevision(),
 					        event.inTransaction());
 					break;
 				case CHANGE:
@@ -403,7 +423,7 @@ public class EventDelta {
 	 *            failed - now the again added object has the wrong revision
 	 *            number (since we cannot take one from the server change log)
 	 */
-	public void applyTo(XWritableModel model) {
+	public void applyTo(XRevWritableModel model) {
 		
 		/* for all newly created objects */
 		Iterator<XModelEvent> modelEventIterator = this.modelEvents.iterator();
@@ -415,6 +435,7 @@ public class EventDelta {
 				if(existingObject != null)
 					throw new RuntimeException("object " + objectId + " already existed!");
 				model.createObject(objectId);
+				model.getObject(objectId).setRevisionNumber(currentEvent.getRevisionNumber());
 			}
 		}
 		/* for all events concerning newly created fields: */
@@ -431,7 +452,8 @@ public class EventDelta {
 				if(existingField != null)
 					throw new RuntimeException("field " + fieldId + " already existed!");
 				model.getObject(keyEntryTuple.getFirst()).createField(fieldId);
-				
+				model.getObject(keyEntryTuple.getFirst()).getField(fieldId)
+				        .setRevisionNumber(currentEvent.getRevisionNumber());
 			}
 			
 		}
@@ -449,7 +471,10 @@ public class EventDelta {
 			        fieldId);
 			if(currentEvent.getChangeType() == ChangeType.ADD
 			        || currentEvent.getChangeType() == ChangeType.CHANGE) {
-				currentField.setValue(currentEvent.getNewValue());
+				if(currentField != null) {
+					currentField.setValue(currentEvent.getNewValue());
+					
+				}
 			} else if(currentEvent.getChangeType() == ChangeType.REMOVE) {
 				currentField.setValue(null);
 			}
