@@ -37,7 +37,7 @@ public class Executor {
     private static final Logger log = LoggerFactory.getLogger(Executor.class);
     
     /**
-     * @param command may NOT be a {@link XRepositoryCommand}
+     * @param command may also be a {@link XRepositoryCommand}
      * @param change
      * @param inTransaction
      * @param ctxBeforeCmd to read from
@@ -47,13 +47,13 @@ public class Executor {
     private static CheckResult checkAtomic(XAtomicCommand command, GaeChange change,
             boolean inTransaction, @NeverNull ContextBeforeCommand ctxBeforeCmd,
             ContextInTxn ctxInTxn) {
-        XyAssert.xyAssert(command.getTarget().getAddressedType() != XType.XREPOSITORY);
-        XyAssert.xyAssert(command.getChangedEntity().getObject() != null,
-                "MOF commands each must have an objectId in their address");
         XyAssert.xyAssert(ctxBeforeCmd != null);
         assert ctxBeforeCmd != null;
         
         switch(command.getTarget().getAddressedType()) {
+        case XREPOSITORY:
+            return Executor.checkRepositoryCommand((XRepositoryCommand)command, change,
+                    ctxBeforeCmd, ctxInTxn);
         case XMODEL:
             return Executor.checkModelCommand((XModelCommand)command, change, ctxBeforeCmd,
                     ctxInTxn, inTransaction);
@@ -63,7 +63,6 @@ public class Executor {
         case XFIELD:
             return Executor.checkFieldCommand((XFieldCommand)command, change, ctxBeforeCmd,
                     ctxInTxn, inTransaction);
-        case XREPOSITORY:
         default:
             throw new AssertionError("Cannot happen");
         }
@@ -459,20 +458,23 @@ public class Executor {
     }
     
     /**
-     * @param rc
+     * @param repoCmd
+     * @param change
+     * @param ctxBeforeCmd
+     * @param ctxInTxn
      * @return
      */
-    private static CheckResult checkRepositoryCommand(XRepositoryCommand rc, GaeChange change,
+    private static CheckResult checkRepositoryCommand(XRepositoryCommand repoCmd, GaeChange change,
             ContextBeforeCommand ctxBeforeCmd, ContextInTxn ctxInTxn) {
         
         GaeModelRevInfo infoBeforeCmd = ctxBeforeCmd.getInfo();
         boolean modelExistsBeforeCmd = infoBeforeCmd.isModelExists();
         
-        switch(rc.getChangeType()) {
+        switch(repoCmd.getChangeType()) {
         case ADD:
             if(!ctxInTxn.isModelExists()) {
-                return CheckResult.successCreatedModel(rc, change, ctxInTxn);
-            } else if(rc.isForced()) {
+                return CheckResult.successCreatedModel(repoCmd, change, ctxInTxn);
+            } else if(repoCmd.isForced()) {
                 return CheckResult.successNoChange("Model exists");
             } else {
                 return CheckResult
@@ -480,21 +482,21 @@ public class Executor {
             }
         case REMOVE:
             long modelRevBeforeCmd = infoBeforeCmd.getLastStableSuccessChange();
-            if((!modelExistsBeforeCmd || modelRevBeforeCmd != rc.getRevisionNumber())
-                    && !rc.isForced()) {
+            if((!modelExistsBeforeCmd || modelRevBeforeCmd != repoCmd.getRevisionNumber())
+                    && !repoCmd.isForced()) {
                 return CheckResult.failed("Safe RepositoryCommand REMOVE failed. Reason: "
                         + (!modelExistsBeforeCmd ? "model is null" : "modelRevNr:"
-                                + modelRevBeforeCmd + " cmdRevNr:" + rc.getRevisionNumber()
-                                + " forced:" + rc.isForced()));
+                                + modelRevBeforeCmd + " cmdRevNr:" + repoCmd.getRevisionNumber()
+                                + " forced:" + repoCmd.isForced()));
             } else if(modelExistsBeforeCmd) {
-                log.debug("Removing model " + rc.getChangedEntity() + " " + modelRevBeforeCmd);
-                return CheckResult.successRemovedModel(rc, change, ctxInTxn);
+                log.debug("Removing model " + repoCmd.getChangedEntity() + " " + modelRevBeforeCmd);
+                return CheckResult.successRemovedModel(repoCmd, change, ctxInTxn);
             } else {
                 return CheckResult.successNoChange("Model did not exist");
             }
             
         default:
-            throw new AssertionError("XRepositoryCommand with unexpected type: " + rc);
+            throw new AssertionError("XRepositoryCommand with unexpected type: " + repoCmd);
         }
     }
     
