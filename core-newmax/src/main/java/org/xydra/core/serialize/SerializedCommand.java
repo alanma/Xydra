@@ -73,7 +73,7 @@ public class SerializedCommand {
             if(revisionString != null)
                 throw new ParsingError(element, "Attribute " + REVISION_ATTRIBUTE
                         + " not allowed for non-field-changes of type ADD");
-            return XCommand.SAFE;
+            return XCommand.SAFE_STATE_BOUND;
         }
         
         if(revisionString == null) {

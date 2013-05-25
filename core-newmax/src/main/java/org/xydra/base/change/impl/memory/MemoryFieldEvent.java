@@ -223,7 +223,8 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
         super(target, changeType, actor, inTransaction, implied);
         
         if(target.getField() == null || fieldRevision < 0) {
-            throw new IllegalArgumentException("field Id and revision must be set for field events");
+            throw new IllegalArgumentException("fieldId (" + target.getField() + ") and revision ("
+                    + fieldRevision + ") must be set for field events");
         }
         
         if(objectRevision < 0 && objectRevision != REVISION_OF_ENTITY_NOT_SET

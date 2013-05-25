@@ -24,7 +24,7 @@ import org.xydra.index.XI;
  * @author dscharrer
  * 
  */
-public class ChangedField implements XWritableField, DeltaUtils.IFieldDiff {
+public class ChangedField implements XWritableField, IFieldDiff {
     
     private final XReadableField base;
     boolean changed = false;

@@ -1792,7 +1792,7 @@ public abstract class AbstractPersistenceTestForAtomicCommandsAndMiscellaneous {
 					assertEquals(value, field.getValue());
 					
 					XCommand addValueCommand = this.comFactory.createAddValueCommand(fieldAddress,
-					        XCommand.SAFE, value, false);
+					        XCommand.SAFE_STATE_BOUND, value, false);
 					
 					txBuilder.addCommand(addValueCommand);
 				}
@@ -1825,7 +1825,7 @@ public abstract class AbstractPersistenceTestForAtomicCommandsAndMiscellaneous {
 					 * number should be 0.
 					 */
 					XCommand removeObjectCommand = this.comFactory.createRemoveObjectCommand(
-					        objectAddress, XCommand.SAFE, false);
+					        objectAddress, XCommand.SAFE_STATE_BOUND, false);
 					
 					txBuilder.addCommand(removeObjectCommand);
 				}
@@ -1895,7 +1895,7 @@ public abstract class AbstractPersistenceTestForAtomicCommandsAndMiscellaneous {
 				field.setValue(value);
 				
 				XCommand addValueCommand = this.comFactory.createAddValueCommand(fieldAddress,
-				        XCommand.SAFE, value, false);
+				        XCommand.SAFE_STATE_BOUND, value, false);
 				txBuilder.addCommand(addValueCommand);
 			}
 		}
@@ -1932,7 +1932,7 @@ public abstract class AbstractPersistenceTestForAtomicCommandsAndMiscellaneous {
 		field.setValue(value);
 		
 		XCommand addValueCommand = this.comFactory.createAddValueCommand(fieldAddress,
-		        XCommand.SAFE, value, false);
+		        XCommand.SAFE_STATE_BOUND, value, false);
 		txBuilder.addCommand(addValueCommand);
 		
 		XTransaction txn = txBuilder.build();
@@ -1960,7 +1960,7 @@ public abstract class AbstractPersistenceTestForAtomicCommandsAndMiscellaneous {
 			if(removeField) {
 				toBeRemovedFields.add(fieldId);
 				XCommand removeFieldCommand = this.comFactory.createRemoveFieldCommand(
-				        fieldAddress, XCommand.SAFE, false);
+				        fieldAddress, XCommand.SAFE_STATE_BOUND, false);
 				
 				txnBuilder.addCommand(removeFieldCommand);
 				
@@ -1976,7 +1976,7 @@ public abstract class AbstractPersistenceTestForAtomicCommandsAndMiscellaneous {
 						assertEquals(null, field.getValue());
 						
 						XCommand removeValueCommand = this.comFactory.createRemoveValueCommand(
-						        fieldAddress, XCommand.SAFE, false);
+						        fieldAddress, XCommand.SAFE_STATE_BOUND, false);
 						
 						txnBuilder.addCommand(removeValueCommand);
 						
@@ -1994,7 +1994,7 @@ public abstract class AbstractPersistenceTestForAtomicCommandsAndMiscellaneous {
 							assertEquals(newValue, field.getValue());
 							
 							XCommand changeValueCommand = this.comFactory.createChangeValueCommand(
-							        fieldAddress, XCommand.SAFE, newValue, false);
+							        fieldAddress, XCommand.SAFE_STATE_BOUND, newValue, false);
 							
 							txnBuilder.addCommand(changeValueCommand);
 						}
@@ -2459,7 +2459,7 @@ public abstract class AbstractPersistenceTestForAtomicCommandsAndMiscellaneous {
 						 * the field didn't exist before the transaction, so its
 						 * revision number is non-existant.
 						 */
-						long fieldRevNr = XCommand.SAFE;
+						long fieldRevNr = XCommand.SAFE_STATE_BOUND;
 						
 						boolean failBecauseOfFaultyFieldCommand = false;
 						if(!failBecauseOfAddOrRemoveFieldCommand
@@ -2585,7 +2585,7 @@ public abstract class AbstractPersistenceTestForAtomicCommandsAndMiscellaneous {
 					XAddress fieldAddress = XX.resolveField(failObject.getAddress(), fieldId);
 					
 					XCommand removeCom = this.comFactory.createRemoveFieldCommand(fieldAddress,
-					        XCommand.SAFE
+					        XCommand.SAFE_STATE_BOUND
 					        // failObject.getRevisionNumber()
 					        , false);
 					
@@ -3897,11 +3897,11 @@ public abstract class AbstractPersistenceTestForAtomicCommandsAndMiscellaneous {
 		assertEquals(1, object.getRevisionNumber());
 		
 		XTransactionBuilder builder2 = new XTransactionBuilder(objectAddress);
-		builder2.addField(objectAddress, XCommand.SAFE, XX.toId("object0field0"));
-		builder2.addField(objectAddress, XCommand.SAFE, XX.toId("object0field1"));
-		builder2.addField(objectAddress, XCommand.SAFE, XX.toId("object0field21"));
+		builder2.addField(objectAddress, XCommand.SAFE_STATE_BOUND, XX.toId("object0field0"));
+		builder2.addField(objectAddress, XCommand.SAFE_STATE_BOUND, XX.toId("object0field1"));
+		builder2.addField(objectAddress, XCommand.SAFE_STATE_BOUND, XX.toId("object0field21"));
 		// FIXME was revision 0 instead of SAFE
-		builder2.addValue(XX.resolveField(objectAddress, XX.toId("object0field21")), XCommand.SAFE,
+		builder2.addValue(XX.resolveField(objectAddress, XX.toId("object0field21")), XCommand.SAFE_STATE_BOUND,
 		        XV.toValue(false));
 		XTransaction txn2 = builder2.build();
 		revNr = this.persistence.executeCommand(this.actorId, txn2);

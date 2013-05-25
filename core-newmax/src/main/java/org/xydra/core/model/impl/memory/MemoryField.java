@@ -156,7 +156,7 @@ public class MemoryField extends AbstractMOFEntity implements XField, IMemoryFie
                 }
             }
             
-            return Executor.executeFieldCommand(getRoot().getSessionActor(), command, modelState,
+            return Executor.executeCommandOnField(getRoot().getSessionActor(), command, modelState,
                     objectState, this.fieldState, this.getRoot(), null);
         }
     }

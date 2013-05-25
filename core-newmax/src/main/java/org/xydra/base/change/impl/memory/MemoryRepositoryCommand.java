@@ -40,7 +40,7 @@ public class MemoryRepositoryCommand extends MemoryAtomicCommand implements XRep
         if(isForced) {
             return createAddCommand(target, XCommand.FORCED, modelId);
         } else {
-            return createAddCommand(target, XCommand.SAFE, modelId);
+            return createAddCommand(target, XCommand.SAFE_STATE_BOUND, modelId);
         }
     }
     
@@ -53,7 +53,7 @@ public class MemoryRepositoryCommand extends MemoryAtomicCommand implements XRep
      *            to - repository Id must not be null, model, object & field Id
      *            must be null
      * @param modelRevision Must be {@link XCommand#FORCED} or
-     *            {@link XCommand#SAFE} to determine the behavior of this
+     *            {@link XCommand#SAFE_STATE_BOUND} to determine the behavior of this
      *            command.
      * @param modelId The {@link XId} for the model which is to be added
      * @return A new {@link XRepositoryCommand} of the add-type
@@ -63,7 +63,7 @@ public class MemoryRepositoryCommand extends MemoryAtomicCommand implements XRep
     public static XRepositoryCommand createAddCommand(XAddress target, long modelRevision,
             XId modelId) {
         
-        if(modelRevision != XCommand.FORCED && modelRevision != XCommand.SAFE)
+        if(modelRevision != XCommand.FORCED && modelRevision != XCommand.SAFE_STATE_BOUND)
             throw new RuntimeException("invalid revision for an XObjectCommand of type ADD: "
                     + modelRevision);
         
@@ -79,7 +79,7 @@ public class MemoryRepositoryCommand extends MemoryAtomicCommand implements XRep
      *            to - repository {@link XId} must not be null, model, object &
      *            field {@link XId} must be null
      * @param modelRevision Must be {@link XCommand#FORCED} or
-     *            {@link XCommand#SAFE} to determine the behavior of this
+     *            {@link XCommand#SAFE_STATE_BOUND} to determine the behavior of this
      *            command.
      * @param modelId The {@link XId} of the model which is to be removed
      * @return A new {@link XRepositoryCommand} of the remove-type

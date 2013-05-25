@@ -24,9 +24,9 @@ import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.value.XValue;
 import org.xydra.core.XCopyUtils;
 import org.xydra.core.XX;
-import org.xydra.core.model.delta.DeltaUtils;
-import org.xydra.core.model.delta.DeltaUtils.IFieldDiff;
-import org.xydra.core.model.delta.DeltaUtils.IObjectDiff;
+import org.xydra.core.model.delta.IFieldDiff;
+import org.xydra.core.model.delta.IModelDiff;
+import org.xydra.core.model.delta.IObjectDiff;
 import org.xydra.core.util.DumpUtils;
 import org.xydra.index.iterator.AbstractFilteringIterator;
 import org.xydra.index.iterator.TransformingIterator;
@@ -53,7 +53,7 @@ import org.xydra.sharedutils.XyAssert;
  * 
  * @author xamde
  */
-public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff {
+public class SessionCachedModel implements XWritableModel, IModelDiff {
     
     private long rev = UNDEFINED;
     
@@ -168,7 +168,7 @@ public class SessionCachedModel implements XWritableModel, DeltaUtils.IModelDiff
     }
     
     private static class CachedObject extends CachedEntity implements XWritableObject,
-            DeltaUtils.IObjectDiff {
+            IObjectDiff {
         /** FieldId -> CachedObject */
         private Map<XId,CachedField> cachedFields;
         

@@ -40,7 +40,7 @@ public class MemoryModelCommand extends MemoryAtomicCommand implements XModelCom
         if(isForced) {
             return createAddCommand(target, XCommand.FORCED, objectId);
         } else {
-            return createAddCommand(target, XCommand.SAFE, objectId);
+            return createAddCommand(target, XCommand.SAFE_STATE_BOUND, objectId);
         }
     }
     
@@ -52,19 +52,19 @@ public class MemoryModelCommand extends MemoryAtomicCommand implements XModelCom
      * @param target The target of this command - the model {@link XId} must not
      *            be null, object & field {@link XId} must be null
      * @param objectRevision Must be {@link XCommand#FORCED} or
-     *            {@link XCommand#SAFE} to determine the behaviour of this
+     *            {@link XCommand#SAFE_STATE_BOUND} to determine the behaviour of this
      *            command.
      * @param objectId The {@link XId} for the object which is to be
      *            added
      * @return A new {@link XModelCommand} of the add-type
      * @throws IllegalArgumentException if the given {@link XAddress} doesn't
      *             refer to an model, if the given objectRevison is
-     *             neither {@link XCommand#FORCED} or {@link XCommand#SAFE} or
+     *             neither {@link XCommand#FORCED} or {@link XCommand#SAFE_STATE_BOUND} or
      *             if the given objectId is null
      */
     public static XModelCommand createAddCommand(XAddress target, long objectRevision, XId objectId) {
         
-        if(objectRevision != XCommand.FORCED && objectRevision != XCommand.SAFE)
+        if(objectRevision != XCommand.FORCED && objectRevision != XCommand.SAFE_STATE_BOUND)
             throw new IllegalArgumentException(
                     "invalid revision for an XObjectCommand of type ADD: " + objectRevision);
         

@@ -109,7 +109,7 @@ public class MemoryCommandFactory implements XCommandFactory {
     @Override
     public XObjectCommand createAddFieldCommand(XId repositoryId, XId modelId, XId objectId,
             XId fieldId, boolean isForced) {
-        long revNr = isForced ? XCommand.FORCED : XCommand.SAFE;
+        long revNr = isForced ? XCommand.FORCED : XCommand.SAFE_STATE_BOUND;
         
         XAddress target = Base.toAddress(repositoryId, modelId, objectId, null);
         
@@ -131,7 +131,7 @@ public class MemoryCommandFactory implements XCommandFactory {
     
     @Override
     public XRepositoryCommand createAddModelCommand(XId repositoryId, XId modelId, boolean isForced) {
-        long revNr = isForced ? XCommand.FORCED : XCommand.SAFE;
+        long revNr = isForced ? XCommand.FORCED : XCommand.SAFE_STATE_BOUND;
         
         XAddress target = Base.toAddress(repositoryId, null, null, null);
         
@@ -184,7 +184,7 @@ public class MemoryCommandFactory implements XCommandFactory {
     @Override
     public XModelCommand createAddObjectCommand(XId repositoryId, XId modelId, XId objectId,
             boolean isForced) {
-        long revNr = isForced ? XCommand.FORCED : XCommand.SAFE;
+        long revNr = isForced ? XCommand.FORCED : XCommand.SAFE_STATE_BOUND;
         
         XAddress target = Base.toAddress(repositoryId, modelId, null, null);
         

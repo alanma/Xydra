@@ -51,4 +51,8 @@ public class RevisionConstants {
      */
     public static final long NO_REVISION = -22;
     
+    public static final long COMMAND_INTENT_FORCED = -10;
+    
+    public static final long COMMAND_INTENT_SAFE_STATE_BOUND = -11;
+    
 }

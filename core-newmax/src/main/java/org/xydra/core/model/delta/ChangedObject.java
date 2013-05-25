@@ -17,9 +17,9 @@ import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableObject;
+import org.xydra.base.rmof.impl.XExistsWritableObject;
 import org.xydra.base.rmof.impl.memory.SimpleField;
 import org.xydra.core.XX;
-import org.xydra.core.model.delta.DeltaUtils.IFieldDiff;
 import org.xydra.index.iterator.AbstractFilteringIterator;
 import org.xydra.index.iterator.BagUnionIterator;
 import org.xydra.sharedutils.XyAssert;
@@ -40,7 +40,8 @@ import org.xydra.sharedutils.XyAssert;
  * @author dscharrer
  * 
  */
-public class ChangedObject implements XWritableObject, DeltaUtils.IObjectDiff {
+public class ChangedObject implements XWritableObject, IObjectDiff,
+        XExistsWritableObject {
     
     // Fields that are not in base and have been added.
     // Contains no XIds that are in removed or changed.
@@ -56,6 +57,8 @@ public class ChangedObject implements XWritableObject, DeltaUtils.IObjectDiff {
     // Fields that are in base but have been removed.
     // Contains no XIds that are in added or changed.
     private final Set<XId> removed = new HashSet<XId>(2);
+    
+    private boolean objectExists = true;
     
     /**
      * Wrap an {@link XReadableObject} to record a set of changes made. Multiple
@@ -479,6 +482,16 @@ public class ChangedObject implements XWritableObject, DeltaUtils.IObjectDiff {
     @Override
     public Collection<XId> getRemoved() {
         return this.removed;
+    }
+    
+    @Override
+    public boolean exists() {
+        return this.objectExists;
+    }
+    
+    @Override
+    public void setExists(boolean entityExists) {
+        this.objectExists = entityExists;
     }
     
 }

@@ -109,8 +109,6 @@ public abstract class AbstractTransactionEvent implements XTransactionEvent {
         
         /* check if implied events are marked correctly */
         for(XAtomicEvent event : this) {
-            System.out.println("TRACE. " + event);
-            
             boolean implied = false;
             boolean lowestInMofHierarchy = true;
             for(XAddress addr = event.getTarget(); addr != null; addr = addr.getParent()) {
@@ -138,9 +136,12 @@ public abstract class AbstractTransactionEvent implements XTransactionEvent {
         Set<XAddress> values = new HashSet<XAddress>();
         
         for(XAtomicEvent event : this) {
+            // FIXME ####
+            System.out.println("EVENT " + event);
             
             if(event instanceof XFieldEvent) {
-                assert !values.contains(event.getTarget()) : "changed value of field twice";
+                assert !values.contains(event.getTarget()) : "changed value of field twice "
+                        + event.getTarget();
                 values.add(event.getTarget());
             } else {
                 XAddress addr = event.getChangedEntity();
@@ -298,9 +299,9 @@ public abstract class AbstractTransactionEvent implements XTransactionEvent {
     public String toString() {
         String str = "TransactionEvent by actor '" + this.actor + "' @" + this.target + " r";
         str += (this.modelRevision < 0 ? "-" : this.modelRevision);
-        if(this.objectRevision >= 0) {
-            str += "/" + this.objectRevision;
-        }
+        // if(this.objectRevision >= 0) {
+        str += "/" + this.objectRevision;
+        // }
         str += ": [";
         boolean b = false;
         for(XAtomicEvent event : this) {

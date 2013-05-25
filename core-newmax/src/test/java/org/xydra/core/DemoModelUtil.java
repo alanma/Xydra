@@ -147,89 +147,89 @@ public class DemoModelUtil {
     
     public static void setupJohn(XAddress objectAddr, XTransactionBuilder tb) {
         
-        tb.addField(objectAddr, XCommand.SAFE, TITLE_ID);
+        tb.addField(objectAddr, XCommand.SAFE_STATE_BOUND, TITLE_ID);
         XAddress titleAddr = XX.resolveField(objectAddr, TITLE_ID);
         tb.addValue(titleAddr, XCommand.FORCED, TITLE_VALUE);
         
-        tb.addField(objectAddr, XCommand.SAFE, PHONE_ID);
+        tb.addField(objectAddr, XCommand.SAFE_STATE_BOUND, PHONE_ID);
         XAddress phoneAddr = XX.resolveField(objectAddr, PHONE_ID);
         tb.addValue(phoneAddr, XCommand.FORCED, PHONE_VALUE);
         
-        tb.addField(objectAddr, XCommand.SAFE, ALIASES_ID);
+        tb.addField(objectAddr, XCommand.SAFE_STATE_BOUND, ALIASES_ID);
         XAddress aliasesAddr = XX.resolveField(objectAddr, ALIASES_ID);
         tb.addValue(aliasesAddr, XCommand.FORCED, ALIASES_VALUE);
         
-        tb.addField(objectAddr, XCommand.SAFE, FRIENDS_ID);
+        tb.addField(objectAddr, XCommand.SAFE_STATE_BOUND, FRIENDS_ID);
         XAddress friendsAddr = XX.resolveField(objectAddr, FRIENDS_ID);
         tb.addValue(friendsAddr, XCommand.FORCED, FRIENDS_VALUE);
         
-        tb.addField(objectAddr, XCommand.SAFE, SPOUSE_ID);
+        tb.addField(objectAddr, XCommand.SAFE_STATE_BOUND, SPOUSE_ID);
         XAddress spouseAddr = XX.resolveField(objectAddr, SPOUSE_ID);
         tb.addValue(spouseAddr, XCommand.FORCED, CLAUDIA_ID);
         
-        tb.addField(objectAddr, XCommand.SAFE, HIDDEN_ID);
+        tb.addField(objectAddr, XCommand.SAFE_STATE_BOUND, HIDDEN_ID);
         XAddress hiddenAddr = XX.resolveField(objectAddr, HIDDEN_ID);
         tb.addValue(hiddenAddr, XCommand.FORCED, HIDDEN_VALUE);
         
-        tb.addField(objectAddr, XCommand.SAFE, FLAGS_ID);
+        tb.addField(objectAddr, XCommand.SAFE_STATE_BOUND, FLAGS_ID);
         XAddress flagsAddr = XX.resolveField(objectAddr, FLAGS_ID);
         tb.addValue(flagsAddr, XCommand.FORCED, FLAGS_VALUE);
         
-        tb.addField(objectAddr, XCommand.SAFE, HEIGHT_ID);
+        tb.addField(objectAddr, XCommand.SAFE_STATE_BOUND, HEIGHT_ID);
         XAddress heightAddr = XX.resolveField(objectAddr, HEIGHT_ID);
         tb.addValue(heightAddr, XCommand.FORCED, HEIGHT_VALUE);
         
-        tb.addField(objectAddr, XCommand.SAFE, COORDINATES_ID);
+        tb.addField(objectAddr, XCommand.SAFE_STATE_BOUND, COORDINATES_ID);
         XAddress coordinatesAddr = XX.resolveField(objectAddr, COORDINATES_ID);
         tb.addValue(coordinatesAddr, XCommand.FORCED, COORDINATES_VALUE);
         
-        tb.addField(objectAddr, XCommand.SAFE, AGE_ID);
+        tb.addField(objectAddr, XCommand.SAFE_STATE_BOUND, AGE_ID);
         XAddress ageAddr = XX.resolveField(objectAddr, AGE_ID);
         tb.addValue(ageAddr, XCommand.FORCED, AGE_VALUE);
         
-        tb.addField(objectAddr, XCommand.SAFE, SCORES_ID);
+        tb.addField(objectAddr, XCommand.SAFE_STATE_BOUND, SCORES_ID);
         XAddress scoresAddr = XX.resolveField(objectAddr, SCORES_ID);
         tb.addValue(scoresAddr, XCommand.FORCED, SCORES_VALUE);
         
-        tb.addField(objectAddr, XCommand.SAFE, MAXCALLTIME_ID);
+        tb.addField(objectAddr, XCommand.SAFE_STATE_BOUND, MAXCALLTIME_ID);
         XAddress maxcalltimeAddr = XX.resolveField(objectAddr, MAXCALLTIME_ID);
         tb.addValue(maxcalltimeAddr, XCommand.FORCED, MAXCALLTIME_VALUE);
         
-        tb.addField(objectAddr, XCommand.SAFE, LASTCALLTIMES_ID);
+        tb.addField(objectAddr, XCommand.SAFE_STATE_BOUND, LASTCALLTIMES_ID);
         XAddress lastcalltimesAddr = XX.resolveField(objectAddr, LASTCALLTIMES_ID);
         tb.addValue(lastcalltimesAddr, XCommand.FORCED, LASTCALLTIMES_VALUE);
         
-        tb.addField(objectAddr, XCommand.SAFE, EMPTYFIELD_ID);
+        tb.addField(objectAddr, XCommand.SAFE_STATE_BOUND, EMPTYFIELD_ID);
         
-        tb.addField(objectAddr, XCommand.SAFE, SIGNATURE_ID);
+        tb.addField(objectAddr, XCommand.SAFE_STATE_BOUND, SIGNATURE_ID);
         XAddress signatureAddr = XX.resolveField(objectAddr, SIGNATURE_ID);
         tb.addValue(signatureAddr, XCommand.FORCED, SIGNATURE_VALUE);
         
-        tb.addField(objectAddr, XCommand.SAFE, COOKIES_ID);
+        tb.addField(objectAddr, XCommand.SAFE_STATE_BOUND, COOKIES_ID);
         XAddress cookiesAddr = XX.resolveField(objectAddr, COOKIES_ID);
         tb.addValue(cookiesAddr, XCommand.FORCED, COOKIES_VALUE);
         
-        tb.addField(objectAddr, XCommand.SAFE, COOKIENAMES_ID);
+        tb.addField(objectAddr, XCommand.SAFE_STATE_BOUND, COOKIENAMES_ID);
         XAddress cookienamesAddr = XX.resolveField(objectAddr, COOKIENAMES_ID);
         tb.addValue(cookienamesAddr, XCommand.FORCED, COOKIENAMES_VALUE);
         
-        tb.addField(objectAddr, XCommand.SAFE, ADDRESS_ID);
+        tb.addField(objectAddr, XCommand.SAFE_STATE_BOUND, ADDRESS_ID);
         XAddress addressAddr = XX.resolveField(objectAddr, ADDRESS_ID);
         tb.addValue(addressAddr, XCommand.FORCED, ADDRESS_VALUE);
         
-        tb.addField(objectAddr, XCommand.SAFE, ADDRESSLIST_ID);
+        tb.addField(objectAddr, XCommand.SAFE_STATE_BOUND, ADDRESSLIST_ID);
         XAddress addressListAddr = XX.resolveField(objectAddr, ADDRESSLIST_ID);
         tb.addValue(addressListAddr, XCommand.FORCED, ADDRESSLIST_VALUE);
         
-        tb.addField(objectAddr, XCommand.SAFE, ADDRESSSET_ID);
+        tb.addField(objectAddr, XCommand.SAFE_STATE_BOUND, ADDRESSSET_ID);
         XAddress addressSetAddr = XX.resolveField(objectAddr, ADDRESSSET_ID);
         tb.addValue(addressSetAddr, XCommand.FORCED, ADDRESSSET_VALUE);
         
-        tb.addField(objectAddr, XCommand.SAFE, IDSORTEDSET_ID);
+        tb.addField(objectAddr, XCommand.SAFE_STATE_BOUND, IDSORTEDSET_ID);
         XAddress idSortedSetAddr = XX.resolveField(objectAddr, IDSORTEDSET_ID);
         tb.addValue(idSortedSetAddr, XCommand.FORCED, IDSORTEDSET_VALUE);
         
-        tb.addField(objectAddr, XCommand.SAFE, ADDRESSSORTEDSET_ID);
+        tb.addField(objectAddr, XCommand.SAFE_STATE_BOUND, ADDRESSSORTEDSET_ID);
         XAddress addressSortedSetAddr = XX.resolveField(objectAddr, ADDRESSSORTEDSET_ID);
         tb.addValue(addressSortedSetAddr, XCommand.FORCED, ADDRESSSORTEDSET_VALUE);
         
@@ -251,12 +251,12 @@ public class DemoModelUtil {
             boolean createModel) {
         if(createModel) {
             assert modelAddr.getParent() != null;
-            tb.addModel(modelAddr.getParent(), XCommand.SAFE, modelAddr.getModel());
+            tb.addModel(modelAddr.getParent(), XCommand.SAFE_STATE_BOUND, modelAddr.getModel());
         }
         
-        tb.addObject(modelAddr, XCommand.SAFE, JOHN_ID);
-        tb.addObject(modelAddr, XCommand.SAFE, CLAUDIA_ID);
-        tb.addObject(modelAddr, XCommand.SAFE, PETER_ID);
+        tb.addObject(modelAddr, XCommand.SAFE_STATE_BOUND, JOHN_ID);
+        tb.addObject(modelAddr, XCommand.SAFE_STATE_BOUND, CLAUDIA_ID);
+        tb.addObject(modelAddr, XCommand.SAFE_STATE_BOUND, PETER_ID);
         
         XAddress johnAddr = XX.resolveObject(modelAddr, JOHN_ID);
         

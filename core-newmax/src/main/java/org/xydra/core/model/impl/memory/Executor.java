@@ -3,14 +3,12 @@ package org.xydra.core.model.impl.memory;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.xydra.annotations.CanBeNull;
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.change.XAtomicCommand;
 import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XCommand;
-import org.xydra.base.change.XCommandUtils;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XFieldCommand;
 import org.xydra.base.change.XFieldEvent;
@@ -22,33 +20,26 @@ import org.xydra.base.change.XRepositoryCommand;
 import org.xydra.base.change.XRepositoryEvent;
 import org.xydra.base.change.XTransaction;
 import org.xydra.base.change.XTransactionEvent;
-import org.xydra.base.change.impl.memory.MemoryFieldEvent;
-import org.xydra.base.change.impl.memory.MemoryModelEvent;
-import org.xydra.base.change.impl.memory.MemoryObjectEvent;
-import org.xydra.base.change.impl.memory.MemoryRepositoryEvent;
-import org.xydra.base.change.impl.memory.MemoryTransactionEvent;
-import org.xydra.base.rmof.XReadableField;
-import org.xydra.base.rmof.XReadableModel;
-import org.xydra.base.rmof.XReadableObject;
-import org.xydra.base.rmof.XReadableRepository;
 import org.xydra.base.rmof.XRevWritableField;
 import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
+import org.xydra.base.rmof.XWritableRepository;
 import org.xydra.base.rmof.impl.XExistsReadableModel;
-import org.xydra.base.rmof.impl.XExistsReadableObject;
 import org.xydra.base.rmof.impl.XExistsRevWritableModel;
-import org.xydra.base.rmof.impl.XExistsRevWritableObject;
 import org.xydra.base.rmof.impl.XExistsRevWritableRepository;
+import org.xydra.base.rmof.impl.XExistsWritableModel;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.base.value.XValue;
-import org.xydra.core.XX;
 import org.xydra.core.change.RevisionConstants;
 import org.xydra.core.change.XRMOFChangeListener;
+import org.xydra.core.model.delta.ChangedField;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.delta.ChangedObject;
+import org.xydra.core.model.delta.DeltaUtils;
+import org.xydra.core.model.delta.DeltaUtils.ModelChange;
 import org.xydra.core.model.impl.memory.sync.Root;
 import org.xydra.index.XI;
 import org.xydra.log.Logger;
@@ -63,15 +54,103 @@ import org.xydra.sharedutils.XyAssert;
  * 
  * Implementation notes: Transaction locking is controlled by root.
  * 
+ * 
+ * 
+ * === Transaction handling ===
+ * 
+ * execute XTransaction on model; exists? => delegate executing txn to object
+ * 
+ * 
+ * execute XTransaction on object; exists?
+ * 
+ * 
+ * === Model & Repo handling === Some cases that can happen:
+ * 
+ * model has father, model exists =
+ * 
+ * model has father, model does not exist
+ * 
+ * 
+ * model has no father, model exists
+ * 
+ * model has no father, model does not exist
+ * 
+ * === Strategy for executing commands ===
+ * 
+ * Cases:
+ * 
+ * <pre>
+ * Type              | Executed on         | Result is
+ * ------------------+---------------------+---------------------------------
+ *      FieldCommand | Field               | FieldEvent  or TransactionEvent
+ *     ObjectCommand | Object              | ObjectEvent or TransactionEvent
+ *      ModelCommand | Model               | ModelEvent  or TransactionEvent
+ * RepositoryCommand | Repository or Model | ModelEvent  or TransactionEvent
+ *       Transaction | Model or Object     |                TransactionEvent
+ * </pre>
+ * 
+ * Strategy:
+ * 
+ * <pre>
+ * For txn: Wrap in ChangedEntity to preserve revision numbers before txn
+ * 
+ * For each atomic command:
+ * 
+ *     Check some assertions
+ *     
+ *     try {
+ *       ChangedMOF changedMOF = evaluateRMOFCommand(XAtomicCommand, revNrs before txn, stateWithinTxn)
+ *       if(changedMOF==null) return NOCHANGE;
+ *       // change happens, represented in ChangedMOF
+ *       List(XAtomicEvent) events = ...
+ *       createEvents(events, revNr before txn, changedMOF)
+ *       applyEvents to state from before txn
+ *       fireEvents
+ *     } catch (ExecutionException) {
+ *       return FAILED;
+ *     }
+ *     
+ *     Command + State before txn -> 
+ *         ChangedEntity (Success) or 
+ *         Exception (Failed) or 
+ *         null (NoChange) 
+ * 
+ * if changes:
+ * ChangedEntity -> Events + Apply changes (have all the same nextRev)
+ * </pre>
+ * 
+ * 
+ * Command -evaluate-> ChangedField -create-> Event -apply->
+ * 
  * @author xamde
  */
 public class Executor {
     
     /**
+     * Thrown by run...methods if command fails
+     */
+    private static class ExecutionException extends RuntimeException {
+        
+        private static final long serialVersionUID = 1L;
+        
+        /**
+         * @param msg reasons for failing command
+         */
+        public ExecutionException(String msg) {
+            super(msg);
+        }
+        
+    }
+    
+    private static final Logger log = LoggerFactory.getLogger(Executor.class);
+    
+    /**
+     * Execute a single field command, not part of a transaction.
+     * 
      * Events are fired to listener and root in an intermixed fashion.
      * 
      * @param actorId @NeverNull
-     * @param command @NeverNull
+     * @param fieldCommand @NeverNull
      * @param modelState @CanBeNull
      * @param objectState @CanBeNull if modelState is also null
      * @param fieldState @NeverNull
@@ -80,99 +159,184 @@ public class Executor {
      * @param root used to fire events @NeverNull
      * @return result of executing command
      */
-    public static long executeFieldCommand(XId actorId, XFieldCommand command,
+    public static long executeCommandOnField(XId actorId, XFieldCommand fieldCommand,
     
     XRevWritableModel modelState, XRevWritableObject objectState, XRevWritableField fieldState,
     
     Root root, XRMOFChangeListener changeEventListener) {
-        
-        /* Assertions and failure cases */
+        /* Assertions */
         assert !(objectState == null && modelState != null);
         XyAssert.xyAssert(!root.isTransactionInProgess());
         
-        // check whether the given event actually refers to this field
-        if(!fieldState.getAddress().equals(command.getTarget())) {
+        /* Command -run-> ChangedField -create-> Events -apply-> -fire-> */
+        try {
+            ChangedField fieldInTxn = new ChangedField(fieldState);
+            runCommandOnField(fieldCommand, fieldState, fieldInTxn);
+            if(!fieldInTxn.isChanged()) {
+                return XCommand.NOCHANGE;
+            }
+            
+            // create event
+            long currentModelRev = modelState == null ? XEvent.REVISION_OF_ENTITY_NOT_SET
+                    : modelState.getRevisionNumber();
+            long currentObjectRev = objectState == null ? XEvent.REVISION_OF_ENTITY_NOT_SET
+                    : objectState.getRevisionNumber();
+            List<XAtomicEvent> events = new LinkedList<XAtomicEvent>();
+            Eventor.createEventsFromChangedField(events, actorId, currentModelRev,
+                    currentObjectRev, fieldState, fieldInTxn, root.isTransactionInProgess());
+            assert events.size() == 1;
+            XEvent event = Eventor.createSingleEvent(events, actorId, fieldCommand.getTarget(),
+                    currentModelRev, currentObjectRev);
+            
+            // apply event
+            Eventor.applyEventOnFieldAndParents((XFieldEvent)event, modelState, objectState,
+                    fieldState);
+            root.getSyncLog().appendSyncLogEntry(fieldCommand, event);
+            fireEvents(root, changeEventListener, event);
+            
+            return event.getRevisionNumber();
+        } catch(ExecutionException e) {
+            log.warn("command " + fieldCommand + " failed", e);
             return XCommand.FAILED;
         }
-        long currentModelRev = modelState == null ? XEvent.REVISION_OF_ENTITY_NOT_SET : modelState
-                .getRevisionNumber();
-        long currentObjectRev = objectState == null ? XEvent.REVISION_OF_ENTITY_NOT_SET
-                : objectState.getRevisionNumber();
-        long currentFieldRev = fieldState.getRevisionNumber();
-        XValue currentValue = fieldState.getValue();
-        
-        EventResult eventResult = createEventFromFieldCommand(actorId, command, currentModelRev,
-                currentObjectRev, currentFieldRev, currentValue, changeEventListener,
-                root.isTransactionInProgess());
-        
-        if(!eventResult.changedSomething())
-            return eventResult.getResult();
-        
-        // apply event
-        XEvent event = eventResult.getEvent();
-        applyFieldEvent((XFieldEvent)event, modelState, objectState, fieldState);
-        root.getSyncLog().appendSyncLogEntry(command, event);
-        fireEvents(root, changeEventListener, event);
-        
-        return event.getRevisionNumber();
     }
     
-    private static class EventResult {
+    /**
+     * Execute a field, object or model command or a transaction.
+     * 
+     * Events are fired to listener and root in an intermixed fashion.
+     * 
+     * @param actorId @NeverNull
+     * @param command @NeverNull
+     * @param repositoryState @CanBeNull
+     * @param modelState @CanBeNull
+     * @param objectState @NeverNull
+     * @param root @NeverNull
+     * @param changeEventListener @CanBenNull
+     * @return resulting revision number or error code
+     */
+    public static long executeCommandOnObject(XId actorId, XCommand command,
+    
+    XWritableRepository repositoryState, XRevWritableModel modelState,
+            XRevWritableObject objectState,
+            
+            Root root, XRMOFChangeListener changeEventListener) {
+        /* Assertions */
+        assert objectState != null;
+        XyAssert.xyAssert(!root.isTransactionInProgess());
         
-        private EventResult(long result, XEvent event) {
-            this.result = result;
-            this.event = event;
-        }
-        
-        public boolean changedSomething() {
-            return XCommandUtils.changedSomething(this.result);
-        }
-        
-        public static EventResult failed() {
-            return new EventResult(XCommand.FAILED, null);
-        }
-        
-        public static EventResult noChange() {
-            return new EventResult(XCommand.NOCHANGE, null);
-        }
-        
-        public static EventResult success(XEvent event) {
-            return new EventResult(event.getRevisionNumber(), event);
-        }
-        
-        public long getResult() {
-            return this.result;
-        }
-        
-        public XEvent getEvent() {
-            return this.event;
-        }
-        
-        private long result;
-        /** is null if result is XCommand.FAILED or XCommand.NOCHANGE */
-        private XEvent event;
-        
-        public boolean isFailed() {
-            return XCommandUtils.failed(getResult());
+        /* Command -run-> ChangedField -create-> Events -apply-> -fire-> */
+        try {
+            ChangedObject objectInTxn = new ChangedObject(objectState);
+            runCommandOnObject(command, objectState, objectInTxn);
+            if(!objectInTxn.hasChanges()) {
+                return XCommand.NOCHANGE;
+            }
+            
+            // create event
+            long currentModelRev = modelState == null ? XEvent.REVISION_OF_ENTITY_NOT_SET
+                    : modelState.getRevisionNumber();
+            List<XAtomicEvent> events = new LinkedList<XAtomicEvent>();
+            Eventor.createEventsFromChangedObject(events, actorId, currentModelRev, objectState,
+                    objectInTxn, root.isTransactionInProgess());
+            XEvent event = Eventor.createSingleEvent(events, actorId, command.getTarget(),
+                    currentModelRev, objectState.getRevisionNumber());
+            
+            // apply event
+            Eventor.applyEventOnObjectAndParents(event, modelState, objectState);
+            root.getSyncLog().appendSyncLogEntry(command, event);
+            fireEvents(root, changeEventListener, event);
+            
+            return event.getRevisionNumber();
+        } catch(ExecutionException e) {
+            log.warn("command " + command + " failed", e);
+            return XCommand.FAILED;
         }
     }
     
-    private static EventResult createEventFromFieldCommand(XId actorId, XFieldCommand command,
+    /**
+     * Execute a field, object, model or repository command or a transaction.
+     * 
+     * Events are fired to listener and root in an intermixed fashion.
+     * 
+     * @param actorId @NeverNull
+     * @param command @NeverNull
+     * @param root @NeverNull
+     * @param repositoryState @CanBeNull
+     * @param modelState @NeverNull
+     * @param changeEventListener @CanBeNull
+     * @return resulting revision number or error code
+     */
+    public static long executeCommandOnModel(XId actorId, XCommand command,
     
-    long currentModelRev, long currentObjectRev, long currentFieldRev, XValue currentValue,
+    XExistsRevWritableRepository repositoryState, XExistsRevWritableModel modelState,
     
-    XRMOFChangeListener changeEventListener, boolean inTransaction) {
+    Root root, XRMOFChangeListener changeEventListener) {
+        /* Assertions */
+        assert modelState != null;
+        XyAssert.xyAssert(!root.isTransactionInProgess());
+        
+        /* Command -run-> ChangedField -create-> Events -apply-> -fire-> */
+        try {
+            ChangedModel modelInTxn = new ChangedModel(modelState);
+            runCommandOnModel(command, modelState, modelInTxn);
+            if(!modelInTxn.hasChanges()) {
+                return XCommand.NOCHANGE;
+            }
+            
+            // create event
+            long currentModelRev = modelState.getRevisionNumber();
+            List<XAtomicEvent> events = new LinkedList<XAtomicEvent>();
+            Eventor.createEventsFromChangedModel(events, actorId, modelState, modelInTxn,
+                    root.isTransactionInProgess());
+            XEvent event = Eventor.createSingleEvent(events, actorId, command.getTarget(),
+                    currentModelRev, RevisionConstants.REVISION_OF_ENTITY_NOT_SET);
+            
+            // apply event
+            Eventor.applyEventOnModel(event, modelState);
+            root.getSyncLog().appendSyncLogEntry(command, event);
+            fireEvents(root, changeEventListener, event);
+            
+            return event.getRevisionNumber();
+        } catch(ExecutionException e) {
+            log.warn("command " + command + " failed", e);
+            return XCommand.FAILED;
+        }
+    }
+    
+    /**
+     * Worker. Can also be used within a transaction. Run... methods define
+     * command execution semantics.
+     * 
+     * @param fieldCommand @NeverNull can be an atomic field command or part of
+     *            a transaction
+     * @param fieldBeforeTxn @CanBeNull
+     * @param fieldInTxn @NeverNull
+     * @throws ExecutionException if the command fails
+     */
+    private static void runCommandOnField(XFieldCommand fieldCommand,
+            XRevWritableField fieldBeforeTxn, XWritableField fieldInTxn) throws ExecutionException {
+        assert fieldCommand != null;
+        assert fieldInTxn != null;
+        
+        // check whether the given event actually refers to this field
+        if(!fieldInTxn.getAddress().equals(fieldCommand.getTarget())) {
+            throw new ExecutionException("Address of command does not match fieldState");
+        }
+        
+        XValue currentValue = fieldInTxn.getValue();
+        long fieldRevBeforeTxn = fieldBeforeTxn == null ? RevisionConstants.NOT_EXISTING
+                : fieldBeforeTxn.getRevisionNumber();
         
         /* Assertions and failure cases */
-        if(!command.isForced() && command.getRevisionNumber() != currentFieldRev) {
-            log.warn("Safe rev-bound-command fails, expected rev=" + command.getRevisionNumber()
-                    + " found rev=" + currentFieldRev);
-            return EventResult.failed();
+        if(!fieldCommand.isForced() && fieldCommand.getRevisionNumber() != fieldRevBeforeTxn) {
+            throw new ExecutionException("Safe rev-bound-command fails, expected rev="
+                    + fieldCommand.getRevisionNumber() + " found rev=" + fieldRevBeforeTxn);
         }
         
         /* Standard execution */
-        XValue newValue = command.getValue();
-        switch(command.getChangeType()) {
+        XValue newValue = fieldCommand.getValue();
+        switch(fieldCommand.getChangeType()) {
         case ADD:
             if(currentValue != null) {
                 /*
@@ -180,9 +344,8 @@ public class Executor {
                  * there is the given value set, not about that there was no
                  * value before
                  */
-                if(!command.isForced()) {
-                    // value already set
-                    return EventResult.failed();
+                if(!fieldCommand.isForced()) {
+                    throw new ExecutionException("Cmd not forced & value was already set");
                 }
             }
             break;
@@ -193,12 +356,9 @@ public class Executor {
                  * there is no value set, not about that there was a value
                  * before
                  */
-                if(!command.isForced()) {
-                    /*
-                     * value is not set and can not be removed or the given
-                     * value is not current anymore
-                     */
-                    return EventResult.failed();
+                if(!fieldCommand.isForced()) {
+                    throw new ExecutionException(
+                            "value is not set and can not be removed or the given value is not current anymore");
                 }
             }
             XyAssert.xyAssert(newValue == null);
@@ -210,209 +370,512 @@ public class Executor {
                  * there is the given value set, not about that there was no
                  * value before
                  */
-                if(!command.isForced()) {
-                    /*
-                     * given old value does not concur with the current value
-                     */
-                    return EventResult.failed();
+                if(!fieldCommand.isForced()) {
+                    throw new ExecutionException(
+                            "given old value does not concur with the current value");
                 }
             }
             break;
         default:
-            throw new IllegalArgumentException("Unknown field command type: " + command);
+            throw new IllegalArgumentException("Unknown field command type: " + fieldCommand);
         }
         
         if(XI.equals(currentValue, newValue)) {
-            return EventResult.noChange();
+            // no change
+            return;
         }
         
-        /* Changes happen, create event */
-        XFieldEvent event = null;
-        XAddress fieldAddress = command.getChangedEntity();
-        switch(command.getChangeType()) {
+        /* Changes happen, materialise them */
+        switch(fieldCommand.getChangeType()) {
         case ADD:
-            if(currentValue == null) {
-                event = MemoryFieldEvent.createAddEvent(actorId, fieldAddress, newValue,
-                        currentModelRev, currentObjectRev, currentFieldRev, inTransaction);
-            } else {
-                assert command.isForced();
-                event = MemoryFieldEvent.createChangeEvent(actorId, fieldAddress, newValue,
-                        currentModelRev, currentObjectRev, currentFieldRev, inTransaction);
-            }
+        case CHANGE:
+            fieldInTxn.setValue(newValue);
             break;
         case REMOVE:
-            event = MemoryFieldEvent.createRemoveEvent(actorId, fieldAddress, currentModelRev,
-                    currentObjectRev, currentFieldRev, false, inTransaction);
-            break;
-        case CHANGE:
-            event = MemoryFieldEvent.createChangeEvent(actorId, fieldAddress, newValue,
-                    currentModelRev, currentObjectRev, currentFieldRev, inTransaction);
+            fieldInTxn.setValue(null);
             break;
         default:
             assert false;
         }
-        assert event != null;
-        
-        return EventResult.success(event);
     }
     
     /**
-     * @param actorId
-     * @param command
-     * @param currentModelRev
-     * @param currentObjectRev
-     * @param currentFieldState @CanBeNull
-     * @param changeEventListener
-     * @param inTransaction
-     * @return
+     * Worker. Can also be used within a transaction. Run... methods define
+     * command execution semantics.
+     * 
+     * @param command @NeverNull
+     * @param objectBeforeTxn @CanBeNull
+     * @param objectInTxn @NeverNull
      */
-    private static EventResult createEventFromObjectCommand(XId actorId, XObjectCommand command,
-            long currentModelRev, long currentObjectRev,
-            @CanBeNull XReadableField currentFieldState, XRMOFChangeListener changeEventListener,
-            boolean inTransaction) {
-        
-        boolean fieldExists = currentFieldState != null;
-        
+    private static void runCommandOnObject(XCommand command, XRevWritableObject objectBeforeTxn,
+            ChangedObject objectInTxn) {
+        if(command instanceof XTransaction) {
+            for(XAtomicCommand atomicCommand : ((XTransaction)command)) {
+                runAtomicCommandOnObject(atomicCommand, objectBeforeTxn, objectInTxn);
+            }
+        } else {
+            runAtomicCommandOnObject((XAtomicCommand)command, objectBeforeTxn, objectInTxn);
+        }
+    }
+    
+    /**
+     * Worker. Can also be used within a transaction. Run... methods define
+     * command execution semantics.
+     * 
+     * @param command @NeverNull
+     * @param modelBeforeTxn @CanBeNull
+     * @param modelInTxn @NeverNull
+     */
+    private static void runCommandOnModel(XCommand command, XExistsRevWritableModel modelBeforeTxn,
+            ChangedModel modelInTxn) throws ExecutionException {
+        if(command instanceof XTransaction) {
+            for(XAtomicCommand atomicCommand : ((XTransaction)command)) {
+                runAtomicCommandOnModel(atomicCommand, modelBeforeTxn, modelInTxn);
+            }
+        } else {
+            runAtomicCommandOnModel((XAtomicCommand)command, modelBeforeTxn, modelInTxn);
+        }
+    }
+    
+    /**
+     * Worker. Can also be used within a transaction. Run... methods define
+     * command execution semantics.
+     * 
+     * @param atomicCommand
+     * @param objectBeforeTxn @CanBeNull
+     * @param objectInTxn
+     */
+    private static void runAtomicCommandOnObject(XAtomicCommand atomicCommand,
+            XRevWritableObject objectBeforeTxn, XWritableObject objectInTxn) {
+        switch(atomicCommand.getTarget().getAddressedType()) {
+        case XREPOSITORY:
+        case XMODEL:
+            // TODO support model commands?
+            throw new IllegalArgumentException();
+        case XOBJECT:
+            runObjectCommandOnObject((XObjectCommand)atomicCommand, objectBeforeTxn, objectInTxn);
+            break;
+        case XFIELD:
+            XFieldCommand fieldCommand = (XFieldCommand)atomicCommand;
+            XId fieldId = fieldCommand.getFieldId();
+            XWritableField fieldInTxn = objectInTxn.getField(fieldId);
+            assert fieldInTxn != null;
+            runCommandOnField(fieldCommand,
+                    objectBeforeTxn == null ? null : objectBeforeTxn.getField(fieldId), fieldInTxn);
+        }
+    }
+    
+    /**
+     * Worker. Can also be used within a transaction. Run... methods define
+     * command execution semantics.
+     * 
+     * @param atomicCommand @NeverNull
+     * @param modelBeforeTxn @CanBeNull
+     * @param modelInTxn @NeverNukk
+     */
+    private static void runAtomicCommandOnModel(XAtomicCommand atomicCommand,
+            XRevWritableModel modelBeforeTxn, XExistsWritableModel modelInTxn) {
+        assert atomicCommand != null;
+        assert modelInTxn != null;
+        switch(atomicCommand.getTarget().getAddressedType()) {
+        case XREPOSITORY:
+            runRepositoryCommandOnModel((XRepositoryCommand)atomicCommand, modelBeforeTxn,
+                    modelInTxn);
+            break;
+        case XMODEL:
+            runModelCommandOnModel((XModelCommand)atomicCommand, modelBeforeTxn, modelInTxn);
+            break;
+        case XOBJECT:
+        case XFIELD:
+            XId objectId;
+            if(atomicCommand instanceof XObjectCommand) {
+                objectId = ((XObjectCommand)atomicCommand).getObjectId();
+            } else if(atomicCommand instanceof XFieldCommand) {
+                objectId = ((XFieldCommand)atomicCommand).getObjectId();
+            } else {
+                throw new AssertionError();
+            }
+            XWritableObject objectInTxn = modelInTxn.getObject(objectId);
+            assert objectInTxn != null;
+            runAtomicCommandOnObject(atomicCommand, modelBeforeTxn.getObject(objectId), objectInTxn);
+            break;
+        }
+    }
+    
+    /**
+     * Worker. Can also be used within a transaction. Run... methods define
+     * command execution semantics.
+     * 
+     * @param objectCommand @NeverNull
+     * @param objectBeforeTxn @CanBeNull
+     * @param objectInTxn @NeverNull
+     * @throws ExecutionException
+     */
+    private static void runObjectCommandOnObject(XObjectCommand objectCommand,
+            XRevWritableObject objectBeforeTxn, XWritableObject objectInTxn)
+            throws ExecutionException {
         /* Assertions and failure cases */
-        XAddress objectAddress = command.getTarget();
-        XId fieldId = command.getFieldId();
-        switch(command.getChangeType()) {
+        if(!objectInTxn.getAddress().equals(objectCommand.getTarget())) {
+            throw new ExecutionException("Event address '" + objectCommand.getTarget()
+                    + "' does not match '" + objectInTxn.getAddress() + "'");
+        }
+        
+        XId fieldId = objectCommand.getFieldId();
+        boolean fieldExists = objectInTxn.hasField(fieldId);
+        long objectRevBeforeTxn = objectBeforeTxn == null ? RevisionConstants.NOT_EXISTING
+                : objectBeforeTxn.getRevisionNumber();
+        
+        switch(objectCommand.getChangeType()) {
         case ADD:
             if(fieldExists) {
                 // ID already taken
-                if(command.isForced()) {
+                if(objectCommand.isForced()) {
                     /*
                      * the forced event only cares about the postcondition -
                      * that there is a field with the given ID, not about that
                      * there was no such field before
                      */
-                    return EventResult.noChange();
+                    return;
                 }
-                return EventResult.failed();
+                throw new ExecutionException("field exists already, command not forced");
             }
             break;
         case REMOVE:
             if(!fieldExists) {
                 // ID not taken
-                if(command.isForced()) {
+                if(objectCommand.isForced()) {
                     /*
                      * the forced event only cares about the postcondition -
                      * that there is no field with the given ID, not about that
                      * there was such a field before
                      */
-                    return EventResult.noChange();
+                    return;
                 }
-                return EventResult.failed();
+                throw new ExecutionException("Field did not exist, command not forced");
             } else {
-                if(!command.isForced() && currentObjectRev != command.getRevisionNumber()) {
-                    return EventResult.failed();
+                if(!objectCommand.isForced()
+                        && objectRevBeforeTxn != objectCommand.getRevisionNumber()) {
+                    throw new ExecutionException("Safe-rev command found wrong rev-nr");
                 }
             }
             break;
         default:
-            throw new IllegalArgumentException("Unknown object command type: " + command);
+            throw new IllegalArgumentException("Unknown object command type: " + objectCommand);
         }
         
-        // create event
-        XEvent event = null;
-        switch(command.getChangeType()) {
+        // create ChangedObject
+        switch(objectCommand.getChangeType()) {
         case ADD:
-            assert currentFieldState == null;
-            event = MemoryObjectEvent.createAddEvent(actorId, objectAddress, fieldId,
-                    currentModelRev, currentObjectRev, inTransaction);
+            assert !objectInTxn.hasField(fieldId);
+            objectInTxn.createField(fieldId);
             break;
         case REMOVE:
-            assert currentFieldState != null;
-            long currentFieldRev = currentFieldState.getRevisionNumber();
-            // recursive removes?
-            XValue currentValue = currentFieldState.getValue();
-            if(currentValue != null) {
-                // create txn event
-                List<XAtomicEvent> events = new LinkedList<XAtomicEvent>();
-                events.add(MemoryFieldEvent.createRemoveEvent(actorId,
-                        XX.resolveField(objectAddress, fieldId), currentModelRev, currentObjectRev,
-                        currentFieldRev, true, true));
-                events.add(MemoryObjectEvent.createRemoveEvent(actorId, objectAddress, fieldId,
-                        currentModelRev, currentObjectRev, currentFieldRev, true, inTransaction));
-                event = MemoryTransactionEvent.createTransactionEvent(actorId, objectAddress,
-                        events, currentModelRev, currentObjectRev);
-            } else {
-                event = MemoryObjectEvent.createRemoveEvent(actorId, objectAddress, fieldId,
-                        currentModelRev, currentObjectRev, currentFieldRev, false, inTransaction);
-            }
+            assert objectInTxn.hasField(fieldId);
+            objectInTxn.removeField(fieldId);
             break;
         default:
             assert false;
         }
-        assert event != null;
-        return EventResult.success(event);
     }
     
     /**
-     * @param actorId
-     * @param command
-     * @param modelState
-     * @param objectState
-     * @param root
-     * @param changeEventListener
-     * @return command result
+     * Worker. Can also be used within a transaction. Run... methods define
+     * command execution semantics.
+     * 
+     * @param atomicCommand @NeverNull
+     * @param modelBeforeTxn @CanBeNull
+     * @param modelInTxn @NeverNull
+     * @throws ExecutionException
      */
-    public static long executeObjectCommand(XId actorId, XObjectCommand command,
-            XRevWritableModel modelState, XRevWritableObject objectState, Root root,
-            XRMOFChangeListener changeEventListener) {
-        // pre-checks
-        XyAssert.xyAssert(!root.isTransactionInProgess());
-        if(!objectState.getAddress().equals(command.getTarget())) {
-            log.warn("Event address '" + command.getTarget() + "' does not match '"
-                    + objectState.getAddress() + "'");
-            return XCommand.FAILED;
+    private static void runModelCommandOnModel(XModelCommand modelCommand,
+            XRevWritableModel modelBeforeTxn, XWritableModel modelInTxn) throws ExecutionException {
+        assert modelCommand != null;
+        assert modelInTxn != null;
+        
+        /* Check if failure */
+        XId objectId = modelCommand.getObjectId();
+        boolean objectExists = modelInTxn.hasObject(objectId);
+        switch(modelCommand.getChangeType()) {
+        case ADD: {
+            if(objectExists) {
+                // ID already taken
+                if(modelCommand.isForced()) {
+                    /*
+                     * the forced event only cares about the postcondition -
+                     * that there is an object with the given ID, not about that
+                     * there was no such object before
+                     */
+                    return;
+                } else {
+                    throw new ExecutionException(
+                            "Cannot add object - exists already; command not forced.");
+                }
+            }
+        }
+            break;
+        case REMOVE: {
+            if(!objectExists) {
+                // ID not taken
+                if(modelCommand.isForced()) {
+                    /*
+                     * the forced event only cares about the postcondition -
+                     * that there is no object with the given ID, not about that
+                     * there was such an object before
+                     */
+                    return;
+                } else {
+                    throw new ExecutionException(
+                            "Cannot removed non-existing object in non-forced mode");
+                }
+            }
+            XWritableObject objectBeforeTxn = modelBeforeTxn.getObject(objectId);
+            assert objectBeforeTxn != null;
+            if(!modelCommand.isForced()
+                    && objectBeforeTxn.getRevisionNumber() != modelCommand.getRevisionNumber()) {
+                throw new ExecutionException("Safe-rev command found wrong rev");
+            }
+        }
+            break;
+        default:
+            throw new IllegalArgumentException("Unknown model command type: " + modelCommand);
         }
         
-        // create event
-        long currentModelRev = modelState == null ? XEvent.REVISION_OF_ENTITY_NOT_SET : modelState
-                .getRevisionNumber();
-        long currentObjectRev = objectState.getRevisionNumber();
-        XRevWritableField currentFieldState = objectState.getField(command.getFieldId());
-        EventResult eventResult = createEventFromObjectCommand(actorId, command, currentModelRev,
-                currentObjectRev, currentFieldState, changeEventListener,
-                root.isTransactionInProgess());
-        
-        if(!eventResult.changedSomething())
-            return eventResult.getResult();
-        
-        // apply event
-        XEvent event = eventResult.getEvent();
-        applyObjectEventOrTransaction(event, modelState, objectState);
-        root.getSyncLog().appendSyncLogEntry(command, event);
-        fireEvents(root, changeEventListener, event);
-        
-        return event.getRevisionNumber();
+        // create changed model
+        switch(modelCommand.getChangeType()) {
+        case ADD:
+            assert !objectExists;
+            modelInTxn.createObject(objectId);
+            break;
+        case REMOVE:
+            assert objectExists;
+            modelInTxn.removeObject(objectId);
+            break;
+        default:
+            assert false;
+        }
     }
     
     /**
-     * Fires the transaction events correctly: fires first atomic events, then
-     * the transaction event itself
-     * 
-     * @param root
-     * @param changeEventListener @CanBeNull An additional changeEventListener
-     * @param event
+     * @param atomicCommand @NeverNull
+     * @param modelBeforeTxn @NeverNull
+     * @param modelInTxn @NeverNull
      */
-    private static void fireEvents(Root root, XRMOFChangeListener changeEventListener, XEvent event) {
-        if(event instanceof XTransactionEvent) {
-            XTransactionEvent txnEvent = (XTransactionEvent)event;
-            for(int i = 0; i < txnEvent.size(); i++) {
-                XAtomicEvent atomicEvent = txnEvent.getEvent(i);
-                fireAtomicEvent(root, changeEventListener, atomicEvent);
+    private static void runRepositoryCommandOnModel(XRepositoryCommand repositoryCommand,
+            XRevWritableModel modelBeforeTxn, XExistsWritableModel modelInTxn) {
+        assert repositoryCommand != null;
+        assert modelBeforeTxn != null; // TODO verify this assertion makes sense
+        assert modelInTxn != null;
+        
+        /* Check if failure */
+        boolean modelExists = modelInTxn.exists();
+        switch(repositoryCommand.getChangeType()) {
+        case ADD: {
+            if(modelExists) {
+                // ID already taken
+                if(repositoryCommand.isForced()) {
+                    /*
+                     * the forced event only cares about the postcondition -
+                     * that there is an object with the given ID, not about that
+                     * there was no such object before
+                     */
+                    return;
+                } else {
+                    throw new ExecutionException(
+                            "Cannot add model - exists already; command not forced.");
+                }
             }
-            /*
-             * fire txn event only to event listeners, changeListener needs to
-             * get only the individual changes to adjust the loaded... stuff
-             * correctly
-             */
-            root.fireTransactionEvent(txnEvent.getTarget(), txnEvent);
-        } else {
-            XAtomicEvent atomicEvent = (XAtomicEvent)event;
-            fireAtomicEvent(root, changeEventListener, atomicEvent);
+        }
+            break;
+        case REMOVE: {
+            if(!modelExists) {
+                // ID not taken
+                if(repositoryCommand.isForced()) {
+                    /*
+                     * the forced event only cares about the postcondition -
+                     * that there is no object with the given ID, not about that
+                     * there was such an object before
+                     */
+                    return;
+                } else {
+                    throw new ExecutionException(
+                            "Cannot removed non-existing model in non-forced mode");
+                }
+            }
+            assert modelBeforeTxn != null;
+            if(!repositoryCommand.isForced()
+                    && modelBeforeTxn.getRevisionNumber() != repositoryCommand.getRevisionNumber()) {
+                throw new ExecutionException("Safe-rev command found wrong rev");
+            }
+        }
+            break;
+        default:
+            throw new IllegalArgumentException("Unknown repo command type: " + repositoryCommand);
+        }
+        
+        // create changed model
+        switch(repositoryCommand.getChangeType()) {
+        case ADD:
+            assert !modelExists;
+            modelInTxn.setExists(true);
+            break;
+        case REMOVE:
+            assert modelExists;
+            modelInTxn.setExists(false);
+            break;
+        default:
+            assert false;
+        }
+        
+    }
+    
+    /**
+     * Execute an {@link XRepositoryCommand} on a model that may or may not
+     * exist and may or may not have a repositoryState
+     * 
+     * @param actorId @NeverNull
+     * @param command @NeverNull
+     * @param repositoryState @CanBeNull
+     * @param modelState @CanBeNull
+     * @param root @NeverNull
+     * @param changeEventListener @CanBeNull
+     * @return command result
+     */
+    @ModificationOperation
+    private static long executeRepositoryCommand(XId actorId, XRepositoryCommand command,
+            XExistsRevWritableRepository repositoryState, XExistsRevWritableModel modelState,
+            Root root, XRMOFChangeListener changeEventListener) {
+        /* pre-checks */
+        assert command != null;
+        XId modelId = command.getModelId();
+        assert repositoryState == null || repositoryState.getModel(modelId) == modelState;
+        XAddress repositoryAddress = command.getTarget();
+        if(repositoryState != null) {
+            if(!repositoryState.getAddress().equals(repositoryAddress)) {
+                log.warn("Command target (" + command.getTarget()
+                        + ")  does not fit this repository " + repositoryAddress);
+                return XCommand.FAILED;
+            }
+        }
+        XyAssert.xyAssert(!root.isTransactionInProgess());
+        
+        /* Command -evaluate-> ChangedModel -create-> Event -apply-> */
+        try {
+            // find or create current model state
+            XExistsRevWritableModel currentModelState;
+            long modelRevBeforeTxn;
+            if(repositoryState != null) {
+                currentModelState = repositoryState.getModel(modelId);
+                assert modelState == currentModelState;
+            } else {
+                assert modelState != null;
+                currentModelState = modelState;
+            }
+            // currentModelState can still be null if repository didn't have it
+            if(currentModelState == null) {
+                currentModelState = new SimpleModel(command.getChangedEntity());
+                currentModelState.setExists(false);
+                modelRevBeforeTxn = RevisionConstants.NOT_EXISTING;
+            } else {
+                modelRevBeforeTxn = currentModelState.getRevisionNumber();
+            }
+            
+            // create change state
+            DeltaUtils.ModelChange modelChange = createModelChangedFromRepositoryCommand(command,
+                    currentModelState);
+            if(modelChange == null) {
+                return XCommand.NOCHANGE;
+            }
+            assert modelChange != null;
+            
+            // create events
+            List<XAtomicEvent> events = new LinkedList<XAtomicEvent>();
+            Eventor.createEventsFromModelChange(events, actorId, modelState, modelChange,
+                    root.isTransactionInProgess());
+            
+            // apply change to state
+            Eventor.applyModelChange(modelChange, currentModelState);
+            
+            // fire events
+            XEvent event = Eventor.createSingleEvent(events, actorId, command.getTarget(),
+                    modelRevBeforeTxn, RevisionConstants.REVISION_OF_ENTITY_NOT_SET);
+            root.getSyncLog().appendSyncLogEntry(command, event);
+            fireEvents(root, changeEventListener, event);
+            return event.getRevisionNumber();
+        } catch(ExecutionException e) {
+            log.warn("command " + command + " failed", e);
+            return XCommand.FAILED;
+        }
+    }
+    
+    /**
+     * @param command
+     * @param currentModelState
+     * @return null or {@link ChangedModel}
+     * @throws ExecutionException
+     */
+    private static DeltaUtils.ModelChange createModelChangedFromRepositoryCommand(
+            XRepositoryCommand command, XExistsReadableModel currentModelState)
+            throws ExecutionException {
+        assert currentModelState != null;
+        
+        switch(command.getChangeType()) {
+        case ADD: {
+            if(currentModelState.exists()) {
+                // model exists already with same id
+                if(command.isForced()) {
+                    /*
+                     * the forced event only cares about the postcondition -
+                     * that there is a model with the given ID, not about that
+                     * there was no such model before
+                     */
+                    return null;
+                } else {
+                    throw new ExecutionException("Cannot add existing model as non-forced command");
+                }
+            }
+            break;
+        }
+        case REMOVE: {
+            if(currentModelState.exists()) {
+                // FIXME create txn event if the model had objects ...
+            } else {
+                if(command.isForced()) {
+                    /*
+                     * the forced event only cares about the postcondition -
+                     * that there is no model with the given ID, not about that
+                     * there was such a model before
+                     */
+                    return null;
+                } else {
+                    throw new ExecutionException(
+                            "Cannot remove non-existing model as non-forced command");
+                }
+            }
+            // model is present, command is removeModel
+            
+            // check safe conditions
+            if(!command.isForced()
+                    && currentModelState.getRevisionNumber() != command.getRevisionNumber()) {
+                throw new ExecutionException(
+                        "Cannot remove model with safe-rev-command and wrong current rev nr");
+            }
+            
+        }
+            break;
+        default:
+            throw new IllegalArgumentException("unknown command type: " + command);
+        }
+        
+        // materialise change
+        switch(command.getChangeType()) {
+        case ADD:
+            assert !currentModelState.exists();
+            return ModelChange.CREATED;
+        case REMOVE:
+            assert currentModelState.exists();
+            return ModelChange.REMOVED;
+        default:
+            throw new AssertionError();
         }
     }
     
@@ -441,940 +904,30 @@ public class Executor {
         }
     }
     
-    private static final Logger log = LoggerFactory.getLogger(Executor.class);
-    
     /**
-     * @param actorId
-     * @param command
-     * @param modelState
+     * Fires the transaction events correctly: fires first atomic events, then
+     * the transaction event itself
+     * 
      * @param root
-     * @param changeEventListener
-     * @return command result
-     */
-    @ModificationOperation
-    public static long executeModelCommand(XId actorId, XModelCommand command,
-            XRevWritableModel modelState, Root root, XRMOFChangeListener changeEventListener) {
-        // pre-checks
-        XAddress modelAddress = modelState.getAddress();
-        if(!modelAddress.equals(command.getTarget())) {
-            log.warn("Command target (" + command.getTarget() + ")  does not fit this model "
-                    + modelAddress);
-            return XCommand.FAILED;
-        }
-        XyAssert.xyAssert(!root.isTransactionInProgess());
-        
-        // create event
-        long currentModelRev = modelState.getRevisionNumber();
-        XRevWritableObject currentObjectState = modelState.getObject(command.getObjectId());
-        EventResult eventResult = createEventFromModelCommand(actorId, command, currentModelRev,
-                currentObjectState, changeEventListener, root.isTransactionInProgess());
-        
-        if(!eventResult.changedSomething())
-            return eventResult.getResult();
-        
-        // apply event
-        XEvent event = eventResult.getEvent();
-        assert event != null;
-        applyModelEvent((XModelEvent)event, modelState);
-        root.getSyncLog().appendSyncLogEntry(command, event);
-        fireEvents(root, changeEventListener, event);
-        
-        return event.getRevisionNumber();
-    }
-    
-    /**
-     * @param actorId
-     * @param command
-     * @param currentModelRev
-     * @param currentObjectState @CanBeNull
-     * @param changeEventListener
-     * @param inTransaction
-     * @return
-     */
-    private static EventResult createEventFromModelCommand(XId actorId, XModelCommand command,
-            long currentModelRev, XReadableObject currentObjectState,
-            XRMOFChangeListener changeEventListener, boolean inTransaction) {
-        /* Check if failure */
-        boolean objectExists = currentObjectState != null;
-        switch(command.getChangeType()) {
-        case ADD: {
-            if(objectExists) {
-                // ID already taken
-                if(command.isForced()) {
-                    /*
-                     * the forced event only cares about the postcondition -
-                     * that there is an object with the given ID, not about that
-                     * there was no such object before
-                     */
-                    return EventResult.noChange();
-                } else {
-                    return EventResult.failed();
-                }
-            }
-        }
-            break;
-        case REMOVE: {
-            
-            // TODO create txn event if the object had fields ...
-            
-            if(!objectExists) {
-                // ID not taken
-                if(command.isForced()) {
-                    /*
-                     * the forced event only cares about the postcondition -
-                     * that there is no object with the given ID, not about that
-                     * there was such an object before
-                     */
-                    return EventResult.noChange();
-                } else {
-                    return EventResult.failed();
-                }
-            }
-            assert currentObjectState != null;
-            if(!command.isForced()
-                    && currentObjectState.getRevisionNumber() != command.getRevisionNumber()) {
-                return EventResult.failed();
-            }
-        }
-            break;
-        default:
-            throw new IllegalArgumentException("Unknown model command type: " + command);
-        }
-        
-        // create event
-        XModelEvent event = null;
-        XAddress modelAddress = command.getTarget();
-        XId objectId = command.getObjectId();
-        switch(command.getChangeType()) {
-        case ADD:
-            assert currentObjectState == null;
-            event = MemoryModelEvent.createAddEvent(actorId, modelAddress, objectId,
-                    currentModelRev, inTransaction);
-            break;
-        case REMOVE:
-            assert currentObjectState != null;
-            event = MemoryModelEvent.createRemoveEvent(actorId, modelAddress, objectId,
-                    currentModelRev, currentObjectState.getRevisionNumber(), inTransaction, false);
-            break;
-        default:
-            assert false;
-        }
-        
-        return EventResult.success(event);
-    }
-    
-    private static void applyModelEvent(XModelEvent event, XWritableModel modelState) {
-        if(modelState instanceof XRevWritableModel) {
-            ((XRevWritableModel)modelState).setRevisionNumber(event.getRevisionNumber());
-        }
-        
-        switch(event.getChangeType()) {
-        case ADD:
-            assert !modelState.hasObject(event.getObjectId());
-            XWritableObject objectState = modelState.createObject(event.getObjectId());
-            if(objectState instanceof XRevWritableObject) {
-                ((XRevWritableObject)objectState).setRevisionNumber(event.getRevisionNumber());
-            }
-            break;
-        case REMOVE:
-            assert modelState.hasObject(event.getObjectId());
-            modelState.removeObject(event.getObjectId());
-            break;
-        default:
-            assert false;
-        }
-    }
-    
-    /**
-     * @param event @NeverNull
-     * @param modelState @CanBeNull
-     * @param objectState @NeverNull
-     */
-    private static void applyObjectEvent(XObjectEvent event, XWritableModel modelState,
-            XWritableObject objectState) {
-        if(modelState != null && modelState instanceof XRevWritableModel) {
-            ((XRevWritableModel)modelState).setRevisionNumber(event.getRevisionNumber());
-        }
-        applyObjectEvent(event, objectState);
-    }
-    
-    private static void applyObjectEvent(XObjectEvent event, XWritableObject objectState) {
-        if(objectState instanceof XRevWritableObject) {
-            ((XRevWritableObject)objectState).setRevisionNumber(event.getRevisionNumber());
-        }
-        
-        XId fieldId = event.getFieldId();
-        switch(event.getChangeType()) {
-        case ADD:
-            assert !objectState.hasField(fieldId) : "objectState " + objectState.getAddress()
-                    + " has field " + fieldId;
-            XWritableField fieldState = objectState.createField(fieldId);
-            if(fieldState instanceof XRevWritableField) {
-                ((XRevWritableField)fieldState).setRevisionNumber(event.getRevisionNumber());
-            }
-            break;
-        case REMOVE:
-            assert objectState.hasField(fieldId);
-            objectState.removeField(fieldId);
-            break;
-        default:
-            assert false;
-        }
-    }
-    
-    private static void applyObjectEventOrTransaction(XEvent event, XRevWritableModel modelState,
-            XRevWritableObject objectState) {
-        if(event instanceof XObjectEvent) {
-            applyObjectEvent((XObjectEvent)event, modelState, objectState);
-        } else {
-            assert event instanceof XTransactionEvent;
-            applyObjectTransaction((XTransactionEvent)event, modelState, objectState);
-        }
-    }
-    
-    @SuppressWarnings("unused")
-    private static void applyModelEventOrTransaction(XEvent event,
-            XExistsRevWritableRepository repositoryState, XExistsRevWritableModel modelState) {
-        if(event instanceof XModelEvent) {
-            applyModelEvent((XModelEvent)event, modelState);
-        } else {
-            assert event instanceof XTransactionEvent;
-            applyModelTransaction((XTransactionEvent)event, repositoryState, modelState);
-        }
-    }
-    
-    /**
-     * @param txn
-     * @param repositoryState @CanBeNull
-     * @param modelState
-     */
-    private static void applyModelTransaction(XTransactionEvent txn,
-            XExistsRevWritableRepository repositoryState, XExistsRevWritableModel modelState) {
-        for(int i = 0; i < txn.size(); i++) {
-            XAtomicEvent atomicEvent = txn.getEvent(i);
-            switch(atomicEvent.getTarget().getAddressedType()) {
-            case XREPOSITORY: {
-                applyRepositoryEvent((XRepositoryEvent)atomicEvent, repositoryState);
-            }
-                break;
-            case XMODEL: {
-                applyModelEvent((XModelEvent)atomicEvent, modelState);
-            }
-                break;
-            case XOBJECT: {
-                XRevWritableObject objectState = modelState.getObject(atomicEvent
-                        .getChangedEntity().getObject());
-                applyObjectEvent((XObjectEvent)atomicEvent, modelState, objectState);
-            }
-                break;
-            case XFIELD: {
-                XRevWritableObject objectState = modelState.getObject(atomicEvent
-                        .getChangedEntity().getObject());
-                XRevWritableField fieldState = objectState.getField(atomicEvent.getChangedEntity()
-                        .getField());
-                assert fieldState != null;
-                applyFieldEvent((XFieldEvent)atomicEvent, modelState, objectState, fieldState);
-            }
-                break;
-            default:
-                throw new AssertionError(
-                        "ModelTransaction can only contain model/object/field events, found:"
-                                + atomicEvent);
-            }
-        }
-    }
-    
-    private static void applyRepositoryEvent(XRepositoryEvent repositoryEvent,
-            XExistsRevWritableRepository repositoryState, XExistsRevWritableModel currentModelState) {
-        applyRepositoryEvent(repositoryEvent, repositoryState);
-        if(currentModelState != null) {
-            switch(repositoryEvent.getChangeType()) {
-            case ADD:
-                currentModelState.setExists(true);
-                break;
-            case REMOVE:
-                currentModelState.setExists(false);
-                break;
-            default:
-                throw new AssertionError();
-            }
-            currentModelState.setRevisionNumber(repositoryEvent.getRevisionNumber());
-        }
-    }
-    
-    /**
-     * @param atomicEvent
-     * @param repositoryState @CanBeNull
-     */
-    private static void applyRepositoryEvent(XRepositoryEvent repositoryEvent,
-            XExistsRevWritableRepository repositoryState) {
-        if(repositoryState == null)
-            return;
-        
-        switch(repositoryEvent.getChangeType()) {
-        case ADD:
-            XExistsRevWritableModel modelState = repositoryState.createModel(repositoryEvent
-                    .getChangedEntity().getModel());
-            modelState.setRevisionNumber(repositoryEvent.getRevisionNumber());
-            modelState.setExists(true);
-            break;
-        case REMOVE:
-            repositoryState.removeModel(repositoryEvent.getChangedEntity().getModel());
-            break;
-        default:
-            throw new AssertionError();
-        }
-    }
-    
-    /**
-     * @param txn
-     * @param modelState @CanBeNull
-     * @param objectState @NeverNull
-     */
-    private static void applyObjectTransaction(XTransactionEvent txn, XRevWritableModel modelState,
-            XRevWritableObject objectState) {
-        for(int i = 0; i < txn.size(); i++) {
-            XAtomicEvent atomicEvent = txn.getEvent(i);
-            switch(atomicEvent.getTarget().getAddressedType()) {
-            case XOBJECT:
-                applyObjectEvent((XObjectEvent)atomicEvent, modelState, objectState);
-                break;
-            case XFIELD:
-                XRevWritableField fieldState = objectState.getField(atomicEvent.getChangedEntity()
-                        .getField());
-                assert fieldState != null;
-                applyFieldEvent((XFieldEvent)atomicEvent, modelState, objectState, fieldState);
-                break;
-            default:
-                throw new AssertionError(
-                        "ObjectTransaction can only contain object/field events, found:"
-                                + atomicEvent);
-            }
-        }
-    }
-    
-    /**
+     * @param changeEventListener @CanBeNull An additional changeEventListener
      * @param event
-     * @param modelState @CanBeNull
-     * @param objectState @CanBeNull
-     * @param fieldState
      */
-    private static void applyFieldEvent(XFieldEvent event, XWritableModel modelState,
-            XWritableObject objectState, XWritableField fieldState) {
-        assert event != null;
-        assert fieldState != null;
-        if(modelState != null && modelState instanceof XRevWritableModel) {
-            ((XRevWritableModel)modelState).setRevisionNumber(event.getRevisionNumber());
-        }
-        applyFieldEvent(event, objectState, fieldState);
-    }
-    
-    /**
-     * @param event
-     * @param objectState @CanBeNull
-     * @param fieldState
-     */
-    private static void applyFieldEvent(XFieldEvent event, XWritableObject objectState,
-            XWritableField fieldState) {
-        assert event != null;
-        assert fieldState != null;
-        if(objectState != null && objectState instanceof XRevWritableObject) {
-            ((XRevWritableObject)objectState).setRevisionNumber(event.getRevisionNumber());
-        }
-        if(fieldState instanceof XRevWritableField) {
-            ((XRevWritableField)fieldState).setRevisionNumber(event.getRevisionNumber());
-        }
-        
-        switch(event.getChangeType()) {
-        case ADD:
-            assert fieldState.getValue() == null;
-            fieldState.setValue(event.getNewValue());
-            break;
-        case REMOVE:
-            assert fieldState.getValue() != null;
-            fieldState.setValue(null);
-            break;
-        case CHANGE:
-            assert fieldState.getValue() != null;
-            fieldState.setValue(event.getNewValue());
-            break;
-        default:
-            assert false;
-        }
-    }
-    
-    public static long executeRepositoryCommand(XId actorId, XRepositoryCommand command,
-            XExistsRevWritableRepository repositoryState, Root root,
-            XRMOFChangeListener changeEventListener) {
-        XExistsRevWritableModel modelState = repositoryState.getModel(command.getModelId());
-        return executeRepositoryCommand_complex(actorId, command, repositoryState, modelState,
-                root, changeEventListener);
-    }
-    
-    /*
-     * Some cases that can happen:
-     * 
-     * model has father, model exists =
-     * 
-     * model has father, model does not exist
-     * 
-     * 
-     * model has no father, model exists
-     * 
-     * model has no father, model does not exist
-     */
-    
-    /**
-     * @param actorId
-     * @param command
-     * @param repositoryState @CanBeNull
-     * @param modelState @CanBeNull
-     * @param root
-     * @param changeEventListener @CanBeNull
-     * @return command result
-     */
-    @ModificationOperation
-    public static long executeRepositoryCommand_complex(XId actorId, XRepositoryCommand command,
-            XExistsRevWritableRepository repositoryState, XExistsRevWritableModel modelState,
-            Root root, XRMOFChangeListener changeEventListener) {
-        assert command != null;
-        XId modelId = command.getModelId();
-        if(repositoryState != null)
-            assert repositoryState.getModel(modelId) == modelState;
-        
-        // pre-checks
-        XAddress repositoryAddress = command.getTarget();
-        if(repositoryState != null) {
-            if(!repositoryState.getAddress().equals(repositoryAddress)) {
-                log.warn("Command target (" + command.getTarget()
-                        + ")  does not fit this repository " + repositoryAddress);
-                return XCommand.FAILED;
-            }
-        }
-        
-        // create event
-        XyAssert.xyAssert(!root.isTransactionInProgess());
-        XExistsRevWritableModel currentModelState;
-        if(repositoryState != null) {
-            currentModelState = repositoryState.getModel(modelId);
-            assert modelState == currentModelState;
-        } else {
-            assert modelState != null;
-            currentModelState = modelState;
-        }
-        // currentModelState can still be null if repository didn't have it
-        if(currentModelState == null) {
-            currentModelState = new SimpleModel(command.getChangedEntity());
-            currentModelState.setExists(false);
-        }
-        
-        EventResult eventResult = createEventFromRepositoryCommand(actorId, command,
-                currentModelState, root, changeEventListener, root.isTransactionInProgess());
-        
-        if(!eventResult.changedSomething())
-            return eventResult.getResult();
-        
-        // apply event
-        XEvent event = eventResult.getEvent();
-        root.getSyncLog().appendSyncLogEntry(command, event);
+    private static void fireEvents(Root root, XRMOFChangeListener changeEventListener, XEvent event) {
         if(event instanceof XTransactionEvent) {
-            applyModelTransaction((XTransactionEvent)event, repositoryState, currentModelState);
+            XTransactionEvent txnEvent = (XTransactionEvent)event;
+            for(int i = 0; i < txnEvent.size(); i++) {
+                XAtomicEvent atomicEvent = txnEvent.getEvent(i);
+                fireAtomicEvent(root, changeEventListener, atomicEvent);
+            }
+            /*
+             * fire txn event only to event listeners, changeListener needs to
+             * get only the individual changes to adjust the loaded... stuff
+             * correctly
+             */
+            root.fireTransactionEvent(txnEvent.getTarget(), txnEvent);
         } else {
-            assert event instanceof XRepositoryEvent;
-            applyRepositoryEvent((XRepositoryEvent)event, repositoryState, currentModelState);
-        }
-        fireEvents(root, changeEventListener, event);
-        
-        assert event.getRevisionNumber() >= 0;
-        assert currentModelState.getRevisionNumber() >= 0;
-        
-        return event.getRevisionNumber();
-    }
-    
-    /**
-     * @param actorId
-     * @param command
-     * @param currentModelState @NeverNull
-     * @param root @CanBeNull
-     * @param changeEventListener @CanBeNull
-     * @param inTransaction
-     * @return
-     */
-    private static EventResult createEventFromRepositoryCommand(XId actorId,
-            XRepositoryCommand command, XExistsReadableModel currentModelState, Root root,
-            XRMOFChangeListener changeEventListener, boolean inTransaction) {
-        XId modelId = command.getModelId();
-        assert currentModelState != null;
-        long currentModelRev = currentModelState.getRevisionNumber();
-        
-        switch(command.getChangeType()) {
-        case ADD: {
-            if(currentModelState.exists()) {
-                // model exists already with same id
-                if(command.isForced()) {
-                    /*
-                     * the forced event only cares about the postcondition -
-                     * that there is a model with the given ID, not about that
-                     * there was no such model before
-                     */
-                    return EventResult.noChange();
-                } else {
-                    return EventResult.failed();
-                }
-            }
-            break;
-        }
-        case REMOVE: {
-            // TODO create txn event if the model had objects ...
-            
-            if(!currentModelState.exists()) {
-                if(command.isForced()) {
-                    /*
-                     * the forced event only cares about the postcondition -
-                     * that there is no model with the given ID, not about that
-                     * there was such a model before
-                     */
-                    return EventResult.noChange();
-                } else {
-                    return EventResult.failed();
-                }
-            }
-            // model is present, command is removeModel
-            
-            // check safe conditions
-            if(!command.isForced()
-                    && currentModelState.getRevisionNumber() != command.getRevisionNumber()) {
-                return EventResult.failed();
-            }
-            
-        }
-            break;
-        default:
-            throw new IllegalArgumentException("unknown command type: " + command);
-        }
-        
-        // event creation
-        XRepositoryEvent event = null;
-        XAddress repositoryAddress = command.getTarget();
-        switch(command.getChangeType()) {
-        case ADD:
-            assert !currentModelState.exists();
-            event = MemoryRepositoryEvent.createAddEvent(actorId, repositoryAddress, modelId,
-                    currentModelRev, inTransaction);
-            break;
-        case REMOVE:
-            assert currentModelState.exists();
-            event = MemoryRepositoryEvent.createRemoveEvent(actorId, repositoryAddress, modelId,
-                    currentModelRev, inTransaction);
-            break;
-        default:
-            assert false;
-        }
-        assert event != null;
-        return EventResult.success(event);
-    }
-    
-    /**
-     * @param actorId
-     * @param txn
-     * @param repositoryState @CanBeNull
-     * @param modelState @NeverNull
-     * @param root
-     * @param changeEventListener
-     * @return ...
-     */
-    public static long executeModelTransaction(XId actorId, XTransaction txn,
-            XExistsRevWritableRepository repositoryState, XExistsRevWritableModel modelState,
-            Root root, XRMOFChangeListener changeEventListener) {
-        assert modelState != null;
-        synchronized(root) {
-            root.startExecutingTransaction();
-            EventResult eventResult = createEventFromModelTransaction(actorId, txn,
-                    repositoryState, modelState);
-            if(!eventResult.changedSomething()) {
-                root.stopExecutingTransaction();
-                return eventResult.getResult();
-            }
-            
-            // apply event
-            XEvent event = eventResult.getEvent();
-            assert event != null;
-            applyModelTransaction((XTransactionEvent)event, repositoryState, modelState);
-            root.getSyncLog().appendSyncLogEntry(txn, event);
-            fireEvents(root, changeEventListener, event);
-            
-            root.stopExecutingTransaction();
-            return event.getRevisionNumber();
-        }
-    }
-    
-    /**
-     * @param actorId
-     * @param txn
-     * @param repositoryState
-     * @param currentModelState @NeverNull
-     * @return
-     */
-    private static EventResult createEventFromModelTransaction(XId actorId, XTransaction txn,
-            XReadableRepository repositoryState, XReadableModel currentModelState) {
-        // make sure changes are not visible to outside yet
-        assert currentModelState != null;
-        
-        ChangedModel tempModelState = new ChangedModel(currentModelState);
-        List<XAtomicEvent> changingEvents = new LinkedList<XAtomicEvent>();
-        
-        for(int i = 0; i < txn.size(); i++) {
-            XAtomicCommand atomicCommand = txn.getCommand(i);
-            EventResult eventResult;
-            switch(atomicCommand.getTarget().getAddressedType()) {
-            /*
-             * We always read from the currentXXX state to check the command
-             * mode (force,safe) and then we apply the event to the tempXXX
-             * state
-             */
-            case XREPOSITORY: {
-                XRepositoryCommand repoCommand = (XRepositoryCommand)atomicCommand;
-                eventResult = createEventFromRepositoryCommand(actorId, repoCommand,
-                        tempModelState, null, null, true);
-            }
-                break;
-            case XMODEL: {
-                XModelCommand modelCommand = (XModelCommand)atomicCommand;
-                long currentModelRev = currentModelState.getRevisionNumber();
-                XWritableObject tempObjectState = tempModelState.getObject(modelCommand
-                        .getObjectId());
-                eventResult = createEventFromModelCommand(actorId, modelCommand, currentModelRev,
-                        tempObjectState, null, true);
-                if(eventResult.changedSomething()) {
-                    applyModelEvent((XModelEvent)eventResult.getEvent(), tempModelState);
-                }
-                // FIXME if result is txn, apply the individual events instead
-            }
-                break;
-            case XOBJECT: {
-                XObjectCommand objectCommand = (XObjectCommand)atomicCommand;
-                long currentModelRev = currentModelState.getRevisionNumber();
-                XId objectId = objectCommand.getObjectId();
-                XId fieldId = objectCommand.getFieldId();
-                XWritableObject tempObjectState = tempModelState.getObject(objectId);
-                if(tempObjectState == null) {
-                    eventResult = EventResult.failed();
-                } else {
-                    XReadableObject currentObjectState = currentModelState.getObject(objectId);
-                    long currentObjectRev = currentObjectState == null ? currentModelRev
-                            : currentObjectState.getRevisionNumber();
-                    XWritableField tempFieldState = tempObjectState.getField(fieldId);
-                    eventResult = createEventFromObjectCommand(actorId, objectCommand,
-                            currentModelRev, currentObjectRev, tempFieldState, null, true);
-                    if(eventResult.changedSomething()) {
-                        applyObjectEvent((XObjectEvent)eventResult.getEvent(), tempModelState,
-                                tempObjectState);
-                    }
-                }
-            }
-                break;
-            case XFIELD: {
-                XFieldCommand fieldCommand = (XFieldCommand)atomicCommand;
-                long currentModelRev = currentModelState.getRevisionNumber();
-                XId objectId = fieldCommand.getObjectId();
-                XWritableObject tempObjectState = tempModelState.getObject(objectId);
-                if(tempObjectState == null) {
-                    eventResult = EventResult.failed();
-                } else {
-                    XReadableObject currentObjectState = currentModelState.getObject(objectId);
-                    long currentObjectRev = currentObjectState == null ? currentModelRev
-                            : currentObjectState.getRevisionNumber();
-                    XId fieldId = fieldCommand.getFieldId();
-                    XWritableField tempFieldState = tempObjectState.getField(fieldId);
-                    if(tempFieldState == null) {
-                        eventResult = EventResult.failed();
-                    } else {
-                        XReadableField currentFieldState = currentObjectState == null ? null
-                                : currentObjectState.getField(fieldId);
-                        long currentFieldRev = currentFieldState == null ? currentObjectRev
-                                : currentFieldState.getRevisionNumber();
-                        XValue tempValue = tempFieldState == null ? null : tempFieldState
-                                .getValue();
-                        eventResult = createEventFromFieldCommand(actorId, fieldCommand,
-                                currentModelRev, currentObjectRev, currentFieldRev, tempValue,
-                                null, true);
-                        if(eventResult.changedSomething()) {
-                            applyFieldEvent((XFieldEvent)eventResult.getEvent(), tempModelState,
-                                    tempObjectState, tempFieldState);
-                        }
-                    }
-                }
-            }
-                break;
-            default:
-                throw new AssertionError();
-            }
-            // process atomic event
-            if(eventResult.isFailed()) {
-                // txn failed
-                return EventResult.failed();
-            } else if(eventResult.changedSomething()) {
-                XEvent event = eventResult.getEvent();
-                if(event instanceof XTransactionEvent) {
-                    // add parts from remove-txn
-                    XTransactionEvent subTxn = (XTransactionEvent)event;
-                    for(int j = 0; j < subTxn.size(); j++) {
-                        XAtomicEvent subAtomicEvent = subTxn.getEvent(j);
-                        changingEvents.add(subAtomicEvent);
-                    }
-                } else {
-                    changingEvents.add((XAtomicEvent)event);
-                }
-                
-            }
-        }
-        if(changingEvents.isEmpty()) {
-            // txn did not fail, but did not change anything either
-            return EventResult.noChange();
-        }
-        
-        // create txn event
-        XTransactionEvent txnEvent = MemoryTransactionEvent.createTransactionEvent(actorId,
-                txn.getTarget(), changingEvents, tempModelState.getRevisionNumber(),
-                XEvent.REVISION_NOT_AVAILABLE);
-        return EventResult.success(txnEvent);
-    }
-    
-    /**
-     * @param actorId
-     * @param txn
-     * @param repositoryState
-     * @param currentModelState @NeverNull
-     * @return
-     */
-    private static EventResult createEventFromObjectTransaction(XId actorId, XTransaction txn,
-            XExistsReadableObject currentObjectState) {
-        // make sure changes are not visible to outside yet
-        assert currentObjectState != null;
-        
-        ChangedObject tempObjectState = new ChangedObject(currentObjectState);
-        List<XAtomicEvent> changingEvents = new LinkedList<XAtomicEvent>();
-        
-        boolean objectExists = currentObjectState.exists();
-        
-        for(int i = 0; i < txn.size(); i++) {
-            XAtomicCommand atomicCommand = txn.getCommand(i);
-            EventResult eventResult;
-            switch(atomicCommand.getTarget().getAddressedType()) {
-            /*
-             * We always read from the currentXXX state to check the command
-             * mode (force,safe) and then we apply the event to the tempXXX
-             * state
-             */
-            case XREPOSITORY:
-                throw new IllegalArgumentException("Cannot happen");
-            case XMODEL: {
-                // since we have no father we can only toggle the exist-flag
-                
-                XModelCommand modelCommand = (XModelCommand)atomicCommand;
-                long currentObjectRev = currentObjectState.getRevisionNumber();
-                eventResult = createEventFromModelCommand_StandaloneObject(actorId, modelCommand,
-                        currentObjectRev, objectExists);
-                if(eventResult.changedSomething()) {
-                    switch(atomicCommand.getChangeType()) {
-                    case ADD:
-                        objectExists = true;
-                        break;
-                    case REMOVE:
-                        objectExists = false;
-                        break;
-                    default:
-                        throw new IllegalArgumentException("Cannot happen");
-                    }
-                }
-            }
-                break;
-            
-            // FIXME here--------------
-            
-            case XOBJECT: {
-                XObjectCommand objectCommand = (XObjectCommand)atomicCommand;
-                long currentModelRev = RevisionConstants.REVISION_OF_ENTITY_NOT_SET;
-                XId objectId = objectCommand.getObjectId();
-                if(!objectExists) {
-                    eventResult = EventResult.failed();
-                } else {
-                    long currentObjectRev = currentObjectState == null ? currentModelRev
-                            : currentObjectState.getRevisionNumber();
-                    XWritableField tempFieldState = tempObjectState.getField(objectId);
-                    eventResult = createEventFromObjectCommand(actorId, objectCommand,
-                            currentModelRev, currentObjectRev, tempFieldState, null, true);
-                    if(eventResult.changedSomething()) {
-                        applyObjectEvent((XObjectEvent)eventResult.getEvent(), tempObjectState);
-                    }
-                }
-            }
-                break;
-            case XFIELD: {
-                XFieldCommand fieldCommand = (XFieldCommand)atomicCommand;
-                long currentModelRev = RevisionConstants.REVISION_OF_ENTITY_NOT_SET;
-                if(!objectExists) {
-                    eventResult = EventResult.failed();
-                } else {
-                    long currentObjectRev = currentObjectState == null ? currentModelRev
-                            : currentObjectState.getRevisionNumber();
-                    XId fieldId = fieldCommand.getFieldId();
-                    XWritableField tempFieldState = tempObjectState.getField(fieldId);
-                    if(tempFieldState == null) {
-                        eventResult = EventResult.failed();
-                    } else {
-                        XReadableField currentFieldState = currentObjectState == null ? null
-                                : currentObjectState.getField(fieldId);
-                        long currentFieldRev = currentFieldState == null ? currentObjectRev
-                                : currentFieldState.getRevisionNumber();
-                        XValue tempValue = tempFieldState == null ? null : tempFieldState
-                                .getValue();
-                        eventResult = createEventFromFieldCommand(actorId, fieldCommand,
-                                currentModelRev, currentObjectRev, currentFieldRev, tempValue,
-                                null, true);
-                        if(eventResult.changedSomething()) {
-                            applyFieldEvent((XFieldEvent)eventResult.getEvent(), tempObjectState,
-                                    tempFieldState);
-                        }
-                    }
-                }
-            }
-                break;
-            default:
-                throw new AssertionError();
-            }
-            // process atomic event
-            if(eventResult.isFailed()) {
-                // txn failed
-                return EventResult.failed();
-            } else if(eventResult.changedSomething()) {
-                XEvent event = eventResult.getEvent();
-                if(event instanceof XTransactionEvent) {
-                    // add parts from remove-txn
-                    XTransactionEvent subTxn = (XTransactionEvent)event;
-                    for(int j = 0; j < subTxn.size(); j++) {
-                        XAtomicEvent subAtomicEvent = subTxn.getEvent(j);
-                        changingEvents.add(subAtomicEvent);
-                    }
-                } else {
-                    changingEvents.add((XAtomicEvent)event);
-                }
-                
-            }
-        }
-        if(changingEvents.isEmpty()) {
-            // txn did not fail, but did not change anything either
-            return EventResult.noChange();
-        }
-        
-        // create txn event
-        XTransactionEvent txnEvent = MemoryTransactionEvent.createTransactionEvent(actorId,
-                txn.getTarget(), changingEvents, tempObjectState.getRevisionNumber(),
-                XEvent.REVISION_NOT_AVAILABLE);
-        return EventResult.success(txnEvent);
-    }
-    
-    private static EventResult createEventFromModelCommand_StandaloneObject(XId actorId,
-            XModelCommand command, long currentObjectRev, boolean objectExists) {
-        /* Check if failure */
-        switch(command.getChangeType()) {
-        case ADD: {
-            if(objectExists) {
-                // ID already taken
-                if(command.isForced()) {
-                    /*
-                     * the forced event only cares about the postcondition -
-                     * that there is an object with the given ID, not about that
-                     * there was no such object before
-                     */
-                    return EventResult.noChange();
-                } else {
-                    return EventResult.failed();
-                }
-            }
-        }
-            break;
-        case REMOVE: {
-            
-            // TODO create txn event if the object had fields ...
-            
-            if(!objectExists) {
-                // ID not taken
-                if(command.isForced()) {
-                    /*
-                     * the forced event only cares about the postcondition -
-                     * that there is no object with the given ID, not about that
-                     * there was such an object before
-                     */
-                    return EventResult.noChange();
-                } else {
-                    return EventResult.failed();
-                }
-            }
-            if(!command.isForced() && currentObjectRev != command.getRevisionNumber()) {
-                return EventResult.failed();
-            }
-        }
-            break;
-        default:
-            throw new IllegalArgumentException("Unknown model command type: " + command);
-        }
-        
-        // create event
-        XModelEvent event = null;
-        XAddress modelAddress = command.getTarget();
-        XId objectId = command.getObjectId();
-        boolean inTransaction = true;
-        switch(command.getChangeType()) {
-        case ADD:
-            assert !objectExists;
-            event = MemoryModelEvent.createAddEvent(actorId, modelAddress, objectId,
-                    RevisionConstants.REVISION_OF_ENTITY_NOT_SET, inTransaction);
-            break;
-        case REMOVE:
-            assert objectExists;
-            event = MemoryModelEvent.createRemoveEvent(actorId, modelAddress, objectId,
-                    RevisionConstants.REVISION_OF_ENTITY_NOT_SET, currentObjectRev, inTransaction,
-                    false);
-            break;
-        default:
-            assert false;
-        }
-        
-        return EventResult.success(event);
-    }
-    
-    // FIXME impl.
-    /**
-     * Execute a txn on an object that has no father
-     * 
-     * @param actorId
-     * @param txn
-     * @param objectState
-     * @param root
-     * @param changeEventListener
-     * @return the resulting revNr or an error code
-     */
-    public static long executeObjectTransaction(XId actorId, XTransaction txn,
-            XExistsRevWritableObject objectState, Root root, XRMOFChangeListener changeEventListener) {
-        assert objectState != null;
-        synchronized(root) {
-            root.startExecutingTransaction();
-            EventResult eventResult = createEventFromObjectTransaction(actorId, txn, objectState);
-            if(!eventResult.changedSomething()) {
-                root.stopExecutingTransaction();
-                return eventResult.getResult();
-            }
-            
-            // apply event
-            XEvent event = eventResult.getEvent();
-            assert event != null;
-            applyObjectTransaction((XTransactionEvent)event, null, objectState);
-            root.getSyncLog().appendSyncLogEntry(txn, event);
-            fireEvents(root, changeEventListener, event);
-            
-            root.stopExecutingTransaction();
-            return event.getRevisionNumber();
+            XAtomicEvent atomicEvent = (XAtomicEvent)event;
+            fireAtomicEvent(root, changeEventListener, atomicEvent);
         }
     }
     

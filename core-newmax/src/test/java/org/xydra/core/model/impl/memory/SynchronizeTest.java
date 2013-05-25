@@ -150,9 +150,9 @@ public class SynchronizeTest {
         
         XTransactionBuilder tb = new XTransactionBuilder(model.getAddress());
         XId objId = XX.createUniqueId();
-        tb.addObject(model.getAddress(), XCommand.SAFE, objId);
+        tb.addObject(model.getAddress(), XCommand.SAFE_STATE_BOUND, objId);
         XAddress objAddr = XX.resolveObject(model.getAddress(), objId);
-        tb.addField(objAddr, XCommand.SAFE, XX.createUniqueId());
+        tb.addField(objAddr, XCommand.SAFE_STATE_BOUND, XX.createUniqueId());
         assertTrue(model.executeCommand(tb.build()) >= 0);
         
         assertTrue(model.removeObject(DemoModelUtil.CLAUDIA_ID));

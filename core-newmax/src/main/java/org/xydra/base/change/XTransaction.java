@@ -35,8 +35,8 @@ import org.xydra.base.XAddress;
  * {@link XRepositoryCommand}s can be added to a Transaction, only if they try
  * to add or remove the model on which the transaction is executed.
  * 
- * The {@link XAddress} of a transaction is address of the model or object that
- * contains all the objects/fields modified by the transaction.
+ * The {@link XAddress} of a transaction is the address of the model or object
+ * that contains all the objects/fields modified by the transaction.
  * 
  * <h3>Composition</h3> XTransaction is a subclass of {@link XCommand}, so it is
  * possible to add a Transaction to a Transaction. Adding a Transaction to

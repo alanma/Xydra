@@ -8,9 +8,9 @@ import org.xydra.base.XId;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.util.DumpUtilsBase;
-import org.xydra.core.model.delta.DeltaUtils;
-import org.xydra.core.model.delta.DeltaUtils.IFieldDiff;
-import org.xydra.core.model.delta.DeltaUtils.IObjectDiff;
+import org.xydra.core.model.delta.IFieldDiff;
+import org.xydra.core.model.delta.IModelDiff;
+import org.xydra.core.model.delta.IObjectDiff;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 
@@ -24,7 +24,7 @@ public class DumpUtils extends DumpUtilsBase {
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(DumpUtils.class);
     
-    public static StringBuilder changesToString(final DeltaUtils.IModelDiff changedModel) {
+    public static StringBuilder changesToString(final IModelDiff changedModel) {
         StringBuilder sb = new StringBuilder();
         List<XReadableObject> addedList = new ArrayList<XReadableObject>(changedModel.getAdded());
         Collections.sort(addedList, XidComparator.INSTANCE);
@@ -49,7 +49,7 @@ public class DumpUtils extends DumpUtilsBase {
         return sb;
     }
     
-    public static StringBuilder changesToString(final DeltaUtils.IObjectDiff changedObject) {
+    public static StringBuilder changesToString(final IObjectDiff changedObject) {
         StringBuilder sb = new StringBuilder();
         List<XReadableField> addedList = new ArrayList<XReadableField>(changedObject.getAdded());
         Collections.sort(addedList, XidComparator.INSTANCE);
@@ -74,7 +74,7 @@ public class DumpUtils extends DumpUtilsBase {
         return sb;
     }
     
-    public static StringBuilder changesToString(final DeltaUtils.IFieldDiff changedField) {
+    public static StringBuilder changesToString(final IFieldDiff changedField) {
         StringBuilder sb = new StringBuilder();
         sb.append("'" + changedField.getInitialValue() + "' ==> '" + changedField.getValue()
                 + "' <br/>\n");

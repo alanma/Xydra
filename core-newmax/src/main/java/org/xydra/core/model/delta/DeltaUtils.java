@@ -1,10 +1,8 @@
 package org.xydra.core.model.delta;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
-import org.xydra.base.IHasXId;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.change.XAtomicEvent;
@@ -257,26 +255,27 @@ public abstract class DeltaUtils {
      * @param events
      * @param actorId
      * @param changedModel
-     * @param inTrans should always be true if there are more than 1 events
+     * @param inTransaction should always be true if there are more than 1
+     *            events
      * @param implied
      */
     public static void createEventsForChangedModel(List<XAtomicEvent> events, XId actorId,
-            ChangedModel changedModel, boolean inTrans, boolean implied) {
+            ChangedModel changedModel, boolean inTransaction, boolean implied) {
         
         long rev = changedModel.getRevisionNumber();
         
         for(XId objectId : changedModel.getRemovedObjects()) {
             XReadableObject removedObject = changedModel.getOldObject(objectId);
-            DeltaUtils.createEventsForRemovedObject(events, rev, actorId, removedObject, inTrans,
-                    implied);
+            DeltaUtils.createEventsForRemovedObject(events, rev, actorId, removedObject,
+                    inTransaction, implied);
         }
         
         for(XReadableObject object : changedModel.getNewObjects()) {
             events.add(MemoryModelEvent.createAddEvent(actorId, changedModel.getAddress(),
-                    object.getId(), rev, inTrans));
+                    object.getId(), rev, inTransaction));
             for(XId fieldId : object) {
                 DeltaUtils.createEventsForNewField(events, rev, actorId, object,
-                        object.getField(fieldId), inTrans);
+                        object.getField(fieldId), inTransaction);
             }
         }
         
@@ -286,11 +285,12 @@ public abstract class DeltaUtils {
             
             for(XId fieldId : object.getRemovedFields()) {
                 DeltaUtils.createEventsForRemovedField(events, rev, actorId, object,
-                        object.getOldField(fieldId), inTrans, false);
+                        object.getOldField(fieldId), inTransaction, false);
             }
             
             for(XReadableField field : object.getNewFields()) {
-                DeltaUtils.createEventsForNewField(events, rev, actorId, object, field, inTrans);
+                DeltaUtils.createEventsForNewField(events, rev, actorId, object, field,
+                        inTransaction);
             }
             
             for(ChangedField field : object.getChangedFields()) {
@@ -305,13 +305,13 @@ public abstract class DeltaUtils {
                         XyAssert.xyAssert(oldValue != null);
                         assert oldValue != null;
                         events.add(MemoryFieldEvent.createRemoveEvent(actorId, target, rev,
-                                objectRev, fieldRev, inTrans, false));
+                                objectRev, fieldRev, inTransaction, false));
                     } else if(oldValue == null) {
                         events.add(MemoryFieldEvent.createAddEvent(actorId, target, newValue, rev,
-                                objectRev, fieldRev, inTrans));
+                                objectRev, fieldRev, inTransaction));
                     } else {
                         events.add(MemoryFieldEvent.createChangeEvent(actorId, target, newValue,
-                                rev, objectRev, fieldRev, inTrans));
+                                rev, objectRev, fieldRev, inTransaction));
                     }
                     
                 }
@@ -322,37 +322,37 @@ public abstract class DeltaUtils {
     }
     
     private static void createEventsForNewField(List<XAtomicEvent> events, long rev, XId actorId,
-            XReadableObject object, XReadableField field, boolean inTrans) {
+            XReadableObject object, XReadableField field, boolean inTransaction) {
         long objectRev = object.getRevisionNumber();
         events.add(MemoryObjectEvent.createAddEvent(actorId, object.getAddress(), field.getId(),
-                rev, objectRev, inTrans));
+                rev, objectRev, inTransaction));
         if(!field.isEmpty()) {
             events.add(MemoryFieldEvent.createAddEvent(actorId, field.getAddress(),
-                    field.getValue(), rev, objectRev, field.getRevisionNumber(), inTrans));
+                    field.getValue(), rev, objectRev, field.getRevisionNumber(), inTransaction));
         }
     }
     
     private static void createEventsForRemovedField(List<XAtomicEvent> events, long modelRev,
-            XId actorId, XReadableObject object, XReadableField field, boolean inTrans,
+            XId actorId, XReadableObject object, XReadableField field, boolean inTransaction,
             boolean implied) {
         long objectRev = object.getRevisionNumber();
         long fieldRev = field.getRevisionNumber();
         if(!field.isEmpty()) {
             events.add(MemoryFieldEvent.createRemoveEvent(actorId, field.getAddress(), modelRev,
-                    objectRev, fieldRev, inTrans, true));
+                    objectRev, fieldRev, inTransaction, true));
         }
         events.add(MemoryObjectEvent.createRemoveEvent(actorId, object.getAddress(), field.getId(),
-                modelRev, objectRev, fieldRev, inTrans, implied));
+                modelRev, objectRev, fieldRev, inTransaction, implied));
     }
     
     private static void createEventsForRemovedObject(List<XAtomicEvent> events, long modelRev,
-            XId actorId, XReadableObject object, boolean inTrans, boolean implied) {
+            XId actorId, XReadableObject object, boolean inTransaction, boolean implied) {
         for(XId fieldId : object) {
             DeltaUtils.createEventsForRemovedField(events, modelRev, actorId, object,
-                    object.getField(fieldId), inTrans, true);
+                    object.getField(fieldId), inTransaction, true);
         }
         events.add(MemoryModelEvent.createRemoveEvent(actorId, object.getAddress().getParent(),
-                object.getId(), modelRev, object.getRevisionNumber(), inTrans, implied));
+                object.getId(), modelRev, object.getRevisionNumber(), inTransaction, implied));
     }
     
     /**
@@ -426,41 +426,6 @@ public abstract class DeltaUtils {
             
             return new Pair<ChangedModel,ModelChange>(changedModel, ModelChange.NOCHANGE);
         }
-    }
-    
-    public static interface IModelDiff {
-        
-        Collection<? extends XReadableObject> getAdded();
-        
-        Collection<? extends IObjectDiff> getPotentiallyChanged();
-        
-        Collection<XId> getRemoved();
-        
-    }
-    
-    public static interface IObjectDiff extends IHasXId {
-        Collection<? extends XReadableField> getAdded();
-        
-        Collection<? extends IFieldDiff> getPotentiallyChanged();
-        
-        Collection<XId> getRemoved();
-        
-        boolean hasChanges();
-        
-        @Override
-        XId getId();
-    }
-    
-    public static interface IFieldDiff extends IHasXId {
-        XValue getInitialValue();
-        
-        // same signature as XReadableField
-        XValue getValue();
-        
-        boolean isChanged();
-        
-        @Override
-        XId getId();
     }
     
 }

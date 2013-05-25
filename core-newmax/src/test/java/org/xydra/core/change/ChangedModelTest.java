@@ -1133,8 +1133,8 @@ public class ChangedModelTest {
         XId objectId1 = X.getIDProvider().createUniqueId();
         XId objectId2 = X.getIDProvider().createUniqueId();
         
-        builder.addObject(this.model.getAddress(), XCommand.SAFE, objectId1);
-        builder.addObject(this.model.getAddress(), XCommand.SAFE, objectId2);
+        builder.addObject(this.model.getAddress(), XCommand.SAFE_STATE_BOUND, objectId1);
+        builder.addObject(this.model.getAddress(), XCommand.SAFE_STATE_BOUND, objectId2);
         
         // remove some objects
         builder.removeObject(this.model.getAddress(), this.object2.getRevisionNumber(),
@@ -1144,12 +1144,12 @@ public class ChangedModelTest {
         XId fieldId1 = X.getIDProvider().createUniqueId();
         XId fieldId2 = X.getIDProvider().createUniqueId();
         
-        builder.addField(this.object.getAddress(), XCommand.SAFE, fieldId1);
-        builder.addField(this.object.getAddress(), XCommand.SAFE, fieldId2);
+        builder.addField(this.object.getAddress(), XCommand.SAFE_STATE_BOUND, fieldId1);
+        builder.addField(this.object.getAddress(), XCommand.SAFE_STATE_BOUND, fieldId2);
         
         // add something, remove it again
         XId temp = X.getIDProvider().createUniqueId();
-        builder.addField(this.object.getAddress(), XCommand.SAFE, temp);
+        builder.addField(this.object.getAddress(), XCommand.SAFE_STATE_BOUND, temp);
         builder.removeField(this.object.getAddress(), XCommand.NEW, temp);
         
         // remove some fields
@@ -1226,8 +1226,8 @@ public class ChangedModelTest {
         XId fieldId1 = X.getIDProvider().createUniqueId();
         XId fieldId2 = X.getIDProvider().createUniqueId();
         
-        builder.addField(this.object.getAddress(), XCommand.SAFE, fieldId1);
-        builder.addField(this.object.getAddress(), XCommand.SAFE, fieldId2);
+        builder.addField(this.object.getAddress(), XCommand.SAFE_STATE_BOUND, fieldId1);
+        builder.addField(this.object.getAddress(), XCommand.SAFE_STATE_BOUND, fieldId2);
         
         // add some values
         XValue value = X.getValueFactory().createStringValue("testValue");
@@ -1248,12 +1248,12 @@ public class ChangedModelTest {
             switch(changeType) {
             case ADD:
                 // try to add an object which already exists
-                builder.addObject(this.model.getAddress(), XCommand.SAFE, this.object.getId());
+                builder.addObject(this.model.getAddress(), XCommand.SAFE_STATE_BOUND, this.object.getId());
                 break;
             
             case REMOVE:
                 // try to remove an object which doesn't exist
-                builder.removeObject(this.model.getAddress(), XCommand.SAFE, XX.createUniqueId());
+                builder.removeObject(this.model.getAddress(), XCommand.SAFE_STATE_BOUND, XX.createUniqueId());
                 break;
             case CHANGE:
             case TRANSACTION:
@@ -1266,12 +1266,12 @@ public class ChangedModelTest {
             switch(changeType) {
             case ADD:
                 // try to add a field which already exists
-                builder.addField(this.object.getAddress(), XCommand.SAFE, this.field.getId());
+                builder.addField(this.object.getAddress(), XCommand.SAFE_STATE_BOUND, this.field.getId());
                 break;
             
             case REMOVE:
                 // try to remove a field which doesn't exist
-                builder.removeField(this.object.getAddress(), XCommand.SAFE, XX.createUniqueId());
+                builder.removeField(this.object.getAddress(), XCommand.SAFE_STATE_BOUND, XX.createUniqueId());
                 break;
             case CHANGE:
             case TRANSACTION:
@@ -1281,13 +1281,13 @@ public class ChangedModelTest {
             switch(changeType) {
             case ADD:
                 // try to add a value to a field which value is already set
-                builder.addValue(this.fieldWithValue.getAddress(), XCommand.SAFE,
+                builder.addValue(this.fieldWithValue.getAddress(), XCommand.SAFE_STATE_BOUND,
                         XX.createUniqueId());
                 break;
             
             case REMOVE:
                 // try to remove the vale from a field which value isn't set
-                builder.removeValue(this.field.getAddress(), XCommand.SAFE);
+                builder.removeValue(this.field.getAddress(), XCommand.SAFE_STATE_BOUND);
                 break;
             case CHANGE:
                 // try to change the value of a field which value is set, but
@@ -1302,8 +1302,8 @@ public class ChangedModelTest {
         }
         
         // add some more commands after the command which should fail
-        builder.addField(this.object.getAddress(), XCommand.SAFE, XX.createUniqueId());
-        builder.addField(this.object.getAddress(), XCommand.SAFE, XX.createUniqueId());
+        builder.addField(this.object.getAddress(), XCommand.SAFE_STATE_BOUND, XX.createUniqueId());
+        builder.addField(this.object.getAddress(), XCommand.SAFE_STATE_BOUND, XX.createUniqueId());
         builder.addValue(this.field.getAddress(), XCommand.FORCED, XX.createUniqueId());
         
         // execute something before the transaction

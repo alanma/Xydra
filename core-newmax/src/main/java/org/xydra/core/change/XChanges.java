@@ -324,7 +324,7 @@ public class XChanges {
 		
 		if(event.getChangeType() == ChangeType.REMOVE) {
 			
-			return MemoryModelCommand.createAddCommand(event.getTarget(), XCommand.SAFE,
+			return MemoryModelCommand.createAddCommand(event.getTarget(), XCommand.SAFE_STATE_BOUND,
 			        event.getObjectId());
 			
 		} else {
@@ -359,7 +359,7 @@ public class XChanges {
 		
 		if(event.getChangeType() == ChangeType.REMOVE) {
 			
-			return MemoryObjectCommand.createAddCommand(event.getTarget(), XCommand.SAFE,
+			return MemoryObjectCommand.createAddCommand(event.getTarget(), XCommand.SAFE_STATE_BOUND,
 			        event.getFieldId());
 			
 		} else {
@@ -394,7 +394,7 @@ public class XChanges {
 		
 		if(event.getChangeType() == ChangeType.REMOVE) {
 			
-			return MemoryRepositoryCommand.createAddCommand(event.getTarget(), XCommand.SAFE,
+			return MemoryRepositoryCommand.createAddCommand(event.getTarget(), XCommand.SAFE_STATE_BOUND,
 			        event.getModelId());
 			
 		} else {
@@ -495,7 +495,7 @@ public class XChanges {
 		
 		if(event.getChangeType() == ChangeType.ADD) {
 			
-			return MemoryModelCommand.createAddCommand(event.getTarget(), XCommand.SAFE,
+			return MemoryModelCommand.createAddCommand(event.getTarget(), XCommand.SAFE_STATE_BOUND,
 			        event.getObjectId());
 			
 		} else {
@@ -523,7 +523,7 @@ public class XChanges {
 		
 		if(event.getChangeType() == ChangeType.ADD) {
 			
-			return MemoryObjectCommand.createAddCommand(event.getTarget(), XCommand.SAFE,
+			return MemoryObjectCommand.createAddCommand(event.getTarget(), XCommand.SAFE_STATE_BOUND,
 			        event.getFieldId());
 			
 		} else {
@@ -551,7 +551,7 @@ public class XChanges {
 		
 		if(event.getChangeType() == ChangeType.ADD) {
 			
-			return MemoryRepositoryCommand.createAddCommand(event.getTarget(), XCommand.SAFE,
+			return MemoryRepositoryCommand.createAddCommand(event.getTarget(), XCommand.SAFE_STATE_BOUND,
 			        event.getModelId());
 			
 		} else {
@@ -704,7 +704,7 @@ public class XChanges {
 				throw new IllegalStateException("model already exists, cannot undo " + event);
 			}
 			
-			return MemoryRepositoryCommand.createAddCommand(event.getTarget(), XCommand.SAFE,
+			return MemoryRepositoryCommand.createAddCommand(event.getTarget(), XCommand.SAFE_STATE_BOUND,
 			        event.getModelId());
 			
 		} else {

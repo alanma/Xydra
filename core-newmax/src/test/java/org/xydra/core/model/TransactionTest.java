@@ -98,9 +98,9 @@ public class TransactionTest {
         XTransactionBuilder tb = new XTransactionBuilder(this.model.getAddress());
         XAddress modelAddr = this.model.getAddress();
         tb.removeObject(modelAddr, peterRev, PETER_ID);
-        tb.addObject(modelAddr, XCommand.SAFE, PETER_ID);
+        tb.addObject(modelAddr, XCommand.SAFE_STATE_BOUND, PETER_ID);
         XAddress peterAddr = this.peter.getAddress();
-        tb.addField(peterAddr, XCommand.SAFE, ALIAS_ID);
+        tb.addField(peterAddr, XCommand.SAFE_STATE_BOUND, ALIAS_ID);
         tb.removeObject(modelAddr, XCommand.NEW, PETER_ID);
         // should fail to execute
         tb.removeObject(modelAddr, johnRev - 1, JOHN_ID);
@@ -162,7 +162,7 @@ public class TransactionTest {
         XAddress modelAddr = this.model.getAddress();
         tb.removeObject(modelAddr, peterRev, PETER_ID);
         XAddress johnAddr = this.john.getAddress();
-        tb.addField(johnAddr, XCommand.SAFE, ALIAS_ID);
+        tb.addField(johnAddr, XCommand.SAFE_STATE_BOUND, ALIAS_ID);
         XAddress aliasAddr = XX.resolveField(johnAddr, ALIAS_ID);
         tb.addValue(aliasAddr, XCommand.NEW, JOHN_ALIAS);
         // should fail to execute
@@ -223,7 +223,7 @@ public class TransactionTest {
         XTransactionBuilder tb = new XTransactionBuilder(this.model.getAddress());
         // should succeed and add john/alias
         XAddress johnAddr = this.john.getAddress();
-        tb.addField(johnAddr, XCommand.SAFE, ALIAS_ID);
+        tb.addField(johnAddr, XCommand.SAFE_STATE_BOUND, ALIAS_ID);
         // should succeed and do nothing (john/alias is already there)
         tb.addField(johnAddr, XCommand.FORCED, ALIAS_ID);
         // should succeed and set john/alias to JOHN_ALIAS
@@ -268,12 +268,12 @@ public class TransactionTest {
         
         tb.removeField(johnAddr, XCommand.FORCED, PHONE_ID);
         tb.removeObject(this.model.getAddress(), XCommand.FORCED, JOHN_ID);
-        tb.addObject(this.model.getAddress(), XCommand.SAFE, JOHN_ID);
-        tb.addField(johnAddr, XCommand.SAFE, PHONE_ID);
+        tb.addObject(this.model.getAddress(), XCommand.SAFE_STATE_BOUND, JOHN_ID);
+        tb.addField(johnAddr, XCommand.SAFE_STATE_BOUND, PHONE_ID);
         tb.addValue(johnPhoneAddr, XCommand.FORCED, JOHN_PHONE);
         
         tb.removeField(peterAddr, XCommand.FORCED, PHONE_ID);
-        tb.addField(peterAddr, XCommand.SAFE, PHONE_ID);
+        tb.addField(peterAddr, XCommand.SAFE_STATE_BOUND, PHONE_ID);
         tb.addValue(peterPhoneAddr, XCommand.FORCED, PETER_PHONE);
         
         // record any changes and check that everything has been changed
@@ -305,7 +305,7 @@ public class TransactionTest {
         XTransactionBuilder tb = new XTransactionBuilder(this.model.getAddress());
         // should succeed and add john/alias
         XAddress johnAddr = this.john.getAddress();
-        tb.addField(johnAddr, XCommand.SAFE, ALIAS_ID);
+        tb.addField(johnAddr, XCommand.SAFE_STATE_BOUND, ALIAS_ID);
         // should succeed and do nothing (john/alias is already there)
         tb.addField(johnAddr, XCommand.FORCED, ALIAS_ID);
         // should succeed and set john/alias to JOHN_ALIAS
@@ -369,7 +369,7 @@ public class TransactionTest {
         tb.removeObject(modelAddr, XCommand.FORCED, PETER_ID);
         // should succeed and add john/alias
         XAddress johnAddr = this.john.getAddress();
-        tb.addField(johnAddr, XCommand.SAFE, ALIAS_ID);
+        tb.addField(johnAddr, XCommand.SAFE_STATE_BOUND, ALIAS_ID);
         // should succeed and do nothing (john/alias is already there)
         tb.addField(johnAddr, XCommand.FORCED, ALIAS_ID);
         // should succeed and set john/alias to JOHN_ALIAS
@@ -467,7 +467,7 @@ public class TransactionTest {
         XTransactionBuilder tb = new XTransactionBuilder(this.john.getAddress());
         
         XAddress johnAddr = this.john.getAddress();
-        tb.addField(johnAddr, XCommand.SAFE, ALIAS_ID);
+        tb.addField(johnAddr, XCommand.SAFE_STATE_BOUND, ALIAS_ID);
         tb.removeField(johnAddr, phoneRev, PHONE_ID);
         XAddress aliasAddr = XX.resolveField(johnAddr, ALIAS_ID);
         tb.addValue(aliasAddr, XCommand.NEW, JOHN_ALIAS);
@@ -525,7 +525,7 @@ public class TransactionTest {
         XAddress johnAddr = this.john.getAddress();
         XTransactionBuilder tb = new XTransactionBuilder(johnAddr);
         // should succeed and add john/alias
-        tb.addField(johnAddr, XCommand.SAFE, ALIAS_ID);
+        tb.addField(johnAddr, XCommand.SAFE_STATE_BOUND, ALIAS_ID);
         // should succeed and do nothing (john/alias is already there)
         tb.addField(johnAddr, XCommand.FORCED, ALIAS_ID);
         // should succeed and set john/alias to JOHN_ALIAS
@@ -560,7 +560,7 @@ public class TransactionTest {
         XAddress johnAddr = this.john.getAddress();
         XTransactionBuilder tb = new XTransactionBuilder(johnAddr);
         // should succeed and add john/alias
-        tb.addField(johnAddr, XCommand.SAFE, ALIAS_ID);
+        tb.addField(johnAddr, XCommand.SAFE_STATE_BOUND, ALIAS_ID);
         // should succeed and do nothing (john/alias is already there)
         tb.addField(johnAddr, XCommand.FORCED, ALIAS_ID);
         // should succeed and set john/alias to JOHN_ALIAS
@@ -623,7 +623,7 @@ public class TransactionTest {
         
         XTransactionBuilder tb = new XTransactionBuilder(this.john.getAddress());
         XAddress johnAddr = this.john.getAddress();
-        tb.addField(johnAddr, XCommand.SAFE, ALIAS_ID);
+        tb.addField(johnAddr, XCommand.SAFE_STATE_BOUND, ALIAS_ID);
         XAddress aliasAddr = XX.resolveField(johnAddr, ALIAS_ID);
         tb.addValue(aliasAddr, XCommand.FORCED, JOHN_ALIAS);
         

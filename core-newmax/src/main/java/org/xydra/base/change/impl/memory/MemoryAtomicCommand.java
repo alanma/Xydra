@@ -32,7 +32,7 @@ abstract public class MemoryAtomicCommand implements XAtomicCommand, Serializabl
         if(target == null)
             throw new NullPointerException("target must not be null");
         
-        if(revision < 0 && revision != XCommand.SAFE && revision != XCommand.FORCED
+        if(revision < 0 && revision != XCommand.SAFE_STATE_BOUND && revision != XCommand.FORCED
                 && revision != XCommand.NONEXISTANT)
             throw new RuntimeException("invalid revison: " + revision);
         

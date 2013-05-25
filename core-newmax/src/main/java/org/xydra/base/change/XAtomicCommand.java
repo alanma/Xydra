@@ -10,7 +10,7 @@ public interface XAtomicCommand extends XCommand {
 	 * @return the current revision number of the entity this {@link XCommand}
 	 *         refers to (for field commands) or adds/removes (for other
 	 *         commands). Can also be {@link XCommand#FORCED} or
-	 *         {@link XCommand#SAFE}.
+	 *         {@link XCommand#SAFE_STATE_BOUND}.
 	 * 
 	 *         More precisely: There are three kinds of commands: forced, safe
 	 *         bound to revisions, safe bound to state.

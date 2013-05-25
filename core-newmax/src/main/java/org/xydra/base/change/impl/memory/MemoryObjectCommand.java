@@ -39,7 +39,7 @@ public class MemoryObjectCommand extends MemoryAtomicCommand implements XObjectC
         if(isForced) {
             return createAddCommand(target, XCommand.FORCED, fieldId);
         } else {
-            return createAddCommand(target, XCommand.SAFE, fieldId);
+            return createAddCommand(target, XCommand.SAFE_STATE_BOUND, fieldId);
         }
     }
     
@@ -51,7 +51,7 @@ public class MemoryObjectCommand extends MemoryAtomicCommand implements XObjectC
      * @param target The target of this command - object {@link XId} must not be
      *            null, field {@link XId} has to be null
      * @param fieldRevision Must be {@link XCommand#FORCED} or
-     *            {@link XCommand#SAFE} to determine the behaviour of this
+     *            {@link XCommand#SAFE_STATE_BOUND} to determine the behaviour of this
      *            command.
      * @param fieldId The {@link XId} for the field which is to be
      *            added
@@ -61,7 +61,7 @@ public class MemoryObjectCommand extends MemoryAtomicCommand implements XObjectC
      */
     public static XObjectCommand createAddCommand(XAddress target, long fieldRevision, XId fieldId) {
         
-        if(fieldRevision != XCommand.FORCED && fieldRevision != XCommand.SAFE)
+        if(fieldRevision != XCommand.FORCED && fieldRevision != XCommand.SAFE_STATE_BOUND)
             throw new RuntimeException("invalid revision for an XObjectCommand of type ADD: "
                     + fieldRevision);
         

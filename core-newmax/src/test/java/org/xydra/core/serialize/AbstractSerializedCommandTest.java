@@ -100,7 +100,7 @@ abstract public class AbstractSerializedCommandTest extends AbstractSerializingT
     
     @Test
     public void testObjectCommandAddSafe() {
-        testCommand(MemoryObjectCommand.createAddCommand(object, XCommand.SAFE, id));
+        testCommand(MemoryObjectCommand.createAddCommand(object, XCommand.SAFE_STATE_BOUND, id));
     }
     
     @Test
@@ -127,7 +127,7 @@ abstract public class AbstractSerializedCommandTest extends AbstractSerializingT
     
     @Test
     public void testModelCommandAddSafe() {
-        testCommand(MemoryModelCommand.createAddCommand(model, XCommand.SAFE, id));
+        testCommand(MemoryModelCommand.createAddCommand(model, XCommand.SAFE_STATE_BOUND, id));
     }
     
     @Test
@@ -154,7 +154,7 @@ abstract public class AbstractSerializedCommandTest extends AbstractSerializingT
     
     @Test
     public void testRepositoryCommandAddSafe() {
-        testCommand(MemoryRepositoryCommand.createAddCommand(repo, XCommand.SAFE, id));
+        testCommand(MemoryRepositoryCommand.createAddCommand(repo, XCommand.SAFE_STATE_BOUND, id));
     }
     
     @Test

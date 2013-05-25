@@ -13,17 +13,17 @@ import org.xydra.core.change.RevisionConstants;
  * 
  * There are general two types of XCommands. Forced commands and normal (safe)
  * commands. The only difference is, that forced XCommands are always succeeding
- * (they do no pre-checks), whereas safe ones fail, if they cannot be executed.
- * Suppose you want to add an XModel to an XRepository, but your chosen XId is
- * already taken, executing a safe XCommand will fail and return an error code,
- * whereas the same XCommand with isForced set to true will still "succeed", but
- * actually change nothing. So forced XCommands are used if you do not care if
- * the actions described in the XCommand are actually executed by this command
- * and only care if they were executed at some point in time, for example you
- * might not interested whether the XModel you wanted to add already existed or
- * if you actually added it, you are only interested in the fact that it exists
- * after you've sent your XCommand for execution, i.e. you're only interested in
- * the post-condition.
+ * (they do no pre-checks), whereas safe ones fail, if they cannot find the
+ * right pre-conditions. Suppose you want to add an XModel to an XRepository,
+ * but your chosen XId is already taken, executing a safe XCommand will fail and
+ * return an error code, whereas the same XCommand with isForced set to true
+ * will still "succeed", but actually change nothing. So forced XCommands are
+ * used if you do not care if the actions described in the XCommand are actually
+ * executed by this command and only care if they were executed at some point in
+ * time, for example you might not interested whether the XModel you wanted to
+ * add already existed or if you actually added it, you are only interested in
+ * the fact that it exists after you've sent your XCommand for execution, i.e.
+ * you're only interested in the post-condition.
  * 
  * Not every XCommand-Type comes in these two variations, but if this is
  * possible, the XCommand needs to specify a "isForced"-command returning a
@@ -52,7 +52,7 @@ public interface XCommand extends Serializable {
      * strongly advise to NOT use this revision number in manually created
      * commands!
      */
-    static final long FORCED = -10;
+    static final long FORCED = RevisionConstants.COMMAND_INTENT_FORCED;
     
     /**
      * Command result code. The returned revision of new models, objects and
@@ -81,7 +81,7 @@ public interface XCommand extends Serializable {
      * strongly advise NOT use this revision number in manually created
      * commands!
      */
-    static final long SAFE = -11;
+    static final long SAFE_STATE_BOUND = RevisionConstants.COMMAND_INTENT_SAFE_STATE_BOUND;
     
     /**
      * A threshold indicating that the revision number should be interpreted as

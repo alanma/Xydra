@@ -25,12 +25,11 @@ import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
-import org.xydra.base.rmof.impl.XExistsReadableModel;
+import org.xydra.base.rmof.impl.XExistsReadable;
+import org.xydra.base.rmof.impl.XExistsWritableModel;
 import org.xydra.base.rmof.impl.memory.SimpleObject;
 import org.xydra.core.XCopyUtils;
 import org.xydra.core.XX;
-import org.xydra.core.model.delta.DeltaUtils.IModelDiff;
-import org.xydra.core.model.delta.DeltaUtils.IObjectDiff;
 import org.xydra.index.iterator.AbstractFilteringIterator;
 import org.xydra.index.iterator.BagUnionIterator;
 import org.xydra.log.Logger;
@@ -55,7 +54,7 @@ import org.xydra.sharedutils.XyAssert;
  * @author dscharrer
  * 
  */
-public class ChangedModel implements XWritableModel, IModelDiff, XExistsReadableModel {
+public class ChangedModel implements XWritableModel, IModelDiff, XExistsWritableModel {
     
     private static final Logger log = LoggerFactory.getLogger(ChangedModel.class);
     
@@ -91,6 +90,8 @@ public class ChangedModel implements XWritableModel, IModelDiff, XExistsReadable
     // Contains no XIds that are in added or changed.
     private final Set<XId> removed = new HashSet<XId>(2);
     
+    private boolean modelExists;
+    
     /**
      * Wrap an {@link XReadableModel} to record a set of changes made. Multiple
      * changes will be combined as much as possible such that a minimal set of
@@ -106,7 +107,10 @@ public class ChangedModel implements XWritableModel, IModelDiff, XExistsReadable
      *            and represent
      */
     public ChangedModel(XReadableModel base) {
+        assert base != null;
         this.base = base;
+        this.modelExists = base instanceof XExistsReadable ? ((XExistsReadable)base).exists()
+                : true;
     }
     
     /**
@@ -173,6 +177,12 @@ public class ChangedModel implements XWritableModel, IModelDiff, XExistsReadable
     public int countCommandsNeeded(int max) {
         int n = this.removed.size() + this.added.size();
         if(n < max) {
+            if(this.base instanceof XExistsReadable) {
+                XExistsReadable existsBase = (XExistsReadable)this.base;
+                if(existsBase.exists() != exists()) {
+                    n++;
+                }
+            }
             for(XReadableObject object : this.added.values()) {
                 n += countChanges(object, max - n + 1) - 1;
                 if(n >= max) {
@@ -227,6 +237,12 @@ public class ChangedModel implements XWritableModel, IModelDiff, XExistsReadable
     public int countEventsNeeded(int max) {
         int n = this.removed.size() + this.added.size();
         if(n < max) {
+            if(this.base instanceof XExistsReadable) {
+                XExistsReadable existsBase = (XExistsReadable)this.base;
+                if(existsBase.exists() != exists()) {
+                    n++;
+                }
+            }
             for(XId objectId : this.removed) {
                 // removing object itself already counted
                 XReadableObject oldObject = getOldObject(objectId);
@@ -356,7 +372,7 @@ public class ChangedModel implements XWritableModel, IModelDiff, XExistsReadable
         }
         
         if(!command.isForced()) {
-            if(command.getRevisionNumber() != XCommand.SAFE
+            if(command.getRevisionNumber() != XCommand.SAFE_STATE_BOUND
                     && field.getRevisionNumber() != command.getRevisionNumber()) {
                 log.warn("Safe FieldCommand {" + command + "} is invalid (wrong revision) field="
                         + field.getRevisionNumber() + " command=" + command.getRevisionNumber());
@@ -418,12 +434,13 @@ public class ChangedModel implements XWritableModel, IModelDiff, XExistsReadable
                         + " is invalid or doesn't change anything");
                 return command.isForced();
             }
-            if(!command.isForced()
-                    && (command.getRevisionNumber() != XCommand.SAFE && command.getRevisionNumber() != object
-                            .getRevisionNumber())) {
-                // command is invalid
-                log.warn("Safe XModelCommand " + command + " is invalid (revNr mismatch)");
-                return false;
+            if(!command.isForced()) {
+                if(command.getRevisionNumber() != XCommand.SAFE_STATE_BOUND
+                        && command.getRevisionNumber() != object.getRevisionNumber()) {
+                    // command is invalid
+                    log.warn("Safe XModelCommand " + command + " is invalid (revNr mismatch)");
+                    return false;
+                }
             }
             // command is OK and removes an existing object
             removeObject(objectId);
@@ -483,12 +500,13 @@ public class ChangedModel implements XWritableModel, IModelDiff, XExistsReadable
                         + "'is invalid or doesn't change anything, forced=" + command.isForced());
                 return command.isForced();
             }
-            if(!command.isForced()
-                    && (command.getRevisionNumber() != XCommand.SAFE && command.getRevisionNumber() != field
-                            .getRevisionNumber())) {
-                // command is invalid
-                log.warn("Safe XObjectCommand REMOVE " + command + " revNr mismatch");
-                return false;
+            if(!command.isForced()) {
+                if(command.getRevisionNumber() != XCommand.SAFE_STATE_BOUND
+                        && command.getRevisionNumber() != field.getRevisionNumber()) {
+                    // command is invalid
+                    log.warn("Safe XObjectCommand REMOVE " + command + " revNr mismatch");
+                    return false;
+                }
             }
             // command is OK and removes an existing field
             object.removeField(fieldId);
@@ -682,32 +700,23 @@ public class ChangedModel implements XWritableModel, IModelDiff, XExistsReadable
     
     @Override
     public boolean removeObject(XId objectId) {
-        
         if(this.added.containsKey(objectId)) {
-            
             // Never existed in base, so removing from added is sufficient.
             XyAssert.xyAssert(!this.base.hasObject(objectId) && !this.changed.containsKey(objectId));
             XyAssert.xyAssert(!this.removed.contains(objectId));
             
             this.added.remove(objectId);
-            
             XyAssert.xyAssert(checkSetInvariants());
-            
             return true;
-            
         } else if(!this.removed.contains(objectId) && this.base.hasObject(objectId)) {
-            
             // Exists in base and not removed yet.
             XyAssert.xyAssert(!this.added.containsKey(objectId));
             
             this.removed.add(objectId);
             this.changed.remove(objectId);
-            
             XyAssert.xyAssert(checkSetInvariants());
-            
             return true;
         }
-        
         return false;
     }
     
@@ -763,11 +772,29 @@ public class ChangedModel implements XWritableModel, IModelDiff, XExistsReadable
         this.added.clear();
         this.removed.clear();
         this.changed.clear();
+        this.modelExists = this.base instanceof XExistsReadable ? ((XExistsReadable)this.base)
+                .exists() : true;
     }
     
-    // TODO maybe vary this
     @Override
     public boolean exists() {
-        return true;
+        return this.modelExists;
+    }
+    
+    @Override
+    public void setExists(boolean entityExists) {
+        this.modelExists = entityExists;
+    }
+    
+    public boolean modelWasCreated() {
+        return this.base instanceof XExistsReadable
+        
+        && !((XExistsReadable)this.base).exists() && exists();
+    }
+    
+    public boolean modelWasRemoved() {
+        return this.base instanceof XExistsReadable
+        
+        && ((XExistsReadable)this.base).exists() && !exists();
     }
 }

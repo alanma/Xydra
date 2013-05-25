@@ -1206,14 +1206,14 @@ public abstract class AbstractPersistenceTestForTransactions {
 		 */
 		XId object1 = XX.toId("object1");
 		XId field1 = XX.toId("field1");
-		builder.addObject(XX.resolveModel(this.repoId, modelId), XCommand.SAFE, object1);
+		builder.addObject(XX.resolveModel(this.repoId, modelId), XCommand.SAFE_STATE_BOUND, object1);
 		
-		builder.addField(XX.resolveObject(this.repoId, modelId, object1), XCommand.SAFE, field1);
+		builder.addField(XX.resolveObject(this.repoId, modelId, object1), XCommand.SAFE_STATE_BOUND, field1);
 		
-		builder.addValue(XX.resolveField(this.repoId, modelId, object1, field1), XCommand.SAFE,
+		builder.addValue(XX.resolveField(this.repoId, modelId, object1, field1), XCommand.SAFE_STATE_BOUND,
 		        XV.toValue("Foo"));
 		
-		builder.removeValue(XX.resolveField(this.repoId, modelId, object1, field1), XCommand.SAFE);
+		builder.removeValue(XX.resolveField(this.repoId, modelId, object1, field1), XCommand.SAFE_STATE_BOUND);
 		
 		XTransaction txn = builder.build();
 		
@@ -1253,8 +1253,8 @@ public abstract class AbstractPersistenceTestForTransactions {
 		 * XYDRA/testRepo/testModel/object1/-,
 		 */
 		XTransactionBuilder builder1 = new XTransactionBuilder(modelAddress);
-		builder1.addObject(XX.resolveModel(this.repoId, model1), XCommand.SAFE, object1);
-		builder1.addField(XX.resolveObject(this.repoId, model1, object1), XCommand.SAFE, field1);
+		builder1.addObject(XX.resolveModel(this.repoId, model1), XCommand.SAFE_STATE_BOUND, object1);
+		builder1.addField(XX.resolveObject(this.repoId, model1, object1), XCommand.SAFE_STATE_BOUND, field1);
 		XTransaction txn = builder1.build();
 		
 		revNr = this.persistence.executeCommand(this.actorId, txn);
@@ -1269,9 +1269,9 @@ public abstract class AbstractPersistenceTestForTransactions {
 		 * testRepo/testModel/object1/field1
 		 */
 		XTransactionBuilder builder2 = new XTransactionBuilder(modelAddress);
-		builder2.addValue(XX.resolveField(this.repoId, model1, object1, field1), XCommand.SAFE,
+		builder2.addValue(XX.resolveField(this.repoId, model1, object1, field1), XCommand.SAFE_STATE_BOUND,
 		        XV.toValue("Foo"));
-		builder2.removeValue(XX.resolveField(this.repoId, model1, object1, field1), XCommand.SAFE);
+		builder2.removeValue(XX.resolveField(this.repoId, model1, object1, field1), XCommand.SAFE_STATE_BOUND);
 		XTransaction txn2 = builder2.build();
 		revNr = this.persistence.executeCommand(this.actorId, txn2);
 		
@@ -1299,9 +1299,9 @@ public abstract class AbstractPersistenceTestForTransactions {
 		 * XYDRA/testRepo/testModel/object1/-,
 		 */
 		XTransactionBuilder builder1 = new XTransactionBuilder(modelAddress);
-		builder1.addObject(XX.resolveModel(this.repoId, model1), XCommand.SAFE, object1);
-		builder1.addField(XX.resolveObject(this.repoId, model1, object1), XCommand.SAFE, field1);
-		builder1.addValue(XX.resolveField(this.repoId, model1, object1, field1), XCommand.SAFE,
+		builder1.addObject(XX.resolveModel(this.repoId, model1), XCommand.SAFE_STATE_BOUND, object1);
+		builder1.addField(XX.resolveObject(this.repoId, model1, object1), XCommand.SAFE_STATE_BOUND, field1);
+		builder1.addValue(XX.resolveField(this.repoId, model1, object1, field1), XCommand.SAFE_STATE_BOUND,
 		        XV.toValue("Foo"));
 		XTransaction txn = builder1.build();
 		
@@ -1317,7 +1317,7 @@ public abstract class AbstractPersistenceTestForTransactions {
 		 * testRepo/testModel/object1/field1
 		 */
 		XTransactionBuilder builder2 = new XTransactionBuilder(modelAddress);
-		builder2.removeValue(XX.resolveField(this.repoId, model1, object1, field1), XCommand.SAFE);
+		builder2.removeValue(XX.resolveField(this.repoId, model1, object1, field1), XCommand.SAFE_STATE_BOUND);
 		XTransaction txn2 = builder2.build();
 		revNr = this.persistence.executeCommand(this.actorId, txn2);
 		

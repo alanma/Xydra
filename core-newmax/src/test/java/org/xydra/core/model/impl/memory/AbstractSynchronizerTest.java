@@ -132,7 +132,7 @@ abstract public class AbstractSynchronizerTest {
      */
     private void createPhonebook(XId modelId) {
         XRepositoryCommand createCommand = MemoryRepositoryCommand.createAddCommand(this.repoAddr,
-                XCommand.SAFE, modelId);
+                XCommand.SAFE_STATE_BOUND, modelId);
         executeCommand(createCommand);
         XAddress modelAddr = createCommand.getChangedEntity();
         XTransactionBuilder tb = new XTransactionBuilder(modelAddr);
@@ -332,9 +332,9 @@ abstract public class AbstractSynchronizerTest {
         final XAddress cookiesAddr = XX.resolveField(janeAddr, cookiesId);
         
         XTransactionBuilder tb = new XTransactionBuilder(this.model.getAddress());
-        tb.addObject(this.model.getAddress(), XCommand.SAFE, janeId);
-        tb.addField(janeAddr, XCommand.SAFE, cookiesId);
-        tb.addValue(cookiesAddr, XCommand.SAFE, cookiesValue);
+        tb.addObject(this.model.getAddress(), XCommand.SAFE_STATE_BOUND, janeId);
+        tb.addField(janeAddr, XCommand.SAFE_STATE_BOUND, cookiesId);
+        tb.addValue(cookiesAddr, XCommand.SAFE_STATE_BOUND, cookiesValue);
         
         executeCommand(tb.buildCommand());
     }
@@ -355,9 +355,9 @@ abstract public class AbstractSynchronizerTest {
         final XAddress janeAddr = XX.resolveObject(this.model.getAddress(), janeId);
         final XAddress cookiesAddr = XX.resolveField(janeAddr, cookiesId);
         XTransactionBuilder tb = new XTransactionBuilder(this.model.getAddress());
-        tb.addObject(this.model.getAddress(), XCommand.SAFE, janeId);
-        tb.addField(janeAddr, XCommand.SAFE, cookiesId);
-        tb.addValue(cookiesAddr, XCommand.SAFE, cookiesValue);
+        tb.addObject(this.model.getAddress(), XCommand.SAFE_STATE_BOUND, janeId);
+        tb.addField(janeAddr, XCommand.SAFE_STATE_BOUND, cookiesId);
+        tb.addValue(cookiesAddr, XCommand.SAFE_STATE_BOUND, cookiesValue);
         
         XCommand txn = tb.buildCommand();
         executeCommand(txn);
@@ -415,7 +415,7 @@ abstract public class AbstractSynchronizerTest {
             
             // now re-create the model, with some content
             XRepositoryCommand createCommand = MemoryRepositoryCommand.createAddCommand(
-                    this.repoAddr, XCommand.SAFE, NEWMODEL_ID);
+                    this.repoAddr, XCommand.SAFE_STATE_BOUND, NEWMODEL_ID);
             executeCommand(createCommand);
             XReadableModel remoteModel = loadModelSnapshot(NEWMODEL_ID);
             assertNotNull(remoteModel);
@@ -562,9 +562,9 @@ abstract public class AbstractSynchronizerTest {
         final XAddress janeAddr = XX.resolveObject(this.model.getAddress(), janeId);
         final XAddress cookiesAddr = XX.resolveField(janeAddr, cookiesId);
         XTransactionBuilder tb = new XTransactionBuilder(this.model.getAddress());
-        tb.addObject(this.model.getAddress(), XCommand.SAFE, janeId);
-        tb.addField(janeAddr, XCommand.SAFE, cookiesId);
-        tb.addValue(cookiesAddr, XCommand.SAFE, cookiesValue);
+        tb.addObject(this.model.getAddress(), XCommand.SAFE_STATE_BOUND, janeId);
+        tb.addField(janeAddr, XCommand.SAFE_STATE_BOUND, cookiesId);
+        tb.addValue(cookiesAddr, XCommand.SAFE_STATE_BOUND, cookiesValue);
         executeCommand(tb.buildCommand());
         
         // and some more remote changes
@@ -581,8 +581,8 @@ abstract public class AbstractSynchronizerTest {
         // also make some local changes
         // should be reverted on sync because of conflicting remote changes
         XTransactionBuilder tb2 = new XTransactionBuilder(this.model.getAddress());
-        tb2.addObject(this.model.getAddress(), XCommand.SAFE, janeId);
-        tb2.addField(janeAddr, XCommand.SAFE, cakesId);
+        tb2.addObject(this.model.getAddress(), XCommand.SAFE_STATE_BOUND, janeId);
+        tb2.addField(janeAddr, XCommand.SAFE_STATE_BOUND, cakesId);
         assertTrue(this.model.executeCommand(tb2.buildCommand()) >= 0);
         // should survive the sync
         final XId newfieldId = XX.toId("newField");

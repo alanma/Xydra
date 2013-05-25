@@ -107,7 +107,7 @@ public interface XEvent extends Serializable {
      *         same transaction event; false for transactions or events where
      *         {@link #getChangeType()} is not {@link ChangeType#REMOVE}.
      * 
-     *         An atomic event can be implies if it is part of a transaction. A
+     *         An atomic event can be implied if it is part of a transaction. A
      *         stand-alone atomic event cannot be implied.
      * 
      *         Repository events are never implied, as the repository cannot be

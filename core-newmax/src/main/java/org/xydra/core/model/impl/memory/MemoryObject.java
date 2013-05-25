@@ -25,7 +25,6 @@ import org.xydra.base.change.XTransactionEvent;
 import org.xydra.base.change.impl.memory.MemoryModelCommand;
 import org.xydra.base.change.impl.memory.MemoryObjectCommand;
 import org.xydra.base.rmof.XRevWritableField;
-import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.base.rmof.impl.XExistsRevWritableModel;
 import org.xydra.base.rmof.impl.XExistsRevWritableObject;
@@ -166,8 +165,8 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
             if(father != null) {
                 XModelCommand createObjectCommand = MemoryModelCommand.createAddCommand(
                         father.getAddress(), true, getId());
-                Executor.executeModelCommand(actorId, createObjectCommand, father.getState(), root,
-                        null);
+                Executor.executeCommandOnModel(actorId, createObjectCommand, null,
+                        father.getState(), root, null);
             }
             setExists(true);
             if(this.objectState.getRevisionNumber() != RevisionConstants.NO_REVISION) {
@@ -297,52 +296,31 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
     
     @Override
     public long executeCommand(XCommand command) {
-        if(command instanceof XTransaction) {
-            synchronized(getRoot()) {
-                XId actorId = getRoot().getSessionActor();
-                long result;
-                if(getFather() != null) {
-                    XExistsRevWritableModel modelState = getFather().getState();
-                    IMemoryRepository repo = getFather().getFather();
-                    XExistsRevWritableRepository repositoryState = null;
-                    if(repo != null)
-                        repositoryState = repo.getState();
-                    result = Executor.executeModelTransaction(actorId, (XTransaction)command,
-                            repositoryState, modelState, getRoot(), this.changeListener);
-                } else {
-                    result = Executor.executeObjectTransaction(actorId, (XTransaction)command,
-                            getState(), getRoot(), this.changeListener);
+        assert command != null;
+        assert command instanceof XTransaction || command instanceof XModelCommand
+                || command instanceof XObjectCommand || command instanceof XFieldCommand;
+        
+        synchronized(getRoot()) {
+            XId actorId = getRoot().getSessionActor();
+            XExistsRevWritableModel modelState = null;
+            IMemoryRepository repository = null;
+            XExistsRevWritableRepository repositoryState = null;
+            if(getFather() != null) {
+                modelState = getFather().getState();
+                repository = getFather().getFather();
+                if(repository != null) {
+                    repositoryState = repository.getState();
                 }
-                return result;
             }
+            return Executor.executeCommandOnObject(actorId, command, repositoryState, modelState,
+                    getState(), getRoot(), this.changeListener);
         }
-        if(command instanceof XObjectCommand) {
-            return executeObjectCommand((XObjectCommand)command);
-        }
-        if(command instanceof XFieldCommand) {
-            IMemoryField field = getField(command.getTarget().getField());
-            if(field != null) {
-                return field.executeFieldCommand((XFieldCommand)command);
-            } else {
-                return XCommand.FAILED;
-            }
-        }
-        throw new IllegalArgumentException("Unknown command type: " + command);
     }
     
     @Override
     public long executeObjectCommand(XObjectCommand command) {
-        synchronized(getRoot()) {
-            assertThisEntityExists();
-            
-            XRevWritableModel modelState = null;
-            if(this.father != null) {
-                modelState = this.father.getState();
-            }
-            
-            return Executor.executeObjectCommand(getRoot().getSessionActor(), command, modelState,
-                    this.objectState, getRoot(), this.changeListener);
-        }
+        return executeCommand(command);
+        
     }
     
     // implement IMemoryObject
