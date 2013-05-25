@@ -6,11 +6,11 @@ import org.junit.BeforeClass;
 import org.xydra.core.X;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
-import org.xydra.store.AbstractPersistenceTest;
+import org.xydra.store.AbstractPersistenceTestForTransactions;
 import org.xydra.store.XydraRuntime;
 
 
-public class GaeDetailedPersistenceTest extends AbstractPersistenceTest {
+public class GaeDetailedPersistenceTestForTransactions extends AbstractPersistenceTestForTransactions {
     
     /*
      * FIXME Running the complete test on my machine sometimes results in an IO
@@ -28,7 +28,7 @@ public class GaeDetailedPersistenceTest extends AbstractPersistenceTest {
      * ~Kaidel
      */
     
-    private static final Logger log = LoggerFactory.getLogger(GaeDetailedPersistenceTest.class);
+    private static final Logger log = LoggerFactory.getLogger(GaeDetailedPersistenceTestForTransactions.class);
     
     @BeforeClass
     public static void beforeClazz() {
