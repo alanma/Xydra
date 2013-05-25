@@ -5,7 +5,8 @@ import org.xydra.core.X;
 import org.xydra.store.impl.memory.MemoryPersistence;
 
 
-public class MemoryPersistenceTest extends AbstractPersistenceTest {
+public class MemoryPersistenceTestForAtomicCommandsAndMiscellaneous extends
+        AbstractPersistenceTestForAtomicCommandsAndMiscellaneous {
 	@Before
 	public void setup() {
 		this.comFactory = X.getCommandFactory();

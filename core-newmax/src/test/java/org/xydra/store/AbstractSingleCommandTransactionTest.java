@@ -27,7 +27,7 @@ public abstract class AbstractSingleCommandTransactionTest {
 	}
 	
 	@SuppressWarnings("unused")
-	private static final Logger log = LoggerFactory.getLogger(AbstractPersistenceTest.class);
+	private static final Logger log = LoggerFactory.getLogger(AbstractPersistenceTestForTransactions.class);
 	
 	public XydraPersistence persistence;
 	
