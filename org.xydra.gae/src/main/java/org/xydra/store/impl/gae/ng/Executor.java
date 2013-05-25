@@ -142,7 +142,7 @@ public class Executor {
             switch(command.getChangeType()) {
             case ADD: {
                 if(fieldInTxn.isEmpty()) {
-                    if(command.getRevisionNumber() == XCommand.SAFE) {
+                    if(command.getRevisionNumber() == XCommand.SAFE_STATE_BOUND) {
                         return CheckResult.successValue(command, change, ctxInTxn, inTransaction);
                     } else {
                         long fieldRevBeforeCmd = getFieldRevBeforeCmd(ctxBeforeCmd, objectId,
@@ -168,7 +168,7 @@ public class Executor {
                     return CheckResult
                             .failed("Could not safely change/remove field value, there was none");
                 } else {
-                    if(command.getRevisionNumber() == XCommand.SAFE) {
+                    if(command.getRevisionNumber() == XCommand.SAFE_STATE_BOUND) {
                         return CheckResult.successValue(command, change, ctxInTxn, inTransaction);
                     } else {
                         long fieldRevBeforeCmd = getFieldRevBeforeCmd(ctxBeforeCmd, objectId,
@@ -284,7 +284,7 @@ public class Executor {
                 if(ctxInTxn.hasObject(objectId)) {
                     return CheckResult.failed("objectExists " + command.getChangedEntity());
                 } else {
-                    if(command.getRevisionNumber() == XCommand.SAFE) {
+                    if(command.getRevisionNumber() == XCommand.SAFE_STATE_BOUND) {
                         return CheckResult.successCreatedObject(command, change, ctxInTxn,
                                 inTransaction);
                     } else {
@@ -301,7 +301,7 @@ public class Executor {
                 }
             case REMOVE:
                 if(ctxInTxn.hasObject(objectId)) {
-                    if(command.getRevisionNumber() == XCommand.SAFE) {
+                    if(command.getRevisionNumber() == XCommand.SAFE_STATE_BOUND) {
                         return CheckResult.successRemovedObject(command, change, ctxInTxn,
                                 inTransaction);
                     } else {
@@ -370,7 +370,7 @@ public class Executor {
                     return CheckResult.failed("tos '" + objectInTxn.getAddress() + "' hasField '"
                             + fieldId + "'");
                 } else {
-                    if(command.getRevisionNumber() == XCommand.SAFE) {
+                    if(command.getRevisionNumber() == XCommand.SAFE_STATE_BOUND) {
                         return CheckResult.successCreatedField(command, ctxInTxn, change,
                                 inTransaction);
                     } else {
@@ -388,7 +388,7 @@ public class Executor {
             }
             case REMOVE: {
                 if(objectInTxn.hasField(fieldId)) {
-                    if(command.getRevisionNumber() == XCommand.SAFE) {
+                    if(command.getRevisionNumber() == XCommand.SAFE_STATE_BOUND) {
                         return CheckResult.successRemovedField(command, change, ctxInTxn,
                                 inTransaction);
                     } else {
