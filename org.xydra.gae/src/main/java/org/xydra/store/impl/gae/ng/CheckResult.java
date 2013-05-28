@@ -9,6 +9,9 @@ import org.xydra.base.change.XModelCommand;
 import org.xydra.base.change.XObjectCommand;
 import org.xydra.base.change.XRepositoryCommand;
 import org.xydra.base.change.XTransaction;
+import org.xydra.base.rmof.XRevWritableField;
+import org.xydra.base.rmof.XStateWritableField;
+import org.xydra.base.rmof.XStateWritableObject;
 import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.impl.gae.changes.GaeChange;
 import org.xydra.store.impl.gae.changes.GaeChange.Status;
@@ -32,10 +35,15 @@ public class CheckResult {
         return new CheckResult(Status.FailedPreconditions, null, null, false, explanation);
     }
     
-    public static CheckResult successCreatedField(XObjectCommand command, ContextInTxn ctxInTxn,
-            GaeChange change, boolean inTransaction) {
-        ctxInTxn.getObject(command.getChangedEntity().getObject()).createField(
-                command.getChangedEntity().getField());
+    public static CheckResult successCreatedField(XObjectCommand command, long revBeforeTxn,
+            ContextInTxn ctxInTxn, GaeChange change, boolean inTransaction) {
+        XStateWritableObject objectInTxn = ctxInTxn.getObject(command.getChangedEntity()
+                .getObject());
+        XStateWritableField newField = objectInTxn.createField(command.getChangedEntity()
+                .getField());
+        if(newField instanceof XRevWritableField) {
+            ((XRevWritableField)newField).setRevisionNumber(revBeforeTxn);
+        }
         return new CheckResult(Status.SuccessExecuted, change.getActorId(), ctxInTxn,
                 inTransaction, null);
     }
@@ -48,7 +56,7 @@ public class CheckResult {
      */
     public static CheckResult successCreatedModel(XRepositoryCommand command, GaeChange change,
             ContextInTxn ctxInTxn) {
-        ctxInTxn.setModelExists(true);
+        ctxInTxn.setExists(true);
         return new CheckResult(Status.SuccessExecuted, change.getActorId(), ctxInTxn,
         /* Add/remove model is never part of a txn */
         false, null);
@@ -83,7 +91,7 @@ public class CheckResult {
     
     public static CheckResult successRemovedModel(XRepositoryCommand command, GaeChange change,
             ContextInTxn ctxInTxn) {
-        ctxInTxn.setModelExists(false);
+        ctxInTxn.setExists(false);
         return new CheckResult(Status.SuccessExecuted, change.getActorId(), ctxInTxn,
         /* Add / remove model is never part of a txn */
         false, null);

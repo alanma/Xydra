@@ -2,7 +2,6 @@ package org.xydra.store.impl.gae.ng;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -14,15 +13,14 @@ import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XFieldEvent;
 import org.xydra.base.change.XModelEvent;
 import org.xydra.base.change.XObjectEvent;
-import org.xydra.base.change.XRepositoryEvent;
 import org.xydra.base.change.impl.memory.MemoryFieldEvent;
 import org.xydra.base.change.impl.memory.MemoryModelEvent;
 import org.xydra.base.change.impl.memory.MemoryObjectEvent;
-import org.xydra.base.change.impl.memory.MemoryRepositoryEvent;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XStateWritableModel;
 import org.xydra.base.rmof.XStateWritableObject;
+import org.xydra.base.rmof.impl.XExists;
 import org.xydra.base.rmof.impl.memory.SimpleObject;
 import org.xydra.core.XX;
 import org.xydra.core.model.delta.ChangedModel;
@@ -40,7 +38,7 @@ import org.xydra.sharedutils.XyAssert;
  * 
  * @author xamde
  */
-public class ContextInTxn implements XStateWritableModel {
+public class ContextInTxn implements XStateWritableModel, XExists {
     
     private static final Logger log = LoggerFactory.getLogger(ContextInTxn.class);
     
@@ -82,16 +80,14 @@ public class ContextInTxn implements XStateWritableModel {
         return this.changedModel.removeObject(objectId);
     }
     
-    private boolean modelExists;
-    
     public ContextInTxn(@NeverNull ContextBeforeCommand ctxBeforeCmd) {
         XyAssert.xyAssert(ctxBeforeCmd != null);
         assert ctxBeforeCmd != null;
         
         this.changedModel = new ChangedModel(ctxBeforeCmd);
-        this.modelExists = ctxBeforeCmd.isModelExists();
+        assert this.changedModel.exists() == ctxBeforeCmd.exists();
         log.trace("At context creation time model '" + this.changedModel.getAddress()
-                + "' exists: " + this.modelExists);
+                + "' exists: " + this.changedModel.exists());
     }
     
     /**
@@ -101,12 +97,12 @@ public class ContextInTxn implements XStateWritableModel {
         return this.changedModel.hasChanges();
     }
     
-    public void setModelExists(boolean modelExists) {
-        this.modelExists = modelExists;
+    public void setExists(boolean modelExists) {
+        this.changedModel.setExists(modelExists);
     }
     
-    public boolean isModelExists() {
-        return this.modelExists;
+    public boolean exists() {
+        return this.changedModel.exists();
     }
     
     public @NeverNull
@@ -114,44 +110,11 @@ public class ContextInTxn implements XStateWritableModel {
             boolean inTransaction) {
         XyAssert.xyAssert(this.getAddress() != null);
         
-        /* Repository commands handled here */
-        boolean existedBefore = ctxBeforeCommand.isModelExists();
-        boolean existsNow = this.isModelExists();
-        if(!existedBefore && existsNow) {
-            // model add
-            XAddress target = this.getAddress().getParent();
-            XRepositoryEvent event = MemoryRepositoryEvent.createAddEvent(actorId, target, getId(),
-                    ctxBeforeCommand.getRevisionNumber(), inTransaction);
-            return Collections.singletonList((XAtomicEvent)event);
-        } else if(existedBefore && !existsNow) {
-            // model remove - implied events
-            List<XAtomicEvent> events = new ArrayList<XAtomicEvent>();
-            XAddress target = this.getAddress().getParent();
-            boolean hadChildren = false;
-            for(XId objectId : ctxBeforeCommand) {
-                hadChildren = true;
-                addImpliedObjectRemoveEventsAndUpdateTos(events, ctxBeforeCommand, actorId,
-                        ctxBeforeCommand.getRevisionNumber(), ctxBeforeCommand.getAddress(),
-                        ctxBeforeCommand.getObject(objectId));
-            }
-            XRepositoryEvent repositoryEvent = MemoryRepositoryEvent.createRemoveEvent(actorId,
-                    target, getId(), ctxBeforeCommand.getRevisionNumber(), inTransaction
-                            || hadChildren);
-            events.add(repositoryEvent);
-            return events;
-        } else if(!existedBefore && !existsNow) {
-            // no model at all
-            return Collections.EMPTY_LIST;
-        } else {
-            // model changed
-            XyAssert.xyAssert(existedBefore && existsNow);
-            
-            List<XAtomicEvent> events = new ArrayList<XAtomicEvent>();
-            boolean inTxn = inTransaction || this.changedModel.countCommandsNeeded(2) > 1;
-            DeltaUtils
-                    .createEventsForChangedModel(events, actorId, this.changedModel, inTxn, false);
-            return events;
-        }
+        List<XAtomicEvent> events = new ArrayList<XAtomicEvent>();
+        boolean inTxn = inTransaction || this.changedModel.countCommandsNeeded(2) > 1;
+        DeltaUtils.createEventsForChangedModel(events, actorId, this.changedModel, inTxn
+                || this.changedModel.modelWasRemoved());
+        return events;
     }
     
     /**
@@ -164,6 +127,7 @@ public class ContextInTxn implements XStateWritableModel {
      * @param modelAddress
      * @param object
      */
+    // FIXME make sure TOS are updated
     private static void addImpliedObjectRemoveEventsAndUpdateTos(List<XAtomicEvent> events,
             ContextBeforeCommand ctxBeforeCmd, XId actorId, long modelRev, XAddress modelAddress,
             XReadableObject object) {

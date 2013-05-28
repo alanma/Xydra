@@ -8,6 +8,7 @@ import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XAtomicCommand;
+import org.xydra.base.change.XAtomicCommand.Intent;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XFieldCommand;
 import org.xydra.base.change.XModelCommand;
@@ -29,6 +30,9 @@ import org.xydra.store.impl.gae.changes.GaeChange.Status;
 /**
  * Checks preconditions and computes events. Decides if execution of a command
  * fails or succeeds.
+ * 
+ * Change in semantics on 2013-05-28: SafeRevBound ADD commands eliminated. Was
+ * checking the revision of the container before.
  * 
  * @author xamde
  */
@@ -82,7 +86,140 @@ public class Executor {
             @NeverNull ContextBeforeCommand ctxBeforeCmd, ContextInTxn ctxInTxn,
             boolean inTransaction) {
         
-        if(!ctxInTxn.isModelExists()) {
+        if(!ctxInTxn.exists()) {
+            return CheckResult.failed("Model '" + command.getModelId() + "' does not exist");
+        }
+        
+        XId objectId = command.getChangedEntity().getObject();
+        XStateWritableObject objectInTxn = ctxInTxn.getObject(objectId);
+        if(objectInTxn == null) {
+            return CheckResult.failed("Object '" + objectId
+                    + "' does not exist, no field command can succeed");
+        }
+        
+        XStateWritableField fieldInTxn = objectInTxn.getField(command.getFieldId());
+        if(fieldInTxn == null) {
+            return CheckResult.failed("Command { " + command + "} is invalid. Field '"
+                    + command.getFieldId() + "' not found in object '" + command.getObjectId()
+                    + ", no field command can succeed");
+        }
+        
+        /* model, object and field exist in the transaction context */
+        boolean valueExists = !fieldInTxn.isEmpty();
+        switch(command.getChangeType()) {
+        
+        case ADD: {
+            if(valueExists) {
+                if(command.getIntent() == Intent.Forced) {
+                    // success or nochange
+                    /*
+                     * forced command ADDs a value, but there is already another
+                     * one? success.
+                     */
+                    XValue oldValueInTxn = fieldInTxn.getValue();
+                    XValue newValue = command.getValue();
+                    XyAssert.xyAssert(newValue != null);
+                    boolean sameValue = oldValueInTxn != null && oldValueInTxn.equals(newValue);
+                    if(sameValue) {
+                        return CheckResult.successNoChange("had already the same value");
+                    } else {
+                        return CheckResult.successValue(command, change, ctxInTxn, inTransaction);
+                    }
+                } else {
+                    // fail
+                    return CheckResult
+                            .failed("Could not safely add field value, there was already one");
+                }
+            } else {
+                if(command.getIntent() == Intent.SafeRevBound) {
+                    throw new AssertionError("SafeRevBound ADD makes no sense");
+                }
+                // success
+                return CheckResult.successValue(command, change, ctxInTxn, inTransaction);
+            }
+        }
+        
+        case REMOVE: {
+            if(!valueExists) {
+                if(command.getIntent() == Intent.Forced) {
+                    return CheckResult.successNoChange("was empty before, nothing to remove");
+                } else {
+                    return CheckResult
+                            .failed("Could not safely remove field value, there was none");
+                }
+            } else {
+                if(command.getIntent() == Intent.SafeRevBound) {
+                    long fieldRevBeforeCmd = getFieldRevBeforeCmd(ctxBeforeCmd, objectId,
+                            command.getFieldId());
+                    if(command.getRevisionNumber() != fieldRevBeforeCmd) {
+                        return CheckResult.failed("Expected revNr " + command.getRevisionNumber()
+                                + " but found " + fieldRevBeforeCmd);
+                    }
+                }
+                return CheckResult.successValue(command, change, ctxInTxn, inTransaction);
+            }
+        }
+        
+        /* semantics similar to 'remove followed by add' */
+        case CHANGE: {
+            if(!valueExists) {
+                if(command.getIntent() == Intent.Forced) {
+                    return CheckResult.successValue(command, change, ctxInTxn, inTransaction);
+                } else {
+                    return CheckResult
+                            .failed("Could not safely change field value, there was none");
+                }
+            } else {
+                if(command.getIntent() == Intent.Forced) {
+                    // success or nochange
+                    /*
+                     * forced command ADDs a value, but there is already another
+                     * one? success.
+                     */
+                    XValue oldValueInTxn = fieldInTxn.getValue();
+                    XValue newValue = command.getValue();
+                    XyAssert.xyAssert(newValue != null);
+                    boolean sameValue = oldValueInTxn != null && oldValueInTxn.equals(newValue);
+                    if(sameValue) {
+                        return CheckResult.successNoChange("had already the same value");
+                    } else {
+                        return CheckResult.successValue(command, change, ctxInTxn, inTransaction);
+                    }
+                } else {
+                    if(command.getIntent() == Intent.SafeRevBound) {
+                        long fieldRevBeforeCmd = getFieldRevBeforeCmd(ctxBeforeCmd, objectId,
+                                command.getFieldId());
+                        if(command.getRevisionNumber() != fieldRevBeforeCmd) {
+                            return CheckResult.failed("Expected revNr "
+                                    + command.getRevisionNumber() + " but found "
+                                    + fieldRevBeforeCmd);
+                        }
+                    }
+                    return CheckResult.successValue(command, change, ctxInTxn, inTransaction);
+                }
+            }
+        }
+        
+        default:
+            throw new AssertionError("illegal command");
+        }
+    }
+    
+    /**
+     * @param command to be checked
+     * @param change just carried over to the result
+     * @param ctxBeforeCmd used to look up revision numbers for safe REMOVE
+     *            command
+     * @param ctxInTxn the running state, queried to decide of command is legal
+     * @param inTransaction just carried over to the result
+     * @return a {@link CheckResult} with a changed {@link ContextInTxn} and the
+     *         resulting {@link Status}
+     */
+    private static CheckResult checkFieldCommandOLD(XFieldCommand command, GaeChange change,
+            @NeverNull ContextBeforeCommand ctxBeforeCmd, ContextInTxn ctxInTxn,
+            boolean inTransaction) {
+        
+        if(!ctxInTxn.exists()) {
             return CheckResult.failed("Model '" + command.getModelId() + "' does not exist");
         }
         
@@ -245,7 +382,84 @@ public class Executor {
             @NeverNull ContextBeforeCommand ctxBeforeCmd, @NeverNull ContextInTxn ctxInTxn,
             boolean inTransaction) {
         
-        if(!ctxInTxn.isModelExists()) {
+        if(!ctxInTxn.exists()) {
+            return CheckResult.failed("Model '" + command.getModelId() + "' does not exist");
+        }
+        
+        XId objectId = command.getChangedEntity().getObject();
+        /*
+         * TODO might be faster to look for TOS instead via
+         * ctxInTxn.getObject(objectId);
+         */
+        boolean objectExists = ctxInTxn.hasObject(objectId);
+        switch(command.getChangeType()) {
+        case ADD:
+            if(objectExists) {
+                switch(command.getIntent()) {
+                case Forced:
+                    // nochange
+                    return CheckResult
+                            .successNoChange("objectExists " + command.getChangedEntity());
+                case SafeStateBound:
+                    // fail
+                    return CheckResult.failed("objectExists " + command.getChangedEntity());
+                case SafeRevBound:
+                    throw new AssertionError("SafeRevBound ADD makes no sense");
+                default:
+                    throw new AssertionError();
+                }
+            } else {
+                // success
+                return CheckResult.successCreatedObject(command, change, ctxInTxn, inTransaction);
+            }
+        case REMOVE:
+            if(!objectExists) {
+                switch(command.getIntent()) {
+                case Forced:
+                    // nochange
+                    return CheckResult.successNoChange("!tos.objectExists");
+                case SafeStateBound:
+                case SafeRevBound:
+                    // fail
+                    return CheckResult.failed("!objectExists");
+                default:
+                    throw new AssertionError();
+                }
+            } else {
+                if(command.getIntent() == Intent.SafeRevBound) {
+                    long objectRevBeforeCmd = getObjectRevBeforeCmd(ctxBeforeCmd, objectId);
+                    if(command.getRevisionNumber() != objectRevBeforeCmd) {
+                        return CheckResult.failed("ObjectRevision number expected "
+                                + command.getRevisionNumber() + " but found " + objectRevBeforeCmd);
+                    }
+                }
+                // success
+                return CheckResult.successRemovedObject(command, change, ctxInTxn, inTransaction);
+            }
+        default:
+            throw new AssertionError("impossible type for model command " + command);
+        }
+    }
+    
+    /**
+     * Checks if the given {@link XModelCommand} is valid and can be
+     * successfully executed on this ChangedModel or if the attempt to execute
+     * it will fail.
+     * 
+     * @param command The {@link XModelCommand} which is to be checked.
+     * @param change
+     * @param beforeContext to read from
+     * @param ctxInTxn to change
+     * @param inTransaction
+     * @return true, if the {@link XModelCommand} is valid and can be executed,
+     *         false otherwise
+     */
+    @Deprecated
+    private static CheckResult checkModelCommandOLD(XModelCommand command, GaeChange change,
+            @NeverNull ContextBeforeCommand ctxBeforeCmd, @NeverNull ContextInTxn ctxInTxn,
+            boolean inTransaction) {
+        
+        if(!ctxInTxn.exists()) {
             return CheckResult.failed("Model '" + command.getModelId() + "' does not exist");
         }
         
@@ -254,8 +468,10 @@ public class Executor {
         if(command.isForced()) {
             switch(command.getChangeType()) {
             case ADD:
-                // TODO might be faster to look for TOS instead
-                // via ctxInTxn.getObject(objectId);
+                /*
+                 * TODO might be faster to look for TOS instead via
+                 * ctxInTxn.getObject(objectId);
+                 */
                 if(ctxInTxn.hasObject(objectId)) {
                     return CheckResult
                             .successNoChange("objectExists " + command.getChangedEntity());
@@ -278,8 +494,10 @@ public class Executor {
             /* safe command, state-bound or revision-bound */
             switch(command.getChangeType()) {
             case ADD:
-                // TODO might be faster to look for TOS instead
-                // via ctxInTxn.getObject(objectId);
+                /*
+                 * TODO might be faster to look for TOS instead via
+                 * ctxInTxn.getObject(objectId);
+                 */
                 if(ctxInTxn.hasObject(objectId)) {
                     return CheckResult.failed("objectExists " + command.getChangedEntity());
                 } else {
@@ -327,7 +545,81 @@ public class Executor {
             @NeverNull ContextBeforeCommand ctxBeforeCmd, ContextInTxn ctxInTxn,
             boolean inTransaction) {
         
-        if(!ctxInTxn.isModelExists()) {
+        if(!ctxInTxn.exists()) {
+            return CheckResult.failed("Model '" + command.getModelId() + "' does not exist");
+        }
+        
+        XId objectId = command.getChangedEntity().getObject();
+        XId fieldId = command.getFieldId();
+        
+        XStateWritableObject objectInTxn = ctxInTxn.getObject(objectId);
+        
+        boolean fieldExists = objectInTxn.hasField(fieldId);
+        
+        switch(command.getChangeType()) {
+        case ADD: {
+            if(fieldExists) {
+                if(command.getIntent() == Intent.Forced) {
+                    // nochange
+                    return CheckResult.successNoChange("tos '" + objectInTxn.getAddress()
+                            + "' hasField '" + fieldId + "'");
+                } else {
+                    // fail
+                    return CheckResult.failed("tos '" + objectInTxn.getAddress() + "' hasField '"
+                            + fieldId + "'");
+                }
+            } else {
+                if(command.getIntent() == Intent.SafeRevBound) {
+                    throw new AssertionError("SafeRevBound ADD makes no sense");
+                    // // check
+                    // long objectRevBeforeCmd =
+                    // getObjectRevBeforeCmd(ctxBeforeCmd, objectId);
+                    // if(command.getRevisionNumber() != objectRevBeforeCmd) {
+                    // return CheckResult.failed("Revision number expected "
+                    // + command.getRevisionNumber() + " but found " +
+                    // objectRevBeforeCmd);
+                    // }
+                }
+                // success
+                return CheckResult.successCreatedField(command, ctxBeforeCmd.getRevisionNumber(),
+                        ctxInTxn, change, inTransaction);
+            }
+        }
+        case REMOVE: {
+            if(!fieldExists) {
+                if(command.getIntent() == Intent.Forced) {
+                    // nochange
+                    return CheckResult.successNoChange("tos '" + objectInTxn.getAddress()
+                            + "' hasField '" + fieldId + "'");
+                } else {
+                    // fail
+                    return CheckResult.failed("tos '" + objectInTxn.getAddress()
+                            + "' has no field '" + fieldId + "'");
+                }
+            } else {
+                if(command.getIntent() == Intent.SafeRevBound) {
+                    // check
+                    long fieldRevBeforeCmd = getFieldRevBeforeCmd(ctxBeforeCmd, objectId, fieldId);
+                    if(command.getRevisionNumber() != fieldRevBeforeCmd) {
+                        return CheckResult.failed("FieldRevision number expected "
+                                + command.getRevisionNumber() + " but found " + fieldRevBeforeCmd);
+                    }
+                }
+                // success
+                return CheckResult.successRemovedField(command, change, ctxInTxn, inTransaction);
+            }
+        }
+        default:
+            throw new AssertionError("impossible type for object command " + command);
+        }
+    }
+    
+    @Deprecated
+    private static CheckResult checkObjectCommandOLD(XObjectCommand command, GaeChange change,
+            @NeverNull ContextBeforeCommand ctxBeforeCmd, ContextInTxn ctxInTxn,
+            boolean inTransaction) {
+        
+        if(!ctxInTxn.exists()) {
             return CheckResult.failed("Model '" + command.getModelId() + "' does not exist");
         }
         
@@ -344,8 +636,8 @@ public class Executor {
                     return CheckResult.successNoChange("tos '" + objectInTxn.getAddress()
                             + "' hasField '" + fieldId + "'");
                 } else {
-                    return CheckResult
-                            .successCreatedField(command, ctxInTxn, change, inTransaction);
+                    return CheckResult.successCreatedField(command,
+                            ctxBeforeCmd.getRevisionNumber(), ctxInTxn, change, inTransaction);
                 }
             }
             case REMOVE: {
@@ -370,12 +662,13 @@ public class Executor {
                             + fieldId + "'");
                 } else {
                     if(command.getRevisionNumber() == XCommand.SAFE_STATE_BOUND) {
-                        return CheckResult.successCreatedField(command, ctxInTxn, change,
-                                inTransaction);
+                        return CheckResult.successCreatedField(command,
+                                ctxBeforeCmd.getRevisionNumber(), ctxInTxn, change, inTransaction);
                     } else {
                         long objectRevBeforeCmd = getObjectRevBeforeCmd(ctxBeforeCmd, objectId);
                         if(command.getRevisionNumber() == objectRevBeforeCmd) {
-                            return CheckResult.successCreatedField(command, ctxInTxn, change,
+                            return CheckResult.successCreatedField(command,
+                                    ctxBeforeCmd.getRevisionNumber(), ctxInTxn, change,
                                     inTransaction);
                         } else {
                             return CheckResult.failed("Revision number expected "
@@ -472,7 +765,7 @@ public class Executor {
         
         switch(repoCmd.getChangeType()) {
         case ADD:
-            if(!ctxInTxn.isModelExists()) {
+            if(!ctxInTxn.exists()) {
                 return CheckResult.successCreatedModel(repoCmd, change, ctxInTxn);
             } else if(repoCmd.isForced()) {
                 return CheckResult.successNoChange("Model exists");
@@ -482,17 +775,30 @@ public class Executor {
             }
         case REMOVE:
             long modelRevBeforeCmd = infoBeforeCmd.getLastStableSuccessChange();
-            if((!modelExistsBeforeCmd || modelRevBeforeCmd != repoCmd.getRevisionNumber())
-                    && !repoCmd.isForced()) {
-                return CheckResult.failed("Safe RepositoryCommand REMOVE failed. Reason: "
-                        + (!modelExistsBeforeCmd ? "model is null" : "modelRevNr:"
-                                + modelRevBeforeCmd + " cmdRevNr:" + repoCmd.getRevisionNumber()
-                                + " forced:" + repoCmd.isForced()));
-            } else if(modelExistsBeforeCmd) {
+            
+            if(!modelExistsBeforeCmd) {
+                if(repoCmd.getIntent() == Intent.Forced) {
+                    return CheckResult.successNoChange("Model did not exist");
+                } else {
+                    return CheckResult
+                            .failed("Safe-X RepositoryCommand REMOVE failed. Reason: "
+                                    + ("model did not exist; modelRevNr=" + modelRevBeforeCmd
+                                            + " cmdRevNr=" + repoCmd.getRevisionNumber()
+                                            + " intent:" + repoCmd.getIntent()));
+                }
+            } else {
+                assert modelExistsBeforeCmd;
+                if(repoCmd.getIntent() == Intent.SafeRevBound) {
+                    if(modelRevBeforeCmd != repoCmd.getRevisionNumber()) {
+                        return CheckResult
+                                .failed("SafeRevBound RepositoryCommand REMOVE failed. Reason: "
+                                        + ("modelRevNr=" + modelRevBeforeCmd + " cmdRevNr=" + repoCmd
+                                                .getRevisionNumber()));
+                    }
+                }
+                // change
                 log.debug("Removing model " + repoCmd.getChangedEntity() + " " + modelRevBeforeCmd);
                 return CheckResult.successRemovedModel(repoCmd, change, ctxInTxn);
-            } else {
-                return CheckResult.successNoChange("Model did not exist");
             }
             
         default:

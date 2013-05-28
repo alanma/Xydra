@@ -15,6 +15,7 @@ import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
+import org.xydra.base.rmof.impl.XExistsReadable;
 import org.xydra.base.rmof.impl.memory.SimpleObject;
 import org.xydra.core.XX;
 import org.xydra.core.serialize.SerializedModel;
@@ -52,7 +53,7 @@ import com.google.appengine.api.datastore.Text;
  * @author xamde
  */
 public class ContextBeforeCommand implements XRevWritableModel,
-        CacheEntryHandler<TentativeObjectState> {
+        CacheEntryHandler<TentativeObjectState>, XExistsReadable {
     
     private static final Logger log = LoggerFactory.getLogger(ContextBeforeCommand.class);
     
@@ -73,10 +74,6 @@ public class ContextBeforeCommand implements XRevWritableModel,
         long modelRev = getInfo().getLastSuccessChange();
         XRevWritableModel modelSnapshot = this.snapshotService.getModelSnapshot(modelRev, false);
         return modelSnapshot;
-    }
-    
-    public boolean isModelExists() {
-        return getInfo().isModelExists();
     }
     
     /**
@@ -367,7 +364,7 @@ public class ContextBeforeCommand implements XRevWritableModel,
     
     @Override
     public boolean exists() {
-        return isModelExists();
+        return getInfo().isModelExists();
     }
     
 }

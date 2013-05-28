@@ -14,6 +14,7 @@ import org.junit.Test;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
+import org.xydra.base.change.XCommandUtils;
 import org.xydra.base.change.XFieldCommand;
 import org.xydra.base.change.XObjectCommand;
 import org.xydra.base.change.XRepositoryCommand;
@@ -26,6 +27,8 @@ import org.xydra.base.value.XStringValue;
 import org.xydra.base.value.XV;
 import org.xydra.core.X;
 import org.xydra.core.XX;
+import org.xydra.core.model.impl.memory.IMemoryModel;
+import org.xydra.core.model.impl.memory.MemoryModel;
 import org.xydra.core.util.DumpUtils;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -147,8 +150,9 @@ public class GaePersistenceTest {
         assertEquals(new ModelRevision(0L, true), pers.getModelRevision(modelAddressRequest));
         assert pers.getManagedModelIds().contains(modelId);
         
-        pers.executeCommand(ACTOR,
-                MemoryRepositoryCommand.createRemoveCommand(repoAddr, -1, modelId));
+        long result = pers.executeCommand(ACTOR,
+                MemoryRepositoryCommand.createRemoveCommand(repoAddr, XCommand.FORCED, modelId));
+        assertTrue(XCommandUtils.success(result));
         
         assertEquals(new ModelRevision(1L, false), pers.getModelRevision(modelAddressRequest));
         
@@ -465,8 +469,9 @@ public class GaePersistenceTest {
         assertEquals(1, pers.getModelRevision(modelAddressRequest).revision());
         
         // remove model
-        l = pers.executeCommand(ACTOR,
-                MemoryRepositoryCommand.createRemoveCommand(repoAddr, -1, modelId));
+        XRepositoryCommand modelRemoveCommand = MemoryRepositoryCommand.createRemoveCommand(
+                repoAddr, XCommand.SAFE_STATE_BOUND, modelId);
+        l = pers.executeCommand(ACTOR, modelRemoveCommand);
         assert l >= 0 : l;
         assert pers.getManagedModelIds().contains(modelId);
         assert !pers.getModelRevision(modelAddressRequest).modelExists();
@@ -492,6 +497,14 @@ public class GaePersistenceTest {
         // TODO compare snapshot & revNr directly
         
         // System.out.println(StatsGatheringMemCacheWrapper.INSTANCE.stats());
+    }
+    
+    @Test
+    public void testNewModelExists() {
+        XId model1 = XX.toId("model1");
+        XAddress modelAddr = XX.resolveModel(XX.toAddress("/repo1"), model1);
+        IMemoryModel model = new MemoryModel(XX.toId("actor"), "fooooo", modelAddr);
+        assertTrue(model.exists());
     }
     
 }
