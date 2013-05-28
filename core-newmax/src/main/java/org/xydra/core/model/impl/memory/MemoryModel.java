@@ -416,6 +416,7 @@ Serializable {
             assert XCommandUtils.success(result);
             assert XCommandUtils.changedSomething(result);
             assert getState().exists();
+            assert exists();
         }
     }
     

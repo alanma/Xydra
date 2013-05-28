@@ -40,8 +40,7 @@ import org.xydra.sharedutils.XyAssert;
  * @author dscharrer
  * 
  */
-public class ChangedObject implements XWritableObject, IObjectDiff,
-        XExistsWritableObject {
+public class ChangedObject implements XWritableObject, IObjectDiff, XExistsWritableObject {
     
     // Fields that are not in base and have been added.
     // Contains no XIds that are in removed or changed.
@@ -238,6 +237,7 @@ public class ChangedObject implements XWritableObject, IObjectDiff,
             // Otherwise, the field is completely new.
             XAddress fieldAddr = XX.resolveField(getAddress(), fieldId);
             SimpleField newField = new SimpleField(fieldAddr);
+            newField.setRevisionNumber(getRevisionNumber());
             this.added.put(fieldId, newField);
             
             XyAssert.xyAssert(checkSetInvariants());
@@ -492,6 +492,10 @@ public class ChangedObject implements XWritableObject, IObjectDiff,
     @Override
     public void setExists(boolean entityExists) {
         this.objectExists = entityExists;
+    }
+    
+    public boolean executeCommand(XCommand command) {
+        return ChangeExecutor.executeAnyCommand(command, this);
     }
     
 }

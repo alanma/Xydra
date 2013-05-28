@@ -89,7 +89,6 @@ public interface XCommand extends Serializable {
      */
     static final long RELATIVE_REV = Long.MAX_VALUE / 2;
     
-    // TODO make revision numbers in commands stricter & document better
     /** The entity with this revision number does not exist yet */
     static final long NONEXISTANT = RevisionConstants.NOT_EXISTING;
     

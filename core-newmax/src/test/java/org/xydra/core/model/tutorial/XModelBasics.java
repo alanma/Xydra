@@ -9,6 +9,7 @@ import org.xydra.base.XId;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XCommandFactory;
+import org.xydra.base.change.XCommandUtils;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XFieldCommand;
 import org.xydra.base.change.XFieldEvent;
@@ -24,7 +25,6 @@ import org.xydra.base.value.XValue;
 import org.xydra.core.LoggerTestHelper;
 import org.xydra.core.X;
 import org.xydra.core.XX;
-import org.xydra.core.change.RevisionConstants;
 import org.xydra.core.change.XModelEventListener;
 import org.xydra.core.change.XObjectEventListener;
 import org.xydra.core.change.XTransactionBuilder;
@@ -526,6 +526,7 @@ public class XModelBasics {
         
         XModel model = repository.getModel(modelId);
         assertNotNull(model);
+        assertEquals(0, model.getRevisionNumber());
         
         // building the commands
         XId objectId = XX.createUniqueId();
@@ -543,9 +544,7 @@ public class XModelBasics {
          * sure that the revision number of the XField will be
          */
         XFieldCommand addValueCommand = commandFactory.createAddValueCommand(
-                XX.resolveField(repositoryId, modelId, objectId, fieldId),
-                // FIXME stupid rev nr for a check
-                RevisionConstants.NOT_EXISTING, doubleValue, false);
+                XX.resolveField(repositoryId, modelId, objectId, fieldId), 0, doubleValue, false);
         
         /*
          * After we created the commands it's time to add them to a transaction.
@@ -564,7 +563,8 @@ public class XModelBasics {
         XTransaction transaction = transBuilder.build();
         
         // executing the transaction on the model
-        model.executeCommand(transaction);
+        long result = model.executeCommand(transaction);
+        assertTrue(XCommandUtils.success(result));
         
         // checking whether the transaction was actually executed or not
         XObject object = model.getObject(objectId);
@@ -573,7 +573,7 @@ public class XModelBasics {
         XField field = object.getField(fieldId);
         assertNotNull(field);
         
-        assertEquals(field.getValue(), doubleValue);
+        assertEquals(doubleValue, field.getValue());
     }
     
 }

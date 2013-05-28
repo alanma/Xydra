@@ -3,6 +3,7 @@ package org.xydra.core.model.delta;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.XType;
+import org.xydra.base.change.XFieldCommand;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.value.XValue;
@@ -114,6 +115,10 @@ public class ChangedField implements XWritableField, IFieldDiff {
     @Override
     public XValue getInitialValue() {
         return this.getOldValue();
+    }
+    
+    public boolean executeCommand(XFieldCommand fieldCommand) {
+        return ChangeExecutor.executeFieldCommand(fieldCommand, this);
     }
     
 }

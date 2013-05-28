@@ -84,8 +84,9 @@ public class MemorySyncLogState implements ISyncLogState {
             XEvent event = syncLogEntry.getEvent();
             XyAssert.xyAssert(this.baseAddr.equalsOrContains(event.getChangedEntity()), "baseAddr="
                     + this.baseAddr + " does not contain " + event.getChangedEntity());
-            XyAssert.xyAssert(event.getRevisionNumber() > getCurrentRevisionNumber(), "event="
-                    + event.getRevisionNumber() + ",currentRev=" + getCurrentRevisionNumber());
+            XyAssert.xyAssert(event.getRevisionNumber() > getCurrentRevisionNumber(), "eventRev="
+                    + event.getRevisionNumber() + ",currentRev=" + getCurrentRevisionNumber()
+                    + " event=" + event);
             XyAssert.xyAssert(!event.inTransaction());
             this.eventMap.put(event.getRevisionNumber(), syncLogEntry);
         }

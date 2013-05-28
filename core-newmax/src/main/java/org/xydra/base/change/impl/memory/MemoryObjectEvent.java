@@ -5,7 +5,6 @@ import org.xydra.base.Base;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.change.ChangeType;
-import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XObjectEvent;
 import org.xydra.base.change.XTransaction;
@@ -199,17 +198,17 @@ public class MemoryObjectEvent extends MemoryAtomicEvent implements XObjectEvent
             throw new IllegalArgumentException("field Id must be set for object events");
         }
         
-        if(objectRevision < 0 && objectRevision != REVISION_NOT_AVAILABLE
-                && objectRevision != XCommand.NONEXISTANT) {
+        if(objectRevision < -1 && objectRevision != REVISION_NOT_AVAILABLE
+                && objectRevision != XEvent.REVISION_OF_ENTITY_NOT_SET) {
             throw new IllegalArgumentException(
                     "object revision must be set for object events, was:" + objectRevision);
         }
         
-        if(fieldRevision < 0 && fieldRevision != REVISION_OF_ENTITY_NOT_SET) {
+        if(fieldRevision < -1 && fieldRevision != REVISION_OF_ENTITY_NOT_SET) {
             throw new IllegalArgumentException("invalid fieldRevision: " + fieldRevision);
         }
         
-        if(modelRevision < 0 && modelRevision != REVISION_OF_ENTITY_NOT_SET) {
+        if(modelRevision < -1 && modelRevision != REVISION_OF_ENTITY_NOT_SET) {
             throw new IllegalArgumentException("invalid modelRevision: " + modelRevision);
         }
         

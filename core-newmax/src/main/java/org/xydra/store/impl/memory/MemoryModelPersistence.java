@@ -16,7 +16,6 @@ import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.core.XCopyUtils;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.delta.DeltaUtils;
-import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.persistence.ModelRevision;
@@ -55,16 +54,15 @@ public class MemoryModelPersistence {
          * Parse the command and calculate the changes needed to apply it. This
          * does not actually change the model.
          */
-        Pair<ChangedModel,DeltaUtils.ModelChange> change = DeltaUtils.executeCommand(this.model,
-                command);
-        if(change == null) {
+        ChangedModel changedModel = DeltaUtils.executeCommand(this.model, command);
+        if(changedModel == null) {
             // There was something wrong with the command.
             return XCommand.FAILED;
         }
         
         // Create events. Do this before we destroy any necessary information by
         // changing the model.
-        List<XAtomicEvent> events = DeltaUtils.createEvents(this.modelAddr, change, actorId,
+        List<XAtomicEvent> events = DeltaUtils.createEvents(this.modelAddr, changedModel, actorId,
                 newModelRev, command.getChangeType() == ChangeType.TRANSACTION);
         XyAssert.xyAssert(events != null);
         assert events != null;
@@ -107,7 +105,7 @@ public class MemoryModelPersistence {
         XyAssert.xyAssert(this.events.get((int)newModelRev) == event);
         
         // Actually apply the changes.
-        this.model = DeltaUtils.applyChanges(this.modelAddr, this.model, change, newModelRev);
+        this.model = DeltaUtils.applyChanges(this.modelAddr, this.model, changedModel, newModelRev);
         
         XyAssert.xyAssert(getRevisionNumber() == newModelRev);
         XyAssert.xyAssert(this.model == null || this.model.getRevisionNumber() == newModelRev);

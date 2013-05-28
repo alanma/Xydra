@@ -45,7 +45,7 @@ public interface XRepositoryCommand extends XAtomicCommand {
     boolean isForced();
     
     /**
-     * TODO can this return {@link ChangeType#CHANGE} ?
+     * This command can only be ADD or REMOVE.
      * 
      * @see org.xydra.base.change.XCommand#getChangeType()
      */

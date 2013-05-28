@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -11,18 +13,16 @@ import org.xydra.annotations.NeverNull;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.XType;
-import org.xydra.base.change.ChangeType;
-import org.xydra.base.change.XAtomicCommand;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XFieldCommand;
 import org.xydra.base.change.XModelCommand;
 import org.xydra.base.change.XObjectCommand;
+import org.xydra.base.change.XRepositoryCommand;
 import org.xydra.base.change.XTransaction;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
-import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.rmof.impl.XExistsReadable;
@@ -30,6 +30,7 @@ import org.xydra.base.rmof.impl.XExistsWritableModel;
 import org.xydra.base.rmof.impl.memory.SimpleObject;
 import org.xydra.core.XCopyUtils;
 import org.xydra.core.XX;
+import org.xydra.index.impl.IteratorUtils;
 import org.xydra.index.iterator.AbstractFilteringIterator;
 import org.xydra.index.iterator.BagUnionIterator;
 import org.xydra.log.Logger;
@@ -56,6 +57,7 @@ import org.xydra.sharedutils.XyAssert;
  */
 public class ChangedModel implements XWritableModel, IModelDiff, XExistsWritableModel {
     
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(ChangedModel.class);
     
     /**
@@ -104,7 +106,7 @@ public class ChangedModel implements XWritableModel, IModelDiff, XExistsWritable
      * {@link ChangedModel}.
      * 
      * @param base The {@link XReadableModel} this ChangedModel will encapsulate
-     *            and represent
+     *            and represent @NeverNull
      */
     public ChangedModel(XReadableModel base) {
         assert base != null;
@@ -177,11 +179,8 @@ public class ChangedModel implements XWritableModel, IModelDiff, XExistsWritable
     public int countCommandsNeeded(int max) {
         int n = this.removed.size() + this.added.size();
         if(n < max) {
-            if(this.base instanceof XExistsReadable) {
-                XExistsReadable existsBase = (XExistsReadable)this.base;
-                if(existsBase.exists() != exists()) {
-                    n++;
-                }
+            if(modelWasCreated() || modelWasRemoved()) {
+                n++;
             }
             for(XReadableObject object : this.added.values()) {
                 n += countChanges(object, max - n + 1) - 1;
@@ -280,6 +279,7 @@ public class ChangedModel implements XWritableModel, IModelDiff, XExistsWritable
     
     @Override
     public XWritableObject createObject(@NeverNull XId objectId) {
+        assert exists();
         
         XWritableObject oldObject = getObject(objectId);
         if(oldObject != null) {
@@ -310,6 +310,7 @@ public class ChangedModel implements XWritableModel, IModelDiff, XExistsWritable
             // Otherwise, the object is completely new.
             XAddress fieldAddr = XX.resolveObject(getAddress(), objectId);
             SimpleObject newObject = new SimpleObject(fieldAddr);
+            newObject.setRevisionNumber(getRevisionNumber());
             this.added.put(objectId, newObject);
             
             XyAssert.xyAssert(checkSetInvariants());
@@ -328,17 +329,7 @@ public class ChangedModel implements XWritableModel, IModelDiff, XExistsWritable
      * @return true if the command succeeded, false otherwise.
      */
     public boolean executeCommand(XCommand command) {
-        if(command instanceof XTransaction) {
-            return executeCommand((XTransaction)command);
-        } else if(command instanceof XModelCommand) {
-            return executeCommand((XModelCommand)command);
-        } else if(command instanceof XObjectCommand) {
-            return executeCommand((XObjectCommand)command);
-        } else if(command instanceof XFieldCommand) {
-            return executeCommand((XFieldCommand)command);
-        } else {
-            throw new IllegalArgumentException("unexpected command type: " + command);
-        }
+        return ChangeExecutor.executeAnyCommand(command, this);
     }
     
     /**
@@ -352,45 +343,11 @@ public class ChangedModel implements XWritableModel, IModelDiff, XExistsWritable
      *         false otherwise
      */
     public boolean executeCommand(XFieldCommand command) {
-        if(!command.getTarget().getParent().getParent().equals(this.getAddress())) {
-            log.warn("XFieldCommand " + command + " does not target this model: "
-                    + this.getAddress());
-            return false;
-        }
-        
-        XWritableObject object = getObject(command.getObjectId());
-        if(object == null) {
-            log.warn("{" + command + "} is invalid - object is null");
-            return false;
-        }
-        
-        XWritableField field = object.getField(command.getFieldId());
-        if(field == null) {
-            log.warn("Command { " + command + "} is invalid. Field '" + command.getFieldId()
-                    + "' not found in object '" + command.getObjectId() + "'");
-            return false;
-        }
-        
-        if(!command.isForced()) {
-            if(command.getRevisionNumber() != XCommand.SAFE_STATE_BOUND
-                    && field.getRevisionNumber() != command.getRevisionNumber()) {
-                log.warn("Safe FieldCommand {" + command + "} is invalid (wrong revision) field="
-                        + field.getRevisionNumber() + " command=" + command.getRevisionNumber());
-                return false;
-            }
-            // empty fields require an ADD command
-            if((command.getChangeType() == ChangeType.ADD) != field.isEmpty()) {
-                log.warn("command {" + command + "} is invalid (wrong type) command is "
-                        + command.getChangeType() + ", but field is "
-                        + (field.isEmpty() ? "empty" : "not emtpy"));
-                return false;
-            }
-        }
-        
-        // command is OK
-        field.setValue(command.getValue());
-        
-        return true;
+        return ChangeExecutor.executeFieldCommand(command, this);
+    }
+    
+    public boolean executeCommand(XRepositoryCommand command) {
+        return ChangeExecutor.executeRepositoryCommand(command, this);
     }
     
     /**
@@ -404,52 +361,7 @@ public class ChangedModel implements XWritableModel, IModelDiff, XExistsWritable
      *         false otherwise
      */
     public boolean executeCommand(XModelCommand command) {
-        if(!command.getTarget().equals(this.getAddress())) {
-            log.warn("XModelCommand " + command + " does not target this model: "
-                    + this.getAddress());
-            return false;
-        }
-        
-        XId objectId = command.getObjectId();
-        
-        switch(command.getChangeType()) {
-        
-        case ADD:
-            if(hasObject(objectId)) {
-                // command is invalid or doesn't change anything
-                log.warn("XModelCommand " + command + " ADDs object '" + objectId
-                        + "' which is already there");
-                return command.isForced();
-            }
-            // command is OK and adds a new object
-            createObject(objectId);
-            return true;
-            
-        case REMOVE:
-            XReadableObject object = getObject(objectId);
-            
-            if(object == null) {
-                // command is invalid or doesn't change anything
-                log.warn("XModelCommand REMOVE " + command
-                        + " is invalid or doesn't change anything");
-                return command.isForced();
-            }
-            if(!command.isForced()) {
-                if(command.getRevisionNumber() != XCommand.SAFE_STATE_BOUND
-                        && command.getRevisionNumber() != object.getRevisionNumber()) {
-                    // command is invalid
-                    log.warn("Safe XModelCommand " + command + " is invalid (revNr mismatch)");
-                    return false;
-                }
-            }
-            // command is OK and removes an existing object
-            removeObject(objectId);
-            return true;
-            
-        default:
-            throw new AssertionError("impossible type for model command " + command);
-        }
-        
+        return ChangeExecutor.executeModelCommand(command, this);
     }
     
     /**
@@ -463,59 +375,8 @@ public class ChangedModel implements XWritableModel, IModelDiff, XExistsWritable
      *         false otherwise
      */
     public boolean executeCommand(XObjectCommand command) {
-        if(!command.getTarget().getParent().equals(this.getAddress())) {
-            log.warn("XObjectCommand " + command.getTarget() + " does not target this model: "
-                    + this.getAddress());
-            return false;
-        }
-        
-        XWritableObject object = getObject(command.getObjectId());
-        if(object == null) {
-            log.warn("XObjectCommand is invalid: " + command);
-            return false;
-        }
-        
-        XId fieldId = command.getFieldId();
-        
-        switch(command.getChangeType()) {
-        
-        case ADD:
-            if(object.hasField(fieldId)) {
-                if(!command.isForced()) {
-                    log.warn(command + " object has already field '" + fieldId + "' and foced="
-                            + command.isForced());
-                }
-                return command.isForced();
-            }
-            // command is OK and adds a new field
-            object.createField(fieldId);
-            return true;
-            
-        case REMOVE:
-            XReadableField field = object.getField(fieldId);
-            
-            if(field == null) {
-                // command is invalid or doesn't change anything
-                log.warn("XObjectCommand REMOVE '" + command
-                        + "'is invalid or doesn't change anything, forced=" + command.isForced());
-                return command.isForced();
-            }
-            if(!command.isForced()) {
-                if(command.getRevisionNumber() != XCommand.SAFE_STATE_BOUND
-                        && command.getRevisionNumber() != field.getRevisionNumber()) {
-                    // command is invalid
-                    log.warn("Safe XObjectCommand REMOVE " + command + " revNr mismatch");
-                    return false;
-                }
-            }
-            // command is OK and removes an existing field
-            object.removeField(fieldId);
-            return true;
-            
-        default:
-            throw new AssertionError("impossible type for object command " + command);
-        }
-        
+        assert exists();
+        return ChangeExecutor.executeObjectCommand(command, this);
     }
     
     /**
@@ -534,26 +395,7 @@ public class ChangedModel implements XWritableModel, IModelDiff, XExistsWritable
      *         return false
      */
     public boolean executeCommand(XTransaction transaction) {
-        for(int i = 0; i < transaction.size(); i++) {
-            XAtomicCommand command = transaction.getCommand(i);
-            
-            if(command instanceof XModelCommand) {
-                if(!executeCommand((XModelCommand)command)) {
-                    return false;
-                }
-            } else if(command instanceof XObjectCommand) {
-                if(!executeCommand((XObjectCommand)command)) {
-                    return false;
-                }
-            } else if(command instanceof XFieldCommand) {
-                if(!executeCommand((XFieldCommand)command)) {
-                    return false;
-                }
-            } else {
-                assert false : "transactions can only contain model, object and field commands";
-            }
-        }
-        return true;
+        return ChangeExecutor.executeTransaction(transaction, this);
     }
     
     @Override
@@ -782,8 +624,15 @@ public class ChangedModel implements XWritableModel, IModelDiff, XExistsWritable
     }
     
     @Override
-    public void setExists(boolean entityExists) {
-        this.modelExists = entityExists;
+    public void setExists(boolean modelExists) {
+        this.modelExists = modelExists;
+        if(!modelExists) {
+            List<XId> toBeRemoved = new LinkedList<XId>();
+            IteratorUtils.addAll(this.iterator(), toBeRemoved);
+            for(XId objectId : toBeRemoved) {
+                removeObject(objectId);
+            }
+        }
     }
     
     public boolean modelWasCreated() {

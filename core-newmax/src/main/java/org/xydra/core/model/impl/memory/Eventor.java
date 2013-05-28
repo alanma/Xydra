@@ -41,6 +41,7 @@ import org.xydra.core.model.delta.DeltaUtils.ModelChange;
  * 
  * @author xamde
  */
+@Deprecated
 class Eventor {
     
     /**

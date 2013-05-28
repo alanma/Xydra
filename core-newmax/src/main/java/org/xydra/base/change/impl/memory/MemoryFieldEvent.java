@@ -222,19 +222,25 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
             boolean implied) {
         super(target, changeType, actor, inTransaction, implied);
         
-        if(target.getField() == null || fieldRevision < 0) {
+        if(target.getField() == null || fieldRevision < -1
+                && fieldRevision != REVISION_OF_ENTITY_NOT_SET) {
             throw new IllegalArgumentException("fieldId (" + target.getField() + ") and revision ("
                     + fieldRevision + ") must be set for field events");
         }
         
-        if(objectRevision < 0 && objectRevision != REVISION_OF_ENTITY_NOT_SET
+        if(objectRevision < -1 && objectRevision != REVISION_OF_ENTITY_NOT_SET
                 && objectRevision != REVISION_NOT_AVAILABLE) {
             throw new IllegalArgumentException("invalid objectRevision: " + objectRevision);
         }
         
-        if(modelRevision < 0 && modelRevision != REVISION_OF_ENTITY_NOT_SET) {
+        if(modelRevision < -1 && modelRevision != REVISION_OF_ENTITY_NOT_SET) {
             throw new IllegalArgumentException("invalid modelRevision: " + modelRevision);
         }
+        
+        assert modelRevision == REVISION_OF_ENTITY_NOT_SET || modelRevision >= objectRevision : "m="
+                + modelRevision + " o=" + objectRevision + " f=" + fieldRevision;
+        assert objectRevision == REVISION_OF_ENTITY_NOT_SET || objectRevision >= fieldRevision : "m="
+                + modelRevision + " o=" + objectRevision + " f=" + fieldRevision;
         
         this.newValue = newValue;
         

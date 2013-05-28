@@ -11,7 +11,6 @@ import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.delta.DeltaUtils;
-import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.sharedutils.XyAssert;
@@ -25,6 +24,7 @@ import org.xydra.sharedutils.XyAssert;
  * @author xamde
  * 
  */
+@Deprecated
 public class CommandExecutor {
     
     private static final Logger log = LoggerFactory.getLogger(CommandExecutor.class);
@@ -46,9 +46,8 @@ public class CommandExecutor {
     public static long checkPreconditionsChangeStateSendEvents(XAddress modelAddress,
             XCommand command, XId actorId, XRevWritableModel modelState,
             IGenericEventListener eventListener, XLocalChangeCallback localChangeCallback) {
-        Pair<ChangedModel,DeltaUtils.ModelChange> c = DeltaUtils
-                .executeCommand(modelState, command);
-        if(c == null) {
+        ChangedModel changedModel = DeltaUtils.executeCommand(modelState, command);
+        if(changedModel == null) {
             log.info("Failed preconditions");
             if(localChangeCallback != null)
                 localChangeCallback.onFailure();
@@ -57,8 +56,8 @@ public class CommandExecutor {
         
         long nextRev = modelState.getRevisionNumber() + 1;
         
-        List<XAtomicEvent> events = DeltaUtils.createEvents(modelAddress, c, actorId, nextRev,
-                command.getChangeType() == ChangeType.TRANSACTION);
+        List<XAtomicEvent> events = DeltaUtils.createEvents(modelAddress, changedModel, actorId,
+                nextRev, command.getChangeType() == ChangeType.TRANSACTION);
         log.debug("[r" + nextRev + "] DeltaUtils generated " + events.size() + " events");
         if(events.size() > 1000) {
             log.warn("Created over 1000 events (" + events.size()
@@ -79,7 +78,7 @@ public class CommandExecutor {
         }
         
         // apply changes to state
-        DeltaUtils.applyChanges(modelAddress, modelState, c, nextRev);
+        DeltaUtils.applyChanges(modelAddress, modelState, changedModel, nextRev);
         // send events
         if(eventListener != null) {
             for(XAtomicEvent ae : events) {

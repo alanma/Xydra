@@ -10,7 +10,7 @@ public class RevisionConstants {
      */
     public static final long JUST_CREATED_ENTITY = 0;
     
-    /** The entity is not existing; introduced at 02.05.2013 */
+    /** -1. The entity is not existing; introduced at 02.05.2013 */
     public static final long NOT_EXISTING = -1;
     
     /**

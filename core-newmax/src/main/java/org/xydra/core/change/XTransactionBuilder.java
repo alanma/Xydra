@@ -179,14 +179,16 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
      * 
      * @param objectAddr The {@link XAddress} of the {@link XObject} to which
      *            the {@link XField} is to be added.
-     * @param revision {@link XCommand#SAFE_STATE_BOUND} or {@link XCommand#FORCED}, to
-     *            define whether the {@link XCommand} which is to be created
-     *            shall be a forced or a safe event
+     * @param revision {@link XCommand#SAFE_STATE_BOUND} or
+     *            {@link XCommand#FORCED}, to define whether the
+     *            {@link XCommand} which is to be created shall be a forced or a
+     *            safe event
      * @param fieldId The {@link XId} of the {@link XField} which will be added
      * 
      * @throws IllegalArgumentException if this builders target doesn't contain
      *             the given {@link XAddress} or if the given revision number is
-     *             neither {@link XCommand#SAFE_STATE_BOUND} or {@link XCommand#FORCED}.
+     *             neither {@link XCommand#SAFE_STATE_BOUND} or
+     *             {@link XCommand#FORCED}.
      */
     public void addField(XAddress objectAddr, long revision, XId fieldId) {
         if(revision != XCommand.SAFE_STATE_BOUND && revision != XCommand.FORCED) {
@@ -214,7 +216,8 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
         if(newField.getValue() != null) {
             XAddress fieldAddr = XX.resolveField(objectAddr, newField.getId());
             // TODO was XCommand.NEW, why not SAFE?
-            addValue(fieldAddr, forced ? XCommand.FORCED : XCommand.SAFE_STATE_BOUND, newField.getValue());
+            addValue(fieldAddr, forced ? XCommand.FORCED : XCommand.SAFE_STATE_BOUND,
+                    newField.getValue());
         }
         assert createsNoTargetAddressTwice(newField.getAddress()) : newField.getAddress();
     }
@@ -225,15 +228,17 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
      * 
      * @param modelAddr The {@link XAddress} of the {@link XModel} to which the
      *            {@link XObject} is to be added.
-     * @param revision {@link XCommand#SAFE_STATE_BOUND} or {@link XCommand#FORCED}, to
-     *            define whether the {@link XCommand} which is to be created
-     *            shall be a forced or a safe event
+     * @param revision {@link XCommand#SAFE_STATE_BOUND} or
+     *            {@link XCommand#FORCED}, to define whether the
+     *            {@link XCommand} which is to be created shall be a forced or a
+     *            safe event
      * @param objectId The {@link XId} for the {@link XObject} which will be
      *            added
      * 
      * @throws IllegalArgumentException if this builders target doesn't contain
      *             the given {@link XAddress} or if the given revision number is
-     *             neither {@link XCommand#SAFE_STATE_BOUND} or {@link XCommand#FORCED}.
+     *             neither {@link XCommand#SAFE_STATE_BOUND} or
+     *             {@link XCommand#FORCED}.
      */
     public void addObject(XAddress modelAddr, long revision, XId objectId) {
         if(revision != XCommand.SAFE_STATE_BOUND && revision != XCommand.FORCED) {
@@ -247,21 +252,22 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
     
     /**
      * Adds an {@link XCommand} to the transaction which is being built which
-     * will will add an {@link XObject} with the given {@link XId}.
+     * will will add an {@link XModel} with the given {@link XId}.
      * 
      * @param repoAddress The {@link XAddress} of the {@link XRepository} to
      *            which the {@link XModel} is to be added.
-     * @param revision {@link XCommand#SAFE_STATE_BOUND} or {@link XCommand#FORCED}, to
-     *            define whether the {@link XCommand} which is to be created
-     *            shall be a forced or a safe event
-     * @param objectId The {@link XId} for the {@link XModel} which will be
-     *            added
+     * @param revision {@link XCommand#SAFE_STATE_BOUND} or
+     *            {@link XCommand#FORCED}, to define whether the
+     *            {@link XCommand} which is to be created shall be a forced or a
+     *            safe event
+     * @param modelId The {@link XId} for the {@link XModel} which will be added
      * 
      * @throws IllegalArgumentException if this builders target doesn't contain
      *             the given {@link XAddress} or if the given revision number is
-     *             neither {@link XCommand#SAFE_STATE_BOUND} or {@link XCommand#FORCED}.
+     *             neither {@link XCommand#SAFE_STATE_BOUND} or
+     *             {@link XCommand#FORCED}.
      */
-    public void addModel(XAddress repoAddress, long revision, XId objectId) {
+    public void addModel(XAddress repoAddress, long revision, XId modelId) {
         assert repoAddress != null;
         assert repoAddress.getRepository() != null;
         if(revision != XCommand.SAFE_STATE_BOUND && revision != XCommand.FORCED) {
@@ -270,7 +276,7 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
                             + revision);
         }
         
-        addCommand(MemoryRepositoryCommand.createAddCommand(repoAddress, revision, objectId));
+        addCommand(MemoryRepositoryCommand.createAddCommand(repoAddress, revision, modelId));
     }
     
     /**
@@ -306,7 +312,8 @@ public class XTransactionBuilder implements Iterable<XAtomicCommand> {
     
     public void addObject(XAddress modelAddr, XReadableObject newObject, boolean forced) {
         XAddress objectAddr = XX.resolveObject(modelAddr, newObject.getId());
-        addObject(modelAddr, forced ? XCommand.FORCED : XCommand.SAFE_STATE_BOUND, newObject.getId());
+        addObject(modelAddr, forced ? XCommand.FORCED : XCommand.SAFE_STATE_BOUND,
+                newObject.getId());
         assert createsNoTargetAddressTwice(newObject.getAddress()) : newObject.getAddress();
         for(XId newFieldId : newObject) {
             addField(objectAddr, newObject.getField(newFieldId), forced);

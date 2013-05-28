@@ -103,29 +103,27 @@ public class APITest {
         
         // a little method to set up the object structure
         public void setUp(XId actorID) {
-            this.book.createField(titleID); // create a field for the
-            // name
-            this.book.createField(authorID); // create a field for the
-            // author
-            XField copiesField = this.book.createField(copiesID); // create
-            // a
-            // field
-            // for
-            // the
-            // copies
+            /*
+             * create a field for the name
+             */
+            this.book.createField(titleID);
+            /*
+             * create a field for the author
+             */
+            this.book.createField(authorID);
+            /*
+             * create a field for the copies
+             */
+            XField copiesField = this.book.createField(copiesID);
+            /*
+             * we'll set up the value here too, because wed take it for granted
+             * that setUp will only be called on "new" objects otherwise it
+             * might overwrite the already existing value
+             * 
+             * the copies have an own XId, so we'll store those
+             */
+            copiesField.setValue(XV.toValue(new XId[] {}));
             
-            // we'll set up the value here too, because wed take it for granted
-            // that setUp will only be called on "new" objects
-            // otherwise it might overwrite the already existing value
-            copiesField.setValue(XV.toValue(new XId[] {})); // the
-            // copies
-            // have
-            // an
-            // own
-            // XId,
-            // so
-            // we'll
-            // store those
         }
     }
     

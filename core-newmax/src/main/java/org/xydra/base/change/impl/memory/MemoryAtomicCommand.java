@@ -9,6 +9,7 @@ import org.xydra.base.XId;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XAtomicCommand;
 import org.xydra.base.change.XCommand;
+import org.xydra.core.change.RevisionConstants;
 
 
 @RunsInGWT(true)
@@ -32,8 +33,8 @@ abstract public class MemoryAtomicCommand implements XAtomicCommand, Serializabl
         if(target == null)
             throw new NullPointerException("target must not be null");
         
-        if(revision < 0 && revision != XCommand.SAFE_STATE_BOUND && revision != XCommand.FORCED
-                && revision != XCommand.NONEXISTANT)
+        if(revision < -1 && revision != XCommand.SAFE_STATE_BOUND && revision != XCommand.FORCED
+                && revision != RevisionConstants.REVISION_OF_ENTITY_NOT_SET)
             throw new RuntimeException("invalid revison: " + revision);
         
         this.target = target;
@@ -66,24 +67,24 @@ abstract public class MemoryAtomicCommand implements XAtomicCommand, Serializabl
     }
     
     /**
-     * @return the {@link XId} of the model holding the entity this
-     *         command will change (may be null)
+     * @return the {@link XId} of the model holding the entity this command will
+     *         change (may be null)
      */
     public XId getModelId() {
         return this.target.getModel();
     }
     
     /**
-     * @return the {@link XId} of the object holding the entity this
-     *         command will change (may be null)
+     * @return the {@link XId} of the object holding the entity this command
+     *         will change (may be null)
      */
     public XId getObjectId() {
         return this.target.getObject();
     }
     
     /**
-     * @return the {@link XId} of the repository holding the entity
-     *         this command will change (may be null)
+     * @return the {@link XId} of the repository holding the entity this command
+     *         will change (may be null)
      */
     public XId getRepositoryId() {
         return this.target.getRepository();
@@ -118,6 +119,17 @@ abstract public class MemoryAtomicCommand implements XAtomicCommand, Serializabl
     @Override
     public boolean isForced() {
         return this.revision == XCommand.FORCED;
+    }
+    
+    public Intent getIntent() {
+        if(this.revision == XCommand.FORCED)
+            return Intent.Forced;
+        else if(this.revision == XCommand.SAFE_STATE_BOUND)
+            return Intent.SafeStateBound;
+        else {
+            assert this.revision >= -1;
+            return Intent.SafeRevBound;
+        }
     }
     
 }
