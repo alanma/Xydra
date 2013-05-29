@@ -1960,15 +1960,15 @@ public abstract class AbstractPersistenceTestForTransactions {
             int reason = rand.nextInt(3);
             
             if(reason == 0) {
-                // fail because we try to remove a not existing
-                // value
+                /* fail because we try to remove a not existing value */
                 XCommand failRemoveCom = this.comFactory.createRemoveValueCommand(failFieldAddress,
-                        fieldRevNr, true);
+                        fieldRevNr, false);
                 
                 failTxnBuilder.addCommand(failRemoveCom);
                 
                 System.out
-                        .println("Transaction will fail because of a faulty FieldCommand of remove type.");
+                        .println("Transaction will fail because of a faulty FieldCommand of remove type: "
+                                + failRemoveCom);
             } else if(reason == 1) {
                 // fail because we try to add a value to a field
                 // which value is already set
@@ -2423,7 +2423,7 @@ public abstract class AbstractPersistenceTestForTransactions {
                      * 
                      * Impl note: Was reported as 0 in earlier implementations.
                      */
-                    long fieldRevNr = XCommand.FORCED;
+                    long fieldRevNr = XCommand.SAFE_STATE_BOUND;
                     
                     boolean failBecauseOfFaultyFieldCommand = false;
                     if(!failBecauseOfAddOrRemoveFieldCommand) {

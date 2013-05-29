@@ -226,6 +226,7 @@ public class Executor {
         
         // apply event
         EventUtils.applyEvent(objectState, event);
+        modelState.setRevisionNumber(event.getRevisionNumber());
         root.getSyncLog().appendSyncLogEntry(command, event);
         fireEvents(root, changeEventListener, event);
         

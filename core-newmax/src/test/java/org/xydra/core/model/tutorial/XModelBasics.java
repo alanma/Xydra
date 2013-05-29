@@ -2,6 +2,7 @@ package org.xydra.core.model.tutorial;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
@@ -155,6 +156,9 @@ public class XModelBasics {
         XId fieldId = XX.toId("ExampleField");
         XField field = object.createField(fieldId);
         assert field != null;
+        assertEquals(2, field.getRevisionNumber());
+        assertEquals(2, object.getRevisionNumber());
+        assertEquals(2, model.getRevisionNumber());
         
         /*
          * Setting the value of a field is just as simple, but first we have to
@@ -165,6 +169,9 @@ public class XModelBasics {
          */
         XValue stringValue = XV.toValue("StringValue");
         field.setValue(stringValue);
+        assertEquals(3, field.getRevisionNumber());
+        assertEquals(3, object.getRevisionNumber());
+        assertEquals(3, model.getRevisionNumber());
         
         /*
          * Please note that the value-type of an XField is not fixed. We could
@@ -172,12 +179,18 @@ public class XModelBasics {
          */
         XValue integerValue = XV.toValue(42);
         field.setValue(integerValue);
+        assertEquals(4, field.getRevisionNumber());
+        assertEquals(4, object.getRevisionNumber());
+        assertEquals(4, model.getRevisionNumber());
         
         /*
          * Removing any part of our XModel structure is just as easy.
          */
         // removing our field from our object
         object.removeField(fieldId);
+        assertNull(object.getField(fieldId));
+        assertEquals(5, object.getRevisionNumber());
+        assertEquals(5, model.getRevisionNumber());
     }
     
     /**

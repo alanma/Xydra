@@ -407,11 +407,13 @@ public abstract class DeltaUtils {
      * @param events
      * @param actorId
      * @param object
-     * @param inTransaction
+     * @param forceTransaction
      * @param currentModelRev the new resulting model revision
      */
     public static void createEventsForChangedObject(List<XAtomicEvent> events, XId actorId,
-            ChangedObject object, boolean inTransaction, long currentModelRev) {
+            ChangedObject object, boolean forceTransaction, long currentModelRev) {
+        boolean inTransaction = forceTransaction || object.countCommandsNeeded(2) > 1;
+        
         for(XId fieldId : object.getRemovedFields()) {
             DeltaUtils.createEventsForRemovedField(events, currentModelRev, actorId, object,
                     object.getOldField(fieldId), inTransaction, false);

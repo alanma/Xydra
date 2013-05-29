@@ -320,7 +320,6 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
     @Override
     public long executeObjectCommand(XObjectCommand command) {
         return executeCommand(command);
-        
     }
     
     // implement IMemoryObject
