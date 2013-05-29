@@ -14,6 +14,7 @@ import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
+import org.xydra.base.rmof.impl.XExistsReadableModel;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.base.rmof.impl.memory.SimpleObject;
 import org.xydra.core.change.EventUtils;
@@ -344,7 +345,7 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
      *         applied.
      */
     private long checkPreconditionsAndSaveEvents(GaeChange change, XCommand command, XId actorId,
-            XReadableModel snapshot) {
+            XExistsReadableModel snapshot) {
         ChangedModel changedModel = DeltaUtils.executeCommand(snapshot, command);
         if(changedModel == null) {
             change.giveUpIfTimeoutCritical();
