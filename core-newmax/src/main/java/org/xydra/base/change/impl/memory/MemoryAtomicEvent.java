@@ -7,6 +7,7 @@ import org.xydra.base.XId;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XEvent;
+import org.xydra.core.change.RevisionConstants;
 import org.xydra.index.XI;
 import org.xydra.sharedutils.XyAssert;
 
@@ -198,8 +199,37 @@ abstract public class MemoryAtomicEvent implements XEvent {
         } else if(rev == XEvent.REVISION_NOT_AVAILABLE) {
             return "?";
         } else {
-            XyAssert.xyAssert(rev >= -1);
+            XyAssert.xyAssert(rev >= RevisionConstants.NOT_EXISTING);
             return Long.toString(rev);
+        }
+    }
+    
+    protected void addChangeTypeAndFlags(StringBuilder sb) {
+        sb.append(" ");
+        switch(getChangeType()) {
+        case TRANSACTION:
+            sb.append("TXN   ");
+            break;
+        case ADD:
+            sb.append("ADD   ");
+            break;
+        case REMOVE:
+            sb.append("REMOVE");
+            break;
+        case CHANGE:
+            sb.append("CHANGE");
+            break;
+        }
+        
+        if(inTransaction()) {
+            sb.append("[+inTxn]");
+        } else {
+            sb.append("[-inTxn]");
+        }
+        if(isImplied()) {
+            sb.append("[+implied]");
+        } else {
+            sb.append("[-implied]");
         }
     }
 }

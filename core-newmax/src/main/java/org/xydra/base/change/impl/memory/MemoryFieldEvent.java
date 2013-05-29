@@ -7,6 +7,7 @@ import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XFieldEvent;
 import org.xydra.base.change.XTransaction;
 import org.xydra.base.value.XValue;
+import org.xydra.core.change.RevisionConstants;
 import org.xydra.index.XI;
 
 
@@ -326,24 +327,40 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
         return result;
     }
     
+    /**
+     * Format: {MOF}Event
+     * 
+     * r{mRev}/{oRev}/{fRev}
+     * 
+     * {'ADD'|'REMOVE'}
+     * 
+     * '[' {'+'|'-'} 'inTxn]' '[' {'+'|'-'} 'implied]'
+     * 
+     * @{target *{id/value}, where xRef = '-' for
+     *          {@link RevisionConstants#REVISION_OF_ENTITY_NOT_SET} and '?' for
+     *          {@link RevisionConstants#REVISION_NOT_AVAILABLE}.
+     * 
+     *          by actor: '{actorId}'
+     */
     @Override
     public String toString() {
-        String prefix = "FieldEvent  by actor: '" + getActor() + "' ";
-        String suffix = " @" + getTarget() + " r" + rev2str(this.modelRevision) + "/"
-                + rev2str(this.objectRevision) + "/" + rev2str(this.fieldRevision);
-        if(inTransaction()) {
-            suffix += " [inTxn]";
-        }
-        switch(getChangeType()) {
-        case ADD:
-            return prefix + "ADD value:" + this.newValue + suffix;
-        case REMOVE:
-            return prefix + "REMOVE value " + suffix + (isImplied() ? " [implied]" : "");
-        case CHANGE:
-            return prefix + "CHANGE " + " to value:" + this.newValue + suffix;
-        default:
-            throw new RuntimeException("this field event should have never been created");
-        }
+        StringBuilder sb = new StringBuilder();
+        sb.append("     FieldEvent");
+        
+        sb.append(" rev:");
+        sb.append(rev2str(this.getRevisionNumber()));
+        sb.append(" old:");
+        sb.append(rev2str(this.getOldModelRevision()));
+        sb.append("/");
+        sb.append(rev2str(this.getOldObjectRevision()));
+        sb.append("/");
+        sb.append(rev2str(this.getOldFieldRevision()));
+        
+        addChangeTypeAndFlags(sb);
+        sb.append(" @" + getTarget());
+        sb.append(" ->*" + this.getNewValue() + "*");
+        sb.append("                 (actor:'" + getActor() + "')");
+        return sb.toString();
     }
     
 }

@@ -8,6 +8,7 @@ import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XModelEvent;
 import org.xydra.base.change.XTransaction;
+import org.xydra.core.change.RevisionConstants;
 
 
 /**
@@ -184,21 +185,40 @@ public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {
         return result;
     }
     
+    /**
+     * Format: {MOF}Event
+     * 
+     * r{mRev}/{oRev}/{fRev}
+     * 
+     * {'ADD'|'REMOVE'}
+     * 
+     * '[' {'+'|'-'} 'inTxn]' '[' {'+'|'-'} 'implied]'
+     * 
+     * @{target *{id/value}, where xRef = '-' for
+     *          {@link RevisionConstants#REVISION_OF_ENTITY_NOT_SET} and '?' for
+     *          {@link RevisionConstants#REVISION_NOT_AVAILABLE}.
+     * 
+     *          by actor: '{actorId}'
+     */
     @Override
     public String toString() {
-        String str = "ModelEvent  by actor: '" + getActor() + "' " + getChangeType() + " object: '"
-                + this.objectId + "'";
-        if(this.objectRevision >= 0)
-            str += " r" + rev2str(this.objectRevision);
-        str += " @" + getTarget();
-        str += " r" + rev2str(this.modelRevision);
-        if(isImplied()) {
-            str += " [implied]";
-        }
-        if(inTransaction()) {
-            str += " [inTxn]";
-        }
-        return str;
+        StringBuilder sb = new StringBuilder();
+        sb.append("     ModelEvent");
+        
+        sb.append(" rev:");
+        sb.append(rev2str(this.getRevisionNumber()));
+        sb.append(" old:");
+        sb.append(rev2str(this.getOldModelRevision()));
+        sb.append("/");
+        sb.append(rev2str(this.getOldObjectRevision()));
+        sb.append("/");
+        sb.append(rev2str(this.getOldFieldRevision()));
+        
+        addChangeTypeAndFlags(sb);
+        sb.append(" @" + getTarget());
+        sb.append(" *" + this.objectId + "*");
+        sb.append("                 (actor:'" + getActor() + "')");
+        return sb.toString();
     }
     
     /**

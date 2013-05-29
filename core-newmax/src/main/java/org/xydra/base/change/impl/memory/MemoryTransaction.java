@@ -169,7 +169,7 @@ public class MemoryTransaction implements XTransaction {
     
     @Override
     public String toString() {
-        return "Transaction @" + this.target + ": " + Arrays.toString(this.commands);
+        return "Transaction @" + this.target + ": \n" + Arrays.toString(this.commands);
     }
     
 }
