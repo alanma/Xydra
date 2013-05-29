@@ -6,8 +6,8 @@ import org.junit.Test;
 import org.xydra.base.XAddress;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XTransaction;
-import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
+import org.xydra.base.rmof.impl.XExistsWritableModel;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.core.XX;
 import org.xydra.core.change.XTransactionBuilder;
@@ -18,7 +18,7 @@ public class ChangedModelTest {
     @Test
     public void testChangedModel() {
         XAddress modelAddress = XX.toAddress("/repo/model1");
-        XWritableModel base = new SimpleModel(modelAddress);
+        XExistsWritableModel base = new SimpleModel(modelAddress);
         assertEquals(0, base.getRevisionNumber());
         ChangedModel changedModel = new ChangedModel(base);
         XWritableObject object1 = changedModel.createObject(XX.toId("object1"));

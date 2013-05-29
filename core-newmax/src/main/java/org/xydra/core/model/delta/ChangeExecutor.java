@@ -147,10 +147,12 @@ public class ChangeExecutor {
             XReadableObject object = changedModel.getObject(objectId);
             
             if(object == null) {
-                // command is invalid or doesn't change anything
-                log.warn("XModelCommand REMOVE " + modelCommand
-                        + " is invalid or doesn't change anything");
-                return modelCommand.isForced();
+                if(modelCommand.getIntent() != Intent.Forced) {
+                    log.warn("XModelCommand REMOVE " + modelCommand
+                            + " cannot remove non-existing object");
+                    return false;
+                }
+                return true;
             } else {
                 // object exists
                 if(modelCommand.getIntent() == Intent.SafeRevBound) {

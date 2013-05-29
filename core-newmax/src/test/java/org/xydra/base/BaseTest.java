@@ -21,6 +21,7 @@ public class BaseTest {
                 Base.toId("aaa"));
         XId modelId = XX.toId("user");
         
+        assertFalse(repo.hasModel(modelId));
         repo.createModel(modelId);
         assertTrue(repo.hasModel(modelId));
         

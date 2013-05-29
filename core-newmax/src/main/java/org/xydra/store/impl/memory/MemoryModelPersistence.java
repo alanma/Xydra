@@ -13,7 +13,9 @@ import org.xydra.base.change.XEvent;
 import org.xydra.base.change.impl.memory.MemoryTransactionEvent;
 import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
+import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.core.XCopyUtils;
+import org.xydra.core.change.RevisionConstants;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.delta.DeltaUtils;
 import org.xydra.log.Logger;
@@ -39,11 +41,16 @@ public class MemoryModelPersistence {
      * The current state of the model, or null if the model doesn't currently
      * exist.
      */
-    private XRevWritableModel model = null;
+    private XRevWritableModel model;
+    
     XAddress modelAddr;
     
     public MemoryModelPersistence(XAddress modelAddr) {
         this.modelAddr = modelAddr;
+        SimpleModel nonExisting = new SimpleModel(modelAddr);
+        nonExisting.setExists(false);
+        nonExisting.setRevisionNumber(RevisionConstants.NOT_EXISTING);
+        this.model = nonExisting;
     }
     
     synchronized public long executeCommand(XId actorId, XCommand command) {
@@ -114,7 +121,7 @@ public class MemoryModelPersistence {
     }
     
     public boolean exists() {
-        return this.model != null;
+        return this.model != null && this.model.exists();
     }
     
     synchronized public List<XEvent> getEvents(XAddress address, long beginRevision,

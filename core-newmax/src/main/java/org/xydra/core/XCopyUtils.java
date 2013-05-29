@@ -21,6 +21,7 @@ import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.base.rmof.impl.memory.SimpleObject;
 import org.xydra.base.rmof.impl.memory.SimpleRepository;
 import org.xydra.base.value.XValue;
+import org.xydra.core.change.RevisionConstants;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.impl.memory.MemoryModel;
@@ -198,7 +199,7 @@ public class XCopyUtils {
      * @return the snapshot or null
      */
     public static XExistsRevWritableModel createSnapshot(XReadableModel sourceModel) {
-        if(sourceModel == null) {
+        if(sourceModel == null || sourceModel.getRevisionNumber() == RevisionConstants.NOT_EXISTING) {
             return null;
         }
         XExistsRevWritableModel targetModel = new SimpleModel(sourceModel.getAddress());

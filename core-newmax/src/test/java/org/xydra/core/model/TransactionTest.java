@@ -61,9 +61,13 @@ public class TransactionTest {
     private XId actorId = XX.toId("actor");
     
     protected XObject john;
+    
     protected XModel model;
+    
     protected XObject peter;
+    
     private XRepository repo;
+    
     {
         LoggerTestHelper.init();
     }
@@ -73,13 +77,14 @@ public class TransactionTest {
         this.actorId = XX.toId("AbstractTransactionTest");
         this.repo = X.createMemoryRepository(this.actorId);
         this.model = this.repo.createModel(MODEL_ID);
+        assertEquals(0, this.model.getRevisionNumber());
         this.john = this.model.createObject(JOHN_ID);
         XField johnsPhone = this.john.createField(PHONE_ID);
         johnsPhone.setValue(JOHN_PHONE);
         this.peter = this.model.createObject(PETER_ID);
         XField petersPhone = this.peter.createField(PHONE_ID);
         petersPhone.setValue(PETER_PHONE);
-        
+        assertEquals(6, this.model.getRevisionNumber());
     }
     
     @After
@@ -310,9 +315,9 @@ public class TransactionTest {
         tb.addField(johnAddr, XCommand.FORCED, ALIAS_ID);
         // should succeed and set john/alias to JOHN_ALIAS
         XAddress aliasAddr = XX.resolveField(johnAddr, ALIAS_ID);
-        tb.addValue(aliasAddr, XCommand.NEW, JOHN_ALIAS);
+        tb.addValue(aliasAddr, XCommand.FORCED, JOHN_ALIAS);
         // should succeed and set john/alias to null
-        tb.removeValue(aliasAddr, XCommand.NEW);
+        tb.removeValue(aliasAddr, XCommand.FORCED);
         
         // record any changes and check that everything has been changed
         // correctly when the first event is executed
@@ -374,12 +379,13 @@ public class TransactionTest {
         tb.addField(johnAddr, XCommand.FORCED, ALIAS_ID);
         // should succeed and set john/alias to JOHN_ALIAS
         XAddress aliasAddr = XX.resolveField(johnAddr, ALIAS_ID);
-        tb.addValue(aliasAddr, XCommand.NEW, JOHN_ALIAS);
+        tb.addValue(aliasAddr, XCommand.FORCED, JOHN_ALIAS);
         
         // record any changes and check that everything has been changed
         // correctly when the first event is executed
         List<XEvent> received = ChangeRecorder.record(this.model);
         List<XEvent> trans = ChangeRecorder.recordTransactions(this.model);
+        assertEquals(6, this.model.getRevisionNumber());
         
         long result = this.model.executeCommand(tb.build());
         
@@ -436,7 +442,7 @@ public class TransactionTest {
                 aliasAddr, JOHN_ALIAS, modelRev, johnRev, XCommand.NEW, true);
         
         int x5 = received.indexOf(addJohnAliasValue);
-        assertTrue(x5 >= 0);
+        assertEquals(0, x5);
         
         assertTrue(x4 < x5);
         

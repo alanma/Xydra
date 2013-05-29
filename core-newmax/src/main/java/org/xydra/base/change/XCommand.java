@@ -56,10 +56,10 @@ public interface XCommand extends Serializable {
     
     /**
      * Command result code. The returned revision of new models, objects and
-     * fields, before they are assigned a proper revision number (for example
-     * during a transaction).
+     * fields. New models always have revision number 0 when created.
      * 
-     * New models always have revision number 0 when created.
+     * During a txn, the revision number is
+     * {@link RevisionConstants#REVISION_OF_ENTITY_NOT_SET}
      */
     static final long NEW = RevisionConstants.JUST_CREATED_ENTITY;
     

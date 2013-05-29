@@ -3,6 +3,7 @@ package org.xydra.store;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.security.SecureRandom;
@@ -1401,6 +1402,11 @@ public abstract class AbstractPersistenceTestForTransactions {
         XId objectId = XX.toId("objectId");
         XId fieldId = XX.toId("fiedlId");
         XAddress modelAddress = XX.resolveModel(this.repoId, modelId);
+        
+        XWritableModel modelSnapshot = this.persistence.getModelSnapshot(new GetWithAddressRequest(
+                modelAddress));
+        assertNull(modelSnapshot);
+        
         XAddress objectAddress = XX.resolveObject(this.repoId, modelId, objectId);
         XCommand addModelCom = this.comFactory.createAddModelCommand(this.repoId, modelId, true);
         XCommand addObjectCom = this.comFactory
@@ -1410,11 +1416,6 @@ public abstract class AbstractPersistenceTestForTransactions {
                 XX.resolveField(objectAddress, fieldId), -1, XV.toValue(true), true);
         XTransactionBuilder transactionBuilder = new XTransactionBuilder(modelAddress);
         transactionBuilder.addCommand(addModelCom);
-        
-        /* workaround!!! */
-        // long executeCommand2 = this.persistence.executeCommand(actorId,
-        // addModelCom);
-        
         transactionBuilder.addCommand(addObjectCom);
         transactionBuilder.addCommand(addFieldCom);
         transactionBuilder.addCommand(addValueCom);
@@ -1424,8 +1425,8 @@ public abstract class AbstractPersistenceTestForTransactions {
         assertTrue(XCommandUtils.success(result));
         assertTrue(XCommandUtils.changedSomething(result));
         
-        XWritableModel modelSnapshot = this.persistence.getModelSnapshot(new GetWithAddressRequest(
-                modelAddress));
+        modelSnapshot = this.persistence.getModelSnapshot(new GetWithAddressRequest(modelAddress));
+        assertNotNull(modelSnapshot);
         
         long modelRevision = modelSnapshot.getRevisionNumber();
         assertEquals(0, modelRevision);

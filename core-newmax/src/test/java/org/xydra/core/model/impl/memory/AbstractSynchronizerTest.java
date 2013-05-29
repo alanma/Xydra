@@ -131,9 +131,10 @@ abstract public class AbstractSynchronizerTest {
      * Create a phonebook model with the given XId in the store.
      */
     private void createPhonebook(XId modelId) {
+        assert this.model == null;
         XRepositoryCommand createCommand = MemoryRepositoryCommand.createAddCommand(this.repoAddr,
                 XCommand.SAFE_STATE_BOUND, modelId);
-        executeCommand(createCommand);
+        executeCommandOnStore(createCommand);
         XAddress modelAddr = createCommand.getChangedEntity();
         XTransactionBuilder tb = new XTransactionBuilder(modelAddr);
         DemoModelUtil.setupPhonebook(modelAddr, tb, false);
@@ -141,7 +142,7 @@ abstract public class AbstractSynchronizerTest {
         // Apply events individually so there is something in the change log
         // to test
         for(XAtomicCommand ac : trans) {
-            executeCommand(ac);
+            executeCommandOnStore(ac);
         }
     }
     
@@ -149,7 +150,7 @@ abstract public class AbstractSynchronizerTest {
      * Execute the given command on the store and check that there were no
      * errors.
      */
-    private void executeCommand(XCommand command) {
+    private void executeCommandOnStore(XCommand command) {
         SynchronousCallbackWithOneResult<BatchedResult<Long>[]> tc;
         tc = new SynchronousCallbackWithOneResult<BatchedResult<Long>[]>();
         
@@ -183,7 +184,7 @@ abstract public class AbstractSynchronizerTest {
     private void removeModel(XId modelId) {
         XyAssert.xyAssert(this.repoAddr != null, "this.repoAddr != null");
         assert this.repoAddr != null;
-        executeCommand(MemoryRepositoryCommand.createRemoveCommand(this.repoAddr, XCommand.FORCED,
+        executeCommandOnStore(MemoryRepositoryCommand.createRemoveCommand(this.repoAddr, XCommand.FORCED,
                 modelId));
     }
     
@@ -326,7 +327,7 @@ abstract public class AbstractSynchronizerTest {
     public void testDoSafeTxn() {
         XCommand command = MemoryModelCommand.createAddCommand(this.model.getAddress(), false,
                 bobId);
-        executeCommand(command);
+        executeCommandOnStore(command);
         
         final XAddress janeAddr = XX.resolveObject(this.model.getAddress(), janeId);
         final XAddress cookiesAddr = XX.resolveField(janeAddr, cookiesId);
@@ -336,7 +337,7 @@ abstract public class AbstractSynchronizerTest {
         tb.addField(janeAddr, XCommand.SAFE_STATE_BOUND, cookiesId);
         tb.addValue(cookiesAddr, XCommand.SAFE_STATE_BOUND, cookiesValue);
         
-        executeCommand(tb.buildCommand());
+        executeCommandOnStore(tb.buildCommand());
     }
     
     @Test
@@ -349,7 +350,7 @@ abstract public class AbstractSynchronizerTest {
         // make some remote changes
         XCommand command = MemoryModelCommand.createAddCommand(this.model.getAddress(), false,
                 bobId);
-        executeCommand(command);
+        executeCommandOnStore(command);
         
         // make more remote changes
         final XAddress janeAddr = XX.resolveObject(this.model.getAddress(), janeId);
@@ -360,7 +361,7 @@ abstract public class AbstractSynchronizerTest {
         tb.addValue(cookiesAddr, XCommand.SAFE_STATE_BOUND, cookiesValue);
         
         XCommand txn = tb.buildCommand();
-        executeCommand(txn);
+        executeCommandOnStore(txn);
         
         XReadableModel testModel = loadModelSnapshot(DemoModelUtil.PHONEBOOK_ID);
         
@@ -416,7 +417,7 @@ abstract public class AbstractSynchronizerTest {
             // now re-create the model, with some content
             XRepositoryCommand createCommand = MemoryRepositoryCommand.createAddCommand(
                     this.repoAddr, XCommand.SAFE_STATE_BOUND, NEWMODEL_ID);
-            executeCommand(createCommand);
+            executeCommandOnStore(createCommand);
             XReadableModel remoteModel = loadModelSnapshot(NEWMODEL_ID);
             assertNotNull(remoteModel);
             
@@ -553,7 +554,7 @@ abstract public class AbstractSynchronizerTest {
         final XId cakesId = XX.toId("cakes");
         XCommand command = MemoryObjectCommand.createAddCommand(
                 this.model.getObject(DemoModelUtil.JOHN_ID).getAddress(), false, cakesId);
-        executeCommand(command);
+        executeCommandOnStore(command);
         
         // make more remote changes
         final XId janeId = XX.toId("Jane");
@@ -565,18 +566,18 @@ abstract public class AbstractSynchronizerTest {
         tb.addObject(this.model.getAddress(), XCommand.SAFE_STATE_BOUND, janeId);
         tb.addField(janeAddr, XCommand.SAFE_STATE_BOUND, cookiesId);
         tb.addValue(cookiesAddr, XCommand.SAFE_STATE_BOUND, cookiesValue);
-        executeCommand(tb.buildCommand());
+        executeCommandOnStore(tb.buildCommand());
         
         // and some more remote changes
         XCommand command2 = MemoryObjectCommand.createAddCommand(
                 this.model.getObject(DemoModelUtil.PETER_ID).getAddress(), false, cakesId);
-        executeCommand(command2);
+        executeCommandOnStore(command2);
         
         // and even more remote changes
         final XId bobId = XX.toId("Bob");
         XCommand command4 = MemoryModelCommand.createAddCommand(this.model.getAddress(), false,
                 bobId);
-        executeCommand(command4);
+        executeCommandOnStore(command4);
         
         // also make some local changes
         // should be reverted on sync because of conflicting remote changes

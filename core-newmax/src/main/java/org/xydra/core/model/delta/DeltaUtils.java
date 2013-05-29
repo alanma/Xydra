@@ -20,6 +20,8 @@ import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XRevWritableField;
 import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
+import org.xydra.base.rmof.impl.XExistsReadableModel;
+import org.xydra.base.rmof.impl.XExistsWritableModel;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.base.value.XValue;
 import org.xydra.core.change.RevisionConstants;
@@ -165,9 +167,15 @@ public abstract class DeltaUtils {
         if(changedModel.modelWasRemoved()) {
             return null;
         } else if(changedModel.modelWasCreated()) {
-            XyAssert.xyAssert(model == null);
-            model = new SimpleModel(modelAddr);
+            assert model != null;
+            
+            // FIXME .......max
+            
+            assert !model.exists();
             model.setRevisionNumber(rev);
+            if(model instanceof XExistsWritableModel) {
+                ((XExistsWritableModel)model).setExists(true);
+            }
         }
         
         if(changedModel != null) {
@@ -562,7 +570,16 @@ public abstract class DeltaUtils {
         }
     }
     
-    private static SimpleModel createNonExistingModel(XAddress modelAddress) {
+    /**
+     * @param modelAddress
+     * @param model @CanBeNull
+     * @return the given model, if not null, or create a new one
+     */
+    private static XReadableModel createNonExistingModel(XAddress modelAddress, XReadableModel model) {
+        if(model != null) {
+            return model;
+        }
+        
         SimpleModel nonExistingModel = new SimpleModel(modelAddress);
         nonExistingModel.setExists(false);
         nonExistingModel.setRevisionNumber(RevisionConstants.NOT_EXISTING);
@@ -574,39 +591,54 @@ public abstract class DeltaUtils {
      * given model.
      * 
      * @param model The model to modify. Null if the model currently doesn't
-     *            exist. This instance is modified.
+     *            exist. This instance is modified. @CanBeNull
      * @param command
      * @return The changed model after executing the command. Returns null if
      *         the command failed.
      */
-    public static ChangedModel executeCommand(XReadableModel model, XCommand command) {
+    public static ChangedModel executeCommand(XExistsReadableModel model, XCommand command) {
+        
+        boolean modelExists = model != null && model.exists();
         
         if(command instanceof XRepositoryCommand) {
             XRepositoryCommand rc = (XRepositoryCommand)command;
             
             switch(rc.getChangeType()) {
             case ADD:
-                if(model == null) {
+                if(modelExists) {
+                    if(rc.getIntent() != Intent.Forced) {
+                        log.warn("Safe-X RepositoryCommand ADD failed; modelExists=" + modelExists
+                                + " model==null?" + (model == null));
+                        return null;
+                    }
+                    log.info("Command is forced, but there is no change");
+                    return new ChangedModel(createNonExistingModel(rc.getChangedEntity(), model));
+                } else {
+                    if(rc.getIntent() == Intent.SafeRevBound) {
+                        if(model != null) {
+                            long currentModelRev = model.getRevisionNumber();
+                            if(((XRepositoryCommand)command).getRevisionNumber() != currentModelRev) {
+                                log.warn("Safe RepositoryCommand ADD failed; modelRev="
+                                        + currentModelRev + " command=" + command);
+                                return null;
+                            }
+                        } else {
+                            log.warn("SafeRevBound model-ADD, but we cannot check rev, model is null");
+                        }
+                    }
                     XAddress modelAddress = rc.getChangedEntity();
-                    ChangedModel changedModel = new ChangedModel(
-                            createNonExistingModel(modelAddress));
-                    
+                    ChangedModel changedModel = new ChangedModel(createNonExistingModel(
+                            modelAddress, model));
                     changedModel.setExists(true);
                     return changedModel;
-                } else if(rc.getIntent() == Intent.Forced) {
-                    log.info("Command is forced, but there is no change");
-                    return new ChangedModel(model);
-                } else {
-                    log.warn("Safe RepositoryCommand ADD failed; model!=null");
-                    return null;
                 }
-                
             case REMOVE:
-                if(model == null) {
+                if(!modelExists) {
                     // which kind of SAFE command?
                     if(rc.getIntent() == Intent.Forced) {
                         log.info("There is no change");
-                        return new ChangedModel(createNonExistingModel(rc.getChangedEntity()));
+                        return new ChangedModel(
+                                createNonExistingModel(rc.getChangedEntity(), model));
                     } else {
                         log.warn("Safe-X RepositoryCommand REMOVE failed, model was already removed");
                         return null;
