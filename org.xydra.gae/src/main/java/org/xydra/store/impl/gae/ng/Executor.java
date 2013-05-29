@@ -132,7 +132,12 @@ public class Executor {
                 }
             } else {
                 if(command.getIntent() == Intent.SafeRevBound) {
-                    throw new AssertionError("SafeRevBound ADD makes no sense");
+                    long fieldRevBeforeCmd = getFieldRevBeforeCmd(ctxBeforeCmd, objectId,
+                            command.getFieldId());
+                    if(command.getRevisionNumber() != fieldRevBeforeCmd) {
+                        return CheckResult.failed("Expected revNr " + command.getRevisionNumber()
+                                + " but found " + fieldRevBeforeCmd);
+                    }
                 }
                 // success
                 return CheckResult.successValue(command, change, ctxInTxn, inTransaction);
@@ -401,14 +406,23 @@ public class Executor {
                     return CheckResult
                             .successNoChange("objectExists " + command.getChangedEntity());
                 case SafeStateBound:
+                case SafeRevBound:
                     // fail
                     return CheckResult.failed("objectExists " + command.getChangedEntity());
-                case SafeRevBound:
-                    throw new AssertionError("SafeRevBound ADD makes no sense");
                 default:
                     throw new AssertionError();
                 }
             } else {
+                if(command.getIntent() == Intent.SafeRevBound) {
+                    if(command.getIntent() == Intent.SafeRevBound) {
+                        long modelRevBeforeCmd = getModelRevBeforeCmd(ctxBeforeCmd);
+                        if(command.getRevisionNumber() != modelRevBeforeCmd) {
+                            return CheckResult.failed("ModelRevision number expected "
+                                    + command.getRevisionNumber() + " but found "
+                                    + modelRevBeforeCmd);
+                        }
+                    }
+                }
                 // success
                 return CheckResult.successCreatedObject(command, change, ctxInTxn, inTransaction);
             }
@@ -570,15 +584,11 @@ public class Executor {
                 }
             } else {
                 if(command.getIntent() == Intent.SafeRevBound) {
-                    throw new AssertionError("SafeRevBound ADD makes no sense");
-                    // // check
-                    // long objectRevBeforeCmd =
-                    // getObjectRevBeforeCmd(ctxBeforeCmd, objectId);
-                    // if(command.getRevisionNumber() != objectRevBeforeCmd) {
-                    // return CheckResult.failed("Revision number expected "
-                    // + command.getRevisionNumber() + " but found " +
-                    // objectRevBeforeCmd);
-                    // }
+                    long objectRevBeforeCmd = getObjectRevBeforeCmd(ctxBeforeCmd, objectId);
+                    if(command.getRevisionNumber() != objectRevBeforeCmd) {
+                        return CheckResult.failed("Revision number expected "
+                                + command.getRevisionNumber() + " but found " + objectRevBeforeCmd);
+                    }
                 }
                 // success
                 return CheckResult.successCreatedField(command, ctxBeforeCmd.getRevisionNumber(),
