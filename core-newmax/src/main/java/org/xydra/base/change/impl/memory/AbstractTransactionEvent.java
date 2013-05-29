@@ -60,7 +60,7 @@ public abstract class AbstractTransactionEvent implements XTransactionEvent {
                 throw new IllegalArgumentException(
                         "model revision must be set for model transactions");
             }
-        } else if(objectRevision < 0) {
+        } else if(objectRevision < -1) {
             throw new IllegalArgumentException(
                     "object revision must be set for object transactions, was " + objectRevision);
         }

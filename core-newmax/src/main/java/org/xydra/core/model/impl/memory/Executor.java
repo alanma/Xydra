@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
+import org.xydra.base.XType;
 import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
@@ -21,6 +22,7 @@ import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.base.rmof.XWritableRepository;
 import org.xydra.base.rmof.impl.XExistsRevWritableModel;
 import org.xydra.base.rmof.impl.XExistsRevWritableRepository;
+import org.xydra.core.XX;
 import org.xydra.core.change.EventUtils;
 import org.xydra.core.change.RevisionConstants;
 import org.xydra.core.change.XRMOFChangeListener;
@@ -271,8 +273,23 @@ public class Executor {
         List<XAtomicEvent> events = new LinkedList<XAtomicEvent>();
         DeltaUtils.createEventsForChangedModel(events, actorId, modelInTxn,
                 root.isTransactionInProgess());
+        long currentObjectRev;
+        if(command.getTarget().getObject() != null) {
+            // object txn
+            XRevWritableObject objectState = modelState.getObject(command.getTarget().getObject());
+            if(objectState == null) {
+                throw new IllegalArgumentException("Cannot execute an objectCommand (" + command
+                        + ") on a non-existing object");
+            } else {
+                currentObjectRev = objectState.getRevisionNumber();
+            }
+        } else {
+            // model txn
+            currentObjectRev = RevisionConstants.REVISION_OF_ENTITY_NOT_SET;
+        }
+        
         XEvent event = createSingleEvent(events, actorId, command.getTarget(), currentModelRev,
-                RevisionConstants.REVISION_OF_ENTITY_NOT_SET);
+                currentObjectRev);
         
         // apply event
         EventUtils.applyEvent(modelState, event);
@@ -297,8 +314,14 @@ public class Executor {
         if(events.size() == 1) {
             return events.get(0);
         }
-        XTransactionEvent txnEvent = MemoryTransactionEvent.createTransactionEvent(actorId, target,
-                events, modelRevision, objectRevision);
+        XAddress txnTarget = target;
+        if(target.getAddressedType() == XType.XREPOSITORY) {
+            // need to construct the model address
+            txnTarget = XX.resolveModel(events.get(0).getTarget());
+        }
+        
+        XTransactionEvent txnEvent = MemoryTransactionEvent.createTransactionEvent(actorId,
+                txnTarget, events, modelRevision, objectRevision);
         return txnEvent;
     }
     
