@@ -155,10 +155,10 @@ public class MemorySyncLogState implements ISyncLogState {
     
     @Override
     public void setSyncRevisionNumber(long rev) {
-        if(!this.eventMap.isEmpty()) {
-            throw new IllegalStateException(
-                    "cannot set start revision number of non-empty change log");
-        }
+        // if(!this.eventMap.isEmpty()) {
+        // throw new IllegalStateException(
+        // "cannot set start revision number of non-empty change log");
+        // }
         this.syncRevisionNumber = rev;
         
     }
@@ -304,4 +304,10 @@ public class MemorySyncLogState implements ISyncLogState {
         // == revisionNumber);
         return syncLogEntry;
     }
+    
+    @Override
+    public long getSize() {
+        return this.eventMap.size();
+    }
+    
 }

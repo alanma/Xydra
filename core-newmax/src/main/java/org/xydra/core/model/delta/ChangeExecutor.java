@@ -46,6 +46,15 @@ public class ChangeExecutor {
             return false;
         }
         
+        if(objectCommand.getChangeType() == ChangeType.ADD
+                && objectCommand.getIntent() == Intent.SafeRevBound) {
+            if(objectCommand.getRevisionNumber() != changedModel.getRevisionNumber()) {
+                log.warn("XObjectCommand " + objectCommand + " failed. Expected rev="
+                        + objectCommand.getRevisionNumber() + " modelRev="
+                        + changedModel.getRevisionNumber());
+                return false;
+            }
+        }
         return executeObjectCommand(objectCommand, object);
     }
     
@@ -110,7 +119,6 @@ public class ChangeExecutor {
             return false;
         }
         return executeFieldCommand(fieldCommand, object);
-        
     }
     
     /**
@@ -135,13 +143,23 @@ public class ChangeExecutor {
                 log.warn("XModelCommand " + modelCommand + " ADDs object '" + objectId
                         + "' which is already there");
                 return modelCommand.isForced();
+            } else {
+                if(modelCommand.getIntent() == Intent.SafeRevBound) {
+                    if(modelCommand.getRevisionNumber() != changedModel.getRevisionNumber()) {
+                        log.warn("XModelCommand " + modelCommand + " failed. Expected rev="
+                                + modelCommand.getRevisionNumber() + " modelRev="
+                                + changedModel.getRevisionNumber());
+                        return false;
+                    }
+                }
+                // command is OK and adds a new object
+                XWritableObject object = changedModel.createObject(objectId);
+                if(object instanceof XRevWritableObject) {
+                    ((XRevWritableObject)object)
+                            .setRevisionNumber(changedModel.getRevisionNumber());
+                }
+                return true;
             }
-            // command is OK and adds a new object
-            XWritableObject object = changedModel.createObject(objectId);
-            if(object instanceof XRevWritableObject) {
-                ((XRevWritableObject)object).setRevisionNumber(changedModel.getRevisionNumber());
-            }
-            return true;
         }
         case REMOVE: {
             XReadableObject object = changedModel.getObject(objectId);
@@ -195,10 +213,20 @@ public class ChangeExecutor {
                 log.warn("XRepositoryCommand " + command + " ADDs model '" + modelId
                         + "' which is already there");
                 return command.isForced();
+            } else {
+                if(command.getIntent() == Intent.SafeRevBound) {
+                    if(command.getRevisionNumber() != changedModel.getRevisionNumber()) {
+                        // command is invalid
+                        log.warn("Safe XRepositoryCommand " + command
+                                + " is invalid. Expected-rev=" + command.getRevisionNumber()
+                                + " found modelRev=" + changedModel.getRevisionNumber());
+                        return false;
+                    }
+                }
+                // command is OK and adds a new model
+                changedModel.setExists(true);
+                return true;
             }
-            // command is OK and adds a new model
-            changedModel.setExists(true);
-            return true;
             
         case REMOVE:
             if(!changedModel.exists()) {
@@ -211,7 +239,8 @@ public class ChangeExecutor {
                     if(command.getRevisionNumber() != changedModel.getRevisionNumber()) {
                         // command is invalid
                         log.warn("Safe XRepositoryCommand " + command
-                                + " is invalid (revNr mismatch)");
+                                + " is invalid. Expected-rev=" + command.getRevisionNumber()
+                                + " found modelRev=" + changedModel.getRevisionNumber());
                         return false;
                     }
                 }
@@ -273,6 +302,13 @@ public class ChangeExecutor {
         return true;
     }
     
+    /**
+     * ADD SafeRevBound must be checked outside.
+     * 
+     * @param modelCommand
+     * @param changedObject
+     * @return true if command succeeds
+     */
     public static boolean executeModelCommand(XModelCommand modelCommand,
             ChangedObject changedObject) {
         if(!modelCommand.getChangedEntity().equals(changedObject.getAddress())) {
@@ -291,10 +327,11 @@ public class ChangeExecutor {
                 log.warn("XModelCommand " + modelCommand + " ADDs object '" + objectId
                         + "' which is already there");
                 return modelCommand.isForced();
+            } else {
+                // command is OK and adds a new object
+                changedObject.setExists(true);
+                return true;
             }
-            // command is OK and adds a new object
-            changedObject.setExists(true);
-            return true;
             
         case REMOVE:
             if(!changedObject.exists()) {
@@ -320,6 +357,14 @@ public class ChangeExecutor {
         }
     }
     
+    /**
+     * ADD-SafeRevBound commands must have checked before if modelRev matches or
+     * not.
+     * 
+     * @param objectCommand
+     * @param object
+     * @return true if command succeeds
+     */
     public static boolean executeObjectCommand(XObjectCommand objectCommand, XWritableObject object) {
         XId fieldId = objectCommand.getFieldId();
         
@@ -379,27 +424,90 @@ public class ChangeExecutor {
     }
     
     public static boolean executeFieldCommand(XFieldCommand fieldCommand, XWritableField field) {
-        if(!fieldCommand.isForced()) {
-            if(fieldCommand.getRevisionNumber() != XCommand.SAFE_STATE_BOUND
-                    && field.getRevisionNumber() != fieldCommand.getRevisionNumber()) {
-                log.warn("Safe FieldCommand {" + fieldCommand
-                        + "} is invalid (wrong revision) field=" + field.getRevisionNumber()
-                        + " command=" + fieldCommand.getRevisionNumber());
-                return false;
-            }
-            // empty fields require an ADD command
-            if((fieldCommand.getChangeType() == ChangeType.ADD) != field.isEmpty()) {
-                log.warn("command {" + fieldCommand + "} is invalid (wrong type) command is "
-                        + fieldCommand.getChangeType() + ", but field is "
-                        + (field.isEmpty() ? "empty" : "not emtpy"));
-                return false;
+        
+        XValue currentValue = field.getValue();
+        switch(fieldCommand.getChangeType()) {
+        case ADD: {
+            if(currentValue != null) {
+                if(fieldCommand.getIntent() == Intent.Forced) {
+                    field.setValue(fieldCommand.getValue());
+                    return true;
+                } else {
+                    log.warn("Could not safely ADD value to a field that had already a value");
+                    return false;
+                }
+            } else {
+                if(fieldCommand.getIntent() == Intent.SafeRevBound) {
+                    if(field.getRevisionNumber() != fieldCommand.getRevisionNumber()) {
+                        log.warn("SafeRevBound FieldCommand {" + fieldCommand
+                                + "} failed. expected=" + fieldCommand.getRevisionNumber()
+                                + " fieldRev=" + field.getRevisionNumber());
+                        return false;
+                    }
+                }
+                field.setValue(fieldCommand.getValue());
+                return true;
             }
         }
-        
-        // command is OK
-        field.setValue(fieldCommand.getValue());
-        
-        return true;
+        case REMOVE: {
+            if(currentValue == null) {
+                if(fieldCommand.getIntent() == Intent.Forced) {
+                    return true;
+                } else {
+                    log.warn("Could not safely REMOVE value from a field that had no value");
+                    return false;
+                }
+            } else {
+                if(fieldCommand.getIntent() == Intent.SafeRevBound) {
+                    if(field.getRevisionNumber() != fieldCommand.getRevisionNumber()) {
+                        log.warn("SafeRevBound FieldCommand {" + fieldCommand
+                                + "} failed. expected=" + fieldCommand.getRevisionNumber()
+                                + " fieldRev=" + field.getRevisionNumber());
+                        return false;
+                    }
+                }
+                field.setValue(fieldCommand.getValue());
+                return true;
+            }
+        }
+        case CHANGE: {
+            if(currentValue == null) {
+                if(fieldCommand.getIntent() == Intent.Forced) {
+                    field.setValue(fieldCommand.getValue());
+                    return true;
+                } else {
+                    log.warn("Could not safely CHANGE value of a field that had no value");
+                    return false;
+                }
+            } else {
+                switch(fieldCommand.getIntent()) {
+                case Forced: {
+                    // no checks
+                }
+                    break;
+                case SafeStateBound: {
+                    assert currentValue != null;
+                    // passed, current value exists
+                }
+                    break;
+                case SafeRevBound: {
+                    if(field.getRevisionNumber() != fieldCommand.getRevisionNumber()) {
+                        log.warn("SafeRevBound FieldCommand {" + fieldCommand
+                                + "} failed. expected=" + fieldCommand.getRevisionNumber()
+                                + " fieldRev==" + field.getRevisionNumber());
+                        return false;
+                    }
+                }
+                    break;
+                }
+                // all checks passed
+                field.setValue(fieldCommand.getValue());
+                return true;
+            }
+        }
+        default:
+            throw new AssertionError();
+        }
     }
     
     // FIXME CRAP-------------------------

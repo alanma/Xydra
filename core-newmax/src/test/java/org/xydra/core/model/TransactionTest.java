@@ -106,7 +106,7 @@ public class TransactionTest {
         tb.addObject(modelAddr, XCommand.SAFE_STATE_BOUND, PETER_ID);
         XAddress peterAddr = this.peter.getAddress();
         tb.addField(peterAddr, XCommand.SAFE_STATE_BOUND, ALIAS_ID);
-        tb.removeObject(modelAddr, XCommand.NEW, PETER_ID);
+        tb.removeObject(modelAddr, XCommand.FORCED, PETER_ID);
         // should fail to execute
         tb.removeObject(modelAddr, johnRev - 1, JOHN_ID);
         
@@ -169,7 +169,7 @@ public class TransactionTest {
         XAddress johnAddr = this.john.getAddress();
         tb.addField(johnAddr, XCommand.SAFE_STATE_BOUND, ALIAS_ID);
         XAddress aliasAddr = XX.resolveField(johnAddr, ALIAS_ID);
-        tb.addValue(aliasAddr, XCommand.NEW, JOHN_ALIAS);
+        tb.addValue(aliasAddr, XCommand.FORCED, JOHN_ALIAS);
         // should fail to execute
         tb.removeObject(modelAddr, johnRev - 1, JOHN_ID);
         
@@ -439,10 +439,10 @@ public class TransactionTest {
         /* check events received for setting john/alias */
         
         XEvent addJohnAliasValue = MemoryReversibleFieldEvent.createAddEvent(this.actorId,
-                aliasAddr, JOHN_ALIAS, modelRev, johnRev, XCommand.NEW, true);
+                aliasAddr, JOHN_ALIAS, modelRev, johnRev, johnPhoneRev, true);
         
         int x5 = received.indexOf(addJohnAliasValue);
-        assertEquals(0, x5);
+        assertEquals(4, x5);
         
         assertTrue(x4 < x5);
         
@@ -476,7 +476,7 @@ public class TransactionTest {
         tb.addField(johnAddr, XCommand.SAFE_STATE_BOUND, ALIAS_ID);
         tb.removeField(johnAddr, phoneRev, PHONE_ID);
         XAddress aliasAddr = XX.resolveField(johnAddr, ALIAS_ID);
-        tb.addValue(aliasAddr, XCommand.NEW, JOHN_ALIAS);
+        tb.addValue(aliasAddr, XCommand.FORCED, JOHN_ALIAS);
         // should fail to execute
         tb.removeField(johnAddr, phoneRev, PHONE_ID);
         
@@ -536,9 +536,9 @@ public class TransactionTest {
         tb.addField(johnAddr, XCommand.FORCED, ALIAS_ID);
         // should succeed and set john/alias to JOHN_ALIAS
         XAddress aliasAddr = XX.resolveField(johnAddr, ALIAS_ID);
-        tb.addValue(aliasAddr, XCommand.NEW, JOHN_ALIAS);
+        tb.addValue(aliasAddr, XCommand.FORCED, JOHN_ALIAS);
         // should succeed and reset everything
-        tb.removeField(johnAddr, XCommand.NEW, ALIAS_ID);
+        tb.removeField(johnAddr, XCommand.FORCED, ALIAS_ID);
         
         // record any changes and check that everything has been changed
         // correctly when the first event is executed
@@ -571,9 +571,9 @@ public class TransactionTest {
         tb.addField(johnAddr, XCommand.FORCED, ALIAS_ID);
         // should succeed and set john/alias to JOHN_ALIAS
         XAddress aliasAddr = XX.resolveField(johnAddr, ALIAS_ID);
-        tb.addValue(aliasAddr, XCommand.NEW, JOHN_ALIAS);
+        tb.addValue(aliasAddr, XCommand.FORCED, JOHN_ALIAS);
         // should succeed and set john/alias to null
-        tb.removeValue(aliasAddr, XCommand.NEW);
+        tb.removeValue(aliasAddr, XCommand.FORCED);
         
         // record any changes and check that everything has been changed
         // correctly when the first event is executed
@@ -625,7 +625,7 @@ public class TransactionTest {
         
         final long modelRev = this.model.getRevisionNumber();
         final long johnRev = this.john.getRevisionNumber();
-        final long phoneRev = this.john.getField(PHONE_ID).getRevisionNumber();
+        final long johnPhoneRev = this.john.getField(PHONE_ID).getRevisionNumber();
         
         XTransactionBuilder tb = new XTransactionBuilder(this.john.getAddress());
         XAddress johnAddr = this.john.getAddress();
@@ -654,7 +654,7 @@ public class TransactionTest {
         assertTrue(this.john.hasField(ALIAS_ID));
         assertEquals(modelRev + 1, this.john.getField(ALIAS_ID).getRevisionNumber());
         
-        assertEquals(phoneRev, this.john.getField(PHONE_ID).getRevisionNumber());
+        assertEquals(johnPhoneRev, this.john.getField(PHONE_ID).getRevisionNumber());
         
         assertEquals(JOHN_ALIAS, this.john.getField(ALIAS_ID).getValue());
         
@@ -671,7 +671,7 @@ public class TransactionTest {
         /* check events received for setting john/alias */
         
         XEvent addJohnAliasValue = MemoryFieldEvent.createAddEvent(this.actorId, aliasAddr,
-                JOHN_ALIAS, modelRev, johnRev, XCommand.NEW, true);
+                JOHN_ALIAS, modelRev, johnRev, johnPhoneRev, true);
         
         int x2 = received.indexOf(addJohnAliasValue);
         assertTrue(x2 >= 0);

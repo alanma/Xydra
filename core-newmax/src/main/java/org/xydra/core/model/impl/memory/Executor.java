@@ -228,7 +228,9 @@ public class Executor {
         
         // apply event
         EventUtils.applyEvent(objectState, event);
-        modelState.setRevisionNumber(event.getRevisionNumber());
+        if(modelState != null) {
+            modelState.setRevisionNumber(event.getRevisionNumber());
+        }
         root.getSyncLog().appendSyncLogEntry(command, event);
         fireEvents(root, changeEventListener, event);
         
@@ -308,8 +310,8 @@ public class Executor {
      * @return the single event within the events list or a
      *         {@link XTransactionEvent} containing all given events
      */
-    private static XEvent createSingleEvent(List<XAtomicEvent> events, XId actorId,
-            XAddress target, long modelRevision, long objectRevision) {
+    public static XEvent createSingleEvent(List<XAtomicEvent> events, XId actorId, XAddress target,
+            long modelRevision, long objectRevision) {
         assert !events.isEmpty() : "no events in list";
         if(events.size() == 1) {
             return events.get(0);
@@ -371,6 +373,9 @@ public class Executor {
              * correctly
              */
             root.fireTransactionEvent(txnEvent.getTarget(), txnEvent);
+            if(txnEvent.getTarget().getAddressedType() == XType.XOBJECT) {
+                root.fireTransactionEvent(txnEvent.getTarget().getParent(), txnEvent);
+            }
         } else {
             XAtomicEvent atomicEvent = (XAtomicEvent)event;
             fireAtomicEvent(root, changeEventListener, atomicEvent);

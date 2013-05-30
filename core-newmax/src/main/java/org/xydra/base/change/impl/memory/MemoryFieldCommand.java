@@ -5,6 +5,7 @@ import org.xydra.base.XId;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XFieldCommand;
 import org.xydra.base.value.XValue;
+import org.xydra.core.change.RevisionConstants;
 import org.xydra.index.XI;
 
 
@@ -24,18 +25,16 @@ public class MemoryFieldCommand extends MemoryAtomicCommand implements XFieldCom
      * Creates a new {@link XFieldCommand} of the add-type. Will add the given
      * {@link XValue} to the specified field, if possible.
      * 
-     * @param target The {@link XAddress} of the field which value is
-     *            to be set.
-     * @param fieldRevision The current revision number of the field
-     *            which {@link XValue} is to be set. The field {@link XId} of
-     *            the given address must not be null
-     * @param newValue The new {@link XValue} for the specified field -
-     *            must not be null
+     * @param target The {@link XAddress} of the field which value is to be set.
+     * @param fieldRevision The current revision number of the field which
+     *            {@link XValue} is to be set. The field {@link XId} of the
+     *            given address must not be null
+     * @param newValue The new {@link XValue} for the specified field - must not
+     *            be null
      * @return Creates a new {@link XFieldCommand} of the add-type for the
      *         specified target.
      * @throws IllegalArgumentException if the given {@link XAddress} does not
-     *             specify an field or if the given {@link XValue} is
-     *             null
+     *             specify an field or if the given {@link XValue} is null
      */
     public static XFieldCommand createAddCommand(XAddress target, long fieldRevision,
             XValue newValue) {
@@ -48,16 +47,15 @@ public class MemoryFieldCommand extends MemoryAtomicCommand implements XFieldCom
     
     /**
      * Creates a new {@link XFieldCommand} of the change-type. Will change the
-     * current {@link XValue} of the specified field to the given
-     * {@link XValue}, if possible.
+     * current {@link XValue} of the specified field to the given {@link XValue}
+     * , if possible.
      * 
-     * @param target The {@link XAddress} of the field which value is
-     *            to be set.
-     * @param fieldRevision The current revision number of the field
-     *            which value is to be set. The field {@link XId} of the given
-     *            address must not be null
-     * @param newValue The new {@link XValue} for the specified field -
-     *            must not be null
+     * @param target The {@link XAddress} of the field which value is to be set.
+     * @param fieldRevision The current revision number of the field which value
+     *            is to be set. The field {@link XId} of the given address must
+     *            not be null
+     * @param newValue The new {@link XValue} for the specified field - must not
+     *            be null
      * @return Creates a new {@link XFieldCommand} of the change-type for the
      *         specified target.
      * @throws IllegalArgumentException if the given {@link XAddress} does not
@@ -77,11 +75,10 @@ public class MemoryFieldCommand extends MemoryAtomicCommand implements XFieldCom
      * Creates a new {@link XFieldCommand} of the remove-type. Will remove the
      * current {@link XValue} from the specified field, if possible.
      * 
-     * @param target The {@link XAddress} of the field which value is
-     *            to be set.
-     * @param fieldRevision The current revision number of the field
-     *            which {@link XValue} is to be set. The field {@link XId} of
-     *            the given address must not be null
+     * @param target The {@link XAddress} of the field which value is to be set.
+     * @param fieldRevision The current revision number of the field which
+     *            {@link XValue} is to be set. The field {@link XId} of the
+     *            given address must not be null
      * @return Creates a new {@link XFieldCommand} of the remove-type for the
      *         specified target.
      * @throws IllegalArgumentException if the given {@link XAddress} does not
@@ -141,23 +138,25 @@ public class MemoryFieldCommand extends MemoryAtomicCommand implements XFieldCom
         return result;
     }
     
+    /**
+     * Format: {MOF}Command
+     * 
+     * {'ADD'|'REMOVE'}
+     * 
+     * @{target *{id/value}, where xRef = '-' for
+     *          {@link RevisionConstants#REVISION_OF_ENTITY_NOT_SET} and '?' for
+     *          {@link RevisionConstants#REVISION_NOT_AVAILABLE}.
+     * 
+     *          {'Forced'|'Safe(State)'|'Safe(' {rev} ')' }
+     */
     @Override
     public String toString() {
-        String suffix = "";
-        if(isForced())
-            suffix += "' (forced)";
-        else
-            suffix += "' safe-r" + getRevisionNumber();
-        suffix += " @" + getTarget();
-        switch(getChangeType()) {
-        case ADD:
-            return "\nFieldCommand:  ADD value '" + this.newValue + suffix;
-        case REMOVE:
-            return "\nFieldCommand:  REMOVE value '" + suffix;
-        case CHANGE:
-            return "\nFieldCommand:  CHANGE value to '" + this.newValue + suffix;
-        default:
-            throw new RuntimeException("this field event should have never been created");
-        }
+        StringBuilder sb = new StringBuilder();
+        sb.append("     FieldCommand");
+        addChangeTypeTarget(sb);
+        // add what is added/removed/changed
+        sb.append(" ->*" + this.getValue() + "*");
+        addIntentRev(sb);
+        return sb.toString();
     }
 }

@@ -3245,8 +3245,8 @@ public abstract class AbstractPersistenceTestForTransactions {
                         + seed, 1, events.size());
         
         XEvent event = events.get(0);
-        assertTrue("The returned event should be a TransactionEvent, seed was " + seed,
-                event instanceof XTransactionEvent);
+        assertTrue("The returned event should be a TransactionEvent, seed was " + seed + " event="
+                + event, event instanceof XTransactionEvent);
         
         XTransactionEvent txnEvent = (XTransactionEvent)event;
         

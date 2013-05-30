@@ -225,23 +225,29 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
         
         if(target.getField() == null || fieldRevision < -1
                 && fieldRevision != REVISION_OF_ENTITY_NOT_SET) {
-            throw new IllegalArgumentException("fieldId (" + target.getField() + ") and revision ("
-                    + fieldRevision + ") must be set for field events");
+            throw new IllegalArgumentException("fieldId ('" + target.getField()
+                    + "') and revision (" + fieldRevision + ") must be set for field events");
         }
-        
+        /* objectRev can only be: defined, notSet, or notAvailable */
         if(objectRevision < -1 && objectRevision != REVISION_OF_ENTITY_NOT_SET
                 && objectRevision != REVISION_NOT_AVAILABLE) {
             throw new IllegalArgumentException("invalid objectRevision: " + objectRevision);
         }
-        
+        /* modelRev can only be: define or notSet */
         if(modelRevision < -1 && modelRevision != REVISION_OF_ENTITY_NOT_SET) {
             throw new IllegalArgumentException("invalid modelRevision: " + modelRevision);
         }
-        
-        assert modelRevision == REVISION_OF_ENTITY_NOT_SET || modelRevision >= objectRevision : "m="
-                + modelRevision + " o=" + objectRevision + " f=" + fieldRevision;
-        assert objectRevision == REVISION_OF_ENTITY_NOT_SET || objectRevision >= fieldRevision : "m="
-                + modelRevision + " o=" + objectRevision + " f=" + fieldRevision;
+        /* modelRev >= objectRev */
+        if(modelRevision >= -1 && modelRevision < objectRevision) {
+            throw new IllegalArgumentException("model revision(" + modelRevision
+                    + ") cannot be smaller than object revision(" + objectRevision + ")");
+        }
+        /* modelRev defined && objectRev notSet && fieldRev defined => error */
+        if(modelRevision >= -1 && objectRevision == REVISION_OF_ENTITY_NOT_SET
+                && fieldRevision >= -1) {
+            throw new IllegalArgumentException("An even cannot define a modelRev (" + modelRevision
+                    + "), no object rev, but a fieldRev (" + fieldRevision + ")");
+        }
         
         this.newValue = newValue;
         

@@ -145,17 +145,17 @@ abstract public class MemoryAtomicEvent implements XEvent {
     public long getRevisionNumber() {
         
         long rev = getOldModelRevision();
-        if(rev >= -1) {
+        if(rev >= RevisionConstants.NOT_EXISTING) {
             return rev + 1;
         }
         
         rev = getOldObjectRevision();
-        if(rev >= -1) {
+        if(rev >= RevisionConstants.NOT_EXISTING) {
             return rev + 1;
         }
         
         rev = getOldFieldRevision();
-        if(rev >= -1) {
+        if(rev >= RevisionConstants.NOT_EXISTING) {
             return rev + 1;
         }
         

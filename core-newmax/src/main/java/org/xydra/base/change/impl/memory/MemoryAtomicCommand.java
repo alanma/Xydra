@@ -132,4 +132,39 @@ abstract public class MemoryAtomicCommand implements XAtomicCommand, Serializabl
         }
     }
     
+    protected void addChangeTypeTarget(StringBuilder sb) {
+        sb.append(" ");
+        switch(getChangeType()) {
+        case ADD:
+            sb.append("ADD   ");
+            break;
+        case REMOVE:
+            sb.append("REMOVE");
+            break;
+        case CHANGE:
+            sb.append("CHANGE");
+            break;
+        case TRANSACTION:
+            sb.append("TXN   ");
+            break;
+        }
+        sb.append(" @" + getTarget());
+    }
+    
+    protected void addIntentRev(StringBuilder sb) {
+        sb.append(" ");
+        switch(this.getIntent()) {
+        case Forced:
+            sb.append("Forced");
+            break;
+        case SafeStateBound:
+            sb.append("Safe(State)");
+            break;
+        case SafeRevBound:
+            assert this.getRevisionNumber() >= RevisionConstants.NOT_EXISTING;
+            sb.append("Safe(" + this.getRevisionNumber() + ")");
+            break;
+        }
+    }
+    
 }

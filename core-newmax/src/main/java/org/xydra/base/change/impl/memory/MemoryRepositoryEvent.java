@@ -123,7 +123,8 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
         }
         
         // TODO this right???
-        if(modelRevision < -1 && modelRevision != REVISION_OF_ENTITY_NOT_SET) {
+        if(modelRevision < RevisionConstants.NOT_EXISTING
+                && modelRevision != REVISION_OF_ENTITY_NOT_SET) {
             throw new IllegalArgumentException("invalid modelRevision: " + modelRevision);
         }
         

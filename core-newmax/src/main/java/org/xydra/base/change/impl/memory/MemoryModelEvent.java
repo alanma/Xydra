@@ -102,12 +102,13 @@ public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {
         if(objectId == null) {
             throw new IllegalArgumentException("object Id must be set for model events, is null");
         }
-        if(modelRevision < -1) {
+        if(modelRevision < RevisionConstants.NOT_EXISTING) {
             throw new IllegalArgumentException("modelRevision (" + modelRevision
                     + ") must be set for model events");
         }
         
-        if(objectRevision < 0 && objectRevision != REVISION_OF_ENTITY_NOT_SET) {
+        if(objectRevision < RevisionConstants.NOT_EXISTING
+                && objectRevision != REVISION_OF_ENTITY_NOT_SET) {
             throw new IllegalArgumentException("invalid objectRevision: " + objectRevision);
         }
         

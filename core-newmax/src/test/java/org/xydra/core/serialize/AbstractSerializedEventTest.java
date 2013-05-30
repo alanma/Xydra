@@ -106,8 +106,8 @@ abstract public class AbstractSerializedEventTest extends AbstractSerializingTes
     
     @Test
     public void testFieldEventRemoveNoObjectRev() {
-        testEvent(MemoryFieldEvent.createRemoveEvent(actor, field, 33, XEvent.REVISION_NOT_AVAILABLE,
-                2, false, false));
+        testEvent(MemoryFieldEvent.createRemoveEvent(actor, field, 33,
+                XEvent.REVISION_NOT_AVAILABLE, 2, false, false));
     }
     
     @Test
@@ -220,8 +220,8 @@ abstract public class AbstractSerializedEventTest extends AbstractSerializingTes
     
     @Test
     public void testObjectEventAddNoModelObjectRev() {
-        testEvent(MemoryObjectEvent.createAddEvent(actor, object, id, XEvent.REVISION_NOT_AVAILABLE,
-                false));
+        testEvent(MemoryObjectEvent.createAddEvent(actor, object, id,
+                XEvent.REVISION_NOT_AVAILABLE, false));
     }
     
     @Test

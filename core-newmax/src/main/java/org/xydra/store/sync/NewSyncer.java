@@ -26,6 +26,8 @@ import org.xydra.core.model.impl.memory.sync.ISyncLogEntry;
 import org.xydra.core.model.impl.memory.sync.Root;
 import org.xydra.core.model.impl.memory.sync.UnorderedEventMapper;
 import org.xydra.index.query.Pair;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 import org.xydra.persistence.GetEventsRequest;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.Callback;
@@ -39,6 +41,8 @@ import org.xydra.store.XydraStore;
  * 
  */
 public class NewSyncer {
+    
+    private static final Logger log = LoggerFactory.getLogger(NewSyncer.class);
     
     private String passwordHash;
     
@@ -62,7 +66,7 @@ public class NewSyncer {
     XRevWritableModel modelState, Root root,
     
     XId actorId, String passwordHash, long syncRev) {
-        this.store = store;
+        this.remoteStore = store;
         this.modelWithListeners = modelWithListeners;
         this.modelState = modelState;
         this.root = root;
@@ -72,7 +76,7 @@ public class NewSyncer {
         this.syncRev = syncRev;
     }
     
-    private XydraStore store;
+    private XydraStore remoteStore;
     
     private long syncRev;
     
@@ -91,8 +95,8 @@ public class NewSyncer {
             commands.add(cmd);
         }
         GetEventsRequest getEventRequest = new GetEventsRequest(this.modelState.getAddress(),
-                this.syncRev, -1);
-        this.store.executeCommandsAndGetEvents(this.actorId, this.passwordHash,
+                this.syncRev, Long.MAX_VALUE);
+        this.remoteStore.executeCommandsAndGetEvents(this.actorId, this.passwordHash,
                 commands.toArray(new XCommand[commands.size()]),
                 new GetEventsRequest[] { getEventRequest }, new ServerCallback());
         // TODO let app continue to run while we wait?
@@ -155,6 +159,10 @@ public class NewSyncer {
         /* calculated event delta */
         EventDelta eventDelta = new EventDelta();
         for(XEvent e : serverEvents) {
+            
+            // FIXME
+            log.info("Received event from server: " + e);
+            
             eventDelta.addEvent(e);
         }
         Iterator<ISyncLogEntry> localChanges = this.syncLog.getLocalChanges();

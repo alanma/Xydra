@@ -240,4 +240,9 @@ public class MemorySyncLog extends AbstractSyncLog implements ISyncLog {
     public Iterator<ISyncLogEntry> getSyncLogEntriesUntil(long revisionNumber) {
         return this.state.getSyncLogEntriesUntil(revisionNumber);
     }
+    
+    @Override
+    public long getSize() {
+        return this.state.getSize();
+    }
 }
