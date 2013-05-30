@@ -27,6 +27,7 @@ import org.xydra.base.change.XObjectEvent;
 import org.xydra.base.change.XRepositoryCommand;
 import org.xydra.base.change.XRepositoryEvent;
 import org.xydra.base.change.XTransactionEvent;
+import org.xydra.base.change.impl.memory.MemoryModelCommand;
 import org.xydra.base.change.impl.memory.MemoryRepositoryCommand;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableModel;
@@ -2575,24 +2576,24 @@ public abstract class AbstractPersistenceTestForAtomicCommandsAndMiscellaneous {
 		 */
 		XCommand addModelCom = this.comFactory.createSafeAddModelCommand(this.repoId, modelId);
 		long result = this.persistence.executeCommand(this.actorId, addModelCom);
-		assert result > -1;
-		assert this.persistence.getManagedModelIds().contains(modelId);
+		assertTrue(result > -1);
+		assertTrue(this.persistence.getManagedModelIds().contains(modelId));
 		
 		XRepositoryCommand addModelAgainCom = this.comFactory.createSafeAddModelCommand(
 		        this.repoId, modelId);
 		result = this.persistence.executeCommand(this.actorId, addModelAgainCom);
-		assert result == -1;
+		assertTrue(result == -1);
 		
 		XCommand removeModelCom = this.comFactory.createSafeRemoveModelCommand(modelAddress,
 		        RevisionConstants.COMMAND_INTENT_SAFE_STATE_BOUND);
 		result = this.persistence.executeCommand(this.actorId, removeModelCom);
-		assert result > -1;
-		assert this.persistence.getModelSnapshot(new GetWithAddressRequest(modelAddress)) == null;
+		assertTrue(result > -1);
+		assertTrue(this.persistence.getModelSnapshot(new GetWithAddressRequest(modelAddress)) == null);
 		
 		XCommand removeModelAgainCom = this.comFactory.createSafeRemoveModelCommand(modelAddress,
 		        RevisionConstants.COMMAND_INTENT_SAFE_STATE_BOUND);
 		result = this.persistence.executeCommand(this.actorId, removeModelAgainCom);
-		assert result == -1;
+		assertTrue(result == -1);
 		
 		/*
 		 * test add, add although already exists, remove and remove although not
@@ -2605,26 +2606,26 @@ public abstract class AbstractPersistenceTestForAtomicCommandsAndMiscellaneous {
 		XModelCommand addObjectCom = this.comFactory.createSafeAddObjectCommand(modelAddress,
 		        objectId);
 		result = this.persistence.executeCommand(this.actorId, addObjectCom);
-		assert result > -1;
+		assertTrue(result > -1);
 		model = this.persistence.getModelSnapshot(new GetWithAddressRequest(modelAddress));
-		assert model.getObject(objectId) != null;
+		assertTrue(model.getObject(objectId) != null);
 		
 		XModelCommand addObjectAgainCom = this.comFactory.createSafeAddObjectCommand(modelAddress,
 		        objectId);
 		result = this.persistence.executeCommand(this.actorId, addObjectAgainCom);
-		assert result == -1;
+		assertTrue(result == -1);
 		
 		XModelCommand removeObjectCom = this.comFactory.createSafeRemoveObjectCommand(
 		        objectAddress, RevisionConstants.COMMAND_INTENT_SAFE_STATE_BOUND);
 		result = this.persistence.executeCommand(this.actorId, removeObjectCom);
-		assert result > -1;
+		assertTrue(result > -1);
 		model = this.persistence.getModelSnapshot(new GetWithAddressRequest(modelAddress));
-		assert model.isEmpty();
+		assertTrue(model.isEmpty());
 		
 		XModelCommand removeObjectAgainCom = this.comFactory.createSafeRemoveObjectCommand(
 		        objectAddress, RevisionConstants.COMMAND_INTENT_SAFE_STATE_BOUND);
 		result = this.persistence.executeCommand(this.actorId, removeObjectAgainCom);
-		assert result == -1;
+		assertTrue(result == -1);
 		
 		/*
 		 * test add, add although already exists, remove and remove although not
@@ -2637,28 +2638,28 @@ public abstract class AbstractPersistenceTestForAtomicCommandsAndMiscellaneous {
 		XObjectCommand addFieldCom = this.comFactory.createSafeAddFieldCommand(objectAddress,
 		        fieldId);
 		result = this.persistence.executeCommand(this.actorId, addFieldCom);
-		assert result > -1;
+		assertTrue(result > -1);
 		object = this.persistence.getModelSnapshot(new GetWithAddressRequest(modelAddress))
 		        .getObject(objectId);
-		assert object.getField(fieldId) != null;
+		assertTrue(object.getField(fieldId) != null);
 		
 		XObjectCommand addFieldAgainCom = this.comFactory.createSafeAddFieldCommand(objectAddress,
 		        fieldId);
 		result = this.persistence.executeCommand(this.actorId, addFieldAgainCom);
-		assert result == -1;
+		assertTrue(result == -1);
 		
 		XObjectCommand removeFieldCom = this.comFactory.createSafeRemoveFieldCommand(fieldAddress,
 		        RevisionConstants.COMMAND_INTENT_SAFE_STATE_BOUND);
 		result = this.persistence.executeCommand(this.actorId, removeFieldCom);
-		assert result > -1;
+		assertTrue(result > -1);
 		object = this.persistence.getModelSnapshot(new GetWithAddressRequest(modelAddress))
 		        .getObject(objectId);
-		assert object.isEmpty();
+		assertTrue(object.isEmpty());
 		
 		XObjectCommand removeFieldAgainCom = this.comFactory.createSafeRemoveFieldCommand(
 		        fieldAddress, RevisionConstants.COMMAND_INTENT_SAFE_STATE_BOUND);
 		result = this.persistence.executeCommand(this.actorId, removeFieldAgainCom);
-		assert result == -1;
+		assertTrue(result == -1);
 		
 		/*
 		 * test add and add although already existing, remove remove although
@@ -2672,22 +2673,22 @@ public abstract class AbstractPersistenceTestForAtomicCommandsAndMiscellaneous {
 		XFieldCommand addValueCom = this.comFactory.createSafeAddValueCommand(fieldAddress,
 		        RevisionConstants.COMMAND_INTENT_SAFE_STATE_BOUND, value);
 		result = this.persistence.executeCommand(this.actorId, addValueCom);
-		assert result > -1;
+		assertTrue(result > -1);
 		field = this.persistence.getModelSnapshot(new GetWithAddressRequest(modelAddress))
 		        .getObject(objectId).getField(fieldId);
-		assert field.getValue() != null;
+		assertTrue(field.getValue() != null);
 		
 		XFieldCommand addValueAgainCom = this.comFactory.createSafeAddValueCommand(fieldAddress,
 		        RevisionConstants.COMMAND_INTENT_SAFE_STATE_BOUND, value);
 		result = this.persistence.executeCommand(this.actorId, addValueAgainCom);
-		assert result == -1;
+		assertTrue(result == -1);
 		
 		XFieldCommand changeValueCom = this.comFactory.createSafeChangeValueCommand(fieldAddress,
 		        RevisionConstants.COMMAND_INTENT_SAFE_STATE_BOUND, newValue);
 		result = this.persistence.executeCommand(this.actorId, changeValueCom);
-		assert result > -1;
-		assert this.persistence.getModelSnapshot(new GetWithAddressRequest(modelAddress))
-		        .getObject(objectId).getField(fieldId).getValue().equals(newValue);
+		assertTrue(result > -1);
+		assertTrue(this.persistence.getModelSnapshot(new GetWithAddressRequest(modelAddress))
+		        .getObject(objectId).getField(fieldId).getValue().equals(newValue));
 		
 		// IMPROVE currently not supported: state bound value changing
 		// XFieldCommand changeValueButDifferentOldValueCom = this.comFactory
@@ -2701,14 +2702,14 @@ public abstract class AbstractPersistenceTestForAtomicCommandsAndMiscellaneous {
 		XFieldCommand removeValueCom = this.comFactory.createSafeRemoveValueCommand(fieldAddress,
 		        RevisionConstants.COMMAND_INTENT_SAFE_STATE_BOUND);
 		result = this.persistence.executeCommand(this.actorId, removeValueCom);
-		assert result > -1;
-		assert this.persistence.getModelSnapshot(new GetWithAddressRequest(modelAddress))
-		        .getObject(objectId).getField(fieldId).getValue() == null;
+		assertTrue(result > -1);
+		assertTrue(this.persistence.getModelSnapshot(new GetWithAddressRequest(modelAddress))
+		        .getObject(objectId).getField(fieldId).getValue() == null);
 		
 		XFieldCommand removeValueAgainCom = this.comFactory.createSafeRemoveValueCommand(
 		        fieldAddress, RevisionConstants.COMMAND_INTENT_SAFE_STATE_BOUND);
 		result = this.persistence.executeCommand(this.actorId, removeValueAgainCom);
-		assert result == -1;
+		assertTrue(result == -1);
 		
 	}
 	
@@ -2729,61 +2730,76 @@ public abstract class AbstractPersistenceTestForAtomicCommandsAndMiscellaneous {
 		
 		/*
 		 * test failing add, add, add although differing revision numbers,
-		 * remove and remove although differing revision numbers model commands
+		 * failing remove, remove and remove although already removed model
+		 * commands
 		 */
 		// FIXME it should be possible to use a command factory here
 		// XCommand addModelCom =
 		// this.comFactory.createSafeAddModelCommand(this.repoId, modelId);
-		// FIXME XRepositoryCommand and XModelCommand - createAddCommands should
-		// be allowed to accept regular entity revision numbers
 		XCommand failingAddModelCom = MemoryRepositoryCommand.createAddCommand(this.repoAddress, 2,
 		        modelId);
 		long result = this.persistence.executeCommand(this.actorId, failingAddModelCom);
-		assert result == -1;
-		assert !this.persistence.getManagedModelIds().contains(modelId);
+		// FIXME fails! You can add safe objects
+		assertEquals(-1, result);
+		assertFalse(this.persistence.getManagedModelIds().contains(modelId));
 		
 		XCommand addModelCom = MemoryRepositoryCommand.createAddCommand(this.repoAddress, 0,
 		        modelId);
 		result = this.persistence.executeCommand(this.actorId, addModelCom);
-		assert result > -1;
-		assert this.persistence.getManagedModelIds().contains(modelId);
+		// FIXME this command should succeed
+		assertTrue(result > -1);
+		assertTrue(this.persistence.getManagedModelIds().contains(modelId));
 		
 		// XRepositoryCommand addModelAgainCom =
 		// this.comFactory.createSafeAddModelCommand(
 		// this.repoId, modelId);
 		XCommand addModelAgainCom = MemoryRepositoryCommand.createAddCommand(this.repoAddress, 0,
 		        modelId);
-		
 		result = this.persistence.executeCommand(this.actorId, addModelAgainCom);
-		assert result == -1;
+		assertEquals(result, -1);
 		
-		XCommand removeModelCom = this.comFactory.createSafeRemoveModelCommand(modelAddress,
-		        RevisionConstants.COMMAND_INTENT_SAFE_STATE_BOUND);
+		XCommand failingRemoveModelCom = this.comFactory.createSafeRemoveModelCommand(modelAddress,
+		        10);
+		result = this.persistence.executeCommand(this.actorId, failingRemoveModelCom);
+		assertEquals(result, -1);
+		assertNotNull(this.persistence.getModelSnapshot(new GetWithAddressRequest(modelAddress)) == null);
+		
+		XCommand removeModelCom = this.comFactory.createSafeRemoveModelCommand(modelAddress, 0);
 		result = this.persistence.executeCommand(this.actorId, removeModelCom);
-		assert result > -1;
-		assert this.persistence.getModelSnapshot(new GetWithAddressRequest(modelAddress)) == null;
+		assertTrue(result > -1);
+		assertNull(this.persistence.getModelSnapshot(new GetWithAddressRequest(modelAddress)));
 		
-		XCommand removeModelAgainCom = this.comFactory.createSafeRemoveModelCommand(modelAddress,
-		        RevisionConstants.COMMAND_INTENT_SAFE_STATE_BOUND);
-		result = this.persistence.executeCommand(this.actorId, removeModelAgainCom);
-		assert result == -1;
+		XCommand removeModelAgain2Com = this.comFactory.createSafeRemoveModelCommand(modelAddress,
+		        0);
+		result = this.persistence.executeCommand(this.actorId, removeModelAgain2Com);
+		assertEquals(result, -1);
 		
 		/*
-		 * test add, add although differing revision numbers, remove and remove
-		 * although differing revision numbers object commands
+		 * test failing add, add, add although differing revision numbers,
+		 * failing remove and remove object commands
 		 */
 		// the model to whom we will add objects:
 		this.persistence.executeCommand(this.actorId, addModelCom);
 		XWritableModel model;
 		
 		// FIXME it should be possible to use a command factory here
-		XModelCommand addObjectCom = this.comFactory.createSafeAddObjectCommand(modelAddress,
+		// XModelCommand addObjectCom =
+		// this.comFactory.createSafeAddObjectCommand(modelAddress,
+		// objectId);
+		XModelCommand failingAddObjectCom = MemoryModelCommand.createAddCommand(modelAddress, 5,
 		        objectId);
-		result = this.persistence.executeCommand(this.actorId, addObjectCom);
-		assert result > -1;
+		result = this.persistence.executeCommand(this.actorId, failingAddObjectCom);
+		assertEquals(result, -1);
 		model = this.persistence.getModelSnapshot(new GetWithAddressRequest(modelAddress));
-		assert model.getObject(objectId) != null;
+		assertNull(model.getObject(objectId));
 		
+		XModelCommand addObjectCom = MemoryModelCommand.createAddCommand(modelAddress, 6, objectId);
+		result = this.persistence.executeCommand(this.actorId, addObjectCom);
+		assertTrue(result > -1);
+		model = this.persistence.getModelSnapshot(new GetWithAddressRequest(modelAddress));
+		assertNotNull(model.getObject(objectId));
+		
+		/* continue here :-) */
 		XModelCommand addObjectAgainCom = this.comFactory.createSafeAddObjectCommand(modelAddress,
 		        objectId);
 		result = this.persistence.executeCommand(this.actorId, addObjectAgainCom);
