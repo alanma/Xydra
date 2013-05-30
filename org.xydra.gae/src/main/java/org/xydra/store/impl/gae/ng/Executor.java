@@ -776,6 +776,16 @@ public class Executor {
         switch(repoCmd.getChangeType()) {
         case ADD:
             if(!ctxInTxn.exists()) {
+                // check
+                if(repoCmd.getIntent() == Intent.SafeRevBound) {
+                    long modelRevBeforeCmd = infoBeforeCmd.getLastStableSuccessChange();
+                    if(modelRevBeforeCmd != repoCmd.getRevisionNumber()) {
+                        return CheckResult
+                                .failed("SafeRevBound RepositoryCommand ADD failed. Reason: "
+                                        + ("modelRevNr=" + modelRevBeforeCmd + " cmdRevNr=" + repoCmd
+                                                .getRevisionNumber()));
+                    }
+                }
                 return CheckResult.successCreatedModel(repoCmd, change, ctxInTxn);
             } else if(repoCmd.isForced()) {
                 return CheckResult.successNoChange("Model exists");
