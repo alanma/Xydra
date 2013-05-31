@@ -353,6 +353,7 @@ public class APITest {
     public void testField() {
         // create a field
         XField field = new MemoryField(this.actorId, XX.createUniqueId());
+        assertEquals(0, field.getRevisionNumber());
         
         // check that the value isn't set
         assertNull(field.getValue());
@@ -360,6 +361,7 @@ public class APITest {
         // add a value to the object
         XValue testValue1 = XV.toValue("Test");
         field.setValue(testValue1);
+        assertEquals(1, field.getRevisionNumber());
         
         // check whether it was really added
         assertEquals(testValue1, field.getValue());

@@ -414,6 +414,7 @@ public class EventUtils {
         case TRANSACTION:
             throw new IllegalStateException("XFieldEvent cannot be this " + event);
         }
+        field.setRevisionNumber(event.getRevisionNumber());
     }
     
     /**
