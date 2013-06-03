@@ -173,7 +173,7 @@ public class EventDelta {
             KeyKeyEntryTuple<XId,XId,XObjectEvent> indexedEventTuple = indexedEventIt.next();
             XObjectEvent indexedEvent = indexedEventTuple.getEntry();
             if(cancelEachOtherOut(objectEvent, indexedEvent)) {
-                this.objectEvents.deIndex(objectId, fieldId, objectEvent);
+                this.objectEvents.deIndex(objectId, fieldId, indexedEvent);
             } else {
                 assert equalEffect(objectEvent, indexedEvent);
             }
