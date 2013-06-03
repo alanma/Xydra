@@ -14,6 +14,10 @@ import org.xydra.sharedutils.XyAssert;
 /**
  * A small, serializable change log without any business logic.
  * 
+ * Used only to read legacy data.
+ * 
+ * TODO deprecate
+ * 
  * @author xamde
  */
 public class MemoryChangeLogState implements XChangeLogState {
@@ -55,7 +59,7 @@ public class MemoryChangeLogState implements XChangeLogState {
             XyAssert.xyAssert(this.baseAddr.equalsOrContains(event.getChangedEntity()), "baseAddr="
                     + this.baseAddr + " does not contain " + event.getChangedEntity());
             long eventRevisionNumber = event.getRevisionNumber();
-			XyAssert.xyAssert(eventRevisionNumber > getCurrentRevisionNumber());
+            XyAssert.xyAssert(eventRevisionNumber > getCurrentRevisionNumber());
             XyAssert.xyAssert(!event.inTransaction());
             this.eventMap.put(event.getRevisionNumber(), event);
         }

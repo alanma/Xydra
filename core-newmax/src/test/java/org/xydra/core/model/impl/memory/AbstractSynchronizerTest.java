@@ -7,6 +7,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -49,6 +50,9 @@ import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.delta.ChangedModel;
+import org.xydra.index.impl.IteratorUtils;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 import org.xydra.persistence.GetEventsRequest;
 import org.xydra.persistence.GetWithAddressRequest;
 import org.xydra.sharedutils.XyAssert;
@@ -71,6 +75,8 @@ import org.xydra.store.sync.NewSyncer;
  */
 abstract public class AbstractSynchronizerTest {
     
+    private static final Logger log = LoggerFactory.getLogger(AbstractSynchronizerTest.class);
+    
     /**
      * The actor ID used to interact with the {@link #remoteStore}. This actor
      * needs to have read/write access. Subclasses should initialize this before
@@ -92,39 +98,63 @@ abstract public class AbstractSynchronizerTest {
     
     protected abstract XydraStore createStore();
     
-    private static final XId NEWMODEL_ID = XX.toId("newmodel");
+    private static final XId NEWMODEL_ID = XX.toId("newmodel1");
     
     private IMemoryModel localModel;
+    
     private XAddress repoAddr;
-    private NewSyncer sync;
+    
+    private NewSyncer sharedSyncer;
     
     {
         LoggerTestHelper.init();
     }
     
-    private void checkEvents(XModel model) {
+    /**
+     * After synchronising, all events in a certain interval should be equal
+     * between local and remote. This method checks ALL events.
+     * 
+     * @param localModel
+     */
+    private void checkEvents(XModel localModel) {
         
-        XChangeLog cl = model.getChangeLog();
+        XChangeLog changeLog = localModel.getChangeLog();
+        long startRev = changeLog.getBaseRevisionNumber() + 1;
+        log.info("Getting changes of model " + localModel.getAddress() + " since " + startRev);
+        Iterator<XEvent> localEventsIt = changeLog.getEventsBetween(startRev, Long.MAX_VALUE);
+        ArrayList<XEvent> localEvents = new ArrayList<XEvent>();
+        IteratorUtils.addAll(localEventsIt, localEvents);
+        log.info(" ... found changes of model " + localModel.getAddress() + " since " + startRev
+                + " = " + localEvents.size());
         
-        long startRev = cl.getBaseRevisionNumber() + 1;
-        Iterator<XEvent> localEvents = cl.getEventsBetween(startRev, Long.MAX_VALUE);
-        
-        SynchronousCallbackWithOneResult<BatchedResult<XEvent[]>[]> callback;
-        callback = new SynchronousCallbackWithOneResult<BatchedResult<XEvent[]>[]>();
+        SynchronousCallbackWithOneResult<BatchedResult<XEvent[]>[]> callback = new SynchronousCallbackWithOneResult<BatchedResult<XEvent[]>[]>();
         this.remoteStore.getEvents(this.actorId, this.passwordHash,
-                new GetEventsRequest[] { new GetEventsRequest(model.getAddress(), startRev,
+                new GetEventsRequest[] { new GetEventsRequest(localModel.getAddress(), startRev,
                         Long.MAX_VALUE) }, callback);
         XEvent[] result = waitForSuccessBatched(callback);
-        Iterator<XEvent> remoteEvents = Arrays.asList(result).iterator();
+        List<XEvent> remoteEvents = Arrays.asList(result);
         
-        while(remoteEvents.hasNext()) {
-            assertTrue(localEvents.hasNext());
-            XEvent remote = remoteEvents.next();
-            XEvent local = localEvents.next();
-            assertEquals(remote, local);
+        // FIXME KILL
+        log.info("****** COMPARING");
+        localEventsIt = localEvents.iterator();
+        while(localEventsIt.hasNext()) {
+            XEvent xEvent = localEventsIt.next();
+            log.info("LOCAL : " + xEvent);
         }
-        assertFalse(localEvents.hasNext());
+        for(XEvent remoteEvent : remoteEvents) {
+            log.info("REMOTE: " + remoteEvent);
+        }
+        log.info("****** /COMPARING");
         
+        localEventsIt = localEvents.iterator();
+        for(XEvent remoteEvent : remoteEvents) {
+            log.info("Remote event=" + remoteEvent + " checkign for local...");
+            assertTrue("there should be localEvents if there are remoteEvents",
+                    localEventsIt.hasNext());
+            XEvent localEvent = localEventsIt.next();
+            assertEquals(remoteEvent, localEvent);
+        }
+        assertFalse(localEventsIt.hasNext());
     }
     
     /**
@@ -165,7 +195,7 @@ abstract public class AbstractSynchronizerTest {
     private IMemoryModel loadModel(XId modelId) {
         
         XReadableModel modelSnapshot = loadModelSnapshot(modelId);
-        assertNotNull(modelSnapshot);
+        assertNotNull("model " + modelId + " was null", modelSnapshot);
         
         return (IMemoryModel)XX.wrap(this.actorId, this.passwordHash, modelSnapshot);
     }
@@ -211,18 +241,19 @@ abstract public class AbstractSynchronizerTest {
         this.repoAddr = XX.toAddress(repoId, null, null, null);
         
         createPhonebook(DemoModelUtil.PHONEBOOK_ID);
-        
-        this.localModel = loadModel(DemoModelUtil.PHONEBOOK_ID);
-        this.sync = createSyncer(this.remoteStore, this.localModel);
-        
         XyAssert.xyAssert(this.repoAddr != null);
         assert this.repoAddr != null;
+        
+        this.localModel = loadModel(DemoModelUtil.PHONEBOOK_ID);
+        assertEquals(46, this.localModel.getRevisionNumber());
+        assertEquals(46, this.localModel.getSynchronizedRevision());
+        
+        this.sharedSyncer = createSyncer(this.remoteStore, this.localModel);
     }
     
     private NewSyncer createSyncer(XydraStore store, IMemoryModel model) {
-        return new NewSyncer(this.remoteStore, this.localModel, this.localModel.getState(),
-                this.localModel.getRoot(), this.actorId, this.passwordHash,
-                this.localModel.getSynchronizedRevision());
+        return new NewSyncer(store, model, model.getState(), model.getRoot(), this.actorId,
+                this.passwordHash, model.getSynchronizedRevision());
     }
     
     /**
@@ -237,84 +268,104 @@ abstract public class AbstractSynchronizerTest {
         removeModel(DemoModelUtil.PHONEBOOK_ID);
     }
     
-    // FIXME MONKEY @Test
+    @Test
     public void testCreateRemoveModel() {
-        
         try {
-            
             assertNull(loadModelSnapshot(NEWMODEL_ID));
             
-            XRepository repo = new MemoryRepository(this.actorId, this.passwordHash,
+            XRepository localRepo = new MemoryRepository(this.actorId, this.passwordHash,
                     this.repoAddr.getRepository());
+            IMemoryModel localNewModel = (IMemoryModel)localRepo.createModel(NEWMODEL_ID);
+            assertEquals(-1, localNewModel.getSynchronizedRevision());
+            assertEquals(0, localNewModel.getRevisionNumber());
             
-            IMemoryModel model = (IMemoryModel)repo.createModel(NEWMODEL_ID);
-            NewSyncer sync = createSyncer(this.remoteStore, model);
-            XObject object = model.createObject(XX.toId("bob"));
-            XField field = object.createField(XX.toId("cookies"));
-            field.setValue(XV.toValue("yummy"));
-            long modelRev = model.getRevisionNumber();
-            HasChanged hc1 = HasChanged.listen(model);
-            XReadableModel testModel = XCopyUtils.createSnapshot(model);
+            // add changes
+            XObject localObject = localNewModel.createObject(XX.toId("bob"));
+            XField localField = localObject.createField(XX.toId("cookies"));
+            localField.setValue(XV.toValue("yummy"));
+            long localModelRev = localNewModel.getRevisionNumber();
+            assertEquals(-1, localNewModel.getSynchronizedRevision());
+            assertEquals(3, localNewModel.getRevisionNumber());
+            assertEquals(4, localNewModel.getRoot().getSyncLog().getSize());
             
-            synchronize(sync);
+            HasChanged hc1 = HasChanged.listen(localNewModel);
+            XReadableModel localModel_t0 = XCopyUtils.createSnapshot(localNewModel);
             
+            // check remote
             XReadableModel remoteModel = loadModelSnapshot(NEWMODEL_ID);
-            assertNotNull(remoteModel);
-            assertTrue(XCompareUtils.equalState(model, remoteModel));
-            assertTrue(XCompareUtils.equalState(model, testModel));
-            assertEquals(modelRev, model.getRevisionNumber());
-            assertEquals(modelRev, model.getSynchronizedRevision());
+            assertNull("remoteModel should be null", remoteModel);
+            
+            System.out.println("------------- Syncing............");
+            NewSyncer specialSyncer = createSyncer(this.remoteStore, localNewModel);
+            synchronize(specialSyncer);
+            System.out.println("............. Syncing done.");
+            
+            // local model should remain unchanged
+            assertEquals(localModelRev, localNewModel.getRevisionNumber());
+            assertTrue(XCompareUtils.equalState(localNewModel, localModel_t0));
+            assertEquals("same synclog size", 4, localNewModel.getRoot().getSyncLog().getSize());
+            
+            assertEquals("higher syncrev now", 3, localNewModel.getSynchronizedRevision());
+            
+            // remote effects should be there
+            remoteModel = loadModelSnapshot(NEWMODEL_ID);
+            assertNotNull("remoteModel should not be null", remoteModel);
+            assertTrue(XCompareUtils.equalState(localNewModel, remoteModel));
             assertFalse(hc1.eventsReceived);
             
-            checkEvents(model);
+            checkEvents(localNewModel);
             
             // check that the local model still works
-            model.createObject(XX.toId("jane"));
+            localNewModel.createObject(XX.toId("jane"));
+            assertEquals(4, localNewModel.getRevisionNumber());
             
-            repo.removeModel(NEWMODEL_ID);
-            modelRev = model.getRevisionNumber();
+            localRepo.removeModel(NEWMODEL_ID);
+            assertEquals(5, localNewModel.getRevisionNumber());
+            localModelRev = localNewModel.getRevisionNumber();
             hc1.eventsReceived = false;
             
-            synchronize(sync);
+            // FIXME BUG HERE....................
+            synchronize(specialSyncer);
             
             assertNull(loadModelSnapshot(NEWMODEL_ID));
-            assertFalse(repo.hasModel(NEWMODEL_ID));
-            assertEquals(modelRev, model.getRevisionNumber());
-            assertEquals(modelRev, model.getSynchronizedRevision());
+            assertFalse(localRepo.hasModel(NEWMODEL_ID));
+            assertEquals(localModelRev, localNewModel.getRevisionNumber());
+            assertEquals(localModelRev, localNewModel.getSynchronizedRevision());
             assertFalse(hc1.eventsReceived);
             
-            checkEvents(model);
+            checkEvents(localNewModel);
             
             // check that local model is removed
             try {
-                model.createObject(XX.toId("jane"));
+                localNewModel.createObject(XX.toId("jane"));
                 fail();
             } catch(IllegalStateException ise) {
                 // worked
             }
             
-            model = (IMemoryModel)repo.createModel(NEWMODEL_ID);
-            model.createObject(XX.toId("john"));
-            modelRev = model.getRevisionNumber();
-            HasChanged hc2 = HasChanged.listen(model);
-            testModel = XCopyUtils.createSnapshot(model);
+            localNewModel = (IMemoryModel)localRepo.createModel(NEWMODEL_ID);
+            localNewModel.createObject(XX.toId("john"));
+            localModelRev = localNewModel.getRevisionNumber();
+            HasChanged hc2 = HasChanged.listen(localNewModel);
+            localModel_t0 = XCopyUtils.createSnapshot(localNewModel);
             
-            sync = createSyncer(this.remoteStore, model);
-            synchronize(sync);
+            specialSyncer = createSyncer(this.remoteStore, localNewModel);
+            synchronize(specialSyncer);
             
             remoteModel = loadModelSnapshot(NEWMODEL_ID);
             assertNotNull(remoteModel);
-            assertTrue(XCompareUtils.equalState(model, remoteModel));
-            assertTrue(XCompareUtils.equalTree(model, testModel));
-            assertEquals(model.getRevisionNumber(), model.getSynchronizedRevision());
+            assertTrue(XCompareUtils.equalState(localNewModel, remoteModel));
+            assertTrue(XCompareUtils.equalTree(localNewModel, localModel_t0));
+            assertEquals(localNewModel.getRevisionNumber(), localNewModel.getSynchronizedRevision());
             assertTrue(hc2.eventsReceived);
             
-            checkEvents(model);
+            checkEvents(localNewModel);
             
             // check that the local model still works
-            model.createObject(XX.toId("jane"));
+            localNewModel.createObject(XX.toId("jane"));
             
         } finally {
+            log.info("*********** Test done, finally remove model " + NEWMODEL_ID);
             removeModel(NEWMODEL_ID);
         }
         
@@ -344,16 +395,17 @@ abstract public class AbstractSynchronizerTest {
     
     @Test
     public void testLoadRemoteChanges() {
-        
         XModel modelCopy = XCopyUtils.copyModel(this.actorId, this.passwordHash, this.localModel);
+        assertEquals(46, modelCopy.getRevisionNumber());
+        assertEquals(46, modelCopy.getSynchronizedRevision());
+        
         List<XEvent> events = ChangeRecorder.record(this.localModel);
         assertTrue(XCompareUtils.equalState(modelCopy, this.localModel));
         
-        // make some remote changes
+        // make remote changes
         XCommand command = MemoryModelCommand.createAddCommand(this.localModel.getAddress(), false,
                 bobId);
         executeCommandOnStore(command);
-        
         // make more remote changes
         final XAddress janeAddr = XX.resolveObject(this.localModel.getAddress(), janeId);
         final XAddress cookiesAddr = XX.resolveField(janeAddr, cookiesId);
@@ -363,13 +415,19 @@ abstract public class AbstractSynchronizerTest {
         tb.addValue(cookiesAddr, XCommand.SAFE_STATE_BOUND, cookiesValue);
         XCommand txn = tb.buildCommand();
         executeCommandOnStore(txn);
+        XReadableModel remoteSnapshotModel = loadModelSnapshot(DemoModelUtil.PHONEBOOK_ID);
+        assertEquals(48, remoteSnapshotModel.getRevisionNumber());
         
-        XReadableModel testModel = loadModelSnapshot(DemoModelUtil.PHONEBOOK_ID);
+        // local model did not change
+        assertEquals(46, this.localModel.getRevisionNumber());
+        assertEquals(46, this.localModel.getSynchronizedRevision());
         
         // synchronize
-        synchronize(this.sync);
+        synchronize(this.sharedSyncer);
         
-        // check the local model
+        // check the local model got the changes
+        assertEquals(48, this.localModel.getRevisionNumber());
+        assertEquals(48, this.localModel.getSynchronizedRevision());
         assertTrue(this.localModel.hasObject(bobId));
         XObject jane = this.localModel.getObject(janeId);
         assertNotNull(jane);
@@ -378,18 +436,17 @@ abstract public class AbstractSynchronizerTest {
         assertEquals(cookiesValue, cookies.getValue());
         assertEquals(jane.getRevisionNumber(), cookies.getRevisionNumber());
         assertEquals(this.localModel.getRevisionNumber(), jane.getRevisionNumber());
-        assertTrue(XCompareUtils.equalState(testModel, this.localModel));
+        assertTrue(XCompareUtils.equalState(remoteSnapshotModel, this.localModel));
         
         // check the remote model
         XReadableModel remoteModel = loadModelSnapshot(DemoModelUtil.PHONEBOOK_ID);
-        assertTrue(XCompareUtils.equalState(testModel, remoteModel));
+        assertTrue(XCompareUtils.equalState(remoteSnapshotModel, remoteModel));
         
         // check that the correct events were sent
         SynchronizeTest.replaySyncEvents(modelCopy, events);
         assertTrue(XCompareUtils.equalTree(modelCopy, this.localModel));
         
         checkEvents(this.localModel);
-        
     }
     
     @Test
@@ -453,7 +510,7 @@ abstract public class AbstractSynchronizerTest {
         
     }
     
-    // FIXME MONKEY @Test
+    @Test
     public void testLoadRemoteChangesRemovedThenCreatedModel() {
         
         try {
@@ -635,7 +692,7 @@ abstract public class AbstractSynchronizerTest {
         assertTrue(XCompareUtils.equalState(midCopy, this.localModel));
         
         // synchronize
-        synchronize(this.sync);
+        synchronize(this.sharedSyncer);
         
         // check local model
         XObject jane = this.localModel.getObject(janeId);
@@ -688,7 +745,7 @@ abstract public class AbstractSynchronizerTest {
         assertTrue(this.localModel.hasObject(frankId));
         
         // Now synchronize with the server.
-        this.sync.startSync();
+        this.sharedSyncer.startSync();
         
         // command may not be applied remotely yet!
         
@@ -721,7 +778,7 @@ abstract public class AbstractSynchronizerTest {
         assertFalse(this.localModel.hasObject(DemoModelUtil.PETER_ID));
         assertTrue(this.localModel.hasObject(janeId));
         
-        this.sync.startSync();
+        this.sharedSyncer.startSync();
         
         // both commands may still not be applied remotely
         
@@ -796,7 +853,7 @@ abstract public class AbstractSynchronizerTest {
             
             assertTrue(XCompareUtils.equalTree(snapshot, model));
             XReadableModel remoteModel = loadModelSnapshot(NEWMODEL_ID);
-            assertNotNull(remoteModel);
+            assertNotNull("model " + NEWMODEL_ID + " was null", remoteModel);
             assertTrue(XCompareUtils.equalState(model, remoteModel));
             checkEvents(model);
             
@@ -811,7 +868,7 @@ abstract public class AbstractSynchronizerTest {
      * the difference to the previous test is that this test initially sync with
      * the server.
      */
-    // FIXME MONKEY @Test
+    @Test
     public void testSyncModelCreatedWithoutRepositoryReplicateClientWithInitialSync() {
         
         try {
@@ -946,7 +1003,7 @@ abstract public class AbstractSynchronizerTest {
      * A minimal test to replicate the observed client sync failures during
      * fixCommands. No txn used.
      */
-    // FIXME MONKEY @Test
+    @Test
     public void testSyncModelCreatedWithoutRepositoryMinimalReplicateClientWithInitialSyncNoTxn() {
         
         try {
@@ -1006,7 +1063,7 @@ abstract public class AbstractSynchronizerTest {
      * A minimal test to replicate the observed client sync failures during
      * fixCommands. No txn used.
      */
-    // FIXME MONKEY @Test
+    @Test
     public void testSyncModelCreatedWithoutRepositoryMinimalReplicateClientWithInitialSyncNoTxnSafeCmd() {
         
         try {
@@ -1164,7 +1221,7 @@ abstract public class AbstractSynchronizerTest {
         
     }
     
-    // FIXME MONKEY @Test
+    @Test
     public void testSyncModelCreatedWithoutRepository() {
         
         try {

@@ -302,7 +302,7 @@ public abstract class AbstractTransactionEvent implements XTransactionEvent {
         // if(this.objectRevision >= 0) {
         str += "/" + this.objectRevision;
         // }
-        str += ": [";
+        str += ": [\n";
         boolean b = false;
         for(XAtomicEvent event : this) {
             if(b) {

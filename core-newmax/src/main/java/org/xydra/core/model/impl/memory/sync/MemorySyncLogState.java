@@ -88,8 +88,16 @@ public class MemorySyncLogState implements ISyncLogState {
                     + event.getRevisionNumber() + ",currentRev=" + getCurrentRevisionNumber()
                     + " event=" + event);
             XyAssert.xyAssert(!event.inTransaction());
-            this.eventMap.put(event.getRevisionNumber(), syncLogEntry);
+            // FIXME kill
+            log.info("Adding \n" + syncLogEntry);
+            Long key = event.getRevisionNumber();
+            assert !this.eventMap.containsKey(key);
+            addEntry(syncLogEntry);
         }
+    }
+    
+    private void addEntry(ISyncLogEntry syncLogEntry) {
+        this.eventMap.put(syncLogEntry.getEvent().getRevisionNumber(), syncLogEntry);
     }
     
     @Override
@@ -117,6 +125,7 @@ public class MemorySyncLogState implements ISyncLogState {
         ISyncLogEntry entry = this.eventMap.get(revisionNumber);
         if(entry == null)
             return null;
+        assert entry.getEvent().getRevisionNumber() == revisionNumber;
         return entry.getEvent();
     }
     
@@ -132,6 +141,11 @@ public class MemorySyncLogState implements ISyncLogState {
     private long getLast() {
         Long lastKey = this.eventMap.lastKey();
         return lastKey;
+    }
+    
+    private long getFirst() {
+        Long firstKey = this.eventMap.firstKey();
+        return firstKey;
     }
     
     @Override
@@ -180,9 +194,14 @@ public class MemorySyncLogState implements ISyncLogState {
             return false;
         }
         
-        this.eventMap = this.eventMap.headMap(revisionNumber);
+        SortedMap<Long,ISyncLogEntry> toBeDeleted = this.eventMap.tailMap(revisionNumber);
+        while(toBeDeleted.size() > 0) {
+            Long key = toBeDeleted.lastKey();
+            this.eventMap.remove(key);
+        }
         
-        XyAssert.xyAssert(revisionNumber == getCurrentRevisionNumber());
+        XyAssert.xyAssert(getCurrentRevisionNumber() <= revisionNumber, "revNr=" + revisionNumber
+                + " currRev=" + getCurrentRevisionNumber());
         
         return true;
     }
@@ -240,8 +259,13 @@ public class MemorySyncLogState implements ISyncLogState {
          * firstRev: the revision number the logged XModel had at the time when
          * the first event was recorded by the change log
          */
-        
-        long firstRev = getSyncRevisionNumber() + 1;
+        long firstRev;
+        XEvent firstEvent = getFirstEvent();
+        if(firstEvent != null) {
+            firstRev = getFirstEvent().getRevisionNumber();
+        } else {
+            firstRev = -1;
+        }
         long curRev = getCurrentRevisionNumber();
         
         if(beginRevision < 0) {
@@ -269,6 +293,14 @@ public class MemorySyncLogState implements ISyncLogState {
         long end = endRevision > curRev ? curRev + 1 : endRevision;
         
         return this.eventMap.subMap(begin, end).values().iterator();
+    }
+    
+    private XEvent getFirstEvent() {
+        if(this.eventMap.isEmpty()) {
+            return null;
+        }
+        long first = getFirst();
+        return getEvent(first);
     }
     
     @Override

@@ -1,6 +1,7 @@
 package org.xydra.core.model.impl.memory;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -17,7 +18,6 @@ import org.xydra.base.change.impl.memory.MemoryCommandFactory;
 import org.xydra.base.change.impl.memory.MemoryObjectCommand;
 import org.xydra.base.change.impl.memory.MemoryObjectEvent;
 import org.xydra.base.change.impl.memory.MemoryTransaction;
-import org.xydra.base.id.MemoryStringIDProvider;
 import org.xydra.core.DemoModelUtil;
 import org.xydra.core.XCopyUtils;
 import org.xydra.core.XX;
@@ -28,24 +28,32 @@ import org.xydra.core.model.impl.memory.sync.IEventMapper.IMappingResult;
 import org.xydra.core.model.impl.memory.sync.ISyncLog;
 import org.xydra.core.model.impl.memory.sync.ISyncLogEntry;
 import org.xydra.core.model.impl.memory.sync.UnorderedEventMapper;
+import org.xydra.log.Logger;
+import org.xydra.log.LoggerFactory;
 
 
 public class UnorderedEventMapperTest {
     
-    XId repo = XX.toId("repo");
-    XId model = XX.toId("model");
-    XId object = XX.toId("object");
-    private static XId actor = XX.toId("actor");
-    String fieldA = "A";
-    String fieldB = "B";
-    String fieldC = "C";
+    private static final Logger log = LoggerFactory.getLogger(UnorderedEventMapperTest.class);
     
-    private static XEvent createFieldAddedEvent(XAddress objectAddress, String fieldId) {
-        return MemoryObjectEvent.createAddEvent(actor, objectAddress, XX.toId(fieldId), 1, false);
+    private static final XId ACTOR_ID = XX.toId("actor1");
+    
+    private static final XId REPO_ID = XX.toId("repo1");
+    private static final XId MODEL_ID = XX.toId("model1");
+    private static final XId OBJECT_ID = XX.toId("object1");
+    private static final XAddress OBJECT_ADDRESS = XX.toAddress(REPO_ID, MODEL_ID, OBJECT_ID, null);
+    private static final XId FIELD_A_ID = XX.toId("A");
+    private static final XId FIELD_B_ID = XX.toId("B");
+    private static final XId FIELD_C_ID = XX.toId("C");
+    
+    private static XEvent createFieldAddedEvent(XAddress objectAddress, XId fieldId) {
+        // set an arbitrary revision number 1000 for testing
+        return MemoryObjectEvent.createAddEvent(ACTOR_ID, objectAddress, fieldId, 1000, false);
     }
     
-    private static XCommand createFieldAddedCommand(XAddress objectAddress, String field) {
-        return MemoryObjectCommand.createAddCommand(objectAddress, true, XX.toId(field));
+    @SuppressWarnings("unused")
+    private static XCommand createFieldAddedCommand(XAddress objectAddress, XId fieldId) {
+        return MemoryObjectCommand.createAddCommand(objectAddress, true, fieldId);
     }
     
     /**
@@ -54,43 +62,41 @@ public class UnorderedEventMapperTest {
      */
     @Test
     public void testAllServerMappedAllLocalMapped() {
-        MemoryStringIDProvider idProvider = new MemoryStringIDProvider();
-        XAddress objectAddress = idProvider
-                .fromComponents(this.repo, this.model, this.object, null);
         
-        XEvent addFieldA = createFieldAddedEvent(objectAddress, this.fieldA);
-        XEvent addFieldB = createFieldAddedEvent(objectAddress, this.fieldB);
-        XEvent addFieldC = createFieldAddedEvent(objectAddress, this.fieldC);
+        XEvent addFieldA = createFieldAddedEvent(OBJECT_ADDRESS, FIELD_A_ID);
+        XEvent addFieldB = createFieldAddedEvent(OBJECT_ADDRESS, FIELD_B_ID);
+        XEvent addFieldC = createFieldAddedEvent(OBJECT_ADDRESS, FIELD_C_ID);
         
         XEvent[] serverEvents = { addFieldA, addFieldB, addFieldC };
         
-        MemoryRepository memoryRepository = new MemoryRepository(actor, "", this.repo);
-        memoryRepository.createModel(this.model);
-        XModel memoryModel = memoryRepository.getModel(this.model);
-        memoryModel.createObject(this.object);
-        XObject object2 = memoryModel.getObject(this.object);
-        object2.createField(XX.toId(this.fieldA));
-        object2.createField(XX.toId(this.fieldB));
-        object2.createField(XX.toId(this.fieldC));
+        MemoryRepository memoryRepository = new MemoryRepository(ACTOR_ID, null, REPO_ID);
+        IMemoryModel memoryModel = memoryRepository.createModel(MODEL_ID);
+        XObject object2 = memoryModel.createObject(OBJECT_ID);
+        object2.createField(FIELD_A_ID);
+        object2.createField(FIELD_B_ID);
+        object2.createField(FIELD_C_ID);
         
-        ISyncLog syncLog = memoryRepository.getModel(this.model).getRoot().getSyncLog();
-        assertEquals(4, syncLog.getSize());
+        ISyncLog syncLog = memoryModel.getRoot().getSyncLog();
+        assertEquals(5, syncLog.getSize());
+        // set syncRev to ignore ADD-model and ADD-object
         syncLog.setSynchronizedRevision(1);
         
         ArrayList<ISyncLogEntry> syncLogEntryList = new ArrayList<ISyncLogEntry>();
-        Iterator<ISyncLogEntry> iterator = syncLog.getSyncLogEntriesSince(1);
+        Iterator<ISyncLogEntry> iterator = syncLog.getSyncLogEntriesSince(2);
         while(iterator.hasNext()) {
             ISyncLogEntry entry = iterator.next();
+            log.info("SyncLogEntry=" + entry);
             syncLogEntryList.add(entry);
         }
         
         UnorderedEventMapper mapper = new UnorderedEventMapper();
         IMappingResult result = mapper.mapEvents(syncLog, serverEvents);
         
-        assert result.getUnmappedLocalEvents().isEmpty();
-        assert result.getUnmappedRemoteEvents().isEmpty();
-        assert result.getMapped().size() == serverEvents.length
-                && result.getMapped().size() == syncLogEntryList.size();
+        assertTrue("unmapped=" + result.getUnmappedLocalEvents(), result.getUnmappedLocalEvents()
+                .isEmpty());
+        assertTrue(result.getUnmappedRemoteEvents().isEmpty());
+        assertEquals(result.getMapped().size(), serverEvents.length);
+        assertEquals(result.getMapped().size(), syncLogEntryList.size());
         
         // FIXME whiteboxtest double event functionality
         
@@ -99,39 +105,32 @@ public class UnorderedEventMapperTest {
     /**
      * Three local changes which shall all be found from server events; event1
      * and event 2 are from one transaction
-     * 
-     * FIXME currently not working
      */
-    // @Test
+    @Test
     public void testAllServerMappedAllLocalMappedWithTransaction() {
-        MemoryStringIDProvider idProvider = new MemoryStringIDProvider();
-        XAddress objectAddress = idProvider
-                .fromComponents(this.repo, this.model, this.object, null);
         
-        XEvent addFieldA = createFieldAddedEvent(objectAddress, this.fieldA);
-        XEvent addFieldB = createFieldAddedEvent(objectAddress, this.fieldB);
-        XEvent addFieldC = createFieldAddedEvent(objectAddress, this.fieldC);
+        XEvent addFieldA = createFieldAddedEvent(OBJECT_ADDRESS, FIELD_A_ID);
+        XEvent addFieldB = createFieldAddedEvent(OBJECT_ADDRESS, FIELD_B_ID);
+        XEvent addFieldC = createFieldAddedEvent(OBJECT_ADDRESS, FIELD_C_ID);
         
         XEvent[] serverEvents = { addFieldA, addFieldB, addFieldC };
         
-        MemoryRepository memoryRepository = new MemoryRepository(actor, "", this.repo);
-        memoryRepository.createModel(this.model);
-        XModel memoryModel = memoryRepository.getModel(this.model);
-        memoryModel.createObject(this.object);
-        XObject object2 = memoryModel.getObject(this.object);
+        MemoryRepository memoryRepository = new MemoryRepository(ACTOR_ID, "", REPO_ID);
+        memoryRepository.createModel(MODEL_ID);
+        XModel memoryModel = memoryRepository.getModel(MODEL_ID);
+        memoryModel.createObject(OBJECT_ID);
+        XObject object2 = memoryModel.getObject(OBJECT_ID);
         
         MemoryCommandFactory factory = new MemoryCommandFactory();
-        XObjectCommand commandA = factory.createAddFieldCommand(objectAddress,
-                XX.toId(this.fieldA), true);
-        XObjectCommand commandB = factory.createAddFieldCommand(objectAddress,
-                XX.toId(this.fieldB), true);
-        XTransaction transaction = MemoryTransaction.createTransaction(objectAddress,
+        XObjectCommand commandA = factory.createAddFieldCommand(OBJECT_ADDRESS, FIELD_A_ID, true);
+        XObjectCommand commandB = factory.createAddFieldCommand(OBJECT_ADDRESS, FIELD_B_ID, true);
+        XTransaction transaction = MemoryTransaction.createTransaction(OBJECT_ADDRESS,
                 new XAtomicCommand[] { commandA, commandB });
         memoryModel.executeCommand(transaction);
         
-        object2.createField(XX.toId(this.fieldC));
+        object2.createField(FIELD_C_ID);
         
-        ISyncLog syncLog = memoryRepository.getModel(this.model).getRoot().getSyncLog();
+        ISyncLog syncLog = memoryRepository.getModel(MODEL_ID).getRoot().getSyncLog();
         syncLog.setSynchronizedRevision(1);
         
         ArrayList<ISyncLogEntry> syncLogEntryList = new ArrayList<ISyncLogEntry>();
@@ -160,28 +159,25 @@ public class UnorderedEventMapperTest {
      */
     @Test
     public void testSomeServerMappedAllLocalMapped() {
-        MemoryStringIDProvider idProvider = new MemoryStringIDProvider();
-        XAddress objectAddress = idProvider
-                .fromComponents(this.repo, this.model, this.object, null);
         
-        XEvent addFieldA = createFieldAddedEvent(objectAddress, this.fieldA);
-        XEvent addFieldB = createFieldAddedEvent(objectAddress, this.fieldB);
-        XEvent addFieldC = createFieldAddedEvent(objectAddress, this.fieldC);
+        XEvent addFieldA = createFieldAddedEvent(OBJECT_ADDRESS, FIELD_A_ID);
+        XEvent addFieldB = createFieldAddedEvent(OBJECT_ADDRESS, FIELD_B_ID);
+        XEvent addFieldC = createFieldAddedEvent(OBJECT_ADDRESS, FIELD_C_ID);
         
         XEvent[] serverEvents = { addFieldA, addFieldB, addFieldC };
         
-        MemoryRepository memoryRepository = new MemoryRepository(actor, "", this.repo);
-        memoryRepository.createModel(this.model);
-        XModel memoryModel = memoryRepository.getModel(this.model);
-        memoryModel.createObject(this.object);
-        XObject object2 = memoryModel.getObject(this.object);
-        object2.createField(XX.toId(this.fieldA));
+        MemoryRepository memoryRepository = new MemoryRepository(ACTOR_ID, "", REPO_ID);
+        memoryRepository.createModel(MODEL_ID);
+        XModel memoryModel = memoryRepository.getModel(MODEL_ID);
+        memoryModel.createObject(OBJECT_ID);
+        XObject object2 = memoryModel.getObject(OBJECT_ID);
+        object2.createField(FIELD_A_ID);
         
-        ISyncLog syncLog = memoryRepository.getModel(this.model).getRoot().getSyncLog();
+        ISyncLog syncLog = memoryRepository.getModel(MODEL_ID).getRoot().getSyncLog();
         syncLog.setSynchronizedRevision(1);
         
         ArrayList<ISyncLogEntry> syncLogEntryList = new ArrayList<ISyncLogEntry>();
-        Iterator<ISyncLogEntry> iterator = syncLog.getSyncLogEntriesSince(1);
+        Iterator<ISyncLogEntry> iterator = syncLog.getSyncLogEntriesSince(2);
         while(iterator.hasNext()) {
             ISyncLogEntry entry = iterator.next();
             syncLogEntryList.add(entry);
@@ -190,10 +186,9 @@ public class UnorderedEventMapperTest {
         UnorderedEventMapper mapper = new UnorderedEventMapper();
         IMappingResult result = mapper.mapEvents(syncLog, serverEvents);
         
-        assert result.getUnmappedLocalEvents().isEmpty();
-        assert result.getUnmappedRemoteEvents().size() == 2;
-        assert result.getMapped().size() == syncLogEntryList.size();
-        
+        assertTrue(result.getUnmappedLocalEvents().isEmpty());
+        assertEquals(2, result.getUnmappedRemoteEvents().size());
+        assertEquals(result.getMapped().size(), syncLogEntryList.size());
     }
     
     /**
@@ -203,25 +198,23 @@ public class UnorderedEventMapperTest {
      */
     @Test
     public void testAllServerMappedSomeLocalNotMapped() {
-        MemoryStringIDProvider idProvider = new MemoryStringIDProvider();
-        XAddress objectAddress = idProvider
-                .fromComponents(this.repo, this.model, this.object, null);
         
-        XEvent addFieldA = createFieldAddedEvent(objectAddress, this.fieldA);
-        XEvent addFieldB = createFieldAddedEvent(objectAddress, this.fieldB);
+        XEvent addFieldA = createFieldAddedEvent(OBJECT_ADDRESS, FIELD_A_ID);
+        XEvent addFieldB = createFieldAddedEvent(OBJECT_ADDRESS, FIELD_B_ID);
         
         XEvent[] serverEvents = { addFieldA, addFieldB };
         
-        MemoryRepository memoryRepository = new MemoryRepository(actor, "", this.repo);
-        memoryRepository.createModel(this.model);
-        XModel memoryModel = memoryRepository.getModel(this.model);
-        memoryModel.createObject(this.object);
-        XObject object2 = memoryModel.getObject(this.object);
-        object2.createField(XX.toId(this.fieldA));
-        object2.createField(XX.toId(this.fieldB));
-        object2.createField(XX.toId(this.fieldC));
+        MemoryRepository memoryRepository = new MemoryRepository(ACTOR_ID, "", REPO_ID);
+        memoryRepository.createModel(MODEL_ID);
+        XModel memoryModel = memoryRepository.getModel(MODEL_ID);
+        memoryModel.createObject(OBJECT_ID);
+        XObject object2 = memoryModel.getObject(OBJECT_ID);
         
-        ISyncLog syncLog = memoryRepository.getModel(this.model).getRoot().getSyncLog();
+        object2.createField(FIELD_A_ID);
+        object2.createField(FIELD_B_ID);
+        object2.createField(FIELD_C_ID);
+        
+        ISyncLog syncLog = memoryRepository.getModel(MODEL_ID).getRoot().getSyncLog();
         syncLog.setSynchronizedRevision(1);
         
         ArrayList<ISyncLogEntry> syncLogEntryList = new ArrayList<ISyncLogEntry>();
@@ -234,10 +227,9 @@ public class UnorderedEventMapperTest {
         UnorderedEventMapper mapper = new UnorderedEventMapper();
         IMappingResult result = mapper.mapEvents(syncLog, serverEvents);
         
-        assert result.getUnmappedLocalEvents().size() == 1;
-        assert result.getUnmappedRemoteEvents().size() == 0;
-        assert result.getMapped().size() == serverEvents.length;
-        
+        assertEquals(1, result.getUnmappedLocalEvents().size());
+        assertEquals(0, result.getUnmappedRemoteEvents().size());
+        assertEquals(result.getMapped().size(), serverEvents.length);
     }
     
     /**
@@ -246,30 +238,27 @@ public class UnorderedEventMapperTest {
      * 
      */
     @Test
-    public void testDouplicateEvents() {
-        MemoryStringIDProvider idProvider = new MemoryStringIDProvider();
-        XAddress objectAddress = idProvider
-                .fromComponents(this.repo, this.model, this.object, null);
+    public void testDuplicateEvents() {
         
-        XEvent addFieldA = createFieldAddedEvent(objectAddress, this.fieldA);
-        XEvent removeFieldA = MemoryObjectEvent.createRemoveEvent(actor, objectAddress,
-                XX.toId(this.fieldA), 2, 2, false, false);
-        XEvent addFieldAAgain = createFieldAddedEvent(objectAddress, this.fieldA);
+        XEvent addFieldA = createFieldAddedEvent(OBJECT_ADDRESS, FIELD_A_ID);
+        XEvent removeFieldA = MemoryObjectEvent.createRemoveEvent(ACTOR_ID, OBJECT_ADDRESS,
+                FIELD_A_ID, 2, 2, false, false);
+        XEvent addFieldAAgain = createFieldAddedEvent(OBJECT_ADDRESS, FIELD_A_ID);
         
         XEvent[] serverEvents = { addFieldA, removeFieldA, addFieldAAgain };
         
-        MemoryRepository memoryRepository = new MemoryRepository(actor, "", this.repo);
-        memoryRepository.createModel(this.model);
-        XModel memoryModel = memoryRepository.getModel(this.model);
-        memoryModel.createObject(this.object);
-        XObject object2 = memoryModel.getObject(this.object);
-        object2.createField(XX.toId(this.fieldA));
+        MemoryRepository memoryRepository = new MemoryRepository(ACTOR_ID, "", REPO_ID);
+        memoryRepository.createModel(MODEL_ID);
+        XModel memoryModel = memoryRepository.getModel(MODEL_ID);
+        memoryModel.createObject(OBJECT_ID);
+        XObject object2 = memoryModel.getObject(OBJECT_ID);
+        object2.createField(FIELD_A_ID);
         
-        ISyncLog syncLog = memoryRepository.getModel(this.model).getRoot().getSyncLog();
+        ISyncLog syncLog = memoryRepository.getModel(MODEL_ID).getRoot().getSyncLog();
         syncLog.setSynchronizedRevision(1);
         
         ArrayList<ISyncLogEntry> syncLogEntryList = new ArrayList<ISyncLogEntry>();
-        Iterator<ISyncLogEntry> iterator = syncLog.getSyncLogEntriesSince(1);
+        Iterator<ISyncLogEntry> iterator = syncLog.getSyncLogEntriesSince(2);
         while(iterator.hasNext()) {
             ISyncLogEntry entry = iterator.next();
             syncLogEntryList.add(entry);
@@ -278,10 +267,9 @@ public class UnorderedEventMapperTest {
         UnorderedEventMapper mapper = new UnorderedEventMapper();
         IMappingResult result = mapper.mapEvents(syncLog, serverEvents);
         
-        assert result.getUnmappedLocalEvents().size() == 0;
-        assert result.getUnmappedRemoteEvents().size() == 2;
-        assert result.getMapped().size() == syncLogEntryList.size();
-        
+        assertEquals(0, result.getUnmappedLocalEvents().size());
+        assertEquals(2, result.getUnmappedRemoteEvents().size());
+        assertEquals(result.getMapped().size(), syncLogEntryList.size());
     }
     
     @Test
@@ -290,17 +278,17 @@ public class UnorderedEventMapperTest {
         /* get server events */
         ArrayList<XEvent> serverEventList = new ArrayList<XEvent>();
         
-        XRepository serverRepo = new MemoryRepository(actor, "", this.repo);
+        XRepository serverRepo = new MemoryRepository(ACTOR_ID, "", REPO_ID);
         DemoModelUtil.addPhonebookModel(serverRepo);
         Iterator<XEvent> serverEvents = DemoLocalChangesAndServerEvents
-                .getServerChanges(serverRepo);
+                .applyAndGetServerChanges(serverRepo);
         while(serverEvents.hasNext()) {
             XEvent serverEvent = (XEvent)serverEvents.next();
             serverEventList.add(serverEvent);
         }
         
         /* get local sync log */
-        XRepository localRepo = new MemoryRepository(actor, "", this.repo);
+        XRepository localRepo = new MemoryRepository(ACTOR_ID, "", REPO_ID);
         localRepo.createModel(XX.toId("trial"));
         XModel secondModel = localRepo.getModel(XX.toId("trial"));
         DemoModelUtil.addPhonebookModel(localRepo);
@@ -326,6 +314,7 @@ public class UnorderedEventMapperTest {
         int numberUnmappedRemoteEvents = result.getUnmappedRemoteEvents().size();
         int numberMappedEvents = result.getMapped().size();
         int numberUnmappedLocalEvents = result.getUnmappedLocalEvents().size();
+        // TODO assertEquals
         assert numberMappedEvents == 11 : "wrong number of mapped events: was "
                 + numberMappedEvents + ", but should have been 11";
         assert numberUnmappedRemoteEvents == 10 : "wrong number of unmapped remote events: was "

@@ -44,7 +44,7 @@ public class SyncLogTest {
         XRepository repo = new MemoryRepository(this.actorId, this.password, this.repo);
         DemoModelUtil.addPhonebookModel(repo);
         
-        syncLog.setSynchronizedRevision(DemoLocalChangesAndServerEvents.SYNCREVISION);
+        syncLog.setSynchronizedRevision(DemoLocalChangesAndServerEvents.SYNC_REVISION);
         
         XModel localModel = repo.getModel(DemoModelUtil.PHONEBOOK_ID);
         ChangedModel changedModel = new ChangedModel(localModel);
@@ -61,7 +61,7 @@ public class SyncLogTest {
         }
         
         Iterator<XEvent> modelChangeEvents = localModel.getChangeLog().getEventsSince(
-                DemoLocalChangesAndServerEvents.SYNCREVISION);
+                DemoLocalChangesAndServerEvents.SYNC_REVISION + 1);
         
         while(modelChangeEvents.hasNext()) {
             XEvent xEvent = (XEvent)modelChangeEvents.next();

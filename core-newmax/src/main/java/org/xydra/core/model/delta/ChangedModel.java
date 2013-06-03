@@ -279,7 +279,7 @@ public class ChangedModel implements XWritableModel, IModelDiff, XExistsWritable
     
     @Override
     public XWritableObject createObject(@NeverNull XId objectId) {
-        assert exists();
+        assert exists() : "cannot create an object in a non-existing model " + getId();
         
         XWritableObject oldObject = getObject(objectId);
         if(oldObject != null) {

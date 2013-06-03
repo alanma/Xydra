@@ -142,7 +142,8 @@ public class Root {
     
     public void fireObjectEvent(XAddress entityAddress, XObjectEvent event) {
         synchronized(this.eventBus) {
-            assert entityAddress.getAddressedType() == XType.XOBJECT;
+            assert entityAddress.getAddressedType() == XType.XOBJECT : "type is "
+                    + entityAddress.getAddressedType();
             this.eventBus.fireEvent(EventType.ObjectChange, entityAddress, event);
             // model
             XAddress parent = entityAddress.getParent();

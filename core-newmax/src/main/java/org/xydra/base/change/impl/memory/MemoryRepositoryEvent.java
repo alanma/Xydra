@@ -85,7 +85,8 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
             long oldModelRevison, boolean inTrans) {
         if(oldModelRevison < 0) {
             throw new IllegalArgumentException(
-                    "model revision must be set for repository REMOVE events");
+                    "model revision must be set for repository REMOVE events, was "
+                            + oldModelRevison);
         }
         
         return new MemoryRepositoryEvent(actor, target, modelId, ChangeType.REMOVE,

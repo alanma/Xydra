@@ -163,7 +163,7 @@ public class MemorySyncLog extends AbstractSyncLog implements ISyncLog {
     
     @Override
     public Iterator<ISyncLogEntry> getLocalChanges() {
-        return new LocalChangesIterator(getSyncLogEntriesSince(getSynchronizedRevision()));
+        return new LocalChangesIterator(getSyncLogEntriesSince(getSynchronizedRevision() + 1));
     }
     
     @Override

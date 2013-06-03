@@ -184,10 +184,9 @@ public class MemoryModelPersistence {
         long start = beginRevision < 0 ? 0 : beginRevision;
         long end = endRevision > currentRev ? currentRev : endRevision;
         
-        log.info("getEvents: br" + beginRevision + " er" + endRevision + " cr" + currentRev
-                + " size" + this.events.size() + " mr"
-                + (this.model == null ? -2 : this.model.getRevisionNumber()) + " s" + start + " e"
-                + end);
+        log.info("getEvents: [" + beginRevision + "," + endRevision + "]=>[" + start + "," + end
+                + "] curr:" + currentRev + " size:" + this.events.size() + " modelrev:"
+                + (this.model == null ? -2 : this.model.getRevisionNumber()));
         
         if(start > end) {
             // happens if start >= currentRev, which is allowed

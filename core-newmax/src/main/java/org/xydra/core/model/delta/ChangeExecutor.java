@@ -231,9 +231,14 @@ public class ChangeExecutor {
         case REMOVE:
             if(!changedModel.exists()) {
                 // command is invalid or doesn't change anything
-                log.warn("XRepositoryCommand REMOVE " + command
-                        + " is invalid or doesn't change anything");
-                return command.isForced();
+                if(command.getIntent() != Intent.Forced) {
+                    log.warn("XRepositoryCommand SAFE REMOVE " + command
+                            + " is invalid - model not present");
+                    return false;
+                } else {
+                    log.info("XRepositoryCommand REMOVE " + command + " doesn't change anything");
+                    return true;
+                }
             } else {
                 if(command.getIntent() == Intent.SafeRevBound) {
                     if(command.getRevisionNumber() != changedModel.getRevisionNumber()) {

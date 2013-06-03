@@ -14,11 +14,8 @@ import org.xydra.base.change.XTransactionEvent;
 import org.xydra.base.rmof.XRevWritableField;
 import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
-import org.xydra.core.model.XField;
-import org.xydra.core.model.XObject;
 import org.xydra.core.model.impl.memory.EventDelta;
 import org.xydra.core.model.impl.memory.IMemoryModel;
-import org.xydra.core.model.impl.memory.ModelUtils;
 import org.xydra.core.model.impl.memory.sync.IEventMapper;
 import org.xydra.core.model.impl.memory.sync.IEventMapper.IMappingResult;
 import org.xydra.core.model.impl.memory.sync.ISyncLog;
@@ -82,23 +79,33 @@ public class NewSyncer {
     
     // TODO make sure it runs only once at the same time
     public void startSync() {
+        log.debug("Sync start on syncRev=" + this.syncRev + " modelRev="
+                + this.modelState.getRevisionNumber() + "...");
         
         this.root.lock();
         
         // create commands to be sent to server from syncLog/localChanges
-        ArrayList<XCommand> commands = new ArrayList<XCommand>();
+        ArrayList<XCommand> localCommandList = new ArrayList<XCommand>();
         
         Iterator<ISyncLogEntry> localChanges = this.syncLog.getLocalChanges();
         while(localChanges.hasNext()) {
             ISyncLogEntry sle = localChanges.next();
             XCommand cmd = sle.getCommand();
-            commands.add(cmd);
+            log.debug("Scheduling local command " + cmd + " for syncing");
+            localCommandList.add(cmd);
         }
         GetEventsRequest getEventRequest = new GetEventsRequest(this.modelState.getAddress(),
-                this.syncRev, Long.MAX_VALUE);
+                this.syncRev + 1, Long.MAX_VALUE);
+        
+        // prepare batch request
+        XCommand[] localCommandsArray = localCommandList.toArray(new XCommand[localCommandList
+                .size()]);
+        GetEventsRequest[] getEventRequestArray = new GetEventsRequest[] { getEventRequest };
+        log.debug("Sync executeCommands(#" + localCommandList.size() + ")AndGetEvents(#?)");
+        
+        // contact remote store
         this.remoteStore.executeCommandsAndGetEvents(this.actorId, this.passwordHash,
-                commands.toArray(new XCommand[commands.size()]),
-                new GetEventsRequest[] { getEventRequest }, new ServerCallback());
+                localCommandsArray, getEventRequestArray, new ServerCallback());
         // TODO let app continue to run while we wait?
     }
     
@@ -155,21 +162,27 @@ public class NewSyncer {
      * @param serverEvents
      */
     private void continueSync(XEvent[] serverEvents) {
+        log.debug("***** Computing eventDelta from " + serverEvents.length + " and local changes");
         
         /* calculated event delta */
         EventDelta eventDelta = new EventDelta();
-        for(XEvent e : serverEvents) {
+        for(XEvent serverEvent : serverEvents) {
             
             // FIXME
-            log.info("Received event from server: " + e);
+            log.debug(">>> Server event: " + serverEvent);
             
-            eventDelta.addEvent(e);
+            eventDelta.addEvent(serverEvent);
         }
         Iterator<ISyncLogEntry> localChanges = this.syncLog.getLocalChanges();
         while(localChanges.hasNext()) {
-            ISyncLogEntry sle = localChanges.next();
-            XEvent e = sle.getEvent();
-            eventDelta.addInverseEvent(e, this.syncRev, this.syncLog);
+            ISyncLogEntry localSyncLogEntry = localChanges.next();
+            XEvent localEvent = localSyncLogEntry.getEvent();
+            log.debug("<<< Local event: " + localEvent);
+            eventDelta.addInverseEvent(localEvent,
+            // FIXME !!!!!!
+                    1000,
+                    // this.syncRev,
+                    this.syncLog);
         }
         
         /* event mapping */
@@ -191,26 +204,43 @@ public class NewSyncer {
         // start atomic section -----
         
         // change state
+        
+        // FIXME
+        log.info("EventDelta NOW=" + eventDelta);
+        
         eventDelta.applyTo(this.modelState);
         NewSyncer.applyEntityRevisionsToModel(serverEvents, this.modelState);
         
-        long newSyncRev = serverEvents[serverEvents.length - 1].getRevisionNumber();
-        
-        // change changeLog
-        this.syncLog.truncateToRevision(this.syncRev);
-        for(XEvent e : serverEvents) {
-            this.syncLog.appendEvent(e);
+        long newSyncRev = -1;
+        if(serverEvents.length > 0) {
+            newSyncRev = serverEvents[serverEvents.length - 1].getRevisionNumber();
+            // change changeLog
+            log.debug("Truncating local syncLog down to syncRev=" + this.syncRev + "; highest was "
+                    + this.syncLog.getLastEvent().getRevisionNumber());
+            this.syncLog.truncateToRevision(this.syncRev);
+            for(XEvent e : serverEvents) {
+                log.debug("Current rev=" + this.syncLog.getCurrentRevisionNumber());
+                log.debug("Appending event from server: " + e);
+                this.syncLog.appendEvent(e);
+            }
         }
         
+        log.debug("Clearing local changes");
         this.syncLog.clearLocalChanges();
         
-        this.syncLog.setSynchronizedRevision(newSyncRev);
+        if(serverEvents.length > 0) {
+            log.debug("Setting new syncRev to " + newSyncRev);
+            this.syncLog.setSynchronizedRevision(newSyncRev);
+        }
+        this.syncRev = newSyncRev;
         
         // end atomic section ----
         
         // send change events
+        log.debug("Sending events");
         eventDelta.sendChangeEvents(this.root, this.modelWithListeners.getAddress(),
-                this.modelWithListeners.getFather().getAddress());
+                this.modelWithListeners.getAddress().getParent());
+        log.info("Done syncing");
     }
     
     /**
@@ -300,14 +330,14 @@ public class NewSyncer {
             this.root.fireSyncEvent(this.modelWithListeners.getAddress(), syncEvent);
             break;
         case XOBJECT:
-            XObject object = ModelUtils.getObject(this.modelWithListeners, target);
-            this.root.fireSyncEvent(object.getAddress(), syncEvent);
+            this.root.fireSyncEvent(target, syncEvent);
             break;
         case XFIELD:
-            XField field = ModelUtils.getField(this.modelWithListeners, target);
-            this.root.fireSyncEvent(field.getAddress(), syncEvent);
+            this.root.fireSyncEvent(target, syncEvent);
             break;
         case XREPOSITORY:
+            this.root.fireSyncEvent(this.modelWithListeners.getAddress().getParent(), syncEvent);
+            break;
         default:
             throw new RuntimeException("cannot happen");
         }

@@ -129,6 +129,8 @@ public class DemoModelUtil {
     
     public static final XStringValue TITLE_VALUE = XV.toValue("Dr. John Doe");
     
+    public static final long REVISION_AFTER_ADDING_INCLUDING_MODEL_ITSELF = 46;
+    
     /**
      * Add the phonebook-demo model with ID "phonebook" to the given repository.
      * 
@@ -284,6 +286,7 @@ public class DemoModelUtil {
     public static void main(String[] args) {
         XRepository repo = new MemoryRepository(XX.toId("actor"), "secret", XX.toId("repo"));
         addPhonebookModel(repo);
+        assert repo.getModel(PHONEBOOK_ID).getRevisionNumber() == REVISION_AFTER_ADDING_INCLUDING_MODEL_ITSELF;
         XydraOut out = new XmlOut();
         SerializedModel.serialize(repo.getModel(PHONEBOOK_ID), out, true, false, true);
         System.out.println(out.getData());
