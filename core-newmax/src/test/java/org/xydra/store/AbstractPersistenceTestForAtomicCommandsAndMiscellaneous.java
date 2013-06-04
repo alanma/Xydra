@@ -2733,30 +2733,40 @@ public abstract class AbstractPersistenceTestForAtomicCommandsAndMiscellaneous {
     }
     
     /**
-     * test revision bound safe commands for all relevant entity change types
+     * test revision-bound SAFE commands for all relevant entity change types
      */
     @Test
     public void testExecuteSafeCommandRevisionBound() {
         
-        XId modelId = XX.toId("modelId");
+        XId modelId = XX.toId("model1");
         XAddress modelAddress = XX.resolveModel(this.repoId, modelId);
-        XId objectId = XX.toId("objectId");
+        XId objectId = XX.toId("object1");
         XAddress objectAddress = XX.resolveObject(this.repoId, modelId, objectId);
-        XId fieldId = XX.toId("fiedlId");
+        XId fieldId = XX.toId("fiedl1");
         XAddress fieldAddress = XX.resolveField(objectAddress, fieldId);
-        XValue value = XV.toValue("value");
-        XStringValue newValue = XV.toValue("newValue");
+        XValue value = XV.toValue("value1");
+        XStringValue newValue = XV.toValue("newValue2");
         
+        assertNull(this.persistence.getModelSnapshot(new GetWithAddressRequest(modelAddress)));
         XCommand forcedAddModelCmd = testRevisionSafeRepositoryCommands(modelId, modelAddress);
+        assertNull(this.persistence.getModelSnapshot(new GetWithAddressRequest(modelAddress)));
         
-        XModelCommand addObjectCom = testRevisionSafeModelCommands(modelAddress, objectId,
+        XModelCommand addObjectCmd = testRevisionSafeModelCommands(modelAddress, objectId,
                 objectAddress, forcedAddModelCmd);
+        assertNotNull(this.persistence.getModelSnapshot(new GetWithAddressRequest(modelAddress)));
+        assertTrue(this.persistence.getModelSnapshot(new GetWithAddressRequest(modelAddress))
+                .isEmpty());
         
-        XObjectCommand addFieldAgainCom = testRevisionSafeObjectCommands(modelAddress, objectId,
-                objectAddress, fieldId, fieldAddress, addObjectCom);
+        /*
+         * FIXME The SAFE addObjectCmd does not work now, because the revNr of
+         * the model went higher - please fix test design somehow :-)
+         */
+        
+        XObjectCommand addFieldAgainCmd = testRevisionSafeObjectCommands(modelAddress, objectId,
+                objectAddress, fieldId, fieldAddress, addObjectCmd);
         
         testRevisionSafeFieldCommands(modelAddress, objectId, fieldId, fieldAddress, value,
-                newValue, addFieldAgainCom);
+                newValue, addFieldAgainCmd);
         
     }
     
@@ -2844,10 +2854,16 @@ public abstract class AbstractPersistenceTestForAtomicCommandsAndMiscellaneous {
      */
     private XObjectCommand testRevisionSafeObjectCommands(XAddress modelAddress, XId objectId,
             XAddress objectAddress, XId fieldId, XAddress fieldAddress, XModelCommand addObjectCom) {
+        assertNotNull(this.persistence.getModelSnapshot(new GetWithAddressRequest(modelAddress)));
+        assertTrue(this.persistence.getModelSnapshot(new GetWithAddressRequest(modelAddress))
+                .isEmpty());
+        
         long result;
         
         // the object to whom we will add fields
-        this.persistence.executeCommand(this.actorId, addObjectCom);
+        result = this.persistence.executeCommand(this.actorId, addObjectCom);
+        assertTrue(XCommandUtils.success(result));
+        
         XWritableObject object;
         
         /*
@@ -2911,6 +2927,7 @@ public abstract class AbstractPersistenceTestForAtomicCommandsAndMiscellaneous {
             XAddress objectAddress, XCommand forcedAddModelCmd) {
         long result;
         long currentModelRev;
+        /* ADD model */
         // the model to whom we will add objects:
         result = this.persistence.executeCommand(this.actorId, forcedAddModelCmd);
         assertTrue(XCommandUtils.success(result));
@@ -2939,6 +2956,7 @@ public abstract class AbstractPersistenceTestForAtomicCommandsAndMiscellaneous {
                 .getModelRevision(new GetWithAddressRequest(modelAddress)).revision();
         XModelCommand addObjectCom = MemoryModelCommand.createAddCommand(modelAddress,
                 currentModelRev, objectId);
+        /* ADD object */
         result = this.persistence.executeCommand(this.actorId, addObjectCom);
         assertTrue(XCommandUtils.success(result));
         model = this.persistence.getModelSnapshot(new GetWithAddressRequest(modelAddress));
@@ -2959,10 +2977,13 @@ public abstract class AbstractPersistenceTestForAtomicCommandsAndMiscellaneous {
          */
         XModelCommand successfulRemoveObjectCom = this.comFactory.createSafeRemoveObjectCommand(
                 objectAddress, RevisionConstants.COMMAND_INTENT_SAFE_STATE_BOUND);
+        /* REMOVE object */
         result = this.persistence.executeCommand(this.actorId, successfulRemoveObjectCom);
         model = this.persistence.getModelSnapshot(new GetWithAddressRequest(modelAddress));
         assertTrue(XCommandUtils.success(result));
         assertTrue(model.isEmpty());
+        
+        /* Net effect: Model ADDed */
         
         return addObjectCom;
     }
@@ -2983,6 +3004,7 @@ public abstract class AbstractPersistenceTestForAtomicCommandsAndMiscellaneous {
         XAtomicCommand failingAddModelCmd = MemoryRepositoryCommand.createAddCommand(
                 this.repoAddress, 2, modelId);
         assertEquals(Intent.SafeRevBound, failingAddModelCmd.getIntent());
+        
         long result = this.persistence.executeCommand(this.actorId, failingAddModelCmd);
         assertTrue("revBoundSafe ADD command (" + failingAddModelCmd + ") should fail",
                 XCommandUtils.failed(result));
@@ -2995,6 +3017,7 @@ public abstract class AbstractPersistenceTestForAtomicCommandsAndMiscellaneous {
                 true, modelId);
         XCommand safeAddModelCmd = MemoryRepositoryCommand.createAddCommand(this.repoAddress,
                 RevisionConstants.NOT_EXISTING, modelId);
+        
         result = this.persistence.executeCommand(this.actorId, safeAddModelCmd);
         assertTrue(XCommandUtils.success(result));
         assertTrue(this.persistence.getManagedModelIds().contains(modelId));
@@ -3018,12 +3041,14 @@ public abstract class AbstractPersistenceTestForAtomicCommandsAndMiscellaneous {
         
         XCommand removeModelCmd = this.comFactory.createSafeRemoveModelCommand(modelAddress,
                 currentModelRev);
+        
         result = this.persistence.executeCommand(this.actorId, removeModelCmd);
         assertTrue(XCommandUtils.success(result));
         assertNull(this.persistence.getModelSnapshot(new GetWithAddressRequest(modelAddress)));
         
         XCommand removeModelAgain2Com = this.comFactory.createSafeRemoveModelCommand(modelAddress,
                 0);
+        
         result = this.persistence.executeCommand(this.actorId, removeModelAgain2Com);
         assertTrue(XCommandUtils.failed(result));
         assertNull(this.persistence.getModelSnapshot(new GetWithAddressRequest(modelAddress)));
