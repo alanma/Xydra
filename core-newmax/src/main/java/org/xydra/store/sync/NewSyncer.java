@@ -5,7 +5,6 @@ import java.util.Iterator;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
-import org.xydra.base.XType;
 import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
@@ -162,7 +161,8 @@ public class NewSyncer {
      * @param serverEvents
      */
     private void continueSync(XEvent[] serverEvents) {
-        log.debug("***** Computing eventDelta from " + serverEvents.length + " and local changes");
+        log.debug("***** Computing eventDelta from " + serverEvents.length
+                + " server events and n local changes");
         
         /* calculated event delta */
         EventDelta eventDelta = new EventDelta();
@@ -203,26 +203,32 @@ public class NewSyncer {
         
         // start atomic section -----
         
-        // change state
-        
         // FIXME
         log.info("EventDelta NOW=" + eventDelta);
         
+        // change model state
         eventDelta.applyTo(this.modelState);
+        
+        log.info("Model now = " + this.modelState);
+        
+        // change model state revison numbers
         NewSyncer.applyEntityRevisionsToModel(serverEvents, this.modelState);
         
+        // change sync log
         long newSyncRev = -1;
         if(serverEvents.length > 0) {
             newSyncRev = serverEvents[serverEvents.length - 1].getRevisionNumber();
             // change changeLog
-            log.debug("Truncating local syncLog down to syncRev=" + this.syncRev + "; highest was "
-                    + this.syncLog.getLastEvent().getRevisionNumber());
             this.syncLog.truncateToRevision(this.syncRev);
+            log.info("Current SyncLog=" + this.syncLog);
+            log.debug("Appending events to syncLog");
             for(XEvent e : serverEvents) {
                 log.debug("Current rev=" + this.syncLog.getCurrentRevisionNumber());
-                log.debug("Appending event from server: " + e);
+                log.debug("### Appending event from server: " + e);
                 this.syncLog.appendEvent(e);
             }
+        } else {
+            log.debug("No server appends received, synclog remains unchanged");
         }
         
         log.debug("Clearing local changes");
@@ -237,7 +243,7 @@ public class NewSyncer {
         // end atomic section ----
         
         // send change events
-        log.debug("Sending events");
+        log.debug("Sending " + eventDelta.getEventCount() + " events");
         eventDelta.sendChangeEvents(this.root, this.modelWithListeners.getAddress(),
                 this.modelWithListeners.getAddress().getParent());
         log.info("Done syncing");
@@ -269,51 +275,34 @@ public class NewSyncer {
     
     public static void applyEntityRevisionOfSingleEventToModel(XRevWritableModel model,
             XEvent anyEntityEvent) {
-        XAddress targetAddress = anyEntityEvent.getTarget();
-        try {
-            
-            long newRev = anyEntityEvent.getRevisionNumber();
-            
-            XType targetedType = targetAddress.getAddressedType();
-            // happens always
-            model.setRevisionNumber(newRev);
-            XRevWritableObject object;
-            switch(targetedType) {
-            case XREPOSITORY:
-                // nothing
-                break;
-            case XMODEL:
-                // an object was added / removed
-                break;
-            case XOBJECT:
-                // a field was added / removed
-                object = model.getObject(anyEntityEvent.getTarget().getObject());
-                if(object == null)
-                    break;
-                object.setRevisionNumber(newRev);
-                
-                break;
-            case XFIELD:
-                // a value was changed
-                object = model.getObject(anyEntityEvent.getTarget().getObject());
-                if(object == null)
-                    break;
-                object.setRevisionNumber(newRev);
-                XRevWritableField field = object.getField(anyEntityEvent.getTarget().getField());
-                if(field == null)
-                    break;
-                field.setRevisionNumber(newRev);
-                break;
-            default:
-                break;
-            }
-            
-        } catch(Exception e) {
-            e.printStackTrace();
-            // TODO Max fragen, ob das so orthodox
-            throw new RuntimeException("could not apply the revision number of entity "
-                    + targetAddress.toString());
+        long newRev = anyEntityEvent.getRevisionNumber();
+        
+        // repo has no revision number
+        
+        // model rev is always updated
+        model.setRevisionNumber(newRev);
+        
+        // object rev
+        XId objectId = anyEntityEvent.getChangedEntity().getObject();
+        if(objectId == null) {
+            return;
         }
+        XRevWritableObject object = model.getObject(objectId);
+        if(object == null) {
+            return;
+        }
+        object.setRevisionNumber(newRev);
+        
+        // field rev
+        XId fieldId = anyEntityEvent.getChangedEntity().getField();
+        if(fieldId == null) {
+            return;
+        }
+        XRevWritableField field = object.getField(fieldId);
+        if(field == null) {
+            return;
+        }
+        field.setRevisionNumber(newRev);
     }
     
     /**

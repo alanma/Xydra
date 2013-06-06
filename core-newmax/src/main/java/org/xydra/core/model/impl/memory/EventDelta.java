@@ -66,6 +66,8 @@ public class EventDelta {
     private IMapMapSetIndex<XId,XId,XFieldEvent> fieldEvents = new MapMapSetIndex<XId,XId,XFieldEvent>(
             new FastEntrySetFactory<XFieldEvent>());
     
+    private int eventCount;
+    
     /**
      * Add event to internal state and maintain a redundancy-free state. I.e. if
      * an event gets added that contradicts an existing event, the existing
@@ -113,16 +115,15 @@ public class EventDelta {
             KeyKeyEntryTuple<XId,XId,XFieldEvent> indexedEventTuple = indexedEventIt.next();
             XFieldEvent indexedEvent = indexedEventTuple.getEntry();
             if(b_cancels_a(indexedEvent, fieldEvent, changeLog)) {
-                this.fieldEvents.deIndex(objectId, fieldId, fieldEvent);
+                this.eventCount--;
+                this.fieldEvents.deIndex(objectId, fieldId, indexedEvent);
             } else {
                 // newer event must be used
                 this.fieldEvents.deIndex(objectId, fieldId, indexedEvent);
                 this.fieldEvents.index(objectId, fieldId, fieldEvent);
-                // assert equalEffect(indexedEvent, fieldEvent) : "indexed=" +
-                // indexedEvent
-                // + " fieldEvent=" + fieldEvent;
             }
         } else {
+            this.eventCount++;
             this.fieldEvents.index(objectId, fieldId, fieldEvent);
         }
         
@@ -173,11 +174,13 @@ public class EventDelta {
             KeyKeyEntryTuple<XId,XId,XObjectEvent> indexedEventTuple = indexedEventIt.next();
             XObjectEvent indexedEvent = indexedEventTuple.getEntry();
             if(cancelEachOtherOut(objectEvent, indexedEvent)) {
+                this.eventCount--;
                 this.objectEvents.deIndex(objectId, fieldId, indexedEvent);
             } else {
                 assert equalEffect(objectEvent, indexedEvent);
             }
         } else {
+            this.eventCount++;
             this.objectEvents.index(objectId, fieldId, objectEvent);
         }
     }
@@ -185,8 +188,10 @@ public class EventDelta {
     private void addModelEvent(XModelEvent modelEvent) {
         XModelEvent indexedEvent = this.modelEvents.get(modelEvent.getObjectId());
         if(indexedEvent == null) {
+            this.eventCount++;
             this.modelEvents.put(modelEvent.getObjectId(), modelEvent);
         } else if(cancelEachOtherOut(modelEvent, indexedEvent)) {
+            this.eventCount--;
             this.modelEvents.remove(modelEvent.getObjectId());
         } else {
             assert equalEffect(modelEvent, indexedEvent);
@@ -196,8 +201,10 @@ public class EventDelta {
     private void addRepositoryEvent(XRepositoryEvent repositoryEvent) {
         XRepositoryEvent indexedEvent = this.repoEvent;
         if(indexedEvent == null) {
+            this.eventCount++;
             this.repoEvent = repositoryEvent;
         } else if(cancelEachOtherOut(repositoryEvent, indexedEvent)) {
+            this.eventCount--;
             this.repoEvent = null;
         } else {
             assert equalEffect(repositoryEvent, indexedEvent);
@@ -256,7 +263,8 @@ public class EventDelta {
         if(ac == ChangeType.CHANGE && bc == ChangeType.REMOVE) {
             return true;
         }
-        if(ac == ChangeType.CHANGE && bc == ChangeType.CHANGE) {
+        if(ac == ChangeType.CHANGE && bc == ChangeType.CHANGE || ac == ChangeType.REMOVE
+                && bc == ChangeType.ADD) {
             if(changeLog == null) {
                 // we cannot compare the old values, so we're conservative
                 return false;
@@ -274,12 +282,24 @@ public class EventDelta {
     }
     
     private static XValue getOldValue(XFieldEvent fieldEvent, XChangeLog changeLog) {
+        assert changeLog != null;
         XEvent oldEvent = changeLog.getEventAt(fieldEvent.getOldFieldRevision());
         XValue oldValue = null;
-        if(oldEvent instanceof MemoryFieldEvent) {
-            MemoryFieldEvent oldFieldEvent = (MemoryFieldEvent)oldEvent;
+        if(oldEvent instanceof XFieldEvent) {
+            XFieldEvent oldFieldEvent = (XFieldEvent)oldEvent;
             oldValue = oldFieldEvent.getNewValue();
+        } else if(oldEvent instanceof XTransactionEvent) {
+            XTransactionEvent oldTxnEvent = (XTransactionEvent)oldEvent;
+            for(XAtomicEvent ae : oldTxnEvent) {
+                if(ae.getTarget().equals(fieldEvent.getTarget())
+                        && ae.getChangedEntity().equals(fieldEvent.getChangedEntity())) {
+                    assert ae instanceof XFieldEvent;
+                    XFieldEvent oldFieldEvent = (XFieldEvent)ae;
+                    oldValue = oldFieldEvent.getNewValue();
+                }
+            }
         }
+        
         return oldValue;
     }
     
@@ -538,8 +558,9 @@ public class EventDelta {
                     break;
                 case REMOVE:
                     if(oldValue == null) {
-                        throw new RuntimeException("old value for fieldChangedEvent "
-                                + event.toString() + " could not be restored!");
+                        throw new RuntimeException(
+                                "old value could not be restored for fieldChangedEvent "
+                                        + event.toString());
                     }
                     resultingEvent = MemoryFieldEvent.createAddEvent(event.getActor(),
                             event.getTarget(), oldValue, event.getOldModelRevision(),
@@ -548,8 +569,9 @@ public class EventDelta {
                     break;
                 case CHANGE:
                     if(oldValue == null) {
-                        throw new RuntimeException("old value for fieldChangedEvent "
-                                + event.toString() + " could not be restored!");
+                        throw new RuntimeException(
+                                "old value could not be restored for fieldChangedEvent "
+                                        + event.toString());
                     }
                     resultingEvent = MemoryFieldEvent.createChangeEvent(event.getActor(),
                             event.getTarget(), oldValue, event.getOldModelRevision(),
@@ -581,7 +603,7 @@ public class EventDelta {
      *            number (since we cannot take one from the server change log)
      */
     public void applyTo(XRevWritableModel model) {
-        log.debug("=> EventDelta=\n" + toString() + "\n***");
+        log.debug("Apply EventDelta=\n" + toString() + "\n***");
         
         // FIXME KILL
         log.debug("   Model=\n" + DumpUtils.toStringBuffer(model) + "\n***");
@@ -743,7 +765,9 @@ public class EventDelta {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Repository-EVENT ").append(this.repoEvent).append("\n");
+        if(this.repoEvent != null) {
+            sb.append("Repository-EVENT ").append(this.repoEvent).append("\n");
+        }
         for(XEvent e : this.modelEvents.values()) {
             sb.append("     Model-EVENT ").append(e).append("\n");
         }
@@ -763,6 +787,10 @@ public class EventDelta {
         }
         
         return sb.toString();
+    }
+    
+    public int getEventCount() {
+        return this.eventCount;
     }
     
 }

@@ -194,7 +194,11 @@ public class MemorySyncLogState implements ISyncLogState {
             return false;
         }
         
-        SortedMap<Long,ISyncLogEntry> toBeDeleted = this.eventMap.tailMap(revisionNumber);
+        log.debug("Truncating local syncLog down to rev=" + revisionNumber + "; highest was "
+                + (this.getLastEvent() == null ? "none" : this.getLastEvent().getRevisionNumber()));
+        
+        /* Delete all events LATER than syncRev */
+        SortedMap<Long,ISyncLogEntry> toBeDeleted = this.eventMap.tailMap(revisionNumber + 1);
         while(toBeDeleted.size() > 0) {
             Long key = toBeDeleted.lastKey();
             this.eventMap.remove(key);

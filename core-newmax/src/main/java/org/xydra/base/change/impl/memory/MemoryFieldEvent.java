@@ -364,7 +364,8 @@ public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {
         
         addChangeTypeAndFlags(sb);
         sb.append(" @" + getTarget());
-        sb.append(" ->*" + this.getNewValue() + "*");
+        XValue newValue = this.getNewValue();
+        sb.append(" ->" + (newValue == null ? " X " : "*" + newValue + "*"));
         sb.append("                 (actor:'" + getActor() + "')");
         return sb.toString();
     }
