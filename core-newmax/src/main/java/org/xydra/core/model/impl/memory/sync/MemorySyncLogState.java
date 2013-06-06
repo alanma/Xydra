@@ -87,7 +87,7 @@ public class MemorySyncLogState implements ISyncLogState {
             XyAssert.xyAssert(event.getRevisionNumber() > getCurrentRevisionNumber(), "eventRev="
                     + event.getRevisionNumber() + ",currentRev=" + getCurrentRevisionNumber()
                     + " event=" + event);
-            XyAssert.xyAssert(!event.inTransaction());
+            XyAssert.xyAssert(!event.inTransaction(), "event=" + event);
             // FIXME kill
             log.info("Adding \n" + syncLogEntry);
             Long key = event.getRevisionNumber();

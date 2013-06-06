@@ -6,6 +6,7 @@ import java.util.List;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.XType;
+import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
@@ -206,14 +207,24 @@ public class Executor {
         assert objectState != null;
         XyAssert.xyAssert(!root.isTransactionInProgess());
         
+        if(command.getChangeType() == ChangeType.TRANSACTION) {
+            root.setTransactionInProgress(true);
+        }
+        
         /* Command -run-> ChangedField -create-> Events -apply-> -fire-> */
         ChangedObject objectInTxn = new ChangedObject(objectState);
         boolean success = objectInTxn.executeCommand(command);
         if(!success) {
             log.warn("command " + command + " failed");
+            if(command.getChangeType() == ChangeType.TRANSACTION) {
+                root.setTransactionInProgress(false);
+            }
             return XCommand.FAILED;
         }
         if(!objectInTxn.hasChanges()) {
+            if(command.getChangeType() == ChangeType.TRANSACTION) {
+                root.setTransactionInProgress(false);
+            }
             return XCommand.NOCHANGE;
         }
         
@@ -233,6 +244,10 @@ public class Executor {
         }
         root.getSyncLog().appendSyncLogEntry(command, event);
         fireEvents(root, changeEventListener, event);
+        
+        if(command.getChangeType() == ChangeType.TRANSACTION) {
+            root.setTransactionInProgress(false);
+        }
         
         return event.getRevisionNumber();
     }
@@ -259,20 +274,33 @@ public class Executor {
         assert modelState != null;
         XyAssert.xyAssert(!root.isTransactionInProgess());
         
+        if(command.getChangeType() == ChangeType.TRANSACTION) {
+            root.setTransactionInProgress(true);
+        }
+        
         /* Command -run-> ChangedField -create-> Events -apply-> -fire-> */
         ChangedModel modelInTxn = new ChangedModel(modelState);
         boolean success = modelInTxn.executeCommand(command);
         if(!success) {
             log.warn("command " + command + " failed");
+            if(command.getChangeType() == ChangeType.TRANSACTION) {
+                root.setTransactionInProgress(false);
+            }
             return XCommand.FAILED;
         }
         if(!modelInTxn.hasChanges()) {
+            if(command.getChangeType() == ChangeType.TRANSACTION) {
+                root.setTransactionInProgress(false);
+            }
             return XCommand.NOCHANGE;
         }
         
         // create event
         long currentModelRev = modelState.getRevisionNumber();
         List<XAtomicEvent> events = new LinkedList<XAtomicEvent>();
+        
+        // FIXME HERE#############################
+        
         DeltaUtils.createEventsForChangedModel(events, actorId, modelInTxn,
                 root.isTransactionInProgess());
         long currentObjectRev;
@@ -298,6 +326,10 @@ public class Executor {
         root.getSyncLog().appendSyncLogEntry(command, event);
         fireEvents(root, changeEventListener, event);
         
+        if(command.getChangeType() == ChangeType.TRANSACTION) {
+            root.setTransactionInProgress(false);
+        }
+        
         return event.getRevisionNumber();
     }
     
@@ -313,7 +345,7 @@ public class Executor {
     public static XEvent createSingleEvent(List<XAtomicEvent> events, XId actorId, XAddress target,
             long modelRevision, long objectRevision) {
         assert !events.isEmpty() : "no events in list";
-        if(events.size() == 1) {
+        if(events.size() == 1 && !events.get(0).inTransaction()) {
             return events.get(0);
         }
         XAddress txnTarget = target;

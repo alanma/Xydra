@@ -887,6 +887,7 @@ abstract public class AbstractSynchronizerTest {
             checkEvents(model);
             
         } finally {
+            log.info("******** finally, cleaning up");
             removeModel(MODEL_1_ID);
         }
         

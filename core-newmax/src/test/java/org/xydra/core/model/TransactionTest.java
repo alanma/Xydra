@@ -343,18 +343,19 @@ public class TransactionTest {
         /* check events received for adding alias to john */
         
         XEvent addJohnAlias = MemoryObjectEvent.createAddEvent(this.actorId, johnAddr, ALIAS_ID,
-                modelRev, johnRev, false);
+                modelRev, johnRev, true);
         
         int x4 = received.indexOf(addJohnAlias);
-        assertTrue(x4 >= 0);
+        assertTrue("x4=" + x4 + " received=" + received, x4 >= 0);
         
         // check that there were no more events
         assertEquals(1, received.size());
         
-        /* check that no transaction event was sent */
-        
-        assertTrue(trans.isEmpty());
-        
+        /*
+         * check that a transaction event was sent, event with just 1 event
+         * inside
+         */
+        assertFalse(trans.isEmpty());
     }
     
     @Test
@@ -601,7 +602,7 @@ public class TransactionTest {
         /* check events received for adding alias to john */
         
         XEvent addJohnAlias = MemoryObjectEvent.createAddEvent(this.actorId, johnAddr, ALIAS_ID,
-                modelRev, johnRev, false);
+                modelRev, johnRev, true);
         
         int x4 = received.indexOf(addJohnAlias);
         assertTrue(x4 >= 0);
@@ -609,9 +610,8 @@ public class TransactionTest {
         // check that there were no more events
         assertEquals(1, received.size());
         
-        /* check that no transaction event was sent */
-        
-        assertTrue(trans.isEmpty());
+        /* check that a transaction event was sent */
+        assertFalse(trans.isEmpty());
         
         /* check events received from object */
         
