@@ -298,7 +298,7 @@ public class XCompareUtils {
         }
         
         if(!XI.equals(fieldA.getValue(), fieldB.getValue())) {
-            log.debug("values differ");
+            log.debug("values differ A=" + fieldA.getValue() + " B=" + fieldB.getValue());
             return false;
         }
         

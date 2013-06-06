@@ -832,59 +832,69 @@ abstract public class AbstractSynchronizerTest {
     public void testSyncModelCreatedWithoutRepositoryReplicateClient() {
         
         try {
-            
+            // before
             assertNull(loadModelSnapshot(MODEL_1_ID));
             
-            // create a local model
+            /* Create local model; add phonebook; */
+            // must be created with a repository ID to be synchronized later
             XAddress modelAddr = XX.resolveModel(this.repoAddr, MODEL_1_ID);
-            // must be created with a repository ID to be synchronized
-            IMemoryModel model = new MemoryModel(this.actorId, this.passwordHash, modelAddr);
-            DemoModelUtil.setupPhonebook(model);
+            IMemoryModel localModel = new MemoryModel(this.actorId, this.passwordHash, modelAddr);
+            DemoModelUtil.setupPhonebook(localModel);
             
-            NewSyncer synchronizer = createSyncer(this.remoteStore, model);
+            NewSyncer synchronizer = createSyncer(this.remoteStore, localModel);
             
-            XTransactionBuilder txBuilder = new XTransactionBuilder(model.getAddress());
-            
-            ChangedModel cm = new ChangedModel(model);
+            // create txn
+            XTransactionBuilder txBuilder = new XTransactionBuilder(localModel.getAddress());
+            ChangedModel cm = new ChangedModel(localModel);
             XWritableObject johnObject = cm.getObject(DemoModelUtil.JOHN_ID);
-            
-            johnObject.getField(DemoModelUtil.TITLE_ID).setValue(XV.toValue("A new title"));
-            
+            johnObject.getField(DemoModelUtil.TITLE_ID).setValue(XV.toValue("Title-1"));
             johnObject.getField(DemoModelUtil.ALIASES_ID).setValue(
-                    XV.toValue(new String[] { "Decoupled distributed systems", "Fries", "Bacon" }));
-            
+                    XV.toValue(new String[] { "Ali-A-1", "Ali-B-1", "Ali-C-1" }));
             txBuilder.applyChanges(cm);
             XTransaction tx = txBuilder.build();
             
-            model.executeCommand(tx);
+            // execute txn locally
+            long result = localModel.executeCommand(tx);
+            assertTrue(XCommandUtils.success(result));
             
-            txBuilder = new XTransactionBuilder(model.getAddress());
-            
-            cm = new ChangedModel(model);
+            // build txn2
+            txBuilder = new XTransactionBuilder(localModel.getAddress());
+            cm = new ChangedModel(localModel);
             johnObject = cm.getObject(DemoModelUtil.JOHN_ID);
-            
-            johnObject.getField(DemoModelUtil.TITLE_ID).setValue(
-                    XV.toValue("A new title second time"));
-            
-            johnObject.getField(DemoModelUtil.ALIASES_ID)
-                    .setValue(
-                            XV.toValue(new String[] { "Highly decoupled distributed systems",
-                                    "Ham", "Eggs" }));
-            
+            johnObject.getField(DemoModelUtil.TITLE_ID).setValue(XV.toValue("Title-2"));
+            johnObject.getField(DemoModelUtil.ALIASES_ID).setValue(
+                    XV.toValue(new String[] { "Ali-A-2", "Ali-B-2", "Ali-C-2" }));
             txBuilder.applyChanges(cm);
             tx = txBuilder.build();
             
-            model.executeCommand(tx);
+            // execute txn2 locally
+            result = localModel.executeCommand(tx);
+            assertTrue(XCommandUtils.success(result));
             
-            XReadableModel snapshot = XCopyUtils.createSnapshot(model);
+            XReadableModel localModel_t1 = XCopyUtils.createSnapshot(localModel);
+            assertEquals("Title-2",
+                    localModel_t1.getObject(DemoModelUtil.JOHN_ID).getField(DemoModelUtil.TITLE_ID)
+                            .getValue().toString());
             
+            log.info("****** Sync");
             synchronize(synchronizer);
             
-            assertTrue(XCompareUtils.equalTree(snapshot, model));
+            assertEquals("Title-2",
+                    localModel_t1.getObject(DemoModelUtil.JOHN_ID).getField(DemoModelUtil.TITLE_ID)
+                            .getValue().toString());
+            assertEquals("Title-2",
+                    localModel.getObject(DemoModelUtil.JOHN_ID).getField(DemoModelUtil.TITLE_ID)
+                            .getValue().toString());
+            assertTrue("syncing to a remote repo should not affect local state",
+                    XCompareUtils.equalTree(localModel_t1, localModel));
             XReadableModel remoteModel = loadModelSnapshot(MODEL_1_ID);
-            assertNotNull("model " + MODEL_1_ID + " was null", remoteModel);
-            assertTrue(XCompareUtils.equalState(model, remoteModel));
-            checkEvents(model);
+            assertNotNull("remote model " + MODEL_1_ID + " should now exist", remoteModel);
+            assertEquals("Title-2",
+                    remoteModel.getObject(DemoModelUtil.JOHN_ID).getField(DemoModelUtil.TITLE_ID)
+                            .getValue().toString());
+            assertTrue("remoteModel should have gotten state from local model",
+                    XCompareUtils.equalState(localModel, remoteModel));
+            checkEvents(localModel);
             
         } finally {
             log.info("******** finally, cleaning up");
