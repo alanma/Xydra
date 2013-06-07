@@ -48,7 +48,6 @@ import org.xydra.log.LoggerFactory;
  * 
  * @author xamde
  * 
- *         TODO Max fragen: Methoden zu lang?
  */
 public class EventDelta {
 	
