@@ -104,6 +104,12 @@ public class EventDelta {
 			throw new AssertionError("unknown event type");
 	}
 	
+	/**
+	 * FIXME: Hypothesis: changeLog only not null, when local event
+	 * 
+	 * @param fieldEvent
+	 * @param changeLog
+	 */
 	private void addFieldEvent(XFieldEvent fieldEvent, XChangeLog changeLog) {
 		XId objectId = fieldEvent.getTarget().getObject();
 		XId fieldId = fieldEvent.getTarget().getField();
@@ -118,13 +124,17 @@ public class EventDelta {
 				this.eventCount--;
 				this.fieldEvents.deIndex(objectId, fieldId, indexedEvent);
 			} else {
-				// newer event must be used
-				this.fieldEvents.deIndex(objectId, fieldId, indexedEvent);
-				this.fieldEvents.index(objectId, fieldId, fieldEvent);
+				// only server events can be used here
+				if(changeLog == null) {
+					this.fieldEvents.deIndex(objectId, fieldId, indexedEvent);
+					this.fieldEvents.index(objectId, fieldId, fieldEvent);
+				}
 			}
 		} else {
-			this.eventCount++;
-			this.fieldEvents.index(objectId, fieldId, fieldEvent);
+			if(changeLog == null) {
+				this.eventCount++;
+				this.fieldEvents.index(objectId, fieldId, fieldEvent);
+			}
 		}
 		
 		// if(event.getChangeType() == ChangeType.CHANGE) {
