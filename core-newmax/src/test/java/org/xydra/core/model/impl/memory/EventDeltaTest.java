@@ -61,7 +61,7 @@ public class EventDeltaTest {
 	
 	private XId actorId = XX.toId("EventDeltaTest");
 	
-	private String password = null; // TODO auth: where to get this?
+	private String password = null;
 	
 	private IMemoryModel model;
 	
@@ -76,6 +76,7 @@ public class EventDeltaTest {
 	XId f2Id = XX.toId("f2");
 	XId f3Id = XX.toId("f3");
 	XId f4Id = XX.toId("f4");
+	XId f5Id = XX.toId("f5");
 	
 	@Before
 	public void setUp() {
@@ -326,6 +327,8 @@ public class EventDeltaTest {
 		XModel localTrialModel = localRepo.createModel(TRIAL_ID);
 		DemoModelUtil.addPhonebookModel(localRepo);
 		XModel localPhonebookModel = localRepo.getModel(DemoModelUtil.PHONEBOOK_ID);
+		ISyncLog syncLog = (ISyncLog)localPhonebookModel.getChangeLog();
+		syncLog.setSynchronizedRevision(46);
 		XCopyUtils.copyData(localPhonebookModel, localTrialModel);
 		DemoLocalChangesAndServerEvents.addLocalChangesToModel(localPhonebookModel);
 		XChangeLog localChangeLog = localPhonebookModel.getChangeLog();
@@ -429,5 +432,91 @@ public class EventDeltaTest {
 		System.out.println("EVENTDELTA=" + eventDelta);
 		
 		assertEquals(2, eventDelta.getEventCount());
+	}
+	
+	/**
+	 * change field value two times. Then nothing [no positive server
+	 * responses]. EventDelta should be empty. Remote revision numbers differ
+	 * only slightly here
+	 */
+	@Test
+	public void testAddMultipleFieldEventAllRemoteChangesFailing() {
+		
+		assert this.model.getObject(this.o2Id).hasField(this.f2Id);
+		
+		EventDelta eventDelta = new EventDelta();
+		
+		XField field = this.model.getObject(this.o2Id).getField(this.f2Id);
+		field.setValue(XV.toValue("A"));
+		field.setValue(XV.toValue("B"));
+		ISyncLog syncLog = this.model.getRoot().getSyncLog();
+		
+		/* add some events in between */
+		Iterator<XEvent> it = syncLog.getEventsSince(7);
+		
+		// add same events inverted
+		it = syncLog.getEventsSince(7);
+		while(it.hasNext()) {
+			XEvent e = it.next();
+			System.out.println("LOCAL =" + e);
+			eventDelta.addInverseEvent(e, 7, syncLog);
+		}
+		
+		System.out.println("EVENTDELTA=" + eventDelta);
+		
+		assertEquals(1, eventDelta.getEventCount());
+	}
+	
+	/**
+	 * create all kinds of entity changes and test, if the right revision
+	 * numbers were restored afterwards
+	 */
+	@Test
+	public void testRevisionnumberRestoration() {
+		
+		assert this.model.getObject(this.o2Id).hasField(this.f2Id);
+		
+		EventDelta eventDelta = new EventDelta();
+		this.model.getObject(this.o2Id).createField(this.f5Id).setValue(XV.toValue("X"));
+		this.model.getRoot().getSyncLog().setSynchronizedRevision(8);
+		this.model.getRoot().getSyncLog().clearLocalChanges();
+		
+		XExistsRevWritableModel model2 = XCopyUtils.createSnapshot(this.model);
+		// create and remove object
+		this.model.createObject(this.o3Id);
+		this.model.removeObject(this.o1Id);
+		
+		// create and remove field
+		XObject o2 = this.model.getObject(this.o2Id);
+		o2.createField(this.f1Id);
+		o2.removeField(this.f2Id);
+		
+		// create and remove value
+		o2.getField(this.f3Id).setValue(XV.toValue(true));
+		o2.getField(this.f4Id).setValue(null);
+		
+		// change value 3 times
+		XField f5 = o2.getField(this.f5Id);
+		f5.setValue(XV.toValue("A"));
+		f5.setValue(XV.toValue("B"));
+		f5.setValue(XV.toValue("C"));
+		
+		ISyncLog syncLog = this.model.getRoot().getSyncLog();
+		
+		Iterator<XEvent> it = syncLog.getEventsSince(9);
+		
+		// add same events inverted
+		while(it.hasNext()) {
+			XEvent e = it.next();
+			System.out.println("LOCAL =" + e);
+			eventDelta.addInverseEvent(e, 9, syncLog);
+		}
+		
+		System.out.println("EVENTDELTA=" + eventDelta);
+		
+		XExistsRevWritableModel model3 = XCopyUtils.createSnapshot(this.model);
+		eventDelta.applyTo(model3);
+		
+		assertTrue(XCompareUtils.equalState(model2, model3));
 	}
 }

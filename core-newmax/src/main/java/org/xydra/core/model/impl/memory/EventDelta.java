@@ -1,8 +1,10 @@
 package org.xydra.core.model.impl.memory;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -26,10 +28,11 @@ import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.impl.XExistsRevWritableModel;
 import org.xydra.base.value.XValue;
+import org.xydra.core.change.RevisionConstants;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.delta.ChangedModel;
+import org.xydra.core.model.impl.memory.sync.ISyncLog;
 import org.xydra.core.model.impl.memory.sync.Root;
-import org.xydra.core.util.DumpUtils;
 import org.xydra.index.IMapMapSetIndex;
 import org.xydra.index.impl.FastEntrySetFactory;
 import org.xydra.index.impl.MapMapSetIndex;
@@ -66,7 +69,17 @@ public class EventDelta {
 	private IMapMapSetIndex<XId,XId,XFieldEvent> fieldEvents = new MapMapSetIndex<XId,XId,XFieldEvent>(
 	        new FastEntrySetFactory<XFieldEvent>());
 	
+	/**
+	 * Set XAddress: fields, for which we have known server responses (so we
+	 * know they were processed)
+	 */
+	private Set<XAddress> fieldsWithProcessedChanges = new HashSet<XAddress>();
+	
+	/** List for all local events, which have failed */
+	private List<XEvent> failedLocalEvents = new ArrayList<XEvent>();
+	
 	private int eventCount;
+	private boolean serverEventsWereAdded;
 	
 	/**
 	 * Add event to internal state and maintain a redundancy-free state. I.e. if
@@ -92,12 +105,13 @@ public class EventDelta {
 	}
 	
 	private void addAtomicEvent(XAtomicEvent atomicEvent, XChangeLog changeLog) {
+		boolean isLocalEvent = changeLog != null;
 		if(atomicEvent instanceof XRepositoryEvent) {
-			addRepositoryEvent((XRepositoryEvent)atomicEvent);
+			addRepositoryEvent((XRepositoryEvent)atomicEvent, isLocalEvent);
 		} else if(atomicEvent instanceof XModelEvent) {
-			addModelEvent((XModelEvent)atomicEvent);
+			addModelEvent((XModelEvent)atomicEvent, isLocalEvent);
 		} else if(atomicEvent instanceof XObjectEvent) {
-			addObjectEvent((XObjectEvent)atomicEvent);
+			addObjectEvent((XObjectEvent)atomicEvent, isLocalEvent);
 		} else if(atomicEvent instanceof XFieldEvent) {
 			addFieldEvent((XFieldEvent)atomicEvent, changeLog);
 		} else
@@ -105,7 +119,15 @@ public class EventDelta {
 	}
 	
 	/**
-	 * FIXME: Hypothesis: changeLog only not null, when local event
+	 * Tricky part. There can be multiple local Change-Events, which would
+	 * falsify the result, if they were simply added, because the resulting
+	 * events from the server are always aggregated.
+	 * 
+	 * So now we only store the resulting server event (we know that by checking
+	 * whether the sync log is existing here). Local events can now only either
+	 * cancel this event out, so there would be no local change, or simply be
+	 * skipped - since they get included at the server in the process of
+	 * aggregation.
 	 * 
 	 * @param fieldEvent
 	 * @param changeLog
@@ -125,15 +147,30 @@ public class EventDelta {
 				this.fieldEvents.deIndex(objectId, fieldId, indexedEvent);
 			} else {
 				// only server events can be used here
-				if(changeLog == null) {
+				if(!this.serverEventsWereAdded) {
 					this.fieldEvents.deIndex(objectId, fieldId, indexedEvent);
 					this.fieldEvents.index(objectId, fieldId, fieldEvent);
 				}
 			}
 		} else {
-			if(changeLog == null) {
+			// there were no events indexed
+			
+			if(!this.serverEventsWereAdded) {
+				// this is a server event
 				this.eventCount++;
 				this.fieldEvents.index(objectId, fieldId, fieldEvent);
+				this.fieldsWithProcessedChanges.add(fieldEvent.getChangedEntity());
+			} else {
+				// this is a local event and there was no server event added
+				// before
+				if(!this.fieldsWithProcessedChanges.contains(fieldEvent.getChangedEntity())) {
+					this.eventCount++;
+					this.fieldEvents.index(objectId, fieldId, fieldEvent);
+					this.fieldsWithProcessedChanges.add(fieldEvent.getChangedEntity());
+					addFailedLocalEvent(fieldEvent);
+				} else {
+					// there has been a server event added before
+				}
 			}
 		}
 		
@@ -173,7 +210,56 @@ public class EventDelta {
 		// }
 	}
 	
-	private void addObjectEvent(XObjectEvent objectEvent) {
+	/**
+	 * add failed local event so you can later restore the revision numbers of
+	 * the whole model
+	 * 
+	 * @param event failed event
+	 */
+	private void addFailedLocalEvent(XEvent event) {
+		this.failedLocalEvents.add(event);
+		
+	}
+	
+	/**
+	 * look in the whole change log for the last XFieldEvent before sync
+	 * revision for this address.
+	 * 
+	 * @param fieldsAddress
+	 * @param changeLog
+	 * @return
+	 */
+	@SuppressWarnings("null")
+	private static XFieldEvent buildInvertedLastFieldEvent(XAddress fieldsAddress,
+	        XChangeLog changeLog) {
+		ISyncLog syncLog = null;
+		if(changeLog instanceof ISyncLog) {
+			syncLog = (ISyncLog)changeLog;
+		} else {
+			// WE NEED A SYNC LOG HERE!
+			assert false;
+		}
+		Iterator<XEvent> iterator = syncLog.getEventsBetween(syncLog.getBaseRevisionNumber() + 1,
+		        syncLog.getSynchronizedRevision());
+		XFieldEvent lastEventBeforeSyncRev = null;
+		while(iterator.hasNext()) {
+			XEvent currentEvent = (XEvent)iterator.next();
+			XAddress changedEntity = currentEvent.getChangedEntity();
+			if(changedEntity.equals(fieldsAddress)) {
+				if(currentEvent instanceof XFieldEvent) {
+					lastEventBeforeSyncRev = (XFieldEvent)currentEvent;
+				}
+				
+			}
+		}
+		ChangeType changeType = ChangeType.CHANGE;
+		if(lastEventBeforeSyncRev != null)
+			changeType = lastEventBeforeSyncRev.getChangeType();
+		
+		return (XFieldEvent)invertFieldEvent(lastEventBeforeSyncRev, changeLog, changeType);
+	}
+	
+	private void addObjectEvent(XObjectEvent objectEvent, boolean isLocalEvent) {
 		XId objectId = objectEvent.getTarget().getObject();
 		XId fieldId = objectEvent.getChangedEntity().getField();
 		Iterator<KeyKeyEntryTuple<XId,XId,XObjectEvent>> indexedEventIt = this.objectEvents
@@ -192,14 +278,20 @@ public class EventDelta {
 		} else {
 			this.eventCount++;
 			this.objectEvents.index(objectId, fieldId, objectEvent);
+			if(isLocalEvent) {
+				addFailedLocalEvent(objectEvent);
+			}
 		}
 	}
 	
-	private void addModelEvent(XModelEvent modelEvent) {
+	private void addModelEvent(XModelEvent modelEvent, boolean isLocalEvent) {
 		XModelEvent indexedEvent = this.modelEvents.get(modelEvent.getObjectId());
 		if(indexedEvent == null) {
 			this.eventCount++;
 			this.modelEvents.put(modelEvent.getObjectId(), modelEvent);
+			if(isLocalEvent) {
+				addFailedLocalEvent(modelEvent);
+			}
 		} else if(cancelEachOtherOut(modelEvent, indexedEvent)) {
 			this.eventCount--;
 			this.modelEvents.remove(modelEvent.getObjectId());
@@ -208,11 +300,14 @@ public class EventDelta {
 		}
 	}
 	
-	private void addRepositoryEvent(XRepositoryEvent repositoryEvent) {
+	private void addRepositoryEvent(XRepositoryEvent repositoryEvent, boolean isLocalEvent) {
 		XRepositoryEvent indexedEvent = this.repoEvent;
 		if(indexedEvent == null) {
 			this.eventCount++;
 			this.repoEvent = repositoryEvent;
+			if(isLocalEvent) {
+				addFailedLocalEvent(repositoryEvent);
+			}
 		} else if(cancelEachOtherOut(repositoryEvent, indexedEvent)) {
 			this.eventCount--;
 			this.repoEvent = null;
@@ -292,8 +387,29 @@ public class EventDelta {
 	}
 	
 	private static XValue getOldValue(XFieldEvent fieldEvent, XChangeLog changeLog) {
+		if(fieldEvent == null) {
+			return null;
+		}
 		assert changeLog != null;
-		XEvent oldEvent = changeLog.getEventAt(fieldEvent.getOldFieldRevision());
+		long syncRev = ((ISyncLog)changeLog).getSynchronizedRevision();
+		long currentFieldRev = fieldEvent.getRevisionNumber();
+		
+		XEvent oldEvent = fieldEvent;
+		while(currentFieldRev > syncRev) {
+			// so we have the latest synchronized value (which has to be before
+			// or exactly the synchronized revision)
+			long oldFieldRevision = oldEvent.getOldFieldRevision();
+			if(oldFieldRevision == RevisionConstants.REVISION_OF_ENTITY_NOT_SET) {
+				// this was an object command
+				oldFieldRevision = oldEvent.getOldObjectRevision();
+				oldEvent = changeLog.getEventAt(oldFieldRevision);
+				// there cannot have been any field commands if there was an
+				// object command later
+				break;
+			}
+			oldEvent = changeLog.getEventAt(oldFieldRevision);
+			currentFieldRev = oldEvent.getRevisionNumber();
+		}
 		XValue oldValue = null;
 		if(oldEvent instanceof XFieldEvent) {
 			XFieldEvent oldFieldEvent = (XFieldEvent)oldEvent;
@@ -479,6 +595,8 @@ public class EventDelta {
 	 * @param changeLog of this client
 	 */
 	public void addInverseEvent(XEvent event, long syncRevision, XChangeLog changeLog) {
+		this.serverEventsWereAdded = true;
+		
 		XAddress changedEntityAddress = event.getChangedEntity();
 		ChangeType changeType = event.getChangeType();
 		
@@ -519,11 +637,10 @@ public class EventDelta {
 					 * the right revision to this formerly locally deleted
 					 * entity
 					 */
-					long adaptedObjectRevisionToReachRightRevision = event.getOldObjectRevision() - 1;
 					resultingEvent = MemoryModelEvent.createInternalAddEvent(event.getActor(),
 					        event.getTarget(), changedEntityAddress.getObject(),
-					        adaptedObjectRevisionToReachRightRevision,
-					        adaptedObjectRevisionToReachRightRevision, event.inTransaction());
+					        event.getOldModelRevision(), event.getOldObjectRevision(),
+					        event.inTransaction());
 					
 					break;
 				default:
@@ -535,71 +652,76 @@ public class EventDelta {
 				case ADD:
 					resultingEvent = MemoryObjectEvent.createRemoveEvent(event.getActor(),
 					        event.getTarget(), changedEntityAddress.getField(),
-					        event.getOldObjectRevision(), syncRevision, event.inTransaction(),
-					        event.isImplied());
+					        event.getOldModelRevision(), event.getOldObjectRevision(),
+					        syncRevision, event.inTransaction(), event.isImplied());
 					break;
 				case REMOVE:
-					/*
-					 * this is necessary because elsewise we couldn't restore
-					 * the right revision to this formerly locally deleted
-					 * entity
-					 */
-					long adaptedObjectRevisionToReachRightRevision = event.getOldFieldRevision() - 1;
-					
-					resultingEvent = MemoryObjectEvent.createInternalAddEvent(event.getActor(),
+					resultingEvent = MemoryObjectEvent.createAddEvent(event.getActor(),
 					        event.getTarget(), changedEntityAddress.getField(),
-					        adaptedObjectRevisionToReachRightRevision,
-					        adaptedObjectRevisionToReachRightRevision, event.inTransaction());
+					        event.getOldModelRevision(), event.getOldObjectRevision(),
+					        event.getOldFieldRevision(), event.inTransaction());
 					break;
 				default:
 					break;
 				}
 				
 			} else if(event instanceof XFieldEvent) {
-				XFieldEvent fieldEvent = (XFieldEvent)event;
-				XValue oldValue = getOldValue(fieldEvent, changeLog);
-				
-				switch(changeType) {
-				case ADD:
-					resultingEvent = MemoryFieldEvent.createRemoveEvent(event.getActor(),
-					        event.getTarget(), event.getOldModelRevision(),
-					        event.getOldObjectRevision(), event.getOldFieldRevision(),
-					        event.inTransaction(), event.isImplied());
-					break;
-				case REMOVE:
-					if(oldValue == null) {
-						throw new RuntimeException(
-						        "old value could not be restored for fieldChangedEvent "
-						                + event.toString());
+				for(XEvent failedFieldEvent : this.failedLocalEvents) {
+					if(failedFieldEvent.getChangedEntity().equals(event.getChangedEntity())) {
+						/*
+						 * skip this event: we already know that no change for
+						 * this event was successful
+						 */
+						return;
 					}
-					resultingEvent = MemoryFieldEvent.createAddEvent(event.getActor(),
-					        event.getTarget(), oldValue, event.getOldModelRevision(),
-					        event.getOldObjectRevision(), event.getOldFieldRevision(),
-					        event.inTransaction());
-					break;
-				case CHANGE:
-					if(oldValue == null) {
-						throw new RuntimeException(
-						        "old value could not be restored for fieldChangedEvent "
-						                + event.toString());
-					}
-					resultingEvent = MemoryFieldEvent.createChangeEvent(event.getActor(),
-					        event.getTarget(), oldValue, event.getOldModelRevision(),
-					        event.getOldObjectRevision(), event.getOldFieldRevision(),
-					        event.inTransaction());
-					break;
-				default:
-					break;
 				}
-				if(resultingEvent == null) {
-					throw new RuntimeException("unable to inverse event " + event.toString());
-				}
+				resultingEvent = invertFieldEvent(event, changeLog, changeType);
 				
 			} else {
 				throw new RuntimeException("event could not be casted!");
 			}
 			this.addEvent(resultingEvent, changeLog);
 		}
+	}
+	
+	private static XEvent invertFieldEvent(XEvent event, XChangeLog changeLog, ChangeType changeType) {
+		XEvent resultingEvent = null;
+		XFieldEvent fieldEvent = (XFieldEvent)event;
+		XValue oldValue = getOldValue(fieldEvent, changeLog);
+		
+		switch(changeType) {
+		case ADD:
+			resultingEvent = MemoryFieldEvent.createRemoveEvent(event.getActor(),
+			        event.getTarget(), event.getOldModelRevision(), event.getOldObjectRevision(),
+			        event.getOldFieldRevision(), event.inTransaction(), event.isImplied());
+			break;
+		case REMOVE:
+			if(oldValue == null) {
+				throw new RuntimeException("old value could not be restored for fieldChangedEvent "
+				        + event.toString());
+			}
+			resultingEvent = MemoryFieldEvent.createAddEvent(event.getActor(), event.getTarget(),
+			        oldValue, event.getOldModelRevision(), event.getOldObjectRevision(),
+			        event.getOldFieldRevision(), event.inTransaction());
+			break;
+		case CHANGE:
+			// if(oldValue == null) {
+			// throw new
+			// RuntimeException("old value could not be restored for fieldChangedEvent "
+			// + event.toString());
+			// }
+			resultingEvent = MemoryFieldEvent.createChangeEvent(event.getActor(),
+			        event.getTarget(), oldValue, event.getOldModelRevision(),
+			        event.getOldObjectRevision(), event.getOldFieldRevision(),
+			        event.inTransaction());
+			break;
+		default:
+			break;
+		}
+		if(resultingEvent == null) {
+			throw new RuntimeException("unable to inverse event " + event.toString());
+		}
+		return resultingEvent;
 	}
 	
 	/**
@@ -624,9 +746,6 @@ public class EventDelta {
 				}
 			}
 		}
-		
-		// FIXME KILL
-		log.debug("   Model=\n" + DumpUtils.toStringBuffer(model) + "\n***");
 		
 		/* for all newly created objects */
 		for(XModelEvent modelEvent : this.modelEvents.values()) {
@@ -697,7 +816,6 @@ public class EventDelta {
 				assert model.getObject(objectId).hasField(fieldId) : "field " + fieldId
 				        + " not existing";
 				model.getObject(objectId).removeField((fieldId));
-				// TODO revs?
 			}
 		}
 		
@@ -715,6 +833,45 @@ public class EventDelta {
 					XExistsRevWritableModel model2 = (XExistsRevWritableModel)model;
 					model2.setExists(false);
 				}
+			}
+		}
+		
+		/* now apply revision numbers of all failed local events */
+		for(int i = this.failedLocalEvents.size() - 1; i >= 0; i--) {
+			long modelRevision = -999;
+			long objectRevision = -999;
+			long fieldRevision = -999;
+			
+			XEvent currentEvent = this.failedLocalEvents.get(i);
+			ChangeType changeType = currentEvent.getChangeType();
+			modelRevision = currentEvent.getOldModelRevision();
+			
+			model.setRevisionNumber(modelRevision);
+			
+			if(currentEvent instanceof XModelEvent) {
+				if(changeType == ChangeType.ADD) {
+					objectRevision = currentEvent.getOldObjectRevision();
+					XModelEvent modelEvent = (XModelEvent)currentEvent;
+					model.getObject(modelEvent.getObjectId()).setRevisionNumber(objectRevision);
+				}
+			} else if(currentEvent instanceof XObjectEvent) {
+				objectRevision = currentEvent.getOldObjectRevision();
+				XObjectEvent objectEvent = (XObjectEvent)currentEvent;
+				model.getObject(objectEvent.getObjectId()).setRevisionNumber(objectRevision);
+				
+				if(changeType == ChangeType.ADD) {
+					fieldRevision = currentEvent.getOldFieldRevision();
+					model.getObject(objectEvent.getObjectId()).getField(objectEvent.getFieldId())
+					        .setRevisionNumber(fieldRevision);
+				}
+			} else if(currentEvent instanceof XFieldEvent) {
+				objectRevision = currentEvent.getOldObjectRevision();
+				fieldRevision = currentEvent.getOldFieldRevision();
+				
+				XFieldEvent fieldEvent = (XFieldEvent)currentEvent;
+				model.getObject(fieldEvent.getObjectId()).setRevisionNumber(objectRevision);
+				model.getObject(fieldEvent.getObjectId()).getField(fieldEvent.getFieldId())
+				        .setRevisionNumber(fieldRevision);
 			}
 		}
 		
