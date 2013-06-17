@@ -14,6 +14,7 @@ import org.xydra.base.XType;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XCommandFactory;
+import org.xydra.base.change.XCommandUtils;
 import org.xydra.base.change.XTransaction;
 import org.xydra.base.rmof.XRevWritableField;
 import org.xydra.base.rmof.XRevWritableModel;
@@ -1248,12 +1249,14 @@ public class ChangedModelTest {
             switch(changeType) {
             case ADD:
                 // try to add an object which already exists
-                builder.addObject(this.model.getAddress(), XCommand.SAFE_STATE_BOUND, this.object.getId());
+                builder.addObject(this.model.getAddress(), XCommand.SAFE_STATE_BOUND,
+                        this.object.getId());
                 break;
             
             case REMOVE:
                 // try to remove an object which doesn't exist
-                builder.removeObject(this.model.getAddress(), XCommand.SAFE_STATE_BOUND, XX.createUniqueId());
+                builder.removeObject(this.model.getAddress(), XCommand.SAFE_STATE_BOUND,
+                        XX.createUniqueId());
                 break;
             case CHANGE:
             case TRANSACTION:
@@ -1266,12 +1269,14 @@ public class ChangedModelTest {
             switch(changeType) {
             case ADD:
                 // try to add a field which already exists
-                builder.addField(this.object.getAddress(), XCommand.SAFE_STATE_BOUND, this.field.getId());
+                builder.addField(this.object.getAddress(), XCommand.SAFE_STATE_BOUND,
+                        this.field.getId());
                 break;
             
             case REMOVE:
                 // try to remove a field which doesn't exist
-                builder.removeField(this.object.getAddress(), XCommand.SAFE_STATE_BOUND, XX.createUniqueId());
+                builder.removeField(this.object.getAddress(), XCommand.SAFE_STATE_BOUND,
+                        XX.createUniqueId());
                 break;
             case CHANGE:
             case TRANSACTION:
@@ -1501,13 +1506,14 @@ public class ChangedModelTest {
         XCommand command = factory.createSafeAddValueCommand(this.field.getAddress(),
                 this.field.getRevisionNumber(), value);
         
-        executeCommand(command, null);
+        long result = executeCommand(command, null);
+        assertTrue(XCommandUtils.success(result));
         
         object2 = this.changedModel.getObject(this.object.getId());
         
         // revision numbers are not increased/managed by the ChangedModel,
         // therefore this should succeed
-        assertTrue(this.object.equals(object2));
+        assertEquals(this.object.getRevisionNumber(), object2.getRevisionNumber());
     }
     
     /*

@@ -14,6 +14,10 @@ import org.xydra.base.value.XValue;
 /**
  * An implementation of {@link XFieldEvent}.
  * 
+ * It holds additionally the oldValue of an {@link XFieldEvent} and is
+ * serialisable. This allows to restore previous versions of a local model in
+ * cases where some local commands failed and need to be rolled back.
+ * 
  * @author voelkel
  * @author kaidel
  */
@@ -173,8 +177,8 @@ public class MemoryReversibleFieldEvent extends MemoryFieldEvent implements XRev
     public static XReversibleFieldEvent createRemoveEvent(XId actor, XAddress target,
             XValue oldValue, long objectRevision, long fieldRevision, boolean inTransaction,
             boolean implied) {
-        return createRemoveEvent(actor, target, oldValue, REVISION_OF_ENTITY_NOT_SET, objectRevision,
-                fieldRevision, inTransaction, implied);
+        return createRemoveEvent(actor, target, oldValue, REVISION_OF_ENTITY_NOT_SET,
+                objectRevision, fieldRevision, inTransaction, implied);
     }
     
     /**
@@ -247,6 +251,19 @@ public class MemoryReversibleFieldEvent extends MemoryFieldEvent implements XRev
         default:
             throw new RuntimeException("this field event should have never been created");
         }
+    }
+    
+    public static XEvent createReversibleEventFrom(XFieldEvent event, XValue oldValue) {
+        if(event.getChangeType() == ChangeType.REMOVE) {
+            return createRemoveEvent(event.getActor(), event.getTarget(), oldValue,
+                    event.getOldModelRevision(), event.getOldFieldRevision(),
+                    event.inTransaction(), event.isImplied());
+        } else if(event.getChangeType() == ChangeType.CHANGE) {
+            return createChangeEvent(event.getActor(), event.getTarget(), oldValue,
+                    event.getNewValue(), event.getOldModelRevision(), event.getOldFieldRevision(),
+                    event.inTransaction());
+        }
+        throw new AssertionError();
     }
     
 }

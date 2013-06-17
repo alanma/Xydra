@@ -16,6 +16,7 @@ import org.xydra.base.change.XModelEvent;
 import org.xydra.base.change.XObjectEvent;
 import org.xydra.base.change.XRepositoryEvent;
 import org.xydra.base.change.XTransactionEvent;
+import org.xydra.base.change.impl.memory.MemoryReversibleFieldEvent;
 import org.xydra.base.change.impl.memory.MemoryTransactionEvent;
 import org.xydra.base.rmof.XRevWritableField;
 import org.xydra.base.rmof.XRevWritableModel;
@@ -23,6 +24,7 @@ import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.base.rmof.XWritableRepository;
 import org.xydra.base.rmof.impl.XExistsRevWritableModel;
 import org.xydra.base.rmof.impl.XExistsRevWritableRepository;
+import org.xydra.base.value.XValue;
 import org.xydra.core.XX;
 import org.xydra.core.change.EventUtils;
 import org.xydra.core.change.RevisionConstants;
@@ -165,6 +167,23 @@ public class Executor {
         assert events.size() == 1;
         XEvent event = createSingleEvent(events, actorId, fieldCommand.getTarget(),
                 currentModelRev, currentObjectRev);
+        assert event.getChangeType() != ChangeType.TRANSACTION;
+        
+        // remember old value, if required
+        XValue oldValue = null;
+        if(event.getChangeType() == ChangeType.REMOVE || event.getChangeType() == ChangeType.CHANGE) {
+            
+            // FIXME
+            System.out.println("SYNCRV=" + root.getSynchronizedRevision() + " EREV="
+                    + event.getOldFieldRevision());
+            
+            if(root.getSynchronizedRevision() >= event.getOldFieldRevision()) {
+                oldValue = fieldState.getValue();
+                assert oldValue != null;
+                // FIXME !!!!!!!
+                System.out.println(oldValue);
+            }
+        }
         
         // apply event
         if(modelState != null) {
@@ -175,6 +194,14 @@ public class Executor {
             } else {
                 EventUtils.applyEvent(fieldState, event);
             }
+        }
+        
+        XEvent loggedEvent;
+        if(oldValue == null) {
+            loggedEvent = event;
+        } else {
+            loggedEvent = MemoryReversibleFieldEvent.createReversibleEventFrom((XFieldEvent)event,
+                    oldValue);
         }
         
         root.getSyncLog().appendSyncLogEntry(fieldCommand, event);
