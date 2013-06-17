@@ -172,16 +172,9 @@ public class Executor {
         // remember old value, if required
         XValue oldValue = null;
         if(event.getChangeType() == ChangeType.REMOVE || event.getChangeType() == ChangeType.CHANGE) {
-            
-            // FIXME
-            System.out.println("SYNCRV=" + root.getSynchronizedRevision() + " EREV="
-                    + event.getOldFieldRevision());
-            
             if(root.getSynchronizedRevision() >= event.getOldFieldRevision()) {
                 oldValue = fieldState.getValue();
                 assert oldValue != null;
-                // FIXME !!!!!!!
-                System.out.println(oldValue);
             }
         }
         
@@ -204,7 +197,7 @@ public class Executor {
                     oldValue);
         }
         
-        root.getSyncLog().appendSyncLogEntry(fieldCommand, event);
+        root.getSyncLog().appendSyncLogEntry(fieldCommand, loggedEvent);
         fireEvents(root, changeEventListener, event);
         
         return event.getRevisionNumber();
@@ -325,9 +318,6 @@ public class Executor {
         // create event
         long currentModelRev = modelState.getRevisionNumber();
         List<XAtomicEvent> events = new LinkedList<XAtomicEvent>();
-        
-        // FIXME HERE#############################
-        
         DeltaUtils.createEventsForChangedModel(events, actorId, modelInTxn,
                 root.isTransactionInProgess());
         long currentObjectRev;
