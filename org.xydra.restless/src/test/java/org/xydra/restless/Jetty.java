@@ -236,7 +236,7 @@ public class Jetty {
                 // do nothing
             }
         });
-        webappContext.addFilter(gwtFilterHolder, "*.nocache*", Handler.ALL);
+        webappContext.addFilter(gwtFilterHolder, "*.nocache.js", Handler.ALL);
         
         // count requests
         FilterHolder filterHolderForCounting = new FilterHolder();
