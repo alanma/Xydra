@@ -121,8 +121,9 @@ public class GwtBuildHelper implements Runnable {
         }
         List<File> subDirs = autoDiscoverAllGwtModulesInTarget(targetDir);
         if(subDirs.isEmpty()) {
-            log.error("No subdirectories found in " + targetDir.getAbsolutePath());
-            System.exit(1);
+            log.warn("No subdirectories found in " + targetDir.getAbsolutePath()
+                    + " - nothing copied.");
+            return;
         }
         assert subDirs != null;
         for(File subDir : subDirs) {
