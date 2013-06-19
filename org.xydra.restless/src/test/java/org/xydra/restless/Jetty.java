@@ -17,10 +17,12 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.mortbay.jetty.Handler;
+import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.security.UserRealm;
@@ -119,6 +121,160 @@ public class Jetty {
         return startServer();
     }
     
+    private final Filter imageCachingFilter = new Filter() {
+        
+        @Override
+        public void destroy() {
+            // do nothing
+        }
+        
+        @Override
+        public void doFilter(ServletRequest request, ServletResponse response,
+                FilterChain filterChain) throws IOException, ServletException {
+            log.debug("JETTY Image GET " + ((HttpServletRequest)request).getRequestURI());
+            HttpServletResponseWrapper responseWrapper = new HttpServletResponseWrapper(
+                    (HttpServletResponse)response);
+            
+            // Modify the servlet which serves png and gif files so that
+            // it
+            // explicitly sets the Pragma, Cache-Control, and Expires
+            // headers. The Pragma and Cache-Control headers should be
+            // removed. The Expires header should be set according to
+            // the
+            // caching recommendations mentioned in the previous
+            // section.
+            
+            Calendar cal = Calendar.getInstance();
+            cal.set(Calendar.YEAR, cal.get(Calendar.YEAR) + 1);
+            
+            SimpleDateFormat dateFormatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z",
+                    Locale.US);
+            TimeZone tz = TimeZone.getTimeZone("GMT");
+            dateFormatter.setTimeZone(tz);
+            String rfc1123 = dateFormatter.format(cal.getTime());
+            ((HttpServletResponse)response).addHeader("Expires", rfc1123);
+            ((HttpServletResponse)response).addHeader("Cache-Control", "public; max-age=31536000");
+            filterChain.doFilter(request, responseWrapper);
+        }
+        
+        @Override
+        public void init(FilterConfig filterConfig) {
+            // do nothing
+        }
+    };
+    
+    private final Filter noGwtCachingFilter = new Filter() {
+        
+        @Override
+        public void destroy() {
+            // do nothing
+        }
+        
+        @Override
+        public void doFilter(ServletRequest request, ServletResponse response,
+                FilterChain filterChain) throws IOException, ServletException {
+            log.debug("Don't cache " + ((HttpServletRequest)request).getRequestURI());
+            HttpServletResponseWrapper responseWrapper = new HttpServletResponseWrapper(
+                    (HttpServletResponse)response);
+            
+            // Modify the servlet which serves png and gif files so that it
+            // explicitly sets the Pragma, Cache-Control, and Expires
+            // headers. The Pragma and Cache-Control headers should be
+            // removed. The Expires header should be set according to the
+            // caching recommendations mentioned in the previous section.
+            
+            Calendar cal = Calendar.getInstance();
+            // one year in the past
+            cal.set(Calendar.YEAR, cal.get(Calendar.YEAR) - 1);
+            
+            SimpleDateFormat dateFormatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z",
+                    Locale.US);
+            TimeZone tz = TimeZone.getTimeZone("GMT");
+            dateFormatter.setTimeZone(tz);
+            String rfc1123 = dateFormatter.format(cal.getTime());
+            ((HttpServletResponse)response).addHeader("Expires", rfc1123);
+            log.debug("Set expire to " + rfc1123);
+            ((HttpServletResponse)response).addHeader("Cache-Control", "no-cache, must-revalidate");
+            
+            // remove IF-MODIFIED-SINCE Header to prevent Jetty from cleverly
+            // serving it
+            HttpServletRequestWrapper requestWrapper = new HttpServletRequestWrapper(
+                    (HttpServletRequest)request) {
+                
+                @Override
+                public String getHeader(String name) {
+                    if(name.equals(HttpHeaders.IF_MODIFIED_SINCE))
+                        return null;
+                    else
+                        return super.getHeader(name);
+                }
+                
+                @Override
+                public long getDateHeader(String name) {
+                    if(name.equals(HttpHeaders.IF_MODIFIED_SINCE))
+                        return -1;
+                    else
+                        return super.getDateHeader(name);
+                }
+                
+            };
+            
+            filterChain.doFilter(requestWrapper, responseWrapper);
+        }
+        
+        @Override
+        public void init(FilterConfig filterConfig) {
+            // do nothing
+        }
+    };
+    
+    private final Filter requestCountingFilter = new Filter() {
+        
+        @Override
+        public void destroy() {
+            // do nothing
+        }
+        
+        @Override
+        public void doFilter(ServletRequest req, ServletResponse response, FilterChain filterChain)
+                throws IOException, ServletException {
+            Jetty.this.requests++;
+            if(req instanceof HttpServletRequest) {
+                HttpServletRequest hreq = (HttpServletRequest)req;
+                log.info("_____JETTY #" + Jetty.this.requests + " " + hreq.getMethod() + " "
+                        + hreq.getRequestURL() + " @" + timeSinceStart());
+            } else {
+                log.info("_____JETTY Request Nr. " + Jetty.this.requests + " @" + timeSinceStart());
+            }
+            filterChain.doFilter(req, response);
+        }
+        
+        @Override
+        public void init(FilterConfig filterConfig) {
+            // do nothing
+        }
+    };
+    
+    private final Filter simulateNetworkDelaysFilter = new Filter() {
+        
+        @Override
+        public void destroy() {
+            // do nothing
+        }
+        
+        @Override
+        public void doFilter(ServletRequest req, ServletResponse response, FilterChain filterChain)
+                throws IOException, ServletException {
+            Delay.servePage();
+            filterChain.doFilter(req, response);
+        }
+        
+        @Override
+        public void init(FilterConfig filterConfig) {
+            // do nothing
+        }
+    };
+    
     /**
      * @return a configured webapp with some nice default servlet filters
      */
@@ -147,48 +303,7 @@ public class Jetty {
         // caching filter
         {
             FilterHolder filterHolder = new FilterHolder();
-            filterHolder.setFilter(new Filter() {
-                
-                @Override
-                public void destroy() {
-                    // do nothing
-                }
-                
-                @Override
-                public void doFilter(ServletRequest request, ServletResponse response,
-                        FilterChain filterChain) throws IOException, ServletException {
-                    log.debug("JETTY Image GET " + ((HttpServletRequest)request).getRequestURI());
-                    HttpServletResponseWrapper responseWrapper = new HttpServletResponseWrapper(
-                            (HttpServletResponse)response);
-                    
-                    // Modify the servlet which serves png and gif files so that
-                    // it
-                    // explicitly sets the Pragma, Cache-Control, and Expires
-                    // headers. The Pragma and Cache-Control headers should be
-                    // removed. The Expires header should be set according to
-                    // the
-                    // caching recommendations mentioned in the previous
-                    // section.
-                    
-                    Calendar cal = Calendar.getInstance();
-                    cal.set(Calendar.YEAR, cal.get(Calendar.YEAR) + 1);
-                    
-                    SimpleDateFormat dateFormatter = new SimpleDateFormat(
-                            "EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
-                    TimeZone tz = TimeZone.getTimeZone("GMT");
-                    dateFormatter.setTimeZone(tz);
-                    String rfc1123 = dateFormatter.format(cal.getTime());
-                    ((HttpServletResponse)response).addHeader("Expires", rfc1123);
-                    ((HttpServletResponse)response).addHeader("Cache-Control",
-                            "public; max-age=31536000");
-                    filterChain.doFilter(request, responseWrapper);
-                }
-                
-                @Override
-                public void init(FilterConfig filterConfig) {
-                    // do nothing
-                }
-            });
+            filterHolder.setFilter(this.imageCachingFilter);
             webappContext.addFilter(filterHolder, "*.png", Handler.ALL);
             webappContext.addFilter(filterHolder, "*.gif", Handler.ALL);
             // webappContext.addFilter(filterHolder, ".cache.*", Handler.ALL);
@@ -196,101 +311,18 @@ public class Jetty {
         
         // GWT caching
         FilterHolder gwtFilterHolder = new FilterHolder();
-        gwtFilterHolder.setFilter(new Filter() {
-            
-            @Override
-            public void destroy() {
-                // do nothing
-            }
-            
-            @Override
-            public void doFilter(ServletRequest request, ServletResponse response,
-                    FilterChain filterChain) throws IOException, ServletException {
-                log.debug("Don't cache " + ((HttpServletRequest)request).getRequestURI());
-                HttpServletResponseWrapper responseWrapper = new HttpServletResponseWrapper(
-                        (HttpServletResponse)response);
-                
-                // Modify the servlet which serves png and gif files so that it
-                // explicitly sets the Pragma, Cache-Control, and Expires
-                // headers. The Pragma and Cache-Control headers should be
-                // removed. The Expires header should be set according to the
-                // caching recommendations mentioned in the previous section.
-                
-                Calendar cal = Calendar.getInstance();
-                // one year in the past
-                cal.set(Calendar.YEAR, cal.get(Calendar.YEAR) - 1);
-                
-                SimpleDateFormat dateFormatter = new SimpleDateFormat(
-                        "EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
-                TimeZone tz = TimeZone.getTimeZone("GMT");
-                dateFormatter.setTimeZone(tz);
-                String rfc1123 = dateFormatter.format(cal.getTime());
-                ((HttpServletResponse)response).addHeader("Expires", rfc1123);
-                ((HttpServletResponse)response).addHeader("Cache-Control",
-                        "no-cache, must-revalidate");
-                filterChain.doFilter(request, responseWrapper);
-            }
-            
-            @Override
-            public void init(FilterConfig filterConfig) {
-                // do nothing
-            }
-        });
+        gwtFilterHolder.setFilter(this.noGwtCachingFilter);
         webappContext.addFilter(gwtFilterHolder, "*.nocache.js", Handler.ALL);
         
         // count requests
         FilterHolder filterHolderForCounting = new FilterHolder();
-        filterHolderForCounting.setFilter(new Filter() {
-            
-            @Override
-            public void destroy() {
-                // do nothing
-            }
-            
-            @Override
-            public void doFilter(ServletRequest req, ServletResponse response,
-                    FilterChain filterChain) throws IOException, ServletException {
-                Jetty.this.requests++;
-                if(req instanceof HttpServletRequest) {
-                    HttpServletRequest hreq = (HttpServletRequest)req;
-                    log.info("_____JETTY #" + Jetty.this.requests + " " + hreq.getMethod() + " "
-                            + hreq.getRequestURL() + " @" + timeSinceStart());
-                } else {
-                    log.info("_____JETTY Request Nr. " + Jetty.this.requests + " @"
-                            + timeSinceStart());
-                }
-                filterChain.doFilter(req, response);
-            }
-            
-            @Override
-            public void init(FilterConfig filterConfig) {
-                // do nothing
-            }
-        });
+        filterHolderForCounting.setFilter(this.requestCountingFilter);
         webappContext.addFilter(filterHolderForCounting, "*", Handler.ALL);
         
         // slow down to simulate bad network
         if(Delay.hasServePageDelay()) {
             FilterHolder filterHolderForDelay = new FilterHolder();
-            filterHolderForDelay.setFilter(new Filter() {
-                
-                @Override
-                public void destroy() {
-                    // do nothing
-                }
-                
-                @Override
-                public void doFilter(ServletRequest req, ServletResponse response,
-                        FilterChain filterChain) throws IOException, ServletException {
-                    Delay.servePage();
-                    filterChain.doFilter(req, response);
-                }
-                
-                @Override
-                public void init(FilterConfig filterConfig) {
-                    // do nothing
-                }
-            });
+            filterHolderForDelay.setFilter(this.simulateNetworkDelaysFilter);
             webappContext.addFilter(filterHolderForDelay, "*", Handler.ALL);
         }
         
