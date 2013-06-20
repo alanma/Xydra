@@ -85,9 +85,7 @@ public class DemoLocalChangesAndServerEvents {
      * 
      */
     public static final void addLocalChangesToModel(XWritableModel localModel) {
-        
         XWritableModel phonebook = localModel;
-        // FIXME SYNC_REVISION = phonebook.getRevisionNumber() + 1;
         
         // apply local changes:
         phonebook.removeObject(PETER_ID);
@@ -123,7 +121,7 @@ public class DemoLocalChangesAndServerEvents {
      * 
      * <li>object events: "john"
      * <ul>
-     * <li>"phone" - "56789" <font color=RED>inverse</font><br>
+     * <li>"phone" - "56789" <font color=RED>conflicting to client</font><br>
      * <li>remove "scores" <font color=GREEN>&#10003</font>
      * <li>add "car" - "T" <font color=GREEN>&#10003</font>
      * <li>add "bDay" - "01.02.03" <font color=RED>set value failed</font><br>
@@ -134,7 +132,7 @@ public class DemoLocalChangesAndServerEvents {
      * <li>object events: "claudia"
      * <ul>
      * <li>add "phone" - "456" <font color=GREEN>&#10003</font>
-     * <li>add "car" - "911S" <font color=RED>inverse</font><br>
+     * <li>add "car" - "911S" <font color=RED>conflicting to client</font><br>
      * </ul>
      * 
      * <li>object events: "jenny"
@@ -150,8 +148,6 @@ public class DemoLocalChangesAndServerEvents {
      * 
      * @param repo Used to change the contained
      *            {@link DemoModelUtil#PHONEBOOK_ID} model
-     * 
-     *            TODO @ANDI: why 'inverse' for some events?
      * 
      * @return the 'new' events from server
      */
@@ -233,8 +229,6 @@ public class DemoLocalChangesAndServerEvents {
      */
     public static final Iterator<XEvent> getOtherClientsChanges(XRepository repo) {
         XModel phonebook = repo.getModel(DemoModelUtil.PHONEBOOK_ID);
-        // FIXME SYNC_REVISION = phonebook.getRevisionNumber() + 1;
-        
         phonebook.createObject(KERSTIN_ID);
         
         // to change peter's revision number */
@@ -320,9 +314,7 @@ public class DemoLocalChangesAndServerEvents {
     public static final XRevWritableModel getResultingClientState(XRepository repo) {
         XModel otherPhonebook = repo.getModel(DemoModelUtil.PHONEBOOK_ID);
         XRevWritableModel phonebook = XCopyUtils.createSnapshot(otherPhonebook);
-        // FIXME SYNC_REVISION = phonebook.getRevisionNumber() + 1;
         
-        // FIXME these seem different from other "server changes"
         // apply server changes:
         phonebook.createObject(JENNY_ID);
         phonebook.createObject(KERSTIN_ID);

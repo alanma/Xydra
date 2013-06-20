@@ -94,7 +94,51 @@ idea:
 
 
 
-
+ * Different from a {@link ChangedModel}, this class e.g., can keep fields even
+ * if its object is removed. The state is stored as an event storage.
+ * 
+ * Revision numbers of incoming events are used.
+ * 
+ * Implementation idea:
+ * 
+ * Base case: Reverse all local events in inverse order; then apply all remote
+ * events.
+ * 
+ * Smarter: If the same event has happened locally, do not reverse it and do not
+ * apply it later.
+ * 
+ * Also smarter: Dont use redundant local events
+ * 
+ * Also smarter: If remote events cancel each other, also don't send them.
+ * 
+ * Order of events between entities does not matter, we can replay in this
+ * order: remove value, remove field, remove object, remove model, add model,
+ * add object, add field, add/change value. But we can also use the order of
+ * local and remote events.
+ * 
+ * What is a good data structure to detect and eliminate duplicate events? What
+ * uses not much memory, runs in O(n*log(n)), needs few passes over the data?
+ * 
+ * Given: remoteEvents as an array, localEvents as an iterator.
+ * 
+ * Data structure 'UniqueEntityEvents': EntityType -> ChangedEntityAddress ->
+ * Event
+ * 
+ * (1) Add all localEvents to a UniqueEntityEvents, getting rid of duplicate
+ * events per entity
+ * 
+ * (2) Add all remoteEvents to another UniqueEntityEvents, getting rid of
+ * duplicate events per entity
+ * 
+ * (3) Create a third UniqueEntityEvents by merging localEvents & remoteEvents
+ * on a per-entity-basis
+ * 
+ * (4) Retrieve merged events in remove-before-add and
+ * repo-model-object-field-order.
+ * 
+ * Analysis: Let R be number of remote and L be number of local events.
+ * 
+ * Then: (1) O(L), (2) O(R), (3) O(L+R), (4) O(L+R) => 3 L + 3 R
 
 
       

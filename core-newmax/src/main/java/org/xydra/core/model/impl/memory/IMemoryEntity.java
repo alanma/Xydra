@@ -3,8 +3,7 @@ package org.xydra.core.model.impl.memory;
 import org.xydra.base.rmof.XEntity;
 
 
-// FIXME MAX set to default access
-public interface IMemoryEntity extends XEntity {
+interface IMemoryEntity extends XEntity {
     
     /**
      * @return the current revision number of this entity. Is 0 if the entity

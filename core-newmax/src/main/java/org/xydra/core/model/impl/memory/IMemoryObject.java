@@ -8,7 +8,6 @@ import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.core.model.XObject;
 
 
-// FIXME MAX set to default access
 public interface IMemoryObject extends XObject, IMemoryEntity, IMemoryMOFEntity {
     
     void fireObjectEvent(XObjectEvent event);

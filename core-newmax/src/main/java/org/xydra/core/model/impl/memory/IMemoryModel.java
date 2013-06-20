@@ -8,7 +8,6 @@ import org.xydra.base.rmof.impl.XExistsRevWritableModel;
 import org.xydra.core.model.XModel;
 
 
-// FIXME MAX set to default access
 public interface IMemoryModel extends XModel, IMemoryEntity, IMemoryMOFEntity {
     
     XExistsRevWritableModel getState();

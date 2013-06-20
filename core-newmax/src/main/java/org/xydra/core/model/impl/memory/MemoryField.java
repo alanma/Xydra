@@ -103,7 +103,7 @@ public class MemoryField extends AbstractMOFEntity implements XField, IMemoryFie
      *            wrapping it in an {@link XField} @NeverNull
      */
     public MemoryField(XId actorId, XRevWritableField fieldState) {
-        super(Root.createWithActor(fieldState.getAddress(), actorId, XCommand.NONEXISTANT));
+        super(Root.createWithActor(actorId, fieldState.getAddress(), XCommand.NONEXISTANT));
         assert fieldState.getAddress().getRepository() != null;
         assert fieldState.getAddress().getModel() != null;
         assert fieldState.getAddress().getObject() != null;

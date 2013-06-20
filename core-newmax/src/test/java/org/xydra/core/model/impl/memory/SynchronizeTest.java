@@ -42,6 +42,7 @@ import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
+import org.xydra.core.model.impl.memory.sync.ISyncLog;
 import org.xydra.core.serialize.SerializedCommand;
 import org.xydra.core.serialize.SerializedEvent;
 import org.xydra.core.serialize.XydraElement;
@@ -263,7 +264,7 @@ public class SynchronizeTest {
         
         XyAssert.xyAssert(lastRevision == this.localModel.getSynchronizedRevision());
         
-        // XLocalChange[] lc = this.localModel.getLocalChanges();
+        ISyncLog lc = (ISyncLog)this.localModel.getChangeLog();
         //
         // // check results
         // assertEquals(5, lc.length);
@@ -276,26 +277,31 @@ public class SynchronizeTest {
         // assertEquals(XCommand.FAILED, lcc[5].waitForResult()); // removePeter
         // assertEquals(XCommand.FAILED, lcc[6].waitForResult()); //
         // removeJohnSafe
-        //
-        // // check that commands have been properly modified
-        // assertEquals(createObject, lc[0].getCommand());
-        // assertEquals(createField, lc[1].getCommand());
+        
+        // check that commands have been properly modified
+        
+        // FIXME use syncRev+1 instead of 0 etc...
+        
+        // assertEquals(createObject, lc.getSyncLogEntryAt(0).getCommand());
+        // assertEquals(createField, lc.getSyncLogEntryAt(1).getCommand());
         // assertEquals(setValue1.getRevisionNumber() + remoteChanges.size(),
-        // ((XFieldCommand)lc[2].getCommand()).getRevisionNumber());
-        // assertEquals(setValue2, lc[3].getCommand());
+        // ((XFieldCommand)lc
+        // .getSyncLogEntryAt(2).getCommand()).getRevisionNumber());
+        // assertEquals(setValue2, lc.getSyncLogEntryAt(3).getCommand());
         // assertEquals(removeField.getRevisionNumber() + remoteChanges.size(),
-        // ((XObjectCommand)lc[4].getCommand()).getRevisionNumber());
+        // ((XObjectCommand)lc
+        // .getSyncLogEntryAt(4).getCommand()).getRevisionNumber());
         //
         // // apply the commands remotely
-        // assertTrue(this.remoteModel.executeCommand(fix(lc[0].getCommand()))
+        // assertTrue(this.remoteModel.executeCommand(fix(lc.getSyncLogEntryAt(0).getCommand()))
         // >= 0);
-        // assertTrue(this.remoteModel.executeCommand(fix(lc[1].getCommand()))
+        // assertTrue(this.remoteModel.executeCommand(fix(lc.getSyncLogEntryAt(1).getCommand()))
         // >= 0);
-        // assertTrue(this.remoteModel.executeCommand(fix(lc[2].getCommand()))
+        // assertTrue(this.remoteModel.executeCommand(fix(lc.getSyncLogEntryAt(2).getCommand()))
         // >= 0);
-        // assertTrue(this.remoteModel.executeCommand(fix(lc[3].getCommand()))
+        // assertTrue(this.remoteModel.executeCommand(fix(lc.getSyncLogEntryAt(3).getCommand()))
         // >= 0);
-        // assertTrue(this.remoteModel.executeCommand(fix(lc[4].getCommand()))
+        // assertTrue(this.remoteModel.executeCommand(fix(lc.getSyncLogEntryAt(4).getCommand()))
         // >= 0);
         //
         // assertTrue(XCompareUtils.equalState(this.remoteModel,
@@ -335,5 +341,4 @@ public class SynchronizeTest {
         // assertTrue(hc.eventsReceived);
         
     }
-    
 }

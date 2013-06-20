@@ -14,7 +14,7 @@ import com.google.gwt.dev.jjs.impl.gflow.Analysis;
 
 
 /**
- * TODO andi implement
+ * Implements the algorithms on top of an {@link ISyncLogState}
  * 
  * @author xamde
  */
@@ -48,15 +48,8 @@ public class MemorySyncLog extends AbstractSyncLog implements ISyncLog {
         this(new MemorySyncLogState(modelAddress));
     }
     
-    // TODO handling of events in transactions???
     @Override
     public synchronized void appendSyncLogEntry(ISyncLogEntry syncLogEntry) {
-        // TODO what to assert? XyAssert.xyAssert((event == null && command ==
-        // null) || !event.inTransaction());
-        /*
-         * "else": event is part of a transaction and will therefore only be
-         * recorded as part of the transaction
-         */
         this.state.appendSyncLogEntry(syncLogEntry);
     }
     
@@ -128,8 +121,14 @@ public class MemorySyncLog extends AbstractSyncLog implements ISyncLog {
     
     @Override
     public int countUnappliedLocalChanges() {
-        // TODO return number of local commands since syncRev
-        return -666;
+        // IMPROVE would be faster if ISyncLogState supported this natively
+        Iterator<ISyncLogEntry> it = this.state.getSyncLogEntriesSince(this
+                .getSynchronizedRevision());
+        int count = 0;
+        while(it.hasNext()) {
+            count++;
+        }
+        return count;
     }
     
     @Override
@@ -227,6 +226,13 @@ public class MemorySyncLog extends AbstractSyncLog implements ISyncLog {
     }
     
     @Override
+    public int hashCode() {
+        // works, but doesn't spread well
+        return (int)(this.getBaseAddress().hashCode() + this.getBaseRevisionNumber() + this
+                .getSynchronizedRevision());
+    }
+    
+    @Override
     public Iterator<ISyncLogEntry> getSyncLogEntriesBetween(long beginRevision, long endRevision) {
         return this.state.getSyncLogEntriesBetween(beginRevision, endRevision);
     }
@@ -245,4 +251,5 @@ public class MemorySyncLog extends AbstractSyncLog implements ISyncLog {
     public long getSize() {
         return this.state.getSize();
     }
+    
 }

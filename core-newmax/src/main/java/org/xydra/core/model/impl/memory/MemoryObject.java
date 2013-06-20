@@ -187,7 +187,7 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
      * @param objectAddress @NeverNull
      */
     public MemoryObject(XId actorId, String passwordHash, XAddress objectAddress) {
-        this(Root.createWithActor(objectAddress, actorId, XCommand.NEW), null, actorId,
+        this(Root.createWithActor(actorId, objectAddress, XCommand.NEW), null, actorId,
                 passwordHash, objectAddress, null, null, true);
         
         assert objectAddress.getRepository() != null;

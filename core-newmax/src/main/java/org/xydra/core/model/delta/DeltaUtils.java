@@ -25,7 +25,6 @@ import org.xydra.base.rmof.impl.XExistsWritableModel;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.base.value.XValue;
 import org.xydra.core.change.RevisionConstants;
-import org.xydra.index.query.Pair;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 import org.xydra.sharedutils.XyAssert;
@@ -115,46 +114,8 @@ public abstract class DeltaUtils {
      *            model needs to be created first (modelToChange is null).
      * @param modelToChange The model to change. This may be null if the model
      *            currently exists.
-     * @param change The changes to apply as returned by
-     *            {@link #executeCommand(XReadableModel, XCommand)}.
-     * @param rev The revision number of the change.
-     * @return a model with the changes applied or null if model has been
-     *         removed by the changes.
-     */
-    @Deprecated
-    public static XRevWritableModel applyChanges(XAddress modelAddr,
-            XRevWritableModel modelToChange, Pair<ChangedModel,ModelChange> change, long rev) {
-        
-        XRevWritableModel model = modelToChange;
-        ChangedModel changedModel = change.getFirst();
-        ModelChange mc = change.getSecond();
-        
-        if(mc == ModelChange.REMOVED) {
-            return null;
-        } else if(mc == ModelChange.CREATED) {
-            XyAssert.xyAssert(model == null);
-            model = new SimpleModel(modelAddr);
-            model.setRevisionNumber(rev);
-        }
-        
-        if(changedModel != null) {
-            XyAssert.xyAssert(model != null);
-            assert model != null;
-            applyChanges(model, changedModel, rev);
-        }
-        
-        return model;
-    }
-    
-    /**
-     * Apply the given changes to a {@link XRevWritableModel}.
-     * 
-     * @param modelAddr The address of the model to change. This is used if the
-     *            model needs to be created first (modelToChange is null).
-     * @param modelToChange The model to change. This may be null if the model
-     *            currently exists.
      * @param changedModel The changes to apply as returned by
-     *            {@link #executeCommand(XReadableModel, XCommand)}.
+     *            {@link #executeCommand(XExistsReadableModel, XCommand)}.
      * @param rev The revision number of the change.
      * @return a model with the changes applied or null if model has been
      *         removed by the changes.
@@ -168,9 +129,6 @@ public abstract class DeltaUtils {
             return null;
         } else if(changedModel.modelWasCreated()) {
             assert model != null;
-            
-            // FIXME .......max
-            
             assert !model.exists();
             model.setRevisionNumber(rev);
             if(model instanceof XExistsWritableModel) {
@@ -198,119 +156,14 @@ public abstract class DeltaUtils {
      * Calculated the events describing the given change.
      * 
      * @param modelAddr The model the change applies to.
-     * @param change A change as created by
-     *            {@link #executeCommand(XReadableModel, XCommand)}.
-     * @param actorId The actor that initiated the change.
-     * @param rev The revision number of the change.
-     * @param forceTxnEvent if true, a txn is created even if there is only 1
-     *            change and thus no transaction necessary
-     * @return the appropriate events for the change (as returned by
-     *         {@link #executeCommand(XReadableModel, XCommand)}
-     */
-    @Deprecated
-    public static List<XAtomicEvent> createEvents(XAddress modelAddr,
-            Pair<ChangedModel,ModelChange> change, XId actorId, long rev, boolean forceTxnEvent) {
-        XyAssert.xyAssert(change != null);
-        assert change != null;
-        
-        ChangedModel changedModel = change.getFirst();
-        ModelChange modelChangeOperation = change.getSecond();
-        
-        assert changedModel == null || (rev - 1 == changedModel.getRevisionNumber()) : ("rev="
-                + rev + " modelRev=" + changedModel.getRevisionNumber());
-        
-        /* we count only 0, 1 or 2 = many */
-        int nChanges;
-        switch(modelChangeOperation) {
-        case NOCHANGE:
-            if(changedModel == null) {
-                nChanges = 0;
-            } else {
-                nChanges = changedModel.countCommandsNeeded(2);
-            }
-            break;
-        case CREATED:
-        case REMOVED: {
-            nChanges = 1;
-            if(changedModel != null) {
-                nChanges += changedModel.countCommandsNeeded(1);
-            }
-            break;
-        }
-        default:
-            throw new AssertionError("unreachable");
-        }
-        
-        //
-        // int nChanges = (modelChange == ModelChange.NOCHANGE ? 0 : 1);
-        // if(model != null) {
-        // nChanges += model.countEventsNeeded(2 - nChanges);
-        // }
-        
-        List<XAtomicEvent> events = new ArrayList<XAtomicEvent>();
-        
-        if(nChanges == 0) {
-            return events;
-        }
-        
-        XyAssert.xyAssert(nChanges > 0);
-        
-        if(modelChangeOperation == ModelChange.CREATED) {
-            long previousRev = rev - 1;
-            if(previousRev < 0)
-                previousRev = XCommand.NONEXISTANT;
-            XRepositoryEvent repositoryEvent = MemoryRepositoryEvent.createAddEvent(actorId,
-                    modelAddr.getParent(), modelAddr.getModel(), previousRev,
-                    /* creating a model is never part of a txn */
-                    false);
-            events.add(repositoryEvent);
-        }
-        
-        /*
-         * FIXME is this the correct way to check if the events are supposed to
-         * be in a transaction or not? We can construct transaction which
-         * actually contain a lot of commands, but every command but one is
-         * cancelled out by another command (i.e. adds get undone by removes in
-         * the same transaction) and the transaction actually only changes one
-         * single thing. Should we think of this case as a transaction (and
-         * create a transaction event) or as a single command (and create a
-         * single atomic event). I suppose a single, atomic event is preferable,
-         * but we should document this thoroughly, since this behavior seems
-         * logical, but actually is quite strange. (we execute a transaction,
-         * but do not create a transaction event)
-         * 
-         * ~Kaidel
-         */
-        boolean inTxn = (nChanges > 1) || forceTxnEvent;
-        
-        if(changedModel != null) {
-            XyAssert.xyAssert(changedModel.getAddress().equals(modelAddr));
-            assert changedModel.modelWasRemoved() == (modelChangeOperation == ModelChange.REMOVED);
-            createEventsForChangedModel(events, actorId, changedModel, inTxn);
-        }
-        
-        if(modelChangeOperation == ModelChange.REMOVED) {
-            events.add(MemoryRepositoryEvent.createRemoveEvent(actorId, modelAddr.getParent(),
-                    modelAddr.getModel(), rev - 1, inTxn));
-        }
-        
-        assert nChanges == 1 ? events.size() == 1 : events.size() >= 2 : "1 change must result in 1 event, more changes result in more events";
-        
-        return events;
-    }
-    
-    /**
-     * Calculated the events describing the given change.
-     * 
-     * @param modelAddr The model the change applies to.
      * @param changedModel A change as created by
-     *            {@link #executeCommand(XReadableModel, XCommand)}. @NeverNull
+     *            {@link #executeCommand(XExistsReadableModel, XCommand)}. @NeverNull
      * @param actorId The actor that initiated the change.
      * @param rev The revision number of the change.
      * @param forceTxnEvent if true, a txn is created even if there is only 1
      *            change and thus no transaction necessary
      * @return the appropriate events for the change (as returned by
-     *         {@link #executeCommand(XReadableModel, XCommand)}
+     *         {@link #executeCommand(XExistsReadableModel, XCommand)}
      */
     public static List<XAtomicEvent> createEvents(XAddress modelAddr, ChangedModel changedModel,
             XId actorId, long rev, boolean forceTxnEvent) {
@@ -329,19 +182,9 @@ public abstract class DeltaUtils {
         XyAssert.xyAssert(nChanges > 0);
         
         /*
-         * FIXME is this the correct way to check if the events are supposed to
-         * be in a transaction or not? We can construct transaction which
-         * actually contain a lot of commands, but every command but one is
-         * cancelled out by another command (i.e. adds get undone by removes in
-         * the same transaction) and the transaction actually only changes one
-         * single thing. Should we think of this case as a transaction (and
-         * create a transaction event) or as a single command (and create a
-         * single atomic event). I suppose a single, atomic event is preferable,
-         * but we should document this thoroughly, since this behavior seems
-         * logical, but actually is quite strange. (we execute a transaction,
-         * but do not create a transaction event)
-         * 
-         * ~Kaidel
+         * A transaction command always creates a transaction event; a single
+         * command might create a transaction, i.e. when there are more than 1
+         * resulting event
          */
         boolean inTxn = (nChanges > 1) || forceTxnEvent;
         
@@ -442,8 +285,8 @@ public abstract class DeltaUtils {
     public static void createEventsForChangedField(List<XAtomicEvent> events, long currentModelRev,
             XId actorId, long currentObjectRev, ChangedField field, boolean inTransaction) {
         if(field.isChanged()) {
-            XValue oldValue = field.getOldValue();
             // IMPROVE we only need to know if the old value exists
+            XValue oldValue = field.getOldValue();
             XValue newValue = field.getValue();
             XAddress target = field.getAddress();
             long currentFieldRev = field.getRevisionNumber();
@@ -494,80 +337,6 @@ public abstract class DeltaUtils {
         }
         events.add(MemoryModelEvent.createRemoveEvent(actorId, object.getAddress().getParent(),
                 object.getId(), modelRev, object.getRevisionNumber(), inTransaction, implied));
-    }
-    
-    /**
-     * Calculate the changes resulting from executing the given command on the
-     * given model.
-     * 
-     * @param model The model to modify. Null if the model currently doesn't
-     *            exist. This instance is modified.
-     * @param command
-     * @return The changed model after executing the command (may be null if
-     *         there are no other changes except creating/removing the model)
-     *         (Pair#getFirst()) and if the model was added or removed by the
-     *         command (Pair#getSecond()).
-     * 
-     *         Returns null if the command failed.
-     */
-    @Deprecated
-    public static Pair<ChangedModel,ModelChange> executeCommand_OLD(XReadableModel model,
-            XCommand command) {
-        
-        if(command instanceof XRepositoryCommand) {
-            XRepositoryCommand rc = (XRepositoryCommand)command;
-            
-            switch(rc.getChangeType()) {
-            case ADD:
-                if(model == null) {
-                    return new Pair<ChangedModel,ModelChange>(null, ModelChange.CREATED);
-                } else if(rc.isForced()) {
-                    log.info("Command is forced, but there is no change");
-                    return new Pair<ChangedModel,ModelChange>(null, ModelChange.NOCHANGE);
-                } else {
-                    log.warn("Safe RepositoryCommand ADD failed; model!=null");
-                    return null;
-                }
-                
-            case REMOVE:
-                if((model == null || model.getRevisionNumber() != rc.getRevisionNumber())
-                        && !rc.isForced()) {
-                    log.warn("OLD Safe RepositoryCommand REMOVE failed. Reason: "
-                            + (model == null ? "model is null" : "modelRevNr:"
-                                    + model.getRevisionNumber() + " cmdRevNr:"
-                                    + rc.getRevisionNumber() + " forced:" + rc.isForced()));
-                    return null;
-                } else if(model != null) {
-                    log.debug("Removing model " + model.getAddress() + " "
-                            + model.getRevisionNumber());
-                    ChangedModel changedModel = new ChangedModel(model);
-                    changedModel.clear();
-                    return new Pair<ChangedModel,ModelChange>(changedModel, ModelChange.REMOVED);
-                } else {
-                    log.info("There is no change");
-                    return new Pair<ChangedModel,ModelChange>(null, ModelChange.NOCHANGE);
-                }
-                
-            default:
-                throw new AssertionError("XRepositoryCommand with unexpected type: " + rc);
-            }
-            
-        } else {
-            if(model == null) {
-                log.warn("Safe Non-RepositoryCommand '" + command + "' failed on null-model");
-                return null;
-            }
-            
-            ChangedModel changedModel = new ChangedModel(model);
-            
-            // apply changes to the delta-model
-            if(!changedModel.executeCommand(command)) {
-                log.info("Could not execute command on ChangedModel");
-                return null;
-            }
-            
-            return new Pair<ChangedModel,ModelChange>(changedModel, ModelChange.NOCHANGE);
-        }
     }
     
     /**

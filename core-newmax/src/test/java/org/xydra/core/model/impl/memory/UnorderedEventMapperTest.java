@@ -97,9 +97,6 @@ public class UnorderedEventMapperTest {
         assertTrue(result.getUnmappedRemoteEvents().isEmpty());
         assertEquals(result.getMapped().size(), serverEvents.length);
         assertEquals(result.getMapped().size(), syncLogEntryList.size());
-        
-        // FIXME whiteboxtest double event functionality
-        
     }
     
     /**
@@ -147,9 +144,6 @@ public class UnorderedEventMapperTest {
         assert result.getUnmappedRemoteEvents().isEmpty();
         assert result.getMapped().size() == serverEvents.length
                 && result.getMapped().size() == syncLogEntryList.size();
-        
-        // FIXME whiteboxtest double event functionality
-        
     }
     
     /**
@@ -314,12 +308,11 @@ public class UnorderedEventMapperTest {
         int numberUnmappedRemoteEvents = result.getUnmappedRemoteEvents().size();
         int numberMappedEvents = result.getMapped().size();
         int numberUnmappedLocalEvents = result.getUnmappedLocalEvents().size();
-        // TODO assertEquals
-        assert numberMappedEvents == 11 : "wrong number of mapped events: was "
-                + numberMappedEvents + ", but should have been 11";
-        assert numberUnmappedRemoteEvents == 10 : "wrong number of unmapped remote events: was "
-                + numberUnmappedRemoteEvents + ", but should have been 10";
-        assert numberUnmappedLocalEvents == 5 : "wrong number of unmapped local events: was "
-                + numberUnmappedLocalEvents + ", but should have been 5";
+        assertEquals("wrong number of mapped events: was " + numberMappedEvents
+                + ", but should have been 11", 11, numberMappedEvents);
+        assertEquals("wrong number of unmapped remote events: was " + numberUnmappedRemoteEvents
+                + ", but should have been 10", 10, numberUnmappedRemoteEvents);
+        assertEquals("wrong number of unmapped local events: was " + numberUnmappedLocalEvents
+                + ", but should have been 5", 5, numberUnmappedLocalEvents);
     }
 }

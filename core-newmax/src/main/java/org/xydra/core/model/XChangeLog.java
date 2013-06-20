@@ -103,6 +103,7 @@ public interface XChangeLog extends Serializable {
      * 
      * @return the internal, serialisable state holder
      */
+    @Deprecated
     XChangeLogState getChangeLogState();
     
     /**

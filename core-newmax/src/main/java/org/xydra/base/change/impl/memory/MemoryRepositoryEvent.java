@@ -83,7 +83,7 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
      */
     public static XRepositoryEvent createRemoveEvent(XId actor, XAddress target, XId modelId,
             long oldModelRevison, boolean inTrans) {
-        if(oldModelRevison < 0) {
+        if(oldModelRevison < 0 && oldModelRevison != REVISION_NOT_AVAILABLE) {
             throw new IllegalArgumentException(
                     "model revision must be set for repository REMOVE events, was "
                             + oldModelRevison);
@@ -107,12 +107,12 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
      * @param target
      * @param modelId
      * @param changeType
-     * @param modelRevision the model revision before this event happened
+     * @param oldModelRevision the model revision before this event happened
      * @param inTrans
      * @param implied
      */
     private MemoryRepositoryEvent(XId actor, XAddress target, XId modelId, ChangeType changeType,
-            long modelRevision, boolean inTrans, boolean implied) {
+            long oldModelRevision, boolean inTrans, boolean implied) {
         super(target, changeType, actor, inTrans, implied);
         
         if(target.getRepository() == null || target.getModel() != null) {
@@ -122,15 +122,14 @@ public class MemoryRepositoryEvent extends MemoryAtomicEvent implements XReposit
         if(modelId == null) {
             throw new IllegalArgumentException("model Id must be set for repository events");
         }
-        
-        // TODO this right???
-        if(modelRevision < RevisionConstants.NOT_EXISTING
-                && modelRevision != REVISION_OF_ENTITY_NOT_SET) {
-            throw new IllegalArgumentException("invalid modelRevision: " + modelRevision);
+        if(oldModelRevision < RevisionConstants.NOT_EXISTING
+                && oldModelRevision != REVISION_OF_ENTITY_NOT_SET
+                && oldModelRevision != REVISION_NOT_AVAILABLE) {
+            throw new IllegalArgumentException("invalid modelRevision: " + oldModelRevision);
         }
         
         this.modelId = modelId;
-        this.modelRevision = modelRevision;
+        this.modelRevision = oldModelRevision;
     }
     
     /**

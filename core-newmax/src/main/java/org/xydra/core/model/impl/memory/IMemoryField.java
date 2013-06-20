@@ -3,7 +3,6 @@ package org.xydra.core.model.impl.memory;
 import org.xydra.core.model.XField;
 
 
-// FIXME MAX set to default access
 public interface IMemoryField extends XField, IMemoryEntity, IMemoryMOFEntity {
     
     // boolean isSynchronized();

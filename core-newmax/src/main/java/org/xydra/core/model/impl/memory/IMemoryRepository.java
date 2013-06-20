@@ -9,7 +9,6 @@ import org.xydra.base.rmof.impl.XExistsRevWritableRepository;
 import org.xydra.core.model.XRepository;
 
 
-// FIXME MAX set to default access
 public interface IMemoryRepository extends XRepository, IMemoryEntity {
     
     void fireRepositoryEvent(XRepositoryEvent event);

@@ -1,4 +1,4 @@
-package org.xydra.core.model.impl.memory;
+package org.xydra.core.model.impl.memory.garbage;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,8 +17,6 @@ import org.xydra.base.change.XObjectCommand;
 import org.xydra.base.change.XObjectEvent;
 import org.xydra.base.change.XTransaction;
 import org.xydra.base.change.XTransactionEvent;
-import org.xydra.core.model.impl.memory.garbage.LocalChange;
-import org.xydra.core.model.impl.memory.garbage.XLocalChanges;
 import org.xydra.index.query.Pair;
 
 

@@ -195,9 +195,6 @@ abstract public class AbstractSerializedCommandTest extends AbstractSerializingT
         assertTrue(out.isClosed());
         String data = out.getData();
         
-        // FIXME BIG MONKEY
-        System.out.println(data);
-        
         log.debug(data);
         
         XydraElement e = parse(data);

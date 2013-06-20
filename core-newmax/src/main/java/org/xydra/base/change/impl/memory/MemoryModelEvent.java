@@ -108,7 +108,8 @@ public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {
         }
         
         if(objectRevision < RevisionConstants.NOT_EXISTING
-                && objectRevision != REVISION_OF_ENTITY_NOT_SET) {
+                && objectRevision != REVISION_OF_ENTITY_NOT_SET
+                && objectRevision != REVISION_NOT_AVAILABLE) {
             throw new IllegalArgumentException("invalid objectRevision: " + objectRevision);
         }
         

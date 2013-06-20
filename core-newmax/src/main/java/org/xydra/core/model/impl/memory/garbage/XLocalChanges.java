@@ -6,6 +6,7 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 
 
+@SuppressWarnings("javadoc")
 public interface XLocalChanges {
     
     /**

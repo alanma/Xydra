@@ -292,6 +292,7 @@ public class Executor {
     Root root, XRMOFChangeListener changeEventListener) {
         /* Assertions */
         assert modelState != null;
+        assert root != null;
         XyAssert.xyAssert(!root.isTransactionInProgess());
         
         if(command.getChangeType() == ChangeType.TRANSACTION) {

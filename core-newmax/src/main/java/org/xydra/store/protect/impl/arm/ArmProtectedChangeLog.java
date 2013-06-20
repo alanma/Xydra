@@ -146,6 +146,7 @@ public class ArmProtectedChangeLog implements XChangeLog {
     }
     
     @Override
+    @Deprecated
     public XChangeLogState getChangeLogState() {
         return this.log.getChangeLogState();
     }

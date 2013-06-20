@@ -102,7 +102,7 @@ Serializable {
         XAddress modelAddress = XX.resolveModel(father.getAddress(), modelId);
         
         MemoryModel nonExistingModel = new MemoryModel(modelAddress, Root.createWithActor(
-                modelAddress, actorId, XCommand.NONEXISTANT), father);
+                actorId, modelAddress, XCommand.NONEXISTANT), father);
         return nonExistingModel;
     }
     
@@ -269,7 +269,7 @@ Serializable {
     
     public MemoryModel(XId actorId, IMemoryRepository father, XRevWritableModel modelState) {
         super(Root
-                .createWithActor(modelState.getAddress(), actorId, modelState.getRevisionNumber()));
+                .createWithActor(actorId, modelState.getAddress(), modelState.getRevisionNumber()));
         
         assert modelState != null;
         
@@ -294,7 +294,7 @@ Serializable {
      * @param modelAddress
      */
     public MemoryModel(XId actorId, String passwordHash, XAddress modelAddress) {
-        this(Root.createWithActor(modelAddress, actorId, XCommand.NONEXISTANT), null, actorId,
+        this(Root.createWithActor(actorId, modelAddress, XCommand.NONEXISTANT), null, actorId,
                 passwordHash, modelAddress, null, true);
     }
     
@@ -320,7 +320,7 @@ Serializable {
      */
     public MemoryModel(XId actorId, String passwordHash, XExistsRevWritableModel modelState) {
         this(
-                Root.createWithActor(modelState.getAddress(), actorId,
+                Root.createWithActor(actorId, modelState.getAddress(),
                         modelState.getRevisionNumber()), null, actorId, passwordHash, modelState
                         .getAddress(), modelState, false);
     }

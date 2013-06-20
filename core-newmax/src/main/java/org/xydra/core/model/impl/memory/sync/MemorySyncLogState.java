@@ -77,7 +77,8 @@ public class MemorySyncLogState implements ISyncLogState {
     @Override
     public void appendSyncLogEntry(ISyncLogEntry syncLogEntry) {
         if(syncLogEntry == null || syncLogEntry.getEvent() == null) {
-            // TODO throw exception once all data is migrated; for now: do
+            // TODO data-migration: throw exception once all data is migrated;
+            // for now: do
             // nothing, just complain a little
             log.warn("Skipping null-event");
         } else {
@@ -88,10 +89,7 @@ public class MemorySyncLogState implements ISyncLogState {
                     + event.getRevisionNumber() + ",currentRev=" + getCurrentRevisionNumber()
                     + " event=" + event);
             XyAssert.xyAssert(!event.inTransaction(), "event=" + event);
-            // FIXME kill
-            log.info("Adding \n" + syncLogEntry);
-            Long key = event.getRevisionNumber();
-            assert !this.eventMap.containsKey(key);
+            assert !this.eventMap.containsKey(event.getRevisionNumber());
             addEntry(syncLogEntry);
         }
     }
@@ -336,8 +334,9 @@ public class MemorySyncLogState implements ISyncLogState {
                             + "number of this log");
         }
         ISyncLogEntry syncLogEntry = getSyncLogEntry(revisionNumber);
-        // TODO what to assert? || syncLogEntry.getValue().getRevisionNumber()
-        // == revisionNumber);
+        assert syncLogEntry.getEvent() == null
+                || syncLogEntry.getEvent().getRevisionNumber() == revisionNumber : "event="
+                + syncLogEntry.getEvent();
         return syncLogEntry;
     }
     

@@ -6,7 +6,6 @@ import org.xydra.core.change.XSyncEventListener;
 import org.xydra.core.model.impl.memory.sync.Root;
 
 
-// FIXME MAX set to default access
 public interface IMemoryMOFEntity extends XSendsSyncEvents {
     
     /**

@@ -242,19 +242,19 @@ public class Root {
     }
     
     /**
-     * @param baseAddress
-     * @param actorId
+     * @param actorId @NeverNull
+     * @param baseAddress for sync log @NeverNull
      * @param changeLogBaseRevision
      * @return ...
      */
-    public static Root createWithActor(XAddress baseAddress, XId actorId, long changeLogBaseRevision) {
+    public static Root createWithActor(XId actorId, XAddress baseAddress, long changeLogBaseRevision) {
         return new Root(new MemoryEventBus(), MemorySyncLog.create(baseAddress,
                 changeLogBaseRevision), actorId);
     }
     
     /**
-     * @param actorId
-     * @param baseAddress TODO
+     * @param actorId @NeverNull
+     * @param baseAddress for sync log @NeverNull
      * @param changeLogState @CanBeNull
      * @return ...
      */

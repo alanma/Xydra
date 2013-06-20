@@ -106,9 +106,8 @@ public class MemoryCommandFactory implements XCommandFactory {
                 false);
     }
     
-    @Override
-    public XObjectCommand createAddFieldCommand(XId repositoryId, XId modelId, XId objectId,
-            XId fieldId, boolean isForced) {
+    private static XObjectCommand createAddFieldCommand(XId repositoryId, XId modelId,
+            XId objectId, XId fieldId, boolean isForced) {
         long revNr = isForced ? XCommand.FORCED : XCommand.SAFE_STATE_BOUND;
         
         XAddress target = Base.toAddress(repositoryId, modelId, objectId, null);
@@ -181,9 +180,8 @@ public class MemoryCommandFactory implements XCommandFactory {
         return createAddObjectCommand(Base.resolveModel(repositoryId, modelId), objectId, false);
     }
     
-    @Override
-    public XModelCommand createAddObjectCommand(XId repositoryId, XId modelId, XId objectId,
-            boolean isForced) {
+    private static XModelCommand createAddObjectCommand(XId repositoryId, XId modelId,
+            XId objectId, boolean isForced) {
         long revNr = isForced ? XCommand.FORCED : XCommand.SAFE_STATE_BOUND;
         
         XAddress target = Base.toAddress(repositoryId, modelId, null, null);
@@ -334,8 +332,7 @@ public class MemoryCommandFactory implements XCommandFactory {
                 fieldRevision, value, false);
     }
     
-    @Override
-    public XFieldCommand createAddValueCommand(XId repositoryId, XId modelId, XId objectId,
+    private static XFieldCommand createAddValueCommand(XId repositoryId, XId modelId, XId objectId,
             XId fieldId, long fieldRevision, XValue value, boolean isForced) {
         if(fieldRevision == XCommand.FORCED && !isForced) {
             throw new IllegalArgumentException(
@@ -494,9 +491,8 @@ public class MemoryCommandFactory implements XCommandFactory {
                 value, false);
     }
     
-    @Override
-    public XFieldCommand createChangeValueCommand(XId repositoryId, XId modelId, XId objectId,
-            XId fieldId, long fieldRevision, XValue value, boolean isForced) {
+    private static XFieldCommand createChangeValueCommand(XId repositoryId, XId modelId,
+            XId objectId, XId fieldId, long fieldRevision, XValue value, boolean isForced) {
         if(fieldRevision == XCommand.FORCED && !isForced) {
             throw new IllegalArgumentException(
                     "Safe commands cannot have XCommand.FORCED as their revision number.");
@@ -964,11 +960,6 @@ public class MemoryCommandFactory implements XCommandFactory {
     @Override
     public XRepositoryCommand createForcedAddModelCommand(XId repositoryId, XId modelId) {
         return createAddModelCommand(repositoryId, modelId, true);
-    }
-    
-    @Override
-    public XModelCommand createForcedAddObjectCommand(XId repositoryId, XId modelId, XId objectId) {
-        return createAddObjectCommand(Base.resolveModel(repositoryId, modelId), objectId, true);
     }
     
     @Override
