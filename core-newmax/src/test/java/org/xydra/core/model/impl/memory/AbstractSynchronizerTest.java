@@ -1241,7 +1241,7 @@ abstract public class AbstractSynchronizerTest {
 			
 			model.executeCommand(tx);
 			
-			txBuilder = new XTransactionBuilder(model.getAddress());
+			txBuilder = new XTransactionBuilder(model.getAddress(), true);
 			
 			cm = new ChangedModel(model);
 			johnObject = cm.getObject(DemoModelUtil.JOHN_ID);
