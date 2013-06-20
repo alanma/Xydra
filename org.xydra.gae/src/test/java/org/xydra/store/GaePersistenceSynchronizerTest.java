@@ -13,29 +13,31 @@ import org.xydra.store.impl.gae.InstanceContext;
 
 
 public class GaePersistenceSynchronizerTest extends AbstractPersistenceSynchronizerTest {
-    
-    @BeforeClass
-    public static void init() {
-        LoggerTestHelper.init();
-        GaeTestfixer.enable();
-        GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-    }
-    
-    @Before
-    public void setUp() {
-        InstanceContext.clear();
-        XydraRuntime.getMemcache().clear();
-        super.setUp();
-    }
-    
-    @After
-    public void tearDown() {
-        super.tearDown();
-    }
-    
-    @Override
-    protected XydraPersistence createPersistence() {
-        return new GaePersistence(XX.toId("repo"));
-    }
-    
+	
+	@BeforeClass
+	public static void init() {
+		LoggerTestHelper.init();
+		GaeTestfixer.enable();
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+	}
+	
+	@Before
+	public void setUp() {
+		InstanceContext.clear();
+		XydraRuntime.getMemcache().clear();
+		super.setUp();
+	}
+	
+	@After
+	public void tearDown() {
+		super.tearDown();
+	}
+	
+	@Override
+	protected XydraPersistence createPersistence() {
+		GaePersistence p = new GaePersistence(XX.toId("repo"));
+		p.clear();
+		return p;
+	}
+	
 }
