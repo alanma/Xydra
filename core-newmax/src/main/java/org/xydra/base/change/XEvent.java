@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
-import org.xydra.core.change.RevisionConstants;
+import org.xydra.base.change.impl.memory.RevisionConstants;
 
 
 /**

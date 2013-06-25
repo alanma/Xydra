@@ -8,7 +8,6 @@ import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XObjectEvent;
 import org.xydra.base.change.XTransaction;
-import org.xydra.core.change.RevisionConstants;
 
 
 /**

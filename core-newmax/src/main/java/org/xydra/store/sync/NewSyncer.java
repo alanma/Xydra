@@ -73,7 +73,12 @@ public class NewSyncer {
     
     private long syncRev;
     
-    public void startSync() {
+    private XSynchronizationCallback synchronizationCallback;
+    
+    /**
+     * @param synchronizationCallback @CanBeNull
+     */
+    public void startSync(XSynchronizationCallback synchronizationCallback) {
         log.debug("Sync start on syncRev=" + this.syncRev + " modelRev="
                 + this.modelState.getRevisionNumber() + "...");
         
@@ -82,6 +87,7 @@ public class NewSyncer {
             log.warn("Syncer seems to run twice");
         }
         this.root.lock();
+        this.synchronizationCallback = synchronizationCallback;
         
         // create commands to be sent to server from syncLog/localChanges
         ArrayList<XCommand> localCommandList = new ArrayList<XCommand>();
@@ -127,8 +133,14 @@ public class NewSyncer {
     
     private IMemoryModel modelWithListeners;
     
-    public void onServerFailure(Throwable exception) {
-        // TODO stop syncing
+    public void onServerFailure(Throwable t) {
+        log.warn("Sync exception", t);
+        if(this.synchronizationCallback != null) {
+            this.synchronizationCallback.onRequestError(t);
+        }
+        
+        // TODO stop syncing, release lock
+        this.root.unlock();
     }
     
     public void onServerSuccess(Pair<BatchedResult<Long>[],BatchedResult<XEvent[]>[]> pair) {
@@ -162,7 +174,7 @@ public class NewSyncer {
      * 
      * @param serverEvents
      */
-    private void continueSync(XEvent[] serverEvents) {
+    public void continueSync(XEvent[] serverEvents) {
         log.debug("***** Computing eventDelta from " + serverEvents.length
                 + " server events and n local changes");
         
@@ -248,6 +260,9 @@ public class NewSyncer {
         }
         
         log.info("Done syncing");
+        if(this.synchronizationCallback != null) {
+            this.synchronizationCallback.onSuccess();
+        }
     }
     
     /**

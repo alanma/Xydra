@@ -7,7 +7,6 @@ import org.xydra.base.XId;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XRepositoryEvent;
-import org.xydra.core.change.RevisionConstants;
 
 
 /**

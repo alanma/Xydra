@@ -6,7 +6,6 @@ import org.xydra.base.XId;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XRepositoryCommand;
-import org.xydra.core.change.RevisionConstants;
 
 
 /**

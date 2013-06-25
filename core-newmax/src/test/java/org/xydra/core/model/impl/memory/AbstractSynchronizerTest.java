@@ -264,7 +264,7 @@ abstract public class AbstractSynchronizerTest {
      * Synchronize and check that there were no errors.
      */
     private static void synchronize(NewSyncer sync) {
-        sync.startSync();
+        sync.startSync(null);
     }
     
     @After
@@ -781,7 +781,7 @@ abstract public class AbstractSynchronizerTest {
         assertTrue(this.localModel.hasObject(frankId));
         
         // Now synchronize with the server.
-        this.sharedSyncer.startSync();
+        this.sharedSyncer.startSync(null);
         
         // command may not be applied remotely yet!
         
@@ -814,7 +814,7 @@ abstract public class AbstractSynchronizerTest {
         assertFalse(this.localModel.hasObject(DemoModelUtil.PETER_ID));
         assertTrue(this.localModel.hasObject(janeId));
         
-        this.sharedSyncer.startSync();
+        this.sharedSyncer.startSync(null);
         
         // both commands may still not be applied remotely
         

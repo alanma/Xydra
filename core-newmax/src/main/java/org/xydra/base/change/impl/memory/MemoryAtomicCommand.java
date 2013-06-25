@@ -9,7 +9,6 @@ import org.xydra.base.XId;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XAtomicCommand;
 import org.xydra.base.change.XCommand;
-import org.xydra.core.change.RevisionConstants;
 
 
 @RunsInGWT(true)

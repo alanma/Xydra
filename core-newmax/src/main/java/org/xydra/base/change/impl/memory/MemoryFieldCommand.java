@@ -5,7 +5,6 @@ import org.xydra.base.XId;
 import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XFieldCommand;
 import org.xydra.base.value.XValue;
-import org.xydra.core.change.RevisionConstants;
 import org.xydra.index.XI;
 
 

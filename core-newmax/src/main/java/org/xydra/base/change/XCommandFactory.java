@@ -2,8 +2,8 @@ package org.xydra.base.change;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
+import org.xydra.base.change.impl.memory.RevisionConstants;
 import org.xydra.base.value.XValue;
-import org.xydra.core.change.RevisionConstants;
 
 
 /**

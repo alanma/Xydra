@@ -7,7 +7,6 @@ import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XFieldEvent;
 import org.xydra.base.change.XTransaction;
 import org.xydra.base.value.XValue;
-import org.xydra.core.change.RevisionConstants;
 import org.xydra.index.XI;
 
 

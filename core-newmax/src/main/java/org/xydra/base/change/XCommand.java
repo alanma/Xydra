@@ -3,7 +3,7 @@ package org.xydra.base.change;
 import java.io.Serializable;
 
 import org.xydra.base.XAddress;
-import org.xydra.core.change.RevisionConstants;
+import org.xydra.base.change.impl.memory.RevisionConstants;
 
 
 /**

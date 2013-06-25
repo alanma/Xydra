@@ -7,16 +7,18 @@ package org.xydra.store.sync;
  * 
  */
 public interface XSynchronizationCallback {
-	
-	void onCommandErrror(Throwable t);
-	
-	void onEventsError(Throwable t);
-	
-	void onRequestError(Throwable t);
-	
-	void onSuccess();
-	
-	// TODO add methods to be called if we detect that synchronization has been
-	// lost
-	
+    
+    // TODO kill?
+    void onCommandErrror(Throwable t);
+    
+    // TODO kill?
+    void onEventsError(Throwable t);
+    
+    void onRequestError(Throwable t);
+    
+    void onSuccess();
+    
+    // TODO add methods to be called if we detect that synchronization has been
+    // lost
+    
 }
