@@ -7,8 +7,8 @@ import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XFieldEvent;
 import org.xydra.base.change.impl.memory.MemoryAtomicEvent;
+import org.xydra.base.change.impl.memory.RevisionConstants;
 import org.xydra.base.value.XValue;
-import org.xydra.core.change.RevisionConstants;
 import org.xydra.index.XI;
 import org.xydra.store.impl.gae.changes.GaeEvents.AsyncValue;
 
