@@ -29,38 +29,6 @@ public class ModelIndex {
 	public boolean matches(XidOrVariable object, XidOrVariable field, XvalueOrVariable value) {
 		return this.index.contains(toConstraint(object), toConstraint(field), toConstraint(value));
 		
-		// if (object == Variable.ANY) {
-		// if (field == Variable.ANY) {
-		// if (value == Variable.ANY) {
-		// // (***) TODO return true if model contains any value
-		// } else {
-		// // (**V)
-		// }
-		// } else {
-		// if (value == Variable.ANY) {
-		// // (*F*)
-		// } else {
-		// // (*FV)
-		// }
-		// }
-		// } else {
-		// if (field == Variable.ANY) {
-		// if (value == Variable.ANY) {
-		// // (O**) TODO return true if model contains any value
-		// // TODO answer without index
-		// } else {
-		// // (O*V)
-		// }
-		// } else {
-		// if (value == Variable.ANY) {
-		// // (OF*)
-		// // TODO answer without index
-		// } else {
-		// // (OFV)
-		// // TODO answer without index
-		// }
-		// }
-		// }
 	}
 	
 	private static Constraint<XId> toConstraint(XidOrVariable xidOrVariable) {

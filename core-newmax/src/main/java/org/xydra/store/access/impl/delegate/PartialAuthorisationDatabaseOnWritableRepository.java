@@ -63,7 +63,8 @@ public class PartialAuthorisationDatabaseOnWritableRepository implements XAccess
 	        .getLogger(PartialAuthorisationDatabaseOnWritableRepository.class);
 	
 	private static boolean accessIdToBoolean(XId accessType) {
-		XyAssert.xyAssert(accessType != null); assert accessType != null;
+		XyAssert.xyAssert(accessType != null);
+		assert accessType != null;
 		if(XA.ACCESS_ALLOW.equals(accessType)) {
 			return true;
 		}
@@ -267,7 +268,8 @@ public class PartialAuthorisationDatabaseOnWritableRepository implements XAccess
 			XWritableModel rightsModel = this.authorisationRepository.getModel(modelId);
 			if(rightsModel == null) {
 				rightsModel = this.authorisationRepository.createModel(modelId);
-				XyAssert.xyAssert(rightsModel != null); assert rightsModel != null;
+				XyAssert.xyAssert(rightsModel != null);
+				assert rightsModel != null;
 			}
 			modelAccessDb = new ModelAccessDatabaseOnWritableModel(rightsModel);
 			this.modelAccessDbs.put(modelId, modelAccessDb);
