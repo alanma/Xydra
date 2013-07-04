@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.0.4//EN" "http://google-web-toolkit.googlecode.com/svn/tags/2.0.4/distro-source/core/src/gwt-module.dtd">
+<!-- If the jar resulting from this maven/eclipse project is on the classpath,
+     then this GWT module def prevents the GWT compiler from trying to compile
+     the RuntimeBindung class. -->
+
+<!-- Inherit as 'org.xydra.store.platform.RuntimeBinding'  -->
+<module>
+
+	<source path="" >
+		<exclude name="**/*.java"/>
+	</source>
+	
+</module>
