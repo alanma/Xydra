@@ -156,10 +156,10 @@ public class TestServer {
         access.getAuthorisationDatabase().setAccess(actorId, repoAddr2, XA.ACCESS_WRITE, true);
         
         XRepositoryCommand createCommand2 = MemoryRepositoryCommand.createAddCommand(repoAddr2,
-                XCommand.SAFE, DemoModelUtil.PHONEBOOK_ID);
+                XCommand.SAFE_STATE_BOUND, DemoModelUtil.PHONEBOOK_ID);
         XAddress modelAddr2 = createCommand2.getChangedEntity();
         XTransactionBuilder tb2 = new XTransactionBuilder(modelAddr2);
-        DemoModelUtil.setupPhonebook(modelAddr2, tb2);
+        DemoModelUtil.setupPhonebook(modelAddr2, tb2, true);
         
         store.executeCommands(actorId, passwordHash,
                 new XCommand[] { createCommand2, tb2.buildCommand() }, null);

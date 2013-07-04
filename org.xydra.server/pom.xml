@@ -10,7 +10,7 @@
 	</parent>
 
 	<artifactId>server</artifactId>
-	<!--@@ use xydra.version here --><version>0.1.6-SNAPSHOT</version>
+	<!--@@ use xydra.version here --><version>0.1.7-SNAPSHOT</version>
 	<!-- /!\ Needs to be 'jar' for 'mvn deploy' but 'war' for 'gae:deploy' -->
 	<packaging>jar</packaging>
 	<name>Xydra Server</name>
@@ -64,7 +64,7 @@
 			<groupId>org.xydra</groupId>
 			<artifactId>core</artifactId>
             <!-- @@ use xydra.version here -->
-            <version>0.1.6-SNAPSHOT</version>
+            <version>0.1.7-SNAPSHOT</version>
 		</dependency>
 
 		<!-- Depend on tests in core as explained in -->
@@ -73,7 +73,7 @@
 			<groupId>org.xydra</groupId>
 			<artifactId>core</artifactId>
             <!-- @@ use xydra.version here -->
-            <version>0.1.6-SNAPSHOT</version>
+            <version>0.1.7-SNAPSHOT</version>
 			<type>test-jar</type>
 			<scope>compile</scope>
 		</dependency>
@@ -83,7 +83,7 @@
 			<groupId>org.xydra</groupId>
 			<artifactId>restless</artifactId>
             <!-- @@ use xydra.version here -->
-            <version>0.1.6-SNAPSHOT</version>
+            <version>0.1.7-SNAPSHOT</version>
 		</dependency>
 
 		<!-- logging -->
@@ -91,13 +91,13 @@
 			<groupId>org.xydra</groupId>
 			<artifactId>log</artifactId>
             <!-- @@ use xydra.version here -->
-            <version>0.1.6-SNAPSHOT</version>
+            <version>0.1.7-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>log.gae</artifactId>
             <!-- @@ use xydra.version here -->
-            <version>0.1.6-SNAPSHOT</version>
+            <version>0.1.7-SNAPSHOT</version>
 		</dependency>
 
 		<!-- test server -->
@@ -127,7 +127,7 @@
 			<groupId>org.xydra</groupId>
 			<artifactId>csv</artifactId>
             <!-- @@ use xydra.version here -->
-            <version>0.1.6-SNAPSHOT</version>
+            <version>0.1.7-SNAPSHOT</version>
 		</dependency>
 
 
