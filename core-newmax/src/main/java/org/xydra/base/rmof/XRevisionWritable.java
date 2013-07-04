@@ -3,7 +3,7 @@ package org.xydra.base.rmof;
 import org.xydra.annotations.ModificationOperation;
 
 
-public interface XRevisionWritable {
+public interface XRevisionWritable extends XRevisionReadable {
     
     /**
      * Set the revision number of this entity. Revision number of contained

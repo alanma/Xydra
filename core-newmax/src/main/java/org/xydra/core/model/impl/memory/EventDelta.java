@@ -28,7 +28,9 @@ import org.xydra.base.rmof.XRevWritableField;
 import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.base.rmof.XWritableField;
+import org.xydra.base.rmof.impl.ISyncableState;
 import org.xydra.base.rmof.impl.XExistsRevWritableModel;
+import org.xydra.base.rmof.impl.XExistsRevWritableObject;
 import org.xydra.base.value.XValue;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.impl.memory.sync.ISyncLog;
@@ -549,6 +551,23 @@ public class EventDelta {
     }
     
     /**
+     * Applies the deltas to the given entity without setting revision numbers.
+     * Throws runtime exceptions when encountering anomalies
+     * 
+     * @param syncableState
+     */
+    public void applyTo(ISyncableState syncableState) {
+        if(syncableState instanceof XRevWritableModel) {
+            applyTo((XRevWritableModel)syncableState);
+        } else if(syncableState instanceof XRevWritableObject) {
+            applyTo((XRevWritableObject)syncableState);
+        } else {
+            throw new RuntimeException("Cannot apply to instanceof of "
+                    + syncableState.getClass().getName());
+        }
+    }
+    
+    /**
      * Applies the deltas to the given model without setting revision numbers.
      * Throws runtime exceptions when encountering anomalies
      * 
@@ -677,25 +696,165 @@ public class EventDelta {
             } else if(currentEvent instanceof XObjectEvent) {
                 objectRevision = currentEvent.getOldObjectRevision();
                 XObjectEvent objectEvent = (XObjectEvent)currentEvent;
-                model.getObject(objectEvent.getObjectId()).setRevisionNumber(objectRevision);
-                
+                XRevWritableObject object = model.getObject(objectEvent.getObjectId());
+                object.setRevisionNumber(objectRevision);
                 if(changeType == ChangeType.ADD) {
                     fieldRevision = currentEvent.getOldFieldRevision();
-                    model.getObject(objectEvent.getObjectId()).getField(objectEvent.getFieldId())
-                            .setRevisionNumber(fieldRevision);
+                    object.getField(objectEvent.getFieldId()).setRevisionNumber(fieldRevision);
                 }
             } else if(currentEvent instanceof XFieldEvent) {
                 objectRevision = currentEvent.getOldObjectRevision();
                 fieldRevision = currentEvent.getOldFieldRevision();
                 
                 XFieldEvent fieldEvent = (XFieldEvent)currentEvent;
-                model.getObject(fieldEvent.getObjectId()).setRevisionNumber(objectRevision);
-                model.getObject(fieldEvent.getObjectId()).getField(fieldEvent.getFieldId())
-                        .setRevisionNumber(fieldRevision);
+                XRevWritableObject object = model.getObject(fieldEvent.getObjectId());
+                object.setRevisionNumber(objectRevision);
+                object.getField(fieldEvent.getFieldId()).setRevisionNumber(fieldRevision);
             }
         }
         
         log.debug("Done applying eventDelta to " + model.getAddress());
+    }
+    
+    /**
+     * Applies the deltas to the given object without setting revision numbers.
+     * Throws runtime exceptions when encountering anomalies
+     * 
+     * @param object
+     */
+    public void applyTo(XRevWritableObject object) {
+        log.debug("Apply EventDelta=\n" + toString() + "\n***");
+        
+        /* newly created object */
+        for(XModelEvent modelEvent : this.modelEvents.values()) {
+            if(modelEvent.getChangeType() == ChangeType.ADD) {
+                XId objectId = modelEvent.getObjectId();
+                if(!object.getId().equals(objectId))
+                    throw new IllegalStateException(
+                            "EventDelta contains changes for other objects such as '" + objectId
+                                    + "'");
+                if(object instanceof XExistsRevWritableObject) {
+                    XExistsRevWritableObject object2 = (XExistsRevWritableObject)object;
+                    if(object2.exists())
+                        throw new RuntimeException("object " + objectId + " already existed!");
+                    log.debug("Creating object " + objectId);
+                    object2.setExists(true);
+                }
+                object.setRevisionNumber(modelEvent.getRevisionNumber());
+            }
+        }
+        /* for all events concerning newly created fields: */
+        Iterator<KeyKeyEntryTuple<XId,XId,XObjectEvent>> objectEventIterator = this.objectEvents
+                .tupleIterator(new Wildcard<XId>(), new Wildcard<XId>(),
+                        new Wildcard<XObjectEvent>());
+        while(objectEventIterator.hasNext()) {
+            KeyKeyEntryTuple<XId,XId,XObjectEvent> tuple = objectEventIterator.next();
+            XObjectEvent currentEvent = tuple.getEntry();
+            if(currentEvent.getChangeType() == ChangeType.ADD) {
+                XId objectId = tuple.getKey1();
+                if(!object.getId().equals(objectId))
+                    throw new IllegalStateException(
+                            "EventDelta contains changes for other objects such as '" + objectId
+                                    + "'");
+                XId fieldId = tuple.getKey2();
+                XRevWritableField field = object.createField(fieldId);
+                field.setRevisionNumber(currentEvent.getRevisionNumber());
+            }
+        }
+        
+        /* for all events concerning newly created values */
+        Iterator<KeyKeyEntryTuple<XId,XId,XFieldEvent>> fieldEventIterator = this.fieldEvents
+                .tupleIterator(new Wildcard<XId>(), new Wildcard<XId>(),
+                        new Wildcard<XFieldEvent>());
+        while(fieldEventIterator.hasNext()) {
+            KeyKeyEntryTuple<org.xydra.base.XId,org.xydra.base.XId,org.xydra.base.change.XFieldEvent> keyKeyEntryTuple = (KeyKeyEntryTuple<org.xydra.base.XId,org.xydra.base.XId,org.xydra.base.change.XFieldEvent>)fieldEventIterator
+                    .next();
+            XId fieldId = keyKeyEntryTuple.getKey2();
+            XFieldEvent currentEvent = keyKeyEntryTuple.getEntry();
+            XId objectId = keyKeyEntryTuple.getKey1();
+            if(!object.getId().equals(objectId))
+                throw new IllegalStateException(
+                        "EventDelta contains changes for other objects such as '" + objectId + "'");
+            XWritableField currentField = object.getField(fieldId);
+            if(currentEvent.getChangeType() == ChangeType.ADD
+                    || currentEvent.getChangeType() == ChangeType.CHANGE) {
+                if(currentField != null) {
+                    currentField.setValue(currentEvent.getNewValue());
+                    
+                }
+            } else if(currentEvent.getChangeType() == ChangeType.REMOVE) {
+                currentField.setValue(null);
+            }
+        }
+        
+        /* for all events concerning fields to be removed */
+        objectEventIterator = this.objectEvents.tupleIterator(new Wildcard<XId>(),
+                new Wildcard<XId>(), new Wildcard<XObjectEvent>());
+        while(objectEventIterator.hasNext()) {
+            KeyKeyEntryTuple<XId,XId,XObjectEvent> tuple = objectEventIterator.next();
+            XObjectEvent currentEvent = tuple.getEntry();
+            if(currentEvent.getChangeType() == ChangeType.REMOVE) {
+                XId objectId = tuple.getKey1();
+                if(!object.getId().equals(objectId))
+                    throw new IllegalStateException(
+                            "EventDelta contains changes for other objects such as '" + objectId
+                                    + "'");
+                XId fieldId = tuple.getKey2();
+                object.removeField((fieldId));
+            }
+        }
+        
+        /* for all events concerning objects to be removed */
+        for(XModelEvent modelEvent : this.modelEvents.values()) {
+            if(modelEvent.getChangeType() == ChangeType.REMOVE) {
+                XId objectId = modelEvent.getObjectId();
+                if(!object.getId().equals(objectId))
+                    throw new IllegalStateException(
+                            "EventDelta contains changes for other objects such as '" + objectId
+                                    + "'");
+                if(object instanceof XExistsRevWritableObject) {
+                    XExistsRevWritableObject object2 = (XExistsRevWritableObject)object;
+                    if(!object2.exists())
+                        throw new RuntimeException("object " + objectId + " did not exist!");
+                    log.debug("Removing object " + objectId);
+                    object2.setExists(false);
+                }
+            }
+        }
+        
+        /* now apply revision numbers of all failed local events */
+        for(int i = this.failedLocalEvents.size() - 1; i >= 0; i--) {
+            long objectRevision = -999;
+            long fieldRevision = -999;
+            
+            XEvent currentEvent = this.failedLocalEvents.get(i);
+            ChangeType changeType = currentEvent.getChangeType();
+            
+            if(currentEvent instanceof XModelEvent) {
+                if(changeType == ChangeType.ADD) {
+                    objectRevision = currentEvent.getOldObjectRevision();
+                    object.setRevisionNumber(objectRevision);
+                }
+            } else if(currentEvent instanceof XObjectEvent) {
+                objectRevision = currentEvent.getOldObjectRevision();
+                XObjectEvent objectEvent = (XObjectEvent)currentEvent;
+                object.setRevisionNumber(objectRevision);
+                
+                if(changeType == ChangeType.ADD) {
+                    fieldRevision = currentEvent.getOldFieldRevision();
+                    object.getField(objectEvent.getFieldId()).setRevisionNumber(fieldRevision);
+                }
+            } else if(currentEvent instanceof XFieldEvent) {
+                objectRevision = currentEvent.getOldObjectRevision();
+                fieldRevision = currentEvent.getOldFieldRevision();
+                
+                XFieldEvent fieldEvent = (XFieldEvent)currentEvent;
+                object.setRevisionNumber(objectRevision);
+                object.getField(fieldEvent.getFieldId()).setRevisionNumber(fieldRevision);
+            }
+        }
+        
+        log.debug("Done applying eventDelta to " + object.getAddress());
     }
     
     /**

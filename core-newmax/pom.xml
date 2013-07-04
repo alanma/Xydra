@@ -11,7 +11,7 @@
 
 	<artifactId>core</artifactId>
 	<!-- @@ use xydra.version -->
-	<version>0.1.6-SNAPSHOT</version>
+	<version>0.1.7-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>Xydra Core</name>
 
@@ -37,13 +37,13 @@
 			<groupId>org.xydra</groupId>
 			<artifactId>annotations</artifactId>
 			<!--@@ use xydra.version here -->
-			<version>0.1.6-SNAPSHOT</version>
+			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>annotations</artifactId>
 			<!--@@ use xydra.version here -->
-			<version>0.1.6-SNAPSHOT</version>
+			<version>0.1.7-SNAPSHOT</version>
 			<classifier>sources</classifier>
 		</dependency>
 
@@ -52,22 +52,27 @@
 			<groupId>org.xydra</groupId>
 			<artifactId>index</artifactId>
 			<!--@@ use xydra.version here -->
-			<version>0.1.6-SNAPSHOT</version>
+			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>index</artifactId>
 			<!--@@ use xydra.version here -->
-			<version>0.1.6-SNAPSHOT</version>
+			<version>0.1.7-SNAPSHOT</version>
 			<classifier>sources</classifier>
 		</dependency>
 
 		<!-- Xlog -->
 		<dependency>
+			<groupId>com.allen-sauer.gwt.log</groupId>
+			<artifactId>gwt-log</artifactId>
+			<version>3.2.1</version>
+		</dependency>
+		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>log.gae</artifactId>
 			<!--@@ use xydra.version here -->
-			<version>0.1.6-SNAPSHOT</version>
+			<version>0.1.7-SNAPSHOT</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -89,13 +94,13 @@
 			<groupId>org.xydra</groupId>
 			<artifactId>log</artifactId>
 			<!--@@ use xydra.version here -->
-			<version>0.1.6-SNAPSHOT</version>
+			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>log</artifactId>
 			<!--@@ use xydra.version here -->
-			<version>0.1.6-SNAPSHOT</version>
+			<version>0.1.7-SNAPSHOT</version>
 			<classifier>sources</classifier>
 		</dependency>
 
@@ -103,14 +108,14 @@
 			<groupId>org.xydra</groupId>
 			<artifactId>log.gae</artifactId>
 			<!--@@ use xydra.version here -->
-			<version>0.1.6-SNAPSHOT</version>
+			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>restless</artifactId>
 			<!--@@ use xydra.version here -->
-			<version>0.1.6-SNAPSHOT</version>
+			<version>0.1.7-SNAPSHOT</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -118,7 +123,7 @@
 			<groupId>org.xydra</groupId>
 			<artifactId>devtools</artifactId>
 			<!--@@ use xydra.version here -->
-			<version>0.1.6-SNAPSHOT</version>
+			<version>0.1.7-SNAPSHOT</version>
 			<scope>test</scope>
 		</dependency>
 

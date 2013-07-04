@@ -4,6 +4,7 @@ import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.ReadOperation;
 import org.xydra.base.XId;
+import org.xydra.base.rmof.impl.ISyncableState;
 import org.xydra.base.rmof.impl.XExistsReadableModel;
 
 
@@ -11,7 +12,8 @@ import org.xydra.base.rmof.impl.XExistsReadableModel;
  * An {@link XWritableModel} whose revision can be set and to which existing
  * {@link XRevWritableObject XRevWritableObjects} can be added.
  */
-public interface XRevWritableModel extends XWritableModel, XRevisionWritable, XExistsReadableModel {
+public interface XRevWritableModel extends XWritableModel, XRevisionWritable, XExistsReadableModel,
+        ISyncableState {
     
     /**
      * Add an existing object to this field. Objects created using

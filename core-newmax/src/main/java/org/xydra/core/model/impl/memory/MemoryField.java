@@ -314,4 +314,13 @@ public class MemoryField extends AbstractMOFEntity implements XField, IMemoryFie
         this.fieldState.setExists(entityExists);
     }
     
+    @Override
+    public long executeCommand(XCommand command) {
+        if(command instanceof XFieldCommand) {
+            return executeFieldCommand((XFieldCommand)command);
+        } else {
+            throw new IllegalArgumentException("Can only execute field commands on fields");
+        }
+    }
+    
 }

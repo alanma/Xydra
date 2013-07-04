@@ -15,6 +15,7 @@ import org.xydra.core.change.XObjectEventListener;
 import org.xydra.core.change.XRepositoryEventListener;
 import org.xydra.core.change.XSyncEventListener;
 import org.xydra.core.change.XTransactionEventListener;
+import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XChangeLogState;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.impl.memory.MemoryChangeLogState;
@@ -31,7 +32,7 @@ import org.xydra.core.model.impl.memory.MemoryEventBus.EventType;
  * 
  * @author xamde
  */
-public class Root {
+public class Root implements XRoot {
     
     /**
      * @param eventBus
@@ -242,6 +243,18 @@ public class Root {
     }
     
     /**
+     * Set a new actor to be used when building commands for changes to this
+     * entity and its children.
+     * 
+     * @param actorId for this entity and its children, if any.
+     * @param passwordHash the password for the given actor.
+     */
+    public void setSessionActor(XId actorId, String passwordHash) {
+        setSessionActor(actorId);
+        setSessionPasswordHash(passwordHash);
+    }
+    
+    /**
      * @param actorId @NeverNull
      * @param baseAddress for sync log @NeverNull
      * @param changeLogBaseRevision
@@ -315,4 +328,22 @@ public class Root {
         return "inTrans?" + this.isTransactionInProgress + " locked?" + this.locked + " "
                 + this.syncLog.toString();
     }
+    
+    @Override
+    public XChangeLog getChangeLog() {
+        return this.getSyncLog();
+    }
+    
+    @Override
+    public boolean addListenerForSyncEvents(XSyncEventListener syncListener) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+    
+    @Override
+    public boolean removeListenerForSyncEvents(XSyncEventListener syncListener) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+    
 }

@@ -3,6 +3,7 @@ package org.xydra.base.rmof;
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.ReadOperation;
 import org.xydra.base.XId;
+import org.xydra.base.rmof.impl.ISyncableState;
 import org.xydra.base.rmof.impl.XExistsReadableObject;
 
 
@@ -11,7 +12,7 @@ import org.xydra.base.rmof.impl.XExistsReadableObject;
  * {@link XRevWritableField XRevWritableFields} can be added.
  */
 public interface XRevWritableObject extends XWritableObject, XRevisionWritable,
-        XExistsReadableObject {
+        XExistsReadableObject, ISyncableState {
     
     /**
      * Add an existing field to this object. Fields created using

@@ -101,8 +101,8 @@ Serializable {
         
         XAddress modelAddress = XX.resolveModel(father.getAddress(), modelId);
         
-        MemoryModel nonExistingModel = new MemoryModel(modelAddress, Root.createWithActor(
-                actorId, modelAddress, XCommand.NONEXISTANT), father);
+        MemoryModel nonExistingModel = new MemoryModel(modelAddress, Root.createWithActor(actorId,
+                modelAddress, XCommand.NONEXISTANT), father);
         return nonExistingModel;
     }
     
@@ -367,12 +367,6 @@ Serializable {
         }
     }
     
-    // implement XSynchronizesChanges
-    @Override
-    public int countUnappliedLocalChanges() {
-        return this.getRoot().countUnappliedLocalChanges();
-    }
-    
     @Override
     @ModificationOperation
     public IMemoryObject createObject(@NeverNull XId objectId) {
@@ -581,28 +575,10 @@ Serializable {
         }
     }
     
-    // implement XSynchronizesChanges
-    @Override
-    public XId getSessionActor() {
-        return getRoot().getSessionActor();
-    }
-    
-    // implement XSynchronizesChanges
-    @Override
-    public String getSessionPasswordHash() {
-        return getRoot().getSessionPasswordHash();
-    }
-    
     // implements IMemoryModel
     @Override
     public XExistsRevWritableModel getState() {
         return this.modelState;
-    }
-    
-    // implement XSynchronizesChanges
-    @Override
-    public long getSynchronizedRevision() {
-        return getRoot().getSyncLog().getSynchronizedRevision();
     }
     
     @Override
