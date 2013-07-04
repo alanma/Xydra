@@ -3,7 +3,6 @@ package org.xydra.log.util;
 import java.util.List;
 
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.core.util.DebugUtils;
 
 
 /**
