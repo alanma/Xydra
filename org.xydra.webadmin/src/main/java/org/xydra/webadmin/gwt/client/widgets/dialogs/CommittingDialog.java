@@ -8,9 +8,9 @@ import org.xydra.base.XId;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.util.DumpUtilsBase.XidComparator;
-import org.xydra.core.model.delta.DeltaUtils;
-import org.xydra.core.model.delta.DeltaUtils.IFieldDiff;
-import org.xydra.core.model.delta.DeltaUtils.IObjectDiff;
+import org.xydra.core.model.delta.IFieldDiff;
+import org.xydra.core.model.delta.IModelDiff;
+import org.xydra.core.model.delta.IObjectDiff;
 import org.xydra.core.util.DumpUtils;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
@@ -103,7 +103,7 @@ public class CommittingDialog extends DialogBox {
 		this.mainPanel.add(okButton);
 	}
 	
-	public static StringBuilder changesToString(final DeltaUtils.IModelDiff changedModel) {
+	public static StringBuilder changesToString(final IModelDiff changedModel) {
 		StringBuilder sb = new StringBuilder();
 		List<XReadableObject> addedList = new ArrayList<XReadableObject>(changedModel.getAdded());
 		Collections.sort(addedList, XidComparator.INSTANCE);
@@ -128,7 +128,7 @@ public class CommittingDialog extends DialogBox {
 		return sb;
 	}
 	
-	public static StringBuilder changesToString(final DeltaUtils.IObjectDiff changedObject) {
+	public static StringBuilder changesToString(final IObjectDiff changedObject) {
 		StringBuilder sb = new StringBuilder();
 		List<XReadableField> addedList = new ArrayList<XReadableField>(changedObject.getAdded());
 		Collections.sort(addedList, XidComparator.INSTANCE);
@@ -153,7 +153,7 @@ public class CommittingDialog extends DialogBox {
 		return sb;
 	}
 	
-	public static StringBuilder changesToString(final DeltaUtils.IFieldDiff changedField) {
+	public static StringBuilder changesToString(final IFieldDiff changedField) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("'" + changedField.getInitialValue() + "' ==> '" + changedField.getValue()
 		        + "' \n");
