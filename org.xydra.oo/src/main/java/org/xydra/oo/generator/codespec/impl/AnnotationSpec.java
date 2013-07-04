@@ -14,7 +14,7 @@ public class AnnotationSpec<T> {
      * @param annot which annotation is made
      * @param values of the annotation
      */
-    @SafeVarargs
+    // @SafeVarargs
     AnnotationSpec(Class<?> annot, T ... values) {
         this.annot = annot;
         this.values = values;

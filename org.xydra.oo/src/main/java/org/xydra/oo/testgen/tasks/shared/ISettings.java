@@ -5,7 +5,7 @@ import org.xydra.base.XId;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.oo.Field;
 
-/** Generated on Thu Mar 07 22:05:12 CET 2013 by SpecWriter, a part of xydra.org:oo */
+/** Generated on Thu Jul 04 11:34:29 CEST 2013 by SpecWriter, a part of xydra.org:oo */
 public interface ISettings extends IHasXId {
 
     /** 

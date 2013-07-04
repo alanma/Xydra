@@ -9,8 +9,8 @@ import org.xydra.oo.testgen.alltypes.shared.IHasAllType;
 import org.xydra.oo.testgen.alltypes.shared.IPerson;
 
 /** 
- * Generated on Thu Mar 07 22:05:12 CET 2013 Generated on Thu Mar 07 22:05:12 CET 2013  
- * by SpecWriter, a part of xydra.org:oo 
+ * Generated on Thu Jul 04 11:34:29 CEST 2013 Generated on Thu Jul 04 11:34:29 CEST  
+ * 2013 by SpecWriter, a part of xydra.org:oo 
  */
 public class GwtFactory extends AbstractSharedFactory {
 

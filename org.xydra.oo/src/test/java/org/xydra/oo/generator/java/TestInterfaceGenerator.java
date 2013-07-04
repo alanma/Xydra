@@ -38,8 +38,8 @@ public class TestInterfaceGenerator {
     
     @Test
     public void generateTasksInterfaces() throws IOException {
-        JavaCodeGenerator.generateInterfaces(TasksSpec.class, new File("./src/main/java"), TESTGEN
-                + ".tasks");
+        JavaCodeGenerator
+                .generateInterfaces(TasksSpec.class, new File("./src"), TESTGEN + ".tasks");
         
         String logs = REMEMBER_LISTENER.getLogs();
         assertFalse("No fields should be ignored", logs.contains("Ignoring field"));
@@ -52,8 +52,8 @@ public class TestInterfaceGenerator {
         JavaTypeMapping.addSingleTypeMapping(MyLongBasedType.class, ValueType.Long,
                 MyLongBasedType.MAPPER);
         
-        JavaCodeGenerator.generateInterfaces(AllTypesSpec.class, new File("./src/main/java"),
-                TESTGEN + ".alltypes");
+        JavaCodeGenerator.generateInterfaces(AllTypesSpec.class, new File("./src"), TESTGEN
+                + ".alltypes");
         
         assertTrue(OOReflectionUtils.isTranslatableSingleType(MyLongBasedType.class));
         

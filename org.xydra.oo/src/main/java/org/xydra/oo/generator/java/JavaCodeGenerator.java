@@ -375,12 +375,12 @@ public class JavaCodeGenerator {
     
     /**
      * @param spec
-     * @param outDir e.g. "/src/main/java"
+     * @param srcDir e.g. "/src"
      * @param basePackage interfaces automatically end in {basePackage}/shared
      *            and get.xml file ends in {basePackage}
      * @throws IOException
      */
-    public static void generateInterfaces(Class<?> spec, File outDir, String basePackage)
+    public static void generateInterfaces(Class<?> spec, File srcDir, String basePackage)
             throws IOException {
         log.info("Generating from " + spec.getCanonicalName());
         PackageSpec packageSpec = new PackageSpec(basePackage, false);
@@ -404,9 +404,9 @@ public class JavaCodeGenerator {
         client.dump();
         java.dump();
         
-        log.info("Writing to " + outDir.getAbsolutePath());
-        SpecWriter.writePackage(packageSpec, outDir);
-        writeGwtXml(gwtSpec, basePackage, outDir);
+        log.info("Writing to " + srcDir.getAbsolutePath());
+        SpecWriter.writePackage(packageSpec, new File(srcDir, "/main/java"));
+        writeGwtXml(gwtSpec, basePackage, new File(srcDir, "/main/resources"));
     }
     
     private static boolean isToBeGeneratedType(Class<?> type, Set<Class<?>> mappedTypes) {
