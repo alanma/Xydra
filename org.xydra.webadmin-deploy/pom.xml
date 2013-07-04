@@ -12,7 +12,7 @@
 
 	<artifactId>webadmin-deploy</artifactId>
 	<!--@@ use xydra.version here -->
-	<version>0.1.6-SNAPSHOT</version>
+	<version>0.1.7-SNAPSHOT</version>
 	<!-- 'war' for web deployment, 'jar' for maven deploy -->
 	<!-- For embedding, make sure to have the static file /s/xml-to-html.xsl 
 		and /s/xyadmin.css /!\ If you do this wrong and try to deploy, you'll get 
@@ -98,13 +98,13 @@
 			<groupId>org.xydra</groupId>
 			<artifactId>webadmin</artifactId>
 			<!-- @@ use xydra.version here -->
-			<version>0.1.6-SNAPSHOT</version>
+			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>webadmin</artifactId>
 			<!-- @@ use xydra.version here -->
-			<version>0.1.6-SNAPSHOT</version>
+			<version>0.1.7-SNAPSHOT</version>
 			<classifier>sources</classifier>
 			<scope>compile</scope>
 		</dependency>
@@ -114,13 +114,13 @@
 			<groupId>org.xydra</groupId>
 			<artifactId>restless</artifactId>
 			<!-- @@ use xydra.version here -->
-			<version>0.1.6-SNAPSHOT</version>
+			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>restless</artifactId>
 			<!-- @@ use xydra.version here -->
-			<version>0.1.6-SNAPSHOT</version>
+			<version>0.1.7-SNAPSHOT</version>
 			<type>test-jar</type>
 		</dependency>
 
@@ -129,13 +129,13 @@
 			<groupId>org.xydra</groupId>
 			<artifactId>core</artifactId>
 			<!-- @@ use xydra.version here -->
-			<version>0.1.6-SNAPSHOT</version>
+			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>core</artifactId>
 			<!-- @@ use xydra.version here -->
-			<version>0.1.6-SNAPSHOT</version>
+			<version>0.1.7-SNAPSHOT</version>
 			<type>test-jar</type>
 			<scope>compile</scope>
 		</dependency>
@@ -154,7 +154,7 @@
 			<groupId>org.xydra</groupId>
 			<artifactId>gae</artifactId>
 			<!-- @@ use xydra.version here -->
-			<version>0.1.6-SNAPSHOT</version>
+			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 
 		<!-- Xydra GWT -->
@@ -162,14 +162,14 @@
 			<groupId>org.xydra</groupId>
 			<artifactId>gwt</artifactId>
 			<!-- @@ use xydra.version here -->
-			<version>0.1.6-SNAPSHOT</version>
+			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>gwt</artifactId>
 			<!-- @@ use xydra.version here -->
 			<classifier>sources</classifier>
-			<version>0.1.6-SNAPSHOT</version>
+			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 
 	</dependencies>
