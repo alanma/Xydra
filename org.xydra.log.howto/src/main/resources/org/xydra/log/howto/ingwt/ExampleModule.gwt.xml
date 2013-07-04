@@ -17,8 +17,8 @@
 		via the `log_level` URL parameter, e.g.
 		http[s]://hostame:port/path/to/your/module/Module.html?log_level=INFO
 	-->
-	<inherits name="com.allen_sauer.gwt.log.gwt-log-OFF" />
-	<extend-property name="log_level" values="DEBUG,INFO" />
+<!-- 	<inherits name="com.allen_sauer.gwt.log.gwt-log-OFF" /> -->
+<!-- 	<extend-property name="log_level" values="DEBUG,INFO" /> -->
 
 
 	<!-- Inherit the default GWT style sheet.  You can change       -->
