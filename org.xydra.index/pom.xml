@@ -11,7 +11,7 @@
 
 	<artifactId>index</artifactId>
 	<!-- @@ use xydra.version here -->
-	<version>0.1.6-SNAPSHOT</version>
+	<version>0.1.7-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>Xydra Index</name>
 
@@ -33,7 +33,7 @@
 			<groupId>org.xydra</groupId>
 			<artifactId>log</artifactId>
 			<!-- @@ use xydra.version here -->
-			<version>0.1.6-SNAPSHOT</version>
+			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 
 		<!-- This is only required for logging in GWT -->
@@ -41,7 +41,7 @@
 			<groupId>org.xydra</groupId>
 			<artifactId>log</artifactId>
 			<!-- @@ use xydra.version here -->
-			<version>0.1.6-SNAPSHOT</version>
+			<version>0.1.7-SNAPSHOT</version>
 			<classifier>sources</classifier>
 		</dependency>
 
@@ -69,8 +69,11 @@
 	</distributionManagement>
 
 	<build>
+
 		<pluginManagement>
+
 			<plugins>
+
 				<!--This plugin's configuration is used to store Eclipse m2e settings 
 					only. It has no influence on the Maven build itself. -->
 				<plugin>
