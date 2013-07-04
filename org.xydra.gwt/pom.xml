@@ -6,7 +6,7 @@
 	<artifactId>gwt</artifactId>
 	<packaging>jar</packaging>
 	<!--@@ use xydra.version here -->
-	<version>0.1.6-SNAPSHOT</version>
+	<version>0.1.7-SNAPSHOT</version>
 	<name>Xydra GWT Client</name>
 
 	<parent>
@@ -19,9 +19,6 @@
 
 		<!-- define a transient output directory for gwt -->
 		<gwt.output.directory>./war</gwt.output.directory>
-
-		<!-- the value of the rename-to attribute in your GWT module configuration -->
-		<gwt.module.alias>XydraEditor</gwt.module.alias>
 
 		<gwt.compiler.force>true</gwt.compiler.force>
 
@@ -60,13 +57,13 @@
 			<groupId>org.xydra</groupId>
 			<artifactId>core</artifactId>
 			<!-- @@ use xydra.version here -->
-			<version>0.1.6-SNAPSHOT</version>
+			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>core</artifactId>
 			<!-- @@ use xydra.version here -->
-			<version>0.1.6-SNAPSHOT</version>
+			<version>0.1.7-SNAPSHOT</version>
 			<classifier>sources</classifier>
 		</dependency>
 
@@ -74,7 +71,7 @@
 			<groupId>org.xydra</groupId>
 			<artifactId>server</artifactId>
 			<!-- @@ use xydra.version here -->
-			<version>0.1.6-SNAPSHOT</version>
+			<version>0.1.7-SNAPSHOT</version>
 			<type>test-jar</type>
 			<!-- Server used for testing, but GWT plugin requires it on main classpath -->
 			<scope>compile</scope>
@@ -83,7 +80,7 @@
 			<groupId>org.xydra</groupId>
 			<artifactId>log</artifactId>
 			<!-- @@ use xydra.version here -->
-			<version>0.1.6-SNAPSHOT</version>
+			<version>0.1.7-SNAPSHOT</version>
 			<classifier>sources</classifier>
 		</dependency>
 
