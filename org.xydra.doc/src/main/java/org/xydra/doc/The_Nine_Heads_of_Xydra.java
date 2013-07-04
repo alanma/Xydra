@@ -1,6 +1,5 @@
 package org.xydra.doc;
 
-import org.xydra.base.X;
 import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
@@ -25,10 +24,12 @@ import org.xydra.base.value.XStringSetValue;
 import org.xydra.base.value.XStringValue;
 import org.xydra.base.value.XValue;
 import org.xydra.base.value.XValueFactory;
+import org.xydra.core.X;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
+import org.xydra.persistence.XydraPersistence;
 import org.xydra.store.NamingUtils;
 import org.xydra.store.XydraStore;
 import org.xydra.store.access.XAccessControlManager;
@@ -43,7 +44,6 @@ import org.xydra.store.access.impl.delegate.AccessControlManagerOnPersistence;
 import org.xydra.store.access.impl.memory.MemoryAuthorisationManager;
 import org.xydra.store.impl.delegate.DelegateToPersistenceAndAcm;
 import org.xydra.store.impl.delegate.XydraBlockingStore;
-import org.xydra.store.impl.delegate.XydraPersistence;
 import org.xydra.store.impl.delegate.XydraSingleOperationStore;
 import org.xydra.store.impl.gae.GaePersistence;
 import org.xydra.store.impl.memory.MemoryPersistence;

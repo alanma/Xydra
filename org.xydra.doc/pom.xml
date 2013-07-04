@@ -11,7 +11,7 @@
 
 	<artifactId>doc</artifactId>
 	<!--@@ use xydra.version here -->
-	<version>0.1.6-SNAPSHOT</version>
+	<version>0.1.7-SNAPSHOT</version>
 	<!-- /!\ Needs to be 'jar' for 'mvn deploy' but 'war' for 'gae:deploy' -->
 	<packaging>jar</packaging>
 	<name>Xydra Documentation and Tutorial</name>
@@ -38,21 +38,21 @@
 			<groupId>org.xydra</groupId>
 			<artifactId>core</artifactId>
 			<!--@@ use xydra.version here -->
-			<version>0.1.6-SNAPSHOT</version>
+			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>server</artifactId>
 			<!--@@ use xydra.version here -->
-			<version>0.1.6-SNAPSHOT</version>
+			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>gae</artifactId>
 			<!--@@ use xydra.version here -->
-			<version>0.1.6-SNAPSHOT</version>
+			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 
 		<!-- logging -->
@@ -60,7 +60,7 @@
 			<groupId>org.xydra</groupId>
 			<artifactId>log</artifactId>
 			<!--@@ use xydra.version here -->
-			<version>0.1.6-SNAPSHOT</version>
+			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 
 	</dependencies>
