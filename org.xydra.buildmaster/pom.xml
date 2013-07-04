@@ -4,7 +4,8 @@
 
 	<groupId>org.xydra</groupId>
 	<artifactId>buildmaster</artifactId>
-	<!--@@ use xydra.version here --><version>0.1.6-SNAPSHOT</version>
+	<!--@@ use xydra.version here -->
+	<version>0.1.7-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>Xydra Buildmaster</name>
@@ -14,8 +15,8 @@
 		and deploy them -->
 
 	<modules>
-        <!-- No Xydra dependencies -->
-        <module>../org.xydra.annotations/</module>
+		<!-- No Xydra dependencies -->
+		<module>../org.xydra.annotations/</module>
 
 		<!-- No Xydra dependencies -->
 		<module>../org.xydra.log/</module>
@@ -26,9 +27,8 @@
 		<!-- DONE -->
 
 		<!-- Depends on: .log, GWT -->
-<!-- Enable only for site -->
-<!-- 		<module>../org.xydra.log.howto/</module>
- -->		<!-- DONE -->
+		<!-- Enable only for site -->
+		<!-- <module>../org.xydra.log.howto/</module> -->		<!-- DONE -->
 
 		<!-- Depends on: .log -->
 		<module>../org.xydra.index/</module>
@@ -46,48 +46,56 @@
 		<module>../org.xydra.core/</module>
 		<!-- DONE -->
 
-		<!-- Depends on: .client, GWT -->
-<!-- 		<module>../org.xydra.gwt/</module> -->
-		<!-- DONE -->
-
 		<!-- No Xydra dependencies -->
 		<module>../org.xydra.restless/</module>
 		<!-- DONE -->
 
 		<!-- Depends on: .log, .restless -->
-<!-- 		<module>../org.xydra.restless.gae-demo/</module>
- -->
+		<!-- <module>../org.xydra.restless.gae-demo/</module> -->
 
 		<!-- Depends on: .core, .log, .restless -->
 		<module>../org.xydra.server/</module>
-		<!-- DONE -->
-
-		<!-- Depends on: .server, .core, .restless, .client, GWT -->
-		<module>../org.xydra.webadmin/</module>
 		<!-- DONE -->
 
 		<!-- Depends on: .server, GAE -->
 		<module>../org.xydra.gae/</module>
 		<!-- DONE -->
 
+		<!-- Depends on: .server, .core, .restless, .client, GWT, .gae -->
+		<module>../org.xydra.webadmin/</module>
+		<!-- DONE -->
+
 		<!-- Depends on: .restless, GAE -->
 		<module>../org.xydra.gaemyadmin/</module>
+		<!-- DONE -->
+
+		<!-- Depends on: .core, GWT, .webadmin -->
+		<module>../org.xydra.gwt/</module>
 		<!-- DONE -->
 
 		<!-- Documentation. Depends on: .core -->
 		<module>../org.xydra.doc/</module>
 		<!-- DONE -->
-		
+
+		<!-- Depends on: .log, .annotations, .gae -->
+		<module>../org.xydra.devtools/</module>
+		<!-- DONE -->
+
 
 		<module>../org.xydra.google-analytics/</module>
 
-        <module>../org.xydra.gwt/</module>
 
-        <module>../org.xydra.testgae/</module>
+
+		<!-- Experimental: oo, gwttools, mvnxy, maven-root -->
+		<module>../org.xydra.oo/</module>
+		<module>../org.xydra.gwttools/</module>
+		<module>../org.xydra.mvnxy/</module>
+		<module>../org.xydra.maven-root/</module>
+
+	<!-- <module>../org.xydra.testgae/</module> -->		
 
 		<!-- Experimental. Depends on: .core -->
-<!-- 		<module>../org.xydra.schema/</module>
- -->		<!-- DONE -->
+		<!-- <module>../org.xydra.schema/</module> -->		<!-- DONE -->
 
 		<!-- Experimental. Depends on: .core, GWT -->
 		<!-- Commented out due to test failures -->
