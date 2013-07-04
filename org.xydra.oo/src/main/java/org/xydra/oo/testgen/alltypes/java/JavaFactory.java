@@ -9,7 +9,7 @@ import org.xydra.oo.testgen.alltypes.shared.AbstractSharedFactory;
 import org.xydra.oo.testgen.alltypes.shared.IHasAllType;
 import org.xydra.oo.testgen.alltypes.shared.IPerson;
 
-/** Generated on Thu Jul 04 11:34:29 CEST 2013 by SpecWriter, a part of xydra.org:oo */
+/** Generated on Thu Jul 04 13:57:24 CEST 2013 by SpecWriter, a part of xydra.org:oo */
 public class JavaFactory extends AbstractSharedFactory {
 
     /** 
