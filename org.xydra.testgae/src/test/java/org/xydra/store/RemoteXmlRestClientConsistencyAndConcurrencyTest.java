@@ -1,5 +1,6 @@
 package org.xydra.store;
 
+import org.junit.Ignore;
 import org.xydra.base.XId;
 import org.xydra.core.serialize.xml.XmlParser;
 import org.xydra.core.serialize.xml.XmlSerializer;
@@ -9,6 +10,8 @@ import org.xydra.persistence.XydraPersistence;
 import org.xydra.store.impl.rest.XydraStoreRestClient;
 
 
+/* Cannot run stand-alone via Maven */
+@Ignore
 public class RemoteXmlRestClientConsistencyAndConcurrencyTest extends
         AbstractRemoteStoreConcurrencyConsistencyTest {
     
