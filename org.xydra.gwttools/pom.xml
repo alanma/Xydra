@@ -10,15 +10,16 @@
 	</parent>
 
 	<artifactId>gwttools</artifactId>
-	<version>0.1.6-SNAPSHOT</version>
+	<version>0.1.7-SNAPSHOT</version>
 	<packaging>jar</packaging>
-	<name>Copy compiled GWT javascript</name>
+	<name>Xydra GWT Tools</name>
+	<description>Copy compiled GWT javascript</description>
 	<dependencies>
 
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>log</artifactId>
-			<version>0.1.6-SNAPSHOT</version>
+			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
