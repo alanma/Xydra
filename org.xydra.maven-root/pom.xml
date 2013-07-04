@@ -63,17 +63,20 @@
 
 	<build>
 
-		<!-- m2eclipse plugin skips copying files from resource folders if resource 
-			filtering is not explicitly turned on. -->
 		<resources>
+
+			<!-- m2eclipse plugin skips copying files from resource folders if resource 
+				filtering is not explicitly turned on. -->
 			<resource>
 				<directory>src/main/resources</directory>
 				<filtering>true</filtering>
 			</resource>
+
 			<resource>
 				<directory>src/test/resources</directory>
 				<filtering>true</filtering>
 			</resource>
+
 		</resources>
 
 		<!-- Support for deploying sites to scp://-Urls -->
@@ -185,6 +188,9 @@
 				<configuration>
 					<excludes>
 						<exclude>log4j.properties</exclude>
+						<!-- Exclude all java source and GWT modules -->
+						<exclude>**/*.java</exclude>
+						<exclude>**/*.gwt.xml</exclude>
 					</excludes>
 				</configuration>
 			</plugin>
