@@ -91,6 +91,7 @@
 		<module>../org.xydra.gwttools/</module>
 		<module>../org.xydra.mvnxy/</module>
 		<module>../org.xydra.maven-root/</module>
+		<module>../org.xydra.conf/</module>
 
 	<!-- <module>../org.xydra.testgae/</module> -->		
 
