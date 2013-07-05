@@ -5,11 +5,13 @@ import org.xydra.base.XAddress;
 
 public class XSyncEvent {
     
-    /**
-     * WHAT has been changed? The {@link XAddress} of the model, object or field
-     * that was synced.
-     */
-    public final XAddress changedEntity;
+    private final XAddress changedEntity;
+    
+    private final boolean syncResult;
+    
+    public boolean isSyncSuccess() {
+        return this.syncResult;
+    }
     
     public XSyncEvent(XAddress changedEntity, boolean syncResult) {
         super();
@@ -17,6 +19,12 @@ public class XSyncEvent {
         this.syncResult = syncResult;
     }
     
-    public final boolean syncResult;
+    /**
+     * @return WHAT has been changed? The {@link XAddress} of the model, object
+     *         or field that was synced.
+     */
+    public XAddress getChangedEntity() {
+        return this.changedEntity;
+    }
     
 }
