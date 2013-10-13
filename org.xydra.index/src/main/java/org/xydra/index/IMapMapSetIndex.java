@@ -3,7 +3,9 @@ package org.xydra.index;
 import java.util.Iterator;
 
 import org.xydra.index.query.Constraint;
+import org.xydra.index.query.EqualsConstraint;
 import org.xydra.index.query.KeyKeyEntryTuple;
+import org.xydra.index.query.Wildcard;
 
 
 /**
@@ -19,7 +21,22 @@ public interface IMapMapSetIndex<K, L, E> extends IIndex {
     
     Iterator<E> constraintIterator(Constraint<K> c1, Constraint<L> c2);
     
+    /**
+     * @param c1
+     * @param c2
+     * @param entryConstraint
+     * @return true if this index contains an entry matching the query pattern
+     */
     boolean contains(Constraint<K> c1, Constraint<L> c2, Constraint<E> entryConstraint);
+    
+    /**
+     * @param c1 if null == {@link Wildcard}; else {@link EqualsConstraint}
+     * @param c2 if null == {@link Wildcard}; else {@link EqualsConstraint}
+     * @param entryConstraint if null == {@link Wildcard}; else
+     *            {@link EqualsConstraint}
+     * @return true if this index contains an entry matching the query pattern
+     */
+    boolean contains(K c1, L c2, E entryConstraint);
     
     /**
      * @param key1
@@ -42,8 +59,23 @@ public interface IMapMapSetIndex<K, L, E> extends IIndex {
      */
     Iterator<E> iterator();
     
+    /**
+     * @param c1 @NeverNull
+     * @param c2 @NeverNull
+     * @param entryConstraint @NeverNull
+     * @return an iterator over all matching {@link KeyKeyEntryTuple}
+     */
     Iterator<KeyKeyEntryTuple<K,L,E>> tupleIterator(Constraint<K> c1, Constraint<L> c2,
             Constraint<E> entryConstraint);
+    
+    /**
+     * @param c1 if null == {@link Wildcard}; else {@link EqualsConstraint}
+     * @param c2 if null == {@link Wildcard}; else {@link EqualsConstraint}
+     * @param entryConstraint if null == {@link Wildcard}; else
+     *            {@link EqualsConstraint}
+     * @return an iterator over all matching {@link KeyKeyEntryTuple}
+     */
+    Iterator<KeyKeyEntryTuple<K,L,E>> tupleIterator(K c1, L c2, E entryConstraint);
     
     /**
      * @param otherFuture the other is the future: What is present here but not
@@ -57,5 +89,7 @@ public interface IMapMapSetIndex<K, L, E> extends IIndex {
         
         IMapMapSetIndex<K,L,E> getRemoved();
     }
+    
+    Iterator<K> keyIterator();
     
 }

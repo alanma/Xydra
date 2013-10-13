@@ -6,6 +6,7 @@ import org.xydra.index.Factory;
 import org.xydra.index.IEntrySet;
 import org.xydra.index.IMapMapMapSetIndex;
 import org.xydra.index.IMapMapSetIndex;
+import org.xydra.index.TripleSetIndex;
 import org.xydra.index.query.Constraint;
 
 

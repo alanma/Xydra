@@ -43,29 +43,32 @@ public class SmallSetIndex<E> extends LinkedList<E> implements IEntrySet<E> {
     @Override
     public IEntrySetDiff<E> computeDiff(IEntrySet<E> other) {
         // assume other is also short
-        SmallEntrySetDiff diff = new SmallEntrySetDiff();
-        diff.added = new SmallSetIndex<E>();
-        diff.removed = new SmallSetIndex<E>();
+        SmallEntrySetDiff<E> diff = new SmallEntrySetDiff<E>();
+        SmallSetIndex<E> added = new SmallSetIndex<E>();
+        SmallSetIndex<E> removed = new SmallSetIndex<E>();
         
         // assume the worst
-        diff.removed.addAll(this);
+        removed.addAll(this);
         // ..and then compensate
         for(E otherEntry : other) {
-            if(diff.removed.contains(otherEntry)) {
+            if(removed.contains(otherEntry)) {
                 // compensate
-                diff.removed.remove(otherEntry);
+                removed.remove(otherEntry);
             } else {
                 // it has been added
-                diff.added.add(otherEntry);
+                added.add(otherEntry);
             }
         }
+        
+        diff.added = added;
+        diff.removed = removed;
         return diff;
     }
     
-    class SmallEntrySetDiff implements IEntrySetDiff<E> {
+    static class SmallEntrySetDiff<E> implements IEntrySetDiff<E> {
         
-        protected SmallSetIndex<E> added;
-        protected SmallSetIndex<E> removed;
+        IEntrySet<E> added;
+        IEntrySet<E> removed;
         
         @Override
         public IEntrySet<E> getAdded() {

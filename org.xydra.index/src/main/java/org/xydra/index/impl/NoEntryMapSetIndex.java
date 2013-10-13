@@ -2,6 +2,7 @@ package org.xydra.index.impl;
 
 import java.util.Iterator;
 
+import org.xydra.index.IEntrySet;
 import org.xydra.index.IMapSetIndex;
 import org.xydra.index.iterator.NoneIterator;
 import org.xydra.index.query.Constraint;
@@ -97,6 +98,11 @@ public class NoEntryMapSetIndex<K, E> implements IMapSetIndex<K,E> {
     @Override
     public Iterator<K> keyIterator() {
         return new NoneIterator<K>();
+    }
+    
+    @Override
+    public IEntrySet<E> lookup(K key) {
+        return new SmallSetIndex<E>();
     }
     
 }

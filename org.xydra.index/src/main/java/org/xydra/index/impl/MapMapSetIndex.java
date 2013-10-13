@@ -24,6 +24,11 @@ public class MapMapSetIndex<K, L, E> implements IMapMapSetIndex<K,L,E> {
     
     private static final long serialVersionUID = -1872398601112534222L;
     
+    // reduce object creation at runtime, recycling these
+    private final Wildcard<K> STAR_K = new Wildcard<K>();
+    private final Wildcard<L> STAR_L = new Wildcard<L>();
+    private final Wildcard<E> STAR_E = new Wildcard<E>();
+    
     /*
      * needed for tupleIterator()
      * 
@@ -188,6 +193,21 @@ public class MapMapSetIndex<K, L, E> implements IMapMapSetIndex<K,L,E> {
         return false;
     }
     
+    @Override
+    public boolean contains(K c1, L c2, E entryConstraint) {
+        // IMPROVE could be implemented faster if all indexes supported
+        // Constraint-less querying
+        return contains(
+        
+        c1 == null ? this.STAR_K : new EqualsConstraint<K>(c1),
+        
+        c2 == null ? this.STAR_L : new EqualsConstraint<L>(c2),
+        
+        entryConstraint == null ? this.STAR_E : new EqualsConstraint<E>(entryConstraint)
+        
+        );
+    }
+    
     public static class DiffImpl<K, L, E> implements IMapMapSetDiff<K,L,E> {
         
         protected MapMapSetIndex<K,L,E> added;
@@ -335,6 +355,26 @@ public class MapMapSetIndex<K, L, E> implements IMapMapSetIndex<K,L,E> {
     @Override
     public String toString() {
         return this.map.toString();
+    }
+    
+    @Override
+    public Iterator<K> keyIterator() {
+        return this.map.keySet().iterator();
+    }
+    
+    @Override
+    public Iterator<KeyKeyEntryTuple<K,L,E>> tupleIterator(K c1, L c2, E entryConstraint) {
+        // IMPROVE could be implemented faster if all indexes supported
+        // Constraint-less querying
+        return tupleIterator(
+        
+        c1 == null ? this.STAR_K : new EqualsConstraint<K>(c1),
+        
+        c2 == null ? this.STAR_L : new EqualsConstraint<L>(c2),
+        
+        entryConstraint == null ? this.STAR_E : new EqualsConstraint<E>(entryConstraint)
+        
+        );
     }
     
 }

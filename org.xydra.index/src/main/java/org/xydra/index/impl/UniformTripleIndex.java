@@ -8,7 +8,7 @@ import org.xydra.index.query.Constraint;
 import org.xydra.index.query.KeyKeyEntryTuple;
 
 
-public class UniformTripleIndex<K> extends TripleIndex<K,K,K> implements IUniformTripleIndex<K> {
+public class UniformTripleIndex<K> extends FastContainsTripleIndex<K,K,K> implements IUniformTripleIndex<K> {
 	
 	private static final long serialVersionUID = 7121877986612175167L;
 	
@@ -25,7 +25,7 @@ public class UniformTripleIndex<K> extends TripleIndex<K,K,K> implements IUnifor
 	@Override
     public Iterator<K> getMatchingAndProject(Constraint<K> c1, Constraint<K> c2, Constraint<K> c3,
 	        int projectedConstraint) {
-		Iterator<KeyKeyEntryTuple<K,K,K>> tupleIterator = this.index_s_p_o_stmt.tupleIterator(c1,
+		Iterator<KeyKeyEntryTuple<K,K,K>> tupleIterator = this.index_s_p_o.tupleIterator(c1,
 		        c2, c3);
 		TransformingIterator.Transformer<KeyKeyEntryTuple<K,K,K>,K> transformer;
 		switch(projectedConstraint) {

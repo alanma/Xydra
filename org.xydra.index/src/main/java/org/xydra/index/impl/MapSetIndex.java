@@ -347,6 +347,7 @@ public class MapSetIndex<K, E> implements IMapSetIndex<K,E> {
         return this.map.keySet().iterator();
     }
     
+    @Override
     public IEntrySet<E> lookup(K key) {
         return this.map.get(key);
     }

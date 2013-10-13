@@ -2,8 +2,10 @@ package org.xydra.index.impl;
 
 import java.util.Iterator;
 
+import org.xydra.index.IEntrySet;
 import org.xydra.index.IMapSetIndex;
 import org.xydra.index.XI;
+import org.xydra.index.impl.SmallSetIndex.SmallEntrySetDiff;
 import org.xydra.index.iterator.NoneIterator;
 import org.xydra.index.iterator.SingleValueIterator;
 import org.xydra.index.query.Constraint;
@@ -164,6 +166,96 @@ public class SingleEntryMapSetIndex<K, E> extends KeyEntryTuple<K,E> implements 
     @Override
     public Iterator<K> keyIterator() {
         return new SingleValueIterator<K>(getKey());
+    }
+    
+    @Override
+    public IEntrySet<E> lookup(K key) {
+        if(isEmpty()) {
+            return null;
+        }
+        
+        if(getKey().equals(key)) {
+            SmallSetIndex<E> set = new SmallSetIndex<E>();
+            set.add(getEntry());
+            return set;
+        } else {
+            return null;
+        }
+    }
+    
+    class EntrySet implements IEntrySet<E> {
+        
+        private static final long serialVersionUID = 1L;
+        
+        @Override
+        public void clear() {
+            throw new UnsupportedOperationException();
+        }
+        
+        @Override
+        public boolean isEmpty() {
+            return SingleEntryMapSetIndex.this.isEmpty();
+        }
+        
+        @Override
+        public Iterator<E> iterator() {
+            return isEmpty() ? new NoneIterator<E>() : new SingleValueIterator<E>(
+                    SingleEntryMapSetIndex.this.getEntry());
+        }
+        
+        @Override
+        public boolean deIndex(E entry) {
+            throw new UnsupportedOperationException();
+        }
+        
+        @Override
+        public boolean index(E entry) {
+            throw new UnsupportedOperationException();
+        }
+        
+        @Override
+        public org.xydra.index.IEntrySet.IEntrySetDiff<E> computeDiff(IEntrySet<E> other) {
+            SmallEntrySetDiff<E> diff = new SmallSetIndex.SmallEntrySetDiff<E>();
+            // this entryset can contain only 0 or 1 entry
+            if(isEmpty()) {
+                diff.added = other;
+                diff.removed = new SmallSetIndex<E>();
+            } else {
+                // a) still present => no removes
+                // b) no longer present => one remove
+                // c) many other values might have been added
+                diff.added = other;
+                if(other.contains(getEntry())) {
+                    // still present => no adds, no removes
+                    diff.removed = new SmallSetIndex<E>();
+                    diff.added.deIndex(getEntry());
+                } else {
+                    // missing? so everything besides this has been added
+                    diff.removed = this;
+                }
+            }
+            return diff;
+        }
+        
+        @Override
+        public boolean contains(E entry) {
+            return !isEmpty() && SingleEntryMapSetIndex.this.getEntry().equals(entry);
+        }
+        
+        @Override
+        public Iterator<E> constraintIterator(Constraint<E> entryConstraint) {
+            if(isEmpty()) {
+                return new NoneIterator<E>();
+            } else {
+                return new SingleValueIterator<E>(getEntry());
+            }
+        }
+        
+        @Override
+        public int size() {
+            return SingleEntryMapSetIndex.this.isEmpty() ? 0 : 1;
+        }
+        
     }
     
 }

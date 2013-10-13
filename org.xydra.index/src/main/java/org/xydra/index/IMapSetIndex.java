@@ -70,4 +70,6 @@ public interface IMapSetIndex<K, E> extends IIndex {
         IMapSetIndex<K,E> getRemoved();
     }
     
+    IEntrySet<E> lookup(K key);
+    
 }

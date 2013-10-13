@@ -1,4 +1,4 @@
-package org.xydra.index.impl;
+package org.xydra.index;
 
 import java.util.Iterator;
 
