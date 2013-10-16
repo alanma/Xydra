@@ -1,8 +1,8 @@
 package org.xydra.store.impl.gae;
 
-import org.xydra.gae.AboutAppEngine;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
+import org.xydra.log.util.ClassPathTool;
 
 import com.google.appengine.api.utils.SystemProperty;
 
@@ -78,19 +78,23 @@ public class GaeTestfixer {
                 Class.forName(
                         "com.google.appengine.tools.development.testing.LocalServiceTestHelper",
                         false, cl);
-                log.debug("We can load the test classes.");
+                log.info("We can load the test classes.");
             } catch(ClassNotFoundException e) {
-                assert AboutAppEngine.inProduction();
+                // we're on AppEngine in production OR locally not running tests
                 /* ah, we are in production */
-                log.warn(
-                        "We are in fact in production (or a jar is missing): Auto-disabled test fixer.",
+                log.info(
+                        "We are in production or have no test-classpath (=a test jar is missing): Auto-disabled test fixer.\n"
+                                + " Reason: 'com.google.appengine.tools.development.testing.LocalServiceTestHelper' not found in classpath",
                         e);
+                // FIXME kill
+                ClassPathTool.dumpCurrentClasspath();
                 enabled = false;
                 return;
             } catch(NoClassDefFoundError e) {
+                // we're on AppEngine in production OR locally not running tests
                 /* ah, we are in production */
                 log.warn(
-                        "We are in fact in production (or a jar is missing): Auto-disabled test fixer.",
+                        "We are in production or have no test-classpath (=a test jar is missing): Auto-disabled test fixer.",
                         e);
                 enabled = false;
                 return;
