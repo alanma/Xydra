@@ -109,7 +109,7 @@ public class MapMapMapIndex<K, L, M, E> implements IMapMapMapIndex<K,L,M,E> {
 		K key1 = ((EqualsConstraint<K>)c1).getKey();
 		IMapMapIndex<L,M,E> map = this.index.lookup(key1);
 		if(map == null)
-			return new NoneIterator<KeyKeyKeyEntryTuple<K,L,M,E>>();
+			return NoneIterator.<KeyKeyKeyEntryTuple<K,L,M,E>>create();
 		return new FixedFirstKeyIterator(key1, map, c2, c3);
 	}
 	

@@ -5,9 +5,9 @@ import java.util.Iterator;
 import org.xydra.index.IMapIndex;
 import org.xydra.index.IMapMapIndex;
 import org.xydra.index.iterator.AbstractCascadedIterator;
+import org.xydra.index.iterator.ITransformer;
 import org.xydra.index.iterator.NoneIterator;
 import org.xydra.index.iterator.TransformingIterator;
-import org.xydra.index.iterator.TransformingIterator.Transformer;
 import org.xydra.index.query.Constraint;
 import org.xydra.index.query.EqualsConstraint;
 import org.xydra.index.query.IndexFullException;
@@ -124,7 +124,7 @@ public class MapMapIndex<K, L, E> implements IMapMapIndex<K,L,E> {
         K key1 = ((EqualsConstraint<K>)c1).getKey();
         IMapIndex<L,E> map = this.index.lookup(key1);
         if(map == null)
-            return new NoneIterator<KeyKeyEntryTuple<K,L,E>>();
+            return NoneIterator.<KeyKeyEntryTuple<K,L,E>>create();
         return new FixedFirstKeyIterator(key1, map, c2);
     }
     
@@ -274,7 +274,7 @@ public class MapMapIndex<K, L, E> implements IMapMapIndex<K,L,E> {
         // IMPROVE this can be done faster if never creating intermediate tuples
         return new TransformingIterator<KeyKeyEntryTuple<K,L,E>,E>(this.tupleIterator(
                 new Wildcard<K>(), new Wildcard<L>()),
-                new Transformer<KeyKeyEntryTuple<K,L,E>,E>() {
+                new ITransformer<KeyKeyEntryTuple<K,L,E>,E>() {
                     
                     @Override
                     public E transform(KeyKeyEntryTuple<K,L,E> in) {

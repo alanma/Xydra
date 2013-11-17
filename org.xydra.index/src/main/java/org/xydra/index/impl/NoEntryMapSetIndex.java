@@ -51,7 +51,7 @@ public class NoEntryMapSetIndex<K, E> implements IMapSetIndex<K,E> {
     
     @Override
     public Iterator<E> constraintIterator(Constraint<K> c1) {
-        return new NoneIterator<E>();
+        return NoneIterator.<E>create();
     }
     
     @Override
@@ -82,7 +82,7 @@ public class NoEntryMapSetIndex<K, E> implements IMapSetIndex<K,E> {
     @Override
     public Iterator<KeyEntryTuple<K,E>> tupleIterator(Constraint<K> c1,
             Constraint<E> entryConstraint) {
-        return new NoneIterator<KeyEntryTuple<K,E>>();
+        return NoneIterator.<KeyEntryTuple<K,E>>create();
     }
     
     @Override
@@ -97,7 +97,7 @@ public class NoEntryMapSetIndex<K, E> implements IMapSetIndex<K,E> {
     
     @Override
     public Iterator<K> keyIterator() {
-        return new NoneIterator<K>();
+        return NoneIterator.<K>create();
     }
     
     @Override

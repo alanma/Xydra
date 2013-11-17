@@ -174,7 +174,7 @@ public class MapMapSetIndex<K, L, E> implements IMapMapSetIndex<K,L,E> {
             EqualsConstraint<K> keyConstraint = (EqualsConstraint<K>)c1;
             K key = keyConstraint.getKey();
             IMapSetIndex<L,E> index1 = this.map.get(key);
-            return index1 == null ? new NoneIterator<E>() : index1.constraintIterator(c2);
+            return index1 == null ? NoneIterator.<E>create() : index1.constraintIterator(c2);
         } else {
             throw new AssertionError("unknown constraint type " + c1.getClass());
         }
@@ -343,7 +343,7 @@ public class MapMapSetIndex<K, L, E> implements IMapMapSetIndex<K,L,E> {
             K key = keyConstraint.getKey();
             IMapSetIndex<L,E> index1 = this.map.get(key);
             if(index1 == null) {
-                return new NoneIterator<KeyKeyEntryTuple<K,L,E>>();
+                return NoneIterator.<KeyKeyEntryTuple<K,L,E>>create();
             } else {
                 return new RememberKeyIterator(key, index1.tupleIterator(c2, entryConstraint));
             }
@@ -375,6 +375,14 @@ public class MapMapSetIndex<K, L, E> implements IMapMapSetIndex<K,L,E> {
         entryConstraint == null ? this.STAR_E : new EqualsConstraint<E>(entryConstraint)
         
         );
+    }
+    
+    public void dump() {
+        Iterator<KeyKeyEntryTuple<K,L,E>> it = tupleIterator(this.STAR_K, this.STAR_L, this.STAR_E);
+        while(it.hasNext()) {
+            KeyKeyEntryTuple<K,L,E> e = it.next();
+            System.out.println("(" + e.getKey1() + ", " + e.getKey2() + ", " + e.getEntry() + ")");
+        }
     }
     
 }

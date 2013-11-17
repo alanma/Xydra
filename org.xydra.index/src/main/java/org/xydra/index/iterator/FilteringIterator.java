@@ -5,21 +5,25 @@ import java.util.Iterator;
 
 /**
  * Encapsulates an iterator, returning only those elements matching a filter.
- * Uses a pre-fetch strategy.
+ * Uses a pre-fetch strategy, so does not support remove().
  * 
  * @author voelkel
  * 
  * @param <E> Type of objects returned by this iterator.
  */
-public abstract class AbstractFilteringIterator<E> implements Iterator<E> {
+public class FilteringIterator<E> implements Iterator<E> {
     
-    protected Iterator<E> base;
+    private Iterator<E> base;
     
-    boolean hasNext;
+    private boolean hasNext;
+    
     private E nextItem = null;
     
-    public AbstractFilteringIterator(Iterator<E> base) {
+    private IFilter<E> filter;
+    
+    public FilteringIterator(Iterator<E> base, IFilter<E> filter) {
         this.base = base;
+        this.filter = filter;
     }
     
     @Override
@@ -43,12 +47,6 @@ public abstract class AbstractFilteringIterator<E> implements Iterator<E> {
         throw new UnsupportedOperationException();
     }
     
-    /**
-     * @param entry
-     * @return true if we want to return entry in the result of the iterator
-     */
-    protected abstract boolean matchesFilter(E entry);
-    
     private void lookAhead() {
         if(this.hasNext)
             return;
@@ -56,12 +54,12 @@ public abstract class AbstractFilteringIterator<E> implements Iterator<E> {
         // advance until we find a match
         while(this.base.hasNext()) {
             this.nextItem = this.base.next();
-            if(this.matchesFilter(this.nextItem)) {
+            if(this.filter.matches(this.nextItem)) {
                 this.hasNext = true;
                 return;
             }
         }
         
-        // we reached the end and never matched, so:
+        // we reached the end and never matched
     }
 }

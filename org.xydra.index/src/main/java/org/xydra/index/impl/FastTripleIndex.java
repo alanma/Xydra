@@ -5,9 +5,9 @@ import java.util.Iterator;
 import org.xydra.index.IEntrySet;
 import org.xydra.index.IMapSetIndex;
 import org.xydra.index.ITripleIndex;
+import org.xydra.index.iterator.ITransformer;
 import org.xydra.index.iterator.NoneIterator;
 import org.xydra.index.iterator.TransformingIterator;
-import org.xydra.index.iterator.TransformingIterator.Transformer;
 import org.xydra.index.query.Constraint;
 import org.xydra.index.query.KeyEntryTuple;
 import org.xydra.index.query.KeyKeyEntryTuple;
@@ -47,7 +47,7 @@ public class FastTripleIndex<K, L, M> extends SmallTripleIndex<K,L,M> implements
      */
     private transient MapMapSetIndex<L,M,K> index_p_o_s;
     
-    private Transformer<KeyKeyEntryTuple<L,M,K>,KeyKeyEntryTuple<K,L,M>> transformerPOS = new Transformer<KeyKeyEntryTuple<L,M,K>,KeyKeyEntryTuple<K,L,M>>() {
+    private ITransformer<KeyKeyEntryTuple<L,M,K>,KeyKeyEntryTuple<K,L,M>> transformerPOS = new ITransformer<KeyKeyEntryTuple<L,M,K>,KeyKeyEntryTuple<K,L,M>>() {
         
         @Override
         public KeyKeyEntryTuple<K,L,M> transform(KeyKeyEntryTuple<L,M,K> in) {
@@ -55,7 +55,7 @@ public class FastTripleIndex<K, L, M> extends SmallTripleIndex<K,L,M> implements
         }
     };
     
-    private Transformer<KeyKeyEntryTuple<M,K,L>,KeyKeyEntryTuple<K,L,M>> transformerOSP = new Transformer<KeyKeyEntryTuple<M,K,L>,KeyKeyEntryTuple<K,L,M>>() {
+    private ITransformer<KeyKeyEntryTuple<M,K,L>,KeyKeyEntryTuple<K,L,M>> transformerOSP = new ITransformer<KeyKeyEntryTuple<M,K,L>,KeyKeyEntryTuple<K,L,M>>() {
         
         @Override
         public KeyKeyEntryTuple<K,L,M> transform(KeyKeyEntryTuple<M,K,L> in) {
@@ -213,10 +213,10 @@ public class FastTripleIndex<K, L, M> extends SmallTripleIndex<K,L,M> implements
         assert p != null;
         IMapSetIndex<L,M> index_s_Px_Ox = this.index_s_p_o.getMapEntry(s);
         if(index_s_Px_Ox == null)
-            return new NoneIterator<M>();
+            return NoneIterator.<M>create();
         IEntrySet<M> index_s_p_Ox = index_s_Px_Ox.lookup(p);
         if(index_s_p_Ox == null)
-            return new NoneIterator<M>();
+            return NoneIterator.<M>create();
         return index_s_p_Ox.iterator();
     }
     
@@ -228,7 +228,7 @@ public class FastTripleIndex<K, L, M> extends SmallTripleIndex<K,L,M> implements
         assert s != null;
         IMapSetIndex<L,M> index_s_Px_Ox = this.index_s_p_o.getMapEntry(s);
         if(index_s_Px_Ox == null)
-            return new NoneIterator<KeyEntryTuple<L,M>>();
+            return NoneIterator.<KeyEntryTuple<L,M>>create();
         return index_s_Px_Ox.tupleIterator(this.STAR_P, this.STAR_O);
     }
     
@@ -242,10 +242,10 @@ public class FastTripleIndex<K, L, M> extends SmallTripleIndex<K,L,M> implements
         assert o != null;
         IMapSetIndex<M,K> index_p_Ox_Sx = this.index_p_o_s.getMapEntry(p);
         if(index_p_Ox_Sx == null)
-            return new NoneIterator<K>();
+            return NoneIterator.<K>create();
         IEntrySet<K> index_p_o_Sx = index_p_Ox_Sx.lookup(o);
         if(index_p_o_Sx == null)
-            return new NoneIterator<K>();
+            return NoneIterator.<K>create();
         return index_p_o_Sx.iterator();
     }
     
@@ -259,10 +259,10 @@ public class FastTripleIndex<K, L, M> extends SmallTripleIndex<K,L,M> implements
         assert o != null;
         IMapSetIndex<K,L> index_o_Sx_Px = this.index_o_s_p.getMapEntry(o);
         if(index_o_Sx_Px == null)
-            return new NoneIterator<L>();
+            return NoneIterator.<L>create();
         IEntrySet<L> index_o_s_Px = index_o_Sx_Px.lookup(s);
         if(index_o_s_Px == null)
-            return new NoneIterator<L>();
+            return NoneIterator.<L>create();
         return index_o_s_Px.iterator();
     }
     
@@ -274,7 +274,7 @@ public class FastTripleIndex<K, L, M> extends SmallTripleIndex<K,L,M> implements
         assert o != null;
         IMapSetIndex<K,L> index_o_Sx_Px = this.index_o_s_p.getMapEntry(o);
         if(index_o_Sx_Px == null)
-            return new NoneIterator<KeyEntryTuple<K,L>>();
+            return NoneIterator.<KeyEntryTuple<K,L>>create();
         return index_o_Sx_Px.tupleIterator(this.STAR_S, this.STAR_P);
     }
     
@@ -286,7 +286,7 @@ public class FastTripleIndex<K, L, M> extends SmallTripleIndex<K,L,M> implements
         assert p != null;
         IMapSetIndex<M,K> index_p_Ox_Sx = this.index_p_o_s.getMapEntry(p);
         if(index_p_Ox_Sx == null)
-            return new NoneIterator<KeyEntryTuple<M,K>>();
+            return NoneIterator.<KeyEntryTuple<M,K>>create();
         return index_p_Ox_Sx.tupleIterator(this.STAR_O, this.STAR_S);
     }
     
@@ -325,4 +325,11 @@ public class FastTripleIndex<K, L, M> extends SmallTripleIndex<K,L,M> implements
         }
     }
     
+    public Iterator<L> key2Iterator() {
+        return this.index_p_o_s.keyIterator();
+    }
+    
+    public Iterator<M> entryIterator() {
+        return this.index_o_s_p.keyIterator();
+    }
 }

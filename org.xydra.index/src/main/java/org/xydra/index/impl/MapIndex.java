@@ -90,7 +90,7 @@ public class MapIndex<K, E> implements IMapIndex<K,E> {
 				}
 			};
 		} else
-			return new NoneIterator<KeyEntryTuple<K,E>>();
+			return NoneIterator.<KeyEntryTuple<K,E>>create();
 		
 	}
 	

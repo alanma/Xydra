@@ -4,14 +4,14 @@ import java.util.Iterator;
 
 import org.xydra.index.IMapMapSetIndex.IMapMapSetDiff;
 import org.xydra.index.query.Constraint;
-import org.xydra.index.query.KeyKeyEntryTuple;
+import org.xydra.index.query.ITriple;
 
 
 /**
  * An index for triples of keys that supports queries on all three keys. Indexes
  * three keys (to boolean, either a key combination is there or not).
  * 
- * * The same concept for two-tuples instead of three-tuples is called
+ * The same concept for two-tuples instead of three-tuples is called
  * {@link IPairIndex}.
  * 
  * @param <K> key type
@@ -41,7 +41,7 @@ public interface ITripleIndex<K, L, M> extends IIndex {
      * @param c3
      * @return an iterator with all triples matching the given constraints
      */
-    Iterator<KeyKeyEntryTuple<K,L,M>> getTriples(Constraint<K> c1, Constraint<L> c2,
+    Iterator<? extends ITriple<K,L,M>> getTriples(Constraint<K> c1, Constraint<L> c2,
             Constraint<M> c3);
     
     IMapMapSetDiff<K,L,M> computeDiff(ITripleIndex<K,L,M> other);

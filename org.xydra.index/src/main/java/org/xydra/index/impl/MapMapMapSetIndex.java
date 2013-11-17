@@ -167,7 +167,7 @@ public class MapMapMapSetIndex<K, L, M, E> implements IMapMapMapSetIndex<K,L,M,E
 			EqualsConstraint<K> keyConstraint = (EqualsConstraint<K>)c1;
 			K key = keyConstraint.getKey();
 			IMapMapSetIndex<L,M,E> index2 = this.map.get(key);
-			return index2 == null ? new NoneIterator<E>() : index2.constraintIterator(c2, c3);
+			return index2 == null ? NoneIterator.<E>create() : index2.constraintIterator(c2, c3);
 		} else {
 			throw new AssertionError("unknown constraint type " + c2.getClass());
 		}
@@ -220,7 +220,7 @@ public class MapMapMapSetIndex<K, L, M, E> implements IMapMapMapSetIndex<K,L,M,E
 			K key = keyConstraint.getKey();
 			IMapMapSetIndex<L,M,E> index2 = this.map.get(key);
 			if(index2 == null) {
-				return new NoneIterator<KeyKeyKeyEntryTuple<K,L,M,E>>();
+				return NoneIterator.<KeyKeyKeyEntryTuple<K,L,M,E>>create();
 			} else {
 				return new RememberKeyIterator(key, index2.tupleIterator(c2, c3, entryConstraint));
 			}

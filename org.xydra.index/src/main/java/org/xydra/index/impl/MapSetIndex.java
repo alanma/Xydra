@@ -16,6 +16,7 @@ import org.xydra.index.query.Constraint;
 import org.xydra.index.query.EqualsConstraint;
 import org.xydra.index.query.GenericKeyEntryTupleConstraintFilteringIterator;
 import org.xydra.index.query.KeyEntryTuple;
+import org.xydra.index.query.Wildcard;
 
 
 public class MapSetIndex<K, E> implements IMapSetIndex<K,E> {
@@ -145,7 +146,7 @@ public class MapSetIndex<K, E> implements IMapSetIndex<K,E> {
             EqualsConstraint<K> keyConstraint = (EqualsConstraint<K>)c1;
             K key = keyConstraint.getKey();
             IEntrySet<E> index0 = this.map.get(key);
-            return index0 == null ? new NoneIterator<E>() : index0.iterator();
+            return index0 == null ? NoneIterator.<E>create() : index0.iterator();
         } else {
             throw new AssertionError("unknown constraint type " + c1.getClass());
         }
@@ -243,7 +244,7 @@ public class MapSetIndex<K, E> implements IMapSetIndex<K,E> {
             K key = keyConstraint.getKey();
             IEntrySet<E> index0 = this.map.get(key);
             if(index0 == null) {
-                return new NoneIterator<KeyEntryTuple<K,E>>();
+                return NoneIterator.<KeyEntryTuple<K,E>>create();
             } else {
                 return new RememberKeyIterator(key, index0.constraintIterator(entryConstraint));
             }
@@ -354,6 +355,14 @@ public class MapSetIndex<K, E> implements IMapSetIndex<K,E> {
     
     public Set<K> keySet() {
         return this.map.keySet();
+    }
+    
+    public void dump() {
+        Iterator<KeyEntryTuple<K,E>> it = tupleIterator(new Wildcard<K>(), new Wildcard<E>());
+        while(it.hasNext()) {
+            KeyEntryTuple<K,E> t = it.next();
+            System.out.println("(" + t.getFirst() + ", " + t.getSecond() + ")");
+        }
     }
     
 }

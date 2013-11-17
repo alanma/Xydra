@@ -13,23 +13,29 @@ import java.util.Iterator;
  * @param <O> output type
  */
 public class TransformingIterator<I, O> extends AbstractTransformingIterator<I,O> {
-	
-	public interface Transformer<I, O> {
-		
-		O transform(I in);
-		
-	}
-	
-	private Transformer<I,O> transformer;
-	
-	public TransformingIterator(Iterator<? extends I> base, Transformer<I,O> transformer) {
-		super(base);
-		this.transformer = transformer;
-	}
-	
-	@Override
-	public O transform(I in) {
-		return this.transformer.transform(in);
-	}
-	
+    
+    /**
+     * @param <I> input type
+     * @param <O> output type
+     * @deprecated use {@link ITransformer} instead
+     */
+    @Deprecated
+    public interface Transformer<I, O> extends ITransformer<I,O> {
+        
+        O transform(I in);
+        
+    }
+    
+    private ITransformer<I,O> transformer;
+    
+    public TransformingIterator(Iterator<? extends I> base, ITransformer<I,O> transformer) {
+        super(base);
+        this.transformer = transformer;
+    }
+    
+    @Override
+    public O transform(I in) {
+        return this.transformer.transform(in);
+    }
+    
 }

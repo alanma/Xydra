@@ -51,7 +51,7 @@ public class SmallMapIndex<K, E> implements IMapIndex<K,E> {
 	@Override
 	public Iterator<E> iterator() {
 		if(this.tuple == null)
-			return new NoneIterator<E>();
+			return NoneIterator.<E>create();
 		return new SingleValueIterator<E>(this.tuple.getEntry()) {
 			@Override
 			public void remove() {
@@ -70,7 +70,7 @@ public class SmallMapIndex<K, E> implements IMapIndex<K,E> {
 	@Override
 	public Iterator<KeyEntryTuple<K,E>> tupleIterator(Constraint<K> c1) {
 		if(!containsKey(c1))
-			return new NoneIterator<KeyEntryTuple<K,E>>();
+			return NoneIterator.<KeyEntryTuple<K,E>>create();
 		return new SingleValueIterator<KeyEntryTuple<K,E>>(this.tuple) {
 			@Override
 			public void remove() {
@@ -100,7 +100,7 @@ public class SmallMapIndex<K, E> implements IMapIndex<K,E> {
 	@Override
 	public Iterator<K> keyIterator() {
 		if(isEmpty())
-			return new NoneIterator<K>();
+			return NoneIterator.<K>create();
 		return new SingleValueIterator<K>(this.tuple.getKey());
 	}
 	

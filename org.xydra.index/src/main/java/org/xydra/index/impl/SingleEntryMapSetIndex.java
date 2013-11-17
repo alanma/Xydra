@@ -66,7 +66,7 @@ public class SingleEntryMapSetIndex<K, E> extends KeyEntryTuple<K,E> implements 
         if(!isEmpty() && c1.matches(getKey())) {
             return new SingleValueIterator<E>(getEntry());
         } else {
-            return new NoneIterator<E>();
+            return NoneIterator.<E>create();
         }
     }
     
@@ -113,7 +113,7 @@ public class SingleEntryMapSetIndex<K, E> extends KeyEntryTuple<K,E> implements 
         if(contains(c1, entryConstraint)) {
             return new SingleValueIterator<KeyEntryTuple<K,E>>(this);
         } else {
-            return new NoneIterator<KeyEntryTuple<K,E>>();
+            return NoneIterator.<KeyEntryTuple<K,E>>create();
         }
     }
     
@@ -199,7 +199,7 @@ public class SingleEntryMapSetIndex<K, E> extends KeyEntryTuple<K,E> implements 
         
         @Override
         public Iterator<E> iterator() {
-            return isEmpty() ? new NoneIterator<E>() : new SingleValueIterator<E>(
+            return isEmpty() ? NoneIterator.<E>create() : new SingleValueIterator<E>(
                     SingleEntryMapSetIndex.this.getEntry());
         }
         
@@ -245,7 +245,7 @@ public class SingleEntryMapSetIndex<K, E> extends KeyEntryTuple<K,E> implements 
         @Override
         public Iterator<E> constraintIterator(Constraint<E> entryConstraint) {
             if(isEmpty()) {
-                return new NoneIterator<E>();
+                return NoneIterator.<E>create();
             } else {
                 return new SingleValueIterator<E>(getEntry());
             }

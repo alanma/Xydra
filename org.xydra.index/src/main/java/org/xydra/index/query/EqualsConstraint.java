@@ -6,26 +6,37 @@ package org.xydra.index.query;
  * @param <E> entity type
  */
 public class EqualsConstraint<E> implements Constraint<E> {
-	
-	private E expect;
-	
-	public EqualsConstraint(E expect) {
-		super();
-		this.expect = expect;
-	}
-	
-	public E getKey() {
-		return this.expect;
-	}
-	
-	@Override
+    
+    protected final E expect;
+    
+    public EqualsConstraint(E expect) {
+        super();
+        this.expect = expect;
+    }
+    
+    public E getKey() {
+        return this.expect;
+    }
+    
+    @Override
     public boolean isStar() {
-		return false;
-	}
-	
-	@Override
+        return false;
+    }
+    
+    @Override
     public boolean matches(E element) {
-		return this.expect == element || (this.expect != null && this.expect.equals(element));
-	}
-	
+        return this.expect == element || (this.expect != null && this.expect.equals(element));
+    }
+    
+    @Override
+    public int hashCode() {
+        return this.expect.hashCode();
+    }
+    
+    @Override
+    public boolean equals(Object other) {
+        return other instanceof EqualsConstraint
+                && ((EqualsConstraint<?>)other).expect.equals(this.expect);
+    }
+    
 }

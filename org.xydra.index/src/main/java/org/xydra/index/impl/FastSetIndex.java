@@ -83,7 +83,7 @@ public class FastSetIndex<E> extends HashSet<E> implements IEntrySet<E> {
             if(contains(entry)) {
                 return new SingleValueIterator<E>(entry);
             } else {
-                return new NoneIterator<E>();
+                return NoneIterator.create();
             }
         }
     }

@@ -92,7 +92,7 @@ public class SmallSetIndex<E> extends LinkedList<E> implements IEntrySet<E> {
             if(contains(entry)) {
                 return new SingleValueIterator<E>(entry);
             } else {
-                return new NoneIterator<E>();
+                return NoneIterator.<E>create();
             }
         }
     }

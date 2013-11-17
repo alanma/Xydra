@@ -103,7 +103,7 @@ public class LowercaseStringKeyMapIndex<E> implements IMapIndex<String,E> {
 			return new SingleValueIterator<KeyEntryTuple<String,E>>(new KeyEntryTuple<String,E>(
 			        key, this.map.get(key)));
 		else
-			return new NoneIterator<KeyEntryTuple<String,E>>();
+			return NoneIterator.<KeyEntryTuple<String,E>>create();
 		
 	}
 	

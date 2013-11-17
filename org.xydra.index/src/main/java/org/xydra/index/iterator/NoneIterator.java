@@ -11,25 +11,38 @@ package org.xydra.index.iterator;
  * @param <E> entity type
  */
 public class NoneIterator<E> implements ClosableIterator<E> {
-	
-	@Override
+    
+    private static final NoneIterator<Object> INSTANCE = new NoneIterator<>();
+    
+    @SuppressWarnings("unchecked")
+    public static <E> NoneIterator<E> create() {
+        return (NoneIterator<E>)INSTANCE;
+    }
+    
+    /**
+     * Use {@link #create()} to avoid excessive object creation
+     */
+    private NoneIterator() {
+    }
+    
+    @Override
     public void close() {
-		// NoneIterator needs not to be closed
-	}
-	
-	@Override
+        // NoneIterator needs not to be closed
+    }
+    
+    @Override
     public boolean hasNext() {
-		return false;
-	}
-	
-	@Override
+        return false;
+    }
+    
+    @Override
     public E next() {
-		return null;
-	}
-	
-	@Override
+        return null;
+    }
+    
+    @Override
     public void remove() {
-		// nothing to do
-	}
-	
+        // nothing to do
+    }
+    
 }
