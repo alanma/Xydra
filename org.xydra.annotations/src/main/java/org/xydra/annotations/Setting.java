@@ -7,6 +7,8 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * A setting that allows to fine-tune behaviour at runtime or compile time.
+ * 
+ * Annotate compile time or hard-coded runtime flags with this annotation.
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

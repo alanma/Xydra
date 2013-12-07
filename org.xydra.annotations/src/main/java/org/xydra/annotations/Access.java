@@ -7,10 +7,10 @@ import java.lang.annotation.Target;
 
 
 /**
- * Documentation: Who is supposed it have access to this data?
+ * Documentation: Who is supposed to have access to this data?
  */
 @Retention(RetentionPolicy.SOURCE)
 @Target({ ElementType.FIELD, ElementType.METHOD })
 public @interface Access {
-	String[] value();
+    String[] value();
 }
