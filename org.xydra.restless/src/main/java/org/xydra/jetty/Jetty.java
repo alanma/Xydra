@@ -1,4 +1,4 @@
-package org.xydra.restless;
+package org.xydra.jetty;
 
 import java.io.File;
 import java.io.IOException;
@@ -104,7 +104,7 @@ public class Jetty {
     }
     
     /**
-     * @param contextPath
+     * @param contextPath set to empty string for none
      * @param docRoot
      */
     public void configure(String contextPath, File docRoot) {

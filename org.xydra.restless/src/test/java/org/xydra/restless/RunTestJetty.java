@@ -3,6 +3,7 @@ package org.xydra.restless;
 import java.io.File;
 import java.net.URI;
 
+import org.xydra.jetty.Jetty;
 import org.xydra.log.Logger;
 import org.xydra.log.LoggerFactory;
 
