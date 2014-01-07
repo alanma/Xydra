@@ -1,4 +1,4 @@
-package org.xydra.log.gae;
+package org.xydra.log.impl.log4j;
 
 import java.util.Collection;
 

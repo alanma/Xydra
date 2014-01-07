@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.0.0//EN" "http://google-web-toolkit.googlecode.com/svn/tags/2.0.0/distro-source/core/src/gwt-module.dtd">
+<module>
+
+	<!-- inherit as org.xydra.log.impl.XydraUniversalLog -->
+
+	<super-source path="gwtemul" />
+
+	<inherits name="com.google.gwt.user.User" />
+	<inherits name="com.google.gwt.logging.Logging" />
+	<inherits name="org.xydra.annotations.XydraAnnotations" />
+	<inherits name="org.xydra.log.XydraLog" />
+	<inherits name="org.xydra.conf.XydraConf" />
+	<inherits name="org.xydra.env.XydraEnv" />
+
+	<source path="">
+		<exclude name="log4j/**" />
+		<exclude name="**/*Test.java" />
+		<exclude name="**/ClickbableLinksInEclipseLogFormatter.java" />
+	</source>
+
+	<entry-point class="org.xydra.log.impl.universal.DummyEntryPoint" />
+
+</module>
