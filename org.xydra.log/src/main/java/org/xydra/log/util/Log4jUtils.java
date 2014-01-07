@@ -10,6 +10,7 @@ import java.io.Reader;
 import java.util.Properties;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.PropertyConfigurator;
 import org.xydra.log.Logger;
@@ -29,6 +30,11 @@ public class Log4jUtils {
     
     private static final Logger log = LoggerFactory.getLogger(Log4jUtils.class);
     
+    /**
+     * Dump log4j.properties resource from classpath to System.out
+     * 
+     * @throws IOException
+     */
     public static void listConfigFromClasspath() throws IOException {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         InputStream in = cl.getResourceAsStream("log4j.properties");
@@ -41,8 +47,26 @@ public class Log4jUtils {
         System.out.println("Found config:\n" + s);
     }
     
+    /**
+     * Tweak log level at runtime
+     * 
+     * @param clazz
+     * @param log4jLevel
+     */
+    public static void setLevel(Class<?> clazz, Level log4jLevel) {
+        LogManager.getLogger(clazz).setLevel(log4jLevel);
+    }
+    
+    /**
+     * Use local FILE (not resource)
+     * './src/{main,test}/resources/log4j.properties' to overwrite log4j
+     * settings
+     */
     public static void configureLog4j() {
         File file = new File("./src/main/resources/log4j.properties");
+        if(!file.exists()) {
+            file = new File("./src/test/resources/log4j.properties");
+        }
         if(!file.exists()) {
             log.warn("Could not update log conf at runtime from file '" + file.getAbsolutePath()
                     + "' -- not found");

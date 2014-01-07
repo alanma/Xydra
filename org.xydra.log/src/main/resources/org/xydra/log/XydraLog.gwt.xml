@@ -2,19 +2,21 @@
 <!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.0.0//EN" "http://google-web-toolkit.googlecode.com/svn/tags/2.0.0/distro-source/core/src/gwt-module.dtd">
 <module>
 
-    <super-source path="gwtemul" />
+	<!-- inherit as org.xydra.log.XydraLog -->
+
+	<super-source path="gwtemul" />
 
 	<inherits name="com.google.gwt.user.User" />
 
-    <inherits name="com.google.gwt.logging.Logging"/>
-    
-    <inherits name="org.xydra.annotations.XydraAnnotations" />
+	<inherits name="com.google.gwt.logging.Logging" />
+
+	<inherits name="org.xydra.annotations.XydraAnnotations" />
 
 	<!-- How to use logging in GWT: -->
-	<!-- See  https://developers.google.com/web-toolkit/doc/latest/DevGuideLogging -->
-	<!-- to learn about settings that you can do in your  (modulename).gwt.xml: -->
+	<!-- See https://developers.google.com/web-toolkit/doc/latest/DevGuideLogging -->
+	<!-- to learn about settings that you can do in your (modulename).gwt.xml: -->
 
-	
+
 	<!-- OLD -->
 	<!-- Compile both `DEBUG` and `ERROR` log levels, with level selection via 
 		a `gwt:property` in your HTML page: <meta name="gwt:property" content="log_level=DEBUG"> 
@@ -22,12 +24,14 @@
 	<!-- Snippet: -->
 	<!-- <inherits name='com.allen_sauer.gwt.log.gwt-log-ERROR' /> <define-property 
 		values="log_level" name="DEBUG" /> -->
-	
-	
+
+
 	<source path="">
-		<exclude name="util/ClassPathTool.java"/>
+		<exclude name="util/ClassPathTool.java" />
 		<exclude name="util/Log4jUtils.java" />
 		<exclude name="**/*Test.java" />
+		<exclude name="gae/**/*.*" />
+		<exclude name="impl/**/*.*" />
 	</source>
 
 	<entry-point class="org.xydra.log.DummyEntryPoint" />
