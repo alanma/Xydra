@@ -7,6 +7,7 @@ import org.xydra.annotations.RunsInGWT;
 public class ConfBuilder {
     
     private final String key;
+    
     private final IConfig config;
     
     public ConfBuilder(IConfig config, String key) {
@@ -14,8 +15,25 @@ public class ConfBuilder {
         this.key = key;
     }
     
-    public IConfig setDocumentation(String documentation) {
-        this.config.setDocumentation(this.key, documentation);
+    /**
+     * Allows callers to set doc at runtime.
+     * 
+     * @param doc
+     * @return this, for a fluent API
+     */
+    public IConfig setDoc(String doc) {
+        this.config.setDocumentation(this.key, doc);
+        return this.config;
+    }
+    
+    /**
+     * Allows callers to set desired type at runtime.
+     * 
+     * @param typeClass
+     * @return this, for a fluent API
+     */
+    public IConfig setType(Class<?> typeClass) {
+        this.config.setType(this.key, typeClass);
         return this.config;
     }
     

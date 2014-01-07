@@ -2,8 +2,16 @@
 
 	<!-- import as 'org.xydra.conf.XydraConf' -->
 
+	<super-source path="gwtemul" />
+
+	<!-- Inherit the core Web Toolkit stuff. -->
+	<inherits name="com.google.gwt.user.User" />
+	<inherits name="org.xydra.index.XydraIndex" />
+
 	<source path="">
 		<exclude name="impl/ConfigTool.java" />
 	</source>
+
+	<entry-point class="org.xydra.conf.DummyEntryPoint" />
 
 </module>
