@@ -10,6 +10,9 @@ import org.xydra.annotations.RunsInGWT;
 @RunsInGWT(false)
 public class ClassPathTool {
     
+    /**
+     * Prints class path (obtained via system property) to System.out
+     */
     public static void dumpCurrentClasspath() {
         String cp = System.getProperty("java.class.path");
         String[] parts = cp.split("[:]");
@@ -22,10 +25,6 @@ public class ClassPathTool {
         for(String p : parts) {
             System.out.println("Classpath: " + p);
         }
-    }
-    
-    public static void main(String[] args) {
-        dumpCurrentClasspath();
     }
     
     /**
@@ -56,6 +55,10 @@ public class ClassPathTool {
         } catch(IllegalAccessException e) {
             e.printStackTrace();
         }
+    }
+    
+    public static void main(String[] args) {
+        dumpCurrentClasspath();
     }
     
 }

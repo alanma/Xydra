@@ -3,11 +3,11 @@ package org.xydra.log.impl.jul;
 import java.util.Collection;
 
 import org.xydra.annotations.ThreadSafe;
-import org.xydra.log.ILogListener;
-import org.xydra.log.ILoggerFactorySPI;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerWithListeners;
-import org.xydra.log.ThreadSafeLoggerWithListeners;
+import org.xydra.log.api.ILogListener;
+import org.xydra.log.api.Logger;
+import org.xydra.log.coreimpl.util.LoggerWithListeners;
+import org.xydra.log.coreimpl.util.ThreadSafeLoggerWithListeners;
+import org.xydra.log.spi.ILoggerFactorySPI;
 
 
 @ThreadSafe

@@ -1,4 +1,4 @@
-package org.xydra.log.impl.gwt;
+package org.xydra.log.impl.jul.gwt;
 
 /*
  * Copyright 2010 Google Inc.
@@ -19,8 +19,6 @@ package org.xydra.log.impl.gwt;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
-
-import org.xydra.log.impl.jul.ClickableLinksInEclipseGwtLogFormatter;
 
 
 /**

@@ -1,26 +1,29 @@
 package org.xydra.log.impl.log4j;
 
 import org.xydra.annotations.ThreadSafe;
-import org.xydra.log.Logger;
+import org.xydra.log.api.Logger;
 
 
 /**
  * Mapping
  * 
  * <pre>
- * FINEST  = trace()
- * FINER   > debug()
- * FINE    = debug()
- * INFO    = info()
- * CONFIG  > info()
- * WARNING = warn()
- * SEVERE  = error()
+ * Log4j --> XydraLog
+ * ----
+ * OFF
+ * FATAL
+ * ERROR  --> Error
+ * WARN   --> Warn
+ * INFO   --> Info
+ * DEBUG  --> Debug
+ * TRACE  --> Trace
+ * ALL
  * </pre>
  * 
  * @author voelkel
  */
 @ThreadSafe
-public class Log4jLogger extends Logger {
+public class Log4jLogger implements Logger {
     
     /*
      * log4j is already thread-safe (according to the official website:
@@ -120,6 +123,27 @@ public class Log4jLogger extends Logger {
     @Override
     public String toString() {
         return this.log4j.getName();
+    }
+    
+    @Override
+    public void setLevel(Level level) {
+        this.log4j.setLevel(toLog4jLevel(level));
+    }
+    
+    private static org.apache.log4j.Level toLog4jLevel(Level xydraLevel) {
+        switch(xydraLevel) {
+        case Trace:
+            return org.apache.log4j.Level.TRACE;
+        case Debug:
+            return org.apache.log4j.Level.DEBUG;
+        case Info:
+            return org.apache.log4j.Level.INFO;
+        case Warn:
+            return org.apache.log4j.Level.WARN;
+        case Error:
+            return org.apache.log4j.Level.ERROR;
+        }
+        throw new AssertionError();
     }
     
 }

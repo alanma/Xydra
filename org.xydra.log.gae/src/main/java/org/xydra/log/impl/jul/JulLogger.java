@@ -5,13 +5,13 @@ import java.util.logging.LogRecord;
 import org.xydra.annotations.ThreadSafe;
 import org.xydra.conf.IConfig;
 import org.xydra.env.Env;
-import org.xydra.log.Logger;
+import org.xydra.log.api.Logger;
 
 
 /**
  * A Java Utils Logging logger that additionally is configurable via Env.conf()
  * by setting the logger name to the desired log level as type
- * {@link org.xydra.log.Logger.Level}
+ * {@link org.xydra.log.api.Logger.Level}
  * 
  * <h3>Mapping:</h3>
  * 
@@ -33,7 +33,8 @@ public class JulLogger extends JulLogger_GwtEmul {
     private static JulLogger logSystem;
     
     static {
-        java.util.logging.Logger julLogSystem = java.util.logging.Logger.getLogger("logSystem");
+        java.util.logging.Logger julLogSystem = java.util.logging.Logger.getLogger(JulLogger.class
+                .getName());
         julLogSystem.setLevel(java.util.logging.Level.INFO);
         logSystem = new JulLogger(julLogSystem);
         logSystem.isConfigured = true;
@@ -66,7 +67,7 @@ public class JulLogger extends JulLogger_GwtEmul {
     public JulLogger(java.util.logging.Logger logger,
             String fullyQualifiedNameOfDelegatingLoggerClass) {
         this(logger);
-        // IMPROVE fix and make sure stacktrace is computed correctly
+        // IMPROVE fix and make sure stack trace is filtered correctly
     }
     
     private LogRecord createLogRecord(java.util.logging.Level level, String msg) {
@@ -238,6 +239,11 @@ public class JulLogger extends JulLogger_GwtEmul {
     @Override
     public String toString() {
         return this.jul.getName();
+    }
+    
+    @Override
+    public void setLevel(Level level) {
+        this.jul.setLevel(toJulLevel(level));
     }
     
 }

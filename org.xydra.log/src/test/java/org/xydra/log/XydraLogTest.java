@@ -2,6 +2,8 @@ package org.xydra.log;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.log.util.ClassPathTool;
 
 

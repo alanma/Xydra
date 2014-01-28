@@ -4,9 +4,10 @@ import org.xydra.conf.IConfig;
 import org.xydra.conf.IConfigProvider;
 import org.xydra.conf.annotations.ConfDoc;
 import org.xydra.conf.annotations.ConfType;
+import org.xydra.log.spi.ILoggerFactorySPI;
 
 
-public class ConfParamsUniversalLog implements IConfigProvider {
+public class ConfParamsXydrdaUniversalLog implements IConfigProvider {
     
     @ConfDoc("Result of com.google.gwt.core.shared.GWT.isScript()")
     @ConfType(Boolean.class)
@@ -15,6 +16,10 @@ public class ConfParamsUniversalLog implements IConfigProvider {
     @ConfDoc("com.google.appengine.api.utils.SystemProperty.environment equals inProduction")
     @ConfType(Boolean.class)
     public static final String GAE_IN_PRODUCTION = "gaeInProduction";
+    
+    @ConfDoc("If defined, this ILoggerFactorySPI should be used")
+    @ConfType(ILoggerFactorySPI.class)
+    public static final String LOGGER_FACTORY_SPI = ILoggerFactorySPI.class.getName();
     
     @Override
     public void configure(IConfig conf) {

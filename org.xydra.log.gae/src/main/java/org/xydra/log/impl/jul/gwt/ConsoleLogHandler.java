@@ -1,4 +1,4 @@
-package org.xydra.log.impl.gwt;
+package org.xydra.log.impl.jul.gwt;
 
 /*
  * Copyright 2010 Google Inc.
@@ -20,17 +20,16 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
-import org.xydra.log.impl.jul.ClickableLinksInEclipseGwtLogFormatter;
-
-import com.google.gwt.core.client.GWT;
-
 
 /**
- * A Handler that prints logs to System.out or System.err.
+ * A Handler that prints logs to the window.console - this is used by things
+ * like FirebugLite in IE, and Safari debug mode. Note we are consciously using
+ * 'window' rather than '$wnd' to avoid issues similar to
+ * http://code.google.com/p/fbug/issues/detail?id=2914
  */
-public class SystemLogHandler extends Handler {
+public class ConsoleLogHandler extends Handler {
     
-    public SystemLogHandler() {
+    public ConsoleLogHandler() {
         setFormatter(new ClickableLinksInEclipseGwtLogFormatter(true));
         setLevel(Level.ALL);
     }
@@ -51,15 +50,18 @@ public class SystemLogHandler extends Handler {
             return;
         }
         String msg = getFormatter().format(record);
-        int val = record.getLevel().intValue();
-        if(val <= Level.WARNING.intValue()) {
-            System.out.println(msg);
-        } else {
-            System.err.println(msg);
-        }
+        log(msg);
     }
     
-    private static boolean isSupported() {
-        return !GWT.isScript();
-    }
+    private native boolean isSupported() /*-{
+                                         return ((window.console != null) &&
+                                         (window.console.firebug == null) && 
+                                         (window.console.log != null) &&
+                                         (typeof(window.console.log) == 'function'));
+                                         }-*/;
+    
+    private native void log(String message) /*-{
+                                            window.console.log(message);
+                                            }-*/;
+    
 }

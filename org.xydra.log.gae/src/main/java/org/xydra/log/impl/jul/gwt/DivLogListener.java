@@ -1,10 +1,10 @@
-package org.xydra.log.util;
+package org.xydra.log.impl.jul.gwt;
 
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.log.ILogListener;
-import org.xydra.log.Logger;
-import org.xydra.log.Logger.Level;
+import org.xydra.log.api.ILogListener;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.Logger.Level;
 
 import com.google.gwt.user.client.Window.Location;
 import com.google.gwt.user.client.ui.FlowPanel;

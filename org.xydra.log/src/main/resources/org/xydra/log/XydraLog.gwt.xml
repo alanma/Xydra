@@ -27,11 +27,15 @@
 
 
 	<source path="">
+	
 		<exclude name="util/ClassPathTool.java" />
 		<exclude name="util/Log4jUtils.java" />
 		<exclude name="**/*Test.java" />
+		
+		<!-- Packages from log.impl -->
 		<exclude name="gae/**/*.*" />
 		<exclude name="impl/**/*.*" />
+		
 	</source>
 
 	<entry-point class="org.xydra.log.DummyEntryPoint" />

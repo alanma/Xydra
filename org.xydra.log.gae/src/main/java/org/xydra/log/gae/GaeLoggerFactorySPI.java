@@ -3,13 +3,13 @@ package org.xydra.log.gae;
 import java.util.Collection;
 
 import org.xydra.annotations.ThreadSafe;
-import org.xydra.log.ILogListener;
-import org.xydra.log.ILoggerFactorySPI;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.ILogListener;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.log.impl.jul.JulLoggerFactory;
 import org.xydra.log.impl.log4j.Log4jLoggerFactory;
-import org.xydra.log.impl.universal.UniversalLoggerFactorySPI;
+import org.xydra.log.impl.universal.UniversalLogger;
+import org.xydra.log.spi.ILoggerFactorySPI;
 
 import com.google.appengine.api.utils.SystemProperty;
 
@@ -18,7 +18,7 @@ import com.google.appengine.api.utils.SystemProperty;
  * In development mode log4j is used. In production, j.u.l. is used.
  * 
  * @author voelkel
- * @deprecated use {@link UniversalLoggerFactorySPI}
+ * @deprecated use {@link UniversalLogger}
  */
 @ThreadSafe
 @Deprecated
@@ -36,7 +36,7 @@ public class GaeLoggerFactorySPI implements ILoggerFactorySPI {
             } else {
                 factory = new Log4jLoggerFactory();
             }
-            LoggerFactory.setLoggerFactorySPI(factory);
+            LoggerFactory.setLoggerFactorySPI(factory, "GaeLoggerFactorySPI()");
         }
     }
     

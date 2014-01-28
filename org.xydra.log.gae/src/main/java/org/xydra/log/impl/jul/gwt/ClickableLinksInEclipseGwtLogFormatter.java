@@ -1,6 +1,8 @@
-package org.xydra.log.impl.jul;
+package org.xydra.log.impl.jul.gwt;
 
 import java.util.logging.LogRecord;
+
+import org.xydra.log.impl.jul.EclipseFormat;
 
 import com.google.gwt.logging.impl.FormatterImpl;
 
