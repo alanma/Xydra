@@ -25,9 +25,9 @@ import org.mortbay.jetty.handler.HandlerList;
 import org.mortbay.jetty.handler.ResourceHandler;
 import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.webapp.WebAppContext;
-import org.xydra.log.DefaultLoggerFactorySPI;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
+import org.xydra.log.coreimpl.sysout.DefaultLoggerFactorySPI;
 
 
 /**
@@ -56,7 +56,7 @@ public class GwtTestServer {
     private static Logger log = getLogger();
     
     private static Logger getLogger() {
-        LoggerFactory.setLoggerFactorySPI(new DefaultLoggerFactorySPI());
+        LoggerFactory.setLoggerFactorySPI(new DefaultLoggerFactorySPI(), "GwtTestServer");
         return LoggerFactory.getLogger(GwtTestServer.class);
     }
     
