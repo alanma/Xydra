@@ -18,6 +18,8 @@ import org.xydra.annotations.RunsInGWT;
  * 
  * seeAlso {@link org.xydra.conf.impl.ConfigTool}
  * 
+ * TODO handling of enum values is not pretty yet
+ * 
  * @author xamde
  * 
  */
@@ -291,7 +293,8 @@ public interface IConfig {
     IConfig setType(Enum<?> key, Class<?> type);
     
     /**
-     * Set the desired instance type for the given key
+     * Set the desired instance <em>type</em> for the given key. This does not
+     * set a value.
      * 
      * @param key @NeverNull
      * @param type @NeverNull The expected type of a config key. Currently a
@@ -443,7 +446,7 @@ public interface IConfig {
      * 
      * @param key @NeverNull
      * @param returnType @NeverNull
-     * @return the value for the given key, casted to the desired returnType
+     * @return the value for the given key, casted to the desired returnType @CanBeNull
      */
     <T> T tryToGetAs(String key, Class<T> returnType);
     
@@ -472,6 +475,8 @@ public interface IConfig {
      * Eager instantiation. Instance has been created and is set to conf. To be
      * used via {@link #getResolver(Class)}.
      * 
+     * TODO confusing name; maybe better: 'setValue'
+     * 
      * @param interfaze @NeverNull
      * @param instance
      */
@@ -480,6 +485,8 @@ public interface IConfig {
     /**
      * Eager instantiation. Instance has been created and is set to conf. To be
      * used via {@link #getResolver(Class)}.
+     * 
+     * TODO confusing name; maybe better: 'setValue'
      * 
      * @param key @NeverNull
      * @param instance

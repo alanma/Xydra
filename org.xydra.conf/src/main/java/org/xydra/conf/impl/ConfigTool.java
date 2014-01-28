@@ -35,8 +35,8 @@ import org.xydra.conf.annotations.ConfDoc;
 import org.xydra.conf.annotations.ConfType;
 import org.xydra.conf.annotations.RequireConf;
 import org.xydra.conf.annotations.RequireConfInstance;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 import com.google.common.base.Predicate;
 

@@ -2,8 +2,8 @@ package org.xydra.conf.impl;
 
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.conf.IConfig;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 import com.google.gwt.i18n.client.Dictionary;
 

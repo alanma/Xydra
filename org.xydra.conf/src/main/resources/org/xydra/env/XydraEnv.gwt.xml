@@ -1,6 +1,6 @@
 <module>
 
-	<!-- import as 'org.xydra.env.XydraEnv' -->
+	<!-- inherit as 'org.xydra.env.XydraEnv' -->
 
 	<super-source path="gwtemul" />
 

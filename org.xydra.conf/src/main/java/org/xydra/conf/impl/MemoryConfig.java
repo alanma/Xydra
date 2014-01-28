@@ -20,14 +20,14 @@ import org.xydra.conf.IResolver;
 import org.xydra.index.impl.MapSetIndex;
 import org.xydra.index.query.KeyEntryTuple;
 import org.xydra.index.query.Wildcard;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 
 @RunsInGWT(true)
 public class MemoryConfig implements IConfig {
     
-    // TODO need to check if this one runs in GWT
+    // TODO need to check if this one runs in GWT‚
     private static class ClassResolver<T> implements IResolver<T> {
         
         private Class<? extends T> clazz;
@@ -463,8 +463,11 @@ public class MemoryConfig implements IConfig {
     public ConfBuilder set(String key, Object value) {
         if(key == null)
             throw new IllegalArgumentException("Key may not be null");
+        
         ensureLogInit();
-        log.trace("Setting '" + key + "' to object");
+        if(log.isTraceEnabled())
+            log.trace("Setting '" + key + "' to object value");
+        
         this.explicit.put(key, value);
         return new ConfBuilder(this, key);
     }
