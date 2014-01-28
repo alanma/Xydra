@@ -4,8 +4,8 @@ import java.io.File;
 import java.net.URI;
 
 import org.xydra.jetty.Jetty;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 
 /**
