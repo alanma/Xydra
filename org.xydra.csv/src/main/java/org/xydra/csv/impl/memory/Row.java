@@ -11,8 +11,8 @@ import org.xydra.csv.ICell;
 import org.xydra.csv.IReadableRow;
 import org.xydra.csv.IRow;
 import org.xydra.csv.ISparseTable;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 
 public class Row extends AbstractRow implements IRow {

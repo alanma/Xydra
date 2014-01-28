@@ -8,7 +8,7 @@
     <!--  FIXME This module does not work yet. We need to port all Writer/Reader to the Xydra MiniIO framework first. -->
 	
     <inherits name="org.xydra.annotations.XydraAnnotations" />
-    <!-- <inherits name='org.xydra.log.Xlog'/>-->
+    <!-- <inherits name='org.xydra.log.XydraLog'/>-->
 	
 	<source path="">
 		<exclude name="**/*Test.java" />

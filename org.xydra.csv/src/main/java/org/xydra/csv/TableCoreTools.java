@@ -15,8 +15,8 @@ import java.util.TreeMap;
 import org.xydra.csv.impl.memory.CsvTable;
 import org.xydra.csv.impl.memory.Row;
 import org.xydra.csv.impl.memory.SparseTable;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 
 public class TableCoreTools {

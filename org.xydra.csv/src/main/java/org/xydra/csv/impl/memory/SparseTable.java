@@ -22,8 +22,8 @@ import org.xydra.csv.ISparseTable;
 import org.xydra.csv.RowFilter;
 import org.xydra.csv.WrongDatatypeException;
 import org.xydra.index.iterator.ReadOnlyIterator;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 
 /**
