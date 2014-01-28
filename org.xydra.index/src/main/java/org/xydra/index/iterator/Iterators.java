@@ -8,26 +8,34 @@ import java.util.Set;
 public class Iterators {
     
     /**
-     * @param base
+     * @param base @NeverNull
      * @param filter
      * @return an iterator returning fewer elements, namely only those matching
      *         the filter
      */
     public static <E> Iterator<E> filter(Iterator<E> base, IFilter<E> filter) {
-        return new FilteringIterator<>(base, filter);
+        assert base != null;
+        if(base == NoneIterator.INSTANCE)
+            return base;
+        
+        return new FilteringIterator<E>(base, filter);
     }
     
     /**
      * Lazy evaluated
      * 
-     * @param it must have valid implementation of {@link Object#hashCode()} and
-     *            {@link Object#equals(Object)}
+     * @param base must have valid implementation of {@link Object#hashCode()}
+     *            and {@link Object#equals(Object)} @NeverNull
      * @return unique elements
      */
-    public static <E> Iterator<E> distinct(Iterator<E> it) {
-        return Iterators.filter(it, new IFilter<E>() {
+    public static <E> Iterator<E> distinct(Iterator<E> base) {
+        assert base != null;
+        if(base == NoneIterator.INSTANCE)
+            return base;
+        
+        return Iterators.filter(base, new IFilter<E>() {
             
-            Set<E> unique = new HashSet<>();
+            Set<E> unique = new HashSet<E>();
             
             @Override
             public boolean matches(E entry) {
@@ -41,29 +49,59 @@ public class Iterators {
     }
     
     /**
-     * @param base
+     * @param base @NeverNull
      * @param transformer
      * @return an iterator returning entries of another type as the input type
      */
-    public static <I, O> Iterator<O> transform(Iterator<I> base, ITransformer<I,O> transformer) {
+    @SuppressWarnings("unchecked")
+    public static <I, O> Iterator<O> transform(Iterator<? extends I> base,
+            ITransformer<I,O> transformer) {
+        assert base != null;
+        
+        if(base == NoneIterator.INSTANCE)
+            return (Iterator<O>)base;
+        
         return new TransformingIterator<I,O>(base, transformer);
     }
     
     /**
-     * @param it1
-     * @param it2
+     * @param it1 @NeverNull
+     * @param it2 @NeverNull
      * @return a single, continuous iterator; might contain duplicates
      */
     public static <E> Iterator<E> concat(Iterator<E> it1, Iterator<E> it2) {
-        return new BagUnionIterator<>(it1, it2);
+        assert it1 != null;
+        assert it2 != null;
+        
+        return new BagUnionIterator<E>(it1, it2);
+    }
+    
+    /**
+     * @param iterators must be of generic type <E>
+     * @return a single, continuous iterator; might contain duplicates
+     */
+    @SuppressWarnings({ "unchecked" })
+    public static <E> Iterator<E> concat(final Iterator<E> ... iterators) {
+        return new BagUnionIterator<E>(iterators);
     }
     
     public static <E> Iterator<E> forOne(E value) {
         return new SingleValueIterator<E>(value);
     }
     
+    /**
+     * @param base @NeverNull
+     * @param transformer
+     * @return a uniform iterator in which each element of base was turned into
+     *         a part of the resulting sequence
+     */
+    @SuppressWarnings("unchecked")
     public static <B, E> Iterator<E> cascade(Iterator<B> base,
             final ITransformer<B,Iterator<E>> transformer) {
+        assert base != null;
+        if(base == NoneIterator.INSTANCE)
+            return (Iterator<E>)base;
+        
         return new AbstractCascadedIterator<B,E>(base) {
             
             @Override

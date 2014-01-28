@@ -21,6 +21,7 @@ public abstract class AbstractCascadedIterator<B, E> implements Iterator<E> {
     private E nextEntry;
     
     public AbstractCascadedIterator(Iterator<B> base) {
+        assert base != null;
         this.base = base;
     }
     

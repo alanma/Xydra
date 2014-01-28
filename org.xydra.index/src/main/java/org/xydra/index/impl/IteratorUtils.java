@@ -1,9 +1,15 @@
 package org.xydra.index.impl;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+
+import org.xydra.annotations.RunsInGWT;
 
 
+@RunsInGWT(true)
 public class IteratorUtils {
     
     /**
@@ -21,6 +27,17 @@ public class IteratorUtils {
         return collection;
     }
     
+    public static <C extends Collection<T>, T> C addFirstN(Iterator<? extends T> it, C collection,
+            int n) {
+        int i = 0;
+        while(it.hasNext() && i < n) {
+            T t = it.next();
+            collection.add(t);
+            i++;
+        }
+        return collection;
+    }
+    
     public static <T> boolean isEmpty(Iterable<T> iterable) {
         return isEmpty(iterable.iterator());
     }
@@ -29,9 +46,21 @@ public class IteratorUtils {
         return !it.hasNext();
     }
     
-    public static String toText(Collection<String> value) {
+    public static <T> List<T> toList(Iterator<? extends T> it) {
+        LinkedList<T> list = new LinkedList<T>();
+        addAll(it, list);
+        return list;
+    }
+    
+    public static <T> List<T> firstNtoList(Iterator<? extends T> it, int n) {
+        ArrayList<T> list = new ArrayList<T>(n);
+        addFirstN(it, list, n);
+        return list;
+    }
+    
+    public static <T> String toText(Collection<T> value) {
         StringBuffer buf = new StringBuffer();
-        for(String s : value) {
+        for(T s : value) {
             buf.append(s).append(",");
         }
         return buf.toString();
@@ -62,6 +91,21 @@ public class IteratorUtils {
         } else {
             return null;
         }
+    }
+    
+    /**
+     * For debugging. Output the contents of the iterator to System.out by
+     * calling toString on each element.
+     * 
+     * @param it
+     */
+    public static <E> void dump(Iterator<E> it) {
+        System.out.println("Dumping " + it.getClass().getName());
+        while(it.hasNext()) {
+            E e = it.next();
+            System.out.println(e.toString());
+        }
+        System.out.println("End of iterator");
     }
     
 }

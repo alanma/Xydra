@@ -9,6 +9,7 @@ import org.xydra.index.iterator.ITransformer;
 import org.xydra.index.iterator.NoneIterator;
 import org.xydra.index.iterator.TransformingIterator;
 import org.xydra.index.query.Constraint;
+import org.xydra.index.query.ITriple;
 import org.xydra.index.query.KeyEntryTuple;
 import org.xydra.index.query.KeyKeyEntryTuple;
 import org.xydra.index.query.Wildcard;
@@ -47,18 +48,18 @@ public class FastTripleIndex<K, L, M> extends SmallTripleIndex<K,L,M> implements
      */
     private transient MapMapSetIndex<L,M,K> index_p_o_s;
     
-    private ITransformer<KeyKeyEntryTuple<L,M,K>,KeyKeyEntryTuple<K,L,M>> transformerPOS = new ITransformer<KeyKeyEntryTuple<L,M,K>,KeyKeyEntryTuple<K,L,M>>() {
+    private ITransformer<ITriple<L,M,K>,ITriple<K,L,M>> transformerPOS = new ITransformer<ITriple<L,M,K>,ITriple<K,L,M>>() {
         
         @Override
-        public KeyKeyEntryTuple<K,L,M> transform(KeyKeyEntryTuple<L,M,K> in) {
+        public ITriple<K,L,M> transform(ITriple<L,M,K> in) {
             return new KeyKeyEntryTuple<K,L,M>(in.getEntry(), in.getKey1(), in.getKey2());
         }
     };
     
-    private ITransformer<KeyKeyEntryTuple<M,K,L>,KeyKeyEntryTuple<K,L,M>> transformerOSP = new ITransformer<KeyKeyEntryTuple<M,K,L>,KeyKeyEntryTuple<K,L,M>>() {
+    private ITransformer<ITriple<M,K,L>,ITriple<K,L,M>> transformerOSP = new ITransformer<ITriple<M,K,L>,ITriple<K,L,M>>() {
         
         @Override
-        public KeyKeyEntryTuple<K,L,M> transform(KeyKeyEntryTuple<M,K,L> in) {
+        public ITriple<K,L,M> transform(ITriple<M,K,L> in) {
             return new KeyKeyEntryTuple<K,L,M>(in.getKey2(), in.getEntry(), in.getKey1());
         }
     };
@@ -161,7 +162,7 @@ public class FastTripleIndex<K, L, M> extends SmallTripleIndex<K,L,M> implements
      * @param c3 @CanBeNull to denote wildcard
      * @return an iterator over all matching triples
      */
-    public Iterator<KeyKeyEntryTuple<K,L,M>> getTriples(K c1, L c2, M c3) {
+    public Iterator<ITriple<K,L,M>> getTriples(K c1, L c2, M c3) {
         /* avoid creating Constraint and Wildcard objects */
         
         // deal with the eight patterns
@@ -184,9 +185,9 @@ public class FastTripleIndex<K, L, M> extends SmallTripleIndex<K,L,M> implements
                 (c1 == null && c2 != null && c3 == null)
         
         ) {
-            Iterator<KeyKeyEntryTuple<L,M,K>> baseIt = this.index_p_o_s.tupleIterator(c2, c3, null);
-            return new TransformingIterator<KeyKeyEntryTuple<L,M,K>,KeyKeyEntryTuple<K,L,M>>(
-                    baseIt, this.transformerPOS);
+            Iterator<ITriple<L,M,K>> baseIt = this.index_p_o_s.tupleIterator(c2, c3, null);
+            return new TransformingIterator<ITriple<L,M,K>,ITriple<K,L,M>>(baseIt,
+                    this.transformerPOS);
             
         } else if(
         // s*o -> o_s
@@ -195,9 +196,9 @@ public class FastTripleIndex<K, L, M> extends SmallTripleIndex<K,L,M> implements
                 (c1 == null && c2 == null && c3 != null)
         
         ) {
-            Iterator<KeyKeyEntryTuple<M,K,L>> baseIt = this.index_o_s_p.tupleIterator(c3, c1, null);
-            return new TransformingIterator<KeyKeyEntryTuple<M,K,L>,KeyKeyEntryTuple<K,L,M>>(
-                    baseIt, this.transformerOSP);
+            Iterator<ITriple<M,K,L>> baseIt = this.index_o_s_p.tupleIterator(c3, c1, null);
+            return new TransformingIterator<ITriple<M,K,L>,ITriple<K,L,M>>(baseIt,
+                    this.transformerOSP);
         }
         
         throw new AssertionError("one of the patterns should have matched");
@@ -222,7 +223,7 @@ public class FastTripleIndex<K, L, M> extends SmallTripleIndex<K,L,M> implements
     
     /**
      * @param s @NeverNull
-     * @return an iterator over (p,o)-tuples for the given s
+     * @return an iterator over (p,o)-tuples for the given s @NeverNull
      */
     public Iterator<KeyEntryTuple<L,M>> getTupels_SXX(K s) {
         assert s != null;
@@ -235,7 +236,7 @@ public class FastTripleIndex<K, L, M> extends SmallTripleIndex<K,L,M> implements
     /**
      * @param p @NeverNull
      * @param o @NeverNull
-     * @return an iterator over all subjects matching (*,p,o)
+     * @return an iterator over all subjects matching (*,p,o) @NeverNull
      */
     public Iterator<K> getSubjects_XPO(L p, M o) {
         assert p != null;
@@ -252,7 +253,7 @@ public class FastTripleIndex<K, L, M> extends SmallTripleIndex<K,L,M> implements
     /**
      * @param s @NeverNull
      * @param o @NeverNull
-     * @return an iterator over all predicates occuring in triples (s,*,o)
+     * @return an iterator over all predicates occuring in triples (s,*,o) @NeverNull
      */
     public Iterator<L> getPredicates_SXO(K s, M o) {
         assert s != null;
@@ -292,6 +293,9 @@ public class FastTripleIndex<K, L, M> extends SmallTripleIndex<K,L,M> implements
     
     @Override
     public void deIndex(K s, L p, M o) {
+        assert s != null;
+        assert p != null;
+        assert o != null;
         super.deIndex(s, p, o);
         this.index_o_s_p.deIndex(o, s, p);
         this.index_p_o_s.deIndex(p, o, s);
@@ -299,6 +303,9 @@ public class FastTripleIndex<K, L, M> extends SmallTripleIndex<K,L,M> implements
     
     @Override
     public void index(K s, L p, M o) {
+        assert s != null;
+        assert p != null;
+        assert o != null;
         super.index(s, p, o);
         transientIndex(s, p, o);
     }
@@ -317,10 +324,10 @@ public class FastTripleIndex<K, L, M> extends SmallTripleIndex<K,L,M> implements
      * /serialization/
      */
     public void rebuildAfterDeserialize() {
-        Iterator<KeyKeyEntryTuple<K,L,M>> it = this.index_s_p_o.tupleIterator(new Wildcard<K>(),
+        Iterator<ITriple<K,L,M>> it = this.index_s_p_o.tupleIterator(new Wildcard<K>(),
                 new Wildcard<L>(), new Wildcard<M>());
         while(it.hasNext()) {
-            KeyKeyEntryTuple<K,L,M> t = it.next();
+            ITriple<K,L,M> t = it.next();
             transientIndex(t.getKey1(), t.getKey2(), t.getEntry());
         }
     }

@@ -2,6 +2,7 @@ package org.xydra.index.iterator;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 
 
 /**
@@ -22,6 +23,21 @@ public class BagUnionIterator<E> extends AbstractCascadedIterator<Iterator<? ext
         super(Arrays.asList(smallIt, largeIt).iterator());
         this.smallIt = smallIt;
         this.largeIt = largeIt;
+    }
+    
+    /**
+     * @param iterators none of them is closed
+     */
+    @SuppressWarnings({ "unchecked" })
+    public BagUnionIterator(final Iterator<? extends E> ... iterators) {
+        super(Arrays.asList(iterators).iterator());
+    }
+    
+    /**
+     * @param iterators none of them is closed
+     */
+    public BagUnionIterator(List<Iterator<? extends E>> iterators) {
+        super(iterators.iterator());
     }
     
     @Override

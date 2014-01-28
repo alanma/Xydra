@@ -1,6 +1,7 @@
 package org.xydra.index.iterator;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 
 /**
@@ -11,28 +12,30 @@ import java.util.Iterator;
  * @param <E> entity type
  */
 public class SingleValueIterator<E> implements Iterator<E> {
-	
-	private boolean done = false;
-	private E singleEntry;
-	
-	public SingleValueIterator(E singleEntry) {
-		this.singleEntry = singleEntry;
-	}
-	
-	@Override
+    
+    private boolean done = false;
+    private E singleEntry;
+    
+    public SingleValueIterator(E singleEntry) {
+        this.singleEntry = singleEntry;
+    }
+    
+    @Override
     public boolean hasNext() {
-		return !this.done && (this.singleEntry != null);
-	}
-	
-	@Override
+        return !this.done && (this.singleEntry != null);
+    }
+    
+    @Override
     public E next() {
-		this.done = true;
-		return this.singleEntry;
-	}
-	
-	@Override
+        if(this.done)
+            throw new NoSuchElementException();
+        this.done = true;
+        return this.singleEntry;
+    }
+    
+    @Override
     public void remove() {
-		throw new UnsupportedOperationException();
-	}
-	
+        throw new UnsupportedOperationException();
+    }
+    
 }

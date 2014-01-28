@@ -38,7 +38,7 @@ public class SetUnionIterator<E> implements ClosableIterator<E> {
                 return !SetUnionIterator.this.smallSet.contains(entry);
             }
         };
-        this.combinedIt = new BagUnionIterator<>(this.smallSet.iterator(), largeUniqueIt);
+        this.combinedIt = new BagUnionIterator<E>(this.smallSet.iterator(), largeUniqueIt);
     }
     
     @Override

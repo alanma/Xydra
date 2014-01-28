@@ -12,7 +12,7 @@ package org.xydra.index.iterator;
  */
 public class NoneIterator<E> implements ClosableIterator<E> {
     
-    private static final NoneIterator<Object> INSTANCE = new NoneIterator<>();
+    public static final NoneIterator<Object> INSTANCE = new NoneIterator<Object>();
     
     @SuppressWarnings("unchecked")
     public static <E> NoneIterator<E> create() {

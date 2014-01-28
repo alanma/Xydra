@@ -6,6 +6,7 @@ import org.xydra.index.IMapMapSetIndex.IMapMapSetDiff;
 import org.xydra.index.ITripleIndex;
 import org.xydra.index.query.Constraint;
 import org.xydra.index.query.EqualsConstraint;
+import org.xydra.index.query.ITriple;
 import org.xydra.index.query.KeyKeyEntryTuple;
 import org.xydra.index.query.Wildcard;
 
@@ -63,10 +64,10 @@ public class SmallTripleIndex<K, L, M> implements ITripleIndex<K,L,M> {
     @Override
     public void dump() {
         System.out.println("Dumping s-p-o-index (there are others)");
-        Iterator<KeyKeyEntryTuple<K,L,M>> it = this.index_s_p_o.tupleIterator(new Wildcard<K>(),
+        Iterator<ITriple<K,L,M>> it = this.index_s_p_o.tupleIterator(new Wildcard<K>(),
                 new Wildcard<L>(), new Wildcard<M>());
         while(it.hasNext()) {
-            KeyKeyEntryTuple<K,L,M> t = it.next();
+            ITriple<K,L,M> t = it.next();
             System.out.println(t.getKey1() + " - " + t.getKey2() + " - " + t.getEntry());
         }
     }
@@ -79,16 +80,14 @@ public class SmallTripleIndex<K, L, M> implements ITripleIndex<K,L,M> {
      *         the given constraints
      */
     @Override
-    public Iterator<KeyKeyEntryTuple<K,L,M>> getTriples(Constraint<K> c1, Constraint<L> c2,
-            Constraint<M> c3) {
+    public Iterator<ITriple<K,L,M>> getTriples(Constraint<K> c1, Constraint<L> c2, Constraint<M> c3) {
         if(c1 == null)
             throw new IllegalArgumentException("c1 was null");
         if(c2 == null)
             throw new IllegalArgumentException("c2 was null");
         if(c3 == null)
             throw new IllegalArgumentException("c3 was null");
-        Iterator<KeyKeyEntryTuple<K,L,M>> tupleIterator = this.index_s_p_o
-                .tupleIterator(c1, c2, c3);
+        Iterator<ITriple<K,L,M>> tupleIterator = this.index_s_p_o.tupleIterator(c1, c2, c3);
         return tupleIterator;
     }
     

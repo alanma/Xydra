@@ -102,7 +102,7 @@ public class NoEntryMapSetIndex<K, E> implements IMapSetIndex<K,E> {
     
     @Override
     public IEntrySet<E> lookup(K key) {
-        return new SmallSetIndex<E>();
+        return null;
     }
     
 }

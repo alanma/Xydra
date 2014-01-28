@@ -39,4 +39,13 @@ public class EqualsConstraint<E> implements Constraint<E> {
                 && ((EqualsConstraint<?>)other).expect.equals(this.expect);
     }
     
+    @Override
+    public E getExpected() {
+        return this.expect;
+    }
+    
+    public String toString() {
+        return "'" + this.expect.toString() + "'";
+    }
+    
 }

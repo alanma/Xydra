@@ -1,5 +1,8 @@
 package org.xydra.index.query;
 
+import org.xydra.index.impl.DebugUtils;
+
+
 public class KeyKeyEntryTuple<K, L, E> implements ITriple<K,L,E>, HasEntry<E> {
     
     private E entry;
@@ -27,7 +30,15 @@ public class KeyKeyEntryTuple<K, L, E> implements ITriple<K,L,E>, HasEntry<E> {
     
     @Override
     public String toString() {
-        return "(" + this.key1 + "," + this.key2 + "," + this.entry + ")";
+        return "("
+        
+        + DebugUtils.toLimitedString(this.key1, 20) + ","
+        
+        + DebugUtils.toLimitedString(this.key2, 20) + ","
+        
+        + DebugUtils.toLimitedString(this.entry, 20)
+        
+        + ")";
     }
     
     @Override
@@ -37,13 +48,13 @@ public class KeyKeyEntryTuple<K, L, E> implements ITriple<K,L,E>, HasEntry<E> {
     
     @Override
     public boolean equals(Object other) {
-        return other instanceof KeyKeyEntryTuple<?,?,?>
+        return other instanceof ITriple<?,?,?>
         
-        && this.key1.equals(((KeyKeyEntryTuple<?,?,?>)other).getKey1())
+        && this.key1.equals(((ITriple<?,?,?>)other).getKey1())
         
-        && this.key2.equals(((KeyKeyEntryTuple<?,?,?>)other).getKey2())
+        && this.key2.equals(((ITriple<?,?,?>)other).getKey2())
         
-        && this.entry.equals(((KeyKeyEntryTuple<?,?,?>)other).getEntry());
+        && this.entry.equals(((ITriple<?,?,?>)other).getEntry());
     }
     
 }

@@ -27,4 +27,13 @@ public class Wildcard<K> implements Constraint<K> {
         return other instanceof Wildcard;
     }
     
+    @Override
+    public K getExpected() {
+        return null;
+    }
+    
+    public String toString() {
+        return "*";
+    }
+    
 }

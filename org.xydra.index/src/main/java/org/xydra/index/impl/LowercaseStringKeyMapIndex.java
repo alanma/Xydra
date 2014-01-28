@@ -13,7 +13,7 @@ import org.xydra.index.iterator.SingleValueIterator;
 import org.xydra.index.query.Constraint;
 import org.xydra.index.query.EqualsConstraint;
 import org.xydra.index.query.KeyEntryTuple;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.LoggerFactory;
 
 
 /**

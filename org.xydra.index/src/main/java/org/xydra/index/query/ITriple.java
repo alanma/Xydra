@@ -1,6 +1,6 @@
 package org.xydra.index.query;
 
-public interface ITriple<K, L, E> {
+public interface ITriple<K, L, E> extends HasEntry<E> {
     
     public E getEntry();
     

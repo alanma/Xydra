@@ -6,7 +6,7 @@ import org.xydra.index.IUniformTripleIndex;
 import org.xydra.index.iterator.ITransformer;
 import org.xydra.index.iterator.TransformingIterator;
 import org.xydra.index.query.Constraint;
-import org.xydra.index.query.KeyKeyEntryTuple;
+import org.xydra.index.query.ITriple;
 
 
 public class UniformTripleIndex<K> extends FastContainsTripleIndex<K,K,K> implements
@@ -27,30 +27,29 @@ public class UniformTripleIndex<K> extends FastContainsTripleIndex<K,K,K> implem
     @Override
     public Iterator<K> getMatchingAndProject(Constraint<K> c1, Constraint<K> c2, Constraint<K> c3,
             int projectedConstraint) {
-        Iterator<KeyKeyEntryTuple<K,K,K>> tupleIterator = this.index_s_p_o
-                .tupleIterator(c1, c2, c3);
-        ITransformer<KeyKeyEntryTuple<K,K,K>,K> transformer;
+        Iterator<ITriple<K,K,K>> tupleIterator = this.index_s_p_o.tupleIterator(c1, c2, c3);
+        ITransformer<ITriple<K,K,K>,K> transformer;
         switch(projectedConstraint) {
         case 1:
-            transformer = new ITransformer<KeyKeyEntryTuple<K,K,K>,K>() {
+            transformer = new ITransformer<ITriple<K,K,K>,K>() {
                 @Override
-                public K transform(KeyKeyEntryTuple<K,K,K> in) {
+                public K transform(ITriple<K,K,K> in) {
                     return in.getKey1();
                 }
             };
             break;
         case 2:
-            transformer = new ITransformer<KeyKeyEntryTuple<K,K,K>,K>() {
+            transformer = new ITransformer<ITriple<K,K,K>,K>() {
                 @Override
-                public K transform(KeyKeyEntryTuple<K,K,K> in) {
+                public K transform(ITriple<K,K,K> in) {
                     return in.getKey2();
                 }
             };
             break;
         case 3:
-            transformer = new ITransformer<KeyKeyEntryTuple<K,K,K>,K>() {
+            transformer = new ITransformer<ITriple<K,K,K>,K>() {
                 @Override
-                public K transform(KeyKeyEntryTuple<K,K,K> in) {
+                public K transform(ITriple<K,K,K> in) {
                     return in.getEntry();
                 }
             };
@@ -59,7 +58,7 @@ public class UniformTripleIndex<K> extends FastContainsTripleIndex<K,K,K> implem
             throw new AssertionError("projectedConstraint must be 1=s, 2=p, 3=o");
         }
         
-        return new TransformingIterator<KeyKeyEntryTuple<K,K,K>,K>(tupleIterator, transformer);
+        return new TransformingIterator<ITriple<K,K,K>,K>(tupleIterator, transformer);
     }
     
 }

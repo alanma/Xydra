@@ -89,7 +89,7 @@ public class TransformerTool {
     
     public static <I, O> Iterator<O> transformIterator(Iterator<I> iteratorIn,
             ITransformer<I,O> transformer) {
-        return new TransformingIterator<>(iteratorIn, transformer);
+        return new TransformingIterator<I,O>(iteratorIn, transformer);
     }
     
     public static <I, O> Iterable<O> transformIterable(Iterable<I> iterableIn,
@@ -109,9 +109,8 @@ public class TransformerTool {
         
         @Override
         public Iterator<O> iterator() {
-            return new TransformingIterator<>(this.iterable.iterator(), this.transformer);
+            return new TransformingIterator<I,O>(this.iterable.iterator(), this.transformer);
         }
-        
     }
     
 }

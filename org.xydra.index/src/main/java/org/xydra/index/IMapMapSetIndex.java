@@ -4,6 +4,7 @@ import java.util.Iterator;
 
 import org.xydra.index.query.Constraint;
 import org.xydra.index.query.EqualsConstraint;
+import org.xydra.index.query.ITriple;
 import org.xydra.index.query.KeyKeyEntryTuple;
 import org.xydra.index.query.Wildcard;
 
@@ -65,7 +66,7 @@ public interface IMapMapSetIndex<K, L, E> extends IIndex {
      * @param entryConstraint @NeverNull
      * @return an iterator over all matching {@link KeyKeyEntryTuple}
      */
-    Iterator<KeyKeyEntryTuple<K,L,E>> tupleIterator(Constraint<K> c1, Constraint<L> c2,
+    Iterator<ITriple<K,L,E>> tupleIterator(Constraint<K> c1, Constraint<L> c2,
             Constraint<E> entryConstraint);
     
     /**
@@ -75,7 +76,7 @@ public interface IMapMapSetIndex<K, L, E> extends IIndex {
      *            {@link EqualsConstraint}
      * @return an iterator over all matching {@link KeyKeyEntryTuple}
      */
-    Iterator<KeyKeyEntryTuple<K,L,E>> tupleIterator(K c1, L c2, E entryConstraint);
+    Iterator<ITriple<K,L,E>> tupleIterator(K c1, L c2, E entryConstraint);
     
     /**
      * @param otherFuture the other is the future: What is present here but not

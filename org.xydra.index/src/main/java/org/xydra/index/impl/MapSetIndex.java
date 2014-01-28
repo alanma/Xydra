@@ -1,7 +1,10 @@
 package org.xydra.index.impl;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -17,11 +20,19 @@ import org.xydra.index.query.EqualsConstraint;
 import org.xydra.index.query.GenericKeyEntryTupleConstraintFilteringIterator;
 import org.xydra.index.query.KeyEntryTuple;
 import org.xydra.index.query.Wildcard;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 
 public class MapSetIndex<K, E> implements IMapSetIndex<K,E> {
     
-    private static final long serialVersionUID = 8275298314930537914L;
+    private static Logger log;
+    
+    private static void ensureLogger() {
+        if(log == null) {
+            log = LoggerFactory.getLogger(MapSetIndex.class);
+        }
+    }
     
     /* needed for tupleIterator() */
     private class AdaptMapEntryToTupleIterator implements Iterator<KeyEntryTuple<K,E>> {
@@ -78,13 +89,52 @@ public class MapSetIndex<K, E> implements IMapSetIndex<K,E> {
         
     }
     
+    public static class DiffImpl<K, E> implements IMapSetDiff<K,E> {
+        
+        protected IMapSetIndex<K,E> added;
+        protected IMapSetIndex<K,E> removed;
+        
+        @Override
+        public IMapSetIndex<K,E> getAdded() {
+            return this.added;
+        }
+        
+        @Override
+        public IMapSetIndex<K,E> getRemoved() {
+            return this.removed;
+        }
+        
+    }
+    
+    public static class LocalDiffImpl<K, E> implements IMapSetDiff<K,E> {
+        
+        protected MapSetIndex<K,E> added;
+        protected MapSetIndex<K,E> removed;
+        
+        public LocalDiffImpl(Factory<IEntrySet<E>> entrySetFactory) {
+            this.added = new MapSetIndex<K,E>(entrySetFactory);
+            this.removed = new MapSetIndex<K,E>(entrySetFactory);
+        }
+        
+        @Override
+        public IMapSetIndex<K,E> getAdded() {
+            return this.added;
+        }
+        
+        @Override
+        public IMapSetIndex<K,E> getRemoved() {
+            return this.removed;
+        }
+        
+    }
+    
     /* needed for tupleIterator() */
-    private class RememberKeyIterator implements Iterator<KeyEntryTuple<K,E>> {
+    private class AddKeyIterator implements Iterator<KeyEntryTuple<K,E>> {
         
         private Iterator<E> base;
         private K key;
         
-        public RememberKeyIterator(K key, Iterator<E> base) {
+        public AddKeyIterator(K key, Iterator<E> base) {
             this.base = base;
             this.key = key;
         }
@@ -107,16 +157,13 @@ public class MapSetIndex<K, E> implements IMapSetIndex<K,E> {
         
     }
     
-    private Map<K,IEntrySet<E>> map;
-    private Factory<IEntrySet<E>> entrySetFactory;
+    private static final long serialVersionUID = 8275298314930537914L;
     
-    public Set<Entry<K,IEntrySet<E>>> getEntries() {
-        return this.map.entrySet();
-    }
-    
-    public MapSetIndex(Factory<IEntrySet<E>> entrySetFactory) {
-        this.map = new HashMap<K,IEntrySet<E>>(4);
-        this.entrySetFactory = entrySetFactory;
+    /**
+     * @return an impl that uses more memory and is fast
+     */
+    public static <K, E> MapSetIndex<K,E> createWithFastEntrySets() {
+        return new MapSetIndex<K,E>(new FastEntrySetFactory<E>());
     }
     
     /**
@@ -126,16 +173,64 @@ public class MapSetIndex<K, E> implements IMapSetIndex<K,E> {
         return new MapSetIndex<K,E>(new SmallEntrySetFactory<E>());
     }
     
-    /**
-     * @return an impl that uses more memory and is fast
-     */
-    public static <K, E> MapSetIndex<K,E> createWithFastEntrySets() {
-        return new MapSetIndex<K,E>(new FastEntrySetFactory<E>());
+    private Factory<IEntrySet<E>> entrySetFactory;
+    
+    private Map<K,IEntrySet<E>> map;
+    
+    public MapSetIndex(Factory<IEntrySet<E>> entrySetFactory) {
+        this.map = new HashMap<K,IEntrySet<E>>(4);
+        this.entrySetFactory = entrySetFactory;
     }
     
     @Override
     public void clear() {
         this.map.clear();
+    }
+    
+    @Override
+    public IMapSetDiff<K,E> computeDiff(IMapSetIndex<K,E> otherFuture) {
+        if(otherFuture instanceof MapSetIndex<?,?>) {
+            return computeDiff_MapSetIndex((MapSetIndex<K,E>)otherFuture);
+        } // else:
+        IMapSetDiff<K,E> twistedDiff = otherFuture.computeDiff(this);
+        DiffImpl<K,E> diff = new DiffImpl<K,E>();
+        diff.added = twistedDiff.getRemoved();
+        diff.removed = twistedDiff.getAdded();
+        return diff;
+    }
+    
+    private IMapSetDiff<K,E> computeDiff_MapSetIndex(MapSetIndex<K,E> otherIndex) {
+        LocalDiffImpl<K,E> diff = new LocalDiffImpl<K,E>(this.entrySetFactory);
+        
+        for(Entry<K,IEntrySet<E>> thisEntry : this.map.entrySet()) {
+            K key = thisEntry.getKey();
+            IEntrySet<E> otherValue = otherIndex.map.get(key);
+            if(otherValue != null) {
+                // same (key,*) entry, compare sets
+                IEntrySetDiff<E> setDiff = thisEntry.getValue().computeDiff(otherValue);
+                if(!setDiff.getAdded().isEmpty()) {
+                    diff.added.map.put(key, setDiff.getAdded());
+                }
+                if(!setDiff.getRemoved().isEmpty()) {
+                    diff.removed.map.put(key, setDiff.getRemoved());
+                }
+            } else {
+                // whole set (key,*) missing in other => removed
+                diff.removed.map.put(key, thisEntry.getValue());
+            }
+        }
+        
+        // compare other to this
+        for(Entry<K,IEntrySet<E>> otherEntry : otherIndex.map.entrySet()) {
+            K key = otherEntry.getKey();
+            if(!this.map.containsKey(key)) {
+                // other has it, this does not => added
+                diff.added.map.put(key, otherEntry.getValue());
+            }
+            // we treated the case of same key in the loop above
+        }
+        
+        return diff;
     }
     
     @Override
@@ -187,6 +282,11 @@ public class MapSetIndex<K, E> implements IMapSetIndex<K,E> {
     }
     
     @Override
+    public void deIndex(K key) {
+        this.map.remove(key);
+    }
+    
+    @Override
     public boolean deIndex(K key1, E entry) {
         IEntrySet<E> index0 = this.map.get(key1);
         if(index0 == null) {
@@ -200,9 +300,53 @@ public class MapSetIndex<K, E> implements IMapSetIndex<K,E> {
         }
     }
     
-    @Override
-    public void deIndex(K key) {
-        this.map.remove(key);
+    /**
+     * Dump the contents to Xydra Logging as log.info(...)
+     */
+    public void dump() {
+        ensureLogger();
+        Iterator<KeyEntryTuple<K,E>> it = tupleIterator(new Wildcard<K>(), new Wildcard<E>());
+        
+        List<KeyEntryTuple<K,E>> list = IteratorUtils.firstNtoList(it, 1000);
+        if(it.hasNext()) {
+            // iterator has over 1000 elements, ignore sort order
+            for(KeyEntryTuple<K,E> t : list) {
+                dumpTuple(t);
+            }
+            while(it.hasNext()) {
+                KeyEntryTuple<K,E> t = it.next();
+                log.info("(" + t.getFirst() + ", " + t.getSecond() + ")");
+            }
+        } else {
+            Collections.sort(list, new Comparator<KeyEntryTuple<K,E>>() {
+                
+                @SuppressWarnings({ "unchecked", "rawtypes" })
+                @Override
+                public int compare(KeyEntryTuple<K,E> o1, KeyEntryTuple<K,E> o2) {
+                    
+                    K k1 = o1.getKey();
+                    K k2 = o2.getKey();
+                    
+                    if(k1 instanceof Comparable) {
+                        return ((Comparable)k1).compareTo(k2);
+                    } else {
+                        return k1.toString().compareTo(k2.toString());
+                    }
+                }
+            });
+            for(KeyEntryTuple<K,E> t : list) {
+                dumpTuple(t);
+            }
+        }
+        
+    }
+    
+    private void dumpTuple(KeyEntryTuple<K,E> t) {
+        log.info("(" + t.getFirst() + ", " + t.getSecond() + ")");
+    }
+    
+    public Set<Entry<K,IEntrySet<E>>> getEntries() {
+        return this.map.entrySet();
     }
     
     @Override
@@ -221,6 +365,25 @@ public class MapSetIndex<K, E> implements IMapSetIndex<K,E> {
     }
     
     @Override
+    public Iterator<K> keyIterator() {
+        return this.map.keySet().iterator();
+    }
+    
+    public Set<K> keySet() {
+        return this.map.keySet();
+    }
+    
+    @Override
+    public IEntrySet<E> lookup(K key) {
+        return this.map.get(key);
+    }
+    
+    @Override
+    public String toString() {
+        return this.map.toString();
+    }
+    
+    @Override
     public Iterator<KeyEntryTuple<K,E>> tupleIterator(Constraint<K> c1,
             Constraint<E> entryConstraint) {
         assert c1 != null;
@@ -228,6 +391,9 @@ public class MapSetIndex<K, E> implements IMapSetIndex<K,E> {
         
         if(c1.isStar()) {
             Iterator<Map.Entry<K,IEntrySet<E>>> entryIt = this.map.entrySet().iterator();
+            if(!entryIt.hasNext()) {
+                return NoneIterator.create();
+            }
             // cascade to tuples
             Iterator<KeyEntryTuple<K,E>> cascaded = new CascadingMapEntry_K_EntrySet_Iterator(
                     entryIt);
@@ -246,122 +412,10 @@ public class MapSetIndex<K, E> implements IMapSetIndex<K,E> {
             if(index0 == null) {
                 return NoneIterator.<KeyEntryTuple<K,E>>create();
             } else {
-                return new RememberKeyIterator(key, index0.constraintIterator(entryConstraint));
+                return new AddKeyIterator(key, index0.constraintIterator(entryConstraint));
             }
         } else {
             throw new AssertionError("unknown constraint type " + c1.getClass());
-        }
-    }
-    
-    public static class LocalDiffImpl<K, E> implements IMapSetDiff<K,E> {
-        
-        protected MapSetIndex<K,E> added;
-        protected MapSetIndex<K,E> removed;
-        
-        @Override
-        public IMapSetIndex<K,E> getAdded() {
-            return this.added;
-        }
-        
-        @Override
-        public IMapSetIndex<K,E> getRemoved() {
-            return this.removed;
-        }
-        
-        public LocalDiffImpl(Factory<IEntrySet<E>> entrySetFactory) {
-            this.added = new MapSetIndex<K,E>(entrySetFactory);
-            this.removed = new MapSetIndex<K,E>(entrySetFactory);
-        }
-        
-    }
-    
-    public static class DiffImpl<K, E> implements IMapSetDiff<K,E> {
-        
-        protected IMapSetIndex<K,E> added;
-        protected IMapSetIndex<K,E> removed;
-        
-        @Override
-        public IMapSetIndex<K,E> getAdded() {
-            return this.added;
-        }
-        
-        @Override
-        public IMapSetIndex<K,E> getRemoved() {
-            return this.removed;
-        }
-        
-    }
-    
-    @Override
-    public IMapSetDiff<K,E> computeDiff(IMapSetIndex<K,E> otherFuture) {
-        if(otherFuture instanceof MapSetIndex<?,?>) {
-            return computeDiff_MapSetIndex((MapSetIndex<K,E>)otherFuture);
-        } // else:
-        IMapSetDiff<K,E> twistedDiff = otherFuture.computeDiff(this);
-        DiffImpl<K,E> diff = new DiffImpl<K,E>();
-        diff.added = twistedDiff.getRemoved();
-        diff.removed = twistedDiff.getAdded();
-        return diff;
-    }
-    
-    private IMapSetDiff<K,E> computeDiff_MapSetIndex(MapSetIndex<K,E> otherIndex) {
-        LocalDiffImpl<K,E> diff = new LocalDiffImpl<K,E>(this.entrySetFactory);
-        
-        for(Entry<K,IEntrySet<E>> thisEntry : this.map.entrySet()) {
-            K key = thisEntry.getKey();
-            IEntrySet<E> otherValue = otherIndex.map.get(key);
-            if(otherValue != null) {
-                // same (key,*) entry, compare sets
-                IEntrySetDiff<E> setDiff = thisEntry.getValue().computeDiff(otherValue);
-                if(!setDiff.getAdded().isEmpty()) {
-                    diff.added.map.put(key, setDiff.getAdded());
-                }
-                if(!setDiff.getRemoved().isEmpty()) {
-                    diff.removed.map.put(key, setDiff.getRemoved());
-                }
-            } else {
-                // whole set (key,*) missing in other => removed
-                diff.removed.map.put(key, thisEntry.getValue());
-            }
-        }
-        
-        // compare other to this
-        for(Entry<K,IEntrySet<E>> otherEntry : otherIndex.map.entrySet()) {
-            K key = otherEntry.getKey();
-            if(!this.map.containsKey(key)) {
-                // other has it, this does not => added
-                diff.added.map.put(key, otherEntry.getValue());
-            }
-            // we treated the case of same key in the loop above
-        }
-        
-        return diff;
-    }
-    
-    @Override
-    public String toString() {
-        return this.map.toString();
-    }
-    
-    @Override
-    public Iterator<K> keyIterator() {
-        return this.map.keySet().iterator();
-    }
-    
-    @Override
-    public IEntrySet<E> lookup(K key) {
-        return this.map.get(key);
-    }
-    
-    public Set<K> keySet() {
-        return this.map.keySet();
-    }
-    
-    public void dump() {
-        Iterator<KeyEntryTuple<K,E>> it = tupleIterator(new Wildcard<K>(), new Wildcard<E>());
-        while(it.hasNext()) {
-            KeyEntryTuple<K,E> t = it.next();
-            System.out.println("(" + t.getFirst() + ", " + t.getSecond() + ")");
         }
     }
     
