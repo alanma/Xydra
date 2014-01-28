@@ -9,7 +9,6 @@ import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.value.XCollectionValue;
 import org.xydra.index.iterator.NoneIterator;
 import org.xydra.index.iterator.TransformingIterator;
-import org.xydra.index.iterator.TransformingIterator.Transformer;
 
 
 /**
@@ -35,7 +34,7 @@ public class CollectionProxy<X extends XCollectionValue<T>, T, J, C> {
      * @param <J> java base type
      * @param <C> java component type
      */
-    public interface ITransformer<X, T, J, C> {
+    public interface IComponentTransformer<X, T, J, C> {
         
         /**
          * @param anyType
@@ -55,11 +54,11 @@ public class CollectionProxy<X extends XCollectionValue<T>, T, J, C> {
         X createCollection();
     }
     
-    protected CollectionProxy.ITransformer<X,T,J,C> t;
+    protected CollectionProxy.IComponentTransformer<X,T,J,C> t;
     protected XWritableObject xo;
     protected XId fieldId;
     
-    public CollectionProxy(XWritableObject xo, XId fieldId, CollectionProxy.ITransformer<X,T,J,C> t) {
+    public CollectionProxy(XWritableObject xo, XId fieldId, CollectionProxy.IComponentTransformer<X,T,J,C> t) {
         this.xo = xo;
         this.fieldId = fieldId;
         this.t = t;
@@ -101,20 +100,21 @@ public class CollectionProxy<X extends XCollectionValue<T>, T, J, C> {
     public Iterator<C> iterator() {
         XWritableField f = this.xo.getField(this.fieldId);
         if(f == null)
-            return new NoneIterator<C>();
+            return NoneIterator.<C>create();
         XCollectionValue<T> v = (XCollectionValue<T>)f.getValue();
         if(v == null)
-            return new NoneIterator<C>();
+            return NoneIterator.<C>create();
         
         Iterator<T> base = v.iterator();
-        return new TransformingIterator<T,C>(base, new Transformer<T,C>() {
-            
-            @Override
-            public C transform(T in) {
-                return CollectionProxy.this.t.toJavaComponent(in);
-            }
-            
-        });
+        return new TransformingIterator<T,C>(base,
+                new org.xydra.index.iterator.ITransformer<T,C>() {
+                    
+                    @Override
+                    public C transform(T in) {
+                        return CollectionProxy.this.t.toJavaComponent(in);
+                    }
+                    
+                });
     }
     
     public boolean add(C j) {

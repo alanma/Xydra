@@ -24,7 +24,7 @@ import org.xydra.base.value.XCollectionValue;
 public class SortedSetProxy<X extends XCollectionValue<T>, T, J, C> extends
         CollectionProxy<X,T,J,C> implements SortedSet<C> {
     
-    public SortedSetProxy(XWritableObject xo, XId fieldId, CollectionProxy.ITransformer<X,T,J,C> t) {
+    public SortedSetProxy(XWritableObject xo, XId fieldId, CollectionProxy.IComponentTransformer<X,T,J,C> t) {
         super(xo, fieldId, t);
     }
     

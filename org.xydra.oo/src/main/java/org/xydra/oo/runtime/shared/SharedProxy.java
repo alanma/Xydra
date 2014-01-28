@@ -7,8 +7,8 @@ import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.value.XValue;
 import org.xydra.core.XX;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 
 /**

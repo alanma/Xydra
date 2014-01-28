@@ -45,7 +45,8 @@ public class AbstractConstructorOrMethodSpec extends AbstractMember implements I
         return this;
     }
     
-    public <T> AbstractConstructorOrMethodSpec annotateWith(Class<?> annotationClass, T ... values) {
+    public final <T> AbstractConstructorOrMethodSpec annotateWith(final Class<?> annotationClass,
+            @SuppressWarnings("unchecked") T ... values) {
         super.annotateWith(annotationClass, values);
         return this;
     }

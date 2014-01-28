@@ -8,9 +8,9 @@ import java.io.IOException;
 
 import org.junit.Test;
 import org.xydra.base.value.ValueType;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
-import org.xydra.log.util.RememberLogListener;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
+import org.xydra.log.util.listener.RememberLogListener;
 import org.xydra.oo.runtime.java.JavaTypeMapping;
 import org.xydra.oo.runtime.java.OOReflectionUtils;
 import org.xydra.oo.testgen.alltypes.shared.MyLongBasedType;

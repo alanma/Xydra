@@ -14,8 +14,8 @@ import org.xydra.base.value.XCollectionValue;
 import org.xydra.base.value.XStringValue;
 import org.xydra.base.value.XValue;
 import org.xydra.core.XX;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.oo.runtime.shared.CollectionProxy;
 import org.xydra.oo.runtime.shared.ListProxy;
 import org.xydra.oo.runtime.shared.SetProxy;
@@ -260,9 +260,9 @@ public class OOJavaOnlyProxy implements InvocationHandler {
         assert XydraReflectionUtils.isCollectionType(type) : "type=" + type.getCanonicalName()
                 + ", compTyp=" + componentType.getCanonicalName();
         
-        CollectionProxy.ITransformer<XCollectionValue<XValue>,XValue,J,C> t
+        CollectionProxy.IComponentTransformer<XCollectionValue<XValue>,XValue,J,C> t
         
-        = new CollectionProxy.ITransformer<XCollectionValue<XValue>,XValue,J,C>() {
+        = new CollectionProxy.IComponentTransformer<XCollectionValue<XValue>,XValue,J,C>() {
             
             @SuppressWarnings("unchecked")
             @Override

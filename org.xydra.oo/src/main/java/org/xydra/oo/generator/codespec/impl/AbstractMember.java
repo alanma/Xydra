@@ -16,12 +16,13 @@ public abstract class AbstractMember extends NamedElement implements IMember {
     
     public String generatedFrom;
     
-    AbstractMember(String name, String generatedFrom) {
+    protected AbstractMember(String name, String generatedFrom) {
         super(name);
         this.generatedFrom = generatedFrom;
     }
     
-    public <T> AbstractMember annotateWith(Class<?> annotationClass, T ... values) {
+    public <T> AbstractMember annotateWith(final Class<?> annotationClass,
+            @SuppressWarnings("unchecked") final T ... values) {
         this.annotations.add(new AnnotationSpec<T>(annotationClass, values));
         return this;
     }

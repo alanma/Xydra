@@ -29,7 +29,7 @@ import org.xydra.oo.runtime.java.OOReflectionUtils;
 import org.xydra.oo.runtime.java.XydraReflectionUtils;
 import org.xydra.oo.runtime.shared.BaseTypeSpec;
 import org.xydra.oo.runtime.shared.CollectionProxy;
-import org.xydra.oo.runtime.shared.CollectionProxy.ITransformer;
+import org.xydra.oo.runtime.shared.CollectionProxy.IComponentTransformer;
 import org.xydra.oo.runtime.shared.ListProxy;
 import org.xydra.oo.runtime.shared.SetProxy;
 import org.xydra.oo.runtime.shared.SharedTypeMapping;
@@ -49,6 +49,12 @@ import com.google.gwt.core.ext.typeinfo.TypeOracle;
 /**
  * Generates GWT classes during gwt:compile -- does the same in code what the
  * {@link OOJavaOnlyProxy} does via reflection
+ * 
+ * TODO super source factory
+ * 
+ * TODO take method comment from @Comment
+ * 
+ * TODO dont copy .gen module
  * 
  * @author xamde
  */
@@ -333,7 +339,7 @@ public class GwtCodeGenerator extends Generator {
         }
         
         c.addRequiredImports(gwtPackagename + ".GwtFactory");
-        c.addRequiredImports(ITransformer.class);
+        c.addRequiredImports(IComponentTransformer.class);
         c.addRequiredImports(CollectionProxy.class);
         c.addRequiredImports(XX.class);
     }

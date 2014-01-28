@@ -8,8 +8,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.oo.generator.codespec.impl.AbstractConstructorOrMethodSpec;
 import org.xydra.oo.generator.codespec.impl.AnnotationSpec;
 import org.xydra.oo.generator.codespec.impl.ClassSpec;

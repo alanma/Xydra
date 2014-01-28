@@ -4,9 +4,8 @@ import org.xydra.base.IHasXId;
 import org.xydra.base.XId;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.oo.Field;
-import org.xydra.oo.testgen.tasks.shared.ISettings;
 
-/** Generated on Thu Jul 04 16:28:58 CEST 2013 by SpecWriter, a part of xydra.org:oo */
+/** Generated on Fri Dec 27 13:29:45 CET 2013 by SpecWriter, a part of xydra.org:oo */
 public interface IUser extends IHasXId {
 
     /** 

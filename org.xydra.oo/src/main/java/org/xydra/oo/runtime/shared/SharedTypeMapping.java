@@ -20,8 +20,8 @@ import org.xydra.base.value.XLongValue;
 import org.xydra.base.value.XStringValue;
 import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 
 /**

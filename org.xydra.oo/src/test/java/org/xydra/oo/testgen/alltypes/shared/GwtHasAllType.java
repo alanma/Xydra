@@ -1,14 +1,9 @@
 package org.xydra.oo.testgen.alltypes.shared;
 
-import java.lang.Boolean;
-import java.lang.Double;
-import java.lang.Integer;
-import java.lang.Long;
-import java.lang.String;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
+
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.value.XAddressListValue;
@@ -35,18 +30,15 @@ import org.xydra.core.XX;
 import org.xydra.oo.runtime.client.GwtXydraMapped;
 import org.xydra.oo.runtime.shared.BaseTypeSpec;
 import org.xydra.oo.runtime.shared.CollectionProxy;
-import org.xydra.oo.runtime.shared.CollectionProxy.ITransformer;
+import org.xydra.oo.runtime.shared.CollectionProxy.IComponentTransformer;
 import org.xydra.oo.runtime.shared.ListProxy;
 import org.xydra.oo.runtime.shared.SetProxy;
 import org.xydra.oo.runtime.shared.SharedTypeMapping;
 import org.xydra.oo.runtime.shared.SortedSetProxy;
 import org.xydra.oo.runtime.shared.TypeSpec;
 import org.xydra.oo.testgen.alltypes.client.GwtFactory;
-import org.xydra.oo.testgen.alltypes.shared.Colors;
-import org.xydra.oo.testgen.alltypes.shared.IPerson;
-import org.xydra.oo.testgen.alltypes.shared.MyLongBasedType;
 
-/** Generated on Thu Jul 04 16:28:58 CEST 2013 by SpecWriter, a part of xydra.org:oo */
+/** Generated on Fri Dec 27 13:29:45 CET 2013 by SpecWriter, a part of xydra.org:oo */
 public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testgen.alltypes.shared.IHasAllType {
 
     /** 
@@ -55,7 +47,7 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      * @return ... 
      */
     public SortedSet<IPerson> bestFriends() {
-        ITransformer<org.xydra.base.value.XIdListValue,org.xydra.base.XId,java.util.SortedSet<org.xydra.oo.testgen.alltypes.shared.IPerson>,org.xydra.oo.testgen.alltypes.shared.IPerson> t = new CollectionProxy.ITransformer<org.xydra.base.value.XIdListValue,org.xydra.base.XId,java.util.SortedSet<org.xydra.oo.testgen.alltypes.shared.IPerson>,org.xydra.oo.testgen.alltypes.shared.IPerson>() {
+        IComponentTransformer<org.xydra.base.value.XIdListValue,org.xydra.base.XId,java.util.SortedSet<org.xydra.oo.testgen.alltypes.shared.IPerson>,org.xydra.oo.testgen.alltypes.shared.IPerson> t = new CollectionProxy.IComponentTransformer<org.xydra.base.value.XIdListValue,org.xydra.base.XId,java.util.SortedSet<org.xydra.oo.testgen.alltypes.shared.IPerson>,org.xydra.oo.testgen.alltypes.shared.IPerson>() {
             @Override
             public org.xydra.oo.testgen.alltypes.shared.IPerson toJavaComponent(org.xydra.base.XId x) {
                 return GwtFactory.wrapPerson(GwtHasAllType.this.oop.getXModel(), (XId) x);
@@ -82,7 +74,7 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      * @return ... 
      */
     public Set<IPerson> friends() {
-        ITransformer<org.xydra.base.value.XIdListValue,org.xydra.base.XId,java.util.Set<org.xydra.oo.testgen.alltypes.shared.IPerson>,org.xydra.oo.testgen.alltypes.shared.IPerson> t = new CollectionProxy.ITransformer<org.xydra.base.value.XIdListValue,org.xydra.base.XId,java.util.Set<org.xydra.oo.testgen.alltypes.shared.IPerson>,org.xydra.oo.testgen.alltypes.shared.IPerson>() {
+        IComponentTransformer<org.xydra.base.value.XIdListValue,org.xydra.base.XId,java.util.Set<org.xydra.oo.testgen.alltypes.shared.IPerson>,org.xydra.oo.testgen.alltypes.shared.IPerson> t = new CollectionProxy.IComponentTransformer<org.xydra.base.value.XIdListValue,org.xydra.base.XId,java.util.Set<org.xydra.oo.testgen.alltypes.shared.IPerson>,org.xydra.oo.testgen.alltypes.shared.IPerson>() {
             @Override
             public org.xydra.oo.testgen.alltypes.shared.IPerson toJavaComponent(org.xydra.base.XId x) {
                 return GwtFactory.wrapPerson(GwtHasAllType.this.oop.getXModel(), (XId) x);
@@ -685,7 +677,7 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      * @return ... 
      */
     public Set<XAddress> jaddresset() {
-        ITransformer<org.xydra.base.value.XAddressSetValue,org.xydra.base.XAddress,java.util.Set<org.xydra.base.XAddress>,org.xydra.base.XAddress> t = new CollectionProxy.ITransformer<org.xydra.base.value.XAddressSetValue,org.xydra.base.XAddress,java.util.Set<org.xydra.base.XAddress>,org.xydra.base.XAddress>() {
+        IComponentTransformer<org.xydra.base.value.XAddressSetValue,org.xydra.base.XAddress,java.util.Set<org.xydra.base.XAddress>,org.xydra.base.XAddress> t = new CollectionProxy.IComponentTransformer<org.xydra.base.value.XAddressSetValue,org.xydra.base.XAddress,java.util.Set<org.xydra.base.XAddress>,org.xydra.base.XAddress>() {
             @Override
             public org.xydra.base.XAddress toJavaComponent(org.xydra.base.XAddress x) {
                 return x;
@@ -712,7 +704,7 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      * @return ... 
      */
     public List<XAddress> jaddresslist() {
-        ITransformer<org.xydra.base.value.XAddressListValue,org.xydra.base.XAddress,java.util.List<org.xydra.base.XAddress>,org.xydra.base.XAddress> t = new CollectionProxy.ITransformer<org.xydra.base.value.XAddressListValue,org.xydra.base.XAddress,java.util.List<org.xydra.base.XAddress>,org.xydra.base.XAddress>() {
+        IComponentTransformer<org.xydra.base.value.XAddressListValue,org.xydra.base.XAddress,java.util.List<org.xydra.base.XAddress>,org.xydra.base.XAddress> t = new CollectionProxy.IComponentTransformer<org.xydra.base.value.XAddressListValue,org.xydra.base.XAddress,java.util.List<org.xydra.base.XAddress>,org.xydra.base.XAddress>() {
             @Override
             public org.xydra.base.XAddress toJavaComponent(org.xydra.base.XAddress x) {
                 return x;
@@ -739,7 +731,7 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      * @return ... 
      */
     public SortedSet<XAddress> jaddresssortedset() {
-        ITransformer<org.xydra.base.value.XAddressSortedSetValue,org.xydra.base.XAddress,java.util.SortedSet<org.xydra.base.XAddress>,org.xydra.base.XAddress> t = new CollectionProxy.ITransformer<org.xydra.base.value.XAddressSortedSetValue,org.xydra.base.XAddress,java.util.SortedSet<org.xydra.base.XAddress>,org.xydra.base.XAddress>() {
+        IComponentTransformer<org.xydra.base.value.XAddressSortedSetValue,org.xydra.base.XAddress,java.util.SortedSet<org.xydra.base.XAddress>,org.xydra.base.XAddress> t = new CollectionProxy.IComponentTransformer<org.xydra.base.value.XAddressSortedSetValue,org.xydra.base.XAddress,java.util.SortedSet<org.xydra.base.XAddress>,org.xydra.base.XAddress>() {
             @Override
             public org.xydra.base.XAddress toJavaComponent(org.xydra.base.XAddress x) {
                 return x;
@@ -766,7 +758,7 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      * @return ... 
      */
     public List<Boolean> jbooleanlist() {
-        ITransformer<org.xydra.base.value.XBooleanListValue,java.lang.Boolean,java.util.List<java.lang.Boolean>,java.lang.Boolean> t = new CollectionProxy.ITransformer<org.xydra.base.value.XBooleanListValue,java.lang.Boolean,java.util.List<java.lang.Boolean>,java.lang.Boolean>() {
+        IComponentTransformer<org.xydra.base.value.XBooleanListValue,java.lang.Boolean,java.util.List<java.lang.Boolean>,java.lang.Boolean> t = new CollectionProxy.IComponentTransformer<org.xydra.base.value.XBooleanListValue,java.lang.Boolean,java.util.List<java.lang.Boolean>,java.lang.Boolean>() {
             @Override
             public java.lang.Boolean toJavaComponent(java.lang.Boolean x) {
                 return x;
@@ -793,7 +785,7 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      * @return ... 
      */
     public List<Double> jdoublelist() {
-        ITransformer<org.xydra.base.value.XDoubleListValue,java.lang.Double,java.util.List<java.lang.Double>,java.lang.Double> t = new CollectionProxy.ITransformer<org.xydra.base.value.XDoubleListValue,java.lang.Double,java.util.List<java.lang.Double>,java.lang.Double>() {
+        IComponentTransformer<org.xydra.base.value.XDoubleListValue,java.lang.Double,java.util.List<java.lang.Double>,java.lang.Double> t = new CollectionProxy.IComponentTransformer<org.xydra.base.value.XDoubleListValue,java.lang.Double,java.util.List<java.lang.Double>,java.lang.Double>() {
             @Override
             public java.lang.Double toJavaComponent(java.lang.Double x) {
                 return x;
@@ -820,7 +812,7 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      * @return ... 
      */
     public List<Integer> jintegerlist() {
-        ITransformer<org.xydra.base.value.XIntegerListValue,java.lang.Integer,java.util.List<java.lang.Integer>,java.lang.Integer> t = new CollectionProxy.ITransformer<org.xydra.base.value.XIntegerListValue,java.lang.Integer,java.util.List<java.lang.Integer>,java.lang.Integer>() {
+        IComponentTransformer<org.xydra.base.value.XIntegerListValue,java.lang.Integer,java.util.List<java.lang.Integer>,java.lang.Integer> t = new CollectionProxy.IComponentTransformer<org.xydra.base.value.XIntegerListValue,java.lang.Integer,java.util.List<java.lang.Integer>,java.lang.Integer>() {
             @Override
             public java.lang.Integer toJavaComponent(java.lang.Integer x) {
                 return x;
@@ -847,7 +839,7 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      * @return ... 
      */
     public List<Long> jlonglist() {
-        ITransformer<org.xydra.base.value.XLongListValue,java.lang.Long,java.util.List<java.lang.Long>,java.lang.Long> t = new CollectionProxy.ITransformer<org.xydra.base.value.XLongListValue,java.lang.Long,java.util.List<java.lang.Long>,java.lang.Long>() {
+        IComponentTransformer<org.xydra.base.value.XLongListValue,java.lang.Long,java.util.List<java.lang.Long>,java.lang.Long> t = new CollectionProxy.IComponentTransformer<org.xydra.base.value.XLongListValue,java.lang.Long,java.util.List<java.lang.Long>,java.lang.Long>() {
             @Override
             public java.lang.Long toJavaComponent(java.lang.Long x) {
                 return x;
@@ -874,7 +866,7 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      * @return ... 
      */
     public List<String> jstringlist() {
-        ITransformer<org.xydra.base.value.XStringListValue,java.lang.String,java.util.List<java.lang.String>,java.lang.String> t = new CollectionProxy.ITransformer<org.xydra.base.value.XStringListValue,java.lang.String,java.util.List<java.lang.String>,java.lang.String>() {
+        IComponentTransformer<org.xydra.base.value.XStringListValue,java.lang.String,java.util.List<java.lang.String>,java.lang.String> t = new CollectionProxy.IComponentTransformer<org.xydra.base.value.XStringListValue,java.lang.String,java.util.List<java.lang.String>,java.lang.String>() {
             @Override
             public java.lang.String toJavaComponent(java.lang.String x) {
                 return x;
@@ -901,7 +893,7 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      * @return ... 
      */
     public Set<String> jstringset() {
-        ITransformer<org.xydra.base.value.XStringSetValue,java.lang.String,java.util.Set<java.lang.String>,java.lang.String> t = new CollectionProxy.ITransformer<org.xydra.base.value.XStringSetValue,java.lang.String,java.util.Set<java.lang.String>,java.lang.String>() {
+        IComponentTransformer<org.xydra.base.value.XStringSetValue,java.lang.String,java.util.Set<java.lang.String>,java.lang.String> t = new CollectionProxy.IComponentTransformer<org.xydra.base.value.XStringSetValue,java.lang.String,java.util.Set<java.lang.String>,java.lang.String>() {
             @Override
             public java.lang.String toJavaComponent(java.lang.String x) {
                 return x;
@@ -928,7 +920,7 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      * @return ... 
      */
     public List<XId> jxidlist() {
-        ITransformer<org.xydra.base.value.XIdListValue,org.xydra.base.XId,java.util.List<org.xydra.base.XId>,org.xydra.base.XId> t = new CollectionProxy.ITransformer<org.xydra.base.value.XIdListValue,org.xydra.base.XId,java.util.List<org.xydra.base.XId>,org.xydra.base.XId>() {
+        IComponentTransformer<org.xydra.base.value.XIdListValue,org.xydra.base.XId,java.util.List<org.xydra.base.XId>,org.xydra.base.XId> t = new CollectionProxy.IComponentTransformer<org.xydra.base.value.XIdListValue,org.xydra.base.XId,java.util.List<org.xydra.base.XId>,org.xydra.base.XId>() {
             @Override
             public org.xydra.base.XId toJavaComponent(org.xydra.base.XId x) {
                 return x;
@@ -955,7 +947,7 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      * @return ... 
      */
     public Set<XId> jxidset() {
-        ITransformer<org.xydra.base.value.XIdSetValue,org.xydra.base.XId,java.util.Set<org.xydra.base.XId>,org.xydra.base.XId> t = new CollectionProxy.ITransformer<org.xydra.base.value.XIdSetValue,org.xydra.base.XId,java.util.Set<org.xydra.base.XId>,org.xydra.base.XId>() {
+        IComponentTransformer<org.xydra.base.value.XIdSetValue,org.xydra.base.XId,java.util.Set<org.xydra.base.XId>,org.xydra.base.XId> t = new CollectionProxy.IComponentTransformer<org.xydra.base.value.XIdSetValue,org.xydra.base.XId,java.util.Set<org.xydra.base.XId>,org.xydra.base.XId>() {
             @Override
             public org.xydra.base.XId toJavaComponent(org.xydra.base.XId x) {
                 return x;
@@ -982,7 +974,7 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      * @return ... 
      */
     public SortedSet<XId> jxidsortedset() {
-        ITransformer<org.xydra.base.value.XIdSortedSetValue,org.xydra.base.XId,java.util.SortedSet<org.xydra.base.XId>,org.xydra.base.XId> t = new CollectionProxy.ITransformer<org.xydra.base.value.XIdSortedSetValue,org.xydra.base.XId,java.util.SortedSet<org.xydra.base.XId>,org.xydra.base.XId>() {
+        IComponentTransformer<org.xydra.base.value.XIdSortedSetValue,org.xydra.base.XId,java.util.SortedSet<org.xydra.base.XId>,org.xydra.base.XId> t = new CollectionProxy.IComponentTransformer<org.xydra.base.value.XIdSortedSetValue,org.xydra.base.XId,java.util.SortedSet<org.xydra.base.XId>,org.xydra.base.XId>() {
             @Override
             public org.xydra.base.XId toJavaComponent(org.xydra.base.XId x) {
                 return x;
@@ -1009,7 +1001,7 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      * @return ... 
      */
     public List<IPerson> nextBirthdays() {
-        ITransformer<org.xydra.base.value.XIdListValue,org.xydra.base.XId,java.util.List<org.xydra.oo.testgen.alltypes.shared.IPerson>,org.xydra.oo.testgen.alltypes.shared.IPerson> t = new CollectionProxy.ITransformer<org.xydra.base.value.XIdListValue,org.xydra.base.XId,java.util.List<org.xydra.oo.testgen.alltypes.shared.IPerson>,org.xydra.oo.testgen.alltypes.shared.IPerson>() {
+        IComponentTransformer<org.xydra.base.value.XIdListValue,org.xydra.base.XId,java.util.List<org.xydra.oo.testgen.alltypes.shared.IPerson>,org.xydra.oo.testgen.alltypes.shared.IPerson> t = new CollectionProxy.IComponentTransformer<org.xydra.base.value.XIdListValue,org.xydra.base.XId,java.util.List<org.xydra.oo.testgen.alltypes.shared.IPerson>,org.xydra.oo.testgen.alltypes.shared.IPerson>() {
             @Override
             public org.xydra.oo.testgen.alltypes.shared.IPerson toJavaComponent(org.xydra.base.XId x) {
                 return GwtFactory.wrapPerson(GwtHasAllType.this.oop.getXModel(), (XId) x);
