@@ -8,8 +8,8 @@ import org.xydra.devtools.XydraArchitecture;
 import org.xydra.devtools.dot.Graph;
 import org.xydra.devtools.dot.Graph.ILabelRenderer;
 import org.xydra.devtools.javapackages.architecture.Architecture;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 
 /**
@@ -38,16 +38,16 @@ public class PackageChaos {
         this.project = new Project();
     }
     
-    public void analyse(String path) throws IOException {
-        File f = new File(path);
-        analyse(f);
+    public void analyseAndRender(String path) throws IOException {
+        readImportsFromDir(path);
+        renderDotGraph();
     }
     
-    public void analyse(File f) throws IOException {
+    public void readImportsFromDir(String path) throws IOException {
+        File f = new File(path);
         assert f.exists();
         assert f.isDirectory();
         this.project.scanDir(f);
-        renderDotGraph();
     }
     
     public Project getProject() {
@@ -60,14 +60,14 @@ public class PackageChaos {
         // }
         log.info("Index has " + this.project.packageCount() + " packages");
         
-        Graph g = new Graph("main");
-        g.setLabelRenderer(new ILabelRenderer() {
+        Graph graph = new Graph("main");
+        graph.setLabelRenderer(new ILabelRenderer() {
             
             @Override
             public String render(String s) {
                 String p = s;
                 for(String scope : PackageChaos.this.arch.getScopes()) {
-                    if(s.startsWith(scope)) {
+                    if(scope.length() > 0 && s.startsWith(scope)) {
                         p = s.substring((scope + ".").length());
                         break;
                     }
@@ -83,7 +83,7 @@ public class PackageChaos {
         this.project.dump();
         
         // --- Graph ---
-        this.project.addPackagesAsSubgraphs(g, this.project, new IDependencyFilter() {
+        this.project.addPackagesAsSubgraphs(graph, this.project, new IDependencyFilter() {
             
             @Override
             public boolean shouldBeShown(Package a, Package b, Set<String> causes) {
@@ -91,17 +91,17 @@ public class PackageChaos {
             }
         });
         
-        g.pruneEmptySubGraphs();
+        graph.pruneEmptySubGraphs();
         
         // addAllEdges(g);
         System.out.println("--- Graph ---");
-        g.dump("");
+        graph.dump("");
         
         File temp = new File(this.resultFile.getAbsoluteFile() + ".temp");
-        g.writeTo(temp);
+        graph.writeTo(temp);
         temp.renameTo(this.resultFile);
         
-        log.info("Written " + g.size() + " edges to DOT file");
+        log.info("Written " + graph.size() + " edges to DOT file");
     }
     
     public void setShowCauses(boolean b) {

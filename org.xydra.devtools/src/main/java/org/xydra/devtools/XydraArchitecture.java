@@ -5,15 +5,15 @@ import java.io.IOException;
 
 import org.xydra.devtools.javapackages.PackageChaos;
 import org.xydra.devtools.javapackages.architecture.Architecture;
-import org.xydra.log.LoggerFactory;
-import org.xydra.log.gae.Log4jLoggerFactory;
+import org.xydra.log.api.LoggerFactory;
+import org.xydra.log.impl.log4j.Log4jLoggerFactory;
 import org.xydra.log.util.Log4jUtils;
 
 
 public class XydraArchitecture {
     
     static {
-        LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory());
+        LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory(), "XydraArchitecture");
         try {
             Log4jUtils.listConfigFromClasspath();
         } catch(IOException e) {
@@ -52,9 +52,9 @@ public class XydraArchitecture {
         
         .ignoreForNow("org.xydra.perf");
         
-        File dot = new File("/Users/xamde/_data_/_p_/2013/org.xydra.devtools/target/res.dot");
+        File dot = new File("/Users/xamde/_data_/_p_/2010/org.xydra.devtools/target/res.dot");
         PackageChaos pc = new PackageChaos(xydraArchitecture, dot);
-        pc.analyse("/Users/xamde/_data_/_p_/2010/org.xydra.core/src/main/java");
+        pc.analyseAndRender("/Users/xamde/_data_/_p_/2010/org.xydra.core/src/main/java");
     }
     
     /**

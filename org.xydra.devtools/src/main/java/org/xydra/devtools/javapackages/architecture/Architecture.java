@@ -5,8 +5,8 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.xydra.devtools.javapackages.Package;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 
 /**
@@ -110,8 +110,15 @@ public class Architecture {
             Architecture.this.layers.add(this.currentLayer);
         }
         
-        Layer currentLayer;
+        private Layer currentLayer;
         
+        /**
+         * Add a new layer on top that is allowed to access all lower layers,
+         * directly or indirectly. Weak layering.
+         * 
+         * @param packageNamePrefix
+         * @return this for a fluent API
+         */
         public ArchitectureBuilder addLayerOnTop(String packageNamePrefix) {
             this.currentLayer = new Layer(packageNamePrefix, false, false);
             for(Layer lower : Architecture.this.layers)
@@ -196,7 +203,7 @@ public class Architecture {
     }
     
     /**
-     * All sub-packages are considered to be part of the layer and dependencied
+     * All sub-packages are considered to be part of the layer and dependencies
      * within the layer are ignored.
      * 
      * @param packageNamePrefix

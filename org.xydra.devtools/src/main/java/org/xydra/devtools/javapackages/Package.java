@@ -49,8 +49,10 @@ public class Package implements Comparable<Package> {
     }
     
     private String name;
-    public Set<Dependency> dependesOn = new TreeSet<Dependency>();
-    public Set<Package> children = new TreeSet<Package>();
+    
+    Set<Dependency> dependesOn = new TreeSet<Dependency>();
+    
+    Set<Package> children = new TreeSet<Package>();
     
     public void addImport(String importName, String cause) {
         Package p = this.project.getOrCreatePackage(importName);

@@ -13,13 +13,18 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 
+/**
+ * Ready to be rendered as a .DOT file
+ * 
+ * @author xamde
+ */
 public class Graph implements Comparable<Graph> {
     
     public static interface ILabelRenderer {
         String render(String s);
     }
     
-    ILabelRenderer labelRenderer = new ILabelRenderer() {
+    private ILabelRenderer labelRenderer = new ILabelRenderer() {
         
         @Override
         public String render(String s) {
@@ -31,13 +36,13 @@ public class Graph implements Comparable<Graph> {
         this.labelRenderer = labelRenderer;
     }
     
-    String name;
+    private String name;
     
-    Set<Edge> edges = new HashSet<Edge>();
+    private Set<Edge> edges = new HashSet<Edge>();
     
-    SortedSet<Graph> subgraphs = new TreeSet<Graph>();
+    private SortedSet<Graph> subgraphs = new TreeSet<Graph>();
     
-    Set<String> nodes = new HashSet<String>();
+    private Set<String> nodes = new HashSet<String>();
     
     public Graph(String name) {
         this.name = name;

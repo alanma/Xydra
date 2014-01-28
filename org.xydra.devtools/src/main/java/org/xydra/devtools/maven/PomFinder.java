@@ -17,8 +17,8 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.xydra.devtools.dot.Graph;
 import org.xydra.devtools.dot.Graph.ILabelRenderer;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 
 public class PomFinder {
@@ -27,6 +27,10 @@ public class PomFinder {
     
     static Map<String,Artifact> artifactMap = new HashMap<String,Artifact>();
     
+    /**
+     * @param dir root
+     * @return a list of pom.xml files
+     */
     public static List<File> findPomFiles(File dir) {
         List<File> list = new LinkedList<File>();
         File[] files = dir.listFiles(new FileFilter() {
@@ -136,14 +140,21 @@ public class PomFinder {
         return scope.contains(artifact.getGroupId());
     }
     
-    private static void parse(File f) throws FileNotFoundException, IOException,
-            XmlPullParserException {
+    public static Model parseToMavenModel(File f) throws FileNotFoundException, IOException {
         log.info("Parsing " + f.getAbsolutePath());
-        
         MavenXpp3Reader mavenReader = new MavenXpp3Reader();
-        
         try {
             Model mavenModel = mavenReader.read(new FileInputStream(f));
+            return mavenModel;
+        } catch(XmlPullParserException e) {
+            throw new RuntimeException("Could not parse " + f.getAbsolutePath(), e);
+        }
+    }
+    
+    private static void parse(File f) throws FileNotFoundException, IOException,
+            XmlPullParserException {
+        try {
+            Model mavenModel = parseToMavenModel(f);
             Artifact artifact = Artifact.createWithoutDependencies(mavenModel);
             artifact = getOrPutArtifactReferenceViaMap(artifact);
             
@@ -156,7 +167,7 @@ public class PomFinder {
                 depArtifact = getOrPutArtifactReferenceViaMap(depArtifact);
                 artifact.addDependency(depArtifact);
             }
-        } catch(XmlPullParserException e) {
+        } catch(RuntimeException e) {
             log.warn("Could not parse " + f.getAbsolutePath(), e);
         }
     }

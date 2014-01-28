@@ -47,7 +47,6 @@ import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 import org.reflections.scanners.TypeElementsScanner;
-import org.reflections.scanners.TypesScanner;
 import org.reflections.util.ClasspathHelper;
 
 
@@ -58,7 +57,11 @@ public class ImportAnalysis {
         Reflections reflections = new Reflections(
         
         ClasspathHelper.forPackage("com.calpano"), ClasspathHelper.forPackage("org.xydra"),
-                new SubTypesScanner(false), new TypesScanner(), new TypeElementsScanner());
+                new SubTypesScanner(false),
+                
+                // gone in reflections 0.9.9-RC1 from 0.9.8
+                // new TypesScanner(),
+                new TypeElementsScanner());
         
         Set<Class<? extends Object>> allClasses = reflections.getSubTypesOf(Object.class);
         

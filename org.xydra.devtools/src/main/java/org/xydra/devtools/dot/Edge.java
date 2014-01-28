@@ -6,7 +6,7 @@ import java.io.Writer;
 import org.xydra.devtools.dot.Graph.ILabelRenderer;
 
 
-public class Edge {
+class Edge {
     
     public Edge(String a, String b, int weight, String edgeLabel) {
         super();

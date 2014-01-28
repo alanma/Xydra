@@ -17,8 +17,8 @@ import java.util.Set;
 import org.xydra.annotations.NeverNull;
 import org.xydra.devtools.dot.Graph;
 import org.xydra.devtools.javapackages.Package.Dependency;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 
 /**
@@ -32,6 +32,7 @@ public class Project {
     
     private static final Logger log = LoggerFactory.getLogger(Project.class);
     
+    /** FQ package name 2 Package */
     private Map<String,Package> allPackages = new HashMap<String,Package>();
     
     private Map<Package,Graph> graphs = new HashMap<Package,Graph>();
@@ -47,6 +48,27 @@ public class Project {
         return s;
     }
     
+    // /**
+    // * Should be called just before rendering.
+    // *
+    // * @param prefix
+    // * @param groupName
+    // */
+    // public void groupPackages(String prefix, String groupName) {
+    // Package group = getOrCreatePackage("Group-"+groupName);
+    // for( String fqName : this.allPackages.keySet()) {
+    // if(fqName.startsWith(prefix)) {
+    // Package p = this.allPackages.get(fqName);
+    //
+    // }
+    // }
+    // }
+    //
+    
+    /**
+     * @param packageName fq
+     * @return ...
+     */
     public Package getOrCreatePackage(String packageName) {
         Package p = this.allPackages.get(packageName);
         if(p == null) {
@@ -56,6 +78,13 @@ public class Project {
         return p;
     }
     
+    /**
+     * While rendering
+     * 
+     * @param g
+     * @param project
+     * @param filter
+     */
     public void addPackagesAsSubgraphs(Graph g, Project project, IDependencyFilter filter) {
         addSubPackagesAsSubGraphs(project.getRootPackage(), g);
         addEdges(project.getRootPackage(), this.graphs, filter);
@@ -297,6 +326,18 @@ public class Project {
         br.close();
         r.close();
         fis.close();
+    }
+    
+    /**
+     * FIXME does not work yet
+     * 
+     * @param sourcePackage
+     * @param cause for the relation
+     * @param targetPackage
+     */
+    public void addSyntheticPackageRelation(String sourcePackage, String cause, String targetPackage) {
+        Package p = getOrCreatePackage(sourcePackage);
+        p.addImport(targetPackage, cause);
     }
     
     private static String extractFromLine(String keyword, String line) {
