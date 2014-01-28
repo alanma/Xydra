@@ -10,8 +10,8 @@ import java.io.StringReader;
 import java.io.StringWriter;
 
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 
 /**
@@ -40,7 +40,7 @@ public class ReflectionUtils {
 	public static Object createInstanceOfClass(String className) throws Exception {
 		try {
 			Class<?> clazz = Class.forName(className);
-			log.debug("Instantiated. Now casting...");
+			if(log.isDebugEnabled()) log.debug("Instantiated. Now casting...");
 			try {
 				Object instance = clazz.newInstance();
 				return instance;

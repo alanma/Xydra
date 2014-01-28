@@ -81,7 +81,7 @@ abstract public class AbstractChangeLog implements XChangeLog {
         }
         
         if(beginRevision >= endRevision || endRevision <= firstRev) {
-            return new NoneIterator<XEvent>();
+            return NoneIterator.create();
         }
         
         long begin = beginRevision < firstRev ? firstRev : beginRevision;

@@ -14,7 +14,8 @@ public class MemoryStringIdRegexGwtEmul {
     private static final Pattern p = Pattern.compile(MemoryStringIDProvider.nameRegex);
     
     public static boolean matchesXydraId(String uriString) {
-        return p.matcher(uriString).matches();
+        boolean res = p.matcher(uriString).matches();
+        return res;
     }
     
 }

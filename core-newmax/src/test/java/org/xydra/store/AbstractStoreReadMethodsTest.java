@@ -9,6 +9,7 @@ import static org.junit.Assert.fail;
 
 import java.util.Set;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.xydra.base.XAddress;
@@ -18,9 +19,9 @@ import org.xydra.base.change.XCommandFactory;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.core.XX;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
-import org.xydra.log.gae.Log4jLoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
+import org.xydra.log.impl.log4j.Log4jLoggerFactory;
 import org.xydra.persistence.GetWithAddressRequest;
 import org.xydra.persistence.ModelRevision;
 import org.xydra.sharedutils.XyAssert;
@@ -41,7 +42,7 @@ import org.xydra.sharedutils.XyAssert;
 public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
     
     static {
-        LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory());
+        LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory(), "SomeTest");
     }
     
     private static final Logger log = LoggerFactory.getLogger(AbstractStoreReadMethodsTest.class);
@@ -57,9 +58,15 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
     protected GetWithAddressRequest[] objectAddressRequests;
     protected XydraStore store;
     
+    @After
+    public void tearDown() {
+        super.tearDown();
+    }
+    
     @Before
-    public void before() {
-        this.store = this.getStore();
+    public void setUp() {
+        super.setUp();
+        this.store = this.createStore();
         this.factory = this.getCommandFactory();
         
         if(this.store == null) {
@@ -116,12 +123,12 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
         XCommand modelCommand2 = this.factory.createAddModelCommand(repoID, modelId2, true);
         XCommand modelCommand3 = this.factory.createAddModelCommand(repoID, modelId3, true);
         
-        XCommand objectCommand1 = this.factory.createAddObjectCommand(XX.resolveModel(repoID, modelId1), objectId1,
-                true);
-        XCommand objectCommand2 = this.factory.createAddObjectCommand(XX.resolveModel(repoID, modelId1), objectId2,
-                true);
-        XCommand objectCommand3 = this.factory.createAddObjectCommand(XX.resolveModel(repoID, modelId1), objectId3,
-                true);
+        XCommand objectCommand1 = this.factory.createAddObjectCommand(
+                XX.resolveModel(repoID, modelId1), objectId1, true);
+        XCommand objectCommand2 = this.factory.createAddObjectCommand(
+                XX.resolveModel(repoID, modelId1), objectId2, true);
+        XCommand objectCommand3 = this.factory.createAddObjectCommand(
+                XX.resolveModel(repoID, modelId1), objectId3, true);
         
         XCommand[] commands = { modelCommand1, modelCommand2, modelCommand3, objectCommand1,
                 objectCommand2, objectCommand3 };

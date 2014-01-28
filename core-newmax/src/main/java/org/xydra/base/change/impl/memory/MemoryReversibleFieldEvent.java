@@ -253,17 +253,26 @@ public class MemoryReversibleFieldEvent extends MemoryFieldEvent implements XRev
         }
     }
     
-    public static XEvent createReversibleEventFrom(XFieldEvent event, XValue oldValue) {
-        if(event.getChangeType() == ChangeType.REMOVE) {
+    public static XReversibleFieldEvent createReversibleEventFrom(XFieldEvent event, XValue oldValue) {
+        switch(event.getChangeType()) {
+        case REMOVE:
             return createRemoveEvent(event.getActor(), event.getTarget(), oldValue,
                     event.getOldModelRevision(), event.getOldFieldRevision(),
                     event.inTransaction(), event.isImplied());
-        } else if(event.getChangeType() == ChangeType.CHANGE) {
+        case CHANGE:
             return createChangeEvent(event.getActor(), event.getTarget(), oldValue,
                     event.getNewValue(), event.getOldModelRevision(), event.getOldFieldRevision(),
                     event.inTransaction());
+        case ADD:
+            return createAddEvent(event.getActor(), event.getTarget(), event.getNewValue(),
+                    event.getOldModelRevision(), event.getOldFieldRevision(), event.inTransaction());
+        case TRANSACTION:
+            break;
+        default:
+            break;
         }
-        throw new AssertionError();
+        
+        throw new AssertionError("still undefined");
     }
     
 }

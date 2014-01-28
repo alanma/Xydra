@@ -18,8 +18,8 @@ import org.xydra.base.value.XSingleValue;
 import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
 import org.xydra.core.XX;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 
 /**
@@ -270,7 +270,7 @@ public class SerializedValue {
         
         XValue value = XV.toIdSortedSetValue(xids);
         
-        log.debug("Serialised XydraElement to '" + value.toString() + "'");
+        if(log.isDebugEnabled()) log.debug("Serialised XydraElement to '" + value.toString() + "'");
         
         return value;
     }

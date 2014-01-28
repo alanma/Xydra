@@ -15,8 +15,8 @@ import org.xydra.base.rmof.XReadableRepository;
 import org.xydra.base.rmof.XStateReadableField;
 import org.xydra.base.rmof.XStateReadableModel;
 import org.xydra.base.rmof.XStateReadableObject;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.sharedutils.XyAssert;
 
 

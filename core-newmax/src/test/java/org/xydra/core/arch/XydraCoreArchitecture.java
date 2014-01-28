@@ -1,4 +1,4 @@
-package org.xydra.core;
+package org.xydra.core.arch;
 
 import java.io.File;
 import java.io.IOException;
@@ -6,15 +6,15 @@ import java.io.IOException;
 import org.xydra.devtools.javapackages.PackageChaos;
 import org.xydra.devtools.javapackages.architecture.Architecture;
 import org.xydra.devtools.javapackages.architecture.Layer;
-import org.xydra.log.LoggerFactory;
-import org.xydra.log.gae.Log4jLoggerFactory;
+import org.xydra.log.api.LoggerFactory;
+import org.xydra.log.impl.log4j.Log4jLoggerFactory;
 import org.xydra.log.util.Log4jUtils;
 
 
 public class XydraCoreArchitecture {
     
     static {
-        LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory());
+        LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory(), "SomeTest");
         try {
             Log4jUtils.listConfigFromClasspath();
         } catch(IOException e) {
@@ -35,7 +35,7 @@ public class XydraCoreArchitecture {
         File dot = new File("./target/core.dot");
         PackageChaos pc = new PackageChaos(a, dot);
         pc.setShowCauses(true);
-        pc.analyse("./src/main/java");
+        pc.analyseAndRender("./src/main/java");
     }
     
 }

@@ -55,8 +55,8 @@ import org.xydra.core.model.XSynchronizesChanges;
 import org.xydra.core.model.impl.memory.sync.ISyncLog;
 import org.xydra.core.model.impl.memory.sync.ISyncLogState;
 import org.xydra.core.model.impl.memory.sync.Root;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.sharedutils.XyAssert;
 
 

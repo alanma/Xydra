@@ -10,8 +10,8 @@ import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.id.UUID;
 import org.xydra.core.XX;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.sharedutils.XyAssert;
 
 
@@ -174,7 +174,7 @@ public class ChangeSession {
 			        modelId);
 			sessionModel = new SessionModel(this, modelAddress, readonly);
 			this.sessionModels.put(modelId, sessionModel);
-			log.debug("Session '" + this.traceid + "' opened session model '" + sessionModel + "'");
+			if(log.isDebugEnabled()) log.debug("Session '" + this.traceid + "' opened session model '" + sessionModel + "'");
 		}
 		return sessionModel;
 	}

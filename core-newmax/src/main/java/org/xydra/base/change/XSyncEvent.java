@@ -3,6 +3,12 @@ package org.xydra.base.change;
 import org.xydra.base.XAddress;
 
 
+/**
+ * A Xydra event which is fired when an entity has been synced (with success or
+ * failure).
+ * 
+ * @author xamde
+ */
 public class XSyncEvent {
     
     private final XAddress changedEntity;
@@ -13,6 +19,10 @@ public class XSyncEvent {
         return this.syncResult;
     }
     
+    /**
+     * @param changedEntity MOF address
+     * @param syncResult true iff sync was successful
+     */
     public XSyncEvent(XAddress changedEntity, boolean syncResult) {
         super();
         this.changedEntity = changedEntity;

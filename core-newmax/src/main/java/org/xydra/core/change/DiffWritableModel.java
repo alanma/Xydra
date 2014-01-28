@@ -26,8 +26,8 @@ import org.xydra.index.query.Constraint;
 import org.xydra.index.query.EqualsConstraint;
 import org.xydra.index.query.KeyKeyEntryTuple;
 import org.xydra.index.query.Wildcard;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.sharedutils.XyAssert;
 
 
@@ -405,14 +405,14 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
             builder.addCommand(command);
         }
         if(builder.isEmpty()) {
-            log.debug("No command in txn for model '" + this.getId() + "'");
+            if(log.isDebugEnabled()) log.debug("No command in txn for model '" + this.getId() + "'");
             return null;
         }
         XTransaction txn = builder.build();
         if(log.isTraceEnabled()) {
-            log.debug("Commands in txn for model '" + this.getId() + "'");
+            if(log.isDebugEnabled()) log.debug("Commands in txn for model '" + this.getId() + "'");
             for(XAtomicCommand atomicCommand : txn) {
-                log.debug("  Command " + atomicCommand);
+                if(log.isDebugEnabled()) log.debug("  Command " + atomicCommand);
             }
         }
         return txn;
@@ -424,7 +424,7 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
     
     public long getRevisionNumber() {
         throw new UnsupportedOperationException();
-        // log.debug("Returning outdated base-revision number");
+        // if(log.isDebugEnabled()) log.debug("Returning outdated base-revision number");
         // return this.base.getRevisionNumber();
     }
     

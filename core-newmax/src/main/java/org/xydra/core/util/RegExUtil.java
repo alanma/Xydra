@@ -16,6 +16,11 @@ import org.xydra.annotations.RunsInGWT;
  * Take care of these characters in character classes: ']' can only be the first
  * char; '-' should be the last char; '^' may not be the first char, put in
  * middle.
+ * 
+ * TODO add support for string negation via negative lookaheads, see
+ * http://stackoverflow.com/questions/1153856/string-negation-using-regular-
+ * expressions
+ * 
  */
 @RunsInGWT(true)
 public class RegExUtil {

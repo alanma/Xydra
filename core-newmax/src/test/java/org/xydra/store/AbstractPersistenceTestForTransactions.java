@@ -44,9 +44,9 @@ import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.delta.ChangedObject;
 import org.xydra.index.query.Pair;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
-import org.xydra.log.gae.Log4jLoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
+import org.xydra.log.impl.log4j.Log4jLoggerFactory;
 import org.xydra.persistence.GetWithAddressRequest;
 import org.xydra.persistence.XydraPersistence;
 
@@ -64,7 +64,7 @@ import org.xydra.persistence.XydraPersistence;
 public abstract class AbstractPersistenceTestForTransactions {
     
     static {
-        LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory());
+        LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory(), "SomeTest");
     }
     
     private static final Logger log = LoggerFactory

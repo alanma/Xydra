@@ -49,10 +49,11 @@ import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
+import org.xydra.core.model.XSynchronizesChanges;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.index.impl.IteratorUtils;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.persistence.GetEventsRequest;
 import org.xydra.persistence.GetWithAddressRequest;
 import org.xydra.sharedutils.XyAssert;
@@ -63,7 +64,7 @@ import org.xydra.store.sync.NewSyncer;
 
 
 /**
- * Test for {@link NewSyncer} and {@link SynchronizesChangesImpl} that uses an
+ * Test for {@link NewSyncer} and {@link XSynchronizesChanges} that uses an
  * arbitrary {@link XydraStore}.
  * 
  * Subclasses should implement the abstract methods and set protected members

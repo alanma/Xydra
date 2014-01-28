@@ -16,8 +16,8 @@ import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.core.XX;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.index.IndexUtils;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 
 /**
@@ -51,13 +51,13 @@ public class ChangedRepository extends AbstractDelegatingWritableRepository {
 			return this.potentiallyChanged.get(modelId);
 		}
 		if(this.baseRepository.hasModel(modelId)) {
-			log.debug("model '" + modelId + "' existed already");
+			if(log.isDebugEnabled()) log.debug("model '" + modelId + "' existed already");
 			XWritableModel baseModel = this.baseRepository.getModel(modelId);
 			ChangedModel diffModel = new ChangedModel(baseModel);
 			this.potentiallyChanged.put(modelId, diffModel);
 			return diffModel;
 		} else {
-			log.debug("model '" + modelId + "' did not exist yet");
+			if(log.isDebugEnabled()) log.debug("model '" + modelId + "' did not exist yet");
 			ChangedModel diffModel = new ChangedModel(new SimpleModel(XX.toAddress(getId(),
 			        modelId, null, null)));
 			this.added.put(modelId, diffModel);

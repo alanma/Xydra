@@ -6,8 +6,8 @@ import java.util.TreeMap;
 import org.xydra.base.XAddress;
 import org.xydra.base.change.XEvent;
 import org.xydra.core.model.XChangeLogState;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.sharedutils.XyAssert;
 
 

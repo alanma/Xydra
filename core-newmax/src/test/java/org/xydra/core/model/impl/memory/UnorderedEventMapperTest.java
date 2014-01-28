@@ -28,8 +28,8 @@ import org.xydra.core.model.impl.memory.sync.IEventMapper.IMappingResult;
 import org.xydra.core.model.impl.memory.sync.ISyncLog;
 import org.xydra.core.model.impl.memory.sync.ISyncLogEntry;
 import org.xydra.core.model.impl.memory.sync.UnorderedEventMapper;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 
 public class UnorderedEventMapperTest {

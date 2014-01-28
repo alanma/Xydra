@@ -14,8 +14,8 @@ import org.xydra.base.rmof.XWritableObject;
 import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.index.iterator.NoneIterator;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.persistence.GetWithAddressRequest;
 import org.xydra.persistence.ModelRevision;
 import org.xydra.persistence.XydraPersistence;
@@ -150,7 +150,7 @@ public class WritableModelOnPersistence extends AbstractWritableOnPersistence im
         XWritableModel modelSnapshot = this.persistence.getModelSnapshot(new GetWithAddressRequest(
                 this.getAddress(), WritableRepositoryOnPersistence.USE_TENTATIVE_STATE));
         if(modelSnapshot == null || modelSnapshot.isEmpty()) {
-            return new NoneIterator<XId>();
+            return NoneIterator.create();
         }
         return modelSnapshot.iterator();
     }

@@ -15,7 +15,6 @@ import org.xydra.sharedutils.XyAssert;
  * @author dscharrer
  * 
  */
-@Deprecated
 class ForTestLocalChangeCallback implements XLocalChangeCallback {
     
     private boolean committed = false;

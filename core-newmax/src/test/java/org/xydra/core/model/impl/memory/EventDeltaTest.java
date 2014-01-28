@@ -38,8 +38,8 @@ import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.impl.memory.sync.ISyncLog;
 import org.xydra.core.util.DumpUtils;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.store.sync.NewSyncer;
 
 

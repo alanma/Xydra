@@ -15,8 +15,8 @@ import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XFieldEvent;
 import org.xydra.base.change.XTransactionEvent;
 import org.xydra.index.XI;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.sharedutils.XyAssert;
 
 
@@ -140,7 +140,7 @@ public abstract class AbstractTransactionEvent implements XTransactionEvent {
         Set<XAddress> values = new HashSet<XAddress>();
         
         for(XAtomicEvent event : this) {
-            log.trace("EVENT " + event);
+            if(log.isTraceEnabled()) log.trace("EVENT " + event);
             
             if(event instanceof XFieldEvent) {
                 assert !values.contains(event.getTarget()) : "changed value of field twice "

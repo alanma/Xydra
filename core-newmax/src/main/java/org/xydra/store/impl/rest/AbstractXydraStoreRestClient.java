@@ -142,6 +142,9 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
         
         protected abstract T parse(XydraElement element);
         
+        /**
+         * @param uri
+         */
         protected void get(String uri) {
             
             if(this.callback == null) {
@@ -157,8 +160,17 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
         
     }
     
+    /**
+     * @param uri format: no slashes
+     * @param req
+     */
     protected abstract void get(String uri, Request<?> req);
     
+    /**
+     * @param uri format: no slashes
+     * @param data
+     * @param req
+     */
     protected abstract void post(String uri, XydraOut data, Request<?> req);
     
     private String encodeEventsRequests(GetEventsRequest[] getEventsRequests,
@@ -215,7 +227,7 @@ public abstract class AbstractXydraStoreRestClient implements XydraStore {
             sb.append(XydraStoreRestInterface.ARG_END_REVISION);
             if(ger.endRevision != Long.MAX_VALUE) {
                 sb.append('=');
-                sb.append(ger.beginRevision);
+                sb.append(ger.endRevision);
             }
             
         }

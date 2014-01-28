@@ -23,8 +23,8 @@ import org.xydra.core.XX;
 import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.index.XI;
 import org.xydra.index.iterator.NoneIterator;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 
 /**
@@ -222,7 +222,7 @@ abstract public class AbstractSerializedCommandTest extends AbstractSerializingT
         
         // now also test the command list
         XydraOut out = create();
-        SerializedCommand.serialize(new NoneIterator<XCommand>(), out, null);
+        SerializedCommand.serialize(NoneIterator.<XCommand>create(), out, null);
         assertTrue(out.isClosed());
         String data = out.getData();
         
@@ -236,7 +236,7 @@ abstract public class AbstractSerializedCommandTest extends AbstractSerializingT
         // now test with a different context
         
         out = create();
-        SerializedCommand.serialize(new NoneIterator<XCommand>(), out, model);
+        SerializedCommand.serialize(NoneIterator.<XCommand>create(), out, model);
         assertTrue(out.isClosed());
         data = out.getData();
         

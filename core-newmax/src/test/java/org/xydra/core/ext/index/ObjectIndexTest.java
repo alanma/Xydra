@@ -84,7 +84,7 @@ public class ObjectIndexTest {
 	private XObject user3;
 	
 	@Before
-	public void before() {
+	public void setUp() {
 		this.actor = X.getIDProvider().fromString("testIndexXObject");
 		this.indexFactory = new IndexFactoryImpl();
 		this.repo = X.createMemoryRepository(this.actor);

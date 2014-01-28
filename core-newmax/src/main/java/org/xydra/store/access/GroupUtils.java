@@ -1,8 +1,8 @@
 package org.xydra.store.access;
 
 import org.xydra.base.XId;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 
 public class GroupUtils {

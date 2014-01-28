@@ -9,13 +9,12 @@
 
 	<!-- Inherit the core GWT HTTP module. -->
 	<inherits name="com.google.gwt.http.HTTP" />
+	<inherits name="org.xydra.log.XydraLog"/>
 
 	<source path="">
-		<!-- Some of these are overwritten via super-source -->
-		<exclude name="ReflectionUtils.java" />
-        <exclude name="URLUtils.java" />
-        <exclude name="SystemUtils.java" />
-        <include name="XyAssert.java"/>
+		<exclude name="ServiceLoaderUtils.java" />
 	</source>
+
+	<entry-point class="org.xydra.sharedutils.DummyEntryPoint" />
 
 </module>

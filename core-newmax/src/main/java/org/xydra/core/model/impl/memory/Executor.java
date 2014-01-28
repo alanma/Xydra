@@ -3,6 +3,7 @@ package org.xydra.core.model.impl.memory;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.xydra.annotations.CanBeNull;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.XType;
@@ -15,6 +16,7 @@ import org.xydra.base.change.XFieldEvent;
 import org.xydra.base.change.XModelEvent;
 import org.xydra.base.change.XObjectEvent;
 import org.xydra.base.change.XRepositoryEvent;
+import org.xydra.base.change.XReversibleFieldEvent;
 import org.xydra.base.change.XTransactionEvent;
 import org.xydra.base.change.impl.memory.MemoryReversibleFieldEvent;
 import org.xydra.base.change.impl.memory.MemoryTransactionEvent;
@@ -34,8 +36,8 @@ import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.delta.ChangedObject;
 import org.xydra.core.model.delta.DeltaUtils;
 import org.xydra.core.model.impl.memory.sync.Root;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.sharedutils.XyAssert;
 
 
@@ -168,39 +170,51 @@ public class Executor {
         XEvent event = createSingleEvent(events, actorId, fieldCommand.getTarget(),
                 currentModelRev, currentObjectRev);
         assert event.getChangeType() != ChangeType.TRANSACTION;
+        XFieldEvent fieldEvent = (XFieldEvent)event;
         
-        // remember old value, if required
-        XValue oldValue = null;
-        if(event.getChangeType() == ChangeType.REMOVE || event.getChangeType() == ChangeType.CHANGE) {
-            if(root.getSynchronizedRevision() >= event.getOldFieldRevision()) {
-                oldValue = fieldState.getValue();
-                assert oldValue != null;
-            }
-        }
+        @CanBeNull
+        XValue oldValue = fieldState.getValue();
         
         // apply event
         if(modelState != null) {
-            EventUtils.applyEvent(modelState, event);
+            EventUtils.applyEvent(modelState, fieldEvent);
         } else {
             if(objectState != null) {
-                EventUtils.applyEvent(objectState, event);
+                EventUtils.applyEvent(objectState, fieldEvent);
             } else {
-                EventUtils.applyEvent(fieldState, event);
+                EventUtils.applyEvent(fieldState, fieldEvent);
             }
         }
         
-        XEvent loggedEvent;
-        if(oldValue == null) {
-            loggedEvent = event;
+        // remember old value in event, if required for sync undo process
+        XFieldEvent loggedEvent;
+        if(
+        
+        (fieldEvent.getChangeType() == ChangeType.REMOVE || fieldEvent.getChangeType() == ChangeType.CHANGE)
+                
+                && (root.getSynchronizedRevision() >= fieldEvent.getOldFieldRevision())
+        
+        ) {
+            assert oldValue != null;
+            loggedEvent = MemoryReversibleFieldEvent
+                    .createReversibleEventFrom(fieldEvent, oldValue);
         } else {
-            loggedEvent = MemoryReversibleFieldEvent.createReversibleEventFrom((XFieldEvent)event,
-                    oldValue);
+            loggedEvent = fieldEvent;
         }
         
         root.getSyncLog().appendSyncLogEntry(fieldCommand, loggedEvent);
-        fireEvents(root, changeEventListener, event);
         
-        return event.getRevisionNumber();
+        // fire local events to app
+        XReversibleFieldEvent reversibleEvent;
+        if(loggedEvent instanceof XReversibleFieldEvent) {
+            reversibleEvent = (XReversibleFieldEvent)loggedEvent;
+        } else {
+            reversibleEvent = MemoryReversibleFieldEvent.createReversibleEventFrom(fieldEvent,
+                    oldValue);
+        }
+        fireEvents(root, changeEventListener, reversibleEvent);
+        
+        return fieldEvent.getRevisionNumber();
     }
     
     /**

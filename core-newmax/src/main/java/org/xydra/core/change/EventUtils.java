@@ -29,8 +29,8 @@ import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.base.rmof.impl.memory.SimpleObject;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.delta.DeltaUtils;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.sharedutils.XyAssert;
 
 
@@ -60,8 +60,9 @@ public class EventUtils {
              * we are working on a partial snapshot where this event is just
              * irrelevant.
              */
-            log.trace("Snapshot partial?" + partialModel + " and event " + atomicEvent
-                    + " found not the matching object in snapshot. event ignored.");
+            if(log.isTraceEnabled())
+                log.trace("Snapshot partial?" + partialModel + " and event " + atomicEvent
+                        + " found not the matching object in snapshot. event ignored.");
         } else {
             XAddress modelAddress = object.getAddress().getParent();
             assert object != null;
@@ -332,7 +333,8 @@ public class EventUtils {
         XyAssert.xyAssert(model != null);
         assert model != null;
         
-        log.trace("Apply event " + event);
+        if(log.isTraceEnabled())
+            log.trace("Apply event " + event);
         
         XRevWritableModel result = model;
         if(event instanceof XTransactionEvent) {
@@ -427,11 +429,11 @@ public class EventUtils {
         
         switch(event.getChangeType()) {
         case ADD:
-            XyAssert.xyAssert(field.isEmpty(), field.getValue());
+            // XyAssert.xyAssert(field.isEmpty(), field.getValue());
             field.setValue(event.getNewValue());
             break;
         case CHANGE:
-            XyAssert.xyAssert(!field.isEmpty());
+            // XyAssert.xyAssert(!field.isEmpty());
             field.setValue(event.getNewValue());
             break;
         case REMOVE:
@@ -478,7 +480,9 @@ public class EventUtils {
         XyAssert.xyAssert(event.getTarget().equals(model.getAddress()));
         switch(event.getChangeType()) {
         case ADD: {
-            XyAssert.xyAssert(!model.hasObject(event.getObjectId()));
+            // XyAssert.xyAssert(!model.hasObject(event.getObjectId()),
+            // "applying ADD event but model had already object " +
+            // event.getObjectId());
             model.createObject(event.getObjectId());
             break;
         }
@@ -533,7 +537,7 @@ public class EventUtils {
         
         switch(event.getChangeType()) {
         case ADD: {
-            XyAssert.xyAssert(!object.hasField(event.getFieldId()));
+            // XyAssert.xyAssert(!object.hasField(event.getFieldId()));
             object.createField(event.getFieldId());
             break;
         }

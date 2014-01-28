@@ -36,7 +36,7 @@ import org.xydra.index.IMapMapSetIndex;
 import org.xydra.index.impl.MapMapSetIndex;
 import org.xydra.index.impl.SmallEntrySetFactory;
 import org.xydra.index.query.EqualsConstraint;
-import org.xydra.index.query.KeyKeyEntryTuple;
+import org.xydra.index.query.ITriple;
 import org.xydra.index.query.Wildcard;
 
 
@@ -51,7 +51,9 @@ import org.xydra.index.query.Wildcard;
 public class MemoryEventBus {
     
     public static enum EventType {
-        FieldChange, ModelChange, ObjectChange, RepositoryChange, TransactionChange, Sync,
+        FieldChange, ModelChange, ObjectChange, RepositoryChange,
+        
+        TransactionChange, Sync,
     }
     
     /**
@@ -126,7 +128,7 @@ public class MemoryEventBus {
         synchronized(this.map) {
             this.fireCalls++;
             try {
-                Iterator<KeyKeyEntryTuple<EventType,XAddress,Object>> it = this.map.tupleIterator(
+                Iterator<ITriple<EventType,XAddress,Object>> it = this.map.tupleIterator(
                 
                 new EqualsConstraint<MemoryEventBus.EventType>(eventType),
                 

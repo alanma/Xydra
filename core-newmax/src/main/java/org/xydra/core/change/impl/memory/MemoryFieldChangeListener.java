@@ -3,8 +3,8 @@ package org.xydra.core.change.impl.memory;
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.base.change.XFieldEvent;
 import org.xydra.core.change.XFieldEventListener;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 
 /**

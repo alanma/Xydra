@@ -18,7 +18,7 @@ public interface XFieldEventListener extends XChangeEventListener {
     
     /**
      * Invoked when an {@link XFieldEvent} occurs on the entity this listener is
-     * registered on.
+     * registered on. Invoked just after the event has happened.
      * 
      * @param event
      */

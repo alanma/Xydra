@@ -15,15 +15,15 @@ import org.xydra.base.change.XTransaction;
 import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.change.XTransactionBuilder;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
-import org.xydra.log.gae.Log4jLoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
+import org.xydra.log.impl.log4j.Log4jLoggerFactory;
 import org.xydra.persistence.XydraPersistence;
 
 
 public abstract class AbstractSingleCommandTransactionTest {
 	static {
-		LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory());
+		LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory(), "SomeTest");
 	}
 	
 	@SuppressWarnings("unused")

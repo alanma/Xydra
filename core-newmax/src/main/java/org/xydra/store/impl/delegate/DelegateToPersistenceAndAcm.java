@@ -19,8 +19,8 @@ import org.xydra.base.rmof.XWritableObject;
 import org.xydra.core.AccessException;
 import org.xydra.core.X;
 import org.xydra.core.XX;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.persistence.GetEventsRequest;
 import org.xydra.persistence.GetWithAddressRequest;
 import org.xydra.persistence.ModelRevision;
@@ -284,6 +284,8 @@ public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraSto
                     if(modelRev.modelExists()) {
                         modelIds.add(modelId);
                     }
+                } else {
+                    if(log.isTraceEnabled()) log.trace("actor '" + actorId + "' not allowed to see model " + modelId);
                 }
             }
         }

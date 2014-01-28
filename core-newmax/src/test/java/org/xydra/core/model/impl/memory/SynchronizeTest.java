@@ -42,6 +42,7 @@ import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
+import org.xydra.core.model.XSynchronizesChanges;
 import org.xydra.core.model.impl.memory.sync.ISyncLog;
 import org.xydra.core.serialize.SerializedCommand;
 import org.xydra.core.serialize.SerializedEvent;
@@ -53,7 +54,7 @@ import org.xydra.sharedutils.XyAssert;
 
 
 /**
- * Test for {@link SynchronizesChangesImpl} ({@link MemoryModel})
+ * Test for {@link XSynchronizesChanges} ({@link MemoryModel})
  * 
  * @author dscharrer
  * 

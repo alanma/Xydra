@@ -60,7 +60,7 @@ public class GetEventsRequest {
      *            entity to get all {@link XEvent XEvents} since beginRevision.
      *            Must be greater than or equal to beginRevision.
      * 
-     *            This value must be at least 0.
+     *            This value must be at least 0 and at most Long.MAX_VALUE.
      */
     public GetEventsRequest(XAddress address, long beginRevision, long endRevision) {
         super();

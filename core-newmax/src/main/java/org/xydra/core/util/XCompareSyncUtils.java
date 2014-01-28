@@ -9,8 +9,8 @@ import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.XSynchronizesChanges;
 import org.xydra.core.model.impl.memory.sync.ISyncLog;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 
 public class XCompareSyncUtils extends XCompareUtils {
@@ -65,7 +65,7 @@ public class XCompareSyncUtils extends XCompareUtils {
             XReadableModel modelB = repoB.getModel(modelId);
             
             if(!equalHistory(modelA, modelB)) {
-                log.debug("Model " + modelId + " has different sync log");
+                if(log.isDebugEnabled()) log.debug("Model " + modelId + " has different sync log");
                 return false;
             }
         }

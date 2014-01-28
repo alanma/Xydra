@@ -6,9 +6,9 @@ import org.xydra.base.XId;
 import org.xydra.base.change.XCommandFactory;
 import org.xydra.core.X;
 import org.xydra.core.XX;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
-import org.xydra.log.gae.Log4jLoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
+import org.xydra.log.impl.log4j.Log4jLoggerFactory;
 import org.xydra.store.rmof.impl.delegate.WritableRepositoryOnPersistence;
 
 
@@ -21,7 +21,7 @@ import org.xydra.store.rmof.impl.delegate.WritableRepositoryOnPersistence;
 public abstract class AbstractRemoteStoreConcurrencyConsistencyTest extends AbstractStoreTest {
 	
 	static {
-		LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory());
+		LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory(), "SomeTest");
 	}
 	
 	private static final Logger log = LoggerFactory.getLogger(AbstractStoreReadMethodsTest.class);
@@ -51,8 +51,8 @@ public abstract class AbstractRemoteStoreConcurrencyConsistencyTest extends Abst
 	}
 	
 	@Before
-	public void before() {
-		this.store = this.getStore();
+	public void setUp() {
+		this.store = this.createStore();
 		this.factory = this.getCommandFactory();
 		
 		if(this.store == null) {
@@ -71,7 +71,7 @@ public abstract class AbstractRemoteStoreConcurrencyConsistencyTest extends Abst
 		}
 		
 		this.persistence = new PersistenceOnStore(getCorrectUser(), getCorrectUserPasswordHash(),
-		        getStore());
+		        createStore());
 		this.repo = new WritableRepositoryOnPersistence(this.persistence, getCorrectUser());
 	}
 	

@@ -1,7 +1,7 @@
 package org.xydra.store.impl.delegate;
 
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.persistence.XydraPersistence;
 import org.xydra.store.XydraStore;
 import org.xydra.store.impl.memory.AllowAllAccessControlManager;

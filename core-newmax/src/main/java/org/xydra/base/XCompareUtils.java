@@ -13,8 +13,8 @@ import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.value.XValue;
 import org.xydra.index.XI;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 
 /**
@@ -99,7 +99,7 @@ public class XCompareUtils {
         }
         
         if(fieldA.getRevisionNumber() != fieldB.getRevisionNumber()) {
-            log.debug("revNr differs");
+            if(log.isDebugEnabled()) log.debug("revNr differs");
             return false;
         }
         
@@ -124,12 +124,12 @@ public class XCompareUtils {
      */
     public static boolean equalState(XReadableModel modelA, XReadableModel modelB) {
         if(!equalId(modelA, modelB)) {
-            log.debug("model id differs");
+            if(log.isDebugEnabled()) log.debug("model id differs");
             return false;
         }
         
         if(modelA.getRevisionNumber() != modelB.getRevisionNumber()) {
-            log.debug("model revNr differs A=" + modelA.getRevisionNumber() + " vs. B="
+            if(log.isDebugEnabled()) log.debug("model revNr differs A=" + modelA.getRevisionNumber() + " vs. B="
                     + modelB.getRevisionNumber());
             return false;
         }
@@ -140,12 +140,12 @@ public class XCompareUtils {
             XReadableObject objectB = modelB.getObject(objectId);
             
             if(objectB == null) {
-                log.debug("B has no object " + objectId);
+                if(log.isDebugEnabled()) log.debug("B has no object " + objectId);
                 return false;
             }
             
             if(!XCompareUtils.equalState(objectA, objectB)) {
-                log.debug("object " + objectId + " differs");
+                if(log.isDebugEnabled()) log.debug("object " + objectId + " differs");
                 return false;
             }
             
@@ -154,7 +154,7 @@ public class XCompareUtils {
         for(XId objectId : modelB) {
             
             if(modelA.getObject(objectId) == null) {
-                log.debug("A has no object " + objectId);
+                if(log.isDebugEnabled()) log.debug("A has no object " + objectId);
                 return false;
             }
             
@@ -181,12 +181,12 @@ public class XCompareUtils {
      */
     public static boolean equalState(XReadableObject objectA, XReadableObject objectB) {
         if(!equalId(objectA, objectB)) {
-            log.debug("object id differs");
+            if(log.isDebugEnabled()) log.debug("object id differs");
             return false;
         }
         
         if(objectA.getRevisionNumber() != objectB.getRevisionNumber()) {
-            log.debug("revNr differs; a=" + objectA.getRevisionNumber() + " ("
+            if(log.isDebugEnabled()) log.debug("revNr differs; a=" + objectA.getRevisionNumber() + " ("
                     + objectA.getAddress() + ") b=" + objectB.getRevisionNumber() + " ("
                     + objectB.getAddress() + ") equalTree?" + equalTree(objectA, objectB));
             return false;
@@ -198,12 +198,12 @@ public class XCompareUtils {
             XReadableField fieldB = objectB.getField(fieldId);
             
             if(fieldB == null) {
-                log.debug("B has no field " + fieldId);
+                if(log.isDebugEnabled()) log.debug("B has no field " + fieldId);
                 return false;
             }
             
             if(!XCompareUtils.equalState(fieldA, fieldB)) {
-                log.debug("field " + fieldId + " differs");
+                if(log.isDebugEnabled()) log.debug("field " + fieldId + " differs");
                 return false;
             }
             
@@ -211,7 +211,7 @@ public class XCompareUtils {
         
         for(XId fieldId : objectB) {
             if(objectA.getField(fieldId) == null) {
-                log.debug("A has no field " + fieldId);
+                if(log.isDebugEnabled()) log.debug("A has no field " + fieldId);
                 return false;
             }
         }
@@ -235,7 +235,7 @@ public class XCompareUtils {
      */
     public static boolean equalState(XReadableRepository repoA, XReadableRepository repoB) {
         if(!equalId(repoA, repoB)) {
-            log.debug("repo id differs");
+            if(log.isDebugEnabled()) log.debug("repo id differs");
             return false;
         }
         
@@ -245,12 +245,12 @@ public class XCompareUtils {
             XReadableModel modelB = repoB.getModel(modelId);
             
             if(modelB == null) {
-                log.debug("B has no model " + modelId);
+                if(log.isDebugEnabled()) log.debug("B has no model " + modelId);
                 return false;
             }
             
             if(!XCompareUtils.equalState(modelA, modelB)) {
-                log.debug("Model " + modelId + " differs");
+                if(log.isDebugEnabled()) log.debug("Model " + modelId + " differs");
                 return false;
             }
             
@@ -259,7 +259,7 @@ public class XCompareUtils {
         for(XId modelId : repoB) {
             
             if(repoA.getModel(modelId) == null) {
-                log.debug("A has no model " + modelId);
+                if(log.isDebugEnabled()) log.debug("A has no model " + modelId);
                 return false;
             }
             
@@ -289,17 +289,17 @@ public class XCompareUtils {
         }
         
         if(fieldA == null || fieldB == null) {
-            log.debug("one of them is null, the other isn't");
+            if(log.isDebugEnabled()) log.debug("one of them is null, the other isn't");
             return false;
         }
         
         if(!XI.equals(fieldA.getValue(), fieldB.getValue())) {
-            log.debug("values differ A=" + fieldA.getValue() + " B=" + fieldB.getValue());
+            if(log.isDebugEnabled()) log.debug("values differ A=" + fieldA.getValue() + " B=" + fieldB.getValue());
             return false;
         }
         
         if(!fieldA.getId().equals(fieldB.getId())) {
-            log.debug("field Ids differ");
+            if(log.isDebugEnabled()) log.debug("field Ids differ");
             return false;
         }
         
@@ -324,7 +324,7 @@ public class XCompareUtils {
      */
     public static boolean equalTree(XStateReadableModel modelA, XStateReadableModel modelB) {
         if(!equalId(modelA, modelB)) {
-            log.debug("model ids differ");
+            if(log.isDebugEnabled()) log.debug("model ids differ");
             return false;
         }
         
@@ -334,12 +334,12 @@ public class XCompareUtils {
             XStateReadableObject objectB = modelB.getObject(objectId);
             
             if(objectB == null) {
-                log.debug("B has no object " + objectId);
+                if(log.isDebugEnabled()) log.debug("B has no object " + objectId);
                 return false;
             }
             
             if(!XCompareUtils.equalTree(objectA, objectB)) {
-                log.debug("object " + objectId + " differs");
+                if(log.isDebugEnabled()) log.debug("object " + objectId + " differs");
                 return false;
             }
             
@@ -348,7 +348,7 @@ public class XCompareUtils {
         for(XId objectId : modelB) {
             
             if(modelA.getObject(objectId) == null) {
-                log.debug("A has no object " + objectId);
+                if(log.isDebugEnabled()) log.debug("A has no object " + objectId);
                 return false;
             }
             
@@ -376,7 +376,7 @@ public class XCompareUtils {
      */
     public static boolean equalTree(XStateReadableObject objectA, XStateReadableObject objectB) {
         if(!equalId(objectA, objectB)) {
-            log.debug("object ids differ");
+            if(log.isDebugEnabled()) log.debug("object ids differ");
             return false;
         }
         
@@ -386,12 +386,12 @@ public class XCompareUtils {
             XStateReadableField fieldB = objectB.getField(fieldId);
             
             if(fieldB == null) {
-                log.debug("B has no field " + fieldId);
+                if(log.isDebugEnabled()) log.debug("B has no field " + fieldId);
                 return false;
             }
             
             if(!XCompareUtils.equalTree(fieldA, fieldB)) {
-                log.debug("field " + fieldId + " differs");
+                if(log.isDebugEnabled()) log.debug("field " + fieldId + " differs");
                 return false;
             }
             
@@ -399,7 +399,7 @@ public class XCompareUtils {
         
         for(XId fieldId : objectB) {
             if(objectA.getField(fieldId) == null) {
-                log.debug("A has no field " + fieldId);
+                if(log.isDebugEnabled()) log.debug("A has no field " + fieldId);
                 return false;
             }
         }
@@ -427,7 +427,7 @@ public class XCompareUtils {
      */
     public static boolean equalTree(XStateReadableRepository repoA, XStateReadableRepository repoB) {
         if(!equalId(repoA, repoB)) {
-            log.debug("repo id differs");
+            if(log.isDebugEnabled()) log.debug("repo id differs");
             return false;
         }
         
@@ -436,12 +436,12 @@ public class XCompareUtils {
             XStateReadableModel modelB = repoB.getModel(modelId);
             
             if(modelB == null) {
-                log.debug("B has no model " + modelId);
+                if(log.isDebugEnabled()) log.debug("B has no model " + modelId);
                 return false;
             }
             
             if(!XCompareUtils.equalTree(modelA, modelB)) {
-                log.debug("Model " + modelId + " differs");
+                if(log.isDebugEnabled()) log.debug("Model " + modelId + " differs");
                 return false;
             }
             
@@ -450,7 +450,7 @@ public class XCompareUtils {
         for(XId modelId : repoB) {
             
             if(repoA.getModel(modelId) == null) {
-                log.debug("A has no model " + modelId);
+                if(log.isDebugEnabled()) log.debug("A has no model " + modelId);
                 return false;
             }
             
@@ -471,7 +471,7 @@ public class XCompareUtils {
         }
         
         if(a == null || b == null) {
-            log.debug("one of them is null, the other isn't");
+            if(log.isDebugEnabled()) log.debug("one of them is null, the other isn't");
             return false;
         }
         

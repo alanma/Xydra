@@ -2,12 +2,14 @@
 <!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.0.4//EN" "http://google-web-toolkit.googlecode.com/svn/tags/2.0.4/distro-source/core/src/gwt-module.dtd">
 <module>
 
+	<!--  import as org.xydra.base.XydraBase -->
+
 	<super-source path="gwtemul" />
 
 	<inherits name="org.xydra.annotations.XydraAnnotations" />
 	<inherits name="org.xydra.sharedutils.XydraSharedUtils" />
 	<inherits name="org.xydra.index.XydraIndex" />
-	<inherits name='org.xydra.log.Xlog' />
+	<inherits name='org.xydra.log.XydraLog' />
 
 	<source path="">
 		<exclude name="**/*Test.java" />

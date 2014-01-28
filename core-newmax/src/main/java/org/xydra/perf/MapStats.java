@@ -13,8 +13,8 @@ import java.util.Map;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.minio.MiniIOException;
 import org.xydra.base.minio.MiniWriter;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.sharedutils.ReflectionUtils;
 
 
@@ -106,7 +106,7 @@ public class MapStats {
 					this.t = e.fillInStackTrace();
 				}
 			}
-			log.debug("Recorded action on map: " + method + " " + key + " = " + value + " \n"
+			if(log.isDebugEnabled()) log.debug("Recorded action on map: " + method + " " + key + " = " + value + " \n"
 			        + stacktrace());
 		}
 		

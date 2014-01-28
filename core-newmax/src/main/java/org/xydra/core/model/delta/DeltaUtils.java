@@ -25,8 +25,8 @@ import org.xydra.base.rmof.impl.XExistsReadableModel;
 import org.xydra.base.rmof.impl.XExistsWritableModel;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
 import org.xydra.base.value.XValue;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.sharedutils.XyAssert;
 
 
@@ -424,7 +424,7 @@ public abstract class DeltaUtils {
                         }
                     }
                     // do change
-                    log.debug("Removing model " + model.getAddress() + " "
+                    if(log.isDebugEnabled()) log.debug("Removing model " + model.getAddress() + " "
                             + model.getRevisionNumber());
                     ChangedModel changedModel = new ChangedModel(model);
                     changedModel.setExists(false);

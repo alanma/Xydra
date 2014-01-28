@@ -15,7 +15,7 @@ public interface XRepositoryEventListener extends XChangeEventListener {
     
     /**
      * Invoked when an {@link XRepositoryEvent} occurs on the entity this
-     * listener is registered on.
+     * listener is registered on. Invoked just after the event has happened.
      * 
      * @param event
      */

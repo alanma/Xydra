@@ -163,7 +163,8 @@ public class SerializedModel {
      */
     public static void loadSyncLogState(XydraElement element, ISyncLogState state) {
         
-        SerializingUtils.checkElementType(element, SYNCLOG_ELEMENT);
+        // FIXME is 'xmap' not 'synclog'
+        // SerializingUtils.checkElementType(element, SYNCLOG_ELEMENT);
         
         state.setBaseRevisionNumber(getBaseRevisionAttribute(element));
         
@@ -750,11 +751,11 @@ public class SerializedModel {
             assert (changeLog instanceof ISyncLog);
             ISyncLog syncLog = (ISyncLog)changeLog;
             
-            if(syncLog.getLastEvent() != null) {
-                out.child(SYNCLOG_NAME);
-                out.setChildType(SYNCLOG_ELEMENT);
-                serialize(syncLog, out, synchronizesChanges.getAddress());
-            }
+            // if(syncLog.getLastEvent() != null) {
+            out.child(SYNCLOG_NAME);
+            out.setChildType(SYNCLOG_ELEMENT);
+            serialize(syncLog, out, synchronizesChanges.getAddress());
+            // }
             
         }
         

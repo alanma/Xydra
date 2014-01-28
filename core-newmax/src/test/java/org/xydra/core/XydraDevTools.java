@@ -14,10 +14,10 @@ import org.xydra.core.serialize.xml.XmlEncoder;
 import org.xydra.core.serialize.xml.XmlOut;
 import org.xydra.core.util.Clock;
 import org.xydra.core.util.ConfigUtils;
-import org.xydra.core.util.DebugUtils;
 import org.xydra.core.util.RegExUtil;
 import org.xydra.perf.MapStats;
 import org.xydra.perf.Stats;
+import org.xydra.sharedutils.DebugUtils;
 import org.xydra.sharedutils.ReflectionUtils;
 import org.xydra.sharedutils.URLUtils;
 

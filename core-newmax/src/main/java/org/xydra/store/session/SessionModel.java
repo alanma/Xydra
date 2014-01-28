@@ -20,8 +20,8 @@ import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.util.Clock;
 import org.xydra.core.util.DumpUtils;
 import org.xydra.index.impl.IteratorUtils;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.persistence.GetWithAddressRequest;
 import org.xydra.sharedutils.XyAssert;
 
@@ -62,7 +62,7 @@ public class SessionModel implements XSessionModel {
      * @param readonly if read-only, model cannot be committed
      */
     public SessionModel(ChangeSession sharedSession, XAddress address, boolean readonly) {
-        log.trace("SessionModel " + this.traceid + " created for '" + address + "'");
+        if(log.isTraceEnabled()) log.trace("SessionModel " + this.traceid + " created for '" + address + "'");
         this.clock = new Clock().start();
         this.session = sharedSession;
         this.readonly = readonly;
@@ -78,7 +78,7 @@ public class SessionModel implements XSessionModel {
     public long commitToSessionPersistence() {
         assert !isReadOnly() : "Called commit on model '" + this.getId() + "' that is readonly?"
                 + this.readonly;
-        log.debug("Committing SessionModel '" + this.traceid + "' ...");
+        if(log.isDebugEnabled()) log.debug("Committing SessionModel '" + this.traceid + "' ...");
         synchronized(this.sessionCacheModel) {
             long l = this.getSessionPersistence().applyChangesAsTxn(this.sessionCacheModel,
                     getActorId());
@@ -242,7 +242,7 @@ public class SessionModel implements XSessionModel {
         if(this.sessionCacheModel.isKnownObject(objectId)) {
             return this;
         }
-        log.trace("Loading object '" + objectId + "' in " + this.getAddress());
+        if(log.isTraceEnabled()) log.trace("Loading object '" + objectId + "' in " + this.getAddress());
         XReadableObject objectSnapshot = this.session.getSessionPersistence().getObjectSnapshot(
                 new GetWithAddressRequest(XX.resolveObject(getAddress(), objectId),
                         INCLUDE_TENTATIVE_CHANGES));

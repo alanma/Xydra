@@ -13,8 +13,8 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XRepositoryCommand;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.persistence.GetWithAddressRequest;
 import org.xydra.persistence.XydraPersistence;
 import org.xydra.restless.utils.NanoClock;
@@ -31,7 +31,7 @@ public abstract class AbstractPersistencePerformanceTest {
     private static int x = 3;
     
     @Before
-    public void before() {
+    public void setUp() {
         log.info("Creating fresh persistence");
     }
     

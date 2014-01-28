@@ -30,8 +30,8 @@ import org.xydra.base.value.XValue;
 import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.index.query.Pair;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.persistence.GetEventsRequest;
 import org.xydra.persistence.GetWithAddressRequest;
 import org.xydra.persistence.ModelRevision;
@@ -74,8 +74,8 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
     protected long timeout;
     
     @Before
-    public void before() {
-        this.store = this.getStore();
+    public void setUp() {
+        this.store = this.createStore();
         this.factory = this.getCommandFactory();
         
         if(this.store == null) {
@@ -105,6 +105,9 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
         
         // get the repository ID of the store
         this.repoId = getRepositoryId();
+    }
+    
+    public void tearDown() {
     }
     
     /*

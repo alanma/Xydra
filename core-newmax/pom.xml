@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.xydra</groupId>
 		<artifactId>maven-root</artifactId>
-		<version>2013.07.04</version>
+		<version>2013.09.24</version>
 	</parent>
 
 	<artifactId>core</artifactId>
@@ -33,26 +33,13 @@
 
 	<dependencies>
 
-		<dependency>
-			<groupId>org.xydra</groupId>
-			<artifactId>annotations</artifactId>
-			<!--@@ use xydra.version here -->
-			<version>0.1.7-SNAPSHOT</version>
-		</dependency>
+		<!-- === GWT Client -->
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>annotations</artifactId>
 			<!--@@ use xydra.version here -->
 			<version>0.1.7-SNAPSHOT</version>
 			<classifier>sources</classifier>
-		</dependency>
-
-		<!-- XIndex -->
-		<dependency>
-			<groupId>org.xydra</groupId>
-			<artifactId>index</artifactId>
-			<!--@@ use xydra.version here -->
-			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.xydra</groupId>
@@ -61,27 +48,58 @@
 			<version>0.1.7-SNAPSHOT</version>
 			<classifier>sources</classifier>
 		</dependency>
-
-		<!-- Xlog -->
 		<dependency>
-			<groupId>com.allen-sauer.gwt.log</groupId>
-			<artifactId>gwt-log</artifactId>
-			<version>3.2.1</version>
+			<groupId>org.xydra</groupId>
+			<artifactId>log</artifactId>
+			<!--@@ use xydra.version here -->
+			<version>0.1.7-SNAPSHOT</version>
+			<classifier>sources</classifier>
+		</dependency>
+
+		<!-- === Shared/Server -->
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>annotations</artifactId>
+			<!--@@ use xydra.version here -->
+			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.xydra</groupId>
-			<artifactId>log.gae</artifactId>
+			<artifactId>index</artifactId>
 			<!--@@ use xydra.version here -->
 			<version>0.1.7-SNAPSHOT</version>
-			<scope>test</scope>
 		</dependency>
-
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava-gwt</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>log</artifactId>
+			<!--@@ use xydra.version here -->
+			<version>0.1.7-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>log.ext</artifactId>
+			<!--@@ use xydra.version here -->
+			<version>0.1.7-SNAPSHOT</version>
+		</dependency>
 
-		<!-- testing dependencies -->
+		<!-- === Test -->
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>log.ext</artifactId>
+			<!--@@ use xydra.version here -->
+			<version>0.1.7-SNAPSHOT</version>
+			<scope>test</scope>
+		</dependency>
+		<!-- Xlog -->
+		<!-- <dependency> -->
+		<!-- <groupId>com.allen-sauer.gwt.log</groupId> -->
+		<!-- <artifactId>gwt-log</artifactId> -->
+		<!-- <version>3.2.1</version> -->
+		<!-- </dependency> -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -89,28 +107,6 @@
 			<scope>compile</scope>
 			<!-- version info taken from parent -->
 		</dependency>
-
-		<dependency>
-			<groupId>org.xydra</groupId>
-			<artifactId>log</artifactId>
-			<!--@@ use xydra.version here -->
-			<version>0.1.7-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.xydra</groupId>
-			<artifactId>log</artifactId>
-			<!--@@ use xydra.version here -->
-			<version>0.1.7-SNAPSHOT</version>
-			<classifier>sources</classifier>
-		</dependency>
-
-		<dependency>
-			<groupId>org.xydra</groupId>
-			<artifactId>log.gae</artifactId>
-			<!--@@ use xydra.version here -->
-			<version>0.1.7-SNAPSHOT</version>
-		</dependency>
-
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>restless</artifactId>
@@ -118,7 +114,6 @@
 			<version>0.1.7-SNAPSHOT</version>
 			<scope>test</scope>
 		</dependency>
-
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>devtools</artifactId>

@@ -13,8 +13,8 @@ import org.xydra.core.model.XModel;
 import org.xydra.core.serialize.SerializedModel;
 import org.xydra.core.serialize.XydraOut;
 import org.xydra.core.serialize.xml.XmlOut;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 
 public class SimpleSyntaxUtilsTest {

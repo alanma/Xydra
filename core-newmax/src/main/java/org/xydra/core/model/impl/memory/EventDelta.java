@@ -39,10 +39,11 @@ import org.xydra.index.IMapMapSetIndex;
 import org.xydra.index.impl.FastEntrySetFactory;
 import org.xydra.index.impl.MapMapSetIndex;
 import org.xydra.index.query.EqualsConstraint;
+import org.xydra.index.query.ITriple;
 import org.xydra.index.query.KeyKeyEntryTuple;
 import org.xydra.index.query.Wildcard;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 
 /**
@@ -137,12 +138,12 @@ public class EventDelta {
     private void addFieldEvent(XFieldEvent fieldEvent, ISyncLog syncLog) {
         XId objectId = fieldEvent.getTarget().getObject();
         XId fieldId = fieldEvent.getTarget().getField();
-        Iterator<KeyKeyEntryTuple<XId,XId,XFieldEvent>> indexedEventIt = this.fieldEvents
-                .tupleIterator(new EqualsConstraint<XId>(objectId), new EqualsConstraint<XId>(
-                        fieldId), new Wildcard<XFieldEvent>());
+        Iterator<ITriple<XId,XId,XFieldEvent>> indexedEventIt = this.fieldEvents.tupleIterator(
+                new EqualsConstraint<XId>(objectId), new EqualsConstraint<XId>(fieldId),
+                new Wildcard<XFieldEvent>());
         
         if(indexedEventIt.hasNext()) {
-            KeyKeyEntryTuple<XId,XId,XFieldEvent> indexedEventTuple = indexedEventIt.next();
+            ITriple<XId,XId,XFieldEvent> indexedEventTuple = indexedEventIt.next();
             XFieldEvent indexedEvent = indexedEventTuple.getEntry();
             if(b_cancels_a(indexedEvent, fieldEvent, syncLog)) {
                 this.eventCount--;
@@ -191,12 +192,12 @@ public class EventDelta {
     private void addObjectEvent(XObjectEvent objectEvent, boolean isLocalEvent) {
         XId objectId = objectEvent.getTarget().getObject();
         XId fieldId = objectEvent.getChangedEntity().getField();
-        Iterator<KeyKeyEntryTuple<XId,XId,XObjectEvent>> indexedEventIt = this.objectEvents
-                .tupleIterator(new EqualsConstraint<XId>(objectId), new EqualsConstraint<XId>(
-                        fieldId), new Wildcard<XObjectEvent>());
+        Iterator<ITriple<XId,XId,XObjectEvent>> indexedEventIt = this.objectEvents.tupleIterator(
+                new EqualsConstraint<XId>(objectId), new EqualsConstraint<XId>(fieldId),
+                new Wildcard<XObjectEvent>());
         
         if(indexedEventIt.hasNext()) {
-            KeyKeyEntryTuple<XId,XId,XObjectEvent> indexedEventTuple = indexedEventIt.next();
+            ITriple<XId,XId,XObjectEvent> indexedEventTuple = indexedEventIt.next();
             XObjectEvent indexedEvent = indexedEventTuple.getEntry();
             if(cancelEachOtherOut(objectEvent, indexedEvent)) {
                 this.eventCount--;
@@ -574,7 +575,7 @@ public class EventDelta {
      * @param model
      */
     public void applyTo(XRevWritableModel model) {
-        log.debug("Apply EventDelta=\n" + toString() + "\n***");
+        if(log.isDebugEnabled()) log.debug("Apply EventDelta=\n" + toString() + "\n***");
         
         /* for a newly created model */
         if(this.repoEvent != null) {
@@ -593,17 +594,17 @@ public class EventDelta {
                 XRevWritableObject object = model.getObject(objectId);
                 if(object != null)
                     throw new RuntimeException("object " + objectId + " already existed!");
-                log.debug("Creating object " + objectId);
+                if(log.isDebugEnabled()) log.debug("Creating object " + objectId);
                 object = model.createObject(objectId);
                 object.setRevisionNumber(modelEvent.getRevisionNumber());
             }
         }
         /* for all events concerning newly created fields: */
-        Iterator<KeyKeyEntryTuple<XId,XId,XObjectEvent>> objectEventIterator = this.objectEvents
+        Iterator<ITriple<XId,XId,XObjectEvent>> objectEventIterator = this.objectEvents
                 .tupleIterator(new Wildcard<XId>(), new Wildcard<XId>(),
                         new Wildcard<XObjectEvent>());
         while(objectEventIterator.hasNext()) {
-            KeyKeyEntryTuple<XId,XId,XObjectEvent> tuple = objectEventIterator.next();
+            ITriple<XId,XId,XObjectEvent> tuple = objectEventIterator.next();
             XObjectEvent currentEvent = tuple.getEntry();
             if(currentEvent.getChangeType() == ChangeType.ADD) {
                 XId objectId = tuple.getKey1();
@@ -617,11 +618,10 @@ public class EventDelta {
         }
         
         /* for all events concerning newly created values */
-        Iterator<KeyKeyEntryTuple<XId,XId,XFieldEvent>> fieldEventIterator = this.fieldEvents
-                .tupleIterator(new Wildcard<XId>(), new Wildcard<XId>(),
-                        new Wildcard<XFieldEvent>());
+        Iterator<ITriple<XId,XId,XFieldEvent>> fieldEventIterator = this.fieldEvents.tupleIterator(
+                new Wildcard<XId>(), new Wildcard<XId>(), new Wildcard<XFieldEvent>());
         while(fieldEventIterator.hasNext()) {
-            KeyKeyEntryTuple<org.xydra.base.XId,org.xydra.base.XId,org.xydra.base.change.XFieldEvent> keyKeyEntryTuple = (KeyKeyEntryTuple<org.xydra.base.XId,org.xydra.base.XId,org.xydra.base.change.XFieldEvent>)fieldEventIterator
+            KeyKeyEntryTuple<XId,XId,XFieldEvent> keyKeyEntryTuple = (KeyKeyEntryTuple<XId,XId,XFieldEvent>)fieldEventIterator
                     .next();
             XId fieldId = keyKeyEntryTuple.getKey2();
             XFieldEvent currentEvent = keyKeyEntryTuple.getEntry();
@@ -646,7 +646,7 @@ public class EventDelta {
         objectEventIterator = this.objectEvents.tupleIterator(new Wildcard<XId>(),
                 new Wildcard<XId>(), new Wildcard<XObjectEvent>());
         while(objectEventIterator.hasNext()) {
-            KeyKeyEntryTuple<XId,XId,XObjectEvent> tuple = objectEventIterator.next();
+            ITriple<XId,XId,XObjectEvent> tuple = objectEventIterator.next();
             XObjectEvent currentEvent = tuple.getEntry();
             if(currentEvent.getChangeType() == ChangeType.REMOVE) {
                 XId objectId = tuple.getKey1();
@@ -713,7 +713,7 @@ public class EventDelta {
             }
         }
         
-        log.debug("Done applying eventDelta to " + model.getAddress());
+        if(log.isDebugEnabled()) log.debug("Done applying eventDelta to " + model.getAddress());
     }
     
     /**
@@ -723,7 +723,7 @@ public class EventDelta {
      * @param object
      */
     public void applyTo(XRevWritableObject object) {
-        log.debug("Apply EventDelta=\n" + toString() + "\n***");
+        if(log.isDebugEnabled()) log.debug("Apply EventDelta=\n" + toString() + "\n***");
         
         /* newly created object */
         for(XModelEvent modelEvent : this.modelEvents.values()) {
@@ -737,18 +737,18 @@ public class EventDelta {
                     XExistsRevWritableObject object2 = (XExistsRevWritableObject)object;
                     if(object2.exists())
                         throw new RuntimeException("object " + objectId + " already existed!");
-                    log.debug("Creating object " + objectId);
+                    if(log.isDebugEnabled()) log.debug("Creating object " + objectId);
                     object2.setExists(true);
                 }
                 object.setRevisionNumber(modelEvent.getRevisionNumber());
             }
         }
         /* for all events concerning newly created fields: */
-        Iterator<KeyKeyEntryTuple<XId,XId,XObjectEvent>> objectEventIterator = this.objectEvents
+        Iterator<ITriple<XId,XId,XObjectEvent>> objectEventIterator = this.objectEvents
                 .tupleIterator(new Wildcard<XId>(), new Wildcard<XId>(),
                         new Wildcard<XObjectEvent>());
         while(objectEventIterator.hasNext()) {
-            KeyKeyEntryTuple<XId,XId,XObjectEvent> tuple = objectEventIterator.next();
+            ITriple<XId,XId,XObjectEvent> tuple = objectEventIterator.next();
             XObjectEvent currentEvent = tuple.getEntry();
             if(currentEvent.getChangeType() == ChangeType.ADD) {
                 XId objectId = tuple.getKey1();
@@ -763,11 +763,10 @@ public class EventDelta {
         }
         
         /* for all events concerning newly created values */
-        Iterator<KeyKeyEntryTuple<XId,XId,XFieldEvent>> fieldEventIterator = this.fieldEvents
-                .tupleIterator(new Wildcard<XId>(), new Wildcard<XId>(),
-                        new Wildcard<XFieldEvent>());
+        Iterator<ITriple<XId,XId,XFieldEvent>> fieldEventIterator = this.fieldEvents.tupleIterator(
+                new Wildcard<XId>(), new Wildcard<XId>(), new Wildcard<XFieldEvent>());
         while(fieldEventIterator.hasNext()) {
-            KeyKeyEntryTuple<org.xydra.base.XId,org.xydra.base.XId,org.xydra.base.change.XFieldEvent> keyKeyEntryTuple = (KeyKeyEntryTuple<org.xydra.base.XId,org.xydra.base.XId,org.xydra.base.change.XFieldEvent>)fieldEventIterator
+            KeyKeyEntryTuple<XId,XId,XFieldEvent> keyKeyEntryTuple = (KeyKeyEntryTuple<XId,XId,XFieldEvent>)fieldEventIterator
                     .next();
             XId fieldId = keyKeyEntryTuple.getKey2();
             XFieldEvent currentEvent = keyKeyEntryTuple.getEntry();
@@ -791,7 +790,7 @@ public class EventDelta {
         objectEventIterator = this.objectEvents.tupleIterator(new Wildcard<XId>(),
                 new Wildcard<XId>(), new Wildcard<XObjectEvent>());
         while(objectEventIterator.hasNext()) {
-            KeyKeyEntryTuple<XId,XId,XObjectEvent> tuple = objectEventIterator.next();
+            ITriple<XId,XId,XObjectEvent> tuple = objectEventIterator.next();
             XObjectEvent currentEvent = tuple.getEntry();
             if(currentEvent.getChangeType() == ChangeType.REMOVE) {
                 XId objectId = tuple.getKey1();
@@ -816,7 +815,7 @@ public class EventDelta {
                     XExistsRevWritableObject object2 = (XExistsRevWritableObject)object;
                     if(!object2.exists())
                         throw new RuntimeException("object " + objectId + " did not exist!");
-                    log.debug("Removing object " + objectId);
+                    if(log.isDebugEnabled()) log.debug("Removing object " + objectId);
                     object2.setExists(false);
                 }
             }
@@ -854,7 +853,7 @@ public class EventDelta {
             }
         }
         
-        log.debug("Done applying eventDelta to " + object.getAddress());
+        if(log.isDebugEnabled()) log.debug("Done applying eventDelta to " + object.getAddress());
     }
     
     /**
@@ -871,11 +870,11 @@ public class EventDelta {
     public void sendChangeEvents(Root root, XAddress modelAddress, XAddress repositoryAddress) {
         
         /* remove fields */
-        Iterator<KeyKeyEntryTuple<XId,XId,XObjectEvent>> objectEventIterator = this.objectEvents
+        Iterator<ITriple<XId,XId,XObjectEvent>> objectEventIterator = this.objectEvents
                 .tupleIterator(new Wildcard<XId>(), new Wildcard<XId>(),
                         new Wildcard<XObjectEvent>());
         while(objectEventIterator.hasNext()) {
-            KeyKeyEntryTuple<XId,XId,XObjectEvent> tuple = objectEventIterator.next();
+            ITriple<XId,XId,XObjectEvent> tuple = objectEventIterator.next();
             XObjectEvent objectEvent = tuple.getEntry();
             if(objectEvent.getChangeType() == ChangeType.REMOVE) {
                 root.fireObjectEvent(objectEvent.getTarget(), objectEvent);
@@ -909,19 +908,18 @@ public class EventDelta {
         objectEventIterator = this.objectEvents.tupleIterator(new Wildcard<XId>(),
                 new Wildcard<XId>(), new Wildcard<XObjectEvent>());
         while(objectEventIterator.hasNext()) {
-            KeyKeyEntryTuple<XId,XId,XObjectEvent> tuple = objectEventIterator.next();
+            ITriple<XId,XId,XObjectEvent> tuple = objectEventIterator.next();
             XObjectEvent objectEvent = tuple.getEntry();
             if(objectEvent.getChangeType() == ChangeType.ADD) {
                 root.fireObjectEvent(objectEvent.getTarget(), objectEvent);
             }
         }
         
-        // change values
-        Iterator<KeyKeyEntryTuple<XId,XId,XFieldEvent>> fieldEventIterator = this.fieldEvents
-                .tupleIterator(new Wildcard<XId>(), new Wildcard<XId>(),
-                        new Wildcard<XFieldEvent>());
+        /* change values */
+        Iterator<ITriple<XId,XId,XFieldEvent>> fieldEventIterator = this.fieldEvents.tupleIterator(
+                new Wildcard<XId>(), new Wildcard<XId>(), new Wildcard<XFieldEvent>());
         while(fieldEventIterator.hasNext()) {
-            KeyKeyEntryTuple<org.xydra.base.XId,org.xydra.base.XId,org.xydra.base.change.XFieldEvent> keyKeyEntryTuple = (KeyKeyEntryTuple<org.xydra.base.XId,org.xydra.base.XId,org.xydra.base.change.XFieldEvent>)fieldEventIterator
+            KeyKeyEntryTuple<XId,XId,XFieldEvent> keyKeyEntryTuple = (KeyKeyEntryTuple<XId,XId,XFieldEvent>)fieldEventIterator
                     .next();
             XFieldEvent fieldEvent = keyKeyEntryTuple.getEntry();
             root.fireFieldEvent(fieldEvent.getTarget(), fieldEvent);
@@ -937,18 +935,18 @@ public class EventDelta {
         for(XEvent e : this.modelEvents.values()) {
             sb.append("     Model-EVENT ").append(e).append("\n");
         }
-        Iterator<KeyKeyEntryTuple<XId,XId,XObjectEvent>> objectEventIterator = this.objectEvents
+        Iterator<ITriple<XId,XId,XObjectEvent>> objectEventIterator = this.objectEvents
                 .tupleIterator(new Wildcard<XId>(), new Wildcard<XId>(),
                         new Wildcard<XObjectEvent>());
         while(objectEventIterator.hasNext()) {
-            KeyKeyEntryTuple<XId,XId,XObjectEvent> tuple = objectEventIterator.next();
+            ITriple<XId,XId,XObjectEvent> tuple = objectEventIterator.next();
             XObjectEvent objectEvent = tuple.getEntry();
             sb.append("    Object-EVENT ").append(objectEvent).append("\n");
         }
-        Iterator<KeyKeyEntryTuple<XId,XId,XFieldEvent>> fieldIt = this.fieldEvents.tupleIterator(
+        Iterator<ITriple<XId,XId,XFieldEvent>> fieldIt = this.fieldEvents.tupleIterator(
                 new Wildcard<XId>(), new Wildcard<XId>(), new Wildcard<XFieldEvent>());
         while(fieldIt.hasNext()) {
-            KeyKeyEntryTuple<XId,XId,XFieldEvent> keyEntryTuple = fieldIt.next();
+            ITriple<XId,XId,XFieldEvent> keyEntryTuple = fieldIt.next();
             sb.append("     Field-EVENT ").append(keyEntryTuple.getEntry()).append("\n");
         }
         

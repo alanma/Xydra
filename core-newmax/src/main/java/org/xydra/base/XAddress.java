@@ -91,6 +91,8 @@ public interface XAddress extends Serializable, XSingleValue<XAddress>, Comparab
     boolean isParentOf(XAddress child);
     
     /**
+     * Always starts with '/', never ends with '/'.
+     * 
      * @return a web-safe string (i.e. it needs no URL encoding). Can be parsed
      *         via {@link Base#toAddress(String)}
      */

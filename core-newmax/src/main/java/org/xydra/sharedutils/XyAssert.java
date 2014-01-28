@@ -17,8 +17,8 @@ package org.xydra.sharedutils;
 
 import javax.annotation.Nullable;
 
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 
 /**
@@ -44,7 +44,7 @@ public class XyAssert {
      * Turn on assertions that run also in AppEngine production mode and in GET
      */
     public static void enable() {
-        log.debug("XyAssert is on");
+        if(log.isDebugEnabled()) log.debug("XyAssert is on");
         enabled = true;
     }
     

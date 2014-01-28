@@ -17,9 +17,9 @@ import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.core.XX;
 import org.xydra.index.query.Pair;
-import org.xydra.log.DefaultLoggerFactorySPI;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
+import org.xydra.log.coreimpl.sysout.DefaultLoggerFactorySPI;
 import org.xydra.persistence.GetEventsRequest;
 import org.xydra.persistence.GetWithAddressRequest;
 import org.xydra.persistence.ModelRevision;
@@ -32,7 +32,7 @@ public abstract class AbstractStoreQuotaExceptionTest {
 	        .getLogger(AbstractStoreQuotaExceptionTest.class);
 	
 	static {
-		LoggerFactory.setLoggerFactorySPI(new DefaultLoggerFactorySPI());
+		LoggerFactory.setLoggerFactorySPI(new DefaultLoggerFactorySPI(), "SomeTest");
 	}
 	
 	protected long bfQuota;

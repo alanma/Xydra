@@ -14,7 +14,7 @@ public class DelegatingAllowAllStoreWriteMethodsTest extends AbstractAllowAllSto
 	}
 	
 	@Override
-	protected XydraStore getStore() {
+	protected XydraStore createStore() {
 		if(this.store == null) {
 			// using the standard repo Id
 			this.store = getNewStore(new MemoryPersistence(XX.toId("data")));

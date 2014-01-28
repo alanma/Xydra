@@ -12,8 +12,8 @@ import org.xydra.base.rmof.XWritableObject;
 import org.xydra.core.X;
 import org.xydra.core.change.SessionCachedModel;
 import org.xydra.core.change.XTransactionBuilder;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.persistence.GetWithAddressRequest;
 import org.xydra.persistence.ModelRevision;
 import org.xydra.persistence.XydraPersistence;
@@ -44,7 +44,7 @@ public class DelegatingSessionPersistence implements ISessionPersistence {
 	@Override
 	public long applyChangesAsTxn(SessionCachedModel sessionCacheModel, XId actorId)
 	        throws SessionException {
-		log.debug("applyChangesAsTxn");
+		if(log.isDebugEnabled()) log.debug("applyChangesAsTxn");
 		XyAssert.xyAssert(actorId != null);
 		assert actorId != null;
 		
@@ -53,7 +53,7 @@ public class DelegatingSessionPersistence implements ISessionPersistence {
 		boolean modelExists = modelRev.modelExists();
 		
 		if(!sessionCacheModel.hasChanges() && modelExists) {
-			log.debug("Model has no changes.");
+			if(log.isDebugEnabled()) log.debug("Model has no changes.");
 			return XCommand.NOCHANGE;
 		}
 		

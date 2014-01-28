@@ -5,7 +5,7 @@
 	<super-source path="gwtemul" />
 
 	<inherits name="org.xydra.annotations.XydraAnnotations" />
-	<inherits name='org.xydra.log.Xlog'/>
+	<inherits name='org.xydra.log.XydraLog'/>
 	
 	<source path="">
 		<exclude name="**/*Test.java" />

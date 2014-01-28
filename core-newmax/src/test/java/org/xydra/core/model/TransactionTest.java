@@ -36,7 +36,7 @@ import org.xydra.index.XI;
 
 
 /**
- * Tests for implementations of {@link OldXSynchronizesChanges} (
+ * Tests for implementations of {@link XSynchronizesChanges} (
  * {@link MemoryModel} and {@link MemoryObject})
  * 
  * @author dscharrer

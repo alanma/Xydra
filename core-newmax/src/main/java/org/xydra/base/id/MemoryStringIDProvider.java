@@ -19,15 +19,37 @@ import org.xydra.base.XIdProvider;
 @RequiresAppEngine(false)
 public class MemoryStringIDProvider implements XIdProvider {
     
-    private static final String nameStartChar = "A-Z_a-z\\xC0-\\xD6\\xD8-\\xF6"
-            + "\\u00F8-\\u02FF\\u0370-\\u037D\\u037F-\\u1FFF\\u200C-\\u200D"
-            + "\\u2070-\\u218F\\u2C00-\\u2FEF\\u3001-\\uD7FF\\uF900-\\uFDCF" + "\\uFDF0-\\uFFFD";
-    // the XML spec also allows 5-digit unicode characters
-    // (\u10000-\uEFFFF) but Java can't handle them as char datatype is 16-bit
-    // only.
-    private static final String nameChar = nameStartChar
-            + "\\-\\.0-9\\xB7\\u0300-\u036F\\u203F-\\u2040";
-    static final String nameRegex = "[" + nameStartChar + "][" + nameChar + "]*";
+    private static final String nameStartChar = // .
+    "A-Z" // .
+            + "_" // .
+            + "a-z" // .
+            + "\\xC0-\\xD6" // .
+            + "\\xD8-\\xF6" // .
+            + "\\u00F8-\\u02FF" // .
+            + "\\u0370-\\u037D" // .
+            + "\\u037F-\\u1FFF"// .
+            + "\\u200C-\\u200D"// .
+            + "\\u2070-\\u218F"// .
+            + "\\u2C00-\\u2FEF"// .
+            + "\\u3001-\\uD7FF"// .
+            + "\\uF900-\\uFDCF" // .
+            + "\\uFDF0-\\uFFFD";
+    
+    /*
+     * the XML spec also allows 5-digit unicode characters (\u10000-\uEFFFF) but
+     * Java can't handle them as char datatype is 16-bit only.
+     */
+    
+    private static final String nameChar = // .
+    nameStartChar + // .
+            "\\-" // .
+            + "\\."// .
+            + "0-9"// .
+            + "\\xB7"// .
+            + "\\u0300-\u036F"// .
+            + "\\u203F-\\u2040";
+    
+    public static final String nameRegex = "[" + nameStartChar + "][" + nameChar + "]*";
     
     @Override
     public XId createUniqueId() {
@@ -82,15 +104,20 @@ public class MemoryStringIDProvider implements XIdProvider {
         return new MemoryAddress(repositoryId, modelId, objectId, fieldId);
     }
     
+    public static boolean isValidId(String s) {
+        return MemoryStringIdRegexGwtEmul.matchesXydraId(s);
+    }
+    
     @Override
     public XId fromString(String uriString) {
         if(uriString == null) {
             throw new IllegalArgumentException("'" + uriString + "' is null - cannot create XId");
         }
-        if(!MemoryStringIdRegexGwtEmul.matchesXydraId(uriString)) {
+        if(!isValidId(uriString)) {
             throw new IllegalArgumentException("'" + uriString
                     + "' is not a valid XML name or contains ':', cannot create XId");
         }
+        assert !uriString.contains(" ") : "uriString='" + uriString + "'";
         return new MemoryStringID(uriString);
     }
     

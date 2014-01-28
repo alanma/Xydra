@@ -8,8 +8,8 @@ import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.value.XValue;
 import org.xydra.core.X;
 import org.xydra.core.XX;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.persistence.GetWithAddressRequest;
 import org.xydra.persistence.XydraPersistence;
 import org.xydra.sharedutils.XyAssert;
@@ -69,12 +69,11 @@ public class WritableFieldOnPersistence extends AbstractWritableOnPersistence im
     }
     
     private XWritableField getFieldSnapshot() {
-        return this.persistence
-                .getModelSnapshot(
-                        new GetWithAddressRequest(X.getIDProvider().fromComponents(
-                                this.persistence.getRepositoryId(), this.modelId, null, null),
-                                WritableRepositoryOnPersistence.USE_TENTATIVE_STATE))
-                .getObject(this.objectId).getField(this.fieldId);
+        return this.persistence.getObjectSnapshot(
+                new GetWithAddressRequest(X.getIDProvider().fromComponents(
+                        this.persistence.getRepositoryId(), this.modelId, this.objectId, null),
+                        WritableRepositoryOnPersistence.USE_TENTATIVE_STATE))
+                .getField(this.fieldId);
     }
     
     @Override

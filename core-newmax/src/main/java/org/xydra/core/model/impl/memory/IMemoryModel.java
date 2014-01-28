@@ -10,16 +10,34 @@ import org.xydra.core.model.XModel;
 
 public interface IMemoryModel extends XModel, IMemoryEntity, IMemoryMOFEntity {
     
+    /**
+     * @return the internal state-holding XExistsRevWritableModel
+     */
     XExistsRevWritableModel getState();
     
+    /**
+     * @return the father repository. maybe can be null TODO clarify
+     */
     IMemoryRepository getFather();
     
+    /**
+     * @param event
+     */
     void fireModelEvent(XModelEvent event);
     
+    /**
+     * @param event
+     */
     void fireObjectEvent(XObjectEvent event);
     
+    /**
+     * @param event
+     */
     void fireFieldEvent(XFieldEvent event);
     
+    /**
+     * @param event
+     */
     void fireTransactionEvent(XTransactionEvent event);
     
 }

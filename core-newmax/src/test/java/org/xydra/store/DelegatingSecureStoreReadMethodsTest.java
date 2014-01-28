@@ -15,7 +15,7 @@ import org.xydra.store.impl.memory.SecureMemoryStore;
 public class DelegatingSecureStoreReadMethodsTest extends AbstractSecureStoreReadMethodsTest {
 	
 	@Override
-	protected XydraStore getStore() {
+	protected XydraStore createStore() {
 		if(this.store == null) {
 			this.store = new SecureMemoryStore();
 		}

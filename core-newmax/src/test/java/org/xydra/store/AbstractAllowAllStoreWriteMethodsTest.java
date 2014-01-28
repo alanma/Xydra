@@ -18,50 +18,50 @@ import org.xydra.store.impl.delegate.DelegatingAllowAllStore;
  */
 
 public abstract class AbstractAllowAllStoreWriteMethodsTest extends AbstractStoreWriteMethodsTest {
-	
-	/**
-	 * Every user can do everything, so it doesn't matter what we return here.
-	 * We use 'DirkCanDoAll' because that is easier in the debugger.
-	 */
-	@Override
-	protected XId getCorrectUser() {
-		return XX.toId("DirkCanDoAll");
-	}
-	
-	@Override
-	protected String getCorrectUserPasswordHash() {
-		return "Test";
-	}
-	
-	/**
-	 * Incorrect users do not exist, so we'll need to return null and do nothing
-	 * else
-	 */
-	@Override
-	protected XId getIncorrectUser() {
-		return null;
-	}
-	
-	@Override
-	protected String getIncorrectUserPasswordHash() {
-		return null;
-	}
-	
-	/**
-	 * @param xydraPersistence
-	 * @return a new instance of AllowAllStore initialized with the given
-	 *         {@link DelegatingAllowAllStore}. This makes it possible to reuse
-	 *         this test with different instantiations.
-	 */
-	public DelegatingAllowAllStore getNewStore(XydraPersistence xydraPersistence) {
-		return new DelegatingAllowAllStore(xydraPersistence);
-	}
-	
-	@Override
-	protected XId getRepositoryId() {
-		return XX.toId("data");
-		// repositoryId as set in the standard constructor of {@link
-		// MemoryStore}
-	}
-	
+    
+    /**
+     * Every user can do everything, so it doesn't matter what we return here.
+     * We use 'DirkCanDoAll' because that is easier in the debugger.
+     */
+    @Override
+    protected XId getCorrectUser() {
+        return XX.toId("DirkCanDoAll");
+    }
+    
+    @Override
+    protected String getCorrectUserPasswordHash() {
+        return "Test";
+    }
+    
+    /**
+     * Incorrect users do not exist, so we'll need to return null and do nothing
+     * else
+     */
+    @Override
+    protected XId getIncorrectUser() {
+        return null;
+    }
+    
+    @Override
+    protected String getIncorrectUserPasswordHash() {
+        return null;
+    }
+    
+    /**
+     * @param xydraPersistence
+     * @return a new instance of AllowAllStore initialized with the given
+     *         {@link DelegatingAllowAllStore}. This makes it possible to reuse
+     *         this test with different instantiations.
+     */
+    public DelegatingAllowAllStore getNewStore(XydraPersistence xydraPersistence) {
+        return new DelegatingAllowAllStore(xydraPersistence);
+    }
+    
+    @Override
+    protected XId getRepositoryId() {
+        return XX.toId("data");
+        // repositoryId as set in the standard constructor of {@link
+        // MemoryStore}
+    }
+    
 }

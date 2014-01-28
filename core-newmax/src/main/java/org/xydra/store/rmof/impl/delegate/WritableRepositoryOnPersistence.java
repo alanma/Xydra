@@ -8,12 +8,11 @@ import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.change.XCommand;
-import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableRepository;
 import org.xydra.core.X;
 import org.xydra.core.XX;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.persistence.GetWithAddressRequest;
 import org.xydra.persistence.ModelRevision;
 import org.xydra.persistence.XydraPersistence;
@@ -41,8 +40,8 @@ public class WritableRepositoryOnPersistence extends AbstractWritableOnPersisten
     
     /** First try to get model, if not found: create it. */
     @Override
-    public XWritableModel createModel(XId modelId) {
-        XWritableModel model = getModel(modelId);
+    public WritableModelOnPersistence createModel(XId modelId) {
+        WritableModelOnPersistence model = getModel(modelId);
         if(model == null) {
             ModelRevision modelRev = this.persistence.getModelRevision(new GetWithAddressRequest(
                     getModelAddress(modelId), USE_TENTATIVE_STATE));
@@ -86,7 +85,7 @@ public class WritableRepositoryOnPersistence extends AbstractWritableOnPersisten
     }
     
     @Override
-    public XWritableModel getModel(XId modelId) {
+    public WritableModelOnPersistence getModel(XId modelId) {
         if(hasModel(modelId)) {
             // make sure changes to model are reflected in persistence
             return new WritableModelOnPersistence(this.persistence, this.executingActorId, modelId);

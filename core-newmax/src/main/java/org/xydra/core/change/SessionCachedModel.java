@@ -29,9 +29,10 @@ import org.xydra.core.model.delta.IModelDiff;
 import org.xydra.core.model.delta.IObjectDiff;
 import org.xydra.core.util.DumpUtils;
 import org.xydra.index.iterator.AbstractFilteringIterator;
+import org.xydra.index.iterator.ITransformer;
 import org.xydra.index.iterator.TransformingIterator;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.sharedutils.XyAssert;
 
 
@@ -47,7 +48,7 @@ import org.xydra.sharedutils.XyAssert;
  * A SessionModels state looks like this: <li>knowsAllObjects?</li> <li>For each
  * object: one {@link EntityState} or Unknown</li>.
  * 
- * The SessionModel get to know state only via
+ * The SessionModel gets to know its state only via
  * {@link #indexModel(XReadableModel)} and {@link #indexObject(XReadableObject)}
  * .
  * 
@@ -167,8 +168,7 @@ public class SessionCachedModel implements XWritableModel, IModelDiff {
         
     }
     
-    private static class CachedObject extends CachedEntity implements XWritableObject,
-            IObjectDiff {
+    private static class CachedObject extends CachedEntity implements XWritableObject, IObjectDiff {
         /** FieldId -> CachedObject */
         private Map<XId,CachedField> cachedFields;
         
@@ -179,6 +179,20 @@ public class SessionCachedModel implements XWritableModel, IModelDiff {
         
         @Override
         public CachedField createField(XId fieldId) {
+            // first, consult caches
+            CachedField cf = this.cachedFields.get(fieldId);
+            if(cf != null) {
+                // create only if possible
+                if(cf.state == EntityState.NotPresent) {
+                    cf.state = EntityState.Added;
+                }
+                if(cf.state == EntityState.Removed) {
+                    cf.state = EntityState.Present;
+                }
+                return cf;
+            }
+            
+            // not known, might be present in base, record as added anyway
             return setFieldState(fieldId, EntityState.Added, null);
         }
         
@@ -195,7 +209,7 @@ public class SessionCachedModel implements XWritableModel, IModelDiff {
         
         @SuppressWarnings("unused")
         @Override
-        public XWritableField getField(XId fieldId) {
+        public CachedField getField(XId fieldId) {
             CachedField cf = this.cachedFields.get(fieldId);
             if(WARN_ON_UNCACHED_ACCESS && WARN_ON_FIELDS && cf == null) {
                 log.warn("Field '" + fieldId + "' not prefetched in " + this.getAddress()
@@ -309,7 +323,7 @@ public class SessionCachedModel implements XWritableModel, IModelDiff {
                 protected boolean matchesFilter(Map.Entry<XId,CachedField> entry) {
                     return entry.getValue().isPresent();
                 }
-            }, new TransformingIterator.Transformer<Map.Entry<XId,CachedField>,XId>() {
+            }, new ITransformer<Map.Entry<XId,CachedField>,XId>() {
                 
                 @Override
                 public XId transform(Map.Entry<XId,CachedField> entry) {
@@ -677,7 +691,8 @@ public class SessionCachedModel implements XWritableModel, IModelDiff {
         if(co == null) {
             co = setObjectState(baseObject.getId(), EntityState.Present);
         } else {
-            log.trace("Avoid re-indexing object " + baseObject.getAddress());
+            if(log.isTraceEnabled())
+                log.trace("Avoid re-indexing object " + baseObject.getAddress());
         }
         
         co.indexFieldsFrom(baseObject);
@@ -724,7 +739,7 @@ public class SessionCachedModel implements XWritableModel, IModelDiff {
             protected boolean matchesFilter(Map.Entry<XId,CachedObject> entry) {
                 return entry.getValue().isPresent();
             }
-        }, new TransformingIterator.Transformer<Map.Entry<XId,CachedObject>,XId>() {
+        }, new ITransformer<Map.Entry<XId,CachedObject>,XId>() {
             
             @Override
             public XId transform(Map.Entry<XId,CachedObject> entry) {

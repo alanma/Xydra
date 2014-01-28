@@ -194,7 +194,7 @@ public class XV {
      *            {@link XIdSetValue}
      * @return an {@link XIdSetValue} with the content of the given list
      */
-    public static XIdSetValue toIdSetValue(XId[] list) {
+    public static XIdSetValue toIdSetValue(XId ... list) {
         return vf.createIdSetValue(list);
     }
     

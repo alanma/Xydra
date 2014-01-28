@@ -1,5 +1,6 @@
 package org.xydra.base;
 
+import org.xydra.annotations.Setting;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XCommandFactory;
 import org.xydra.base.change.impl.memory.MemoryCommandFactory;
@@ -13,6 +14,7 @@ public class BaseRuntime {
     
     private static XCommandFactory commandFactory;
     
+    @Setting("repositoryId")
     public static final String DEFAULT_REPOSITORY_ID = "repo";
     
     private static XIdProvider idProvider;

@@ -34,7 +34,7 @@ public class GroupDatabaseTest {
 	private MemoryGroupDatabase groupDb;
 	
 	@Before
-	public void before() {
+	public void setUp() {
 		this.groupDb = new MemoryGroupDatabase();
 	}
 	

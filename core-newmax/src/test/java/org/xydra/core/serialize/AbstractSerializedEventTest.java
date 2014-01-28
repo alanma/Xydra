@@ -22,8 +22,8 @@ import org.xydra.core.XX;
 import org.xydra.core.change.XTransactionBuilder;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.impl.memory.MemoryModel;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 
 /**

@@ -11,8 +11,8 @@ import org.xydra.base.util.DumpUtilsBase;
 import org.xydra.core.model.delta.IFieldDiff;
 import org.xydra.core.model.delta.IModelDiff;
 import org.xydra.core.model.delta.IObjectDiff;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 
 /**

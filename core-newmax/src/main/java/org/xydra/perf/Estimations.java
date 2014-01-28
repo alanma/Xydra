@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 
 /**
@@ -245,7 +245,7 @@ public class Estimations {
 		double f = pi(numbersBetween(n - k, n));
 		double e = Math.pow(n, k);
 		double p = 1d - (f / e);
-		log.trace(p + "= 1 - (" + f + "/" + e + ")");
+		if(log.isTraceEnabled()) log.trace(p + "= 1 - (" + f + "/" + e + ")");
 		return p;
 	}
 	
@@ -268,7 +268,7 @@ public class Estimations {
 		for(int i = 0; i < result.length; i++) {
 			result[i] = first + i + 1;
 		}
-		log.trace("Between " + first + " and " + last + " = " + Arrays.toString(result));
+		if(log.isTraceEnabled()) log.trace("Between " + first + " and " + last + " = " + Arrays.toString(result));
 		return result;
 	}
 	

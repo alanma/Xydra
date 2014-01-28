@@ -7,11 +7,33 @@ import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XRevWritableField;
 import org.xydra.base.rmof.impl.memory.SimpleField;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
+import org.xydra.base.value.XValue;
 import org.xydra.core.XX;
 
 
 public class ModelUtils {
     
+    /**
+     * @param model
+     * @param fieldAddress
+     * @return the field or @CanBeNull
+     */
+    public static <M extends XReadableModel, O extends XReadableObject, F extends XReadableField, V extends XValue> V getValue(
+            M model, XAddress fieldAddress) {
+        O object = (O)model.getObject(fieldAddress.getObject());
+        if(object == null)
+            return null;
+        F field = (F)object.getField(fieldAddress.getField());
+        if(field == null)
+            return null;
+        return (V)field.getValue();
+    }
+    
+    /**
+     * @param model
+     * @param fieldAddress
+     * @return the field or @CanBeNull
+     */
     public static <M extends XReadableModel, O extends XReadableObject, F extends XReadableField> F getField(
             M model, XAddress fieldAddress) {
         O object = (O)model.getObject(fieldAddress.getObject());
