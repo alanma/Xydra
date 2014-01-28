@@ -1,6 +1,5 @@
 package org.xydra.sharedutils;
 
-import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.ServiceLoader;
 
@@ -67,12 +66,12 @@ public class ServiceLoaderUtils {
         return "/META-INF/services/" + interfaceToBeLoaded.getCanonicalName().replace("/", ".");
     }
     
-    public static void main(String[] args) {
-        try {
-            getSingleInstance(Path.class);
-        } catch(Error e) {
-            System.out.println(">>>" + e + "<<<");
-        }
-    }
+    // public static void main(String[] args) {
+    // try {
+    // getSingleInstance(Path.class);
+    // } catch(Error e) {
+    // System.out.println(">>>" + e + "<<<");
+    // }
+    // }
     
 }
