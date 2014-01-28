@@ -7,8 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 
 /**
@@ -116,7 +116,8 @@ public class GwtBuildHelper implements Runnable {
         File targetDir = new File(warPath);
         if(!targetDir.exists()) {
             log.error("Target WAR dir not found as \n" + "  " + targetDir.getAbsolutePath() + "\n"
-                    + "Compile something first, e.g. call 'mvn compile'.");
+                    + "Compile something first, e.g. call 'mvn compile'\n"
+                    + " - and make sure your pom is packaging=war.");
             System.exit(1);
         }
         List<File> subDirs = autoDiscoverAllGwtModulesInTarget(targetDir);

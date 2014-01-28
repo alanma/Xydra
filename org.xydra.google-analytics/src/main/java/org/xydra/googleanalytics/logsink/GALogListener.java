@@ -10,8 +10,8 @@ import org.xydra.googleanalytics.GaEvent;
 import org.xydra.googleanalytics.Tracker;
 import org.xydra.googleanalytics.UserInfo;
 import org.xydra.googleanalytics.Utils;
-import org.xydra.log.ILogListener;
-import org.xydra.log.Logger;
+import org.xydra.log.api.ILogListener;
+import org.xydra.log.api.Logger;
 
 
 /**

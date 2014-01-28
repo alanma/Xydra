@@ -3,8 +3,8 @@ package org.xydra.googleanalytics;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 
 public class UserInfoImpl implements UserInfo {
