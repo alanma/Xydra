@@ -9,9 +9,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.apache.http.annotation.NotThreadSafe;
 import org.xydra.annotations.CanBeNull;
 import org.xydra.annotations.NeverNull;
+import org.xydra.annotations.NotThreadSafe;
 import org.xydra.annotations.RunsInGWT;
 
 

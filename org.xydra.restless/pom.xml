@@ -67,6 +67,7 @@
 			<artifactId>commons-io</artifactId>
 		</dependency>
 
+
 		<!-- J2EE Servlet API. -->
 		<dependency>
 			<groupId>org.apache.geronimo.specs</groupId>
@@ -77,11 +78,18 @@
 
 		<!-- === Test === -->
 
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.mortbay.jetty</groupId> -->
-<!-- 			<artifactId>jetty</artifactId> -->
-<!-- 			<scope>provided</scope> -->
-<!-- 		</dependency> -->
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>jetty</artifactId>
+			<version>0.1.7-SNAPSHOT</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- <dependency> -->
+		<!-- <groupId>org.mortbay.jetty</groupId> -->
+		<!-- <artifactId>jetty</artifactId> -->
+		<!-- <scope>provided</scope> -->
+		<!-- </dependency> -->
 
 	</dependencies>
 
