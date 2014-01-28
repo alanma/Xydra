@@ -70,9 +70,8 @@ import org.xydra.core.model.XSynchronizesChanges;
  * <i>allows to fetch and apply remote changes</i>
  * <ul>
  * <li>{@link XChangeLog} {@link XSynchronizesChanges#getChangeLog()}</li>
- * <li>{@link XSynchronizesChanges#rollback(long)}</li>
+ * <li>{@link XSynchronizesChanges}</li>
  * <li>
- * {@link XSynchronizesChanges#synchronize(org.xydra.base.change.XEvent[])}</li>
  * </ul>
  * <b>extends</b>
  * <ul>
@@ -127,5 +126,5 @@ import org.xydra.core.model.XSynchronizesChanges;
  * 
  */
 public class ArchitectureOverview {
-	
+    
 }
