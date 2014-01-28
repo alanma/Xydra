@@ -20,8 +20,6 @@
 	<inherits name='org.xydra.gwt.XydraGwt' />
 	<inherits name="org.xydra.gwt.editor.XydraEditorComponents" />
 
-	<inherits name="org.xydra.store.impl.gae.XydraGae" />
-
 	<inherits name="org.xydra.restless.XydraRestless" />
 
 	<source path="shared" />

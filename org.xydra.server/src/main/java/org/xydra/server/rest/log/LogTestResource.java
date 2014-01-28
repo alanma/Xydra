@@ -4,8 +4,8 @@ import java.util.logging.Handler;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.restless.Restless;
 import org.xydra.server.rest.XydraRestServer;
 

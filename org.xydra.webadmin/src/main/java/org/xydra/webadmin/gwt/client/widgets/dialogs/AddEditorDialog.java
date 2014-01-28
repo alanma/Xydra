@@ -50,8 +50,8 @@ import org.xydra.gwt.editor.value.XStringListEditor;
 import org.xydra.gwt.editor.value.XStringSetEditor;
 import org.xydra.gwt.editor.value.XValueEditor;
 import org.xydra.gwt.editor.value.XValueEditor.EditListener;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.webadmin.gwt.client.widgets.XyAdmin;
 
 import com.google.gwt.core.client.GWT;

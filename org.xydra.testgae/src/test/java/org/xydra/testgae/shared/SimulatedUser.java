@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.concurrent.Exchanger;
 
 import org.xydra.core.util.Clock;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.testgae.server.model.xmas.NameUtils;
 
 

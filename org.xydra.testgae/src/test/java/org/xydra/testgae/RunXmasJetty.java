@@ -3,11 +3,11 @@ package org.xydra.testgae;
 import java.io.File;
 import java.net.URI;
 
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
-import org.xydra.restless.Jetty;
+import org.xydra.jetty.Jetty;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.restless.Restless;
-import org.xydra.store.impl.gae.GaeTestfixer;
+import org.xydra.xgae.gaeutils.GaeTestfixer;
 
 
 /**
@@ -18,26 +18,26 @@ import org.xydra.store.impl.gae.GaeTestfixer;
  * @author voelkel
  */
 public class RunXmasJetty {
-	
-	private static final Logger log = LoggerFactory.getLogger(RunXmasJetty.class);
-	
-	public static void main(String[] args) throws Exception {
-		/*
-		 * Enable tests with GAE (especially mail)
-		 */
-		GaeTestfixer.enable();
-		/* Make this thread GAE-test-ready */
-		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		
-		Restless.DELEGATE_UNHANDLED_TO_DEFAULT = true;
-		
-		CopyGwt.copyGwt();
-		
-		// start jetty
-		Jetty jetty = new Jetty(8787);
-		jetty.configure("", new File("src/main/webapp"));
-		URI uri = jetty.startServer();
-		
-		log.info("Started embedded Jetty server. User interface is at " + uri.toString());
-	}
+    
+    private static final Logger log = LoggerFactory.getLogger(RunXmasJetty.class);
+    
+    public static void main(String[] args) throws Exception {
+        /*
+         * Enable tests with GAE (especially mail)
+         */
+        GaeTestfixer.enable();
+        /* Make this thread GAE-test-ready */
+        GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+        
+        Restless.DELEGATE_UNHANDLED_TO_DEFAULT = true;
+        
+        CopyGwt.copyGwt();
+        
+        // start jetty
+        Jetty jetty = new Jetty(8787);
+        jetty.configure("", new File("src/main/webapp"));
+        URI uri = jetty.startServer();
+        
+        log.info("Started embedded Jetty server. User interface is at " + uri.toString());
+    }
 }

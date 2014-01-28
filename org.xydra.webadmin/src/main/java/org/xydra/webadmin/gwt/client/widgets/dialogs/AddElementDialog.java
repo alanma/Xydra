@@ -5,8 +5,8 @@ import org.xydra.base.value.XValue;
 import org.xydra.core.XX;
 import org.xydra.gwt.editor.value.XIdEditor;
 import org.xydra.gwt.editor.value.XValueEditor.EditListener;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.webadmin.gwt.client.util.Presenter;
 
 import com.google.gwt.core.client.GWT;

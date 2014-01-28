@@ -47,8 +47,8 @@ import org.xydra.core.serialize.xml.XmlParser;
 import org.xydra.core.serialize.xml.XmlSerializer;
 import org.xydra.core.util.Clock;
 import org.xydra.index.impl.IteratorUtils;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.persistence.GetWithAddressRequest;
 import org.xydra.persistence.ModelRevision;
 import org.xydra.persistence.XydraPersistence;
@@ -60,9 +60,9 @@ import org.xydra.restless.utils.ServletUtils;
 import org.xydra.restless.utils.SharedHtmlUtils.METHOD;
 import org.xydra.server.util.XydraHtmlUtils;
 import org.xydra.sharedutils.XyAssert;
-import org.xydra.store.impl.gae.GaeTestfixer;
 import org.xydra.store.impl.gae.changes.ChangesUtils;
 import org.xydra.store.rmof.impl.delegate.WritableRepositoryOnPersistence;
+import org.xydra.xgae.gaeutils.GaeTestfixer;
 
 
 public class ModelResource {

@@ -9,8 +9,8 @@ import org.xydra.base.value.XStringValue;
 import org.xydra.base.value.XV;
 import org.xydra.core.X;
 import org.xydra.core.XX;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.restless.utils.HtmlUtils;
 
 

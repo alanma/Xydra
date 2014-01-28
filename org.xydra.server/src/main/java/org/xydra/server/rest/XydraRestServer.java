@@ -12,8 +12,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.persistence.XydraPersistence;
 import org.xydra.restless.Restless;
 import org.xydra.restless.utils.Delay;
@@ -26,12 +26,8 @@ import org.xydra.store.XydraStore;
 /**
  * A REST-server exposing a {@link XydraStore} over HTTP.
  * 
- * 
- * 
- * 
  * @author voelkel
  * @author dscharrer
- * 
  */
 @RunsInAppEngine(true)
 @RequiresAppEngine(false)
@@ -67,6 +63,7 @@ public class XydraRestServer {
      * The defined key for storing a reference to a {@link XydraPersistence} in
      * the servlet context.
      */
+    // TODO use conf instead OR XydraRuntime
     public static final String SERVLET_CONTEXT_ATTRIBUTE_XYDRA_PERSISTENCE = "org.xydra.persistence";
     
     /**
@@ -85,6 +82,9 @@ public class XydraRestServer {
     }
     
     /**
+     * Use the servlet context to exchange parameters among different Restless
+     * apps booting/running in the same servlet.
+     * 
      * @param restless
      * @return a {@link XydraStore} from servlet context
      */
@@ -94,6 +94,9 @@ public class XydraRestServer {
     }
     
     /**
+     * Use the servlet context to exchange parameters among different Restless
+     * apps booting/running in the same servlet.
+     * 
      * @param restless
      * @param store too be retrieved via {@link #getStore(Restless)}
      */
@@ -124,7 +127,10 @@ public class XydraRestServer {
      */
     public static void restless(Restless restless, String prefix) {
         log.info("Booting XydraRestServer");
-        
+        xydraV1(restless, prefix);
+    }
+    
+    private static void xydraV1(Restless restless, String prefix) {
         // configure
         initializeServer(restless);
         
@@ -158,34 +164,34 @@ public class XydraRestServer {
         
         String storeClassName = restless.getInitParameter(INIT_PARAM_XYDRASTORE);
         XydraStore storeInstance;
-        if(storeClassName != null) {
-            try {
-                Class<?> storeClass = Class.forName(storeClassName);
-                Constructor<?> cons = storeClass.getConstructor();
-                if(!XydraStore.class.isAssignableFrom(storeClass)) {
-                    throw new RuntimeException(storeClass.getClass() + " is not a XydraStore");
-                }
-                
-                storeInstance = (XydraStore)cons.newInstance();
-                // store in context
-                setXydraStoreInServletContext(restless, storeInstance);
-                log.info("XydraStore instance stored in servletContext at key '"
-                        + SERVLET_CONTEXT_ATTRIBUTE_XYDRASTORE + "'");
-            } catch(InvocationTargetException e) {
-                log.error("Could no start XydraStore: '" + storeClassName + "'", e);
-            } catch(InstantiationException e) {
-                log.error("Could no start XydraStore: '" + storeClassName + "'", e);
-            } catch(IllegalAccessException e) {
-                log.error("Could no start XydraStore due to IllegalAccessException", e);
-            } catch(NoSuchMethodException e) {
-                log.error("Could no start XydraStore: '" + storeClassName
-                        + "' seems to be a broken implementation", e);
-            } catch(ClassNotFoundException e) {
-                log.error("XydraStore is malconfigured: '" + storeClassName + "'", e);
+        if(storeClassName == null) {
+            throw new RuntimeException("no xydra store backend configured in web.xml. Set param '"
+                    + INIT_PARAM_XYDRASTORE + "' to the classname of a XydraStore impl.");
+        }
+        
+        try {
+            Class<?> storeClass = Class.forName(storeClassName);
+            Constructor<?> cons = storeClass.getConstructor();
+            if(!XydraStore.class.isAssignableFrom(storeClass)) {
+                throw new RuntimeException(storeClass.getClass() + " is not a XydraStore");
             }
-        } else {
-            throw new RuntimeException("no xydra store backend configured in web.xml. Set <"
-                    + INIT_PARAM_XYDRASTORE + "> to the classname of a XydraStore impl.");
+            
+            storeInstance = (XydraStore)cons.newInstance();
+            // store in context
+            setXydraStoreInServletContext(restless, storeInstance);
+            log.info("XydraStore instance stored in servletContext at key '"
+                    + SERVLET_CONTEXT_ATTRIBUTE_XYDRASTORE + "'");
+        } catch(InvocationTargetException e) {
+            log.error("Could no start XydraStore: '" + storeClassName + "'", e);
+        } catch(InstantiationException e) {
+            log.error("Could no start XydraStore: '" + storeClassName + "'", e);
+        } catch(IllegalAccessException e) {
+            log.error("Could no start XydraStore due to IllegalAccessException", e);
+        } catch(NoSuchMethodException e) {
+            log.error("Could no start XydraStore: '" + storeClassName
+                    + "' seems to be a broken implementation", e);
+        } catch(ClassNotFoundException e) {
+            log.error("XydraStore is malconfigured: '" + storeClassName + "'", e);
         }
         
         /* Configure ServerApp, if one is defined */

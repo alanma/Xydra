@@ -1,8 +1,8 @@
 package org.xydra.webadmin.gwt.client.widgets.selectiontree.modelbranches;
 
 import org.xydra.base.XAddress;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.webadmin.gwt.client.widgets.editorpanel.tablewidgets.EntityWidget;
 
 import com.google.gwt.core.client.GWT;

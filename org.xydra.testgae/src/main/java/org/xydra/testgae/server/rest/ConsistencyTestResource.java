@@ -12,11 +12,10 @@ import org.xydra.base.XId;
 import org.xydra.base.change.XCommandUtils;
 import org.xydra.base.change.XEvent;
 import org.xydra.core.XX;
-import org.xydra.gae.AboutAppEngine;
 import org.xydra.gae.admin.GaeConfigurationManager;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
-import org.xydra.log.util.HtmlWriterLogListener;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
+import org.xydra.log.util.listener.HtmlWriterLogListener;
 import org.xydra.persistence.GetWithAddressRequest;
 import org.xydra.persistence.XydraPersistence;
 import org.xydra.restless.Restless;
@@ -26,11 +25,12 @@ import org.xydra.restless.utils.ServletUtils;
 import org.xydra.server.util.XydraHtmlUtils;
 import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.XydraRuntime;
-import org.xydra.store.impl.gae.GaeTestfixer;
 import org.xydra.store.session.ChangeSession;
 import org.xydra.store.session.DelegatingSessionPersistence;
 import org.xydra.store.session.ISessionPersistence;
 import org.xydra.store.session.SessionModel;
+import org.xydra.xgae.gaeutils.AboutAppEngine;
+import org.xydra.xgae.gaeutils.GaeTestfixer;
 
 
 /**

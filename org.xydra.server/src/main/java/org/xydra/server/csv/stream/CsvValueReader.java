@@ -16,8 +16,8 @@ import org.xydra.base.value.XValue;
 import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.serialize.SerializedValue;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 
 /**

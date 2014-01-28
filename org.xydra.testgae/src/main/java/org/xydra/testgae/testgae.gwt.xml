@@ -27,7 +27,7 @@
 
 
 	<!-- Inherit Xydra Logging -->
-	<inherits name='org.xydra.log.Xlog' />
+	<inherits name='org.xydra.log.XydraLog' />
 
 
 	<!-- TODO 2012-01 Max: Exclude more code -->

@@ -11,8 +11,8 @@ import org.xydra.base.XId;
 import org.xydra.core.XX;
 import org.xydra.core.change.SessionCachedModel;
 import org.xydra.core.change.XTransactionBuilder;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.webadmin.gwt.client.widgets.XyAdmin;
 
 

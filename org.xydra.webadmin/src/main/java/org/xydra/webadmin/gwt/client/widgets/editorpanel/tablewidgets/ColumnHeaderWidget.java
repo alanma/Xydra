@@ -1,8 +1,8 @@
 package org.xydra.webadmin.gwt.client.widgets.editorpanel.tablewidgets;
 
 import org.xydra.base.XId;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.webadmin.gwt.client.widgets.XyAdmin;
 
 import com.google.gwt.core.client.GWT;

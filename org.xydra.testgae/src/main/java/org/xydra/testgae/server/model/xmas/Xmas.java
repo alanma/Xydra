@@ -10,14 +10,14 @@ import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableRepository;
 import org.xydra.core.XX;
 import org.xydra.core.change.DiffWritableModel;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.restless.utils.NanoClock;
 import org.xydra.store.impl.gae.GaePersistence;
-import org.xydra.store.impl.gae.GaeTestfixer;
 import org.xydra.store.rmof.impl.delegate.WritableRepositoryOnPersistence;
 import org.xydra.testgae.server.rest.xmas.XmasResource;
+import org.xydra.xgae.gaeutils.GaeTestfixer;
 
 import com.google.apphosting.api.DeadlineExceededException;
 

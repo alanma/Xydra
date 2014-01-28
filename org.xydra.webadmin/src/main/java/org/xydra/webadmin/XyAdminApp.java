@@ -11,16 +11,16 @@ import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.core.XX;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.restless.IRestlessContext;
 import org.xydra.restless.Restless;
 import org.xydra.restless.Restless.IRequestListener;
 import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.server.rest.XydraRestServer;
 import org.xydra.store.XydraRuntime;
-import org.xydra.store.impl.gae.GaeTestfixer;
 import org.xydra.webadmin.ModelResource.MStyle;
+import org.xydra.xgae.gaeutils.GaeTestfixer;
 
 
 /**

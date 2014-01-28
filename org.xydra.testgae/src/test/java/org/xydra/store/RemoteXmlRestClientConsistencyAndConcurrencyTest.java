@@ -4,8 +4,8 @@ import org.junit.Ignore;
 import org.xydra.base.XId;
 import org.xydra.core.serialize.xml.XmlParser;
 import org.xydra.core.serialize.xml.XmlSerializer;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.persistence.XydraPersistence;
 import org.xydra.store.impl.rest.XydraStoreRestClient;
 
@@ -36,7 +36,7 @@ public class RemoteXmlRestClientConsistencyAndConcurrencyTest extends
     }
     
     @Override
-    protected XydraStore getStore() {
+    protected XydraStore createStore() {
         if(this.store == null) {
             this.store = new XydraStoreRestClient(serverConfig.absoluteURI, new XmlSerializer(),
                     new XmlParser());
@@ -54,7 +54,7 @@ public class RemoteXmlRestClientConsistencyAndConcurrencyTest extends
         
         // client
         RemoteXmlRestClientConsistencyAndConcurrencyTest t = new RemoteXmlRestClientConsistencyAndConcurrencyTest();
-        XydraStore store = t.getStore();
+        XydraStore store = t.createStore();
         XydraPersistence persistence = new PersistenceOnStore(t.getCorrectUser(),
                 t.getCorrectUserPasswordHash(), store);
         

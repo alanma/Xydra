@@ -1,8 +1,8 @@
 package org.xydra.webadmin.gwt.client.widgets.dialogs;
 
 import org.xydra.base.XAddress;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.webadmin.gwt.client.util.Presenter;
 import org.xydra.webadmin.gwt.client.widgets.XyAdmin;
 

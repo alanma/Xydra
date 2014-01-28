@@ -17,8 +17,8 @@ import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.XydraOut;
 import org.xydra.core.serialize.XydraParser;
 import org.xydra.core.serialize.XydraSerializer;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.store.impl.rest.XydraStoreRestClient;
 
 
@@ -68,10 +68,10 @@ public abstract class AbstractRestClientReadMethodsTest extends AbstractStoreRea
     
     @Override
     @Before
-    public void before() {
+    public void setUp() {
         this.clientStore = new XydraStoreRestClient(getServerConfig().absoluteURI, this.serializer,
                 this.parser);
-        super.before();
+        super.setUp();
     }
     
     @After
@@ -122,7 +122,7 @@ public abstract class AbstractRestClientReadMethodsTest extends AbstractStoreRea
     }
     
     @Override
-    protected XydraStore getStore() {
+    protected XydraStore createStore() {
         return this.clientStore;
     }
     

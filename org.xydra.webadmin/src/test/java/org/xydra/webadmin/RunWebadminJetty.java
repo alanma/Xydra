@@ -4,12 +4,12 @@ import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
-import org.xydra.log.gae.Log4jLoggerFactory;
-import org.xydra.restless.Jetty;
+import org.xydra.jetty.Jetty;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
+import org.xydra.log.impl.log4j.Log4jLoggerFactory;
 import org.xydra.restless.Restless;
-import org.xydra.store.impl.gae.GaeTestfixer;
+import org.xydra.xgae.gaeutils.GaeTestfixer;
 
 
 /**
@@ -39,7 +39,7 @@ public class RunWebadminJetty {
     private static URI uri;
     
     static {
-        LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory());
+        LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory(), "SomeTest");
         GaeTestfixer.enable();
     }
     
@@ -50,7 +50,7 @@ public class RunWebadminJetty {
     }
     
     static {
-        LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory());
+        LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory(), "SomeTest");
         /*
          * Enable tests with GAE (especially mail)
          */
