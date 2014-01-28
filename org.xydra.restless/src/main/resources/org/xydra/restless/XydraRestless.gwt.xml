@@ -12,6 +12,7 @@
 	<source path="" >
 		<include name="utils/XmlUtils.java" />
 		<include name="utils/SharedHtmlUtils.java" />
+		<include name="utils/Progress.java" />
 	</source>
 	
 </module>
