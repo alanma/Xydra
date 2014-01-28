@@ -2,13 +2,14 @@ package org.xydra.store.impl.gae.ng;
 
 import java.io.Serializable;
 
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.store.impl.gae.UniCache;
 import org.xydra.store.impl.gae.UniCache.CacheEntryHandler;
+import org.xydra.xgae.XGae;
+import org.xydra.xgae.datastore.api.SEntity;
+import org.xydra.xgae.datastore.api.SKey;
 
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.Key;
 
 
 /**
@@ -18,65 +19,65 @@ import com.google.appengine.api.datastore.Key;
  * @author xamde
  */
 class UniCacheRevisionInfoEntryHandler implements UniCache.CacheEntryHandler<GaeModelRevInfo> {
-	
-	private static UniCacheRevisionInfoEntryHandler instance;
-	
-	private static final String LastStableCommitted = "stableComm";
-	private static final String LastStableSuccess = "stableSucc";
-	private static final String LastSuccess = "succ";
-	private static final String LastTaken = "taken";
-	private static final Logger log = LoggerFactory
-	        .getLogger(UniCacheRevisionInfoEntryHandler.class);
-	private static final String ModelExists = "exists";
-	private static final String Timestamp = "time";
-	private static final String Precision = "prec";
-	
-	public static synchronized CacheEntryHandler<GaeModelRevInfo> instance() {
-		if(instance == null) {
-			instance = new UniCacheRevisionInfoEntryHandler();
-		}
-		return instance;
-	}
-	
-	@Override
-	public GaeModelRevInfo fromEntity(Entity e) {
-		long timestamp = (Long)e.getProperty(Timestamp);
-		boolean modelExists = (Boolean)e.getProperty(ModelExists);
-		long lastStableSuccess = (Long)e.getProperty(LastStableSuccess);
-		long lastStableCommitted = (Long)e.getProperty(LastStableCommitted);
-		long lastSuccess = (Long)e.getProperty(LastSuccess);
-		long lastTaken = (Long)e.getProperty(LastTaken);
-		String precStr = (String)e.getProperty(Precision);
-		org.xydra.store.impl.gae.ng.GaeModelRevInfo.Precision prec = org.xydra.store.impl.gae.ng.GaeModelRevInfo.Precision
-		        .valueOf(precStr);
-		GaeModelRevInfo ri = new GaeModelRevInfo(timestamp, modelExists, lastStableSuccess,
-		        lastStableCommitted, lastSuccess, lastTaken, prec);
-		log.debug("loaded from entity " + ri);
-		return ri;
-	}
-	
-	@Override
-	public GaeModelRevInfo fromSerializable(Serializable s) {
-		GaeModelRevInfo ri = (GaeModelRevInfo)s;
-		return ri;
-	}
-	
-	@Override
-	public Entity toEntity(Key datastoreKey, GaeModelRevInfo revInfo) {
-		Entity e = new Entity(datastoreKey);
-		e.setUnindexedProperty(LastStableCommitted, revInfo.getLastStableCommitted());
-		e.setUnindexedProperty(LastStableSuccess, revInfo.getLastStableSuccessChange());
-		e.setUnindexedProperty(ModelExists, revInfo.isModelExists());
-		e.setUnindexedProperty(LastSuccess, revInfo.getLastSuccessChange());
-		e.setUnindexedProperty(LastTaken, revInfo.getLastTaken());
-		e.setUnindexedProperty(Timestamp, revInfo.getTimestamp());
-		e.setUnindexedProperty(Precision, revInfo.getPrecision().name());
-		return e;
-	}
-	
-	@Override
-	public Serializable toSerializable(GaeModelRevInfo entry) {
-		return entry;
-	}
-	
+    
+    private static UniCacheRevisionInfoEntryHandler instance;
+    
+    private static final String LastStableCommitted = "stableComm";
+    private static final String LastStableSuccess = "stableSucc";
+    private static final String LastSuccess = "succ";
+    private static final String LastTaken = "taken";
+    private static final Logger log = LoggerFactory
+            .getLogger(UniCacheRevisionInfoEntryHandler.class);
+    private static final String ModelExists = "exists";
+    private static final String Timestamp = "time";
+    private static final String Precision = "prec";
+    
+    public static synchronized CacheEntryHandler<GaeModelRevInfo> instance() {
+        if(instance == null) {
+            instance = new UniCacheRevisionInfoEntryHandler();
+        }
+        return instance;
+    }
+    
+    @Override
+    public GaeModelRevInfo fromEntity(SEntity e) {
+        long timestamp = (Long)e.getAttribute(Timestamp);
+        boolean modelExists = (Boolean)e.getAttribute(ModelExists);
+        long lastStableSuccess = (Long)e.getAttribute(LastStableSuccess);
+        long lastStableCommitted = (Long)e.getAttribute(LastStableCommitted);
+        long lastSuccess = (Long)e.getAttribute(LastSuccess);
+        long lastTaken = (Long)e.getAttribute(LastTaken);
+        String precStr = (String)e.getAttribute(Precision);
+        org.xydra.store.impl.gae.ng.GaeModelRevInfo.Precision prec = org.xydra.store.impl.gae.ng.GaeModelRevInfo.Precision
+                .valueOf(precStr);
+        GaeModelRevInfo ri = new GaeModelRevInfo(timestamp, modelExists, lastStableSuccess,
+                lastStableCommitted, lastSuccess, lastTaken, prec);
+        log.debug("loaded from entity " + ri);
+        return ri;
+    }
+    
+    @Override
+    public GaeModelRevInfo fromSerializable(Serializable s) {
+        GaeModelRevInfo ri = (GaeModelRevInfo)s;
+        return ri;
+    }
+    
+    @Override
+    public SEntity toEntity(SKey datastoreKey, GaeModelRevInfo revInfo) {
+        SEntity e = XGae.get().datastore().createEntity(datastoreKey);
+        e.setAttribute(LastStableCommitted, revInfo.getLastStableCommitted());
+        e.setAttribute(LastStableSuccess, revInfo.getLastStableSuccessChange());
+        e.setAttribute(ModelExists, revInfo.isModelExists());
+        e.setAttribute(LastSuccess, revInfo.getLastSuccessChange());
+        e.setAttribute(LastTaken, revInfo.getLastTaken());
+        e.setAttribute(Timestamp, revInfo.getTimestamp());
+        e.setAttribute(Precision, revInfo.getPrecision().name());
+        return e;
+    }
+    
+    @Override
+    public Serializable toSerializable(GaeModelRevInfo entry) {
+        return entry;
+    }
+    
 }

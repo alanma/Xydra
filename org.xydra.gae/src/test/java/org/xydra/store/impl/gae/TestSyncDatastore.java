@@ -6,31 +6,31 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.junit.Test;
+import org.xydra.xgae.XGae;
+import org.xydra.xgae.datastore.api.SEntity;
+import org.xydra.xgae.datastore.api.SKey;
 
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
 
 
 public class TestSyncDatastore {
-	
-	@Test
-	public void testBatchPut() {
-		GaeTestfixer.enable();
-		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-		
-		ArrayList<Entity> list = new ArrayList<Entity>();
-		list.add(new Entity("kind1", "key1"));
-		list.add(new Entity("kind1", "key2"));
-		list.add(new Entity("kind1", "key3"));
-		
-		SyncDatastore.putEntities(list);
-		
-		Map<Key,Entity> map = SyncDatastore.getEntities(Arrays.asList(
-		        KeyFactory.createKey("kind1", "key1"), KeyFactory.createKey("kind1", "key2")));
-		for(Entry<Key,Entity> a : map.entrySet()) {
-			System.out.println(a.getKey() + "=" + a.getValue());
-		}
-	}
-	
+    
+    @Test
+    public void testBatchPut() {
+        ArrayList<SEntity> list = new ArrayList<SEntity>();
+        list.add(XGae.get().datastore().createEntity(XGae.get().datastore().createKey("kind1", "key1")));
+        list.add(XGae.get().datastore().createEntity(XGae.get().datastore().createKey("kind1", "key2")));
+        list.add(XGae.get().datastore().createEntity(XGae.get().datastore().createKey("kind1", "key3")));
+        
+        XGae.get().datastore().sync().putEntities(list);
+        
+        Map<SKey,SEntity> map = XGae.get().datastore().sync().getEntities(Arrays.asList(
+        
+        XGae.get().datastore().createKey("kind1", "key1"), XGae.get().datastore().createKey("kind1", "key2")
+        
+        ));
+        for(Entry<SKey,SEntity> a : map.entrySet()) {
+            System.out.println(a.getKey() + "=" + a.getValue());
+        }
+    }
+    
 }

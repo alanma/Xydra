@@ -14,7 +14,6 @@ import org.xydra.core.XX;
 import org.xydra.persistence.GetWithAddressRequest;
 import org.xydra.persistence.ModelRevision;
 import org.xydra.store.impl.gae.GaePersistence;
-import org.xydra.store.impl.gae.GaeTestfixer;
 
 
 public class GaeStoreSpecialTest {
@@ -96,8 +95,6 @@ public class GaeStoreSpecialTest {
         this.pers = new GaePersistence(XX.toId("special"));
         this.repoID = this.pers.getRepositoryId();
         this.repoAddr = XX.toAddress(this.pers.getRepositoryId(), null, null, null);
-        GaeTestfixer.enable();
-        GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
         
         doStuff();
         deleteModel1();

@@ -1,5 +1,6 @@
 package org.xydra.store.impl.gae.ng;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
@@ -35,21 +36,19 @@ import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.xml.XmlParser;
 import org.xydra.core.util.DumpUtils;
 import org.xydra.index.impl.IteratorUtils;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.sharedutils.XyAssert;
-import org.xydra.store.impl.gae.DebugFormatter;
-import org.xydra.store.impl.gae.GaeOperation;
 import org.xydra.store.impl.gae.Memcache;
-import org.xydra.store.impl.gae.SyncDatastore;
 import org.xydra.store.impl.gae.changes.KeyStructure;
 import org.xydra.store.impl.gae.snapshot.AbstractGaeSnapshotServiceImpl;
+import org.xydra.store.impl.utils.DebugFormatter;
+import org.xydra.xgae.XGae;
+import org.xydra.xgae.annotations.XGaeOperation;
+import org.xydra.xgae.datastore.api.SEntity;
+import org.xydra.xgae.datastore.api.SKey;
+import org.xydra.xgae.datastore.api.SText;
 
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
-import com.google.appengine.api.datastore.Text;
-import com.google.appengine.api.memcache.MemcacheServiceException;
 import com.google.common.collect.Sets;
 
 
@@ -302,12 +301,12 @@ public class GaeSnapshotServiceImpl5 extends AbstractGaeSnapshotServiceImpl {
             .newSetFromMap(new ConcurrentHashMap<XAddress,Boolean>());
     
     private void putInMemcacheIfNotTooLarge(long rev, XRevWritableModel snapshot) {
-        Key key = getSnapshotKey(rev);
+        SKey key = getSnapshotKey(rev);
         XyAssert.xyAssert(isConsistent(KeyStructure.toString(key), snapshot));
         if(!uncacheable.contains(snapshot.getAddress())) {
             try {
-                Memcache.put(key, snapshot);
-            } catch(MemcacheServiceException e) {
+                Memcache.putChecked(key, snapshot);
+            } catch(IOException e) {
                 /*
                  * remember on this instance that the snapshot is probably too
                  * big and don't try to store it again
@@ -519,13 +518,13 @@ public class GaeSnapshotServiceImpl5 extends AbstractGaeSnapshotServiceImpl {
      * @return a snapshot with the requested revisionNumber or null if model was
      *         null at that revision.
      */
-    @GaeOperation(datastoreRead = true ,memcacheRead = true)
+    @XGaeOperation(datastoreRead = true ,memcacheRead = true)
     synchronized private XRevWritableModel getSnapshotFromMemcacheOrDatastore(long requestedRevNr) {
         XyAssert.xyAssert(requestedRevNr >= 0);
         log.debug("getSnapshotFromMemcacheOrDatastore " + requestedRevNr);
         // try to retrieve an exact match for the required revisionNumber
         // memcache + datastore read
-        Key snapshotKey = getSnapshotKey(requestedRevNr);
+        SKey snapshotKey = getSnapshotKey(requestedRevNr);
         Object o = null;
         if(USE_MEMCACHE) {
             o = Memcache.get(snapshotKey);
@@ -544,10 +543,10 @@ public class GaeSnapshotServiceImpl5 extends AbstractGaeSnapshotServiceImpl {
             }
         }
         // else: look for direct match in datastore
-        Entity e = SyncDatastore.getEntity(snapshotKey);
+        SEntity e = XGae.get().datastore().sync().getEntity(snapshotKey);
         if(e != null) {
             log.debug("return from datastore");
-            Text xmlText = (Text)e.getProperty(PROP_XML);
+            SText xmlText = (SText)e.getAttribute(PROP_XML);
             if(xmlText == null) {
                 // model was null at that revision
                 return null;
@@ -564,8 +563,9 @@ public class GaeSnapshotServiceImpl5 extends AbstractGaeSnapshotServiceImpl {
         return snapshot;
     }
     
-    private synchronized Key getSnapshotKey(long revNr) {
-        return KeyFactory.createKey(KIND_SNAPSHOT, this.modelAddress.toURI() + "/" + revNr);
+    private synchronized SKey getSnapshotKey(long revNr) {
+        return XGae.get().datastore()
+                .createKey(KIND_SNAPSHOT, this.modelAddress.toURI() + "/" + revNr);
     }
     
     /**

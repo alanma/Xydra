@@ -17,7 +17,7 @@ import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.index.iterator.ReadOnlyIterator;
-import org.xydra.store.impl.gae.GaeOperation;
+import org.xydra.xgae.annotations.XGaeOperation;
 
 
 /**
@@ -50,7 +50,7 @@ public class GaeLocks implements Iterable<XAddress> {
      * @param command The command to calculate the locks for.
      * @return never null
      */
-    @GaeOperation()
+    @XGaeOperation()
     public static GaeLocks createLocks(XCommand command) {
         GaeLocks gaeLocks = new GaeLocks();
         if(command instanceof XTransaction) {

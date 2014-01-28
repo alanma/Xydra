@@ -2,11 +2,13 @@ package org.xydra.store.impl.gae;
 
 import org.xydra.base.XAddress;
 import org.xydra.core.model.XModel;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.persistence.ModelRevision;
 import org.xydra.store.impl.gae.changes.GaeModelRevision;
 import org.xydra.store.impl.gae.changes.RevisionInfo;
+import org.xydra.xgae.annotations.XGaeOperation;
+import org.xydra.xgae.util.XGaeDebugHelper;
 
 import com.google.common.cache.Cache;
 
@@ -105,48 +107,48 @@ import com.google.common.cache.Cache;
  * @author xamde
  */
 public class InstanceRevisionManager {
-	
-	private static final Logger log = LoggerFactory.getLogger(InstanceRevisionManager.class);
-	
-	/** For debug strings */
-	private static final String REVMANAGER_NAME = "[.rev]";
-	
-	private final XAddress modelAddress;
-	
-	/**
-	 * @param modelAddress ..
-	 */
-	@GaeOperation()
-	public InstanceRevisionManager(XAddress modelAddress) {
-		log.debug(DebugFormatter.init(REVMANAGER_NAME));
-		this.modelAddress = modelAddress;
-		assert this.getInstanceRevisionInfo() != null;
-		assert this.getInstanceRevisionInfo().getGaeModelRevision() != null;
-		assert this.getInstanceRevisionInfo().getGaeModelRevision().getModelRevision() != null;
-	}
-	
-	/**
-	 * @return the instance-wide cache {@link RevisionInfo} for the modelAddress
-	 *         of this {@link InstanceRevisionManager}. Never null. If no cached
-	 *         info was found, a "know nothing"-entry is created, locally
-	 *         cached, and returned.
-	 */
-	public RevisionInfo getInstanceRevisionInfo() {
-		Cache<String,Object> instanceContext = InstanceContext.getInstanceCache();
-		String key = this.modelAddress + "/revisions";
-		synchronized(instanceContext) {
-			RevisionInfo instanceRevInfo = (RevisionInfo)instanceContext.getIfPresent(key);
-			if(instanceRevInfo == null) {
-				instanceRevInfo = new RevisionInfo(".instance-rev" + this.modelAddress);
-				instanceContext.put(key, instanceRevInfo);
-			}
-			return instanceRevInfo;
-		}
-	}
-	
-	@Override
-	public String toString() {
-		return this.modelAddress + ":: instance:" + getInstanceRevisionInfo();
-	}
-	
+    
+    private static final Logger log = LoggerFactory.getLogger(InstanceRevisionManager.class);
+    
+    /** For debug strings */
+    private static final String REVMANAGER_NAME = "[.rev]";
+    
+    private final XAddress modelAddress;
+    
+    /**
+     * @param modelAddress ..
+     */
+    @XGaeOperation()
+    public InstanceRevisionManager(XAddress modelAddress) {
+        log.debug(XGaeDebugHelper.init(REVMANAGER_NAME));
+        this.modelAddress = modelAddress;
+        assert this.getInstanceRevisionInfo() != null;
+        assert this.getInstanceRevisionInfo().getGaeModelRevision() != null;
+        assert this.getInstanceRevisionInfo().getGaeModelRevision().getModelRevision() != null;
+    }
+    
+    /**
+     * @return the instance-wide cache {@link RevisionInfo} for the modelAddress
+     *         of this {@link InstanceRevisionManager}. Never null. If no cached
+     *         info was found, a "know nothing"-entry is created, locally
+     *         cached, and returned.
+     */
+    public RevisionInfo getInstanceRevisionInfo() {
+        Cache<String,Object> instanceContext = InstanceContext.getInstanceCache();
+        String key = this.modelAddress + "/revisions";
+        synchronized(instanceContext) {
+            RevisionInfo instanceRevInfo = (RevisionInfo)instanceContext.getIfPresent(key);
+            if(instanceRevInfo == null) {
+                instanceRevInfo = new RevisionInfo(".instance-rev" + this.modelAddress);
+                instanceContext.put(key, instanceRevInfo);
+            }
+            return instanceRevInfo;
+        }
+    }
+    
+    @Override
+    public String toString() {
+        return this.modelAddress + ":: instance:" + getInstanceRevisionInfo();
+    }
+    
 }

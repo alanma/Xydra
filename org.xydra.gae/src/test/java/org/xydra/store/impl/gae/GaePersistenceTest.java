@@ -30,15 +30,16 @@ import org.xydra.core.XX;
 import org.xydra.core.model.impl.memory.IMemoryModel;
 import org.xydra.core.model.impl.memory.MemoryModel;
 import org.xydra.core.util.DumpUtils;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
-import org.xydra.log.gae.Log4jLoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
+import org.xydra.log.impl.log4j.Log4jLoggerFactory;
 import org.xydra.persistence.GetWithAddressRequest;
 import org.xydra.persistence.ModelRevision;
 import org.xydra.persistence.XydraPersistence;
 import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.XydraRuntime;
 import org.xydra.store.rmof.impl.delegate.WritableRepositoryOnPersistence;
+import org.xydra.xgae.XGae;
 
 
 public class GaePersistenceTest {
@@ -49,9 +50,7 @@ public class GaePersistenceTest {
     
     @Before
     public void setUp() {
-        GaeTestfixer.enable();
-        GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-        LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory());
+        LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory(), "SomeTest");
     }
     
     @After
@@ -61,7 +60,7 @@ public class GaePersistenceTest {
     
     @Test
     public void testQueryIds() {
-        LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory());
+        LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory(), "SomeTest");
         XId repoId = XX.toId("repo-testQueryIds");
         
         XydraPersistence pers = new GaePersistence(repoId);
@@ -93,7 +92,7 @@ public class GaePersistenceTest {
         assertEquals(1, pers.getModelRevision(modelAddressRequest).revision());
         
         log.info("###   Clear memcache");
-        XydraRuntime.getMemcache().clear();
+        XGae.get().memcache().clear();
         
         pers = new GaePersistence(repoId);
         
@@ -343,7 +342,7 @@ public class GaePersistenceTest {
     public void testAddAndRemoveModel() {
         // XydraRuntime.getConfigMap().put(XydraRuntime.PROP_MEMCACHESTATS,
         // "true");
-        LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory());
+        LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory(), "SomeTest");
         
         XydraPersistence pers = new GaePersistence(XX.toId("test-repo4"));
         XId modelId = XX.toId("model1");
@@ -386,10 +385,8 @@ public class GaePersistenceTest {
     }
     
     public XydraPersistence createPersistence(XId repositoryId) {
-        LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory());
+        LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory(), "SomeTest");
         // configureLog4j();
-        GaeTestfixer.enable();
-        GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
         InstanceContext.clear();
         XydraRuntime.init();
         XydraPersistence p = new GaePersistence(repositoryId);
@@ -443,7 +440,7 @@ public class GaePersistenceTest {
     
     @Test
     public void testAddAndRemoveModelWithObject() {
-        LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory());
+        LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory(), "SomeTest");
         
         XydraPersistence pers = new GaePersistence(XX.toId("test-repo5"));
         XId modelId = XX.toId("model1");

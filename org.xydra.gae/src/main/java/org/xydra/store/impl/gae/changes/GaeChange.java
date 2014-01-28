@@ -13,21 +13,18 @@ import org.xydra.base.change.XTransaction;
 import org.xydra.base.change.impl.memory.MemoryTransactionEvent;
 import org.xydra.core.XX;
 import org.xydra.core.model.XChangeLog;
-import org.xydra.gae.AboutAppEngine;
 import org.xydra.index.query.Pair;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.sharedutils.XyAssert;
-import org.xydra.store.impl.gae.AsyncDatastore;
-import org.xydra.store.impl.gae.GaeConstants;
-import org.xydra.store.impl.gae.GaeDebugFormatter;
-import org.xydra.store.impl.gae.GaeOperation;
 import org.xydra.store.impl.gae.Memcache;
-import org.xydra.store.impl.gae.SyncDatastore;
+import org.xydra.store.impl.utils.DebugFormatter;
+import org.xydra.xgae.XGae;
+import org.xydra.xgae.annotations.XGaeOperation;
+import org.xydra.xgae.datastore.api.SEntity;
+import org.xydra.xgae.datastore.api.SKey;
+import org.xydra.xgae.datastore.api.STransaction;
 
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.Transaction;
 
 
 /**
@@ -237,7 +234,7 @@ public class GaeChange {
      * A too long timeout however might cause the model to "starve" as processes
      * are be aborted by GAE while waiting for other changes.
      * */
-    private static final long TIMEOUT = GaeConstants.GAE_WEB_REQUEST_TIMEOUT
+    private static final long TIMEOUT = XGae.get().getRuntimeLimitInMillis()
             - APPLICATION_RESERVED_TIME;
     
     /**
@@ -263,7 +260,7 @@ public class GaeChange {
     private long lastActivity;
     private GaeLocks locks;
     private final XAddress modelAddr;
-    private Entity entity;
+    private SEntity entity;
     private Status status;
     private XId actor;
     private Pair<List<XAtomicEvent>,int[]> events;
@@ -283,16 +280,16 @@ public class GaeChange {
         this.rev = rev;
         this.locks = locks;
         this.modelAddr = modelAddr;
-        this.entity = new Entity(KeyStructure.createChangeKey(modelAddr, rev));
+        this.entity = XGae.get().datastore().createEntity(KeyStructure.createChangeKey(modelAddr, rev));
         
         this.status = Status.Creating;
-        this.entity.setUnindexedProperty(PROP_STATUS, this.status.value);
+        this.entity.setAttribute(PROP_STATUS, this.status.value);
         
         this.actor = actorId;
         if(actorId != null) {
-            this.entity.setUnindexedProperty(PROP_ACTOR, actorId.toString());
+            this.entity.setAttribute(PROP_ACTOR, actorId.toString());
         }
-        this.entity.setUnindexedProperty(PROP_LOCKS, locks.encode());
+        this.entity.setAttribute(PROP_LOCKS, locks.encode());
         
         registerActivity();
         
@@ -316,7 +313,7 @@ public class GaeChange {
      * @param rev
      * @param entity
      */
-    public GaeChange(XAddress modelAddr, long rev, Entity entity) {
+    public GaeChange(XAddress modelAddr, long rev, SEntity entity) {
         if(entity == null) {
             throw new IllegalArgumentException("entity is null");
         }
@@ -328,9 +325,9 @@ public class GaeChange {
         clearCache();
     }
     
-    public void reload(Transaction trans) {
+    public void reload(STransaction trans) {
         XyAssert.xyAssert(getStatus().canChange());
-        this.entity = SyncDatastore.getEntity(this.entity.getKey(), trans);
+        this.entity = XGae.get().datastore().sync().getEntity(this.entity.getKey(), trans);
         assert this.entity != null : "change entities should not vanish";
         clearCache();
     }
@@ -345,7 +342,7 @@ public class GaeChange {
     private XId getActor() {
         if(this.actor == null) {
             synchronized(this) {
-                String actorStr = (String)this.entity.getProperty(PROP_ACTOR);
+                String actorStr = (String)this.entity.getAttribute(PROP_ACTOR);
                 if(actorStr == null) {
                     return null;
                 }
@@ -364,7 +361,7 @@ public class GaeChange {
         if(!getStatus().canChange())
             return false;
         if(this.lastActivity < 0) {
-            this.lastActivity = (Long)this.entity.getProperty(PROP_LAST_ACTIVITY);
+            this.lastActivity = (Long)this.entity.getAttribute(PROP_LAST_ACTIVITY);
         }
         return now() - this.lastActivity > TIMEOUT;
     }
@@ -377,9 +374,9 @@ public class GaeChange {
     public void commitAndClearLocks(Status status) {
         assert getStatus().canChange();
         this.locks = null;
-        this.entity.removeProperty(PROP_LOCKS);
+        this.entity.removeAttribute(PROP_LOCKS);
         setStatus(status);
-        SyncDatastore.putEntity(this.entity);
+        XGae.get().datastore().sync().putEntity(this.entity);
     }
     
     /**
@@ -390,7 +387,7 @@ public class GaeChange {
     public void setStatus(Status status) {
         XyAssert.xyAssert(getStatus().canChange(), "A commited change cannot change its status");
         this.status = status;
-        this.entity.setUnindexedProperty(PROP_STATUS, status.value);
+        this.entity.setAttribute(PROP_STATUS, status.value);
     }
     
     /**
@@ -399,7 +396,7 @@ public class GaeChange {
     synchronized public GaeLocks getLocks() {
         XyAssert.xyAssert(getStatus().canChange());
         if(this.locks == null) {
-            List<String> lockStrs = (List<String>)this.entity.getProperty(PROP_LOCKS);
+            List<String> lockStrs = (List<String>)this.entity.getAttribute(PROP_LOCKS);
             if(lockStrs == null) {
                 return null;
             }
@@ -410,11 +407,11 @@ public class GaeChange {
     }
     
     /**
-     * @return the status code associated with the given change {@link Entity}.
+     * @return the status code associated with the given change {@link SEntity}.
      */
     synchronized public Status getStatus() {
         if(this.status == null) {
-            Object o = this.entity.getProperty(PROP_STATUS);
+            Object o = this.entity.getAttribute(PROP_STATUS);
             // trying to find the NPE bug here...
             if(o == null) {
                 try {
@@ -435,13 +432,13 @@ public class GaeChange {
      * @return true if the given change entity has any locks set.
      */
     public boolean hasLocks() {
-        return (this.locks != null || this.entity.getProperty(PROP_LOCKS) != null);
+        return (this.locks != null || this.entity.getAttribute(PROP_LOCKS) != null);
     }
     
     private void registerActivity() {
         XyAssert.xyAssert(getStatus().canChange());
         this.lastActivity = now();
-        this.entity.setUnindexedProperty(PROP_LAST_ACTIVITY, this.lastActivity);
+        this.entity.setAttribute(PROP_LAST_ACTIVITY, this.lastActivity);
     }
     
     /**
@@ -463,13 +460,13 @@ public class GaeChange {
      */
     public void giveUpIfTimeoutCritical() throws VoluntaryTimeoutException {
         
-        if(AboutAppEngine.onBackend()) {
+        if(XGae.get().getRuntimeLimitInMillis() == -1) {
             // never time out on a backend
             return;
         }
         
         /* Don't give up in development mode to let the debugger step through */
-        if(!AboutAppEngine.inProduction()) {
+        if(!XGae.get().inProduction()) {
             this.timeoutCheckCount++;
             if(this.timeoutCheckCount > 10000) {
                 throw new RuntimeException("Waiting to long");
@@ -487,10 +484,10 @@ public class GaeChange {
         }
     }
     
-    public Pair<int[],List<Future<Key>>> setEvents(List<XAtomicEvent> events) {
+    public Pair<int[],List<Future<SKey>>> setEvents(List<XAtomicEvent> events) {
         XyAssert.xyAssert(getStatus().canChange());
         XyAssert.xyAssert(events.size() >= 1);
-        Pair<int[],List<Future<Key>>> res = GaeEvents.saveEvents(this.modelAddr, this.entity,
+        Pair<int[],List<Future<SKey>>> res = GaeEvents.saveEvents(this.modelAddr, this.entity,
                 events);
         this.events = new Pair<List<XAtomicEvent>,int[]>(events, res.getFirst());
         return res;
@@ -502,14 +499,14 @@ public class GaeChange {
      * 
      * @param trans
      */
-    @GaeOperation(datastoreWrite = true ,memcacheWrite = true)
-    public void save(Transaction trans) {
+    @XGaeOperation(datastoreWrite = true ,memcacheWrite = true)
+    public void save(STransaction trans) {
         XyAssert.xyAssert(getStatus().canChange());
         
         registerActivity();
         
         // Synchronized by endTransaction()
-        AsyncDatastore.putEntity(this.entity, trans);
+        XGae.get().datastore().async().putEntity(this.entity, trans);
     }
     
     /**
@@ -517,15 +514,15 @@ public class GaeChange {
      * 
      * @return a future that returns the putted key on success
      */
-    public Future<Key> save() {
+    public Future<SKey> save() {
         XyAssert.xyAssert(getStatus().canChange());
         
         registerActivity();
         
         XyAssert.xyAssert(getStatus().canChange(), "getStatus().canChange()");
-        XyAssert.xyAssert(this.entity.getProperty("eventTypes") != null,
+        XyAssert.xyAssert(this.entity.getAttribute("eventTypes") != null,
                 "Trying to save changeEntity with PROP_EVENT_TYPES==null");
-        return AsyncDatastore.putEntity(this.entity);
+        return XGae.get().datastore().async().putEntity(this.entity);
     }
     
     /**
@@ -591,7 +588,7 @@ public class GaeChange {
     @Override
     public String toString() {
         return "rev:" + this.rev + " lastAct:" + this.lastActivity + " status:" + this.status + " "
-                + GaeDebugFormatter.toString(this.entity);
+                + DebugFormatter.format(this.entity);
     }
     
     public XId getActorId() {

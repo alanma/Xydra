@@ -2,10 +2,10 @@ package org.xydra.store.impl.gae.changes;
 
 import java.io.Serializable;
 
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
-import org.xydra.store.impl.gae.DebugFormatter;
-import org.xydra.store.impl.gae.DebugFormatter.Timing;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
+import org.xydra.xgae.util.XGaeDebugHelper;
+import org.xydra.xgae.util.XGaeDebugHelper.Timing;
 
 
 /**
@@ -70,14 +70,14 @@ public class RevisionInfo implements Serializable {
 		this.gaeModelRev = modelRev;
 		this.lastCommitted = lastCommited;
 		this.lastTaken = lastTaken;
-		log.debug(DebugFormatter.init(this.datasourceName));
+		log.debug(XGaeDebugHelper.init(this.datasourceName));
 	}
 	
 	/**
 	 * Reset to initial values that denote zero knowledge.
 	 */
 	public void clear() {
-		log.debug(DebugFormatter.clear(this.datasourceName));
+		log.debug(XGaeDebugHelper.clear(this.datasourceName));
 		this.gaeModelRev.clear();
 		this.lastCommitted = NOT_SET;
 		this.lastTaken = NOT_SET;
@@ -89,7 +89,7 @@ public class RevisionInfo implements Serializable {
 	public GaeModelRevision getGaeModelRevision() {
 		synchronized(this) {
 			GaeModelRevision result = this.gaeModelRev;
-			log.trace(DebugFormatter
+			log.trace(XGaeDebugHelper
 			        .dataGet(this.datasourceName, "gaeModelRev", result, Timing.Now));
 			return result;
 		}
@@ -101,7 +101,7 @@ public class RevisionInfo implements Serializable {
 	public synchronized long getLastCommitted() {
 		synchronized(this) {
 			long result = this.lastCommitted;
-			log.trace(DebugFormatter.dataGet(this.datasourceName, "lastCommitted", result,
+			log.trace(XGaeDebugHelper.dataGet(this.datasourceName, "lastCommitted", result,
 			        Timing.Now));
 			return result;
 		}
@@ -115,7 +115,7 @@ public class RevisionInfo implements Serializable {
 	public synchronized long getLastTaken() {
 		synchronized(this) {
 			long result = this.lastTaken;
-			log.trace(DebugFormatter.dataGet(this.datasourceName, "lastTaken", result, Timing.Now));
+			log.trace(XGaeDebugHelper.dataGet(this.datasourceName, "lastTaken", result, Timing.Now));
 			return result;
 		}
 	}
@@ -159,7 +159,7 @@ public class RevisionInfo implements Serializable {
 	
 	protected void setGaeModelRev(GaeModelRevision gaeModelRev) {
 		assert gaeModelRev != null;
-		log.debug(DebugFormatter.dataPut(this.datasourceName, "gaeModelRev", gaeModelRev,
+		log.debug(XGaeDebugHelper.dataPut(this.datasourceName, "gaeModelRev", gaeModelRev,
 		        Timing.Now));
 		this.gaeModelRev = gaeModelRev;
 	}
@@ -172,7 +172,7 @@ public class RevisionInfo implements Serializable {
 	 */
 	public synchronized void setLastCommittedIfHigher(long lastCommitted) {
 		if(lastCommitted > this.lastCommitted) {
-			log.debug(DebugFormatter.dataPut(this.datasourceName, "lastCommitted", lastCommitted,
+			log.debug(XGaeDebugHelper.dataPut(this.datasourceName, "lastCommitted", lastCommitted,
 			        Timing.Now));
 			this.lastCommitted = lastCommitted;
 			// invariant: lastCommitted >= lastTaken
@@ -195,7 +195,7 @@ public class RevisionInfo implements Serializable {
 	 */
 	public synchronized void setLastTakenIfHigher(long lastTaken) {
 		if(lastTaken > this.lastTaken) {
-			log.debug(DebugFormatter.dataPut(this.datasourceName, "lastTaken", lastTaken,
+			log.debug(XGaeDebugHelper.dataPut(this.datasourceName, "lastTaken", lastTaken,
 			        Timing.Now));
 			this.lastTaken = lastTaken;
 		}
@@ -235,7 +235,7 @@ public class RevisionInfo implements Serializable {
 		assert gaeModelRev.getModelRevision() != null;
 		if(gaeModelRev.getModelRevision().revision() > this.gaeModelRev.getModelRevision()
 		        .revision()) {
-			log.trace(DebugFormatter.dataPut(this.datasourceName, "gaeModelRev", gaeModelRev,
+			log.trace(XGaeDebugHelper.dataPut(this.datasourceName, "gaeModelRev", gaeModelRev,
 			        Timing.Now));
 			this.gaeModelRev = gaeModelRev;
 		}

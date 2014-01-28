@@ -23,112 +23,117 @@ import org.xydra.sharedutils.XyAssert;
  * @author xamde
  */
 public class TentativeObjectState implements Serializable, XRevWritableObject {
-	
-	private static final long serialVersionUID = -1351865686747885441L;
-	
-	private long modelRevision;
-	
-	@NeverNull
-	XRevWritableObject object;
-	
-	private boolean objectExists;
-	
-	public boolean exists() {
-		return this.objectExists;
-	}
-	
-	@Override
-	public String toString() {
-		return this.getAddress() + " [" + (this.objectExists ? "exists" : "-na-") + "]"
-		        + " [model:" + this.modelRevision + "] " + this.object;
-	}
-	
-	public TentativeObjectState(@NeverNull XReadableObject object, boolean objectExists,
-	        long modelRev) {
-		XyAssert.xyAssert(object != null);
-		this.object = XCopyUtils.createSnapshot(object);
-		this.objectExists = objectExists;
-		this.modelRevision = modelRev;
-	}
-	
-	public XRevWritableObject asRevWritableObject() {
-		return this.object;
-	}
-	
-	@Override
-	public XAddress getAddress() {
-		return this.object.getAddress();
-	}
-	
-	public XRevWritableField getField(XId fieldId) {
-		return this.object.getField(fieldId);
-	}
-	
-	@Override
-	public XId getId() {
-		return this.getAddress().getObject();
-	}
-	
-	public long getModelRevision() {
-		return this.modelRevision;
-	}
-	
-	public long getRevisionNumber() {
-		return this.object.getRevisionNumber();
-	}
-	
-	@Override
-	public XType getType() {
-		return XType.XOBJECT;
-	}
-	
-	public boolean hasField(XId fieldId) {
-		return this.object.hasField(fieldId);
-	}
-	
-	public boolean isEmpty() {
-		return this.object.isEmpty();
-	}
-	
-	public Iterator<XId> iterator() {
-		return this.object.iterator();
-	}
-	
-	public void setModelRev(long modelRev) {
-		this.modelRevision = modelRev;
-	}
-	
-	public TentativeObjectState copy() {
-		return new TentativeObjectState(XCopyUtils.createSnapshot(this.object), this.objectExists,
-		        this.modelRevision);
-	}
-	
-	@Override
-	public boolean removeField(XId fieldId) {
-		return this.object.removeField(fieldId);
-	}
-	
-	@Override
-	public void addField(XRevWritableField field) {
-		this.object.addField(field);
-	}
-	
-	@Override
-	public XRevWritableField createField(XId fieldId) {
-		return this.object.createField(fieldId);
-	}
-	
-	@Override
-	public void setRevisionNumber(long rev) {
-		this.object.setRevisionNumber(rev);
-	}
-	
-	public void setObjectExists(boolean objectExists) {
-		this.objectExists = objectExists;
-	}
-	
-	public void setObjectState(XReadableObject object) {
-		this.object = XCopyUtils.createSnapshot(object);
-	}
-	
+    
+    private static final long serialVersionUID = -1351865686747885441L;
+    
+    private long modelRevision;
+    
+    @NeverNull
+    private XRevWritableObject object;
+    
+    private boolean objectExists;
+    
+    public boolean exists() {
+        return this.objectExists;
+    }
+    
+    @Override
+    public String toString() {
+        return this.getAddress() + " [" + (this.objectExists ? "exists" : "-na-") + "]"
+                + " [model:" + this.modelRevision + "] " + this.object;
+    }
+    
+    /**
+     * @param object is snapshotted
+     * @param objectExists
+     * @param modelRev
+     */
+    public TentativeObjectState(@NeverNull XReadableObject object, boolean objectExists,
+            long modelRev) {
+        XyAssert.xyAssert(object != null);
+        this.object = XCopyUtils.createSnapshot(object);
+        this.objectExists = objectExists;
+        this.modelRevision = modelRev;
+    }
+    
+    public XRevWritableObject asRevWritableObject() {
+        return this.object;
+    }
+    
+    @Override
+    public XAddress getAddress() {
+        return this.object.getAddress();
+    }
+    
+    public XRevWritableField getField(XId fieldId) {
+        return this.object.getField(fieldId);
+    }
+    
+    @Override
+    public XId getId() {
+        return this.getAddress().getObject();
+    }
+    
+    public long getModelRevision() {
+        return this.modelRevision;
+    }
+    
+    public long getRevisionNumber() {
+        return this.object.getRevisionNumber();
+    }
+    
+    @Override
+    public XType getType() {
+        return XType.XOBJECT;
+    }
+    
+    public boolean hasField(XId fieldId) {
+        return this.object.hasField(fieldId);
+    }
+    
+    public boolean isEmpty() {
+        return this.object.isEmpty();
+    }
+    
+    public Iterator<XId> iterator() {
+        return this.object.iterator();
+    }
+    
+    public void setModelRev(long modelRev) {
+        this.modelRevision = modelRev;
+    }
+    
+    public TentativeObjectState copy() {
+        return new TentativeObjectState(XCopyUtils.createSnapshot(this.object), this.objectExists,
+                this.modelRevision);
+    }
+    
+    @Override
+    public boolean removeField(XId fieldId) {
+        return this.object.removeField(fieldId);
+    }
+    
+    @Override
+    public void addField(XRevWritableField field) {
+        this.object.addField(field);
+    }
+    
+    @Override
+    public XRevWritableField createField(XId fieldId) {
+        return this.object.createField(fieldId);
+    }
+    
+    @Override
+    public void setRevisionNumber(long rev) {
+        this.object.setRevisionNumber(rev);
+    }
+    
+    public void setObjectExists(boolean objectExists) {
+        this.objectExists = objectExists;
+    }
+    
+    public void setObjectState(XReadableObject object) {
+        this.object = XCopyUtils.createSnapshot(object);
+    }
+    
 }

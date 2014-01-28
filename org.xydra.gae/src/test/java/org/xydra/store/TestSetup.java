@@ -6,21 +6,20 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XCommandFactory;
 import org.xydra.core.X;
 import org.xydra.core.XX;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
-import org.xydra.log.gae.Log4jLoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
+import org.xydra.log.impl.log4j.Log4jLoggerFactory;
 import org.xydra.persistence.GetWithAddressRequest;
 import org.xydra.persistence.ModelRevision;
 import org.xydra.persistence.XydraPersistence;
 import org.xydra.store.impl.delegate.DelegatingAllowAllStore;
 import org.xydra.store.impl.gae.GaePersistence;
-import org.xydra.store.impl.gae.GaeTestfixer;
 
 
 public class TestSetup {
     
     static {
-        LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory());
+        LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory(), "SomeTest");
     }
     
     private static final Logger log = LoggerFactory.getLogger(TestSetup.class);
@@ -30,8 +29,6 @@ public class TestSetup {
     
     @Test
     public void testSetup() throws Exception {
-        GaeTestfixer.enable();
-        GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
         XydraRuntime.init();
         
         XId repoId = XX.toId("repo1");
@@ -60,9 +57,7 @@ public class TestSetup {
     @Test
     public void testSetupPersistence() throws Exception {
         log.info("______________ testSetupPersistence ________________");
-        GaeTestfixer.enable();
-        GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-        LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory());
+        LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory(), "SomeTest");
         log.debug("logtest 1-2-3");
         XydraRuntime.init();
         
@@ -92,8 +87,6 @@ public class TestSetup {
     
     @Test
     public void testSetupPersistenceModelCommand() throws Exception {
-        GaeTestfixer.enable();
-        GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
         XydraRuntime.init();
         
         XId repoId = XX.toId("repo1");

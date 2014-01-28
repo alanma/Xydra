@@ -11,34 +11,30 @@ import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.impl.memory.MemoryRepositoryCommand;
+import org.xydra.core.LoggerTestHelper;
 import org.xydra.core.XX;
-import org.xydra.log.api.LoggerFactory;
-import org.xydra.log.impl.log4j.Log4jLoggerFactory;
 import org.xydra.log.util.Log4jUtils;
 import org.xydra.store.impl.gae.GaePersistence;
 import org.xydra.xgae.gaeutils.GaeTestFixer_LocalPart;
 import org.xydra.xgae.gaeutils.GaeTestfixer;
 
 
-public class GaeStoreReadMethodsTest extends AbstractSecureStoreReadMethodsTest {
+public class GaeStoreSetupTest extends AbstractSecureStoreReadMethodsTest {
     
     @BeforeClass
     public static void init() {
-        // LoggerTestHelper.init();
-        LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory(), "SomeTest");
+        LoggerTestHelper.init();
         Log4jUtils.configureLog4j();
         GaeTestfixer.enable();
+        GaeTestFixer_LocalPart.initialiseHelperAndAttachToCurrentThread();
+        System.out.println("GaeTestfixer runs");
     }
     
     @Override
     protected XydraStore createStore() {
-        GaeTestFixer_LocalPart.initialiseHelperAndAttachToCurrentThread();
         XydraRuntime.init();
         
-        if(this.store == null) {
-            this.store = GaePersistence.create();
-        }
-        return this.store;
+        return GaePersistence.create();
     }
     
     @Before
@@ -65,12 +61,8 @@ public class GaeStoreReadMethodsTest extends AbstractSecureStoreReadMethodsTest 
         this.store.getModelIds(getCorrectUser(), getCorrectUserPasswordHash(), mids);
         assertEquals(SynchronousCallbackWithOneResult.SUCCESS, mids.waitOnCallback(Long.MAX_VALUE));
         assert mids.effect.size() == 0 : mids.effect.size();
-    }
-    
-    public static void main(String[] args) {
-        GaeStoreReadMethodsTest t = new GaeStoreReadMethodsTest();
-        t.setUp();
-        t.setUp();
+        
+        super.tearDown();
     }
     
 }

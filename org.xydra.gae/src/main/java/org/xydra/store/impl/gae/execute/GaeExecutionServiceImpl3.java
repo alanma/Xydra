@@ -21,12 +21,10 @@ import org.xydra.core.change.EventUtils;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.delta.DeltaUtils;
 import org.xydra.index.query.Pair;
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 import org.xydra.restless.utils.NanoClock;
 import org.xydra.sharedutils.XyAssert;
-import org.xydra.store.impl.gae.DebugFormatter;
-import org.xydra.store.impl.gae.FutureUtils;
 import org.xydra.store.impl.gae.InstanceRevisionManager;
 import org.xydra.store.impl.gae.changes.GaeChange;
 import org.xydra.store.impl.gae.changes.GaeChange.Status;
@@ -35,8 +33,9 @@ import org.xydra.store.impl.gae.changes.GaeModelRevision;
 import org.xydra.store.impl.gae.changes.IGaeChangesService;
 import org.xydra.store.impl.gae.changes.VoluntaryTimeoutException;
 import org.xydra.store.impl.gae.snapshot.IGaeSnapshotService;
-
-import com.google.appengine.api.datastore.Key;
+import org.xydra.store.impl.utils.DebugFormatter;
+import org.xydra.xgae.datastore.api.SKey;
+import org.xydra.xgae.util.FutureUtils;
 
 
 /**
@@ -315,12 +314,14 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
                         + result.getAddress());
                 continue;
             }
+            assert object != null;
             
             if(referenceModel != null && object == referenceModel.getObject(lock.getObject())) {
                 if(result == referenceModel) {
                     result = SimpleModel.shallowCopy(result);
                 }
                 object = SimpleObject.shallowCopy(object);
+                assert object != null;
                 result.addObject(object);
             }
             
@@ -375,10 +376,10 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
                 log.debug("No change");
                 return XCommand.NOCHANGE;
             }
-            Pair<int[],List<Future<Key>>> res = change.setEvents(events);
+            Pair<int[],List<Future<SKey>>> res = change.setEvents(events);
             
             // Wait on all changes.
-            for(Future<Key> future : res.getSecond()) {
+            for(Future<SKey> future : res.getSecond()) {
                 FutureUtils.waitFor(future);
             }
             

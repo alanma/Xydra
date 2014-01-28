@@ -2,8 +2,8 @@ package org.xydra.store.impl.gae;
 
 import java.util.concurrent.TimeUnit;
 
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
