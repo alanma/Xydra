@@ -4,7 +4,8 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.xydra</groupId>
 	<artifactId>maven-root</artifactId>
-	<version>2013.07.04</version>
+	<!-- previous 2013.09.24 -->
+	<version>2013.09.24</version>
 	<packaging>pom</packaging>
 
 	<name>Xydra Maven Root</name>
@@ -16,9 +17,10 @@
 	</description>
 
 	<properties>
-		<!-- tell the compiler we use 1.6 -->
-		<maven.compiler.source>1.6</maven.compiler.source>
-		<maven.compiler.target>1.6</maven.compiler.target>
+		<!-- tell the compiler we use 1.7; note that GWT code must still remain 
+			in 1.6 source compatibility -->
+		<maven.compiler.source>1.7</maven.compiler.source>
+		<maven.compiler.target>1.7</maven.compiler.target>
 
 		<!-- For properties like xydra.version, gae.version and gwt.version us 
 			full-text search. gwt.version should match the version of get plugin, if 
@@ -176,7 +178,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.2</version>
+				<version>2.4</version>
 				<executions>
 					<execution>
 						<goals>
@@ -461,13 +463,23 @@
 						<inherited>true</inherited>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-source-plugin</artifactId>
-						<version>2.1.2</version>
+						<version>2.2.1</version>
+						<configuration>
+							<includePom>true</includePom>
+						</configuration>
 						<executions>
 							<execution>
 								<id>attach-sources</id>
 								<phase>package</phase>
 								<goals>
 									<goal>jar-no-fork</goal>
+								</goals>
+							</execution>
+							<execution>
+								<id>attach-test-sources</id>
+								<phase>package</phase>
+								<goals>
+									<goal>test-jar-no-fork</goal>
 								</goals>
 							</execution>
 						</executions>
