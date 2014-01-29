@@ -161,7 +161,13 @@ public class DeluxeTextSearch<V> {
         for(String tokenWithCase : tokensWithCase) {
             int count = 0;
             Iterator<V> res = this.pts.search(this.normaliser.normalise(tokenWithCase));
-            while(res.hasNext() && count < maxResults) {
+            /*
+             * we accept a 10 x overhead to increase the chance to have really
+             * good matches. As we search for tokens "A" and "B" separately, we
+             * want to return "A B" even if many items with only "A" and others
+             * with only "B" are present. -- 10 x is empirically
+             */
+            while(res.hasNext() && count < (maxResults * 10)) {
                 V value = res.next();
                 if(filter.matches(value)) {
                     found.index(value, tokenWithCase);
