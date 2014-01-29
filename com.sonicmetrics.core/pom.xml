@@ -38,55 +38,39 @@
 
 	<dependencies>
 
+		<!-- GWT Client -->
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>log</artifactId>
+			<!-- @@ use xydra.version here -->
+			<version>0.1.7-SNAPSHOT</version>
+			<classifier>sources</classifier>
+		</dependency>
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>restless</artifactId>
+			<!-- @@ use xydra.version here -->
+			<version>0.1.7-SNAPSHOT</version>
+			<classifier>sources</classifier>
+		</dependency>
+
+		<!-- === Shared/Server -->
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>csv</artifactId>
+			<!-- @@ use xydra.version here -->
+			<version>0.1.7-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>restless</artifactId>
+			<!-- @@ use xydra.version here -->
+			<version>0.1.7-SNAPSHOT</version>
+		</dependency>
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava-gwt</artifactId>
 		</dependency>
-
-		<!-- test server -->
-		<dependency>
-			<groupId>org.mortbay.jetty</groupId>
-			<artifactId>jetty</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.xydra</groupId>
-			<artifactId>csv</artifactId>
-            <!-- @@ use xydra.version here -->
-            <version>0.1.7-SNAPSHOT</version>
-		</dependency>
-
-
-		<dependency>
-			<groupId>org.xydra</groupId>
-			<artifactId>restless</artifactId>
-            <!-- @@ use xydra.version here -->
-            <version>0.1.7-SNAPSHOT</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.xydra</groupId>
-			<artifactId>restless</artifactId>
-            <!-- @@ use xydra.version here -->
-            <version>0.1.7-SNAPSHOT</version>
-			<type>test-jar</type>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.xydra</groupId>
-			<artifactId>restless</artifactId>
-            <!-- @@ use xydra.version here -->
-            <version>0.1.7-SNAPSHOT</version>
-			<classifier>sources</classifier>
-		</dependency>
-
-
 		<!-- devmode logging requires log4j libs! -->
 		<!-- compile dependencies -->
 		<dependency>
@@ -104,22 +88,47 @@
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>log.ext</artifactId>
+			<!-- @@ use xydra.version here -->
+			<version>0.1.7-SNAPSHOT</version>
+		</dependency>
+		
+		<!-- === Test -->
+		<dependency>
+			<groupId>org.mortbay.jetty</groupId>
+			<artifactId>jetty</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>jetty</artifactId>
+			<!-- @@ use xydra.version here -->
+			<version>0.1.7-SNAPSHOT</version>
+			<scope>test</scope>
+		</dependency>
 
 	</dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>log4j.properties</exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<excludes>
+						<exclude>log4j.properties</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 
 	<distributionManagement>
 		<!-- Add this to settings.xml <server> <id>xydra-repo</id> <username>xamde</username> 

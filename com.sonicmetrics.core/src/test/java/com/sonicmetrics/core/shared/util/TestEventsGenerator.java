@@ -7,8 +7,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
-import org.xydra.log.Logger;
-import org.xydra.log.LoggerFactory;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 import com.sonicmetrics.core.server.IndexedDay;
 import com.sonicmetrics.core.shared.impl.memory.SonicEvent;

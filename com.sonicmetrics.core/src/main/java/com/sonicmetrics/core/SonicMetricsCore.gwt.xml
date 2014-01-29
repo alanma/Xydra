@@ -12,7 +12,7 @@
 
 	<inherits name="org.xydra.annotations.XydraAnnotations" />
 	<inherits name="org.xydra.index.XydraIndex" />
-	<inherits name='org.xydra.log.Xlog' />
+	<inherits name='org.xydra.log.XydraLog' />
 
     <source path="shared" />
     <source path="client" />

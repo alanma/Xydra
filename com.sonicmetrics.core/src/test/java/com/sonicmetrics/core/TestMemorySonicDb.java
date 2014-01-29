@@ -8,7 +8,7 @@ import com.sonicmetrics.core.shared.impl.memory.SonicMemoryDB;
 public class TestMemorySonicDb extends AbstractTestSonicDb {
 	
 	@Before
-	public void before() {
+	public void setUp() {
 		super.db = new SonicMemoryDB();
 	}
 	
