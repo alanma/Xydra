@@ -113,6 +113,10 @@ public class MemoryStringIDProvider implements XIdProvider {
         if(uriString == null) {
             throw new IllegalArgumentException("'" + uriString + "' is null - cannot create XId");
         }
+        if(uriString.length() > XIdProvider.MAX_LENGTH) {
+            throw new IllegalArgumentException("'" + uriString + "' is too long (over "
+                    + XIdProvider.MAX_LENGTH + ") - cannot create XId");
+        }
         if(!isValidId(uriString)) {
             throw new IllegalArgumentException("'" + uriString
                     + "' is not a valid XML name or contains ':', cannot create XId");

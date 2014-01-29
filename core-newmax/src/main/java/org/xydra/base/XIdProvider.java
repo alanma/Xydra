@@ -12,6 +12,12 @@ import org.xydra.annotations.NeverNull;
 public interface XIdProvider {
     
     /**
+     * Maximal length of XIds. 100 characters long = maximal compatibility with
+     * all back-ends such as Google AppEngine.
+     */
+    byte MAX_LENGTH = 100;
+    
+    /**
      * @return a new random unique {@link XId}
      */
     XId createUniqueId();
@@ -73,6 +79,7 @@ public interface XIdProvider {
      * @return a new unique {@link XId} object calculated from the given name
      * @throws IllegalArgumentException if the given name is not a valid
      *             {@link XId} string
+     * @see #MAX_LENGTH
      */
     XId fromString(String name) throws IllegalArgumentException;
     
