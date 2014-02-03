@@ -36,7 +36,7 @@ public class SharedTypeSystem {
         return mapping;
     }
     
-    public static boolean isCollection(BaseTypeSpec baseType) {
+    public static boolean isCollection(IBaseType baseType) {
         return baseType.getPackageName().equals("java.util")
                 && (baseType.getSimpleName().equals("Set")
                         || baseType.getSimpleName().equals("List") || baseType.getSimpleName()

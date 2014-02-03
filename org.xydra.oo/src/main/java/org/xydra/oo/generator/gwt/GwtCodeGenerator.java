@@ -30,6 +30,8 @@ import org.xydra.oo.runtime.java.XydraReflectionUtils;
 import org.xydra.oo.runtime.shared.BaseTypeSpec;
 import org.xydra.oo.runtime.shared.CollectionProxy;
 import org.xydra.oo.runtime.shared.CollectionProxy.IComponentTransformer;
+import org.xydra.oo.runtime.shared.IBaseType;
+import org.xydra.oo.runtime.shared.IType;
 import org.xydra.oo.runtime.shared.ListProxy;
 import org.xydra.oo.runtime.shared.SetProxy;
 import org.xydra.oo.runtime.shared.SharedTypeMapping;
@@ -214,14 +216,14 @@ public class GwtCodeGenerator extends Generator {
     
     private static void addCollectionGetter(String gwtPackagename, String gwtSimpleName,
             ClassSpec c, MethodSpec methodSpec, String fieldId) {
-        TypeSpec returnType = methodSpec.returnType;
+        IType returnType = methodSpec.returnType;
         
         /** <J> java base type */
         /** <C> java component type */
-        BaseTypeSpec typeJ = returnType.getBaseType();
+        IBaseType typeJ = returnType.getBaseType();
         String gJ = typeJ.getCanonicalName();
         String sJ = typeJ.getSimpleName();
-        BaseTypeSpec typeC = returnType.getComponentType();
+        IBaseType typeC = returnType.getComponentType();
         String gC = typeC.getCanonicalName();
         String sC = typeC.getSimpleName();
         
@@ -246,8 +248,8 @@ public class GwtCodeGenerator extends Generator {
         }
         c.addRequiredImports(classX);
         c.addRequiredImports(classT);
-        BaseTypeSpec typeX = JavaTypeSpecUtils.createBaseTypeSpec(classX);
-        BaseTypeSpec typeT = JavaTypeSpecUtils.createBaseTypeSpec(classT);
+        IBaseType typeX = JavaTypeSpecUtils.createBaseTypeSpec(classX);
+        IBaseType typeT = JavaTypeSpecUtils.createBaseTypeSpec(classT);
         String gX = typeX.getCanonicalName();
         String gT = typeT.getCanonicalName();
         
@@ -255,8 +257,8 @@ public class GwtCodeGenerator extends Generator {
         // XIdSetValue,XAddressSetValue,Set<XAddress>,XAddress
         
         // CODE: ITransformer<X, T extends XValue, J, C> {
-        methodSpec.sourceLines.add("ITransformer<" + gX + "," + gT + "," + gJ + "<" + gC + ">,"
-                + gC + "> t = new CollectionProxy.ITransformer<" + gX + "," + gT + "," + gJ + "<"
+        methodSpec.sourceLines.add("IComponentTransformer<" + gX + "," + gT + "," + gJ + "<" + gC
+                + ">," + gC + "> t = new IComponentTransformer<" + gX + "," + gT + "," + gJ + "<"
                 + gC + ">," + gC + ">() {");
         
         // CODE: C toJavaComponent(T componentType);
@@ -347,8 +349,8 @@ public class GwtCodeGenerator extends Generator {
     private static void addGetter(String gwtPackagename, ClassSpec classSpec, MethodSpec m,
             String fieldId, String generatedFrom) {
         
-        TypeSpec returnType = m.getReturnType();
-        BaseTypeSpec baseType = returnType.getBaseType();
+        IType returnType = m.getReturnType();
+        IBaseType baseType = returnType.getBaseType();
         SharedTypeMapping mapping = SharedTypeMapping.getMapping(returnType);
         
         /* 1) Mapped types */
@@ -450,6 +452,7 @@ public class GwtCodeGenerator extends Generator {
         classSpec.addRequiredImports(XValueJavaUtils.class);
     }
     
+    // all setters return the class itself for more fluent api usage
     private static void addSetter(String gwtPackagename, ClassSpec c, MethodSpec m, String fieldId,
             TypeSpec type, String generatedFrom) {
         m.addParam(fieldId, type, generatedFrom);
@@ -460,6 +463,7 @@ public class GwtCodeGenerator extends Generator {
                 /* 1.1) xydra types */
                 m.sourceLines.add("this.oop.setValue(\"" + fieldId + "\", " + fieldId + ");");
                 m.setComment("Trivial xydra type");
+                m.sourceLines.add("return this;");
                 return;
             } else {
                 /* 1.2) other types with a mapping */
@@ -480,6 +484,7 @@ public class GwtCodeGenerator extends Generator {
                 c.addRequiredImports(SharedTypeMapping.class);
                 c.addRequiredImports(mapping.getXydraBaseType());
                 m.sourceLines.add("this.oop.setValue(\"" + fieldId + "\", x);");
+                m.sourceLines.add("return this;");
                 return;
             }
         }
@@ -490,6 +495,7 @@ public class GwtCodeGenerator extends Generator {
                     + fieldId + "\"), " + fieldId + ".getId()" + ");");
             c.addRequiredImports(XValueJavaUtils.class);
             m.setComment("Proxy types");
+            m.sourceLines.add("return this;");
             return;
         }
         
@@ -504,6 +510,7 @@ public class GwtCodeGenerator extends Generator {
             m.addSourceLine("return " + methodCallSpec.toMethodCall() + ";");
             m.setComment("Collections of built-in Xydra types");
             c.addRequiredImports(XValueJavaUtils.class);
+            m.sourceLines.add("return this;");
             return;
         }
         
@@ -513,6 +520,7 @@ public class GwtCodeGenerator extends Generator {
                     + fieldId + "\"), " + fieldId + ".name()" + ");");
             m.setComment("Enum types");
             c.addRequiredImports(XValueJavaUtils.class);
+            m.sourceLines.add("return this;");
             return;
         }
         
@@ -521,13 +529,14 @@ public class GwtCodeGenerator extends Generator {
                 + "(this.oop.getXObject(), XX.toId(\"" + fieldId + "\"), " + fieldId + ");");
         m.setComment("Java types corresponding to Xydra types");
         c.addRequiredImports(XValueJavaUtils.class);
+        m.sourceLines.add("return this;");
     }
     
     /**
      * @param returnType
      * @return a name starting with "get" or throws an exception @NeverNull
      */
-    private static String getPropertyName(TypeSpec typeSpec) {
+    private static String getPropertyName(IType typeSpec) {
         String s = null;
         ValueType valueType = XydraReflectionUtils.getValueType(typeSpec);
         if(valueType != null) {

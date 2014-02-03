@@ -7,9 +7,9 @@ import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.value.ValueType;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
-import org.xydra.oo.runtime.shared.BaseTypeSpec;
+import org.xydra.oo.runtime.shared.IBaseType;
+import org.xydra.oo.runtime.shared.IType;
 import org.xydra.oo.runtime.shared.SharedTypeMapping;
-import org.xydra.oo.runtime.shared.TypeSpec;
 
 
 /**
@@ -68,7 +68,7 @@ public class XydraReflectionUtils {
      * @return true iff the given BaseTypeSpec represents a Xydra interface that
      *         is a known Xydra value type, i.e. a subclass of XValue.
      */
-    public static boolean isXydraValueType(BaseTypeSpec type) {
+    public static boolean isXydraValueType(IBaseType type) {
         Class<?> c;
         try {
             c = Class.forName(type.getCanonicalName());
@@ -92,11 +92,11 @@ public class XydraReflectionUtils {
         || XydraReflectionUtils.javaMappedSingleObjectTypes.contains(type);
     }
     
-    public static ValueType getValueType(TypeSpec typeSpec) {
+    public static ValueType getValueType(IType typeSpec) {
         return SharedTypeMapping.getValueType(typeSpec.getBaseType(), typeSpec.getComponentType());
     }
     
-    public static ValueType getValueType(BaseTypeSpec baseType) {
+    public static ValueType getValueType(IBaseType baseType) {
         return SharedTypeMapping.getValueType(baseType, null);
     }
     

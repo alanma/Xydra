@@ -12,6 +12,8 @@ import java.util.TreeSet;
 import org.xydra.annotations.CanBeNull;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.oo.runtime.shared.BaseTypeSpec;
+import org.xydra.oo.runtime.shared.IBaseType;
+import org.xydra.oo.runtime.shared.IType;
 import org.xydra.oo.runtime.shared.TypeSpec;
 
 import com.google.gwt.dom.client.Style.Float;
@@ -26,20 +28,20 @@ import com.google.gwt.dom.client.Style.Float;
 @RunsInGWT(false)
 public class JavaReflectionUtils {
     
-    public static final BaseTypeSpec BASETYPE_boolean = JavaTypeSpecUtils
+    public static final IBaseType BASETYPE_boolean = JavaTypeSpecUtils
             .createBaseTypeSpec(boolean.class);
-    public static final BaseTypeSpec BASETYPE_byte = JavaTypeSpecUtils
+    public static final IBaseType BASETYPE_byte = JavaTypeSpecUtils
             .createBaseTypeSpec(byte.class);
-    public static final BaseTypeSpec BASETYPE_char = JavaTypeSpecUtils
+    public static final IBaseType BASETYPE_char = JavaTypeSpecUtils
             .createBaseTypeSpec(char.class);
-    public static final BaseTypeSpec BASETYPE_double = JavaTypeSpecUtils
+    public static final IBaseType BASETYPE_double = JavaTypeSpecUtils
             .createBaseTypeSpec(double.class);
-    public static final BaseTypeSpec BASETYPE_float = JavaTypeSpecUtils
+    public static final IBaseType BASETYPE_float = JavaTypeSpecUtils
             .createBaseTypeSpec(float.class);
-    public static final BaseTypeSpec BASETYPE_int = JavaTypeSpecUtils.createBaseTypeSpec(int.class);
-    public static final BaseTypeSpec BASETYPE_long = JavaTypeSpecUtils
+    public static final IBaseType BASETYPE_int = JavaTypeSpecUtils.createBaseTypeSpec(int.class);
+    public static final IBaseType BASETYPE_long = JavaTypeSpecUtils
             .createBaseTypeSpec(long.class);
-    public static final BaseTypeSpec BASETYPE_short = JavaTypeSpecUtils
+    public static final IBaseType BASETYPE_short = JavaTypeSpecUtils
             .createBaseTypeSpec(short.class);
     
     /**
@@ -88,7 +90,8 @@ public class JavaReflectionUtils {
      * @param baseTypeSpec
      * @return true iff array or any implementation of java.util.Collection
      */
-    public static boolean isJavaCollectionType(BaseTypeSpec baseTypeSpec) {
+    public static boolean isJavaCollectionType(IBaseType baseTypeSpec) {
+        assert baseTypeSpec != null;
         if(baseTypeSpec.isArray())
             return true;
         
@@ -118,11 +121,11 @@ public class JavaReflectionUtils {
         return set;
     }
     
-    public static boolean isJavaCollectionType(TypeSpec type) {
+    public static boolean isJavaCollectionType(IType type) {
         return isJavaCollectionType(type.getBaseType());
     }
     
-    public static boolean isJavaPrimitiveType(BaseTypeSpec baseType) {
+    public static boolean isJavaPrimitiveType(IBaseType baseType) {
         return baseType.getPackageName() == null;
     }
     
@@ -222,7 +225,7 @@ public class JavaReflectionUtils {
         throw new IllegalArgumentException("Not known primitive type: " + primitiveType);
     }
     
-    public static Class<?> forName(BaseTypeSpec baseTypeSpec) {
+    public static Class<?> forName(IBaseType baseTypeSpec) {
         if(baseTypeSpec == null)
             return null;
         
@@ -258,7 +261,7 @@ public class JavaReflectionUtils {
                 && JavaReflectionUtils.equalsClass(type.getComponentType(), componentType);
     }
     
-    public static boolean isEnumType(TypeSpec type) {
+    public static boolean isEnumType(IType type) {
         assert type != null;
         if(type.getComponentType() != null)
             return false;
@@ -274,7 +277,7 @@ public class JavaReflectionUtils {
      * @param type
      * @return null or primitive type
      */
-    public static BaseTypeSpec getPrimitiveTypeForWrapperClass(BaseTypeSpec type) {
+    public static IBaseType getPrimitiveTypeForWrapperClass(IBaseType type) {
         if(JavaReflectionUtils.equalsClass(type, Boolean.class))
             return BASETYPE_boolean;
         if(JavaReflectionUtils.equalsClass(type, Byte.class))
@@ -294,7 +297,7 @@ public class JavaReflectionUtils {
         return null;
     }
     
-    public static boolean equalsClass(TypeSpec t, Class<?> c) {
+    public static boolean equalsClass(IType t, Class<?> c) {
         if(c.isArray()) {
             return t.isArray()
                     && JavaReflectionUtils.equalsClass(t.getComponentType(), c.getComponentType());
@@ -303,7 +306,7 @@ public class JavaReflectionUtils {
         }
     }
     
-    public static boolean equalsClass(BaseTypeSpec b, Class<?> c) {
+    public static boolean equalsClass(IBaseType b, Class<?> c) {
         assert c != null;
         return (c.getPackage() == null ? b.getPackageName() == null : c.getPackage().getName()
                 .equals(b.getPackageName()))

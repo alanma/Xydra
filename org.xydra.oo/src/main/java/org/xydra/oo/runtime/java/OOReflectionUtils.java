@@ -16,10 +16,9 @@ import org.xydra.base.value.XValue;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.oo.generator.codespec.NameUtils;
-import org.xydra.oo.runtime.shared.BaseTypeSpec;
+import org.xydra.oo.runtime.shared.IBaseType;
+import org.xydra.oo.runtime.shared.IType;
 import org.xydra.oo.runtime.shared.SharedTypeMapping;
-import org.xydra.oo.runtime.shared.TypeSpec;
-import org.xydra.oo.testgen.alltypes.shared.IPerson;
 
 
 /**
@@ -140,7 +139,7 @@ public class OOReflectionUtils {
      * @return true iff type is mapped indirectly via an XId to the Xydra type
      *         system (has an 'XId getId()' method)
      */
-    public static boolean hasAnId(BaseTypeSpec baseTypeSpec) {
+    public static boolean hasAnId(IBaseType baseTypeSpec) {
         Class<?> c = JavaReflectionUtils.forName(baseTypeSpec);
         if(c == null)
             return false;
@@ -183,7 +182,7 @@ public class OOReflectionUtils {
         }
     }
     
-    public static boolean isProxyType(TypeSpec type) {
+    public static boolean isProxyType(IType type) {
         assert type != null;
         try {
             Class<?> c = Class.forName(type.getBaseType().getCanonicalName());
@@ -193,7 +192,7 @@ public class OOReflectionUtils {
         }
     }
     
-    public static boolean isProxyType(BaseTypeSpec baseTypeSpec) {
+    public static boolean isProxyType(IBaseType baseTypeSpec) {
         Class<?> c = JavaReflectionUtils.forName(baseTypeSpec);
         if(c == null)
             return false;
@@ -222,9 +221,6 @@ public class OOReflectionUtils {
             System.out.println(v.name());
         }
         assert OOReflectionUtils.isTranslatableSingleType(byte[].class);
-        
-        assert !XydraReflectionUtils.isXydraValueType(JavaTypeSpecUtils
-                .createBaseTypeSpec(IPerson.class));
         assert XydraReflectionUtils.isXydraValueType(JavaTypeSpecUtils
                 .createBaseTypeSpec(XId.class));
     }

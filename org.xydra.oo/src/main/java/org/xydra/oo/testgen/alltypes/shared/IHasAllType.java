@@ -3,7 +3,6 @@ package org.xydra.oo.testgen.alltypes.shared;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
-
 import org.xydra.base.IHasXId;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
@@ -27,8 +26,12 @@ import org.xydra.base.value.XStringListValue;
 import org.xydra.base.value.XStringSetValue;
 import org.xydra.base.value.XStringValue;
 import org.xydra.oo.Field;
+import org.xydra.oo.testgen.alltypes.shared.Colors;
+import org.xydra.oo.testgen.alltypes.shared.IHasAllType;
+import org.xydra.oo.testgen.alltypes.shared.IPerson;
+import org.xydra.oo.testgen.alltypes.shared.MyLongBasedType;
 
-/** Generated on Fri Dec 27 13:29:45 CET 2013 by SpecWriter, a part of xydra.org:oo */
+/** Generated on Mon Feb 03 22:56:14 CET 2014 by SpecWriter, a part of xydra.org:oo */
 public interface IHasAllType extends IHasXId {
 
     /** 
@@ -517,9 +520,10 @@ public interface IHasAllType extends IHasXId {
      *  
      * @param color the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType'] 
+     * @return ... 
      */
     @Field("color")
-    void setColor(Colors color);
+    IHasAllType setColor(Colors color);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -527,9 +531,10 @@ public interface IHasAllType extends IHasXId {
      *  
      * @param jBooleanarray the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType'] 
+     * @return ... 
      */
     @Field("jBooleanarray")
-    void setJBooleanarray(boolean[] jBooleanarray);
+    IHasAllType setJBooleanarray(boolean[] jBooleanarray);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -537,9 +542,10 @@ public interface IHasAllType extends IHasXId {
      *  
      * @param jBoolean the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType'] 
+     * @return ... 
      */
     @Field("jBoolean")
-    void setJBoolean(Boolean jBoolean);
+    IHasAllType setJBoolean(Boolean jBoolean);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -547,9 +553,10 @@ public interface IHasAllType extends IHasXId {
      *  
      * @param jDoublearray the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType'] 
+     * @return ... 
      */
     @Field("jDoublearray")
-    void setJDoublearray(double[] jDoublearray);
+    IHasAllType setJDoublearray(double[] jDoublearray);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -557,9 +564,10 @@ public interface IHasAllType extends IHasXId {
      *  
      * @param jDouble the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType'] 
+     * @return ... 
      */
     @Field("jDouble")
-    void setJDouble(Double jDouble);
+    IHasAllType setJDouble(Double jDouble);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -567,9 +575,10 @@ public interface IHasAllType extends IHasXId {
      *  
      * @param jIntegerarray the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType'] 
+     * @return ... 
      */
     @Field("jIntegerarray")
-    void setJIntegerarray(int[] jIntegerarray);
+    IHasAllType setJIntegerarray(int[] jIntegerarray);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -577,9 +586,10 @@ public interface IHasAllType extends IHasXId {
      *  
      * @param jInteger the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType'] 
+     * @return ... 
      */
     @Field("jInteger")
-    void setJInteger(Integer jInteger);
+    IHasAllType setJInteger(Integer jInteger);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -587,9 +597,10 @@ public interface IHasAllType extends IHasXId {
      *  
      * @param jLongarray the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType'] 
+     * @return ... 
      */
     @Field("jLongarray")
-    void setJLongarray(long[] jLongarray);
+    IHasAllType setJLongarray(long[] jLongarray);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -597,9 +608,10 @@ public interface IHasAllType extends IHasXId {
      *  
      * @param jLong the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType'] 
+     * @return ... 
      */
     @Field("jLong")
-    void setJLong(Long jLong);
+    IHasAllType setJLong(Long jLong);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -607,9 +619,10 @@ public interface IHasAllType extends IHasXId {
      *  
      * @param jString the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType'] 
+     * @return ... 
      */
     @Field("jString")
-    void setJString(String jString);
+    IHasAllType setJString(String jString);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -617,9 +630,10 @@ public interface IHasAllType extends IHasXId {
      *  
      * @param jaddressarray the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType'] 
+     * @return ... 
      */
     @Field("jaddressarray")
-    void setJaddressarray(XAddress[] jaddressarray);
+    IHasAllType setJaddressarray(XAddress[] jaddressarray);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -627,9 +641,10 @@ public interface IHasAllType extends IHasXId {
      *  
      * @param jbinary the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType'] 
+     * @return ... 
      */
     @Field("jbinary")
-    void setJbinary(byte[] jbinary);
+    IHasAllType setJbinary(byte[] jbinary);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -637,9 +652,10 @@ public interface IHasAllType extends IHasXId {
      *  
      * @param jbooleanarray the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType'] 
+     * @return ... 
      */
     @Field("jbooleanarray")
-    void setJbooleanarray(boolean[] jbooleanarray);
+    IHasAllType setJbooleanarray(boolean[] jbooleanarray);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -647,9 +663,10 @@ public interface IHasAllType extends IHasXId {
      *  
      * @param jboolean the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType'] 
+     * @return ... 
      */
     @Field("jboolean")
-    void setJboolean(boolean jboolean);
+    IHasAllType setJboolean(boolean jboolean);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -657,9 +674,10 @@ public interface IHasAllType extends IHasXId {
      *  
      * @param jdoublearray the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType'] 
+     * @return ... 
      */
     @Field("jdoublearray")
-    void setJdoublearray(double[] jdoublearray);
+    IHasAllType setJdoublearray(double[] jdoublearray);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -667,9 +685,10 @@ public interface IHasAllType extends IHasXId {
      *  
      * @param jdouble the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType'] 
+     * @return ... 
      */
     @Field("jdouble")
-    void setJdouble(double jdouble);
+    IHasAllType setJdouble(double jdouble);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -677,9 +696,10 @@ public interface IHasAllType extends IHasXId {
      *  
      * @param jiddarray the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType'] 
+     * @return ... 
      */
     @Field("jiddarray")
-    void setJiddarray(XId[] jiddarray);
+    IHasAllType setJiddarray(XId[] jiddarray);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -687,9 +707,10 @@ public interface IHasAllType extends IHasXId {
      *  
      * @param jintarray the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType'] 
+     * @return ... 
      */
     @Field("jintarray")
-    void setJintarray(int[] jintarray);
+    IHasAllType setJintarray(int[] jintarray);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -697,9 +718,10 @@ public interface IHasAllType extends IHasXId {
      *  
      * @param jint the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType'] 
+     * @return ... 
      */
     @Field("jint")
-    void setJint(int jint);
+    IHasAllType setJint(int jint);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -707,9 +729,10 @@ public interface IHasAllType extends IHasXId {
      *  
      * @param jlongarray the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType'] 
+     * @return ... 
      */
     @Field("jlongarray")
-    void setJlongarray(long[] jlongarray);
+    IHasAllType setJlongarray(long[] jlongarray);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -717,9 +740,10 @@ public interface IHasAllType extends IHasXId {
      *  
      * @param jlong the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType'] 
+     * @return ... 
      */
     @Field("jlong")
-    void setJlong(long jlong);
+    IHasAllType setJlong(long jlong);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -727,9 +751,10 @@ public interface IHasAllType extends IHasXId {
      *  
      * @param jstringarray the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType'] 
+     * @return ... 
      */
     @Field("jstringarray")
-    void setJstringarray(String[] jstringarray);
+    IHasAllType setJstringarray(String[] jstringarray);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -737,9 +762,10 @@ public interface IHasAllType extends IHasXId {
      *  
      * @param myLongBasedType the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType'] 
+     * @return ... 
      */
     @Field("myLongBasedType")
-    void setMyLongBasedType(MyLongBasedType myLongBasedType);
+    IHasAllType setMyLongBasedType(MyLongBasedType myLongBasedType);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -747,9 +773,10 @@ public interface IHasAllType extends IHasXId {
      *  
      * @param partner the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType'] 
+     * @return ... 
      */
     @Field("partner")
-    void setPartner(IPerson partner);
+    IHasAllType setPartner(IPerson partner);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -757,9 +784,10 @@ public interface IHasAllType extends IHasXId {
      *  
      * @param xaddresslist the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType'] 
+     * @return ... 
      */
     @Field("xaddresslist")
-    void setXaddresslist(XAddressListValue xaddresslist);
+    IHasAllType setXaddresslist(XAddressListValue xaddresslist);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -767,9 +795,10 @@ public interface IHasAllType extends IHasXId {
      *  
      * @param xaddressset the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType'] 
+     * @return ... 
      */
     @Field("xaddressset")
-    void setXaddressset(XAddressSetValue xaddressset);
+    IHasAllType setXaddressset(XAddressSetValue xaddressset);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -777,9 +806,10 @@ public interface IHasAllType extends IHasXId {
      *  
      * @param xaddresssortedset the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType'] 
+     * @return ... 
      */
     @Field("xaddresssortedset")
-    void setXaddresssortedset(XAddressSortedSetValue xaddresssortedset);
+    IHasAllType setXaddresssortedset(XAddressSortedSetValue xaddresssortedset);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -787,9 +817,10 @@ public interface IHasAllType extends IHasXId {
      *  
      * @param xaddress the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType'] 
+     * @return ... 
      */
     @Field("xaddress")
-    void setXaddress(XAddress xaddress);
+    IHasAllType setXaddress(XAddress xaddress);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -797,9 +828,10 @@ public interface IHasAllType extends IHasXId {
      *  
      * @param xbinary the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType'] 
+     * @return ... 
      */
     @Field("xbinary")
-    void setXbinary(XBinaryValue xbinary);
+    IHasAllType setXbinary(XBinaryValue xbinary);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -807,9 +839,10 @@ public interface IHasAllType extends IHasXId {
      *  
      * @param xbooleanlist the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType'] 
+     * @return ... 
      */
     @Field("xbooleanlist")
-    void setXbooleanlist(XBooleanListValue xbooleanlist);
+    IHasAllType setXbooleanlist(XBooleanListValue xbooleanlist);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -817,9 +850,10 @@ public interface IHasAllType extends IHasXId {
      *  
      * @param xboolean the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType'] 
+     * @return ... 
      */
     @Field("xboolean")
-    void setXboolean(XBooleanValue xboolean);
+    IHasAllType setXboolean(XBooleanValue xboolean);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -827,9 +861,10 @@ public interface IHasAllType extends IHasXId {
      *  
      * @param xdoublelist the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType'] 
+     * @return ... 
      */
     @Field("xdoublelist")
-    void setXdoublelist(XDoubleListValue xdoublelist);
+    IHasAllType setXdoublelist(XDoubleListValue xdoublelist);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -837,9 +872,10 @@ public interface IHasAllType extends IHasXId {
      *  
      * @param xdouble the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType'] 
+     * @return ... 
      */
     @Field("xdouble")
-    void setXdouble(XDoubleValue xdouble);
+    IHasAllType setXdouble(XDoubleValue xdouble);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -847,9 +883,10 @@ public interface IHasAllType extends IHasXId {
      *  
      * @param xidlist the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType'] 
+     * @return ... 
      */
     @Field("xidlist")
-    void setXidlist(XIdListValue xidlist);
+    IHasAllType setXidlist(XIdListValue xidlist);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -857,9 +894,10 @@ public interface IHasAllType extends IHasXId {
      *  
      * @param xidset the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType'] 
+     * @return ... 
      */
     @Field("xidset")
-    void setXidset(XIdSetValue xidset);
+    IHasAllType setXidset(XIdSetValue xidset);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -867,9 +905,10 @@ public interface IHasAllType extends IHasXId {
      *  
      * @param xidsortedset the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType'] 
+     * @return ... 
      */
     @Field("xidsortedset")
-    void setXidsortedset(XIdSortedSetValue xidsortedset);
+    IHasAllType setXidsortedset(XIdSortedSetValue xidsortedset);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -877,9 +916,10 @@ public interface IHasAllType extends IHasXId {
      *  
      * @param xid the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType'] 
+     * @return ... 
      */
     @Field("xid")
-    void setXid(XId xid);
+    IHasAllType setXid(XId xid);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -887,9 +927,10 @@ public interface IHasAllType extends IHasXId {
      *  
      * @param xintegerlist the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType'] 
+     * @return ... 
      */
     @Field("xintegerlist")
-    void setXintegerlist(XIntegerListValue xintegerlist);
+    IHasAllType setXintegerlist(XIntegerListValue xintegerlist);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -897,9 +938,10 @@ public interface IHasAllType extends IHasXId {
      *  
      * @param xinteger the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType'] 
+     * @return ... 
      */
     @Field("xinteger")
-    void setXinteger(XIntegerValue xinteger);
+    IHasAllType setXinteger(XIntegerValue xinteger);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -907,9 +949,10 @@ public interface IHasAllType extends IHasXId {
      *  
      * @param xlonglist the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType'] 
+     * @return ... 
      */
     @Field("xlonglist")
-    void setXlonglist(XLongListValue xlonglist);
+    IHasAllType setXlonglist(XLongListValue xlonglist);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -917,9 +960,10 @@ public interface IHasAllType extends IHasXId {
      *  
      * @param xlong the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType'] 
+     * @return ... 
      */
     @Field("xlong")
-    void setXlong(XLongValue xlong);
+    IHasAllType setXlong(XLongValue xlong);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -927,9 +971,10 @@ public interface IHasAllType extends IHasXId {
      *  
      * @param xstringlist the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType'] 
+     * @return ... 
      */
     @Field("xstringlist")
-    void setXstringlist(XStringListValue xstringlist);
+    IHasAllType setXstringlist(XStringListValue xstringlist);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -937,9 +982,10 @@ public interface IHasAllType extends IHasXId {
      *  
      * @param xstringset the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType'] 
+     * @return ... 
      */
     @Field("xstringset")
-    void setXstringset(XStringSetValue xstringset);
+    IHasAllType setXstringset(XStringSetValue xstringset);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -947,8 +993,9 @@ public interface IHasAllType extends IHasXId {
      *  
      * @param xstring the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.HasAllType'] 
+     * @return ... 
      */
     @Field("xstring")
-    void setXstring(XStringValue xstring);
+    IHasAllType setXstring(XStringValue xstring);
 
 }

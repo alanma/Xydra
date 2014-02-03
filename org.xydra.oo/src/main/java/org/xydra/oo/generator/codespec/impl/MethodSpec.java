@@ -7,12 +7,13 @@ import java.util.Set;
 import org.xydra.oo.generator.codespec.IMember;
 import org.xydra.oo.runtime.java.JavaReflectionUtils;
 import org.xydra.oo.runtime.java.JavaTypeSpecUtils;
+import org.xydra.oo.runtime.shared.IType;
 import org.xydra.oo.runtime.shared.TypeSpec;
 
 
 public class MethodSpec extends AbstractConstructorOrMethodSpec implements IMember {
     
-    public TypeSpec returnType;
+    public IType returnType;
     
     /**
      * @param method use to take name, returnType and returnType.componentType
@@ -38,9 +39,14 @@ public class MethodSpec extends AbstractConstructorOrMethodSpec implements IMemb
         this.returnType = new TypeSpec(typePackageName, typeName, generatedFrom);
     }
     
-    MethodSpec(String name, TypeSpec t, String generatedFrom) {
+    /**
+     * @param name
+     * @param returnType
+     * @param generatedFrom
+     */
+    MethodSpec(String name, IType returnType, String generatedFrom) {
         super(name, generatedFrom);
-        this.returnType = t;
+        this.returnType = returnType;
     }
     
     public static MethodSpec createVoid(String name, String generatedFrom) {
@@ -58,7 +64,7 @@ public class MethodSpec extends AbstractConstructorOrMethodSpec implements IMemb
         return fs;
     }
     
-    public FieldSpec addParam(String name, TypeSpec typeSpec, String generatedFrom) {
+    public FieldSpec addParam(String name, IType typeSpec, String generatedFrom) {
         FieldSpec fs = new FieldSpec(name, typeSpec, generatedFrom);
         this.params.add(fs);
         return fs;
@@ -87,7 +93,7 @@ public class MethodSpec extends AbstractConstructorOrMethodSpec implements IMemb
         return s;
     }
     
-    public TypeSpec getReturnType() {
+    public IType getReturnType() {
         return this.returnType;
     }
     

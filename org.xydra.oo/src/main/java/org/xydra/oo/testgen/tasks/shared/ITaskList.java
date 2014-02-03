@@ -1,12 +1,13 @@
 package org.xydra.oo.testgen.tasks.shared;
 
 import java.util.List;
-
 import org.xydra.base.XId;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.oo.Field;
+import org.xydra.oo.testgen.tasks.shared.IBaseList;
+import org.xydra.oo.testgen.tasks.shared.ITask;
 
-/** Generated on Fri Dec 27 13:29:45 CET 2013 by SpecWriter, a part of xydra.org:oo */
+/** Generated on Mon Feb 03 22:56:15 CET 2014 by SpecWriter, a part of xydra.org:oo */
 public interface ITaskList extends IBaseList {
 
     /** 

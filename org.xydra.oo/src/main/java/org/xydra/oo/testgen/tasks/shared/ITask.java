@@ -1,13 +1,13 @@
 package org.xydra.oo.testgen.tasks.shared;
 
 import java.util.List;
-
 import org.xydra.base.IHasXId;
 import org.xydra.base.XId;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.oo.Field;
+import org.xydra.oo.testgen.tasks.shared.ITask;
 
-/** Generated on Fri Dec 27 13:29:45 CET 2013 by SpecWriter, a part of xydra.org:oo */
+/** Generated on Mon Feb 03 22:56:15 CET 2014 by SpecWriter, a part of xydra.org:oo */
 public interface ITask extends IHasXId {
 
     /** 
@@ -95,9 +95,10 @@ public interface ITask extends IHasXId {
      *  
      * @param checked the value to set [generated from:  
      * 'org.xydra.oo.testspecs.TasksSpec.Task'] 
+     * @return ... 
      */
     @Field("checked")
-    void setChecked(boolean checked);
+    ITask setChecked(boolean checked);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -105,9 +106,10 @@ public interface ITask extends IHasXId {
      *  
      * @param completionDate the value to set [generated from:  
      * 'org.xydra.oo.testspecs.TasksSpec.Task'] 
+     * @return ... 
      */
     @Field("completionDate")
-    void setCompletionDate(long completionDate);
+    ITask setCompletionDate(long completionDate);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -115,9 +117,10 @@ public interface ITask extends IHasXId {
      *  
      * @param dueDate the value to set [generated from:  
      * 'org.xydra.oo.testspecs.TasksSpec.Task'] 
+     * @return ... 
      */
     @Field("dueDate")
-    void setDueDate(long dueDate);
+    ITask setDueDate(long dueDate);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -125,9 +128,10 @@ public interface ITask extends IHasXId {
      *  
      * @param note the value to set [generated from:  
      * 'org.xydra.oo.testspecs.TasksSpec.Task'] 
+     * @return ... 
      */
     @Field("note")
-    void setNote(String note);
+    ITask setNote(String note);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -135,9 +139,10 @@ public interface ITask extends IHasXId {
      *  
      * @param rECENTLY_COMPLETED the value to set [generated from:  
      * 'org.xydra.oo.testspecs.TasksSpec.Task'] 
+     * @return ... 
      */
     @Field("rECENTLY_COMPLETED")
-    void setRECENTLY_COMPLETED(long rECENTLY_COMPLETED);
+    ITask setRECENTLY_COMPLETED(long rECENTLY_COMPLETED);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -145,9 +150,10 @@ public interface ITask extends IHasXId {
      *  
      * @param remindDate the value to set [generated from:  
      * 'org.xydra.oo.testspecs.TasksSpec.Task'] 
+     * @return ... 
      */
     @Field("remindDate")
-    void setRemindDate(long remindDate);
+    ITask setRemindDate(long remindDate);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -155,9 +161,10 @@ public interface ITask extends IHasXId {
      *  
      * @param starred the value to set [generated from:  
      * 'org.xydra.oo.testspecs.TasksSpec.Task'] 
+     * @return ... 
      */
     @Field("starred")
-    void setStarred(boolean starred);
+    ITask setStarred(boolean starred);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -165,9 +172,10 @@ public interface ITask extends IHasXId {
      *  
      * @param title the value to set [generated from:  
      * 'org.xydra.oo.testspecs.TasksSpec.Task'] 
+     * @return ... 
      */
     @Field("title")
-    void setTitle(String title);
+    ITask setTitle(String title);
 
     /** 
      *  [generated from: 'org.xydra.oo.testspecs.TasksSpec.Task'] 

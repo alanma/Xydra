@@ -1,7 +1,7 @@
 package org.xydra.oo.testgen.tasks.java;
 
+import java.lang.Override;
 import java.lang.reflect.Proxy;
-
 import org.xydra.base.XId;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.oo.runtime.java.OOJavaOnlyProxy;
@@ -14,7 +14,7 @@ import org.xydra.oo.testgen.tasks.shared.ITask;
 import org.xydra.oo.testgen.tasks.shared.ITaskList;
 import org.xydra.oo.testgen.tasks.shared.IUser;
 
-/** Generated on Fri Dec 27 13:29:45 CET 2013 by SpecWriter, a part of xydra.org:oo */
+/** Generated on Mon Feb 03 22:56:15 CET 2014 by SpecWriter, a part of xydra.org:oo */
 public class JavaFactory extends AbstractSharedFactory {
 
     /** 

@@ -4,8 +4,9 @@ import org.xydra.base.IHasXId;
 import org.xydra.base.XId;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.oo.Field;
+import org.xydra.oo.testgen.alltypes.shared.IPerson;
 
-/** Generated on Fri Dec 27 13:29:45 CET 2013 by SpecWriter, a part of xydra.org:oo */
+/** Generated on Mon Feb 03 22:56:14 CET 2014 by SpecWriter, a part of xydra.org:oo */
 public interface IPerson extends IHasXId {
 
     /** 
@@ -38,9 +39,10 @@ public interface IPerson extends IHasXId {
      *  
      * @param age the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.Person'] 
+     * @return ... 
      */
     @Field("age")
-    void setAge(int age);
+    IPerson setAge(int age);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -48,8 +50,9 @@ public interface IPerson extends IHasXId {
      *  
      * @param name the value to set [generated from:  
      * 'org.xydra.oo.testspecs.AllTypesSpec.Person'] 
+     * @return ... 
      */
     @Field("name")
-    void setName(String name);
+    IPerson setName(String name);
 
 }

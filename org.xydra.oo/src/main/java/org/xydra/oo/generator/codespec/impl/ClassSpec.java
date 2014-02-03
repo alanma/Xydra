@@ -2,29 +2,45 @@ package org.xydra.oo.generator.codespec.impl;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.xydra.annotations.CanBeNull;
+import org.xydra.annotations.NeverNull;
 import org.xydra.oo.generator.codespec.IMember;
-import org.xydra.oo.runtime.shared.TypeSpec;
+import org.xydra.oo.runtime.shared.IBaseType;
+import org.xydra.oo.runtime.shared.IType;
 
 
+/**
+ * state: required imports, implemented intefaces, kind, members, package,
+ * superclass
+ * 
+ * @author xamde
+ */
 public class ClassSpec extends NamedElement {
     
     /** Make sure to add also as required imports */
     public List<String> implementedInterfaces = new ArrayList<String>();
     
+    /** "class" or "interface" or "abstract class" */
+    @NeverNull
     public String kind;
     
     public List<IMember> members = new ArrayList<IMember>();
     
+    /** back-ref */
+    @NeverNull
     private PackageSpec packageSpec;
     
-    private Set<String> req = new HashSet<String>();
+    private Set<String> requiredImports = new HashSet<String>();
     
+    @CanBeNull
     public ClassSpec superClass;
     
+    @CanBeNull
     private String comment;
     
     /**
@@ -58,8 +74,14 @@ public class ClassSpec extends NamedElement {
         return methodSpec;
     }
     
-    public MethodSpec addMethod(String name, TypeSpec t, String generatedFrom) {
-        MethodSpec methodSpec = new MethodSpec(name, t, generatedFrom);
+    /**
+     * @param name of method
+     * @param returnType type
+     * @param generatedFrom debug comment
+     * @return new MethodSpec
+     */
+    public MethodSpec addMethod(String name, IType returnType, String generatedFrom) {
+        MethodSpec methodSpec = new MethodSpec(name, returnType, generatedFrom);
         this.members.add(methodSpec);
         return methodSpec;
     }
@@ -70,7 +92,7 @@ public class ClassSpec extends NamedElement {
     
     public void addRequiredImports(String canonicalName) {
         assert !canonicalName.equals("void");
-        this.req.add(canonicalName);
+        this.requiredImports.add(canonicalName);
     }
     
     public MethodSpec addVoidMethod(String name, String generatedFrom) {
@@ -100,7 +122,7 @@ public class ClassSpec extends NamedElement {
     
     public Set<String> getRequiredImports() {
         Set<String> imports = new HashSet<String>();
-        imports.addAll(this.req);
+        imports.addAll(this.requiredImports);
         if(this.superClass != null) {
             imports.add(this.superClass.getCanonicalName());
         }
@@ -132,4 +154,83 @@ public class ClassSpec extends NamedElement {
         return this.comment;
     }
     
+    public String getTypeString() {
+        return getName();
+    }
+    
+    class Wrapper implements IType, IBaseType {
+        
+        @Override
+        @NeverNull
+        public IBaseType getBaseType() {
+            return this;
+        }
+        
+        @Override
+        public boolean isArray() {
+            return false;
+        }
+        
+        @Override
+        @CanBeNull
+        public IBaseType getComponentType() {
+            return null;
+        }
+        
+        @Override
+        public String getGeneratedFrom() {
+            return "ClassSpec";
+        }
+        
+        @Override
+        public String getSimpleName() {
+            return getName();
+        }
+        
+        @Override
+        public String getRequiredImport() {
+            return getCanonicalName();
+        }
+        
+        @Override
+        public String getCanonicalName() {
+            return ClassSpec.this.getCanonicalName();
+        }
+        
+        @Override
+        public String getPackageName() {
+            return ClassSpec.this.getPackageName();
+        }
+        
+        @Override
+        public String getTypeString() {
+            return getName();
+        }
+        
+        @Override
+        public Set<String> getRequiredImports() {
+            // TODO Auto-generated method stub
+            return Collections.singleton(getCanonicalName());
+        }
+        
+        @Override
+        public String id() {
+            return ClassSpec.this.id();
+        }
+        
+        @Override
+        public String getComment() {
+            return ClassSpec.this.getComment();
+        }
+        
+        @Override
+        public void setComment(String comment) {
+            ClassSpec.this.setComment(comment);
+        }
+        
+    }
+    
+    public IType asType() {
+        return new Wrapper();
+    }
 }

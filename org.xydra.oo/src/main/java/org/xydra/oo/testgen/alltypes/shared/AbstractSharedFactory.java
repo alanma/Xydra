@@ -4,8 +4,10 @@ import org.xydra.base.XId;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.core.XX;
 import org.xydra.oo.runtime.shared.AbstractFactory;
+import org.xydra.oo.testgen.alltypes.shared.IHasAllType;
+import org.xydra.oo.testgen.alltypes.shared.IPerson;
 
-/** Generated on Fri Dec 27 13:29:45 CET 2013 by SpecWriter, a part of xydra.org:oo */
+/** Generated on Mon Feb 03 22:56:14 CET 2014 by SpecWriter, a part of xydra.org:oo */
 public abstract class AbstractSharedFactory extends AbstractFactory {
 
     /** 

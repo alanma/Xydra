@@ -7,7 +7,8 @@ import org.xydra.annotations.RunsInGWT;
 
 /**
  * A single type with a package and a simple name. Is either a collection type
- * OR a component type OR a generic (typeless) array type.
+ * (List, Set, ...) OR a component type (String, int, boolean, ... ) OR a
+ * generic (typeless) array type (Array).
  * 
  * To represent generic collection types or normal typed arrays, use a
  * {@link TypeSpec}.
@@ -15,9 +16,9 @@ import org.xydra.annotations.RunsInGWT;
  * @author xamde
  */
 @RunsInGWT(true)
-public class BaseTypeSpec implements Comparable<BaseTypeSpec> {
+public class BaseTypeSpec implements Comparable<BaseTypeSpec>, IBaseType {
     
-    public static final BaseTypeSpec ARRAY = new BaseTypeSpec("org.xydra.oo.runtime.shared",
+    public static final IBaseType ARRAY = new BaseTypeSpec("org.xydra.oo.runtime.shared",
             "Array");
     
     @CanBeNull
@@ -35,7 +36,7 @@ public class BaseTypeSpec implements Comparable<BaseTypeSpec> {
      * 
      * @param baseType
      */
-    public BaseTypeSpec(BaseTypeSpec baseType) {
+    public BaseTypeSpec(IBaseType baseType) {
         this(baseType.getPackageName(), baseType.getSimpleName());
     }
     
@@ -76,14 +77,26 @@ public class BaseTypeSpec implements Comparable<BaseTypeSpec> {
         return false;
     }
     
+    /* (non-Javadoc)
+     * @see org.xydra.oo.runtime.shared.IBaseType#getCanonicalName()
+     */
+    @Override
     public String getCanonicalName() {
         return (this.packageName == null ? "" : this.packageName + ".") + this.simpleName;
     }
     
+    /* (non-Javadoc)
+     * @see org.xydra.oo.runtime.shared.IBaseType#getPackageName()
+     */
+    @Override
     public String getPackageName() {
         return this.packageName;
     }
     
+    /* (non-Javadoc)
+     * @see org.xydra.oo.runtime.shared.IBaseType#getSimpleName()
+     */
+    @Override
     public String getSimpleName() {
         return this.simpleName;
     }
@@ -96,10 +109,18 @@ public class BaseTypeSpec implements Comparable<BaseTypeSpec> {
         return this.getCanonicalName();
     }
     
+    /* (non-Javadoc)
+     * @see org.xydra.oo.runtime.shared.IBaseType#isArray()
+     */
+    @Override
     public boolean isArray() {
         return this.equals(ARRAY);
     }
     
+    /* (non-Javadoc)
+     * @see org.xydra.oo.runtime.shared.IBaseType#getRequiredImport()
+     */
+    @Override
     public String getRequiredImport() {
         if(getSimpleName().contains(".")) {
             // require enclosing class
@@ -115,7 +136,7 @@ public class BaseTypeSpec implements Comparable<BaseTypeSpec> {
      * @param simpleName @CanBeNull
      * @return null if simpleName is null
      */
-    public static BaseTypeSpec create(java.lang.String packageName, java.lang.String simpleName) {
+    public static IBaseType create(java.lang.String packageName, java.lang.String simpleName) {
         if(simpleName == null)
             return null;
         return new BaseTypeSpec(packageName, simpleName);

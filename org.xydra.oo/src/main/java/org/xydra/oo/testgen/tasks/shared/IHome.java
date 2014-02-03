@@ -4,8 +4,10 @@ import org.xydra.base.IHasXId;
 import org.xydra.base.XId;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.oo.Field;
+import org.xydra.oo.testgen.tasks.shared.IBaseList;
+import org.xydra.oo.testgen.tasks.shared.IHome;
 
-/** Generated on Fri Dec 27 13:29:45 CET 2013 by SpecWriter, a part of xydra.org:oo */
+/** Generated on Mon Feb 03 22:56:15 CET 2014 by SpecWriter, a part of xydra.org:oo */
 public interface IHome extends IHasXId {
 
     /** 
@@ -54,9 +56,10 @@ public interface IHome extends IHasXId {
      *  
      * @param inbox the value to set [generated from:  
      * 'org.xydra.oo.testspecs.TasksSpec.Home'] 
+     * @return ... 
      */
     @Field("inbox")
-    void setInbox(IBaseList inbox);
+    IHome setInbox(IBaseList inbox);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -64,9 +67,10 @@ public interface IHome extends IHasXId {
      *  
      * @param starred the value to set [generated from:  
      * 'org.xydra.oo.testspecs.TasksSpec.Home'] 
+     * @return ... 
      */
     @Field("starred")
-    void setStarred(IBaseList starred);
+    IHome setStarred(IBaseList starred);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -74,9 +78,10 @@ public interface IHome extends IHasXId {
      *  
      * @param today the value to set [generated from:  
      * 'org.xydra.oo.testspecs.TasksSpec.Home'] 
+     * @return ... 
      */
     @Field("today")
-    void setToday(IBaseList today);
+    IHome setToday(IBaseList today);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
@@ -84,8 +89,9 @@ public interface IHome extends IHasXId {
      *  
      * @param week the value to set [generated from:  
      * 'org.xydra.oo.testspecs.TasksSpec.Home'] 
+     * @return ... 
      */
     @Field("week")
-    void setWeek(IBaseList week);
+    IHome setWeek(IBaseList week);
 
 }

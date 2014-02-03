@@ -8,7 +8,7 @@ public class TypeConstants {
     public static final String BASE = "org.xydra.base";
     public static final String VALUE = "org.xydra.base.value";
     
-    public static final BaseTypeSpec BaseType_XId = new BaseTypeSpec(BASE, "XId");
+    public static final IBaseType BaseType_XId = new BaseTypeSpec(BASE, "XId");
     
     public static final TypeSpec Address = new TypeSpec(BASE, "XAddress", null, null,
             "TypeConstants");

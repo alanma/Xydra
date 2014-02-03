@@ -1,5 +1,7 @@
 package org.xydra.oo.testgen.tasks.client;
 
+import com.google.gwt.core.client.GWT;
+import java.lang.Override;
 import org.xydra.base.XId;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.oo.testgen.tasks.shared.AbstractSharedFactory;
@@ -11,10 +13,8 @@ import org.xydra.oo.testgen.tasks.shared.ITask;
 import org.xydra.oo.testgen.tasks.shared.ITaskList;
 import org.xydra.oo.testgen.tasks.shared.IUser;
 
-import com.google.gwt.core.client.GWT;
-
 /** 
- * Generated on Fri Dec 27 13:29:45 CET 2013 Generated on Fri Dec 27 13:29:45 CET 2013  
+ * Generated on Mon Feb 03 22:56:15 CET 2014 Generated on Mon Feb 03 22:56:15 CET 2014  
  * by SpecWriter, a part of xydra.org:oo 
  */
 public class GwtFactory extends AbstractSharedFactory {

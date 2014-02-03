@@ -10,10 +10,11 @@ import org.xydra.annotations.RunsInGWT;
 
 
 /**
- * Represents a Java type in a form that is easier to do type inference with.
+ * Represents a Java type as a pair (baseType, componentType?). That is easier
+ * to do type inference with.
  * 
  * Has a base type and optionally a component type - iff base type is a
- * collection type (including array). Both component are represented as
+ * collection type (including array). Both components are represented as
  * {@link BaseTypeSpec} instances.
  * 
  * Has a comment (for the user) and debug info where it was generated from.
@@ -21,16 +22,16 @@ import org.xydra.annotations.RunsInGWT;
  * @author xamde
  */
 @RunsInGWT(true)
-public class TypeSpec implements Comparable<TypeSpec> {
+public class TypeSpec implements Comparable<TypeSpec>, IType {
     
     /** simple type or collection */
     @NeverNull
-    private BaseTypeSpec baseType;
+    private IBaseType baseType;
     
     private String comment;
     
     @CanBeNull
-    private BaseTypeSpec componentType;
+    private IBaseType componentType;
     
     private String generatedFrom;
     
@@ -46,7 +47,12 @@ public class TypeSpec implements Comparable<TypeSpec> {
         this.generatedFrom = generatedFrom;
     }
     
-    public TypeSpec(@NeverNull BaseTypeSpec baseType, BaseTypeSpec componentType,
+    /**
+     * @param baseType
+     * @param componentType
+     * @param generatedFrom
+     */
+    public TypeSpec(@NeverNull IBaseType baseType, IBaseType componentType,
             String generatedFrom) {
         assert baseType != null;
         this.baseType = baseType;
@@ -54,6 +60,13 @@ public class TypeSpec implements Comparable<TypeSpec> {
         this.generatedFrom = generatedFrom;
     }
     
+    /**
+     * @param baseTypePackage
+     * @param baseTypeSimpleName
+     * @param componentTypePackage
+     * @param componentTypeSimpleName
+     * @param generatedFrom
+     */
     public TypeSpec(String baseTypePackage, String baseTypeSimpleName, String componentTypePackage,
             String componentTypeSimpleName, String generatedFrom) {
         this.baseType = new BaseTypeSpec(baseTypePackage, baseTypeSimpleName);
@@ -66,9 +79,9 @@ public class TypeSpec implements Comparable<TypeSpec> {
      * 
      * @param t
      */
-    public TypeSpec(TypeSpec t) {
+    public TypeSpec(IType t) {
         this(new BaseTypeSpec(t.getBaseType()), t.getComponentType() == null ? null
-                : new BaseTypeSpec(t.getComponentType()), t.generatedFrom);
+                : new BaseTypeSpec(t.getComponentType()), t.getGeneratedFrom());
         setComment(t.getComment());
     }
     
@@ -85,7 +98,7 @@ public class TypeSpec implements Comparable<TypeSpec> {
         return other instanceof TypeSpec && ((TypeSpec)other).id().equals(this.id());
     }
     
-    public BaseTypeSpec getBaseType() {
+    public IBaseType getBaseType() {
         return this.baseType;
     }
     
@@ -93,10 +106,11 @@ public class TypeSpec implements Comparable<TypeSpec> {
         return this.comment;
     }
     
-    public BaseTypeSpec getComponentType() {
+    public IBaseType getComponentType() {
         return this.componentType;
     }
     
+    @Override
     public Set<String> getRequiredImports() {
         HashSet<String> req = new HashSet<String>();
         
@@ -136,6 +150,7 @@ public class TypeSpec implements Comparable<TypeSpec> {
     /**
      * @return a valid type expression in java
      */
+    @Override
     public String getTypeString() {
         if(this.componentType == null) {
             // simple type
@@ -156,6 +171,7 @@ public class TypeSpec implements Comparable<TypeSpec> {
         return id().hashCode();
     }
     
+    @Override
     public String id() {
         assert this.baseType != null;
         return this.baseType.getCanonicalName()
@@ -178,6 +194,11 @@ public class TypeSpec implements Comparable<TypeSpec> {
     
     public boolean isArray() {
         return this.baseType.isArray();
+    }
+    
+    @Override
+    public String getGeneratedFrom() {
+        return this.generatedFrom;
     }
     
 }

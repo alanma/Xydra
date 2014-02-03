@@ -29,7 +29,6 @@ import org.xydra.base.value.XValueJavaUtils;
 import org.xydra.core.XX;
 import org.xydra.oo.runtime.client.GwtXydraMapped;
 import org.xydra.oo.runtime.shared.BaseTypeSpec;
-import org.xydra.oo.runtime.shared.CollectionProxy;
 import org.xydra.oo.runtime.shared.CollectionProxy.IComponentTransformer;
 import org.xydra.oo.runtime.shared.ListProxy;
 import org.xydra.oo.runtime.shared.SetProxy;
@@ -38,7 +37,7 @@ import org.xydra.oo.runtime.shared.SortedSetProxy;
 import org.xydra.oo.runtime.shared.TypeSpec;
 import org.xydra.oo.testgen.alltypes.client.GwtFactory;
 
-/** Generated on Fri Dec 27 13:29:45 CET 2013 by SpecWriter, a part of xydra.org:oo */
+/** Generated on Mon Feb 03 22:56:15 CET 2014 by SpecWriter, a part of xydra.org:oo */
 public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testgen.alltypes.shared.IHasAllType {
 
     /** 
@@ -47,7 +46,7 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      * @return ... 
      */
     public SortedSet<IPerson> bestFriends() {
-        IComponentTransformer<org.xydra.base.value.XIdListValue,org.xydra.base.XId,java.util.SortedSet<org.xydra.oo.testgen.alltypes.shared.IPerson>,org.xydra.oo.testgen.alltypes.shared.IPerson> t = new CollectionProxy.IComponentTransformer<org.xydra.base.value.XIdListValue,org.xydra.base.XId,java.util.SortedSet<org.xydra.oo.testgen.alltypes.shared.IPerson>,org.xydra.oo.testgen.alltypes.shared.IPerson>() {
+        IComponentTransformer<org.xydra.base.value.XIdListValue,org.xydra.base.XId,java.util.SortedSet<org.xydra.oo.testgen.alltypes.shared.IPerson>,org.xydra.oo.testgen.alltypes.shared.IPerson> t = new IComponentTransformer<org.xydra.base.value.XIdListValue,org.xydra.base.XId,java.util.SortedSet<org.xydra.oo.testgen.alltypes.shared.IPerson>,org.xydra.oo.testgen.alltypes.shared.IPerson>() {
             @Override
             public org.xydra.oo.testgen.alltypes.shared.IPerson toJavaComponent(org.xydra.base.XId x) {
                 return GwtFactory.wrapPerson(GwtHasAllType.this.oop.getXModel(), (XId) x);
@@ -74,7 +73,7 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      * @return ... 
      */
     public Set<IPerson> friends() {
-        IComponentTransformer<org.xydra.base.value.XIdListValue,org.xydra.base.XId,java.util.Set<org.xydra.oo.testgen.alltypes.shared.IPerson>,org.xydra.oo.testgen.alltypes.shared.IPerson> t = new CollectionProxy.IComponentTransformer<org.xydra.base.value.XIdListValue,org.xydra.base.XId,java.util.Set<org.xydra.oo.testgen.alltypes.shared.IPerson>,org.xydra.oo.testgen.alltypes.shared.IPerson>() {
+        IComponentTransformer<org.xydra.base.value.XIdListValue,org.xydra.base.XId,java.util.Set<org.xydra.oo.testgen.alltypes.shared.IPerson>,org.xydra.oo.testgen.alltypes.shared.IPerson> t = new IComponentTransformer<org.xydra.base.value.XIdListValue,org.xydra.base.XId,java.util.Set<org.xydra.oo.testgen.alltypes.shared.IPerson>,org.xydra.oo.testgen.alltypes.shared.IPerson>() {
             @Override
             public org.xydra.oo.testgen.alltypes.shared.IPerson toJavaComponent(org.xydra.base.XId x) {
                 return GwtFactory.wrapPerson(GwtHasAllType.this.oop.getXModel(), (XId) x);
@@ -677,7 +676,7 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      * @return ... 
      */
     public Set<XAddress> jaddresset() {
-        IComponentTransformer<org.xydra.base.value.XAddressSetValue,org.xydra.base.XAddress,java.util.Set<org.xydra.base.XAddress>,org.xydra.base.XAddress> t = new CollectionProxy.IComponentTransformer<org.xydra.base.value.XAddressSetValue,org.xydra.base.XAddress,java.util.Set<org.xydra.base.XAddress>,org.xydra.base.XAddress>() {
+        IComponentTransformer<org.xydra.base.value.XAddressSetValue,org.xydra.base.XAddress,java.util.Set<org.xydra.base.XAddress>,org.xydra.base.XAddress> t = new IComponentTransformer<org.xydra.base.value.XAddressSetValue,org.xydra.base.XAddress,java.util.Set<org.xydra.base.XAddress>,org.xydra.base.XAddress>() {
             @Override
             public org.xydra.base.XAddress toJavaComponent(org.xydra.base.XAddress x) {
                 return x;
@@ -704,7 +703,7 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      * @return ... 
      */
     public List<XAddress> jaddresslist() {
-        IComponentTransformer<org.xydra.base.value.XAddressListValue,org.xydra.base.XAddress,java.util.List<org.xydra.base.XAddress>,org.xydra.base.XAddress> t = new CollectionProxy.IComponentTransformer<org.xydra.base.value.XAddressListValue,org.xydra.base.XAddress,java.util.List<org.xydra.base.XAddress>,org.xydra.base.XAddress>() {
+        IComponentTransformer<org.xydra.base.value.XAddressListValue,org.xydra.base.XAddress,java.util.List<org.xydra.base.XAddress>,org.xydra.base.XAddress> t = new IComponentTransformer<org.xydra.base.value.XAddressListValue,org.xydra.base.XAddress,java.util.List<org.xydra.base.XAddress>,org.xydra.base.XAddress>() {
             @Override
             public org.xydra.base.XAddress toJavaComponent(org.xydra.base.XAddress x) {
                 return x;
@@ -731,7 +730,7 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      * @return ... 
      */
     public SortedSet<XAddress> jaddresssortedset() {
-        IComponentTransformer<org.xydra.base.value.XAddressSortedSetValue,org.xydra.base.XAddress,java.util.SortedSet<org.xydra.base.XAddress>,org.xydra.base.XAddress> t = new CollectionProxy.IComponentTransformer<org.xydra.base.value.XAddressSortedSetValue,org.xydra.base.XAddress,java.util.SortedSet<org.xydra.base.XAddress>,org.xydra.base.XAddress>() {
+        IComponentTransformer<org.xydra.base.value.XAddressSortedSetValue,org.xydra.base.XAddress,java.util.SortedSet<org.xydra.base.XAddress>,org.xydra.base.XAddress> t = new IComponentTransformer<org.xydra.base.value.XAddressSortedSetValue,org.xydra.base.XAddress,java.util.SortedSet<org.xydra.base.XAddress>,org.xydra.base.XAddress>() {
             @Override
             public org.xydra.base.XAddress toJavaComponent(org.xydra.base.XAddress x) {
                 return x;
@@ -758,7 +757,7 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      * @return ... 
      */
     public List<Boolean> jbooleanlist() {
-        IComponentTransformer<org.xydra.base.value.XBooleanListValue,java.lang.Boolean,java.util.List<java.lang.Boolean>,java.lang.Boolean> t = new CollectionProxy.IComponentTransformer<org.xydra.base.value.XBooleanListValue,java.lang.Boolean,java.util.List<java.lang.Boolean>,java.lang.Boolean>() {
+        IComponentTransformer<org.xydra.base.value.XBooleanListValue,java.lang.Boolean,java.util.List<java.lang.Boolean>,java.lang.Boolean> t = new IComponentTransformer<org.xydra.base.value.XBooleanListValue,java.lang.Boolean,java.util.List<java.lang.Boolean>,java.lang.Boolean>() {
             @Override
             public java.lang.Boolean toJavaComponent(java.lang.Boolean x) {
                 return x;
@@ -785,7 +784,7 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      * @return ... 
      */
     public List<Double> jdoublelist() {
-        IComponentTransformer<org.xydra.base.value.XDoubleListValue,java.lang.Double,java.util.List<java.lang.Double>,java.lang.Double> t = new CollectionProxy.IComponentTransformer<org.xydra.base.value.XDoubleListValue,java.lang.Double,java.util.List<java.lang.Double>,java.lang.Double>() {
+        IComponentTransformer<org.xydra.base.value.XDoubleListValue,java.lang.Double,java.util.List<java.lang.Double>,java.lang.Double> t = new IComponentTransformer<org.xydra.base.value.XDoubleListValue,java.lang.Double,java.util.List<java.lang.Double>,java.lang.Double>() {
             @Override
             public java.lang.Double toJavaComponent(java.lang.Double x) {
                 return x;
@@ -812,7 +811,7 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      * @return ... 
      */
     public List<Integer> jintegerlist() {
-        IComponentTransformer<org.xydra.base.value.XIntegerListValue,java.lang.Integer,java.util.List<java.lang.Integer>,java.lang.Integer> t = new CollectionProxy.IComponentTransformer<org.xydra.base.value.XIntegerListValue,java.lang.Integer,java.util.List<java.lang.Integer>,java.lang.Integer>() {
+        IComponentTransformer<org.xydra.base.value.XIntegerListValue,java.lang.Integer,java.util.List<java.lang.Integer>,java.lang.Integer> t = new IComponentTransformer<org.xydra.base.value.XIntegerListValue,java.lang.Integer,java.util.List<java.lang.Integer>,java.lang.Integer>() {
             @Override
             public java.lang.Integer toJavaComponent(java.lang.Integer x) {
                 return x;
@@ -839,7 +838,7 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      * @return ... 
      */
     public List<Long> jlonglist() {
-        IComponentTransformer<org.xydra.base.value.XLongListValue,java.lang.Long,java.util.List<java.lang.Long>,java.lang.Long> t = new CollectionProxy.IComponentTransformer<org.xydra.base.value.XLongListValue,java.lang.Long,java.util.List<java.lang.Long>,java.lang.Long>() {
+        IComponentTransformer<org.xydra.base.value.XLongListValue,java.lang.Long,java.util.List<java.lang.Long>,java.lang.Long> t = new IComponentTransformer<org.xydra.base.value.XLongListValue,java.lang.Long,java.util.List<java.lang.Long>,java.lang.Long>() {
             @Override
             public java.lang.Long toJavaComponent(java.lang.Long x) {
                 return x;
@@ -866,7 +865,7 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      * @return ... 
      */
     public List<String> jstringlist() {
-        IComponentTransformer<org.xydra.base.value.XStringListValue,java.lang.String,java.util.List<java.lang.String>,java.lang.String> t = new CollectionProxy.IComponentTransformer<org.xydra.base.value.XStringListValue,java.lang.String,java.util.List<java.lang.String>,java.lang.String>() {
+        IComponentTransformer<org.xydra.base.value.XStringListValue,java.lang.String,java.util.List<java.lang.String>,java.lang.String> t = new IComponentTransformer<org.xydra.base.value.XStringListValue,java.lang.String,java.util.List<java.lang.String>,java.lang.String>() {
             @Override
             public java.lang.String toJavaComponent(java.lang.String x) {
                 return x;
@@ -893,7 +892,7 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      * @return ... 
      */
     public Set<String> jstringset() {
-        IComponentTransformer<org.xydra.base.value.XStringSetValue,java.lang.String,java.util.Set<java.lang.String>,java.lang.String> t = new CollectionProxy.IComponentTransformer<org.xydra.base.value.XStringSetValue,java.lang.String,java.util.Set<java.lang.String>,java.lang.String>() {
+        IComponentTransformer<org.xydra.base.value.XStringSetValue,java.lang.String,java.util.Set<java.lang.String>,java.lang.String> t = new IComponentTransformer<org.xydra.base.value.XStringSetValue,java.lang.String,java.util.Set<java.lang.String>,java.lang.String>() {
             @Override
             public java.lang.String toJavaComponent(java.lang.String x) {
                 return x;
@@ -920,7 +919,7 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      * @return ... 
      */
     public List<XId> jxidlist() {
-        IComponentTransformer<org.xydra.base.value.XIdListValue,org.xydra.base.XId,java.util.List<org.xydra.base.XId>,org.xydra.base.XId> t = new CollectionProxy.IComponentTransformer<org.xydra.base.value.XIdListValue,org.xydra.base.XId,java.util.List<org.xydra.base.XId>,org.xydra.base.XId>() {
+        IComponentTransformer<org.xydra.base.value.XIdListValue,org.xydra.base.XId,java.util.List<org.xydra.base.XId>,org.xydra.base.XId> t = new IComponentTransformer<org.xydra.base.value.XIdListValue,org.xydra.base.XId,java.util.List<org.xydra.base.XId>,org.xydra.base.XId>() {
             @Override
             public org.xydra.base.XId toJavaComponent(org.xydra.base.XId x) {
                 return x;
@@ -947,7 +946,7 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      * @return ... 
      */
     public Set<XId> jxidset() {
-        IComponentTransformer<org.xydra.base.value.XIdSetValue,org.xydra.base.XId,java.util.Set<org.xydra.base.XId>,org.xydra.base.XId> t = new CollectionProxy.IComponentTransformer<org.xydra.base.value.XIdSetValue,org.xydra.base.XId,java.util.Set<org.xydra.base.XId>,org.xydra.base.XId>() {
+        IComponentTransformer<org.xydra.base.value.XIdSetValue,org.xydra.base.XId,java.util.Set<org.xydra.base.XId>,org.xydra.base.XId> t = new IComponentTransformer<org.xydra.base.value.XIdSetValue,org.xydra.base.XId,java.util.Set<org.xydra.base.XId>,org.xydra.base.XId>() {
             @Override
             public org.xydra.base.XId toJavaComponent(org.xydra.base.XId x) {
                 return x;
@@ -974,7 +973,7 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      * @return ... 
      */
     public SortedSet<XId> jxidsortedset() {
-        IComponentTransformer<org.xydra.base.value.XIdSortedSetValue,org.xydra.base.XId,java.util.SortedSet<org.xydra.base.XId>,org.xydra.base.XId> t = new CollectionProxy.IComponentTransformer<org.xydra.base.value.XIdSortedSetValue,org.xydra.base.XId,java.util.SortedSet<org.xydra.base.XId>,org.xydra.base.XId>() {
+        IComponentTransformer<org.xydra.base.value.XIdSortedSetValue,org.xydra.base.XId,java.util.SortedSet<org.xydra.base.XId>,org.xydra.base.XId> t = new IComponentTransformer<org.xydra.base.value.XIdSortedSetValue,org.xydra.base.XId,java.util.SortedSet<org.xydra.base.XId>,org.xydra.base.XId>() {
             @Override
             public org.xydra.base.XId toJavaComponent(org.xydra.base.XId x) {
                 return x;
@@ -1001,7 +1000,7 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      * @return ... 
      */
     public List<IPerson> nextBirthdays() {
-        IComponentTransformer<org.xydra.base.value.XIdListValue,org.xydra.base.XId,java.util.List<org.xydra.oo.testgen.alltypes.shared.IPerson>,org.xydra.oo.testgen.alltypes.shared.IPerson> t = new CollectionProxy.IComponentTransformer<org.xydra.base.value.XIdListValue,org.xydra.base.XId,java.util.List<org.xydra.oo.testgen.alltypes.shared.IPerson>,org.xydra.oo.testgen.alltypes.shared.IPerson>() {
+        IComponentTransformer<org.xydra.base.value.XIdListValue,org.xydra.base.XId,java.util.List<org.xydra.oo.testgen.alltypes.shared.IPerson>,org.xydra.oo.testgen.alltypes.shared.IPerson> t = new IComponentTransformer<org.xydra.base.value.XIdListValue,org.xydra.base.XId,java.util.List<org.xydra.oo.testgen.alltypes.shared.IPerson>,org.xydra.oo.testgen.alltypes.shared.IPerson>() {
             @Override
             public org.xydra.oo.testgen.alltypes.shared.IPerson toJavaComponent(org.xydra.base.XId x) {
                 return GwtFactory.wrapPerson(GwtHasAllType.this.oop.getXModel(), (XId) x);
@@ -1028,9 +1027,11 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      *  
      * @param color  [generated from:  
      * 'org.xydra.oo.testgen.alltypes.shared.IHasAllType'] 
+     * @return ... 
      */
-    public void setColor(Colors color) {
+    public IHasAllType setColor(Colors color) {
         XValueJavaUtils.setString(this.oop.getXObject(), XX.toId("color"), color.name());
+        return this;
     }
 
     /** 
@@ -1039,9 +1040,11 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      *  
      * @param jBooleanarray  [generated from:  
      * 'org.xydra.oo.testgen.alltypes.shared.IHasAllType'] 
+     * @return ... 
      */
-    public void setJBooleanarray(boolean[] jBooleanarray) {
+    public IHasAllType setJBooleanarray(boolean[] jBooleanarray) {
         XValueJavaUtils.setBooleanArray(this.oop.getXObject(), XX.toId("jBooleanarray"), jBooleanarray);
+        return this;
     }
 
     /** 
@@ -1049,13 +1052,15 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      *  
      * @param jBoolean  [generated from:  
      * 'org.xydra.oo.testgen.alltypes.shared.IHasAllType'] 
+     * @return ... 
      */
-    public void setJBoolean(Boolean jBoolean) {
+    public IHasAllType setJBoolean(Boolean jBoolean) {
         // non-xydra type 'Boolean' with mapping
         SharedTypeMapping mapping = SharedTypeMapping.getMapping(new TypeSpec(new BaseTypeSpec(
           "java.lang", "Boolean"), null, "gwt"));
         XBooleanValue x = (XBooleanValue)mapping.toXydra(jBoolean);
         this.oop.setValue("jBoolean", x);
+        return this;
     }
 
     /** 
@@ -1064,9 +1069,11 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      *  
      * @param jDoublearray  [generated from:  
      * 'org.xydra.oo.testgen.alltypes.shared.IHasAllType'] 
+     * @return ... 
      */
-    public void setJDoublearray(double[] jDoublearray) {
+    public IHasAllType setJDoublearray(double[] jDoublearray) {
         XValueJavaUtils.setDoubleArray(this.oop.getXObject(), XX.toId("jDoublearray"), jDoublearray);
+        return this;
     }
 
     /** 
@@ -1074,13 +1081,15 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      *  
      * @param jDouble  [generated from:  
      * 'org.xydra.oo.testgen.alltypes.shared.IHasAllType'] 
+     * @return ... 
      */
-    public void setJDouble(Double jDouble) {
+    public IHasAllType setJDouble(Double jDouble) {
         // non-xydra type 'Double' with mapping
         SharedTypeMapping mapping = SharedTypeMapping.getMapping(new TypeSpec(new BaseTypeSpec(
           "java.lang", "Double"), null, "gwt"));
         XDoubleValue x = (XDoubleValue)mapping.toXydra(jDouble);
         this.oop.setValue("jDouble", x);
+        return this;
     }
 
     /** 
@@ -1089,9 +1098,11 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      *  
      * @param jIntegerarray  [generated from:  
      * 'org.xydra.oo.testgen.alltypes.shared.IHasAllType'] 
+     * @return ... 
      */
-    public void setJIntegerarray(int[] jIntegerarray) {
+    public IHasAllType setJIntegerarray(int[] jIntegerarray) {
         XValueJavaUtils.setIntegerArray(this.oop.getXObject(), XX.toId("jIntegerarray"), jIntegerarray);
+        return this;
     }
 
     /** 
@@ -1099,13 +1110,15 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      *  
      * @param jInteger  [generated from:  
      * 'org.xydra.oo.testgen.alltypes.shared.IHasAllType'] 
+     * @return ... 
      */
-    public void setJInteger(Integer jInteger) {
+    public IHasAllType setJInteger(Integer jInteger) {
         // non-xydra type 'Integer' with mapping
         SharedTypeMapping mapping = SharedTypeMapping.getMapping(new TypeSpec(new BaseTypeSpec(
           "java.lang", "Integer"), null, "gwt"));
         XIntegerValue x = (XIntegerValue)mapping.toXydra(jInteger);
         this.oop.setValue("jInteger", x);
+        return this;
     }
 
     /** 
@@ -1114,9 +1127,11 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      *  
      * @param jLongarray  [generated from:  
      * 'org.xydra.oo.testgen.alltypes.shared.IHasAllType'] 
+     * @return ... 
      */
-    public void setJLongarray(long[] jLongarray) {
+    public IHasAllType setJLongarray(long[] jLongarray) {
         XValueJavaUtils.setLongArray(this.oop.getXObject(), XX.toId("jLongarray"), jLongarray);
+        return this;
     }
 
     /** 
@@ -1124,13 +1139,15 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      *  
      * @param jLong  [generated from:  
      * 'org.xydra.oo.testgen.alltypes.shared.IHasAllType'] 
+     * @return ... 
      */
-    public void setJLong(Long jLong) {
+    public IHasAllType setJLong(Long jLong) {
         // non-xydra type 'Long' with mapping
         SharedTypeMapping mapping = SharedTypeMapping.getMapping(new TypeSpec(new BaseTypeSpec(
           "java.lang", "Long"), null, "gwt"));
         XLongValue x = (XLongValue)mapping.toXydra(jLong);
         this.oop.setValue("jLong", x);
+        return this;
     }
 
     /** 
@@ -1138,13 +1155,15 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      *  
      * @param jString  [generated from:  
      * 'org.xydra.oo.testgen.alltypes.shared.IHasAllType'] 
+     * @return ... 
      */
-    public void setJString(String jString) {
+    public IHasAllType setJString(String jString) {
         // non-xydra type 'String' with mapping
         SharedTypeMapping mapping = SharedTypeMapping.getMapping(new TypeSpec(new BaseTypeSpec(
           "java.lang", "String"), null, "gwt"));
         XStringValue x = (XStringValue)mapping.toXydra(jString);
         this.oop.setValue("jString", x);
+        return this;
     }
 
     /** 
@@ -1153,9 +1172,11 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      *  
      * @param jaddressarray  [generated from:  
      * 'org.xydra.oo.testgen.alltypes.shared.IHasAllType'] 
+     * @return ... 
      */
-    public void setJaddressarray(XAddress[] jaddressarray) {
+    public IHasAllType setJaddressarray(XAddress[] jaddressarray) {
         XValueJavaUtils.setAddressArray(this.oop.getXObject(), XX.toId("jaddressarray"), jaddressarray);
+        return this;
     }
 
     /** 
@@ -1163,13 +1184,15 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      *  
      * @param jbinary  [generated from:  
      * 'org.xydra.oo.testgen.alltypes.shared.IHasAllType'] 
+     * @return ... 
      */
-    public void setJbinary(byte[] jbinary) {
+    public IHasAllType setJbinary(byte[] jbinary) {
         // non-xydra type 'byte[]' with mapping
         SharedTypeMapping mapping = SharedTypeMapping.getMapping(new TypeSpec(new BaseTypeSpec(
           "org.xydra.oo.runtime.shared", "byte[]"), null, "gwt"));
         XBinaryValue x = (XBinaryValue)mapping.toXydra(jbinary);
         this.oop.setValue("jbinary", x);
+        return this;
     }
 
     /** 
@@ -1178,9 +1201,11 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      *  
      * @param jbooleanarray  [generated from:  
      * 'org.xydra.oo.testgen.alltypes.shared.IHasAllType'] 
+     * @return ... 
      */
-    public void setJbooleanarray(boolean[] jbooleanarray) {
+    public IHasAllType setJbooleanarray(boolean[] jbooleanarray) {
         XValueJavaUtils.setBooleanArray(this.oop.getXObject(), XX.toId("jbooleanarray"), jbooleanarray);
+        return this;
     }
 
     /** 
@@ -1188,13 +1213,15 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      *  
      * @param jboolean  [generated from:  
      * 'org.xydra.oo.testgen.alltypes.shared.IHasAllType'] 
+     * @return ... 
      */
-    public void setJboolean(boolean jboolean) {
+    public IHasAllType setJboolean(boolean jboolean) {
         // non-xydra type 'boolean' with mapping
         SharedTypeMapping mapping = SharedTypeMapping.getMapping(new TypeSpec(new BaseTypeSpec(
           null, "boolean"), null, "gwt"));
         XBooleanValue x = (XBooleanValue)mapping.toXydra(jboolean);
         this.oop.setValue("jboolean", x);
+        return this;
     }
 
     /** 
@@ -1203,9 +1230,11 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      *  
      * @param jdoublearray  [generated from:  
      * 'org.xydra.oo.testgen.alltypes.shared.IHasAllType'] 
+     * @return ... 
      */
-    public void setJdoublearray(double[] jdoublearray) {
+    public IHasAllType setJdoublearray(double[] jdoublearray) {
         XValueJavaUtils.setDoubleArray(this.oop.getXObject(), XX.toId("jdoublearray"), jdoublearray);
+        return this;
     }
 
     /** 
@@ -1213,13 +1242,15 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      *  
      * @param jdouble  [generated from:  
      * 'org.xydra.oo.testgen.alltypes.shared.IHasAllType'] 
+     * @return ... 
      */
-    public void setJdouble(double jdouble) {
+    public IHasAllType setJdouble(double jdouble) {
         // non-xydra type 'double' with mapping
         SharedTypeMapping mapping = SharedTypeMapping.getMapping(new TypeSpec(new BaseTypeSpec(
           null, "double"), null, "gwt"));
         XDoubleValue x = (XDoubleValue)mapping.toXydra(jdouble);
         this.oop.setValue("jdouble", x);
+        return this;
     }
 
     /** 
@@ -1228,9 +1259,11 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      *  
      * @param jiddarray  [generated from:  
      * 'org.xydra.oo.testgen.alltypes.shared.IHasAllType'] 
+     * @return ... 
      */
-    public void setJiddarray(XId[] jiddarray) {
+    public IHasAllType setJiddarray(XId[] jiddarray) {
         XValueJavaUtils.setIdArray(this.oop.getXObject(), XX.toId("jiddarray"), jiddarray);
+        return this;
     }
 
     /** 
@@ -1239,9 +1272,11 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      *  
      * @param jintarray  [generated from:  
      * 'org.xydra.oo.testgen.alltypes.shared.IHasAllType'] 
+     * @return ... 
      */
-    public void setJintarray(int[] jintarray) {
+    public IHasAllType setJintarray(int[] jintarray) {
         XValueJavaUtils.setIntegerArray(this.oop.getXObject(), XX.toId("jintarray"), jintarray);
+        return this;
     }
 
     /** 
@@ -1249,13 +1284,15 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      *  
      * @param jint  [generated from:  
      * 'org.xydra.oo.testgen.alltypes.shared.IHasAllType'] 
+     * @return ... 
      */
-    public void setJint(int jint) {
+    public IHasAllType setJint(int jint) {
         // non-xydra type 'int' with mapping
         SharedTypeMapping mapping = SharedTypeMapping.getMapping(new TypeSpec(new BaseTypeSpec(
           null, "int"), null, "gwt"));
         XIntegerValue x = (XIntegerValue)mapping.toXydra(jint);
         this.oop.setValue("jint", x);
+        return this;
     }
 
     /** 
@@ -1264,9 +1301,11 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      *  
      * @param jlongarray  [generated from:  
      * 'org.xydra.oo.testgen.alltypes.shared.IHasAllType'] 
+     * @return ... 
      */
-    public void setJlongarray(long[] jlongarray) {
+    public IHasAllType setJlongarray(long[] jlongarray) {
         XValueJavaUtils.setLongArray(this.oop.getXObject(), XX.toId("jlongarray"), jlongarray);
+        return this;
     }
 
     /** 
@@ -1274,13 +1313,15 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      *  
      * @param jlong  [generated from:  
      * 'org.xydra.oo.testgen.alltypes.shared.IHasAllType'] 
+     * @return ... 
      */
-    public void setJlong(long jlong) {
+    public IHasAllType setJlong(long jlong) {
         // non-xydra type 'long' with mapping
         SharedTypeMapping mapping = SharedTypeMapping.getMapping(new TypeSpec(new BaseTypeSpec(
           null, "long"), null, "gwt"));
         XLongValue x = (XLongValue)mapping.toXydra(jlong);
         this.oop.setValue("jlong", x);
+        return this;
     }
 
     /** 
@@ -1289,9 +1330,11 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      *  
      * @param jstringarray  [generated from:  
      * 'org.xydra.oo.testgen.alltypes.shared.IHasAllType'] 
+     * @return ... 
      */
-    public void setJstringarray(String[] jstringarray) {
+    public IHasAllType setJstringarray(String[] jstringarray) {
         XValueJavaUtils.setStringArray(this.oop.getXObject(), XX.toId("jstringarray"), jstringarray);
+        return this;
     }
 
     /** 
@@ -1299,13 +1342,15 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      *  
      * @param myLongBasedType  [generated from:  
      * 'org.xydra.oo.testgen.alltypes.shared.IHasAllType'] 
+     * @return ... 
      */
-    public void setMyLongBasedType(MyLongBasedType myLongBasedType) {
+    public IHasAllType setMyLongBasedType(MyLongBasedType myLongBasedType) {
         // non-xydra type 'MyLongBasedType' with mapping
         SharedTypeMapping mapping = SharedTypeMapping.getMapping(new TypeSpec(new BaseTypeSpec(
           "org.xydra.oo.testgen.alltypes.shared", "MyLongBasedType"), null, "gwt"));
         XLongValue x = (XLongValue)mapping.toXydra(myLongBasedType);
         this.oop.setValue("myLongBasedType", x);
+        return this;
     }
 
     /** 
@@ -1314,9 +1359,11 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      *  
      * @param partner  [generated from:  
      * 'org.xydra.oo.testgen.alltypes.shared.IHasAllType'] 
+     * @return ... 
      */
-    public void setPartner(IPerson partner) {
+    public IHasAllType setPartner(IPerson partner) {
         XValueJavaUtils.setId(this.oop.getXObject(), XX.toId("partner"), partner.getId());
+        return this;
     }
 
     /** 
@@ -1325,9 +1372,11 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      *  
      * @param xaddresslist  [generated from:  
      * 'org.xydra.oo.testgen.alltypes.shared.IHasAllType'] 
+     * @return ... 
      */
-    public void setXaddresslist(XAddressListValue xaddresslist) {
+    public IHasAllType setXaddresslist(XAddressListValue xaddresslist) {
         this.oop.setValue("xaddresslist", xaddresslist);
+        return this;
     }
 
     /** 
@@ -1336,9 +1385,11 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      *  
      * @param xaddressset  [generated from:  
      * 'org.xydra.oo.testgen.alltypes.shared.IHasAllType'] 
+     * @return ... 
      */
-    public void setXaddressset(XAddressSetValue xaddressset) {
+    public IHasAllType setXaddressset(XAddressSetValue xaddressset) {
         this.oop.setValue("xaddressset", xaddressset);
+        return this;
     }
 
     /** 
@@ -1347,9 +1398,11 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      *  
      * @param xaddresssortedset  [generated from:  
      * 'org.xydra.oo.testgen.alltypes.shared.IHasAllType'] 
+     * @return ... 
      */
-    public void setXaddresssortedset(XAddressSortedSetValue xaddresssortedset) {
+    public IHasAllType setXaddresssortedset(XAddressSortedSetValue xaddresssortedset) {
         this.oop.setValue("xaddresssortedset", xaddresssortedset);
+        return this;
     }
 
     /** 
@@ -1358,9 +1411,11 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      *  
      * @param xaddress  [generated from:  
      * 'org.xydra.oo.testgen.alltypes.shared.IHasAllType'] 
+     * @return ... 
      */
-    public void setXaddress(XAddress xaddress) {
+    public IHasAllType setXaddress(XAddress xaddress) {
         this.oop.setValue("xaddress", xaddress);
+        return this;
     }
 
     /** 
@@ -1369,9 +1424,11 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      *  
      * @param xbinary  [generated from:  
      * 'org.xydra.oo.testgen.alltypes.shared.IHasAllType'] 
+     * @return ... 
      */
-    public void setXbinary(XBinaryValue xbinary) {
+    public IHasAllType setXbinary(XBinaryValue xbinary) {
         this.oop.setValue("xbinary", xbinary);
+        return this;
     }
 
     /** 
@@ -1380,9 +1437,11 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      *  
      * @param xbooleanlist  [generated from:  
      * 'org.xydra.oo.testgen.alltypes.shared.IHasAllType'] 
+     * @return ... 
      */
-    public void setXbooleanlist(XBooleanListValue xbooleanlist) {
+    public IHasAllType setXbooleanlist(XBooleanListValue xbooleanlist) {
         this.oop.setValue("xbooleanlist", xbooleanlist);
+        return this;
     }
 
     /** 
@@ -1391,9 +1450,11 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      *  
      * @param xboolean  [generated from:  
      * 'org.xydra.oo.testgen.alltypes.shared.IHasAllType'] 
+     * @return ... 
      */
-    public void setXboolean(XBooleanValue xboolean) {
+    public IHasAllType setXboolean(XBooleanValue xboolean) {
         this.oop.setValue("xboolean", xboolean);
+        return this;
     }
 
     /** 
@@ -1402,9 +1463,11 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      *  
      * @param xdoublelist  [generated from:  
      * 'org.xydra.oo.testgen.alltypes.shared.IHasAllType'] 
+     * @return ... 
      */
-    public void setXdoublelist(XDoubleListValue xdoublelist) {
+    public IHasAllType setXdoublelist(XDoubleListValue xdoublelist) {
         this.oop.setValue("xdoublelist", xdoublelist);
+        return this;
     }
 
     /** 
@@ -1413,9 +1476,11 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      *  
      * @param xdouble  [generated from:  
      * 'org.xydra.oo.testgen.alltypes.shared.IHasAllType'] 
+     * @return ... 
      */
-    public void setXdouble(XDoubleValue xdouble) {
+    public IHasAllType setXdouble(XDoubleValue xdouble) {
         this.oop.setValue("xdouble", xdouble);
+        return this;
     }
 
     /** 
@@ -1424,9 +1489,11 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      *  
      * @param xidlist  [generated from:  
      * 'org.xydra.oo.testgen.alltypes.shared.IHasAllType'] 
+     * @return ... 
      */
-    public void setXidlist(XIdListValue xidlist) {
+    public IHasAllType setXidlist(XIdListValue xidlist) {
         this.oop.setValue("xidlist", xidlist);
+        return this;
     }
 
     /** 
@@ -1435,9 +1502,11 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      *  
      * @param xidset  [generated from:  
      * 'org.xydra.oo.testgen.alltypes.shared.IHasAllType'] 
+     * @return ... 
      */
-    public void setXidset(XIdSetValue xidset) {
+    public IHasAllType setXidset(XIdSetValue xidset) {
         this.oop.setValue("xidset", xidset);
+        return this;
     }
 
     /** 
@@ -1446,9 +1515,11 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      *  
      * @param xidsortedset  [generated from:  
      * 'org.xydra.oo.testgen.alltypes.shared.IHasAllType'] 
+     * @return ... 
      */
-    public void setXidsortedset(XIdSortedSetValue xidsortedset) {
+    public IHasAllType setXidsortedset(XIdSortedSetValue xidsortedset) {
         this.oop.setValue("xidsortedset", xidsortedset);
+        return this;
     }
 
     /** 
@@ -1457,9 +1528,11 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      *  
      * @param xid  [generated from:  
      * 'org.xydra.oo.testgen.alltypes.shared.IHasAllType'] 
+     * @return ... 
      */
-    public void setXid(XId xid) {
+    public IHasAllType setXid(XId xid) {
         this.oop.setValue("xid", xid);
+        return this;
     }
 
     /** 
@@ -1468,9 +1541,11 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      *  
      * @param xintegerlist  [generated from:  
      * 'org.xydra.oo.testgen.alltypes.shared.IHasAllType'] 
+     * @return ... 
      */
-    public void setXintegerlist(XIntegerListValue xintegerlist) {
+    public IHasAllType setXintegerlist(XIntegerListValue xintegerlist) {
         this.oop.setValue("xintegerlist", xintegerlist);
+        return this;
     }
 
     /** 
@@ -1479,9 +1554,11 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      *  
      * @param xinteger  [generated from:  
      * 'org.xydra.oo.testgen.alltypes.shared.IHasAllType'] 
+     * @return ... 
      */
-    public void setXinteger(XIntegerValue xinteger) {
+    public IHasAllType setXinteger(XIntegerValue xinteger) {
         this.oop.setValue("xinteger", xinteger);
+        return this;
     }
 
     /** 
@@ -1490,9 +1567,11 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      *  
      * @param xlonglist  [generated from:  
      * 'org.xydra.oo.testgen.alltypes.shared.IHasAllType'] 
+     * @return ... 
      */
-    public void setXlonglist(XLongListValue xlonglist) {
+    public IHasAllType setXlonglist(XLongListValue xlonglist) {
         this.oop.setValue("xlonglist", xlonglist);
+        return this;
     }
 
     /** 
@@ -1501,9 +1580,11 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      *  
      * @param xlong  [generated from:  
      * 'org.xydra.oo.testgen.alltypes.shared.IHasAllType'] 
+     * @return ... 
      */
-    public void setXlong(XLongValue xlong) {
+    public IHasAllType setXlong(XLongValue xlong) {
         this.oop.setValue("xlong", xlong);
+        return this;
     }
 
     /** 
@@ -1512,9 +1593,11 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      *  
      * @param xstringlist  [generated from:  
      * 'org.xydra.oo.testgen.alltypes.shared.IHasAllType'] 
+     * @return ... 
      */
-    public void setXstringlist(XStringListValue xstringlist) {
+    public IHasAllType setXstringlist(XStringListValue xstringlist) {
         this.oop.setValue("xstringlist", xstringlist);
+        return this;
     }
 
     /** 
@@ -1523,9 +1606,11 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      *  
      * @param xstringset  [generated from:  
      * 'org.xydra.oo.testgen.alltypes.shared.IHasAllType'] 
+     * @return ... 
      */
-    public void setXstringset(XStringSetValue xstringset) {
+    public IHasAllType setXstringset(XStringSetValue xstringset) {
         this.oop.setValue("xstringset", xstringset);
+        return this;
     }
 
     /** 
@@ -1534,9 +1619,11 @@ public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testge
      *  
      * @param xstring  [generated from:  
      * 'org.xydra.oo.testgen.alltypes.shared.IHasAllType'] 
+     * @return ... 
      */
-    public void setXstring(XStringValue xstring) {
+    public IHasAllType setXstring(XStringValue xstring) {
         this.oop.setValue("xstring", xstring);
+        return this;
     }
 
 }

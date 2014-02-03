@@ -45,7 +45,7 @@ public class SharedTypeMapping {
     
     private static final Logger log = LoggerFactory.getLogger(SharedTypeMapping.class);
     
-    private static Map<TypeSpec,SharedTypeMapping> _mappings = new HashMap<TypeSpec,SharedTypeMapping>();
+    private static Map<IType,SharedTypeMapping> _mappings = new HashMap<IType,SharedTypeMapping>();
     
     // mappers
     private static IMapper<Boolean,XBooleanValue> _javaBooleanMapper = new IMapper<Boolean,XBooleanValue>() {
@@ -645,7 +645,7 @@ public class SharedTypeMapping {
      * @param type @NeverNull
      * @return a mapping for the given type
      */
-    public static SharedTypeMapping getMapping(@NeverNull TypeSpec type) {
+    public static SharedTypeMapping getMapping(@NeverNull IType type) {
         assert type != null;
         return _mappings.get(type);
     }
@@ -656,8 +656,8 @@ public class SharedTypeMapping {
      * @return looks up a mapping for the given type and returns the ValueType
      *         or null if no mapping was found
      */
-    public static ValueType getValueType(@NeverNull BaseTypeSpec baseType,
-            BaseTypeSpec componentType) {
+    public static ValueType getValueType(@NeverNull IBaseType baseType,
+            IBaseType componentType) {
         assert baseType != null;
         return getXydraBaseValueType(new TypeSpec(baseType, componentType, "runtime"));
     }

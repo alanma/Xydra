@@ -6,12 +6,18 @@ import java.util.Set;
 import org.xydra.oo.generator.codespec.IMember;
 import org.xydra.oo.runtime.java.JavaReflectionUtils;
 import org.xydra.oo.runtime.java.JavaTypeSpecUtils;
+import org.xydra.oo.runtime.shared.IType;
 import org.xydra.oo.runtime.shared.TypeSpec;
 
 
+/**
+ * specifies a field
+ * 
+ * @author xamde
+ */
 public class FieldSpec extends AbstractMember implements IMember {
     
-    public TypeSpec t;
+    public IType t;
     
     public FieldSpec(String name, Class<?> type, Class<?> componentType, String generatedFrom) {
         super(name, generatedFrom);
@@ -36,7 +42,7 @@ public class FieldSpec extends AbstractMember implements IMember {
                 JavaReflectionUtils.getComponentType(t), generatedFrom);
     }
     
-    FieldSpec(String name, TypeSpec typeSpec, String generatedFrom) {
+    FieldSpec(String name, IType typeSpec, String generatedFrom) {
         super(name, generatedFrom);
         this.t = typeSpec;
     }
@@ -82,7 +88,7 @@ public class FieldSpec extends AbstractMember implements IMember {
         return this.t.getTypeString();
     }
     
-    public TypeSpec getType() {
+    public IType getType() {
         return this.t;
     }
     

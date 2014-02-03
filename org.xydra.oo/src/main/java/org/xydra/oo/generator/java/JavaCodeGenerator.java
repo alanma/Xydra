@@ -38,7 +38,8 @@ import org.xydra.oo.generator.java.GwtModuleXmlSpec.GenerateWith;
 import org.xydra.oo.runtime.java.JavaReflectionUtils;
 import org.xydra.oo.runtime.java.OOJavaOnlyProxy;
 import org.xydra.oo.runtime.java.OOReflectionUtils;
-import org.xydra.oo.runtime.shared.BaseTypeSpec;
+import org.xydra.oo.runtime.shared.IBaseType;
+import org.xydra.oo.runtime.shared.IType;
 import org.xydra.oo.runtime.shared.TypeSpec;
 
 import com.google.gwt.core.client.GWT;
@@ -54,7 +55,7 @@ public class JavaCodeGenerator {
     
     private static final Logger log = LoggerFactory.getLogger(JavaCodeGenerator.class);
     
-    static void addCollectionGetter(ClassSpec classSpec, String name, TypeSpec t, String comment,
+    static void addCollectionGetter(ClassSpec classSpec, String name, IType t, String comment,
             String generatedFrom) {
         MethodSpec getter = classSpec.addMethod(NameUtils.firstLetterLowercased(name), t,
                 generatedFrom);
@@ -63,21 +64,27 @@ public class JavaCodeGenerator {
     }
     
     /**
-     * @param classSpec
-     * @param name of bean property
-     * @param typeSpec
-     * @param comment
-     * @param generatedFrom
+     * @param classSpec to which the getter/setter belong
+     * @param name of bean property, e.g. "name" or "age"
+     * @param typeSpec specifies the type to be set or get
+     * @param comment ends in javadoc
+     * @param generatedFrom debug comment
      */
-    static void addGetterSetter(ClassSpec classSpec, String name, TypeSpec typeSpec,
+    static void addGetterSetter(ClassSpec classSpec, String name, IType typeSpec,
             @CanBeNull String comment, String generatedFrom) {
         MethodSpec getter = classSpec.addMethod("get" + NameUtils.toJavaName(name), typeSpec,
                 generatedFrom);
         getter.returnType.setComment("the current value or null if not defined");
         getter.annotateWith(org.xydra.oo.Field.class, NameUtils.toXFieldName(name));
         
-        MethodSpec setter = classSpec.addVoidMethod("set" + NameUtils.toJavaName(name),
-                generatedFrom);
+        MethodSpec setter = classSpec.addMethod("set" + NameUtils.toJavaName(name),
+                classSpec.asType(), generatedFrom);
+        
+        // FIXME ##########
+        
+        // MethodSpec setter = classSpec.addVoidMethod("set" +
+        // NameUtils.toJavaName(name),
+        // generatedFrom);
         FieldSpec param = setter.addParam(NameUtils.toXFieldName(name), typeSpec, generatedFrom);
         param.setComment("the value to set");
         setter.setComment("Set a value, silently overwriting existing values, if any.");
@@ -224,7 +231,7 @@ public class JavaCodeGenerator {
                      */
                     TypeSpec normalisedType = new TypeSpec(fieldSpec.t);
                     if(normalisedType.isArray()) {
-                        BaseTypeSpec normalisedCompType = JavaReflectionUtils
+                        IBaseType normalisedCompType = JavaReflectionUtils
                                 .getPrimitiveTypeForWrapperClass(normalisedType.getComponentType());
                         if(normalisedCompType != null) {
                             normalisedType = new TypeSpec(normalisedType.getBaseType(),

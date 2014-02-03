@@ -4,6 +4,7 @@ import org.xydra.annotations.CanBeNull;
 import org.xydra.annotations.NeverNull;
 import org.xydra.base.value.XCollectionValue;
 import org.xydra.oo.runtime.shared.BaseTypeSpec;
+import org.xydra.oo.runtime.shared.IBaseType;
 import org.xydra.oo.runtime.shared.SharedTypeMapping;
 import org.xydra.oo.runtime.shared.SharedTypeSystem;
 import org.xydra.oo.runtime.shared.TypeSpec;
@@ -19,8 +20,8 @@ public class JavaTypeSpecUtils {
      */
     public static TypeSpec createTypeSpec(Class<?> type, Class<?> componentType,
             String generatedFrom) {
-        BaseTypeSpec baseType;
-        BaseTypeSpec componentBaseType;
+        IBaseType baseType;
+        IBaseType componentBaseType;
         if(type.isArray()) {
             baseType = BaseTypeSpec.ARRAY;
             assert type.getComponentType() != null;
@@ -36,7 +37,7 @@ public class JavaTypeSpecUtils {
      * @param c
      * @return null or wrapped type
      */
-    public static BaseTypeSpec createBaseTypeSpec(@CanBeNull Class<?> c) {
+    public static IBaseType createBaseTypeSpec(@CanBeNull Class<?> c) {
         if(c == null)
             return null;
         // package is null for primitive types
@@ -80,8 +81,8 @@ public class JavaTypeSpecUtils {
     }
     
     public static TypeSpec createTypeSpec(Class<?> javaBaseType, Class<?> javaComponentType) {
-        BaseTypeSpec baseType = createBaseTypeSpec(javaBaseType);
-        BaseTypeSpec componentType = createBaseTypeSpec(javaComponentType);
+        IBaseType baseType = createBaseTypeSpec(javaBaseType);
+        IBaseType componentType = createBaseTypeSpec(javaComponentType);
         return new TypeSpec(baseType, componentType, "JavaTypeSpecUtils");
     }
     

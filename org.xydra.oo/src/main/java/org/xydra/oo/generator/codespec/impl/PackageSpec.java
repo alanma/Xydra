@@ -6,6 +6,11 @@ import java.util.List;
 import java.util.Set;
 
 
+/**
+ * Packagename + classes, sub-packages
+ * 
+ * @author xamde
+ */
 public class PackageSpec {
     
     public Set<ClassSpec> classes = new HashSet<ClassSpec>();

@@ -60,7 +60,7 @@ public class OOJavaOnlyProxy implements InvocationHandler {
         }
         
         try {
-            return invoke(method, args);
+            return invokeIntern(proxy, method, args);
         } catch(Exception e) {
             log.error(method.getReturnType() + " " + method.getName() + "(..)", e);
             throw e;
@@ -70,7 +70,7 @@ public class OOJavaOnlyProxy implements InvocationHandler {
         }
     }
     
-    private Object invoke(Method method, Object[] args) {
+    private Object invokeIntern(Object proxy, Method method, Object[] args) {
         assert args == null && method.getParameterTypes().length == 0
                 || (args != null && method.getParameterTypes().length == args.length) : args == null ? "args null"
                 : "args.len=" + args.length;
@@ -134,13 +134,13 @@ public class OOJavaOnlyProxy implements InvocationHandler {
             Class<?> paramType = method.getParameterTypes()[0];
             if(OOReflectionUtils.isTranslatableSingleType(paramType)) {
                 _set_(args[0], paramType, null, fieldId);
-                return null;
+                return proxy;
             }
             Class<?> componentType = JavaReflectionUtils.getComponentType(method
                     .getGenericParameterTypes()[0]);
             if(OOReflectionUtils.isKnownTranslatableCollectionType(paramType, componentType)) {
                 _set_(args[0], paramType, componentType, fieldId);
-                return null;
+                return proxy;
             }
             throw new RuntimeException("Setter for type '" + paramType.getCanonicalName()
                     + "' not yet impl");
