@@ -111,7 +111,9 @@ public class OOJavaOnlyProxy implements InvocationHandler {
             }
             throw new RuntimeException("Cannot handle type " + returnType.getCanonicalName()
                     + " in setter for " + fieldId);
-        } else if(kindOfMethod == KindOfMethod.Is) {
+        } else
+        /* ================================ IS ================================ */
+        if(kindOfMethod == KindOfMethod.Is) {
             if(args != null) {
                 throw new RuntimeException("isXXX() method does not take arguments");
             }
@@ -144,8 +146,9 @@ public class OOJavaOnlyProxy implements InvocationHandler {
             }
             throw new RuntimeException("Setter for type '" + paramType.getCanonicalName()
                     + "' not yet impl");
-        } else {
-            // TODO impl, .e.g "is" methods
+        } else
+        /* ============================== Unknown ============================== */
+        {
             throw new RuntimeException("Don't know how to handle method '" + name + "' with kind '"
                     + kindOfMethod + "'");
         }

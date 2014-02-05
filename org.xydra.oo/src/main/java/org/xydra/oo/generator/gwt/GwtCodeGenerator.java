@@ -204,7 +204,7 @@ public class GwtCodeGenerator extends Generator {
                     break;
                 
                 default:
-                    break;
+                    throw new AssertionError("Unknown method type: " + kindOfMethod);
                 }
             }
         }

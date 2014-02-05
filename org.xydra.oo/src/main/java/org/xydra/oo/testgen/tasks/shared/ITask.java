@@ -7,7 +7,7 @@ import org.xydra.base.rmof.XWritableModel;
 import org.xydra.oo.Field;
 import org.xydra.oo.testgen.tasks.shared.ITask;
 
-/** Generated on Wed Feb 05 14:35:25 CET 2014 by SpecWriter, a part of xydra.org:oo */
+/** Generated on Wed Feb 05 14:55:52 CET 2014 by SpecWriter, a part of xydra.org:oo */
 public interface ITask extends IHasXId {
 
     /** 
