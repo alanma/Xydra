@@ -105,8 +105,9 @@ public class JavaTypeMapping {
     public static SharedTypeMapping createMapping(Class<?> javaBaseType,
             @CanBeNull Class<?> javaComponentType, ValueType xydraBaseValueType,
             @CanBeNull IMapper<?,? extends XValue> mapper, IXydraCollectionFactory factory) {
-        return new SharedTypeMapping(JavaTypeSpecUtils.createTypeSpec(javaBaseType,
-                javaComponentType), xydraBaseValueType, mapper, factory);
+        return SharedTypeMapping.createAndAdd(
+                JavaTypeSpecUtils.createTypeSpec(javaBaseType, javaComponentType),
+                xydraBaseValueType, mapper, factory);
     }
     
 }

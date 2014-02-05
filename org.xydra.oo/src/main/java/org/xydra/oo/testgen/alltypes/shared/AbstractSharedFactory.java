@@ -7,7 +7,7 @@ import org.xydra.oo.runtime.shared.AbstractFactory;
 import org.xydra.oo.testgen.alltypes.shared.IHasAllType;
 import org.xydra.oo.testgen.alltypes.shared.IPerson;
 
-/** Generated on Wed Feb 05 14:55:52 CET 2014 by SpecWriter, a part of xydra.org:oo */
+/** Generated on Wed Feb 05 16:34:31 CET 2014 by SpecWriter, a part of xydra.org:oo */
 public abstract class AbstractSharedFactory extends AbstractFactory {
 
     /** 

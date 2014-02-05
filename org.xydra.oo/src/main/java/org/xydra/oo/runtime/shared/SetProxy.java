@@ -23,7 +23,8 @@ import org.xydra.base.value.XCollectionValue;
 public class SetProxy<X extends XCollectionValue<T>, T, J, C> extends CollectionProxy<X,T,J,C>
         implements Set<C> {
     
-    public SetProxy(XWritableObject xo, XId fieldId, CollectionProxy.IComponentTransformer<X,T,J,C> t) {
+    public SetProxy(XWritableObject xo, XId fieldId,
+            CollectionProxy.IComponentTransformer<X,T,J,C> t) {
         super(xo, fieldId, t);
     }
     
@@ -34,6 +35,7 @@ public class SetProxy<X extends XCollectionValue<T>, T, J, C> extends Collection
     
     @Override
     public boolean addAll(Collection<? extends C> c) {
+        // TODO add whole collection in one step
         throw new UnsupportedOperationException("Not implemented yet");
     }
     

@@ -167,10 +167,10 @@ public class SharedTypeMapping {
     
     // trivial mappings for built-in Xydra types
     
-    public final static SharedTypeMapping Address = new SharedTypeMapping(TypeConstants.Address,
-            ValueType.Address, null, null);
+    public final static SharedTypeMapping Address = SharedTypeMapping.createAndAdd(
+            TypeConstants.Address, ValueType.Address, null, null);
     
-    public final static SharedTypeMapping Address_List = new SharedTypeMapping(
+    public final static SharedTypeMapping Address_List = SharedTypeMapping.createAndAdd(
     
     TypeConstants.Address_List, ValueType.AddressList,
             new IMapper<List<XAddress>,XAddressListValue>() {
@@ -210,7 +210,7 @@ public class SharedTypeMapping {
                 }
             });
     
-    public final static SharedTypeMapping Address_Set = new SharedTypeMapping(
+    public final static SharedTypeMapping Address_Set = SharedTypeMapping.createAndAdd(
             TypeConstants.Address_Set, ValueType.AddressSet, null, new IXydraCollectionFactory() {
                 
                 @Override
@@ -225,7 +225,7 @@ public class SharedTypeMapping {
                 }
             });
     
-    public final static SharedTypeMapping Address_SortedSet = new SharedTypeMapping(
+    public final static SharedTypeMapping Address_SortedSet = SharedTypeMapping.createAndAdd(
             TypeConstants.Address_SortedSet, ValueType.AddressSortedSet, null,
             new IXydraCollectionFactory() {
                 
@@ -241,7 +241,7 @@ public class SharedTypeMapping {
                 }
             });
     
-    public final static SharedTypeMapping AddressList = new SharedTypeMapping(
+    public final static SharedTypeMapping AddressList = SharedTypeMapping.createAndAdd(
             TypeConstants.AddressList, ValueType.AddressList, null, new IXydraCollectionFactory() {
                 
                 @Override
@@ -256,7 +256,7 @@ public class SharedTypeMapping {
                 }
             });
     
-    public final static SharedTypeMapping AddressSet = new SharedTypeMapping(
+    public final static SharedTypeMapping AddressSet = SharedTypeMapping.createAndAdd(
             TypeConstants.AddressSet, ValueType.AddressSet, null, new IXydraCollectionFactory() {
                 
                 @Override
@@ -271,7 +271,7 @@ public class SharedTypeMapping {
                 }
             });
     
-    public final static SharedTypeMapping AddressSortedSet = new SharedTypeMapping(
+    public final static SharedTypeMapping AddressSortedSet = SharedTypeMapping.createAndAdd(
             TypeConstants.AddressSortedSet, ValueType.AddressSortedSet, null,
             new IXydraCollectionFactory() {
                 
@@ -287,13 +287,13 @@ public class SharedTypeMapping {
                 }
             });
     
-    public final static SharedTypeMapping Binary = new SharedTypeMapping(TypeConstants.Binary,
-            ValueType.Binary, null, null);
+    public final static SharedTypeMapping Binary = SharedTypeMapping.createAndAdd(
+            TypeConstants.Binary, ValueType.Binary, null, null);
     
-    public final static SharedTypeMapping Boolean = new SharedTypeMapping(TypeConstants.Boolean,
-            ValueType.Boolean, null, null);
+    public final static SharedTypeMapping Boolean = SharedTypeMapping.createAndAdd(
+            TypeConstants.Boolean, ValueType.Boolean, null, null);
     
-    public final static SharedTypeMapping Boolean_List = new SharedTypeMapping(
+    public final static SharedTypeMapping Boolean_List = SharedTypeMapping.createAndAdd(
             TypeConstants.Boolean_List, ValueType.BooleanList, null, new IXydraCollectionFactory() {
                 
                 @Override
@@ -308,7 +308,7 @@ public class SharedTypeMapping {
                 }
             });
     
-    public final static SharedTypeMapping BooleanList = new SharedTypeMapping(
+    public final static SharedTypeMapping BooleanList = SharedTypeMapping.createAndAdd(
             TypeConstants.BooleanList, ValueType.BooleanList, null, new IXydraCollectionFactory() {
                 
                 @Override
@@ -323,10 +323,10 @@ public class SharedTypeMapping {
                 }
             });
     
-    public final static SharedTypeMapping Double = new SharedTypeMapping(TypeConstants.Double,
-            ValueType.Double, null, null);
+    public final static SharedTypeMapping Double = SharedTypeMapping.createAndAdd(
+            TypeConstants.Double, ValueType.Double, null, null);
     
-    public final static SharedTypeMapping Double_List = new SharedTypeMapping(
+    public final static SharedTypeMapping Double_List = SharedTypeMapping.createAndAdd(
             TypeConstants.Double_List, ValueType.DoubleList, null, new IXydraCollectionFactory() {
                 
                 @Override
@@ -341,7 +341,7 @@ public class SharedTypeMapping {
                 }
             });
     
-    public final static SharedTypeMapping DoubleList = new SharedTypeMapping(
+    public final static SharedTypeMapping DoubleList = SharedTypeMapping.createAndAdd(
             TypeConstants.DoubleList, ValueType.DoubleList, null, new IXydraCollectionFactory() {
                 
                 @Override
@@ -356,11 +356,11 @@ public class SharedTypeMapping {
                 }
             });
     
-    public final static SharedTypeMapping Id = new SharedTypeMapping(TypeConstants.Id,
+    public final static SharedTypeMapping Id = SharedTypeMapping.createAndAdd(TypeConstants.Id,
             ValueType.Id, null, null);
     
-    public final static SharedTypeMapping Id_List = new SharedTypeMapping(TypeConstants.Id_List,
-            ValueType.IdList, null, new IXydraCollectionFactory() {
+    public final static SharedTypeMapping Id_List = SharedTypeMapping.createAndAdd(
+            TypeConstants.Id_List, ValueType.IdList, null, new IXydraCollectionFactory() {
                 
                 @Override
                 public Object createEmptyCollection() {
@@ -373,8 +373,13 @@ public class SharedTypeMapping {
                 }
             });
     
-    public final static SharedTypeMapping Id_Set = new SharedTypeMapping(TypeConstants.Id_Set,
-            ValueType.IdSet, null, new IXydraCollectionFactory() {
+    public final static SharedTypeMapping Id_Set = SharedTypeMapping.createAndAdd(
+            TypeConstants.Id_Set, ValueType.IdSet,
+            
+            // IMPROVE add a mapper here?
+            null,
+            
+            new IXydraCollectionFactory() {
                 
                 @Override
                 public Object createEmptyCollection() {
@@ -387,7 +392,7 @@ public class SharedTypeMapping {
                 }
             });
     
-    public final static SharedTypeMapping Id_SortedSet = new SharedTypeMapping(
+    public final static SharedTypeMapping Id_SortedSet = SharedTypeMapping.createAndAdd(
             TypeConstants.Id_SortedSet, ValueType.IdSortedSet, null, new IXydraCollectionFactory() {
                 
                 @Override
@@ -402,8 +407,8 @@ public class SharedTypeMapping {
                 }
             });
     
-    public final static SharedTypeMapping IdList = new SharedTypeMapping(TypeConstants.IdList,
-            ValueType.IdList, null, new IXydraCollectionFactory() {
+    public final static SharedTypeMapping IdList = SharedTypeMapping.createAndAdd(
+            TypeConstants.IdList, ValueType.IdList, null, new IXydraCollectionFactory() {
                 
                 @Override
                 public Object createEmptyCollection() {
@@ -416,8 +421,8 @@ public class SharedTypeMapping {
                 }
             });
     
-    public final static SharedTypeMapping IdSet = new SharedTypeMapping(TypeConstants.IdSet,
-            ValueType.IdSet, null, new IXydraCollectionFactory() {
+    public final static SharedTypeMapping IdSet = SharedTypeMapping.createAndAdd(
+            TypeConstants.IdSet, ValueType.IdSet, null, new IXydraCollectionFactory() {
                 
                 @Override
                 public Object createEmptyCollection() {
@@ -430,7 +435,7 @@ public class SharedTypeMapping {
                 }
             });
     
-    public final static SharedTypeMapping IdSortedSet = new SharedTypeMapping(
+    public final static SharedTypeMapping IdSortedSet = SharedTypeMapping.createAndAdd(
             TypeConstants.IdSortedSet, ValueType.IdSortedSet, null, new IXydraCollectionFactory() {
                 
                 @Override
@@ -445,10 +450,10 @@ public class SharedTypeMapping {
                 }
             });
     
-    public final static SharedTypeMapping Integer = new SharedTypeMapping(TypeConstants.Integer,
-            ValueType.Integer, null, null);
+    public final static SharedTypeMapping Integer = SharedTypeMapping.createAndAdd(
+            TypeConstants.Integer, ValueType.Integer, null, null);
     
-    public final static SharedTypeMapping Integer_List = new SharedTypeMapping(
+    public final static SharedTypeMapping Integer_List = SharedTypeMapping.createAndAdd(
             TypeConstants.Integer_List, ValueType.IntegerList, null, new IXydraCollectionFactory() {
                 
                 @Override
@@ -463,7 +468,7 @@ public class SharedTypeMapping {
                 }
             });
     
-    public final static SharedTypeMapping IntegerList = new SharedTypeMapping(
+    public final static SharedTypeMapping IntegerList = SharedTypeMapping.createAndAdd(
             TypeConstants.IntegerList, ValueType.IntegerList, null, new IXydraCollectionFactory() {
                 
                 @Override
@@ -478,10 +483,10 @@ public class SharedTypeMapping {
                 }
             });
     
-    public final static SharedTypeMapping Long = new SharedTypeMapping(TypeConstants.Long,
+    public final static SharedTypeMapping Long = SharedTypeMapping.createAndAdd(TypeConstants.Long,
             ValueType.Long, null, null);
     
-    public final static SharedTypeMapping Long_List = new SharedTypeMapping(
+    public final static SharedTypeMapping Long_List = SharedTypeMapping.createAndAdd(
             TypeConstants.Long_List, ValueType.LongList, _javaLongMapper,
             new IXydraCollectionFactory() {
                 
@@ -496,8 +501,9 @@ public class SharedTypeMapping {
                 }
             });
     
-    public final static SharedTypeMapping LongList = new SharedTypeMapping(TypeConstants.LongList,
-            ValueType.LongList, _javaLongMapper, new IXydraCollectionFactory() {
+    public final static SharedTypeMapping LongList = SharedTypeMapping.createAndAdd(
+            TypeConstants.LongList, ValueType.LongList, _javaLongMapper,
+            new IXydraCollectionFactory() {
                 
                 @Override
                 public Object createEmptyCollection() {
@@ -510,10 +516,10 @@ public class SharedTypeMapping {
                 }
             });
     
-    public final static SharedTypeMapping String = new SharedTypeMapping(TypeConstants.String,
-            ValueType.String, null, null);
+    public final static SharedTypeMapping String = SharedTypeMapping.createAndAdd(
+            TypeConstants.String, ValueType.String, null, null);
     
-    public final static SharedTypeMapping String_List = new SharedTypeMapping(
+    public final static SharedTypeMapping String_List = SharedTypeMapping.createAndAdd(
             TypeConstants.String_List, ValueType.StringList, null, new IXydraCollectionFactory() {
                 
                 @Override
@@ -528,7 +534,7 @@ public class SharedTypeMapping {
                 }
             });
     
-    public final static SharedTypeMapping String_Set = new SharedTypeMapping(
+    public final static SharedTypeMapping String_Set = SharedTypeMapping.createAndAdd(
             TypeConstants.String_Set, ValueType.StringSet, null, new IXydraCollectionFactory() {
                 
                 @Override
@@ -542,7 +548,7 @@ public class SharedTypeMapping {
                 }
             });
     
-    public final static SharedTypeMapping StringList = new SharedTypeMapping(
+    public final static SharedTypeMapping StringList = SharedTypeMapping.createAndAdd(
             TypeConstants.StringList, ValueType.StringList, null, new IXydraCollectionFactory() {
                 
                 @Override
@@ -557,7 +563,7 @@ public class SharedTypeMapping {
                 }
             });
     
-    public final static SharedTypeMapping StringSet = new SharedTypeMapping(
+    public final static SharedTypeMapping StringSet = SharedTypeMapping.createAndAdd(
             TypeConstants.StringSet, ValueType.StringSet, null, new IXydraCollectionFactory() {
                 
                 @Override
@@ -573,48 +579,48 @@ public class SharedTypeMapping {
     
     // mappings for Java types
     
-    public final static SharedTypeMapping Javaboolean = new SharedTypeMapping(
+    public final static SharedTypeMapping Javaboolean = SharedTypeMapping.createAndAdd(
             TypeConstants.Javaboolean, ValueType.Boolean, _javaBooleanMapper, null);
     
-    public final static SharedTypeMapping JavaBoolean = new SharedTypeMapping(
+    public final static SharedTypeMapping JavaBoolean = SharedTypeMapping.createAndAdd(
             TypeConstants.JavaBoolean, ValueType.Boolean, _javaBooleanMapper, null);
-    public final static SharedTypeMapping JavabooleanList = new SharedTypeMapping(
+    public final static SharedTypeMapping JavabooleanList = SharedTypeMapping.createAndAdd(
             TypeConstants.JavabooleanList, ValueType.Boolean, _javaBooleanMapper, null);
     
-    public final static SharedTypeMapping JavabyteArray = new SharedTypeMapping(
+    public final static SharedTypeMapping JavabyteArray = SharedTypeMapping.createAndAdd(
             TypeConstants.JavabyteArray, ValueType.Binary, _javaByteArrayMapper, null);
     
-    public final static SharedTypeMapping JavabyteList = new SharedTypeMapping(
+    public final static SharedTypeMapping JavabyteList = SharedTypeMapping.createAndAdd(
             TypeConstants.JavabyteList, ValueType.Binary, _javaByteArrayMapper, null);
     
-    public final static SharedTypeMapping Javadouble = new SharedTypeMapping(
+    public final static SharedTypeMapping Javadouble = SharedTypeMapping.createAndAdd(
             TypeConstants.Javadouble, ValueType.Double, _javaDoubleMapper, null);
     
-    public final static SharedTypeMapping JavaDouble = new SharedTypeMapping(
+    public final static SharedTypeMapping JavaDouble = SharedTypeMapping.createAndAdd(
             TypeConstants.JavaDouble, ValueType.Double, _javaDoubleMapper, null);
     
-    public final static SharedTypeMapping JavadoubleList = new SharedTypeMapping(
+    public final static SharedTypeMapping JavadoubleList = SharedTypeMapping.createAndAdd(
             TypeConstants.JavadoubleList, ValueType.DoubleList, _javaDoubleMapper, null);
     
-    public final static SharedTypeMapping Javaint = new SharedTypeMapping(TypeConstants.Javaint,
-            ValueType.Integer, _javaIntegerMapper, null);
+    public final static SharedTypeMapping Javaint = SharedTypeMapping.createAndAdd(
+            TypeConstants.Javaint, ValueType.Integer, _javaIntegerMapper, null);
     
-    public final static SharedTypeMapping JavaInteger = new SharedTypeMapping(
+    public final static SharedTypeMapping JavaInteger = SharedTypeMapping.createAndAdd(
             TypeConstants.JavaInteger, ValueType.Integer, _javaIntegerMapper, null);
     
-    public final static SharedTypeMapping JavaintList = new SharedTypeMapping(
+    public final static SharedTypeMapping JavaintList = SharedTypeMapping.createAndAdd(
             TypeConstants.JavaintList, ValueType.Integer, _javaIntegerMapper, null);
     
-    public final static SharedTypeMapping Javalong = new SharedTypeMapping(TypeConstants.Javalong,
-            ValueType.Long, _javaLongMapper, null);
+    public final static SharedTypeMapping Javalong = SharedTypeMapping.createAndAdd(
+            TypeConstants.Javalong, ValueType.Long, _javaLongMapper, null);
     
-    public final static SharedTypeMapping JavaLong = new SharedTypeMapping(TypeConstants.JavaLong,
-            ValueType.Long, _javaLongMapper, null);
+    public final static SharedTypeMapping JavaLong = SharedTypeMapping.createAndAdd(
+            TypeConstants.JavaLong, ValueType.Long, _javaLongMapper, null);
     
-    public final static SharedTypeMapping JavalongList = new SharedTypeMapping(
+    public final static SharedTypeMapping JavalongList = SharedTypeMapping.createAndAdd(
             TypeConstants.JavalongList, ValueType.Long, _javaLongMapper, null);
     
-    public final static SharedTypeMapping JavaString = new SharedTypeMapping(
+    public final static SharedTypeMapping JavaString = SharedTypeMapping.createAndAdd(
             TypeConstants.JavaString, ValueType.String, new IMapper<String,XStringValue>() {
                 
                 @Override
@@ -656,8 +662,7 @@ public class SharedTypeMapping {
      * @return looks up a mapping for the given type and returns the ValueType
      *         or null if no mapping was found
      */
-    public static ValueType getValueType(@NeverNull IBaseType baseType,
-            IBaseType componentType) {
+    public static ValueType getValueType(@NeverNull IBaseType baseType, IBaseType componentType) {
         assert baseType != null;
         return getXydraBaseValueType(new TypeSpec(baseType, componentType, "runtime"));
     }
@@ -688,27 +693,51 @@ public class SharedTypeMapping {
     @NeverNull
     private ValueType xydraBaseValueType;
     
-    public SharedTypeMapping(String javaBaseTypePackage, String javaBaseTypeName,
+    /**
+     * @param javaBaseTypePackage
+     * @param javaBaseTypeName
+     * @param javaComponentTypePackage
+     * @param javaComponentTypeName
+     * @param xydraBaseValueType
+     * @param mapper
+     * @param factory
+     * @return ...
+     */
+    public SharedTypeMapping createAndAdd(String javaBaseTypePackage, String javaBaseTypeName,
             String javaComponentTypePackage, String javaComponentTypeName,
             ValueType xydraBaseValueType, @CanBeNull IMapper<?,? extends XValue> mapper,
             IXydraCollectionFactory factory) {
-        this(new TypeSpec(BaseTypeSpec.create(javaBaseTypePackage, javaBaseTypeName),
-                BaseTypeSpec.create(javaComponentTypePackage, javaComponentTypeName),
-                "OOTypeMapping"), xydraBaseValueType, mapper, factory);
+        return createAndAdd(
+                new TypeSpec(BaseTypeSpec.create(javaBaseTypePackage, javaBaseTypeName),
+                        BaseTypeSpec.create(javaComponentTypePackage, javaComponentTypeName),
+                        "OOTypeMapping"), xydraBaseValueType, mapper, factory);
     }
     
-    public SharedTypeMapping(TypeSpec typeSpec, ValueType xydraBaseValueType,
-            @CanBeNull IMapper<?,? extends XValue> mapper, IXydraCollectionFactory factory) {
-        this.typeSpec = typeSpec;
-        this.xydraBaseValueType = xydraBaseValueType;
-        this.mapper = mapper;
-        this.factory = factory;
-        
-        _mappings.put(typeSpec, this);
+    private SharedTypeMapping() {
     }
     
     /**
-     * @return an empty Xydra collection value, a subtype of
+     * @param typeSpec
+     * @param xydraBaseValueType
+     * @param mapper
+     * @param factory
+     * @return ...
+     */
+    public static SharedTypeMapping createAndAdd(TypeSpec typeSpec, ValueType xydraBaseValueType,
+            @CanBeNull IMapper<?,? extends XValue> mapper, IXydraCollectionFactory factory) {
+        SharedTypeMapping stm = new SharedTypeMapping();
+        stm.typeSpec = typeSpec;
+        stm.xydraBaseValueType = xydraBaseValueType;
+        stm.mapper = mapper;
+        stm.factory = factory;
+        
+        _mappings.put(typeSpec, stm);
+        
+        return stm;
+    }
+    
+    /**
+     * @return an empty Xydra collection value, a sub-type of
      *         {@link XCollectionValue}
      */
     public <T> XCollectionValue<T> createEmptyXydraCollection() {
@@ -741,7 +770,7 @@ public class SharedTypeMapping {
     
     @Override
     public String toString() {
-        return this.typeSpec.id() + " ->" + this.xydraBaseValueType + " mapper?"
+        return this.typeSpec.id() + " -> " + this.xydraBaseValueType + " mapper?"
                 + (this.mapper != null) + " factory?" + (this.factory != null);
     }
     
@@ -760,7 +789,8 @@ public class SharedTypeMapping {
                 return y;
             } catch(ClassCastException e) {
                 throw new RuntimeException("Maybe you need to add a mapper from "
-                        + j.getClass().getName() + " to Xydra", e);
+                        + j.getClass().getName() + " to a Xydra type. No mapper found. Mapping: "
+                        + this, e);
             }
         }
         
