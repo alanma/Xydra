@@ -1,6 +1,7 @@
 package org.xydra.oo.runtime.shared;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -24,8 +25,14 @@ import org.xydra.base.value.XCollectionValue;
 public class ListProxy<X extends XCollectionValue<T>, T, J, C> extends CollectionProxy<X,T,J,C>
         implements List<C> {
     
-    public ListProxy(XWritableObject xo, XId fieldId, CollectionProxy.IComponentTransformer<X,T,J,C> t) {
-        super(xo, fieldId, t);
+    /**
+     * @param xo
+     * @param fieldId
+     * @param componentTransformer @NeverNull
+     */
+    public ListProxy(XWritableObject xo, XId fieldId,
+            CollectionProxy.IComponentTransformer<X,T,J,C> componentTransformer) {
+        super(xo, fieldId, componentTransformer);
     }
     
     @Override
@@ -45,7 +52,13 @@ public class ListProxy<X extends XCollectionValue<T>, T, J, C> extends Collectio
     
     @Override
     public boolean addAll(Collection<? extends C> c) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        Iterator<? extends C> it = c.iterator();
+        boolean changed = false;
+        while(it.hasNext()) {
+            C cItem = it.next();
+            changed |= super.add(cItem);
+        }
+        return changed;
     }
     
     @Override

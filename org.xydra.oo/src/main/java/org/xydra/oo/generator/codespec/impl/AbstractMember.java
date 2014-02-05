@@ -12,9 +12,9 @@ public abstract class AbstractMember extends NamedElement implements IMember {
     
     public List<AnnotationSpec<?>> annotations = new ArrayList<AnnotationSpec<?>>();
     
-    String comment;
+    private String comment;
     
-    public String generatedFrom;
+    private String generatedFrom;
     
     protected AbstractMember(String name, String generatedFrom) {
         super(name);

@@ -221,7 +221,15 @@ public class OOJavaOnlyProxy implements InvocationHandler {
         /* 2) Collection of Proxy type, i.e. List<IPerson> */
         if(XydraReflectionUtils.isCollectionType(type)
                 && OOReflectionUtils.isProxyType(componentType)) {
-            return liveCollection(type, componentType, fieldName, model, object);
+            if(v == null || v.getType().isCollection())
+                return liveCollection(type, componentType, fieldName, model, object);
+            else {
+                assert v != null;
+                assert !v.getType().isCollection();
+                // return casted component type
+                assert v instanceof XId : v.getType();
+                return OOReflectionUtils.toJavaInstance(type, model, (XId)v);
+            }
         }
         
         /* 3) Auto-convert Enum <-> String */
@@ -260,14 +268,15 @@ public class OOJavaOnlyProxy implements InvocationHandler {
         assert XydraReflectionUtils.isCollectionType(type) : "type=" + type.getCanonicalName()
                 + ", compTyp=" + componentType.getCanonicalName();
         
-        CollectionProxy.IComponentTransformer<XCollectionValue<XValue>,XValue,J,C> t
+        CollectionProxy.IComponentTransformer<XCollectionValue<XValue>,XValue,J,C> componentTransformer
         
         = new CollectionProxy.IComponentTransformer<XCollectionValue<XValue>,XValue,J,C>() {
             
             @SuppressWarnings("unchecked")
             @Override
             public C toJavaComponent(XValue xydraValue) {
-                return (C)convertToJava(fieldName, xydraValue, type, componentType, model, object);
+                Object o = convertToJava(fieldName, xydraValue, type, componentType, model, object);
+                return (C)o;
             }
             
             @Override
@@ -283,12 +292,14 @@ public class OOJavaOnlyProxy implements InvocationHandler {
         };
         
         if(type.equals(List.class)) {
-            return new ListProxy<XCollectionValue<XValue>,XValue,J,C>(object, XX.toId(fieldName), t);
+            return new ListProxy<XCollectionValue<XValue>,XValue,J,C>(object, XX.toId(fieldName),
+                    componentTransformer);
         } else if(type.equals(Set.class)) {
-            return new SetProxy<XCollectionValue<XValue>,XValue,J,C>(object, XX.toId(fieldName), t);
+            return new SetProxy<XCollectionValue<XValue>,XValue,J,C>(object, XX.toId(fieldName),
+                    componentTransformer);
         } else if(type.equals(SortedSet.class)) {
             return new SortedSetProxy<XCollectionValue<XValue>,XValue,J,C>(object,
-                    XX.toId(fieldName), t);
+                    XX.toId(fieldName), componentTransformer);
         } else
             throw new IllegalArgumentException(
                     "Cannot create a live view for a collection of type " + type.getCanonicalName());

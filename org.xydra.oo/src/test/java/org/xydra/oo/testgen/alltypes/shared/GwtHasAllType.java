@@ -1,9 +1,13 @@
 package org.xydra.oo.testgen.alltypes.shared;
 
+import java.lang.Boolean;
+import java.lang.Double;
+import java.lang.Integer;
+import java.lang.Long;
+import java.lang.String;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
-
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.value.XAddressListValue;
@@ -36,8 +40,12 @@ import org.xydra.oo.runtime.shared.SharedTypeMapping;
 import org.xydra.oo.runtime.shared.SortedSetProxy;
 import org.xydra.oo.runtime.shared.TypeSpec;
 import org.xydra.oo.testgen.alltypes.client.GwtFactory;
+import org.xydra.oo.testgen.alltypes.shared.Colors;
+import org.xydra.oo.testgen.alltypes.shared.IHasAllType;
+import org.xydra.oo.testgen.alltypes.shared.IPerson;
+import org.xydra.oo.testgen.alltypes.shared.MyLongBasedType;
 
-/** Generated on Mon Feb 03 22:56:15 CET 2014 by SpecWriter, a part of xydra.org:oo */
+/** Generated on Wed Feb 05 14:35:25 CET 2014 by SpecWriter, a part of xydra.org:oo */
 public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testgen.alltypes.shared.IHasAllType {
 
     /** 

@@ -36,7 +36,19 @@ public class PackageSpec {
         return new ClassSpec(this, "class", name);
     }
     
+    /**
+     * Don't always create a new one, also return existing one with same name
+     * 
+     * @param name
+     * @return an existing or new classSpec with the given name
+     */
     public ClassSpec addInterface(String name) {
+        // slow, but who cares
+        for(ClassSpec cs : this.classes) {
+            if(cs.getName().equals(name))
+                return cs;
+        }
+        // else
         return new ClassSpec(this, "interface", name);
     }
     

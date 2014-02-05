@@ -8,6 +8,7 @@ import org.xydra.oo.runtime.shared.SharedProxy;
 
 public class GwtXydraMapped implements IHasXId {
     
+    /** object-oriented proxy */
     protected SharedProxy oop;
     
     /** For GWT.create only */

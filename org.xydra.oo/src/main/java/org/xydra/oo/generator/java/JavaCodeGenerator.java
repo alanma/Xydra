@@ -45,6 +45,12 @@ import org.xydra.oo.runtime.shared.TypeSpec;
 import com.google.gwt.core.client.GWT;
 
 
+/**
+ * Generates shared interfaces ({@link #generateInterfaces(Class, File, String)}
+ * ) and Java factory. For GWT factory, see {@link GwtCodeGenerator}.
+ * 
+ * @author xamde
+ */
 public class JavaCodeGenerator {
     
     private static final PackageSpec HasIdPackage = new PackageSpec(IHasXId.class.getPackage()
@@ -80,11 +86,12 @@ public class JavaCodeGenerator {
         MethodSpec setter = classSpec.addMethod("set" + NameUtils.toJavaName(name),
                 classSpec.asType(), generatedFrom);
         
-        // FIXME ##########
-        
-        // MethodSpec setter = classSpec.addVoidMethod("set" +
-        // NameUtils.toJavaName(name),
-        // generatedFrom);
+        /*
+         * setter variant that returns void:
+         * 
+         * MethodSpec setter = classSpec.addVoidMethod("set" +
+         * NameUtils.toJavaName(name), generatedFrom);
+         */
         FieldSpec param = setter.addParam(NameUtils.toXFieldName(name), typeSpec, generatedFrom);
         param.setComment("the value to set");
         setter.setComment("Set a value, silently overwriting existing values, if any.");
@@ -109,6 +116,14 @@ public class JavaCodeGenerator {
         }
     }
     
+    /**
+     * @param clazz
+     * @param toBeGeneratedTypesto know during code generation which java
+     *            classes will have been translated in the end
+     * @param sharedPackage
+     * @return a set of members (fields and methods) mapped to the Xydra type
+     *         system
+     */
     private static Set<IMember> collectMappedMembers(Class<?> clazz,
             Set<Class<?>> toBeGeneratedTypes, String sharedPackage) {
         Set<IMember> classMemberSpecs = new HashSet<IMember>();
@@ -138,7 +153,7 @@ public class JavaCodeGenerator {
                 }
             } else {
                 log.warn("Ignoring field '" + field.getName() + "' of type '" + type + "' in '"
-                        + clazz.getCanonicalName() + "'");
+                        + clazz.getCanonicalName() + "' - type could not be translated");
             }
             
             if(fieldSpec != null) {
@@ -200,6 +215,7 @@ public class JavaCodeGenerator {
             if(specificationMemberClass.isEnum())
                 continue;
             
+            log.debug("Processing '" + specificationMemberClass.getCanonicalName() + "'");
             ClassSpec result = toClassSpec(packageSpec, specificationMemberClass,
                     toBeGeneratedTypes);
             convertFieldsToGettersAndSetters(result);
@@ -389,7 +405,7 @@ public class JavaCodeGenerator {
      */
     public static void generateInterfaces(Class<?> spec, File srcDir, String basePackage)
             throws IOException {
-        log.info("Generating from " + spec.getCanonicalName());
+        log.info("Generating from '" + spec.getCanonicalName() + "'");
         PackageSpec packageSpec = new PackageSpec(basePackage, false);
         
         PackageSpec shared = convertInnerClassesToPackageSpec(basePackage, "shared", spec);
@@ -420,31 +436,47 @@ public class JavaCodeGenerator {
         return mappedTypes.contains(type);
     }
     
+    /**
+     * @param packageSpec @NeverNull
+     * @param specClass @NeverNull
+     * @param toBeGeneratedTypes @NeverNull
+     * @return a new {@link ClassSpec}, attached to the given packageSpec.
+     *         Content is based on specClass.
+     */
     private static ClassSpec toClassSpec(PackageSpec packageSpec, Class<?> specClass,
             Set<Class<?>> toBeGeneratedTypes) {
-        ClassSpec resultSpec = packageSpec.addInterface(NameUtils.toClassName(specClass));
-        ClassSpec classSpec = resultSpec;
+        assert packageSpec != null;
+        assert specClass != null;
+        assert toBeGeneratedTypes != null;
         
+        ClassSpec resultSpec = packageSpec.addInterface(NameUtils.toClassName(specClass));
         /*
-         * Look in this class and all super-types. Add lowest members first, to
-         * account for overwriting in the inheritance tree.
+         * Look in this class and all super-types. Put members at the right
+         * level in the hierarchy. Make sure the higher, abstract classes
+         * contain as many members as possible. This avoids code duplication in
+         * the generated code.
          */
-        Class<?> superClass = specClass;
-        while(superClass != null && !superClass.equals(Object.class)) {
-            Set<IMember> extracted = collectMappedMembers(superClass, toBeGeneratedTypes,
-                    packageSpec.getFQPackageName());
-            for(IMember t : extracted) {
-                if(!classSpec.members.contains(t)) {
-                    classSpec.members.add(t);
+        ClassSpec currentClassSpec = resultSpec;
+        Class<?> currentClass = specClass;
+        while(currentClass != null && !currentClass.equals(Object.class)) {
+            // process this level
+            Set<IMember> currentClassMembers = collectMappedMembers(currentClass,
+                    toBeGeneratedTypes, packageSpec.getFQPackageName());
+            for(IMember member : currentClassMembers) {
+                if(!currentClassSpec.members.contains(member)) {
+                    log.trace("Adding member '" + member.getName() + "' to '" + currentClassSpec
+                            + "'");
+                    currentClassSpec.members.add(member);
                 }
             }
-            superClass = superClass.getSuperclass();
-            if(!superClass.equals(Object.class)) {
-                ClassSpec superSpec = packageSpec.addInterface(NameUtils.toClassName(superClass));
-                classSpec.superClass = superSpec;
-                classSpec = superSpec;
+            // move one level up
+            currentClass = currentClass.getSuperclass();
+            if(!currentClass.equals(Object.class)) {
+                ClassSpec superSpec = packageSpec.addInterface(NameUtils.toClassName(currentClass));
+                currentClassSpec.superClass = superSpec;
+                currentClassSpec = superSpec;
             } else {
-                classSpec.superClass = HasIdClass;
+                currentClassSpec.superClass = HasIdClass;
             }
         }
         

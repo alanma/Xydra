@@ -13,7 +13,7 @@ public class ConstructorSpec extends AbstractConstructorOrMethodSpec implements 
         String s = "";
         s += "CONSTRUCTOR\n";
         s += "  name:" + this.getName() + "\n";
-        s += "  comment:" + this.comment + "\n";
+        s += "  comment:" + this.getComment() + "\n";
         for(FieldSpec p : this.params) {
             s += "  PARAM " + p.toString() + "\n";
         }

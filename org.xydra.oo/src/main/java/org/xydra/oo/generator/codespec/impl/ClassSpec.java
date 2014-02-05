@@ -233,4 +233,8 @@ public class ClassSpec extends NamedElement {
     public IType asType() {
         return new Wrapper();
     }
+    
+    public String toString() {
+        return this.kind + " " + this.getCanonicalName();
+    }
 }

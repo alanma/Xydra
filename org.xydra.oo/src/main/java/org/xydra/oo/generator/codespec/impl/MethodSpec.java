@@ -81,7 +81,7 @@ public class MethodSpec extends AbstractConstructorOrMethodSpec implements IMemb
     
     public String toString() {
         String s = "";
-        s += "// " + this.comment + "\n";
+        s += "// " + this.getComment() + "\n";
         s += "METHOD " + this.getName() + "\n";
         s += "  returnType:[" + this.getReturnTypeString() + "]" + "\n";
         for(FieldSpec p : this.params) {

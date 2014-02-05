@@ -3,6 +3,14 @@ package org.xydra.oo.generator.codespec;
 import java.util.Set;
 
 
+/**
+ * A class member, either a field or a method.
+ * 
+ * Implementations must have working {@link #equals(Object)} and
+ * {@link #hashCode()}
+ * 
+ * @author xamde
+ */
 public interface IMember extends Comparable<IMember> {
     
     /**

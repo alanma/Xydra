@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Method;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
@@ -28,7 +27,6 @@ import org.xydra.oo.runtime.java.OOJavaOnlyProxy;
 import org.xydra.oo.runtime.java.OOReflectionUtils;
 import org.xydra.oo.runtime.java.XydraReflectionUtils;
 import org.xydra.oo.runtime.shared.BaseTypeSpec;
-import org.xydra.oo.runtime.shared.CollectionProxy;
 import org.xydra.oo.runtime.shared.CollectionProxy.IComponentTransformer;
 import org.xydra.oo.runtime.shared.IBaseType;
 import org.xydra.oo.runtime.shared.IType;
@@ -323,7 +321,7 @@ public class GwtCodeGenerator extends Generator {
         } else {
             methodSpec.addSourceLine("        return "
                     + mapping.getCollectionFactory().createEmptyCollection_asSourceCode() + ";");
-            c.addRequiredImports(Collections.class);
+            // c.addRequiredImports(Collections.class);
         }
         
         methodSpec.sourceLines.add("    }");
@@ -342,7 +340,7 @@ public class GwtCodeGenerator extends Generator {
         
         c.addRequiredImports(gwtPackagename + ".GwtFactory");
         c.addRequiredImports(IComponentTransformer.class);
-        c.addRequiredImports(CollectionProxy.class);
+        // c.addRequiredImports(CollectionProxy.class);
         c.addRequiredImports(XX.class);
     }
     

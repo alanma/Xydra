@@ -54,14 +54,14 @@ public class CollectionProxy<X extends XCollectionValue<T>, T, J, C> {
         X createCollection();
     }
     
-    protected CollectionProxy.IComponentTransformer<X,T,J,C> t;
+    protected CollectionProxy.IComponentTransformer<X,T,J,C> componentTransformer;
     protected XWritableObject xo;
     protected XId fieldId;
     
-    public CollectionProxy(XWritableObject xo, XId fieldId, CollectionProxy.IComponentTransformer<X,T,J,C> t) {
+    public CollectionProxy(XWritableObject xo, XId fieldId, CollectionProxy.IComponentTransformer<X,T,J,C> componentTransformer) {
         this.xo = xo;
         this.fieldId = fieldId;
-        this.t = t;
+        this.componentTransformer = componentTransformer;
     }
     
     public int size() {
@@ -93,7 +93,7 @@ public class CollectionProxy<X extends XCollectionValue<T>, T, J, C> {
             return false;
         @SuppressWarnings("unchecked")
         C j = (C)o;
-        T t = this.t.toXydraComponent(j);
+        T t = this.componentTransformer.toXydraComponent(j);
         return v.contains(t);
     }
     
@@ -111,7 +111,7 @@ public class CollectionProxy<X extends XCollectionValue<T>, T, J, C> {
                     
                     @Override
                     public C transform(T in) {
-                        return CollectionProxy.this.t.toJavaComponent(in);
+                        return CollectionProxy.this.componentTransformer.toJavaComponent(in);
                     }
                     
                 });
@@ -124,16 +124,16 @@ public class CollectionProxy<X extends XCollectionValue<T>, T, J, C> {
         if(f == null) {
             changes = true;
             f = this.xo.createField(this.fieldId);
-            xydraCollectionValue = this.t.createCollection();
+            xydraCollectionValue = this.componentTransformer.createCollection();
         } else {
             xydraCollectionValue = (XCollectionValue<T>)f.getValue();
             if(xydraCollectionValue == null) {
                 changes = true;
-                xydraCollectionValue = this.t.createCollection();
+                xydraCollectionValue = this.componentTransformer.createCollection();
             }
         }
         assert xydraCollectionValue != null;
-        T x = this.t.toXydraComponent(j);
+        T x = this.componentTransformer.toXydraComponent(j);
         xydraCollectionValue = xydraCollectionValue.add(x);
         f.setValue(xydraCollectionValue);
         return changes;
@@ -153,7 +153,7 @@ public class CollectionProxy<X extends XCollectionValue<T>, T, J, C> {
         assert v != null;
         @SuppressWarnings("unchecked")
         C j = (C)o;
-        T x = this.t.toXydraComponent(j);
+        T x = this.componentTransformer.toXydraComponent(j);
         boolean b = v.contains(x);
         v.remove(x);
         return b;

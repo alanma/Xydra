@@ -6,7 +6,7 @@ import org.xydra.base.rmof.XWritableModel;
 import org.xydra.oo.Field;
 import org.xydra.oo.testgen.tasks.shared.ISettings;
 
-/** Generated on Mon Feb 03 22:56:15 CET 2014 by SpecWriter, a part of xydra.org:oo */
+/** Generated on Wed Feb 05 14:35:25 CET 2014 by SpecWriter, a part of xydra.org:oo */
 public interface ISettings extends IHasXId {
 
     /** 

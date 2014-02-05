@@ -11,6 +11,10 @@ import org.xydra.oo.runtime.shared.IXydraCollectionFactory;
 import org.xydra.oo.runtime.shared.SharedTypeMapping;
 
 
+/**
+ * @author xamde
+ * 
+ */
 public class JavaTypeMapping {
     
     /**

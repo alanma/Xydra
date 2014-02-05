@@ -65,7 +65,8 @@ public class AbstractConstructorOrMethodSpec extends AbstractMember implements I
     }
     
     public boolean equals(Object other) {
-        return other instanceof FieldSpec && ((FieldSpec)other).id().equals(this.id());
+        return other instanceof AbstractConstructorOrMethodSpec
+                && ((AbstractConstructorOrMethodSpec)other).id().equals(this.id());
     }
     
     public String getModifiers() {
