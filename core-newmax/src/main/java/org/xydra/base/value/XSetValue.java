@@ -14,6 +14,8 @@ import java.util.Set;
 public interface XSetValue<E> extends XCollectionValue<E> {
     
     /**
+     * TODO better name
+     * 
      * Create a new {@link XSetValue} contains all entries from this value as
      * well as the specified entry. This value is not modified.
      */
@@ -21,6 +23,8 @@ public interface XSetValue<E> extends XCollectionValue<E> {
     XSetValue<E> add(E entry);
     
     /**
+     * TODO better name
+     * 
      * Create a new {@link XSetValue} contains all entries from this value
      * except the specified entry. This value is not modified.
      */

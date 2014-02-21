@@ -417,6 +417,9 @@ Serializable {
     @Override
     @ReadOperation
     public boolean equals(Object o) {
+        
+        // FIXME use readablemodel here?
+        
         if(!(o instanceof MemoryModel)) {
             return false;
         }

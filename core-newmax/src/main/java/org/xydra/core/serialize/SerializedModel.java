@@ -341,7 +341,7 @@ public class SerializedModel {
      * 
      * @param element
      * 
-     * @param parent If parent is null, the field is loaded into a
+     * @param parent @CanBeNull If parent is null, the field is loaded into a
      *            {@link SimpleModel}, otherwise it is loaded into a child state
      *            of parent.
      * @return the created {@link XRevWritableModel}
@@ -357,8 +357,8 @@ public class SerializedModel {
     
     /**
      * @param element
-     * @param parent
-     * @param context
+     * @param parent @CanBeNull
+     * @param context @CanBeNull
      * @return @NeverNull
      */
     private static XExistsRevWritableModel toModelState(XydraElement element,

@@ -12,6 +12,7 @@ import java.util.List;
 import org.junit.Test;
 import org.xydra.base.XCompareUtils;
 import org.xydra.base.XId;
+import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.value.XBooleanValue;
 import org.xydra.base.value.XIdListValue;
 import org.xydra.base.value.XStringValue;
@@ -629,7 +630,38 @@ public class APITest {
     
     @Test
     public void testSaveAndLoadModel() {
+        // create model
         XModel model = new MemoryModel(this.actorId, this.password, XX.createUniqueId());
+        // create test data
+        addSomeTestDataToModel(model);
+        
+        writeToXmlAndLoadAgain(model, this.actorId, this.password);
+        
+    }
+    
+    public static void writeToXmlAndLoadAgain(XWritableModel model, XId actorId, String password) {
+        // write model
+        XydraOut out = new XmlOut();
+        SerializedModel.serialize(model, out);
+        
+        // try to load it
+        XydraElement e = new XmlParser().parse(out.getData());
+        XModel loadedModel = SerializedModel.toModel(actorId, password, e);
+        assertTrue(loadedModel != null);
+        assertTrue(XCompareUtils.equalState(loadedModel, model));
+        assertNotNull(loadedModel);
+        assert loadedModel != null;
+        
+        assertTrue(XCompareUtils.equalTree(model, loadedModel));
+        assertTrue(XCompareUtils.equalTree(loadedModel, model));
+        assertTrue(XCompareUtils.equalState(model, loadedModel));
+        assertTrue(XCompareUtils.equalState(loadedModel, model));
+        
+        // assertTrue(loadedModel.equals(model));
+        // assertEquals(loadedModel, model);
+    }
+    
+    public static void addSomeTestDataToModel(XModel model) {
         model.createObject(XX.createUniqueId()).createField(XX.createUniqueId())
                 .setValue(XV.toValue(true));
         model.createObject(XX.createUniqueId()).createField(XX.createUniqueId())
@@ -644,19 +676,6 @@ public class APITest {
                 .setValue(XV.toValue(3.14159265));
         model.createObject(XX.createUniqueId()).createField(XX.createUniqueId())
                 .setValue(XV.toValue("Another Test!"));
-        
-        XydraOut out = new XmlOut();
-        SerializedModel.serialize(model, out);
-        
-        // try to load it
-        XydraElement e = new XmlParser().parse(out.getData());
-        XModel loadedModel = SerializedModel.toModel(this.actorId, this.password, e);
-        assertTrue(loadedModel != null);
-        assertTrue(XCompareUtils.equalState(loadedModel, model));
-        assertNotNull(loadedModel);
-        assert loadedModel != null;
-        assertTrue(loadedModel.equals(model));
-        assertEquals(loadedModel, model);
     }
     
     @Test
