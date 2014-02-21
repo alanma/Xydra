@@ -35,6 +35,7 @@ import org.xydra.oo.generator.codespec.impl.MethodSpec;
 import org.xydra.oo.generator.codespec.impl.PackageSpec;
 import org.xydra.oo.generator.gwt.GwtCodeGenerator;
 import org.xydra.oo.generator.java.GwtModuleXmlSpec.GenerateWith;
+import org.xydra.oo.runtime.java.ICanDump;
 import org.xydra.oo.runtime.java.JavaReflectionUtils;
 import org.xydra.oo.runtime.java.OOJavaOnlyProxy;
 import org.xydra.oo.runtime.java.OOReflectionUtils;
@@ -377,7 +378,8 @@ public class JavaCodeGenerator {
                                 c.getName() + " w = (" + c.getName() + ") Proxy.newProxyInstance("
                                         + c.getName() + ".class.getClassLoader(),")
                         .addSourceLine(
-                                "    new Class<?>[] { " + c.getName()
+                                "    new Class<?>[] { " + c.getName() + ".class, "
+                                        + ICanDump.class.getCanonicalName()
                                         + ".class }, new OOJavaOnlyProxy(model, id));")
                         .addSourceLine("return w;");
                 javaFactory.addRequiredImports(OOJavaOnlyProxy.class);

@@ -58,7 +58,8 @@ public class CollectionProxy<X extends XCollectionValue<T>, T, J, C> {
     protected XWritableObject xo;
     protected XId fieldId;
     
-    public CollectionProxy(XWritableObject xo, XId fieldId, CollectionProxy.IComponentTransformer<X,T,J,C> componentTransformer) {
+    public CollectionProxy(XWritableObject xo, XId fieldId,
+            CollectionProxy.IComponentTransformer<X,T,J,C> componentTransformer) {
         this.xo = xo;
         this.fieldId = fieldId;
         this.componentTransformer = componentTransformer;
@@ -135,7 +136,7 @@ public class CollectionProxy<X extends XCollectionValue<T>, T, J, C> {
         assert xydraCollectionValue != null;
         T x = this.componentTransformer.toXydraComponent(j);
         xydraCollectionValue = xydraCollectionValue.add(x);
-        f.setValue(xydraCollectionValue);
+        changes = f.setValue(xydraCollectionValue);
         return changes;
     }
     

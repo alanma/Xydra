@@ -291,8 +291,11 @@ public class OOReflectionUtils {
      *         delegates persistence to a Xydra object
      */
     public static <T> T toJavaInstance(Class<T> interfaze, XWritableModel model, XId id) {
-        T instance = (T)Proxy.newProxyInstance(interfaze.getClassLoader(),
-                new Class<?>[] { interfaze }, new OOJavaOnlyProxy(model, id));
+        if(log.isTraceEnabled())
+            log.trace("Creating proxy for " + interfaze.getCanonicalName());
+        
+        T instance = (T)Proxy.newProxyInstance(interfaze.getClassLoader(), new Class<?>[] {
+                interfaze, ICanDump.class }, new OOJavaOnlyProxy(model, id));
         return instance;
     }
     

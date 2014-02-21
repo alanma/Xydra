@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XId;
+import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.value.XCollectionValue;
 
@@ -51,7 +52,9 @@ public class SetProxy<X extends XCollectionValue<T>, T, J, C> extends Collection
     
     @Override
     public void clear() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        XWritableField f = this.xo.getField(this.fieldId);
+        if(f != null)
+            f.setValue(this.componentTransformer.createCollection());
     }
     
     @Override

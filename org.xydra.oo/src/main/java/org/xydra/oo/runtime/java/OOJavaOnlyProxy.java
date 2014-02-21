@@ -14,8 +14,10 @@ import org.xydra.base.value.XCollectionValue;
 import org.xydra.base.value.XStringValue;
 import org.xydra.base.value.XValue;
 import org.xydra.core.XX;
+import org.xydra.core.util.DumpUtils;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
+import org.xydra.oo.runtime.shared.ArrayProxy;
 import org.xydra.oo.runtime.shared.CollectionProxy;
 import org.xydra.oo.runtime.shared.ListProxy;
 import org.xydra.oo.runtime.shared.SetProxy;
@@ -44,8 +46,8 @@ public class OOJavaOnlyProxy implements InvocationHandler {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         /* handle Object.class methods special */
+        String name = method.getName();
         if(Object.class == method.getDeclaringClass()) {
-            String name = method.getName();
             if("equals".equals(name)) {
                 return proxy == args[0];
             } else if("hashCode".equals(name)) {
@@ -57,6 +59,10 @@ public class OOJavaOnlyProxy implements InvocationHandler {
             } else {
                 throw new IllegalStateException(String.valueOf(method));
             }
+        }
+        
+        if("dump".equals(name)) {
+            return DumpUtils.toStringBuffer(this.oop.getXObject()).toString();
         }
         
         try {
@@ -121,7 +127,9 @@ public class OOJavaOnlyProxy implements InvocationHandler {
             // TODO deal with old style booleans (missing field = false)
             Boolean b = (Boolean)_get_(Boolean.class, null, fieldId, false);
             return b;
-        } else if(kindOfMethod == KindOfMethod.GetCollection) {
+        } else
+        /* ============================== GET COLLECTION ======================= */
+        if(kindOfMethod == KindOfMethod.GetCollection) {
             Class<?> returnType = method.getReturnType();
             assert XydraReflectionUtils.isCollectionType(returnType);
             Class<?> componentType = JavaReflectionUtils.getComponentType(method);
@@ -266,11 +274,22 @@ public class OOJavaOnlyProxy implements InvocationHandler {
                 + (componentType == null ? "NONE" : componentType.getCanonicalName()));
     }
     
-    public static <J, C> Object liveCollection(final Class<J> type, final Class<C> componentType,
-            final String fieldName, final XWritableModel model, final XWritableObject object) {
-        assert XydraReflectionUtils.isCollectionType(type) : "type=" + type.getCanonicalName()
-                + ", compTyp=" + componentType.getCanonicalName();
+    /**
+     * @param javaCollectionType (J)
+     * @param componentType (C) object-oriented interface type
+     * @param fieldName
+     * @param model
+     * @param xobject
+     * @return a {@link CollectionProxy} or subclass of it
+     */
+    public static <J, C> Object liveCollection(final Class<J> javaCollectionType,
+            final Class<C> componentType, final String fieldName, final XWritableModel model,
+            final XWritableObject xobject) {
+        assert XydraReflectionUtils.isCollectionType(javaCollectionType) : "type="
+                + javaCollectionType.getCanonicalName() + ", compTyp="
+                + componentType.getCanonicalName();
         
+        /* ComponentTransformer: C (Java _C_omponent Type) <--> XValue */
         CollectionProxy.IComponentTransformer<XCollectionValue<XValue>,XValue,J,C> componentTransformer
         
         = new CollectionProxy.IComponentTransformer<XCollectionValue<XValue>,XValue,J,C>() {
@@ -278,33 +297,38 @@ public class OOJavaOnlyProxy implements InvocationHandler {
             @SuppressWarnings("unchecked")
             @Override
             public C toJavaComponent(XValue xydraValue) {
-                Object o = convertToJava(fieldName, xydraValue, type, componentType, model, object);
+                Object o = convertToJava(fieldName, xydraValue, componentType, null, model, xobject);
                 return (C)o;
             }
             
             @Override
             public XValue toXydraComponent(C javaValue) {
-                return OOReflectionUtils.convertToXydra(type, componentType, javaValue);
+                return OOReflectionUtils.convertToXydra(componentType, null, javaValue);
             }
             
             @Override
             public XCollectionValue<XValue> createCollection() {
-                return OOReflectionUtils.createCollection(type, componentType);
+                // FIXME create collection
+                
+                return OOReflectionUtils.createCollection(javaCollectionType, componentType);
             }
-            
         };
         
-        if(type.equals(List.class)) {
-            return new ListProxy<XCollectionValue<XValue>,XValue,J,C>(object, XX.toId(fieldName),
+        if(javaCollectionType.equals(List.class)) {
+            return new ListProxy<XCollectionValue<XValue>,XValue,J,C>(xobject, XX.toId(fieldName),
                     componentTransformer);
-        } else if(type.equals(Set.class)) {
-            return new SetProxy<XCollectionValue<XValue>,XValue,J,C>(object, XX.toId(fieldName),
+        } else if(javaCollectionType.equals(Set.class)) {
+            return new SetProxy<XCollectionValue<XValue>,XValue,J,C>(xobject, XX.toId(fieldName),
                     componentTransformer);
-        } else if(type.equals(SortedSet.class)) {
-            return new SortedSetProxy<XCollectionValue<XValue>,XValue,J,C>(object,
+        } else if(javaCollectionType.equals(SortedSet.class)) {
+            return new SortedSetProxy<XCollectionValue<XValue>,XValue,J,C>(xobject,
                     XX.toId(fieldName), componentTransformer);
+        } else if(javaCollectionType.isArray()) {
+            return new ArrayProxy<XCollectionValue<XValue>,XValue,J,C>(xobject, XX.toId(fieldName),
+                    componentTransformer);
         } else
             throw new IllegalArgumentException(
-                    "Cannot create a live view for a collection of type " + type.getCanonicalName());
+                    "Cannot create a live view for a collection of type "
+                            + javaCollectionType.getCanonicalName());
     }
 }
