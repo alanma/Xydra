@@ -105,7 +105,9 @@ public class MemoryStringIDProvider implements XIdProvider {
     }
     
     public static boolean isValidId(String s) {
-        return MemoryStringIdRegexGwtEmul.matchesXydraId(s);
+        return MemoryStringIdRegexGwtEmul.matchesXydraId(s)
+        
+        && s.length() <= XIdProvider.MAX_LENGTH;
     }
     
     @Override
