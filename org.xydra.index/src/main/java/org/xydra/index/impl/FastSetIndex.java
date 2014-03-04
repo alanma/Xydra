@@ -2,6 +2,7 @@ package org.xydra.index.impl;
 
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 import org.xydra.index.IEntrySet;
 import org.xydra.index.iterator.NoneIterator;
@@ -86,6 +87,11 @@ public class FastSetIndex<E> extends HashSet<E> implements IEntrySet<E> {
                 return NoneIterator.create();
             }
         }
+    }
+    
+    @Override
+    public Set<E> toSet() {
+        return this;
     }
     
 }

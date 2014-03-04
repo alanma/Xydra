@@ -31,7 +31,9 @@ public abstract class AbstractTransformingIterator<I, O> implements ClosableIter
         if(!hasNext()) {
             return null;
         }
-        return this.transform(this.base.next());
+        I in = this.base.next();
+        O out = this.transform(in);
+        return out;
     }
     
     @Override

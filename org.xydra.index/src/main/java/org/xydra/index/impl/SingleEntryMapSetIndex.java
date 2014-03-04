@@ -1,6 +1,8 @@
 package org.xydra.index.impl;
 
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 import org.xydra.index.IEntrySet;
 import org.xydra.index.IMapSetIndex;
@@ -254,6 +256,14 @@ public class SingleEntryMapSetIndex<K, E> extends KeyEntryTuple<K,E> implements 
         @Override
         public int size() {
             return SingleEntryMapSetIndex.this.isEmpty() ? 0 : 1;
+        }
+        
+        @Override
+        public Set<E> toSet() {
+            Set<E> set = new HashSet<E>();
+            if(!isEmpty())
+                set.add(getEntry());
+            return set;
         }
         
     }

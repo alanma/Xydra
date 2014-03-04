@@ -1,7 +1,9 @@
 package org.xydra.index.impl;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Set;
 
 import org.xydra.index.IEntrySet;
 import org.xydra.index.iterator.NoneIterator;
@@ -95,6 +97,13 @@ public class SmallSetIndex<E> extends LinkedList<E> implements IEntrySet<E> {
                 return NoneIterator.<E>create();
             }
         }
+    }
+    
+    @Override
+    public Set<E> toSet() {
+        Set<E> set = new HashSet<E>();
+        set.addAll(this);
+        return set;
     }
     
 }

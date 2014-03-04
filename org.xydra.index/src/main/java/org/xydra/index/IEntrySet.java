@@ -1,6 +1,7 @@
 package org.xydra.index;
 
 import java.util.Iterator;
+import java.util.Set;
 
 import org.xydra.index.query.Constraint;
 
@@ -42,5 +43,10 @@ public interface IEntrySet<E> extends IIndex, Iterable<E> {
     Iterator<E> constraintIterator(Constraint<E> entryConstraint);
     
     int size();
+    
+    /**
+     * @return a read-only Set
+     */
+    Set<E> toSet();
     
 }
