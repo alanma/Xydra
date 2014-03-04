@@ -11,8 +11,6 @@ import java.util.Map.Entry;
  * Can be used for representing, e.g. character classes with Unicode code points
  * in regular expressions
  * 
- * Monoton growing. TODO support for de-indexing
- * 
  * @author xamde
  */
 public interface IIntegerRangeIndex extends IIndex {
