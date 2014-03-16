@@ -19,7 +19,7 @@ public class IntegerRangeIndexTest {
     private static final Logger log = LoggerFactory.getLogger(IntegerRangeIndexTest.class);
     
     @Test
-    public void testIsInInterval() {
+    public void testIndex() {
         List<Entry<Integer,Integer>> list;
         
         IIntegerRangeIndex iri = new IntegerRangeIndex();
@@ -43,6 +43,19 @@ public class IntegerRangeIndexTest {
         list = IteratorUtils.toList(iri.rangesIterator());
         assertEquals(1, list.size());
         assertInterval(10, 180, list.get(0));
+    }
+    
+    @Test
+    public void testIndex2() {
+        List<Entry<Integer,Integer>> list;
+        IIntegerRangeIndex iri = new IntegerRangeIndex();
+        
+        iri.index(10, 20);
+        iri.index(5, 20);
+        
+        list = IteratorUtils.toList(iri.rangesIterator());
+        assertEquals(1, list.size());
+        assertInterval(5, 20, list.get(0));
     }
     
     @Test

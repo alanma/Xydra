@@ -38,7 +38,8 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
     @Override
     public void index(int start, int end) {
         assert start <= end;
-        log.debug("Index " + start + "," + end);
+        if(log.isTraceEnabled())
+            log.trace("Index " + start + "," + end);
         
         int mergedStart = start;
         int mergedEnd = end;
@@ -119,16 +120,20 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
          * prev = entry with the greatest key <= start, or null if there is no
          * such key
          */
-        Entry<Integer,Integer> prev = this.sortedmap.floorEntry(start);
+        Entry<Integer,Integer> prev = this.sortedmap.floorEntry(start - 1);
         if(prev != null) {
-            assert start(prev) < start;
+            assert start(prev) < start : "start(prev)=" + start(prev) + " start=" + start;
             
             if(start <= end(prev)) {
                 // prev needs to be trimmed/split
                 
                 if(end == end(prev)) {
                     // corner case: trim & done
-                    prev.setValue(start - 1);
+                    
+                    int oldStart = prev.getKey();
+                    this.sortedmap.remove(prev.getKey());
+                    this.sortedmap.put(oldStart, start - 1);
+                    
                     return;
                 } else if(end < end(prev)) {
                     // split & done
@@ -199,5 +204,20 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
     
     private static int end(Entry<Integer,Integer> entry) {
         return entry.getValue();
+    }
+    
+    /**
+     * @return number of stored ranges, NOT number of contained integer numbers
+     */
+    public int size() {
+        return this.sortedmap.size();
+    }
+    
+    public void addAll(IIntegerRangeIndex other) {
+        Iterator<Entry<Integer,Integer>> it = other.rangesIterator();
+        while(it.hasNext()) {
+            Map.Entry<Integer,Integer> entry = it.next();
+            index(entry.getKey(), entry.getValue());
+        }
     }
 }
