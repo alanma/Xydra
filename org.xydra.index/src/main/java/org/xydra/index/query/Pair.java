@@ -27,7 +27,7 @@ public class Pair<K, L> {
     
     @Override
     public String toString() {
-        return "(" + this.first + ", " + this.second + ")";
+        return "('" + this.first + "', '" + this.second + "')";
     }
     
     @Override

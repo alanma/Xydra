@@ -1,4 +1,4 @@
-package org.xydra.index.impl;
+package org.xydra.index;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -9,6 +9,7 @@ import java.util.Iterator;
 import org.junit.Before;
 import org.junit.Test;
 import org.xydra.index.ITripleIndex;
+import org.xydra.index.impl.IteratorUtils;
 import org.xydra.index.query.Constraint;
 import org.xydra.index.query.EqualsConstraint;
 import org.xydra.index.query.ITriple;

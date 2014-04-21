@@ -48,4 +48,9 @@ public class EqualsConstraint<E> implements Constraint<E> {
         return "'" + this.expect.toString() + "'";
     }
     
+    @Override
+    public boolean isExact() {
+        return true;
+    }
+    
 }

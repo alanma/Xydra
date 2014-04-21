@@ -1,5 +1,6 @@
 package org.xydra.index.impl;
 
+import org.xydra.index.AbstractTripleIndexTest;
 import org.xydra.index.ITripleIndex;
 
 

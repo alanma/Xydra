@@ -36,4 +36,9 @@ public class Wildcard<K> implements Constraint<K> {
         return "*";
     }
     
+    @Override
+    public boolean isExact() {
+        return false;
+    }
+    
 }

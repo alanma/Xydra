@@ -4,7 +4,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.xydra.index.impl.IteratorUtils;
 
+
+/**
+ * @author xamde
+ * 
+ */
 public class Iterators {
     
     /**
@@ -20,6 +26,20 @@ public class Iterators {
         
         return new FilteringIterator<E>(base, filter);
     }
+    
+    @SuppressWarnings("unchecked")
+    public static <E> Iterator<E> nonNull(Iterator<E> base) {
+        return filter(base, FILTER_NON_NULL);
+    }
+    
+    @SuppressWarnings("rawtypes")
+    public static final IFilter FILTER_NON_NULL = new IFilter() {
+        
+        @Override
+        public boolean matches(Object entry) {
+            return entry != null;
+        }
+    };
     
     /**
      * Lazy evaluated
@@ -125,6 +145,43 @@ public class Iterators {
             System.out.println("  Item: '" + e.toString() + "'");
         }
         System.out.println(" End of iterator '" + label + "'.");
+    }
+    
+    /**
+     * @param partIterators @NeverNull each may return an element only once, no
+     *            duplicates
+     * @return an iterator representing the set-intersection of the set implied
+     *         by the partial iterators
+     */
+    public static <E> Iterator<E> setIntersect(Iterator<Iterator<E>> partIterators) {
+        // none
+        if(!partIterators.hasNext())
+            return NoneIterator.create();
+        
+        // just one?
+        Set<E> result = new HashSet<E>();
+        IteratorUtils.addAll(partIterators.next(), result);
+        if(!partIterators.hasNext())
+            return result.iterator();
+        
+        // more
+        while(partIterators.hasNext()) {
+            Iterator<E> otherIt = partIterators.next();
+            Set<E> deleteMe = new HashSet<E>();
+            Set<E> other = new HashSet<E>();
+            IteratorUtils.addAll(otherIt, other);
+            for(E e : result) {
+                if(!other.contains(e)) {
+                    deleteMe.add(e);
+                }
+            }
+            result.removeAll(deleteMe);
+        }
+        return result.iterator();
+    }
+    
+    public static <E> Iterator<E> none() {
+        return NoneIterator.create();
     }
     
 }

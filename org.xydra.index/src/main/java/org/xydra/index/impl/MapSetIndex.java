@@ -315,7 +315,7 @@ public class MapSetIndex<K, E> implements IMapSetIndex<K,E> {
             }
             while(it.hasNext()) {
                 KeyEntryTuple<K,E> t = it.next();
-                log.info("(" + t.getFirst() + ", " + t.getSecond() + ")");
+                dumpTuple(t);
             }
         } else {
             Collections.sort(list, new Comparator<KeyEntryTuple<K,E>>() {

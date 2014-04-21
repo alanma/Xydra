@@ -1,6 +1,7 @@
 package org.xydra.index.iterator;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 
 /**
@@ -29,7 +30,8 @@ public abstract class AbstractTransformingIterator<I, O> implements ClosableIter
     @Override
     public O next() {
         if(!hasNext()) {
-            return null;
+            throw new NoSuchElementException();
+            // return null;
         }
         I in = this.base.next();
         O out = this.transform(in);
