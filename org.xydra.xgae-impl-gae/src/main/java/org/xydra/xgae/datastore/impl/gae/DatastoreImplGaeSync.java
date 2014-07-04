@@ -1,13 +1,5 @@
 package org.xydra.xgae.datastore.impl.gae;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.ConcurrentModificationException;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
 import org.xydra.annotations.NeverNull;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
@@ -21,6 +13,14 @@ import org.xydra.xgae.datastore.api.STransaction;
 import org.xydra.xgae.gaeutils.GaeTestfixer;
 import org.xydra.xgae.util.XGaeDebugHelper;
 import org.xydra.xgae.util.XGaeDebugHelper.Timing;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.ConcurrentModificationException;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceConfig;
