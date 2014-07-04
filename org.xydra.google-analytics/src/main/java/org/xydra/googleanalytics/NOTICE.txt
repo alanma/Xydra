@@ -1,9 +1,0 @@
-The code in this package is based on code from Siddique Hameed
-version 0.2.0
-released under an Apache 2.0 License at http://code.google.com/p/jgoogleanalytics/
-
-
-
-
-
-
