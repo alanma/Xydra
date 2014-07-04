@@ -1,20 +1,21 @@
 package org.xydra.index.impl.trie;
 
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
 import org.xydra.index.IMapIndex;
+import org.xydra.index.iterator.IFilter;
 import org.xydra.index.iterator.ITransformer;
 import org.xydra.index.iterator.Iterators;
 import org.xydra.index.query.Constraint;
 import org.xydra.index.query.KeyEntryTuple;
+import org.xydra.index.query.Pair;
+
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.SortedMap;
 
 
 /**
- * A {@link TreeMap} put under an {@link IMapIndex}<String,E> interface.
+ * A {@link SortedArrayMap} put under an {@link IMapIndex}<String,E> interface.
  * 
  * @author xamde
  * 
@@ -24,10 +25,17 @@ public class SortedStringMap<E> implements IMapIndex<String,E> {
     
     private static final long serialVersionUID = 1L;
     
-    private TreeMap<String,E> map = new TreeMap<String,E>();
+    /**
+     * org.apache.commons.collections.FastTreeMap = 26 seconds
+     * 
+     * java.util.TreeMap = 19-20 seconds
+     */
+    SortedArrayMap<String,E> map = new SortedArrayMap<String,E>();
     
-    public void index(String key, E value) {
-        this.map.put(key, value);
+    // new TreeMap<String,E>();
+    
+    public void index(final String key, final E value) {
+        this.map.put(key.intern(), value);
     }
     
     @Override
@@ -41,7 +49,7 @@ public class SortedStringMap<E> implements IMapIndex<String,E> {
     }
     
     @Override
-    public boolean containsKey(String key) {
+    public boolean containsKey(final String key) {
         return this.map.containsKey(key);
     }
     
@@ -56,12 +64,12 @@ public class SortedStringMap<E> implements IMapIndex<String,E> {
     }
     
     @Override
-    public E lookup(String key) {
+    public E lookup(final String key) {
         return this.map.get(key);
     }
     
     @Override
-    public boolean containsKey(Constraint<String> c1) {
+    public boolean containsKey(final Constraint<String> c1) {
         if(c1.isStar()) {
             return !this.map.isEmpty();
         } else {
@@ -70,15 +78,41 @@ public class SortedStringMap<E> implements IMapIndex<String,E> {
     }
     
     @Override
-    public Iterator<KeyEntryTuple<String,E>> tupleIterator(Constraint<String> c1) {
-        return Iterators.transform(this.map.entrySet().iterator(),
+    public Iterator<KeyEntryTuple<String,E>> tupleIterator(final Constraint<String> keyConstraint) {
+        Iterator<Entry<String,E>> mapentryIt = this.map.entrySet().iterator();
+        mapentryIt = Iterators.filter(mapentryIt, new IFilter<Entry<String,E>>() {
+            
+            @Override
+            public boolean matches(Entry<String,E> mapentry) {
+                return keyConstraint.matches(mapentry.getKey());
+            }
+        });
+        return Iterators.transform(mapentryIt,
                 new ITransformer<Map.Entry<String,E>,KeyEntryTuple<String,E>>() {
                     
                     @Override
-                    public KeyEntryTuple<String,E> transform(Entry<String,E> in) {
-                        return new KeyEntryTuple<String,E>(in.getKey(), in.getValue());
+                    public KeyEntryTuple<String,E> transform(Entry<String,E> mapentry) {
+                        return new KeyEntryTuple<String,E>(mapentry.getKey(), mapentry.getValue());
                     }
                 });
+    }
+    
+    public Iterator<E> entryIterator(final Constraint<String> keyConstraint) {
+        Iterator<Entry<String,E>> mapentryIt = this.map.entrySet().iterator();
+        mapentryIt = Iterators.filter(mapentryIt, new IFilter<Entry<String,E>>() {
+            
+            @Override
+            public boolean matches(Entry<String,E> mapentry) {
+                return keyConstraint.matches(mapentry.getKey());
+            }
+        });
+        return Iterators.transform(mapentryIt, new ITransformer<Map.Entry<String,E>,E>() {
+            
+            @Override
+            public E transform(Entry<String,E> mapentry) {
+                return mapentry.getValue();
+            }
+        });
     }
     
     @Override
@@ -100,7 +134,7 @@ public class SortedStringMap<E> implements IMapIndex<String,E> {
      * @return true iff at least one key has been indexed which starts with the
      *         given keyPrefix
      */
-    public boolean containsKeysStartingWith(String keyPrefix) {
+    public boolean containsKeysStartingWith(final String keyPrefix) {
         SortedMap<String,E> subMap = this.map.subMap(keyPrefix, keyPrefix + LAST_UNICODE_CHAR);
         return !subMap.isEmpty();
     }
@@ -110,7 +144,7 @@ public class SortedStringMap<E> implements IMapIndex<String,E> {
      * @return all entries which have been indexed at a key starting with the
      *         given prefix. Collects the results of potentially many such keys.
      */
-    public Iterator<E> lookupStartingWith(String keyPrefix) {
+    public Iterator<E> lookupStartingWith(final String keyPrefix) {
         SortedMap<String,E> subMap = this.map.subMap(keyPrefix, keyPrefix + LAST_UNICODE_CHAR);
         return subMap.values().iterator();
     }
@@ -122,13 +156,61 @@ public class SortedStringMap<E> implements IMapIndex<String,E> {
      * @return the first (lowest) complete key starting with the given prefix @CanBeNull
      *         if no such key exists.
      */
-    public String lookupFirstPrefix(String keyPrefix) {
+    public String lookupFirstPrefix(final String keyPrefix) {
+        // fast path hack
+        if(this.map instanceof SortedArrayMap) {
+            return ((SortedArrayMap<String,E>)this.map).tailMapFirstKey(keyPrefix, keyPrefix
+                    + LAST_UNICODE_CHAR);
+        }
+        
         SortedMap<String,E> subMap = this.map.subMap(keyPrefix, keyPrefix + LAST_UNICODE_CHAR);
         return subMap.isEmpty() ? null : subMap.firstKey();
     }
     
+    public E lookupFirstValue(final String keyPrefix) {
+        // fast path hack
+        if(this.map instanceof SortedArrayMap) {
+            return ((SortedArrayMap<String,E>)this.map).tailMapFirstEntry(keyPrefix, keyPrefix
+                    + LAST_UNICODE_CHAR);
+        }
+        
+        SortedMap<String,E> subMap = this.map.subMap(keyPrefix, keyPrefix + LAST_UNICODE_CHAR);
+        return subMap.isEmpty() ? null : subMap.get(subMap.firstKey());
+    }
+    
     public int size() {
         return this.map.size();
+    }
+    
+    public String toString() {
+        return this.map.toString();
+    }
+    
+    /**
+     * @param keyPrefix
+     * @return @CanBeNull if no entry starts with the given keyPrefix. If not
+     *         null, a Pair is returned. Pair.first: @CanBeNull, is the found
+     *         value; Pair.second: iff true, the found value is a perfect match;
+     *         iff false, it's merely a prefix match.
+     */
+    public Pair<E,Boolean> findWithPrefix(final String keyPrefix) {
+        // fast path hack
+        if(this.map instanceof SortedArrayMap) {
+            SortedArrayMap<String,E> sortedArrayMap = (SortedArrayMap<String,E>)this.map;
+            return sortedArrayMap.findWithPrefix(keyPrefix);
+        }
+        
+        SortedMap<String,E> subMap = this.map.subMap(keyPrefix, keyPrefix + LAST_UNICODE_CHAR);
+        if(subMap.isEmpty())
+            return null;
+        assert subMap.size() == 1;
+        E e = subMap.values().iterator().next();
+        String key = subMap.firstKey();
+        if(key.equals(keyPrefix)) {
+            return new Pair<E,Boolean>(e, true);
+        } else {
+            return new Pair<E,Boolean>(e, false);
+        }
     }
     
 }

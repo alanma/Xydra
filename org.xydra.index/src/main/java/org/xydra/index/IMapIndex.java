@@ -7,10 +7,10 @@ import org.xydra.index.query.KeyEntryTuple;
 
 
 /**
+ * Multiple entries can be indexed for a certain key-combination.
+ * 
+ * 
  * @author voelkel
- * 
- *         Multiple entries can be indexed for a certain key-combination.
- * 
  * @param <K> key type
  * @param <E> entity type
  */
@@ -23,9 +23,16 @@ public interface IMapIndex<K, E> extends IIndex {
      */
     boolean containsKey(K key);
     
-    void deIndex(K key1);
+    /**
+     * @param key
+     */
+    void deIndex(K key);
     
-    void index(K key1, E entry);
+    /**
+     * @param key
+     * @param entry
+     */
+    void index(K key, E entry);
     
     /**
      * @return all entries
@@ -39,10 +46,22 @@ public interface IMapIndex<K, E> extends IIndex {
      */
     E lookup(K key);
     
+    /**
+     * @param c1
+     * @return true iff this index contains at least one key matching the
+     *         constraint
+     */
     boolean containsKey(Constraint<K> c1);
     
-    Iterator<KeyEntryTuple<K,E>> tupleIterator(Constraint<K> c1);
+    /**
+     * @param keyConstraint
+     * @return all tuples matching the key-constraint
+     */
+    Iterator<KeyEntryTuple<K,E>> tupleIterator(Constraint<K> keyConstraint);
     
+    /**
+     * @return an iterator over all keys
+     */
     Iterator<K> keyIterator();
     
 }

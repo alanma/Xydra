@@ -1,12 +1,14 @@
 package org.xydra.index.impl;
 
+import org.xydra.annotations.RunsInGWT;
+
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-
-import org.xydra.annotations.RunsInGWT;
+import java.util.Set;
 
 
 @RunsInGWT(true)
@@ -46,10 +48,30 @@ public class IteratorUtils {
         return !it.hasNext();
     }
     
+    /**
+     * @param it
+     * @return a LinkedList
+     */
     public static <T> List<T> toList(Iterator<? extends T> it) {
         LinkedList<T> list = new LinkedList<T>();
         addAll(it, list);
         return list;
+    }
+    
+    public static <T> ArrayList<T> toArrayList(Iterator<T> it) {
+        ArrayList<T> list = new ArrayList<T>();
+        addAll(it, list);
+        return list;
+    }
+    
+    /**
+     * @param it
+     * @return a HashSet
+     */
+    public static <T> Set<T> toSet(Iterator<? extends T> it) {
+        HashSet<T> set = new HashSet<T>();
+        addAll(it, set);
+        return set;
     }
     
     public static <T> List<T> firstNtoList(Iterator<? extends T> it, int n) {
@@ -73,6 +95,21 @@ public class IteratorUtils {
             it.next();
         }
         return i;
+    }
+    
+    /**
+     * @param it
+     * @param max
+     * @return number of elements in iterator; maximum is max. Reports -1 if
+     *         maximum is reached.
+     */
+    public static int count(Iterator<?> it, int max) {
+        int i = 0;
+        while(it.hasNext() && i < max) {
+            i++;
+            it.next();
+        }
+        return i < max ? i : -1;
     }
     
     /**
@@ -106,6 +143,15 @@ public class IteratorUtils {
             System.out.println(e.toString());
         }
         System.out.println("End of iterator");
+    }
+    
+    public static <E> boolean contains(Iterator<E> it, E element) {
+        while(it.hasNext()) {
+            E e = it.next();
+            if(e.equals(element))
+                return true;
+        }
+        return false;
     }
     
 }

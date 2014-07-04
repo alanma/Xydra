@@ -1,10 +1,14 @@
 package org.xydra.index.iterator;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.xydra.index.impl.IteratorUtils;
+
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.Set;
 
 
 /**
@@ -42,10 +46,13 @@ public class Iterators {
     };
     
     /**
+     * Uses an internal, unbounded HashSet to return only unique elements.
+     * 
      * Lazy evaluated
      * 
-     * @param base must have valid implementation of {@link Object#hashCode()}
-     *            and {@link Object#equals(Object)} @NeverNull
+     * @param base elements must have valid implementation of
+     *            {@link Object#hashCode()} and {@link Object#equals(Object)}
+     * @NeverNull
      * @return unique elements
      */
     public static <E> Iterator<E> distinct(Iterator<E> base) {
@@ -66,6 +73,61 @@ public class Iterators {
                 return true;
             }
         });
+    }
+    
+    /*
+     * Copyright (C) 2007 The Guava Authors
+     * 
+     * Licensed under the Apache License, Version 2.0 (the "License"); you may
+     * not use this file except in compliance with the License. You may obtain a
+     * copy of the License at
+     * 
+     * http://www.apache.org/licenses/LICENSE-2.0
+     * 
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+     * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+     * License for the specific language governing permissions and limitations
+     * under the License.
+     */
+    /**
+     * Creates an iterator returning the first {@code max} elements of the given
+     * iterator. If the original iterator does not contain that many elements,
+     * the returned iterator will have the same behaviour as the original
+     * iterator. The returned iterator supports {@code remove()} if the original
+     * iterator does.
+     * 
+     * @param iterator the iterator to limit
+     * @param max the maximum number of elements in the returned iterator
+     * @return ...
+     * @throws IllegalArgumentException if {@code limitSize} is negative
+     * @since 3.0
+     */
+    public static <T> Iterator<T> limit(final Iterator<T> iterator, final int max) {
+        checkNotNull(iterator);
+        checkArgument(max >= 0, "limit is negative");
+        return new Iterator<T>() {
+            private int count;
+            
+            @Override
+            public boolean hasNext() {
+                return this.count < max && iterator.hasNext();
+            }
+            
+            @Override
+            public T next() {
+                if(!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+                this.count++;
+                return iterator.next();
+            }
+            
+            @Override
+            public void remove() {
+                iterator.remove();
+            }
+        };
     }
     
     /**

@@ -1,12 +1,14 @@
 package org.xydra.index;
 
+import org.xydra.index.impl.MapMapIndex;
+import org.xydra.index.query.Constraint;
+import org.xydra.index.query.KeyKeyEntryTuple;
+
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.xydra.index.impl.MapMapIndex;
-import org.xydra.index.query.Constraint;
-import org.xydra.index.query.KeyKeyEntryTuple;
+import com.google.gwt.dev.util.collect.Sets;
 
 
 /**
@@ -70,6 +72,93 @@ public class IndexUtils {
             set.add(added.next());
         }
         return set;
+    }
+    
+    /**
+     * A diff of two sets
+     * 
+     * @param <E>
+     */
+    public static interface ISetDiff<E> {
+        /**
+         * @return all added tuples; writes to this data have no effect.
+         */
+        Set<E> getAdded();
+        
+        /**
+         * @return all removed tuples; writes to this data have no effect.
+         */
+        Set<E> getRemoved();
+    }
+    
+    public static class SetDiff<E> implements ISetDiff<E> {
+        
+        public SetDiff(Set<E> added, Set<E> removed) {
+            super();
+            this.added = added;
+            this.removed = removed;
+        }
+        
+        @Override
+        public String toString() {
+            return "SetDiff [added=" + this.added + ", removed=" + this.removed + "]";
+        }
+        
+        private Set<E> added;
+        private Set<E> removed;
+        
+        @Override
+        public Set<E> getAdded() {
+            return this.added;
+        }
+        
+        @Override
+        public Set<E> getRemoved() {
+            return this.removed;
+        }
+        
+    }
+    
+    /**
+     * @param a @NeverNull
+     * @param b @NeverNull
+     * @return a diff with all elements added (not present in a, but present in
+     *         b); and all elements remove (present in a, but no longer present
+     *         in b)
+     */
+    public static <T> ISetDiff<T> diff(Set<T> a, Set<T> b) {
+        assert a != null;
+        assert b != null;
+        
+        Set<T> added = new HashSet<T>();
+        Set<T> removed = new HashSet<T>();
+        if(a.size() > b.size()) {
+            // b is small(er)
+            for(T elemB : b) {
+                if(!a.contains(elemB)) {
+                    added.add(elemB);
+                }
+            }
+            removed.addAll(a);
+            removed.removeAll(b);
+        } else {
+            // a is small(er)
+            added.addAll(b);
+            added.removeAll(a);
+            for(T elemA : a) {
+                if(!b.contains(elemA)) {
+                    removed.add(elemA);
+                }
+            }
+        }
+        return new SetDiff<T>(added, removed);
+    }
+    
+    public static void main(String[] args) {
+        Set<String> a = Sets.create("1", "2", "3", "4");
+        Set<String> b = Sets.create("3", "4", "5", "6");
+        ISetDiff<String> diff = diff(a, b);
+        System.out.println(diff.toString());
     }
     
     /**

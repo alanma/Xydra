@@ -68,7 +68,8 @@ public abstract class AbstractCascadedIterator<B, E> implements Iterator<E> {
                 this.nextEntry = this.currentIterator.next();
             } else {
                 while(this.base.hasNext() && !this.currentIterator.hasNext()) {
-                    this.currentIterator = this.toIterator(this.base.next());
+                    B baseNext = this.base.next();
+                    this.currentIterator = this.toIterator(baseNext);
                 }
                 if(this.currentIterator.hasNext()) {
                     this.nextEntry = this.currentIterator.next();

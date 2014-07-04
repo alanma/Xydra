@@ -1,14 +1,15 @@
 package org.xydra.index.impl;
 
+import org.xydra.index.IIntegerRangeIndex;
+import org.xydra.index.iterator.AbstractLookAheadIterator;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
+
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
-
-import org.xydra.index.IIntegerRangeIndex;
-import org.xydra.log.api.Logger;
-import org.xydra.log.api.LoggerFactory;
 
 
 /**
@@ -25,6 +26,8 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
     @Override
     public boolean isInInterval(int i) {
         Entry<Integer,Integer> prev = this.sortedmap.floorEntry(i);
+        if(prev == null)
+            return false;
         return start(prev) <= i && i <= end(prev);
     }
     
@@ -37,7 +40,7 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
      */
     @Override
     public void index(int start, int end) {
-        assert start <= end;
+        assert start <= end : "start=" + start + " end=" + end;
         if(log.isTraceEnabled())
             log.trace("Index " + start + "," + end);
         
@@ -94,6 +97,126 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
     @Override
     public Iterator<Entry<Integer,Integer>> rangesIterator() {
         return this.sortedmap.entrySet().iterator();
+    }
+    
+    /**
+     * A span in an integer range -- might or might not belong to an indexed
+     * region of this {@link IntegerRangeIndex}. Query the {@link #isInRange()}
+     * of each {@link Span} to find out. This method is intended to split a
+     * region (e.g. a longer string) into smaller pieces (e.g. some tokens).
+     */
+    public static class Span {
+        public Span(int startInclusive, int endInclusive, boolean isInRange) {
+            super();
+            assert startInclusive <= endInclusive;
+            this.startInclusive = startInclusive;
+            this.endInclusive = endInclusive;
+            this.isInRange = isInRange;
+        }
+        
+        @Override
+        public String toString() {
+            return "Span [startInclusive=" + this.startInclusive + ", endInclusive="
+                    + this.endInclusive + ", isInRange=" + this.isInRange + "]";
+        }
+        
+        public int getStartInclusive() {
+            return this.startInclusive;
+        }
+        
+        public int getEndInclusive() {
+            return this.endInclusive;
+        }
+        
+        public boolean isInRange() {
+            return this.isInRange;
+        }
+        
+        int startInclusive;
+        int endInclusive;
+        boolean isInRange;
+    }
+    
+    /**
+     * @param maxValue used only at then end of the integerRange to append a
+     *            final span
+     * @return all spans until maxValue; each span has a boolean flag to
+     *         indicate, if the span is within an integer range or between two
+     *         of them.
+     */
+    public Iterator<Span> spanIterator(int maxValue) {
+        return new SpanIterator(maxValue);
+    }
+    
+    class SpanIterator extends AbstractLookAheadIterator<Span> implements Iterator<Span> {
+        
+        private Iterator<Entry<Integer,Integer>> baseIt = IntegerRangeIndex.this.sortedmap
+                .entrySet().iterator();
+        
+        private int maxValue;
+        
+        private Entry<Integer,Integer> prefetchedEntry = null;
+        
+        private Span lastSpan = null;
+        
+        public SpanIterator(int maxValue) {
+            this.maxValue = maxValue;
+        }
+        
+        @Override
+        protected Span baseNext() {
+            if(this.lastSpan == null) {
+                if(!this.baseIt.hasNext()) {
+                    // completely empty, return the only span
+                    this.lastSpan = new Span(0, this.maxValue, false);
+                    return this.lastSpan;
+                }
+                
+                this.prefetchedEntry = this.baseIt.next();
+                if(this.prefetchedEntry.getKey() > 0) {
+                    // first span is not an integer range
+                    this.lastSpan = new Span(0, this.prefetchedEntry.getKey() - 1, false);
+                } else {
+                    // coincidentially the first span starts just at 0
+                    assert this.prefetchedEntry.getKey() == 0;
+                    this.lastSpan = new Span(0, this.prefetchedEntry.getValue(), true);
+                    this.prefetchedEntry = null;
+                }
+                return this.lastSpan;
+            } else {
+                // we are in the middle of sending spans
+                if(this.lastSpan.isInRange) {
+                    // next span is out of range
+                    assert this.prefetchedEntry == null : "was just consumed";
+                    if(this.baseIt.hasNext()) {
+                        this.prefetchedEntry = this.baseIt.next();
+                        this.lastSpan = new Span(this.lastSpan.endInclusive + 1,
+                                this.prefetchedEntry.getKey() - 1, false);
+                    } else {
+                        this.lastSpan = new Span(this.lastSpan.endInclusive + 1, this.maxValue,
+                                false);
+                    }
+                } else {
+                    // next span is in range
+                    assert this.prefetchedEntry != null : "prefetched";
+                    this.lastSpan = new Span(this.lastSpan.endInclusive + 1,
+                            this.prefetchedEntry.getValue(), true);
+                    this.prefetchedEntry = null;
+                }
+                return this.lastSpan;
+            }
+        }
+        
+        @Override
+        protected boolean baseHasNext() {
+            if(this.lastSpan == null) {
+                return true;
+            } else if(this.lastSpan.endInclusive < this.maxValue) {
+                return true;
+            } else
+                return false;
+        }
+        
     }
     
     @Override
@@ -199,10 +322,12 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
     }
     
     private static int start(Entry<Integer,Integer> entry) {
+        assert entry != null;
         return entry.getKey();
     }
     
     private static int end(Entry<Integer,Integer> entry) {
+        assert entry != null;
         return entry.getValue();
     }
     

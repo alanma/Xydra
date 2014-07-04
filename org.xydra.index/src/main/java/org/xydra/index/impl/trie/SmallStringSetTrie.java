@@ -1,15 +1,12 @@
 package org.xydra.index.impl.trie;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
+import org.xydra.annotations.NotThreadSafe;
 import org.xydra.index.Factory;
 import org.xydra.index.IEntrySet;
 import org.xydra.index.IMapSetIndex;
 import org.xydra.index.impl.IteratorUtils;
 import org.xydra.index.impl.SmallEntrySetFactory;
+import org.xydra.index.iterator.IFilter;
 import org.xydra.index.iterator.ITransformer;
 import org.xydra.index.iterator.Iterators;
 import org.xydra.index.iterator.NoneIterator;
@@ -19,17 +16,82 @@ import org.xydra.index.query.Wildcard;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import java.io.Serializable;
+
 import com.google.common.base.Function;
 
 
 /**
+ * Current impl: this class -> {@link SortedStringMap} -> {@link SortedArrayMap}
+ * 
+ * IMPROVE rewrite algorithms into non-recursive form
+ * 
  * @author xamde
  * 
  * @param <E>
  */
+@NotThreadSafe
 public class SmallStringSetTrie<E> implements IMapSetIndex<String,E>, Serializable {
     
-    /** public only for debug */
+    public final Function<Node,Boolean> FUNCTION_clear = new Function<Node,Boolean>() {
+        
+        @Override
+        public Boolean apply(Node node) {
+            node.entrySet.clear();
+            node.children.clear();
+            return true;
+        }
+    };
+    
+    public final ITransformer<KeyEntryTuple<String,Node>,Iterator<E>> TRANSFORMER_KET2EntrySet = new ITransformer<KeyEntryTuple<String,Node>,Iterator<E>>() {
+        
+        @Override
+        public Iterator<E> transform(KeyEntryTuple<String,Node> ket) {
+            return ket.getSecond().entrySet.iterator();
+        }
+    };
+    
+    private static class ConstraintKeyPrefix implements Constraint<String> {
+        
+        public void setKeyPrefix(String keyPrefix) {
+            this.keyPrefix = keyPrefix;
+        }
+        
+        private String keyPrefix;
+        
+        @Override
+        public boolean matches(String element) {
+            return element.startsWith(this.keyPrefix);
+        }
+        
+        @Override
+        public boolean isStar() {
+            return false;
+        }
+        
+        @Override
+        public boolean isExact() {
+            return false;
+        }
+        
+        @Override
+        public String getExpected() {
+            return this.keyPrefix;
+        }
+    }
+    
+    private ConstraintKeyPrefix CONSTRAINT_KEY_PREFIX = new ConstraintKeyPrefix();
+    
+    /**
+     * public only for debug; non-static to avoid generics-overkill and have
+     * access to entrySetFactory
+     * 
+     * 
+     */
     public class Node implements Serializable {
         
         private static final long serialVersionUID = -125040148037301604L;
@@ -41,13 +103,14 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String,E>, Serializab
          * start with the same prefix, not even a single character. Different
          * from normal tries, strings might be longer than 1 character
          */
-        private SortedStringMap<Node> children = new SortedStringMap<Node>();
+        private SortedStringMap<Node> children;
         
         /** @NeverNull */
         private IEntrySet<E> entrySet;
         
         public Node() {
             this.entrySet = SmallStringSetTrie.this.entrySetFactory.createInstance();
+            this.children = new SortedStringMap<Node>();
         }
         
         public Node(E value) {
@@ -71,29 +134,38 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String,E>, Serializab
                 } else {
                     // search...
                     Iterator<KeyEntryTuple<String,Node>> it = this.children.tupleIterator(c1);
-                    return Iterators.cascade(it,
-                            new ITransformer<KeyEntryTuple<String,Node>,Iterator<E>>() {
-                                
-                                @Override
-                                public Iterator<E> transform(KeyEntryTuple<String,Node> ket) {
-                                    return ket.getSecond().entrySet.iterator();
-                                }
-                            });
+                    return Iterators.cascade(it, SmallStringSetTrie.this.TRANSFORMER_KET2EntrySet);
                 }
             }
         }
         
+        /**
+         * Search via internal tuples
+         * 
+         * @param keyPrefix
+         * @return ...
+         */
+        public Iterator<E> searchPrefix(final String keyPrefix) {
+            SmallStringSetTrie.this.CONSTRAINT_KEY_PREFIX.setKeyPrefix(keyPrefix);
+            Iterator<KeyEntryTuple<String,Node>> it = this.children
+                    .tupleIterator(SmallStringSetTrie.this.CONSTRAINT_KEY_PREFIX);
+            return Iterators.cascade(it, SmallStringSetTrie.this.TRANSFORMER_KET2EntrySet);
+        }
+        
+        /**
+         * @param keyPrefix
+         * @return ...
+         */
+        public Iterator<E> quick_searchPrefix(final String keyPrefix) {
+            SmallStringSetTrie.this.CONSTRAINT_KEY_PREFIX.setKeyPrefix(keyPrefix);
+            Iterator<Node> it = this.children
+                    .entryIterator(SmallStringSetTrie.this.CONSTRAINT_KEY_PREFIX);
+            return Iterators.cascade(it, SmallStringSetTrie.this.TRANSFORMER_NODE2ENTRIES);
+        }
+        
         public void deIndex(Node parent, String parentKey, String removeKey) {
             assert removeKey != null;
-            deIndex(parent, parentKey, removeKey, new Function<Node,Boolean>() {
-                
-                @Override
-                public Boolean apply(Node node) {
-                    node.entrySet.clear();
-                    node.children.clear();
-                    return true;
-                }
-            });
+            deIndex(parent, parentKey, removeKey, SmallStringSetTrie.this.FUNCTION_clear);
         }
         
         public boolean deIndex(Node parent, String parentKey, String removeKey, final E removeEntry) {
@@ -198,7 +270,8 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String,E>, Serializab
             Node conflictingNode = this.children.lookup(conflictKey);
             // find common prefix to extract
             int commonPrefixLen = getSharedPrefixLength(insertKey, conflictKey);
-            assert commonPrefixLen > 0;
+            assert commonPrefixLen > 0 : "commonPrefixLen==0? insertKey=" + insertKey
+                    + " conflictKey=" + conflictKey;
             if(conflictKey.equals(insertKey)) {
                 // the conflicting node is our node
                 return conflictingNode.entrySet.index(value);
@@ -241,16 +314,16 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String,E>, Serializab
         
         /**
          * @param combinedKey
-         * @param c1 @NeverNull
+         * @param keyConstraint @NeverNull
          * @return an iterator over all nodes with entries; breadth-first
          */
         public Iterator<KeyEntryTuple<String,Node>> keyAndNodeIterator(final String combinedKey,
-                final Constraint<String> c1) {
+                final Constraint<String> keyConstraint) {
             
             Iterator<KeyEntryTuple<String,Node>> thisNodeIt = null;
-            if(c1.matches(combinedKey)) {
+            if(keyConstraint.matches(combinedKey)) {
                 thisNodeIt = Iterators.forOne(new KeyEntryTuple<String,Node>(combinedKey, this));
-                if(c1.isExact()) {
+                if(keyConstraint.isExact()) {
                     // recursion base case: I am *the* searched node
                     return thisNodeIt;
                 }
@@ -268,9 +341,10 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String,E>, Serializab
                         KeyEntryTuple<String,Node> tuple) {
                     /* does it make sense to recurse here? */
                     String currentKey = combinedKey + tuple.getKey();
-                    if(canMatch(currentKey, c1)) {
-                        // recursion
-                        return tuple.getEntry().keyAndNodeIterator(currentKey, c1);
+                    if(canMatch(currentKey, keyConstraint)) {
+                        // IMPROVE avoid recursion here
+                        // recursion (!)
+                        return tuple.getEntry().keyAndNodeIterator(currentKey, keyConstraint);
                     } else {
                         return NoneIterator.create();
                     }
@@ -278,16 +352,73 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String,E>, Serializab
                 
             });
             
-            if(c1.isStar()) {
+            if(keyConstraint.isStar()) {
                 assert thisNodeIt != null;
                 // include this node and children
                 return Iterators.concat(thisNodeIt, fromChildrenIt);
-            } else if(c1.isExact()) {
+            } else if(keyConstraint.isExact()) {
                 // look only in children
                 return fromChildrenIt;
             } else {
-                if(c1.matches(combinedKey)) {
-                    // incluse this
+                if(keyConstraint.matches(combinedKey)) {
+                    // include this
+                    return Iterators.concat(thisNodeIt, fromChildrenIt);
+                } else {
+                    // children only
+                    return fromChildrenIt;
+                }
+            }
+        }
+        
+        /**
+         * @param combinedKey
+         * @param keyConstraint @NeverNull
+         * @return an iterator over all nodes with entries; breadth-first
+         */
+        public Iterator<Node> nodeIterator(final String combinedKey,
+                final Constraint<String> keyConstraint) {
+            
+            Iterator<Node> thisNodeIt = null;
+            if(keyConstraint.matches(combinedKey)) {
+                thisNodeIt = Iterators.forOne(this);
+                if(keyConstraint.isExact()) {
+                    // recursion base case: I am *the* searched node
+                    return thisNodeIt;
+                }
+            }
+            
+            // else we need to (also) traverse children
+            Iterator<Node> fromChildrenIt = Iterators.cascade(
+            
+            this.children.tupleIterator(ANY_STRING),
+            
+            new ITransformer<KeyEntryTuple<String,Node>,Iterator<Node>>() {
+                
+                @Override
+                public Iterator<Node> transform(KeyEntryTuple<String,Node> tuple) {
+                    /* does it make sense to recurse here? */
+                    String currentKey = combinedKey + tuple.getKey();
+                    if(canMatch(currentKey, keyConstraint)) {
+                        // IMPROVE avoid recursion here
+                        // recursion (!)
+                        return tuple.getEntry().nodeIterator(currentKey, keyConstraint);
+                    } else {
+                        return NoneIterator.create();
+                    }
+                }
+                
+            });
+            
+            if(keyConstraint.isStar()) {
+                assert thisNodeIt != null;
+                // include this node and children
+                return Iterators.concat(thisNodeIt, fromChildrenIt);
+            } else if(keyConstraint.isExact()) {
+                // look only in children
+                return fromChildrenIt;
+            } else {
+                if(keyConstraint.matches(combinedKey)) {
+                    // include this
                     return Iterators.concat(thisNodeIt, fromChildrenIt);
                 } else {
                     // children only
@@ -399,18 +530,19 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String,E>, Serializab
         
         /**
          * @param combinedKey
-         * @param c1
+         * @param keyConstraint
          * @param entryConstraint
          * @return all matching keys X their matching entries
          */
         public Iterator<KeyEntryTuple<String,E>> tupleIterator(String combinedKey,
-                Constraint<String> c1, final Constraint<E> entryConstraint) {
+                Constraint<String> keyConstraint, final Constraint<E> entryConstraint) {
             
             /*
              * get all c1-matching (combinedKey,Node) pairs, recursion happens
              * only here
              */
-            Iterator<KeyEntryTuple<String,Node>> keyNodeIt = keyAndNodeIterator(combinedKey, c1);
+            Iterator<KeyEntryTuple<String,Node>> keyNodeIt = keyAndNodeIterator(combinedKey,
+                    keyConstraint);
             
             Iterator<KeyEntryTuple<String,E>> keyEntriesIt = Iterators
                     .cascade(
@@ -458,7 +590,85 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String,E>, Serializab
             return keyEntriesIt;
         }
         
+        /**
+         * @param combinedKey
+         * @param keyConstraint
+         * @param optionalEntryFilter @CanBeNull
+         * @return all matching keys X their matching entries
+         */
+        public Iterator<E> valueIterator(String combinedKey, Constraint<String> keyConstraint,
+                final IFilter<E> optionalEntryFilter) {
+            
+            /*
+             * get all c1-matching (combinedKey,Node) pairs, recursion happens
+             * only here
+             */
+            Iterator<Node> keyNodeIt = nodeIterator(combinedKey, keyConstraint);
+            
+            Iterator<E> keyEntriesIt = Iterators.cascade(keyNodeIt,
+                    new ITransformer<Node,Iterator<E>>() {
+                        
+                        @Override
+                        public Iterator<E> transform(final Node ketCombinedKeyNode) {
+                            /*
+                             * for each matching (combinedKey-Node)-pair: look
+                             * in the node and take all entryConstraint-matching
+                             * entries and ...
+                             */
+                            Iterator<E> entryIt = ketCombinedKeyNode.entrySet.iterator();
+                            
+                            Iterator<E> filteredEntryIt;
+                            if(optionalEntryFilter == null) {
+                                return entryIt;
+                            } else {
+                                // apply constraint
+                                filteredEntryIt = Iterators.filter(entryIt, optionalEntryFilter);
+                                return filteredEntryIt;
+                            }
+                        }
+                    });
+            
+            return keyEntriesIt;
+        }
+        
+        public Iterator<IEntrySet<E>> valueAsEntrySetIterator(String combinedKey,
+                Constraint<String> keyConstraint) {
+            /*
+             * get all c1-matching (combinedKey,Node) pairs, recursion happens
+             * only here
+             */
+            Iterator<Node> keyNodeIt = nodeIterator(combinedKey, keyConstraint);
+            
+            Iterator<IEntrySet<E>> entrySetIt = Iterators.transform(keyNodeIt,
+                    new ITransformer<Node,IEntrySet<E>>() {
+                        
+                        @Override
+                        public IEntrySet<E> transform(final Node ketCombinedKeyNode) {
+                            /*
+                             * for each matching (combinedKey-Node)-pair: look
+                             * in the node and take all entryConstraint-matching
+                             * entries and ...
+                             */
+                            IEntrySet<E> set = ketCombinedKeyNode.entrySet;
+                            return set;
+                        }
+                    });
+            
+            Iterator<IEntrySet<E>> nonEmptyEntrySetIt = Iterators.filter(entrySetIt,
+                    SmallStringSetTrie.this.FILTER_NON_EMPTY_ENTRYSET);
+            
+            return nonEmptyEntrySetIt;
+        }
+        
     }
+    
+    private final IFilter<IEntrySet<E>> FILTER_NON_EMPTY_ENTRYSET = new IFilter<IEntrySet<E>>() {
+        
+        @Override
+        public boolean matches(IEntrySet<E> entry) {
+            return !entry.isEmpty();
+        }
+    };
     
     private static final Constraint<String> ANY_STRING = new Wildcard<String>();
     
@@ -544,7 +754,7 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String,E>, Serializab
         st.deIndex("Hell");
     }
     
-    private Factory<IEntrySet<E>> entrySetFactory;
+    private transient Factory<IEntrySet<E>> entrySetFactory;
     
     private Node root;
     
@@ -553,6 +763,14 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String,E>, Serializab
         @Override
         public Iterator<E> transform(Node node) {
             return node.entrySet.iterator();
+        }
+    };
+    
+    final ITransformer<Node,IEntrySet<E>> TRANSFORMER_NODE2ENTRYSET = new ITransformer<Node,IEntrySet<E>>() {
+        
+        @Override
+        public IEntrySet<E> transform(Node node) {
+            return node.entrySet;
         }
     };
     
@@ -571,13 +789,17 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String,E>, Serializab
     public org.xydra.index.IMapSetIndex.IMapSetDiff<String,E> computeDiff(
             IMapSetIndex<String,E> otherFuture) {
         
-        // TODO implement
+        // IMPROVE implement diff function
         throw new UnsupportedOperationException("not impl yet");
     }
     
     @Override
     public Iterator<E> constraintIterator(Constraint<String> c1) {
         return this.root.constraintIterator(c1);
+    }
+    
+    public Iterator<E> searchPrefix(String keyPrefix) {
+        return this.root.searchPrefix(keyPrefix);
     }
     
     @Override
@@ -672,31 +894,22 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String,E>, Serializab
         return this.root.lookup(key);
     }
     
+    /**
+     * IMPROVE performance: create and use a direct prefix search returning just
+     * V's, without creating intermediate KeyEntryTuple
+     * 
+     * Contains dupes, e.g. if the term "HelloWorld" has been indexed, it was
+     * also indexed as "Hello" and "World". Hence the query "hell" returns both
+     * "hello" and "helloworld", both with the same V.
+     * 
+     * @param keyPrefix
+     * @return all tuples matching the keyPrefix, sorted in lexicographical
+     *         order of the keys. Shorter keys before longer keys. No order in
+     *         values for the same keys.
+     */
     public Iterator<KeyEntryTuple<String,E>> search(final String keyPrefix) {
-        
-        return tupleIterator(new Constraint<String>() {
-            
-            @Override
-            public String getExpected() {
-                return null;
-            }
-            
-            @Override
-            public boolean isExact() {
-                return false;
-            }
-            
-            @Override
-            public boolean isStar() {
-                return false;
-            }
-            
-            @Override
-            public boolean matches(String element) {
-                return element.startsWith(keyPrefix);
-            }
-            
-        }, new Wildcard<E>());
+        SmallStringSetTrie.this.CONSTRAINT_KEY_PREFIX.setKeyPrefix(keyPrefix);
+        return tupleIterator(SmallStringSetTrie.this.CONSTRAINT_KEY_PREFIX, new Wildcard<E>());
     }
     
     /**
@@ -711,9 +924,17 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String,E>, Serializab
     }
     
     @Override
-    public Iterator<KeyEntryTuple<String,E>> tupleIterator(Constraint<String> c1,
+    public Iterator<KeyEntryTuple<String,E>> tupleIterator(Constraint<String> keyConstraint,
             Constraint<E> entryConstraint) {
-        return this.root.tupleIterator("", c1, entryConstraint);
+        return this.root.tupleIterator("", keyConstraint, entryConstraint);
     }
     
+    public Iterator<E> valueIterator(Constraint<String> keyConstraint,
+            IFilter<E> optionalEntryFilter) {
+        return this.root.valueIterator("", keyConstraint, optionalEntryFilter);
+    }
+    
+    public Iterator<IEntrySet<E>> valueAsEntrySetIterator(Constraint<String> keyConstraint) {
+        return this.root.valueAsEntrySetIterator("", keyConstraint);
+    }
 }

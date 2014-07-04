@@ -1,20 +1,29 @@
 package org.xydra.index.impl;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-
 import org.xydra.index.IEntrySet;
 import org.xydra.index.iterator.NoneIterator;
 import org.xydra.index.iterator.SingleValueIterator;
 import org.xydra.index.query.Constraint;
 import org.xydra.index.query.EqualsConstraint;
 
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
+import com.google.common.collect.Sets;
+
 
 public class FastSetIndex<E> extends HashSet<E> implements IEntrySet<E> {
     
+    private boolean concurrent;
+    
     public FastSetIndex() {
+        this(false);
+    }
+    
+    public FastSetIndex(boolean concurrent) {
         super(4);
+        this.concurrent = concurrent;
     }
     
     private static final long serialVersionUID = 1067549369843962009L;
@@ -77,8 +86,15 @@ public class FastSetIndex<E> extends HashSet<E> implements IEntrySet<E> {
     @Override
     public Iterator<E> constraintIterator(Constraint<E> entryConstraint) {
         if(entryConstraint.isStar()) {
+            if(this.concurrent) {
+                return toSet().iterator();
+            }
             return iterator();
         } else {
+            // this additional check is making things faster?
+            if(isEmpty())
+                return NoneIterator.create();
+            
             assert entryConstraint instanceof EqualsConstraint<?>;
             E entry = ((EqualsConstraint<E>)entryConstraint).getKey();
             if(contains(entry)) {
@@ -91,7 +107,11 @@ public class FastSetIndex<E> extends HashSet<E> implements IEntrySet<E> {
     
     @Override
     public Set<E> toSet() {
-        return this;
+        if(this.concurrent) {
+            return Sets.newHashSet(this);
+        } else {
+            return this;
+        }
     }
     
 }

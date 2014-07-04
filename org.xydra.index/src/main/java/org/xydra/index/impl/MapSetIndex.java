@@ -1,14 +1,5 @@
 package org.xydra.index.impl;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
 import org.xydra.index.Factory;
 import org.xydra.index.IEntrySet;
 import org.xydra.index.IEntrySet.IEntrySetDiff;
@@ -22,6 +13,16 @@ import org.xydra.index.query.KeyEntryTuple;
 import org.xydra.index.query.Wildcard;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
+
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 public class MapSetIndex<K, E> implements IMapSetIndex<K,E> {
@@ -178,7 +179,19 @@ public class MapSetIndex<K, E> implements IMapSetIndex<K,E> {
     private Map<K,IEntrySet<E>> map;
     
     public MapSetIndex(Factory<IEntrySet<E>> entrySetFactory) {
-        this.map = new HashMap<K,IEntrySet<E>>(4);
+        this(entrySetFactory, false);
+    }
+    
+    /**
+     * @param entrySetFactory
+     * @param concurrent
+     */
+    public MapSetIndex(Factory<IEntrySet<E>> entrySetFactory, boolean concurrent) {
+        if(concurrent) {
+            this.map = new ConcurrentHashMap<K,IEntrySet<E>>(4);
+        } else {
+            this.map = new HashMap<K,IEntrySet<E>>(4);
+        }
         this.entrySetFactory = entrySetFactory;
     }
     
@@ -249,6 +262,8 @@ public class MapSetIndex<K, E> implements IMapSetIndex<K,E> {
     
     @Override
     public boolean contains(Constraint<K> c1, Constraint<E> entryConstraint) {
+        // IMPROVE can this be sped up?
+        
         if(c1.isStar()) {
             if(entryConstraint.isStar()) {
                 return !this.map.isEmpty();

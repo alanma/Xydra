@@ -4,13 +4,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import org.xydra.index.IIntegerRangeIndex;
+import org.xydra.index.impl.IntegerRangeIndex.Span;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
+
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 
 import org.junit.Test;
-import org.xydra.index.IIntegerRangeIndex;
-import org.xydra.log.api.Logger;
-import org.xydra.log.api.LoggerFactory;
 
 
 public class IntegerRangeIndexTest {
@@ -103,4 +106,29 @@ public class IntegerRangeIndexTest {
         assertEquals(e, (int)entry.getValue());
     }
     
+    @Test
+    public void testSpanIterator1() {
+        IntegerRangeIndex iri = new IntegerRangeIndex();
+        iri.index(10, 20);
+        iri.index(30, 40);
+        
+        Iterator<Span> spanIt = iri.spanIterator(100);
+        List<Span> list = IteratorUtils.toList(spanIt);
+        // for(Span span : list) {
+        // System.out.println(span);
+        // }
+        assertEquals(5, list.size());
+        assertSpan(0, 9, false, list.get(0));
+        assertSpan(10, 20, true, list.get(1));
+        assertSpan(21, 29, false, list.get(2));
+        assertSpan(30, 40, true, list.get(3));
+        assertSpan(41, 100, false, list.get(4));
+        
+    }
+    
+    private static void assertSpan(int s, int e, boolean inRange, Span span) {
+        assertEquals(s, span.startInclusive);
+        assertEquals(e, span.endInclusive);
+        assertEquals(inRange, span.isInRange);
+    }
 }

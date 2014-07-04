@@ -38,7 +38,8 @@ public interface IIntegerRangeIndex extends IIndex {
     void dump();
     
     /**
-     * @return the indexed ranges sorted by their first component
+     * @return the indexed ranges sorted by their first component; each entry is
+     *         [start,end], both inclusive
      */
     Iterator<Entry<Integer,Integer>> rangesIterator();
     

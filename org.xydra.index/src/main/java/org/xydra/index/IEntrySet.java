@@ -1,9 +1,9 @@
 package org.xydra.index;
 
+import org.xydra.index.query.Constraint;
+
 import java.util.Iterator;
 import java.util.Set;
-
-import org.xydra.index.query.Constraint;
 
 
 /**
@@ -30,22 +30,42 @@ public interface IEntrySet<E> extends IIndex, Iterable<E> {
      */
     boolean index(E entry);
     
+    /**
+     * @param other
+     * @return the diff (added, removed) of this set with another set
+     */
     IEntrySetDiff<E> computeDiff(IEntrySet<E> other);
     
+    /**
+     * @author xamde
+     * 
+     * @param <E>
+     */
     static interface IEntrySetDiff<E> {
         IEntrySet<E> getAdded();
         
         IEntrySet<E> getRemoved();
     }
     
+    /**
+     * @param entry
+     * @return true iff the set contains the entry
+     */
     boolean contains(E entry);
     
+    /**
+     * @param entryConstraint
+     * @return all elements of the set matching the given entryConstraint
+     */
     Iterator<E> constraintIterator(Constraint<E> entryConstraint);
     
+    /**
+     * @return the number of elements in the set
+     */
     int size();
     
     /**
-     * @return a read-only Set
+     * @return a read-only {@link java.util.Set}
      */
     Set<E> toSet();
     
