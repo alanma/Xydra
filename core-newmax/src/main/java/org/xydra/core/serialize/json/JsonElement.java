@@ -18,6 +18,17 @@ public class JsonElement extends AbstractJsonElement {
     private static final Iterator<XydraElement> noChildren = NoneIterator.create();
     private static final Iterator<Object> noValue = NoneIterator.create();
     
+    protected static Iterator<Pair<String,XydraElement>> transformMap(
+            Iterator<Map.Entry<String,Object>> iterator, final String type) {
+        return new AbstractTransformingIterator<Map.Entry<String,Object>,Pair<String,XydraElement>>(
+                iterator) {
+            @Override
+            public Pair<String,XydraElement> transform(Map.Entry<String,Object> in) {
+                return new Pair<String,XydraElement>(in.getKey(), wrap(in.getValue(), type));
+            }
+        };
+    }
+    
     private final Map<String,Object> data;
     private final String type;
     
@@ -39,6 +50,11 @@ public class JsonElement extends AbstractJsonElement {
     }
     
     @Override
+    public XydraElement getChild(String name) {
+        return getElement(name);
+    }
+    
+    @Override
     public XydraElement getChild(String name, String type) {
         return this.data.containsKey(name) ? wrap(this.data.get(name), type) : null;
     }
@@ -50,34 +66,21 @@ public class JsonElement extends AbstractJsonElement {
     
     @Override
     public Iterator<XydraElement> getChildrenByName(String name, String defaultType) {
-        
         Object childList = this.data.get(name);
         if(childList == null || !(childList instanceof List<?>)) {
             return noChildren;
         }
-        
         return transform(((List<?>)childList).iterator(), defaultType);
     }
     
     @Override
-    public XydraElement getChild(String name) {
-        return getElement(name);
+    public Object getContent() {
+        throw new ParsingError(this, "cannot get unnamed content from JSON object");
     }
     
     @Override
     public Object getContent(String name) {
         return getAttribute(name);
-    }
-    
-    protected static Iterator<Pair<String,XydraElement>> transformMap(
-            Iterator<Map.Entry<String,Object>> iterator, final String type) {
-        return new AbstractTransformingIterator<Map.Entry<String,Object>,Pair<String,XydraElement>>(
-                iterator) {
-            @Override
-            public Pair<String,XydraElement> transform(Map.Entry<String,Object> in) {
-                return new Pair<String,XydraElement>(in.getKey(), wrap(in.getValue(), type));
-            }
-        };
     }
     
     @Override
@@ -93,12 +96,10 @@ public class JsonElement extends AbstractJsonElement {
     
     @Override
     public Object getValue(String name, int index) {
-        
         Object value = this.data.get(name);
         if(value instanceof Map<?,?> || value instanceof List<?>) {
             throw new ParsingError(this, "expected value, got container");
         }
-        
         return value;
     }
     
@@ -110,18 +111,11 @@ public class JsonElement extends AbstractJsonElement {
     @SuppressWarnings("unchecked")
     @Override
     public Iterator<Object> getValues(String name) {
-        
         Object childList = this.data.get(name);
         if(childList == null || !(childList instanceof List<?>)) {
             return noValue;
         }
-        
         return ((List<Object>)childList).iterator();
-    }
-    
-    @Override
-    public Object getContent() {
-        throw new ParsingError(this, "cannot get unnamed content from JSON object");
     }
     
 }
