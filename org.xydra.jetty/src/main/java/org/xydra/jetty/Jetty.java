@@ -1,5 +1,12 @@
 package org.xydra.jetty;
 
+import org.xydra.annotations.CanBeNull;
+import org.xydra.conf.IConfig;
+import org.xydra.env.Env;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
+import org.xydra.restless.utils.Delay;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -14,11 +21,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.webapp.WebAppContext;
-import org.xydra.annotations.CanBeNull;
-import org.xydra.env.Env;
-import org.xydra.log.api.Logger;
-import org.xydra.log.api.LoggerFactory;
-import org.xydra.restless.utils.Delay;
 
 
 /**
@@ -61,6 +63,7 @@ public class Jetty extends EmbeddedJetty {
      * Jetty with your port of choice
      * 
      * @param port
+     * @deprecated use {@link #configureFromConf(IConfig)} instead
      */
     public Jetty(int port) {
         Env.get().conf().set(ConfParamsJetty.PORT, port);
@@ -168,6 +171,11 @@ public class Jetty extends EmbeddedJetty {
         this.userFirstFilter = filter;
     }
     
+    /**
+     * @param contextPath
+     * @param docRoot
+     * @deprecated use {@link #configureFromConf(IConfig)} instead
+     */
     @Deprecated
     public void configure(String contextPath, File docRoot) {
         configure(8888, contextPath, docRoot);
