@@ -167,27 +167,27 @@ public class DefaultLogger implements Logger {
     
     @Override
     public boolean isDebugEnabled() {
-        return this.level.isAsImportantOrEvenMoreImportantThan(Level.Debug);
+        return Level.Debug.isAsImportantOrEvenMoreImportantThan(this.level);
     }
     
     @Override
     public boolean isErrorEnabled() {
-        return this.level.isAsImportantOrEvenMoreImportantThan(Level.Error);
+        return Level.Error.isAsImportantOrEvenMoreImportantThan(this.level);
     }
     
     @Override
     public boolean isInfoEnabled() {
-        return this.level.isAsImportantOrEvenMoreImportantThan(Level.Info);
+        return Level.Info.isAsImportantOrEvenMoreImportantThan(this.level);
     }
     
     @Override
     public boolean isTraceEnabled() {
-        return this.level.isAsImportantOrEvenMoreImportantThan(Level.Trace);
+        return Level.Trace.isAsImportantOrEvenMoreImportantThan(this.level);
     }
     
     @Override
     public boolean isWarnEnabled() {
-        return this.level.isAsImportantOrEvenMoreImportantThan(Level.Warn);
+        return Level.Warn.isAsImportantOrEvenMoreImportantThan(this.level);
     }
     
     private void log(Level level, String msg) {

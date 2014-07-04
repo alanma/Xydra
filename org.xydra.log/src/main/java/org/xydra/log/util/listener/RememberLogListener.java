@@ -4,6 +4,7 @@ import org.xydra.annotations.NeverNull;
 import org.xydra.log.api.ILogListener;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.Logger.Level;
+import org.xydra.log.coreimpl.util.LimitedBuffer;
 import org.xydra.log.util.SharedExceptionUtils;
 
 
@@ -18,10 +19,7 @@ public class RememberLogListener implements ILogListener {
     
     private static final String LINEEND = " <br/>\n";
     
-    /* Max 100 KB */
-    private static final int MAXLEN = 100 * 1024;
-    
-    private StringBuffer buf = new StringBuffer();
+    private LimitedBuffer buf = new LimitedBuffer(100 * 1024, LINEEND);
     
     private Level minLevel;
     
@@ -81,17 +79,11 @@ public class RememberLogListener implements ILogListener {
     
     private void log(String logLevel, Logger log, String msg) {
         this.buf.append("[" + logLevel + "] " + log.toString() + ">> " + msg + LINEEND);
-        if(this.buf.length() > MAXLEN) {
-            this.buf = new StringBuffer("(too many logs, deleted past)" + LINEEND);
-        }
     }
     
     private void log(String logLevel, Logger log, String msg, Throwable t) {
         this.buf.append("[" + logLevel + "] " + log.toString() + ">> " + msg + LINEEND);
         this.buf.append("Exception: " + SharedExceptionUtils.toString(t) + LINEEND);
-        if(this.buf.length() > MAXLEN) {
-            this.buf = new StringBuffer("(too many logs, deleted past)" + LINEEND);
-        }
     }
     
     private boolean shouldLog(@NeverNull Level level) {

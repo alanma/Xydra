@@ -1,5 +1,8 @@
 package org.xydra.log.util;
 
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -7,19 +10,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.URL;
 import java.util.Properties;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.PropertyConfigurator;
-import org.xydra.log.api.Logger;
-import org.xydra.log.api.LoggerFactory;
 
 
 /**
  * Utility class for managing log4j.properties files. If some bundled jar
- * contains a log4j.propeties (e.g. it might come in from a /src/test/resources
+ * contains a log4j.properties (e.g. it might come in from a /src/test/resources
  * folder), then the first log4j.properties found on the classpath is used. To
  * fix that, this class allows to explicitly load a local file from
  * /src/main/resources and apply the config listed in there.
@@ -65,11 +67,15 @@ public class Log4jUtils {
      */
     public static void listConfigFromClasspath() throws IOException {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        InputStream in = cl.getResourceAsStream("log4j.properties");
+        final String name = "log4j.properties";
+        InputStream in = cl.getResourceAsStream(name);
         if(in == null) {
             System.out.println("System.out: Found not log4j.properties on classpath.");
             return;
         }
+        // found!
+        URL url = cl.getResource(name);
+        System.out.println("Found in " + url.toString());
         Reader r = new InputStreamReader(in, "utf-8");
         String s = IOUtils.toString(r);
         System.out.println("System.out: Found config:\n" + s);
@@ -79,6 +85,9 @@ public class Log4jUtils {
         listConfigFromClasspath();
     }
     
+    /**
+     * Calls the internal log4j configuration reset
+     */
     public static void resetLog4jConfig() {
         LogManager.resetConfiguration();
         log.info("Logging: Log4j config resetted");
