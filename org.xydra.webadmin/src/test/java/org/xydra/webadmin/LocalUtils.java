@@ -1,10 +1,5 @@
 package org.xydra.webadmin;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-
 import org.xydra.base.XId;
 import org.xydra.core.XX;
 import org.xydra.persistence.XydraPersistence;
@@ -12,6 +7,11 @@ import org.xydra.store.XydraRuntime;
 import org.xydra.store.impl.gae.InstanceContext;
 import org.xydra.xgae.XGae;
 import org.xydra.xgae.gaeutils.GaeTestfixer;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 
 
 public class LocalUtils {
@@ -28,7 +28,7 @@ public class LocalUtils {
         XGae.get().datastore().sync().clear();
         assert XGae.get().datastore().sync().getAllKinds().size() == 0;
         XGae.get().memcache().clear();
-        InstanceContext.clearInstanceContext();
+        InstanceContext.clear();
         
         File zipFile = new File(zipFilePath);
         FileInputStream fis = new FileInputStream(zipFile);
