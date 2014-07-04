@@ -1,14 +1,17 @@
 package org.xydra.gaemyadmin;
 
-import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
-
+import org.xydra.conf.IConfig;
+import org.xydra.env.Env;
+import org.xydra.jetty.ConfParamsJetty;
 import org.xydra.jetty.Jetty;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.log.util.Log4jUtils;
 import org.xydra.restless.Restless;
+
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 
 /**
@@ -37,12 +40,15 @@ public class RunGaeMyAdminJetty {
         Restless.DELEGATE_UNHANDLED_TO_DEFAULT = true;
         
         // start jetty
-        jetty = new Jetty(8765);
+        jetty = new Jetty();
+        IConfig conf = Env.get().conf();
+        conf.set(ConfParamsJetty.PORT, 8765);
+        File webAppDir = new File("src/main/webapp");
+        conf.set(ConfParamsJetty.DOC_ROOT, webAppDir.getAbsolutePath());
+        jetty.configureFromConf(conf);
         
-        File webappDir = new File("src/main/webapp");
-        jetty.configure("", webappDir);
         uri = jetty.startServer();
-        log.info("Embedded jetty serves " + webappDir.getAbsolutePath() + " at " + uri.toString());
+        log.info("Embedded jetty serves " + webAppDir.getAbsolutePath() + " at " + uri.toString());
         log.info(".oO ___________ Running ____________________________");
         System.out.println("Server runs at " + uri.toString());
     }

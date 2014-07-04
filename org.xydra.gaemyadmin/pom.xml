@@ -72,7 +72,7 @@
 			<groupId>com.google.appengine</groupId>
 			<artifactId>appengine-testing</artifactId>
 			<!-- @@ use gae.version here -->
-			<version>1.7.3</version>
+			<version>1.8.5</version>
 			<scope>compile</scope>
 		</dependency>
 
@@ -80,7 +80,7 @@
 			<groupId>com.google.appengine</groupId>
 			<artifactId>appengine-api-stubs</artifactId>
 			<!-- @@ use gae.version here -->
-			<version>1.7.3</version>
+			<version>1.8.5</version>
 			<scope>compile</scope>
 		</dependency>
 
