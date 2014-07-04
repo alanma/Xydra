@@ -45,7 +45,7 @@ import org.xydra.oo.testgen.alltypes.shared.IHasAllType;
 import org.xydra.oo.testgen.alltypes.shared.IPerson;
 import org.xydra.oo.testgen.alltypes.shared.MyLongBasedType;
 
-/** Generated on Wed Feb 05 16:34:32 CET 2014 by SpecWriter, a part of xydra.org:oo */
+/** Generated on Fri Jul 04 01:02:18 CEST 2014 by SpecWriter, a part of xydra.org:oo */
 public class GwtHasAllType extends GwtXydraMapped implements org.xydra.oo.testgen.alltypes.shared.IHasAllType {
 
     /** 

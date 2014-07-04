@@ -9,7 +9,7 @@ import org.xydra.oo.testgen.alltypes.shared.AbstractSharedFactory;
 import org.xydra.oo.testgen.alltypes.shared.IHasAllType;
 import org.xydra.oo.testgen.alltypes.shared.IPerson;
 
-/** Generated on Wed Feb 05 16:34:31 CET 2014 by SpecWriter, a part of xydra.org:oo */
+/** Generated on Fri Jul 04 01:02:18 CEST 2014 by SpecWriter, a part of xydra.org:oo */
 public class JavaFactory extends AbstractSharedFactory {
 
     /** 
@@ -31,7 +31,7 @@ public class JavaFactory extends AbstractSharedFactory {
     @Override
     protected IHasAllType getHasAllTypeInternal(XWritableModel model, XId id) {
         IHasAllType w = (IHasAllType) Proxy.newProxyInstance(IHasAllType.class.getClassLoader(),
-            new Class<?>[] { IHasAllType.class }, new OOJavaOnlyProxy(model, id));
+            new Class<?>[] { IHasAllType.class, org.xydra.oo.runtime.java.ICanDump.class }, new OOJavaOnlyProxy(model, id));
         return w;
     }
 
@@ -45,7 +45,7 @@ public class JavaFactory extends AbstractSharedFactory {
     @Override
     protected IPerson getPersonInternal(XWritableModel model, XId id) {
         IPerson w = (IPerson) Proxy.newProxyInstance(IPerson.class.getClassLoader(),
-            new Class<?>[] { IPerson.class }, new OOJavaOnlyProxy(model, id));
+            new Class<?>[] { IPerson.class, org.xydra.oo.runtime.java.ICanDump.class }, new OOJavaOnlyProxy(model, id));
         return w;
     }
 

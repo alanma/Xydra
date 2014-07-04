@@ -14,7 +14,7 @@ import org.xydra.oo.testgen.tasks.shared.ITask;
 import org.xydra.oo.testgen.tasks.shared.ITaskList;
 import org.xydra.oo.testgen.tasks.shared.IUser;
 
-/** Generated on Wed Feb 05 16:34:31 CET 2014 by SpecWriter, a part of xydra.org:oo */
+/** Generated on Fri Jul 04 01:02:18 CEST 2014 by SpecWriter, a part of xydra.org:oo */
 public class JavaFactory extends AbstractSharedFactory {
 
     /** 
@@ -36,7 +36,7 @@ public class JavaFactory extends AbstractSharedFactory {
     @Override
     protected IBaseList getBaseListInternal(XWritableModel model, XId id) {
         IBaseList w = (IBaseList) Proxy.newProxyInstance(IBaseList.class.getClassLoader(),
-            new Class<?>[] { IBaseList.class }, new OOJavaOnlyProxy(model, id));
+            new Class<?>[] { IBaseList.class, org.xydra.oo.runtime.java.ICanDump.class }, new OOJavaOnlyProxy(model, id));
         return w;
     }
 
@@ -50,7 +50,7 @@ public class JavaFactory extends AbstractSharedFactory {
     @Override
     protected IHome getHomeInternal(XWritableModel model, XId id) {
         IHome w = (IHome) Proxy.newProxyInstance(IHome.class.getClassLoader(),
-            new Class<?>[] { IHome.class }, new OOJavaOnlyProxy(model, id));
+            new Class<?>[] { IHome.class, org.xydra.oo.runtime.java.ICanDump.class }, new OOJavaOnlyProxy(model, id));
         return w;
     }
 
@@ -64,7 +64,7 @@ public class JavaFactory extends AbstractSharedFactory {
     @Override
     protected ISettings getSettingsInternal(XWritableModel model, XId id) {
         ISettings w = (ISettings) Proxy.newProxyInstance(ISettings.class.getClassLoader(),
-            new Class<?>[] { ISettings.class }, new OOJavaOnlyProxy(model, id));
+            new Class<?>[] { ISettings.class, org.xydra.oo.runtime.java.ICanDump.class }, new OOJavaOnlyProxy(model, id));
         return w;
     }
 
@@ -78,7 +78,7 @@ public class JavaFactory extends AbstractSharedFactory {
     @Override
     protected ISmartList getSmartListInternal(XWritableModel model, XId id) {
         ISmartList w = (ISmartList) Proxy.newProxyInstance(ISmartList.class.getClassLoader(),
-            new Class<?>[] { ISmartList.class }, new OOJavaOnlyProxy(model, id));
+            new Class<?>[] { ISmartList.class, org.xydra.oo.runtime.java.ICanDump.class }, new OOJavaOnlyProxy(model, id));
         return w;
     }
 
@@ -92,7 +92,7 @@ public class JavaFactory extends AbstractSharedFactory {
     @Override
     protected ITask getTaskInternal(XWritableModel model, XId id) {
         ITask w = (ITask) Proxy.newProxyInstance(ITask.class.getClassLoader(),
-            new Class<?>[] { ITask.class }, new OOJavaOnlyProxy(model, id));
+            new Class<?>[] { ITask.class, org.xydra.oo.runtime.java.ICanDump.class }, new OOJavaOnlyProxy(model, id));
         return w;
     }
 
@@ -106,7 +106,7 @@ public class JavaFactory extends AbstractSharedFactory {
     @Override
     protected ITaskList getTaskListInternal(XWritableModel model, XId id) {
         ITaskList w = (ITaskList) Proxy.newProxyInstance(ITaskList.class.getClassLoader(),
-            new Class<?>[] { ITaskList.class }, new OOJavaOnlyProxy(model, id));
+            new Class<?>[] { ITaskList.class, org.xydra.oo.runtime.java.ICanDump.class }, new OOJavaOnlyProxy(model, id));
         return w;
     }
 
@@ -120,7 +120,7 @@ public class JavaFactory extends AbstractSharedFactory {
     @Override
     protected IUser getUserInternal(XWritableModel model, XId id) {
         IUser w = (IUser) Proxy.newProxyInstance(IUser.class.getClassLoader(),
-            new Class<?>[] { IUser.class }, new OOJavaOnlyProxy(model, id));
+            new Class<?>[] { IUser.class, org.xydra.oo.runtime.java.ICanDump.class }, new OOJavaOnlyProxy(model, id));
         return w;
     }
 

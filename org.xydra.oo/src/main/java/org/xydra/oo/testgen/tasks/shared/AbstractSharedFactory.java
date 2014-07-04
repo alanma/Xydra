@@ -12,7 +12,7 @@ import org.xydra.oo.testgen.tasks.shared.ITask;
 import org.xydra.oo.testgen.tasks.shared.ITaskList;
 import org.xydra.oo.testgen.tasks.shared.IUser;
 
-/** Generated on Wed Feb 05 16:34:31 CET 2014 by SpecWriter, a part of xydra.org:oo */
+/** Generated on Fri Jul 04 01:02:18 CEST 2014 by SpecWriter, a part of xydra.org:oo */
 public abstract class AbstractSharedFactory extends AbstractFactory {
 
     /** 
