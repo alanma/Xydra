@@ -1,15 +1,18 @@
 package org.xydra.webadmin;
 
-import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
-
+import org.xydra.conf.IConfig;
+import org.xydra.env.Env;
+import org.xydra.jetty.ConfParamsJetty;
 import org.xydra.jetty.Jetty;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.log.impl.log4j.Log4jLoggerFactory;
 import org.xydra.restless.Restless;
 import org.xydra.xgae.gaeutils.GaeTestfixer;
+
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 
 /**
@@ -67,11 +70,14 @@ public class RunWebadminJetty {
         GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
         
         // start jetty
-        jetty = new Jetty(8765);
+        jetty = new Jetty();
         
         File webappDir = new File("src/main/webapp");
         
-        jetty.configure("", webappDir);
+        IConfig conf = Env.get().conf();
+        conf.set(ConfParamsJetty.PORT, 8765);
+        conf.set(ConfParamsJetty.DOC_ROOT, webappDir.getAbsolutePath());
+        jetty.configureFromConf(conf);
         uri = jetty.startServer();
         log.info("Embedded jetty serves " + webappDir.getAbsolutePath() + " at " + uri.toString());
         log.info(".oO ___________ Running ____________________________");
