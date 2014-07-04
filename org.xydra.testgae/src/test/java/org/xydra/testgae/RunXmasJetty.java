@@ -1,13 +1,15 @@
 package org.xydra.testgae;
 
-import java.io.File;
-import java.net.URI;
-
+import org.xydra.conf.IConfig;
+import org.xydra.env.Env;
+import org.xydra.jetty.ConfParamsJetty;
 import org.xydra.jetty.Jetty;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.restless.Restless;
 import org.xydra.xgae.gaeutils.GaeTestfixer;
+
+import java.net.URI;
 
 
 /**
@@ -34,8 +36,13 @@ public class RunXmasJetty {
         CopyGwt.copyGwt();
         
         // start jetty
-        Jetty jetty = new Jetty(8787);
-        jetty.configure("", new File("src/main/webapp"));
+        Jetty jetty = new Jetty();
+        
+        IConfig conf = Env.get().conf();
+        new ConfParamsJetty().configure(conf);
+        
+        conf.setLong(ConfParamsJetty.PORT, 8787);
+        conf.set(ConfParamsJetty.DOC_ROOT, "src/main/webapp");
         URI uri = jetty.startServer();
         
         log.info("Started embedded Jetty server. User interface is at " + uri.toString());
