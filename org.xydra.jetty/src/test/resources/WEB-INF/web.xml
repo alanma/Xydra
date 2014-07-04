@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	version="2.5">
+
+	<!--  only active if default servlet handles root path -->
+	<welcome-file-list>
+		<welcome-file>/index.html</welcome-file>
+	</welcome-file-list>
+
+	<servlet>
+		<servlet-name>Restless</servlet-name>
+		<servlet-class>org.xydra.restless.Restless</servlet-class>
+		<init-param>
+			<param-name>app</param-name>
+			<param-value>org.xydra.restless.example.ExampleApp</param-value>
+		</init-param>
+		<init-param>
+			<param-name>foo</param-name>
+			<param-value>bar</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>Restless</servlet-name>
+		<url-pattern>/*</url-pattern>
+		<!--  for secure resources -->
+		<url-pattern>/admin/*</url-pattern>
+	</servlet-mapping>
+
+	<security-constraint>
+		<!--  Admin -->
+		<web-resource-collection>
+			<web-resource-name>admin</web-resource-name>
+			<url-pattern>/admin/*</url-pattern>
+		</web-resource-collection>
+		<auth-constraint>
+			<role-name>admin</role-name>
+		</auth-constraint>
+	</security-constraint>
+
+	<!--
+		ignored by appengine, used by local jetty to simulate admin login
+	-->
+	<security-role>
+		<role-name>admin</role-name>
+	</security-role>
+	<login-config>
+		<auth-method>FORM</auth-method>
+		<form-login-config>
+			<form-login-page>/login.html</form-login-page>
+			<form-error-page>/login.html</form-error-page>
+		</form-login-config>
+	</login-config>
+
+</web-app>
