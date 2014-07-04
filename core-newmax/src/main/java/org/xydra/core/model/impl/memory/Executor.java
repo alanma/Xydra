@@ -1,8 +1,5 @@
 package org.xydra.core.model.impl.memory;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import org.xydra.annotations.CanBeNull;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
@@ -39,6 +36,9 @@ import org.xydra.core.model.impl.memory.sync.Root;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.sharedutils.XyAssert;
+
+import java.util.LinkedList;
+import java.util.List;
 
 
 /**
@@ -228,7 +228,7 @@ public class Executor {
      * @param modelState @CanBeNull
      * @param objectState @NeverNull
      * @param root @NeverNull
-     * @param changeEventListener @CanBenNull
+     * @param changeEventListener @CanBeNull
      * @return resulting revision number or error code
      */
     public static long executeCommandOnObject(XId actorId, XCommand command,

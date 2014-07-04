@@ -1,10 +1,5 @@
 package org.xydra.core.model.impl.memory;
 
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.ReadOperation;
@@ -59,6 +54,12 @@ import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.sharedutils.XyAssert;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
+import java.io.Serializable;
+
 
 /**
  * The core state information is represented in two ways, which must be kept in
@@ -110,7 +111,7 @@ Serializable {
      * delegates change events to local cache only, state change is handled by
      * {@link Executor} already
      */
-    private final XRMOFChangeListener changeListener = new XRMOFChangeListener() {
+    private transient final XRMOFChangeListener changeListener = new XRMOFChangeListener() {
         
         @Override
         public void onChangeEvent(XFieldEvent event) {
@@ -148,7 +149,7 @@ Serializable {
      * @CanBeNull for stand-alone-models without father; if present, it's used
      *            to ensure uniqueness of modelIds
      */
-    private final IMemoryRepository father;
+    private final transient IMemoryRepository father;
     
     /**
      * Current state as a snapshot in augmented form.

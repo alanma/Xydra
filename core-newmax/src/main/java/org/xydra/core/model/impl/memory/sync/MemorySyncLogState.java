@@ -1,9 +1,5 @@
 package org.xydra.core.model.impl.memory.sync;
 
-import java.util.Iterator;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
 import org.xydra.base.XAddress;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
@@ -12,6 +8,10 @@ import org.xydra.index.iterator.NoneIterator;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.sharedutils.XyAssert;
+
+import java.util.Iterator;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 
 public class MemorySyncLogState implements ISyncLogState {
@@ -188,8 +188,12 @@ public class MemorySyncLogState implements ISyncLogState {
             return false;
         }
         
-        if(log.isDebugEnabled()) log.debug("Truncating local syncLog down to rev=" + revisionNumber + "; highest was "
-                + (this.getLastEvent() == null ? "none" : this.getLastEvent().getRevisionNumber()));
+        if(log.isDebugEnabled())
+            log.debug("Truncating local syncLog down to rev="
+                    + revisionNumber
+                    + "; highest was "
+                    + (this.getLastEvent() == null ? "none" : this.getLastEvent()
+                            .getRevisionNumber()));
         
         /* Delete all events LATER than syncRev */
         SortedMap<Long,ISyncLogEntry> toBeDeleted = this.eventMap.tailMap(revisionNumber + 1);
