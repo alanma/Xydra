@@ -1,9 +1,9 @@
 package org.xydra.store.impl.gae;
 
-import java.util.concurrent.TimeUnit;
-
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
+
+import java.util.concurrent.TimeUnit;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -23,38 +23,34 @@ import com.google.common.cache.CacheBuilder;
  * @author xamde
  */
 public class InstanceContext {
-	
-	private static final Logger log = LoggerFactory.getLogger(InstanceContext.class);
-	
-	private static Cache<String,Object> sharedCache;
-	
-	/**
-	 * @return the static cache. Use with care (about race conditions).
-	 */
-	public static synchronized Cache<String,Object> getInstanceCache() {
-		if(sharedCache == null) {
-			log.info("Created InstanceContext");
-			// use Guava limited cache here to avoid memory leak
-			sharedCache = CacheBuilder.newBuilder().expireAfterAccess(30, TimeUnit.MINUTES)
-			        .maximumSize(100).build();
-			// new ConcurrentHashMap<String,Object>();
-		}
-		return sharedCache;
-	}
-	
-	/**
-	 * Clears instance context
-	 */
-	public static void clear() {
-		clearInstanceContext();
-	}
-	
-	public static void clearInstanceContext() {
-		log.info("Cleared InstanceContext");
-		if(sharedCache != null) {
-			sharedCache.invalidateAll();
-			sharedCache.cleanUp();
-		}
-	}
-	
+    
+    private static final Logger log = LoggerFactory.getLogger(InstanceContext.class);
+    
+    private static Cache<String,Object> sharedCache;
+    
+    /**
+     * @return the static cache. Use with care (about race conditions).
+     */
+    public static synchronized Cache<String,Object> getInstanceCache() {
+        if(sharedCache == null) {
+            log.info("Created InstanceContext");
+            // use Guava limited cache here to avoid memory leak
+            sharedCache = CacheBuilder.newBuilder().expireAfterAccess(30, TimeUnit.MINUTES)
+                    .maximumSize(100).build();
+            // new ConcurrentHashMap<String,Object>();
+        }
+        return sharedCache;
+    }
+    
+    /**
+     * Clears instance context
+     */
+    public static void clear() {
+        log.info("Cleared InstanceContext");
+        if(sharedCache != null) {
+            sharedCache.invalidateAll();
+            sharedCache.cleanUp();
+        }
+    }
+    
 }

@@ -1,34 +1,25 @@
 package org.xydra.store.impl.gae.ng;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-
 import org.xydra.annotations.NeverNull;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.XType;
 import org.xydra.base.change.XAtomicEvent;
-import org.xydra.base.change.XFieldEvent;
-import org.xydra.base.change.XModelEvent;
-import org.xydra.base.change.XObjectEvent;
-import org.xydra.base.change.impl.memory.MemoryFieldEvent;
-import org.xydra.base.change.impl.memory.MemoryModelEvent;
-import org.xydra.base.change.impl.memory.MemoryObjectEvent;
-import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XStateWritableModel;
 import org.xydra.base.rmof.XStateWritableObject;
 import org.xydra.base.rmof.impl.XExists;
-import org.xydra.base.rmof.impl.memory.SimpleObject;
-import org.xydra.core.XX;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.model.delta.ChangedObject;
 import org.xydra.core.model.delta.DeltaUtils;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.sharedutils.XyAssert;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 
 
 /**
@@ -115,55 +106,6 @@ public class ContextInTxn implements XStateWritableModel, XExists {
         DeltaUtils.createEventsForChangedModel(events, actorId, this.changedModel, inTxn
                 || this.changedModel.modelWasRemoved());
         return events;
-    }
-    
-    /**
-     * Remove object and below
-     * 
-     * @param events
-     * @param ctxBeforeCmd
-     * @param actorId
-     * @param modelRev
-     * @param modelAddress
-     * @param object
-     */
-    // FIXME make sure TOS are updated
-    private static void addImpliedObjectRemoveEventsAndUpdateTos(List<XAtomicEvent> events,
-            ContextBeforeCommand ctxBeforeCmd, XId actorId, long modelRev, XAddress modelAddress,
-            XReadableObject object) {
-        for(XId fieldId : object) {
-            addImpliedFieldAndValueRemoveEventsAndUpdateTos(events, actorId, modelRev,
-                    object.getRevisionNumber(), object.getField(fieldId));
-        }
-        XModelEvent modelEvent = MemoryModelEvent.createRemoveEvent(actorId, modelAddress,
-                object.getId(), modelRev, object.getRevisionNumber(), true, true);
-        events.add(modelEvent);
-        // update TOS
-        SimpleObject so = new SimpleObject(XX.resolveObject(modelAddress, object.getId()));
-        TentativeObjectState tos = new TentativeObjectState(so, false, modelRev);
-        ctxBeforeCmd.saveTentativeObjectState(tos);
-    }
-    
-    /**
-     * Remove fields and below
-     * 
-     * @param events
-     * @param actorId
-     * @param modelRev
-     * @param objectRev
-     * @param field
-     */
-    private static void addImpliedFieldAndValueRemoveEventsAndUpdateTos(List<XAtomicEvent> events,
-            XId actorId, long modelRev, long objectRev, XReadableField field) {
-        if(!field.isEmpty()) {
-            XFieldEvent fieldEvent = MemoryFieldEvent.createRemoveEvent(actorId,
-                    field.getAddress(), modelRev, objectRev, field.getRevisionNumber(), true, true);
-            events.add(fieldEvent);
-        }
-        XObjectEvent objectEvent = MemoryObjectEvent.createRemoveEvent(actorId, field.getAddress()
-                .getParent(), field.getId(), modelRev, objectRev, field.getRevisionNumber(), true,
-                true);
-        events.add(objectEvent);
     }
     
     public Collection<? extends XReadableObject> getAdded() {

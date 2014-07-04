@@ -1,13 +1,14 @@
 package org.xydra.store.impl.gae;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.xydra.core.X;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.store.AbstractPersistenceTestForTransactions;
 import org.xydra.store.XydraRuntime;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
 
 
 public class GaeDetailedPersistenceTestForTransactions extends

@@ -412,8 +412,8 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
     private static void updateTentativeObjectStates(ContextInTxn sourceContext,
             ContextBeforeCommand targetContext, long changeRev) {
         
-        for(XReadableObject added : sourceContext.getAdded()) {
-            TentativeObjectState tos = new TentativeObjectState(added, true, changeRev);
+        for(XReadableObject addedObject : sourceContext.getAdded()) {
+            TentativeObjectState tos = new TentativeObjectState(addedObject, true, changeRev);
             for(XId fieldId : tos) {
                 XRevWritableField field = tos.getField(fieldId);
                 field.setRevisionNumber(changeRev);
@@ -421,8 +421,8 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
             tos.setRevisionNumber(changeRev);
             targetContext.saveTentativeObjectState(tos);
         }
-        for(XId removed : sourceContext.getRemoved()) {
-            TentativeObjectState tos = targetContext.getTentativeObjectState(removed);
+        for(XId removedObject : sourceContext.getRemoved()) {
+            TentativeObjectState tos = targetContext.getTentativeObjectState(removedObject);
             XyAssert.xyAssert(tos != null);
             assert tos != null;
             tos.setObjectExists(false);
@@ -430,13 +430,13 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
             tos.setRevisionNumber(changeRev);
             targetContext.saveTentativeObjectState(tos);
         }
-        for(ChangedObject changed : sourceContext.getChanged()) {
-            if(changed.hasChanges()) {
-                XRevWritableObject object = XCopyUtils.createSnapshot(changed);
-                for(XReadableField addedField : changed.getAdded()) {
+        for(ChangedObject changedObject : sourceContext.getChanged()) {
+            if(changedObject.hasChanges()) {
+                XRevWritableObject object = XCopyUtils.createSnapshot(changedObject);
+                for(XReadableField addedField : changedObject.getAdded()) {
                     object.getField(addedField.getId()).setRevisionNumber(changeRev);
                 }
-                for(ChangedField changedField : changed.getChangedFields()) {
+                for(ChangedField changedField : changedObject.getChangedFields()) {
                     if(changedField.isChanged())
                         object.getField(changedField.getId()).setRevisionNumber(changeRev);
                 }

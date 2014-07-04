@@ -1,10 +1,5 @@
 package org.xydra.store.impl.gae;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
@@ -42,6 +37,11 @@ import org.xydra.xgae.datastore.api.DatastoreTimeoutException;
 import org.xydra.xgae.datastore.api.SEntity;
 import org.xydra.xgae.datastore.api.SKey;
 import org.xydra.xgae.datastore.api.SPreparedQuery;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -113,8 +113,7 @@ public class GaePersistence implements XydraPersistence {
     // private Map<XId,IGaeModelPersistence> modelPersistenceMapXXXXOLD = new
     // HashMap<XId,IGaeModelPersistence>();
     
-    private Cache<XId,IGaeModelPersistence> modelPersistenceMap = CacheBuilder.newBuilder()
-            .maximumSize(10).expireAfterAccess(5, TimeUnit.MINUTES).build();
+    private Cache<XId,IGaeModelPersistence> modelPersistenceMap;
     
     private final XAddress repoAddr;
     
@@ -125,6 +124,8 @@ public class GaePersistence implements XydraPersistence {
      */
     @XGaeOperation()
     public GaePersistence(XId repoId) {
+        this.modelPersistenceMap = CacheBuilder.newBuilder().maximumSize(10)
+                .expireAfterAccess(5, TimeUnit.MINUTES).build();
         log.debug("static stuff done");
         if(repoId == null) {
             throw new IllegalArgumentException("repoId was null");
@@ -153,6 +154,12 @@ public class GaePersistence implements XydraPersistence {
     public synchronized void clear() {
         log.info("Clear");
         XGae.get().datastore().sync().clear();
+        XGae.get().memcache().clear();
+        this.modelPersistenceMap.invalidateAll();
+        assert this.modelPersistenceMap.asMap().isEmpty();
+        this.modelPersistenceMap.cleanUp();
+        assert this.modelPersistenceMap.size() == 0;
+        InstanceContext.clear();
         Memcache.clear();
     }
     
@@ -173,7 +180,8 @@ public class GaePersistence implements XydraPersistence {
         checkIdLength(modelId);
         
         try {
-            return getModelPersistence(modelId).executeCommand(command, actorId);
+            IGaeModelPersistence mp = getModelPersistence(modelId);
+            return mp.executeCommand(command, actorId);
         } catch(DatastoreTimeoutException e) {
             throw new InternalStoreException("Storage did not work - please retry", e, 503);
         } catch(DatastoreFailureException e) {
@@ -232,8 +240,8 @@ public class GaePersistence implements XydraPersistence {
         // find models ids by looking for all change entities with rev=0
         String low = "0/" + this.repoAddr.getRepository();
         String high = low + LAST_UNICODE_CHAR;
-        SPreparedQuery preparedQuery = XGae.get().datastore().sync().prepareRangeQuery(
-                KeyStructure.KIND_XCHANGE, true, low, high);
+        SPreparedQuery preparedQuery = XGae.get().datastore().sync()
+                .prepareRangeQuery(KeyStructure.KIND_XCHANGE, true, low, high);
         
         Set<XId> managedModelIds = new HashSet<XId>();
         for(SEntity e : preparedQuery.asIterable()) {
@@ -253,8 +261,8 @@ public class GaePersistence implements XydraPersistence {
             throw new RequestException("address must refer to a model, was " + addressRequest);
         }
         log.debug("getModelRevision of " + addressRequest);
-        return getModelPersistence(addressRequest.address.getModel()).getModelRevision(
-                addressRequest.includeTentative);
+        IGaeModelPersistence mp = getModelPersistence(addressRequest.address.getModel());
+        return mp.getModelRevision(addressRequest.includeTentative);
     }
     
     @Override

@@ -111,12 +111,6 @@
 			</exclusions>
 			<classifier>tests</classifier>
 		</dependency>
-		<dependency>
-			<groupId>org.xydra</groupId>
-			<artifactId>csv</artifactId>
-			<!--@@ use xydra.version here -->
-			<version>0.1.7-SNAPSHOT</version>
-		</dependency>
 
 		<!-- devmode logging requires log4j libs! -->
 		<!-- compile dependencies -->

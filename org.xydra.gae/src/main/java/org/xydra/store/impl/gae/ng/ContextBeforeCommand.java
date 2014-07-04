@@ -1,10 +1,5 @@
 package org.xydra.store.impl.gae.ng;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 import org.xydra.annotations.CanBeNull;
 import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.Setting;
@@ -29,6 +24,12 @@ import org.xydra.xgae.XGae;
 import org.xydra.xgae.datastore.api.SEntity;
 import org.xydra.xgae.datastore.api.SKey;
 import org.xydra.xgae.datastore.api.SPreparedQuery;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import java.io.Serializable;
 
 
 /**
@@ -149,7 +150,8 @@ public class ContextBeforeCommand implements XRevWritableModel,
                         keyPrefix + GaeUtils2.LAST_UNICODE_CHAR);
         
         log.info("Firing query " + preparedQuery.toString());
-        List<SEntity> entityList = preparedQuery.asListWithChunkSize(128);
+        preparedQuery.setChunkSize(128);
+        List<SEntity> entityList = preparedQuery.asList();
         
         List<TentativeObjectState> tosList = new ArrayList<TentativeObjectState>(entityList.size());
         log.info("got " + entityList.size() + " results");

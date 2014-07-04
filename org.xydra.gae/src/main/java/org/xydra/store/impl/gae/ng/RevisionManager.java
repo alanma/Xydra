@@ -28,12 +28,13 @@ public class RevisionManager {
     
     private GaeModelRevInfo revision;
     
-    private UniCache<GaeModelRevInfo> uniRevCache = new UniCache<GaeModelRevInfo>(
-            UniCacheRevisionInfoEntryHandler.instance(), "CACHEDREV");
+    private UniCache<GaeModelRevInfo> uniRevCache;
     
     public RevisionManager(XAddress modelAddress) {
         this.modelAddress = modelAddress;
         this.revision = null;
+        this.uniRevCache = new UniCache<GaeModelRevInfo>(
+                UniCacheRevisionInfoEntryHandler.instance(), "CACHEDREV");
     }
     
     /**
@@ -87,14 +88,15 @@ public class RevisionManager {
         
         // FIXME !!!!!!!!!!!!!
         // check if still current
-        if(this.revision.getPrecision() == Precision.Precise) {
-            ChangeLogManager clm = new ChangeLogManager(this.modelAddress);
-            long rev = this.revision.getLastStableSuccessChange() + 1;
-            GaeChange chg = clm.getChange(rev);
-            XyAssert.xyAssert(chg == null || !chg.getStatus().changedSomething()
-                    || chg.getStatus().canChange(), "revMan say %s but change at %s is %s",
-                    this.revision, rev, chg);
-        }
+        // if(this.revision.getPrecision() == Precision.Precise) {
+        // ChangeLogManager clm = new ChangeLogManager(this.modelAddress);
+        // long rev = this.revision.getLastStableSuccessChange() + 1;
+        // GaeChange chg = clm.getChange(rev);
+        // XyAssert.xyAssert(chg == null || !chg.getStatus().changedSomething()
+        // || chg.getStatus().canChange(),
+        // "revMan say %s but change at %s is %s",
+        // this.revision, rev, chg);
+        // }
         
         return this.revision;
     }
