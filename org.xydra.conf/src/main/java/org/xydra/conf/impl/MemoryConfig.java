@@ -1,16 +1,5 @@
 package org.xydra.conf.impl;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.annotations.Setting;
 import org.xydra.conf.ConfBuilder;
@@ -22,6 +11,19 @@ import org.xydra.index.query.KeyEntryTuple;
 import org.xydra.index.query.Wildcard;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 
 @RunsInGWT(true)
@@ -86,6 +88,7 @@ public class MemoryConfig implements IConfig {
      */
     private static <T> IResolver<T> createResolverFromClassName(String className) {
         assert className != null;
+        assert className.length() > 0;
         
         // try dynamic class loading
         Class<?> clazz = MemoryConfig_GwtEmul.classForName(className);
@@ -224,7 +227,8 @@ public class MemoryConfig implements IConfig {
         if(value == null) {
             throw new ConfigException("Config key '" + key
                     + "' requested but not defined - and no default defined either. " + idStr()
-                    + " \n" + getDocumentation(key));
+                    
+                    + " \nDoc:" + getDocumentation(key));
         }
         return value;
     }
@@ -265,7 +269,7 @@ public class MemoryConfig implements IConfig {
     
     @Override
     public Iterable<String> getDefinedKeys() {
-        Set<String> keys = new HashSet<String>();
+        SortedSet<String> keys = new TreeSet<String>();
         keys.addAll(this.explicit.keySet());
         keys.addAll(this.defaults.keySet());
         return keys;
@@ -374,7 +378,11 @@ public class MemoryConfig implements IConfig {
         Object o = get(key);
         
         if(o instanceof String) {
-            return createResolverFromClassName((String)o);
+            try {
+                return createResolverFromClassName((String)o);
+            } catch(Exception e) {
+                throw new RuntimeException("Could not resolve from '" + key + "'='" + o + "'", e);
+            }
         }
         
         if(o instanceof IResolver) {
@@ -669,6 +677,11 @@ public class MemoryConfig implements IConfig {
         Object o = tryToGet(key);
         if(o == null)
             return null;
+        
+        if(o instanceof IResolver) {
+            return ((IResolver<T>)o).resolve();
+        }
+        
         return ((T)o);
     }
     
@@ -691,5 +704,25 @@ public class MemoryConfig implements IConfig {
         } catch(Exception e) {
             return null;
         }
+    }
+    
+    @Override
+    public int getInt(Enum<?> key) {
+        if(key == null)
+            throw new IllegalArgumentException("Key may not be null");
+        return getInt(key.name());
+    }
+    
+    @Override
+    public int getInt(String key) {
+        Object o = get(key);
+        if(o instanceof Integer) {
+            return (int)(Integer)o;
+        }
+        if(o instanceof String) {
+            return Integer.parseInt((String)o);
+        }
+        throw new ConfigException("Value with key '" + key + "' not a int but '"
+                + o.getClass().getName());
     }
 }

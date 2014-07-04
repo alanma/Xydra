@@ -2,6 +2,19 @@ package org.xydra.conf.impl;
 
 import static org.reflections.ReflectionUtils.withName;
 
+import org.xydra.annotations.CanBeNull;
+import org.xydra.annotations.NeverNull;
+import org.xydra.annotations.RunsInGWT;
+import org.xydra.annotations.Setting;
+import org.xydra.conf.IConfig;
+import org.xydra.conf.IConfigProvider;
+import org.xydra.conf.annotations.ConfDoc;
+import org.xydra.conf.annotations.ConfType;
+import org.xydra.conf.annotations.RequireConf;
+import org.xydra.conf.annotations.RequireConfInstance;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -25,18 +38,6 @@ import org.reflections.scanners.TypeAnnotationsScanner;
 import org.reflections.scanners.TypeElementsScanner;
 import org.reflections.scanners.TypesScanner;
 import org.reflections.util.ClasspathHelper;
-import org.xydra.annotations.CanBeNull;
-import org.xydra.annotations.NeverNull;
-import org.xydra.annotations.RunsInGWT;
-import org.xydra.annotations.Setting;
-import org.xydra.conf.IConfig;
-import org.xydra.conf.IConfigProvider;
-import org.xydra.conf.annotations.ConfDoc;
-import org.xydra.conf.annotations.ConfType;
-import org.xydra.conf.annotations.RequireConf;
-import org.xydra.conf.annotations.RequireConfInstance;
-import org.xydra.log.api.Logger;
-import org.xydra.log.api.LoggerFactory;
 
 import com.google.common.base.Predicate;
 
@@ -367,5 +368,11 @@ public class ConfigTool {
     
     private static boolean jsonSerialisable(Object value) {
         return value instanceof String || value instanceof Boolean;
+    }
+    
+    public static void addAll(IConfig conf, Map<String,?> map) {
+        for(Entry<String,?> e : map.entrySet()) {
+            conf.set(e.getKey(), e.getValue());
+        }
     }
 }

@@ -1,4 +1,4 @@
 /**
- * A runtime-configurable LoggerFactory
+ * TODO A runtime-configurable LoggerFactory
  */
 package org.xydra.conf.log;

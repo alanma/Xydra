@@ -119,17 +119,31 @@ public interface IConfig {
     
     /**
      * @param key @NeverNull
-     * @return the current value for the key converted as a boolean.
+     * @return the current value for the key converted as a long.
      * @throws ConfigException if key is not defined
      */
     long getLong(Enum<?> key);
     
     /**
      * @param key @NeverNull
-     * @return the current value for the key converted as a boolean.
+     * @return the current value for the key converted as a long.
      * @throws ConfigException if key is not defined
      */
     long getLong(String key);
+    
+    /**
+     * @param key @NeverNull
+     * @return the current value for the key converted as a integer.
+     * @throws ConfigException if key is not defined
+     */
+    int getInt(Enum<?> key);
+    
+    /**
+     * @param key @NeverNull
+     * @return the current value for the key converted as a integer.
+     * @throws ConfigException if key is not defined
+     */
+    int getInt(String key);
     
     /**
      * @return the set of all keys that are required, but have no value yet.
