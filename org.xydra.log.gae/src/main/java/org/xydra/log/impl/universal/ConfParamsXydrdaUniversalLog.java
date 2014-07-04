@@ -17,12 +17,13 @@ public class ConfParamsXydrdaUniversalLog implements IConfigProvider {
     @ConfType(Boolean.class)
     public static final String GAE_IN_PRODUCTION = "gaeInProduction";
     
-    @ConfDoc("If defined, this ILoggerFactorySPI should be used")
+    @ConfDoc("If 'org.xydra.log.spi.ILoggerFactorySPI' defined, this ILoggerFactorySPI should be used")
     @ConfType(ILoggerFactorySPI.class)
     public static final String LOGGER_FACTORY_SPI = ILoggerFactorySPI.class.getName();
     
     @Override
     public void configure(IConfig conf) {
+        /* default is running in pure java */
         conf.setDefault(GWT_IN_PRODUCTION, false, true);
         conf.setDefault(GAE_IN_PRODUCTION, false, true);
     }

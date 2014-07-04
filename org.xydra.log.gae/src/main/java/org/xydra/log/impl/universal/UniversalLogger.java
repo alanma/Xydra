@@ -1,7 +1,5 @@
 package org.xydra.log.impl.universal;
 
-import java.util.Collection;
-
 import org.xydra.annotations.ThreadSafe;
 import org.xydra.conf.IConfig;
 import org.xydra.conf.annotations.RequireConf;
@@ -12,6 +10,8 @@ import org.xydra.log.api.LoggerFactory;
 import org.xydra.log.impl.jul.JulLoggerFactory;
 import org.xydra.log.impl.log4j.Log4jLoggerFactory;
 import org.xydra.log.spi.ILoggerFactorySPI;
+
+import java.util.Collection;
 
 
 /**
@@ -47,11 +47,13 @@ public class UniversalLogger implements ILoggerFactorySPI {
     
     private static ILoggerFactorySPI configure(ILoggerFactorySPI givenFactory, String configSource) {
         ILoggerFactorySPI innerFactory = null;
+        IConfig conf = Env.get().conf();
         if(givenFactory == null) {
             // reasonable auto-conf
-            IConfig conf = Env.get().conf();
-            boolean gwtInProduction = conf.getBoolean(ConfParamsXydrdaUniversalLog.GWT_IN_PRODUCTION);
-            boolean gaeInProduction = conf.getBoolean(ConfParamsXydrdaUniversalLog.GAE_IN_PRODUCTION);
+            boolean gwtInProduction = conf
+                    .getBoolean(ConfParamsXydrdaUniversalLog.GWT_IN_PRODUCTION);
+            boolean gaeInProduction = conf
+                    .getBoolean(ConfParamsXydrdaUniversalLog.GAE_IN_PRODUCTION);
             
             if(gwtInProduction || gaeInProduction) {
                 innerFactory = new JulLoggerFactory();
@@ -63,6 +65,10 @@ public class UniversalLogger implements ILoggerFactorySPI {
         }
         // don't log anything before this is done :-)
         LoggerFactory.setLoggerFactorySPI(innerFactory, configSource);
+        
+        conf.setInstance(org.xydra.log.spi.ILoggerFactorySPI.class, innerFactory);
+        assert conf.resolve(ILoggerFactorySPI.class) != null;
+        
         return innerFactory;
     }
     
@@ -96,8 +102,10 @@ public class UniversalLogger implements ILoggerFactorySPI {
     }
     
     /**
-     * Configures default values of {@link ConfParamsXydrdaUniversalLog} and sets
-     * logger factory
+     * Configures default values of {@link ConfParamsXydrdaUniversalLog} and
+     * sets logger factory.
+     * 
+     * Sets config values into Env.{@link IConfig}.
      * 
      * @param inGWT if running as compiled JavaScript
      * @param onGAE if running on App Engine
@@ -113,8 +121,8 @@ public class UniversalLogger implements ILoggerFactorySPI {
         
         // check for explicit configuration of factory
         String source;
-        ILoggerFactorySPI spi = conf.tryToGetAs(ConfParamsXydrdaUniversalLog.LOGGER_FACTORY_SPI,
-                ILoggerFactorySPI.class);
+        
+        ILoggerFactorySPI spi = conf.tryToResolve(ConfParamsXydrdaUniversalLog.LOGGER_FACTORY_SPI);
         if(spi != null) {
             source = "conf.getInstance";
         }
