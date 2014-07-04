@@ -1,9 +1,9 @@
 package org.xydra.core.serialize;
 
-import java.util.Iterator;
-
 import org.xydra.annotations.NeverNull;
 import org.xydra.index.query.Pair;
+
+import java.util.Iterator;
 
 
 /**
@@ -62,13 +62,13 @@ public interface XydraElement {
     public Object getContent(String name);
     
     /**
-     * @return
+     * @return children as XydraElement iterator
      */
     public Iterator<XydraElement> getChildren();
     
     /**
-     * @param defaultType
-     * @return
+     * @param defaultType TODO document
+     * @return children as XydraElement iterator
      */
     public Iterator<XydraElement> getChildren(String defaultType);
     
@@ -94,7 +94,7 @@ public interface XydraElement {
     /**
      * @param name
      * @param defaultType
-     * @return
+     * @return children as XydraElement iterator
      */
     public Iterator<XydraElement> getChildrenByName(String name, String defaultType);
     
@@ -192,7 +192,7 @@ public interface XydraElement {
     String getType();
     
     /**
-     * @return
+     * @return ???
      */
     public Iterator<Object> getValues();
     
@@ -282,27 +282,27 @@ public interface XydraElement {
     
     /**
      * @param name
-     * @return
+     * @return ...
      */
     public XydraElement getChild(String name);
     
     /**
      * @param attribute
-     * @return
+     * @return ...
      */
     public Iterator<Pair<String,XydraElement>> getEntries(String attribute);
     
     /**
      * @param attribute
      * @param defaultType
-     * @return
+     * @return ...
      */
     public Iterator<Pair<String,XydraElement>> getEntries(String attribute, String defaultType);
     
     /**
      * @param attribute
      * @param type
-     * @return
+     * @return ...
      */
     public Iterator<Pair<String,XydraElement>> getEntriesByType(String attribute, String type);
     

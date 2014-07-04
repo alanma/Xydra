@@ -3,11 +3,11 @@ package org.xydra.sharedutils;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.util.HashSet;
-import java.util.Iterator;
-
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.index.impl.IteratorUtils;
+
+import java.util.HashSet;
+import java.util.Iterator;
 
 
 /**
@@ -22,6 +22,7 @@ public class TestUtils {
      * @param it
      * @param expected
      */
+    @SafeVarargs
     public static <E> void assertIteratorContains(Iterator<E> it, E ... expected) {
         HashSet<E> exp = new HashSet<E>();
         for(E e : expected)

@@ -1,9 +1,5 @@
 package org.xydra.store.impl.memory;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.change.ChangeType;
@@ -22,6 +18,10 @@ import org.xydra.core.model.impl.memory.Executor;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.persistence.ModelRevision;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 
 /**
@@ -66,15 +66,30 @@ public class MemoryModelPersistence {
             return XCommand.NOCHANGE;
         }
         
+        return applyChanes(changedModel, this.model, actorId, command, this.events);
+    }
+    
+    /**
+     * Public for testing only.
+     * 
+     * @param changedModel
+     * @param model
+     * @param actorId
+     * @param command
+     * @param eventList
+     * @return resulting revision number
+     */
+    public static long applyChanes(ChangedModel changedModel, XRevWritableModel model, XId actorId,
+            XCommand command, List<XEvent> eventList) {
         // create event
-        long currentModelRev = this.model.getRevisionNumber();
+        long currentModelRev = model.getRevisionNumber();
         List<XAtomicEvent> events = new LinkedList<XAtomicEvent>();
         DeltaUtils.createEventsForChangedModel(events, actorId, changedModel,
                 command.getChangeType() == ChangeType.TRANSACTION);
         long currentObjectRev;
         if(command.getTarget().getObject() != null) {
             // object txn
-            XRevWritableObject objectState = this.model.getObject(command.getTarget().getObject());
+            XRevWritableObject objectState = model.getObject(command.getTarget().getObject());
             if(objectState == null) {
                 throw new IllegalArgumentException("Cannot execute an objectCommand (" + command
                         + ") on a non-existing object");
@@ -90,8 +105,8 @@ public class MemoryModelPersistence {
                 currentModelRev, currentObjectRev);
         
         // apply event
-        EventUtils.applyEvent(this.model, event);
-        this.events.add(event);
+        EventUtils.applyEvent(model, event);
+        eventList.add(event);
         
         return event.getRevisionNumber();
         

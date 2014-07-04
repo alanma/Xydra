@@ -1,9 +1,5 @@
 package org.xydra.core.serialize;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
@@ -48,6 +44,10 @@ import org.xydra.core.model.impl.memory.sync.MemorySyncLogEntry;
 import org.xydra.core.model.impl.memory.sync.MemorySyncLogState;
 import org.xydra.index.query.Pair;
 import org.xydra.sharedutils.XyAssert;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 
 /**
@@ -637,7 +637,7 @@ public class SerializedModel {
      * @param element
      * @param parent
      * @param context
-     * @return
+     * @return ...
      */
     public static XRevWritableField toFieldState(XydraElement element, XRevWritableObject parent,
             XAddress context) {

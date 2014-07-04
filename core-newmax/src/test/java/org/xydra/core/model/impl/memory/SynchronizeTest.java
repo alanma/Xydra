@@ -5,14 +5,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
 import org.xydra.base.XAddress;
 import org.xydra.base.XCompareUtils;
 import org.xydra.base.XId;
@@ -31,7 +23,6 @@ import org.xydra.base.change.impl.memory.MemoryModelCommand;
 import org.xydra.base.change.impl.memory.MemoryObjectCommand;
 import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
-import org.xydra.core.ChangeRecorder;
 import org.xydra.core.DemoModelUtil;
 import org.xydra.core.HasChanged;
 import org.xydra.core.LoggerTestHelper;
@@ -52,11 +43,22 @@ import org.xydra.core.serialize.xml.XmlOut;
 import org.xydra.core.serialize.xml.XmlParser;
 import org.xydra.sharedutils.XyAssert;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 
 /**
  * Test for {@link XSynchronizesChanges} ({@link MemoryModel})
  * 
  * @author dscharrer
+ * 
+ *         FIXME sync test needs to be finished (see commented parts)
  * 
  */
 public class SynchronizeTest {
@@ -181,6 +183,7 @@ public class SynchronizeTest {
     public void tearDown() {
     }
     
+    @SuppressWarnings("unused")
     @Test
     public void testModelSynchronize() {
         
@@ -243,55 +246,50 @@ public class SynchronizeTest {
         XModel checkModel = XCopyUtils.copyModel(this.actorId, this.password, this.localModel);
         
         // apply the commands locally
-        int i = 0;
         for(XCommand command : localChanges) {
             long result = 0;
             result = checkModel.executeCommand(command);
             assertTrue("command: " + fix(command), result >= 0 || result == XCommand.NOCHANGE);
             result = this.localModel.executeCommand(command);
             assertTrue("command: " + command, result >= 0 || result == XCommand.NOCHANGE);
-            i++;
         }
         
         // setup listeners
-        List<XEvent> events = ChangeRecorder.record(this.localModel);
+        // List<XEvent> events = ChangeRecorder.record(this.localModel);
         HasChanged hc = new HasChanged();
         XObject newObject = this.localModel.getObject(newObjectId);
         newObject.addListenerForFieldEvents(hc);
         newObject.addListenerForObjectEvents(hc);
         
         // synchronize the remoteChanges into localModel
-        XEvent[] remoteEvents = remoteChanges.toArray(new XEvent[remoteChanges.size()]);
+        // XEvent[] remoteEvents = remoteChanges.toArray(new
+        // XEvent[remoteChanges.size()]);
         
         XyAssert.xyAssert(lastRevision == this.localModel.getSynchronizedRevision());
         
         ISyncLog lc = (ISyncLog)this.localModel.getChangeLog();
-        //
-        // // check results
-        // assertEquals(5, lc.length);
-        //
-        // assertFalse(lcc[0].hasBeenCalled()); // createObject
-        // assertFalse(lcc[1].hasBeenCalled()); // createField
-        // assertFalse(lcc[2].hasBeenCalled()); // setValue1
-        // assertFalse(lcc[3].hasBeenCalled()); // setValue2
-        // assertFalse(lcc[4].hasBeenCalled()); // removeField
-        // assertEquals(XCommand.FAILED, lcc[5].waitForResult()); // removePeter
-        // assertEquals(XCommand.FAILED, lcc[6].waitForResult()); //
-        // removeJohnSafe
+        
+        // check results
+        assertEquals(7, lc.getSize());
+        
+        // TODO verify syncEvents
         
         // check that commands have been properly modified
         
         // FIXME use syncRev+1 instead of 0 etc...
-        
-        // assertEquals(createObject, lc.getSyncLogEntryAt(0).getCommand());
-        // assertEquals(createField, lc.getSyncLogEntryAt(1).getCommand());
+        // long offset = lc.getSynchronizedRevision() + 1;
+        // assertEquals(createObject, lc.getSyncLogEntryAt(offset +
+        // 0).getCommand());
+        // assertEquals(createField, lc.getSyncLogEntryAt(offset +
+        // 1).getCommand());
         // assertEquals(setValue1.getRevisionNumber() + remoteChanges.size(),
         // ((XFieldCommand)lc
-        // .getSyncLogEntryAt(2).getCommand()).getRevisionNumber());
-        // assertEquals(setValue2, lc.getSyncLogEntryAt(3).getCommand());
+        // .getSyncLogEntryAt(offset + 2).getCommand()).getRevisionNumber());
+        // assertEquals(setValue2, lc.getSyncLogEntryAt(offset +
+        // 3).getCommand());
         // assertEquals(removeField.getRevisionNumber() + remoteChanges.size(),
         // ((XObjectCommand)lc
-        // .getSyncLogEntryAt(4).getCommand()).getRevisionNumber());
+        // .getSyncLogEntryAt(offset + 4).getCommand()).getRevisionNumber());
         //
         // // apply the commands remotely
         // assertTrue(this.remoteModel.executeCommand(fix(lc.getSyncLogEntryAt(0).getCommand()))

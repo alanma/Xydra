@@ -7,14 +7,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 import org.xydra.base.XAddress;
 import org.xydra.base.XCompareUtils;
 import org.xydra.base.XId;
@@ -61,6 +53,15 @@ import org.xydra.store.BatchedResult;
 import org.xydra.store.SynchronousCallbackWithOneResult;
 import org.xydra.store.XydraStore;
 import org.xydra.store.sync.NewSyncer;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 
 /**
@@ -683,14 +684,12 @@ abstract public class AbstractSynchronizerTest {
         // should survive the sync
         final XId newfieldId = XX.toId("newField");
         this.localModel.getObject(DemoModelUtil.JOHN_ID).createField(newfieldId);
-        // should be reverted on sync
-        ForTestLocalChangeCallback tlc2 = new ForTestLocalChangeCallback();
+        // TODO test: should be reverted on sync
         XCommand command3 = MemoryModelCommand.createRemoveCommand(this.localModel.getAddress(),
                 this.localModel.getObject(DemoModelUtil.PETER_ID).getRevisionNumber(),
                 DemoModelUtil.PETER_ID);
         assertTrue(this.localModel.executeCommand(command3) >= 0);
-        // should sync to XCommand#NOCHANGE
-        ForTestLocalChangeCallback tlc3 = new ForTestLocalChangeCallback();
+        // TODO test: should sync to XCommand#NOCHANGE
         XCommand command5 = MemoryModelCommand.createAddCommand(this.localModel.getAddress(),
                 false, bobId);
         assertTrue(this.localModel.executeCommand(command5) >= 0);

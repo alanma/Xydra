@@ -6,8 +6,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.Before;
-import org.junit.Test;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.XType;
@@ -15,6 +13,7 @@ import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XCommandFactory;
 import org.xydra.base.change.XCommandUtils;
+import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XTransaction;
 import org.xydra.base.rmof.XRevWritableField;
 import org.xydra.base.rmof.XRevWritableModel;
@@ -26,10 +25,15 @@ import org.xydra.base.value.XValue;
 import org.xydra.core.LoggerTestHelper;
 import org.xydra.core.X;
 import org.xydra.core.XX;
-import org.xydra.core.model.XLocalChangeCallback;
 import org.xydra.core.model.delta.ChangedModel;
-import org.xydra.core.model.impl.memory.CommandExecutor;
 import org.xydra.sharedutils.XyAssert;
+import org.xydra.store.impl.memory.MemoryModelPersistence;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.Before;
+import org.junit.Test;
 
 
 /*
@@ -38,7 +42,7 @@ import org.xydra.sharedutils.XyAssert;
 public class ChangedModelTest {
     
     private ChangedModel changedModel;
-    private XRevWritableModel model;
+    private XRevWritableModel revWritableModel;
     XRevWritableObject object;
     private XRevWritableObject object2;
     private XWritableField field, fieldWithValue;
@@ -56,9 +60,9 @@ public class ChangedModelTest {
         XId fieldWithValueId = XX.createUniqueId();
         
         SimpleRepository repo = new SimpleRepository(XX.resolveRepository(XX.toId("testActor")));
-        this.model = repo.createModel(modelId);
-        this.object = this.model.createObject(objectId);
-        this.object2 = this.model.createObject(object2Id);
+        this.revWritableModel = repo.createModel(modelId);
+        this.object = this.revWritableModel.createObject(objectId);
+        this.object2 = this.revWritableModel.createObject(object2Id);
         
         // add two fields
         this.field = this.object.createField(fieldId);
@@ -68,7 +72,7 @@ public class ChangedModelTest {
         XValue value = X.getValueFactory().createStringValue("test value");
         this.fieldWithValue.setValue(value);
         
-        this.changedModel = new ChangedModel(this.model);
+        this.changedModel = new ChangedModel(this.revWritableModel);
     }
     
     // Tests for commit() {
@@ -88,15 +92,16 @@ public class ChangedModelTest {
         
         // add a new XObject
         XId objectId = X.getIDProvider().createUniqueId();
-        assertFalse(this.changedModel.hasObject(objectId) || this.model.hasObject(objectId));
+        assertFalse(this.changedModel.hasObject(objectId)
+                || this.revWritableModel.hasObject(objectId));
         
         this.changedModel.createObject(objectId);
         
         assertTrue(this.changedModel.hasChanges());
         assertEquals(1, this.changedModel.countCommandsNeeded(10));
         
-        long oldRevNr = this.model.getRevisionNumber();
-        long revNr = this.commit();
+        long oldRevNr = this.revWritableModel.getRevisionNumber();
+        long revNr = this._commit();
         
         assertFalse(this.changedModel.hasChanges());
         
@@ -105,7 +110,7 @@ public class ChangedModelTest {
         assertEquals(revNr, this.changedModel.getRevisionNumber());
         
         // check that the object was added to the real model
-        assertTrue(this.model.hasObject(objectId));
+        assertTrue(this.revWritableModel.hasObject(objectId));
         
         // remove an XObject
         
@@ -113,8 +118,8 @@ public class ChangedModelTest {
         
         assertTrue(this.changedModel.hasChanges());
         
-        oldRevNr = this.model.getRevisionNumber();
-        revNr = this.commit();
+        oldRevNr = this.revWritableModel.getRevisionNumber();
+        revNr = this._commit();
         
         assertFalse(this.changedModel.hasChanges());
         
@@ -123,32 +128,47 @@ public class ChangedModelTest {
         assertEquals(revNr, this.changedModel.getRevisionNumber());
         
         // check that the object was removed from the real model
-        assertFalse(this.model.hasObject(objectId));
+        assertFalse(this.revWritableModel.hasObject(objectId));
     }
     
-    private long commit() {
-        XTransactionBuilder tb = new XTransactionBuilder(this.model.getAddress());
+    /**
+     * Apply changes from this.changedModel to this.model; tests inspect
+     * this.model afterwards.
+     * 
+     * @return resulting revision number
+     */
+    private long _commit() {
+        
+        XTransactionBuilder tb = new XTransactionBuilder(this.revWritableModel.getAddress());
         tb.applyChanges(this.changedModel);
         XTransaction txn = tb.build();
         
-        long result = CommandExecutor.checkPreconditionsChangeStateSendEvents(
-                this.model.getAddress(), txn, XX.toId("testActor"), this.model, null, null);
+        // FIXME now is
+        assert this.changedModel.exists();
+        assert this.revWritableModel.exists();
+        
+        List<XEvent> eventList = new ArrayList<XEvent>();
+        long result = MemoryModelPersistence.applyChanes(this.changedModel, this.revWritableModel,
+                XX.toId("testActor"), txn, eventList);
+        
+        // FIXME was:
+        // long result =
+        // CommandExecutor.checkPreconditionsChangeStateSendEvents(
+        // this.model.getAddress(), txn, XX.toId("testActor"), this.model, null,
+        // null);
         
         this.changedModel.reset();
-        assert result == -1 || result == this.model.getRevisionNumber() : "result=" + result
-                + " modelRev=" + this.model.getRevisionNumber();
+        assert result == -1 || result == this.revWritableModel.getRevisionNumber() : "result="
+                + result + " modelRev=" + this.revWritableModel.getRevisionNumber();
         return result;
     }
     
-    private long executeCommand(XCommand command, XLocalChangeCallback callback) {
+    private long executeCommand(XCommand command) {
         // careful
         ChangedModel wrapper = new ChangedModel(this.changedModel);
         boolean success = wrapper.executeCommand(command);
         
         if(!success) {
-            if(callback != null) {
-                callback.onFailure();
-            }
             return XCommand.FAILED;
         }
         
@@ -156,10 +176,6 @@ public class ChangedModelTest {
         assert success == success2;
         long rev = this.changedModel.getRevisionNumber()
                 + this.changedModel.countCommandsNeeded(1000);
-        if(callback != null) {
-            if(success)
-                callback.onSuccess(rev);
-        }
         return rev;
     }
     
@@ -175,8 +191,8 @@ public class ChangedModelTest {
         
         assertTrue(this.changedModel.hasChanges());
         
-        long oldRevNr = this.model.getRevisionNumber();
-        long revNr = this.commit();
+        long oldRevNr = this.revWritableModel.getRevisionNumber();
+        long revNr = this._commit();
         
         assertFalse(this.changedModel.hasChanges());
         
@@ -193,8 +209,8 @@ public class ChangedModelTest {
         
         assertTrue(this.changedModel.hasChanges());
         
-        oldRevNr = this.model.getRevisionNumber();
-        revNr = this.commit();
+        oldRevNr = this.revWritableModel.getRevisionNumber();
+        revNr = this._commit();
         
         assertFalse(this.changedModel.hasChanges());
         
@@ -219,8 +235,8 @@ public class ChangedModelTest {
         
         assertTrue(this.changedModel.hasChanges());
         
-        long oldRevNr = this.model.getRevisionNumber();
-        long revNr = this.commit();
+        long oldRevNr = this.revWritableModel.getRevisionNumber();
+        long revNr = this._commit();
         
         assertFalse(this.changedModel.hasChanges());
         
@@ -240,8 +256,8 @@ public class ChangedModelTest {
         
         assertTrue(this.changedModel.hasChanges());
         
-        oldRevNr = this.model.getRevisionNumber();
-        revNr = this.commit();
+        oldRevNr = this.revWritableModel.getRevisionNumber();
+        revNr = this._commit();
         
         assertFalse(this.changedModel.hasChanges());
         
@@ -260,8 +276,8 @@ public class ChangedModelTest {
         
         assertTrue(this.changedModel.hasChanges());
         
-        oldRevNr = this.model.getRevisionNumber();
-        revNr = this.commit();
+        oldRevNr = this.revWritableModel.getRevisionNumber();
+        revNr = this._commit();
         
         assertFalse(this.changedModel.hasChanges());
         
@@ -319,8 +335,8 @@ public class ChangedModelTest {
         // commit the transaction
         assertTrue(this.changedModel.hasChanges());
         
-        long oldRevNr = this.model.getRevisionNumber();
-        long revNr = this.commit();
+        long oldRevNr = this.revWritableModel.getRevisionNumber();
+        long revNr = this._commit();
         
         assertFalse(this.changedModel.hasChanges());
         
@@ -329,9 +345,9 @@ public class ChangedModelTest {
         assertEquals(revNr, this.changedModel.getRevisionNumber());
         
         // check that the changes were actually executed
-        assertTrue(this.model.hasObject(objectId1));
+        assertTrue(this.revWritableModel.hasObject(objectId1));
         
-        assertFalse(this.model.hasObject(objectId2));
+        assertFalse(this.revWritableModel.hasObject(objectId2));
         
         assertTrue(this.object.hasField(fieldId1));
         assertTrue(this.object.hasField(fieldId2));
@@ -367,8 +383,8 @@ public class ChangedModelTest {
         // commit the transaction
         assertTrue(this.changedModel.hasChanges());
         
-        oldRevNr = this.model.getRevisionNumber();
-        revNr = this.commit();
+        oldRevNr = this.revWritableModel.getRevisionNumber();
+        revNr = this._commit();
         
         assertFalse(this.changedModel.hasChanges());
         
@@ -377,7 +393,7 @@ public class ChangedModelTest {
         assertEquals(revNr, this.changedModel.getRevisionNumber());
         
         // check that the changes were actually executed
-        assertFalse(this.model.hasObject(objectId1));
+        assertFalse(this.revWritableModel.hasObject(objectId1));
         
         assertTrue(this.object.hasField(fieldId3));
         
@@ -393,13 +409,13 @@ public class ChangedModelTest {
     // Tests for getAddress()
     @Test
     public void testGetAddress() {
-        assertEquals(this.model.getAddress(), this.changedModel.getAddress());
+        assertEquals(this.revWritableModel.getAddress(), this.changedModel.getAddress());
     }
     
     // Tests for getId()
     @Test
     public void testGetId() {
-        assertEquals(this.model.getId(), this.changedModel.getId());
+        assertEquals(this.revWritableModel.getId(), this.changedModel.getId());
     }
     
     /*
@@ -413,7 +429,6 @@ public class ChangedModelTest {
     public void testExecuteCommandsWrongXAddress() {
         XCommandFactory factory = X.getCommandFactory();
         XId newId = X.getIDProvider().createUniqueId();
-        TestCallback callback = new TestCallback();
         XAddress randomFieldAddress = XX.toAddress(XX.createUniqueId(), XX.createUniqueId(),
                 XX.createUniqueId(), XX.createUniqueId());
         XAddress randomObjectAddress = XX.toAddress(XX.createUniqueId(), XX.createUniqueId(),
@@ -421,34 +436,34 @@ public class ChangedModelTest {
         
         XCommand objectCommand = factory.createAddFieldCommand(randomObjectAddress, newId, false);
         
-        long result = this.executeCommand(objectCommand, callback);
+        long result = this.executeCommand(objectCommand);
         assertEquals(XCommand.FAILED, result);
         assertFalse(this.changedModel.hasChanges());
         
-        // check callback
-        assertTrue(callback.failed);
-        assertNull(callback.revision);
+        // TODO listen to sync events and check
+        // assertTrue(callback.failed);
+        // assertNull(callback.revision);
         
         XCommand fieldCommand = factory.createAddFieldCommand(randomFieldAddress, newId, false);
         
-        result = executeCommand(fieldCommand, callback);
+        result = executeCommand(fieldCommand);
         assertEquals(XCommand.FAILED, result);
         assertFalse(this.changedModel.hasChanges());
         
-        // check callback
-        assertTrue(callback.failed);
-        assertNull(callback.revision);
+        // TODO listen to sync events and check
+        // assertTrue(callback.failed);
+        // assertNull(callback.revision);
         
         XCommand valueCommand = factory.createAddValueCommand(randomFieldAddress, 0,
                 XX.createUniqueId(), false);
         
-        result = executeCommand(valueCommand, callback);
+        result = executeCommand(valueCommand);
         assertEquals(XCommand.FAILED, result);
         assertFalse(this.changedModel.hasChanges());
         
-        // check callback
-        assertTrue(callback.failed);
-        assertNull(callback.revision);
+        // TODO listen to sync events and check
+        // assertTrue(callback.failed);
+        // assertNull(callback.revision);
     }
     
     // Tests for model commands
@@ -456,7 +471,6 @@ public class ChangedModelTest {
     public void executeCommandsAddObjectCommands(boolean forced) {
         XCommandFactory factory = X.getCommandFactory();
         XId newObjectId = X.getIDProvider().createUniqueId();
-        TestCallback callback = new TestCallback();
         
         // make sure there is no object with this ID
         assertFalse(this.changedModel.hasObject(newObjectId));
@@ -465,12 +479,12 @@ public class ChangedModelTest {
         XCommand addCommand = factory.createAddObjectCommand(this.changedModel.getAddress(),
                 newObjectId, forced);
         
-        long result = executeCommand(addCommand, callback);
+        long result = executeCommand(addCommand);
         assertTrue(result != XCommand.FAILED);
         
-        // check callback
-        assertFalse(callback.failed);
-        assertEquals((Long)result, callback.revision);
+        // TODO listen to sync events and check
+        // assertFalse(callback.failed);
+        // assertEquals((Long)result, callback.revision);
         
         // check whether the object was added correctly
         assertTrue(this.changedModel.hasObject(newObjectId));
@@ -478,28 +492,27 @@ public class ChangedModelTest {
         XWritableObject object = this.changedModel.getObject(newObjectId);
         assertTrue(object.getRevisionNumber() >= 0);
         
-        assertFalse(this.model.hasObject(newObjectId));
+        assertFalse(this.revWritableModel.hasObject(newObjectId));
         
         // try to add an object that already exists
         addCommand = factory.createAddObjectCommand(this.changedModel.getAddress(),
                 this.object.getId(), forced);
-        callback = new TestCallback();
         
-        result = executeCommand(addCommand, callback);
+        result = executeCommand(addCommand);
         if(forced) {
             // forced -> should succeed
             assertTrue(result != XCommand.FAILED);
             
-            // check callback
-            assertFalse(callback.failed);
-            assertEquals((Long)result, callback.revision);
+            // TODO listen to sync events and check
+            // assertFalse(callback.failed);
+            // assertEquals((Long)result, callback.revision);
         } else {
             // not forced -> should fail
             assertEquals(XCommand.FAILED, result);
             
-            // check callback
-            assertTrue(callback.failed);
-            assertNull(callback.revision);
+            // TODO listen to sync events and check
+            // assertTrue(callback.failed);
+            // assertNull(callback.revision);
         }
     }
     
@@ -516,7 +529,6 @@ public class ChangedModelTest {
     public void executeCommandsRemoveObjectCommands(boolean forced) {
         XCommandFactory factory = X.getCommandFactory();
         XId newObjectId = X.getIDProvider().createUniqueId();
-        TestCallback callback = new TestCallback();
         
         // make sure there is no field with this ID
         assertFalse(this.changedModel.hasObject(newObjectId));
@@ -527,39 +539,38 @@ public class ChangedModelTest {
         
         XCommand removeCommand = factory.createRemoveObjectCommand(address, 0, forced);
         
-        long result = executeCommand(removeCommand, callback);
+        long result = executeCommand(removeCommand);
         if(forced) {
             // forced --> should succeed
             assertTrue(result != XCommand.FAILED);
             
-            // check callback
-            assertFalse(callback.failed);
-            assertEquals((Long)result, callback.revision);
+            // TODO listen to sync events and check
+            // assertFalse(callback.failed);
+            // assertEquals((Long)result, callback.revision);
             
         } else {
             // not forced --> should fail
             assertEquals(XCommand.FAILED, result);
             
-            // check callback
-            assertTrue(callback.failed);
-            assertNull(callback.revision);
+            // TODO listen to sync events and check
+            // assertTrue(callback.failed);
+            // assertNull(callback.revision);
         }
         
         // try to remove an object that already exists, should succeed
         removeCommand = factory.createRemoveObjectCommand(this.object.getAddress(),
                 this.object.getRevisionNumber(), forced);
-        callback = new TestCallback();
         
-        result = executeCommand(removeCommand, callback);
+        result = executeCommand(removeCommand);
         assertTrue(result != XCommand.FAILED);
         
-        // check callback
-        assertFalse(callback.failed);
-        assertEquals((Long)result, callback.revision);
+        // TODO listen to sync events and check
+        // assertFalse(callback.failed);
+        // assertEquals((Long)result, callback.revision);
         
         // check whether the object was removed correctly
         assertFalse(this.changedModel.hasObject(this.object.getId()));
-        assertTrue(this.model.hasObject(this.object.getId()));
+        assertTrue(this.revWritableModel.hasObject(this.object.getId()));
         
         /*
          * object was removed, add it again (otherwise the next case doesn't
@@ -573,28 +584,27 @@ public class ChangedModelTest {
          */
         removeCommand = factory.createRemoveObjectCommand(this.object.getAddress(),
                 this.object.getRevisionNumber() + 1, forced);
-        callback = new TestCallback();
         
-        result = executeCommand(removeCommand, callback);
+        result = executeCommand(removeCommand);
         
         if(forced) {
             // forced --> should succeed
             assertTrue(result != XCommand.FAILED);
             
-            // check callback
-            assertFalse(callback.failed);
-            assertEquals((Long)result, callback.revision);
+            // TODO listen to sync events and check
+            // assertFalse(callback.failed);
+            // assertEquals((Long)result, callback.revision);
             
             // check whether the object was removed correctly
             assertFalse(this.changedModel.hasObject(this.object.getId()));
-            assertTrue(this.model.hasObject(this.object.getId()));
+            assertTrue(this.revWritableModel.hasObject(this.object.getId()));
         } else {
             // not forced --> should fail
             assertEquals(XCommand.FAILED, result);
             
-            // check callback
-            assertTrue(callback.failed);
-            assertNull(callback.revision);
+            // TODO listen to sync events and check
+            // assertTrue(callback.failed);
+            // assertNull(callback.revision);
         }
         
     }
@@ -614,7 +624,6 @@ public class ChangedModelTest {
     public void executeCommandsAddFieldCommands(boolean forced) {
         XCommandFactory factory = X.getCommandFactory();
         XId newFieldId = X.getIDProvider().createUniqueId();
-        TestCallback callback = new TestCallback();
         XWritableObject transObject = this.changedModel.getObject(this.object.getId());
         
         // make sure there is no field with this ID
@@ -624,12 +633,12 @@ public class ChangedModelTest {
         XCommand addCommand = factory.createAddFieldCommand(transObject.getAddress(), newFieldId,
                 forced);
         
-        long result = executeCommand(addCommand, callback);
+        long result = executeCommand(addCommand);
         assertTrue(result != XCommand.FAILED);
         
-        // check callback
-        assertFalse(callback.failed);
-        assertEquals((Long)result, callback.revision);
+        // TODO listen to sync events and check
+        // assertFalse(callback.failed);
+        // assertEquals((Long)result, callback.revision);
         
         // check whether the field was added correctly
         assertTrue(transObject.hasField(newFieldId));
@@ -642,23 +651,22 @@ public class ChangedModelTest {
         // try to add a field that already exists
         addCommand = factory.createAddFieldCommand(transObject.getAddress(), this.field.getId(),
                 forced);
-        callback = new TestCallback();
         
-        result = executeCommand(addCommand, callback);
+        result = executeCommand(addCommand);
         if(forced) {
             // forced --> should succeed
             assertTrue(result != XCommand.FAILED);
             
-            // check callback
-            assertFalse(callback.failed);
-            assertEquals((Long)result, callback.revision);
+            // TODO listen to sync events and check
+            // assertFalse(callback.failed);
+            // assertEquals((Long)result, callback.revision);
         } else {
             // not forced --> should fail
             assertEquals(XCommand.FAILED, result);
             
-            // check callback
-            assertTrue(callback.failed);
-            assertNull(callback.revision);
+            // TODO listen to sync events and check
+            // assertTrue(callback.failed);
+            // assertNull(callback.revision);
         }
     }
     
@@ -675,7 +683,6 @@ public class ChangedModelTest {
     public void executeCommandsRemoveFieldCommands(boolean forced) {
         XCommandFactory factory = X.getCommandFactory();
         XId newFieldId = X.getIDProvider().createUniqueId();
-        TestCallback callback = new TestCallback();
         XWritableObject transObject = this.changedModel.getObject(this.object.getId());
         
         // make sure there is no field with this ID
@@ -688,34 +695,33 @@ public class ChangedModelTest {
         
         XCommand removeCommand = factory.createRemoveFieldCommand(address, 0, forced);
         
-        long result = executeCommand(removeCommand, callback);
+        long result = executeCommand(removeCommand);
         if(forced) {
             // forced --> should suceed
             assertTrue(result != XCommand.FAILED);
             
-            // check callback
-            assertFalse(callback.failed);
-            assertEquals((Long)result, callback.revision);
+            // TODO listen to sync events and check
+            // assertFalse(callback.failed);
+            // assertEquals((Long)result, callback.revision);
         } else {
             // not forced --> should fail
             assertEquals(XCommand.FAILED, result);
             
-            // check callback
-            assertTrue(callback.failed);
-            assertNull(callback.revision);
+            // TODO listen to sync events and check
+            // assertTrue(callback.failed);
+            // assertNull(callback.revision);
         }
         
         // try to remove a field that already exists, should succeed
         removeCommand = factory.createRemoveFieldCommand(this.field.getAddress(),
                 this.field.getRevisionNumber(), forced);
-        callback = new TestCallback();
         
-        result = executeCommand(removeCommand, callback);
+        result = executeCommand(removeCommand);
         assertTrue(result != XCommand.FAILED);
         
-        // check callback
-        assertFalse(callback.failed);
-        assertEquals((Long)result, callback.revision);
+        // TODO listen to sync events and check
+        // assertFalse(callback.failed);
+        // assertEquals((Long)result, callback.revision);
         
         // check whether the field was removed correctly
         assertFalse(transObject.hasField(this.field.getId()));
@@ -735,16 +741,15 @@ public class ChangedModelTest {
         
         removeCommand = factory.createRemoveFieldCommand(this.field.getAddress(),
                 this.field.getRevisionNumber() + 1, forced);
-        callback = new TestCallback();
         
-        result = executeCommand(removeCommand, callback);
+        result = executeCommand(removeCommand);
         if(forced) {
             // forced --> should suceed
             assertTrue(result != XCommand.FAILED);
             
-            // check callback
-            assertFalse(callback.failed);
-            assertEquals((Long)result, callback.revision);
+            // TODO listen to sync events and check
+            // assertFalse(callback.failed);
+            // assertEquals((Long)result, callback.revision);
             
             // check whether the field was removed correctly
             assertFalse(transObject.hasField(this.field.getId()));
@@ -753,9 +758,9 @@ public class ChangedModelTest {
             // not forced --> should fail
             assertEquals(XCommand.FAILED, result);
             
-            // check callback
-            assertTrue(callback.failed);
-            assertNull(callback.revision);
+            // TODO listen to sync events and check
+            // assertTrue(callback.failed);
+            // assertNull(callback.revision);
         }
     }
     
@@ -774,7 +779,6 @@ public class ChangedModelTest {
     public void executeCommandsAddValueCommands(boolean forced) {
         XCommandFactory factory = X.getCommandFactory();
         XId newFieldId = X.getIDProvider().createUniqueId();
-        TestCallback callback = new TestCallback();
         XWritableObject transObject = this.changedModel.getObject(this.object.getId());
         
         XValue value = X.getValueFactory().createStringValue("test");
@@ -787,26 +791,25 @@ public class ChangedModelTest {
                 newFieldId);
         XCommand addCommand = factory.createAddValueCommand(address, 0, value, forced);
         
-        long result = executeCommand(addCommand, callback);
+        long result = executeCommand(addCommand);
         assertEquals(XCommand.FAILED, result);
         
-        // check callback
-        assertTrue(callback.failed);
-        assertNull(callback.revision);
+        // TODO listen to sync events and check
+        // assertTrue(callback.failed);
+        // assertNull(callback.revision);
         
         // add a value to an existing field, use wrong revNr
         addCommand = factory.createAddValueCommand(this.field.getAddress(),
                 this.field.getRevisionNumber() + 1, value, forced);
-        callback = new TestCallback();
         
-        result = executeCommand(addCommand, callback);
+        result = executeCommand(addCommand);
         if(forced) {
             // forced --> should succeed
             assertTrue(result != XCommand.FAILED);
             
-            // check callback
-            assertFalse(callback.failed);
-            assertEquals((Long)result, callback.revision);
+            // TODO listen to sync events and check
+            // assertFalse(callback.failed);
+            // assertEquals((Long)result, callback.revision);
             
             // check whether the simulated field was changed and the real field
             // wasn't
@@ -824,22 +827,21 @@ public class ChangedModelTest {
             // not forced --> should fail
             assertEquals(XCommand.FAILED, result);
             
-            // check callback
-            assertTrue(callback.failed);
-            assertNull(callback.revision);
+            // TODO listen to sync events and check
+            // assertTrue(callback.failed);
+            // assertNull(callback.revision);
         }
         
         // add a value to an existing field, should succeed
         addCommand = factory.createAddValueCommand(this.field.getAddress(),
                 this.field.getRevisionNumber(), value, forced);
-        callback = new TestCallback();
         
-        result = executeCommand(addCommand, callback);
+        result = executeCommand(addCommand);
         assertTrue(result != XCommand.FAILED);
         
-        // check callback
-        assertFalse(callback.failed);
-        assertEquals((Long)result, callback.revision);
+        // TODO listen to sync events and check
+        // assertFalse(callback.failed);
+        // assertEquals((Long)result, callback.revision);
         
         // check whether the simulated field was changed and the real field
         // wasn't
@@ -852,16 +854,15 @@ public class ChangedModelTest {
         XValue value2 = X.getValueFactory().createStringValue("test2");
         addCommand = factory.createAddValueCommand(this.field.getAddress(),
                 this.field.getRevisionNumber(), value2, forced);
-        callback = new TestCallback();
         
-        result = executeCommand(addCommand, callback);
+        result = executeCommand(addCommand);
         if(forced) {
             // forced --> should succeed
             assertTrue(result != XCommand.FAILED);
             
-            // check callback
-            assertFalse(callback.failed);
-            assertEquals((Long)result, callback.revision);
+            // TODO listen to sync events and check
+            // assertFalse(callback.failed);
+            // assertEquals((Long)result, callback.revision);
             
             // check whether the simulated field was changed and the real field
             // wasn't
@@ -873,9 +874,9 @@ public class ChangedModelTest {
             // not forced --> should fail
             assertEquals(XCommand.FAILED, result);
             
-            // check callback
-            assertTrue(callback.failed);
-            assertNull(callback.revision);
+            // TODO listen to sync events and check
+            // assertTrue(callback.failed);
+            // assertNull(callback.revision);
         }
     }
     
@@ -892,7 +893,6 @@ public class ChangedModelTest {
     public void executeCommandsChangeValueCommands(boolean forced) {
         XCommandFactory factory = X.getCommandFactory();
         XId newFieldId = X.getIDProvider().createUniqueId();
-        TestCallback callback = new TestCallback();
         XWritableObject transObject = this.changedModel.getObject(this.object.getId());
         
         XValue value = X.getValueFactory().createStringValue("test");
@@ -905,26 +905,25 @@ public class ChangedModelTest {
                 newFieldId);
         XCommand changeCommand = factory.createChangeValueCommand(address, 0, value, forced);
         
-        long result = executeCommand(changeCommand, callback);
+        long result = executeCommand(changeCommand);
         assertEquals(XCommand.FAILED, result);
         
-        // check callback
-        assertTrue(callback.failed);
-        assertNull(callback.revision);
+        // TODO listen to sync events and check
+        // assertTrue(callback.failed);
+        // assertNull(callback.revision);
         
         // change the value of a field, which value is not set
         changeCommand = factory.createChangeValueCommand(this.field.getAddress(),
                 this.field.getRevisionNumber(), value, forced);
-        callback = new TestCallback();
         
-        result = executeCommand(changeCommand, callback);
+        result = executeCommand(changeCommand);
         if(forced) {
             // forced --> should succeed
             assertTrue(result != XCommand.FAILED);
             
-            // check callback
-            assertFalse(callback.failed);
-            assertEquals((Long)result, callback.revision);
+            // TODO listen to sync events and check
+            // assertFalse(callback.failed);
+            // assertEquals((Long)result, callback.revision);
             
             // check the changes
             XWritableField simulatedField = transObject.getField(this.field.getId());
@@ -936,9 +935,9 @@ public class ChangedModelTest {
             
             assertEquals(XCommand.FAILED, result);
             
-            // check callback
-            assertTrue(callback.failed);
-            assertNull(callback.revision);
+            // TODO listen to sync events and check
+            // assertTrue(callback.failed);
+            // assertNull(callback.revision);
             
             // check that nothing was changed
             XWritableField simulatedField = transObject.getField(this.field.getId());
@@ -950,16 +949,15 @@ public class ChangedModelTest {
         // wrong revNr
         changeCommand = factory.createChangeValueCommand(this.fieldWithValue.getAddress(),
                 this.fieldWithValue.getRevisionNumber() + 1, value, forced);
-        callback = new TestCallback();
         
-        result = executeCommand(changeCommand, callback);
+        result = executeCommand(changeCommand);
         if(forced) {
             // forced --> should succeed
             assertTrue(result != XCommand.FAILED);
             
-            // check callback
-            assertFalse(callback.failed);
-            assertEquals((Long)result, callback.revision);
+            // TODO listen to sync events and check
+            // assertFalse(callback.failed);
+            // assertEquals((Long)result, callback.revision);
             
             // check whether the simulated field was changed and the real field
             // wasn't
@@ -971,9 +969,9 @@ public class ChangedModelTest {
             // not forced --> should fail
             assertEquals(XCommand.FAILED, result);
             
-            // check callback
-            assertTrue(callback.failed);
-            assertNull(callback.revision);
+            // TODO listen to sync events and check
+            // assertTrue(callback.failed);
+            // assertNull(callback.revision);
             
             // check that nothing was changed
             XWritableField changedField = transObject.getField(this.fieldWithValue.getId());
@@ -987,14 +985,13 @@ public class ChangedModelTest {
         XValue value2 = X.getValueFactory().createStringValue("test2");
         changeCommand = factory.createChangeValueCommand(this.fieldWithValue.getAddress(),
                 this.fieldWithValue.getRevisionNumber(), value2, forced);
-        callback = new TestCallback();
         
-        result = executeCommand(changeCommand, callback);
+        result = executeCommand(changeCommand);
         assertTrue(result != XCommand.FAILED);
         
-        // check callback
-        assertFalse(callback.failed);
-        assertEquals((Long)result, callback.revision);
+        // TODO listen to sync events and check
+        // assertFalse(callback.failed);
+        // assertEquals((Long)result, callback.revision);
         
         // check whether the simulated field was changed and the real field
         // wasn't
@@ -1018,7 +1015,6 @@ public class ChangedModelTest {
     public void executeCommandsRemoveValueCommands(boolean forced) {
         XCommandFactory factory = X.getCommandFactory();
         XId newFieldId = X.getIDProvider().createUniqueId();
-        TestCallback callback = new TestCallback();
         XWritableObject transObject = this.changedModel.getObject(this.object.getId());
         
         // remove a value from a not existing field, should fail
@@ -1029,46 +1025,44 @@ public class ChangedModelTest {
                 newFieldId);
         XCommand removeCommand = factory.createRemoveValueCommand(address, 0, forced);
         
-        long result = executeCommand(removeCommand, callback);
+        long result = executeCommand(removeCommand);
         assertEquals(XCommand.FAILED, result);
         
-        // check callback
-        assertTrue(callback.failed);
-        assertNull(callback.revision);
+        // TODO listen to sync events and check
+        // assertTrue(callback.failed);
+        // assertNull(callback.revision);
         
         // remove a value from an existing field, without a set value
         removeCommand = factory.createRemoveValueCommand(this.field.getAddress(),
                 this.field.getRevisionNumber(), forced);
-        callback = new TestCallback();
-        result = executeCommand(removeCommand, callback);
+        result = executeCommand(removeCommand);
         
         if(forced) {
             // forced --> should succeed
             assertTrue(result != XCommand.FAILED);
             
-            // check callback
-            assertFalse(callback.failed);
-            assertEquals((Long)result, callback.revision);
+            // TODO listen to sync events and check
+            // assertFalse(callback.failed);
+            // assertEquals((Long)result, callback.revision);
         } else {
             // not forced --> should fail
             assertEquals(XCommand.FAILED, result);
             
-            // check callback
-            assertTrue(callback.failed);
-            assertNull(callback.revision);
+            // TODO listen to sync events and check
+            // assertTrue(callback.failed);
+            // assertNull(callback.revision);
         }
         
         // remove a value from an existing field with set value - should succeed
         removeCommand = factory.createSafeRemoveValueCommand(this.fieldWithValue.getAddress(),
                 this.fieldWithValue.getRevisionNumber());
-        callback = new TestCallback();
         
-        result = executeCommand(removeCommand, callback);
+        result = executeCommand(removeCommand);
         assertTrue(result != XCommand.FAILED);
         
-        // check callback
-        assertFalse(callback.failed);
-        assertEquals((Long)result, callback.revision);
+        // TODO listen to sync events and check
+        // assertFalse(callback.failed);
+        // assertEquals((Long)result, callback.revision);
         
         // check whether the simulated field was changed and the real field
         // wasn't
@@ -1086,16 +1080,15 @@ public class ChangedModelTest {
         // remove a value from an existing field with set value, use wrong revNr
         removeCommand = factory.createRemoveValueCommand(this.fieldWithValue.getAddress(),
                 this.fieldWithValue.getRevisionNumber() + 1, forced);
-        callback = new TestCallback();
         
-        result = executeCommand(removeCommand, callback);
+        result = executeCommand(removeCommand);
         if(forced) {
             // forced --> should succeed
             assertTrue(result != XCommand.FAILED);
             
-            // check callback
-            assertFalse(callback.failed);
-            assertEquals((Long)result, callback.revision);
+            // TODO listen to sync events and check
+            // assertFalse(callback.failed);
+            // assertEquals((Long)result, callback.revision);
             
             // check whether the simulated field was changed and the real field
             // wasn't
@@ -1107,9 +1100,8 @@ public class ChangedModelTest {
             // not forced --> should fail
             assertEquals(XCommand.FAILED, result);
             
-            // check callback
-            assertTrue(callback.failed);
-            assertNull(callback.revision);
+            // assertTrue(callback.failed);
+            // assertNull(callback.revision);
         }
     }
     
@@ -1128,17 +1120,17 @@ public class ChangedModelTest {
     @Test
     public void testExecuteCommandSucceedingTransaction() {
         // manually build a transaction
-        XTransactionBuilder builder = new XTransactionBuilder(this.model.getAddress());
+        XTransactionBuilder builder = new XTransactionBuilder(this.revWritableModel.getAddress());
         
         // add some objects
         XId objectId1 = X.getIDProvider().createUniqueId();
         XId objectId2 = X.getIDProvider().createUniqueId();
         
-        builder.addObject(this.model.getAddress(), XCommand.SAFE_STATE_BOUND, objectId1);
-        builder.addObject(this.model.getAddress(), XCommand.SAFE_STATE_BOUND, objectId2);
+        builder.addObject(this.revWritableModel.getAddress(), XCommand.SAFE_STATE_BOUND, objectId1);
+        builder.addObject(this.revWritableModel.getAddress(), XCommand.SAFE_STATE_BOUND, objectId2);
         
         // remove some objects
-        builder.removeObject(this.model.getAddress(), this.object2.getRevisionNumber(),
+        builder.removeObject(this.revWritableModel.getAddress(), this.object2.getRevisionNumber(),
                 this.object2.getId());
         
         // add some fields
@@ -1174,16 +1166,15 @@ public class ChangedModelTest {
         
         // execute the transaction - should succeed
         XTransaction transaction = builder.build();
-        TestCallback callback = new TestCallback();
         
-        long result = executeCommand(transaction, callback);
+        long result = executeCommand(transaction);
         
         assertTrue(result != XCommand.FAILED);
         assertTrue(this.changedModel.hasChanges());
         
-        // check callback
-        assertFalse(callback.failed);
-        assertEquals((Long)result, callback.revision);
+        // TODO listen to sync events and check
+        // assertFalse(callback.failed);
+        // assertEquals((Long)result, callback.revision);
         
         /*
          * we do not need to check whether the single commands in the
@@ -1195,7 +1186,7 @@ public class ChangedModelTest {
         // commit the transaction
         
         long oldRevNr = this.object.getRevisionNumber();
-        long revNr = this.commit();
+        long revNr = this._commit();
         
         assertFalse(this.changedModel.hasChanges());
         
@@ -1221,7 +1212,7 @@ public class ChangedModelTest {
     
     private void testExecuteCommandsFailingTransaction(XType type, ChangeType changeType) {
         // manually build a transaction
-        XTransactionBuilder builder = new XTransactionBuilder(this.model.getAddress());
+        XTransactionBuilder builder = new XTransactionBuilder(this.revWritableModel.getAddress());
         
         // add some fields
         XId fieldId1 = X.getIDProvider().createUniqueId();
@@ -1249,13 +1240,13 @@ public class ChangedModelTest {
             switch(changeType) {
             case ADD:
                 // try to add an object which already exists
-                builder.addObject(this.model.getAddress(), XCommand.SAFE_STATE_BOUND,
+                builder.addObject(this.revWritableModel.getAddress(), XCommand.SAFE_STATE_BOUND,
                         this.object.getId());
                 break;
             
             case REMOVE:
                 // try to remove an object which doesn't exist
-                builder.removeObject(this.model.getAddress(), XCommand.SAFE_STATE_BOUND,
+                builder.removeObject(this.revWritableModel.getAddress(), XCommand.SAFE_STATE_BOUND,
                         XX.createUniqueId());
                 break;
             case CHANGE:
@@ -1316,15 +1307,14 @@ public class ChangedModelTest {
         
         // execute the transaction - should fail
         XTransaction transaction = builder.build();
-        TestCallback callback = new TestCallback();
         
-        long result = executeCommand(transaction, callback);
+        long result = executeCommand(transaction);
         
         assertEquals(XCommand.FAILED, result);
         
-        // check callback
-        assertTrue(callback.failed);
-        assertNull(callback.revision);
+        // TODO listen to sync events and check
+        // assertTrue(callback.failed);
+        // assertNull(callback.revision);
         
         // check that nothing was changed by the transaction
         
@@ -1384,32 +1374,33 @@ public class ChangedModelTest {
     // Tests for getRevisionNumber
     @Test
     public void testGetRevisionNumber() {
-        assertEquals(this.model.getRevisionNumber(), this.changedModel.getRevisionNumber());
+        assertEquals(this.revWritableModel.getRevisionNumber(),
+                this.changedModel.getRevisionNumber());
     }
     
     // Tests for isEmpty
     @Test
     public void testIsEmpty() {
         // At first, the value should be the same as that of object.isEmpty()
-        assertEquals(this.model.isEmpty(), this.changedModel.isEmpty());
+        assertEquals(this.revWritableModel.isEmpty(), this.changedModel.isEmpty());
         
         // remove object
         assertTrue(this.changedModel.removeObject(this.object.getId()));
         assertTrue(this.changedModel.removeObject(this.object2.getId()));
         
         assertTrue(this.changedModel.isEmpty());
-        assertFalse(this.model.isEmpty());
+        assertFalse(this.revWritableModel.isEmpty());
         
         // add a new field, remove it, check again
         XId newObjectId = X.getIDProvider().createUniqueId();
         this.changedModel.createObject(newObjectId);
         
         assertTrue(this.changedModel.hasObject(newObjectId));
-        assertFalse(this.model.hasObject(newObjectId));
+        assertFalse(this.revWritableModel.hasObject(newObjectId));
         
         this.changedModel.removeObject(newObjectId);
         assertTrue(this.changedModel.isEmpty());
-        assertFalse(this.model.isEmpty());
+        assertFalse(this.revWritableModel.isEmpty());
     }
     
     // Tests for hasObject()
@@ -1431,15 +1422,15 @@ public class ChangedModelTest {
         // do the same with commands
         XCommand addCommand = X.getCommandFactory().createSafeAddObjectCommand(
                 this.changedModel.getAddress(), newObjectId);
-        executeCommand(addCommand, null);
+        executeCommand(addCommand);
         assertTrue(this.changedModel.hasObject(newObjectId));
         
-        XAddress temp = this.model.getAddress();
+        XAddress temp = this.revWritableModel.getAddress();
         XAddress objectAddress = XX.toAddress(temp.getRepository(), temp.getModel(), newObjectId,
                 null);
         XCommand removeCommand = X.getCommandFactory().createSafeRemoveObjectCommand(objectAddress,
                 XCommand.NEW);
-        executeCommand(removeCommand, null);
+        executeCommand(removeCommand);
         assertFalse(this.changedModel.hasObject(newObjectId));
     }
     
@@ -1452,7 +1443,7 @@ public class ChangedModelTest {
         assertNotNull(object);
         
         // make sure it exists in the transObject but not in object
-        assertFalse(this.model.hasObject(objectId));
+        assertFalse(this.revWritableModel.hasObject(objectId));
         assertTrue(this.changedModel.hasObject(objectId));
         
         // try to add the same object again
@@ -1460,7 +1451,7 @@ public class ChangedModelTest {
         assertEquals(object, object2);
         
         // make sure it exists in the transModel but not in model
-        assertFalse(this.model.hasObject(objectId));
+        assertFalse(this.revWritableModel.hasObject(objectId));
         assertTrue(this.changedModel.hasObject(objectId));
     }
     
@@ -1478,7 +1469,7 @@ public class ChangedModelTest {
         assertFalse(this.changedModel.hasObject(this.object.getId()));
         
         // make sure it wasn't removed from the underlying model
-        assertTrue(this.model.hasObject(this.object.getId()));
+        assertTrue(this.revWritableModel.hasObject(this.object.getId()));
         
         // add an object an remove it again
         this.changedModel.createObject(objectId);
@@ -1486,7 +1477,7 @@ public class ChangedModelTest {
         
         assertTrue(this.changedModel.removeObject(objectId));
         assertFalse(this.changedModel.hasObject(objectId));
-        assertFalse(this.model.hasObject(objectId));
+        assertFalse(this.revWritableModel.hasObject(objectId));
     }
     
     // Tests for getObject()
@@ -1506,7 +1497,7 @@ public class ChangedModelTest {
         XCommand command = factory.createSafeAddValueCommand(this.field.getAddress(),
                 this.field.getRevisionNumber(), value);
         
-        long result = executeCommand(command, null);
+        long result = executeCommand(command);
         assertTrue(XCommandUtils.success(result));
         
         object2 = this.changedModel.getObject(this.object.getId());
@@ -1658,19 +1649,4 @@ public class ChangedModelTest {
         assertFalse(transField.setValue(null));
     }
     
-    private class TestCallback implements XLocalChangeCallback {
-        boolean failed = false;
-        Long revision;
-        
-        @Override
-        public void onFailure() {
-            this.failed = true;
-        }
-        
-        @Override
-        public void onSuccess(long revision) {
-            this.revision = revision;
-        }
-        
-    }
 }
