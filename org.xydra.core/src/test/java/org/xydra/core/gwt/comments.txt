@@ -1,1 +1,0 @@
-These should live in test, if they would run there by Maven.
