@@ -6,6 +6,8 @@ import org.xydra.base.URIFormatException;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.XIdProvider;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 
 /**
@@ -18,6 +20,8 @@ import org.xydra.base.XIdProvider;
 @RunsInGWT(true)
 @RequiresAppEngine(false)
 public class MemoryStringIDProvider implements XIdProvider {
+    
+    private static final Logger log = LoggerFactory.getLogger(MemoryStringIDProvider.class);
     
     private static final String nameStartChar = // .
     "A-Z" // .
@@ -105,9 +109,12 @@ public class MemoryStringIDProvider implements XIdProvider {
     }
     
     public static boolean isValidId(String s) {
-        return MemoryStringIdRegexGwtEmul.matchesXydraId(s)
+        if(s.length() > XIdProvider.MAX_LENGTH) {
+            log.trace("Too long");
+            return false;
+        }
         
-        && s.length() <= XIdProvider.MAX_LENGTH;
+        return MemoryStringIdRegexGwtEmul.matchesXydraId(s);
     }
     
     @Override

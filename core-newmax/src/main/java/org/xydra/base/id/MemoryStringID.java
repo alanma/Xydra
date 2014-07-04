@@ -1,11 +1,11 @@
 package org.xydra.base.id;
 
-import java.io.Serializable;
-
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XId;
 import org.xydra.base.value.ValueType;
+
+import java.io.Serializable;
 
 
 /**
@@ -34,7 +34,7 @@ public class MemoryStringID implements XId, Serializable {
      * @param uriString
      */
     protected MemoryStringID(String uriString) {
-        this.string = uriString;
+        this.string = uriString.intern();
     }
     
     @Override
@@ -45,7 +45,10 @@ public class MemoryStringID implements XId, Serializable {
     @Override
     public boolean equals(Object other) {
         if(other instanceof MemoryStringID) {
-            return ((MemoryStringID)other).string.equals(this.string);
+            MemoryStringID otherMemoryStringID = (MemoryStringID)other;
+            if(otherMemoryStringID.string == this.string)
+                return true;
+            return otherMemoryStringID.string.equals(this.string);
         } else if(other instanceof XId) {
             return ((XId)other).toString().equals(this.string);
         } else {
