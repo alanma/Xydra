@@ -1,1 +1,0 @@
-Exposes xydra.gwttools as a maven mojo

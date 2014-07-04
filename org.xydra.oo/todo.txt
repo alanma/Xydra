@@ -1,5 +1,0 @@
-Write factory methods into GwtFactory & JavaFactory
-
-No need to generate GWT classes
-
-Test in a real GWT project

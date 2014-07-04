@@ -1,8 +1,0 @@
-How to run example for logging on Google Web Toolkit (GWT):
-
-Run "mvn gwt:run"
-
-Click "Launch default browser"
-
-(Download GWT developer plugin, if you haven't already)
-

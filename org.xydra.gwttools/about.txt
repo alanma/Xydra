@@ -1,3 +1,0 @@
-Copies GWT compile reslult into src/webapp folder; pure java app/lib, not a maven plugin
-
-Used by xydra.mvnxy

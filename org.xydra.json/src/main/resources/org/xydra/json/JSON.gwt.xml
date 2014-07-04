@@ -1,8 +1,0 @@
-<module>
-	
-	<inherits name="com.google.gwt.user.User" />
-	<inherits name="org.xydra.base.XydraBase" />
-	
-	<source path="" />
-	
-</module>
