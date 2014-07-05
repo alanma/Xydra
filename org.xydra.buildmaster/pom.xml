@@ -38,10 +38,6 @@
 		<module>../org.xydra.csv/</module>
 		<!-- DONE -->
 
-		<!-- Depends on .index, .log -->
-		<module>../org.xydra.textsearch/</module>
-		<!-- DONE -->
-
 		<!-- Depends on: .index, .log -->
 		<module>../org.xydra.core/</module>
 		<!-- DONE -->
@@ -77,14 +73,6 @@
 		<module>../org.xydra.doc/</module>
 		<!-- DONE -->
 
-		<!-- Depends on: .log, .annotations, .gae -->
-		<module>../org.xydra.devtools/</module>
-		<!-- DONE -->
-
-
-		<module>../org.xydra.google-analytics/</module>
-
-
 
 		<!-- Experimental: oo, gwttools, mvnxy, maven-root -->
 		<module>../org.xydra.oo/</module>
@@ -93,21 +81,8 @@
 		<module>../org.xydra.maven-root/</module>
 		<module>../org.xydra.conf/</module>
 
-	<!-- <module>../org.xydra.testgae/</module> -->		
+		<!-- <module>../org.xydra.testgae/</module> -->
 
-		<!-- Experimental. Depends on: .core -->
-		<!-- <module>../org.xydra.schema/</module> -->		<!-- DONE -->
-
-		<!-- Experimental. Depends on: .core, GWT -->
-		<!-- Commented out due to test failures -->
-		<!-- <module>../org.xydra.dev/</module> -->
-		<!-- DONE -->
-
-
-		<!-- Experimental. Depends on: GAE -->
-		<!-- Commented out due to site generation error: package com.google.appengine.tools.admin 
-			does not exist --><!-- <module>../org.xydra.gaeclient/</module> -->
-		<!-- DONE -->
 	</modules>
 
 </project>
