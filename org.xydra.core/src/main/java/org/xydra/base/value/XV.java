@@ -1,15 +1,16 @@
 package org.xydra.base.value;
 
+import org.xydra.annotations.NeverNull;
+import org.xydra.base.BaseRuntime;
+import org.xydra.base.XAddress;
+import org.xydra.base.XId;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-
-import org.xydra.annotations.NeverNull;
-import org.xydra.base.BaseRuntime;
-import org.xydra.base.XAddress;
-import org.xydra.base.XId;
+import java.util.SortedSet;
 
 
 /**
@@ -20,10 +21,13 @@ import org.xydra.base.XId;
  */
 public class XV {
     
-    private final static XValueFactory vf = BaseRuntime.getValueFactory();
+    public final static XValueFactory vf = BaseRuntime.getValueFactory();
     
     /**
-     * Returns the content of the given {@link XListValue} as a {@link List}
+     * Returns the content of the given {@link XListValue} as a {@link List}.
+     * 
+     * For {@link XSetValue} use {@link XSetValue#toSet()}. For
+     * {@link XSortedSetValue} use {@link XSortedSetValue#toSortedSet()}.
      * 
      * @param <E> The content type
      * @param listValue The {@link XListValue}
@@ -31,6 +35,23 @@ public class XV {
      */
     public static <E> List<E> asList(XListValue<E> listValue) {
         return Arrays.asList(listValue.toArray());
+    }
+    
+    public static XAddress toAddress(XValue value) {
+        if(value.getType() == ValueType.Address) {
+            return (XAddress)value;
+        } else {
+            throw new IllegalArgumentException();
+        }
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static List<XAddress> toAddressList(XValue value) {
+        if(value.getType() == ValueType.AddressList) {
+            return asList((XListValue<XAddress>)value);
+        } else {
+            throw new IllegalArgumentException();
+        }
     }
     
     /**
@@ -69,6 +90,15 @@ public class XV {
         return vf.createAddressSetValue(list);
     }
     
+    @SuppressWarnings("unchecked")
+    public static SortedSet<XAddress> toAddressSortedSet(XValue value) {
+        if(value.getType() == ValueType.AddressList) {
+            return ((XSortedSetValue<XAddress>)value).toSortedSet();
+        } else {
+            throw new IllegalArgumentException();
+        }
+    }
+    
     /**
      * Returns the content of the given {@link Collection} as an
      * {@link XAddressSortedSetValue}
@@ -95,6 +125,15 @@ public class XV {
         return vf.createAddressSortedSetValue(list);
     }
     
+    public static byte[] toBinary(XValue value) {
+        if(value.getType() == ValueType.Double) {
+            return ((XBinaryValue)value).contents();
+        } else {
+            throw new IllegalArgumentException();
+        }
+        
+    }
+    
     /**
      * Returns the content of the given {@link Collection} as an
      * {@link XBinaryValue}
@@ -105,6 +144,19 @@ public class XV {
      */
     public static XBinaryValue toBinaryValue(Collection<Byte> list) {
         return vf.createBinaryValue(list);
+    }
+    
+    public static Boolean toBoolean(XValue value) {
+        if(value == null) {
+            return null;
+        } else {
+            try {
+                XBooleanValue booleanValue = (XBooleanValue)value;
+                return booleanValue.contents();
+            } catch(ClassCastException e) {
+                throw new IllegalArgumentException("Given value is not an XBooleanValue", e);
+            }
+        }
     }
     
     /**
@@ -119,6 +171,14 @@ public class XV {
         return vf.createBooleanListValue(list);
     }
     
+    public static Double toDouble(XValue value) {
+        if(value.getType() == ValueType.Double) {
+            return ((XDoubleValue)value).contents();
+        } else {
+            throw new IllegalArgumentException();
+        }
+    }
+    
     /**
      * Returns the content of the given {@link Collection} as an
      * {@link XDoubleListValue}
@@ -129,6 +189,23 @@ public class XV {
      */
     public static XDoubleListValue toDoubleListValue(Collection<Double> list) {
         return vf.createDoubleListValue(list);
+    }
+    
+    public static XId toId(XValue value) {
+        if(value.getType() == ValueType.Id) {
+            return (XId)value;
+        } else {
+            throw new IllegalArgumentException();
+        }
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static List<XId> toIdList(XValue value) {
+        if(value.getType() == ValueType.IdList) {
+            return asList((XListValue<XId>)value);
+        } else {
+            throw new IllegalArgumentException();
+        }
     }
     
     /**
@@ -198,6 +275,15 @@ public class XV {
         return vf.createIdSetValue(list);
     }
     
+    @SuppressWarnings("unchecked")
+    public static SortedSet<XId> toIdSortedSet(XValue value) {
+        if(value.getType() == ValueType.IdSortedSet) {
+            return ((XSortedSetValue<XId>)value).toSortedSet();
+        } else {
+            throw new IllegalArgumentException();
+        }
+    }
+    
     /**
      * Returns the content of the given {@link Collection} as an
      * {@link XIdSortedSetValue}
@@ -242,6 +328,16 @@ public class XV {
         }
     }
     
+    @SuppressWarnings("unchecked")
+    public static List<Integer> toIntegerList(XValue value) {
+        if(value.getType() == ValueType.IntegerList) {
+            return asList((XListValue<Integer>)value);
+        } else {
+            throw new IllegalArgumentException();
+        }
+        
+    }
+    
     /**
      * Returns the content of the given {@link Collection} as an
      * {@link XIntegerListValue}
@@ -252,6 +348,72 @@ public class XV {
      */
     public static XIntegerListValue toIntegerListValue(Collection<Integer> list) {
         return vf.createIntegerListValue(list);
+    }
+    
+    public static Object toJava(XValue value) {
+        if(value == null)
+            return null;
+        switch(value.getType()) {
+        case Boolean:
+            return toBoolean(value);
+        case String:
+            return toString(value);
+        case Address:
+            return toAddress(value);
+        case AddressList:
+            return toAddressList(value);
+        case AddressSet:
+            return toString(value);
+        case AddressSortedSet:
+            return toAddressSortedSet(value);
+        case Binary:
+            return toBinary(value);
+        case BooleanList:
+            return toString(value);
+        case Double:
+            return toDouble(value);
+        case DoubleList:
+            return toString(value);
+        case Id:
+            return toId(value);
+        case IdList:
+            return toIdList(value);
+        case IdSet:
+            return toIdSet(value);
+        case IdSortedSet:
+            return toIdSortedSet(value);
+        case Integer:
+            return toInteger(value);
+        case IntegerList:
+            return toIntegerList(value);
+        case Long:
+            return toLong(value);
+        case LongList:
+            return toLongList(value);
+        case StringList:
+            return toStringList(value);
+        case StringSet:
+            return toStringSet(value);
+        default:
+            throw new AssertionError();
+        }
+    }
+    
+    public static Long toLong(XValue value) {
+        if(value.getType() == ValueType.Long) {
+            return ((XLongValue)value).contents();
+        } else {
+            throw new IllegalArgumentException();
+        }
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static List<Long> toLongList(XValue value) {
+        if(value.getType() == ValueType.LongList) {
+            return asList((XListValue<Long>)value);
+        } else {
+            throw new IllegalArgumentException();
+        }
     }
     
     /**
@@ -284,6 +446,15 @@ public class XV {
         }
     }
     
+    @SuppressWarnings("unchecked")
+    public static List<String> toStringList(XValue value) {
+        if(value.getType() == ValueType.StringList) {
+            return asList((XListValue<String>)value);
+        } else {
+            throw new IllegalArgumentException();
+        }
+    }
+    
     /**
      * Returns the content of the given {@link Collection} as an
      * {@link XStringListValue}
@@ -298,6 +469,15 @@ public class XV {
     
     public static XStringListValue toStringListValue(String ... strings) {
         return vf.createStringListValue(strings);
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static Set<String> toStringSet(XValue value) {
+        if(value.getType() == ValueType.StringSet) {
+            return ((XSetValue<String>)value).toSet();
+        } else {
+            throw new IllegalArgumentException();
+        }
     }
     
     /**
@@ -530,7 +710,7 @@ public class XV {
         return vf.createIdListValue(list);
     }
     
-    private static void toValueStream(XValue value, Class<?> type, XValueStreamHandler stream) {
+    public static void toValueStream(XValue value, Class<?> type, XValueStreamHandler stream) {
         if(type == XAddress.class) {
             stream.address((XAddress)value);
         } else if(type == Boolean.class) {
