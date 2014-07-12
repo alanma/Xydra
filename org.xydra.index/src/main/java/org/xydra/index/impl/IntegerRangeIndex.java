@@ -138,8 +138,8 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
     }
     
     /**
-     * @param maxValue used only at then end of the integerRange to append a
-     *            final span
+     * @param maxValue inclusive; used only at then end of the integerRange to
+     *            append a final span. Typically use length() - 1.
      * @return all spans until maxValue; each span has a boolean flag to
      *         indicate, if the span is within an integer range or between two
      *         of them.
