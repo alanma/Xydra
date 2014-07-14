@@ -285,10 +285,15 @@ public class MapSetIndex<K, E> implements IMapSetIndex<K,E> {
             } else {
                 assert entryConstraint instanceof EqualsConstraint<?>;
                 E entry = ((EqualsConstraint<E>)entryConstraint).getKey();
-                IEntrySet<E> index0 = this.map.get(key);
-                return index0 != null && index0.contains(entry);
+                return contains(key, entry);
             }
         }
+    }
+    
+    @Override
+    public boolean contains(K key, E entry) {
+        IEntrySet<E> index0 = this.map.get(key);
+        return index0 != null && index0.contains(entry);
     }
     
     @Override

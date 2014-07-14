@@ -807,6 +807,12 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String,E>, Serializab
         return tupleIterator(c1, entryConstraint).hasNext();
     }
     
+    @Override
+    public boolean contains(String key, E entry) {
+        IEntrySet<E> set = this.lookup(key);
+        return set != null && set.contains(entry);
+    }
+    
     public boolean containsKey(Constraint<String> c1) {
         if(c1.isStar()) {
             return !isEmpty();

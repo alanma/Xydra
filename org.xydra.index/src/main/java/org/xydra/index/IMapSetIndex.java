@@ -1,9 +1,9 @@
 package org.xydra.index;
 
-import java.util.Iterator;
-
 import org.xydra.index.query.Constraint;
 import org.xydra.index.query.KeyEntryTuple;
+
+import java.util.Iterator;
 
 
 /**
@@ -18,7 +18,7 @@ public interface IMapSetIndex<K, E> extends IIndex {
     
     /**
      * @param c1 @NeverNull
-     * @return an iterator that ranges over all entries indexes by keys, where
+     * @return an iterator that ranges over all entries indexed by keys, where
      *         the keys match c1
      */
     Iterator<E> constraintIterator(Constraint<K> c1);
@@ -30,6 +30,13 @@ public interface IMapSetIndex<K, E> extends IIndex {
      *         constraints.
      */
     boolean contains(Constraint<K> c1, Constraint<E> entryConstraint);
+    
+    /**
+     * @param k
+     * @param e
+     * @return true iff the index contains exactly the tuple
+     */
+    boolean contains(K k, E e);
     
     /**
      * @param key @NeverNull

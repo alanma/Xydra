@@ -1,9 +1,5 @@
 package org.xydra.index.impl;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-
 import org.xydra.index.IEntrySet;
 import org.xydra.index.IMapSetIndex;
 import org.xydra.index.XI;
@@ -13,6 +9,10 @@ import org.xydra.index.iterator.SingleValueIterator;
 import org.xydra.index.query.Constraint;
 import org.xydra.index.query.EqualsConstraint;
 import org.xydra.index.query.KeyEntryTuple;
+
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 
 /**
@@ -86,6 +86,14 @@ public class SingleEntryMapSetIndex<K, E> extends KeyEntryTuple<K,E> implements 
         
         // 2nd component
         return entryConstraint.matches(getEntry());
+    }
+    
+    @Override
+    public boolean contains(K key, E entry) {
+        if(isEmpty()) {
+            return false;
+        }
+        return getKey().equals(key) && getEntry().equals(entry);
     }
     
     @Override
