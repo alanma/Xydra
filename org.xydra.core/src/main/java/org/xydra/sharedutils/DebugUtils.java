@@ -36,11 +36,11 @@ public class DebugUtils {
     
     /**
      * @param label
-     * @param b
+     * @param booleanFlag
      * @return a compact string for debugging
      */
-    public static String dumpFlag(String label, boolean b) {
-        return (b ? "+" : "-") + label;
+    public static String flagToString(String label, boolean booleanFlag) {
+        return (booleanFlag ? "+" : "-") + label;
     }
     
     public static <T> String toString(Iterable<T> c) {
