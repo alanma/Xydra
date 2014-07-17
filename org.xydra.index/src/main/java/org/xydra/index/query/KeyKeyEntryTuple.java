@@ -57,4 +57,19 @@ public class KeyKeyEntryTuple<K, L, E> implements ITriple<K,L,E>, HasEntry<E> {
         && this.entry.equals(((ITriple<?,?,?>)other).getEntry());
     }
     
+    @Override
+    public K s() {
+        return this.key1;
+    }
+    
+    @Override
+    public L p() {
+        return this.key2;
+    }
+    
+    @Override
+    public E o() {
+        return this.entry;
+    }
+    
 }

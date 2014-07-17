@@ -66,8 +66,7 @@ public interface ITripleIndex<K, L, M> extends IIndex {
      * @param c3 @NotNull
      * @return an iterator with all triples matching the given constraints
      */
-    Iterator<? extends ITriple<K,L,M>> getTriples(Constraint<K> c1, Constraint<L> c2,
-            Constraint<M> c3);
+    Iterator<ITriple<K,L,M>> getTriples(Constraint<K> c1, Constraint<L> c2, Constraint<M> c3);
     
     /**
      * @param other
