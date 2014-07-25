@@ -1,8 +1,5 @@
 package org.xydra.store.sync;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
@@ -32,6 +29,9 @@ import org.xydra.store.BatchedResult;
 import org.xydra.store.Callback;
 import org.xydra.store.XydraStore;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+
 
 /**
  * @author xamde
@@ -56,6 +56,10 @@ public class NewSyncer {
     
     private static final Logger log = LoggerFactory.getLogger(NewSyncer.class);
     
+    /**
+     * @param syncableState
+     * @param atomicEvent
+     */
     public static void applyEntityRevisionOfSingleEvent(ISyncableState syncableState,
             XAtomicEvent atomicEvent) {
         if(syncableState instanceof XRevWritableModel) {
@@ -89,6 +93,12 @@ public class NewSyncer {
         applyEntityRevisionOfSingleEventToObject(object, atomicEvent);
     }
     
+    /**
+     * Set object and field rev from event
+     * 
+     * @param object @NeverNull
+     * @param atomicEvent
+     */
     public static void applyEntityRevisionOfSingleEventToObject(XRevWritableObject object,
             XAtomicEvent atomicEvent) {
         long newRev = atomicEvent.getRevisionNumber();
@@ -113,7 +123,7 @@ public class NewSyncer {
      * already inserted via the EventDelta
      * 
      * @param serverEvents expected to be sorted: changes with the highest
-     *            revision numbers are latest
+     *            revision numbers are latest (last)
      * @param syncableState
      */
     public static void applyEntityRevisionsToModel(XEvent[] serverEvents,
@@ -206,22 +216,25 @@ public class NewSyncer {
      * @param serverEvents
      */
     public void continueSync(XEvent[] serverEvents) {
-        if(log.isDebugEnabled()) log.debug("***** Computing eventDelta from " + serverEvents.length
-                + " server events and n local changes");
+        if(log.isDebugEnabled())
+            log.debug("***** Computing eventDelta from " + serverEvents.length
+                    + " server events and n local changes");
         
         try {
             
             /* calculated event delta */
             EventDelta eventDelta = new EventDelta();
             for(XEvent serverEvent : serverEvents) {
-                if(log.isTraceEnabled()) log.trace(">>> Server event: " + serverEvent);
+                if(log.isTraceEnabled())
+                    log.trace(">>> Server event: " + serverEvent);
                 eventDelta.addEvent(serverEvent);
             }
             Iterator<ISyncLogEntry> localChanges = this.syncLog.getLocalChanges();
             while(localChanges.hasNext()) {
                 ISyncLogEntry localSyncLogEntry = localChanges.next();
                 XEvent localEvent = localSyncLogEntry.getEvent();
-                if(log.isDebugEnabled()) log.debug("<<< Local event: " + localEvent);
+                if(log.isDebugEnabled())
+                    log.debug("<<< Local event: " + localEvent);
                 eventDelta.addInverseEvent(localEvent, this.syncLog);
             }
             
@@ -257,21 +270,27 @@ public class NewSyncer {
                 // change changeLog
                 this.syncLog.truncateToRevision(this.syncRev);
                 log.info("Current SyncLog=" + this.syncLog);
-                if(log.isDebugEnabled()) log.debug("Appending events to syncLog");
+                if(log.isDebugEnabled())
+                    log.debug("Appending events to syncLog");
                 for(XEvent e : serverEvents) {
-                    if(log.isDebugEnabled()) log.debug("Current rev=" + this.syncLog.getCurrentRevisionNumber());
-                    if(log.isDebugEnabled()) log.debug("### Appending event from server: " + e);
+                    if(log.isDebugEnabled())
+                        log.debug("Current rev=" + this.syncLog.getCurrentRevisionNumber());
+                    if(log.isDebugEnabled())
+                        log.debug("### Appending event from server: " + e);
                     this.syncLog.appendEvent(e);
                 }
             } else {
-                if(log.isDebugEnabled()) log.debug("No server appends received, synclog remains unchanged");
+                if(log.isDebugEnabled())
+                    log.debug("No server appends received, synclog remains unchanged");
             }
             
-            if(log.isDebugEnabled()) log.debug("Clearing local changes");
+            if(log.isDebugEnabled())
+                log.debug("Clearing local changes");
             this.syncLog.clearLocalChanges();
             
             if(serverEvents.length > 0) {
-                if(log.isDebugEnabled()) log.debug("Setting new syncRev to " + newSyncRev);
+                if(log.isDebugEnabled())
+                    log.debug("Setting new syncRev to " + newSyncRev);
                 this.syncLog.setSynchronizedRevision(newSyncRev);
             }
             this.syncRev = newSyncRev;
@@ -279,7 +298,8 @@ public class NewSyncer {
             // end atomic section ----
             
             // send change events
-            if(log.isDebugEnabled()) log.debug("Sending " + eventDelta.getEventCount() + " events");
+            if(log.isDebugEnabled())
+                log.debug("Sending " + eventDelta.getEventCount() + " events");
             eventDelta.sendChangeEvents(this.root, this.entityAddress,
                     this.entityAddress.getParent());
             
@@ -349,8 +369,9 @@ public class NewSyncer {
      * @param synchronizationCallback @CanBeNull
      */
     public void startSync(XSynchronizationCallback synchronizationCallback) {
-        if(log.isDebugEnabled()) log.debug("Sync start on " + this.entityAddress + " syncRev=" + this.syncRev
-                + " entityRev=" + this.syncableState.getRevisionNumber() + "...");
+        if(log.isDebugEnabled())
+            log.debug("Sync start on " + this.entityAddress + " syncRev=" + this.syncRev
+                    + " entityRev=" + this.syncableState.getRevisionNumber() + "...");
         
         // TODO make sure it runs only once at the same time
         if(this.root.isLocked()) {
@@ -366,7 +387,8 @@ public class NewSyncer {
         while(localChanges.hasNext()) {
             ISyncLogEntry sle = localChanges.next();
             XCommand cmd = sle.getCommand();
-            if(log.isDebugEnabled()) log.debug("Scheduling local command " + cmd + " for syncing");
+            if(log.isDebugEnabled())
+                log.debug("Scheduling local command " + cmd + " for syncing");
             localCommandList.add(cmd);
         }
         GetEventsRequest getEventRequest = new GetEventsRequest(this.syncableState.getAddress(),
@@ -376,7 +398,8 @@ public class NewSyncer {
         XCommand[] localCommandsArray = localCommandList.toArray(new XCommand[localCommandList
                 .size()]);
         GetEventsRequest[] getEventRequestArray = new GetEventsRequest[] { getEventRequest };
-        if(log.isDebugEnabled()) log.debug("Sync executeCommands(#" + localCommandList.size() + ")AndGetEvents(#?)");
+        if(log.isDebugEnabled())
+            log.debug("Sync executeCommands(#" + localCommandList.size() + ")AndGetEvents(#?)");
         
         // contact remote store
         this.remoteStore.executeCommandsAndGetEvents(this.actorId, this.passwordHash,
