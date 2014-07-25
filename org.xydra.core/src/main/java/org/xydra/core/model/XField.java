@@ -1,7 +1,5 @@
 package org.xydra.core.model;
 
-import java.io.Serializable;
-
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
@@ -10,6 +8,8 @@ import org.xydra.base.change.XFieldCommand;
 import org.xydra.base.rmof.XRevWritableField;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.value.XValue;
+
+import java.io.Serializable;
 
 
 /**
@@ -66,7 +66,7 @@ public interface XField extends XLoggedField, XWritableField, Serializable {
     void setSessionActor(XId actor);
     
     /**
-     * Sets the {@link XValue} of this field to the given value.
+     * FORCED Sets the {@link XValue} of this field to the given value.
      * 
      * Passing "null" as the 'value' arguments implies an remove operation (will
      * remove the current {@link XValue})

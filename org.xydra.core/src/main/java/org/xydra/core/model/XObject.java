@@ -29,9 +29,9 @@ import org.xydra.base.rmof.XWritableObject;
 public interface XObject extends XLoggedObject, XWritableObject, XSynchronizesChanges {
     
     /**
-     * Creates a new {@link XField} and adds it to this {@link XObject} or
-     * returns the already existing {@link XField} if the given {@link XId} was
-     * already taken.
+     * FORCED Creates a new {@link XField} and adds it to this {@link XObject}
+     * or returns the already existing {@link XField} if the given {@link XId}
+     * was already taken.
      * 
      * @param fieldId The {@link XId} for the {@link XField} which is to be
      *            created.
@@ -86,7 +86,8 @@ public interface XObject extends XLoggedObject, XWritableObject, XSynchronizesCh
     XField getField(XId fieldId);
     
     /**
-     * Removes the {@link XField} with the given {@link XId} from this XObject
+     * FORCED Removes the {@link XField} with the given {@link XId} from this
+     * XObject
      * 
      * @param fieldId The {@link XId} of the {@link XField} which is to be
      *            removed
