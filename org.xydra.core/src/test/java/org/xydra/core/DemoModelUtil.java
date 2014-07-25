@@ -264,6 +264,7 @@ public class DemoModelUtil {
         
         setupJohn(johnAddr, tb);
         
+        // revision is now REVISION_AFTER_ADDING_INCLUDING_MODEL_ITSELF
     }
     
     /**
