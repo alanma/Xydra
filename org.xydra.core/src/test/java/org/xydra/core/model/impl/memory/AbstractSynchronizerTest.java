@@ -26,11 +26,12 @@ import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableObject;
+import org.xydra.base.rmof.impl.XExistsRevWritableModel;
 import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
 import org.xydra.core.ChangeRecorder;
 import org.xydra.core.DemoModelUtil;
-import org.xydra.core.HasChanged;
+import org.xydra.core.HasChangedListener;
 import org.xydra.core.LoggerTestHelper;
 import org.xydra.core.X;
 import org.xydra.core.XCopyUtils;
@@ -101,6 +102,8 @@ abstract public class AbstractSynchronizerTest {
     protected abstract XydraStore createStore();
     
     private static final XId MODEL_1_ID = XX.toId("newmodel1");
+    
+    private static final XId JOHN = XX.toId("john");
     
     private IMemoryModel localModel;
     
@@ -274,6 +277,9 @@ abstract public class AbstractSynchronizerTest {
         removeModel(DemoModelUtil.PHONEBOOK_ID);
     }
     
+    /**
+     * TODO create more realistic sync tests (shorter ones, too)
+     */
     @Test
     public void testCreateRemoveModel() {
         try {
@@ -282,120 +288,134 @@ abstract public class AbstractSynchronizerTest {
             
             XRepository localRepo = new MemoryRepository(this.actorId, this.passwordHash,
                     this.repoAddr.getRepository());
-            IMemoryModel localNewModel = (IMemoryModel)localRepo.createModel(MODEL_1_ID);
-            assertEquals("so far, nothing synchronized ever", -1,
-                    localNewModel.getSynchronizedRevision());
-            assertEquals("local model was created, so rev=0", 0, localNewModel.getRevisionNumber());
-            
-            // add changes
-            XObject localObject = localNewModel.createObject(XX.toId("bob"));
-            XField localField = localObject.createField(XX.toId("cookies"));
-            localField.setValue(XV.toValue("yummy"));
-            long localModelRev = localNewModel.getRevisionNumber();
-            assertEquals(-1, localNewModel.getSynchronizedRevision());
-            assertEquals(3, localNewModel.getRevisionNumber());
-            assertEquals(4, localNewModel.getRoot().getSyncLog().getSize());
-            
-            HasChanged hc1 = HasChanged.listen(localNewModel);
-            XReadableModel localNewModel_beforeSync = XCopyUtils.createSnapshot(localNewModel);
-            
-            // check remote before sync
-            XReadableModel remoteModel = loadModelSnapshot(MODEL_1_ID);
-            assertNull("remoteModel should be null", remoteModel);
-            
-            log.info("------------- Syncing 1............");
-            NewSyncer specialSyncer = createSyncer(this.remoteStore, localNewModel);
-            synchronize(specialSyncer);
-            log.info("............. Syncing 1 done.");
-            
-            /*
-             * local model should remain unchanged, there are no changes from
-             * server
-             */
-            assertEquals(localModelRev, localNewModel.getRevisionNumber());
-            assertTrue(XCompareUtils.equalState(localNewModel, localNewModel_beforeSync));
-            assertEquals("same synclog size", 4, localNewModel.getRoot().getSyncLog().getSize());
-            assertEquals("higher syncrev now", 3, localNewModel.getSynchronizedRevision());
-            
-            // remote model should be updated
-            remoteModel = loadModelSnapshot(MODEL_1_ID);
-            assertNotNull("remoteModel should not be null", remoteModel);
-            assertTrue(XCompareUtils.equalState(localNewModel, remoteModel));
-            assertFalse(hc1.eventsReceived);
-            
-            checkEvents(localNewModel);
-            
-            /* Sync 2: Do local changes, then delete model */
-            
-            // check that the local model still works
-            localNewModel.createObject(XX.toId("jane"));
-            assertEquals(4, localNewModel.getRevisionNumber());
-            
-            localRepo.removeModel(MODEL_1_ID);
-            assertEquals(5, localNewModel.getRevisionNumber());
-            localModelRev = localNewModel.getRevisionNumber();
-            hc1.eventsReceived = false;
-            
-            System.out.println("------------- Syncing 2............");
-            synchronize(specialSyncer);
-            System.out.println("............. Syncing 2 done.");
-            
-            assertNull(loadModelSnapshot(MODEL_1_ID));
-            assertFalse(localRepo.hasModel(MODEL_1_ID));
-            assertEquals(localModelRev, localNewModel.getRevisionNumber());
-            assertEquals(localModelRev, localNewModel.getSynchronizedRevision());
-            assertFalse(hc1.eventsReceived);
-            
-            checkEvents(localNewModel);
-            
-            // check that local model is removed
-            try {
-                // this fails
-                localNewModel.createObject(XX.toId("jane"));
-                fail();
-            } catch(IllegalStateException ise) {
-                // worked
+            {
+                IMemoryModel localNewBobModel = (IMemoryModel)localRepo.createModel(MODEL_1_ID);
+                assertEquals("so far, nothing synchronized ever", -1,
+                        localNewBobModel.getSynchronizedRevision());
+                assertEquals("local model was created, so rev=0", 0,
+                        localNewBobModel.getRevisionNumber());
+                
+                // add changes
+                XObject localObject = localNewBobModel.createObject(BOB);
+                XField localField = localObject.createField(COOKIES);
+                localField.setValue(COOKIES_YUMMY);
+                long localModelRev = localNewBobModel.getRevisionNumber();
+                assertEquals(-1, localNewBobModel.getSynchronizedRevision());
+                assertEquals(3, localNewBobModel.getRevisionNumber());
+                assertEquals(4, localNewBobModel.getRoot().getSyncLog().getSize());
+                
+                HasChangedListener hasChanged1 = HasChangedListener.listen(localNewBobModel);
+                XReadableModel localNewModel_beforeSync = XCopyUtils
+                        .createSnapshot(localNewBobModel);
+                
+                // check remote before sync
+                XReadableModel remoteModel = loadModelSnapshot(MODEL_1_ID);
+                assertNull("remoteModel should be null", remoteModel);
+                
+                log.info("------------- Syncing 1............");
+                NewSyncer syncer = createSyncer(this.remoteStore, localNewBobModel);
+                synchronize(syncer);
+                log.info("............. Syncing 1 done.");
+                
+                /*
+                 * local model should remain unchanged, there are no changes
+                 * from server
+                 */
+                assertEquals(localModelRev, localNewBobModel.getRevisionNumber());
+                assertTrue(XCompareUtils.equalState(localNewBobModel, localNewModel_beforeSync));
+                assertEquals("same synclog size", 4, localNewBobModel.getRoot().getSyncLog()
+                        .getSize());
+                assertEquals("higher syncrev now", 3, localNewBobModel.getSynchronizedRevision());
+                
+                /* remote model should be updated */
+                remoteModel = loadModelSnapshot(MODEL_1_ID);
+                assertNotNull("remoteModel should not be null", remoteModel);
+                assertTrue(XCompareUtils.equalState(localNewBobModel, remoteModel));
+                assertFalse(hasChanged1.hasEventsReceived());
+                
+                checkEvents(localNewBobModel);
+                
+                /* Sync 2: Do local changes, then delete model */
+                
+                // check that the local model still works
+                localNewBobModel.createObject(JANE);
+                assertEquals(4, localNewBobModel.getRevisionNumber());
+                
+                localRepo.removeModel(MODEL_1_ID);
+                assertEquals(5, localNewBobModel.getRevisionNumber());
+                localModelRev = localNewBobModel.getRevisionNumber();
+                hasChanged1.reset();
+                
+                System.out.println("------------- Syncing 2............");
+                synchronize(syncer);
+                System.out.println("............. Syncing 2 done.");
+                
+                assertNull(loadModelSnapshot(MODEL_1_ID));
+                assertFalse(localRepo.hasModel(MODEL_1_ID));
+                assertEquals(localModelRev, localNewBobModel.getRevisionNumber());
+                assertEquals(localModelRev, localNewBobModel.getSynchronizedRevision());
+                assertFalse(hasChanged1.hasEventsReceived());
+                
+                checkEvents(localNewBobModel);
+                
+                // check that local model is removed
+                try {
+                    // this fails
+                    localNewBobModel.createObject(JANE);
+                    fail();
+                } catch(IllegalStateException ise) {
+                    // worked
+                }
+                
+                remoteModel = loadModelSnapshot(MODEL_1_ID);
+                assertNull(remoteModel);
             }
             
-            /*
-             * Sync 3: Re-create the same model locally (server still has all
-             * the history); this time add different content 'john'
-             */
-            localNewModel = (IMemoryModel)localRepo.createModel(MODEL_1_ID);
-            assertEquals(0, localNewModel.getRevisionNumber());
-            localNewModel.createObject(XX.toId("john"));
-            assertEquals(1, localNewModel.getRevisionNumber());
-            localModelRev = localNewModel.getRevisionNumber();
-            HasChanged hc2 = HasChanged.listen(localNewModel);
-            localNewModel_beforeSync = XCopyUtils.createSnapshot(localNewModel);
-            assertEquals(1, localNewModel_beforeSync.getRevisionNumber());
-            
-            remoteModel = loadModelSnapshot(MODEL_1_ID);
-            assertNull(remoteModel);
-            
-            System.out.println("------------- Syncing 3............");
-            specialSyncer = createSyncer(this.remoteStore, localNewModel);
-            synchronize(specialSyncer);
-            System.out.println("............. Syncing 3 done.");
-            
-            remoteModel = loadModelSnapshot(MODEL_1_ID);
-            assertNotNull(remoteModel);
-            assertEquals(7, remoteModel.getRevisionNumber());
-            assertEquals(7, localNewModel.getRevisionNumber());
-            
-            assertEquals(localNewModel.getRevisionNumber(), localNewModel.getSynchronizedRevision());
-            
-            log.info("Comparing state");
-            assertTrue(XCompareUtils.equalTree(localNewModel, localNewModel_beforeSync));
-            assertTrue("revNrs should match", XCompareUtils.equalState(localNewModel, remoteModel));
-            
-            assertFalse("nothing happened on the server what is not yet happened locally",
-                    hc2.eventsReceived);
-            
-            checkEvents(localNewModel);
-            
-            // check that the local model still works
-            localNewModel.createObject(XX.toId("jane"));
+            {
+                /*
+                 * Sync 3: Re-create the same model locally (server still has
+                 * all the history); this time add different content 'john'
+                 */
+                IMemoryModel localNewJohnModel = (IMemoryModel)localRepo.createModel(MODEL_1_ID);
+                assertEquals(0, localNewJohnModel.getRevisionNumber());
+                localNewJohnModel.createObject(JOHN);
+                long localModelRev = localNewJohnModel.getRevisionNumber();
+                assertEquals(1, localModelRev);
+                HasChangedListener hasChanges2 = HasChangedListener.listen(localNewJohnModel);
+                XExistsRevWritableModel localNewModel_beforeSync = XCopyUtils
+                        .createSnapshot(localNewJohnModel);
+                assertEquals(1, localNewModel_beforeSync.getRevisionNumber());
+                
+                XReadableModel remoteModel = loadModelSnapshot(MODEL_1_ID);
+                assertNull(remoteModel);
+                
+                System.out.println("------------- Syncing 3............");
+                // we have a new syncer, so we sync from begin of time
+                NewSyncer syncer = createSyncer(this.remoteStore, localNewJohnModel);
+                synchronize(syncer);
+                System.out.println("............. Syncing 3 done.");
+                
+                remoteModel = loadModelSnapshot(MODEL_1_ID);
+                assertNotNull(remoteModel);
+                assertEquals(7, remoteModel.getRevisionNumber());
+                assertEquals(7, localNewJohnModel.getRevisionNumber());
+                
+                assertEquals(localNewJohnModel.getRevisionNumber(),
+                        localNewJohnModel.getSynchronizedRevision());
+                
+                log.info("Comparing state");
+                assertTrue(XCompareUtils.equalTree(localNewJohnModel, localNewModel_beforeSync));
+                assertTrue("revNrs should match",
+                        XCompareUtils.equalState(localNewJohnModel, remoteModel));
+                
+                assertFalse("nothing happened on the server what is not yet happened locally",
+                        hasChanges2.hasEventsReceived());
+                
+                checkEvents(localNewJohnModel);
+                
+                // check that the local model still works
+                localNewJohnModel.createObject(JANE);
+            }
             
         } finally {
             log.info("*********** Test done, finally remove model " + MODEL_1_ID);
@@ -404,24 +424,25 @@ abstract public class AbstractSynchronizerTest {
         
     }
     
-    static final XId bobId = XX.toId("Bob");
-    static final XId janeId = XX.toId("Jane");
-    static final XId cookiesId = XX.toId("cookies");
-    static final XValue cookiesValue = XV.toValue("gone");
+    static final XId BOB = XX.toId("Bob");
+    static final XId JANE = XX.toId("Jane");
+    static final XId COOKIES = XX.toId("cookies");
+    static final XValue COOKIES_GONE = XV.toValue("gone");
+    static final XValue COOKIES_YUMMY = XV.toValue("yummy");
     
     @Test
     public void testDoSafeTxn() {
         XCommand command = MemoryModelCommand.createAddCommand(this.localModel.getAddress(), false,
-                bobId);
+                BOB);
         executeCommandOnStore(command);
         
-        final XAddress janeAddr = XX.resolveObject(this.localModel.getAddress(), janeId);
-        final XAddress cookiesAddr = XX.resolveField(janeAddr, cookiesId);
+        final XAddress janeAddr = XX.resolveObject(this.localModel.getAddress(), JANE);
+        final XAddress cookiesAddr = XX.resolveField(janeAddr, COOKIES);
         
         XTransactionBuilder tb = new XTransactionBuilder(this.localModel.getAddress());
-        tb.addObject(this.localModel.getAddress(), XCommand.SAFE_STATE_BOUND, janeId);
-        tb.addField(janeAddr, XCommand.SAFE_STATE_BOUND, cookiesId);
-        tb.addValue(cookiesAddr, XCommand.SAFE_STATE_BOUND, cookiesValue);
+        tb.addObject(this.localModel.getAddress(), XCommand.SAFE_STATE_BOUND, JANE);
+        tb.addField(janeAddr, XCommand.SAFE_STATE_BOUND, COOKIES);
+        tb.addValue(cookiesAddr, XCommand.SAFE_STATE_BOUND, COOKIES_GONE);
         
         executeCommandOnStore(tb.buildCommand());
     }
@@ -437,15 +458,15 @@ abstract public class AbstractSynchronizerTest {
         
         // make remote changes
         XCommand command = MemoryModelCommand.createAddCommand(this.localModel.getAddress(), false,
-                bobId);
+                BOB);
         executeCommandOnStore(command);
         // make more remote changes
-        final XAddress janeAddr = XX.resolveObject(this.localModel.getAddress(), janeId);
-        final XAddress cookiesAddr = XX.resolveField(janeAddr, cookiesId);
+        final XAddress janeAddr = XX.resolveObject(this.localModel.getAddress(), JANE);
+        final XAddress cookiesAddr = XX.resolveField(janeAddr, COOKIES);
         XTransactionBuilder tb = new XTransactionBuilder(this.localModel.getAddress());
-        tb.addObject(this.localModel.getAddress(), XCommand.SAFE_STATE_BOUND, janeId);
-        tb.addField(janeAddr, XCommand.SAFE_STATE_BOUND, cookiesId);
-        tb.addValue(cookiesAddr, XCommand.SAFE_STATE_BOUND, cookiesValue);
+        tb.addObject(this.localModel.getAddress(), XCommand.SAFE_STATE_BOUND, JANE);
+        tb.addField(janeAddr, XCommand.SAFE_STATE_BOUND, COOKIES);
+        tb.addValue(cookiesAddr, XCommand.SAFE_STATE_BOUND, COOKIES_GONE);
         XCommand txn = tb.buildCommand();
         executeCommandOnStore(txn);
         XReadableModel remoteSnapshotModel = loadModelSnapshot(DemoModelUtil.PHONEBOOK_ID);
@@ -461,12 +482,12 @@ abstract public class AbstractSynchronizerTest {
         // check the local model got the changes
         assertEquals(48, this.localModel.getRevisionNumber());
         assertEquals(48, this.localModel.getSynchronizedRevision());
-        assertTrue(this.localModel.hasObject(bobId));
-        XObject jane = this.localModel.getObject(janeId);
+        assertTrue(this.localModel.hasObject(BOB));
+        XObject jane = this.localModel.getObject(JANE);
         assertNotNull(jane);
-        XField cookies = jane.getField(cookiesId);
+        XField cookies = jane.getField(COOKIES);
         assertNotNull(cookies);
-        assertEquals(cookiesValue, cookies.getValue());
+        assertEquals(COOKIES_GONE, cookies.getValue());
         assertEquals(jane.getRevisionNumber(), cookies.getRevisionNumber());
         assertEquals(this.localModel.getRevisionNumber(), jane.getRevisionNumber());
         assertTrue(XCompareUtils.equalState(remoteSnapshotModel, this.localModel));
@@ -498,8 +519,8 @@ abstract public class AbstractSynchronizerTest {
             IMemoryModel modelCopy = loadModel(MODEL_1_ID);
             assertTrue(XCompareUtils.equalState(model, modelCopy));
             long modelRev = model.getRevisionNumber();
-            HasChanged hc2 = HasChanged.listen(model);
-            HasChanged hc3 = HasChanged.listen(modelCopy);
+            HasChangedListener hc2 = HasChangedListener.listen(model);
+            HasChangedListener hc3 = HasChangedListener.listen(modelCopy);
             checkEvents(model);
             
             removeModel(MODEL_1_ID);
@@ -513,14 +534,14 @@ abstract public class AbstractSynchronizerTest {
             assertNotNull(remoteModel);
             
             // test synchronizing the model with repository
-            HasChanged hc1 = new HasChanged();
+            HasChangedListener hc1 = new HasChangedListener();
             repo.addListenerForModelEvents(hc1);
             synchronize(sync);
             assertTrue(repo.hasModel(MODEL_1_ID));
             assertEquals(modelRev + 2, model.getRevisionNumber());
             assertEquals(modelRev + 2, model.getSynchronizedRevision());
-            assertFalse(hc1.eventsReceived);
-            assertFalse(hc2.eventsReceived);
+            assertFalse(hc1.hasEventsReceived());
+            assertFalse(hc2.hasEventsReceived());
             assertTrue(XCompareUtils.equalState(model, remoteModel));
             checkEvents(model);
             // test that the model is not removed
@@ -531,7 +552,7 @@ abstract public class AbstractSynchronizerTest {
             synchronize(sync2);
             assertEquals(modelRev + 2, modelCopy.getRevisionNumber());
             assertEquals(modelRev + 2, modelCopy.getSynchronizedRevision());
-            assertFalse(hc3.eventsReceived);
+            assertFalse(hc3.hasEventsReceived());
             assertTrue(XCompareUtils.equalState(modelCopy, remoteModel));
             checkEvents(modelCopy);
             // test that the model is not removed
@@ -562,8 +583,8 @@ abstract public class AbstractSynchronizerTest {
             IMemoryModel modelCopy = loadModel(MODEL_1_ID);
             assertTrue(XCompareUtils.equalState(model, modelCopy));
             long modelRev = model.getRevisionNumber();
-            HasChanged hc3 = HasChanged.listen(model);
-            HasChanged hc4 = HasChanged.listen(modelCopy);
+            HasChangedListener hc3 = HasChangedListener.listen(model);
+            HasChangedListener hc4 = HasChangedListener.listen(modelCopy);
             checkEvents(model);
             
             removeModel(MODEL_1_ID);
@@ -571,7 +592,7 @@ abstract public class AbstractSynchronizerTest {
             /* at this point there is no "newModel1" at the remote repository */
             
             // test synchronizing the model with repository
-            HasChanged hc1 = new HasChanged();
+            HasChangedListener hc1 = new HasChangedListener();
             repo.addListenerForModelEvents(hc1);
             synchronize(sync);
             /*
@@ -581,8 +602,8 @@ abstract public class AbstractSynchronizerTest {
             assertFalse(repo.hasModel(MODEL_1_ID));
             assertEquals(modelRev + 1, model.getRevisionNumber());
             assertEquals(modelRev + 1, model.getSynchronizedRevision());
-            assertTrue(hc1.eventsReceived);
-            assertTrue(hc3.eventsReceived);
+            assertTrue(hc1.hasEventsReceived());
+            assertTrue(hc3.hasEventsReceived());
             checkEvents(model);
             try {
                 model.createObject(XX.toId("jane"));
@@ -596,7 +617,7 @@ abstract public class AbstractSynchronizerTest {
             synchronize(sync2);
             assertEquals(modelRev + 1, modelCopy.getRevisionNumber());
             assertEquals(modelRev + 1, modelCopy.getSynchronizedRevision());
-            assertTrue(hc4.eventsReceived);
+            assertTrue(hc4.hasEventsReceived());
             checkEvents(modelCopy);
             try {
                 modelCopy.createObject(XX.toId("jane"));
@@ -611,21 +632,21 @@ abstract public class AbstractSynchronizerTest {
             assertNotNull(remoteModel);
             
             // test synchronizing the model with repository
-            HasChanged hc2 = new HasChanged();
+            HasChangedListener hc2 = new HasChangedListener();
             repo.addListenerForModelEvents(hc2);
-            hc3.eventsReceived = false;
+            hc3.reset();
             synchronize(sync);
             assertTrue(repo.hasModel(MODEL_1_ID));
-            assertTrue(hc2.eventsReceived);
-            assertTrue(hc3.eventsReceived);
+            assertTrue(hc2.hasEventsReceived());
+            assertTrue(hc3.hasEventsReceived());
             checkEvents(model);
             // test that the model is not removed
             model.createObject(XX.toId("jane"));
             
             // test synchronizing the model without repository
-            hc4.eventsReceived = false;
+            hc4.reset();
             synchronize(sync2);
-            assertTrue(hc4.eventsReceived);
+            assertTrue(hc4.hasEventsReceived());
             checkEvents(modelCopy);
             // test that the model is not removed
             modelCopy.createObject(XX.toId("jane"));

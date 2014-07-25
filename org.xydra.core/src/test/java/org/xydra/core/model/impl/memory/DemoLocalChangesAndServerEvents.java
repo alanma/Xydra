@@ -1,7 +1,5 @@
 package org.xydra.core.model.impl.memory;
 
-import java.util.Iterator;
-
 import org.xydra.base.XId;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XRevWritableModel;
@@ -16,6 +14,8 @@ import org.xydra.core.XX;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
+
+import java.util.Iterator;
 
 
 public class DemoLocalChangesAndServerEvents {
@@ -54,6 +54,8 @@ public class DemoLocalChangesAndServerEvents {
     static final long SYNC_REVISION = DemoModelUtil.REVISION_AFTER_ADDING_INCLUDING_MODEL_ITSELF;
     
     /**
+     * The only method which sets Claudias car to "911"
+     * 
      * <ul>
      * 
      * <li>model events:
@@ -263,47 +265,52 @@ public class DemoLocalChangesAndServerEvents {
      * 
      * <li>objects:
      * <ul>
-     * <li>"peter"-r3
-     * <li>"john" -r57
-     * <li>"claudia" -r61
-     * <li>"jenny" -r63
-     * <li>"kerstin" -r65
+     * <li>"peter"-r3</li>
+     * <li>"john" -r57</li>
+     * <li>"claudia" -r61</li>
+     * <li>"jenny" -r63</li>
+     * <li>"kerstin" -r65</li>
      * </ul>
-     * 
+     * </li>
      * 
      * 
      * <li>fields of "peter"
-     * 
      * <ul>
-     * <li>none
+     * <li>none</li>
      * </ul>
+     * </li>
      * 
      * <li>fields of "john"
      * <ul>
-     * <li>"phone" - "56789" -r48
-     * <li>"car" - "T" -r51
-     * <li>"bDay" - null -r52
-     * <li>"birthday" - "01.02.03" -r54
-     * <li>"cups" - "fishing" -r56
-     * <li>"flags" - null -r57
-     * <li>some others that you can look up at the {@link DemoModelUtil}
+     * <li>"phone" - "56789" -r48</li>
+     * <li>"car" - "T" -r51</li>
+     * <li>"bDay" - null -r52</li>
+     * <li>"birthday" - "01.02.03" -r54</li>
+     * <li>"cups" - "fishing" -r56</li>
+     * <li>"flags" - null -r57</li>
+     * <li>some others that you can look up at the {@link DemoModelUtil}</li>
      * </ul>
+     * </li>
      * 
      * <li>fields of "claudia"
      * <ul>
-     * <li>"phone" - "456" -r59
-     * <li>"car" - "911S" -r61
+     * <li>"phone" - "456" -r59</li>
+     * <li>"car" - "911S" -r61</li>
      * </ul>
+     * </li>
      * 
      * <li>fields of "jenny"
      * <ul>
-     * <li>"phone" - "8675309" -r63
+     * <li>"phone" - "8675309" -r63</li>
      * </ul>
+     * </li>
      * 
      * <li>fields of "kerstin"
      * <ul>
-     * <li>"phone" - "Canada" -r65
+     * <li>"phone" - "Canada" -r65</li>
      * </ul>
+     * </li>
+     * 
      * </ul>
      * 
      * @param repo repository with phonebook-model

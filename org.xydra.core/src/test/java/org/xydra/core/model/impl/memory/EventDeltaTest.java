@@ -5,12 +5,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Iterator;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
 import org.xydra.base.XAddress;
 import org.xydra.base.XCompareUtils;
 import org.xydra.base.XId;
@@ -42,6 +36,13 @@ import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.store.sync.NewSyncer;
 
+import java.util.Iterator;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 
 /**
  * Test for {@link EventDelta}
@@ -51,8 +52,6 @@ import org.xydra.store.sync.NewSyncer;
 public class EventDeltaTest {
     
     private static final Logger log = LoggerFactory.getLogger(EventDeltaTest.class);
-    
-    private static final XId TRIAL_ID = XX.toId("trial");
     
     @BeforeClass
     public static void init() {
@@ -270,29 +269,65 @@ public class EventDeltaTest {
                 .equals(XV.toValue(true)));
     }
     
+    /**
+     * 
+     */
     @Test
     public void testWithNewDemoData() {
         EventDelta eventDelta = new EventDelta();
+        // S1 = phonebook + server changes
+        XEvent[] serverEvents = applyPhonebookPlusSimulatedServerChangesToEventDelta(eventDelta);
+        System.out.println("--- server = phonebook + simulated serverChanges");
+        eventDelta.dump();
+        System.out.println("--- /server = phonebook + simulated serverChanges");
         
-        XEvent[] serverEvents = applyServerChangesToEventDelta(eventDelta);
+        /*
+         * reverse local changes in EventDelta.
+         */
+        XModel localModel = applyInverseSimulatedLocalChangesToEventDelta(eventDelta);
+        System.out.println("--- phonebook + local");
+        // assert localModel has claudias car = "911"
+        System.out.println(DumpUtils.toStringBuffer(localModel));
+        System.out.println("--- /phonebook + local");
+        System.out.println("--- phonebook + server - local");
+        eventDelta.dump();
+        System.out.println("--- /phonebook + server - local");
         
-        /* add local changes to the EventDelta */
-        XModel localPhonebookModel = applyLocalChangesToEventDelta(eventDelta);
-        
+        // P0
         /* check, if the Delta is just as it should be */
         XRepository referenceRepo = new MemoryRepository(this.actorId, this.password, this.repo);
+        // P1
         DemoModelUtil.addPhonebookModel(referenceRepo);
+        // P2
         XRevWritableModel referenceModel = DemoLocalChangesAndServerEvents
                 .getResultingClientState(referenceRepo);
-        XExistsRevWritableModel localModel2 = XCopyUtils.createSnapshot(localPhonebookModel);
+        System.out.println("--- referenceModel with 911S");
+        System.out.println(DumpUtils.toStringBuffer(referenceModel));
+        System.out.println("--- /referenceModel");
+        
+        /* copy localPhonebook, add changes from 'server' in two steps */
+        XExistsRevWritableModel localModel2 = XCopyUtils.createSnapshot(localModel);
+        
+        // 911 --> 911S is still in the eventDelta
         eventDelta.applyTo(localModel2);
         XRevWritableModel localModelWithRevisions = XCopyUtils.createSnapshot(localModel2);
+        // simply copy revs over, so they match for sure
         NewSyncer.applyEntityRevisionsToModel(serverEvents, localModelWithRevisions);
+        
+        System.out.println("--- localModelWithRevisions");
+        System.out.println(DumpUtils.toStringBuffer(localModelWithRevisions));
+        System.out.println("--- /localModelWithRevisions");
         
         assertTrue(XCompareUtils.equalState(localModelWithRevisions, referenceModel));
     }
     
-    private XEvent[] applyServerChangesToEventDelta(EventDelta eventDelta) {
+    /**
+     * Add phoneBookModel + additional changes to eventDelta
+     * 
+     * @param eventDelta
+     * @return
+     */
+    private XEvent[] applyPhonebookPlusSimulatedServerChangesToEventDelta(EventDelta eventDelta) {
         /* Simulate changes on remote repo */
         XRepository remoteRepo = new MemoryRepository(this.actorId, this.password, this.repo);
         DemoModelUtil.addPhonebookModel(remoteRepo);
@@ -318,19 +353,26 @@ public class EventDeltaTest {
         return serverEvents;
     }
     
-    private XModel applyLocalChangesToEventDelta(EventDelta eventDelta) {
+    /**
+     * Sets among other things Claudias car to "911"
+     * 
+     * @param eventDelta reverse all local changes here
+     * @return phonebook + local changes (claudis car = "911")
+     */
+    private XModel applyInverseSimulatedLocalChangesToEventDelta(EventDelta eventDelta) {
         XRepository localRepo = new MemoryRepository(this.actorId, this.password, this.repo);
-        XModel localTrialModel = localRepo.createModel(TRIAL_ID);
         DemoModelUtil.addPhonebookModel(localRepo);
         XModel localPhonebookModel = localRepo.getModel(DemoModelUtil.PHONEBOOK_ID);
         ISyncLog syncLog = (ISyncLog)localPhonebookModel.getChangeLog();
-        syncLog.setSynchronizedRevision(46);
-        XCopyUtils.copyData(localPhonebookModel, localTrialModel);
+        syncLog.setSynchronizedRevision(DemoModelUtil.REVISION_AFTER_ADDING_INCLUDING_MODEL_ITSELF);
+        
+        // model = phonebook + local changes
         DemoLocalChangesAndServerEvents.addLocalChangesToModel(localPhonebookModel);
         XChangeLog localChangeLog = localPhonebookModel.getChangeLog();
         assert localChangeLog instanceof ISyncLog;
         ISyncLog localSyncLog = (ISyncLog)localChangeLog;
         
+        // undo all changes after SYNC_REV in eventDelta
         Iterator<XEvent> localEventIterator = localChangeLog
                 .getEventsSince(DemoLocalChangesAndServerEvents.SYNC_REVISION + 1);
         while(localEventIterator.hasNext()) {

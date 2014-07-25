@@ -1,20 +1,16 @@
 package org.xydra.core.model.impl.memory.sync;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
 import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XTransactionEvent;
 import org.xydra.base.change.impl.memory.MemoryFieldEvent;
 import org.xydra.base.value.XValue;
 import org.xydra.index.query.Pair;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 
 /**
@@ -36,12 +32,12 @@ public class UnorderedEventMapper implements IEventMapper {
      */
     private class MappingResult implements IMappingResult {
         
-        private List<ISyncLogEntry> nonMappedLocalEvents;
+        private List<XEvent> nonMappedLocalEvents;
         private List<XEvent> nonMappedRemoteEvents;
-        private List<Pair<XEvent,ISyncLogEntry>> mapped;
+        private List<Pair<XEvent,XEvent>> mapped;
         
-        public MappingResult(List<Pair<XEvent,ISyncLogEntry>> mapped,
-                List<XEvent> nonMappedServerEvents, List<ISyncLogEntry> nonMappedLocalEvents) {
+        public MappingResult(List<Pair<XEvent,XEvent>> mapped, List<XEvent> nonMappedServerEvents,
+                List<XEvent> nonMappedLocalEvents) {
             this.mapped = mapped;
             this.nonMappedRemoteEvents = nonMappedServerEvents;
             this.nonMappedLocalEvents = nonMappedLocalEvents;
@@ -53,12 +49,12 @@ public class UnorderedEventMapper implements IEventMapper {
         }
         
         @Override
-        public List<ISyncLogEntry> getUnmappedLocalEvents() {
+        public List<XEvent> getUnmappedLocalEvents() {
             return this.nonMappedLocalEvents;
         }
         
         @Override
-        public List<Pair<XEvent,ISyncLogEntry>> getMapped() {
+        public List<Pair<XEvent,XEvent>> getMapped() {
             return this.mapped;
         }
         
@@ -67,11 +63,11 @@ public class UnorderedEventMapper implements IEventMapper {
     @Override
     public IMappingResult mapEvents(ISyncLog localSyncLog, XEvent[] remoteEvents) {
         
-        List<ISyncLogEntry> nonMappedLocalEvents = new ArrayList<ISyncLogEntry>();
+        List<XEvent> nonMappedLocalEvents = new ArrayList<XEvent>();
         
         List<XEvent> nonMappedServerEvents = new ArrayList<XEvent>();
         
-        List<Pair<XEvent,ISyncLogEntry>> mapped = new ArrayList<Pair<XEvent,ISyncLogEntry>>();
+        List<Pair<XEvent,XEvent>> mapped = new ArrayList<Pair<XEvent,XEvent>>();
         
         Iterator<ISyncLogEntry> localEventsSinceLastSynchronization = localSyncLog
                 .getSyncLogEntriesSince(
@@ -80,24 +76,22 @@ public class UnorderedEventMapper implements IEventMapper {
                 
                 );
         
-        Map<XEvent,ISyncLogEntry> atomicSyncLogEventsMap = unpackTransactionsToMap(localEventsSinceLastSynchronization);
+        List<XAtomicEvent> atomicLocalEventsList = unpackTransactionsToList(localEventsSinceLastSynchronization);
         List<XEvent> atomicRemoteEvents = unpackTransactions(remoteEvents);
         
         /* for each server event: look for corresponding local event */
         ArrayList<XEvent> foundLocalEvents = new ArrayList<XEvent>();
         for(XEvent remoteEvent : atomicRemoteEvents) {
+            assert !(remoteEvent instanceof XTransactionEvent);
             boolean eventCouldBeMapped = false;
-            Iterator<Entry<XEvent,ISyncLogEntry>> atomicSyncLogEntries = atomicSyncLogEventsMap
-                    .entrySet().iterator();
-            while(atomicSyncLogEntries.hasNext()) {
-                Map.Entry<XEvent,ISyncLogEntry> atomicSyncLogEntry = atomicSyncLogEntries.next();
-                XEvent localEvent = atomicSyncLogEntry.getKey();
-                if(isEqual(remoteEvent, localEvent)) {
-                    if(!foundLocalEvents.contains(localEvent)) {
-                        mapped.add(new Pair<XEvent,ISyncLogEntry>(remoteEvent, atomicSyncLogEntry
-                                .getValue()));
+            Iterator<XAtomicEvent> atomicLocalEventsIt = atomicLocalEventsList.iterator();
+            while(atomicLocalEventsIt.hasNext()) {
+                XAtomicEvent atomicLocalEvent = atomicLocalEventsIt.next();
+                if(isEqual(remoteEvent, atomicLocalEvent)) {
+                    if(!foundLocalEvents.contains(atomicLocalEvent)) {
+                        mapped.add(new Pair<XEvent,XEvent>(remoteEvent, atomicLocalEvent));
                         eventCouldBeMapped = true;
-                        foundLocalEvents.add(localEvent);
+                        foundLocalEvents.add(atomicLocalEvent);
                     }
                     break;
                 }
@@ -109,11 +103,9 @@ public class UnorderedEventMapper implements IEventMapper {
         }
         
         /* look for not found local Events */
-        Set<Entry<XEvent,ISyncLogEntry>> entries = atomicSyncLogEventsMap.entrySet();
-        for(Entry<XEvent,ISyncLogEntry> entry : entries) {
-            XEvent atomicEvent = entry.getKey();
-            if(!foundLocalEvents.contains(atomicEvent)) {
-                nonMappedLocalEvents.add(entry.getValue());
+        for(XEvent atomicLocalEvent : atomicLocalEventsList) {
+            if(!foundLocalEvents.contains(atomicLocalEvent)) {
+                nonMappedLocalEvents.add(atomicLocalEvent);
             }
         }
         
@@ -152,26 +144,27 @@ public class UnorderedEventMapper implements IEventMapper {
      * adds events to a map XEvent -> ISyncLogEntry and unpacks all transactions
      * so this list only contains atomic events
      * 
-     * @param entries events that could contain TransactionEvents
+     * @param syncLogEntries events that could contain TransactionEvents
      */
-    private static Map<XEvent,ISyncLogEntry> unpackTransactionsToMap(Iterator<ISyncLogEntry> entries) {
-        Map<XEvent,ISyncLogEntry> unpackedEventsMap = new HashMap<XEvent,ISyncLogEntry>();
-        while(entries.hasNext()) {
-            ISyncLogEntry currentEntry = entries.next();
-            XEvent currentEntriesEvent = currentEntry.getEvent();
-            if(currentEntriesEvent instanceof XTransactionEvent) {
-                XTransactionEvent currentTransactionEvent = (XTransactionEvent)currentEntriesEvent;
-                Iterator<XAtomicEvent> eventsInTransaction = currentTransactionEvent.iterator();
+    private static List<XAtomicEvent> unpackTransactionsToList(
+            Iterator<ISyncLogEntry> syncLogEntries) {
+        List<XAtomicEvent> unpackedEventsList = new ArrayList<XAtomicEvent>(8);
+        while(syncLogEntries.hasNext()) {
+            ISyncLogEntry syncLogEntry = syncLogEntries.next();
+            XEvent event = syncLogEntry.getEvent();
+            if(event instanceof XTransactionEvent) {
+                XTransactionEvent transactionEvent = (XTransactionEvent)event;
+                Iterator<XAtomicEvent> eventsInTransaction = transactionEvent.iterator();
                 while(eventsInTransaction.hasNext()) {
-                    XAtomicEvent currentEventInTransaction = eventsInTransaction.next();
-                    unpackedEventsMap.put(currentEventInTransaction, currentEntry);
+                    XAtomicEvent atomicEvent = eventsInTransaction.next();
+                    unpackedEventsList.add(atomicEvent);
                 }
                 
             } else {
-                unpackedEventsMap.put(currentEntriesEvent, currentEntry);
+                unpackedEventsList.add((XAtomicEvent)event);
             }
         }
-        return unpackedEventsMap;
+        return unpackedEventsList;
     }
     
     /**

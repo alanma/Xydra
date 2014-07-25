@@ -24,7 +24,7 @@ import org.xydra.base.change.impl.memory.MemoryObjectCommand;
 import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
 import org.xydra.core.DemoModelUtil;
-import org.xydra.core.HasChanged;
+import org.xydra.core.HasChangedListener;
 import org.xydra.core.LoggerTestHelper;
 import org.xydra.core.XCopyUtils;
 import org.xydra.core.XX;
@@ -256,7 +256,7 @@ public class SynchronizeTest {
         
         // setup listeners
         // List<XEvent> events = ChangeRecorder.record(this.localModel);
-        HasChanged hc = new HasChanged();
+        HasChangedListener hc = new HasChangedListener();
         XObject newObject = this.localModel.getObject(newObjectId);
         newObject.addListenerForFieldEvents(hc);
         newObject.addListenerForObjectEvents(hc);

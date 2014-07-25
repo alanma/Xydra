@@ -233,10 +233,13 @@ public class NewSyncer {
             while(localChanges.hasNext()) {
                 ISyncLogEntry localSyncLogEntry = localChanges.next();
                 XEvent localEvent = localSyncLogEntry.getEvent();
+                assert this.syncLog.getEventAt(localEvent.getRevisionNumber()) == localEvent;
                 if(log.isDebugEnabled())
                     log.debug("<<< Local event: " + localEvent);
                 eventDelta.addInverseEvent(localEvent, this.syncLog);
             }
+            
+            // state of eventDelta matters now a lot
             
             /* event mapping */
             // choose your event mapper here
@@ -244,13 +247,13 @@ public class NewSyncer {
             IMappingResult mapping = eventMapper.mapEvents(this.syncLog, serverEvents);
             
             // send sync events, let app see state before sync
-            for(Pair<XEvent,ISyncLogEntry> p : mapping.getMapped()) {
-                ISyncLogEntry sle = p.getSecond();
+            for(Pair<XEvent,XEvent> p : mapping.getMapped()) {
+                XEvent event = p.getSecond();
                 // send sync-success events
-                fireSyncEvent(sle, true);
+                fireSyncEvent(event, true);
             }
-            for(ISyncLogEntry sle : mapping.getUnmappedLocalEvents()) {
-                fireSyncEvent(sle, false);
+            for(XEvent event : mapping.getUnmappedLocalEvents()) {
+                fireSyncEvent(event, false);
             }
             
             // start atomic section -----
@@ -319,12 +322,11 @@ public class NewSyncer {
      * @param lc @NeverNull
      * @param result true iff sync-success, false if sync-error
      */
-    private void fireSyncEvent(ISyncLogEntry sle, boolean result) {
-        XEvent e = sle.getEvent();
-        XAddress target = e.getTarget();
+    private void fireSyncEvent(XEvent event, boolean result) {
+        XAddress target = event.getTarget();
         XSyncEvent syncEvent = new XSyncEvent(target, result);
         
-        switch(e.getTarget().getAddressedType()) {
+        switch(event.getTarget().getAddressedType()) {
         case XMODEL:
             this.root.fireSyncEvent(this.entityAddress, syncEvent);
             break;

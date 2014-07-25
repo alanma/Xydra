@@ -89,6 +89,40 @@ public class MemoryReversibleFieldEvent extends MemoryFieldEvent implements XRev
     }
     
     /**
+     * Creates an {@link XReversibleFieldEvent} of the add-type (an
+     * {@link XValue} was added to the field this event refers to)
+     * 
+     * @param actor The {@link XId} of the actor
+     * @param target The {@link XAddress} of the target - the field {@link XId}
+     *            of the given address must not be null.
+     * @param oldValue an existing value, makes only sense if command was FORCED
+     * @param newValue The added {@link XValue} - must not be null
+     * @param modelRevision The revision number of the model holding the object
+     *            holding the field this event refers to.
+     * @param objectRevision The revision number of the object holding the field
+     *            this event refers to.
+     * @param fieldRevision The revision number of the field this event refers
+     *            to
+     * @param inTransaction sets whether this event occurred during an
+     *            {@link XTransaction} or not
+     * @return An {@link XReversibleFieldEvent} of the add-type
+     * @throws IllegalArgumentException if the given {@link XAddress} does not
+     *             specify an field or if the given revision number equals
+     *             {@link XEvent#REVISION_OF_ENTITY_NOT_SET}
+     * @throws IllegalArgumentException if newValue is null
+     */
+    public static XReversibleFieldEvent createAddEvent(XId actor, XAddress target, XValue oldValue,
+            XValue newValue, long modelRevision, long objectRevision, long fieldRevision,
+            boolean inTransaction) {
+        if(newValue == null) {
+            throw new RuntimeException("newValue must not be null for field ADD events");
+        }
+        
+        return new MemoryReversibleFieldEvent(actor, target, oldValue, newValue, ChangeType.ADD,
+                modelRevision, objectRevision, fieldRevision, inTransaction, false);
+    }
+    
+    /**
      * Creates an {@link XReversibleFieldEvent} of the change-type (the
      * {@link XValue} of the field this event refers to was changed)
      * 
@@ -217,8 +251,12 @@ public class MemoryReversibleFieldEvent extends MemoryFieldEvent implements XRev
                 modelRevision, objectRevision, fieldRevision, inTransaction, implied);
     }
     
-    // the old value, before the event happened (null for "add" events)
-    private XValue oldValue;
+    /*
+     * the old value, before the event happened (null for "add" events). This
+     * should not be sent over the wire, it might be big and can be obtained
+     * from the synclog anyway.
+     */
+    private transient XValue oldValue;
     
     // private constructor, use the createEvent-methods for instantiating a
     // MemoryFieldEvent.

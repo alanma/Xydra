@@ -25,7 +25,7 @@ import org.xydra.base.change.impl.memory.MemoryReversibleFieldEvent;
 import org.xydra.base.value.XV;
 import org.xydra.base.value.XValue;
 import org.xydra.core.ChangeRecorder;
-import org.xydra.core.HasChanged;
+import org.xydra.core.HasChangedListener;
 import org.xydra.core.LoggerTestHelper;
 import org.xydra.core.X;
 import org.xydra.core.XX;
@@ -112,18 +112,18 @@ public class TransactionTest {
         
         // register listeners so we can check if rollback restores the correct
         // listeners
-        HasChanged peterObjectListener = new HasChanged();
-        HasChanged peterFieldListener = new HasChanged();
+        HasChangedListener peterObjectListener = new HasChangedListener();
+        HasChangedListener peterFieldListener = new HasChangedListener();
         this.model.getObject(PETER_ID).addListenerForObjectEvents(peterObjectListener);
         this.model.getObject(PETER_ID).addListenerForFieldEvents(peterFieldListener);
         
-        HasChanged hc = HasChanged.listen(this.model);
+        HasChangedListener hc = HasChangedListener.listen(this.model);
         
         long result = this.model.executeCommand(tb.build());
         
         assertEquals(XCommand.FAILED, result);
         
-        assertFalse(hc.eventsReceived);
+        assertFalse(hc.hasEventsReceived());
         
         // check that the model is in the same state as before
         
@@ -139,12 +139,12 @@ public class TransactionTest {
         assertFalse(this.model.getObject(PETER_ID).hasField(ALIAS_ID));
         
         // test if the event listeners are still there
-        assertFalse(peterObjectListener.eventsReceived);
-        assertFalse(peterFieldListener.eventsReceived);
+        assertFalse(peterObjectListener.hasEventsReceived());
+        assertFalse(peterFieldListener.hasEventsReceived());
         XField peterAlias = this.model.getObject(PETER_ID).createField(ALIAS_ID);
         peterAlias.setValue(XV.toValue("nomnomnom"));
-        assertTrue(peterObjectListener.eventsReceived);
-        assertTrue(peterFieldListener.eventsReceived);
+        assertTrue(peterObjectListener.hasEventsReceived());
+        assertTrue(peterFieldListener.hasEventsReceived());
         
         // check that the peter we have now and the peter we had before are the
         // same or at least modifications to one affect the other.
@@ -175,18 +175,18 @@ public class TransactionTest {
         
         // register listeners so we can check if rollback restores the correct
         // listeners
-        HasChanged peterObjectListener = new HasChanged();
-        HasChanged peterFieldListener = new HasChanged();
+        HasChangedListener peterObjectListener = new HasChangedListener();
+        HasChangedListener peterFieldListener = new HasChangedListener();
         this.peter.addListenerForObjectEvents(peterObjectListener);
         this.peter.addListenerForFieldEvents(peterFieldListener);
         
-        HasChanged hc = HasChanged.listen(this.model);
+        HasChangedListener hc = HasChangedListener.listen(this.model);
         
         long result = this.model.executeCommand(tb.build());
         
         assertEquals(XCommand.FAILED, result);
         
-        assertFalse(hc.eventsReceived);
+        assertFalse(hc.hasEventsReceived());
         
         // check that the model is in the same state as before
         
@@ -204,12 +204,12 @@ public class TransactionTest {
         assertEquals(johnsPhoneRev, this.john.getField(PHONE_ID).getRevisionNumber());
         
         // test if the event listeners are still there
-        assertFalse(peterObjectListener.eventsReceived);
-        assertFalse(peterFieldListener.eventsReceived);
+        assertFalse(peterObjectListener.hasEventsReceived());
+        assertFalse(peterFieldListener.hasEventsReceived());
         XField peterAlias = this.model.getObject(PETER_ID).createField(ALIAS_ID);
         peterAlias.setValue(XV.toValue("nomnomnom"));
-        assertTrue(peterObjectListener.eventsReceived);
-        assertTrue(peterFieldListener.eventsReceived);
+        assertTrue(peterObjectListener.hasEventsReceived());
+        assertTrue(peterFieldListener.hasEventsReceived());
         
         // check that the peter we have now and the peter we had before are the
         // same or at least modifications to one affect the other.
@@ -239,7 +239,7 @@ public class TransactionTest {
         
         // record any changes and check that everything has been changed
         // correctly when the first event is executed
-        HasChanged hc = HasChanged.listen(this.model);
+        HasChangedListener hc = HasChangedListener.listen(this.model);
         
         XTransaction txn = tb.build();
         long result = this.model.executeCommand(txn);
@@ -251,7 +251,7 @@ public class TransactionTest {
         assertEquals(modelRev, this.model.getRevisionNumber());
         assertEquals(johnRev, this.john.getRevisionNumber());
         
-        assertFalse(hc.eventsReceived);
+        assertFalse(hc.hasEventsReceived());
         
     }
     
@@ -283,7 +283,7 @@ public class TransactionTest {
         
         // record any changes and check that everything has been changed
         // correctly when the first event is executed
-        HasChanged hc = HasChanged.listen(this.model);
+        HasChangedListener hc = HasChangedListener.listen(this.model);
         
         long result = this.model.executeCommand(tb.build());
         
@@ -297,7 +297,7 @@ public class TransactionTest {
         assertEquals(johnPhoneRev, this.john.getField(PHONE_ID).getRevisionNumber());
         assertEquals(peterPhoneRev, this.peter.getField(PHONE_ID).getRevisionNumber());
         
-        assertFalse(hc.eventsReceived);
+        assertFalse(hc.hasEventsReceived());
         
     }
     
@@ -481,16 +481,16 @@ public class TransactionTest {
         // should fail to execute
         tb.removeField(johnAddr, phoneRev, PHONE_ID);
         
-        HasChanged hc = HasChanged.listen(this.model);
+        HasChangedListener hc = HasChangedListener.listen(this.model);
         
-        HasChanged phoneListener = new HasChanged();
+        HasChangedListener phoneListener = new HasChangedListener();
         johnPhone.addListenerForFieldEvents(phoneListener);
         
         long result = this.john.executeCommand(tb.build());
         
         assertEquals(XCommand.FAILED, result);
         
-        assertFalse(hc.eventsReceived);
+        assertFalse(hc.hasEventsReceived());
         
         // check that the model is in the same state as before
         
@@ -510,10 +510,10 @@ public class TransactionTest {
         assertEquals(JOHN_PHONE, phone.getValue());
         
         // test if the event listeners are still there
-        assertFalse(phoneListener.eventsReceived);
+        assertFalse(phoneListener.hasEventsReceived());
         XValue newPhone = XV.toValue("0-NEW-PHONE");
         phone.setValue(newPhone);
-        assertTrue(phoneListener.eventsReceived);
+        assertTrue(phoneListener.hasEventsReceived());
         
         // check that the phone we have now and the phone we had before are the
         // same or at least modifications to one affect the other.
@@ -543,7 +543,7 @@ public class TransactionTest {
         
         // record any changes and check that everything has been changed
         // correctly when the first event is executed
-        HasChanged hc = HasChanged.listen(this.model);
+        HasChangedListener hc = HasChangedListener.listen(this.model);
         
         long result = this.john.executeCommand(tb.build());
         
@@ -554,7 +554,7 @@ public class TransactionTest {
         assertEquals(modelRev, this.model.getRevisionNumber());
         assertEquals(johnRev, this.john.getRevisionNumber());
         
-        assertFalse(hc.eventsReceived);
+        assertFalse(hc.hasEventsReceived());
         
     }
     
