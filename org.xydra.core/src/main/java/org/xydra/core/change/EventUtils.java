@@ -1,8 +1,5 @@
 package org.xydra.core.change;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import org.xydra.annotations.CanBeNull;
 import org.xydra.annotations.NeverNull;
 import org.xydra.base.XAddress;
@@ -32,6 +29,9 @@ import org.xydra.core.model.delta.DeltaUtils;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.sharedutils.XyAssert;
+
+import java.util.LinkedList;
+import java.util.List;
 
 
 /**
@@ -230,6 +230,8 @@ public class EventUtils {
     
     /**
      * Applies an event to a model. Event must be addressed to the model.
+     * 
+     * Sets the revision number of the model.
      * 
      * It is the responsibility of the caller to ensure that the provided model
      * is at a state where the given event applies.

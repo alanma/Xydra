@@ -22,7 +22,7 @@ public class MemoryStringID implements XId, Serializable {
     private static final long serialVersionUID = 3397013331330118533L;
     
     /** Impl Note: field is not final to allow GWT-Serialisation to work on it */
-    private String string;
+    protected String string;
     
     /** Required for GWT. Do not use. */
     public MemoryStringID() {

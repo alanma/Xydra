@@ -53,6 +53,10 @@ public class BaseRuntime {
         return idProvider;
     }
     
+    public static void setIdProvider(XIdProvider idProvider) {
+        BaseRuntime.idProvider = idProvider;
+    }
+    
     /**
      * Returns the {@link XValueFactory} instance of the Xydra Instance that is
      * currently being used. An {@link XValueFactory} provides methods for
