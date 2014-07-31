@@ -7,6 +7,9 @@ import org.xydra.annotations.NotThreadSafe;
 /**
  * A simple named clock for measuring time. Nanosecond precision.
  * 
+ * TODO move to xydra code or similar, rename into neutral name. In JS, there is
+ * only milliseconds.
+ * 
  * @author xamde
  * 
  */
