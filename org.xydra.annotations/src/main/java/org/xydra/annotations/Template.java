@@ -18,5 +18,9 @@ import java.lang.annotation.Target;
 @Documented
 @Target(ElementType.METHOD)
 public @interface Template {
+    
+    /**
+     * @return variable name in template for annotated method
+     */
     String value();
 }
