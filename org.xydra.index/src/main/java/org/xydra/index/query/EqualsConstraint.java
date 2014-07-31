@@ -9,8 +9,12 @@ public class EqualsConstraint<E> implements Constraint<E> {
     
     protected final E expect;
     
+    /**
+     * @param expect @NeverNull
+     */
     public EqualsConstraint(E expect) {
         super();
+        assert expect != null;
         this.expect = expect;
     }
     

@@ -10,6 +10,7 @@ package org.xydra.index.query;
 public class Pair<K, L> {
     
     private final K first;
+    
     private final L second;
     
     public Pair(K first, L second) {

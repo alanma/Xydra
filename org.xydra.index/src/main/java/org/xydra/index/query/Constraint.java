@@ -28,7 +28,7 @@ public interface Constraint<E> extends IFilter<E> {
     /**
      * Inherited from {@link IFilter}.
      * 
-     * @param element
+     * @param element @CanBeNull
      * @return true if the constraint matches the element, i.e. if the element
      *         should appear in a result iterator.
      */

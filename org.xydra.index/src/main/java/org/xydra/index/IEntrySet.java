@@ -7,10 +7,9 @@ import java.util.Set;
 
 
 /**
+ * A set in Xydra Index API shape.
+ * 
  * @author voelkel
- * 
- *         Multiple entries can be indexed for a certain key-combination.
- * 
  * @param <E> entity type
  */
 public interface IEntrySet<E> extends IIndex, Iterable<E> {
