@@ -11,7 +11,8 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.xydra.index.impl.IteratorUtils;
+
+import org.xydra.index.iterator.Iterators;
 import org.xydra.index.query.EqualsConstraint;
 import org.xydra.index.query.KeyEntryTuple;
 import org.xydra.index.query.Wildcard;
@@ -60,13 +61,13 @@ public abstract class AbstractMapSetIndexTest<K, E> {
         this.mapSetIndex.index(this.key1, this.entry3);
         
         Iterator<E> it = this.mapSetIndex.constraintIterator(new EqualsConstraint<K>(this.key1));
-        List<E> list = IteratorUtils.toList(it);
+        List<E> list = Iterators.toList(it);
         assertEquals(2, list.size());
         assertTrue(list.contains(this.entry1));
         assertTrue(list.contains(this.entry3));
         
         it = this.mapSetIndex.constraintIterator(new Wildcard<K>());
-        list = IteratorUtils.toList(it);
+        list = Iterators.toList(it);
         assertEquals(3, list.size());
         assertTrue(list.contains(this.entry1));
         assertTrue(list.contains(this.entry2));
@@ -158,7 +159,7 @@ public abstract class AbstractMapSetIndexTest<K, E> {
         this.mapSetIndex.index(this.key1, this.entry3);
         
         Iterator<K> it = this.mapSetIndex.keyIterator();
-        List<K> list = IteratorUtils.toList(it);
+        List<K> list = Iterators.toList(it);
         
         assertEquals(2, list.size());
         assertTrue(list.contains(this.key1));
@@ -189,43 +190,43 @@ public abstract class AbstractMapSetIndexTest<K, E> {
         this.mapSetIndex.index(this.key1, this.entry3);
         
         List<KeyEntryTuple<K,E>> list;
-        list = IteratorUtils.toList(this.mapSetIndex.tupleIterator(new Wildcard<K>(),
+        list = Iterators.toList(this.mapSetIndex.tupleIterator(new Wildcard<K>(),
                 new Wildcard<E>()));
         assertEquals(3, list.size());
         
-        list = IteratorUtils.toList(this.mapSetIndex.tupleIterator(new EqualsConstraint<K>(
+        list = Iterators.toList(this.mapSetIndex.tupleIterator(new EqualsConstraint<K>(
                 this.key1), new Wildcard<E>()));
         assertEquals(2, list.size());
         
-        list = IteratorUtils.toList(this.mapSetIndex.tupleIterator(new EqualsConstraint<K>(
+        list = Iterators.toList(this.mapSetIndex.tupleIterator(new EqualsConstraint<K>(
                 this.key2), new Wildcard<E>()));
         assertEquals(1, list.size());
         
-        list = IteratorUtils.toList(this.mapSetIndex.tupleIterator(new EqualsConstraint<K>(
+        list = Iterators.toList(this.mapSetIndex.tupleIterator(new EqualsConstraint<K>(
                 this.key3), new Wildcard<E>()));
         assertEquals(0, list.size());
         
-        list = IteratorUtils.toList(this.mapSetIndex.tupleIterator(new Wildcard<K>(),
+        list = Iterators.toList(this.mapSetIndex.tupleIterator(new Wildcard<K>(),
                 new EqualsConstraint<E>(this.entry1)));
         assertEquals(1, list.size());
         
-        list = IteratorUtils.toList(this.mapSetIndex.tupleIterator(new Wildcard<K>(),
+        list = Iterators.toList(this.mapSetIndex.tupleIterator(new Wildcard<K>(),
                 new EqualsConstraint<E>(this.entry2)));
         assertEquals(1, list.size());
         
-        list = IteratorUtils.toList(this.mapSetIndex.tupleIterator(new Wildcard<K>(),
+        list = Iterators.toList(this.mapSetIndex.tupleIterator(new Wildcard<K>(),
                 new EqualsConstraint<E>(this.entry3)));
         assertEquals(1, list.size());
         
-        list = IteratorUtils.toList(this.mapSetIndex.tupleIterator(new Wildcard<K>(),
+        list = Iterators.toList(this.mapSetIndex.tupleIterator(new Wildcard<K>(),
                 new EqualsConstraint<E>(this.entry4)));
         assertEquals(0, list.size());
         
-        list = IteratorUtils.toList(this.mapSetIndex.tupleIterator(new EqualsConstraint<K>(
+        list = Iterators.toList(this.mapSetIndex.tupleIterator(new EqualsConstraint<K>(
                 this.key1), new EqualsConstraint<E>(this.entry1)));
         assertEquals(1, list.size());
         
-        list = IteratorUtils.toList(this.mapSetIndex.tupleIterator(new EqualsConstraint<K>(
+        list = Iterators.toList(this.mapSetIndex.tupleIterator(new EqualsConstraint<K>(
                 this.key2), new EqualsConstraint<E>(this.entry1)));
         assertEquals(0, list.size());
     }

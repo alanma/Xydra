@@ -4,7 +4,6 @@ import org.xydra.annotations.NotThreadSafe;
 import org.xydra.index.Factory;
 import org.xydra.index.IEntrySet;
 import org.xydra.index.IMapSetIndex;
-import org.xydra.index.impl.IteratorUtils;
 import org.xydra.index.impl.SmallEntrySetFactory;
 import org.xydra.index.iterator.IFilter;
 import org.xydra.index.iterator.ITransformer;
@@ -738,15 +737,15 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String,E>, Serializab
         st.dump();
         
         List<Integer> ints = new ArrayList<Integer>();
-        IteratorUtils.addAll(st.iterator(), ints);
+        Iterators.addAll(st.iterator(), ints);
         System.out.println(ints);
         
         List<String> keys = new ArrayList<String>();
-        IteratorUtils.addAll(st.keyIterator(), keys);
+        Iterators.addAll(st.keyIterator(), keys);
         System.out.println(keys);
         
         List<KeyEntryTuple<String,Integer>> tuples = new ArrayList<KeyEntryTuple<String,Integer>>();
-        IteratorUtils.addAll(st.tupleIterator(new Wildcard<String>(), new Wildcard<Integer>()),
+        Iterators.addAll(st.tupleIterator(new Wildcard<String>(), new Wildcard<Integer>()),
                 tuples);
         System.out.println(tuples);
         
@@ -846,7 +845,7 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String,E>, Serializab
     public void dumpStats() {
         int keys = size();
         long chars = 0;
-        int entries = IteratorUtils.count(iterator());
+        int entries = Iterators.count(iterator());
         String longestKey = "";
         Iterator<String> it = this.keyIterator();
         while(it.hasNext()) {
@@ -922,7 +921,7 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String,E>, Serializab
      * @return number of different indexed keys
      */
     public int size() {
-        return IteratorUtils.count(keyIterator());
+        return Iterators.count(keyIterator());
     }
     
     public String toString() {

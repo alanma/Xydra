@@ -5,6 +5,7 @@ import org.xydra.index.IEntrySet;
 import org.xydra.index.IEntrySet.IEntrySetDiff;
 import org.xydra.index.IMapSetIndex;
 import org.xydra.index.iterator.AbstractCascadedIterator;
+import org.xydra.index.iterator.Iterators;
 import org.xydra.index.iterator.NoneIterator;
 import org.xydra.index.query.Constraint;
 import org.xydra.index.query.EqualsConstraint;
@@ -327,7 +328,7 @@ public class MapSetIndex<K, E> implements IMapSetIndex<K,E> {
         ensureLogger();
         Iterator<KeyEntryTuple<K,E>> it = tupleIterator(new Wildcard<K>(), new Wildcard<E>());
         
-        List<KeyEntryTuple<K,E>> list = IteratorUtils.firstNtoList(it, 1000);
+        List<KeyEntryTuple<K,E>> list = Iterators.firstNtoList(it, 1000);
         if(it.hasNext()) {
             // iterator has over 1000 elements, ignore sort order
             for(KeyEntryTuple<K,E> t : list) {

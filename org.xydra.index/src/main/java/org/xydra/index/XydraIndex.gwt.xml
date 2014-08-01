@@ -10,7 +10,7 @@
 
 	<source path="">
 		<exclude name="impl/LowercaseStringKeyMapIndex.java" />
-		<exclude name="impl/Iterators_NoGwt.java" />
+		<exclude name="iterator/Iterators_NoGwt.java" />
 	</source>
 	
 </module>

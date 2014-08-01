@@ -5,7 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import org.xydra.index.impl.IteratorUtils;
+import org.xydra.index.iterator.Iterators;
 import org.xydra.index.query.EqualsConstraint;
 import org.xydra.index.query.KeyEntryTuple;
 import org.xydra.index.query.Wildcard;
@@ -111,7 +111,7 @@ public abstract class AbstractMapIndexTest<K, E> {
         this.mapIndex.index(this.key1, this.entry3);
         
         Iterator<K> it = this.mapIndex.keyIterator();
-        List<K> list = IteratorUtils.toList(it);
+        List<K> list = Iterators.toList(it);
         
         assertEquals(2, list.size());
         assertTrue(list.contains(this.key1));
@@ -142,20 +142,20 @@ public abstract class AbstractMapIndexTest<K, E> {
         // map = {s1=3, s2=2}
         
         List<KeyEntryTuple<K,E>> list;
-        list = IteratorUtils.toList(this.mapIndex.tupleIterator(new Wildcard<K>()));
+        list = Iterators.toList(this.mapIndex.tupleIterator(new Wildcard<K>()));
         assertEquals(2, list.size());
         
-        list = IteratorUtils
+        list = Iterators
                 .toList(this.mapIndex.tupleIterator(new EqualsConstraint<K>(this.key1)));
         assertEquals("list=" + list, 1, list.size());
         assertTrue(list.get(0).getEntry() == this.entry3);
         
-        list = IteratorUtils
+        list = Iterators
                 .toList(this.mapIndex.tupleIterator(new EqualsConstraint<K>(this.key2)));
         assertEquals(1, list.size());
         assertTrue(list.get(0).getEntry() == this.entry2);
         
-        list = IteratorUtils
+        list = Iterators
                 .toList(this.mapIndex.tupleIterator(new EqualsConstraint<K>(this.key3)));
         assertEquals(0, list.size());
     }

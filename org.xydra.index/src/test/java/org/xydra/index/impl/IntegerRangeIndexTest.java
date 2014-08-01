@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.xydra.index.IIntegerRangeIndex;
 import org.xydra.index.impl.IntegerRangeIndex.Span;
+import org.xydra.index.iterator.Iterators;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 
@@ -27,23 +28,23 @@ public class IntegerRangeIndexTest {
         
         IIntegerRangeIndex iri = new IntegerRangeIndex();
         assertTrue(iri.isEmpty());
-        list = IteratorUtils.toList(iri.rangesIterator());
+        list = Iterators.toList(iri.rangesIterator());
         assertEquals(0, list.size());
         
         iri.index(13, 16);
         assertFalse(iri.isEmpty());
-        list = IteratorUtils.toList(iri.rangesIterator());
+        list = Iterators.toList(iri.rangesIterator());
         assertEquals(1, list.size());
         assertInterval(13, 16, list.get(0));
         
         iri.index(19, 25);
-        list = IteratorUtils.toList(iri.rangesIterator());
+        list = Iterators.toList(iri.rangesIterator());
         assertEquals(2, list.size());
         assertInterval(13, 16, list.get(0));
         assertInterval(19, 25, list.get(1));
         
         iri.index(10, 180);
-        list = IteratorUtils.toList(iri.rangesIterator());
+        list = Iterators.toList(iri.rangesIterator());
         assertEquals(1, list.size());
         assertInterval(10, 180, list.get(0));
     }
@@ -56,7 +57,7 @@ public class IntegerRangeIndexTest {
         iri.index(10, 20);
         iri.index(5, 20);
         
-        list = IteratorUtils.toList(iri.rangesIterator());
+        list = Iterators.toList(iri.rangesIterator());
         assertEquals(1, list.size());
         assertInterval(5, 20, list.get(0));
     }
@@ -69,7 +70,7 @@ public class IntegerRangeIndexTest {
         iii.index(10, 180);
         iii.deIndex(20, 30);
         
-        list = IteratorUtils.toList(iii.rangesIterator());
+        list = Iterators.toList(iii.rangesIterator());
         assertEquals(2, list.size());
         assertInterval(10, 19, list.get(0));
         assertInterval(31, 180, list.get(1));
@@ -83,7 +84,7 @@ public class IntegerRangeIndexTest {
         iii.index(10, 180);
         iii.deIndex(20, 200);
         
-        list = IteratorUtils.toList(iii.rangesIterator());
+        list = Iterators.toList(iii.rangesIterator());
         assertEquals(1, list.size());
         assertInterval(10, 19, list.get(0));
     }
@@ -96,7 +97,7 @@ public class IntegerRangeIndexTest {
         iii.index(10, 180);
         iii.deIndex(5, 20);
         
-        list = IteratorUtils.toList(iii.rangesIterator());
+        list = Iterators.toList(iii.rangesIterator());
         assertEquals(1, list.size());
         assertInterval(21, 180, list.get(0));
     }
@@ -113,7 +114,7 @@ public class IntegerRangeIndexTest {
         iri.index(30, 40);
         
         Iterator<Span> spanIt = iri.spanIterator(100);
-        List<Span> list = IteratorUtils.toList(spanIt);
+        List<Span> list = Iterators.toList(spanIt);
         // for(Span span : list) {
         // System.out.println(span);
         // }

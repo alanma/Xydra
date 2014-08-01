@@ -1,4 +1,4 @@
-package org.xydra.index.impl;
+package org.xydra.index.iterator;
 
 import org.xydra.annotations.RunsInGWT;
 
@@ -7,6 +7,12 @@ import java.util.Iterator;
 import java.util.Set;
 
 
+/**
+ * See also {@link Iterators}
+ * 
+ * @author xamde
+ * 
+ */
 @RunsInGWT(false)
 public class Iterators_NoGwt {
     
@@ -24,7 +30,7 @@ public class Iterators_NoGwt {
         int t = timeout;
         while(true) {
             try {
-                Set<E> set = IteratorUtils.toSet(base);
+                Set<E> set = Iterators.toSet(base);
                 return set.iterator();
             } catch(ConcurrentModificationException e) {
                 try {

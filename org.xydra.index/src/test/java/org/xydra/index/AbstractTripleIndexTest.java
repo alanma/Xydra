@@ -8,8 +8,9 @@ import java.util.Iterator;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.xydra.index.ITripleIndex;
-import org.xydra.index.impl.IteratorUtils;
+import org.xydra.index.iterator.Iterators;
 import org.xydra.index.query.Constraint;
 import org.xydra.index.query.EqualsConstraint;
 import org.xydra.index.query.ITriple;
@@ -53,62 +54,62 @@ public abstract class AbstractTripleIndexTest<K, L, M> {
     public void testIndexAndDeindexWithContainsAndQuery() {
         KeyKeyEntryTuple<K,L,M> s1p1o1 = new KeyKeyEntryTuple<K,L,M>(this.s1, this.p1, this.o1);
         assertFalse(contains(this.s1, this.p1, this.o1));
-        assertFalse(IteratorUtils.toList(query(this.s1, this.p1, this.o1)).contains(s1p1o1));
+        assertFalse(Iterators.toList(query(this.s1, this.p1, this.o1)).contains(s1p1o1));
         assertFalse(contains(this.s1, this.p1, null));
-        assertFalse(IteratorUtils.toList(query(this.s1, this.p1, null)).contains(s1p1o1));
+        assertFalse(Iterators.toList(query(this.s1, this.p1, null)).contains(s1p1o1));
         assertFalse(contains(this.s1, null, this.o1));
-        assertFalse(IteratorUtils.toList(query(this.s1, null, this.o1)).contains(s1p1o1));
+        assertFalse(Iterators.toList(query(this.s1, null, this.o1)).contains(s1p1o1));
         assertFalse(contains(this.s1, null, null));
-        assertFalse(IteratorUtils.toList(query(this.s1, null, null)).contains(s1p1o1));
+        assertFalse(Iterators.toList(query(this.s1, null, null)).contains(s1p1o1));
         assertFalse(contains(null, this.p1, this.o1));
-        assertFalse(IteratorUtils.toList(query(null, this.p1, this.o1)).contains(s1p1o1));
+        assertFalse(Iterators.toList(query(null, this.p1, this.o1)).contains(s1p1o1));
         assertFalse(contains(null, this.p1, null));
-        assertFalse(IteratorUtils.toList(query(null, this.p1, null)).contains(s1p1o1));
+        assertFalse(Iterators.toList(query(null, this.p1, null)).contains(s1p1o1));
         assertFalse(contains(null, null, this.o1));
-        assertFalse(IteratorUtils.toList(query(null, null, this.o1)).contains(s1p1o1));
+        assertFalse(Iterators.toList(query(null, null, this.o1)).contains(s1p1o1));
         
         if(!containsBuiltIns()) {
             assertFalse(contains(null, null, null));
-            assertFalse(IteratorUtils.toList(query(null, null, null)).contains(s1p1o1));
+            assertFalse(Iterators.toList(query(null, null, null)).contains(s1p1o1));
         }
         
         this.ti.index(this.s1, this.p1, this.o1);
         assertTrue(contains(this.s1, this.p1, this.o1));
-        assertTrue(IteratorUtils.toList(query(this.s1, this.p1, this.o1)).contains(s1p1o1));
+        assertTrue(Iterators.toList(query(this.s1, this.p1, this.o1)).contains(s1p1o1));
         assertTrue(contains(this.s1, this.p1, null));
-        assertTrue(IteratorUtils.toList(query(this.s1, this.p1, null)).contains(s1p1o1));
+        assertTrue(Iterators.toList(query(this.s1, this.p1, null)).contains(s1p1o1));
         assertTrue(contains(this.s1, null, this.o1));
-        assertTrue(IteratorUtils.toList(query(this.s1, null, this.o1)).contains(s1p1o1));
+        assertTrue(Iterators.toList(query(this.s1, null, this.o1)).contains(s1p1o1));
         assertTrue(contains(this.s1, null, null));
-        assertTrue(IteratorUtils.toList(query(this.s1, null, null)).contains(s1p1o1));
+        assertTrue(Iterators.toList(query(this.s1, null, null)).contains(s1p1o1));
         assertTrue(contains(null, this.p1, this.o1));
-        assertTrue(IteratorUtils.toList(query(null, this.p1, this.o1)).contains(s1p1o1));
+        assertTrue(Iterators.toList(query(null, this.p1, this.o1)).contains(s1p1o1));
         assertTrue(contains(null, this.p1, null));
-        assertTrue(IteratorUtils.toList(query(null, this.p1, null)).contains(s1p1o1));
+        assertTrue(Iterators.toList(query(null, this.p1, null)).contains(s1p1o1));
         assertTrue(contains(null, null, this.o1));
-        assertTrue(IteratorUtils.toList(query(null, null, this.o1)).contains(s1p1o1));
+        assertTrue(Iterators.toList(query(null, null, this.o1)).contains(s1p1o1));
         assertTrue(contains(null, null, null));
-        assertTrue(IteratorUtils.toList(query(null, null, null)).contains(s1p1o1));
-        assertEquals(1, IteratorUtils.toList(query(this.s1, this.p1, this.o1)).size());
+        assertTrue(Iterators.toList(query(null, null, null)).contains(s1p1o1));
+        assertEquals(1, Iterators.toList(query(this.s1, this.p1, this.o1)).size());
         
         this.ti.deIndex(this.s1, this.p1, this.o1);
         assertFalse(contains(this.s1, this.p1, this.o1));
-        assertFalse(IteratorUtils.toList(query(this.s1, this.p1, this.o1)).contains(s1p1o1));
+        assertFalse(Iterators.toList(query(this.s1, this.p1, this.o1)).contains(s1p1o1));
         assertFalse(contains(this.s1, this.p1, null));
-        assertFalse(IteratorUtils.toList(query(this.s1, this.p1, null)).contains(s1p1o1));
+        assertFalse(Iterators.toList(query(this.s1, this.p1, null)).contains(s1p1o1));
         assertFalse(contains(this.s1, null, this.o1));
-        assertFalse(IteratorUtils.toList(query(this.s1, null, this.o1)).contains(s1p1o1));
+        assertFalse(Iterators.toList(query(this.s1, null, this.o1)).contains(s1p1o1));
         assertFalse(contains(this.s1, null, null));
-        assertFalse(IteratorUtils.toList(query(this.s1, null, null)).contains(s1p1o1));
+        assertFalse(Iterators.toList(query(this.s1, null, null)).contains(s1p1o1));
         assertFalse(contains(null, this.p1, this.o1));
-        assertFalse(IteratorUtils.toList(query(null, this.p1, this.o1)).contains(s1p1o1));
+        assertFalse(Iterators.toList(query(null, this.p1, this.o1)).contains(s1p1o1));
         assertFalse(contains(null, this.p1, null));
-        assertFalse(IteratorUtils.toList(query(null, this.p1, null)).contains(s1p1o1));
+        assertFalse(Iterators.toList(query(null, this.p1, null)).contains(s1p1o1));
         assertFalse(contains(null, null, this.o1));
-        assertFalse(IteratorUtils.toList(query(null, null, this.o1)).contains(s1p1o1));
+        assertFalse(Iterators.toList(query(null, null, this.o1)).contains(s1p1o1));
         if(!containsBuiltIns()) {
             assertFalse(contains(null, null, null));
-            assertFalse(IteratorUtils.toList(query(null, null, null)).contains(s1p1o1));
+            assertFalse(Iterators.toList(query(null, null, null)).contains(s1p1o1));
         }
     }
     

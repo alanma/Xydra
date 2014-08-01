@@ -1,7 +1,5 @@
 package org.xydra.index.impl;
 
-import java.util.Iterator;
-
 import org.xydra.index.IMapIndex;
 import org.xydra.index.IMapMapIndex;
 import org.xydra.index.iterator.AbstractCascadedIterator;
@@ -14,6 +12,8 @@ import org.xydra.index.query.IndexFullException;
 import org.xydra.index.query.KeyEntryTuple;
 import org.xydra.index.query.KeyKeyEntryTuple;
 import org.xydra.index.query.Wildcard;
+
+import java.util.Iterator;
 
 
 /**
@@ -260,6 +260,7 @@ public class MapMapIndex<K, L, E> implements IMapMapIndex<K,L,E> {
     
     @Override
     public Iterator<L> key2Iterator() {
+        // maybe slightly faster than Iterators.cascade(...)
         return new AbstractCascadedIterator<IMapIndex<L,E>,L>(this.index.iterator()) {
             
             @Override

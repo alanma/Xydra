@@ -5,9 +5,9 @@ import static org.junit.Assert.assertTrue;
 
 import org.xydra.index.AbstractMapSetIndexTest;
 import org.xydra.index.IEntrySet;
-import org.xydra.index.impl.IteratorUtils;
 import org.xydra.index.impl.SmallEntrySetFactory;
 import org.xydra.index.impl.TestDataGenerator;
+import org.xydra.index.iterator.Iterators;
 import org.xydra.index.query.KeyEntryTuple;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
@@ -53,7 +53,7 @@ public class SmallStringSetTrieTest extends AbstractMapSetIndexTest<String,Integ
         trie().index("abg", 2);
         trie().index("abu", 4);
         
-        List<KeyEntryTuple<String,Integer>> list = IteratorUtils.toList(trie().search("ab"));
+        List<KeyEntryTuple<String,Integer>> list = Iterators.toList(trie().search("ab"));
         // for(KeyEntryTuple<String,Integer> a : list) {
         // System.out.println(a);
         // }
@@ -83,7 +83,7 @@ public class SmallStringSetTrieTest extends AbstractMapSetIndexTest<String,Integ
         trie().index("hello", 3);
         trie().index("hello", 2);
         
-        List<KeyEntryTuple<String,Integer>> list = IteratorUtils.toList(trie().search("hell"));
+        List<KeyEntryTuple<String,Integer>> list = Iterators.toList(trie().search("hell"));
         // for(KeyEntryTuple<String,Integer> a : list) {
         // System.out.println(a);
         // }

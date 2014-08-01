@@ -3,10 +3,14 @@ package org.xydra.index.iterator;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.xydra.index.impl.IteratorUtils;
+import org.xydra.annotations.RunsInGWT;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
@@ -15,6 +19,7 @@ import java.util.Set;
  * @author xamde
  * 
  */
+@RunsInGWT(true)
 public class Iterators {
     
     /**
@@ -131,6 +136,17 @@ public class Iterators {
     }
     
     /**
+     * @param iterator
+     * @param max use -1 for no limit
+     * @return a potentially limited iterator, depending on max
+     */
+    public static <T> Iterator<T> maybeLimit(final Iterator<T> iterator, final int max) {
+        if(max == -1)
+            return iterator;
+        return limit(iterator, max);
+    }
+    
+    /**
      * @param base @NeverNull
      * @param transformer
      * @return an iterator returning entries of another type as the input type
@@ -151,7 +167,7 @@ public class Iterators {
      * @param it2 @NeverNull
      * @return a single, continuous iterator; might contain duplicates
      */
-    public static <E> Iterator<E> concat(Iterator<E> it1, Iterator<E> it2) {
+    public static <E> Iterator<E> concat(Iterator<? extends E> it1, Iterator<? extends E> it2) {
         assert it1 != null;
         assert it2 != null;
         
@@ -222,7 +238,7 @@ public class Iterators {
         
         // just one?
         Set<E> result = new HashSet<E>();
-        IteratorUtils.addAll(partIterators.next(), result);
+        Iterators.addAll(partIterators.next(), result);
         if(!partIterators.hasNext())
             return result.iterator();
         
@@ -231,7 +247,7 @@ public class Iterators {
             Iterator<E> otherIt = partIterators.next();
             Set<E> deleteMe = new HashSet<E>();
             Set<E> other = new HashSet<E>();
-            IteratorUtils.addAll(otherIt, other);
+            Iterators.addAll(otherIt, other);
             for(E e : result) {
                 if(!other.contains(e)) {
                     deleteMe.add(e);
@@ -244,6 +260,146 @@ public class Iterators {
     
     public static <E> Iterator<E> none() {
         return NoneIterator.create();
+    }
+    
+    /**
+     * @param <T> type of both
+     * @param <C> a collection type of T
+     * @param it never null
+     * @param collection to which elements are added
+     * @return as a convenience, the supplied collection
+     */
+    public static <C extends Collection<T>, T> C addAll(Iterator<? extends T> it, C collection) {
+        while(it.hasNext()) {
+            T t = it.next();
+            collection.add(t);
+        }
+        return collection;
+    }
+    
+    public static <C extends Collection<T>, T> C addFirstN(Iterator<? extends T> it, C collection,
+            int n) {
+        int i = 0;
+        while(it.hasNext() && i < n) {
+            T t = it.next();
+            collection.add(t);
+            i++;
+        }
+        return collection;
+    }
+    
+    public static <T> boolean isEmpty(Iterable<T> iterable) {
+        return isEmpty(iterable.iterator());
+    }
+    
+    public static <T> boolean isEmpty(Iterator<T> it) {
+        return !it.hasNext();
+    }
+    
+    /**
+     * @param it
+     * @return a LinkedList
+     */
+    public static <T> List<T> toList(Iterator<? extends T> it) {
+        LinkedList<T> list = new LinkedList<T>();
+        addAll(it, list);
+        return list;
+    }
+    
+    public static <T> ArrayList<T> toArrayList(Iterator<T> it) {
+        ArrayList<T> list = new ArrayList<T>();
+        addAll(it, list);
+        return list;
+    }
+    
+    /**
+     * @param it
+     * @return a HashSet
+     */
+    public static <T> Set<T> toSet(Iterator<? extends T> it) {
+        HashSet<T> set = new HashSet<T>();
+        addAll(it, set);
+        return set;
+    }
+    
+    public static <T> List<T> firstNtoList(Iterator<? extends T> it, int n) {
+        ArrayList<T> list = new ArrayList<T>(n);
+        addFirstN(it, list, n);
+        return list;
+    }
+    
+    public static <T> String toText(Collection<T> value) {
+        StringBuffer buf = new StringBuffer();
+        for(T s : value) {
+            buf.append(s).append(",");
+        }
+        return buf.toString();
+    }
+    
+    public static int count(Iterator<?> it) {
+        int i = 0;
+        while(it.hasNext()) {
+            i++;
+            it.next();
+        }
+        return i;
+    }
+    
+    /**
+     * @param it
+     * @param max
+     * @return number of elements in iterator; maximum is max. Reports -1 if
+     *         maximum is reached.
+     */
+    public static int count(Iterator<?> it, int max) {
+        int i = 0;
+        while(it.hasNext() && i < max) {
+            i++;
+            it.next();
+        }
+        return i < max ? i : -1;
+    }
+    
+    /**
+     * @param it @NeverNull
+     * @return the single value, if present. Or null, otherwise.
+     * @throws IllegalStateException if iterator has more than one result
+     */
+    public static <X> X getSingleValue(Iterator<X> it) {
+        assert it != null;
+        if(it.hasNext()) {
+            X result = it.next();
+            if(it.hasNext())
+                throw new IllegalStateException("Found more than one result: " + result + " AND "
+                        + it.next());
+            return result;
+        } else {
+            return null;
+        }
+    }
+    
+    /**
+     * For debugging. Output the contents of the iterator to System.out by
+     * calling toString on each element.
+     * 
+     * @param it
+     */
+    public static <E> void dump(Iterator<E> it) {
+        System.out.println("Dumping " + it.getClass().getName());
+        while(it.hasNext()) {
+            E e = it.next();
+            System.out.println(e.toString());
+        }
+        System.out.println("End of iterator");
+    }
+    
+    public static <E> boolean contains(Iterator<E> it, E element) {
+        while(it.hasNext()) {
+            E e = it.next();
+            if(e.equals(element))
+                return true;
+        }
+        return false;
     }
     
 }

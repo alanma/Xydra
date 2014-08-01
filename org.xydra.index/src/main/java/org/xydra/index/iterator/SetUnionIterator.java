@@ -4,8 +4,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.xydra.index.impl.IteratorUtils;
-
 
 /**
  * Turns two iterators (one probably smaller than the other one) into a single
@@ -27,7 +25,7 @@ public class SetUnionIterator<E> implements ClosableIterator<E> {
     
     public SetUnionIterator(Iterator<? extends E> smallIt, Iterator<E> largeIt) {
         this.smallSet = new HashSet<E>();
-        IteratorUtils.addAll(smallIt, this.smallSet);
+        Iterators.addAll(smallIt, this.smallSet);
         if(smallIt instanceof ClosableIterator<?>) {
             ((ClosableIterator<? extends E>)smallIt).close();
         }
