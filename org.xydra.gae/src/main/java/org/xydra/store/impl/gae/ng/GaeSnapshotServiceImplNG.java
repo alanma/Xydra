@@ -1,6 +1,7 @@
 package org.xydra.store.impl.gae.ng;
 
 import java.io.Serializable;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
@@ -28,7 +29,7 @@ import org.xydra.core.serialize.SerializedModel;
 import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.xml.XmlParser;
 import org.xydra.core.util.DumpUtils;
-import org.xydra.index.impl.IteratorUtils;
+import org.xydra.index.iterator.Iterators;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.sharedutils.XyAssert;
@@ -441,7 +442,7 @@ public class GaeSnapshotServiceImplNG extends AbstractGaeSnapshotServiceImpl {
         }
         
         /* no locks requested? */
-        if(IteratorUtils.isEmpty(locks)) {
+        if(Iterators.isEmpty(locks)) {
             return null;
         }
         

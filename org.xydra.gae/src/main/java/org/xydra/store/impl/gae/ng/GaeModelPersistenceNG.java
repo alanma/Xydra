@@ -26,8 +26,8 @@ import org.xydra.core.XCopyUtils;
 import org.xydra.core.XX;
 import org.xydra.core.model.delta.ChangedField;
 import org.xydra.core.model.delta.ChangedObject;
-import org.xydra.index.impl.IteratorUtils;
 import org.xydra.index.iterator.AbstractFilteringIterator;
+import org.xydra.index.iterator.Iterators;
 import org.xydra.index.query.Pair;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
@@ -484,7 +484,7 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
                 }
                 
             };
-            return IteratorUtils.addAll(it, new LinkedList<XEvent>());
+            return Iterators.addAll(it, new LinkedList<XEvent>());
         }
     }
     
