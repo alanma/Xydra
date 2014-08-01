@@ -163,6 +163,26 @@ public class Iterators {
     }
     
     /**
+     * An optimized version of {@link #transform(Iterator, ITransformer)}, which
+     * implicitly filters out all items for which the transformer returns null
+     * 
+     * @param base @NeverNull
+     * @param transformer returns null for unwanted elements @NeverNull
+     * @return an iterator returning entries of another type as the input type @NeverNull
+     */
+    @SuppressWarnings("unchecked")
+    public static <I, O> Iterator<O> transformSkipNulls(Iterator<? extends I> base,
+            ITransformer<I,O> transformer) {
+        assert base != null;
+        assert transformer != null;
+        
+        if(base == NoneIterator.INSTANCE)
+            return (Iterator<O>)base;
+        
+        return Iterators.filter(Iterators.transform(base, transformer), FILTER_NON_NULL);
+    }
+    
+    /**
      * @param it1 @NeverNull
      * @param it2 @NeverNull
      * @return a single, continuous iterator; might contain duplicates
