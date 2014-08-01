@@ -9,7 +9,7 @@ import org.xydra.core.X;
 import org.xydra.core.XX;
 import org.xydra.core.util.Clock;
 import org.xydra.core.util.ConfigUtils;
-import org.xydra.index.impl.IteratorUtils;
+import org.xydra.index.iterator.Iterators;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.persistence.GetWithAddressRequest;
@@ -328,7 +328,7 @@ public class RepositoryResource {
             w.write("Deleting model " + modelId);
             w.flush();
             XWritableModel model = new WritableModelOnPersistence(p, actorId, modelId);
-            Collection<XId> objectIds = IteratorUtils.addAll(model.iterator(), new HashSet<XId>());
+            Collection<XId> objectIds = Iterators.addAll(model.iterator(), new HashSet<XId>());
             for(XId objectId : objectIds) {
                 XCommand command = X.getCommandFactory().createForcedRemoveObjectCommand(repoId,
                         modelId, objectId);

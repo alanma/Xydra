@@ -9,6 +9,7 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -21,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
+
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
@@ -46,7 +48,7 @@ import org.xydra.core.serialize.json.JsonSerializer;
 import org.xydra.core.serialize.xml.XmlParser;
 import org.xydra.core.serialize.xml.XmlSerializer;
 import org.xydra.core.util.Clock;
-import org.xydra.index.impl.IteratorUtils;
+import org.xydra.index.iterator.Iterators;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.persistence.GetWithAddressRequest;
@@ -490,7 +492,7 @@ public class ModelResource {
         if(repo.hasModel(modelId)) {
             // avoid creating too large events
             XWritableModel oldModel = repo.getModel(modelId);
-            Collection<XId> oldObjectsIds = IteratorUtils.addAll(oldModel.iterator(),
+            Collection<XId> oldObjectsIds = Iterators.addAll(oldModel.iterator(),
                     new HashSet<XId>());
             if(oldObjectsIds.size() > 20) {
                 for(XId oldObjectID : oldObjectsIds) {
