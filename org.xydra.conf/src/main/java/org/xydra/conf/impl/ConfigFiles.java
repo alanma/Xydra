@@ -1,7 +1,7 @@
 package org.xydra.conf.impl;
 
 import org.xydra.conf.IConfig;
-import org.xydra.index.impl.IteratorUtils;
+import org.xydra.index.iterator.Iterators;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Properties;
@@ -35,7 +36,7 @@ public class ConfigFiles {
         pfw.comment("=== Written on " + new Date() + " ===");
         
         Set<String> explicitly = new HashSet<String>();
-        IteratorUtils.addAll(conf.getExplicitlyDefinedKeys().iterator(), explicitly);
+        Iterators.addAll(conf.getExplicitlyDefinedKeys().iterator(), explicitly);
         
         // one alphabetically sorted list
         for(String key : conf.getDefinedKeys()) {
