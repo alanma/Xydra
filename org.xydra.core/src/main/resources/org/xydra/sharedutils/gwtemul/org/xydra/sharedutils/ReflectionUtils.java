@@ -18,6 +18,11 @@ public class ReflectionUtils {
 		throw new Exception("Dynamic class loading not possible in GWT");
 	}
 	
+    public static <T> T createInstanceOfClass(Class<T> clazz) throws Exception {
+        throw new Exception("Dynamic class loading not possible in GWT");
+    }
+
+	
 	/**
 	 * @param obj to be estimated in size
 	 * @return estimated size by serialising to ObjectStream and counting bytes
