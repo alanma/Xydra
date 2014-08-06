@@ -10,14 +10,16 @@ public class EqualsConstraint<E> implements Constraint<E> {
     protected final E expect;
     
     /**
-     * @param expect @NeverNull
+     * @param expect @CanBeNull if you search for nulls
      */
     public EqualsConstraint(E expect) {
         super();
-        assert expect != null;
         this.expect = expect;
     }
     
+    /**
+     * @return @CanBeNull
+     */
     public E getKey() {
         return this.expect;
     }

@@ -36,6 +36,7 @@ public interface Constraint<E> extends IFilter<E> {
     
     /**
      * @return the expected object; @CanBeNull if this is a (kind of) wild card
+     *         or if you search for nulls
      */
     E getExpected();
     
