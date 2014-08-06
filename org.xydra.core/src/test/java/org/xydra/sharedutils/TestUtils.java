@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.index.impl.IteratorUtils;
+import org.xydra.index.iterator.Iterators;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -28,7 +28,7 @@ public class TestUtils {
         for(E e : expected)
             exp.add(e);
         HashSet<E> found = new HashSet<E>();
-        IteratorUtils.addAll(it, found);
+        Iterators.addAll(it, found);
         
         assertEquals("Should have the same size", exp.size(), found.size());
         for(E e : exp) {

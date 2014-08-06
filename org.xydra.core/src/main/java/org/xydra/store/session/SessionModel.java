@@ -1,9 +1,5 @@
 package org.xydra.store.session;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-
 import org.xydra.annotations.NeverNull;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
@@ -19,11 +15,15 @@ import org.xydra.core.change.SessionCachedModel;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.core.util.Clock;
 import org.xydra.core.util.DumpUtils;
-import org.xydra.index.impl.IteratorUtils;
+import org.xydra.index.iterator.Iterators;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.persistence.GetWithAddressRequest;
 import org.xydra.sharedutils.XyAssert;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
 
 
 /**
@@ -62,7 +62,8 @@ public class SessionModel implements XSessionModel {
      * @param readonly if read-only, model cannot be committed
      */
     public SessionModel(ChangeSession sharedSession, XAddress address, boolean readonly) {
-        if(log.isTraceEnabled()) log.trace("SessionModel " + this.traceid + " created for '" + address + "'");
+        if(log.isTraceEnabled())
+            log.trace("SessionModel " + this.traceid + " created for '" + address + "'");
         this.clock = new Clock().start();
         this.session = sharedSession;
         this.readonly = readonly;
@@ -78,7 +79,8 @@ public class SessionModel implements XSessionModel {
     public long commitToSessionPersistence() {
         assert !isReadOnly() : "Called commit on model '" + this.getId() + "' that is readonly?"
                 + this.readonly;
-        if(log.isDebugEnabled()) log.debug("Committing SessionModel '" + this.traceid + "' ...");
+        if(log.isDebugEnabled())
+            log.debug("Committing SessionModel '" + this.traceid + "' ...");
         synchronized(this.sessionCacheModel) {
             long l = this.getSessionPersistence().applyChangesAsTxn(this.sessionCacheModel,
                     getActorId());
@@ -183,7 +185,7 @@ public class SessionModel implements XSessionModel {
     public Iterator<XId> iterator() {
         Collection<XId> set;
         synchronized(this.sessionCacheModel) {
-            set = IteratorUtils.addAll(this.sessionCacheModel.iterator(), new HashSet<XId>());
+            set = Iterators.addAll(this.sessionCacheModel.iterator(), new HashSet<XId>());
         }
         return set.iterator();
     }
@@ -242,7 +244,8 @@ public class SessionModel implements XSessionModel {
         if(this.sessionCacheModel.isKnownObject(objectId)) {
             return this;
         }
-        if(log.isTraceEnabled()) log.trace("Loading object '" + objectId + "' in " + this.getAddress());
+        if(log.isTraceEnabled())
+            log.trace("Loading object '" + objectId + "' in " + this.getAddress());
         XReadableObject objectSnapshot = this.session.getSessionPersistence().getObjectSnapshot(
                 new GetWithAddressRequest(XX.resolveObject(getAddress(), objectId),
                         INCLUDE_TENTATIVE_CHANGES));

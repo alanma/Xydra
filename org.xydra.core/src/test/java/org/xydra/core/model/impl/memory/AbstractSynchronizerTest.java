@@ -44,7 +44,7 @@ import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.XSynchronizesChanges;
 import org.xydra.core.model.delta.ChangedModel;
-import org.xydra.index.impl.IteratorUtils;
+import org.xydra.index.iterator.Iterators;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.persistence.GetEventsRequest;
@@ -128,7 +128,7 @@ abstract public class AbstractSynchronizerTest {
         log.info("Getting changes of model " + localModel.getAddress() + " since " + startRev);
         Iterator<XEvent> localEventsIt = changeLog.getEventsBetween(startRev, Long.MAX_VALUE);
         ArrayList<XEvent> localEvents = new ArrayList<XEvent>();
-        IteratorUtils.addAll(localEventsIt, localEvents);
+        Iterators.addAll(localEventsIt, localEvents);
         log.info(" ... found changes of model " + localModel.getAddress() + " since " + startRev
                 + " = " + localEvents.size());
         

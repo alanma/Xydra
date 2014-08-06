@@ -6,6 +6,7 @@ import org.xydra.base.URIFormatException;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.XIdProvider;
+import org.xydra.index.impl.IntegerRangeIndex;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 
@@ -23,7 +24,12 @@ public abstract class BaseStringIDProvider implements XIdProvider {
     
     private static final Logger log = LoggerFactory.getLogger(BaseStringIDProvider.class);
     
-    private static final String nameStartChar = // .
+    /**
+     * Notable excludes: [-.0-9]
+     * 
+     * Some notable includes: [:_öä]
+     */
+    public static final String nameStartChar = // .
     "A-Z" // .
             + "_" // .
             + "a-z" // .
@@ -39,17 +45,67 @@ public abstract class BaseStringIDProvider implements XIdProvider {
             + "\\uF900-\\uFDCF" // .
             + "\\uFDF0-\\uFFFD";
     
+    public static IntegerRangeIndex RANGEINDEX_nameStartChar;
+    
+    public static IntegerRangeIndex RANGEINDEX_nameChar;
+    
+    static {
+        RANGEINDEX_nameStartChar = new IntegerRangeIndex();
+        RANGEINDEX_nameStartChar.index('A', 'Z');// .
+        RANGEINDEX_nameStartChar.index('_', '_');// .
+        RANGEINDEX_nameStartChar.index('a', 'z');// .
+        RANGEINDEX_nameStartChar.index(hex("C0"), hex("D6")); // .
+        RANGEINDEX_nameStartChar.index(hex("D8"), hex("F6")); // .
+        RANGEINDEX_nameStartChar.index(hex("00F8"), hex("02FF")); // .
+        RANGEINDEX_nameStartChar.index(hex("0370"), hex("037D")); // .
+        RANGEINDEX_nameStartChar.index(hex("037F"), hex("1FFF")); // .
+        RANGEINDEX_nameStartChar.index(hex("200C"), hex("200D")); // .
+        RANGEINDEX_nameStartChar.index(hex("2070"), hex("218F")); // .
+        RANGEINDEX_nameStartChar.index(hex("2C00"), hex("2FEF")); // .
+        RANGEINDEX_nameStartChar.index(hex("3001"), hex("D7FF")); // .
+        RANGEINDEX_nameStartChar.index(hex("F900"), hex("FDCF")); // .
+        RANGEINDEX_nameStartChar.index(hex("FDF0"), hex("FFFD")); // .
+        RANGEINDEX_nameChar = new IntegerRangeIndex();
+        RANGEINDEX_nameChar.addAll(RANGEINDEX_nameStartChar);
+        RANGEINDEX_nameChar.index('-', '-');
+        RANGEINDEX_nameChar.index('.', '.');
+        RANGEINDEX_nameChar.index('0', '9');
+        RANGEINDEX_nameChar.index(hex("B7"), hex("B7"));
+        RANGEINDEX_nameChar.index(hex("0300"), hex("036F"));
+        RANGEINDEX_nameChar.index(hex("203F"), hex("2040"));
+    }
+    
+    private static int hex(String s) {
+        return Integer.parseInt(s, 16);
+    }
+    
+    public static void main(String[] args) {
+        System.out.println(hex("C0"));
+        System.out.println(hex("00F8"));
+    }
+    
     /*
      * the XML spec also allows 5-digit unicode characters (\u10000-\uEFFFF) but
      * Java can't handle them as char datatype is 16-bit only.
      */
     
-    private static final String nameChar = // .
+    /**
+     * Notable excludes: ' ;<=>?@[\]^{|}~§°´%!"#$%&'()*+,-./ '
+     * 
+     * Notable includes: [-:_äö0-9]
+     * 
+     * ':' is used in XML namespaces
+     * 
+     * Random XIds are UUIDs which match [-0-9a-z]
+     * 
+     * This leaves '_' as the only reasonable escape character
+     * */
+    public static final String nameChar = // .
     nameStartChar + // .
             "\\-" // .
             + "\\."// .
             + "0-9"// .
-            + "\\xB7"// .
+            + "\\xB7"// . the "middle dot"
             + "\\u0300-\u036F"// .
             + "\\u203F-\\u2040";
     
@@ -116,12 +172,38 @@ public abstract class BaseStringIDProvider implements XIdProvider {
         return new MemoryAddress(repositoryId, modelId, objectId, fieldId);
     }
     
+    /**
+     * @param s @NeverNull
+     * @return true if valid XId string
+     */
     public static boolean isValidId(String s) {
+        if(s == null) {
+            throw new IllegalArgumentException("s is null");
+        }
         if(s.length() > XIdProvider.MAX_LENGTH) {
             log.trace("Too long");
             return false;
         }
+        if(s.length() == 0) {
+            log.trace("Too short");
+            return false;
+        }
+        int firstCodePoint = s.codePointAt(0);
+        int i = Character.charCount(firstCodePoint);
+        return RANGEINDEX_nameStartChar.isInInterval(firstCodePoint)
+                && IntegerRangeIndex
+                        .isAllCharactersInIntervals(RANGEINDEX_nameChar, s.substring(i));
         
+    }
+    
+    /**
+     * Alternative, slower implementation
+     * 
+     * @param s
+     * @return true if valid XId string
+     */
+    public static boolean isValidId_versionB(String s) {
+        // slower ?
         return MemoryStringIdRegexGwtEmul.matchesXydraId(s);
     }
     

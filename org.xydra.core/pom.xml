@@ -121,6 +121,18 @@
 			<version>0.1.7-SNAPSHOT</version>
 			<scope>test</scope>
 		</dependency>
+		<!-- FIXME this needs a local install via: git clone https://code.google.com/p/caliper/ 
+			mvn install -Dmaven.test.skip=true -->
+		<!-- <dependency> -->
+		<!-- <groupId>com.google.caliper</groupId> -->
+		<!-- <artifactId>caliper</artifactId> -->
+		<!-- <version>1.0-beta-SNAPSHOT</version> -->
+		<!-- </dependency> -->
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>google-caliper</artifactId>
+			<version>1.0-beta-2</version>
+		</dependency>
 
 	</dependencies>
 

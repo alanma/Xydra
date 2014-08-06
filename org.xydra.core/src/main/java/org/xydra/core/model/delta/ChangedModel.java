@@ -1,14 +1,5 @@
 package org.xydra.core.model.delta;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.xydra.annotations.NeverNull;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
@@ -30,12 +21,21 @@ import org.xydra.base.rmof.impl.XExistsWritableModel;
 import org.xydra.base.rmof.impl.memory.SimpleObject;
 import org.xydra.core.XCopyUtils;
 import org.xydra.core.XX;
-import org.xydra.index.impl.IteratorUtils;
 import org.xydra.index.iterator.AbstractFilteringIterator;
 import org.xydra.index.iterator.BagUnionIterator;
+import org.xydra.index.iterator.Iterators;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.sharedutils.XyAssert;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -631,7 +631,7 @@ public class ChangedModel implements XWritableModel, IModelDiff, XExistsWritable
         this.modelExists = modelExists;
         if(!modelExists) {
             List<XId> toBeRemoved = new LinkedList<XId>();
-            IteratorUtils.addAll(this.iterator(), toBeRemoved);
+            Iterators.addAll(this.iterator(), toBeRemoved);
             for(XId objectId : toBeRemoved) {
                 removeObject(objectId);
             }

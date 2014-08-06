@@ -1,12 +1,14 @@
 package org.xydra.base;
 
-import java.io.Serializable;
-
 import org.xydra.base.value.XSingleValue;
+
+import java.io.Serializable;
 
 
 /**
  * A identification object that can be serialised.
+ * 
+ * See {@link XIdProvider} for limits.
  * 
  * <em>Important:</em> Implementations of XId must implement <tt>equals()</tt>
  * and <tt>hashCode</tt> correctly.
@@ -17,7 +19,7 @@ public interface XId extends XSingleValue<XId>, Serializable, Comparable<XId>, I
     
     /**
      * A default Id to be used in cases where a single default Id solves the
-     * problem. E.g. to ber used as the repository-Id of a model that has no
+     * problem. E.g. to be used as the repository-Id of a model that has no
      * repository.
      */
     XId DEFAULT = Base.toId("_default");
