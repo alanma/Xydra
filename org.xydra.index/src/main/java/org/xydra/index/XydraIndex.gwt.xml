@@ -11,6 +11,8 @@
 	<source path="">
 		<exclude name="impl/LowercaseStringKeyMapIndex.java" />
 		<exclude name="iterator/Iterators_NoGwt.java" />
+		<!-- runs almost in GWT -->
+		<exclude name="impl/IntegerRangeIndex.java" />
 	</source>
 	
 </module>

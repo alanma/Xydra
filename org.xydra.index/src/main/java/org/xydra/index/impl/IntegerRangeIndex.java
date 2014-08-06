@@ -1,5 +1,6 @@
 package org.xydra.index.impl;
 
+import org.xydra.annotations.RunsInGWT;
 import org.xydra.index.IIntegerRangeIndex;
 import org.xydra.index.iterator.AbstractLookAheadIterator;
 import org.xydra.log.api.Logger;
@@ -16,7 +17,10 @@ import java.util.TreeMap;
  * Uses internally a sorted map. Fast; memory-efficient;
  * 
  * @author xamde
+ * 
+ *         TODO runs almost in GWT
  */
+@RunsInGWT(false)
 public class IntegerRangeIndex implements IIntegerRangeIndex {
     
     private static final long serialVersionUID = -6793029187873016827L;
@@ -50,6 +54,11 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
             log.trace("Current: " + mergedStart + "," + mergedEnd);
         
         /* merge with previous? */
+        
+        // TODO use something like this for GWT
+        // Integer prev_start = this.sortedmap.headMap(start).lastKey();
+        // Integer prev_end = this.sortedmap.get(prev_start);
+        
         Entry<Integer,Integer> prev = this.sortedmap.floorEntry(start - 1);
         assert prev == null || start(prev) <= start - 1;
         // [1,5] & [3,9]
