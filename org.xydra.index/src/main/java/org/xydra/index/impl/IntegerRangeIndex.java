@@ -1,6 +1,5 @@
 package org.xydra.index.impl;
 
-import org.xydra.annotations.RunsInGWT;
 import org.xydra.index.IIntegerRangeIndex;
 import org.xydra.index.iterator.AbstractLookAheadIterator;
 import org.xydra.log.api.Logger;
@@ -18,9 +17,7 @@ import java.util.TreeMap;
  * 
  * @author xamde
  * 
- *         TODO runs almost in GWT
  */
-@RunsInGWT(false)
 public class IntegerRangeIndex implements IIntegerRangeIndex {
     
     private static final long serialVersionUID = -6793029187873016827L;
@@ -36,6 +33,64 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
     }
     
     private TreeMap<Integer,Integer> sortedmap = new TreeMap<Integer,Integer>();
+    
+    // /*
+    // * Runtime: O(1) + O(1) + O(contained intervals).
+    // *
+    // * @see org.xydra.index.IIntegerRangeIndex#index(int, int)
+    // */
+    // @Override
+    // public void index_OLD(int start, int end) {
+    // assert start <= end : "start=" + start + " end=" + end;
+    // if(log.isTraceEnabled())
+    // log.trace("Index " + start + "," + end);
+    //
+    // int mergedStart = start;
+    // int mergedEnd = end;
+    // if(log.isTraceEnabled())
+    // log.trace("Current: " + mergedStart + "," + mergedEnd);
+    //
+    // /* merge with previous? */
+    //
+    // // Integer prev_start = this.sortedmap.headMap(start).lastKey();
+    // // Integer prev_end = this.sortedmap.get(prev_start);
+    //
+    // Entry<Integer,Integer> prev = this.sortedmap.floorEntry(start - 1);
+    //
+    // assert prev == null || start(prev) <= start - 1;
+    // // [1,5] & [3,9]
+    // if(prev != null && start - 1 <= end(prev)) {
+    // if(log.isTraceEnabled())
+    // log.trace("Merge with prev: " + prev);
+    // mergedStart = start(prev);
+    // mergedEnd = Math.max(end(prev), end);
+    // this.sortedmap.remove(start(prev));
+    // if(log.isTraceEnabled())
+    // log.trace("Current: " + mergedStart + "," + mergedEnd);
+    // }
+    //
+    // /* merge with next? */
+    // Entry<Integer,Integer> next = this.sortedmap.floorEntry(end + 1);
+    // assert next == null || start(next) <= end + 1;
+    // if(next != null && start(next) >= mergedStart && mergedEnd + 1 >=
+    // start(next)) {
+    // if(log.isTraceEnabled())
+    // log.trace("Merge with next: " + next);
+    // mergedEnd = Math.max(mergedEnd, end(next));
+    // this.sortedmap.remove(start(next));
+    // if(log.isTraceEnabled())
+    // log.trace("Current: " + mergedStart + "," + mergedEnd);
+    // }
+    //
+    // /* prune contained intervals? */
+    // int pruneStart = mergedStart + 1;
+    // int pruneEnd = mergedEnd - 1;
+    // if(pruneEnd - pruneStart > 1) {
+    // pruneRanges(pruneStart, pruneEnd);
+    // }
+    //
+    // this.sortedmap.put(mergedStart, mergedEnd);
+    // }
     
     /*
      * Runtime: O(1) + O(1) + O(contained intervals).
@@ -54,34 +109,42 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
             log.trace("Current: " + mergedStart + "," + mergedEnd);
         
         /* merge with previous? */
-        
-        // TODO use something like this for GWT
-        // Integer prev_start = this.sortedmap.headMap(start).lastKey();
-        // Integer prev_end = this.sortedmap.get(prev_start);
-        
-        Entry<Integer,Integer> prev = this.sortedmap.floorEntry(start - 1);
-        assert prev == null || start(prev) <= start - 1;
-        // [1,5] & [3,9]
-        if(prev != null && start - 1 <= end(prev)) {
-            if(log.isTraceEnabled())
-                log.trace("Merge with prev: " + prev);
-            mergedStart = start(prev);
-            mergedEnd = Math.max(end(prev), end);
-            this.sortedmap.remove(start(prev));
-            if(log.isTraceEnabled())
-                log.trace("Current: " + mergedStart + "," + mergedEnd);
+        SortedMap<Integer,Integer> prevHeadMap = this.sortedmap.headMap(start);
+        if(!prevHeadMap.isEmpty()) {
+            Integer prev_start = prevHeadMap.lastKey();
+            assert prev_start != null;
+            assert prev_start <= start - 1;
+            Integer prev_end = this.sortedmap.get(prev_start);
+            assert prev_end != null;
+            // [1,5] & [3,9]
+            if(start - 1 <= prev_end) {
+                if(log.isTraceEnabled())
+                    log.trace("Merge with prev: [" + prev_start + "," + prev_end + "]");
+                mergedStart = prev_start;
+                mergedEnd = Math.max(prev_end, end);
+                this.sortedmap.remove(prev_start);
+                if(log.isTraceEnabled())
+                    log.trace("Current: [" + mergedStart + "," + mergedEnd + "]");
+            }
         }
         
         /* merge with next? */
-        Entry<Integer,Integer> next = this.sortedmap.floorEntry(end + 1);
-        assert next == null || start(next) <= end + 1;
-        if(next != null && start(next) >= mergedStart && mergedEnd + 1 >= start(next)) {
-            if(log.isTraceEnabled())
-                log.trace("Merge with next: " + next);
-            mergedEnd = Math.max(mergedEnd, end(next));
-            this.sortedmap.remove(start(next));
-            if(log.isTraceEnabled())
-                log.trace("Current: " + mergedStart + "," + mergedEnd);
+        
+        SortedMap<Integer,Integer> nextHeadMap = this.sortedmap.headMap(end);
+        if(!nextHeadMap.isEmpty()) {
+            Integer next_start = nextHeadMap.lastKey();
+            assert next_start != null;
+            assert next_start <= end + 1;
+            if(next_start >= mergedStart && mergedEnd + 1 >= next_start) {
+                Integer next_end = this.sortedmap.get(next_start);
+                assert next_end != null;
+                if(log.isTraceEnabled())
+                    log.trace("Merge with next: [" + next_start + "," + next_end + "]");
+                mergedEnd = Math.max(mergedEnd, next_end);
+                this.sortedmap.remove(next_start);
+                if(log.isTraceEnabled())
+                    log.trace("Current: " + mergedStart + "," + mergedEnd);
+            }
         }
         
         /* prune contained intervals? */
