@@ -7,6 +7,8 @@ import org.xydra.index.iterator.SingleValueIterator;
 import org.xydra.index.query.Constraint;
 import org.xydra.index.query.EqualsConstraint;
 import org.xydra.index.query.KeyEntryTuple;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -125,6 +127,14 @@ public class MapIndex<K, E> implements IMapIndex<K,E> {
     @Override
     public Iterator<K> keyIterator() {
         return this.index.keySet().iterator();
+    }
+    
+    private static final Logger log = LoggerFactory.getLogger(MapIndex.class);
+    
+    public void dump() {
+        for(Entry<K,E> e : this.index.entrySet()) {
+            log.info("'" + e.getKey() + "' = '" + e.getValue() + "'");
+        }
     }
     
 }

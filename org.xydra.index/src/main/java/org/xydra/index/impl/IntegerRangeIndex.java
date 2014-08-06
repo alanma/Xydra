@@ -138,14 +138,15 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
     }
     
     /**
-     * @param maxValue inclusive; used only at then end of the integerRange to
-     *            append a final span. Typically use length() - 1.
+     * @param maxValueInclusive inclusive; used only at then end of the
+     *            integerRange to append a final span. Typically use length() -
+     *            1.
      * @return all spans until maxValue; each span has a boolean flag to
      *         indicate, if the span is within an integer range or between two
      *         of them.
      */
-    public Iterator<Span> spanIterator(int maxValue) {
-        return new SpanIterator(maxValue);
+    public Iterator<Span> spanIterator(int maxValueInclusive) {
+        return new SpanIterator(maxValueInclusive);
     }
     
     class SpanIterator extends AbstractLookAheadIterator<Span> implements Iterator<Span> {
@@ -345,4 +346,61 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
             index(entry.getKey(), entry.getValue());
         }
     }
+    
+    /**
+     * @param validIntervals
+     * @param s @NeverNull
+     * @return true if all Unicode codepoints of s are in an indexed range of
+     *         the given index; true for the empty string.
+     */
+    public static boolean isAllCharactersInIntervals(IntegerRangeIndex validIntervals, String s) {
+        if(s == null)
+            throw new IllegalArgumentException("s is null");
+        if(s.length() == 0)
+            return true;
+        
+        int i = 0;
+        do {
+            int codepoint = s.codePointAt(i);
+            if(!validIntervals.isInInterval(codepoint)) {
+                log.trace("Invalid character at " + i + " in " + s);
+                return false;
+            }
+            i += Character.charCount(i);
+        } while(i < s.length());
+        return true;
+    }
+    
+    /**
+     * @param tabooIntervals
+     * @param s @NeverNull
+     * @return true if any codepoint in s is indexed in the tabooIntervals;
+     *         false for the empty string
+     */
+    public static boolean isAnyCharacterInIntervals(IntegerRangeIndex tabooIntervals, String s) {
+        if(s == null)
+            throw new IllegalArgumentException("s is null");
+        if(s.length() == 0)
+            return true;
+        
+        int i = 0;
+        do {
+            int codepoint = s.codePointAt(i);
+            if(tabooIntervals.isInInterval(codepoint)) {
+                log.trace("Taboo character at " + i + " in " + s);
+                return true;
+            }
+            i += Character.charCount(i);
+        } while(i < s.length());
+        return false;
+    }
+    
+    // /**
+    // * @return a new {@link IntegerRangeIndex} in which every span NOT indexed
+    // in this index, IS indexed and vice versa.
+    // */
+    // public IntegerRangeIndex invert(int maxInclusive) {
+    // IntegerRangeIndex inverted = new IntegerRangeIndex();
+    //
+    // }
 }
