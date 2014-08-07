@@ -1,5 +1,6 @@
 package org.xydra.base.id;
 
+import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XId;
 import org.xydra.base.XIdProvider;
 import org.xydra.core.XX;
@@ -13,6 +14,8 @@ import org.xydra.index.impl.IntegerRangeIndex;
  * 
  * @author xamde
  */
+@RunsInGWT(false)
+// TODO make it work in GWT
 public class XidCodec {
     
     /** May not be one of the lower-case hex characters! */
