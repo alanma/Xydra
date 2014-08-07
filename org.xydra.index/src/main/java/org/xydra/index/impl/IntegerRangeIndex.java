@@ -27,14 +27,19 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
     @Override
     public boolean isInInterval(int i) {
         
-        SortedMap<Integer,Integer> headMap = this.sortedmap.headMap(i - 1);
+        SortedMap<Integer,Integer> headMap = this.sortedmap.headMap(i + 1);
         if(headMap.isEmpty())
             return false;
         
         Integer prev_start = headMap.lastKey();
         assert prev_start != null;
         
-        return prev_start <= i && i <= headMap.get(prev_start);
+        if(prev_start > i)
+            return false;
+        
+        Integer prev_end = headMap.get(prev_start);
+        return i <= prev_end;
+        
         //
         // Entry<Integer,Integer> prev = this.sortedmap.floorEntry(i);
         // if(prev == null)

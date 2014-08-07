@@ -190,10 +190,11 @@ public abstract class BaseStringIDProvider implements XIdProvider {
         }
         int firstCodePoint = s.codePointAt(0);
         int i = Character.charCount(firstCodePoint);
-        return RANGEINDEX_nameStartChar.isInInterval(firstCodePoint)
-                && IntegerRangeIndex
-                        .isAllCharactersInIntervals(RANGEINDEX_nameChar, s.substring(i));
         
+        if(!RANGEINDEX_nameStartChar.isInInterval(firstCodePoint))
+            return false;
+        
+        return IntegerRangeIndex.isAllCharactersInIntervals(RANGEINDEX_nameChar, s.substring(i));
     }
     
     /**
