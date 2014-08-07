@@ -26,10 +26,20 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
     
     @Override
     public boolean isInInterval(int i) {
-        Entry<Integer,Integer> prev = this.sortedmap.floorEntry(i);
-        if(prev == null)
+        
+        SortedMap<Integer,Integer> headMap = this.sortedmap.headMap(i - 1);
+        if(headMap.isEmpty())
             return false;
-        return start(prev) <= i && i <= end(prev);
+        
+        Integer prev_start = headMap.lastKey();
+        assert prev_start != null;
+        
+        return prev_start <= i && i <= headMap.get(prev_start);
+        //
+        // Entry<Integer,Integer> prev = this.sortedmap.floorEntry(i);
+        // if(prev == null)
+        // return false;
+        // return start(prev) <= i && i <= end(prev);
     }
     
     private TreeMap<Integer,Integer> sortedmap = new TreeMap<Integer,Integer>();
@@ -316,62 +326,111 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
          * prev = entry with the greatest key <= start, or null if there is no
          * such key
          */
-        Entry<Integer,Integer> prev = this.sortedmap.floorEntry(start - 1);
-        if(prev != null) {
-            assert start(prev) < start : "start(prev)=" + start(prev) + " start=" + start;
-            
-            if(start <= end(prev)) {
+        
+        SortedMap<Integer,Integer> prevHeadMap = this.sortedmap.headMap(start);
+        if(!prevHeadMap.isEmpty()) {
+            Integer prev_start = prevHeadMap.lastKey();
+            assert prev_start != null;
+            assert prev_start < start : "start(prev)=" + prev_start + " start=" + start;
+            Integer prev_end = prevHeadMap.get(prev_start);
+            if(start <= prev_end) {
                 // prev needs to be trimmed/split
                 
-                if(end == end(prev)) {
+                if(end == prev_end) {
                     // corner case: trim & done
-                    
-                    int oldStart = prev.getKey();
-                    this.sortedmap.remove(prev.getKey());
-                    this.sortedmap.put(oldStart, start - 1);
+                    this.sortedmap.remove(prev_start);
+                    this.sortedmap.put(prev_start, start - 1);
                     
                     return;
-                } else if(end < end(prev)) {
+                } else if(end < prev_end) {
                     // split & done
-                    int oldEnd = end(prev);
-                    
-                    assert end < oldEnd;
-                    assert start(prev) <= start - 1;
-                    
-                    int oldStart = start(prev);
-                    this.sortedmap.remove(prev.getKey());
-                    this.sortedmap.put(oldStart, start - 1);
-                    
-                    this.sortedmap.put(end + 1, oldEnd);
+                    assert prev_start <= start - 1;
+                    this.sortedmap.remove(prev_start);
+                    this.sortedmap.put(prev_start, start - 1);
+                    this.sortedmap.put(end + 1, prev_end);
                     return;
                 } else {
                     // trim & not done
-                    int oldStart = start(prev);
-                    this.sortedmap.remove(prev.getKey());
-                    this.sortedmap.put(oldStart, start - 1);
+                    this.sortedmap.remove(prev_start);
+                    this.sortedmap.put(prev_start, start - 1);
                 }
             }
         }
+        
+        // Entry<Integer,Integer> prev = this.sortedmap.floorEntry(start - 1);
+        // if(prev != null) {
+        // assert start(prev) < start : "start(prev)=" + start(prev) + " start="
+        // + start;
+        //
+        // if(start <= end(prev)) {
+        // // prev needs to be trimmed/split
+        //
+        // if(end == end(prev)) {
+        // // corner case: trim & done
+        //
+        // int oldStart = prev.getKey();
+        // this.sortedmap.remove(prev.getKey());
+        // this.sortedmap.put(oldStart, start - 1);
+        //
+        // return;
+        // } else if(end < end(prev)) {
+        // // split & done
+        // int oldEnd = end(prev);
+        //
+        // assert end < oldEnd;
+        // assert start(prev) <= start - 1;
+        //
+        // int oldStart = start(prev);
+        // this.sortedmap.remove(prev.getKey());
+        // this.sortedmap.put(oldStart, start - 1);
+        //
+        // this.sortedmap.put(end + 1, oldEnd);
+        // return;
+        // } else {
+        // // trim & not done
+        // int oldStart = start(prev);
+        // this.sortedmap.remove(prev.getKey());
+        // this.sortedmap.put(oldStart, start - 1);
+        // }
+        // }
+        // }
         
         /*
          * next = entry with the greatest key <= end, or null if there is no
          * such key
          */
+        SortedMap<Integer,Integer> nextHeadMap = this.sortedmap.headMap(end - 1);
         // assert prev was null || prev was trimmed
-        Entry<Integer,Integer> next = this.sortedmap.floorEntry(end);
-        if(next != null) {
-            assert start(next) <= end;
-            
-            if(end < end(next)) {
+        if(!nextHeadMap.isEmpty()) {
+            Integer next_start = nextHeadMap.lastKey();
+            assert next_start != null;
+            assert next_start <= end;
+            Integer next_end = nextHeadMap.get(next_start);
+            if(end < next_end) {
                 // trim start of next
-                int oldEnd = end(next);
-                this.sortedmap.remove(next.getKey());
-                this.sortedmap.put(end + 1, oldEnd);
+                this.sortedmap.remove(next_start);
+                this.sortedmap.put(end + 1, next_end);
             } else {
-                assert end >= end(next);
+                assert end >= next_end;
                 // delete next, will happen in next loop anyway
             }
         }
+        
+        // // assert prev was null || prev was trimmed
+        // Entry<Integer,Integer> next = this.sortedmap.floorEntry(end);
+        // if(next != null) {
+        // assert start(next) <= end;
+        //
+        // if(end < end(next)) {
+        // // trim start of next
+        // int oldEnd = end(next);
+        // this.sortedmap.remove(next.getKey());
+        // this.sortedmap.put(end + 1, oldEnd);
+        // } else {
+        // assert end >= end(next);
+        // // delete next, will happen in next loop anyway
+        // }
+        // }
         
         /* delete inner ranges */
         
