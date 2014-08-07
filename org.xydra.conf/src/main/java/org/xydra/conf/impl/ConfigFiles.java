@@ -3,6 +3,11 @@ package org.xydra.conf.impl;
 import org.xydra.conf.IConfig;
 import org.xydra.index.iterator.Iterators;
 
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Properties;
+import java.util.Set;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -11,11 +16,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
-
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Properties;
-import java.util.Set;
 
 
 /**
@@ -82,7 +82,9 @@ public class ConfigFiles {
     }
     
     /**
-     * Drop all comments from file
+     * Drop all comments from file;
+     * 
+     * Overwrite settings in <code>conf</code> with definitions from file
      * 
      * @param file
      * @param conf

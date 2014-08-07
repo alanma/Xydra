@@ -145,7 +145,7 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
         
         /* merge with next? */
         
-        SortedMap<Integer,Integer> nextHeadMap = this.sortedmap.headMap(end);
+        SortedMap<Integer,Integer> nextHeadMap = this.sortedmap.headMap(mergedEnd + 2);
         if(!nextHeadMap.isEmpty()) {
             Integer next_start = nextHeadMap.lastKey();
             assert next_start != null;
@@ -195,7 +195,8 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
     public static class Span {
         public Span(int startInclusive, int endInclusive, boolean isInRange) {
             super();
-            assert startInclusive <= endInclusive;
+            assert startInclusive <= endInclusive : "start=" + startInclusive + " end="
+                    + endInclusive;
             this.startInclusive = startInclusive;
             this.endInclusive = endInclusive;
             this.isInRange = isInRange;

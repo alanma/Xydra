@@ -127,6 +127,26 @@ public class IntegerRangeIndexTest {
         
     }
     
+    @Test
+    public void testCase() {
+        // {7=13, 14=16, 21=27, 28=30}
+        IIntegerRangeIndex iii = new IntegerRangeIndex();
+        iii.index(28, 30);
+        iii.index(7, 13);
+        iii.index(21, 27);
+        iii.index(14, 16);
+        
+        iii.dump();
+        
+        List<Entry<Integer,Integer>> ranges = Iterators.toList(iii.rangesIterator());
+        Entry<Integer,Integer> range = ranges.get(0);
+        assertEquals(7, (int)range.getKey());
+        assertEquals(16, (int)range.getValue());
+        Entry<Integer,Integer> range2 = ranges.get(1);
+        assertEquals(21, (int)range2.getKey());
+        assertEquals(30, (int)range2.getValue());
+    }
+    
     private static void assertSpan(int s, int e, boolean inRange, Span span) {
         assertEquals(s, span.startInclusive);
         assertEquals(e, span.endInclusive);

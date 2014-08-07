@@ -15,7 +15,7 @@ public class ConfParamsJetty implements IConfigProvider {
     public static final String CONTEXT_PATH = "jetty.contextpath";
     
     @ConfType(String.class)
-    @ConfDoc("suitable for putting in a File() object")
+    @ConfDoc("suitable for putting in a File() object. Jetty will look for docRoot + 'WEB-INF/web.xml'")
     public static final String DOC_ROOT = "jetty.docroot";
     
     /** this is really a Restless setting and should migrate there */
