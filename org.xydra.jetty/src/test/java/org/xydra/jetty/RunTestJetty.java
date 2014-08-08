@@ -1,6 +1,7 @@
 package org.xydra.jetty;
 
-import org.xydra.jetty.Jetty;
+import org.xydra.conf.IConfig;
+import org.xydra.env.Env;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 
@@ -24,10 +25,14 @@ public class RunTestJetty {
     
     private static final Logger log = LoggerFactory.getLogger(RunTestJetty.class);
     
-    @SuppressWarnings("deprecation")
     public static void main(String[] args) throws Exception {
         Jetty jetty = new Jetty();
-        jetty.configure(8888, "", new File("src/test/resources"));
+        
+        IConfig conf = Env.get().conf();
+        new ConfParamsJetty().configure(conf);
+        conf.set(ConfParamsJetty.DOC_ROOT, new File("src/test/resources"));
+        jetty.configureFromConf(conf);
+        
         URI uri = jetty.startServer();
         log.info("Started embedded Jetty server. User interface is at " + uri.toString());
         

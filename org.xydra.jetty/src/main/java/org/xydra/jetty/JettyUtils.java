@@ -1,12 +1,19 @@
 package org.xydra.jetty;
 
-import java.io.IOException;
-import java.security.Principal;
-import java.text.SimpleDateFormat;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
+import org.xydra.restless.utils.Delay;
+
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import java.io.IOException;
+import java.security.Principal;
+import java.text.SimpleDateFormat;
+
+import javax.security.auth.Subject;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -18,73 +25,139 @@ import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
-import org.mortbay.jetty.HttpHeaders;
-import org.mortbay.jetty.Request;
-import org.mortbay.jetty.security.UserRealm;
-import org.xydra.log.api.Logger;
-import org.xydra.log.api.LoggerFactory;
-import org.xydra.restless.utils.Delay;
+import org.eclipse.jetty.security.IdentityService;
+import org.eclipse.jetty.security.LoginService;
+import org.eclipse.jetty.server.UserIdentity;
+
+import com.google.common.collect.Sets;
+import com.google.common.net.HttpHeaders;
 
 
 public class JettyUtils {
     private static final Logger log = LoggerFactory.getLogger(JettyUtils.class);
     
     /**
-     * @return a {@link UserRealm} in whcih everybody with the name 'admin' is
-     *         in the admin role
+     * @return a {@link LoginService} in which everybody with the name "admin"
+     *         is in the admin role
      */
-    public static UserRealm createInsecureTestUserRealm() {
-        return new UserRealm() {
+    public static LoginService createInsecureTestLoginService() {
+        return new LoginService() {
+            
+            private String name;
+            private IdentityService service;
             
             @Override
-            public Principal authenticate(String username, Object credentials, Request request) {
-                return getPrincipal(username);
+            public boolean validate(UserIdentity user) {
+                return user.getUserPrincipal().getName().equalsIgnoreCase("admin");
             }
             
             @Override
-            public void disassociate(Principal user) {
+            public void setIdentityService(IdentityService service) {
+                this.service = service;
             }
             
             @Override
-            public String getName() {
-                return "dummyRealm";
+            public void logout(UserIdentity user) {
             }
             
             @Override
-            public Principal getPrincipal(final String username) {
-                return new Principal() {
+            public UserIdentity login(final String username, Object credentials) {
+                this.name = username;
+                return new UserIdentity() {
+                    
                     @Override
-                    public String getName() {
-                        return username;
+                    public Subject getSubject() {
+                        return new Subject(true, Sets.newHashSet(getUserPrincipal()),
+                                Collections.EMPTY_SET, Collections.EMPTY_SET);
+                    }
+                    
+                    @Override
+                    public Principal getUserPrincipal() {
+                        return new Principal() {
+                            @Override
+                            public String getName() {
+                                return username;
+                            }
+                        };
+                    }
+                    
+                    @Override
+                    public boolean isUserInRole(String role, Scope scope) {
+                        return username.equalsIgnoreCase("admin");
                     }
                 };
             }
             
             @Override
-            public boolean isUserInRole(Principal user, String role) {
-                return user.getName().equalsIgnoreCase("admin");
+            public String getName() {
+                return this.name;
             }
             
             @Override
-            public void logout(Principal user) {
-            }
-            
-            @Override
-            public Principal popRole(Principal user) {
-                return user;
-            }
-            
-            @Override
-            public Principal pushRole(Principal user, String role) {
-                return user;
-            }
-            
-            @Override
-            public boolean reauthenticate(Principal user) {
-                return true;
+            public IdentityService getIdentityService() {
+                return this.service;
             }
         };
     }
+    
+    //
+    // /**
+    // * @return a {@link UserRealm} in whcih everybody with the name 'admin' is
+    // * in the admin role
+    // */
+    // public static UserRealm createInsecureTestUserRealm() {
+    // return new UserRealm() {
+    //
+    // @Override
+    // public Principal authenticate(String username, Object credentials,
+    // Request request) {
+    // return getPrincipal(username);
+    // }
+    //
+    // @Override
+    // public void disassociate(Principal user) {
+    // }
+    //
+    // @Override
+    // public String getName() {
+    // return "dummyRealm";
+    // }
+    //
+    // @Override
+    // public Principal getPrincipal(final String username) {
+    // return new Principal() {
+    // @Override
+    // public String getName() {
+    // return username;
+    // }
+    // };
+    // }
+    //
+    // @Override
+    // public boolean isUserInRole(Principal user, String role) {
+    // return user.getName().equalsIgnoreCase("admin");
+    // }
+    //
+    // @Override
+    // public void logout(Principal user) {
+    // }
+    //
+    // @Override
+    // public Principal popRole(Principal user) {
+    // return user;
+    // }
+    //
+    // @Override
+    // public Principal pushRole(Principal user, String role) {
+    // return user;
+    // }
+    //
+    // @Override
+    // public boolean reauthenticate(Principal user) {
+    // return true;
+    // }
+    // };
+    // }
     
     /**
      * Use with caution, it'S very hard to get the resources out of the cache --
@@ -275,4 +348,5 @@ public class JettyUtils {
             }
         };
     }
+    
 }

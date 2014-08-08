@@ -7,9 +7,11 @@ import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.restless.utils.Delay;
 
-import java.io.File;
+import java.util.EnumSet;
+
 import java.io.IOException;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -18,9 +20,8 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
-import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.servlet.FilterHolder;
-import org.mortbay.jetty.webapp.WebAppContext;
+import org.eclipse.jetty.servlet.FilterHolder;
+import org.eclipse.jetty.webapp.WebAppContext;
 
 
 /**
@@ -62,8 +63,11 @@ public class Jetty extends EmbeddedJetty {
     /**
      * Jetty with your port of choice
      * 
+     * TODO deprecate this constructor
+     * 
      * @param port
-     * @deprecated use {@link #configureFromConf(IConfig)} instead
+     * 
+     *            use {@link #configureFromConf(IConfig)} instead
      */
     public Jetty(int port) {
         Env.get().conf().set(ConfParamsJetty.PORT, port);
@@ -93,40 +97,44 @@ public class Jetty extends EmbeddedJetty {
         if(this.userFirstFilter != null) {
             FilterHolder filterHolder = new FilterHolder();
             filterHolder.setFilter(this.userFirstFilter);
-            webappContext.addFilter(filterHolder, "*", Handler.ALL);
+            webappContext.addFilter(filterHolder, "*", EnumSet.allOf(DispatcherType.class));
         }
         
         // caching filter
         {
             FilterHolder filterHolder = new FilterHolder();
             filterHolder.setFilter(this.imageCachingFilter);
-            webappContext.addFilter(filterHolder, "*.png", Handler.ALL);
-            webappContext.addFilter(filterHolder, "*.gif", Handler.ALL);
-            // webappContext.addFilter(filterHolder, ".cache.*", Handler.ALL);
+            webappContext.addFilter(filterHolder, "*.png", EnumSet.allOf(DispatcherType.class));
+            webappContext.addFilter(filterHolder, "*.gif", EnumSet.allOf(DispatcherType.class));
+            // webappContext.addFilter(filterHolder, ".cache.*",
+            // EnumSet.allOf(DispatcherType.class));
         }
         
         // GWT caching
         FilterHolder gwtFilterHolder = new FilterHolder();
         gwtFilterHolder.setFilter(this.noGwtCachingFilter);
-        webappContext.addFilter(gwtFilterHolder, "*.nocache.js", Handler.ALL);
+        webappContext.addFilter(gwtFilterHolder, "*.nocache.js",
+                EnumSet.allOf(DispatcherType.class));
         
         // count requests
         FilterHolder filterHolderForCounting = new FilterHolder();
         filterHolderForCounting.setFilter(this.requestCountingFilter);
-        webappContext.addFilter(filterHolderForCounting, "*", Handler.ALL);
+        webappContext.addFilter(filterHolderForCounting, "*", EnumSet.allOf(DispatcherType.class));
         
         // slow down to simulate bad network
         if(Delay.hasServePageDelay()) {
             FilterHolder filterHolderForDelay = new FilterHolder();
             filterHolderForDelay.setFilter(this.simulateNetworkDelaysFilter);
-            webappContext.addFilter(filterHolderForDelay, "*", Handler.ALL);
+            webappContext.addFilter(filterHolderForDelay, "*", EnumSet.allOf(DispatcherType.class));
         }
         
         /*
          * Add simple security handler that puts anybody with the name 'admin'
          * into the admin role.
          */
-        webappContext.getSecurityHandler().setUserRealm(JettyUtils.createInsecureTestUserRealm());
+        webappContext.getSecurityHandler().setLoginService(
+                JettyUtils.createInsecureTestLoginService());
+        // webappContext.getSecurityHandler().setUserRealm(JettyUtils.createInsecureTestUserRealm());
         
         // route requests to static content
         FilterHolder filterHolderForStaticContent = new FilterHolder();
@@ -164,21 +172,12 @@ public class Jetty extends EmbeddedJetty {
                 // do nothing
             }
         });
-        webappContext.addFilter(filterHolderForStaticContent, "*", Handler.ALL);
+        webappContext.addFilter(filterHolderForStaticContent, "*",
+                EnumSet.allOf(DispatcherType.class));
     }
     
     public void setFirstFilter(Filter filter) {
         this.userFirstFilter = filter;
-    }
-    
-    /**
-     * @param contextPath
-     * @param docRoot
-     * @deprecated use {@link #configureFromConf(IConfig)} instead
-     */
-    @Deprecated
-    public void configure(String contextPath, File docRoot) {
-        configure(8888, contextPath, docRoot);
     }
     
 }

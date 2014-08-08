@@ -3,10 +3,13 @@ package org.xydra.jetty;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 
-import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.MimeTypes;
-import org.mortbay.jetty.servlet.FilterHolder;
-import org.mortbay.jetty.webapp.WebAppContext;
+import java.util.EnumSet;
+
+import javax.servlet.DispatcherType;
+
+import org.eclipse.jetty.http.MimeTypes;
+import org.eclipse.jetty.servlet.FilterHolder;
+import org.eclipse.jetty.webapp.WebAppContext;
 
 
 public class DesktopJetty extends EmbeddedJetty {
@@ -24,7 +27,7 @@ public class DesktopJetty extends EmbeddedJetty {
         /* caching for desktop jetty? don't cache anything until we know better */
         FilterHolder noCacheFilterHolder = new FilterHolder();
         noCacheFilterHolder.setFilter(JettyUtils.createNoCacheFilter());
-        webapp.addFilter(noCacheFilterHolder, "*.*", Handler.ALL);
+        webapp.addFilter(noCacheFilterHolder, "*.*", EnumSet.allOf(DispatcherType.class));
         
         // IMPROVE move?
         MimeTypes mimeTypes = new MimeTypes();
@@ -55,6 +58,8 @@ public class DesktopJetty extends EmbeddedJetty {
          * Add simple security handler that puts anybody with the name 'admin'
          * into the admin role.
          */
-        webapp.getSecurityHandler().setUserRealm(JettyUtils.createInsecureTestUserRealm());
+        webapp.getSecurityHandler().setLoginService(JettyUtils.createInsecureTestLoginService());
+        // jetty6
+        // webapp.getSecurityHandler().setUserRealm(JettyUtils.createInsecureTestUserRealm());
     }
 }

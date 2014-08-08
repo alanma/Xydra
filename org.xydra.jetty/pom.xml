@@ -44,10 +44,23 @@
 			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 
+		<!-- jetty 6 -->
+		<!-- <dependency> -->
+		<!-- <groupId>org.mortbay.jetty</groupId> -->
+		<!-- <artifactId>jetty</artifactId> -->
+		<!-- </dependency> -->
+		<!-- jetty 9 -->
 		<dependency>
-			<groupId>org.mortbay.jetty</groupId>
-			<artifactId>jetty</artifactId>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-webapp</artifactId>
+			<version>9.2.2.v20140723</version>
 		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-jmx</artifactId>
+			<version>9.2.2.v20140723</version>
+		</dependency>
+
 
 	</dependencies>
 
@@ -88,5 +101,5 @@
 			</plugin>
 		</plugins>
 	</build>
-	
+
 </project>
