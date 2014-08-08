@@ -13,7 +13,7 @@ public class ConfParamsXydraServer implements IConfigProvider {
     /** The config key */
     @ConfType(XId.class)
     @ConfDoc("The default ID for a repository in the current XydraRuntime")
-    public static final String repoId = "repoId";
+    public static final String repoId = "xydra-repoId";
     
     @Override
     public void configure(IConfig conf) {
