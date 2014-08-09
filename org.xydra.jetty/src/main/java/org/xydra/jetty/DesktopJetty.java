@@ -21,8 +21,9 @@ public class DesktopJetty extends EmbeddedJetty {
         log.info("Configuring DesktopJetty");
         
         // TODO really required?
-        ClassLoader classloader = Thread.currentThread().getContextClassLoader();
-        webapp.setClassLoader(classloader);
+        // ClassLoader classloader =
+        // Thread.currentThread().getContextClassLoader();
+        // webapp.setClassLoader(classloader);
         
         /* caching for desktop jetty? don't cache anything until we know better */
         FilterHolder noCacheFilterHolder = new FilterHolder();
