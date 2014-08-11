@@ -1,13 +1,13 @@
 package org.xydra.log.coreimpl.sysout;
 
-import java.util.Collection;
-
 import org.xydra.annotations.CanBeNull;
 import org.xydra.annotations.NotThreadSafe;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.log.api.ILogListener;
 import org.xydra.log.api.Logger;
 import org.xydra.log.util.SharedExceptionUtils;
+
+import java.util.Collection;
 
 
 /**
@@ -269,5 +269,10 @@ public class DefaultLogger implements Logger {
             for(ILogListener l : this.logListeners) {
                 l.warn(this, msg, t);
             }
+    }
+    
+    @Override
+    public String getName() {
+        return this.name;
     }
 }

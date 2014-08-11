@@ -1,12 +1,13 @@
 package org.xydra.log.coreimpl.util;
 
+import org.xydra.annotations.CanBeNull;
+import org.xydra.log.api.ILogListener;
+import org.xydra.log.api.Logger;
+
 import java.util.ArrayList;
 import java.util.Collection;
 
 import org.apache.http.annotation.NotThreadSafe;
-import org.xydra.annotations.CanBeNull;
-import org.xydra.log.api.ILogListener;
-import org.xydra.log.api.Logger;
 
 
 /**
@@ -35,6 +36,11 @@ public class LoggerWithListeners implements Logger {
          */
         this.logListeners = logListeners == null ? new ArrayList<ILogListener>(0) : logListeners;
         assert this.logListeners != null;
+    }
+    
+    @Override
+    public String getName() {
+        return this.log.getName();
     }
     
     @Override

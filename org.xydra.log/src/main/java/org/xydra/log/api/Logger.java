@@ -107,4 +107,6 @@ public interface Logger {
      * @param level
      */
     void setLevel(Level level);
+    
+    String getName();
 }

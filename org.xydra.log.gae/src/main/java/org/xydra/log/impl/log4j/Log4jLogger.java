@@ -146,4 +146,9 @@ public class Log4jLogger implements Logger {
         throw new AssertionError();
     }
     
+    @Override
+    public String getName() {
+        return this.log4j.getName();
+    }
+    
 }

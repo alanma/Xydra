@@ -1,13 +1,13 @@
 package org.xydra.log.api;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.xydra.annotations.Setting;
 import org.xydra.annotations.ThreadSafe;
 import org.xydra.log.api.Logger.Level;
 import org.xydra.log.coreimpl.sysout.DefaultLoggerFactorySPI;
 import org.xydra.log.spi.ILoggerFactorySPI;
+
+import java.util.HashSet;
+import java.util.Set;
 
 
 /**
@@ -98,8 +98,19 @@ public class LoggerFactory {
      * @return a logger, using the sub-system configured by
      */
     public static synchronized Logger getLogger(Class<?> clazz) {
+        return getLogger(clazz.getName());
+    }
+    
+    /**
+     * Note {@link #getLogger(Class)} is preferred. It survives refactorings
+     * better.
+     * 
+     * @param name for the logger
+     * @return a logger, using the sub-system configured by
+     */
+    public static synchronized Logger getLogger(String name) {
         ensureLoggerFactoryDefined();
-        return loggerFactorySPI.getLogger(clazz.getName(), LoggerFactory.logListeners);
+        return loggerFactorySPI.getLogger(name, LoggerFactory.logListeners);
     }
     
     /**
@@ -128,8 +139,12 @@ public class LoggerFactory {
     }
     
     public static synchronized Logger getThreadSafeLogger(Class<?> clazz) {
+        return getThreadSafeLogger(clazz.getName());
+    }
+    
+    public static synchronized Logger getThreadSafeLogger(String name) {
         ensureLoggerFactoryDefined();
-        return loggerFactorySPI.getThreadSafeLogger(clazz.getName(), LoggerFactory.logListeners);
+        return loggerFactorySPI.getThreadSafeLogger(name, LoggerFactory.logListeners);
     }
     
     // private static synchronized void setFallbackLoggerFactory() {

@@ -1,11 +1,11 @@
 package org.xydra.log.impl.jul;
 
-import java.util.logging.LogRecord;
-
 import org.xydra.annotations.ThreadSafe;
 import org.xydra.conf.IConfig;
 import org.xydra.env.Env;
 import org.xydra.log.api.Logger;
+
+import java.util.logging.LogRecord;
 
 
 /**
@@ -244,6 +244,11 @@ public class JulLogger extends JulLogger_GwtEmul {
     @Override
     public void setLevel(Level level) {
         this.jul.setLevel(toJulLevel(level));
+    }
+    
+    @Override
+    public String getName() {
+        return this.jul.getName();
     }
     
 }

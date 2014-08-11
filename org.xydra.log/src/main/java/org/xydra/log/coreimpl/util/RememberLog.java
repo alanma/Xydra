@@ -48,6 +48,14 @@ public class RememberLog implements Logger {
     }
     
     @Override
+    public String getName() {
+        if(this.delegate == null) {
+            return "RememberLog";
+        }
+        return this.delegate.getName();
+    }
+    
+    @Override
     public void debug(String msg) {
         if(shouldLog(Level.Debug))
             log("debug", msg);
