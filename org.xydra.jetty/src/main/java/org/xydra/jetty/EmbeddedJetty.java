@@ -64,6 +64,18 @@ public abstract class EmbeddedJetty {
         if(conf.tryToGet(ConfParamsJetty.USE_DEFAULT_SERVLET) == Boolean.TRUE) {
             Restless.DELEGATE_UNHANDLED_TO_DEFAULT = true;
         }
+        
+        // map Jettys log Xydras
+        // org.eclipse.jetty.util.log.Log.setLog(new
+        // JettyLog2XydraLogger("initialLogger"));
+        try {
+            org.eclipse.jetty.util.log.Log.setLog(new org.eclipse.jetty.util.log.Slf4jLog());
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+        }
+        // didn't work
+        // System.setProperty("org.eclipse.jetty.util.log.class",
+        // JettyLog2XydraLogger.class.getCanonicalName());
     }
     
     /** when was server started or restarted? */

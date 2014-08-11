@@ -30,7 +30,8 @@ public class RunTestJetty {
         
         IConfig conf = Env.get().conf();
         new ConfParamsJetty().configure(conf);
-        conf.set(ConfParamsJetty.DOC_ROOT, new File("src/test/resources"));
+        conf.set(ConfParamsJetty.DOC_ROOT, new File("src/test/resources").toURI().toURL()
+                .toExternalForm());
         jetty.configureFromConf(conf);
         
         URI uri = jetty.startServer();
