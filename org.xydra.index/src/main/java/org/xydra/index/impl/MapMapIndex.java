@@ -299,4 +299,9 @@ public class MapMapIndex<K, L, E> implements IMapMapIndex<K,L,E> {
     public Iterator<IMapIndex<L,E>> getIterator(K key1) {
         return this.index.iterator();
     }
+    
+    public boolean containsKey1(K key1) {
+        return this.index.containsKey(key1);
+    }
+    
 }

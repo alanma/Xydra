@@ -111,28 +111,41 @@ public class Iterators {
     public static <T> Iterator<T> limit(final Iterator<T> iterator, final int max) {
         checkNotNull(iterator);
         checkArgument(max >= 0, "limit is negative");
-        return new Iterator<T>() {
-            private int count;
-            
-            @Override
-            public boolean hasNext() {
-                return this.count < max && iterator.hasNext();
+        return new LimitingIterator<T>(max, iterator);
+    }
+    
+    private static class LimitingIterator<T> implements Iterator<T> {
+        
+        private int count = 0;
+        
+        public LimitingIterator(int max, Iterator<T> limited) {
+            super();
+            this.max = max;
+            this.limited = limited;
+        }
+        
+        private int max;
+        private Iterator<T> limited;
+        
+        @Override
+        public boolean hasNext() {
+            return this.count < this.max && this.limited.hasNext();
+        }
+        
+        @Override
+        public T next() {
+            if(!hasNext()) {
+                throw new NoSuchElementException();
             }
-            
-            @Override
-            public T next() {
-                if(!hasNext()) {
-                    throw new NoSuchElementException();
-                }
-                this.count++;
-                return iterator.next();
-            }
-            
-            @Override
-            public void remove() {
-                iterator.remove();
-            }
-        };
+            this.count++;
+            return this.limited.next();
+        }
+        
+        @Override
+        public void remove() {
+            this.limited.remove();
+        }
+        
     }
     
     /**
@@ -220,13 +233,23 @@ public class Iterators {
         if(base == NoneIterator.INSTANCE)
             return (Iterator<E>)base;
         
-        return new AbstractCascadedIterator<B,E>(base) {
-            
-            @Override
-            protected Iterator<? extends E> toIterator(B baseEntry) {
-                return transformer.transform(baseEntry);
-            }
-        };
+        return new CascadedIterator<B,E>(base, transformer);
+    }
+    
+    private static class CascadedIterator<B, E> extends AbstractCascadedIterator<B,E> implements
+            Iterator<E> {
+        
+        private ITransformer<B,Iterator<E>> transformer;
+        
+        public CascadedIterator(Iterator<B> base, final ITransformer<B,Iterator<E>> transformer) {
+            super(base);
+            this.transformer = transformer;
+        }
+        
+        @Override
+        protected Iterator<? extends E> toIterator(B baseEntry) {
+            return this.transformer.transform(baseEntry);
+        }
     }
     
     /**

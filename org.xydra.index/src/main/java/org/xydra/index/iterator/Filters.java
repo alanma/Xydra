@@ -10,7 +10,14 @@ public class Filters {
      */
     @SafeVarargs
     public static <E> IFilter<E> and(final IFilter<E> ... filters) {
-        assert filters != null && filters.length >= 1;
+        
+        if(filters == null || filters.length == 0) {
+            return matchAll();
+        }
+        
+        if(filters.length == 1) {
+            return filters[0];
+        }
         
         return new IFilter<E>() {
             
@@ -28,4 +35,31 @@ public class Filters {
         };
     }
     
+    @SuppressWarnings("unchecked")
+    public static <E> IFilter<E> matchAll() {
+        return (IFilter<E>)MATCH_ALL;
+    }
+    
+    private static IFilter<Object> MATCH_ALL = new IFilter<Object>() {
+        
+        @Override
+        public boolean matches(Object entry) {
+            return true;
+        }
+        
+    };
+    
+    @SuppressWarnings("unchecked")
+    public static <E> IFilter<E> matchNone() {
+        return (IFilter<E>)MATCH_NONE;
+    }
+    
+    private static IFilter<Object> MATCH_NONE = new IFilter<Object>() {
+        
+        @Override
+        public boolean matches(Object entry) {
+            return false;
+        }
+        
+    };
 }
