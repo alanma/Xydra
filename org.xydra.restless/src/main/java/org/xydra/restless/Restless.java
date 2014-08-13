@@ -259,8 +259,10 @@ public class Restless extends HttpServlet {
         PathTemplate pt = new PathTemplate(pathTemplate);
         
         synchronized(this.methods) {
-            this.methods.add(new RestlessMethod(instanceOrClass, httpMethod, javaMethodName, pt,
-                    adminOnly, parameter));
+            RestlessMethod restlessMethod = new RestlessMethod(instanceOrClass, httpMethod,
+                    javaMethodName, pt, adminOnly, parameter);
+            this.methods.add(restlessMethod);
+            log.debug("Add method " + restlessMethod);
         }
         assert RestlessStatic.methodByName(instanceOrClass, javaMethodName) != null : "method '"
                 + javaMethodName + "' not found";
@@ -435,6 +437,27 @@ public class Restless extends HttpServlet {
             HtmlUtils.endHtmlPage(w);
         } catch(IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+    
+    public String toConfigDebug() {
+        synchronized(this.methods) {
+            StringBuilder b = new StringBuilder();
+            for(RestlessMethod rm : this.methods) {
+                String url = XmlUtils.xmlEncode(rm.getPathTemplate().getRegex());
+                b.append((rm.isAdminOnly() ? "ADMIN ONLY" : "PUBLIC") + " [" + url + "] "
+                        + rm.getHttpMethod() + " => ");
+                b.append(RestlessStatic.instanceOrClass_className(rm.getInstanceOrClass()) + "#"
+                        + rm.getMethodName() + "\n");
+                
+                /* list parameters */
+                b.append("  ");
+                for(RestlessParameter parameter : rm.getRequiredNamedParameter()) {
+                    b.append(parameter.getName() + "='" + parameter.getDefaultValue() + "' ");
+                }
+                b.append("\n");
+            }
+            return b.toString();
         }
     }
     

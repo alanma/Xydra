@@ -788,4 +788,9 @@ class RestlessMethod {
         }
         return requestId;
     }
+    
+    public String toString() {
+        return this.pathTemplate + " ==> " + this.instanceOrClass.getClass() + "."
+                + this.methodName + "(...)";
+    }
 }
