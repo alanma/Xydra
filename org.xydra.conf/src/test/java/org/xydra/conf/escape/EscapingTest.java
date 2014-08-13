@@ -44,13 +44,14 @@ public class EscapingTest {
         for(int i = 0; i < keys.size(); i++) {
             String k = keys.get(i);
             log.info("Testing key " + i + " ='" + k + "' " + Escaping.toCodepoints(k));
-            String escaped = Escaping.escape(k);
+            String escaped = Escaping.escape(k, true);
             log.info("Escaped as '" + escaped + "' " + Escaping.toCodepoints(escaped));
-            String unescaped = Escaping.materializeEscapes(escaped, true);
-            assertEquals("expected=\n" + Escaping.toCodepoints(k) + "\nreceived=\n "
-                    + Escaping.toCodepoints(unescaped),
-            
-            k, unescaped);
+            String unescaped = Escaping.materializeEscapes(escaped, true, true);
+            assertEquals(
+                    "expected=\n" + Escaping.toCodepoints(k) + "\nreceived=\n "
+                            + Escaping.toCodepoints(unescaped),
+                    
+                    k, unescaped);
         }
     }
     

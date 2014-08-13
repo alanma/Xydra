@@ -42,9 +42,10 @@ public class Escaping {
      * backslash-escaping) [\\n\t\r:= ]
      * 
      * @param raw
+     * @param escapeColonSpaceEquals TODO
      * @return ...
      */
-    public static String escape(String raw) {
+    public static String escape(String raw, boolean escapeColonSpaceEquals) {
         assert raw != null;
         
         StringBuilder esc = new StringBuilder();
@@ -55,12 +56,21 @@ public class Escaping {
             
             switch(c) {
             case '\\':
-            case ':':
-            case '=':
-            case ' ':
                 // simple escaping
                 esc.append('\\');
                 esc.appendCodePoint(c);
+                break;
+            case ':':
+            case '=':
+            case ' ':
+                if(escapeColonSpaceEquals) {
+                    // simple escaping
+                    esc.append('\\');
+                    esc.appendCodePoint(c);
+                } else {
+                    // no escaping
+                    esc.appendCodePoint(c);
+                }
                 break;
             case '\n':
                 esc.append('\\');
@@ -95,10 +105,12 @@ public class Escaping {
      *            reading mandates: when reading [backslash][newline] just emit
      *            nothing instead. This allows long lines to broken in the
      *            syntax and still get a single line-break free string
+     * @param escapeColonSpaceEqual if true, colon, space and equal sign are
+     *            escaped: [:] = [\\][:], [ ] = [\\][ ], [=] = [\\][=].
      * @return number of interpreted characters
      */
     private static int materializeBackslashEscapes(String escaped, int i, StringBuilder unescaped,
-            boolean swallowBackslashNewline) {
+            boolean swallowBackslashNewline, boolean escapeColonSpaceEqual) {
         int c = escaped.codePointAt(i);
         switch(c) {
         case '\n':
@@ -116,9 +128,16 @@ public class Escaping {
         case ':':
         case '=':
         case ' ':
-            // just un-escape
-            unescaped.appendCodePoint(c);
-            break;
+            if(escapeColonSpaceEqual) {
+                // just un-escape
+                unescaped.appendCodePoint(c);
+                break;
+            } else {
+                // ignore escaping and write back verbatim
+                unescaped.append('\\');
+                unescaped.appendCodePoint(c);
+                break;
+            }
         case 't':
             unescaped.append('\t');
             break;
@@ -145,10 +164,13 @@ public class Escaping {
      *            reading mandates: when reading [backslash][newline] just emit
      *            nothing instead. This allows long lines to broken in the
      *            syntax and still get a single line-break free string
+     * @param escapeColonSpaceEqual if true, colon, space and equal sign are
+     *            escaped: [:] = [\\][:], [ ] = [\\][ ], [=] = [\\][=].
      * @return a string in which java and unicode escapes have been replaced
      *         with the correct unicode codepoint
      */
-    public static String materializeEscapes(String escaped, boolean swallowBackslashNewline) {
+    public static String materializeEscapes(String escaped, boolean swallowBackslashNewline,
+            boolean escapeColonSpaceEqual) {
         assert escaped != null;
         
         StringBuilder unescaped = new StringBuilder();
@@ -158,7 +180,8 @@ public class Escaping {
             i += Character.charCount(c);
             switch(c) {
             case '\\':
-                i += materializeBackslashEscapes(escaped, i, unescaped, swallowBackslashNewline);
+                i += materializeBackslashEscapes(escaped, i, unescaped, swallowBackslashNewline,
+                        true);
                 break;
             default:
                 unescaped.appendCodePoint(c);
@@ -170,13 +193,18 @@ public class Escaping {
     
     /**
      * @param escaped
-     * @param i
+     * @param i position of hex chars after the '\ u'
      * @param unescaped
      * @return how many chars used
      */
     private static int materializeUnicode(String escaped, int i, StringBuilder unescaped) {
         // try to get hex chars
-        String hex4 = escaped.substring(i + 2, i + 6);
+        if(i + 4 > escaped.length()) {
+            // parse nothing
+            return 0;
+        }
+        
+        String hex4 = escaped.substring(i, i + 4);
         // TODO optimisation potential
         if(hex4.matches("[a-fA-F0-9]{4}")) {
             int codepointNumber = Integer.parseInt(hex4, 16);
@@ -188,7 +216,7 @@ public class Escaping {
             return 0;
         }
     }
-
+    
     /**
      * Not optimized for speed, but handy for debugging.
      * 
@@ -204,6 +232,18 @@ public class Escaping {
             res += "[" + Integer.toString(c) + "='" + ((char)c) + "']";
         }
         return res;
+    }
+    
+    public static void main(String[] args) {
+        StringBuilder b = new StringBuilder();
+        // b.append("foo");
+        // appendAsUnicodeEscapeSequence(b, 254);
+        // b.append("foo");
+        // appendAsUnicodeEscapeSequence(b, 50000);
+        b.append("foo");
+        System.out.println(b);
+        System.out.println(materializeUnicode("0298", 0, b));
+        System.out.println("'" + b + "'");
     }
     
 }

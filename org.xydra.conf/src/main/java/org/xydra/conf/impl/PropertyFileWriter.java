@@ -27,9 +27,9 @@ public class PropertyFileWriter {
      */
     public void keyValue(String key, String value) throws IOException {
         assert key != null;
-        this.w.write(Escaping.escape(key));
+        this.w.write(Escaping.escape(key, true));
         this.w.write("=");
-        this.w.write(value == null ? "" : Escaping.escape(value));
+        this.w.write(value == null ? "" : Escaping.escape(value, true));
         this.w.write("\n");
     }
     
