@@ -39,20 +39,94 @@ public class EscapingTest {
     
     );
     
+    public static String[] nasty = {
+            "a",
+            "",
+            "\" \"",
+            "\n so \n",
+            "\" \n deep \\\n value \"",
+            // TODO handle high unicode "",
+            "\\",
+            "\t",
+            "\r",
+            "\"",
+            "C:\\\\ners\\\\andre_000\\\\Desktop\\\\Usersandre_000Denkwerkzeug Knowledge Files\\\\my",
+            "^a°a!a\"a§a%a&a/a{a(a[a)a]a=a}a?a \\a´a`a*a*a~a'a#a,a;a.a:a-a_a<a>a|" };
+    
+    @Test
+    public void testRoundtrip() {
+        for(int i = 0; i < nasty.length; i++) {
+            testRoundtrip(i, nasty[i]);
+        }
+    }
+    
+    @Test
+    public void testMaterialiseEscape() {
+        for(int i = 0; i < nasty.length; i++) {
+            testMaterialiseEscape(i, nasty[i]);
+        }
+    }
+    
+    private static void testMaterialiseEscape(int i, String s) {
+        log.info("Testing key " + i + " ='" + s + "' " + Escaping.toCodepoints(s));
+        
+        boolean escapeColonSpaceEqual = true;
+        boolean swallowBaskslashNewline = true;
+        testMaterialiseEscape(s, escapeColonSpaceEqual, swallowBaskslashNewline);
+        swallowBaskslashNewline = false;
+        testMaterialiseEscape(s, escapeColonSpaceEqual, swallowBaskslashNewline);
+        
+        escapeColonSpaceEqual = false;
+        swallowBaskslashNewline = true;
+        testMaterialiseEscape(s, escapeColonSpaceEqual, swallowBaskslashNewline);
+        swallowBaskslashNewline = false;
+        testMaterialiseEscape(s, escapeColonSpaceEqual, swallowBaskslashNewline);
+    }
+    
+    private static void testMaterialiseEscape(String s, boolean escapeColonSpaceEqual,
+            boolean swallowBaskslashNewline) {
+        
+        Escaping.materializeEscapes(s, swallowBaskslashNewline, escapeColonSpaceEqual);
+        // no bug? we're happy
+    }
+    
     @Test
     public void test() {
         for(int i = 0; i < keys.size(); i++) {
             String k = keys.get(i);
-            log.info("Testing key " + i + " ='" + k + "' " + Escaping.toCodepoints(k));
-            String escaped = Escaping.escape(k, true);
-            log.info("Escaped as '" + escaped + "' " + Escaping.toCodepoints(escaped));
-            String unescaped = Escaping.materializeEscapes(escaped, true, true);
-            assertEquals(
-                    "expected=\n" + Escaping.toCodepoints(k) + "\nreceived=\n "
-                            + Escaping.toCodepoints(unescaped),
-                    
-                    k, unescaped);
+            testRoundtrip(i, k);
         }
+    }
+    
+    /**
+     * @param i to help debugging, some index
+     * @param s
+     */
+    private static void testRoundtrip(int i, String s) {
+        log.info("Testing key " + i + " ='" + s + "' " + Escaping.toCodepoints(s));
+        
+        boolean escapeColonSpaceEqual = true;
+        boolean swallowBaskslashNewline = true;
+        testRoundtrip(s, escapeColonSpaceEqual, swallowBaskslashNewline);
+        swallowBaskslashNewline = false;
+        testRoundtrip(s, escapeColonSpaceEqual, swallowBaskslashNewline);
+        
+        escapeColonSpaceEqual = false;
+        swallowBaskslashNewline = true;
+        testRoundtrip(s, escapeColonSpaceEqual, swallowBaskslashNewline);
+        swallowBaskslashNewline = false;
+        testRoundtrip(s, escapeColonSpaceEqual, swallowBaskslashNewline);
+    }
+    
+    private static void testRoundtrip(String s, boolean escapeColonSpaceEqual,
+            boolean swallowBaskslashNewline) {
+        String escaped = Escaping.escape(s, escapeColonSpaceEqual);
+        log.info("Escaped as '" + escaped + "' " + Escaping.toCodepoints(escaped));
+        String unescaped = Escaping.materializeEscapes(escaped, swallowBaskslashNewline,
+                escapeColonSpaceEqual);
+        assertEquals(
+                "expected=\n" + Escaping.toCodepoints(s) + "\nreceived=\n "
+                        + Escaping.toCodepoints(unescaped), s, unescaped);
     }
     
     public static void main(String[] args) {

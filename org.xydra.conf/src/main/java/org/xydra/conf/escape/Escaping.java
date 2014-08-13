@@ -180,8 +180,14 @@ public class Escaping {
             i += Character.charCount(c);
             switch(c) {
             case '\\':
-                i += materializeBackslashEscapes(escaped, i, unescaped, swallowBackslashNewline,
-                        true);
+                if(i < escaped.length()) {
+                    // process
+                    i += materializeBackslashEscapes(escaped, i, unescaped,
+                            swallowBackslashNewline, true);
+                } else {
+                    // we're at the end
+                    unescaped.appendCodePoint(c);
+                }
                 break;
             default:
                 unescaped.appendCodePoint(c);
