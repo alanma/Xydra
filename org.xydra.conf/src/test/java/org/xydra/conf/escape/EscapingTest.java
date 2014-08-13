@@ -1,4 +1,4 @@
-package org.xydra.conf.impl;
+package org.xydra.conf.escape;
 
 import static org.junit.Assert.assertEquals;
 
@@ -12,9 +12,9 @@ import org.junit.Test;
 import com.google.common.collect.Lists;
 
 
-public class PropertyFileEscapingTest {
+public class EscapingTest {
     
-    private static final Logger log = LoggerFactory.getLogger(PropertyFileEscapingTest.class);
+    private static final Logger log = LoggerFactory.getLogger(EscapingTest.class);
     
     public static final String a = "a";
     public static final String b = "b";
@@ -43,30 +43,19 @@ public class PropertyFileEscapingTest {
     public void test() {
         for(int i = 0; i < keys.size(); i++) {
             String k = keys.get(i);
-            log.info("Testing key " + i + " ='" + k + "' " + toCodepoints(k));
-            String escaped = PropertyFileEscaping.escape(k);
-            log.info("Escaped as '" + escaped + "' " + toCodepoints(escaped));
-            String unescaped = PropertyFileEscaping.materializeEscapes(escaped);
-            assertEquals("expected=\n" + toCodepoints(k) + "\nreceived=\n "
-                    + toCodepoints(unescaped),
+            log.info("Testing key " + i + " ='" + k + "' " + Escaping.toCodepoints(k));
+            String escaped = Escaping.escape(k);
+            log.info("Escaped as '" + escaped + "' " + Escaping.toCodepoints(escaped));
+            String unescaped = Escaping.materializeEscapes(escaped, true);
+            assertEquals("expected=\n" + Escaping.toCodepoints(k) + "\nreceived=\n "
+                    + Escaping.toCodepoints(unescaped),
             
             k, unescaped);
         }
     }
     
-    public static String toCodepoints(String s) {
-        String res = "";
-        int i = 0;
-        while(i < s.length()) {
-            int c = s.codePointAt(i);
-            i += Character.charCount(c);
-            res += "[" + Integer.toString(c) + "='" + ((char)c) + "']";
-        }
-        return res;
-    }
-    
     public static void main(String[] args) {
-        System.out.println(toCodepoints("foo\nbar"));
+        System.out.println(Escaping.toCodepoints("foo\nbar"));
     }
     
 }

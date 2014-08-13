@@ -1,5 +1,7 @@
 package org.xydra.conf.impl;
 
+import org.xydra.conf.escape.Escaping;
+
 import java.io.IOException;
 import java.io.Writer;
 
@@ -25,9 +27,9 @@ public class PropertyFileWriter {
      */
     public void keyValue(String key, String value) throws IOException {
         assert key != null;
-        this.w.write(PropertyFileEscaping.escape(key));
+        this.w.write(Escaping.escape(key));
         this.w.write("=");
-        this.w.write(value == null ? "" : PropertyFileEscaping.escape(value));
+        this.w.write(value == null ? "" : Escaping.escape(value));
         this.w.write("\n");
     }
     

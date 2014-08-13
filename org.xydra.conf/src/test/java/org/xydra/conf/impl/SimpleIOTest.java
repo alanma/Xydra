@@ -1,19 +1,21 @@
 package org.xydra.conf.impl;
 
 import static org.junit.Assert.assertTrue;
-import static org.xydra.conf.impl.PropertyFileEscapingTest.a;
-import static org.xydra.conf.impl.PropertyFileEscapingTest.b;
-import static org.xydra.conf.impl.PropertyFileEscapingTest.c;
-import static org.xydra.conf.impl.PropertyFileEscapingTest.classicWindowsPath;
-import static org.xydra.conf.impl.PropertyFileEscapingTest.d;
-import static org.xydra.conf.impl.PropertyFileEscapingTest.e;
-import static org.xydra.conf.impl.PropertyFileEscapingTest.eC1;
-import static org.xydra.conf.impl.PropertyFileEscapingTest.eC2;
-import static org.xydra.conf.impl.PropertyFileEscapingTest.eC3;
-import static org.xydra.conf.impl.PropertyFileEscapingTest.f;
-import static org.xydra.conf.impl.PropertyFileEscapingTest.keys;
-import static org.xydra.conf.impl.PropertyFileEscapingTest.strangeUnicodeSign;
-import static org.xydra.conf.impl.PropertyFileEscapingTest.weirdWindowsPathWithEscapedBackslashes;
+import static org.xydra.conf.escape.EscapingTest.a;
+import static org.xydra.conf.escape.EscapingTest.b;
+import static org.xydra.conf.escape.EscapingTest.c;
+import static org.xydra.conf.escape.EscapingTest.classicWindowsPath;
+import static org.xydra.conf.escape.EscapingTest.d;
+import static org.xydra.conf.escape.EscapingTest.e;
+import static org.xydra.conf.escape.EscapingTest.eC1;
+import static org.xydra.conf.escape.EscapingTest.eC2;
+import static org.xydra.conf.escape.EscapingTest.eC3;
+import static org.xydra.conf.escape.EscapingTest.f;
+import static org.xydra.conf.escape.EscapingTest.keys;
+import static org.xydra.conf.escape.EscapingTest.strangeUnicodeSign;
+import static org.xydra.conf.escape.EscapingTest.weirdWindowsPathWithEscapedBackslashes;
+
+import org.xydra.conf.escape.Escaping;
 
 import java.io.File;
 import java.io.IOException;
@@ -86,8 +88,8 @@ public class SimpleIOTest {
             System.out.println("successfully gotten value from original");
             String reRead = confAgain.getString(key);
             System.out.println("key: '" + key + "', expected \n'"
-                    + PropertyFileEscapingTest.toCodepoints(original) + "', got \n'"
-                    + PropertyFileEscapingTest.toCodepoints(reRead) + "'\n\n");
+                    + Escaping.toCodepoints(original) + "', got \n'"
+                    + Escaping.toCodepoints(reRead) + "'\n\n");
             
             if(original.equals(""))
                 original = "\uF8FF";
