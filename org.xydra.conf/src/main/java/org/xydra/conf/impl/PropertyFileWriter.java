@@ -41,17 +41,22 @@ public class PropertyFileWriter {
 		s = s.replace(" ", "\\ ");
 		
 		// FIXME make legal
-		StringBuffer outBuffer = new StringBuffer(1000);
-		char thisChar = raw.toCharArray()[0];
-		if(((thisChar < 0x0020) || (thisChar > 0x007e))) {
-			raw = "\\u";
-			
-			outBuffer.append(toHex((thisChar >> 12) & 0xF));
-			outBuffer.append(toHex((thisChar >> 8) & 0xF));
-			outBuffer.append(toHex((thisChar >> 4) & 0xF));
-			outBuffer.append(toHex(thisChar & 0xF));
-		}
-		return raw + outBuffer.toString();
+		// StringBuffer outBuffer = new StringBuffer(1000);
+		// char thisChar = raw.toCharArray()[0];
+		//
+		// boolean alreadyEdited = false;
+		//
+		// if(((thisChar < 0x0020) || (thisChar > 0x007e))) {
+		// outBuffer.append("\\u");
+		//
+		// outBuffer.append(toHex((thisChar >> 12) & 0xF));
+		// outBuffer.append(toHex((thisChar >> 8) & 0xF));
+		// outBuffer.append(toHex((thisChar >> 4) & 0xF));
+		// outBuffer.append(toHex(thisChar & 0xF));
+		//
+		// s += outBuffer.toString();
+		// }
+		return s;
 	}
 	
 	// FIXME make legal

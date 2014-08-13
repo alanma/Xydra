@@ -96,6 +96,9 @@ public class SimpleIOTest {
 			Object reRead = confAgain.get(key);
 			System.out.println("key: '" + key + "', expected \n'" + original + "', got \n'"
 			        + reRead + "'\n\n");
+			
+			if(original.equals(""))
+				original = "\uF8FF";
 			assertTrue(original.equals(reRead));
 		}
 		
@@ -104,7 +107,7 @@ public class SimpleIOTest {
 	@After
 	public void tearDown() {
 		this.memoryConfig = null;
-
+		
 	}
 	
 }
