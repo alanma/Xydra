@@ -43,9 +43,10 @@ public class Escaping {
      * 
      * @param raw
      * @param escapeColonSpaceEquals TODO
+     * @param escapeQuotes TODO
      * @return ...
      */
-    public static String escape(String raw, boolean escapeColonSpaceEquals) {
+    public static String escape(String raw, boolean escapeColonSpaceEquals, boolean escapeQuotes) {
         assert raw != null;
         
         StringBuilder esc = new StringBuilder();
@@ -64,6 +65,16 @@ public class Escaping {
             case '=':
             case ' ':
                 if(escapeColonSpaceEquals) {
+                    // simple escaping
+                    esc.append('\\');
+                    esc.appendCodePoint(c);
+                } else {
+                    // no escaping
+                    esc.appendCodePoint(c);
+                }
+                break;
+            case '\"':
+                if(escapeQuotes) {
                     // simple escaping
                     esc.append('\\');
                     esc.appendCodePoint(c);
@@ -198,19 +209,21 @@ public class Escaping {
     }
     
     /**
-     * @param escaped
+     * Surrogate pairs not supported.
+     * 
+     * @param escapedSource
      * @param i position of hex chars after the '\ u'
      * @param unescaped
      * @return how many chars used
      */
-    private static int materializeUnicode(String escaped, int i, StringBuilder unescaped) {
+    public static int materializeUnicode(String escapedSource, int i, StringBuilder unescaped) {
         // try to get hex chars
-        if(i + 4 > escaped.length()) {
+        if(i + 4 > escapedSource.length()) {
             // parse nothing
             return 0;
         }
         
-        String hex4 = escaped.substring(i, i + 4);
+        String hex4 = escapedSource.substring(i, i + 4);
         // TODO optimisation potential
         if(hex4.matches("[a-fA-F0-9]{4}")) {
             int codepointNumber = Integer.parseInt(hex4, 16);

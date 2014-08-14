@@ -120,7 +120,7 @@ public class EscapingTest {
     
     private static void testRoundtrip(String s, boolean escapeColonSpaceEqual,
             boolean swallowBaskslashNewline) {
-        String escaped = Escaping.escape(s, escapeColonSpaceEqual);
+        String escaped = Escaping.escape(s, escapeColonSpaceEqual, false);
         log.info("Escaped as '" + escaped + "' " + Escaping.toCodepoints(escaped));
         String unescaped = Escaping.materializeEscapes(escaped, swallowBaskslashNewline,
                 escapeColonSpaceEqual);
