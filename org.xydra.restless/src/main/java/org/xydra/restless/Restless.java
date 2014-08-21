@@ -323,6 +323,9 @@ public class Restless extends HttpServlet {
      */
     @Override
     public void doDelete(@NeverNull HttpServletRequest req, @NeverNull HttpServletResponse res) {
+        if(log.isDebugEnabled()) {
+            Thread.currentThread().setName("Restless DELETE " + req.getRequestURI());
+        }
         restlessService(req, res);
     }
     
@@ -343,6 +346,9 @@ public class Restless extends HttpServlet {
     public void doGet(@NeverNull final HttpServletRequest req,
             @NeverNull final HttpServletResponse res) {
         final String uri = req.getRequestURI();
+        if(log.isDebugEnabled()) {
+            Thread.currentThread().setName("Restless GET " + uri);
+        }
         if(uri.startsWith(INTROSPECTION_PATH)) {
             doIntrospection(req, res);
         } else {
@@ -365,6 +371,9 @@ public class Restless extends HttpServlet {
      */
     @Override
     public void doHead(@NeverNull HttpServletRequest req, @NeverNull HttpServletResponse res) {
+        if(log.isDebugEnabled()) {
+            Thread.currentThread().setName("Restless HEAD " + req.getRequestURI());
+        }
         try {
             super.doHead(req, res);
         } catch(ServletException e) {
@@ -476,6 +485,9 @@ public class Restless extends HttpServlet {
      */
     @Override
     public void doPost(@NeverNull HttpServletRequest req, @NeverNull HttpServletResponse res) {
+        if(log.isDebugEnabled()) {
+            Thread.currentThread().setName("Restless POST " + req.getRequestURI());
+        }
         restlessService(req, res);
     }
     
@@ -494,6 +506,9 @@ public class Restless extends HttpServlet {
      */
     @Override
     public void doPut(@NeverNull HttpServletRequest req, @NeverNull HttpServletResponse res) {
+        if(log.isDebugEnabled()) {
+            Thread.currentThread().setName("Restless PUT " + req.getRequestURI());
+        }
         restlessService(req, res);
     }
     
