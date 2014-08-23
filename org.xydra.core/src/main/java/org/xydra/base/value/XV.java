@@ -350,6 +350,10 @@ public class XV {
         return vf.createIntegerListValue(list);
     }
     
+    /**
+     * @param value @CanBeNull
+     * @return @CanBeNull
+     */
     public static Object toJava(XValue value) {
         if(value == null)
             return null;
