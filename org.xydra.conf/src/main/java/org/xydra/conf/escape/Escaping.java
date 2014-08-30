@@ -108,6 +108,10 @@ public class Escaping {
         return esc.toString();
     }
     
+    public static String escapeUnicode(String raw) {
+        return escape(raw, false, false);
+    }
+    
     /**
      * @param escaped
      * @param i
@@ -263,6 +267,7 @@ public class Escaping {
         System.out.println(b);
         System.out.println(materializeUnicode("0298", 0, b));
         System.out.println("'" + b + "'");
+        System.out.println(escapeUnicode("Völkel"));
     }
     
 }
