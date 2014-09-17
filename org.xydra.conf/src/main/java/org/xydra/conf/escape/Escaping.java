@@ -112,6 +112,10 @@ public class Escaping {
         return escape(raw, false, false);
     }
     
+    public static String escapeUnicodeAndQuotes(String raw) {
+        return escape(raw, false, true);
+    }
+    
     /**
      * @param escaped
      * @param i
