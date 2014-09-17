@@ -18,7 +18,7 @@ import java.util.Iterator;
  * @param <L> key type
  * @param <M> key type
  */
-public interface ITripleIndex<K, L, M> extends IIndex {
+public interface ITripleIndex<K, L, M> extends IIndex, ITripleSink<K,L,M> {
     
     /**
      * @param c1

@@ -254,11 +254,15 @@ public class MapSetIndex<K, E> implements IMapSetIndex<K,E> {
         } else if(c1 instanceof EqualsConstraint<?>) {
             EqualsConstraint<K> keyConstraint = (EqualsConstraint<K>)c1;
             K key = keyConstraint.getKey();
-            IEntrySet<E> index0 = this.map.get(key);
-            return index0 == null ? NoneIterator.<E>create() : index0.iterator();
+            return valueIterator(key);
         } else {
             throw new AssertionError("unknown constraint type " + c1.getClass());
         }
+    }
+    
+    public Iterator<E> valueIterator(K key) {
+        IEntrySet<E> index0 = this.map.get(key);
+        return index0 == null ? NoneIterator.<E>create() : index0.iterator();
     }
     
     @Override
