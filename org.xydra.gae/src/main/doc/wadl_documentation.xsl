@@ -16,7 +16,7 @@
     San Francisco, California, 94105, USA
 -->
 <!-- 
- * FIXME
+ * FIXME WADL
     - Doesn't inherit query/header params from resource/@type
     - XML schema import, include, redefine don't import
 -->

@@ -1,7 +1,5 @@
 package org.xydra.store.impl.gae;
 
-import java.util.Map;
-
 import org.xydra.annotations.Setting;
 import org.xydra.base.XId;
 import org.xydra.gae.admin.GaeConfigSettings;
@@ -14,6 +12,8 @@ import org.xydra.store.XydraConfigUtils;
 import org.xydra.store.XydraPlatformRuntime;
 import org.xydra.store.XydraRuntime;
 import org.xydra.xgae.XGae;
+
+import java.util.Map;
 
 
 /**
@@ -49,7 +49,7 @@ public class GaePlatformRuntime implements XydraPlatformRuntime {
                 // Map<String,String> configMap = XydraRuntime.getConfigMap();
                 // boolean gaeAssert =
                 // configMap.get(GaeConfigSettings.PROP_ASSERT) != null;
-                // FIXME ... XyAssert.setEnabled(gaeAssert);
+                // FIXME GAE... XyAssert.setEnabled(gaeAssert);
                 // memcache
                 boolean usememcache = XydraRuntime.getConfigMap().get(
                         GaeConfigSettings.PROP_USEMEMCACHE) != null;

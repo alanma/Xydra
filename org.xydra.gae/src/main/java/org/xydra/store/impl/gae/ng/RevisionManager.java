@@ -86,7 +86,7 @@ public class RevisionManager {
         
         // log.debug("Return " + this.revision + " for " + this.modelAddress);
         
-        // FIXME !!!!!!!!!!!!!
+        // FIXME GAE !!!!!!!!!!!!!
         // check if still current
         // if(this.revision.getPrecision() == Precision.Precise) {
         // ChangeLogManager clm = new ChangeLogManager(this.modelAddress);

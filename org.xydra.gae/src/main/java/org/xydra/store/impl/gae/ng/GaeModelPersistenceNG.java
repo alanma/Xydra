@@ -1,10 +1,5 @@
 package org.xydra.store.impl.gae.ng;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Future;
-
 import org.xydra.annotations.Setting;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
@@ -46,6 +41,11 @@ import org.xydra.store.impl.utils.DebugFormatter;
 import org.xydra.xgae.annotations.XGaeOperation;
 import org.xydra.xgae.datastore.api.SKey;
 import org.xydra.xgae.util.FutureUtils;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Future;
 
 
 /**
@@ -326,7 +326,7 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
         
         /* --- Code synchronised by Xydra locks in GAE datastore --- */
         
-        // FIXME some serious do-all-or-nothing problems
+        // FIXME GAE some serious do-all-or-nothing problems
         
         /* Phase 3 */
         log.debug("[r" + change.rev + "] Phase 3: check constraints, compute events = " + change
@@ -494,7 +494,7 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
      * @return true iff a equals b or if b is an address within the entity
      *         addressed by a.
      * 
-     *         // TODO move to core
+     *         // TODO GAE: move to core
      */
     public static boolean addressContainsOther(XAddress a, XAddress b) {
         switch(a.getAddressedType()) {
@@ -523,7 +523,7 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
     public ModelRevision getModelRevision(boolean includeTentative) {
         GaeModelRevInfo info;
         
-        // FIXME should suffice to compute only if imprecise
+        // FIXME GAE should suffice to compute only if imprecise
         // info = this.revisionManager.getInfo();
         // if(info.getPrecision() != Precision.Precise) {
         computeMorePreciseCurrentRev();
@@ -641,14 +641,14 @@ public class GaeModelPersistenceNG implements IGaeModelPersistence {
         computeMorePreciseCurrentRev();
         GaeModelRevInfo info = this.revisionManager.getInfo();
         
-        // // FIXME returns sometimes a way too low rev number as Precise
+        // // FIXME GAE returns sometimes a way too low rev number as Precise
         // GaeModelRevInfo info = this.revisionManager.getInfo();
         // if(info.getPrecision() != Precision.Precise) {
         // computeMorePreciseCurrentRev();
         // info = this.revisionManager.getInfo();
         // }
         //
-        // // FIXME !!!!!!!!!!!!!!!
+        // // FIXME GAE !!!!!!!!!!!!!!!
         // else {
         // GaeModelRevInfo before = info.copy();
         // computeMorePreciseCurrentRev();
