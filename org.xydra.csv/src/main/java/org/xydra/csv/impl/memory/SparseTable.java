@@ -1,5 +1,19 @@
 package org.xydra.csv.impl.memory;
 
+import org.xydra.csv.ExcelLimitException;
+import org.xydra.csv.ICell;
+import org.xydra.csv.IReadableRow;
+import org.xydra.csv.IRow;
+import org.xydra.csv.IRowInsertionHandler;
+import org.xydra.csv.IRowVisitor;
+import org.xydra.csv.ISparseTable;
+import org.xydra.csv.RowFilter;
+import org.xydra.csv.WrongDatatypeException;
+import org.xydra.index.iterator.Iterators;
+import org.xydra.index.iterator.ReadOnlyIterator;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -11,19 +25,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-
-import org.xydra.csv.ExcelLimitException;
-import org.xydra.csv.ICell;
-import org.xydra.csv.IReadableRow;
-import org.xydra.csv.IRow;
-import org.xydra.csv.IRowInsertionHandler;
-import org.xydra.csv.IRowVisitor;
-import org.xydra.csv.ISparseTable;
-import org.xydra.csv.RowFilter;
-import org.xydra.csv.WrongDatatypeException;
-import org.xydra.index.iterator.ReadOnlyIterator;
-import org.xydra.log.api.Logger;
-import org.xydra.log.api.LoggerFactory;
 
 
 /**
@@ -106,6 +107,22 @@ public class SparseTable implements ISparseTable {
     @Override
     public Iterator<Row> iterator() {
         return new ReadOnlyIterator<Row>(this.table.values().iterator());
+    }
+    
+    @Override
+    public Iterator<Row> getDataRows() {
+        Iterator<Row> it = this.table.values().iterator();
+        if(it.hasNext()) {
+            it.next();
+            return new ReadOnlyIterator<Row>(it);
+        } else {
+            return Iterators.none();
+        }
+    }
+    
+    @Override
+    public Row getHeaderRow() {
+        return this.table.values().iterator().next();
     }
     
     // -----------------
@@ -297,9 +314,9 @@ public class SparseTable implements ISparseTable {
         if(row == null) {
             assert !this.rowNames.contains(rowName);
             if(create) {
-            row = new Row(rowName, this);
-            this.insertRow(rowName, row);
-        }
+                row = new Row(rowName, this);
+                this.insertRow(rowName, row);
+            }
         }
         return row;
     }
@@ -469,11 +486,11 @@ public class SparseTable implements ISparseTable {
     
     @Override
     public Iterable<String> getColumnNamesSorted() {
-        if(this.columnNames instanceof TreeSet<?>) {
-            return this.columnNames;
-        } else {
-            return null;
-        }
+        return this.columnNames;
+        // if(this.columnNames instanceof TreeSet<?>) {
+        // } else {
+        // return null;
+        // }
     }
     
     @Override

@@ -1,5 +1,19 @@
 package org.xydra.csv.impl.memory;
 
+import org.xydra.csv.ExcelLimitException;
+import org.xydra.csv.ICsvTable;
+import org.xydra.csv.ICsvTableFactory;
+import org.xydra.csv.IReadableRow;
+import org.xydra.csv.IRow;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -10,19 +24,6 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.Charset;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import org.xydra.csv.ExcelLimitException;
-import org.xydra.csv.ICsvTable;
-import org.xydra.csv.ICsvTableFactory;
-import org.xydra.csv.IReadableRow;
-import org.xydra.csv.IRow;
-import org.xydra.log.api.Logger;
-import org.xydra.log.api.LoggerFactory;
 
 
 /**
@@ -74,10 +75,15 @@ public class CsvTable extends CsvCoreTable implements ICsvTable, ICsvTableFactor
      */
     @Override
     public void readFrom(File f) throws IOException {
+        readFrom(f, this.defaultEncoding);
+    }
+    
+    @Override
+    public void readFrom(File f, String encoding) throws IOException {
         log.info("Reading CSV table from " + f.getAbsolutePath() + " Before: " + this.rowCount()
                 + " rows and " + this.colCount() + " columns");
         FileInputStream fos = new FileInputStream(f);
-        Reader reader = new InputStreamReader(fos, Charset.forName(this.defaultEncoding));
+        Reader reader = new InputStreamReader(fos, Charset.forName(encoding));
         readFrom(reader, true);
         reader.close();
         // remove "NULL" and "ROW"-columns
@@ -245,7 +251,6 @@ public class CsvTable extends CsvCoreTable implements ICsvTable, ICsvTableFactor
                 + " columns");
         writeTo(w, 0, this.rowCount());
     }
-    
     
     private boolean oversizeWarning = false;
     

@@ -1,10 +1,10 @@
 package org.xydra.csv;
 
+import org.xydra.csv.impl.memory.Row;
+
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-
-import org.xydra.csv.impl.memory.Row;
 
 
 /**
@@ -234,5 +234,17 @@ public interface ISparseTable extends Iterable<Row>, IRowHandler {
      * @param rowVisitor never null
      */
     void visitRows(IRowVisitor rowVisitor);
+    
+    /**
+     * Simply return the first row
+     * 
+     * @return @CanBeNull
+     */
+    Row getHeaderRow();
+    
+    /**
+     * @return all rows except the first
+     */
+    Iterator<Row> getDataRows();
     
 }
