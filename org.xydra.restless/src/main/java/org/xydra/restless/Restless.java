@@ -262,7 +262,7 @@ public class Restless extends HttpServlet {
             RestlessMethod restlessMethod = new RestlessMethod(instanceOrClass, httpMethod,
                     javaMethodName, pt, adminOnly, parameter);
             this.methods.add(restlessMethod);
-            log.debug("Add method " + restlessMethod);
+            log.trace("Add method " + restlessMethod);
         }
         assert RestlessStatic.methodByName(instanceOrClass, javaMethodName) != null : "method '"
                 + javaMethodName + "' not found";

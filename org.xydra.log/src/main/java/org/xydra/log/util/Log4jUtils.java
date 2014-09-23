@@ -3,6 +3,8 @@ package org.xydra.log.util;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 
+import java.util.Properties;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -11,7 +13,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
-import java.util.Properties;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Level;
@@ -103,4 +104,7 @@ public class Log4jUtils {
         LogManager.getLogger(clazz).setLevel(log4jLevel);
     }
     
+    public static void setRootLevel(Level log4jLevel) {
+        LogManager.getRootLogger().setLevel(log4jLevel);
+    }
 }

@@ -58,9 +58,6 @@ public abstract class EmbeddedJetty {
         this.port = conf.getInt(ConfParamsJetty.PORT);
         this.contextPath = conf.getString(ConfParamsJetty.CONTEXT_PATH);
         this.docRootURL = conf.getString(ConfParamsJetty.DOC_ROOT);
-        
-        // FIXME kill
-        System.out.println("#### jetty.docRoot = " + this.docRootURL);
         if(conf.tryToGet(ConfParamsJetty.USE_DEFAULT_SERVLET) == Boolean.TRUE) {
             Restless.DELEGATE_UNHANDLED_TO_DEFAULT = true;
         }
@@ -76,6 +73,9 @@ public abstract class EmbeddedJetty {
         // didn't work
         // System.setProperty("org.eclipse.jetty.util.log.class",
         // JettyLog2XydraLogger.class.getCanonicalName());
+        String serverVersion = Server.getVersion();
+        log.info("Mapped Jetty logging to global logging. Expect '" + serverVersion
+                + "' as next line");
     }
     
     /** when was server started or restarted? */
@@ -148,11 +148,8 @@ public abstract class EmbeddedJetty {
                 // staticHandler,
                 this.webapp, new DefaultHandler() });
         this.server.setHandler(handlers);
-        // FIXME was this.server.setHandler(this.webapp);
         
-        // last check
-        System.out.println("### base URI = " + this.webapp.getBaseResource().getURI());
-        System.out.println("### base URL = " + this.webapp.getBaseResource().getURL());
+        log.debug("Base URI of webapp: " + this.webapp.getBaseResource().getURI());
         
         this.startTime = System.currentTimeMillis();
         try {
@@ -163,6 +160,22 @@ public abstract class EmbeddedJetty {
             this.server.addBean(mbContainer);
             
             this.server.start();
+            
+            new Thread() {
+                
+                @Override
+                public void run() {
+                    while(EmbeddedJetty.this.server.isStarting()) {
+                        System.out.println("Starting...");
+                        try {
+                            Thread.sleep(1000);
+                        } catch(InterruptedException e) {
+                        }
+                    }
+                    System.out.println("Done. Now " + EmbeddedJetty.this.server.getState());
+                }
+                
+            }.start();
             
             // this.server.join();
         } catch(BindException e) {
