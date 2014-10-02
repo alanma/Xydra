@@ -5,7 +5,7 @@
 	<groupId>org.xydra</groupId>
 	<artifactId>maven-root</artifactId>
 	<!-- previous 2013.09.24 -->
-	<version>2013.09.24</version>
+	<version>2014.09.23</version>
 	<packaging>pom</packaging>
 
 	<name>Xydra Maven Root</name>
@@ -198,7 +198,7 @@
 					<excludes>
 						<exclude>log4j.properties</exclude>
 						<!-- Exclude all java source and GWT modules -->
-<!-- 						<exclude>**/*.java</exclude> -->
+						<!-- <exclude>**/*.java</exclude> -->
 						<exclude>**/*.gwt.xml</exclude>
 					</excludes>
 				</configuration>
@@ -305,9 +305,9 @@
 			</dependency>
 
 			<dependency>
-				<groupId>org.mortbay.jetty</groupId>
-				<artifactId>jetty</artifactId>
-				<version>6.1.26</version>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-webapp</artifactId>
+				<version>9.2.2.v20140723</version>
 			</dependency>
 
 			<dependency>
