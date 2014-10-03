@@ -7,7 +7,8 @@ import org.xydra.base.XId;
 public interface XReadableObject extends XStateReadableObject, XRevisionReadable {
     
     /* More specific return type */
-    @ReadOperation
+    @Override
+	@ReadOperation
     XReadableField getField(XId fieldId);
     
 }

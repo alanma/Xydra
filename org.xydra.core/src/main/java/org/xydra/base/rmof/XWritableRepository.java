@@ -13,6 +13,7 @@ import org.xydra.base.XId;
 public interface XWritableRepository extends XStateWritableRepository, XReadableRepository {
 	
 	/* More specific return type */
+	@Override
 	@ModificationOperation
 	XWritableModel createModel(XId modelId);
 	

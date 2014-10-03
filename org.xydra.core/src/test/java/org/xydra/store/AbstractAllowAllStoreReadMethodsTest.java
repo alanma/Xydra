@@ -48,7 +48,8 @@ public abstract class AbstractAllowAllStoreReadMethodsTest extends AbstractStore
      *         {@link DelegatingAllowAllStore}. This makes it possible to reuse
      *         this test with different instantiations.
      */
-    public DelegatingAllowAllStore createStore() {
+    @Override
+	public DelegatingAllowAllStore createStore() {
         return new DelegatingAllowAllStore(createPersistence());
     }
     

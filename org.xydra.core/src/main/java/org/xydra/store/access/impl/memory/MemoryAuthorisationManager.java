@@ -46,8 +46,6 @@ import org.xydra.store.access.impl.AbstractAuthorisationManager;
 public class MemoryAuthorisationManager extends AbstractAuthorisationManager implements
         XAuthorisationManager, XAuthorisationDatabaseWitListeners {
 	
-	public static final long serialVersionUID = -1731169839295825690L;
-	
 	private final XGroupDatabaseWithListeners groups;
 	private final Set<XAccessListener> listeners;
 	// map of access -> resource -> actor

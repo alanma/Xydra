@@ -58,12 +58,14 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
     protected GetWithAddressRequest[] objectAddressRequests;
     protected XydraStore store;
     
-    @After
+    @Override
+	@After
     public void tearDown() {
         super.tearDown();
     }
     
-    @Before
+    @Override
+	@Before
     public void setUp() {
         super.setUp();
         this.store = this.createStore();
@@ -96,8 +98,6 @@ public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
         SynchronousCallbackWithOneResult<Set<XId>> callback = new SynchronousCallbackWithOneResult<Set<XId>>();
         this.store.getModelIds(this.correctUser, this.correctUserPass, callback);
         waitOnCallback(callback);
-        XyAssert.xyAssert(callback != null);
-        assert callback != null;
         XyAssert.xyAssert(callback.effect != null, "callback.effect != null");
         assert callback.effect != null;
         XyAssert.xyAssert(!callback.effect.contains(modelId1));

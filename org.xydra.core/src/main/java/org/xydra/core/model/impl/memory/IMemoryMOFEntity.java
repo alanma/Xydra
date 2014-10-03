@@ -31,8 +31,10 @@ public interface IMemoryMOFEntity extends XSendsSyncEvents, IHasXAddress {
      */
     void fireSyncEvent(XSyncEvent event);
     
-    boolean addListenerForSyncEvents(XSyncEventListener syncListener);
+    @Override
+	boolean addListenerForSyncEvents(XSyncEventListener syncListener);
     
-    boolean removeListenerForSyncEvents(XSyncEventListener syncListener);
+    @Override
+	boolean removeListenerForSyncEvents(XSyncEventListener syncListener);
     
 }

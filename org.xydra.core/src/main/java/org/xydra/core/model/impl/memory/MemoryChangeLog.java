@@ -32,7 +32,8 @@ public class MemoryChangeLog extends AbstractChangeLog implements XWritableChang
         this.state = state;
     }
     
-    public synchronized void appendEvent(@CanBeNull XEvent event) {
+    @Override
+	public synchronized void appendEvent(@CanBeNull XEvent event) {
         XyAssert.xyAssert(event == null || !event.inTransaction());
         /*
          * "else": event is part of a transaction and will therefore only be
@@ -84,7 +85,8 @@ public class MemoryChangeLog extends AbstractChangeLog implements XWritableChang
         return this.state.toString();
     }
     
-    public synchronized boolean truncateToRevision(long revisionNumber) {
+    @Override
+	public synchronized boolean truncateToRevision(long revisionNumber) {
         return this.state.truncateToRevision(revisionNumber);
     }
     

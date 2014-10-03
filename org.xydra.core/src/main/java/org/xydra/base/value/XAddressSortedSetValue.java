@@ -57,6 +57,7 @@ public interface XAddressSortedSetValue extends XAddressSetValue, XSortedSetValu
      * @return a {@link SortedSet} containing all {@link XAddress} entries in
      *         this {@link XAddressSortedSetValue}
      */
-    SortedSet<XAddress> toSortedSet();
+    @Override
+	SortedSet<XAddress> toSortedSet();
     
 }

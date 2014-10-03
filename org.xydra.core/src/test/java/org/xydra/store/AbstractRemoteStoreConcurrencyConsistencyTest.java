@@ -50,6 +50,7 @@ public abstract class AbstractRemoteStoreConcurrencyConsistencyTest extends Abst
 		return null;
 	}
 	
+	@Override
 	@Before
 	public void setUp() {
 		this.store = this.createStore();

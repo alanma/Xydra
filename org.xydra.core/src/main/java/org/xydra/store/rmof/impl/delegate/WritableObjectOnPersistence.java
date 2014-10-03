@@ -9,7 +9,7 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.core.X;
-import org.xydra.index.iterator.NoneIterator;
+import org.xydra.index.iterator.Iterators;
 import org.xydra.persistence.GetWithAddressRequest;
 import org.xydra.persistence.XydraPersistence;
 import org.xydra.sharedutils.XyAssert;
@@ -97,7 +97,11 @@ public class WritableObjectOnPersistence extends AbstractWritableOnPersistence i
     @Override
     public Iterator<XId> iterator() {
         XWritableObject snapshot = getObjectSnapshot();
-        return (Iterator<XId>)(snapshot == null ? NoneIterator.create() : snapshot.iterator());
+        if(snapshot==null) {
+        	return Iterators.none();
+        } else {
+        	return snapshot.iterator();
+        }
     }
     
     @Override

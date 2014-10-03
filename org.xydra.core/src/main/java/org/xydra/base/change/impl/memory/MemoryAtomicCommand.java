@@ -120,7 +120,8 @@ abstract public class MemoryAtomicCommand implements XAtomicCommand, Serializabl
         return this.revision == XCommand.FORCED;
     }
     
-    public Intent getIntent() {
+    @Override
+	public Intent getIntent() {
         if(this.revision == XCommand.FORCED)
             return Intent.Forced;
         else if(this.revision == XCommand.SAFE_STATE_BOUND)

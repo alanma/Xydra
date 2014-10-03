@@ -13,9 +13,11 @@ import org.xydra.base.rmof.XRevWritableRepository;
  */
 public interface XExistsRevWritableRepository extends XRevWritableRepository {
     
-    XExistsRevWritableModel createModel(XId modelId);
+    @Override
+	XExistsRevWritableModel createModel(XId modelId);
     
-    XExistsRevWritableModel getModel(XId modelId);
+    @Override
+	XExistsRevWritableModel getModel(XId modelId);
     
     /**
      * Add an existing model to this repository. Models created using

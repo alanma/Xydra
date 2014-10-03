@@ -317,7 +317,8 @@ public abstract class AbstractTransactionEvent implements XTransactionEvent {
         return str + "]";
     }
     
-    @CanBeNull
+    @Override
+	@CanBeNull
     public XAtomicEvent getLastEvent() {
         int size = size();
         if(size > 0) {

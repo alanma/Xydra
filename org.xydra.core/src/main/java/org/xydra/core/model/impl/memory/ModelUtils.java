@@ -18,7 +18,8 @@ public class ModelUtils {
      * @param fieldAddress
      * @return the field or @CanBeNull
      */
-    public static <M extends XReadableModel, O extends XReadableObject, F extends XReadableField, V extends XValue> V getValue(
+    @SuppressWarnings("unchecked")
+	public static <M extends XReadableModel, O extends XReadableObject, F extends XReadableField, V extends XValue> V getValue(
             M model, XAddress fieldAddress) {
         O object = (O)model.getObject(fieldAddress.getObject());
         if(object == null)
@@ -34,6 +35,7 @@ public class ModelUtils {
      * @param fieldAddress
      * @return the field or @CanBeNull
      */
+    @SuppressWarnings("unchecked")
     public static <M extends XReadableModel, O extends XReadableObject, F extends XReadableField> F getField(
             M model, XAddress fieldAddress) {
         O object = (O)model.getObject(fieldAddress.getObject());
@@ -43,6 +45,7 @@ public class ModelUtils {
         return field;
     }
     
+    @SuppressWarnings("unchecked")
     public static <M extends XReadableModel, O extends XReadableObject> O getObject(M model,
             XAddress objectAddress) {
         O object = (O)model.getObject(objectAddress.getObject());

@@ -55,7 +55,8 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
             return this.fieldId;
         }
         
-        public long getRevisionNumber() {
+        @Override
+		public long getRevisionNumber() {
             return AbstractDelegatingWritableModel.this.field_getRevisionNumber(this.objectId,
                     this.fieldId);
         }
@@ -122,7 +123,8 @@ public abstract class AbstractDelegatingWritableModel implements XWritableModel 
             return this.objectId;
         }
         
-        public long getRevisionNumber() {
+        @Override
+		public long getRevisionNumber() {
             return object_getRevisionNumber(this.objectId);
         }
         

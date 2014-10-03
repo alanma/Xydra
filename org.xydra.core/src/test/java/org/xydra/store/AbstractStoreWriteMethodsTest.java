@@ -73,7 +73,8 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
     protected XydraStore store;
     protected long timeout;
     
-    @Before
+    @Override
+	@Before
     public void setUp() {
         this.store = this.createStore();
         this.factory = this.getCommandFactory();
@@ -107,7 +108,8 @@ public abstract class AbstractStoreWriteMethodsTest extends AbstractStoreTest {
         this.repoId = getRepositoryId();
     }
     
-    public void tearDown() {
+    @Override
+	public void tearDown() {
     }
     
     /*

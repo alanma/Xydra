@@ -16,6 +16,7 @@ import org.xydra.base.change.XEvent;
 public interface ISyncLog extends XWritableChangeLog, IBrowsableSyncLog {
 	
 	// from XWritableChangeLog
+	@Override
 	void appendEvent(XEvent event);
 	
 	/**

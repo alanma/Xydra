@@ -43,12 +43,14 @@ public class LocalChanges implements XLocalChanges {
 		return this.list.size();
 	}
 	
+	@Override
 	public void setSyncRevision(long syncRevision) {
 		this.syncRevision = syncRevision;
 	}
 	
 	private long syncRevision;
 	
+	@Override
 	public long getSynchronizedRevision() {
 		return this.syncRevision;
 	}

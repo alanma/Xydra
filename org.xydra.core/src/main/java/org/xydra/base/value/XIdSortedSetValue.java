@@ -59,6 +59,7 @@ public interface XIdSortedSetValue extends XIdSetValue, XSortedSetValue<XId> {
      * @return a {@link SortedSet} containing all {@link XId} entries in this
      *         {@link XIdSortedSetValue}
      */
-    SortedSet<XId> toSortedSet();
+    @Override
+	SortedSet<XId> toSortedSet();
     
 }

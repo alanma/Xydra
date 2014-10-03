@@ -454,7 +454,8 @@ Serializable {
      * @param command @NeverNull
      * @return ...
      */
-    @ModificationOperation
+    @Override
+	@ModificationOperation
     public long executeModelCommand(XModelCommand command) {
         assert command != null;
         return Executor.executeCommandOnModel(getSessionActor(), command, getFatherState(),

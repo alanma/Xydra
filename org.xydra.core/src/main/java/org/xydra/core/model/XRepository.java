@@ -57,7 +57,8 @@ public interface XRepository extends XWritableRepository, XSendsRepositoryEvents
      *         or the revision number of the {@link XEvent} caused by the
      *         command.
      */
-    @ModificationOperation
+    @Override
+	@ModificationOperation
     long executeCommand(XCommand command);
     
     /**

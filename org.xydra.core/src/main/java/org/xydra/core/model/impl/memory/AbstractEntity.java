@@ -45,7 +45,8 @@ public abstract class AbstractEntity implements XEntity, IMemoryEntity {
      *         has been created. Can be -1 if this instance represents an entity
      *         that has not been created.
      */
-    public abstract long getRevisionNumber();
+    @Override
+	public abstract long getRevisionNumber();
     
     /**
      * Looks into address and revision number. Does not use potential father

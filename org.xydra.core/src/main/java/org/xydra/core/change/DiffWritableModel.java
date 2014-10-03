@@ -422,7 +422,8 @@ public class DiffWritableModel extends AbstractDelegatingWritableModel implement
         return !this.added.isEmpty() || !this.removed.isEmpty();
     }
     
-    public long getRevisionNumber() {
+    @Override
+	public long getRevisionNumber() {
         throw new UnsupportedOperationException();
         // if(log.isDebugEnabled()) log.debug("Returning outdated base-revision number");
         // return this.base.getRevisionNumber();

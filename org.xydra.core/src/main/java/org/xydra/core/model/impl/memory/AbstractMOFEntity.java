@@ -86,12 +86,14 @@ public abstract class AbstractMOFEntity extends AbstractEntity implements IMemor
      * @param actorId for this entity and its children, if any.
      * @param passwordHash the password for the given actor.
      */
-    public void setSessionActor(XId actorId, String passwordHash) {
+    @Override
+	public void setSessionActor(XId actorId, String passwordHash) {
         this.root.setSessionActor(actorId);
         this.root.setSessionPasswordHash(passwordHash);
     }
     
-    public XChangeLog getChangeLog() {
+    @Override
+	public XChangeLog getChangeLog() {
         return this.root.getChangeLog();
     }
     

@@ -16,7 +16,8 @@ import org.xydra.sharedutils.ReflectionUtils;
 @RunsInAppEngine(true)
 public class XydraDebugFormatter implements IDebugFormatter {
     
-    public String format(Object value) {
+    @Override
+	public String format(Object value) {
         assert value != null;
         if(value instanceof XId) {
             return "'" + value.toString() + "'";

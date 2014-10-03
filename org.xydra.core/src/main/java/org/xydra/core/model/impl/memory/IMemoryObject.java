@@ -18,7 +18,8 @@ public interface IMemoryObject extends XObject, IMemoryEntity, IMemoryMOFEntity 
     
     IMemoryModel getFather();
     
-    IMemoryField getField(XId fieldId);
+    @Override
+	IMemoryField getField(XId fieldId);
     
     XRevWritableObject getState();
     

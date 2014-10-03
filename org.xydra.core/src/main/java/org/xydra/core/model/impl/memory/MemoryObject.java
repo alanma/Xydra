@@ -252,7 +252,8 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
         }
     }
     
-    public int countUnappliedLocalChanges() {
+    @Override
+	public int countUnappliedLocalChanges() {
         return this.getRoot().countUnappliedLocalChanges();
     }
     
@@ -351,7 +352,8 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
         }
     }
     
-    public XChangeLog getChangeLog() {
+    @Override
+	public XChangeLog getChangeLog() {
         return this.getRoot().getSyncLog();
     }
     
@@ -405,15 +407,18 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
         }
     }
     
-    public XId getSessionActor() {
+    @Override
+	public XId getSessionActor() {
         return this.getRoot().getSessionActor();
     }
     
-    public String getSessionPasswordHash() {
+    @Override
+	public String getSessionPasswordHash() {
         return this.getRoot().getSessionPasswordHash();
     }
     
-    public long getSynchronizedRevision() {
+    @Override
+	public long getSynchronizedRevision() {
         return getRoot().getSynchronizedRevision();
     }
     
@@ -452,7 +457,8 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
         }
     }
     
-    public boolean isSynchronized() {
+    @Override
+	public boolean isSynchronized() {
         return getRevisionNumber() <= getSynchronizedRevision();
     }
     
@@ -501,7 +507,8 @@ public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XO
         }
     }
     
-    public void setSessionActor(XId actorId, String passwordHash) {
+    @Override
+	public void setSessionActor(XId actorId, String passwordHash) {
         getRoot().setSessionActor(actorId);
         getRoot().setSessionPasswordHash(passwordHash);
     }

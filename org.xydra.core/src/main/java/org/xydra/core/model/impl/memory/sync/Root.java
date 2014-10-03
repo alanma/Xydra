@@ -60,7 +60,8 @@ public class Root implements XRoot {
     
     private ISyncLog syncLog;
     
-    public String getSessionPasswordHash() {
+    @Override
+	public String getSessionPasswordHash() {
         return this.sessionPasswordHash;
     }
     
@@ -230,7 +231,8 @@ public class Root implements XRoot {
         this.isTransactionInProgress = b;
     }
     
-    public XId getSessionActor() {
+    @Override
+	public XId getSessionActor() {
         return this.sessionActor;
     }
     
@@ -250,7 +252,8 @@ public class Root implements XRoot {
      * @param actorId for this entity and its children, if any.
      * @param passwordHash the password for the given actor.
      */
-    public void setSessionActor(XId actorId, String passwordHash) {
+    @Override
+	public void setSessionActor(XId actorId, String passwordHash) {
         setSessionActor(actorId);
         setSessionPasswordHash(passwordHash);
     }
@@ -286,7 +289,8 @@ public class Root implements XRoot {
         actorId);
     }
     
-    public int countUnappliedLocalChanges() {
+    @Override
+	public int countUnappliedLocalChanges() {
         return this.syncLog.countUnappliedLocalChanges();
     }
     
@@ -316,7 +320,8 @@ public class Root implements XRoot {
         return this.syncLog;
     }
     
-    public long getSynchronizedRevision() {
+    @Override
+	public long getSynchronizedRevision() {
         return this.syncLog.getSynchronizedRevision();
     }
     

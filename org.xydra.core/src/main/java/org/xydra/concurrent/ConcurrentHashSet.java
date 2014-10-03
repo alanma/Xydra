@@ -17,67 +17,82 @@ public class ConcurrentHashSet<E> implements Set<E> {
     public ConcurrentHashSet() {
     }
     
-    public synchronized boolean add(E e) {
+    @Override
+	public synchronized boolean add(E e) {
         return this.set.add(e);
     }
     
-    public synchronized boolean addAll(Collection<? extends E> c) {
+    @Override
+	public synchronized boolean addAll(Collection<? extends E> c) {
         return this.set.addAll(c);
     }
     
-    public synchronized void clear() {
+    @Override
+	public synchronized void clear() {
         this.set.clear();
     }
     
-    public synchronized boolean contains(Object o) {
+    @Override
+	public synchronized boolean contains(Object o) {
         return this.set.contains(o);
     }
     
-    public synchronized boolean containsAll(Collection<?> c) {
+    @Override
+	public synchronized boolean containsAll(Collection<?> c) {
         return this.set.containsAll(c);
     }
     
-    public synchronized boolean equals(Object o) {
+    @Override
+	public synchronized boolean equals(Object o) {
         return this.set.equals(o);
     }
     
-    public synchronized int hashCode() {
+    @Override
+	public synchronized int hashCode() {
         return this.set.hashCode();
     }
     
-    public synchronized boolean isEmpty() {
+    @Override
+	public synchronized boolean isEmpty() {
         return this.set.isEmpty();
     }
     
     /**
      * @return an iterator that is based on a copy of this set at creation time.
      */
-    public synchronized Iterator<E> iterator() {
+    @Override
+	public synchronized Iterator<E> iterator() {
         ArrayList<E> list = new ArrayList<E>(this.set);
         return list.iterator();
     }
     
-    public synchronized boolean remove(Object o) {
+    @Override
+	public synchronized boolean remove(Object o) {
         return this.set.remove(o);
     }
     
-    public synchronized boolean removeAll(Collection<?> c) {
+    @Override
+	public synchronized boolean removeAll(Collection<?> c) {
         return this.set.removeAll(c);
     }
     
-    public synchronized boolean retainAll(Collection<?> c) {
+    @Override
+	public synchronized boolean retainAll(Collection<?> c) {
         return this.set.retainAll(c);
     }
     
-    public synchronized int size() {
+    @Override
+	public synchronized int size() {
         return this.set.size();
     }
     
-    public synchronized Object[] toArray() {
+    @Override
+	public synchronized Object[] toArray() {
         return this.set.toArray();
     }
     
-    public synchronized <T> T[] toArray(T[] a) {
+    @Override
+	public synchronized <T> T[] toArray(T[] a) {
         return this.set.toArray(a);
     }
     

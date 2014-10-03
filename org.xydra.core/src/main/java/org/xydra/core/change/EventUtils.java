@@ -205,15 +205,13 @@ public class EventUtils {
                 XId fieldId = atomicEvent.getTarget().getField();
                 if(fieldId != null) {
                     // => its a field event
-                    XRevWritableField field = object.getField(fieldId);
+                    final XRevWritableField field = object.getField(fieldId);
                     if(field == null) {
                         XyAssert.xyAssert(partialSnapshot, "field '" + atomicEvent.getTarget()
                                 + "' is null, but snapshot is not partial.");
                     } else {
                         XReadableField referenceField = (referenceObject == null) ? null
                                 : referenceObject.getField(fieldId);
-                        XyAssert.xyAssert(field != null);
-                        assert field != null;
                         if(field == referenceField) {
                             object.addField(new SimpleField(referenceField.getAddress(),
                                     referenceField.getRevisionNumber(), referenceField.getValue()));
