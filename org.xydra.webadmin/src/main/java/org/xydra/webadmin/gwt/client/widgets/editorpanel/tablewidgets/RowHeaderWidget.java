@@ -14,44 +14,43 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
-
 public class RowHeaderWidget extends Composite {
-	
+
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(XyAdmin.class);
-	
-	interface ViewUiBinder extends UiBinder<Widget,RowHeaderWidget> {
+
+	interface ViewUiBinder extends UiBinder<Widget, RowHeaderWidget> {
 	}
-	
+
 	private static ViewUiBinder uiBinder = GWT.create(ViewUiBinder.class);
-	
+
 	@UiField
 	Button expandButton;
-	
+
 	@UiField(provided = true)
 	EntityWidget entityWidget;
-	
+
 	private RowPresenter presenter;
-	
+
 	public RowHeaderWidget(RowPresenter presenter, String expandButtonText) {
 		this.presenter = presenter;
 		this.entityWidget = new EntityWidget(presenter, presenter.getAddress(), new ClickHandler() {
-			
+
 			@Override
 			public void onClick(ClickEvent event) {
 				RowHeaderWidget.this.expandButton.click();
 			}
 		});
-		
+
 		initWidget(uiBinder.createAndBindUi(this));
-		
+
 		this.expandButton.setText(expandButtonText);
-		
+
 	}
-	
+
 	@UiHandler("expandButton")
 	void onClickExpand(ClickEvent e) {
-		
+
 		this.presenter.handleExpandOrCollapse();
 	}
 }

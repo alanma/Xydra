@@ -5,15 +5,17 @@ package org.xydra.index.iterator;
  * 
  * @author xamde
  * 
- * @param <I> input type
- * @param <O> output type
+ * @param <I>
+ *            input type
+ * @param <O>
+ *            output type
  */
 public interface ITransformer<I, O> {
-    
-    /**
-     * @param in
-     * @return ipout type instance of type I transformed to the output type O
-     */
-    O transform(I in);
-    
+
+	/**
+	 * @param in
+	 * @return ipout type instance of type I transformed to the output type O
+	 */
+	O transform(I in);
+
 }

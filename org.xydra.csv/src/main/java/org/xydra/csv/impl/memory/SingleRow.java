@@ -10,76 +10,76 @@ import java.util.Set;
 import org.xydra.csv.ICell;
 import org.xydra.csv.IReadableRow;
 
-
 public class SingleRow extends AbstractReadableRow implements IReadableRow {
-	
+
 	private static final long serialVersionUID = -7970004628196813272L;
-	
-	private Map<String,ICell> map = new HashMap<String,ICell>();
-	
+
+	private Map<String, ICell> map = new HashMap<String, ICell>();
+
 	/**
-	 * @param key (the row name)
+	 * @param key
+	 *            (the row name)
 	 */
 	public SingleRow(final String key) {
 		super(key);
 	}
-	
+
 	public SingleRow(final String key, String[][] arrayOfPairs) {
 		this(key);
-		for(String[] pair : arrayOfPairs) {
+		for (String[] pair : arrayOfPairs) {
 			assert pair.length == 2;
 			this.map.put(pair[0], new Cell(pair[1]));
 		}
 	}
-	
-	public SingleRow(final String key, Map<String,String> map) {
+
+	public SingleRow(final String key, Map<String, String> map) {
 		this(key);
-		for(Entry<String,String> entry : map.entrySet()) {
+		for (Entry<String, String> entry : map.entrySet()) {
 			this.map.put(entry.getKey(), new Cell(entry.getValue()));
 		}
 	}
-	
+
 	@Override
 	public Collection<String> getColumnNames() {
 		return this.map.keySet();
 	}
-	
+
 	@Override
 	public Iterator<ICell> iterator() {
 		return this.map.values().iterator();
 	}
-	
+
 	protected void removeValue(String colName) {
 		this.map.remove(colName);
 	}
-	
+
 	@Override
 	public ICell getOrCreateCell(String columnName, boolean create) {
 		ICell cell = this.map.get(columnName);
-		if(cell == null && create) {
+		if (cell == null && create) {
 			cell = new Cell();
 			this.map.put(columnName, cell);
 		}
 		return cell;
 	}
-	
+
 	@Override
-	public Set<Entry<String,ICell>> entrySet() {
+	public Set<Entry<String, ICell>> entrySet() {
 		return this.map.entrySet();
 	}
-	
+
 	public void setValue(String columnName, String value, boolean initial) {
-		if(value == null) {
+		if (value == null) {
 			// nothing to set, keep table sparse
 		} else {
 			ICell cell = getOrCreateCell(columnName, true);
 			try {
 				cell.setValue(value, initial);
-			} catch(IllegalStateException e) {
+			} catch (IllegalStateException e) {
 				throw new IllegalStateException("Could not set value in column (" + columnName
-				        + ")", e);
+						+ ")", e);
 			}
 		}
 	}
-	
+
 }

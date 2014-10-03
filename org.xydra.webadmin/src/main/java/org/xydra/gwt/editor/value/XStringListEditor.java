@@ -8,32 +8,31 @@ import org.xydra.base.value.XStringListValue;
 import org.xydra.base.value.XStringValue;
 import org.xydra.base.value.XV;
 
+public class XStringListEditor extends XCollectionEditor<XStringValue, XStringListValue> {
 
-public class XStringListEditor extends XCollectionEditor<XStringValue,XStringListValue> {
-	
 	public XStringListEditor(Iterator<String> value, EditListener listener) {
 		super(listener);
-		
-		if(value == null)
+
+		if (value == null)
 			return;
-		
-		while(value.hasNext())
+
+		while (value.hasNext())
 			add(new XStringEditor(value.next(), this));
-		
+
 	}
-	
+
 	@Override
 	protected XStringListValue asCollectionValue(Iterator<XStringValue> entries) {
 		List<String> lst = new ArrayList<String>();
-		while(entries.hasNext())
+		while (entries.hasNext())
 			lst.add(entries.next().contents());
 		return XV.toStringListValue(lst);
 	}
-	
+
 	@Override
 	public void add() {
 		add(new XStringEditor(null, getListenerForEntry()));
 		changed();
 	}
-	
+
 }

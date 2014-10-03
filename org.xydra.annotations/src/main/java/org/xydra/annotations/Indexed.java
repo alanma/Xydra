@@ -5,7 +5,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-
 /**
  * Documentation: If this annotation is present, the field is indexed. String
  * denotes where. E.g. "server".

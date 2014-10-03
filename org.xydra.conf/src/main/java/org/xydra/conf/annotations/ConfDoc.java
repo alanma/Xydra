@@ -6,7 +6,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-
 /**
  * The documentation text for the annotated string
  */
@@ -14,10 +13,10 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.FIELD })
 public @interface ConfDoc {
-    
-    /**
-     * @return the configuration key that is required at runtime
-     */
-    String value();
-    
+
+	/**
+	 * @return the configuration key that is required at runtime
+	 */
+	String value();
+
 }

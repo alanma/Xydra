@@ -10,25 +10,24 @@ import org.xydra.base.rmof.XRevWritableModel;
 import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
 
-
 public abstract class AbstractGaeSnapshotServiceImpl implements IGaeSnapshotService {
-	
+
 	@Override
 	public XRevWritableField getFieldSnapshot(long modelRevisionNumber, boolean precise,
-	        XId objectId, XId fieldId) {
-		
+			XId objectId, XId fieldId) {
+
 		XRevWritableObject objectSnapshot = getObjectSnapshot(modelRevisionNumber, precise,
-		        objectId);
-		if(objectSnapshot == null) {
+				objectId);
+		if (objectSnapshot == null) {
 			return null;
 		}
-		
+
 		return objectSnapshot.getField(fieldId);
 	}
-	
+
 	@Override
 	public XRevWritableObject getObjectSnapshot(long modelRevisionNumber, boolean precise,
-	        XId objectId) {
+			XId objectId) {
 		/*
 		 * IMPROVE(performance, defer) generate the object snapshot directly.
 		 * While reading the change events, one could skip reading large,
@@ -41,46 +40,46 @@ public abstract class AbstractGaeSnapshotServiceImpl implements IGaeSnapshotServ
 		 * just the object from it.
 		 */
 		XRevWritableModel modelSnapshot = getModelSnapshot(modelRevisionNumber, precise);
-		if(modelSnapshot == null) {
+		if (modelSnapshot == null) {
 			return null;
 		}
-		
+
 		return modelSnapshot.getObject(objectId);
 	}
-	
+
 	@Override
 	public XRevWritableModel getPartialSnapshot(long snapshotRev, Iterable<XAddress> locks) {
-		
+
 		Iterator<XAddress> it = locks.iterator();
-		if(!it.hasNext()) {
+		if (!it.hasNext()) {
 			return null;
 		}
-		if(it.next().equals(getModelAddress())) {
+		if (it.next().equals(getModelAddress())) {
 			assert !it.hasNext();
 			return getModelSnapshot(snapshotRev, true);
 		}
-		
+
 		SimpleModel model = new SimpleModel(getModelAddress());
-		
-		for(XAddress lock : locks) {
-			
-			switch(lock.getAddressedType()) {
-			
+
+		for (XAddress lock : locks) {
+
+			switch (lock.getAddressedType()) {
+
 			case XFIELD: {
 				XRevWritableField field = getFieldSnapshot(snapshotRev, true, lock.getObject(),
-				        lock.getField());
+						lock.getField());
 				XRevWritableObject object = model.getObject(lock.getObject());
-				if(field != null) {
-					if(object == null) {
+				if (field != null) {
+					if (object == null) {
 						object = model.createObject(lock.getObject());
 						object.setRevisionNumber(XEvent.REVISION_NOT_AVAILABLE);
 					}
-					if(object.hasField(lock.getField())) {
+					if (object.hasField(lock.getField())) {
 						continue;
 					}
 					object.addField(field);
 					break;
-				} else if(object != null) {
+				} else if (object != null) {
 					break;
 				} else {
 					/*
@@ -91,24 +90,24 @@ public abstract class AbstractGaeSnapshotServiceImpl implements IGaeSnapshotServ
 					 */
 				}
 			}
-				
-				//$FALL-THROUGH$
+
+			//$FALL-THROUGH$
 			case XOBJECT: {
 				assert !model.hasObject(lock.getObject());
 				XRevWritableObject object = getObjectSnapshot(snapshotRev, true, lock.getObject());
-				if(object != null) {
+				if (object != null) {
 					model.addObject(object);
 				}
 				break;
 			}
-				
+
 			default:
 				assert false : "invalid lock: " + locks;
-				
+
 			}
 		}
-		
+
 		return model;
 	}
-	
+
 }

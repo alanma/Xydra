@@ -7,21 +7,20 @@ import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.user.client.ui.TextBox;
 
-
 public class XLongEditor extends AtomicXValueEditor<XLongValue> implements KeyPressHandler {
-	
+
 	private final TextBox editor = new TextBox();
-	
+
 	public XLongEditor(long oldValue, EditListener listener) {
 		super(listener);
-		
+
 		this.editor.setText(Long.toString(oldValue));
-		
+
 		this.editor.addKeyPressHandler(this);
-		
+
 		initWidget(this.editor);
 	}
-	
+
 	@Override
 	public XLongValue getValue() {
 		long v = 0L;
@@ -33,10 +32,10 @@ public class XLongEditor extends AtomicXValueEditor<XLongValue> implements KeyPr
 		// }
 		return XV.toValue(v);
 	}
-	
+
 	@Override
 	public void onKeyPress(KeyPressEvent e) {
-		
+
 		// char cc = e.getCharCode();
 		//
 		// switch(cc) {
@@ -61,5 +60,5 @@ public class XLongEditor extends AtomicXValueEditor<XLongValue> implements KeyPr
 		// e.stopPropagation();
 		//
 	}
-	
+
 }

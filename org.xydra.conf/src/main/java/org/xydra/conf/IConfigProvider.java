@@ -21,12 +21,12 @@ package org.xydra.conf;
  * @author xamde
  */
 public interface IConfigProvider {
-    
-    /**
-     * Set a number of configuration settings in the given conf
-     * 
-     * @param conf
-     */
-    void configure(IConfig conf);
-    
+
+	/**
+	 * Set a number of configuration settings in the given conf
+	 * 
+	 * @param conf
+	 */
+	void configure(IConfig conf);
+
 }

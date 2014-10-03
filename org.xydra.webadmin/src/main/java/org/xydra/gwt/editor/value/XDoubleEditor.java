@@ -7,21 +7,20 @@ import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.user.client.ui.TextBox;
 
-
 public class XDoubleEditor extends AtomicXValueEditor<XDoubleValue> implements KeyPressHandler {
-	
+
 	private final TextBox editor = new TextBox();
-	
+
 	public XDoubleEditor(double oldValue, EditListener listener) {
 		super(listener);
-		
+
 		this.editor.setText(Double.toString(oldValue));
-		
+
 		this.editor.addKeyPressHandler(this);
-		
+
 		initWidget(this.editor);
 	}
-	
+
 	@Override
 	public XDoubleValue getValue() {
 		double v = 0;
@@ -33,10 +32,10 @@ public class XDoubleEditor extends AtomicXValueEditor<XDoubleValue> implements K
 		// }
 		return XV.toValue(v);
 	}
-	
+
 	@Override
 	public void onKeyPress(KeyPressEvent e) {
-		
+
 		// char cc = e.getCharCode();
 		//
 		// switch(cc) {
@@ -62,7 +61,7 @@ public class XDoubleEditor extends AtomicXValueEditor<XDoubleValue> implements K
 		//
 		// e.preventDefault();
 		// e.stopPropagation();
-		
+
 	}
-	
+
 }

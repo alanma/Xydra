@@ -19,7 +19,6 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
-
 /**
  * Main Class. Singleton, that holds references to the most important global
  * objects:
@@ -47,74 +46,74 @@ import com.google.gwt.user.client.ui.Widget;
  * 
  */
 public class XyAdmin extends Composite {
-	
-	interface ViewUiBinder extends UiBinder<Widget,XyAdmin> {
+
+	interface ViewUiBinder extends UiBinder<Widget, XyAdmin> {
 	}
-	
+
 	private static ViewUiBinder uiBinder = GWT.create(ViewUiBinder.class);
-	
+
 	private Controller controller;
 	private DataModel model;
-	
+
 	private EventBus eventbus;
-	
+
 	@UiField
 	SelectionTree selectionTree;
-	
+
 	@UiField
 	EditorPanel editorPanel;
-	
+
 	@UiField
 	AddressWidget addressWidget;
-	
+
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(XyAdmin.class);
-	
+
 	private static XyAdmin instance;
-	
+
 	public XyAdmin(XyAdminServiceAsync service) {
 		instance = this;
-		
+
 		this.getModel().addRepoID(XX.toId("repo1"));
 		this.getModel().addRepoID(XX.toId("gae-repo"));
 		initWidget(uiBinder.createAndBindUi(this));
-		
+
 		SelectionTreePresenter selectionTreePresenter = new SelectionTreePresenter(
-		        this.selectionTree);
+				this.selectionTree);
 		EditorPanelPresenter editorPanelPresenter = new EditorPanelPresenter(this.editorPanel);
 		AddressWidgetPresenter addressWidgetPresenter = new AddressWidgetPresenter(
-		        this.addressWidget);
-		
+				this.addressWidget);
+
 		this.controller = new Controller(service, selectionTreePresenter, editorPanelPresenter,
-		        addressWidgetPresenter);
-		
+				addressWidgetPresenter);
+
 		this.getController().startPresenting();
-		
+
 	}
-	
+
 	public static XyAdmin getInstance() {
-		if(instance == null)
+		if (instance == null)
 			throw new IllegalStateException("Please init first with a service");
 		return instance;
 	}
-	
+
 	public synchronized Controller getController() {
-		
+
 		return this.controller;
 	}
-	
+
 	public synchronized DataModel getModel() {
-		if(this.model == null) {
+		if (this.model == null) {
 			this.model = new DataModel();
 		}
 		return this.model;
 	}
-	
+
 	public EventBus getEventBus() {
-		if(this.eventbus == null) {
+		if (this.eventbus == null) {
 			this.eventbus = GWT.create(SimpleEventBus.class);
 		}
 		return this.eventbus;
 	}
-	
+
 }

@@ -11,23 +11,22 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-
 public class SelectionTree extends Composite {
-	
+
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(XyAdmin.class);
-	
-	interface ViewUiBinder extends UiBinder<Widget,SelectionTree> {
+
+	interface ViewUiBinder extends UiBinder<Widget, SelectionTree> {
 	}
-	
+
 	private static ViewUiBinder uiBinder = GWT.create(ViewUiBinder.class);
-	
+
 	@UiField
 	VerticalPanel mainPanel;
-	
+
 	public SelectionTree() {
 		super();
 		initWidget(uiBinder.createAndBindUi(this));
-		
+
 	}
 }

@@ -13,30 +13,33 @@ import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.restless.utils.HtmlUtils;
 
-
 /**
  * A single wish with a title, price and URL for more information.
  * 
  * @author xamde
  */
 public class Wish {
-	
+
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(Wish.class);
-	
+
 	private XWritableObject xo;
-	
+
 	public static final XId TITLE = XX.toId("title");
 	public static final XId PRICE = XX.toId("price");
 	public static final XId URL = XX.toId("url");
-	
+
 	/**
 	 * Create a new wish
 	 * 
-	 * @param xo where new state data is persisted
-	 * @param title of the wish
-	 * @param price in euros
-	 * @param url product information
+	 * @param xo
+	 *            where new state data is persisted
+	 * @param title
+	 *            of the wish
+	 * @param price
+	 *            in euros
+	 * @param url
+	 *            product information
 	 */
 	public Wish(XWritableObject xo, String title, int price, String url) {
 		this(xo);
@@ -47,70 +50,71 @@ public class Wish {
 		assert getPrice() == price;
 		assert getUrl().equals(url);
 	}
-	
+
 	/**
 	 * Internal constructor for loading an already initialised
 	 * {@link XWritableObject}.
 	 * 
-	 * @param xo where to read state information from
+	 * @param xo
+	 *            where to read state information from
 	 */
 	public Wish(XWritableObject xo) {
 		this.xo = xo;
 	}
-	
+
 	public String toHtml() {
 		return "<b>"
-		        + HtmlUtils.link("/xmas/" + this.xo.getAddress().getRepository() + "/"
-		                + this.xo.getAddress().getModel() + "/" + this.xo.getId(), getTitle())
-		        + "</b> "
-		        +
+				+ HtmlUtils.link("/xmas/" + this.xo.getAddress().getRepository() + "/"
+						+ this.xo.getAddress().getModel() + "/" + this.xo.getId(), getTitle())
+				+ "</b> "
+				+
 
-		        "("
-		        + getPrice()
-		        + " EUR) "
-		        
-		        + HtmlUtils.link(getUrl(), getUrl())
-		        + " "
-		        
-		        + HtmlUtils.link("/xmas/" + this.xo.getAddress().getRepository() + "/"
-		                + this.xo.getAddress().getModel() + "/" + this.xo.getId() + "/delete",
-		                "[Delete this wish]")
-		        
-		        // TODO implement edit functionalities
-		        + HtmlUtils.link("/xmas/" + this.xo.getAddress().getRepository() + "/"
-		                + this.xo.getAddress().getModel() + "/" + this.xo.getId()
-		                + "/editName?name=test", "[Edit name]")
-		        + HtmlUtils.link("/xmas/" + this.xo.getAddress().getRepository() + "/"
-		                + this.xo.getAddress().getModel() + "/" + this.xo.getId()
-		                + "/editPrice?price=1", "[Edit price]")
-		        + HtmlUtils.link("/xmas/" + this.xo.getAddress().getRepository() + "/"
-		                + this.xo.getAddress().getModel() + "/" + this.xo.getId()
-		                + "/editUrl?url=www.test.test", "[Edit URL]")
+				"("
+				+ getPrice()
+				+ " EUR) "
 
-		        + "<br />\n";
+				+ HtmlUtils.link(getUrl(), getUrl())
+				+ " "
+
+				+ HtmlUtils.link("/xmas/" + this.xo.getAddress().getRepository() + "/"
+						+ this.xo.getAddress().getModel() + "/" + this.xo.getId() + "/delete",
+						"[Delete this wish]")
+
+				// TODO implement edit functionalities
+				+ HtmlUtils.link("/xmas/" + this.xo.getAddress().getRepository() + "/"
+						+ this.xo.getAddress().getModel() + "/" + this.xo.getId()
+						+ "/editName?name=test", "[Edit name]")
+				+ HtmlUtils.link("/xmas/" + this.xo.getAddress().getRepository() + "/"
+						+ this.xo.getAddress().getModel() + "/" + this.xo.getId()
+						+ "/editPrice?price=1", "[Edit price]")
+				+ HtmlUtils.link("/xmas/" + this.xo.getAddress().getRepository() + "/"
+						+ this.xo.getAddress().getModel() + "/" + this.xo.getId()
+						+ "/editUrl?url=www.test.test", "[Edit URL]")
+
+				+ "<br />\n";
 	}
-	
+
 	public String getTitle() {
 		XWritableField field = this.xo.getField(TITLE);
-		if(field == null)
+		if (field == null)
 			return "";
-		return ((XStringValue)field.getValue()).contents();
+		return ((XStringValue) field.getValue()).contents();
 	}
-	
+
 	public String getUrl() {
 		XWritableField field = this.xo.getField(URL);
-		if(field == null)
+		if (field == null)
 			return "";
-		return ((XStringValue)field.getValue()).contents();
+		return ((XStringValue) field.getValue()).contents();
 	}
-	
+
 	public int getPrice() {
 		XWritableField field = this.xo.getField(PRICE);
-		if(field == null)
+		if (field == null)
 			return -1;
-		return ((XIntegerValue)field.getValue()).contents();
+		return ((XIntegerValue) field.getValue()).contents();
 	}
-	
+
 	public void delete() {
 		XId modelId = this.xo.getAddress().getModel();
 		XId repoId = this.xo.getAddress().getRepository();

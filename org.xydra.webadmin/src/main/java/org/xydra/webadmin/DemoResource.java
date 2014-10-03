@@ -17,37 +17,36 @@ import org.xydra.restless.Restless;
 import org.xydra.store.rmof.impl.delegate.WritableRepositoryOnPersistence;
 import org.xydra.xgae.gaeutils.GaeTestfixer;
 
-
 public class DemoResource {
-	
+
 	public static final Logger log = LoggerFactory.getLogger(DemoResource.class);
 	public static final String PAGE_NAME = "Add Demo Data";
 	public static String URL;
-	
+
 	public static void restless(Restless restless, String prefix) {
 		URL = prefix + "/demo";
 		restless.addMethod(URL, "GET", DemoResource.class, "demo", true);
 	}
-	
+
 	public static void demo(HttpServletResponse res) throws IOException {
 		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
 		Writer w = Utils.startPage(res, PAGE_NAME, "");
-		
+
 		w.write("Generating phonebook demodata...");
 		w.flush();
 		XydraPersistence p = Utils.createPersistence(XX.toId("repo1"));
 		WritableRepositoryOnPersistence repository = new WritableRepositoryOnPersistence(p,
-		        XX.toId("DEMO"));
-		
+				XX.toId("DEMO"));
+
 		XRepository xr = new MemoryRepository(XyAdminApp.ACTOR, "pass", XX.toId("repo1"));
 		DemoModelUtil.addPhonebookModel(xr);
-		
+
 		w.write("  adding ...");
 		w.flush();
 		XCopyUtils.copyData(xr, repository);
 		w.write(" done");
-		
+
 		Utils.endPage(w);
 	}
-	
+
 }

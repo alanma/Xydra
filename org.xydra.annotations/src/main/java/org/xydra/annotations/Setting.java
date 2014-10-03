@@ -4,7 +4,6 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-
 /**
  * A setting that allows to fine-tune behaviour at runtime or compile time.
  * 
@@ -13,7 +12,7 @@ import java.lang.annotation.RetentionPolicy;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Setting {
-    
-    String value();
-    
+
+	String value();
+
 }

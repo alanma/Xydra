@@ -4,18 +4,18 @@ package org.xydra.annotations;
 @RunsInGWT(true)
 @RunsInAppEngine(false)
 public class Demo {
-	
+
 	@Indexed({ "server", "client" })
 	@NeverNull
 	String name;
-	
+
 	@CanBeNull
 	@Feature("security")
 	String password;
-	
+
 	@ModificationOperation
 	void setName(String name) {
 		this.name = name;
 	}
-	
+
 }

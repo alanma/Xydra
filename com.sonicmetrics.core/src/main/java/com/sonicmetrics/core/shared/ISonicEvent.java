@@ -4,7 +4,6 @@ import org.xydra.annotations.CanBeNull;
 import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.RunsInGWT;
 
-
 /**
  * Each sonic event answers the basic questions of journalism about an event:
  * when, who and what happened?
@@ -28,33 +27,33 @@ import org.xydra.annotations.RunsInGWT;
  */
 @RunsInGWT(true)
 public interface ISonicEvent extends ISonicPotentialEvent, Comparable<ISonicEvent> {
-    
-    /**
-     * @return the time-stamp of the event
-     */
-    long getWhen();
-    
-    /**
-     * @return the database key used to store the event. This helps to get only
-     *         new events when using such a key as a 'lastkey' parameter in a
-     *         REST query.
-     */
-    @CanBeNull
-    String getKey();
-    
-    /**
-     * Used by {@link ISonicDB} to set a key. May be set only once. Key must
-     * match internal time encoding.
-     * 
-     * @param key
-     */
-    void setKey(@NeverNull String key);
-    
-    /**
-     * @return a valid JSON string that looks like this
-     *         "{ 'key1'='value1'; 'key2'='value2' }"
-     */
-    @NeverNull
-    StringBuilder toJsonObject();
-    
+
+	/**
+	 * @return the time-stamp of the event
+	 */
+	long getWhen();
+
+	/**
+	 * @return the database key used to store the event. This helps to get only
+	 *         new events when using such a key as a 'lastkey' parameter in a
+	 *         REST query.
+	 */
+	@CanBeNull
+	String getKey();
+
+	/**
+	 * Used by {@link ISonicDB} to set a key. May be set only once. Key must
+	 * match internal time encoding.
+	 * 
+	 * @param key
+	 */
+	void setKey(@NeverNull String key);
+
+	/**
+	 * @return a valid JSON string that looks like this
+	 *         "{ 'key1'='value1'; 'key2'='value2' }"
+	 */
+	@NeverNull
+	StringBuilder toJsonObject();
+
 }

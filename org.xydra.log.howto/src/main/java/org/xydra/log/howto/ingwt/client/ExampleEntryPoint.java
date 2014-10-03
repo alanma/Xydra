@@ -17,11 +17,10 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
-
 public class ExampleEntryPoint implements EntryPoint {
-	
+
 	private static Logger log = LoggerFactory.getLogger(ExampleEntryPoint.class);
-	
+
 	/**
 	 * This is the entry point method.
 	 */
@@ -30,19 +29,19 @@ public class ExampleEntryPoint implements EntryPoint {
 		final Button sendButton = new Button("Send");
 		final TextBox nameField = new TextBox();
 		nameField.setText("GWT User");
-		
+
 		// We can add style names to widgets
 		sendButton.addStyleName("sendButton");
-		
+
 		// Add the nameField and sendButton to the RootPanel
 		// Use RootPanel.get() to get the entire body element
 		RootPanel.get("nameFieldContainer").add(nameField);
 		RootPanel.get("sendButtonContainer").add(sendButton);
-		
+
 		// Focus the cursor on the name field when the app loads
 		nameField.setFocus(true);
 		nameField.selectAll();
-		
+
 		// Create the popup dialog box
 		final DialogBox dialogBox = new DialogBox();
 		dialogBox.setText("Fake Remote Procedure Call that will never end");
@@ -61,7 +60,7 @@ public class ExampleEntryPoint implements EntryPoint {
 		dialogVPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
 		dialogVPanel.add(closeButton);
 		dialogBox.setWidget(dialogVPanel);
-		
+
 		// Add a handler to close the DialogBox
 		closeButton.addClickHandler(new ClickHandler() {
 			@Override
@@ -71,7 +70,7 @@ public class ExampleEntryPoint implements EntryPoint {
 				sendButton.setFocus(true);
 			}
 		});
-		
+
 		// Create a handler for the sendButton and nameField
 		class MyHandler implements ClickHandler, KeyUpHandler {
 			/**
@@ -81,17 +80,17 @@ public class ExampleEntryPoint implements EntryPoint {
 			public void onClick(ClickEvent event) {
 				sendNameToServer();
 			}
-			
+
 			/**
 			 * Fired when the user types in the nameField.
 			 */
 			@Override
 			public void onKeyUp(KeyUpEvent event) {
-				if(event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+				if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
 					sendNameToServer();
 				}
 			}
-			
+
 			/**
 			 * Send the name from the nameField to the server and wait for a
 			 * response.
@@ -104,17 +103,17 @@ public class ExampleEntryPoint implements EntryPoint {
 				log.info("Sending name " + textToServer);
 			}
 		}
-		
+
 		// Add a handler to send the name to the server
 		MyHandler handler = new MyHandler();
 		sendButton.addClickHandler(handler);
 		nameField.addKeyUpHandler(handler);
-		
+
 		log.trace("trace you");
 		log.debug("debug you");
 		log.info("info you");
 		log.warn("warn you");
 		log.error("error you");
-		
+
 	}
 }

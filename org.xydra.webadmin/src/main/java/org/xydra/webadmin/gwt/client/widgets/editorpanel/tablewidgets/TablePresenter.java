@@ -37,7 +37,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
-
 /**
  * Performs logic for table. So it:
  * 
@@ -56,78 +55,78 @@ import com.google.gwt.user.client.ui.VerticalPanel;
  * 
  */
 public class TablePresenter {
-	
+
 	public static enum Status {
-		
+
 		Deleted,
-		
+
 		NotPresent,
-		
+
 		Opened,
-		
+
 		Present;
 	}
-	
+
 	private static final Logger log = LoggerFactory.getLogger(TablePresenter.class);
-	
+
 	private int amountColumns;
-	
+
 	private String[] backgroundStyles = { "evenRow", "oddRow" };
-	
+
 	private List<XId> columnIDs = new ArrayList<XId>();
-	
+
 	private EditorPanelPresenter presenter;
-	
+
 	List<XId> rowList = new ArrayList<XId>();
-	
+
 	private ScrollPanel scrollPanel;
-	
+
 	private Grid contentTable;
-	
+
 	private Grid tableHeader;
-	
+
 	private VerticalPanel tablePanel;
-	
+
 	private ModelInformationPanel panel;
-	
-	private HashMap<XAddress,RowPresenter> rowsMap = new HashMap<XAddress,RowPresenter>();
-	
+
+	private HashMap<XAddress, RowPresenter> rowsMap = new HashMap<XAddress, RowPresenter>();
+
 	private HandlerRegistration handlerRegistration;
-	
+
 	public TablePresenter(EditorPanelPresenter editorPanelPresenter,
-	        ModelInformationPanel modelInformationPanel) {
+			ModelInformationPanel modelInformationPanel) {
 		this.presenter = editorPanelPresenter;
 		this.panel = modelInformationPanel;
-		
+
 	}
-	
+
 	public void generateTableOrShowInformation() {
-		if(this.handlerRegistration != null) {
+		if (this.handlerRegistration != null) {
 			XyAdmin.getInstance().getController().removeRegistration(this.handlerRegistration);
 			this.handlerRegistration.removeHandler();
 		}
-		
+
 		this.panel.clear();
-		
+
 		SessionCachedModel model = this.presenter.getCurrentModel();
-		if(!model.isEmpty()) {
+		if (!model.isEmpty()) {
 			VerticalPanel tableWidget = createTable(model);
 			this.panel.setData(tableWidget);
 			log.info("table for model " + this.presenter.getCurrentModelAddress().toString()
-			        + " built, now firing ViewBuiltEvent!");
-			
+					+ " built, now firing ViewBuiltEvent!");
+
 			Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-				
+
 				@Override
 				public void execute() {
 					EventHelper.fireViewBuiltEvent(TablePresenter.this.presenter
-					        .getCurrentModelAddress());
+							.getCurrentModelAddress());
 				}
 			});
-			
+
 		} else {
 			String problemText = "";
-			if(!model.knowsAllObjects()) {
+			if (!model.knowsAllObjects()) {
 				problemText = "No objects locally present!";
 			} else {
 				problemText = "No objects existing at all!";
@@ -140,118 +139,118 @@ public class TablePresenter {
 			dummyPanel.add(noObjectsLabel);
 			this.panel.setData(dummyPanel);
 		}
-		
+
 		this.handlerRegistration = EventHelper.addModelChangedListener(
-		        this.presenter.getCurrentModelAddress(), new IModelChangedEventHandler() {
-			        
-			        @Override
-			        public void onModelChange(ModelChangedEvent event) {
-				        handleModelChanges(event.getStatus(), event.getMoreInfos());
-			        }
-			        
-		        });
+				this.presenter.getCurrentModelAddress(), new IModelChangedEventHandler() {
+
+					@Override
+					public void onModelChange(ModelChangedEvent event) {
+						handleModelChanges(event.getStatus(), event.getMoreInfos());
+					}
+
+				});
 		XyAdmin.getInstance().getController().addRegistration(this.handlerRegistration);
 		log.info("handler registrated!");
-		
+
 	}
-	
+
 	private VerticalPanel createTable(SessionCachedModel model) {
-		
+
 		int maxColumnsWithRowHeader = determineColumnHeadersAndBuildPanel(model) + 1;
-		
+
 		buildTableContent(model, maxColumnsWithRowHeader);
-		
+
 		Window.addResizeHandler(new ResizeHandler() {
-			
+
 			@Override
 			public void onResize(ResizeEvent event) {
 				setScrollTableHeight();
 			}
-			
+
 		});
-		
+
 		return this.tablePanel;
 	}
-	
+
 	private int determineColumnHeadersAndBuildPanel(SessionCachedModel model) {
-		for(XId objectId : model) {
+		for (XId objectId : model) {
 			XWritableObject object = model.getObject(objectId);
-			for(XId xid : object) {
-				if(!this.columnIDs.contains(xid)) {
+			for (XId xid : object) {
+				if (!this.columnIDs.contains(xid)) {
 					this.columnIDs.add(xid);
 				}
 			}
 			Collections.sort(this.columnIDs, XidComparator.INSTANCE);
 		}
-		
+
 		this.amountColumns = this.columnIDs.size();
 		int maxColumnsWithRowHeader = this.amountColumns + 1;
-		
+
 		this.tableHeader = new Grid(1, maxColumnsWithRowHeader);
 		ColumnHeaderWidget idWidget = new ColumnHeaderWidget(XX.toId("ID"));
 		idWidget.setStyleName("fieldIDWidget rowHeaderWidth");
 		this.tableHeader.setWidget(0, 0, idWidget);
 		this.tableHeader.setStyleName("compactTable");
 		this.tableHeader.getRowFormatter().setStyleName(0, "oddRow");
-		
+
 		int count = 1;
-		for(XId columnsID : this.columnIDs) {
+		for (XId columnsID : this.columnIDs) {
 			this.tableHeader.setWidget(0, count, new ColumnHeaderWidget(columnsID));
 			count++;
 		}
-		
+
 		return maxColumnsWithRowHeader;
 	}
-	
+
 	private void buildTableContent(SessionCachedModel model, int maxColumnsWithRowHeader) {
-		
+
 		this.rowList.clear();
 		int rowCount = 0;
-		
-		for(XId objectID : model) {
+
+		for (XId objectID : model) {
 			this.rowList.add(objectID);
 			rowCount++;
 		}
-		
+
 		Collections.sort(this.rowList, XidComparator.INSTANCE);
-		
+
 		initUIComponents(maxColumnsWithRowHeader, rowCount);
-		
+
 		int count = 0;
-		for(XId objectId : model) {
-			
+		for (XId objectId : model) {
+
 			addRow(model, count, objectId);
-			
+
 			count++;
 		}
 	}
-	
+
 	private int addRow(SessionCachedModel model, int verticalRowPosition, XId objectId) {
 		XReadableObject currentObject = model.getObject(objectId);
 		String backgroundStyle = this.backgroundStyles[verticalRowPosition % 2];
-		
+
 		RowPresenter rowPresenter = new RowPresenter(verticalRowPosition, backgroundStyle,
-		        currentObject, this);
+				currentObject, this);
 		rowPresenter.presentRow(currentObject);
 		XAddress currentModelAddress = this.presenter.getCurrentModelAddress();
 		XAddress objectAddress = XX.resolveObject(currentModelAddress, objectId);
 		this.rowsMap.put(objectAddress, rowPresenter);
 		return verticalRowPosition;
 	}
-	
+
 	private void handleModelChanges(EntityStatus status, XId moreInfos) {
-		if(status.equals(EntityStatus.EXTENDED)) {
-			if(this.contentTable == null) {
+		if (status.equals(EntityStatus.EXTENDED)) {
+			if (this.contentTable == null) {
 				this.generateTableOrShowInformation();
-				
+
 			} else {
 				this.extendByRow(XX.resolveObject(this.presenter.getCurrentModelAddress(),
-				        moreInfos));
+						moreInfos));
 			}
 		}
-		
+
 	}
-	
+
 	private void extendByRow(XAddress newObjectsAddress) {
 		this.rowList.add(newObjectsAddress.getObject());
 		int position = this.rowList.size() - 1;
@@ -259,21 +258,21 @@ public class TablePresenter {
 		this.contentTable.insertRow(position);
 		SessionCachedModel model = this.presenter.getCurrentModel();
 		log.info("adding row for object " + newObjectsAddress.toString());
-		
+
 		addRow(model, position, newObjectsAddress.getObject());
 	}
-	
+
 	//
 	// public void scrollToField(XAddress fieldAddress) {
 	// this.scrollableFields.get(fieldAddress).scrollToMe();
 	// }
-	
+
 	private void setScrollTableHeight() {
 		String scrollTableHeight = "" + (Window.getClientHeight() - 93) + "px";
 		TablePresenter.this.scrollPanel.getElement().setAttribute("style",
-		        "overflow-y:overlay; position:relative; zoom:1; height: " + scrollTableHeight);
+				"overflow-y:overlay; position:relative; zoom:1; height: " + scrollTableHeight);
 	}
-	
+
 	private void initUIComponents(int maxColumnsWithRowHeader, int rowCount) {
 		this.contentTable = new Grid(rowCount, maxColumnsWithRowHeader - 1);
 		this.contentTable.setStyleName("compactTable");
@@ -285,33 +284,33 @@ public class TablePresenter {
 		this.tablePanel.add(this.tableHeader);
 		this.tablePanel.add(this.scrollPanel);
 	}
-	
+
 	public Grid getContentTable() {
 		return this.contentTable;
 	}
-	
+
 	public List<XId> getColumnIds() {
 		return this.columnIDs;
 	}
-	
+
 	public SessionCachedModel getModel() {
 		return this.presenter.getCurrentModel();
 	}
-	
+
 	public void checkAndResizeColumns(XAddress objectAddress, XId newFieldId) {
-		if(!this.columnIDs.contains(newFieldId)) {
+		if (!this.columnIDs.contains(newFieldId)) {
 			this.columnIDs.add(newFieldId);
 			int newAmountOfColumns = this.tableHeader.getColumnCount() + 1;
 			this.tableHeader.resizeColumns(newAmountOfColumns);
 			this.tableHeader.setWidget(0, newAmountOfColumns - 1,
-			        new ColumnHeaderWidget(newFieldId));
+					new ColumnHeaderWidget(newFieldId));
 			log.info("extended tableHeader by column " + newFieldId.toString() + ", now we have "
-			        + newAmountOfColumns + " columns");
-			
+					+ newAmountOfColumns + " columns");
+
 			this.contentTable.resizeColumns(newAmountOfColumns);
-			Set<Entry<XAddress,RowPresenter>> rows = this.rowsMap.entrySet();
-			for(Entry<XAddress,RowPresenter> row : rows) {
-				if(row.getKey().equals(objectAddress)) {
+			Set<Entry<XAddress, RowPresenter>> rows = this.rowsMap.entrySet();
+			for (Entry<XAddress, RowPresenter> row : rows) {
+				if (row.getKey().equals(objectAddress)) {
 					// nothing
 				} else {
 					// insert EmptyFieldWidget
@@ -320,32 +319,32 @@ public class TablePresenter {
 				}
 			}
 		}
-		
+
 	}
-	
+
 	public void expandAll(String expandButtonText) {
-		
+
 		Status status = Status.Present;
-		if(expandButtonText.equals("expand all objects")) {
+		if (expandButtonText.equals("expand all objects")) {
 		} else {
 			status = Status.Opened;
 		}
-		Set<Entry<XAddress,RowPresenter>> rows = this.rowsMap.entrySet();
-		for(Entry<XAddress,RowPresenter> row : rows) {
+		Set<Entry<XAddress, RowPresenter>> rows = this.rowsMap.entrySet();
+		for (Entry<XAddress, RowPresenter> row : rows) {
 			row.getValue().handleExpandOrCollapse(status);
 		}
-		
+
 	}
-	
+
 	public void showObjectAndField(XAddress desiredAddress) {
 		RowPresenter rowPresenter = this.rowsMap.get(XX.resolveObject(desiredAddress));
 		rowPresenter.handleExpandOrCollapse(Status.Opened);
 		XId fieldId = desiredAddress.getField();
-		if(fieldId != null) {
+		if (fieldId != null) {
 			rowPresenter.scrollToField(fieldId);
 		}
 		EventHelper.fireViewBuiltEvent(XX.toAddress(desiredAddress.getRepository(),
-		        desiredAddress.getModel(), desiredAddress.getObject(), null));
-		
+				desiredAddress.getModel(), desiredAddress.getObject(), null));
+
 	}
 }

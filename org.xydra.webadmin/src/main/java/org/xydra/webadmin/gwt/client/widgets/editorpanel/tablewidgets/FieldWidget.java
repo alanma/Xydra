@@ -20,7 +20,6 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-
 /**
  * For table fields with existing content
  * 
@@ -28,52 +27,52 @@ import com.google.gwt.user.client.ui.Widget;
  * 
  */
 public class FieldWidget extends Composite implements TableFieldWidget {
-	
+
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(XyAdmin.class);
-	
-	interface ViewUiBinder extends UiBinder<Widget,FieldWidget> {
+
+	interface ViewUiBinder extends UiBinder<Widget, FieldWidget> {
 	}
-	
+
 	private static ViewUiBinder uiBinder = GWT.create(ViewUiBinder.class);
-	
+
 	@UiField
 	VerticalPanel mainPanel;
-	
+
 	private XFieldEditor fieldEditor;
-	
+
 	public FieldWidget(RowPresenter rowPresenter, XId fieldId) {
 		super();
-		
+
 		initWidget(uiBinder.createAndBindUi(this));
-		
+
 		this.fieldEditor = new XFieldEditor(rowPresenter, fieldId);
 		this.mainPanel.insert(this.fieldEditor, 0);
 		this.fieldEditor.hideButtons();
 		this.addDomHandler(new MouseOverHandler() {
-			
+
 			@Override
 			public void onMouseOver(MouseOverEvent event) {
 				FieldWidget.this.fieldEditor.showButtons();
-				
+
 			}
 		}, MouseOverEvent.getType());
-		
+
 		this.addDomHandler(new MouseOutHandler() {
-			
+
 			@Override
 			public void onMouseOut(MouseOutEvent event) {
 				FieldWidget.this.fieldEditor.hideButtons();
-				
+
 			}
 		}, MouseOutEvent.getType());
 	}
-	
+
 	@Override
 	public void scrollToMe() {
 		Document.get().setScrollLeft(this.getAbsoluteLeft() - (Window.getClientWidth() / 2 - 50));
 		this.addStyleName("fadeOut");
-		
+
 		Timer timer1 = new Timer() {
 			@Override
 			public void run() {
@@ -81,9 +80,9 @@ public class FieldWidget extends Composite implements TableFieldWidget {
 				// FieldWidget.this.removeStyleName("highlightStyle");
 			}
 		};
-		
+
 		timer1.schedule(500);
-		
+
 		Timer timer2 = new Timer() {
 			@Override
 			public void run() {
@@ -91,8 +90,8 @@ public class FieldWidget extends Composite implements TableFieldWidget {
 				FieldWidget.this.removeStyleName("fadeOut");
 			}
 		};
-		
+
 		timer2.schedule(3000);
-		
+
 	}
 }

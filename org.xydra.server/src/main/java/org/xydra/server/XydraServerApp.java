@@ -6,10 +6,10 @@ package org.xydra.server;
  * @author xamde
  */
 public interface XydraServerApp {
-    
-    /**
-     * Set up internal parts to handle a single (or multiple) requests
-     */
-    void init();
-    
+
+	/**
+	 * Set up internal parts to handle a single (or multiple) requests
+	 */
+	void init();
+
 }

@@ -9,55 +9,54 @@ import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.user.client.ui.TextBox;
 
-
 public class XAddressEditor extends AtomicXValueEditor<XAddress> implements KeyPressHandler,
-        KeyDownHandler {
-	
+		KeyDownHandler {
+
 	private static final String nameStartChar = "A-Z_a-z\\xC0-\\xD6\\xD8-\\xF6"
-	        + "\\u00F8-\\u02FF\\u0370-\\u037D\\u037F-\\u1FFF\\u200C-\\u200D"
-	        + "\\u2070-\\u218F\\u2C00-\\u2FEF\\u3001-\\uD7FF\\uF900-\\uFDCF" + "\\uFDF0-\\uFFFD";
+			+ "\\u00F8-\\u02FF\\u0370-\\u037D\\u037F-\\u1FFF\\u200C-\\u200D"
+			+ "\\u2070-\\u218F\\u2C00-\\u2FEF\\u3001-\\uD7FF\\uF900-\\uFDCF" + "\\uFDF0-\\uFFFD";
 	private static final String nameChar = nameStartChar
-	        + "\\-\\.0-9\\xB7\\u0300-\u036F\\u203F-\\u2040/";
+			+ "\\-\\.0-9\\xB7\\u0300-\u036F\\u203F-\\u2040/";
 	@SuppressWarnings("unused")
 	private static final String startClass = "[" + nameStartChar + "]";
 	@SuppressWarnings("unused")
 	private static final String nameClass = "[" + nameChar + "]";
-	
+
 	private final TextBox editor = new TextBox();
-	
+
 	public XAddressEditor(XAddress value, EditListener listener) {
 		super(listener);
-		
-		if(value != null)
+
+		if (value != null)
 			this.editor.setText(value.toString());
-		
+
 		this.editor.addKeyPressHandler(this);
 		this.editor.addKeyDownHandler(this);
-		
+
 		initWidget(this.editor);
 	}
-	
+
 	public void setValue(XAddress value) {
-		if(value != null)
+		if (value != null)
 			this.editor.setText(value.toString());
 	}
-	
+
 	@Override
 	public XAddress getValue() {
 		String text = this.editor.getText();
-		if(text.equals("")) {
+		if (text.equals("")) {
 			return null;
 		}
 		XAddress address = XX.toAddress(text);
-		if(address == null) {
+		if (address == null) {
 			return null;
 		}
 		return address;
 	}
-	
+
 	@Override
 	public void onKeyPress(KeyPressEvent e) {
-		
+
 		// char cc = e.getCharCode();
 		//
 		// switch(cc) {
@@ -88,9 +87,9 @@ public class XAddressEditor extends AtomicXValueEditor<XAddress> implements KeyP
 		// e.preventDefault();
 		// e.stopPropagation();
 		// }
-		
+
 	}
-	
+
 	@Override
 	public void onKeyDown(KeyDownEvent e) {
 		// boolean allowed = true;
@@ -131,5 +130,5 @@ public class XAddressEditor extends AtomicXValueEditor<XAddress> implements KeyP
 		// }
 		//
 	}
-	
+
 }

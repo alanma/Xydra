@@ -5,27 +5,26 @@ import org.xydra.base.XId;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.oo.runtime.shared.SharedProxy;
 
-
 public class GwtXydraMapped implements IHasXId {
-    
-    /** object-oriented proxy */
-    protected SharedProxy oop;
-    
-    /** For GWT.create only */
-    public GwtXydraMapped() {
-    }
-    
-    public void init(XWritableModel model, XId id) {
-        this.oop = new SharedProxy(model, id);
-    }
-    
-    public GwtXydraMapped(XWritableModel model, XId id) {
-        this.oop = new SharedProxy(model, id);
-    }
-    
-    @Override
+
+	/** object-oriented proxy */
+	protected SharedProxy oop;
+
+	/** For GWT.create only */
+	public GwtXydraMapped() {
+	}
+
+	public void init(XWritableModel model, XId id) {
+		this.oop = new SharedProxy(model, id);
+	}
+
+	public GwtXydraMapped(XWritableModel model, XId id) {
+		this.oop = new SharedProxy(model, id);
+	}
+
+	@Override
 	public XId getId() {
-        return this.oop.getId();
-    }
-    
+		return this.oop.getId();
+	}
+
 }

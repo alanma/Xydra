@@ -17,9 +17,9 @@ public class RestlessUtils {
 
 	/**
 	 * @param req
-	 *            @NeverNull
+	 * @NeverNull
 	 * @param pathTemplate
-	 *            @NeverNull
+	 * @NeverNull
 	 * @return a single map of key-value pairs extracted from the path-part of
 	 *         the request-URI
 	 */

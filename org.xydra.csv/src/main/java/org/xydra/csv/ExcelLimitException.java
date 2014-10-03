@@ -7,15 +7,15 @@ package org.xydra.csv;
  * 
  */
 public class ExcelLimitException extends RuntimeException {
-	
+
 	private static final long serialVersionUID = 9164248069465424019L;
-	
+
 	public ExcelLimitException(String msg) {
 		super(msg);
 	}
-	
+
 	public ExcelLimitException(String msg, Exception e) {
 		super(msg, e);
 	}
-	
+
 }

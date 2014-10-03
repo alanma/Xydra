@@ -396,13 +396,13 @@ class RestlessMethod {
 	 * precedence
 	 * 
 	 * @param params
-	 *            @NeverNull
+	 * @NeverNull
 	 * @param restless
-	 *            @NeverNull
+	 * @NeverNull
 	 * @param req
-	 *            @NeverNull
+	 * @NeverNull
 	 * @param res
-	 *            @NeverNull
+	 * @NeverNull
 	 * 
 	 * @return true if method launched successfully, i.e. parameters matched
 	 * @throws IOException
@@ -587,7 +587,7 @@ class RestlessMethod {
 	/**
 	 * 
 	 * @param value
-	 *            @CanBeNull
+	 * @CanBeNull
 	 * @return true, if the given value is null or equals the empty string
 	 */
 	private static boolean notSet(@CanBeNull Object value) {
@@ -682,9 +682,9 @@ class RestlessMethod {
 	 * {@link Restless#addExceptionHandler(RestlessExceptionHandler)}
 	 * 
 	 * @param cause
-	 *            @NeverNull
+	 * @NeverNull
 	 * @param context
-	 *            @NeverNull
+	 * @NeverNull
 	 * @return
 	 */
 	private static boolean callGlobalExceptionHandlers(@NeverNull Throwable cause,
@@ -705,7 +705,7 @@ class RestlessMethod {
 	 * simply return the given parameter itself.
 	 * 
 	 * @param instanceOrClass
-	 *            @NeverNull
+	 * @NeverNull
 	 * @return an instance
 	 */
 	private static Object toInstance(@NeverNull Object instanceOrClass) {
@@ -788,9 +788,9 @@ class RestlessMethod {
 	 * Note: POST-parameters are ignored.
 	 * 
 	 * @param urlParameter
-	 *            @NeverNull
+	 * @NeverNull
 	 * @param cookieMap
-	 *            @NeverNull
+	 * @NeverNull
 	 * @return an existing request id found in URL parameters or cookies.
 	 */
 	private static String reuseOrCreateUniqueRequestIdentifier(

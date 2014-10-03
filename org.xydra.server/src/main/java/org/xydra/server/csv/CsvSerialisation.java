@@ -41,7 +41,6 @@ import org.xydra.csv.impl.memory.CsvTable;
 import org.xydra.csv.impl.memory.Row;
 import org.xydra.index.query.Pair;
 
-
 /**
  * Write any {@link XReadableModel} into a CSV file. One row per {@link XObject}
  * , one column per {@link XField}. Values are serialised as JSON fragments.
@@ -53,9 +52,9 @@ import org.xydra.index.query.Pair;
  */
 @RunsInGWT(false)
 public class CsvSerialisation {
-	
+
 	private static final String TYPE_SUFFIX = "__type";
-	
+
 	/**
 	 * @param model
 	 * @param w
@@ -67,7 +66,7 @@ public class CsvSerialisation {
 		table.writeTo(w);
 		return table.rowCount();
 	}
-	
+
 	/**
 	 * @param model
 	 * @return the CsvTable
@@ -75,21 +74,21 @@ public class CsvSerialisation {
 	 */
 	public static CsvTable toCsvTable(XReadableModel model) throws IOException {
 		CsvTable table = new CsvTable(false);
-		for(XId oid : model) {
+		for (XId oid : model) {
 			Row row = table.getOrCreateRow(oid.toString(), true);
 			XReadableObject xo = model.getObject(oid);
-			for(XId fid : xo) {
+			for (XId fid : xo) {
 				XReadableField xf = xo.getField(fid);
 				assert xf != null;
 				XValue xvalue = xf.getValue();
 				String csvTypeStr;
 				String csvValueStr;
-				if(xvalue == null) {
+				if (xvalue == null) {
 					// a boolean field?
 					csvTypeStr = ValueType.Boolean.name();
 					csvValueStr = "fieldPresent";
 				} else {
-					Pair<String,String> pair = ValueDeSerializer.toStringPair(xvalue);
+					Pair<String, String> pair = ValueDeSerializer.toStringPair(xvalue);
 					csvTypeStr = pair.getFirst();
 					csvValueStr = pair.getSecond();
 				}
@@ -99,7 +98,7 @@ public class CsvSerialisation {
 		}
 		return table;
 	}
-	
+
 	/**
 	 * @param r
 	 * @param model
@@ -109,15 +108,15 @@ public class CsvSerialisation {
 	public static int readFromCsv(Reader r, XWritableModel model) throws IOException {
 		CsvTable table = new CsvTable();
 		table.readFrom(r, true);
-		for(IRow row : table) {
+		for (IRow row : table) {
 			String oidStr = row.getKey();
 			XId oid = XX.toId(oidStr);
 			XWritableObject xo = model.createObject(oid);
-			for(String col : row.getColumnNames()) {
-				if(col.endsWith(TYPE_SUFFIX))
+			for (String col : row.getColumnNames()) {
+				if (col.endsWith(TYPE_SUFFIX))
 					continue;
 				String valueStr = row.getValue(col);
-				if(valueStr == null)
+				if (valueStr == null)
 					continue;
 				String typeStr = row.getValue(col + TYPE_SUFFIX);
 				try {
@@ -125,35 +124,35 @@ public class CsvSerialisation {
 					XId fid = XX.toId(col);
 					XWritableField field = xo.createField(fid);
 					field.setValue(value);
-				} catch(IllegalArgumentException e) {
+				} catch (IllegalArgumentException e) {
 					throw new RuntimeException("Could not parse " + row + " as Xydra data", e);
 				}
 			}
 		}
 		return table.rowCount();
 	}
-	
+
 	protected static String serialize(XValue value) {
 		// set up corresponding serialiser & parser
 		JsonSerializer serializer = new JsonSerializer();
 		// serialise with revisions
 		XydraOut out = serializer.create();
 		out.enableWhitespace(false, false);
-		
+
 		SerializedValue.serialize(value, out);
-		
+
 		String data = out.getData();
-		
+
 		return data;
 	}
-	
+
 	protected static XValue deserialize(String data) {
 		JsonParser parser = new JsonParser();
 		XydraElement xydraElement = parser.parse(data);
 		XValue value = SerializedValue.toValue(xydraElement);
 		return value;
 	}
-	
+
 	public static void main(String[] args) throws IOException {
 		XValue test = XV.toIntegerListValue(Arrays.asList(11, 12, 13));
 		String test2 = serialize(test);
@@ -161,7 +160,7 @@ public class CsvSerialisation {
 		System.out.println(test);
 		System.out.println(test2);
 		System.out.println(test3);
-		
+
 		XRepository repo = new MemoryRepository(XX.toId("actor"), "secret", XX.toId("repo"));
 		DemoModelUtil.addPhonebookModel(repo);
 		XModel model = repo.getModel(DemoModelUtil.PHONEBOOK_ID);
@@ -170,7 +169,7 @@ public class CsvSerialisation {
 		Writer w = new OutputStreamWriter(fout, "utf-8");
 		writeToCsv(model, w);
 		w.close();
-		
+
 		FileInputStream fin = new FileInputStream(f);
 		InputStreamReader in = new InputStreamReader(fin, "utf-8");
 		SimpleModel model2 = new SimpleModel(XX.toAddress("/repo1/model1"));

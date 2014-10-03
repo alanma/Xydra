@@ -6,7 +6,6 @@ import java.util.GregorianCalendar;
 
 import com.sonicmetrics.core.shared.util.SharedIndexedDay;
 
-
 /**
  * Converts from long UTC timestamps to indexed days. Days are indexes after
  * some defined 'BIG BANG'-like moment. Every day is 24 hours long. This implies
@@ -20,28 +19,28 @@ import com.sonicmetrics.core.shared.util.SharedIndexedDay;
  * @author xamde
  */
 public class IndexedDay extends SharedIndexedDay {
-	
+
 	private static final SimpleDateFormat ISO_DATE_FORMAT = new SimpleDateFormat("yyyy'-'MM'-'dd");
-	
+
 	/** 2007-12-24T18:21Z */
 	private static final SimpleDateFormat ISO_DATETIME_FORMAT = new SimpleDateFormat(
-	        "yyyy'-'MM'-'dd'T'HH':'mm':'ss','SSS'Z'");
-	
+			"yyyy'-'MM'-'dd'T'HH':'mm':'ss','SSS'Z'");
+
 	protected static void assertAfterBigBang(long timeUtc, long bigBang) {
-		if(timeUtc < bigBang) {
+		if (timeUtc < bigBang) {
 			throw new IllegalArgumentException("not a valid timeStamp - must be after "
-			        + toIsoDateTimeString(bigBang) + ", was on " + toIsoDateTimeString(timeUtc));
+					+ toIsoDateTimeString(bigBang) + ", was on " + toIsoDateTimeString(timeUtc));
 		}
 	}
-	
+
 	public static String toUpperIsoDateString(int indexedDay, long bigBang) {
 		return toIsoDateString(toUpperUtc(indexedDay, bigBang));
 	}
-	
+
 	public static String toIsoDateString(int indexedDay, long bigBang) {
 		return toIsoDateString(toUtc(indexedDay, bigBang));
 	}
-	
+
 	/**
 	 * @param utcTime
 	 * @return the UTC time as a ISO8601 date string in the format yyyy-MM-dd
@@ -49,13 +48,14 @@ public class IndexedDay extends SharedIndexedDay {
 	public static String toIsoDateString(long utcTime) {
 		return ISO_DATE_FORMAT.format(new Date(utcTime));
 	}
-	
+
 	public static String toIsoDateTimeString(long utcTime) {
 		return ISO_DATETIME_FORMAT.format(new Date(utcTime));
 	}
-	
+
 	/**
-	 * @param isoDate in format yyyy-MM-dd
+	 * @param isoDate
+	 *            in format yyyy-MM-dd
 	 * @param bigBang
 	 * @return the default (lower) indexed day
 	 */
@@ -70,11 +70,11 @@ public class IndexedDay extends SharedIndexedDay {
 			GregorianCalendar gc = new GregorianCalendar();
 			gc.set(year, month, day, 0, 0, 0);
 			long timeInMillis = gc.getTimeInMillis();
-			
+
 			return toIndexedDay(timeInMillis, bigBang);
-		} catch(NumberFormatException e) {
+		} catch (NumberFormatException e) {
 			throw new IllegalArgumentException("Could not parse '" + isoDate + "'", e);
 		}
 	}
-	
+
 }

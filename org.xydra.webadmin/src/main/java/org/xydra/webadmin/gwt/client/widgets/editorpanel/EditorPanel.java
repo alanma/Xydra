@@ -11,36 +11,35 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-
 public class EditorPanel extends Composite implements IEditorPanel {
-	
+
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(XyAdmin.class);
-	
-	interface ViewUiBinder extends UiBinder<Widget,EditorPanel> {
+
+	interface ViewUiBinder extends UiBinder<Widget, EditorPanel> {
 	}
-	
+
 	private static ViewUiBinder uiBinder = GWT.create(ViewUiBinder.class);
-	
+
 	@UiField
 	VerticalPanel mainPanel;
-	
+
 	public EditorPanel() {
 		initWidget(uiBinder.createAndBindUi(this));
-		
+
 	}
-	
+
 	@Override
 	public void init() {
-		
+
 	}
-	
+
 	@Override
 	public void add(Widget widget) {
 		this.mainPanel.add(widget);
-		
+
 	}
-	
+
 	@Override
 	public void clear() {
 		this.mainPanel.clear();

@@ -5,7 +5,6 @@ import org.xydra.log.api.LoggerFactory;
 
 import com.google.appengine.api.utils.SystemProperty;
 
-
 /**
  * A helper class to turn the simulated local AppEngine environment into a
  * singleton.
@@ -21,85 +20,85 @@ import com.google.appengine.api.utils.SystemProperty;
  * @author xamde
  */
 public class GaeMyAdmin_GaeTestfixer {
-	
+
 	private static final Logger log = LoggerFactory.getLogger(GaeMyAdmin_GaeTestfixer.class);
-	
+
 	private static boolean enabled = false;
 	/** checking for production env only once makes this run faster */
 	private static boolean checkedProduction = false;
-	
+
 	public static void enable() {
 		log.debug("Enabling test fixer.");
 		enabled = true;
 		checkedProduction = false;
 	}
-	
+
 	public static boolean isEnabled() {
 		return enabled;
 	}
-	
+
 	/**
 	 * @return true if app is running on a real remote GAE server
 	 */
 	public static boolean inProduction() {
 		return SystemProperty.environment.get() != null
-		        && SystemProperty.environment.value().equals(
-		                SystemProperty.Environment.Value.Production);
+				&& SystemProperty.environment.value().equals(
+						SystemProperty.Environment.Value.Production);
 	}
-	
+
 	/**
 	 * Fix testing in development mode which spawns multiple threads, which
 	 * cannot not happen on AppEngine in production mode.
 	 * 
-	 * This method just returns, doing nothing if {@link GaeMyAdmin_GaeTestfixer#enable()}
-	 * is not called from main code.
+	 * This method just returns, doing nothing if
+	 * {@link GaeMyAdmin_GaeTestfixer#enable()} is not called from main code.
 	 */
 	public static void initialiseHelperAndAttachToCurrentThread() {
-		if(!enabled) {
+		if (!enabled) {
 			return;
 		}
-		
+
 		/* if enabled and in production: self-disable */
-		if(!checkedProduction) {
+		if (!checkedProduction) {
 			log.debug("Testing if we are on the real GAE in production...");
 			checkedProduction = true;
-			if(inProduction()) {
+			if (inProduction()) {
 				log.debug("Testfixer: Running on AppEngine in production: Auto-disabled test fixer.");
 				enabled = false;
 				return;
 			} else {
 				log.debug("Testfixer: Running locally");
 			}
-			
+
 			/* second check: can we load this class: 'LocalServiceTestHelper' ? */
 			try {
 				ClassLoader cl = Thread.currentThread().getContextClassLoader();
 				Class.forName(
-				        "com.google.appengine.tools.development.testing.LocalServiceTestHelper",
-				        false, cl);
+						"com.google.appengine.tools.development.testing.LocalServiceTestHelper",
+						false, cl);
 				log.debug("We can load the test classes.");
-			} catch(ClassNotFoundException e) {
+			} catch (ClassNotFoundException e) {
 				/* ah, we are in production */
 				log.warn(
-				        "We are in fact in production (or a jar is missing): Auto-disabled test fixer.",
-				        e);
+						"We are in fact in production (or a jar is missing): Auto-disabled test fixer.",
+						e);
 				enabled = false;
 				return;
-			} catch(NoClassDefFoundError e) {
+			} catch (NoClassDefFoundError e) {
 				/* ah, we are in production */
 				log.warn(
-				        "We are in fact in production (or a jar is missing): Auto-disabled test fixer.",
-				        e);
+						"We are in fact in production (or a jar is missing): Auto-disabled test fixer.",
+						e);
 				enabled = false;
 				return;
 			}
 		}
-		
+
 		GaeMyAdmin_GaeTestFixer_LocalPart.initialiseHelperAndAttachToCurrentThread();
 	}
-	
+
 	public static synchronized void tearDown() {
 		GaeMyAdmin_GaeTestFixer_LocalPart.tearDown();
 	}
-	
+
 }

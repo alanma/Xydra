@@ -36,65 +36,64 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-
 public class EntityWidget extends Composite {
-	
+
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(XyAdmin.class);
-	
-	interface ViewUiBinder extends UiBinder<Widget,EntityWidget> {
+
+	interface ViewUiBinder extends UiBinder<Widget, EntityWidget> {
 	}
-	
+
 	private static ViewUiBinder uiBinder = GWT.create(ViewUiBinder.class);
-	
+
 	@UiField
 	VerticalPanel panel;
-	
+
 	@UiField
 	HTMLPanel buttonPanel;
-	
+
 	@UiField
 	HorizontalPanel idPanel;
-	
+
 	@UiField
 	Anchor idLabel;
-	
+
 	@UiField
 	Label revisionLabel;
-	
+
 	@UiField
 	Button removeButton;
-	
+
 	@UiField
 	Button addButton;
-	
+
 	@UiField
 	Button showAddressButton;
-	
+
 	private XAddress address;
-	
+
 	private String addText;
 	private String addTitle;
 	private String removeTitle;
-	
+
 	private String addFieldText = "enter Field ID";
 	private String addObjectText = "enter Object ID";
 	private String addFieldButtonTitle = "add new field";
 	private String addObjectButtonTitle = "add new object";
 	private String removeObjectButtonTitle = "remove this object";
 	private String removeModelButtonTitle = "remove this model";
-	
+
 	private HandlerRegistration removeClickHandlerRegistration;
-	
+
 	private Presenter presenter;
-	
+
 	public EntityWidget(Presenter presenter, XAddress address, ClickHandler anchorClickHandler) {
 		super();
-		
+
 		this.presenter = presenter;
 		this.address = address;
 		initWidget(uiBinder.createAndBindUi(this));
-		
+
 		Image deleteImg = new Image(BundledRes.INSTANCE.images().delete());
 		this.removeButton.getElement().appendChild(deleteImg.getElement());
 		this.removeButton.setStyleName("imageButtonStyle");
@@ -107,52 +106,52 @@ public class EntityWidget extends Composite {
 		this.removeButton.getElement().setAttribute("style", "float: right");
 		this.addButton.getElement().setAttribute("style", "float: left");
 		int rightPosition = 37;
-		if(this.address.getObject() != null) {
+		if (this.address.getObject() != null) {
 			rightPosition = 28;
 		}
 		this.showAddressButton.getElement().setAttribute("style",
-		        "float: right; position: relative; right: " + rightPosition + "% ");
-		
+				"float: right; position: relative; right: " + rightPosition + "% ");
+
 		XId entityId = address.getModel();
 		long revisionNumber = -1000l;
 		SessionCachedModel model = XyAdmin.getInstance().getModel()
-		        .getRepo(address.getRepository()).getModel(entityId);
-		
-		switch(address.getAddressedType()) {
+				.getRepo(address.getRepository()).getModel(entityId);
+
+		switch (address.getAddressedType()) {
 		case XMODEL:
 			// entityID stays the same
 			revisionNumber = model.getRevisionNumber();
 			this.addText = this.addObjectText;
 			this.addTitle = this.addObjectButtonTitle;
 			this.removeTitle = this.removeModelButtonTitle;
-			
+
 			this.idPanel.addStyleName("modelIDLabel");
 			this.idLabel.addStyleName("modelAnchorStyle");
 			break;
 		case XOBJECT:
-			
+
 			this.addText = this.addFieldText;
 			this.addTitle = this.addFieldButtonTitle;
 			this.removeTitle = this.removeObjectButtonTitle;
 			entityId = address.getObject();
 			XWritableObject object = model.getObject(entityId);
 			revisionNumber = object.getRevisionNumber();
-			
+
 			this.idPanel.addStyleName("objectIDLabel");
 			break;
 		default:
 			// nothing
 		}
-		
+
 		this.idLabel.setText(entityId.toString());
 		this.idLabel.addClickHandler(anchorClickHandler);
 		this.revisionLabel.setText("rev. " + revisionNumber);
 		this.addButton.setTitle(this.addTitle);
 		this.removeButton.setTitle(this.removeTitle);
 		this.showAddressButton.setTitle("show entity's address");
-		
+
 		this.addDomHandler(new MouseOverHandler() {
-			
+
 			@Override
 			public void onMouseOver(MouseOverEvent event) {
 				EntityWidget.this.addButton.setVisible(true);
@@ -160,49 +159,49 @@ public class EntityWidget extends Composite {
 				EntityWidget.this.showAddressButton.setVisible(true);
 			}
 		}, MouseOverEvent.getType());
-		
+
 		this.addDomHandler(new MouseOutHandler() {
-			
+
 			@Override
 			public void onMouseOut(MouseOutEvent event) {
 				EntityWidget.this.addButton.setVisible(false);
 				EntityWidget.this.removeButton.setVisible(false);
 				EntityWidget.this.showAddressButton.setVisible(false);
-				
+
 			}
 		}, MouseOutEvent.getType());
-		
+
 		this.addButton.setVisible(false);
 		this.removeButton.setVisible(false);
 		this.showAddressButton.setVisible(false);
-		
+
 		this.removeClickHandlerRegistration = this.removeButton.addClickHandler(new ClickHandler() {
-			
+
 			@Override
 			public void onClick(ClickEvent event) {
 				RemoveElementDialog removeDialog = new RemoveElementDialog(
-				        EntityWidget.this.presenter, EntityWidget.this.address);
+						EntityWidget.this.presenter, EntityWidget.this.address);
 				removeDialog.show();
-				
+
 			}
 		});
-		
+
 	}
-	
+
 	@UiHandler("addButton")
 	void onClickAdd(ClickEvent event) {
 		AddElementDialog addDialog = new AddElementDialog(this.presenter,
-		        EntityWidget.this.address, this.addText);
+				EntityWidget.this.address, this.addText);
 		addDialog.show();
 		addDialog.selectEverything();
-		
+
 	}
-	
+
 	@UiHandler("showAddressButton")
 	void onClickShow(ClickEvent event) {
 		String entityIdString = "";
 		XType entitysType = this.address.getAddressedType();
-		switch(entitysType) {
+		switch (entitysType) {
 		case XFIELD:
 			entityIdString = " field " + this.address.getField().toString();
 			break;
@@ -218,37 +217,37 @@ public class EntityWidget extends Composite {
 		AddressDialog addressDialog = new AddressDialog(entityIdString, this.address.toString());
 		addressDialog.show();
 		addressDialog.selectEverything();
-		
+
 	}
-	
+
 	public void setDeleteModelDialog() {
 		this.removeClickHandlerRegistration.removeHandler();
 		this.removeButton.addClickHandler(new ClickHandler() {
-			
+
 			@SuppressWarnings("unused")
 			@Override
 			public void onClick(ClickEvent event) {
-				
+
 				new RemoveModelDialog(EntityWidget.this.presenter, EntityWidget.this.address);
-				
+
 			}
 		});
 	}
-	
+
 	public void setStatusDeleted() {
 		this.idLabel.addStyleName("deletedStyle");
-		
+
 	}
-	
+
 	public void setRevisionUnknown() {
 		this.revisionLabel.setText("???");
 	}
-	
+
 	public void setRevisionNumber(long modelsRevisionNumber) {
 		this.revisionLabel.setText("Rev. " + modelsRevisionNumber);
-		
+
 	}
-	
+
 	public void removeStatusDeleted() {
 		this.idLabel.removeStyleName("deletedStyle");
 	}

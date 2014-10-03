@@ -9,9 +9,8 @@ import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.user.client.ui.TextBox;
 
-
 public class XIdEditor extends AtomicXValueEditor<XId> implements KeyPressHandler, KeyDownHandler {
-	
+
 	// private static final String nameStartChar =
 	// "A-Z_a-z\\xC0-\\xD6\\xD8-\\xF6"
 	// + "\\u00F8-\\u02FF\\u0370-\\u037D\\u037F-\\u1FFF\\u200C-\\u200D"
@@ -21,21 +20,21 @@ public class XIdEditor extends AtomicXValueEditor<XId> implements KeyPressHandle
 	// + "\\-\\.0-9\\xB7\\u0300-\u036F\\u203F-\\u2040";
 	// private static final String startClass = "[" + nameStartChar + "]";
 	// private static final String nameClass = "[" + nameChar + "]";
-	
+
 	private final TextBox editor = new TextBox();
-	
+
 	public XIdEditor(XId value, EditListener listener) {
 		super(listener);
-		
-		if(value != null)
+
+		if (value != null)
 			this.editor.setText(value.toString());
-		
+
 		this.editor.addKeyPressHandler(this);
 		this.editor.addKeyDownHandler(this);
-		
+
 		initWidget(this.editor);
 	}
-	
+
 	@Override
 	public XId getValue() {
 		XId xid;
@@ -50,10 +49,10 @@ public class XIdEditor extends AtomicXValueEditor<XId> implements KeyPressHandle
 		// }
 		return xid;
 	}
-	
+
 	@Override
 	public void onKeyPress(KeyPressEvent e) {
-		
+
 		// char cc = e.getCharCode();
 		//
 		// switch(cc) {
@@ -84,9 +83,9 @@ public class XIdEditor extends AtomicXValueEditor<XId> implements KeyPressHandle
 		// e.preventDefault();
 		// e.stopPropagation();
 		// }
-		
+
 	}
-	
+
 	@Override
 	public void onKeyDown(KeyDownEvent e) {
 		// boolean allowed = true;
@@ -125,15 +124,15 @@ public class XIdEditor extends AtomicXValueEditor<XId> implements KeyPressHandle
 		// e.preventDefault();
 		// e.stopPropagation();
 		// }
-		
+
 	}
-	
+
 	public void selectEverything() {
 		this.editor.setSelectionRange(0, this.editor.getText().length());
 	}
-	
+
 	public TextBox getTextBox() {
-		
+
 		return this.editor;
 	}
 }

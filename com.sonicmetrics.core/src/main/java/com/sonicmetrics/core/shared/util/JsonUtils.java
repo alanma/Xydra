@@ -2,7 +2,6 @@ package com.sonicmetrics.core.shared.util;
 
 import org.xydra.annotations.RunsInGWT;
 
-
 /**
  * Based on parts of org.stringtree.json.JSONWriter, licensed under APL and
  * LGPL. We've chosen APL (see above). The original code was written by Frank
@@ -12,7 +11,7 @@ import org.xydra.annotations.RunsInGWT;
  */
 @RunsInGWT(true)
 public class JsonUtils {
-	
+
 	/**
 	 * @param raw
 	 * @return null as 'null', every other strings as '"abc"' with proper
@@ -21,31 +20,31 @@ public class JsonUtils {
 	public static StringBuilder string(String raw) {
 		StringBuilder b = new StringBuilder();
 		/* handle null */
-		if(raw == null) {
+		if (raw == null) {
 			b.append("null");
 			return b;
 		}
-		
+
 		b.append('"');
-		for(int i = 0; i < raw.length(); i++) {
+		for (int i = 0; i < raw.length(); i++) {
 			char c = raw.charAt(i);
-			if(c == '"')
+			if (c == '"')
 				b.append("\\\"");
-			else if(c == '\\')
+			else if (c == '\\')
 				b.append("\\\\");
-			else if(c == '/')
+			else if (c == '/')
 				b.append("\\/");
-			else if(c == '\b')
+			else if (c == '\b')
 				b.append("\\b");
-			else if(c == '\f')
+			else if (c == '\f')
 				b.append("\\f");
-			else if(c == '\n')
+			else if (c == '\n')
 				b.append("\\n");
-			else if(c == '\r')
+			else if (c == '\r')
 				b.append("\\r");
-			else if(c == '\t')
+			else if (c == '\t')
 				b.append("\\t");
-			else if(isISOControl(c)) {
+			else if (isISOControl(c)) {
 				b.append(unicode(c));
 			} else {
 				b.append(c);
@@ -53,9 +52,9 @@ public class JsonUtils {
 		}
 		b.append('"');
 		return b;
-		
+
 	}
-	
+
 	/**
 	 * The GWT version for Character.isISOControl(c).
 	 * 
@@ -77,28 +76,28 @@ public class JsonUtils {
 	public static boolean isISOControl(char c) {
 		return ('\u0000' <= c && c <= '\u001F') || ('\u007F' <= c && c <= '\u009F');
 	}
-	
+
 	protected static StringBuilder unicode(char c) {
 		StringBuilder b = new StringBuilder();
-		
+
 		b.append("\\u");
 		int n = c;
-		for(int i = 0; i < 4; ++i) {
+		for (int i = 0; i < 4; ++i) {
 			int digit = (n & 0xf000) >> 12;
 			b.append(hex[digit]);
 			n <<= 4;
 		}
 		return b;
 	}
-	
+
 	static char[] hex = "0123456789ABCDEF".toCharArray();
-	
+
 	public static void appendKeyValue(StringBuilder b, String key, String value) {
 		b.append(string(key).toString()).append(": ").append(string(value).toString());
 	}
-	
+
 	public static void appendKeyValue(StringBuilder b, String key, long value) {
 		b.append(string(key).toString()).append(": ").append(value);
 	}
-	
+
 }

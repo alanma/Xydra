@@ -23,7 +23,6 @@ import com.google.appengine.repackaged.org.apache.http.client.ClientProtocolExce
 import com.google.appengine.repackaged.org.apache.http.client.methods.HttpGet;
 import com.google.appengine.repackaged.org.apache.http.impl.client.DefaultHttpClient;
 
-
 /**
  * TODO run in GWT as well? requires a custom http response wrapper
  * 
@@ -33,46 +32,52 @@ import com.google.appengine.repackaged.org.apache.http.impl.client.DefaultHttpCl
 @RunsInAppEngine(true)
 @RequiresAppEngine(false)
 public class UniversalUrlFetch {
-	
+
 	private static final Logger log = LoggerFactory.getLogger(UniversalUrlFetch.class);
-	
+
 	/**
-	 * @param urlStr never null
-	 * @param username if not null, will be used for HTTP Basic Authentication
-	 * @param password if not null, will be used for HTTP Basic Authentication
-	 * @param async TODO implement: if true, run asynchronously
+	 * @param urlStr
+	 *            never null
+	 * @param username
+	 *            if not null, will be used for HTTP Basic Authentication
+	 * @param password
+	 *            if not null, will be used for HTTP Basic Authentication
+	 * @param async
+	 *            TODO implement: if true, run asynchronously
 	 * @return the HTTP status code
-	 * @throws IOException ...
+	 * @throws IOException
+	 *             ...
 	 */
-	public static int callUrl(String urlStr, String username, String password, boolean async) throws IOException {
+	public static int callUrl(String urlStr, String username, String password, boolean async)
+			throws IOException {
 		log.info("Calling URL '" + urlStr + "'");
 		boolean doBasicAuth = username != null && password != null;
 		String encodedAuth = null;
-		if(doBasicAuth) {
+		if (doBasicAuth) {
 			byte[] auth = Base64.utf8(username + ":" + password);
 			encodedAuth = Base64.encode(auth);
 		}
-		if(AboutAppEngine.onAppEngine()) {
+		if (AboutAppEngine.onAppEngine()) {
 			URLFetchService service = URLFetchServiceFactory.getURLFetchService();
 			URL u = new URL(urlStr);
 			HTTPRequest request = new HTTPRequest(u, HTTPMethod.GET);
-			if(doBasicAuth) {
+			if (doBasicAuth) {
 				request.addHeader(new HTTPHeader("Authorization", "Basic " + encodedAuth));
 			}
 			Future<HTTPResponse> future = service.fetchAsync(new URL(urlStr));
 			try {
 				return future.get().getResponseCode();
-			} catch(InterruptedException e) {
+			} catch (InterruptedException e) {
 				throw new RuntimeException(e);
-			} catch(ExecutionException e) {
+			} catch (ExecutionException e) {
 				throw new RuntimeException(e);
 			}
 		} else {
-			
+
 			// TODO dont keep connections open (maybe we do that here)
 			DefaultHttpClient httpClient = new DefaultHttpClient();
 			HttpGet request = new HttpGet(urlStr);
-			if(doBasicAuth) {
+			if (doBasicAuth) {
 				request.setHeader("Authorization", "Basic " + encodedAuth);
 			}
 			try {
@@ -80,7 +85,7 @@ public class UniversalUrlFetch {
 				int responseCode = response.getStatusLine().getStatusCode();
 				request.abort();
 				return responseCode;
-			} catch(ClientProtocolException e) {
+			} catch (ClientProtocolException e) {
 				throw new RuntimeException(e);
 			}
 		}

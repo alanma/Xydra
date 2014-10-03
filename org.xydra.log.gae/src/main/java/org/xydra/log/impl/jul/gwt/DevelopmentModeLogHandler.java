@@ -22,39 +22,38 @@ import java.util.logging.LogRecord;
 
 import com.google.gwt.core.client.GWT;
 
-
 /**
  * A Handler that prints logs to GWT.log, causing the messages to show up in the
  * Development Mode tab in Eclipse when running in Development mode.
  */
 public class DevelopmentModeLogHandler extends Handler {
-    
-    public DevelopmentModeLogHandler() {
-        setFormatter(new ClickableLinksInEclipseGwtLogFormatter(true));
-        setLevel(Level.ALL);
-    }
-    
-    @Override
-    public void close() {
-        // No action needed
-    }
-    
-    @Override
-    public void flush() {
-        // No action needed
-    }
-    
-    @Override
-    public void publish(LogRecord record) {
-        if(!isSupported() || !isLoggable(record)) {
-            return;
-        }
-        String msg = getFormatter().format(record);
-        GWT.log(msg, record.getThrown());
-    }
-    
-    private static boolean isSupported() {
-        return !GWT.isScript();
-    }
-    
+
+	public DevelopmentModeLogHandler() {
+		setFormatter(new ClickableLinksInEclipseGwtLogFormatter(true));
+		setLevel(Level.ALL);
+	}
+
+	@Override
+	public void close() {
+		// No action needed
+	}
+
+	@Override
+	public void flush() {
+		// No action needed
+	}
+
+	@Override
+	public void publish(LogRecord record) {
+		if (!isSupported() || !isLoggable(record)) {
+			return;
+		}
+		String msg = getFormatter().format(record);
+		GWT.log(msg, record.getThrown());
+	}
+
+	private static boolean isSupported() {
+		return !GWT.isScript();
+	}
+
 }

@@ -5,7 +5,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-
 /**
  * Documentation: Since when was the annotated code piece in use. Use a version
  * identifier or an ISO time stamp.

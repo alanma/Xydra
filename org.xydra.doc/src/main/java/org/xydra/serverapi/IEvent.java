@@ -2,7 +2,6 @@ package org.xydra.serverapi;
 
 import java.io.Serializable;
 
-
 /**
  * Records only a change that happened. Immutable.
  * 
@@ -10,5 +9,5 @@ import java.io.Serializable;
  * 
  */
 public interface IEvent extends Serializable {
-	
+
 }

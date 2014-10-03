@@ -2,7 +2,6 @@ package org.xydra.index.iterator;
 
 import java.util.Iterator;
 
-
 /**
  * Returns only as many elements as indicated in "limit".
  * 
@@ -10,36 +9,37 @@ import java.util.Iterator;
  * 
  * @author voelkel
  * 
- * @param <E> entity type
+ * @param <E>
+ *            entity type
  */
 public class LimitIterator<E> implements ClosableIterator<E> {
-	
+
 	private Iterator<E> base;
-	
+
 	private long count;
-	
+
 	private long limit;
-	
+
 	private E nextItem = null;
-	
+
 	public LimitIterator(Iterator<E> base, long limit) {
 		this.base = base;
 		this.limit = limit;
 		this.count = 0;
 	}
-	
+
 	@Override
-    public boolean hasNext() {
-		if(this.count == this.limit) {
+	public boolean hasNext() {
+		if (this.count == this.limit) {
 			return false;
 		}
 		this.lookAhead();
 		return this.nextItem != null;
 	}
-	
+
 	@Override
-    public E next() {
-		if(this.count == this.limit) {
+	public E next() {
+		if (this.count == this.limit) {
 			return null;
 		}
 		E result = this.nextItem;
@@ -48,27 +48,27 @@ public class LimitIterator<E> implements ClosableIterator<E> {
 		this.count++;
 		return result;
 	}
-	
+
 	@Override
-    public void remove() {
+	public void remove() {
 		throw new UnsupportedOperationException();
 	}
-	
+
 	private void lookAhead() {
-		if(this.nextItem != null)
+		if (this.nextItem != null)
 			return;
-		
+
 		// else: advance one step
-		if(this.base.hasNext()) {
+		if (this.base.hasNext()) {
 			this.nextItem = this.base.next();
 		}
 	}
-	
+
 	@Override
-    public void close() {
-		if(this.base instanceof ClosableIterator<?>) {
-			((ClosableIterator<E>)this.base).close();
+	public void close() {
+		if (this.base instanceof ClosableIterator<?>) {
+			((ClosableIterator<E>) this.base).close();
 		}
 	}
-	
+
 }

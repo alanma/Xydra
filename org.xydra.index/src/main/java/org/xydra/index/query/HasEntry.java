@@ -6,7 +6,7 @@ package org.xydra.index.query;
  * @param <E>
  */
 public interface HasEntry<E> {
-	
+
 	E getEntry();
-	
+
 }

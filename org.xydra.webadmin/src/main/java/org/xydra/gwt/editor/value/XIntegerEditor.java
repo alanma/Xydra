@@ -7,21 +7,20 @@ import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.user.client.ui.TextBox;
 
-
 public class XIntegerEditor extends AtomicXValueEditor<XIntegerValue> implements KeyPressHandler {
-	
+
 	private final TextBox editor = new TextBox();
-	
+
 	public XIntegerEditor(int oldValue, EditListener listener) {
 		super(listener);
-		
+
 		this.editor.setText(Integer.toString(oldValue));
-		
+
 		this.editor.addKeyPressHandler(this);
-		
+
 		initWidget(this.editor);
 	}
-	
+
 	@Override
 	public XIntegerValue getValue() {
 		int v = 0;
@@ -39,10 +38,10 @@ public class XIntegerEditor extends AtomicXValueEditor<XIntegerValue> implements
 		// }
 		return XV.toValue(v);
 	}
-	
+
 	@Override
 	public void onKeyPress(KeyPressEvent e) {
-		
+
 		// char cc = e.getCharCode();
 		//
 		// switch(cc) {
@@ -70,5 +69,5 @@ public class XIntegerEditor extends AtomicXValueEditor<XIntegerValue> implements
 		// e.stopPropagation();
 		//
 	}
-	
+
 }

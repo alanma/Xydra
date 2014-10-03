@@ -2,7 +2,6 @@ package org.xydra.serverapi;
 
 import java.io.Serializable;
 
-
 /**
  * Immutable state (DTO) of an XObject at a given revision.
  * 
@@ -10,5 +9,5 @@ import java.io.Serializable;
  * 
  */
 public interface IObjectSnapshot extends Serializable {
-	
+
 }

@@ -12,25 +12,24 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-
 public class ObjectChangesPanel extends Composite {
-	
+
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(XyAdmin.class);
-	
-	interface ViewUiBinder extends UiBinder<Widget,ObjectChangesPanel> {
+
+	interface ViewUiBinder extends UiBinder<Widget, ObjectChangesPanel> {
 	}
-	
+
 	private static ViewUiBinder uiBinder = GWT.create(ViewUiBinder.class);
-	
+
 	@UiField(provided = true)
 	HorizontalPanel objectIdPanel;
-	
+
 	@UiField(provided = true)
 	VerticalPanel fieldChangesPanel;
-	
+
 	public ObjectChangesPanel(String backgroundColor, HorizontalPanel objectIdPanel,
-	        VerticalPanel fieldChangesPanel) {
+			VerticalPanel fieldChangesPanel) {
 		super();
 		this.fieldChangesPanel = fieldChangesPanel;
 		this.objectIdPanel = objectIdPanel;

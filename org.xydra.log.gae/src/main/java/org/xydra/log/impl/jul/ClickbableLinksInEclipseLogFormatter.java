@@ -4,7 +4,6 @@ import java.util.logging.LogRecord;
 
 import org.xydra.annotations.ThreadSafe;
 
-
 /**
  * A custom java util logging formatter trying to output the pattern
  * 
@@ -29,19 +28,19 @@ import org.xydra.annotations.ThreadSafe;
  */
 @ThreadSafe
 public class ClickbableLinksInEclipseLogFormatter extends java.util.logging.Formatter {
-    
-    @Override
-    public String format(LogRecord log) {
-        return EclipseFormat.format(log, getLineNumber());
-    }
-    
-    /**
-     * Get the current line number. Slow operation.
-     * 
-     * @return int - Current line number.
-     */
-    public static int getLineNumber() {
-        return Thread.currentThread().getStackTrace()[2].getLineNumber();
-    }
-    
+
+	@Override
+	public String format(LogRecord log) {
+		return EclipseFormat.format(log, getLineNumber());
+	}
+
+	/**
+	 * Get the current line number. Slow operation.
+	 * 
+	 * @return int - Current line number.
+	 */
+	public static int getLineNumber() {
+		return Thread.currentThread().getStackTrace()[2].getLineNumber();
+	}
+
 }

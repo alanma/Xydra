@@ -5,7 +5,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-
 /**
  * For some profilers: Fields marked with this annotation should not be
  * considered to consume memory. This makes sense in some memory-optimisation
@@ -14,5 +13,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.FIELD })
 public @interface IgnoreMemoryConsumption {
-    
+
 }

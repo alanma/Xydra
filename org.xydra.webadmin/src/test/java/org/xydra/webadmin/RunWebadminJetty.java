@@ -14,7 +14,6 @@ import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-
 /**
  * This class is starts a Jetty server configured to allow testing of the
  * webapp, loading static files directly from src/main/webapp. This class is not
@@ -37,66 +36,66 @@ import java.net.URISyntaxException;
  * 
  */
 public class RunWebadminJetty {
-    
-    private static Jetty jetty;
-    private static URI uri;
-    
-    static {
-        LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory(), "SomeTest");
-        GaeTestfixer.enable();
-    }
-    
-    private static final Logger log = LoggerFactory.getLogger(RunWebadminJetty.class);
-    
-    public static void main(String[] args) throws Exception {
-        start();
-    }
-    
-    static {
-        LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory(), "SomeTest");
-        /*
-         * Enable tests with GAE (especially mail)
-         */
-        GaeTestfixer.enable();
-    }
-    
-    public static void start() {
-        
-        // LogUtils.configureLog4j();
-        log.info("--- Booting WebAdmin Jetty ---");
-        Restless.DELEGATE_UNHANDLED_TO_DEFAULT = true;
-        
-        // initialize GAE
-        GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
-        
-        // start jetty
-        jetty = new Jetty();
-        
-        File webappDir = new File("src/main/webapp");
-        
-        IConfig conf = Env.get().conf();
-        conf.set(ConfParamsJetty.PORT, 8765);
-        conf.set(ConfParamsJetty.DOC_ROOT, webappDir.getAbsolutePath());
-        jetty.configureFromConf(conf);
-        uri = jetty.startServer();
-        log.info("Embedded jetty serves " + webappDir.getAbsolutePath() + " at " + uri.toString());
-        log.info(".oO ___________ Running ____________________________");
-    }
-    
-    public static URI getServerURI() {
-        if(jetty == null) {
-            try {
-                return new URI("http://0.0.0.0:8765");
-            } catch(URISyntaxException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        return uri;
-    }
-    
-    public static void stop() {
-        assert jetty != null;
-        jetty.stopServer();
-        log.info("Server stopped.");
-    }
+
+	private static Jetty jetty;
+	private static URI uri;
+
+	static {
+		LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory(), "SomeTest");
+		GaeTestfixer.enable();
+	}
+
+	private static final Logger log = LoggerFactory.getLogger(RunWebadminJetty.class);
+
+	public static void main(String[] args) throws Exception {
+		start();
+	}
+
+	static {
+		LoggerFactory.setLoggerFactorySPI(new Log4jLoggerFactory(), "SomeTest");
+		/*
+		 * Enable tests with GAE (especially mail)
+		 */
+		GaeTestfixer.enable();
+	}
+
+	public static void start() {
+
+		// LogUtils.configureLog4j();
+		log.info("--- Booting WebAdmin Jetty ---");
+		Restless.DELEGATE_UNHANDLED_TO_DEFAULT = true;
+
+		// initialize GAE
+		GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
+
+		// start jetty
+		jetty = new Jetty();
+
+		File webappDir = new File("src/main/webapp");
+
+		IConfig conf = Env.get().conf();
+		conf.set(ConfParamsJetty.PORT, 8765);
+		conf.set(ConfParamsJetty.DOC_ROOT, webappDir.getAbsolutePath());
+		jetty.configureFromConf(conf);
+		uri = jetty.startServer();
+		log.info("Embedded jetty serves " + webappDir.getAbsolutePath() + " at " + uri.toString());
+		log.info(".oO ___________ Running ____________________________");
+	}
+
+	public static URI getServerURI() {
+		if (jetty == null) {
+			try {
+				return new URI("http://0.0.0.0:8765");
+			} catch (URISyntaxException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		return uri;
+	}
+
+	public static void stop() {
+		assert jetty != null;
+		jetty.stopServer();
+		log.info("Server stopped.");
+	}
 }

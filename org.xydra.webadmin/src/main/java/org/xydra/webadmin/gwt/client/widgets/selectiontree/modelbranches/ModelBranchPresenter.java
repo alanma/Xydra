@@ -20,7 +20,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 
-
 /**
  * Performs all the logic for {@link ModelBranchWidget}s. So it:
  * 
@@ -45,28 +44,28 @@ import com.google.gwt.event.shared.HandlerRegistration;
  * 
  */
 public class ModelBranchPresenter extends SelectionTreePresenter {
-	
+
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(XyAdmin.class);
-	
+
 	private XAddress modelAddress;
 	private IModelBranchWidget widget;
 	boolean expanded = false;
-	
+
 	private RepoBranchPresenter presenter;
-	
+
 	private HandlerRegistration registration;
-	
+
 	private HandlerRegistration repoChangeRegistration;
-	
+
 	public ModelBranchPresenter(RepoBranchPresenter repoPresenter, XAddress address) {
 		this.presenter = repoPresenter;
 		this.modelAddress = address;
-		
+
 	}
-	
+
 	protected void processChanges(XAddress modelAddress, final EntityStatus status, XId info) {
-		switch(status) {
+		switch (status) {
 		case CHANGED:
 			// doesn't happen...
 			break;
@@ -76,108 +75,108 @@ public class ModelBranchPresenter extends SelectionTreePresenter {
 			this.registration.removeHandler();
 			break;
 		case INDEXED:
-			if(info.equals(XX.toId("removed"))) {
+			if (info.equals(XX.toId("removed"))) {
 				this.widget.setStatusDeleted();
 				this.repoChangeRegistration = EventHelper.addRepoChangeListener(
-				        XX.toAddress(modelAddress.getRepository(), null, null, null),
-				        new IRepoChangedEventHandler() {
-					        
-					        @Override
-					        public void onRepoChange(RepoChangedEvent event) {
-						        if(event.getStatus().equals(EntityStatus.EXTENDED)) {
-							        if(!XyAdmin
-							                .getInstance()
-							                .getModel()
-							                .getRepo(
-							                        ModelBranchPresenter.this.modelAddress
-							                                .getRepository())
-							                .isNotExisting(
-							                        ModelBranchPresenter.this.modelAddress
-							                                .getModel())) {
-								        ModelBranchPresenter.this.reset();
-							        }
-						        }
-						        ModelBranchPresenter.this.repoChangeRegistration.removeHandler();
-						        
-					        }
-				        });
+						XX.toAddress(modelAddress.getRepository(), null, null, null),
+						new IRepoChangedEventHandler() {
+
+							@Override
+							public void onRepoChange(RepoChangedEvent event) {
+								if (event.getStatus().equals(EntityStatus.EXTENDED)) {
+									if (!XyAdmin
+											.getInstance()
+											.getModel()
+											.getRepo(
+													ModelBranchPresenter.this.modelAddress
+															.getRepository())
+											.isNotExisting(
+													ModelBranchPresenter.this.modelAddress
+															.getModel())) {
+										ModelBranchPresenter.this.reset();
+									}
+								}
+								ModelBranchPresenter.this.repoChangeRegistration.removeHandler();
+
+							}
+						});
 				this.presenter.addRegistration(this.repoChangeRegistration);
 			} else {
 				long revisionNumber = XyAdmin.getInstance().getModel()
-				        .getRepo(modelAddress.getRepository()).getModel(modelAddress.getModel())
-				        .getRevisionNumber();
+						.getRepo(modelAddress.getRepository()).getModel(modelAddress.getModel())
+						.getRevisionNumber();
 				this.widget.setRevisionNumber(revisionNumber);
 			}
 			break;
 		case EXTENDED:
-			if(!this.modelAddress.equals(XyAdmin.getInstance().getController()
-			        .getCurrentlyOpenedModelAddress())) {
+			if (!this.modelAddress.equals(XyAdmin.getInstance().getController()
+					.getCurrentlyOpenedModelAddress())) {
 				this.presentModel();
 			}
 			break;
 		default:
 			break;
-		
+
 		}
-		
+
 	}
-	
+
 	protected void reset() {
 		this.widget.setRevisionNumber(XyAdmin.getInstance().getModel()
-		        .getRepo(this.modelAddress.getRepository()).getModel(this.modelAddress.getModel())
-		        .getRevisionNumber());
+				.getRepo(this.modelAddress.getRepository()).getModel(this.modelAddress.getModel())
+				.getRevisionNumber());
 		this.widget.removeStatusDeleted();
-		
+
 	}
-	
+
 	public void openAddElementDialog(String string) {
 		super.openAddElementDialog(this.modelAddress, string);
-		
+
 	}
-	
+
 	private void checkStatus() {
-		if(XyAdmin.getInstance().getModel().getRepo(this.modelAddress.getRepository())
-		        .isNotExisting(this.modelAddress.getModel())) {
+		if (XyAdmin.getInstance().getModel().getRepo(this.modelAddress.getRepository())
+				.isNotExisting(this.modelAddress.getModel())) {
 			this.widget.setStatusDeleted();
 		}
-		if(!XyAdmin.getInstance().getModel().getRepo(this.modelAddress.getRepository())
-		        .isAddedModel(this.modelAddress.getModel())) {
-			if(!XyAdmin.getInstance().getModel().getRepo(this.modelAddress.getRepository())
-			        .getModel(this.modelAddress.getModel()).knowsAllObjects()) {
-				
+		if (!XyAdmin.getInstance().getModel().getRepo(this.modelAddress.getRepository())
+				.isAddedModel(this.modelAddress.getModel())) {
+			if (!XyAdmin.getInstance().getModel().getRepo(this.modelAddress.getRepository())
+					.getModel(this.modelAddress.getModel()).knowsAllObjects()) {
+
 				this.widget.setRevisionUnknown();
 			}
 		}
 	}
-	
+
 	public void presentModel() {
 		XyAdmin.getInstance().getController().presentModel(this.modelAddress);
-		
+
 	}
-	
+
 	public IModelBranchWidget presentWidget() {
 		this.widget = new ModelBranchWidget(this);
-		
+
 		ClickHandler anchorClickHandler = new ClickHandler() {
-			
+
 			@Override
 			public void onClick(ClickEvent event) {
 				ModelBranchPresenter.this.presentModel();
 			}
 		};
-		
+
 		this.widget.init(this, this.modelAddress, anchorClickHandler);
 		this.checkStatus();
-		
+
 		this.registration = EventHelper.addModelChangedListener(this.modelAddress,
-		        new IModelChangedEventHandler() {
-			        
-			        @Override
-			        public void onModelChange(ModelChangedEvent event) {
-				        ModelBranchPresenter.this.processChanges(event.getModelAddress(),
-				                event.getStatus(), event.getMoreInfos());
-			        }
-		        });
+				new IModelChangedEventHandler() {
+
+					@Override
+					public void onModelChange(ModelChangedEvent event) {
+						ModelBranchPresenter.this.processChanges(event.getModelAddress(),
+								event.getStatus(), event.getMoreInfos());
+					}
+				});
 		this.presenter.addRegistration(this.registration);
 		return this.widget.asWidget();
 	}

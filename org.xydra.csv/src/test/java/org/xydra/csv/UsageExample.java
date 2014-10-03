@@ -9,26 +9,26 @@ import java.io.IOException;
 import org.junit.Test;
 import org.xydra.csv.impl.memory.CsvTable;
 
-
 public class UsageExample {
-	
+
 	@Test
 	public void testColumnsInInsertionOrder() throws IOException {
 		/* Create a new in-memory table */
 		CsvTable table = new CsvTable(true);
 		/* Create a row with a unique key, using the system time */
-		IRow row = table.getOrCreateRow("" + System.currentTimeMillis() + "-" + Math.random(), true);
+		IRow row = table
+				.getOrCreateRow("" + System.currentTimeMillis() + "-" + Math.random(), true);
 		/* Set values */
 		row.setValue("bbb", "111", true);
 		row.setValue("aaa", "222", true);
-		
+
 		row = table.getOrCreateRow("" + System.currentTimeMillis() + "-" + Math.random(), true);
 		row.setValue("aaa", "333", true);
-		
+
 		/* Now column order should be "bbb", "aaa" */
 		table.dump();
 	}
-	
+
 	@Test
 	public void testSimpleUseCases() throws FileNotFoundException {
 		/* A temporary file, create it'S parent directory */
@@ -46,7 +46,7 @@ public class UsageExample {
 		try {
 			row.setValue("first name", "Jones", true);
 			fail("we try to set the value initially, but there was already a value, so we get an exception.");
-		} catch(IllegalStateException e) {
+		} catch (IllegalStateException e) {
 			// we expected that.
 		}
 		/* set another value */
@@ -55,10 +55,10 @@ public class UsageExample {
 		IRow row2 = table.getOrCreateRow("" + System.currentTimeMillis() + Math.random(), true);
 		row2.setValue("last name", "Homer", true);
 		row2.setValue("first name", "Simpson", true);
-		
+
 		table.writeTo(temp);
 		System.out.println("Wrote table to " + temp.getAbsolutePath());
-		
+
 		/**
 		 * The expected result should be: <code><pre>
 "ROW";"first name";"last name";

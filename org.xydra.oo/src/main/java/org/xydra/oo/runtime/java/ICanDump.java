@@ -7,7 +7,7 @@ package org.xydra.oo.runtime.java;
  * 
  */
 public interface ICanDump {
-    
-    public String dump();
-    
+
+	public String dump();
+
 }

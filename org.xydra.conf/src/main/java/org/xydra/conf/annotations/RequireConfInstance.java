@@ -4,7 +4,6 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-
 /**
  * A hint to the configuration system where which configuration setting is
  * required
@@ -12,10 +11,10 @@ import java.lang.annotation.RetentionPolicy;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RequireConfInstance {
-    
-    /**
-     * @return the configuration key that is required at runtime
-     */
-    Class<?>[] value();
-    
+
+	/**
+	 * @return the configuration key that is required at runtime
+	 */
+	Class<?>[] value();
+
 }

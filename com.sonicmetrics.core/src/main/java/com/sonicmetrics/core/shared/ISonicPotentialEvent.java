@@ -6,7 +6,6 @@ import org.xydra.annotations.CanBeNull;
 import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.RunsInGWT;
 
-
 /**
  * Each sonic event answers the basic questions of journalism about an event:
  * when, who and what happened?
@@ -29,11 +28,11 @@ import org.xydra.annotations.RunsInGWT;
  */
 @RunsInGWT(true)
 public interface ISonicPotentialEvent {
-	
+
 	public static enum FilterProperty {
 		Subject, Category, Action, Label, Value, Source
 	}
-	
+
 	/**
 	 * See {@link ISonicPotentialEvent} for details about
 	 * 'category.action.label.value'
@@ -42,7 +41,7 @@ public interface ISonicPotentialEvent {
 	 */
 	@NeverNull
 	String getAction();
-	
+
 	/**
 	 * See {@link ISonicPotentialEvent} for details about
 	 * 'category.action.label.value'
@@ -51,7 +50,7 @@ public interface ISonicPotentialEvent {
 	 */
 	@NeverNull
 	String getCategory();
-	
+
 	/**
 	 * @return the subject about whom or what the event is. In the Twitter
 	 *         world, this would be the twitter user account, such as
@@ -59,14 +58,14 @@ public interface ISonicPotentialEvent {
 	 */
 	@NeverNull
 	String getSubject();
-	
+
 	/**
 	 * @return the technical source of the event, like e.g. TweetDeck as a
 	 *         sender for tweets.
 	 */
 	@NeverNull
 	String getSource();
-	
+
 	/**
 	 * @return a compact string representing the contents of
 	 *         'category.action.label.value'. Might turn out to be
@@ -75,7 +74,7 @@ public interface ISonicPotentialEvent {
 	 */
 	@NeverNull
 	String getDotString();
-	
+
 	/**
 	 * See {@link ISonicPotentialEvent} for details about
 	 * 'category.action.label.value'
@@ -84,7 +83,7 @@ public interface ISonicPotentialEvent {
 	 */
 	@CanBeNull
 	String getLabel();
-	
+
 	/**
 	 * See {@link ISonicPotentialEvent} for details about
 	 * 'category.action.label.value'
@@ -93,12 +92,12 @@ public interface ISonicPotentialEvent {
 	 */
 	@CanBeNull
 	String getValue();
-	
+
 	/**
 	 * @return true if the label is defined (i.e. not null)
 	 */
 	boolean hasLabel();
-	
+
 	/**
 	 * @return an id that allows updating the event. If a new event with the
 	 *         same time-stamp and this unique key is sent, the existing event
@@ -109,19 +108,19 @@ public interface ISonicPotentialEvent {
 	 */
 	@CanBeNull
 	String getUniqueId();
-	
+
 	/**
 	 * @return true if the event was stored with a uniqueId which allows
 	 *         updating the event later on.
 	 */
 	boolean hasUniqueId();
-	
+
 	/**
 	 * @return an unmodifiable map of user-supplied extension data. Keys are
 	 *         valid Identifier, values can be any strings. User data may not
 	 *         exceed 500 KB.
 	 */
 	@NeverNull
-	Map<String,String> getExtensionData();
-	
+	Map<String, String> getExtensionData();
+
 }

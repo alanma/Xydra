@@ -19,46 +19,48 @@ import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.restless.utils.SharedHtmlUtils;
 import org.xydra.sharedutils.XyAssert;
 
-
 public class XydraHtmlUtils {
-	
+
 	/**
 	 * Write events as HTML table to writer. Does not flush.
 	 * 
-	 * @param events never null
-	 * @param w never null
-	 * @throws IOException ...
+	 * @param events
+	 *            never null
+	 * @param w
+	 *            never null
+	 * @throws IOException
+	 *             ...
 	 */
 	public static void writeEvents(@NeverNull List<XEvent> events, Writer w) throws IOException {
 		XyAssert.xyAssert(events != null);
 		assert events != null;
-		
+
 		w.write("<table border='1'>" +
-		
+
 		"<tr>"
-		
+
 		+ "<th>rev</th>"
-		
+
 		+ "<th>target</th>"
-		
+
 		+ "<th>type</th>"
-		
+
 		+ "<th>what</th>"
-		
+
 		+ "<th>oldRevs</th>"
-		
+
 		+ "<th>txn</th>"
-		
+
 		+ "<th>implied</th>"
-		
+
 		+ "</tr>");
-		for(XEvent e : events) {
+		for (XEvent e : events) {
 			writeEventRow(e, w);
 			w.flush();
-			if(e.getChangeType() == ChangeType.TRANSACTION) {
+			if (e.getChangeType() == ChangeType.TRANSACTION) {
 				assert (e instanceof XTransactionEvent);
-				XTransactionEvent te = (XTransactionEvent)e;
-				for(XEvent child : te) {
+				XTransactionEvent te = (XTransactionEvent) e;
+				for (XEvent child : te) {
 					writeEventRow(child, w);
 					w.flush();
 				}
@@ -66,31 +68,32 @@ public class XydraHtmlUtils {
 		}
 		w.write("</table>");
 	}
-	
+
 	private static void writeEventRow(XEvent e, Writer w) throws IOException {
 		w.write("<tr>"
-		
+
 		+ "<td>" + e.getRevisionNumber() + "</td>"
-		
+
 		+ "<td>" + e.getTarget() + "</td> "
-		
+
 		+ "<td>" + e.getChangeType() + "</td>"
-		
+
 		+ "<td>" + e.getChangedEntity() + "</td>"
-		
+
 		+ "<td>" + e.getOldModelRevision() + "/" + e.getOldObjectRevision() + "/"
-		        + e.getOldFieldRevision() + "</td>"
-		        
-		        + "<td>" + e.inTransaction() + "</td>"
-		        
-		        + "<td>" + e.isImplied() + "</td>"
-		        
-		        + "</tr>\n");
-		
+				+ e.getOldFieldRevision() + "</td>"
+
+				+ "<td>" + e.inTransaction() + "</td>"
+
+				+ "<td>" + e.isImplied() + "</td>"
+
+				+ "</tr>\n");
+
 	}
-	
+
 	/**
-	 * @param xo to be rendered as HTML
+	 * @param xo
+	 *            to be rendered as HTML
 	 * @return an HTML String representation of the given XObject
 	 */
 	public static String toHtml(XReadableObject xo) {
@@ -100,18 +103,18 @@ public class XydraHtmlUtils {
 		buf.append("' <span class='rev'>");
 		buf.append(xo.getRevisionNumber());
 		buf.append("</span></b>\n");
-		SortedMap<String,String> map = new TreeMap<String,String>();
+		SortedMap<String, String> map = new TreeMap<String, String>();
 		Iterator<XId> fieldIt = xo.iterator();
-		while(fieldIt.hasNext()) {
+		while (fieldIt.hasNext()) {
 			XId fieldId = fieldIt.next();
 			XReadableField field = xo.getField(fieldId);
 			assert field != null;
 			XValue value = field.getValue();
 			map.put(fieldId.toString(),
-			        (value == null ? "null" : SharedHtmlUtils.sanitize(value.toString()))
-			                + " <span class='rev'>" + field.getRevisionNumber() + "</span>");
+					(value == null ? "null" : SharedHtmlUtils.sanitize(value.toString()))
+							+ " <span class='rev'>" + field.getRevisionNumber() + "</span>");
 		}
 		return buf + HtmlUtils.toDefinitionList(map);
 	}
-	
+
 }

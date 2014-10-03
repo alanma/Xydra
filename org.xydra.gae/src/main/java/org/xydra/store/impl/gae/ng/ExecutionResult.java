@@ -9,7 +9,6 @@ import org.xydra.base.change.XAtomicEvent;
 import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.impl.gae.changes.GaeChange.Status;
 
-
 /**
  * Preliminary, unsaved result of executing a command.
  * 
@@ -17,28 +16,28 @@ import org.xydra.store.impl.gae.changes.GaeChange.Status;
  * 
  */
 class ExecutionResult {
-	
+
 	public static ExecutionResult createEventsFrom(CheckResult checkResult,
-	        @NeverNull ContextBeforeCommand ctxBeforeCommand) {
+			@NeverNull ContextBeforeCommand ctxBeforeCommand) {
 		XyAssert.xyAssert(ctxBeforeCommand != null);
-		
-		switch(checkResult.getStatus()) {
+
+		switch (checkResult.getStatus()) {
 		case FailedPreconditions:
 		case FailedTimeout:
 		case SuccessNochange:
 			return new ExecutionResult(checkResult.getStatus(), Collections.EMPTY_LIST,
-			        checkResult.getDebugHint());
+					checkResult.getDebugHint());
 		case SuccessExecuted:
 		case SuccessExecutedApplied:
 			List<XAtomicEvent> events = checkResult.getExecutionContextInTxn().toEvents(
-			        checkResult.getActorId(), ctxBeforeCommand, checkResult.inTransaction());
+					checkResult.getActorId(), ctxBeforeCommand, checkResult.inTransaction());
 			return new ExecutionResult(checkResult.getStatus(), events, null);
 		default:
 		case Creating:
 			throw new AssertionError();
 		}
 	}
-	
+
 	// /**
 	// * Failed preconditions.
 	// *
@@ -339,48 +338,50 @@ class ExecutionResult {
 	//
 	// return new ExecutionResult(Status.SuccessExecuted, event, null);
 	// }
-	
+
 	private List<XAtomicEvent> events = new LinkedList<XAtomicEvent>();
-	
+
 	private Status status;
-	
+
 	private String debugHint;
-	
+
 	@Override
 	public String toString() {
 		return this.status
-		        + " "
-		        + (this.debugHint == null ? "" : this.debugHint)
-		        + " -> "
-		        + (this.events.size() == 1 ? this.events.get(0) + " event" : this.events.size()
-		                + " events");
+				+ " "
+				+ (this.debugHint == null ? "" : this.debugHint)
+				+ " -> "
+				+ (this.events.size() == 1 ? this.events.get(0) + " event" : this.events.size()
+						+ " events");
 	}
-	
+
 	/**
 	 * @param status
-	 * @param events @NeverNull if status != SuccessExecuted.
-	 * @param explanation @CanBeNull if status != failed
+	 * @param events
+	 *            @NeverNull if status != SuccessExecuted.
+	 * @param explanation
+	 *            @CanBeNull if status != failed
 	 */
 	public ExecutionResult(Status status, List<XAtomicEvent> events, String explanation) {
 		XyAssert.xyAssert(status != null);
 		assert status != null;
 		XyAssert.xyAssert(status.isCommitted());
-		
+
 		this.status = status;
 		this.events = events;
 		this.debugHint = explanation;
 	}
-	
+
 	public List<XAtomicEvent> getEvents() {
 		return this.events;
 	}
-	
+
 	public Status getStatus() {
 		return this.status;
 	}
-	
+
 	public String getDebugHint() {
 		return this.debugHint;
 	}
-	
+
 }

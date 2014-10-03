@@ -8,9 +8,8 @@ import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Query;
 
-
 public class GaeMyUtils {
-	
+
 	/**
 	 * @return a list of all gae 'kinds' found in the datastore. They are
 	 *         retrieved via the gae internal stats, represented as
@@ -20,22 +19,23 @@ public class GaeMyUtils {
 		List<String> kinds = new LinkedList<String>();
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		Iterable<Entity> statKinds = datastore.prepare(new Query("__Stat_Kind__")).asIterable();
-		for(Entity statKind : statKinds) {
+		for (Entity statKind : statKinds) {
 			String kind = statKind.getProperty("kind_name").toString();
 			kinds.add(kind);
 		}
 		return kinds;
 	}
-	
+
 	/**
 	 * IMPROVE add pagination
 	 * 
-	 * @param kind of entity to export
+	 * @param kind
+	 *            of entity to export
 	 * @return an {@link Iterable} over all Entity of the given kind
 	 */
 	public static Iterable<Entity> getEntitiesOfKind(String kind) {
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		return datastore.prepare(new Query(kind)).asIterable();
 	}
-	
+
 }

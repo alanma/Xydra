@@ -7,69 +7,94 @@ package org.xydra.log.api;
  * @author voelkel
  */
 public interface ILogListener {
-    
-    /**
-     * @param log the {@link Logger} sending the log message
-     * @param msg the log message
-     */
-    void debug(Logger log, String msg);
-    
-    /**
-     * @param log the {@link Logger} sending the log message
-     * @param msg the log message
-     * @param t @NeverNull a thrown exception to be logged
-     */
-    void debug(Logger log, String msg, Throwable t);
-    
-    /**
-     * @param log the {@link Logger} sending the log message
-     * @param msg the log message
-     */
-    void error(Logger log, String msg);
-    
-    /**
-     * @param log the {@link Logger} sending the log message
-     * @param msg the log message
-     * @param t @NeverNull a thrown exception to be logged
-     */
-    void error(Logger log, String msg, Throwable t);
-    
-    /**
-     * @param log the {@link Logger} sending the log message
-     * @param msg the log message
-     */
-    void info(Logger log, String msg);
-    
-    /**
-     * @param log the {@link Logger} sending the log message
-     * @param msg the log message
-     * @param t @NeverNull a thrown exception to be logged
-     */
-    void info(Logger log, String msg, Throwable t);
-    
-    /**
-     * @param log the {@link Logger} sending the log message
-     * @param msg the log message
-     */
-    void trace(Logger log, String msg);
-    
-    /**
-     * @param log the {@link Logger} sending the log message
-     * @param msg the log message
-     * @param t @NeverNull a thrown exception to be logged
-     */
-    void trace(Logger log, String msg, Throwable t);
-    
-    /**
-     * @param log the {@link Logger} sending the log message
-     * @param msg the log message
-     */
-    void warn(Logger log, String msg);
-    
-    /**
-     * @param log the {@link Logger} sending the log message
-     * @param msg the log message
-     * @param t @NeverNull a thrown exception to be logged
-     */
-    void warn(Logger log, String msg, Throwable t);
+
+	/**
+	 * @param log
+	 *            the {@link Logger} sending the log message
+	 * @param msg
+	 *            the log message
+	 */
+	void debug(Logger log, String msg);
+
+	/**
+	 * @param log
+	 *            the {@link Logger} sending the log message
+	 * @param msg
+	 *            the log message
+	 * @param t
+	 *            @NeverNull a thrown exception to be logged
+	 */
+	void debug(Logger log, String msg, Throwable t);
+
+	/**
+	 * @param log
+	 *            the {@link Logger} sending the log message
+	 * @param msg
+	 *            the log message
+	 */
+	void error(Logger log, String msg);
+
+	/**
+	 * @param log
+	 *            the {@link Logger} sending the log message
+	 * @param msg
+	 *            the log message
+	 * @param t
+	 *            @NeverNull a thrown exception to be logged
+	 */
+	void error(Logger log, String msg, Throwable t);
+
+	/**
+	 * @param log
+	 *            the {@link Logger} sending the log message
+	 * @param msg
+	 *            the log message
+	 */
+	void info(Logger log, String msg);
+
+	/**
+	 * @param log
+	 *            the {@link Logger} sending the log message
+	 * @param msg
+	 *            the log message
+	 * @param t
+	 *            @NeverNull a thrown exception to be logged
+	 */
+	void info(Logger log, String msg, Throwable t);
+
+	/**
+	 * @param log
+	 *            the {@link Logger} sending the log message
+	 * @param msg
+	 *            the log message
+	 */
+	void trace(Logger log, String msg);
+
+	/**
+	 * @param log
+	 *            the {@link Logger} sending the log message
+	 * @param msg
+	 *            the log message
+	 * @param t
+	 *            @NeverNull a thrown exception to be logged
+	 */
+	void trace(Logger log, String msg, Throwable t);
+
+	/**
+	 * @param log
+	 *            the {@link Logger} sending the log message
+	 * @param msg
+	 *            the log message
+	 */
+	void warn(Logger log, String msg);
+
+	/**
+	 * @param log
+	 *            the {@link Logger} sending the log message
+	 * @param msg
+	 *            the log message
+	 * @param t
+	 *            @NeverNull a thrown exception to be logged
+	 */
+	void warn(Logger log, String msg, Throwable t);
 }

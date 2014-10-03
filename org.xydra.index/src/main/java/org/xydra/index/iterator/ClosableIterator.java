@@ -11,17 +11,17 @@ package org.xydra.index.iterator;
 
 import java.util.Iterator;
 
-
 /**
  * An <b>closable</b> iterator over a collection. Iterator takes the place of
  * Enumeration in the Java collections framework.
  * 
  * @author Max Voelkel
- * @param <E> entry type
+ * @param <E>
+ *            entry type
  * @see Iterator
  */
 public interface ClosableIterator<E> extends Iterator<E> {
-	
+
 	/**
 	 * The underlying implementation frees resources. For some it is absolutely
 	 * necessary to call this method.

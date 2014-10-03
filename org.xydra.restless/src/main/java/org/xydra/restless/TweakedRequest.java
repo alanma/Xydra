@@ -27,7 +27,7 @@ class TweakedRequest extends HttpServletRequestWrapper {
 	/**
 	 * 
 	 * @param baseReq
-	 *            @NeverNull
+	 * @NeverNull
 	 */
 	public TweakedRequest(@NeverNull HttpServletRequest baseReq) {
 		super(baseReq);

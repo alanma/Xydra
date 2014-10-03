@@ -11,7 +11,6 @@ import org.xydra.index.query.EqualsConstraint;
 import org.xydra.index.query.Pair;
 import org.xydra.index.query.Wildcard;
 
-
 /**
  * Implementation of {@link ITransitivePairIndex} that calculates all implied
  * pairs and stores them internally.
@@ -29,67 +28,67 @@ import org.xydra.index.query.Wildcard;
  * @param <K>
  */
 public class StoredTransitivePairIndex<K> extends AbstractStoredTransitivePairIndex<K> {
-	
+
 	private static final long serialVersionUID = -4489815903874718863L;
-	
-	public StoredTransitivePairIndex(IPairIndex<K,K> direct, Factory<IPairIndex<K,K>> implied) {
+
+	public StoredTransitivePairIndex(IPairIndex<K, K> direct, Factory<IPairIndex<K, K>> implied) {
 		super(direct, implied);
 	}
-	
+
 	@Override
 	public void addImplied(K k1, K k2) {
-		
-		if(!addAll(k1, k2))
+
+		if (!addAll(k1, k2))
 			return;
-		
-		Iterator<Pair<K,K>> left = constraintIterator(new Wildcard<K>(),
-		        new EqualsConstraint<K>(k1));
-		while(left.hasNext())
+
+		Iterator<Pair<K, K>> left = constraintIterator(new Wildcard<K>(), new EqualsConstraint<K>(
+				k1));
+		while (left.hasNext())
 			addImplied(left.next().getFirst(), k2);
-		
+
 	}
-	
+
 	/**
 	 * Remove all now obsolete implied pairs (k1,k) for all k = k2 or k is in
 	 * implied pair (k2,k)
 	 */
 	private boolean removeAll(K k1, K k2) {
-		
+
 		Constraint<K> c1 = new EqualsConstraint<K>(k1);
 		Constraint<K> c2 = new EqualsConstraint<K>(k2);
 		Constraint<K> w = new Wildcard<K>();
-		
-		if(!implies(c1, c2))
+
+		if (!implies(c1, c2))
 			return false;
-		
-		Iterator<Pair<K,K>> dr = constraintIterator(c1, w);
-		while(dr.hasNext()) {
+
+		Iterator<Pair<K, K>> dr = constraintIterator(c1, w);
+		while (dr.hasNext()) {
 			K dg = dr.next().getSecond();
-			
-			if(XI.equals(dg, k2) || implies(new EqualsConstraint<K>(dg), c2))
+
+			if (XI.equals(dg, k2) || implies(new EqualsConstraint<K>(dg), c2))
 				return false; // pair is still implied
 		}
-		
+
 		this.implied.deIndex(k1, k2);
-		
-		Iterator<Pair<K,K>> right = constraintIterator(c2, w);
-		while(right.hasNext())
+
+		Iterator<Pair<K, K>> right = constraintIterator(c2, w);
+		while (right.hasNext())
 			removeAll(k1, right.next().getSecond());
-		
+
 		return true;
 	}
-	
+
 	@Override
 	public void removeImplied(K k1, K k2) {
-		
-		if(!removeAll(k1, k2))
+
+		if (!removeAll(k1, k2))
 			return;
-		
-		Iterator<Pair<K,K>> left = constraintIterator(new Wildcard<K>(),
-		        new EqualsConstraint<K>(k1));
-		while(left.hasNext())
+
+		Iterator<Pair<K, K>> left = constraintIterator(new Wildcard<K>(), new EqualsConstraint<K>(
+				k1));
+		while (left.hasNext())
 			removeImplied(left.next().getFirst(), k2);
-		
+
 	}
-	
+
 }

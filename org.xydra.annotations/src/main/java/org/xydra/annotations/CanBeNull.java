@@ -4,7 +4,6 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-
 /**
  * The annotated type can be null, its author believes.
  * 
@@ -20,5 +19,5 @@ import java.lang.annotation.RetentionPolicy;
 @Documented
 @Retention(RetentionPolicy.SOURCE)
 public @interface CanBeNull {
-	
+
 }

@@ -10,15 +10,15 @@ package org.xydra.conf;
  * @param <T>
  */
 public interface IResolver<T> {
-    
-    /**
-     * @return the desired singleton instance or @CanBeNull
-     */
-    T resolve();
-    
-    /**
-     * @return false iff {@link #resolve()} returns null
-     */
-    boolean canResolve();
-    
+
+	/**
+	 * @return the desired singleton instance or @CanBeNull
+	 */
+	T resolve();
+
+	/**
+	 * @return false iff {@link #resolve()} returns null
+	 */
+	boolean canResolve();
+
 }

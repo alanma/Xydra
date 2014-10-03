@@ -48,7 +48,6 @@ import org.xydra.store.impl.delegate.XydraSingleOperationStore;
 import org.xydra.store.impl.gae.GaePersistence;
 import org.xydra.store.impl.memory.MemoryPersistence;
 
-
 /**
  * Xydra is a module that helps to build rich social (web) applications easily.
  * This document gives a holistic overview on the 'Nine Heads of Xydra' -
@@ -291,5 +290,5 @@ import org.xydra.store.impl.memory.MemoryPersistence;
  * 
  */
 public interface The_Nine_Heads_of_Xydra {
-    
+
 }

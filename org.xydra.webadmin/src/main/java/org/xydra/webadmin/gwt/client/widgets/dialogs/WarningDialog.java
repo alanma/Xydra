@@ -14,49 +14,48 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-
 public class WarningDialog extends DialogBox {
-	
+
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(XyAdmin.class);
-	
-	interface ViewUiBinder extends UiBinder<Widget,WarningDialog> {
+
+	interface ViewUiBinder extends UiBinder<Widget, WarningDialog> {
 	}
-	
+
 	private static ViewUiBinder uiBinder = GWT.create(ViewUiBinder.class);
 	String inputString = "";
-	
+
 	@UiField
 	VerticalPanel mainPanel;
-	
+
 	@UiField
 	Label infoText;
-	
+
 	@UiField(provided = true)
 	ButtonPanel buttonPanel;
-	
+
 	public WarningDialog(String message) {
-		
+
 		super();
-		
+
 		ClickHandler okHandler = new ClickHandler() {
-			
+
 			@Override
 			public void onClick(ClickEvent event) {
 				WarningDialog.this.removeFromParent();
 			}
 		};
-		
+
 		this.buttonPanel = new ButtonPanel(okHandler, this);
-		
+
 		setWidget(uiBinder.createAndBindUi(this));
-		
+
 		this.setStyleName("dialogStyle");
 		this.setText("Warning");
 		this.infoText.setText(message);
 		this.getElement().setId("removeDialog");
-		
+
 		this.center();
 	}
-	
+
 }

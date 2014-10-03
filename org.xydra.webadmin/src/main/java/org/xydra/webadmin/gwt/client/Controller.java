@@ -18,7 +18,6 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.RootPanel;
 
-
 /**
  * Unit that holds some regularly needed objects and has the ability to start /
  * stop processes.
@@ -27,102 +26,102 @@ import com.google.gwt.user.client.ui.RootPanel;
  * 
  */
 public class Controller {
-	
+
 	private ServiceConnection service;
 	private SelectionTreePresenter selectionTreePresenter;
 	private EditorPanelPresenter editorPanelPresenter;
 	private Set<HandlerRegistration> registrations = new HashSet<HandlerRegistration>();
 	private AddressWidgetPresenter addressWidgetPresenter;
-	
+
 	private static final Logger log = LoggerFactory.getLogger(XyAdmin.class);
-	
+
 	public Controller(XyAdminServiceAsync service2, SelectionTreePresenter selectionTreePresenter2,
-	        EditorPanelPresenter editorPanelPresenter2,
-	        AddressWidgetPresenter addressWidgetPresenter2) {
-		
+			EditorPanelPresenter editorPanelPresenter2,
+			AddressWidgetPresenter addressWidgetPresenter2) {
+
 		this.service = new ServiceConnection(service2);
 		this.selectionTreePresenter = selectionTreePresenter2;
 		this.editorPanelPresenter = editorPanelPresenter2;
 		this.addressWidgetPresenter = addressWidgetPresenter2;
 	}
-	
+
 	public void startPresenting() {
 		this.selectionTreePresenter.present();
 		this.editorPanelPresenter.present();
 		this.addressWidgetPresenter.present();
 	}
-	
+
 	public void loadModelsObjects(XAddress address) {
 		this.service.loadModelsObjects(address);
 	}
-	
+
 	public void commit(XAddress modelAddress, XCommand addModelCommand,
-	        final XTransaction modelTransactions) {
-		
-		if(addModelCommand != null) {
+			final XTransaction modelTransactions) {
+
+		if (addModelCommand != null) {
 			this.service.commitAddedModel(modelAddress, addModelCommand, modelTransactions);
 		} else {
 			this.service.commitModelTransactions(modelAddress, modelTransactions);
 		}
 	}
-	
+
 	public void removeModel(final XAddress address) {
 		this.service.removeModel(address);
-		
+
 	}
-	
+
 	public void fetchModelIds(XAddress address) {
 		this.service.getModelIdsFromServer(address);
-		
+
 	}
-	
+
 	public void presentModel(XAddress address) {
 		this.editorPanelPresenter.presentModel(address);
 		log.info("now presenting model " + address.toString());
-		
+
 	}
-	
+
 	public static void showWaitCursor() {
 		DOM.setStyleAttribute(RootPanel.getBodyElement(), "cursor", "wait");
 	}
-	
+
 	public static void showDefaultCursor() {
 		DOM.setStyleAttribute(RootPanel.getBodyElement(), "cursor", "default");
 	}
-	
+
 	public XAddress getCurrentlyOpenedModelAddress() {
 		return this.editorPanelPresenter.getCurrentModelAddress();
 	}
-	
+
 	public void addRegistration(HandlerRegistration handler) {
 		this.registrations.add(handler);
 	}
-	
+
 	public void unregistrateAllHandlers() {
-		for(HandlerRegistration handler : this.registrations) {
+		for (HandlerRegistration handler : this.registrations) {
 			handler.removeHandler();
-			
+
 			handler = null;
 		}
 		this.registrations.clear();
 		log.info("unregistrated all handlers!");
 	}
-	
+
 	public void removeRegistration(HandlerRegistration handler) {
 		this.registrations.remove(handler);
 	}
-	
+
 	public SelectionTreePresenter getSelectionTreePresenter() {
 		return this.selectionTreePresenter;
-		
+
 	}
-	
+
 	public EditorPanelPresenter getEditorPanelPresenter() {
 		return this.editorPanelPresenter;
 	}
-	
+
 	public AddressWidgetPresenter getAddressWidgetPresenter() {
 		return this.addressWidgetPresenter;
 	}
-	
+
 }

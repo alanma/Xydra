@@ -6,14 +6,14 @@ package org.xydra.oo.runtime.shared;
  * @author xamde
  */
 public interface IXydraCollectionFactory {
-    /**
-     * @return an empty xydra collection
-     */
-    Object createEmptyCollection();
-    
-    /**
-     * @return code to be used in GWT to create an empty xydra collection
-     */
-    String createEmptyCollection_asSourceCode();
-    
+	/**
+	 * @return an empty xydra collection
+	 */
+	Object createEmptyCollection();
+
+	/**
+	 * @return code to be used in GWT to create an empty xydra collection
+	 */
+	String createEmptyCollection_asSourceCode();
+
 }

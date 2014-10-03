@@ -5,19 +5,18 @@ import java.util.NoSuchElementException;
 
 import org.xydra.csv.impl.memory.SingleRow;
 
-
 public class RowDataGenerator implements Iterator<IReadableRow> {
-	
+
 	private long delivered = 0;
-	
+
 	@Override
 	public boolean hasNext() {
 		return this.delivered < 100;
 	}
-	
+
 	@Override
 	public IReadableRow next() {
-		if(!hasNext()) {
+		if (!hasNext()) {
 			throw new NoSuchElementException();
 		}
 		this.delivered++;
@@ -35,10 +34,10 @@ public class RowDataGenerator implements Iterator<IReadableRow> {
 
 		});
 	}
-	
+
 	@Override
 	public void remove() {
 		throw new UnsupportedOperationException();
 	}
-	
+
 }

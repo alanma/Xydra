@@ -17,7 +17,7 @@ public class ExceptionHandlerException extends Exception {
 	/**
 	 * 
 	 * @param cause
-	 *            @CanBeNull
+	 * @CanBeNull
 	 */
 	public ExceptionHandlerException(@CanBeNull Throwable cause) {
 		super("error while invoking exception handler", cause);

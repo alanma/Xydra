@@ -7,7 +7,6 @@ import org.xydra.core.serialize.XydraParser;
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.XMLParser;
 
-
 /**
  * {@link XydraParser} implementation that uses the GWT browser-supported
  * XMLParser
@@ -17,23 +16,23 @@ import com.google.gwt.xml.client.XMLParser;
  */
 @RunsInGWT(true)
 public class GwtXmlParser implements XydraParser {
-	
+
 	@Override
-    public XydraElement parse(String xml) throws IllegalArgumentException {
-		
+	public XydraElement parse(String xml) throws IllegalArgumentException {
+
 		Document document;
 		try {
 			document = XMLParser.parse(xml);
-		} catch(Exception e) {
+		} catch (Exception e) {
 			throw new IllegalArgumentException();
 		}
-		
+
 		return new GwtXmlElement(document.getDocumentElement());
 	}
-	
+
 	@Override
 	public String getContentType() {
 		return "application/xml";
 	}
-	
+
 }

@@ -16,92 +16,91 @@ import com.sonicmetrics.core.shared.query.ISonicQueryResult;
 import com.sonicmetrics.core.shared.query.SonicMetadataResult;
 import com.sonicmetrics.core.shared.query.TimeConstraint;
 
-
 /**
  * @author xamde
  * 
  */
 @RunsInGWT(true)
 public class SonicMemoryDB implements ISonicDB {
-    
-    public static final String LAST_UNICODE_CHAR = "\uFFFF";
-    
-    private SortedMap<String,ISonicEvent> db = new TreeMap<String,ISonicEvent>();
-    
-    @Override
-    public void receiveEvent(ISonicEvent sonicEvent) {
-        String key = sonicEvent.getKey();
-        if(key == null) {
-            key = toKey(sonicEvent.getWhen()) + "-" + UUID.uuid(8);
-        }
-        sonicEvent.setKey(key);
-        this.db.put(key, sonicEvent);
-    }
-    
-    /**
-     * @param timeConstraint
-     * @param now
-     * @return a pair of keys or a lookup [inclusive, exclusive)
-     */
-    static Pair<String,String> toKeyConstraint(@NeverNull TimeConstraint timeConstraint, long now) {
-        // end
-        long endTime = timeConstraint.end;
-        if(endTime == 0l) {
-            endTime = now;
-        }
-        // start
-        String lastKey = timeConstraint.lastKey;
-        if(lastKey == null) {
-            assert timeConstraint.start >= 0 : timeConstraint.start;
-            long startInclusive = timeConstraint.start;
-            lastKey = startInclusive + "";
-        }
-        
-        return new Pair<String,String>(lastKey, toKey(endTime) + LAST_UNICODE_CHAR);
-    }
-    
-    private static String toKey(long now) {
-        return now + "";
-    }
-    
-    @Override
-    public long getCurrentTime() {
-        return System.currentTimeMillis();
-    }
-    
-    @Override
-    public void setKey(ISonicEvent sonicEvent) {
-        // TODO Auto-generated method stub
-    }
-    
-    @Override
-    public SonicMetadataResult search(String keyword) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-    
-    @Override
-    public ISonicQueryResult query(ISonicQuery sonicQuery) {
-        long now = getCurrentTime();
-        
-        Pair<String,String> keyConstraint = toKeyConstraint(sonicQuery.getTimeConstraint(), now);
-        
-        Iterator<ISonicEvent> it = this.db
-                .subMap(keyConstraint.getFirst(), keyConstraint.getSecond()).values().iterator();
-        
-        return new SonicQueryResult(it);
-    }
-    
-    @Override
-    public void delete(ISonicQuery sonicQuery) {
-        // TODO Auto-generated method stub
-        
-    }
-    
-    @Override
-    public void receiveEventAsync(ISonicEvent sonicEvent) {
-        // TODO Auto-generated method stub
-        
-    }
-    
+
+	public static final String LAST_UNICODE_CHAR = "\uFFFF";
+
+	private SortedMap<String, ISonicEvent> db = new TreeMap<String, ISonicEvent>();
+
+	@Override
+	public void receiveEvent(ISonicEvent sonicEvent) {
+		String key = sonicEvent.getKey();
+		if (key == null) {
+			key = toKey(sonicEvent.getWhen()) + "-" + UUID.uuid(8);
+		}
+		sonicEvent.setKey(key);
+		this.db.put(key, sonicEvent);
+	}
+
+	/**
+	 * @param timeConstraint
+	 * @param now
+	 * @return a pair of keys or a lookup [inclusive, exclusive)
+	 */
+	static Pair<String, String> toKeyConstraint(@NeverNull TimeConstraint timeConstraint, long now) {
+		// end
+		long endTime = timeConstraint.end;
+		if (endTime == 0l) {
+			endTime = now;
+		}
+		// start
+		String lastKey = timeConstraint.lastKey;
+		if (lastKey == null) {
+			assert timeConstraint.start >= 0 : timeConstraint.start;
+			long startInclusive = timeConstraint.start;
+			lastKey = startInclusive + "";
+		}
+
+		return new Pair<String, String>(lastKey, toKey(endTime) + LAST_UNICODE_CHAR);
+	}
+
+	private static String toKey(long now) {
+		return now + "";
+	}
+
+	@Override
+	public long getCurrentTime() {
+		return System.currentTimeMillis();
+	}
+
+	@Override
+	public void setKey(ISonicEvent sonicEvent) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public SonicMetadataResult search(String keyword) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ISonicQueryResult query(ISonicQuery sonicQuery) {
+		long now = getCurrentTime();
+
+		Pair<String, String> keyConstraint = toKeyConstraint(sonicQuery.getTimeConstraint(), now);
+
+		Iterator<ISonicEvent> it = this.db
+				.subMap(keyConstraint.getFirst(), keyConstraint.getSecond()).values().iterator();
+
+		return new SonicQueryResult(it);
+	}
+
+	@Override
+	public void delete(ISonicQuery sonicQuery) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void receiveEventAsync(ISonicEvent sonicEvent) {
+		// TODO Auto-generated method stub
+
+	}
+
 }

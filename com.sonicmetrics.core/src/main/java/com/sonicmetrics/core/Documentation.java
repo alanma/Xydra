@@ -6,7 +6,6 @@ import com.sonicmetrics.core.shared.impl.memory.SonicEvent;
 import com.sonicmetrics.core.shared.query.ISonicFilter;
 import com.sonicmetrics.core.shared.query.ISonicQuery;
 
-
 /**
  * SonicMetrics allows to write and query events.
  * 

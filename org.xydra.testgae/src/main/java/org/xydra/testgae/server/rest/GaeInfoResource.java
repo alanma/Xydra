@@ -9,7 +9,6 @@ import org.xydra.restless.Restless;
 import org.xydra.restless.utils.HtmlUtils;
 import org.xydra.xgae.gaeutils.GaeTestfixer;
 
-
 /**
  * Some simple basic information about Google AppEngine.
  * 
@@ -19,17 +18,17 @@ import org.xydra.xgae.gaeutils.GaeTestfixer;
  * 
  */
 public class GaeInfoResource {
-	
+
 	public static void restless(Restless r, String path) {
 		r.addGet(path + "/gaeinfo", GaeInfoResource.class, "index");
 		r.addGet(path + "/echo", GaeInfoResource.class, "echo");
 	}
-	
+
 	public void index(HttpServletResponse res) throws IOException {
 		Writer w = HtmlUtils.startHtmlPage(res, "GAE Information");
-		
+
 		w.write("GAE is in production? " + GaeTestfixer.inProduction() + "<br />");
-		
+
 		/*
 		 * check status of java 'assert' keyword which is disabled on AppEngine
 		 * in production
@@ -37,13 +36,13 @@ public class GaeInfoResource {
 		try {
 			assert false : "vm assertions are on";
 			w.write("If you can read this, java 'assert' keyword is off");
-		} catch(AssertionError e) {
+		} catch (AssertionError e) {
 			w.write("If you can read this, java 'assert' keyword is on");
 		}
 	}
-	
+
 	public String echo() {
 		return "It is " + System.currentTimeMillis();
 	}
-	
+
 }

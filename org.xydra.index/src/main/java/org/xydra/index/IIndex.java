@@ -2,7 +2,6 @@ package org.xydra.index;
 
 import java.io.Serializable;
 
-
 /**
  * Generic super-interface for all kinds of indexes.
  * 
@@ -10,9 +9,9 @@ import java.io.Serializable;
  * 
  */
 public interface IIndex extends Serializable {
-	
+
 	void clear();
-	
+
 	boolean isEmpty();
-	
+
 }

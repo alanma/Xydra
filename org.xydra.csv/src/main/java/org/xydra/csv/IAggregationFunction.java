@@ -5,17 +5,17 @@ public interface IAggregationFunction {
 	static class AVERAGE implements IAggregationFunction {
 
 		@Override
-        public String aggregate(double a, double b) {
+		public String aggregate(double a, double b) {
 			return "" + (a + b) / 2;
 		}
 
 		@Override
-        public String aggregate(long a, long b) {
+		public String aggregate(long a, long b) {
 			return "" + (a + b) / 2;
 		}
 
 		@Override
-        public String aggregate(String a, String b) {
+		public String aggregate(String a, String b) {
 			return "##";
 		}
 
@@ -24,17 +24,17 @@ public interface IAggregationFunction {
 	static class SUM implements IAggregationFunction {
 
 		@Override
-        public String aggregate(double a, double b) {
+		public String aggregate(double a, double b) {
 			return "" + a + b;
 		}
 
 		@Override
-        public String aggregate(long a, long b) {
+		public String aggregate(long a, long b) {
 			return "" + a + b;
 		}
 
 		@Override
-        public String aggregate(String a, String b) {
+		public String aggregate(String a, String b) {
 			return "##";
 		}
 

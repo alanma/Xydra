@@ -2,7 +2,6 @@ package org.xydra.oo.runtime.client;
 
 import com.google.gwt.core.client.EntryPoint;
 
-
 /**
  * This package allows to test all the other packages for GWT-compatibility
  * without requiring each of them to have a separate entry point.
@@ -11,13 +10,13 @@ import com.google.gwt.core.client.EntryPoint;
  * 
  */
 public class MyEntryPoint implements EntryPoint {
-    
-    @Override
-    public void onModuleLoad() {
-        // TODO do something
-        // XId actorId = XX.toId("gwt-moduleload");
-        // X.createMemoryRepository(actorId).createModel(XX.createUniqueId())
-        // .createObject(XX.toId("hello world"));
-    }
-    
+
+	@Override
+	public void onModuleLoad() {
+		// TODO do something
+		// XId actorId = XX.toId("gwt-moduleload");
+		// X.createMemoryRepository(actorId).createModel(XX.createUniqueId())
+		// .createObject(XX.toId("hello world"));
+	}
+
 }

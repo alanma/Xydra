@@ -6,7 +6,7 @@ package org.xydra.xgae.datastore.api;
  * @author xamde
  */
 public interface SText extends SWrapper, SValue {
-    
-    String getValue();
-    
+
+	String getValue();
+
 }

@@ -22,42 +22,41 @@ import java.util.logging.LogRecord;
 
 import com.google.gwt.core.client.GWT;
 
-
 /**
  * A Handler that prints logs to System.out or System.err.
  */
 public class SystemLogHandler extends Handler {
-    
-    public SystemLogHandler() {
-        setFormatter(new ClickableLinksInEclipseGwtLogFormatter(true));
-        setLevel(Level.ALL);
-    }
-    
-    @Override
-    public void close() {
-        // No action needed
-    }
-    
-    @Override
-    public void flush() {
-        // No action needed
-    }
-    
-    @Override
-    public void publish(LogRecord record) {
-        if(!isSupported() || !isLoggable(record)) {
-            return;
-        }
-        String msg = getFormatter().format(record);
-        int val = record.getLevel().intValue();
-        if(val <= Level.WARNING.intValue()) {
-            System.out.println(msg);
-        } else {
-            System.err.println(msg);
-        }
-    }
-    
-    private static boolean isSupported() {
-        return !GWT.isScript();
-    }
+
+	public SystemLogHandler() {
+		setFormatter(new ClickableLinksInEclipseGwtLogFormatter(true));
+		setLevel(Level.ALL);
+	}
+
+	@Override
+	public void close() {
+		// No action needed
+	}
+
+	@Override
+	public void flush() {
+		// No action needed
+	}
+
+	@Override
+	public void publish(LogRecord record) {
+		if (!isSupported() || !isLoggable(record)) {
+			return;
+		}
+		String msg = getFormatter().format(record);
+		int val = record.getLevel().intValue();
+		if (val <= Level.WARNING.intValue()) {
+			System.out.println(msg);
+		} else {
+			System.err.println(msg);
+		}
+	}
+
+	private static boolean isSupported() {
+		return !GWT.isScript();
+	}
 }

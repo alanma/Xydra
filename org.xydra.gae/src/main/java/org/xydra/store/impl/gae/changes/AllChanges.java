@@ -8,7 +8,6 @@ import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.sharedutils.XyAssert;
 
-
 /**
  * In-memory representation for some change events. Required for
  * {@link GaeChangesServiceImpl3}
@@ -18,21 +17,21 @@ import org.xydra.sharedutils.XyAssert;
  * @author xamde
  */
 public class AllChanges {
-	
+
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(AllChanges.class);
-	
+
 	/** Just the debug name */
-	private Map<Long,GaeChange> localMap = new HashMap<Long,GaeChange>();
+	private Map<Long, GaeChange> localMap = new HashMap<Long, GaeChange>();
 	private CommitedChanges commitedChanges;
-	
+
 	/**
 	 * @param modelAddress
 	 */
 	public AllChanges(XAddress modelAddress) {
 		this.commitedChanges = new CommitedChanges(modelAddress);
 	}
-	
+
 	/**
 	 * @param rev
 	 * @return cached change for this revisions. Can be null if (1) is really
@@ -40,26 +39,27 @@ public class AllChanges {
 	 */
 	GaeChange getCachedChange(long rev) {
 		GaeChange change = this.commitedChanges.getCachedChange(rev);
-		if(change == null) {
+		if (change == null) {
 			change = this.localMap.get(rev);
 		}
 		return change;
 	}
-	
+
 	/**
 	 * Cache given change
 	 * 
-	 * @param change to be cached; never null
+	 * @param change
+	 *            to be cached; never null
 	 */
 	public void cacheCommittedChange(GaeChange change) {
 		XyAssert.xyAssert(change != null);
 		assert change != null;
-		
-		if(!change.getStatus().canChange()) {
+
+		if (!change.getStatus().canChange()) {
 			this.commitedChanges.cacheStableChange(change);
 		} else {
 			this.localMap.put(change.rev, change);
 		}
 	}
-	
+
 }

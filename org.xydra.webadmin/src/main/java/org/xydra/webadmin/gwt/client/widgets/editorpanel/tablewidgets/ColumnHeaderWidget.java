@@ -13,7 +13,6 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
-
 /**
  * For column heads in the table
  * 
@@ -21,27 +20,27 @@ import com.google.gwt.user.client.ui.Widget;
  * 
  */
 public class ColumnHeaderWidget extends Composite {
-	
+
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(XyAdmin.class);
-	
-	interface ViewUiBinder extends UiBinder<Widget,ColumnHeaderWidget> {
+
+	interface ViewUiBinder extends UiBinder<Widget, ColumnHeaderWidget> {
 	}
-	
+
 	private static ViewUiBinder uiBinder = GWT.create(ViewUiBinder.class);
-	
+
 	@UiField
 	HTMLPanel panel;
-	
+
 	@UiField
 	Label idLabel;
-	
+
 	public ColumnHeaderWidget(XId id) {
 		super();
 		initWidget(uiBinder.createAndBindUi(this));
-		
+
 		this.idLabel.setText(id.toString());
-		
+
 	}
-	
+
 }

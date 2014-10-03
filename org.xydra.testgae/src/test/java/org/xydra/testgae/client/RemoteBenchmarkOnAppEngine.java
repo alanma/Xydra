@@ -8,12 +8,12 @@ package org.xydra.testgae.client;
  * 
  */
 public class RemoteBenchmarkOnAppEngine extends RemoteBenchmark {
-	
+
 	public RemoteBenchmarkOnAppEngine(String absoluteUrl, String path, int iterations,
-	        int maxAmount, Integer[] range) {
+			int maxAmount, Integer[] range) {
 		super(absoluteUrl, path, iterations, maxAmount, range);
 	}
-	
+
 	public void executeAllSingleThreadBenchmarks() {
 		benchmarkAddingOneWishOneThread();
 		benchmarkDeletingOneWishOneThread();
@@ -21,9 +21,9 @@ public class RemoteBenchmarkOnAppEngine extends RemoteBenchmark {
 		benchmarkAddingMultipleWishesInTransactionOneThread();
 		benchmarkAddingWishesInTransactionWithInitialWishesOneThread();
 		benchmarkEditingOneWishInTransactionWithInitialWishesOneThread();
-		
+
 	}
-	
+
 	public void executeAllMultiThreadedBenchmarks(int threads) {
 		benchmarkAddingOneWishMultipleThreads(threads);
 		benchmarkDeletingOneWishMultipleThreads(threads);
@@ -31,6 +31,6 @@ public class RemoteBenchmarkOnAppEngine extends RemoteBenchmark {
 		benchmarkAddingMultipleWishesInTransactionMultipleThreads(threads);
 		benchmarkAddingWishesInTransactionWithInitialWishesMultipleThreads(threads);
 		benchmarkEditingOneWishInTransactionWithInitialWishesMultipleThreads(threads);
-		
+
 	}
 }

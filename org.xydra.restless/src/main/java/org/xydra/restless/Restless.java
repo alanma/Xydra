@@ -230,7 +230,7 @@ public class Restless extends HttpServlet {
 	 *            {@link #addMethod(String, String, Object, String, boolean, RestlessParameter...)}
 	 *            for handling of this parameter @NeverNull
 	 * @param parameter
-	 *            @NeverNull
+	 * @NeverNull
 	 */
 	public void addGet(@NeverNull String pathTemplate, @NeverNull Object instanceOrClass,
 			@NeverNull String javaMethodName, @NeverNull RestlessParameter... parameter) {
@@ -289,9 +289,9 @@ public class Restless extends HttpServlet {
 	 * -content
 	 * 
 	 * @param req
-	 *            @NeverNull
+	 * @NeverNull
 	 * @param res
-	 *            @NeverNull
+	 * @NeverNull
 	 * @throws IOException
 	 */
 	public void delegateToDefaultServlet(@NeverNull HttpServletRequest req,
@@ -330,9 +330,9 @@ public class Restless extends HttpServlet {
 	 */
 	/**
 	 * @param req
-	 *            @NeverNull
+	 * @NeverNull
 	 * @param res
-	 *            @NeverNull
+	 * @NeverNull
 	 */
 	@Override
 	public void doDelete(@NeverNull HttpServletRequest req, @NeverNull HttpServletResponse res) {
@@ -353,9 +353,9 @@ public class Restless extends HttpServlet {
 	 */
 	/**
 	 * @param req
-	 *            @NeverNull
+	 * @NeverNull
 	 * @param res
-	 *            @NeverNull
+	 * @NeverNull
 	 */
 	@Override
 	public void doGet(@NeverNull final HttpServletRequest req,
@@ -382,9 +382,9 @@ public class Restless extends HttpServlet {
 	 */
 	/**
 	 * @param req
-	 *            @NeverNull
+	 * @NeverNull
 	 * @param res
-	 *            @NeverNull
+	 * @NeverNull
 	 */
 	@Override
 	public void doHead(@NeverNull HttpServletRequest req, @NeverNull HttpServletResponse res) {
@@ -405,9 +405,9 @@ public class Restless extends HttpServlet {
 	 * page.
 	 * 
 	 * @param req
-	 *            @NeverNull
+	 * @NeverNull
 	 * @param res
-	 *            @NeverNull
+	 * @NeverNull
 	 */
 	private void doIntrospection(@NeverNull HttpServletRequest req,
 			@NeverNull HttpServletResponse res) {
@@ -500,9 +500,9 @@ public class Restless extends HttpServlet {
 	 */
 	/**
 	 * @param req
-	 *            @NeverNull
+	 * @NeverNull
 	 * @param res
-	 *            @NeverNull
+	 * @NeverNull
 	 */
 	@Override
 	public void doPost(@NeverNull HttpServletRequest req, @NeverNull HttpServletResponse res) {
@@ -523,9 +523,9 @@ public class Restless extends HttpServlet {
 	 */
 	/**
 	 * @param req
-	 *            @NeverNull
+	 * @NeverNull
 	 * @param res
-	 *            @NeverNull
+	 * @NeverNull
 	 */
 	@Override
 	public void doPut(@NeverNull HttpServletRequest req, @NeverNull HttpServletResponse res) {
@@ -538,7 +538,7 @@ public class Restless extends HttpServlet {
 	/**
 	 * 
 	 * @param restlessContext
-	 *            @NeverNull
+	 * @NeverNull
 	 */
 	protected void fireRequestFinished(@NeverNull IRestlessContext restlessContext) {
 		synchronized (this.requestListeners) {
@@ -551,7 +551,7 @@ public class Restless extends HttpServlet {
 	/**
 	 * 
 	 * @param restlessContext
-	 *            @NeverNull
+	 * @NeverNull
 	 */
 	protected void fireRequestStarted(@NeverNull IRestlessContext restlessContext) {
 		synchronized (this.requestListeners) {
@@ -628,7 +628,7 @@ public class Restless extends HttpServlet {
 	 * 
 	 * @see javax.servlet.GenericServlet#init()
 	 * @param servletConfig
-	 *            @NeverNull
+	 * @NeverNull
 	 */
 	@Override
 	public void init(@NeverNull ServletConfig servletConfig) {
@@ -785,7 +785,7 @@ public class Restless extends HttpServlet {
 
 	/**
 	 * @param requestListener
-	 *            @CanBeNull
+	 * @CanBeNull
 	 */
 	public void removeRequestListener(@CanBeNull IRequestListener requestListener) {
 		synchronized (this.requestListeners) {
@@ -877,9 +877,9 @@ public class Restless extends HttpServlet {
 	 * {@link RestlessMethod}. Match path and HTTP method.
 	 * 
 	 * @param req
-	 *            @NeverNull
+	 * @NeverNull
 	 * @param res
-	 *            @NeverNull
+	 * @NeverNull
 	 */
 	protected void restlessService(@NeverNull final HttpServletRequest req,
 			@NeverNull final HttpServletResponse res) {

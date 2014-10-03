@@ -6,7 +6,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-
 /**
  * Methods annotated with this annotation are accessed from (e.g. Apache
  * Velocity) templates. Rename and change them with care. They might also be
@@ -18,9 +17,9 @@ import java.lang.annotation.Target;
 @Documented
 @Target(ElementType.METHOD)
 public @interface Template {
-    
-    /**
-     * @return variable name in template for annotated method
-     */
-    String value();
+
+	/**
+	 * @return variable name in template for annotated method
+	 */
+	String value();
 }

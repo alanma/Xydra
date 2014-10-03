@@ -15,48 +15,47 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-
 public class ButtonPanel extends Composite {
-	
+
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(XyAdmin.class);
-	
-	interface ViewUiBinder extends UiBinder<Widget,ButtonPanel> {
+
+	interface ViewUiBinder extends UiBinder<Widget, ButtonPanel> {
 	}
-	
+
 	private static ViewUiBinder uiBinder = GWT.create(ViewUiBinder.class);
 	String inputString = "";
-	
+
 	@UiField
 	HorizontalPanel buttonPanel;
-	
+
 	@UiField
 	Button okButton;
-	
+
 	@UiField
 	Button cancelButton;
-	
+
 	private Widget parentWidget;
-	
+
 	public ButtonPanel(ClickHandler handler, Widget parentWidget) {
-		
+
 		super();
-		
+
 		this.parentWidget = parentWidget;
-		
+
 		this.initWidget(uiBinder.createAndBindUi(this));
-		
+
 		this.okButton.addClickHandler(handler);
 	}
-	
+
 	@UiHandler("cancelButton")
 	void onClickRemove(ClickEvent event) {
 		this.parentWidget.removeFromParent();
 	}
-	
+
 	public void clickOk() {
 		this.okButton.click();
-		
+
 	}
-	
+
 }

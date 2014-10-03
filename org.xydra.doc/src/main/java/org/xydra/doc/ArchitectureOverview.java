@@ -16,7 +16,6 @@ import org.xydra.core.model.XLoggedModel;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XSynchronizesChanges;
 
-
 /**
  * Xydra uses a client-server concept to let several clients communicate via a
  * persistent store. Clients can be used without a server.
@@ -126,5 +125,5 @@ import org.xydra.core.model.XSynchronizesChanges;
  * 
  */
 public class ArchitectureOverview {
-    
+
 }

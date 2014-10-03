@@ -26,58 +26,57 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-
 public class RemoveModelDialog extends DialogBox {
-	
+
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(XyAdmin.class);
-	
-	interface ViewUiBinder extends UiBinder<Widget,RemoveModelDialog> {
+
+	interface ViewUiBinder extends UiBinder<Widget, RemoveModelDialog> {
 	}
-	
+
 	private static ViewUiBinder uiBinder = GWT.create(ViewUiBinder.class);
 	String inputString = "";
-	
+
 	@UiField
 	VerticalPanel mainPanel;
-	
+
 	@UiField
 	Label infoText;
-	
+
 	@UiField(provided = true)
 	ButtonPanel buttonPanel;
-	
+
 	private XAddress address;
 	private CheckBox checkBox;
 	private HorizontalPanel panel;
-	
+
 	public RemoveModelDialog(final Presenter presenter, XAddress address) {
-		
+
 		super();
-		
+
 		this.address = address;
-		
+
 		ClickHandler okHandler = new ClickHandler() {
-			
+
 			@Override
 			public void onClick(ClickEvent event) {
 				Boolean deleteFromRepo = RemoveModelDialog.this.checkBox.getValue();
 				presenter.remove(RemoveModelDialog.this.address, deleteFromRepo);
-				if(deleteFromRepo) {
+				if (deleteFromRepo) {
 					RemoveModelDialog.this.mainPanel.clear();
 				} else {
 					RemoveModelDialog.this.removeFromParent();
 				}
 			}
 		};
-		
+
 		this.buttonPanel = new ButtonPanel(okHandler, this);
-		
+
 		setWidget(uiBinder.createAndBindUi(this));
-		
+
 		this.infoText.setText("Are you sure you want to delete the item " + address.toString()
-		        + "?");
-		
+				+ "?");
+
 		this.panel = new HorizontalPanel();
 		this.panel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
 		this.mainPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
@@ -86,28 +85,28 @@ public class RemoveModelDialog extends DialogBox {
 		this.panel.add(text);
 		this.checkBox = new CheckBox();
 		this.panel.add(this.checkBox);
-		
+
 		this.setStyleName("dialogStyle");
 		this.setText("remove Entity");
 		this.getElement().setId("removeDialog");
-		
+
 		this.center();
-		
+
 		EventHelper.addCommittingListener(address, new ICommitEventHandler() {
-			
+
 			@Override
 			public void onCommit(CommittingEvent event) {
 				processCommitResponse(event.getModelAddress(), event.getStatus(),
-				        event.getNewRevision());
-				
+						event.getNewRevision());
+
 			}
 		});
 	}
-	
+
 	protected void processCommitResponse(XAddress modelAddress, CommitStatus status,
-	        long newRevision) {
+			long newRevision) {
 		String resultString = "successfully deleted model " + modelAddress.toString();
-		switch(status) {
+		switch (status) {
 		case FAILED:
 			resultString = "error!";
 			break;
@@ -119,20 +118,20 @@ public class RemoveModelDialog extends DialogBox {
 		this.mainPanel.add(new Label(resultString));
 		this.addCloseOKButton();
 		Controller.showDefaultCursor();
-		
+
 	}
-	
+
 	public void addCloseOKButton() {
 		Button okButton = new Button("ok");
 		okButton.addClickHandler(new ClickHandler() {
-			
+
 			@Override
 			public void onClick(ClickEvent event) {
 				RemoveModelDialog.this.removeFromParent();
 			}
 		});
 		this.mainPanel.add(okButton);
-		
+
 	}
-	
+
 }

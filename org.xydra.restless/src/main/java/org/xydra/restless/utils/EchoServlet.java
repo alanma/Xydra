@@ -33,9 +33,9 @@ public class EchoServlet extends HttpServlet {
 	/**
 	 * 
 	 * @param req
-	 *            @NeverNull
+	 * @NeverNull
 	 * @param resp
-	 *            @NeverNull
+	 * @NeverNull
 	 */
 	@Override
 	public void doGet(@NeverNull HttpServletRequest req, @NeverNull HttpServletResponse resp)
@@ -46,9 +46,9 @@ public class EchoServlet extends HttpServlet {
 	/**
 	 * 
 	 * @param req
-	 *            @NeverNull
+	 * @NeverNull
 	 * @param resp
-	 *            @NeverNull
+	 * @NeverNull
 	 */
 	@Override
 	public void doPost(@NeverNull HttpServletRequest req, @NeverNull HttpServletResponse resp)
@@ -59,9 +59,9 @@ public class EchoServlet extends HttpServlet {
 	/**
 	 * 
 	 * @param req
-	 *            @NeverNull
+	 * @NeverNull
 	 * @param resp
-	 *            @NeverNull
+	 * @NeverNull
 	 */
 	private static void echo(@NeverNull HttpServletRequest req, @NeverNull HttpServletResponse resp)
 			throws IOException {

@@ -70,7 +70,7 @@ public class NanoClock {
 	 * restarts it.
 	 * 
 	 * @param name
-	 *            @NeverNull
+	 * @NeverNull
 	 */
 	public synchronized void stopAndStart(@NeverNull String name) {
 		stop(name);

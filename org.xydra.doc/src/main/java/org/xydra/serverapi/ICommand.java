@@ -2,7 +2,6 @@ package org.xydra.serverapi;
 
 import java.io.Serializable;
 
-
 /**
  * Contains conditions under which the command should fail.
  * 
@@ -14,5 +13,5 @@ import java.io.Serializable;
  * 
  */
 public interface ICommand extends Serializable {
-	
+
 }
