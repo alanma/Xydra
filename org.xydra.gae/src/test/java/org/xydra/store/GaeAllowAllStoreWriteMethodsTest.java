@@ -32,7 +32,8 @@ public class GaeAllowAllStoreWriteMethodsTest extends AbstractAllowAllStoreWrite
         super.setUp();
     }
     
-    @After
+    @Override
+	@After
     public void tearDown() {
         super.tearDown();
     }

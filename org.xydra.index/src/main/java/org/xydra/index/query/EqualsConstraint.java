@@ -50,7 +50,8 @@ public class EqualsConstraint<E> implements Constraint<E> {
         return this.expect;
     }
     
-    public String toString() {
+    @Override
+	public String toString() {
         return "'" + this.expect.toString() + "'";
     }
     

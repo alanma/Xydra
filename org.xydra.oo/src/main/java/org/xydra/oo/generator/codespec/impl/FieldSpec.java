@@ -57,11 +57,13 @@ public class FieldSpec extends AbstractMember implements IMember {
         
     }
     
-    public void dump() {
+    @Override
+	public void dump() {
         System.out.println(this.toString());
     }
     
-    public boolean equals(Object other) {
+    @Override
+	public boolean equals(Object other) {
         return other instanceof FieldSpec && ((FieldSpec)other).id().equals(this.id());
     }
     
@@ -72,7 +74,8 @@ public class FieldSpec extends AbstractMember implements IMember {
         return set;
     }
     
-    public int hashCode() {
+    @Override
+	public int hashCode() {
         return id().hashCode();
     }
     
@@ -80,7 +83,8 @@ public class FieldSpec extends AbstractMember implements IMember {
         return this.getName() + this.t.id();
     }
     
-    public String toString() {
+    @Override
+	public String toString() {
         return "FIELD\n" + "  " + this.getName() + " " + this.t.toString();
     }
     

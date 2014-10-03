@@ -1,6 +1,6 @@
 package org.xydra.jetty;
 
-import org.xydra.annotations.CanBeNull;
+import org.xydra.annotations.NeverNull;
 import org.xydra.conf.IConfig;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
@@ -43,7 +43,7 @@ public abstract class EmbeddedJetty {
      */
     protected String docRootURL;
     
-    @CanBeNull
+    @NeverNull
     private Server server;
     
     private int port;
@@ -81,8 +81,8 @@ public abstract class EmbeddedJetty {
     /** when was server started or restarted? */
     protected long startTime;
     
-    @CanBeNull
-    private WebAppContext webapp;
+    @NeverNull
+    private WebAppContext webapp= new WebAppContext();
     
     /**
      * Make sure to #configure first
@@ -112,7 +112,6 @@ public abstract class EmbeddedJetty {
          * configuration from docRoot + WEB-INF/web.xml
          */
         
-        this.webapp = new WebAppContext();
         
         // ClassLoader loader = this.getClass().getClassLoader();
         // URL autodiscoverResource =

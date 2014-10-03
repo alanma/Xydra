@@ -9,7 +9,8 @@ public class ConstructorSpec extends AbstractConstructorOrMethodSpec implements 
         super(classSpec.getName(), generatedFrom);
     }
     
-    public String toString() {
+    @Override
+	public String toString() {
         String s = "";
         s += "CONSTRUCTOR\n";
         s += "  name:" + this.getName() + "\n";

@@ -3,7 +3,6 @@ package org.xydra.restless;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-
 /**
  * Provides convenient access to all meta-data available in Restless.
  * 
@@ -19,7 +18,7 @@ import javax.servlet.http.HttpServletResponse;
  * 
  */
 public interface IRestlessContext {
-	
+
 	/**
 	 * parameter name used to re-use request IDs from query parameters or
 	 * cookies.
@@ -27,26 +26,26 @@ public interface IRestlessContext {
 	 * @see #getRequestIdentifier()
 	 */
 	final String PARAM_REQUEST_ID = "restless__rid";
-	
+
 	/**
 	 * @return Restless itself
 	 */
 	Restless getRestless();
-	
+
 	/**
 	 * @return the {@link HttpServletRequest}. Instead of using the
 	 *         {@link IRestlessContext} in your Java method you can also use
 	 *         {@link HttpServletRequest} directly.
 	 */
 	HttpServletRequest getRequest();
-	
+
 	/**
 	 * @return the {@link HttpServletResponse}. Instead of using the
 	 *         {@link IRestlessContext} in your Java method you can also use
 	 *         {@link HttpServletResponse} directly.
 	 */
 	HttpServletResponse getResponse();
-	
+
 	/**
 	 * A unique tracking string to relate rendered web responses (which can also
 	 * be errors) and server logs.
@@ -57,5 +56,5 @@ public interface IRestlessContext {
 	 *         request-response even over redirects.
 	 */
 	String getRequestIdentifier();
-	
+
 }

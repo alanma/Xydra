@@ -72,7 +72,8 @@ public class ConfigTool {
         private Class<?> clazz;
         private String subName;
         
-        public String toString() {
+        @Override
+		public String toString() {
             return this.annotation.getClass().getSimpleName() + " at '" + this.clazz
                     + (this.subName == null ? "" : "." + this.subName) + "': "
                     + getValue(this.annotation) + " (" + this.clazz.getSimpleName()
@@ -131,7 +132,8 @@ public class ConfigTool {
         @CanBeNull
         String doc;
         
-        public String toString() {
+        @Override
+		public String toString() {
             return this.whereDefined + "." + this.key + " "
                     + (this.type == null ? "noType" : this.type.getName()) + " "
                     + (this.doc == null ? "noDoc" : this.doc);

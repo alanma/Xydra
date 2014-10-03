@@ -23,7 +23,8 @@ public interface ISmartList extends IBaseList {
      * @param model  [generated from: 'toClassSpec 2'] 
      * @param id  [generated from: 'toClassSpec 3'] 
      */
-    void init(XWritableModel model, XId id);
+    @Override
+	void init(XWritableModel model, XId id);
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  

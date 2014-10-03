@@ -23,7 +23,8 @@ public class GwtXydraMapped implements IHasXId {
         this.oop = new SharedProxy(model, id);
     }
     
-    public XId getId() {
+    @Override
+	public XId getId() {
         return this.oop.getId();
     }
     

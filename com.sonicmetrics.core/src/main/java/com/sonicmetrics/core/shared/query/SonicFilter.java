@@ -30,7 +30,8 @@ public class SonicFilter implements ISonicFilter, Serializable {
         }
     }
     
-    @NeverNull
+    @Override
+	@NeverNull
     public Collection<KeyValueConstraint> getKeyValueConstraints() {
         return this.keyValueConstraints.values();
     }
@@ -176,7 +177,8 @@ public class SonicFilter implements ISonicFilter, Serializable {
         return true;
     }
     
-    public boolean equals(Object other) {
+    @Override
+	public boolean equals(Object other) {
         if(!(other instanceof ISonicFilter))
             return false;
         
@@ -216,7 +218,8 @@ public class SonicFilter implements ISonicFilter, Serializable {
                 + SonicUtils.hashCode(getLabel());
     }
     
-    public String toString() {
+    @Override
+	public String toString() {
         return "cat.act.lab.sou.sub=" + this.getCategory() + "." + this.getAction() + "."
                 + this.getLabel() + "." + this.getSource() + "." + this.getSubject();
     }

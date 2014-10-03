@@ -28,15 +28,18 @@ public class GwtModuleXmlSpec {
     
     public class GenerateWith {
         
-        public Class<?> generateWith;
+        @SuppressWarnings("hiding")
+		public Class<?> generateWith;
         
         public String whenTypeAssignable;
         
-        public int hashCode() {
+        @Override
+		public int hashCode() {
             return this.whenTypeAssignable.hashCode();
         }
         
-        public boolean equals(Object o) {
+        @Override
+		public boolean equals(Object o) {
             return o instanceof GenerateWith
                     && ((GenerateWith)o).whenTypeAssignable.endsWith(this.whenTypeAssignable);
         }
@@ -61,7 +64,8 @@ public class GwtModuleXmlSpec {
         }
     }
     
-    public String toString() {
+    @Override
+	public String toString() {
         StringBuilder b = new StringBuilder();
         
         b.append("<module");

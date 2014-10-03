@@ -368,7 +368,6 @@ public class GaeExecutionServiceImpl3 implements IGaeExecutionService {
                 log.warn("Over 1000 events", e);
             }
         }
-        XyAssert.xyAssert(events != null);
         try {
             if(events.isEmpty()) {
                 change.giveUpIfTimeoutCritical();

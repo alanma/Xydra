@@ -96,7 +96,8 @@ public class CommitedChanges {
      * 
      * @return the instance-level cache of committed change objects
      */
-    private Map<Long,GaeChange> getInstanceCommittedChangeCache() {
+    @SuppressWarnings("unchecked")
+	private Map<Long,GaeChange> getInstanceCommittedChangeCache() {
         String key = "changes:" + this.modelAddr;
         Cache<String,Object> instanceCache = InstanceContext.getInstanceCache();
         Map<Long,GaeChange> committedChangeCache;

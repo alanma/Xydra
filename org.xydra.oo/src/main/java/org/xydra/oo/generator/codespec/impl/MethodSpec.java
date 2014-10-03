@@ -79,7 +79,8 @@ public class MethodSpec extends AbstractConstructorOrMethodSpec implements IMemb
         return req;
     }
     
-    public String toString() {
+    @Override
+	public String toString() {
         String s = "";
         s += "// " + this.getComment() + "\n";
         s += "METHOD " + this.getName() + "\n";

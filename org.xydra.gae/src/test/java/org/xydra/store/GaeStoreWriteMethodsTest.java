@@ -26,7 +26,8 @@ public class GaeStoreWriteMethodsTest extends AbstractSecureStoreWriteMethodsTes
         GaeTestfixer.enable();
     }
     
-    @Before
+    @Override
+	@Before
     public void setUp() {
         this.store = null;
         GaeTestfixer.initialiseHelperAndAttachToCurrentThread();
@@ -43,7 +44,8 @@ public class GaeStoreWriteMethodsTest extends AbstractSecureStoreWriteMethodsTes
         return this.store;
     }
     
-    @After
+    @Override
+	@After
     public void tearDown() {
         SynchronousCallbackWithOneResult<Set<XId>> mids = new SynchronousCallbackWithOneResult<Set<XId>>();
         this.store.getModelIds(getCorrectUser(), getCorrectUserPasswordHash(), mids);

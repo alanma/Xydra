@@ -75,6 +75,7 @@ public class FieldWidget extends Composite implements TableFieldWidget {
 		this.addStyleName("fadeOut");
 		
 		Timer timer1 = new Timer() {
+			@Override
 			public void run() {
 				FieldWidget.this.addStyleName("highlightStyle");
 				// FieldWidget.this.removeStyleName("highlightStyle");
@@ -84,6 +85,7 @@ public class FieldWidget extends Composite implements TableFieldWidget {
 		timer1.schedule(500);
 		
 		Timer timer2 = new Timer() {
+			@Override
 			public void run() {
 				FieldWidget.this.removeStyleName("highlightStyle");
 				FieldWidget.this.removeStyleName("fadeOut");

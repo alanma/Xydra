@@ -49,7 +49,8 @@ public class JulLogger extends JulLogger_GwtEmul {
     
     private boolean isConfigured;
     
-    protected boolean hasLogListeners() {
+    @Override
+	protected boolean hasLogListeners() {
         return this.hasLogListeners;
     }
     

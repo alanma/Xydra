@@ -131,6 +131,7 @@ public class RepoBranchWidget extends Composite implements IRepoBranchWidget {
 		
 	}
 	
+	@Override
 	public RepoBranchWidget asWidget() {
 		return this;
 	}

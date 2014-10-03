@@ -197,7 +197,8 @@ public class MemoryConfig implements IConfig {
         get(key);
     }
     
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     public IConfig copy() {
         MemoryConfig copy = new MemoryConfig(this.internalId + "-copy");
         copy.defaults.putAll(this.defaults);
@@ -215,7 +216,8 @@ public class MemoryConfig implements IConfig {
         return copy;
     }
     
-    public Object get(Enum<?> key) {
+    @Override
+	public Object get(Enum<?> key) {
         if(key == null)
             throw new IllegalArgumentException("Key may not be null");
         return get(key.name());
@@ -318,7 +320,8 @@ public class MemoryConfig implements IConfig {
      * @return a short 4-character marker string to help identify which config
      *         is which.
      */
-    public String getInternalId() {
+    @Override
+	public String getInternalId() {
         return this.internalId;
     }
     
@@ -393,7 +396,8 @@ public class MemoryConfig implements IConfig {
                 + o.getClass().getName());
     }
     
-    public String getString(Enum<?> key) {
+    @Override
+	public String getString(Enum<?> key) {
         return getString(key.name());
     }
     
@@ -637,7 +641,8 @@ public class MemoryConfig implements IConfig {
         return this;
     }
     
-    public String toString() {
+    @Override
+	public String toString() {
         StringBuilder b = new StringBuilder();
         b.append("DEFINED\n");
         List<String> defined = new ArrayList<String>();

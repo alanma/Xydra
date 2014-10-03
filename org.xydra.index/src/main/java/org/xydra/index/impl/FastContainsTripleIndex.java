@@ -87,7 +87,8 @@ public class FastContainsTripleIndex<K, L, M> extends SmallTripleIndex<K,L,M> im
         throw new AssertionError("one of the patterns should have matched");
     }
     
-    public boolean contains(K key1, L key2, M key3) {
+    @Override
+	public boolean contains(K key1, L key2, M key3) {
         Constraint<K> c1 = new EqualsConstraint<K>(key1);
         Constraint<L> c2 = new EqualsConstraint<L>(key2);
         Constraint<M> c3 = new EqualsConstraint<M>(key3);

@@ -85,7 +85,8 @@ public class Jetty extends EmbeddedJetty {
     /**
      * set some nice default servlet filters
      */
-    protected void configureWebapp(WebAppContext webappContext) {
+    @Override
+	protected void configureWebapp(WebAppContext webappContext) {
         // make sure 'com.google.appengine.tools.appstats.AppstatsFilter' is on
         // the classpath
         

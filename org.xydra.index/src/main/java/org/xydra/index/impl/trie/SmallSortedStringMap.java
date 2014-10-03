@@ -44,7 +44,8 @@ public class SmallSortedStringMap<E> implements IMapIndex<String,E> {
         }
     });
     
-    public void index(String key, E value) {
+    @Override
+	public void index(String key, E value) {
         this.map.put(toBytes(key), value);
     }
     
@@ -177,7 +178,8 @@ public class SmallSortedStringMap<E> implements IMapIndex<String,E> {
         return this.map.size();
     }
     
-    public String toString() {
+    @Override
+	public String toString() {
         return this.map.toString();
     }
     

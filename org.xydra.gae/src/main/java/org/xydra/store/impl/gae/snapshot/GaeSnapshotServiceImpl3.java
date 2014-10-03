@@ -1,7 +1,6 @@
 package org.xydra.store.impl.gae.snapshot;
 
 import java.io.Serializable;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
@@ -361,7 +360,8 @@ public class GaeSnapshotServiceImpl3 extends AbstractGaeSnapshotServiceImpl {
      * 
      * TODO SCALE avoid growing large, keep only most recent version?
      */
-    private SortedMap<Long,XRevWritableModel> getModelSnapshotsCache() {
+    @SuppressWarnings("unchecked")
+	private SortedMap<Long,XRevWritableModel> getModelSnapshotsCache() {
         String key = "snapshots:" + this.changesService.getModelAddress();
         Cache<String,Object> instanceCache = InstanceContext.getInstanceCache();
         SortedMap<Long,XRevWritableModel> modelSnapshotsCache;

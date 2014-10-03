@@ -20,7 +20,8 @@ public class DatastoreImplGae implements IDatastore {
     
     private IDatastoreAsync asyncInstance;
     
-    public synchronized IDatastoreSync sync() {
+    @Override
+	public synchronized IDatastoreSync sync() {
         // TODO implement factory pattern
         if(this.syncInstance == null) {
             this.syncInstance = new DatastoreImplGaeSync();
@@ -28,7 +29,8 @@ public class DatastoreImplGae implements IDatastore {
         return this.syncInstance;
     }
     
-    public synchronized IDatastoreAsync async() {
+    @Override
+	public synchronized IDatastoreAsync async() {
         // TODO implement factory pattern
         if(this.asyncInstance == null) {
             this.asyncInstance = new DatastoreImplGaeAsync();
@@ -36,12 +38,14 @@ public class DatastoreImplGae implements IDatastore {
         return this.asyncInstance;
     }
     
-    public SEntity createEntity(SKey key) {
+    @Override
+	public SEntity createEntity(SKey key) {
         Entity e = new Entity((Key)key.raw());
         return GEntity.wrap(e);
     }
     
-    public SEntity createEntity(String kind, String name) {
+    @Override
+	public SEntity createEntity(String kind, String name) {
         return createEntity(createKey(kind, name));
     }
     

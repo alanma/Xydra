@@ -18,13 +18,15 @@ public class GaePersistenceSynchronizerTest extends AbstractPersistenceSynchroni
         LoggerTestHelper.init();
     }
     
-    @Before
+    @Override
+	@Before
     public void setUp() {
         InstanceContext.clear();
         super.setUp();
     }
     
-    @After
+    @Override
+	@After
     public void tearDown() {
         super.tearDown();
     }

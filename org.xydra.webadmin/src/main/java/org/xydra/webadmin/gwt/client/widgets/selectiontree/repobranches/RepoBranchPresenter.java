@@ -69,6 +69,7 @@ public class RepoBranchPresenter extends SelectionTreePresenter {
 		
 		EventHelper.addRepoChangeListener(this.repoAddress, new IRepoChangedEventHandler() {
 			
+			@Override
 			public void onRepoChange(RepoChangedEvent event) {
 				processRepoDataChanges(event.getStatus());
 			}

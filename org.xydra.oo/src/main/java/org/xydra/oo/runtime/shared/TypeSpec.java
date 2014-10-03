@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.xydra.annotations.CanBeNull;
 import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.RunsInGWT;
 
@@ -30,7 +29,7 @@ public class TypeSpec implements Comparable<TypeSpec>, IType {
     
     private String comment;
     
-    @CanBeNull
+    /** @CanBeNull */
     private IBaseType componentType;
     
     private String generatedFrom;
@@ -94,19 +93,23 @@ public class TypeSpec implements Comparable<TypeSpec>, IType {
         System.out.println("TYPESPEC " + toString());
     }
     
-    public boolean equals(Object other) {
+    @Override
+	public boolean equals(Object other) {
         return other instanceof TypeSpec && ((TypeSpec)other).id().equals(this.id());
     }
     
-    public IBaseType getBaseType() {
+    @Override
+	public IBaseType getBaseType() {
         return this.baseType;
     }
     
-    public String getComment() {
+    @Override
+	public String getComment() {
         return this.comment;
     }
     
-    public IBaseType getComponentType() {
+    @Override
+	public IBaseType getComponentType() {
         return this.componentType;
     }
     
@@ -156,18 +159,19 @@ public class TypeSpec implements Comparable<TypeSpec>, IType {
             // simple type
             return this.baseType.getSimpleName();
         } else {
+        	assert this.componentType != null;
             // assume a generic collection type
             if(this.baseType.isArray()) {
                 return this.componentType.getSimpleName() + "[]";
             } else {
-                assert this.componentType != null;
                 return this.baseType.getSimpleName() + "<" + this.componentType.getSimpleName()
                         + ">";
             }
         }
     }
     
-    public int hashCode() {
+    @Override
+	public int hashCode() {
         return id().hashCode();
     }
     
@@ -178,11 +182,13 @@ public class TypeSpec implements Comparable<TypeSpec>, IType {
                 + (this.componentType == null ? "" : ":" + this.componentType.getCanonicalName());
     }
     
-    public void setComment(String string) {
+    @Override
+	public void setComment(String string) {
         this.comment = string;
     }
     
-    public String toString() {
+    @Override
+	public String toString() {
         return
         
         (this.comment != null ? "// " + this.comment + "\n" : "")
@@ -192,7 +198,8 @@ public class TypeSpec implements Comparable<TypeSpec>, IType {
         + "type=" + this.baseType + " compType=" + this.componentType;
     }
     
-    public boolean isArray() {
+    @Override
+	public boolean isArray() {
         return this.baseType.isArray();
     }
     

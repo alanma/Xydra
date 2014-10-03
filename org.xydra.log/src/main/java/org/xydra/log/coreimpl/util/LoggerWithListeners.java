@@ -1,6 +1,7 @@
 package org.xydra.log.coreimpl.util;
 
 import org.xydra.annotations.CanBeNull;
+import org.xydra.annotations.NeverNull;
 import org.xydra.log.api.ILogListener;
 import org.xydra.log.api.Logger;
 
@@ -20,14 +21,14 @@ public class LoggerWithListeners implements Logger {
     
     private Logger log;
     
-    @CanBeNull
+    @NeverNull
     protected final Collection<ILogListener> logListeners;
     
     /**
      * @param logger @NeverNull
      * @param logListeners @CanBeNull
      */
-    public LoggerWithListeners(Logger logger, Collection<ILogListener> logListeners) {
+    public LoggerWithListeners(Logger logger, @CanBeNull Collection<ILogListener> logListeners) {
         assert logger != null;
         this.log = logger;
         /*

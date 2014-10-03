@@ -22,7 +22,8 @@ public class TransformingIterator<I, O> extends AbstractTransformingIterator<I,O
     @Deprecated
     public interface Transformer<I, O> extends ITransformer<I,O> {
         
-        O transform(I in);
+        @Override
+		O transform(I in);
         
     }
     

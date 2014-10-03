@@ -63,24 +63,29 @@ public class FutureUtils {
     
     public static class TransformingFuture<I, O> implements Future<O> {
         
-        public boolean cancel(boolean mayInterruptIfRunning) {
+        @Override
+		public boolean cancel(boolean mayInterruptIfRunning) {
             return this.in.cancel(mayInterruptIfRunning);
         }
         
-        public boolean isCancelled() {
+        @Override
+		public boolean isCancelled() {
             return this.in.isCancelled();
         }
         
-        public boolean isDone() {
+        @Override
+		public boolean isDone() {
             return this.in.isDone();
         }
         
-        public O get() throws InterruptedException, ExecutionException {
+        @Override
+		public O get() throws InterruptedException, ExecutionException {
             I inValue = this.in.get();
             return this.transformer.transform(inValue);
         }
         
-        public O get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException,
+        @Override
+		public O get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException,
                 TimeoutException {
             I inValue = this.in.get(timeout, unit);
             return this.transformer.transform(inValue);

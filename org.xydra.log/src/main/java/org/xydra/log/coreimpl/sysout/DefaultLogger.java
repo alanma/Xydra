@@ -218,7 +218,8 @@ public class DefaultLogger implements Logger {
         }
     }
     
-    public void setLevel(Level level) {
+    @Override
+	public void setLevel(Level level) {
         this.level = level;
     }
     

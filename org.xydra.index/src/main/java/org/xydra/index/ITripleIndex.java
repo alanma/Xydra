@@ -58,7 +58,8 @@ public interface ITripleIndex<K, L, M> extends IIndex, ITripleSink<K,L,M> {
      * @param p
      * @param o
      */
-    void index(K s, L p, M o);
+    @Override
+	void index(K s, L p, M o);
     
     /**
      * @param c1 @NotNull

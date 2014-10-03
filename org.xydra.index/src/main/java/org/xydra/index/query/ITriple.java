@@ -2,7 +2,8 @@ package org.xydra.index.query;
 
 public interface ITriple<K, L, E> extends HasEntry<E> {
     
-    E getEntry();
+    @Override
+	E getEntry();
     
     K getKey1();
     

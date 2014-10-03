@@ -183,7 +183,7 @@ public abstract class SortedMapTest {
     }
     
     @SuppressWarnings("rawtypes")
-    private void dump(SortedMap<String,Integer> map) {
+    private static void dump(SortedMap<String,Integer> map) {
         if(map instanceof SortedArrayMap) {
             ((SortedArrayMap)map).dump();
         }

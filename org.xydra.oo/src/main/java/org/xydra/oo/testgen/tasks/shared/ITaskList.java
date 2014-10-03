@@ -16,7 +16,8 @@ public interface ITaskList extends IBaseList {
      * @param model  [generated from: 'toClassSpec 2'] 
      * @param id  [generated from: 'toClassSpec 3'] 
      */
-    void init(XWritableModel model, XId id);
+    @Override
+	void init(XWritableModel model, XId id);
 
     /** 
      *  [generated from: 'org.xydra.oo.testspecs.TasksSpec.TaskList'] 

@@ -274,7 +274,8 @@ public class GaeEvents {
                 SText eventXml;
                 if(this.transIndex < 0) {
                     int realindex = getInternalValueId(this.transIndex);
-                    List<SText> eventValues = (List<SText>)eventEntity
+                    @SuppressWarnings("unchecked")
+					List<SText> eventValues = (List<SText>)eventEntity
                             .getAttribute(PROP_EVENT_VALUES);
                     if(eventValues == null || realindex >= eventValues.size()) {
                         return null;
@@ -452,7 +453,8 @@ public class GaeEvents {
      * @return a List of {@link XAtomicEvent} which is stored as a number of GAE
      *         entities
      */
-    protected static Pair<XAtomicEvent[],int[]> loadAtomicEvents(XAddress modelAddr, long rev,
+    @SuppressWarnings("unchecked")
+	protected static Pair<XAtomicEvent[],int[]> loadAtomicEvents(XAddress modelAddr, long rev,
             XId actor, SEntity changeEntity) {
         
         /*

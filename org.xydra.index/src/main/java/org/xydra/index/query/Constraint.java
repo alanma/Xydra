@@ -32,7 +32,8 @@ public interface Constraint<E> extends IFilter<E> {
      * @return true if the constraint matches the element, i.e. if the element
      *         should appear in a result iterator.
      */
-    boolean matches(E element);
+    @Override
+	boolean matches(E element);
     
     /**
      * @return the expected object; @CanBeNull if this is a (kind of) wild card

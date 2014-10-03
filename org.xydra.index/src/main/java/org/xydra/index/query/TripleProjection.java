@@ -40,15 +40,18 @@ public class TripleProjection {
         
     };
     
-    public static <T> Iterator<T> o(Iterator<? extends ITriple<?,?,T>> it) {
+    @SuppressWarnings("unchecked")
+	public static <T> Iterator<T> o(Iterator<? extends ITriple<?,?,T>> it) {
         return (Iterator<T>)Iterators.transform(it, PROJECT_O);
     }
     
+    @SuppressWarnings("unchecked")
     public static <T> Iterator<T> p(Iterator<? extends ITriple<?,T,?>> it) {
         return (Iterator<T>)Iterators.transform(it, PROJECT_P);
         
     }
     
+    @SuppressWarnings("unchecked")
     public static <T> Iterator<T> s(Iterator<? extends ITriple<T,?,?>> it) {
         return (Iterator<T>)Iterators.transform(it, PROJECT_S);
     }

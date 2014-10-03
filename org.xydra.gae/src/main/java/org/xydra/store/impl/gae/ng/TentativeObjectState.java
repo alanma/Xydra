@@ -33,7 +33,8 @@ public class TentativeObjectState implements Serializable, XRevWritableObject {
     
     private boolean objectExists;
     
-    public boolean exists() {
+    @Override
+	public boolean exists() {
         return this.objectExists;
     }
     
@@ -65,7 +66,8 @@ public class TentativeObjectState implements Serializable, XRevWritableObject {
         return this.object.getAddress();
     }
     
-    public XRevWritableField getField(XId fieldId) {
+    @Override
+	public XRevWritableField getField(XId fieldId) {
         return this.object.getField(fieldId);
     }
     
@@ -78,7 +80,8 @@ public class TentativeObjectState implements Serializable, XRevWritableObject {
         return this.modelRevision;
     }
     
-    public long getRevisionNumber() {
+    @Override
+	public long getRevisionNumber() {
         return this.object.getRevisionNumber();
     }
     
@@ -87,15 +90,18 @@ public class TentativeObjectState implements Serializable, XRevWritableObject {
         return XType.XOBJECT;
     }
     
-    public boolean hasField(XId fieldId) {
+    @Override
+	public boolean hasField(XId fieldId) {
         return this.object.hasField(fieldId);
     }
     
-    public boolean isEmpty() {
+    @Override
+	public boolean isEmpty() {
         return this.object.isEmpty();
     }
     
-    public Iterator<XId> iterator() {
+    @Override
+	public Iterator<XId> iterator() {
         return this.object.iterator();
     }
     

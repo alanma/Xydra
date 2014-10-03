@@ -39,7 +39,8 @@ public abstract class AbstractMember extends NamedElement implements IMember {
         return this.generatedFrom;
     }
     
-    public Set<String> getRequiredImports() {
+    @Override
+	public Set<String> getRequiredImports() {
         HashSet<String> req = new HashSet<String>();
         for(AnnotationSpec<?> ann : this.annotations) {
             req.add(ann.annot.getCanonicalName());

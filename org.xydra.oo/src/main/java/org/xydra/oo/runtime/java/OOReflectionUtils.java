@@ -294,7 +294,8 @@ public class OOReflectionUtils {
         if(log.isTraceEnabled())
             log.trace("Creating proxy for " + interfaze.getCanonicalName());
         
-        T instance = (T)Proxy.newProxyInstance(interfaze.getClassLoader(), new Class<?>[] {
+        @SuppressWarnings("unchecked")
+		T instance = (T)Proxy.newProxyInstance(interfaze.getClassLoader(), new Class<?>[] {
                 interfaze, ICanDump.class }, new OOJavaOnlyProxy(model, id));
         return instance;
     }

@@ -740,7 +740,8 @@ public class SharedTypeMapping {
      * @return an empty Xydra collection value, a sub-type of
      *         {@link XCollectionValue}
      */
-    public <T> XCollectionValue<T> createEmptyXydraCollection() {
+    @SuppressWarnings("unchecked")
+	public <T> XCollectionValue<T> createEmptyXydraCollection() {
         return (XCollectionValue<T>)this.factory.createEmptyCollection();
     }
     

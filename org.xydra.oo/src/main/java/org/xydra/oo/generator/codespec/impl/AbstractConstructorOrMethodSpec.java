@@ -45,7 +45,8 @@ public class AbstractConstructorOrMethodSpec extends AbstractMember implements I
         return this;
     }
     
-    public final <T> AbstractConstructorOrMethodSpec annotateWith(final Class<?> annotationClass,
+    @Override
+	public final <T> AbstractConstructorOrMethodSpec annotateWith(final Class<?> annotationClass,
             @SuppressWarnings("unchecked") T ... values) {
         super.annotateWith(annotationClass, values);
         return this;
@@ -60,11 +61,13 @@ public class AbstractConstructorOrMethodSpec extends AbstractMember implements I
         }
     }
     
-    public void dump() {
+    @Override
+	public void dump() {
         System.out.println(this.toString());
     }
     
-    public boolean equals(Object other) {
+    @Override
+	public boolean equals(Object other) {
         return other instanceof AbstractConstructorOrMethodSpec
                 && ((AbstractConstructorOrMethodSpec)other).id().equals(this.id());
     }
@@ -95,7 +98,8 @@ public class AbstractConstructorOrMethodSpec extends AbstractMember implements I
         return req;
     }
     
-    public int hashCode() {
+    @Override
+	public int hashCode() {
         return this.id().hashCode();
     }
     

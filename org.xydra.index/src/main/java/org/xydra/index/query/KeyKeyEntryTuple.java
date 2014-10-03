@@ -20,11 +20,13 @@ public class KeyKeyEntryTuple<K, L, E> implements ITriple<K,L,E>, HasEntry<E> {
         return this.entry;
     }
     
-    public K getKey1() {
+    @Override
+	public K getKey1() {
         return this.key1;
     }
     
-    public L getKey2() {
+    @Override
+	public L getKey2() {
         return this.key2;
     }
     

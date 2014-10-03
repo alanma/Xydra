@@ -60,7 +60,8 @@ public class SonicQuery extends SonicFilter implements ISonicQuery {
         return this.timeConstraint != null && this.timeConstraint.isConstraining();
     }
     
-    @NeverNull
+    @Override
+	@NeverNull
     public TimeConstraint getTimeConstraint() {
         return this.timeConstraint;
     }
@@ -95,7 +96,8 @@ public class SonicQuery extends SonicFilter implements ISonicQuery {
         return true;
     }
     
-    public boolean equals(Object other) {
+    @Override
+	public boolean equals(Object other) {
         if(!(other instanceof ISonicQuery))
             return false;
         

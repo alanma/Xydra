@@ -306,6 +306,7 @@ public class AddEditorDialog extends DialogBox {
 	
 	class EditedValueListener implements EditListener {
 		
+		@Override
 		public void newValue(XValue value) {
 		}
 		

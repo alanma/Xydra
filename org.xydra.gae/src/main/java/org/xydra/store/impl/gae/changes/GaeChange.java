@@ -396,7 +396,8 @@ public class GaeChange {
     synchronized public GaeLocks getLocks() {
         XyAssert.xyAssert(getStatus().canChange());
         if(this.locks == null) {
-            List<String> lockStrs = (List<String>)this.entity.getAttribute(PROP_LOCKS);
+            @SuppressWarnings("unchecked")
+			List<String> lockStrs = (List<String>)this.entity.getAttribute(PROP_LOCKS);
             if(lockStrs == null) {
                 return null;
             }

@@ -41,7 +41,8 @@ public class SonicEvent extends SonicPotentialEvent implements ISonicEvent, Seri
             this.b = this;
         }
         
-        public void validate() {
+        @Override
+		public void validate() {
             XyAssert.validateNotNull(this.t.category, "category");
             XyAssert.validateNotNull(this.t.action, "action");
             XyAssert.validateNotNull(this.t.subject, "subject");
@@ -140,7 +141,8 @@ public class SonicEvent extends SonicPotentialEvent implements ISonicEvent, Seri
         this.timestamp = utcTimestamp;
     }
     
-    public boolean equals(Object other) {
+    @Override
+	public boolean equals(Object other) {
         if(!(other instanceof ISonicEvent))
             return false;
         
@@ -173,26 +175,31 @@ public class SonicEvent extends SonicPotentialEvent implements ISonicEvent, Seri
         return true;
     }
     
-    public String getKey() {
+    @Override
+	public String getKey() {
         return this.key;
     }
     
-    public long getWhen() {
+    @Override
+	public long getWhen() {
         return this.timestamp;
     }
     
-    public int hashCode() {
+    @Override
+	public int hashCode() {
         return ((int)(this.timestamp % Integer.MAX_VALUE))
                 + (this.key == null ? 0 : this.key.hashCode());
     }
     
-    public void setKey(@NeverNull String key) {
+    @Override
+	public void setKey(@NeverNull String key) {
         XyAssert.validateCondition(this.key == null, "Key can be set only once");
         // key = key name
         this.key = key;
     }
     
-    public @NeverNull
+    @Override
+	public @NeverNull
     StringBuilder toJsonObject() {
         StringBuilder b = new StringBuilder();
         b.append("{ ");
@@ -321,7 +328,8 @@ public class SonicEvent extends SonicPotentialEvent implements ISonicEvent, Seri
     /**
      * @return a pessimistic estimate of the size in bytes if serialised
      */
-    public final int size() {
+    @Override
+	public final int size() {
         /* measured overhead */
         int size = 39 + super.size();
         for(Entry<String,String> e : this.extensionDataMap.entrySet()) {

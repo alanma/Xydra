@@ -43,7 +43,8 @@ public class RawWrapper<R, S extends SWrapper> {
         public Iterator<R> iterator() {
             return new TransformingIterator<S,R>(this.iterable.iterator(), new ITransformer<S,R>() {
                 
-                @Override
+                @SuppressWarnings("unchecked")
+				@Override
                 public R transform(S in) {
                     return (R)in.raw();
                 }

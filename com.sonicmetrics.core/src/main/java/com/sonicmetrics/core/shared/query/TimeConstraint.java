@@ -80,6 +80,7 @@ public class TimeConstraint implements Serializable {
 		        + "]";
 	}
 	
+	@Override
 	public boolean equals(Object other) {
 		return other instanceof TimeConstraint && equals(this, (TimeConstraint)other);
 	}

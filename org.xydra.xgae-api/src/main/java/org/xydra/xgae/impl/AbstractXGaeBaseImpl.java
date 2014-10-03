@@ -9,7 +9,8 @@ public abstract class AbstractXGaeBaseImpl implements IXGae {
      * @return true if on AppEngine (regardless whether in production or in
      *         development mode)
      */
-    public boolean onAppEngine() {
+    @Override
+	public boolean onAppEngine() {
         return inProduction() || inDevelopment();
     }
     
@@ -23,7 +24,8 @@ public abstract class AbstractXGaeBaseImpl implements IXGae {
     /**
      * @return 'inProduction', 'inDevelopment' or 'notOnAppengine'
      */
-    public String inModeAsString() {
+    @Override
+	public String inModeAsString() {
         if(inProduction()) {
             return "inProduction";
         } else if(inDevelopment()) {

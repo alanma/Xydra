@@ -34,6 +34,7 @@ public class ModelBranchWidget extends Composite implements IModelBranchWidget {
 		
 	}
 	
+	@Override
 	public void init(ModelBranchPresenter presenter, XAddress address,
 	        ClickHandler anchorClickHandler) {
 		this.entityWidget = new EntityWidget(presenter, address, anchorClickHandler);
@@ -66,6 +67,7 @@ public class ModelBranchWidget extends Composite implements IModelBranchWidget {
 		
 	}
 	
+	@Override
 	public ModelBranchWidget asWidget() {
 		return this;
 	}

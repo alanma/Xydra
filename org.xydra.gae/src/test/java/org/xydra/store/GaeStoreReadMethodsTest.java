@@ -41,12 +41,14 @@ public class GaeStoreReadMethodsTest extends AbstractSecureStoreReadMethodsTest 
         return this.store;
     }
     
-    @Before
+    @Override
+	@Before
     public void setUp() {
         super.setUp();
     }
     
-    @After
+    @Override
+	@After
     public void tearDown() {
         SynchronousCallbackWithOneResult<Set<XId>> mids = new SynchronousCallbackWithOneResult<Set<XId>>();
         this.store.getModelIds(getCorrectUser(), getCorrectUserPasswordHash(), mids);

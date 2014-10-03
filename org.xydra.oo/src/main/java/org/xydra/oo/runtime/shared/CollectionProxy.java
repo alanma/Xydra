@@ -69,7 +69,8 @@ public class CollectionProxy<X extends XCollectionValue<T>, T, J, C> {
         XWritableField f = this.xo.getField(this.fieldId);
         if(f == null)
             return 0;
-        XCollectionValue<T> v = (XCollectionValue<T>)f.getValue();
+        @SuppressWarnings("unchecked")
+		XCollectionValue<T> v = (XCollectionValue<T>)f.getValue();
         if(v == null)
             return 0;
         return v.size();
@@ -79,6 +80,7 @@ public class CollectionProxy<X extends XCollectionValue<T>, T, J, C> {
         XWritableField f = this.xo.getField(this.fieldId);
         if(f == null)
             return true;
+        @SuppressWarnings("unchecked")
         XCollectionValue<T> v = (XCollectionValue<T>)f.getValue();
         if(v == null)
             return true;
@@ -89,6 +91,7 @@ public class CollectionProxy<X extends XCollectionValue<T>, T, J, C> {
         XWritableField f = this.xo.getField(this.fieldId);
         if(f == null)
             return false;
+        @SuppressWarnings("unchecked")
         XCollectionValue<T> v = (XCollectionValue<T>)f.getValue();
         if(v == null)
             return false;
@@ -102,6 +105,7 @@ public class CollectionProxy<X extends XCollectionValue<T>, T, J, C> {
         XWritableField f = this.xo.getField(this.fieldId);
         if(f == null)
             return NoneIterator.<C>create();
+        @SuppressWarnings("unchecked")
         XCollectionValue<T> v = (XCollectionValue<T>)f.getValue();
         if(v == null)
             return NoneIterator.<C>create();
@@ -118,6 +122,7 @@ public class CollectionProxy<X extends XCollectionValue<T>, T, J, C> {
                 });
     }
     
+    @SuppressWarnings("unchecked")
     public boolean add(C j) {
         boolean changes = false;
         XWritableField f = this.xo.getField(this.fieldId);
@@ -140,6 +145,7 @@ public class CollectionProxy<X extends XCollectionValue<T>, T, J, C> {
         return changes;
     }
     
+    @SuppressWarnings("unchecked")
     public boolean remove(Object o) {
         XWritableField f = this.xo.getField(this.fieldId);
         XCollectionValue<T> v;
@@ -152,7 +158,6 @@ public class CollectionProxy<X extends XCollectionValue<T>, T, J, C> {
             }
         }
         assert v != null;
-        @SuppressWarnings("unchecked")
         C j = (C)o;
         T x = this.componentTransformer.toXydraComponent(j);
         boolean b = v.contains(x);

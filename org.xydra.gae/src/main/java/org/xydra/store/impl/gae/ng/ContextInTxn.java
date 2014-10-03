@@ -35,39 +35,48 @@ public class ContextInTxn implements XStateWritableModel, XExists {
     
     private ChangedModel changedModel;
     
-    public XStateWritableObject createObject(XId objectId) {
+    @Override
+	public XStateWritableObject createObject(XId objectId) {
         return this.changedModel.createObject(objectId);
     }
     
-    public XAddress getAddress() {
+    @Override
+	public XAddress getAddress() {
         return this.changedModel.getAddress();
     }
     
-    public XId getId() {
+    @Override
+	public XId getId() {
         return this.changedModel.getId();
     }
     
-    public boolean hasObject(XId objectId) {
+    @Override
+	public boolean hasObject(XId objectId) {
         return this.changedModel.hasObject(objectId);
     }
     
-    public XStateWritableObject getObject(XId objectId) {
+    @Override
+	public XStateWritableObject getObject(XId objectId) {
         return this.changedModel.getObject(objectId);
     }
     
-    public boolean isEmpty() {
+    @Override
+	public boolean isEmpty() {
         return this.changedModel.isEmpty();
     }
     
-    public Iterator<XId> iterator() {
+    @Override
+	public Iterator<XId> iterator() {
         return this.changedModel.iterator();
     }
     
-    public XType getType() {
+    @Override
+	public XType getType() {
         return this.changedModel.getType();
     }
     
-    public boolean removeObject(XId objectId) {
+    @Override
+	public boolean removeObject(XId objectId) {
         return this.changedModel.removeObject(objectId);
     }
     
@@ -88,11 +97,13 @@ public class ContextInTxn implements XStateWritableModel, XExists {
         return this.changedModel.hasChanges();
     }
     
-    public void setExists(boolean modelExists) {
+    @Override
+	public void setExists(boolean modelExists) {
         this.changedModel.setExists(modelExists);
     }
     
-    public boolean exists() {
+    @Override
+	public boolean exists() {
         return this.changedModel.exists();
     }
     

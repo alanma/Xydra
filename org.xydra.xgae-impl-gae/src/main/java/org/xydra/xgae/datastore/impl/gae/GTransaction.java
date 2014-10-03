@@ -24,23 +24,28 @@ public class GTransaction extends RawWrapper<Transaction,STransaction> implement
             this.raw = rawTxn;
         }
         
-        public boolean cancel(boolean mayInterruptIfRunning) {
+        @Override
+		public boolean cancel(boolean mayInterruptIfRunning) {
             return this.raw.cancel(mayInterruptIfRunning);
         }
         
-        public boolean isCancelled() {
+        @Override
+		public boolean isCancelled() {
             return this.raw.isCancelled();
         }
         
-        public boolean isDone() {
+        @Override
+		public boolean isDone() {
             return this.raw.isDone();
         }
         
-        public STransaction get() throws InterruptedException, ExecutionException {
+        @Override
+		public STransaction get() throws InterruptedException, ExecutionException {
             return GTransaction.wrap(this.raw.get());
         }
         
-        public STransaction get(long timeout, TimeUnit unit) throws InterruptedException,
+        @Override
+		public STransaction get(long timeout, TimeUnit unit) throws InterruptedException,
                 ExecutionException, TimeoutException {
             return GTransaction.wrap(this.raw.get(timeout, unit));
         }

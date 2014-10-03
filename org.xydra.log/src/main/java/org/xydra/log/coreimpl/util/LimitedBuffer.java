@@ -25,7 +25,8 @@ public class LimitedBuffer {
         }
     }
     
-    public String toString() {
+    @Override
+	public String toString() {
         return this.buf.toString();
     }
     

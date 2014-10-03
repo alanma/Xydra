@@ -200,7 +200,8 @@ public class SonicPotentialEvent implements ISonicPotentialEvent, Serializable {
             this.b = this;
         }
         
-        public void validate() {
+        @Override
+		public void validate() {
             XyAssert.validateNotNull(this.t.category, "category");
             XyAssert.validateNotNull(this.t.action, "action");
             XyAssert.validateNotNull(this.t.subject, "subject");
@@ -263,12 +264,14 @@ public class SonicPotentialEvent implements ISonicPotentialEvent, Serializable {
     public SonicPotentialEvent() {
     }
     
-    public @NeverNull
+    @Override
+	public @NeverNull
     String getAction() {
         return this.action;
     }
     
-    public @NeverNull
+    @Override
+	public @NeverNull
     String getCategory() {
         return this.category;
     }
@@ -277,7 +280,8 @@ public class SonicPotentialEvent implements ISonicPotentialEvent, Serializable {
      * @return category.action.label if all three are defined; category.action
      *         if these two are defined; or just the category.
      */
-    public @NeverNull
+    @Override
+	public @NeverNull
     String getDotString() {
         return SonicUtils.toDotString(getCategory(), getAction(), getLabel());
     }
@@ -288,33 +292,40 @@ public class SonicPotentialEvent implements ISonicPotentialEvent, Serializable {
         return Collections.unmodifiableMap(this.extensionDataMap);
     }
     
-    public String getLabel() {
+    @Override
+	public String getLabel() {
         return this.label;
     }
     
-    public @NeverNull
+    @Override
+	public @NeverNull
     String getSource() {
         return this.source;
     }
     
-    public @NeverNull
+    @Override
+	public @NeverNull
     String getSubject() {
         return this.subject;
     }
     
-    public String getUniqueId() {
+    @Override
+	public String getUniqueId() {
         return this.uniqueId;
     }
     
-    public String getValue() {
+    @Override
+	public String getValue() {
         return this.value;
     }
     
-    public boolean hasLabel() {
+    @Override
+	public boolean hasLabel() {
         return getLabel() != null;
     }
     
-    public boolean hasUniqueId() {
+    @Override
+	public boolean hasUniqueId() {
         return this.getUniqueId() != null;
     }
     

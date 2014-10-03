@@ -445,7 +445,8 @@ public class JavaCodeGenerator {
      * @return a new {@link ClassSpec}, attached to the given packageSpec.
      *         Content is based on specClass.
      */
-    private static ClassSpec toClassSpec(PackageSpec packageSpec, Class<?> specClass,
+    @SuppressWarnings("null")
+	private static ClassSpec toClassSpec(PackageSpec packageSpec, Class<?> specClass,
             Set<Class<?>> toBeGeneratedTypes) {
         assert packageSpec != null;
         assert specClass != null;

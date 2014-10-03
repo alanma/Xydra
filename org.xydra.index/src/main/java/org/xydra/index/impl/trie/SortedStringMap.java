@@ -34,7 +34,8 @@ public class SortedStringMap<E> implements IMapIndex<String,E> {
     
     // new TreeMap<String,E>();
     
-    public void index(final String key, final E value) {
+    @Override
+	public void index(final String key, final E value) {
         this.map.put(key.intern(), value);
     }
     
@@ -182,7 +183,8 @@ public class SortedStringMap<E> implements IMapIndex<String,E> {
         return this.map.size();
     }
     
-    public String toString() {
+    @Override
+	public String toString() {
         return this.map.toString();
     }
     

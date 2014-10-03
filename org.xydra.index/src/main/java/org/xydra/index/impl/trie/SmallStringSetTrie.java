@@ -508,7 +508,8 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String,E>, Serializab
             }
         }
         
-        public String toString() {
+        @Override
+		public String toString() {
             return toString("  ", "").toString();
         }
         
@@ -924,7 +925,8 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String,E>, Serializab
         return Iterators.count(keyIterator());
     }
     
-    public String toString() {
+    @Override
+	public String toString() {
         return this.root.toString();
     }
     

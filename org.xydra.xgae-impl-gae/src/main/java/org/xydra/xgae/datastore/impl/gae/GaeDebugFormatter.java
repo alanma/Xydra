@@ -22,7 +22,8 @@ import com.google.appengine.api.memcache.MemcacheService.IdentifiableValue;
 @RunsInGWT(false)
 public class GaeDebugFormatter implements IDebugFormatter {
     
-    public String format(Object value) {
+    @Override
+	public String format(Object value) {
         if(value instanceof IdentifiableValue) {
             return DebugFormatter.format((((IdentifiableValue)value).getValue()));
         } else

@@ -39,7 +39,8 @@ public class CopyGwt extends AbstractMojo {
      */
     private String[] gwtModuleNames;
     
-    public void execute() throws MojoExecutionException {
+    @Override
+	public void execute() throws MojoExecutionException {
         try {
             this.warPath = "./target/" + this.artifactId + "-" + this.versionId;
             copyGwt();

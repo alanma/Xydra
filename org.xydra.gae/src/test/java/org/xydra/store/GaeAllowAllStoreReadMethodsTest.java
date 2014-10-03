@@ -19,12 +19,14 @@ public class GaeAllowAllStoreReadMethodsTest extends AbstractAllowAllStoreReadMe
         LoggerTestHelper.init();
     }
     
-    @Before
+    @Override
+	@Before
     public void setUp() {
         super.setUp();
     }
     
-    @After
+    @Override
+	@After
     public void tearDown() {
         XydraRuntime.finishRequest();
     }

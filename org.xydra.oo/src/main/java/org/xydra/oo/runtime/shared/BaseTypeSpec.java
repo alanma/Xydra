@@ -68,7 +68,8 @@ public class BaseTypeSpec implements Comparable<BaseTypeSpec>, IBaseType {
         return this.simpleName.compareTo(o.getSimpleName());
     }
     
-    public boolean equals(Object o) {
+    @Override
+	public boolean equals(Object o) {
         if(o instanceof BaseTypeSpec) {
             BaseTypeSpec obts = (BaseTypeSpec)o;
             return obts.packageName.equals(this.packageName)
@@ -101,11 +102,13 @@ public class BaseTypeSpec implements Comparable<BaseTypeSpec>, IBaseType {
         return this.simpleName;
     }
     
-    public int hashCode() {
-        return this.packageName.hashCode() + this.simpleName.hashCode();
+    @Override
+	public int hashCode() {
+        return (this.packageName==null?0:this.packageName.hashCode()) + this.simpleName.hashCode();
     }
     
-    public String toString() {
+    @Override
+	public String toString() {
         return this.getCanonicalName();
     }
     

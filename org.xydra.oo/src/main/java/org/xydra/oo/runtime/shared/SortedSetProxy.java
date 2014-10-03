@@ -41,7 +41,8 @@ public class SortedSetProxy<X extends XCollectionValue<T>, T, J, C> extends
             /* IMPROVE more efficient */
             XWritableField f = this.xo.getField(this.fieldId);
             
-            XCollectionValue<T> col = (XCollectionValue<T>)f.getValue();
+            @SuppressWarnings("unchecked")
+			XCollectionValue<T> col = (XCollectionValue<T>)f.getValue();
             List<T> list = new ArrayList<T>();
             list.addAll(Arrays.asList(col.toArray()));
             Collections.sort(list, new Comparator<T>() {

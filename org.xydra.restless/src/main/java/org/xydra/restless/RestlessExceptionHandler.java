@@ -1,7 +1,7 @@
 package org.xydra.restless;
 
 public interface RestlessExceptionHandler {
-	
+
 	/**
 	 * Handle the given exception.
 	 * 
@@ -12,5 +12,5 @@ public interface RestlessExceptionHandler {
 	 *         processed further.
 	 */
 	boolean handleException(Throwable t, IRestlessContext context);
-	
+
 }

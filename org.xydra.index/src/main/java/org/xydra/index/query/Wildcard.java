@@ -32,7 +32,8 @@ public class Wildcard<K> implements Constraint<K> {
         return null;
     }
     
-    public String toString() {
+    @Override
+	public String toString() {
         return "*";
     }
     

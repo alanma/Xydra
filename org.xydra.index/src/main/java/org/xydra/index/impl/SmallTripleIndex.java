@@ -49,7 +49,8 @@ public class SmallTripleIndex<K, L, M> implements ITripleIndex<K,L,M> {
      * @param key3 @NeverNull
      * @return true if triple index contains the given triple
      */
-    public boolean contains(K key1, L key2, M key3) {
+    @Override
+	public boolean contains(K key1, L key2, M key3) {
         Constraint<K> c1 = new EqualsConstraint<K>(key1);
         Constraint<L> c2 = new EqualsConstraint<L>(key2);
         Constraint<M> c3 = new EqualsConstraint<M>(key3);

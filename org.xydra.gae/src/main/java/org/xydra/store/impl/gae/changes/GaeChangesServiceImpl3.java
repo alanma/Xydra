@@ -436,7 +436,7 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
                         log.debug(this.modelAddr + ":: New currentRev candidate " + candidate);
                     }
                 } else {
-                    XyAssert.xyAssert(change != null && !change.getStatus().isCommitted());
+                    XyAssert.xyAssert(!change.getStatus().isCommitted());
                     if(!includeTentative) {
                         // we just validated a stable candidate revision
                         log.debug("Found end at " + i + " return workingRev=" + candidate);
@@ -514,7 +514,7 @@ public class GaeChangesServiceImpl3 implements IGaeChangesService {
             if(change == null) {
                 locallyMissingRevs.add(i);
             } else {
-                XyAssert.xyAssert(change != null && change.rev == i);
+                XyAssert.xyAssert(change.rev == i);
                 // re-request all pending changes
                 if(!change.getStatus().isCommitted()) {
                     locallyMissingRevs.add(i);

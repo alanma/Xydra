@@ -18,7 +18,8 @@ import org.xydra.xgae.datastore.api.SKey;
 @RunsInGWT(false)
 public class GaeDebugFormatter implements IDebugFormatter {
     
-    public String format(Object value) {
+    @Override
+	public String format(Object value) {
         if(value instanceof SKey) {
             return KeyStructure.toString((SKey)value);
         } else if(value instanceof SEntity) {
