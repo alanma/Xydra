@@ -178,7 +178,6 @@ public class UnorderedEventMapper implements IEventMapper {
      * @param localEvent
      * @return
      */
-    @SuppressWarnings("null")
     private static boolean isEqual(XEvent remoteEvent, XEvent localEvent) {
         
         if(remoteEvent.getChangeType().equals(localEvent.getChangeType())
@@ -190,12 +189,12 @@ public class UnorderedEventMapper implements IEventMapper {
                 
                 XValue newValueRemote = remoteFieldEvent.getNewValue();
                 XValue newValueLocal = localFieldEvent.getNewValue();
-                if(newValueRemote == null && newValueLocal == null
-                        || newValueRemote.equals(newValueLocal)) {
-                    return true;
-                } else
-                    return false;
                 
+                if(newValueRemote == null) {
+                	return newValueLocal == null;
+                } else {
+                	return newValueRemote.equals(newValueLocal);
+                }
             } else {
                 return true;
             }
