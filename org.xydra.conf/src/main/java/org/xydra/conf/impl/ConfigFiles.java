@@ -1,13 +1,5 @@
 package org.xydra.conf.impl;
 
-import org.xydra.conf.IConfig;
-import org.xydra.index.iterator.Iterators;
-
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Properties;
-import java.util.Set;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -16,6 +8,14 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
+
+import org.xydra.conf.IConfig;
+import org.xydra.index.iterator.Iterators;
 
 /**
  * Support for reading/writing {@link IConfig}
@@ -38,7 +38,8 @@ public class ConfigFiles {
 		Iterators.addAll(conf.getExplicitlyDefinedKeys().iterator(), explicitly);
 
 		// one alphabetically sorted list
-		for (String key : conf.getDefinedKeys()) {
+		List<String> listOfDefinedKeys = Iterators.toList(conf.getDefinedKeys().iterator());
+		for (String key : listOfDefinedKeys) {
 			String typeComment = "";
 			Object o = conf.get(key);
 			String value;
