@@ -35,28 +35,20 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>index</artifactId>
-			<!--@@ use xydra.version here -->
-			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>xgae-api</artifactId>
-			<!--@@ use xydra.version here -->
-			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>annotations</artifactId>
-			<!--@@ use xydra.version here -->
-			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>annotations</artifactId>
-			<!--@@ use xydra.version here -->
-			<version>0.1.7-SNAPSHOT</version>
 			<classifier>sources</classifier>
 		</dependency>
 
@@ -64,8 +56,6 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>core</artifactId>
-			<!--@@ use xydra.version here -->
-			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 
 
@@ -73,24 +63,18 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>log</artifactId>
-			<!-- @@ use xydra.version here -->
-			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 
 
 		<dependency>
 			<groupId>com.google.appengine</groupId>
 			<artifactId>appengine-api-stubs</artifactId>
-			<!--@@ use gae.version here -->
-			<version>1.8.5</version>
 			<scope>compile</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>com.google.appengine</groupId>
 			<artifactId>appengine-testing</artifactId>
-			<!--@@ use gae.version here -->
-			<version>1.8.5</version>
 			<scope>compile</scope>
 		</dependency>
 

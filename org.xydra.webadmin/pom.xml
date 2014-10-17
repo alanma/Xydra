@@ -88,7 +88,6 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>core</artifactId>
-			<version>0.1.7-SNAPSHOT</version>
 			<classifier>tests</classifier>
 			<scope>compile</scope>
 		</dependency>
@@ -96,54 +95,45 @@
 			<groupId>org.xydra</groupId>
 			<artifactId>gwt</artifactId>
 			<classifier>sources</classifier>
-			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 
 		<!-- === Shared === -->
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>core</artifactId>
-			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 		<!-- Xydra GWT -->
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>gwt</artifactId>
-			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 
 		<!-- === Server === -->
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>csv</artifactId>
-			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>restless</artifactId>
-			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>xgae-api</artifactId>
-			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>xgae-impl-gae</artifactId>
-			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>gae</artifactId>
-			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 
 		<!-- === TEST === -->
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>jetty</artifactId>
-			<version>0.1.7-SNAPSHOT</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -191,8 +181,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>gwt-maven-plugin</artifactId>
-				<!-- @@ use gwt.version here -->
-				<version>2.5.0</version>
+				<version>${gwt.version}</version>
 				<configuration>
 					<!-- FIXME not always detailed -->
 					<style>DETAILED</style>

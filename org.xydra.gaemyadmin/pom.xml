@@ -36,14 +36,10 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>restless</artifactId>
-			<!-- @@ use xydra.version here -->
-			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>jetty</artifactId>
-			<!-- @@ use xydra.version here -->
-			<version>0.1.7-SNAPSHOT</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -56,31 +52,23 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>csv</artifactId>
-			<!-- @@ use xydra.version here -->
-			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 
 		<!-- logging -->
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>log</artifactId>
-			<!-- @@ use xydra.version here -->
-			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.google.appengine</groupId>
 			<artifactId>appengine-testing</artifactId>
-			<!-- @@ use gae.version here -->
-			<version>1.8.5</version>
 			<scope>compile</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>com.google.appengine</groupId>
 			<artifactId>appengine-api-stubs</artifactId>
-			<!-- @@ use gae.version here -->
-			<version>1.8.5</version>
 			<scope>compile</scope>
 		</dependency>
 

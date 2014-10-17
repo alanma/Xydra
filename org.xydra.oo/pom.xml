@@ -22,8 +22,6 @@
 		<!-- Set your AppEngine developer account email here -->
 		<gae.email>max.at.xam.de@gmail.com</gae.email>
 		<!-- required for gae plugin to determin gae.home -->
-		<!-- @@ use gae.version here -->
-		<gae.version>1.7.5</gae.version>
 	</properties>
 
 	<dependencies>
@@ -32,28 +30,15 @@
 		<dependency>
 			<groupId>com.google.gwt</groupId>
 			<artifactId>gwt-dev</artifactId>
-			<version>2.5.0</version>
 		</dependency>
-
-		<!-- Java code generator -->
-		<!-- Too complex -->
-		<!-- <dependency> -->
-		<!-- <groupId>org.jboss.errai</groupId> -->
-		<!-- <artifactId>errai-codegen</artifactId> -->
-		<!-- <version>2.2.0.Final</version> -->
-		<!-- </dependency> -->
 
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>gwt</artifactId>
-			<!-- @@ use xydra.version here -->
-			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>gwt</artifactId>
-			<!-- @@ use xydra.version here -->
-			<version>0.1.7-SNAPSHOT</version>
 			<classifier>sources</classifier>
 		</dependency>
 		<!-- <dependency> -->
@@ -82,17 +67,5 @@
 		</dependency>
 
 	</dependencies>
-
-	<build>
-		<plugins>
-			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
-				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+	
 </project>

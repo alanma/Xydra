@@ -2,12 +2,12 @@ package org.xydra.xgae.gaeutils;
 
 import org.xydra.store.XydraRuntime;
 
-import com.google.appengine.api.backends.BackendServiceFactory;
 import com.google.appengine.api.capabilities.CapabilitiesService;
 import com.google.appengine.api.capabilities.CapabilitiesServiceFactory;
 import com.google.appengine.api.capabilities.Capability;
 import com.google.appengine.api.capabilities.CapabilityStatus;
 import com.google.appengine.api.utils.SystemProperty;
+import com.google.apphosting.api.ApiProxy;
 
 /**
  * Information about AppEngine
@@ -102,18 +102,10 @@ public class AboutAppEngine {
 		}
 	}
 
-	/**
-	 * @return true if the current request is handled by a backend
-	 */
-	public static boolean onBackend() {
-		String backend = BackendServiceFactory.getBackendService().getCurrentBackend();
-		return backend != null;
-	}
-
 	public static String inModeAsString() {
 		return (inProduction() ? "inProduction" : "inDevelopment") + "-"
 				+ (onAppEngine() ? "onAppEngine" : "notOnAppEngine") + "-"
-				+ (onBackend() ? "onBackend" : "onFrontent");
+				+ ("module:" + ApiProxy.getCurrentEnvironment().getModuleId());
 	}
 
 	// TODO get os.environ REQUEST HASH

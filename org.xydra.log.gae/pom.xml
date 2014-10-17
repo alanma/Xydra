@@ -37,15 +37,11 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>log</artifactId>
-			<!-- @@ use xydra.version here -->
-			<version>0.1.7-SNAPSHOT</version>
 			<classifier>sources</classifier>
 		</dependency>
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>conf</artifactId>
-			<!-- @@ use xydra.version here -->
-			<version>0.1.7-SNAPSHOT</version>
 			<classifier>sources</classifier>
 		</dependency>
 
@@ -53,22 +49,16 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>log</artifactId>
-			<!-- @@ use xydra.version here -->
-			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>conf</artifactId>
-			<!-- @@ use xydra.version here -->
-			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 
 		<!-- === Test -->
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>log</artifactId>
-			<!-- @@ use xydra.version here -->
-			<version>0.1.7-SNAPSHOT</version>
 			<classifier>tests</classifier>
 			<scope>test</scope>
 		</dependency>

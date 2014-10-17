@@ -54,8 +54,6 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>core</artifactId>
-			<!--@@ use xydra.version here -->
-			<version>0.1.7-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
@@ -66,8 +64,6 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>core</artifactId>
-			<!-- @@ use xydra.version here -->
-			<version>0.1.7-SNAPSHOT</version>
 			<classifier>tests</classifier>
 			<scope>compile</scope>
 		</dependency>
@@ -75,22 +71,17 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>xgae-api</artifactId>
-			<!-- @@ use xydra.version here -->
-			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>xgae-impl-gae</artifactId>
-			<version>0.1.7-SNAPSHOT</version>
 			<scope>runtime</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>server</artifactId>
-			<!--@@ use xydra.version here -->
-			<version>0.1.7-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
@@ -101,8 +92,6 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>server</artifactId>
-			<!--@@ use xydra.version here -->
-			<version>0.1.7-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>

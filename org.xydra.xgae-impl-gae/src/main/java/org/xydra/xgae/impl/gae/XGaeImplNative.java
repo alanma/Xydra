@@ -7,12 +7,13 @@ import org.xydra.xgae.XGae;
 import org.xydra.xgae.datastore.api.IDatastore;
 import org.xydra.xgae.datastore.impl.gae.DatastoreImplGae;
 import org.xydra.xgae.gaeutils.AboutAppEngine;
-import org.xydra.xgae.gaeutils.GaeConstants;
 import org.xydra.xgae.gaeutils.GaeTestfixer;
 import org.xydra.xgae.impl.AbstractXGaeBaseImpl;
 import org.xydra.xgae.memcache.api.IMemCache;
 import org.xydra.xgae.memcache.impl.LocalMemcache;
 import org.xydra.xgae.memcache.impl.gae.GaeLowLevelMemCache;
+
+import com.google.apphosting.api.ApiProxy;
 
 /**
  * Implements the IXGae abstraction interface simply by calling the real Google
@@ -68,11 +69,7 @@ public class XGaeImplNative extends AbstractXGaeBaseImpl implements IXGae {
 
 	@Override
 	public long getRuntimeLimitInMillis() {
-		if (AboutAppEngine.onBackend()) {
-			return -1;
-		} else {
-			return GaeConstants.GAE_WEB_REQUEST_TIMEOUT;
-		}
+		return ApiProxy.getCurrentEnvironment().getRemainingMillis();
 	}
 
 	@Override

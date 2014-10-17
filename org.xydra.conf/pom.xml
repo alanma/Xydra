@@ -20,7 +20,6 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>index</artifactId>
-			<version>0.1.7-SNAPSHOT</version>
 			<classifier>sources</classifier>
 		</dependency>
 
@@ -41,14 +40,12 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>index</artifactId>
-			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 
 		<!-- ConfigTool -->
 		<dependency>
 			<groupId>org.reflections</groupId>
 			<artifactId>reflections</artifactId>
-			<version>0.9.8</version>
 			<exclusions>
 				<exclusion>
 					<groupId>xml-apis</groupId>

@@ -34,27 +34,22 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>restless</artifactId>
-			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>log</artifactId>
-			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 
 		<!-- === Test -->
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>restless</artifactId>
-			<version>0.1.7-SNAPSHOT</version>
 			<classifier>tests</classifier>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>jetty</artifactId>
-			<!--@@ use xydra.version here -->
-			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 
 	</dependencies>

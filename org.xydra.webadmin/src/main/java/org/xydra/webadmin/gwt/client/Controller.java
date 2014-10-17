@@ -15,7 +15,6 @@ import org.xydra.webadmin.gwt.client.widgets.selectiontree.SelectionTreePresente
 import org.xydra.webadmin.gwt.shared.XyAdminServiceAsync;
 
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.RootPanel;
 
 /**
@@ -82,11 +81,11 @@ public class Controller {
 	}
 
 	public static void showWaitCursor() {
-		DOM.setStyleAttribute(RootPanel.getBodyElement(), "cursor", "wait");
+		RootPanel.getBodyElement().getStyle().setProperty("cursor", "wait");
 	}
 
 	public static void showDefaultCursor() {
-		DOM.setStyleAttribute(RootPanel.getBodyElement(), "cursor", "default");
+		RootPanel.getBodyElement().getStyle().setProperty("cursor", "default");
 	}
 
 	public XAddress getCurrentlyOpenedModelAddress() {

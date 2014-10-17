@@ -43,14 +43,10 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>log</artifactId>
-			<!-- @@ use xydra.version here -->
-			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>gae</artifactId>
-			<!-- @@ use xydra.version here -->
-			<version>0.1.7-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<groupId>com.google.gwt</groupId>
@@ -65,14 +61,10 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>csv</artifactId>
-			<!-- @@ use xydra.version here -->
-			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>jetty</artifactId>
-			<!-- @@ use xydra.version here -->
-			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>log4j</groupId>
@@ -106,22 +98,16 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>core</artifactId>
-			<!-- @@ use xydra.version here -->
-			<version>0.1.7-SNAPSHOT</version>
 			<classifier>tests</classifier>
 		</dependency>
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>restless</artifactId>
-			<!-- @@ use xydra.version here -->
-			<version>0.1.7-SNAPSHOT</version>
 			<classifier>tests</classifier>
 		</dependency>
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>gae</artifactId>
-			<!-- @@ use xydra.version here -->
-			<version>0.1.7-SNAPSHOT</version>
 			<classifier>tests</classifier>
 			<exclusions>
 				<exclusion>

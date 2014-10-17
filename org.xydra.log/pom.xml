@@ -36,7 +36,6 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>annotations</artifactId>
-			<version>0.1.7-SNAPSHOT</version>
 			<classifier>sources</classifier>
 		</dependency>
 
@@ -44,7 +43,6 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>annotations</artifactId>
-			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 
 		<!-- for Log4jUtils -->

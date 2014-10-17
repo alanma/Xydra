@@ -26,9 +26,9 @@
 
 
 	<properties>
-		<gae.version>1.7.4</gae.version>
-		<gae-runtime.version>1.7.4</gae-runtime.version>
-		<maven.gae.plugin.version>0.9.5</maven.gae.plugin.version>
+<!-- 		<gae.version>1.7.4</gae.version> -->
+<!-- 		<gae-runtime.version>1.7.4</gae-runtime.version> -->
+<!-- 		<maven.gae.plugin.version>0.9.5</maven.gae.plugin.version> -->
 
 		<!-- define a transient output directory for gwt -->
 		<!-- <gwt.output.directory>${project.build.directory}/war</gwt.output.directory> -->
@@ -92,8 +92,6 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>webadmin</artifactId>
-			<!-- @@ use xydra.version here -->
-			<version>0.1.7-SNAPSHOT</version>
 			<classifier>sources</classifier>
 			<scope>compile</scope>
 		</dependency>
@@ -102,40 +100,29 @@
 		<dependency>
 			<groupId>com.google.gwt</groupId>
 			<artifactId>gwt-user</artifactId>
-			<version>2.5.0</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>gae</artifactId>
-			<!-- @@ use xydra.version here -->
-			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>gwt</artifactId>
-			<!-- @@ use xydra.version here -->
-			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 
 		<!-- === Server === -->
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>webadmin</artifactId>
-			<!-- @@ use xydra.version here -->
-			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>restless</artifactId>
-			<!-- @@ use xydra.version here -->
-			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>core</artifactId>
-			<!-- @@ use xydra.version here -->
-			<version>0.1.7-SNAPSHOT</version>
 		</dependency>
 
 		<!-- === TEST === -->
@@ -148,15 +135,11 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>restless</artifactId>
-			<!-- @@ use xydra.version here -->
-			<version>0.1.7-SNAPSHOT</version>
 			<classifier>tests</classifier>
 		</dependency>
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>core</artifactId>
-			<!-- @@ use xydra.version here -->
-			<version>0.1.7-SNAPSHOT</version>
 			<classifier>tests</classifier>
 			<scope>compile</scope>
 		</dependency>
@@ -204,37 +187,37 @@
 				</configuration>
 			</plugin>
 
-			<plugin>
-				<groupId>net.kindleit</groupId>
-				<artifactId>maven-gae-plugin</artifactId>
-				<version>${maven.gae.plugin.version}</version>
-				<configuration>
-					<unpackVersion>${gae.version}</unpackVersion>
-					<serverId>appengine.google.com</serverId>
-					<appDir>target/war</appDir>
-					<!-- <appDir>${webappDirectory}</appDir> -->
-					<keepTempUploadDir>true</keepTempUploadDir>
-					<days>30</days>
-					<outputFile>${project.build.directory}/gae.log</outputFile>
-					<!-- 0 = debug, info, warn, error, critical = 4 -->
-					<severity>0</severity>
+<!-- 			<plugin> -->
+<!-- 				<groupId>net.kindleit</groupId> -->
+<!-- 				<artifactId>maven-gae-plugin</artifactId> -->
+<!-- 				<version>${maven.gae.plugin.version}</version> -->
+<!-- 				<configuration> -->
+<!-- 					<unpackVersion>${gae.version}</unpackVersion> -->
+<!-- 					<serverId>appengine.google.com</serverId> -->
+<!-- 					<appDir>target/war</appDir> -->
+<!-- 					<appDir>${webappDirectory}</appDir> -->
+<!-- 					<keepTempUploadDir>true</keepTempUploadDir> -->
+<!-- 					<days>30</days> -->
+<!-- 					<outputFile>${project.build.directory}/gae.log</outputFile> -->
+<!-- 					0 = debug, info, warn, error, critical = 4 -->
+<!-- 					<severity>0</severity> -->
 
-					<!-- ADDED -->
-					<jvmFlags>
-						<jvmFlag>
-							-Xmx1024m
-						</jvmFlag>
-					</jvmFlags>
-				</configuration>
-				<dependencies>
-					<dependency>
-						<groupId>net.kindleit</groupId>
-						<artifactId>gae-runtime</artifactId>
-						<version>${gae-runtime.version}</version>
-						<type>pom</type>
-					</dependency>
-				</dependencies>
-			</plugin>
+<!-- 					ADDED -->
+<!-- 					<jvmFlags> -->
+<!-- 						<jvmFlag> -->
+<!-- 							-Xmx1024m -->
+<!-- 						</jvmFlag> -->
+<!-- 					</jvmFlags> -->
+<!-- 				</configuration> -->
+<!-- 				<dependencies> -->
+<!-- 					<dependency> -->
+<!-- 						<groupId>net.kindleit</groupId> -->
+<!-- 						<artifactId>gae-runtime</artifactId> -->
+<!-- 						<version>${gae-runtime.version}</version> -->
+<!-- 						<type>pom</type> -->
+<!-- 					</dependency> -->
+<!-- 				</dependencies> -->
+<!-- 			</plugin> -->
 
 			<plugin>
 				<artifactId>maven-antrun-plugin</artifactId>

@@ -19,9 +19,9 @@ import org.xydra.xgae.XGae;
 import org.xydra.xgae.datastore.api.SEntity;
 import org.xydra.xgae.datastore.api.SKey;
 import org.xydra.xgae.datastore.api.SText;
-import org.xydra.xgae.gaeutils.AboutAppEngine;
-import org.xydra.xgae.gaeutils.GaeConstants;
 import org.xydra.xgae.gaeutils.UniversalTaskQueue;
+
+import com.google.apphosting.api.ApiProxy;
 
 /**
  * Stores serialised models
@@ -147,13 +147,14 @@ public class SerialisationCache {
 				long msLeftToGo = p.willTakeMsUntilProgressIs(modelIdList.size());
 				long msWeRanAlready = p.getMsSinceStart();
 				long totalTimeRequired = msWeRanAlready + msLeftToGo;
-				if (giveUp && totalTimeRequired + 2000 > GaeConstants.GAE_WEB_REQUEST_TIMEOUT) {
+
+				long timeLeft = ApiProxy.getCurrentEnvironment().getRemainingMillis();
+				if (giveUp && totalTimeRequired + 2000 < timeLeft) {
 					log.warn("We won't make it if we continue like this. Total time required = "
 							+ totalTimeRequired + " ms. Giving up.");
 					return false;
 				}
-				if (!AboutAppEngine.onBackend()
-						&& msWeRanAlready + 2000 > GaeConstants.GAE_WEB_REQUEST_TIMEOUT) {
+				if (timeLeft < 2000) {
 					log.warn("Only 2 seconds left. Total time required = " + totalTimeRequired
 							+ " ms. Giving up.");
 					return false;
