@@ -241,7 +241,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
-				<version>2.3</version>
 				<configuration>
 					<!-- true = To not copy things twice -->
 					<!-- false = avoid bug http://jira.codehaus.org/browse/MWAR-187 -->

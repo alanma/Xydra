@@ -89,21 +89,27 @@
 			<resource>
 				<directory>src/main/resources</directory>
 				<filtering>true</filtering>
-				<configuration>
-					<nonFilteredFileExtensions>
-						<nonFilteredFileExtension>js</nonFilteredFileExtension>
-					</nonFilteredFileExtensions>
-				</configuration>
+				<excludes>
+					<exclude>*.ico</exclude>
+					<exclude>*.jpg</exclude>
+					<exclude>*.js</exclude>
+					<exclude>*.png</exclude>
+					<exclude>*.properties</exclude>
+					<exclude>*.xsl</exclude>
+				</excludes>
 			</resource>
 
 			<resource>
 				<directory>src/test/resources</directory>
 				<filtering>true</filtering>
-				<configuration>
-					<nonFilteredFileExtensions>
-						<nonFilteredFileExtension>js</nonFilteredFileExtension>
-					</nonFilteredFileExtensions>
-				</configuration>
+				<excludes>
+					<exclude>*.ico</exclude>
+					<exclude>*.jpg</exclude>
+					<exclude>*.js</exclude>
+					<exclude>*.png</exclude>
+					<exclude>*.properties</exclude>
+					<exclude>*.xsl</exclude>
+				</excludes>
 			</resource>
 
 		</resources>
@@ -176,7 +182,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
-				<version>${maven-war-plugin.version}</version>
 				<configuration>
 					<!-- exclude files that don't need to be in the final war -->
 					<packagingExcludes>
@@ -234,7 +239,14 @@
 		</plugins>
 
 		<pluginManagement>
+
 			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-war-plugin</artifactId>
+					<version>${maven-war-plugin.version}</version>
+				</plugin>
+
 				<!--This plugin's configuration is used to store Eclipse m2e settings 
 					only. It has no influence on the Maven build itself. -->
 				<plugin>
@@ -717,16 +729,6 @@
 
 		</dependencies>
 	</dependencyManagement>
-
-	<pluginManagement>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-war-plugin</artifactId>
-				<version>2.3</version>
-			</plugin>
-		</plugins>
-	</pluginManagement>
 
 	<profiles>
 		<!-- _______________________ DETAILED __________ -->
