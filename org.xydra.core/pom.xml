@@ -150,7 +150,7 @@
 		</snapshotRepository>
 		<site>
 			<id>xydra-site</id>
-			<url>scp://${project.xydra.site}/${artifactId}</url>
+			<url>scp://${project.xydra.site}/${project.artifactId}</url>
 		</site>
 	</distributionManagement>
 

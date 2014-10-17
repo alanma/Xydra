@@ -1,20 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.0.4//EN" "http://google-web-toolkit.googlecode.com/svn/tags/2.0.4/distro-source/core/src/gwt-module.dtd">
-<!--  This module is the MAIN module of this project -->
 <module>
 
+	<super-source path="gwtemul" />
+
+	<!-- Inherit the core Web Toolkit stuff. -->
     <inherits name="com.google.gwt.user.User" />
+
+	<!-- Inherit Xydra Logging -->
+	<inherits name='org.xydra.log.XydraLog'/>
 
     <!--  FIXME This module does not work yet. We need to port all Writer/Reader to the Xydra MiniIO framework first. -->
 	
     <inherits name="org.xydra.annotations.XydraAnnotations" />
-    <!-- <inherits name='org.xydra.log.XydraLog'/>-->
 	
 	<source path="">
 		<exclude name="**/*Test.java" />
-		<exclude name="CsvRowHandler.java" />
-        <!-- to let it formally compile for now -->
-        <exclude name="**/*.java" />
+		<exclude name="**/Test*.java" />
+		<!-- Exclude java.io.File users -->
+		<exclude name="**/CsvTable.java" />
+		<exclude name="**/LatexMain.java" />
+		<exclude name="**/TableTools.java" />
+		<exclude name="**/CsvRowHandler.java" />
+		<exclude name="**.java" />
 	</source>
 	
 </module>

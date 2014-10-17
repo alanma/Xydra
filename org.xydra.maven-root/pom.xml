@@ -33,6 +33,14 @@
 		<!-- define a transient output directory for gwt -->
 		<gwt.output.directory>${project.build.directory}/war</gwt.output.directory>
 
+		<gae.version>1.9.13</gae.version>
+		<gwt.version>2.6.1</gwt.version>
+		<maven-surefire-plugin.version>2.17</maven-surefire-plugin.version>
+		<maven-source-plugin.version>2.4</maven-source-plugin.version>
+		<maven-jar-plugin.version>2.5</maven-jar-plugin.version>
+		<maven-war-plugin.version>2.4</maven-war-plugin.version>
+		<maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
+
 	</properties>
 
 	<repositories>
@@ -72,11 +80,21 @@
 			<resource>
 				<directory>src/main/resources</directory>
 				<filtering>true</filtering>
+				<configuration>
+					<nonFilteredFileExtensions>
+						<nonFilteredFileExtension>js</nonFilteredFileExtension>
+					</nonFilteredFileExtensions>
+				</configuration>
 			</resource>
 
 			<resource>
 				<directory>src/test/resources</directory>
 				<filtering>true</filtering>
+				<configuration>
+					<nonFilteredFileExtensions>
+						<nonFilteredFileExtension>js</nonFilteredFileExtension>
+					</nonFilteredFileExtensions>
+				</configuration>
 			</resource>
 
 		</resources>
@@ -107,7 +125,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-eclipse-plugin</artifactId>
-				<version>2.8</version>
+				<version>2.9</version>
 				<configuration>
 					<downloadSources>true</downloadSources>
 				</configuration>
@@ -127,7 +145,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
+				<version>${maven-compiler-plugin.version}</version>
 				<configuration>
 					<source>${maven.compiler.source}</source>
 					<target>${maven.compiler.target}</target>
@@ -149,7 +167,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
-				<version>2.1.1</version>
+				<version>${maven-war-plugin.version}</version>
 				<configuration>
 					<!-- exclude files that don't need to be in the final war -->
 					<packagingExcludes>
@@ -185,7 +203,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.4</version>
+				<version>${maven-jar-plugin.version}</version>
 				<executions>
 					<execution>
 						<goals>
@@ -354,32 +372,32 @@
 						</configuration>
 					</plugin>
 
-					<plugin>
-						<groupId>net.kindleit</groupId>
-						<artifactId>maven-gae-plugin</artifactId>
-						<version>0.9.5</version>
-						<configuration>
-							<keepTempUploadDir>false</keepTempUploadDir>
-							<days>30</days>
-							<outputFile>${project.build.directory}/gae.log</outputFile>
-							<!-- 0 = debug, info, warn, error, critical = 4 -->
-							<severity>0</severity>
-							<!-- ADDED -->
-							<jvmFlags>
-								<jvmFlag>
-									-Xmx1024m
-								</jvmFlag>
-							</jvmFlags>
-						</configuration>
-						<dependencies>
-							<dependency>
-								<groupId>net.kindleit</groupId>
-								<artifactId>gae-runtime</artifactId>
-								<version>1.8.5</version>
-								<type>pom</type>
-							</dependency>
-						</dependencies>
-					</plugin>
+					<!-- <plugin> -->
+					<!-- <groupId>net.kindleit</groupId> -->
+					<!-- <artifactId>maven-gae-plugin</artifactId> -->
+					<!-- <version>0.9.5</version> -->
+					<!-- <configuration> -->
+					<!-- <keepTempUploadDir>false</keepTempUploadDir> -->
+					<!-- <days>30</days> -->
+					<!-- <outputFile>${project.build.directory}/gae.log</outputFile> -->
+					<!-- 0 = debug, info, warn, error, critical = 4 -->
+					<!-- <severity>0</severity> -->
+					<!-- ADDED -->
+					<!-- <jvmFlags> -->
+					<!-- <jvmFlag> -->
+					<!-- -Xmx1024m -->
+					<!-- </jvmFlag> -->
+					<!-- </jvmFlags> -->
+					<!-- </configuration> -->
+					<!-- <dependencies> -->
+					<!-- <dependency> -->
+					<!-- <groupId>net.kindleit</groupId> -->
+					<!-- <artifactId>gae-runtime</artifactId> -->
+					<!-- <version>${gae.version}</version> -->
+					<!-- <type>pom</type> -->
+					<!-- </dependency> -->
+					<!-- </dependencies> -->
+					<!-- </plugin> -->
 				</plugins>
 			</build>
 		</profile>
@@ -403,28 +421,28 @@
 						</configuration>
 					</plugin>
 
-					<plugin>
-						<groupId>net.kindleit</groupId>
-						<artifactId>maven-gae-plugin</artifactId>
-						<version>0.9.5</version>
-						<configuration>
-							<disableUpdateCheck>true</disableUpdateCheck>
-							<!-- ADDED -->
-							<jvmFlags>
-								<jvmFlag>
-									-Xmx1024m
-								</jvmFlag>
-							</jvmFlags>
-						</configuration>
-						<dependencies>
-							<dependency>
-								<groupId>net.kindleit</groupId>
-								<artifactId>gae-runtime</artifactId>
-								<version>1.8.5</version>
-								<type>pom</type>
-							</dependency>
-						</dependencies>
-					</plugin>
+					<!-- <plugin> -->
+					<!-- <groupId>net.kindleit</groupId> -->
+					<!-- <artifactId>maven-gae-plugin</artifactId> -->
+					<!-- <version>0.9.5</version> -->
+					<!-- <configuration> -->
+					<!-- <disableUpdateCheck>true</disableUpdateCheck> -->
+					<!-- ADDED -->
+					<!-- <jvmFlags> -->
+					<!-- <jvmFlag> -->
+					<!-- -Xmx1024m -->
+					<!-- </jvmFlag> -->
+					<!-- </jvmFlags> -->
+					<!-- </configuration> -->
+					<!-- <dependencies> -->
+					<!-- <dependency> -->
+					<!-- <groupId>net.kindleit</groupId> -->
+					<!-- <artifactId>gae-runtime</artifactId> -->
+					<!-- <version>${gae.version}</version> -->
+					<!-- <type>pom</type> -->
+					<!-- </dependency> -->
+					<!-- </dependencies> -->
+					<!-- </plugin> -->
 				</plugins>
 			</build>
 		</profile>
@@ -462,14 +480,12 @@
 				<dependency>
 					<groupId>com.google.gwt</groupId>
 					<artifactId>gwt-servlet</artifactId>
-					<!-- @@ use gwt.version here -->
-					<version>2.5.0</version>
+					<version>${gwt.version}</version>
 				</dependency>
 				<dependency>
 					<groupId>com.google.gwt</groupId>
 					<artifactId>gwt-user</artifactId>
-					<!-- @@ use gwt.version here -->
-					<version>2.5.0</version>
+					<version>${gwt.version}</version>
 					<scope>provided</scope>
 					<!-- Transitive dependency to javax.validation required for tests in 
 						GWT -->
@@ -477,8 +493,7 @@
 				<dependency>
 					<groupId>com.google.gwt</groupId>
 					<artifactId>gwt-dev</artifactId>
-					<!-- @@ use gwt.version here -->
-					<version>2.5.0</version>
+					<version>${gwt.version}</version>
 					<scope>provided</scope>
 				</dependency>
 				<!-- Removed since 2012-04-13, now using the new emulated java.util.logging -->
@@ -492,7 +507,7 @@
 						<inherited>true</inherited>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-source-plugin</artifactId>
-						<version>2.2.1</version>
+						<version>${maven-source-plugin.version}</version>
 						<configuration>
 							<includePom>true</includePom>
 						</configuration>
@@ -517,7 +532,7 @@
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>gwt-maven-plugin</artifactId>
-						<version>2.5.0</version>
+						<version>${gwt.version}</version>
 						<!-- TODO: Add configuration to your pom. -->
 						<!-- Example: <configuration> <module>org.xydra.core.XydraCore</module> 
 							</configuration> -->
@@ -551,9 +566,8 @@
 					</plugin>
 
 					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-surefire-plugin</artifactId>
-						<version>2.11</version>
+						<version>${maven-surefire-plugin.version}</version>
 						<executions>
 							<execution>
 								<phase>integration-test</phase>
@@ -581,32 +595,38 @@
 				<plugins>
 					<!-- Google App Engine (GAE) plugin -->
 					<plugin>
-						<groupId>net.kindleit</groupId>
-						<artifactId>maven-gae-plugin</artifactId>
-						<version>0.9.5</version>
-						<configuration>
-							<!-- @@ use gae.version here -->
-							<unpackVersion>1.8.5</unpackVersion>
-							<splitJars>true</splitJars>
-							<jvmFlags>
-								<jvmFlag>-ea</jvmFlag>
-								<jvmFlag>
-									-Xmx1024m
-								</jvmFlag>
-							</jvmFlags>
-						</configuration>
-						<dependencies>
-							<dependency>
-								<groupId>net.kindleit</groupId>
-								<artifactId>gae-runtime</artifactId>
-								<version>1.8.5</version>
-								<type>pom</type>
-							</dependency>
-						</dependencies>
-						<!-- <dependencies> <dependency> <groupId>net.kindleit</groupId> <artifactId>gae-runtime</artifactId> 
-							<version>${project.gae.version}</version> <type>pom</type> </dependency> 
-							</dependencies> -->
+						<groupId>com.google.appengine</groupId>
+						<artifactId>appengine-maven-plugin</artifactId>
+						<version>${gae.version}</version>
 					</plugin>
+
+					<!-- <plugin> -->
+					<!-- <groupId>net.kindleit</groupId> -->
+					<!-- <artifactId>maven-gae-plugin</artifactId> -->
+					<!-- <version>0.9.5</version> -->
+					<!-- <configuration> -->
+					<!-- @@ use gae.version here -->
+					<!-- <unpackVersion>1.8.5</unpackVersion> -->
+					<!-- <splitJars>true</splitJars> -->
+					<!-- <jvmFlags> -->
+					<!-- <jvmFlag>-ea</jvmFlag> -->
+					<!-- <jvmFlag> -->
+					<!-- -Xmx1024m -->
+					<!-- </jvmFlag> -->
+					<!-- </jvmFlags> -->
+					<!-- </configuration> -->
+					<!-- <dependencies> -->
+					<!-- <dependency> -->
+					<!-- <groupId>net.kindleit</groupId> -->
+					<!-- <artifactId>gae-runtime</artifactId> -->
+					<!-- <version>${gae.version}</version> -->
+					<!-- <type>pom</type> -->
+					<!-- </dependency> -->
+					<!-- </dependencies> -->
+					<!-- commented <dependencies> <dependency> <groupId>net.kindleit</groupId> 
+						<artifactId>gae-runtime</artifactId> <version>${project.gae.version}</version> 
+						<type>pom</type> </dependency> </dependencies> -->
+					<!-- </plugin> -->
 				</plugins>
 			</build>
 
@@ -616,16 +636,17 @@
 					<groupId>com.google.appengine</groupId>
 					<artifactId>appengine-api-1.0-sdk</artifactId>
 					<!-- @@ use gae.version here -->
-					<version>1.8.5</version>
+					<version>${gae.version}</version>
 				</dependency>
 				<dependency>
 					<groupId>com.google.appengine</groupId>
 					<artifactId>appengine-api-labs</artifactId>
 					<!-- @@ use gae.version here -->
-					<version>1.8.5</version>
+					<version>${gae.version}</version>
 				</dependency>
 
-				<!-- J2EE Servlet API. -->
+				<!-- J2EE Servlet API. Version 2.5 still in use by AppEngine 1.9.x. GWT 
+					2.6.x uses already Version 3.0. -->
 				<dependency>
 					<groupId>org.apache.geronimo.specs</groupId>
 					<artifactId>geronimo-servlet_2.5_spec</artifactId>
@@ -637,16 +658,14 @@
 				<dependency>
 					<groupId>com.google.appengine</groupId>
 					<artifactId>appengine-api-stubs</artifactId>
-					<!-- @@ use gae.version here -->
-					<version>1.8.5</version>
+					<version>${gae.version}</version>
 					<scope>test</scope>
 				</dependency>
 
 				<dependency>
 					<groupId>com.google.appengine</groupId>
 					<artifactId>appengine-testing</artifactId>
-					<!-- @@ use gae.version here -->
-					<version>1.8.5</version>
+					<version>${gae.version}</version>
 					<scope>test</scope>
 				</dependency>
 
@@ -703,14 +722,14 @@
 					<!-- use surefire version that works with Junit 4.x tests -->
 					<plugin>
 						<artifactId>maven-surefire-plugin</artifactId>
-						<version>2.11</version>
+						<version>${maven-surefire-plugin.version}</version>
 					</plugin>
 
 					<!-- configure site:stage and some display parameters for site generation -->
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-site-plugin</artifactId>
-						<version>3.0</version>
+						<version>3.4</version>
 						<executions>
 							<execution>
 								<goals>
@@ -759,9 +778,7 @@
 					<!-- switch on only the reports we want to see -->
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>
-					maven-project-info-reports-plugin
-				</artifactId>
+						<artifactId>maven-project-info-reports-plugin</artifactId>
 						<reportSets>
 							<reportSet>
 								<reports>
@@ -884,7 +901,7 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-javadoc-plugin</artifactId>
-						<version>2.7</version>
+						<version>2.10.1</version>
 						<configuration>
 							<doclet>org.jboss.apiviz.APIviz</doclet>
 							<docletArtifact>

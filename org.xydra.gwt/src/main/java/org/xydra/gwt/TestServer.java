@@ -6,8 +6,8 @@ import java.net.URISyntaxException;
 
 import javax.servlet.ServletContext;
 
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.webapp.WebAppContext;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.webapp.WebAppContext;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;

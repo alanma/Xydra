@@ -6,9 +6,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.EnumSet;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -19,12 +21,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
-import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.handler.HandlerList;
-import org.mortbay.jetty.handler.ResourceHandler;
-import org.mortbay.jetty.servlet.FilterHolder;
-import org.mortbay.jetty.webapp.WebAppContext;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.HandlerList;
+import org.eclipse.jetty.server.handler.ResourceHandler;
+import org.eclipse.jetty.servlet.FilterHolder;
+import org.eclipse.jetty.webapp.WebAppContext;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.log.coreimpl.sysout.DefaultLoggerFactorySPI;
@@ -109,7 +110,7 @@ public class GwtTestServer {
 		gwtFiles.setResourceBase(docRoot.getAbsolutePath());
 		hl.addHandler(gwtFiles);
 
-		this.webapp.addHandler(hl);
+		this.webapp.setHandler(hl);
 
 		FilterHolder filterHolder = new FilterHolder();
 		filterHolder.setFilter(new Filter() {
@@ -151,9 +152,9 @@ public class GwtTestServer {
 				// do nothing
 			}
 		});
-		this.webapp.addFilter(filterHolder, "*.png", Handler.ALL);
-		this.webapp.addFilter(filterHolder, "*.gif", Handler.ALL);
-		this.webapp.addFilter(filterHolder, ".cache.*", Handler.ALL);
+		this.webapp.addFilter(filterHolder, "*.png", EnumSet.allOf(DispatcherType.class));
+		this.webapp.addFilter(filterHolder, "*.gif", EnumSet.allOf(DispatcherType.class));
+		this.webapp.addFilter(filterHolder, ".cache.*", EnumSet.allOf(DispatcherType.class));
 
 		// Add the webapp to the server.
 		this.server.setHandler(this.webapp);
