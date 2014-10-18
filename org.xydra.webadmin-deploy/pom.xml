@@ -179,7 +179,6 @@
 			<plugin>
 				<groupId>org.xydra</groupId>
 				<artifactId>xydra-maven-plugin</artifactId>
-				<version>1.0-SNAPSHOT</version>
 				<configuration>
 					<gwtModuleNames>
 						<gwtModuleName>xyadmin</gwtModuleName>

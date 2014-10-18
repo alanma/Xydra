@@ -170,7 +170,6 @@
 			<plugin>
 				<groupId>org.xydra</groupId>
 				<artifactId>xydra-maven-plugin</artifactId>
-				<version>1.0-SNAPSHOT</version>
 				<configuration>
 					<gwtModuleNames>
 						<gwtModuleName>xyadmin</gwtModuleName>
@@ -181,7 +180,6 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>gwt-maven-plugin</artifactId>
-				<version>${gwt.version}</version>
 				<configuration>
 					<!-- FIXME not always detailed -->
 					<style>DETAILED</style>
