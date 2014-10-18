@@ -292,8 +292,6 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>gwt-maven-plugin</artifactId>
-				<!-- @@ use gwt.version here -->
-				<version>2.5.0</version>
 				<configuration>
 					<!-- FIXME not always detailed -->
 					<style>DETAILED</style>
