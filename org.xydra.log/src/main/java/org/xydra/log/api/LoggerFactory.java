@@ -1,13 +1,13 @@
 package org.xydra.log.api;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.xydra.annotations.Setting;
 import org.xydra.annotations.ThreadSafe;
 import org.xydra.log.api.Logger.Level;
 import org.xydra.log.coreimpl.sysout.DefaultLoggerFactorySPI;
 import org.xydra.log.spi.ILoggerFactorySPI;
-
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * The basic logger factory. Same signature to obtain a {@link Logger} as slf4j.

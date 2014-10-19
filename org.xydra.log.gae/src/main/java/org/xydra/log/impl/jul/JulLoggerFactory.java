@@ -1,13 +1,13 @@
 package org.xydra.log.impl.jul;
 
+import java.util.Collection;
+
 import org.xydra.annotations.ThreadSafe;
 import org.xydra.log.api.ILogListener;
 import org.xydra.log.api.Logger;
 import org.xydra.log.coreimpl.util.LoggerWithListeners;
 import org.xydra.log.coreimpl.util.ThreadSafeLoggerWithListeners;
 import org.xydra.log.spi.ILoggerFactorySPI;
-
-import java.util.Collection;
 
 /**
  * A {@link ILoggerFactorySPI} using Java.Utils.Logging (JUL) internally.

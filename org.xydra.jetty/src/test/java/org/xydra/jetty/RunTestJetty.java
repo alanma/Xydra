@@ -1,12 +1,12 @@
 package org.xydra.jetty;
 
+import java.io.File;
+import java.net.URI;
+
 import org.xydra.conf.IConfig;
 import org.xydra.env.Env;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
-
-import java.io.File;
-import java.net.URI;
 
 /**
  * This class is starts a Jetty server configured to allow testing of the

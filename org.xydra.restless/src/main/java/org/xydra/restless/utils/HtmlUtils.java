@@ -1,14 +1,14 @@
 package org.xydra.restless.utils;
 
-import org.xydra.annotations.CanBeNull;
-import org.xydra.annotations.NeverNull;
-import org.xydra.annotations.ThreadSafe;
-import org.xydra.restless.Restless;
-
 import java.io.IOException;
 import java.io.Writer;
 
 import javax.servlet.http.HttpServletResponse;
+
+import org.xydra.annotations.CanBeNull;
+import org.xydra.annotations.NeverNull;
+import org.xydra.annotations.ThreadSafe;
+import org.xydra.restless.Restless;
 
 /**
  * Genereates some simple HTML5.

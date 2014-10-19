@@ -13,6 +13,7 @@ import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.core.XX;
+import org.xydra.core.model.XObject;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.store.impl.gae.changes.GaeLocks;

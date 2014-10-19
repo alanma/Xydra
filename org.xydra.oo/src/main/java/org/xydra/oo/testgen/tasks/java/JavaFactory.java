@@ -1,7 +1,7 @@
 package org.xydra.oo.testgen.tasks.java;
 
-import java.lang.Override;
 import java.lang.reflect.Proxy;
+
 import org.xydra.base.XId;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.oo.runtime.java.OOJavaOnlyProxy;

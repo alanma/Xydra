@@ -1,17 +1,5 @@
 package org.xydra.conf.impl;
 
-import org.xydra.annotations.RunsInGWT;
-import org.xydra.annotations.Setting;
-import org.xydra.conf.ConfBuilder;
-import org.xydra.conf.ConfigException;
-import org.xydra.conf.IConfig;
-import org.xydra.conf.IResolver;
-import org.xydra.index.impl.MapSetIndex;
-import org.xydra.index.query.KeyEntryTuple;
-import org.xydra.index.query.Wildcard;
-import org.xydra.log.api.Logger;
-import org.xydra.log.api.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,6 +12,18 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+
+import org.xydra.annotations.RunsInGWT;
+import org.xydra.annotations.Setting;
+import org.xydra.conf.ConfBuilder;
+import org.xydra.conf.ConfigException;
+import org.xydra.conf.IConfig;
+import org.xydra.conf.IResolver;
+import org.xydra.index.impl.MapSetIndex;
+import org.xydra.index.query.KeyEntryTuple;
+import org.xydra.index.query.Wildcard;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 @RunsInGWT(true)
 public class MemoryConfig implements IConfig {

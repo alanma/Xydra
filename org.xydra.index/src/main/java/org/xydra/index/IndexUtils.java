@@ -1,14 +1,14 @@
 package org.xydra.index;
 
-import org.xydra.index.impl.MapMapIndex;
-import org.xydra.index.query.Constraint;
-import org.xydra.index.query.KeyKeyEntryTuple;
-
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import com.google.gwt.dev.util.collect.Sets;
+import org.xydra.index.impl.MapMapIndex;
+import org.xydra.index.query.Constraint;
+import org.xydra.index.query.KeyKeyEntryTuple;
+
+import com.google.common.collect.Sets;
 
 /**
  * Some static methods performing simple or complex operations that work on top
@@ -129,9 +129,9 @@ public class IndexUtils {
 
 	/**
 	 * @param a
-	 *            @NeverNull
+	 * @NeverNull
 	 * @param b
-	 *            @NeverNull
+	 * @NeverNull
 	 * @return a diff with all elements added (not present in a, but present in
 	 *         b); and all elements remove (present in a, but no longer present
 	 *         in b)
@@ -165,8 +165,8 @@ public class IndexUtils {
 	}
 
 	public static void main(String[] args) {
-		Set<String> a = Sets.create("1", "2", "3", "4");
-		Set<String> b = Sets.create("3", "4", "5", "6");
+		Set<String> a = Sets.newHashSet("1", "2", "3", "4");
+		Set<String> b = Sets.newHashSet("3", "4", "5", "6");
 		ISetDiff<String> diff = diff(a, b);
 		System.out.println(diff.toString());
 	}

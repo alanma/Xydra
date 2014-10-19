@@ -1,5 +1,9 @@
 package org.xydra.index.impl;
 
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
 import org.xydra.index.IEntrySet;
 import org.xydra.index.IMapSetIndex;
 import org.xydra.index.XI;
@@ -9,10 +13,6 @@ import org.xydra.index.iterator.SingleValueIterator;
 import org.xydra.index.query.Constraint;
 import org.xydra.index.query.EqualsConstraint;
 import org.xydra.index.query.KeyEntryTuple;
-
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
 
 /**
  * An {@link IMapSetIndex} that can store exactly one key-entry mapping. Small.

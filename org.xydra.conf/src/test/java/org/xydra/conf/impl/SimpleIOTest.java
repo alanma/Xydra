@@ -15,14 +15,13 @@ import static org.xydra.conf.escape.EscapingTest.keys;
 import static org.xydra.conf.escape.EscapingTest.strangeUnicodeSign;
 import static org.xydra.conf.escape.EscapingTest.weirdWindowsPathWithEscapedBackslashes;
 
-import org.xydra.conf.escape.Escaping;
-
 import java.io.File;
 import java.io.IOException;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.xydra.conf.escape.Escaping;
 
 public class SimpleIOTest {
 

@@ -1,5 +1,10 @@
 package org.xydra.store.impl.gae.ng;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.xydra.annotations.CanBeNull;
 import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.Setting;
@@ -24,12 +29,6 @@ import org.xydra.xgae.XGae;
 import org.xydra.xgae.datastore.api.SEntity;
 import org.xydra.xgae.datastore.api.SKey;
 import org.xydra.xgae.datastore.api.SPreparedQuery;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import java.io.Serializable;
 
 /**
  * The outside (standard) execution context, which is different from the

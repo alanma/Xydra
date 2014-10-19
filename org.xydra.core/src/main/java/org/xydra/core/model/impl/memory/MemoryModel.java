@@ -1,5 +1,10 @@
 package org.xydra.core.model.impl.memory;
 
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.ReadOperation;
@@ -53,12 +58,6 @@ import org.xydra.core.model.impl.memory.sync.Root;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.sharedutils.XyAssert;
-
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
-import java.io.Serializable;
 
 
 /**

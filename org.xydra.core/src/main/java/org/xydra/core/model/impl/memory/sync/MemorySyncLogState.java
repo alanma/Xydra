@@ -1,5 +1,9 @@
 package org.xydra.core.model.impl.memory.sync;
 
+import java.util.Iterator;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
 import org.xydra.base.XAddress;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
@@ -8,10 +12,6 @@ import org.xydra.index.iterator.NoneIterator;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.sharedutils.XyAssert;
-
-import java.util.Iterator;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 
 public class MemorySyncLogState implements ISyncLogState {

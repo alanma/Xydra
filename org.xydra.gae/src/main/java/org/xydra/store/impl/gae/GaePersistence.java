@@ -1,5 +1,10 @@
 package org.xydra.store.impl.gae;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
@@ -37,11 +42,6 @@ import org.xydra.xgae.datastore.api.DatastoreTimeoutException;
 import org.xydra.xgae.datastore.api.SEntity;
 import org.xydra.xgae.datastore.api.SKey;
 import org.xydra.xgae.datastore.api.SPreparedQuery;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;

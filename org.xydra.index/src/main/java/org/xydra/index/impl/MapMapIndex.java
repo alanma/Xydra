@@ -1,5 +1,7 @@
 package org.xydra.index.impl;
 
+import java.util.Iterator;
+
 import org.xydra.index.IMapIndex;
 import org.xydra.index.IMapMapIndex;
 import org.xydra.index.iterator.AbstractCascadedIterator;
@@ -12,8 +14,6 @@ import org.xydra.index.query.IndexFullException;
 import org.xydra.index.query.KeyEntryTuple;
 import org.xydra.index.query.KeyKeyEntryTuple;
 import org.xydra.index.query.Wildcard;
-
-import java.util.Iterator;
 
 /**
  * An implementation of {@link IMapMapIndex} using a IMapIndex of an IMapIndex.

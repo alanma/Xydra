@@ -1,13 +1,13 @@
 package org.xydra.restless;
 
-import org.xydra.annotations.NeverNull;
-import org.xydra.annotations.ThreadSafe;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.xydra.annotations.NeverNull;
+import org.xydra.annotations.ThreadSafe;
 
 /**
  * Internal class to represent a URL path that gets mapped to a set of variables

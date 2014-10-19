@@ -2,10 +2,9 @@ package org.xydra.store;
 
 import static org.junit.Assert.assertEquals;
 
+import org.junit.Test;
 import org.xydra.base.XId;
 import org.xydra.core.XX;
-
-import org.junit.Test;
 
 
 public class NamingUtilsTest {

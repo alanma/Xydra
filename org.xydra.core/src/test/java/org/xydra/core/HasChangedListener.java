@@ -3,6 +3,9 @@
  */
 package org.xydra.core;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.xydra.base.XId;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XFieldEvent;
@@ -18,9 +21,6 @@ import org.xydra.core.change.XTransactionEventListener;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
-
-import java.util.ArrayList;
-import java.util.List;
 
 
 /**

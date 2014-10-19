@@ -8,8 +8,6 @@ import java.util.Iterator;
 
 import org.junit.Before;
 import org.junit.Test;
-
-import org.xydra.index.ITripleIndex;
 import org.xydra.index.iterator.Iterators;
 import org.xydra.index.query.Constraint;
 import org.xydra.index.query.EqualsConstraint;

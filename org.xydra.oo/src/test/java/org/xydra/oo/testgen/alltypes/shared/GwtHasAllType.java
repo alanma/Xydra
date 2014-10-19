@@ -1,13 +1,9 @@
 package org.xydra.oo.testgen.alltypes.shared;
 
-import java.lang.Boolean;
-import java.lang.Double;
-import java.lang.Integer;
-import java.lang.Long;
-import java.lang.String;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
+
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.value.XAddressListValue;
@@ -40,10 +36,6 @@ import org.xydra.oo.runtime.shared.SharedTypeMapping;
 import org.xydra.oo.runtime.shared.SortedSetProxy;
 import org.xydra.oo.runtime.shared.TypeSpec;
 import org.xydra.oo.testgen.alltypes.client.GwtFactory;
-import org.xydra.oo.testgen.alltypes.shared.Colors;
-import org.xydra.oo.testgen.alltypes.shared.IHasAllType;
-import org.xydra.oo.testgen.alltypes.shared.IPerson;
-import org.xydra.oo.testgen.alltypes.shared.MyLongBasedType;
 
 /**
  * Generated on Fri Jul 04 01:02:18 CEST 2014 by SpecWriter, a part of

@@ -1,8 +1,5 @@
 package org.xydra.jetty;
 
-import org.xydra.log.api.Logger;
-import org.xydra.log.api.LoggerFactory;
-
 import java.util.EnumSet;
 
 import javax.servlet.DispatcherType;
@@ -10,6 +7,8 @@ import javax.servlet.DispatcherType;
 import org.eclipse.jetty.http.MimeTypes;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.webapp.WebAppContext;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 public class DesktopJetty extends EmbeddedJetty {
 

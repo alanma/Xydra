@@ -4,17 +4,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import org.xydra.index.IIntegerRangeIndex;
-import org.xydra.index.impl.IntegerRangeIndex.Span;
-import org.xydra.index.iterator.Iterators;
-import org.xydra.log.api.Logger;
-import org.xydra.log.api.LoggerFactory;
-
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 
 import org.junit.Test;
+import org.xydra.index.IIntegerRangeIndex;
+import org.xydra.index.impl.IntegerRangeIndex.Span;
+import org.xydra.index.iterator.Iterators;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 public class IntegerRangeIndexTest {
 

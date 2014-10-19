@@ -7,6 +7,7 @@ import org.xydra.base.XType;
 import org.xydra.base.rmof.XEntity;
 import org.xydra.core.model.XField;
 import org.xydra.core.model.XModel;
+import org.xydra.core.model.XObject;
 import org.xydra.store.impl.gae.changes.GaeLocks;
 import org.xydra.store.impl.gae.changes.IGaeChangesService;
 import org.xydra.store.impl.gae.changes.KeyStructure;

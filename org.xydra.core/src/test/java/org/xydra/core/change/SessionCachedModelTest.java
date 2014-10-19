@@ -1,5 +1,9 @@
 package org.xydra.core.change;
 
+import java.util.HashSet;
+
+import org.junit.Assert;
+import org.junit.Test;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.rmof.XWritableField;
@@ -13,11 +17,6 @@ import org.xydra.core.model.XRepository;
 import org.xydra.core.model.impl.memory.MemoryRepository;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
-
-import java.util.HashSet;
-
-import org.junit.Assert;
-import org.junit.Test;
 
 
 public class SessionCachedModelTest {

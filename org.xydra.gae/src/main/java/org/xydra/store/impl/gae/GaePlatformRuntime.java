@@ -1,5 +1,7 @@
 package org.xydra.store.impl.gae;
 
+import java.util.Map;
+
 import org.xydra.annotations.Setting;
 import org.xydra.base.XId;
 import org.xydra.gae.admin.GaeConfigSettings;
@@ -12,8 +14,6 @@ import org.xydra.store.XydraConfigUtils;
 import org.xydra.store.XydraPlatformRuntime;
 import org.xydra.store.XydraRuntime;
 import org.xydra.xgae.XGae;
-
-import java.util.Map;
 
 /**
  * GAE implementation of {@link XydraPlatformRuntime}.

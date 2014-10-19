@@ -1,5 +1,7 @@
 package org.xydra.core.model;
 
+import java.io.Serializable;
+
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
@@ -8,8 +10,6 @@ import org.xydra.base.change.XFieldCommand;
 import org.xydra.base.rmof.XRevWritableField;
 import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.value.XValue;
-
-import java.io.Serializable;
 
 
 /**

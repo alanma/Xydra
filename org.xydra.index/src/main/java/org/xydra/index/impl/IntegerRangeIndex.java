@@ -1,15 +1,15 @@
 package org.xydra.index.impl;
 
-import org.xydra.index.IIntegerRangeIndex;
-import org.xydra.index.iterator.AbstractLookAheadIterator;
-import org.xydra.log.api.Logger;
-import org.xydra.log.api.LoggerFactory;
-
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
+
+import org.xydra.index.IIntegerRangeIndex;
+import org.xydra.index.iterator.AbstractLookAheadIterator;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 /**
  * Uses internally a sorted map. Fast; memory-efficient;

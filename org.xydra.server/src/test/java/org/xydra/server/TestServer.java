@@ -1,5 +1,13 @@
 package org.xydra.server;
 
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
+
+import javax.servlet.ServletContext;
+
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.webapp.WebAppContext;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.change.XCommand;
@@ -17,15 +25,6 @@ import org.xydra.store.XydraStoreAdmin;
 import org.xydra.store.access.XA;
 import org.xydra.store.access.XAuthenticationDatabase;
 import org.xydra.store.access.XAuthorisationManager;
-
-import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
-
-import javax.servlet.ServletContext;
-
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.webapp.WebAppContext;
 
 /**
  * This class is starts a Jetty server configured to allow testing of the

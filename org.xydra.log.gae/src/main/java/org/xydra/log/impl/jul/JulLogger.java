@@ -1,11 +1,11 @@
 package org.xydra.log.impl.jul;
 
+import java.util.logging.LogRecord;
+
 import org.xydra.annotations.ThreadSafe;
 import org.xydra.conf.IConfig;
 import org.xydra.env.Env;
 import org.xydra.log.api.Logger;
-
-import java.util.logging.LogRecord;
 
 /**
  * A Java Utils Logging logger that additionally is configurable via Env.conf()

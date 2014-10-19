@@ -1,9 +1,9 @@
 package org.xydra.index;
 
+import java.util.Iterator;
+
 import org.xydra.index.query.Constraint;
 import org.xydra.index.query.KeyEntryTuple;
-
-import java.util.Iterator;
 
 /**
  * Multiple entries can be indexed for a certain key-combination.

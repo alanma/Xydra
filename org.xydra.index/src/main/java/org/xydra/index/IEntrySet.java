@@ -1,9 +1,9 @@
 package org.xydra.index;
 
-import org.xydra.index.query.Constraint;
-
 import java.util.Iterator;
 import java.util.Set;
+
+import org.xydra.index.query.Constraint;
 
 /**
  * A set in Xydra Index API shape.

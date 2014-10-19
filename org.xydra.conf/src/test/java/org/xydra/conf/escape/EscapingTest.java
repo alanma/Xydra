@@ -2,12 +2,11 @@ package org.xydra.conf.escape;
 
 import static org.junit.Assert.assertEquals;
 
-import org.xydra.log.api.Logger;
-import org.xydra.log.api.LoggerFactory;
-
 import java.util.ArrayList;
 
 import org.junit.Test;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 import com.google.common.collect.Lists;
 

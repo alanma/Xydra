@@ -1,10 +1,10 @@
 package org.xydra.csv;
 
-import org.xydra.csv.impl.memory.Row;
-
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
+import org.xydra.csv.impl.memory.Row;
 
 /**
  * Appends all rows, that it handles via its {@link IRowHandler}.

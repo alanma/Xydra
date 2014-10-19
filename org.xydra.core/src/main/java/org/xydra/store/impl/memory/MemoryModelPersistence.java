@@ -1,5 +1,9 @@
 package org.xydra.store.impl.memory;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.change.ChangeType;
@@ -18,10 +22,6 @@ import org.xydra.core.model.impl.memory.Executor;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.persistence.ModelRevision;
-
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 
 
 /**

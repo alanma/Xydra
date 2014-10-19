@@ -1,5 +1,7 @@
 package org.xydra.core.model.impl.memory;
 
+import java.util.Iterator;
+
 import org.xydra.base.XId;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.rmof.XRevWritableModel;
@@ -14,8 +16,6 @@ import org.xydra.core.XX;
 import org.xydra.core.model.XModel;
 import org.xydra.core.model.XObject;
 import org.xydra.core.model.XRepository;
-
-import java.util.Iterator;
 
 
 public class DemoLocalChangesAndServerEvents {

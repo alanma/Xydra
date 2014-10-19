@@ -1,14 +1,14 @@
 package org.xydra.restless.utils;
 
-import org.xydra.annotations.NeverNull;
-import org.xydra.annotations.ThreadSafe;
-import org.xydra.log.api.Logger;
-import org.xydra.log.api.LoggerFactory;
-
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import javax.servlet.http.HttpServletRequest;
+
+import org.xydra.annotations.NeverNull;
+import org.xydra.annotations.ThreadSafe;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 @ThreadSafe
 public class HostUtils {

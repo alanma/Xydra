@@ -1,5 +1,7 @@
 package org.xydra.log.impl.universal;
 
+import java.util.Collection;
+
 import org.xydra.annotations.ThreadSafe;
 import org.xydra.conf.IConfig;
 import org.xydra.conf.annotations.RequireConf;
@@ -10,8 +12,6 @@ import org.xydra.log.api.LoggerFactory;
 import org.xydra.log.impl.jul.JulLoggerFactory;
 import org.xydra.log.impl.log4j.Log4jLoggerFactory;
 import org.xydra.log.spi.ILoggerFactorySPI;
-
-import java.util.Collection;
 
 /**
  * In development mode log4j is used. In production, j.u.l. is used.

@@ -1,5 +1,17 @@
 package org.xydra.csv.impl.memory;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
+
 import org.xydra.csv.ExcelLimitException;
 import org.xydra.csv.ICell;
 import org.xydra.csv.IReadableRow;
@@ -13,18 +25,6 @@ import org.xydra.index.iterator.Iterators;
 import org.xydra.index.iterator.ReadOnlyIterator;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
 
 /**
  * Maintains a sparse table, organised by rows and columns.

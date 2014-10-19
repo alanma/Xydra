@@ -1,5 +1,9 @@
 package org.xydra.gaemyadmin;
 
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import org.xydra.conf.IConfig;
 import org.xydra.env.Env;
 import org.xydra.jetty.ConfParamsJetty;
@@ -8,10 +12,6 @@ import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.log.util.Log4jUtils;
 import org.xydra.restless.Restless;
-
-import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 /**
  * This class is starts a local Jetty server configured to allow testing of the

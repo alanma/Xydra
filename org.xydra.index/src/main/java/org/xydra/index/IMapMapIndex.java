@@ -1,10 +1,10 @@
 package org.xydra.index;
 
+import java.util.Iterator;
+
 import org.xydra.index.iterator.Iterators;
 import org.xydra.index.query.Constraint;
 import org.xydra.index.query.KeyKeyEntryTuple;
-
-import java.util.Iterator;
 
 /**
  * A map with double keys.

@@ -1,21 +1,19 @@
 package org.xydra.log.coreimpl.util;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import org.xydra.annotations.CanBeNull;
 import org.xydra.annotations.NeverNull;
 import org.xydra.log.api.ILogListener;
 import org.xydra.log.api.Logger;
-
-import java.util.ArrayList;
-import java.util.Collection;
-
-import org.apache.http.annotation.NotThreadSafe;
 
 /**
  * Log to logger and delegate to {@link ILogListener}.
  * 
  * @author voelkel
  */
-@NotThreadSafe
+@org.xydra.annotations.NotThreadSafe
 public class LoggerWithListeners implements Logger {
 
 	private Logger log;
@@ -25,9 +23,9 @@ public class LoggerWithListeners implements Logger {
 
 	/**
 	 * @param logger
-	 *            @NeverNull
+	 * @NeverNull
 	 * @param logListeners
-	 *            @CanBeNull
+	 * @CanBeNull
 	 */
 	public LoggerWithListeners(Logger logger, @CanBeNull Collection<ILogListener> logListeners) {
 		assert logger != null;

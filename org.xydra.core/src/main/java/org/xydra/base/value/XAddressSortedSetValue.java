@@ -1,8 +1,8 @@
 package org.xydra.base.value;
 
-import org.xydra.base.XAddress;
-
 import java.util.SortedSet;
+
+import org.xydra.base.XAddress;
 
 
 /**

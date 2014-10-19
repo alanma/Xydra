@@ -3,8 +3,6 @@ package org.xydra.index.iterator;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.xydra.annotations.RunsInGWT;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -13,6 +11,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
+
+import org.xydra.annotations.RunsInGWT;
 
 /**
  * @author xamde

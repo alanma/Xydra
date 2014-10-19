@@ -1,10 +1,10 @@
 package org.xydra.index.iterator;
 
-import org.xydra.annotations.RunsInGWT;
-
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.Set;
+
+import org.xydra.annotations.RunsInGWT;
 
 /**
  * See also {@link Iterators}

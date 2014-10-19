@@ -1,5 +1,8 @@
 package org.xydra.store.sync;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
@@ -28,9 +31,6 @@ import org.xydra.persistence.GetEventsRequest;
 import org.xydra.store.BatchedResult;
 import org.xydra.store.Callback;
 import org.xydra.store.XydraStore;
-
-import java.util.ArrayList;
-import java.util.Iterator;
 
 
 /**

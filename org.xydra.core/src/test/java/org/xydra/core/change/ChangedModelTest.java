@@ -6,6 +6,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.Before;
+import org.junit.Test;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.XType;
@@ -28,12 +33,6 @@ import org.xydra.core.XX;
 import org.xydra.core.model.delta.ChangedModel;
 import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.impl.memory.MemoryModelPersistence;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import org.junit.Before;
-import org.junit.Test;
 
 
 /*

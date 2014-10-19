@@ -1,8 +1,8 @@
 package org.xydra.base;
 
-import org.xydra.base.value.XSingleValue;
-
 import java.io.Serializable;
+
+import org.xydra.base.value.XSingleValue;
 
 
 /**

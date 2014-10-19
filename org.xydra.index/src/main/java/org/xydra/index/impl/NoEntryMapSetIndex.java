@@ -1,12 +1,12 @@
 package org.xydra.index.impl;
 
+import java.util.Iterator;
+
 import org.xydra.index.IEntrySet;
 import org.xydra.index.IMapSetIndex;
 import org.xydra.index.iterator.NoneIterator;
 import org.xydra.index.query.Constraint;
 import org.xydra.index.query.KeyEntryTuple;
-
-import java.util.Iterator;
 
 /**
  * An empty, read-only {@link IMapSetIndex}.

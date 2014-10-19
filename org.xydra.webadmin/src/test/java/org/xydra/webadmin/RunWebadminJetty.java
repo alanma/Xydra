@@ -1,5 +1,9 @@
 package org.xydra.webadmin;
 
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import org.xydra.conf.IConfig;
 import org.xydra.env.Env;
 import org.xydra.jetty.ConfParamsJetty;
@@ -9,10 +13,6 @@ import org.xydra.log.api.LoggerFactory;
 import org.xydra.log.impl.log4j.Log4jLoggerFactory;
 import org.xydra.restless.Restless;
 import org.xydra.xgae.gaeutils.GaeTestfixer;
-
-import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 /**
  * This class is starts a Jetty server configured to allow testing of the

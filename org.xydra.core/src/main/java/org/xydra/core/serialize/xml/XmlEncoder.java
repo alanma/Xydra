@@ -3,12 +3,12 @@
  */
 package org.xydra.core.serialize.xml;
 
+import java.io.IOException;
+import java.io.StringReader;
+
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
-
-import java.io.IOException;
-import java.io.StringReader;
 
 
 /**

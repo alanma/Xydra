@@ -3,11 +3,11 @@ package org.xydra.sharedutils;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.xydra.annotations.RunsInGWT;
-import org.xydra.index.iterator.Iterators;
-
 import java.util.HashSet;
 import java.util.Iterator;
+
+import org.xydra.annotations.RunsInGWT;
+import org.xydra.index.iterator.Iterators;
 
 
 /**

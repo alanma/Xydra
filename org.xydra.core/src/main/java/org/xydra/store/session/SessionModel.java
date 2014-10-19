@@ -1,5 +1,9 @@
 package org.xydra.store.session;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+
 import org.xydra.annotations.NeverNull;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
@@ -20,10 +24,6 @@ import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.persistence.GetWithAddressRequest;
 import org.xydra.sharedutils.XyAssert;
-
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
 
 
 /**

@@ -1,12 +1,5 @@
 package org.xydra.jetty;
 
-import org.xydra.annotations.NeverNull;
-import org.xydra.conf.IConfig;
-import org.xydra.log.api.Logger;
-import org.xydra.log.api.LoggerFactory;
-import org.xydra.restless.Restless;
-import org.xydra.restless.utils.HostUtils;
-
 import java.lang.management.ManagementFactory;
 import java.net.BindException;
 import java.net.MalformedURLException;
@@ -20,6 +13,12 @@ import org.eclipse.jetty.server.handler.DefaultHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.webapp.WebAppContext;
+import org.xydra.annotations.NeverNull;
+import org.xydra.conf.IConfig;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
+import org.xydra.restless.Restless;
+import org.xydra.restless.utils.HostUtils;
 
 /**
  * A nicer way to configure Jetty. Less complex.

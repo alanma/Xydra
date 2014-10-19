@@ -1,19 +1,5 @@
 package org.xydra.csv.impl.memory;
 
-import org.xydra.csv.ExcelLimitException;
-import org.xydra.csv.ICsvTable;
-import org.xydra.csv.ICsvTableFactory;
-import org.xydra.csv.IReadableRow;
-import org.xydra.csv.IRow;
-import org.xydra.log.api.Logger;
-import org.xydra.log.api.LoggerFactory;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -24,6 +10,19 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import org.xydra.csv.ExcelLimitException;
+import org.xydra.csv.ICsvTable;
+import org.xydra.csv.ICsvTableFactory;
+import org.xydra.csv.IReadableRow;
+import org.xydra.csv.IRow;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 /**
  * Maintains a sparse table, organised by rows and columns.

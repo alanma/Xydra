@@ -1,10 +1,5 @@
 package org.xydra.log.util;
 
-import org.xydra.log.api.Logger;
-import org.xydra.log.api.LoggerFactory;
-
-import java.util.Properties;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -13,11 +8,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
+import java.util.Properties;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.PropertyConfigurator;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 /**
  * Utility class for managing log4j.properties files. If some bundled jar
@@ -77,8 +74,31 @@ public class Log4jUtils {
 		URL url = cl.getResource(name);
 		System.out.println("Found in " + url.toString());
 		Reader r = new InputStreamReader(in, "utf-8");
-		String s = IOUtils.toString(r);
+		String s = toString(r);
 		System.out.println("System.out: Found config:\n" + s);
+	}
+
+	/**
+	 * This is not fast (hence not public) and only used to dump an internal
+	 * config
+	 * 
+	 * @param r
+	 * @return
+	 */
+	private static String toString(Reader r) {
+		StringBuilder b = new StringBuilder();
+		int c;
+		try {
+			do {
+				c = r.read();
+				if (c >= 0) {
+					b.append((char) c);
+				}
+			} while (c >= 0);
+			return b.toString();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public static void main(String[] args) throws IOException {

@@ -1,10 +1,9 @@
 package org.xydra.jetty;
 
-import org.xydra.log.api.Logger.Level;
-import org.xydra.log.api.LoggerFactory;
-
 import org.eclipse.jetty.util.log.AbstractLogger;
 import org.eclipse.jetty.util.log.Logger;
+import org.xydra.log.api.Logger.Level;
+import org.xydra.log.api.LoggerFactory;
 
 /**
  * Unused.

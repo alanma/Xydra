@@ -165,10 +165,6 @@
 					<source>${maven.compiler.source}</source>
 					<target>${maven.compiler.target}</target>
 					<encoding>UTF-8</encoding>
-					<!-- Fix for GWT issue #3439 -->
-					<excludes>
-						<exclude>javax/servlet/**</exclude>
-					</excludes>
 				</configuration>
 			</plugin>
 
@@ -898,12 +894,12 @@
 					<!-- Transitive dependency to javax.validation required for tests in 
 						GWT -->
 				</dependency>
-				<dependency>
-					<groupId>com.google.gwt</groupId>
-					<artifactId>gwt-dev</artifactId>
-					<version>${gwt.version}</version>
-					<scope>provided</scope>
-				</dependency>
+<!-- 				<dependency> -->
+<!-- 					<groupId>com.google.gwt</groupId> -->
+<!-- 					<artifactId>gwt-dev</artifactId> -->
+<!-- 					<version>${gwt.version}</version> -->
+<!-- 					<scope>provided</scope> -->
+<!-- 				</dependency> -->
 				<!-- Removed since 2012-04-13, now using the new emulated java.util.logging -->
 				<!-- <dependency> <groupId>com.allen-sauer.gwt.log</groupId> <artifactId>gwt-log</artifactId> 
 					<version>3.1.6</version> </dependency> -->

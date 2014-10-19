@@ -1,14 +1,11 @@
 package org.xydra.base.id;
 
-import org.xydra.base.XId;
-import org.xydra.base.XIdProvider;
-import org.xydra.base.id.MemoryStringIDProvider;
-import org.xydra.base.id.XidCodec;
-import org.xydra.log.api.Logger;
-import org.xydra.log.api.LoggerFactory;
-
 import org.junit.Assert;
 import org.junit.Test;
+import org.xydra.base.XId;
+import org.xydra.base.XIdProvider;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;

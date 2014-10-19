@@ -1,5 +1,10 @@
 package org.xydra.store.impl.gae.ng;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Future;
+
 import org.xydra.annotations.Setting;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
@@ -41,11 +46,6 @@ import org.xydra.store.impl.utils.DebugFormatter;
 import org.xydra.xgae.annotations.XGaeOperation;
 import org.xydra.xgae.datastore.api.SKey;
 import org.xydra.xgae.util.FutureUtils;
-
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Future;
 
 /**
  * Xydra allows transaction only within one model. The GAE implementation

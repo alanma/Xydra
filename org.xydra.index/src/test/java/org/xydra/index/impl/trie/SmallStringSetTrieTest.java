@@ -3,6 +3,11 @@ package org.xydra.index.impl.trie;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.junit.Test;
 import org.xydra.index.AbstractMapSetIndexTest;
 import org.xydra.index.IEntrySet;
 import org.xydra.index.impl.SmallEntrySetFactory;
@@ -11,12 +16,6 @@ import org.xydra.index.iterator.Iterators;
 import org.xydra.index.query.KeyEntryTuple;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.junit.Test;
 
 public class SmallStringSetTrieTest extends AbstractMapSetIndexTest<String, Integer> {
 

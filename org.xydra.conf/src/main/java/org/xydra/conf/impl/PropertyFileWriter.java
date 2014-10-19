@@ -1,9 +1,9 @@
 package org.xydra.conf.impl;
 
-import org.xydra.conf.escape.Escaping;
-
 import java.io.IOException;
 import java.io.Writer;
+
+import org.xydra.conf.escape.Escaping;
 
 /**
  * Writes java property files with comments.

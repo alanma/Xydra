@@ -1,5 +1,10 @@
 package org.xydra.index.impl.trie;
 
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.SortedMap;
+
 import org.xydra.index.IMapIndex;
 import org.xydra.index.iterator.IFilter;
 import org.xydra.index.iterator.ITransformer;
@@ -7,11 +12,6 @@ import org.xydra.index.iterator.Iterators;
 import org.xydra.index.query.Constraint;
 import org.xydra.index.query.KeyEntryTuple;
 import org.xydra.index.query.Pair;
-
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.SortedMap;
 
 /**
  * A {@link SortedArrayMap} put under an {@link IMapIndex}<String,E> interface.

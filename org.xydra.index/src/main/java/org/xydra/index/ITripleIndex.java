@@ -1,10 +1,10 @@
 package org.xydra.index;
 
+import java.util.Iterator;
+
 import org.xydra.index.IMapMapSetIndex.IMapMapSetDiff;
 import org.xydra.index.query.Constraint;
 import org.xydra.index.query.ITriple;
-
-import java.util.Iterator;
 
 /**
  * An index for triples of keys that supports queries on all three keys. Indexes

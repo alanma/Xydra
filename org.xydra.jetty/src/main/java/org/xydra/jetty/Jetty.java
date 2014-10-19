@@ -1,15 +1,7 @@
 package org.xydra.jetty;
 
-import org.xydra.annotations.CanBeNull;
-import org.xydra.conf.IConfig;
-import org.xydra.env.Env;
-import org.xydra.log.api.Logger;
-import org.xydra.log.api.LoggerFactory;
-import org.xydra.restless.utils.Delay;
-
-import java.util.EnumSet;
-
 import java.io.IOException;
+import java.util.EnumSet;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
@@ -22,6 +14,12 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.webapp.WebAppContext;
+import org.xydra.annotations.CanBeNull;
+import org.xydra.conf.IConfig;
+import org.xydra.env.Env;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
+import org.xydra.restless.utils.Delay;
 
 /**
  * This class starts a Jetty server configured to allow testing of the webapp,

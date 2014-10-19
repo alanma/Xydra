@@ -1,10 +1,10 @@
 package org.xydra.index.impl;
 
-import org.xydra.index.IEntrySet;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import org.xydra.index.IEntrySet;
 
 /**
  * Based on a simple linked list - much more memory efficient than based on a

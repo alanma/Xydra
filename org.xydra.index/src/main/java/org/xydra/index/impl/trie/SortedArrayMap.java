@@ -15,10 +15,7 @@
  */
 package org.xydra.index.impl.trie;
 
-import org.xydra.index.query.Pair;
-import org.xydra.log.api.Logger;
-import org.xydra.log.api.LoggerFactory;
-
+import java.io.Serializable;
 import java.util.AbstractCollection;
 import java.util.AbstractSet;
 import java.util.Arrays;
@@ -31,7 +28,9 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.SortedMap;
 
-import java.io.Serializable;
+import org.xydra.index.query.Pair;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 /**
  * A memory-efficient sorted map based on two simple sorted arrays.

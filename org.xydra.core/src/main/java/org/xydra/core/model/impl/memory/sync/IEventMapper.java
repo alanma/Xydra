@@ -1,9 +1,9 @@
 package org.xydra.core.model.impl.memory.sync;
 
+import java.util.List;
+
 import org.xydra.base.change.XEvent;
 import org.xydra.index.query.Pair;
-
-import java.util.List;
 
 
 /**

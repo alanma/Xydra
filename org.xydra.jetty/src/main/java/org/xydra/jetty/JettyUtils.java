@@ -1,17 +1,12 @@
 package org.xydra.jetty;
 
-import org.xydra.log.api.Logger;
-import org.xydra.log.api.LoggerFactory;
-import org.xydra.restless.utils.Delay;
-
+import java.io.IOException;
+import java.security.Principal;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.TimeZone;
-
-import java.io.IOException;
-import java.security.Principal;
-import java.text.SimpleDateFormat;
 
 import javax.security.auth.Subject;
 import javax.servlet.Filter;
@@ -28,6 +23,9 @@ import javax.servlet.http.HttpServletResponseWrapper;
 import org.eclipse.jetty.security.IdentityService;
 import org.eclipse.jetty.security.LoginService;
 import org.eclipse.jetty.server.UserIdentity;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
+import org.xydra.restless.utils.Delay;
 
 import com.google.common.collect.Sets;
 import com.google.common.net.HttpHeaders;

@@ -1,11 +1,11 @@
 package org.xydra.base.id;
 
+import java.io.Serializable;
+
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.base.XId;
 import org.xydra.base.value.ValueType;
-
-import java.io.Serializable;
 
 
 /**

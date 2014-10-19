@@ -3,9 +3,6 @@ package org.xydra.index.impl;
 import org.xydra.index.AbstractTransitivePairIndexTest;
 import org.xydra.index.Factory;
 import org.xydra.index.IPairIndex;
-import org.xydra.index.impl.MapPairIndex;
-import org.xydra.index.impl.PairIndex;
-import org.xydra.index.impl.StoredTransitivePairIndex;
 
 public class StoredTransitivePairIndexTest extends AbstractTransitivePairIndexTest {
 

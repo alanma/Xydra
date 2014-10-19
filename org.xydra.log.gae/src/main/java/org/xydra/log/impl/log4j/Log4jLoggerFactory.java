@@ -1,13 +1,13 @@
 package org.xydra.log.impl.log4j;
 
+import java.util.Collection;
+
 import org.xydra.annotations.ThreadSafe;
 import org.xydra.log.api.ILogListener;
 import org.xydra.log.api.Logger;
 import org.xydra.log.coreimpl.util.LoggerWithListeners;
 import org.xydra.log.coreimpl.util.ThreadSafeLoggerWithListeners;
 import org.xydra.log.spi.ILoggerFactorySPI;
-
-import java.util.Collection;
 
 /**
  * Using log4j internally.

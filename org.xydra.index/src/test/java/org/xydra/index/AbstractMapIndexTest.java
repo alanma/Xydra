@@ -5,19 +5,18 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import org.xydra.index.iterator.Iterators;
-import org.xydra.index.query.EqualsConstraint;
-import org.xydra.index.query.KeyEntryTuple;
-import org.xydra.index.query.Wildcard;
-import org.xydra.log.api.Logger;
-import org.xydra.log.api.LoggerFactory;
-
 import java.util.Iterator;
 import java.util.List;
 
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.xydra.index.iterator.Iterators;
+import org.xydra.index.query.EqualsConstraint;
+import org.xydra.index.query.KeyEntryTuple;
+import org.xydra.index.query.Wildcard;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
 public abstract class AbstractMapIndexTest<K, E> {
 

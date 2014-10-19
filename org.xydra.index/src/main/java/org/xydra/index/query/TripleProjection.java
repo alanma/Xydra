@@ -1,9 +1,9 @@
 package org.xydra.index.query;
 
+import java.util.Iterator;
+
 import org.xydra.index.iterator.ITransformer;
 import org.xydra.index.iterator.Iterators;
-
-import java.util.Iterator;
 
 /**
  * Utility class to project parts of an {@link ITriple}.

@@ -1,8 +1,8 @@
 package org.xydra.core.serialize;
 
-import org.xydra.sharedutils.XyAssert;
-
 import java.io.UnsupportedEncodingException;
+
+import org.xydra.sharedutils.XyAssert;
 
 
 /***

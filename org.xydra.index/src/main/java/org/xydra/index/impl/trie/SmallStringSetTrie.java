@@ -1,5 +1,10 @@
 package org.xydra.index.impl.trie;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.xydra.annotations.NotThreadSafe;
 import org.xydra.index.Factory;
 import org.xydra.index.IEntrySet;
@@ -14,12 +19,6 @@ import org.xydra.index.query.KeyEntryTuple;
 import org.xydra.index.query.Wildcard;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import java.io.Serializable;
 
 import com.google.common.base.Function;
 

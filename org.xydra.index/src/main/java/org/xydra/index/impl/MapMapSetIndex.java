@@ -1,5 +1,10 @@
 package org.xydra.index.impl;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import org.xydra.index.Factory;
 import org.xydra.index.IEntrySet;
 import org.xydra.index.IMapMapSetIndex;
@@ -14,11 +19,6 @@ import org.xydra.index.query.ITriple;
 import org.xydra.index.query.KeyEntryTuple;
 import org.xydra.index.query.KeyKeyEntryTuple;
 import org.xydra.index.query.Wildcard;
-
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
 
 public class MapMapSetIndex<K, L, E> implements IMapMapSetIndex<K, L, E> {
 

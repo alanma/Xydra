@@ -1,14 +1,14 @@
 package org.xydra.index.impl;
 
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
 import org.xydra.index.IEntrySet;
 import org.xydra.index.iterator.NoneIterator;
 import org.xydra.index.iterator.SingleValueIterator;
 import org.xydra.index.query.Constraint;
 import org.xydra.index.query.EqualsConstraint;
-
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
 
 import com.google.common.collect.Sets;
 

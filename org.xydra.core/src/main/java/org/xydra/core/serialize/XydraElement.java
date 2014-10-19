@@ -1,9 +1,9 @@
 package org.xydra.core.serialize;
 
+import java.util.Iterator;
+
 import org.xydra.annotations.NeverNull;
 import org.xydra.index.query.Pair;
-
-import java.util.Iterator;
 
 
 /**

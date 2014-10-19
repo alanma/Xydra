@@ -1,5 +1,8 @@
 package org.xydra.core.change;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import org.xydra.annotations.CanBeNull;
 import org.xydra.annotations.NeverNull;
 import org.xydra.base.XAddress;
@@ -29,9 +32,6 @@ import org.xydra.core.model.delta.DeltaUtils;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.sharedutils.XyAssert;
-
-import java.util.LinkedList;
-import java.util.List;
 
 
 /**

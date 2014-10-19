@@ -1,5 +1,7 @@
 package org.xydra.testgae;
 
+import java.net.URI;
+
 import org.xydra.conf.IConfig;
 import org.xydra.env.Env;
 import org.xydra.jetty.ConfParamsJetty;
@@ -8,8 +10,6 @@ import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.restless.Restless;
 import org.xydra.xgae.gaeutils.GaeTestfixer;
-
-import java.net.URI;
 
 /**
  * This class is starts a Jetty server configured to allow testing of the
