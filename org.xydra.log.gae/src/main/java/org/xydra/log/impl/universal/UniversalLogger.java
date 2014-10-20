@@ -27,6 +27,8 @@ import org.xydra.log.spi.ILoggerFactorySPI;
 @ThreadSafe
 public class UniversalLogger implements ILoggerFactorySPI {
 
+	private static boolean activated = false;
+
 	/** delegatee */
 	private ILoggerFactorySPI innerFactory = null;
 
@@ -36,7 +38,7 @@ public class UniversalLogger implements ILoggerFactorySPI {
 	 * Don't set this manually to LoggerFactory.
 	 * 
 	 * @param givenFactory
-	 *            @CanBeNull
+	 * @CanBeNull
 	 * @param configSource
 	 */
 	@RequireConf(value = { ConfParamsXydrdaUniversalLog.GAE_IN_PRODUCTION,
@@ -112,7 +114,9 @@ public class UniversalLogger implements ILoggerFactorySPI {
 	 * @param onGAE
 	 *            if running on App Engine
 	 */
-	public static void activate(boolean inGWT, boolean onGAE) {
+	public static synchronized void activate(boolean inGWT, boolean onGAE) {
+		if (activated)
+			return;
 		IConfig conf = Env.get().conf();
 
 		// set reasonable defaults
@@ -141,5 +145,6 @@ public class UniversalLogger implements ILoggerFactorySPI {
 		// init
 		configure(spi, "UniversalLoggerFactorySPI.activate");
 		LoggerFactory.getSelfLogger().info("LoggerFactorySPI configured from " + source);
+		activated = true;
 	}
 }
