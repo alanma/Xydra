@@ -35,7 +35,7 @@ public class MemoryConfig implements IConfig {
 
 		/**
 		 * @param clazz
-		 *            @NeverNull
+		 * @NeverNull
 		 */
 		public ClassResolver(Class<? extends T> clazz) {
 			this.clazz = clazz;
@@ -59,7 +59,7 @@ public class MemoryConfig implements IConfig {
 
 		/**
 		 * @param instance
-		 *            @CanBeNull
+		 * @CanBeNull
 		 */
 		public InstanceResolver(T instance) {
 			this.instance = instance;
@@ -84,7 +84,7 @@ public class MemoryConfig implements IConfig {
 
 	/**
 	 * @param className
-	 *            @NeverNull
+	 * @NeverNull
 	 * @return
 	 * @throws RuntimeException
 	 *             when class could not be loaded or has wrong type
@@ -340,7 +340,7 @@ public class MemoryConfig implements IConfig {
 	public long getLong(String key) {
 		Object o = get(key);
 		if (o instanceof Integer) {
-			return (long) (int) (Integer) o;
+			return (Integer) o;
 		}
 		if (o instanceof Long) {
 			return (Long) o;
@@ -684,8 +684,12 @@ public class MemoryConfig implements IConfig {
 		if (key == null)
 			throw new IllegalArgumentException("Key may not be null");
 		Object o = tryToGet(key);
-		if (o == null)
-			return null;
+		if (o == null) {
+			if (clazz.equals(boolean.class) || clazz.equals(Boolean.class))
+				return (T) Boolean.FALSE;
+			else
+				return null;
+		}
 
 		if (o instanceof IResolver) {
 			return ((IResolver<T>) o).resolve();
@@ -726,7 +730,7 @@ public class MemoryConfig implements IConfig {
 	public int getInt(String key) {
 		Object o = get(key);
 		if (o instanceof Integer) {
-			return (int) (Integer) o;
+			return (Integer) o;
 		}
 		if (o instanceof String) {
 			return Integer.parseInt((String) o);
