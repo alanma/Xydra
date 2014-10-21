@@ -35,7 +35,6 @@
 		<dependency>
 			<groupId>org.xydra</groupId>
 			<artifactId>oo-runtime</artifactId>
-			<version>${xydra.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.xydra</groupId>
