@@ -13,9 +13,9 @@ import org.xydra.log.api.LoggerFactory;
 import org.xydra.log.util.listener.RememberLogListener;
 import org.xydra.oo.runtime.java.JavaTypeMapping;
 import org.xydra.oo.runtime.java.OOReflectionUtils;
-import org.xydra.oo.testgen.alltypes.shared.MyLongBasedType;
 import org.xydra.oo.testspecs.AllTypesSpec;
 import org.xydra.oo.testspecs.TasksSpec;
+import org.xydra.oo.testtypes.MyLongBasedType;
 
 public class TestInterfaceGenerator {
 

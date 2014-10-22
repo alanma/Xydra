@@ -38,6 +38,17 @@
 		</dependency>
 		<dependency>
 			<groupId>org.xydra</groupId>
+			<artifactId>oo-runtime</artifactId>
+			<classifier>sources</classifier>
+		</dependency>
+		<dependency>
+			<groupId>org.xydra</groupId>
+			<artifactId>oo-runtime</artifactId>
+			<classifier>tests</classifier>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.xydra</groupId>
 			<artifactId>gwt</artifactId>
 		</dependency>
 		<dependency>

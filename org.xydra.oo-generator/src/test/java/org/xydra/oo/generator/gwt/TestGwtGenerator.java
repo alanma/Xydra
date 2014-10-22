@@ -10,7 +10,7 @@ import org.xydra.oo.generator.codespec.impl.ClassSpec;
 import org.xydra.oo.generator.codespec.impl.PackageSpec;
 import org.xydra.oo.runtime.java.JavaTypeMapping;
 import org.xydra.oo.testgen.alltypes.shared.IHasAllType;
-import org.xydra.oo.testgen.alltypes.shared.MyLongBasedType;
+import org.xydra.oo.testtypes.MyLongBasedType;
 
 /**
  * This is usually done automatically as part of gwt:compile

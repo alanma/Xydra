@@ -265,7 +265,8 @@ public class JavaCodeGenerator {
 					addGetterSetter(classSpec, t.getName(), normalisedType, t.getComment(),
 							t.getGeneratedFrom());
 				}
-				classSpec.members.remove(fieldSpec);
+				boolean removed = classSpec.members.remove(fieldSpec);
+				assert removed;
 			}
 		}
 	}

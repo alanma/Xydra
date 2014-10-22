@@ -24,8 +24,8 @@ import org.xydra.base.value.XLongValue;
 import org.xydra.base.value.XStringListValue;
 import org.xydra.base.value.XStringSetValue;
 import org.xydra.base.value.XStringValue;
-import org.xydra.oo.testgen.alltypes.shared.Colors;
-import org.xydra.oo.testgen.alltypes.shared.MyLongBasedType;
+import org.xydra.oo.testtypes.Colors;
+import org.xydra.oo.testtypes.MyLongBasedType;
 
 public class AllTypesSpec {
 
