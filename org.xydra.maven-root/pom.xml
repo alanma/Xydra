@@ -225,8 +225,7 @@
 				</executions>
 				<configuration>
 					<excludes>
-						<exclude>log4j.properties</exclude>
-						<!-- Exclude all java source and GWT modules -->
+						<!-- Exclude all java sources and GWT module definitions -->
 						<!-- <exclude>**/*.java</exclude> -->
 						<exclude>**/*.gwt.xml</exclude>
 					</excludes>
