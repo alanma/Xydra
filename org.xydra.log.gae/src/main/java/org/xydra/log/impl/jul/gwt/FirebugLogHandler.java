@@ -20,11 +20,14 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
+import org.xydra.annotations.LicenseApache;
+
 /**
  * A Handler that prints logs to window.console which is used by Firebug. Note
  * we are consciously using 'window' rather than '$wnd' to avoid issues similar
  * to http://code.google.com/p/fbug/issues/detail?id=2914
  */
+@LicenseApache(copyright = "Copyright 2010 Google Inc.")
 public class FirebugLogHandler extends Handler {
 
 	public FirebugLogHandler() {

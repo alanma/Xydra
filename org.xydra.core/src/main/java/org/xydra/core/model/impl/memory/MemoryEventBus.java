@@ -19,6 +19,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.xydra.annotations.LicenseApache;
 import org.xydra.base.XAddress;
 import org.xydra.base.change.XFieldEvent;
 import org.xydra.base.change.XModelEvent;
@@ -39,7 +40,6 @@ import org.xydra.index.query.EqualsConstraint;
 import org.xydra.index.query.ITriple;
 import org.xydra.index.query.Wildcard;
 
-
 /**
  * Can register listeners and send events for all kinds of Xydra events.
  * 
@@ -48,133 +48,140 @@ import org.xydra.index.query.Wildcard;
  * 
  * @author xamde
  */
+@LicenseApache(copyright = "Copyright 2011 Google Inc.")
 public class MemoryEventBus {
-    
-    public static enum EventType {
-        FieldChange, ModelChange, ObjectChange, RepositoryChange,
-        
-        TransactionChange, Sync,
-    }
-    
-    /**
-     * @param eventType @NeverNull
-     * @param event @NeverNull
-     * @param listener @NeverNull
-     */
-    private static void fireEventToListener(EventType eventType, Object event, Object listener) {
-        switch(eventType) {
-        case FieldChange:
-            ((XFieldEventListener)listener).onChangeEvent((XFieldEvent)event);
-            break;
-        case ObjectChange:
-            ((XObjectEventListener)listener).onChangeEvent((XObjectEvent)event);
-            break;
-        case ModelChange:
-            ((XModelEventListener)listener).onChangeEvent((XModelEvent)event);
-            break;
-        case RepositoryChange:
-            ((XRepositoryEventListener)listener).onChangeEvent((XRepositoryEvent)event);
-            break;
-        case TransactionChange:
-            ((XTransactionEventListener)listener).onChangeEvent((XTransactionEvent)event);
-            break;
-        case Sync:
-            ((XSyncEventListener)listener).onSynced((XSyncEvent)event);
-        }
-    }
-    
-    /**
-     * Add and remove operations received during dispatch.
-     */
-    private List<Runnable> deferredDeltas = new LinkedList<Runnable>();
-    
-    private int fireCalls = 0;
-    
-    IMapMapSetIndex<EventType,XAddress,Object> map = new MapMapSetIndex<EventType,XAddress,Object>(
-            new SmallEntrySetFactory<Object>());
-    
-    public boolean addListener(final EventType eventType, final XAddress sourceAddress,
-            final Object listener) {
-        if(this.fireCalls > 0) {
-            this.deferredDeltas.add(new Runnable() {
-                
-                @Override
-                public void run() {
-                    addListener(eventType, sourceAddress, listener);
-                }
-            });
-            // we can just hope it will work
-            return true;
-        } else {
-            return this.map.index(eventType, sourceAddress, listener);
-        }
-    }
-    
-    /**
-     * Notifies all listeners that have registered interest for notification on
-     * events of type EventType happening on source-entities.
-     * 
-     * @param eventType @NeverNull
-     * @param source @NeverNull
-     * @param event The, e.g., {@link XFieldEvent} which will be propagated to
-     *            the registered listeners.
-     */
-    public void fireEvent(EventType eventType, XAddress source, Object event) {
-        assert eventType != null;
-        if(event == null) {
-            throw new NullPointerException("Cannot fire null event");
-        }
-        
-        synchronized(this.map) {
-            this.fireCalls++;
-            try {
-                Iterator<ITriple<EventType,XAddress,Object>> it = this.map.tupleIterator(
-                
-                new EqualsConstraint<MemoryEventBus.EventType>(eventType),
-                
-                source == null ? new Wildcard<XAddress>() : new EqualsConstraint<XAddress>(source),
-                
-                new Wildcard<Object>()
-                
-                );
-                while(it.hasNext()) {
-                    Object o = it.next().getEntry();
-                    fireEventToListener(eventType, event, o);
-                }
-            } finally {
-                this.fireCalls--;
-                if(this.fireCalls == 0) {
-                    handleQueuedAddsAndRemoves();
-                }
-            }
-        }
-    }
-    
-    private void handleQueuedAddsAndRemoves() {
-        try {
-            for(Runnable r : this.deferredDeltas) {
-                r.run();
-            }
-        } finally {
-            this.deferredDeltas.clear();
-        }
-    }
-    
-    public boolean removeListener(final EventType eventType, final XAddress sourceAddress,
-            final Object listener) {
-        if(this.fireCalls > 0) {
-            this.deferredDeltas.add(new Runnable() {
-                
-                @Override
-                public void run() {
-                    removeListener(eventType, sourceAddress, listener);
-                }
-            });
-            // we can just assume it will work
-            return true;
-        } else {
-            return this.map.deIndex(eventType, sourceAddress, listener);
-        }
-    }
-    
+
+	public static enum EventType {
+		FieldChange, ModelChange, ObjectChange, RepositoryChange,
+
+		TransactionChange, Sync,
+	}
+
+	/**
+	 * @param eventType
+	 *            @NeverNull
+	 * @param event
+	 *            @NeverNull
+	 * @param listener
+	 *            @NeverNull
+	 */
+	private static void fireEventToListener(EventType eventType, Object event, Object listener) {
+		switch (eventType) {
+		case FieldChange:
+			((XFieldEventListener) listener).onChangeEvent((XFieldEvent) event);
+			break;
+		case ObjectChange:
+			((XObjectEventListener) listener).onChangeEvent((XObjectEvent) event);
+			break;
+		case ModelChange:
+			((XModelEventListener) listener).onChangeEvent((XModelEvent) event);
+			break;
+		case RepositoryChange:
+			((XRepositoryEventListener) listener).onChangeEvent((XRepositoryEvent) event);
+			break;
+		case TransactionChange:
+			((XTransactionEventListener) listener).onChangeEvent((XTransactionEvent) event);
+			break;
+		case Sync:
+			((XSyncEventListener) listener).onSynced((XSyncEvent) event);
+		}
+	}
+
+	/**
+	 * Add and remove operations received during dispatch.
+	 */
+	private List<Runnable> deferredDeltas = new LinkedList<Runnable>();
+
+	private int fireCalls = 0;
+
+	IMapMapSetIndex<EventType, XAddress, Object> map = new MapMapSetIndex<EventType, XAddress, Object>(
+			new SmallEntrySetFactory<Object>());
+
+	public boolean addListener(final EventType eventType, final XAddress sourceAddress,
+			final Object listener) {
+		if (this.fireCalls > 0) {
+			this.deferredDeltas.add(new Runnable() {
+
+				@Override
+				public void run() {
+					addListener(eventType, sourceAddress, listener);
+				}
+			});
+			// we can just hope it will work
+			return true;
+		} else {
+			return this.map.index(eventType, sourceAddress, listener);
+		}
+	}
+
+	/**
+	 * Notifies all listeners that have registered interest for notification on
+	 * events of type EventType happening on source-entities.
+	 * 
+	 * @param eventType
+	 *            @NeverNull
+	 * @param source
+	 *            @NeverNull
+	 * @param event
+	 *            The, e.g., {@link XFieldEvent} which will be propagated to the
+	 *            registered listeners.
+	 */
+	public void fireEvent(EventType eventType, XAddress source, Object event) {
+		assert eventType != null;
+		if (event == null) {
+			throw new NullPointerException("Cannot fire null event");
+		}
+
+		synchronized (this.map) {
+			this.fireCalls++;
+			try {
+				Iterator<ITriple<EventType, XAddress, Object>> it = this.map.tupleIterator(
+
+				new EqualsConstraint<MemoryEventBus.EventType>(eventType),
+
+				source == null ? new Wildcard<XAddress>() : new EqualsConstraint<XAddress>(source),
+
+				new Wildcard<Object>()
+
+				);
+				while (it.hasNext()) {
+					Object o = it.next().getEntry();
+					fireEventToListener(eventType, event, o);
+				}
+			} finally {
+				this.fireCalls--;
+				if (this.fireCalls == 0) {
+					handleQueuedAddsAndRemoves();
+				}
+			}
+		}
+	}
+
+	private void handleQueuedAddsAndRemoves() {
+		try {
+			for (Runnable r : this.deferredDeltas) {
+				r.run();
+			}
+		} finally {
+			this.deferredDeltas.clear();
+		}
+	}
+
+	public boolean removeListener(final EventType eventType, final XAddress sourceAddress,
+			final Object listener) {
+		if (this.fireCalls > 0) {
+			this.deferredDeltas.add(new Runnable() {
+
+				@Override
+				public void run() {
+					removeListener(eventType, sourceAddress, listener);
+				}
+			});
+			// we can just assume it will work
+			return true;
+		} else {
+			return this.map.deIndex(eventType, sourceAddress, listener);
+		}
+	}
+
 }

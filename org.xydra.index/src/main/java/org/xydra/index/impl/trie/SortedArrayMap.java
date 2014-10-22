@@ -28,6 +28,7 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.SortedMap;
 
+import org.xydra.annotations.LicenseApache;
 import org.xydra.index.query.Pair;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
@@ -43,6 +44,7 @@ import org.xydra.log.api.LoggerFactory;
  * @param <V>
  *            the value type
  */
+@LicenseApache(copyright = "Copyright 2009 Google Inc.")
 public class SortedArrayMap<K, V> implements SortedMap<K, V>, Serializable {
 
 	private static final Logger log = LoggerFactory.getLogger(SortedArrayMap.class);

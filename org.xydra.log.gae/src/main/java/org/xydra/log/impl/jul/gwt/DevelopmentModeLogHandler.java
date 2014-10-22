@@ -20,12 +20,15 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
+import org.xydra.annotations.LicenseApache;
+
 import com.google.gwt.core.client.GWT;
 
 /**
  * A Handler that prints logs to GWT.log, causing the messages to show up in the
  * Development Mode tab in Eclipse when running in Development mode.
  */
+@LicenseApache(copyright = "Copyright 2010 Google Inc.")
 public class DevelopmentModeLogHandler extends Handler {
 
 	public DevelopmentModeLogHandler() {

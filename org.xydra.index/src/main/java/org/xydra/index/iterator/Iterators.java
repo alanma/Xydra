@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
+import org.xydra.annotations.LicenseApache;
 import org.xydra.annotations.RunsInGWT;
 
 /**
@@ -23,7 +24,7 @@ public class Iterators {
 
 	/**
 	 * @param base
-	 *            @NeverNull
+	 * @NeverNull
 	 * @param filter
 	 * @return an iterator returning fewer elements, namely only those matching
 	 *         the filter
@@ -112,12 +113,14 @@ public class Iterators {
 	 *             if {@code limitSize} is negative
 	 * @since 3.0
 	 */
+	@LicenseApache(copyright = "Copyright (C) 2007 The Guava Authors", project = "Guava")
 	public static <T> Iterator<T> limit(final Iterator<T> iterator, final int max) {
 		checkNotNull(iterator);
 		checkArgument(max >= 0, "limit is negative");
 		return new LimitingIterator<T>(max, iterator);
 	}
 
+	@LicenseApache(copyright = "Copyright (C) 2007 The Guava Authors", project = "Guava")
 	private static class LimitingIterator<T> implements Iterator<T> {
 
 		private int count = 0;
@@ -166,7 +169,7 @@ public class Iterators {
 
 	/**
 	 * @param base
-	 *            @NeverNull
+	 * @NeverNull
 	 * @param transformer
 	 * @return an iterator returning entries of another type as the input type
 	 */
@@ -186,7 +189,7 @@ public class Iterators {
 	 * implicitly filters out all items for which the transformer returns null
 	 * 
 	 * @param base
-	 *            @NeverNull
+	 * @NeverNull
 	 * @param transformer
 	 *            returns null for unwanted elements @NeverNull
 	 * @return an iterator returning entries of another type as the input type @NeverNull
@@ -205,9 +208,9 @@ public class Iterators {
 
 	/**
 	 * @param it1
-	 *            @NeverNull
+	 * @NeverNull
 	 * @param it2
-	 *            @NeverNull
+	 * @NeverNull
 	 * @return a single, continuous iterator; might contain duplicates
 	 */
 	public static <E> Iterator<E> concat(Iterator<? extends E> it1, Iterator<? extends E> it2) {
@@ -233,7 +236,7 @@ public class Iterators {
 
 	/**
 	 * @param base
-	 *            @NeverNull
+	 * @NeverNull
 	 * @param transformer
 	 * @return a uniform iterator in which each element of base was turned into
 	 *         a part of the resulting sequence
@@ -282,7 +285,7 @@ public class Iterators {
 
 	/**
 	 * @param partIterators
-	 *            @NeverNull each may return an element only once, no duplicates
+	 * @NeverNull each may return an element only once, no duplicates
 	 * @return an iterator representing the set-intersection of the set implied
 	 *         by the partial iterators
 	 */
@@ -421,7 +424,7 @@ public class Iterators {
 
 	/**
 	 * @param it
-	 *            @NeverNull
+	 * @NeverNull
 	 * @return the single value, if present. Or null, otherwise.
 	 * @throws IllegalStateException
 	 *             if iterator has more than one result
