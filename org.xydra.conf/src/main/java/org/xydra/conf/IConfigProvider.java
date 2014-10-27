@@ -27,6 +27,6 @@ public interface IConfigProvider {
 	 * 
 	 * @param conf
 	 */
-	void configure(IConfig conf);
+	void configureDefaults(IConfig conf);
 
 }

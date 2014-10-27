@@ -120,7 +120,7 @@ public class UniversalLogger implements ILoggerFactorySPI {
 		IConfig conf = Env.get().conf();
 
 		// set reasonable defaults
-		new ConfParamsXydrdaUniversalLog().configure(conf);
+		new ConfParamsXydrdaUniversalLog().configureDefaults(conf);
 		// set values given by user
 		conf.setBoolean(ConfParamsXydrdaUniversalLog.GWT_IN_PRODUCTION, inGWT);
 		conf.setBoolean(ConfParamsXydrdaUniversalLog.GAE_IN_PRODUCTION, onGAE);

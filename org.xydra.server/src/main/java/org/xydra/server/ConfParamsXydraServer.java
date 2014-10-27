@@ -15,7 +15,7 @@ public class ConfParamsXydraServer implements IConfigProvider {
 	public static final String repoId = "xydra-repoId";
 
 	@Override
-	public void configure(IConfig conf) {
+	public void configureDefaults(IConfig conf) {
 		conf.setDefault(ConfParamsXydraServer.repoId, XX.toId("data"), true);
 	}
 

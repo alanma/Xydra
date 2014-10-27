@@ -38,7 +38,7 @@ public class RunXmasJetty {
 		Jetty jetty = new Jetty();
 
 		IConfig conf = Env.get().conf();
-		new ConfParamsJetty().configure(conf);
+		new ConfParamsJetty().configureDefaults(conf);
 
 		conf.setLong(ConfParamsJetty.PORT, 8787);
 		conf.set(ConfParamsJetty.DOC_ROOT, "src/main/webapp");

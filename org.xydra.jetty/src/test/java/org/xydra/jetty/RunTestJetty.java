@@ -28,7 +28,7 @@ public class RunTestJetty {
 		Jetty jetty = new Jetty();
 
 		IConfig conf = Env.get().conf();
-		new ConfParamsJetty().configure(conf);
+		new ConfParamsJetty().configureDefaults(conf);
 		conf.set(ConfParamsJetty.DOC_ROOT, new File("src/test/resources").toURI().toURL()
 				.toExternalForm());
 		jetty.configureFromConf(conf);

@@ -8,7 +8,7 @@ public class DummyConfigProvider implements IConfigProvider {
 	public static final String FOO = "example.field-foo";
 
 	@Override
-	public void configure(IConfig conf) {
+	public void configureDefaults(IConfig conf) {
 	}
 
 }

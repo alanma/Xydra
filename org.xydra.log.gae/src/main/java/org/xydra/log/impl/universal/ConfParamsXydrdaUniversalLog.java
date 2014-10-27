@@ -22,7 +22,7 @@ public class ConfParamsXydrdaUniversalLog implements IConfigProvider {
 	public static final String LOGGER_FACTORY_SPI = "log-" + ILoggerFactorySPI.class.getName();
 
 	@Override
-	public void configure(IConfig conf) {
+	public void configureDefaults(IConfig conf) {
 		/* default is running in pure java */
 		conf.setDefault(GWT_IN_PRODUCTION, false, true);
 		conf.setDefault(GAE_IN_PRODUCTION, false, true);
