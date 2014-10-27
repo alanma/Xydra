@@ -12,10 +12,15 @@ import java.lang.annotation.Target;
  * Package annotations are inherited on to sub-packages. So annotating
  * package-info in the root of a project annotates the whole project.
  * 
+ * IMPROVE It would make a somehow cleaner process by using RetentionPolicy
+ * SOURCE, then write an AnnotationProcessor to extract some XML file to be put
+ * in /META-INF, where another process collects them.
+ * 
  * @author xamde
  */
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.METHOD, ElementType.TYPE, ElementType.PACKAGE })
+@LicenseAnnotation(id = "Apache2_0", label = "Apache 2.0 License")
 public @interface LicenseApache {
 
 	/**
@@ -34,10 +39,12 @@ public @interface LicenseApache {
 	String contributors() default "";
 
 	/**
+	 * Resource name of NOTICE file, if any.
+	 * 
 	 * Syntax convention: "NOTICE.(some unique name).txt", e.g.
 	 * "NOTICE.apache-commons-lang.txt"
 	 * 
-	 * @return resource name of NOTICE file, if any.
+	 * @return
 	 */
 	String notice() default "";
 
