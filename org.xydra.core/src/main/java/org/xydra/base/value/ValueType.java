@@ -9,7 +9,6 @@ import org.xydra.annotations.NeverNull;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 
-
 /**
  * The type system of Xydra XValues.
  * 
@@ -149,218 +148,223 @@ import org.xydra.base.XId;
  * @author xamde
  */
 public enum ValueType {
-    
-    /* single types first, so that they can be referenced, alphabetically */
-    
-    Address(XAddress.class, XAddress.class, null, false, false, false),
-    
-    Boolean(XBooleanValue.class, Boolean.class, null, false, false, false),
-    
-    Binary(XBinaryValue.class, byte[].class, null, false, false, false),
-    
-    Double(XDoubleValue.class, Double.class, null, false, false, true),
-    
-    Id(org.xydra.base.XId.class, XId.class, null, false, false, false),
-    
-    Integer(XIntegerValue.class, Integer.class, null, false, false, true),
-    
-    Long(XLongValue.class, Long.class, null, false, false, true),
-    
-    String(XStringValue.class, String.class, null, false, false, true),
-    
-    /* collection types, alphabetically */
-    AddressList(XAddressListValue.class, List.class, Address, false, true, false),
-    
-    AddressSet(XAddressSetValue.class, Set.class, Address, true, false, false),
-    
-    AddressSortedSet(XAddressSortedSetValue.class, SortedSet.class, Address, true, true, false),
-    
-    BooleanList(XBooleanListValue.class, List.class, Boolean, false, true, false),
-    
-    DoubleList(XDoubleListValue.class, List.class, Double, false, true, false),
-    
-    IdList(XIdListValue.class, List.class, Id, false, true, false),
-    
-    IdSet(XIdSetValue.class, Set.class, Id, true, false, false),
-    
-    IdSortedSet(XIdSortedSetValue.class, SortedSet.class, Id, true, true, false),
-    
-    IntegerList(XIntegerListValue.class, List.class, Integer, false, true, false),
-    
-    LongList(XLongListValue.class, List.class, Long, false, true, false),
-    
-    StringList(XStringListValue.class, List.class, String, false, true, false),
-    
-    StringSet(XStringSetValue.class, Set.class, String, true, false, false);
-    
-    private Class<?> xydraInterface;
-    private ValueType componentValueType;
-    private boolean isSortedCollection;
-    private boolean isNumeric;
-    private boolean isSet;
-    private Class<?> javaClass;
-    
-    /**
-     * @return true iff this type is a collection that has a defined order.
-     */
-    public boolean isSortedCollection() {
-        return this.isSortedCollection;
-    }
-    
-    /**
-     * @return true iff this type represents any collection type. Xydra knows
-     *         only List, Set and SortedSet.
-     */
-    public boolean isCollection() {
-        return this.componentValueType != null;
-    }
-    
-    public boolean isSingle() {
-        return !isCollection();
-    }
-    
-    /**
-     * @return true iff this type is a collection with set-semantics, i.e. each
-     *         element can appear only once.
-     */
-    public boolean isSet() {
-        return this.isSet;
-    }
-    
-    /**
-     * @return true iff this type is a numberic type, i.e. it can store numbers.
-     *         Collections are never numeric, but their components can.
-     */
-    public boolean isNumeric() {
-        return this.isNumeric;
-    }
-    
-    /**
-     * @param xydraInterface
-     * @param javaClass The Java class that this Xydra type maps to
-     * @param componentValueType If this value type represents a kind of
-     *            collection, this is the value type of its components. Null for
-     *            single types.
-     * @param isSet
-     * @param isSortedCollection
-     * @param isNumeric
-     */
-    ValueType(@NeverNull Class<?> xydraInterface, Class<?> javaClass,
-            @CanBeNull ValueType componentValueType, boolean isSet, boolean isSortedCollection,
-            boolean isNumeric) {
-        assert componentValueType != null || !(isSet || isSortedCollection) : xydraInterface
-                .getName();
-        assert !isNumeric || componentValueType == null : xydraInterface.getName();
-        this.xydraInterface = xydraInterface;
-        this.javaClass = javaClass;
-        this.componentValueType = componentValueType;
-        this.isSet = isSet;
-        this.isSortedCollection = isSortedCollection;
-        this.isNumeric = isNumeric;
-    }
-    
-    /**
-     * @return the interface B in Xydra that this ValueType A represents. If you
-     *         take this interface B and call {@link XValue#getType()} on it,
-     *         you get back this value type A.
-     */
-    public Class<?> getXydraInterface() {
-        return this.xydraInterface;
-    }
-    
-    /**
-     * @return null if this type is not a collection type. Otherwise the
-     *         ValueType of the component type. E.g. XDoubleList returns
-     *         XDouble.
-     */
-    public ValueType getComponentType() {
-        return this.componentValueType;
-    }
-    
-    /**
-     * @return the native Java class that this Xydra type represents. E.g.
-     *         Xydra's XInteger has the Java class Integer.
-     */
-    public Class<?> getJavaClass() {
-        return this.javaClass;
-    }
-    
-    /**
-     * @param xydraInterface
-     * @return ...
-     * @throws IllegalArgumentException if class could not be recognised as a
-     *             ValueType
-     */
-    public static ValueType valueType(Class<?> xydraInterface) {
-        assert xydraInterface != null;
-        if(xydraInterface.equals(XAddressListValue.class)) {
-            return AddressList;
-        }
-        if(xydraInterface.equals(XAddressListValue.class)) {
-            return AddressList;
-        }
-        if(xydraInterface.equals(XAddressSetValue.class)) {
-            return AddressSet;
-        }
-        if(xydraInterface.equals(XAddressSortedSetValue.class)) {
-            return AddressSortedSet;
-        }
-        if(xydraInterface.equals(XBooleanListValue.class)) {
-            return BooleanList;
-        }
-        if(xydraInterface.equals(XBooleanValue.class)) {
-            return Boolean;
-        }
-        if(xydraInterface.equals(XBinaryValue.class)) {
-            return Binary;
-        }
-        if(xydraInterface.equals(XDoubleListValue.class)) {
-            return DoubleList;
-        }
-        if(xydraInterface.equals(XDoubleValue.class)) {
-            return Double;
-        }
-        if(xydraInterface.equals(XId.class)) {
-            return Id;
-        }
-        if(xydraInterface.equals(XIdListValue.class)) {
-            return IdList;
-        }
-        if(xydraInterface.equals(XIdSetValue.class)) {
-            return IdSet;
-        }
-        if(xydraInterface.equals(XIdSortedSetValue.class)) {
-            return IdSortedSet;
-        }
-        if(xydraInterface.equals(XIntegerListValue.class)) {
-            return IntegerList;
-        }
-        if(xydraInterface.equals(XIntegerValue.class)) {
-            return Integer;
-        }
-        if(xydraInterface.equals(XLongListValue.class)) {
-            return LongList;
-        }
-        if(xydraInterface.equals(XLongValue.class)) {
-            return Long;
-        }
-        if(xydraInterface.equals(XStringListValue.class)) {
-            return StringList;
-        }
-        if(xydraInterface.equals(XStringSetValue.class)) {
-            return StringSet;
-        }
-        if(xydraInterface.equals(XStringValue.class)) {
-            return String;
-        }
-        throw new IllegalArgumentException("Don't know how to map '" + xydraInterface.getName()
-                + "' to a ValueType");
-    }
-    
-    // public static void main(String[] args) {
-    // for(ValueType v : ValueType.values()) {
-    // System.out.println(v.getXydraInterface().getSimpleName() + ".class, ");
-    // }
-    // }
-    
+
+	Null(XNullValue.class, null, null, false, false, false),
+
+	/* single types first, so that they can be referenced, alphabetically */
+
+	Address(XAddress.class, XAddress.class, null, false, false, false),
+
+	Boolean(XBooleanValue.class, Boolean.class, null, false, false, false),
+
+	Binary(XBinaryValue.class, byte[].class, null, false, false, false),
+
+	Double(XDoubleValue.class, Double.class, null, false, false, true),
+
+	Id(org.xydra.base.XId.class, XId.class, null, false, false, false),
+
+	Integer(XIntegerValue.class, Integer.class, null, false, false, true),
+
+	Long(XLongValue.class, Long.class, null, false, false, true),
+
+	String(XStringValue.class, String.class, null, false, false, true),
+
+	/* collection types, alphabetically */
+	AddressList(XAddressListValue.class, List.class, Address, false, true, false),
+
+	AddressSet(XAddressSetValue.class, Set.class, Address, true, false, false),
+
+	AddressSortedSet(XAddressSortedSetValue.class, SortedSet.class, Address, true, true, false),
+
+	BooleanList(XBooleanListValue.class, List.class, Boolean, false, true, false),
+
+	DoubleList(XDoubleListValue.class, List.class, Double, false, true, false),
+
+	IdList(XIdListValue.class, List.class, Id, false, true, false),
+
+	IdSet(XIdSetValue.class, Set.class, Id, true, false, false),
+
+	IdSortedSet(XIdSortedSetValue.class, SortedSet.class, Id, true, true, false),
+
+	IntegerList(XIntegerListValue.class, List.class, Integer, false, true, false),
+
+	LongList(XLongListValue.class, List.class, Long, false, true, false),
+
+	StringList(XStringListValue.class, List.class, String, false, true, false),
+
+	StringSet(XStringSetValue.class, Set.class, String, true, false, false),
+
+	;
+
+	private Class<?> xydraInterface;
+	private ValueType componentValueType;
+	private boolean isSortedCollection;
+	private boolean isNumeric;
+	private boolean isSet;
+	private Class<?> javaClass;
+
+	/**
+	 * @return true iff this type is a collection that has a defined order.
+	 */
+	public boolean isSortedCollection() {
+		return this.isSortedCollection;
+	}
+
+	/**
+	 * @return true iff this type represents any collection type. Xydra knows
+	 *         only List, Set and SortedSet.
+	 */
+	public boolean isCollection() {
+		return this.componentValueType != null;
+	}
+
+	public boolean isSingle() {
+		return !isCollection();
+	}
+
+	/**
+	 * @return true iff this type is a collection with set-semantics, i.e. each
+	 *         element can appear only once.
+	 */
+	public boolean isSet() {
+		return this.isSet;
+	}
+
+	/**
+	 * @return true iff this type is a numberic type, i.e. it can store numbers.
+	 *         Collections are never numeric, but their components can.
+	 */
+	public boolean isNumeric() {
+		return this.isNumeric;
+	}
+
+	/**
+	 * @param xydraInterface
+	 * @param javaClass
+	 *            The Java class that this Xydra type maps to
+	 * @param componentValueType
+	 *            If this value type represents a kind of collection, this is
+	 *            the value type of its components. Null for single types.
+	 * @param isSet
+	 * @param isSortedCollection
+	 * @param isNumeric
+	 */
+	ValueType(@NeverNull Class<?> xydraInterface, Class<?> javaClass,
+			@CanBeNull ValueType componentValueType, boolean isSet, boolean isSortedCollection,
+			boolean isNumeric) {
+		assert componentValueType != null || !(isSet || isSortedCollection) : xydraInterface
+				.getName();
+		assert !isNumeric || componentValueType == null : xydraInterface.getName();
+		this.xydraInterface = xydraInterface;
+		this.javaClass = javaClass;
+		this.componentValueType = componentValueType;
+		this.isSet = isSet;
+		this.isSortedCollection = isSortedCollection;
+		this.isNumeric = isNumeric;
+	}
+
+	/**
+	 * @return the interface B in Xydra that this ValueType A represents. If you
+	 *         take this interface B and call {@link XValue#getType()} on it,
+	 *         you get back this value type A.
+	 */
+	public Class<?> getXydraInterface() {
+		return this.xydraInterface;
+	}
+
+	/**
+	 * @return null if this type is not a collection type. Otherwise the
+	 *         ValueType of the component type. E.g. XDoubleList returns
+	 *         XDouble.
+	 */
+	public ValueType getComponentType() {
+		return this.componentValueType;
+	}
+
+	/**
+	 * @return the native Java class that this Xydra type represents. E.g.
+	 *         Xydra's XInteger has the Java class Integer.
+	 */
+	public Class<?> getJavaClass() {
+		return this.javaClass;
+	}
+
+	/**
+	 * @param xydraInterface
+	 * @return ...
+	 * @throws IllegalArgumentException
+	 *             if class could not be recognised as a ValueType
+	 */
+	public static ValueType valueType(Class<?> xydraInterface) {
+		assert xydraInterface != null;
+		if (xydraInterface.equals(XAddressListValue.class)) {
+			return AddressList;
+		}
+		if (xydraInterface.equals(XAddressListValue.class)) {
+			return AddressList;
+		}
+		if (xydraInterface.equals(XAddressSetValue.class)) {
+			return AddressSet;
+		}
+		if (xydraInterface.equals(XAddressSortedSetValue.class)) {
+			return AddressSortedSet;
+		}
+		if (xydraInterface.equals(XBooleanListValue.class)) {
+			return BooleanList;
+		}
+		if (xydraInterface.equals(XBooleanValue.class)) {
+			return Boolean;
+		}
+		if (xydraInterface.equals(XBinaryValue.class)) {
+			return Binary;
+		}
+		if (xydraInterface.equals(XDoubleListValue.class)) {
+			return DoubleList;
+		}
+		if (xydraInterface.equals(XDoubleValue.class)) {
+			return Double;
+		}
+		if (xydraInterface.equals(XId.class)) {
+			return Id;
+		}
+		if (xydraInterface.equals(XIdListValue.class)) {
+			return IdList;
+		}
+		if (xydraInterface.equals(XIdSetValue.class)) {
+			return IdSet;
+		}
+		if (xydraInterface.equals(XIdSortedSetValue.class)) {
+			return IdSortedSet;
+		}
+		if (xydraInterface.equals(XIntegerListValue.class)) {
+			return IntegerList;
+		}
+		if (xydraInterface.equals(XIntegerValue.class)) {
+			return Integer;
+		}
+		if (xydraInterface.equals(XLongListValue.class)) {
+			return LongList;
+		}
+		if (xydraInterface.equals(XLongValue.class)) {
+			return Long;
+		}
+		if (xydraInterface.equals(XStringListValue.class)) {
+			return StringList;
+		}
+		if (xydraInterface.equals(XStringSetValue.class)) {
+			return StringSet;
+		}
+		if (xydraInterface.equals(XStringValue.class)) {
+			return String;
+		}
+		throw new IllegalArgumentException("Don't know how to map '" + xydraInterface.getName()
+				+ "' to a ValueType");
+	}
+
+	// public static void main(String[] args) {
+	// for(ValueType v : ValueType.values()) {
+	// System.out.println(v.getXydraInterface().getSimpleName() + ".class, ");
+	// }
+	// }
+
 }
