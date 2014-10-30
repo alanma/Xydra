@@ -30,13 +30,6 @@
 		</repository>
 	</repositories>
 
-	<!-- Specify hard-coded project properties here -->
-	<properties>
-		<!-- required for gae plugin to determin gae.home -->
-		<!-- @@ use gae.version here -->
-		<gae.version>1.7.3</gae.version>
-	</properties>
-
 	<dependencies>
 
 		<!-- === Server -->
