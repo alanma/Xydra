@@ -7,12 +7,12 @@ package org.xydra.base.value;
  * 
  */
 public interface XStringValue extends XSingleValue<String> {
-	
+
 	/**
 	 * Returns the stored String value.
 	 * 
 	 * @return The stored String value.
 	 */
 	String contents();
-	
+
 }

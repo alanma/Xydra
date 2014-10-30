@@ -7,12 +7,12 @@ package org.xydra.base.value;
  * 
  */
 public interface XDoubleValue extends XNumberValue, XSingleValue<Double> {
-	
+
 	/**
 	 * Returns the stored double value.
 	 * 
 	 * @return The stored double value.
 	 */
 	double contents();
-	
+
 }
