@@ -64,20 +64,20 @@ public class SerializedCommand {
         
         if(forced) {
             if(revisionString != null)
-                throw new ParsingError(element, "Attribute " + REVISION_ATTRIBUTE
+                throw new ParsingException(element, "Attribute " + REVISION_ATTRIBUTE
                         + " not allowed for forced changes");
             return XCommand.FORCED;
         }
         
         if(!revisioned) {
             if(revisionString != null)
-                throw new ParsingError(element, "Attribute " + REVISION_ATTRIBUTE
+                throw new ParsingException(element, "Attribute " + REVISION_ATTRIBUTE
                         + " not allowed for non-field-changes of type ADD");
             return XCommand.SAFE_STATE_BOUND;
         }
         
         if(revisionString == null) {
-            throw new ParsingError(element, "Missing attribute" + REVISION_ATTRIBUTE
+            throw new ParsingException(element, "Missing attribute" + REVISION_ATTRIBUTE
                     + " from non-forced change");
         }
         
@@ -126,7 +126,7 @@ public class SerializedCommand {
     }
     
     private static XAtomicCommand toAtomicCommand(XydraElement element, XAddress context)
-            throws ParsingError {
+            throws ParsingException {
         String name = element.getType();
         if(name.equals(XFIELDCOMMAND_ELEMENT)) {
             return toFieldCommand(element, context);
@@ -137,7 +137,7 @@ public class SerializedCommand {
         } else if(name.equals(XREPOSITORYCOMMAND_ELEMENT)) {
             return toRepositoryCommand(element, context);
         } else {
-            throw new ParsingError(element, "Unexpected command element: <" + name + ">.");
+            throw new ParsingException(element, "Unexpected command element: <" + name + ">.");
         }
     }
     
@@ -178,7 +178,7 @@ public class SerializedCommand {
         if(type != ChangeType.REMOVE) {
             value = SerializedValue.toValue(element.getElement(NAME_VALUE));
             if(value == null) {
-                throw new ParsingError(element, "Missing xvalue.");
+                throw new ParsingException(element, "Missing xvalue.");
             }
         }
         
@@ -189,7 +189,7 @@ public class SerializedCommand {
         } else if(type == ChangeType.REMOVE) {
             return MemoryFieldCommand.createRemoveCommand(target, rev);
         } else {
-            throw new ParsingError(element, "Attribute " + SerializingUtils.TYPE_ATTRIBUTE
+            throw new ParsingException(element, "Attribute " + SerializingUtils.TYPE_ATTRIBUTE
                     + " does not contain a valid type for field commands, but '" + type + "'");
         }
     }
@@ -205,12 +205,12 @@ public class SerializedCommand {
         XAddress address = SerializingUtils.getAddress(element, context);
         
         if(address.getModel() == null) {
-            throw new ParsingError(element, "Missing attribute "
+            throw new ParsingException(element, "Missing attribute "
                     + SerializingUtils.MODELID_ATTRIBUTE);
         }
         
         if(address.getObject() == null)
-            throw new ParsingError(element, "Missing attribute "
+            throw new ParsingException(element, "Missing attribute "
                     + SerializingUtils.OBJECTID_ATTRIBUTE);
         
         ChangeType type = SerializingUtils.getChangeType(element);
@@ -224,7 +224,7 @@ public class SerializedCommand {
         } else if(type == ChangeType.REMOVE) {
             return MemoryModelCommand.createRemoveCommand(target, rev, objectId);
         } else {
-            throw new ParsingError(element, "Attribute " + SerializingUtils.TYPE_ATTRIBUTE
+            throw new ParsingException(element, "Attribute " + SerializingUtils.TYPE_ATTRIBUTE
                     + " does not contain a valid type for model commands, but '" + type + "'");
         }
     }
@@ -240,12 +240,12 @@ public class SerializedCommand {
         XAddress address = SerializingUtils.getAddress(element, context);
         
         if(address.getObject() == null) {
-            throw new ParsingError(element, "Missing attribute "
+            throw new ParsingException(element, "Missing attribute "
                     + SerializingUtils.OBJECTID_ATTRIBUTE);
         }
         
         if(address.getField() == null) {
-            throw new ParsingError(element, "Missing attribute "
+            throw new ParsingException(element, "Missing attribute "
                     + SerializingUtils.FIELDID_ATTRIBUTE);
         }
         
@@ -260,7 +260,7 @@ public class SerializedCommand {
         } else if(type == ChangeType.REMOVE) {
             return MemoryObjectCommand.createRemoveCommand(target, rev, fieldId);
         } else {
-            throw new ParsingError(element, "Attribute " + SerializingUtils.TYPE_ATTRIBUTE
+            throw new ParsingException(element, "Attribute " + SerializingUtils.TYPE_ATTRIBUTE
                     + " does not contain a valid type for object commands, but '" + type + "'");
         }
     }
@@ -281,12 +281,12 @@ public class SerializedCommand {
         XAddress address = SerializingUtils.getAddress(element, context);
         
         if(address.getRepository() == null) {
-            throw new ParsingError(element, "Missing attribute "
+            throw new ParsingException(element, "Missing attribute "
                     + SerializingUtils.REPOSITORYID_ATTRIBUTE);
         }
         
         if(address.getModel() == null) {
-            throw new ParsingError(element, "Missing attribute "
+            throw new ParsingException(element, "Missing attribute "
                     + SerializingUtils.MODELID_ATTRIBUTE);
         }
         
@@ -301,7 +301,7 @@ public class SerializedCommand {
         } else if(type == ChangeType.REMOVE) {
             return MemoryRepositoryCommand.createRemoveCommand(target, rev, modelId);
         } else {
-            throw new ParsingError(element, "Attribute " + SerializingUtils.TYPE_ATTRIBUTE
+            throw new ParsingException(element, "Attribute " + SerializingUtils.TYPE_ATTRIBUTE
                     + " does not contain a valid type for repository commands, but '" + type + "'");
         }
     }

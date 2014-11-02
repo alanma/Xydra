@@ -7,7 +7,7 @@ import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.RequiresAppEngine;
 import org.xydra.annotations.RunsInAppEngine;
 import org.xydra.annotations.RunsInGWT;
-import org.xydra.core.serialize.ParsingError;
+import org.xydra.core.serialize.ParsingException;
 import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.xml.XmlEncoder;
 import org.xydra.index.query.Pair;
@@ -48,47 +48,47 @@ public class JsonArray extends AbstractJsonElement {
 	
 	@Override
 	public Object getAttribute(String name) {
-		throw new ParsingError(this, "cannot get attribute from JSON array");
+		throw new ParsingException(this, "cannot get attribute from JSON array");
 	}
 	
 	@Override
 	public XydraElement getChild(String name, String type) {
-		throw new ParsingError(this, "cannot get single child from JSON array");
+		throw new ParsingException(this, "cannot get single child from JSON array");
 	}
 	
 	@Override
 	public Iterator<XydraElement> getChildrenByName(String name, String defaultType) {
-		throw new ParsingError(this, "cannot get named children from JSON array");
+		throw new ParsingException(this, "cannot get named children from JSON array");
 	}
 	
 	@Override
 	public XydraElement getChild(String name) {
-		throw new ParsingError(this, "cannot get container from JSON array");
+		throw new ParsingException(this, "cannot get container from JSON array");
 	}
 	
 	@Override
 	public Object getContent(String name) {
-		throw new ParsingError(this, "cannot get content from JSON array");
+		throw new ParsingException(this, "cannot get content from JSON array");
 	}
 	
 	@Override
 	public Iterator<Pair<String,XydraElement>> getEntries(String attribute, String defaultType) {
-		throw new ParsingError(this, "cannot get entries from JSON array");
+		throw new ParsingException(this, "cannot get entries from JSON array");
 	}
 	
 	@Override
 	public Object getValue(String name, int index) {
-		throw new ParsingError(this, "cannot get attribute from JSON array");
+		throw new ParsingException(this, "cannot get attribute from JSON array");
 	}
 	
 	@Override
 	public Iterator<Object> getValues(String name) {
-		throw new ParsingError(this, "cannot get named values from JSON array");
+		throw new ParsingException(this, "cannot get named values from JSON array");
 	}
 	
 	@Override
 	public Object getContent() {
-		throw new ParsingError(this, "cannot get content from JSON array");
+		throw new ParsingException(this, "cannot get content from JSON array");
 	}
 	
 }

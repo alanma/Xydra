@@ -73,7 +73,7 @@ public class SerializedEvent {
         
         if(revisionString == null) {
             if(required) {
-                throw new ParsingError(element, "Missing attribute '" + attribute + "'");
+                throw new ParsingException(element, "Missing attribute '" + attribute + "'");
             }
             return XEvent.REVISION_OF_ENTITY_NOT_SET;
         }
@@ -129,7 +129,7 @@ public class SerializedEvent {
     }
     
     private static XAtomicEvent toAtomicEvent(XydraElement element, XAddress context,
-            TempTrans trans) throws ParsingError {
+            TempTrans trans) throws ParsingException {
         String name = element.getType();
         if(name.equals(XFIELDEVENT_ELEMENT)) {
             return toFieldEvent(element, context, trans);
@@ -142,7 +142,7 @@ public class SerializedEvent {
         } else if(name.equals(XREPOSITORYEVENT_ELEMENT)) {
             return toRepositoryEvent(element, context, trans);
         } else {
-            throw new ParsingError(element, "Unexpected event element.");
+            throw new ParsingException(element, "Unexpected event element.");
         }
     }
     
@@ -156,11 +156,11 @@ public class SerializedEvent {
      *            given element represents a transaction, the context for the
      *            contained events will be given by the transaction.
      * @return The {@link XEvent} represented by the given XML/JSON element.
-     * @throws ParsingError if the XML/JSON element does not represent a valid
+     * @throws ParsingException if the XML/JSON element does not represent a valid
      *             event.
      * 
      */
-    public static XEvent toEvent(XydraElement element, XAddress context) throws ParsingError {
+    public static XEvent toEvent(XydraElement element, XAddress context) throws ParsingException {
         if(element == null) {
             return null;
         } else if(element.getType().equals(XTRANSACTIONEVENT_ELEMENT)) {
@@ -181,7 +181,7 @@ public class SerializedEvent {
      *            the transaction.
      * @return The {@link List} of {@link XEvent}s represented by the given
      *         XML/JSON element.
-     * @throws ParsingError if the XML element does not represent a valid event
+     * @throws ParsingException if the XML element does not represent a valid event
      *             list.
      * 
      */
@@ -233,7 +233,7 @@ public class SerializedEvent {
             return MemoryFieldEvent.createRemoveEvent(actor, target, modelRev, objectRev, fieldRev,
                     inTransaction, implied);
         } else {
-            throw new ParsingError(element, "Attribute " + SerializingUtils.TYPE_ATTRIBUTE
+            throw new ParsingException(element, "Attribute " + SerializingUtils.TYPE_ATTRIBUTE
                     + " does not contain a valid type for field events, but '" + type + "'");
         }
     }
@@ -280,7 +280,7 @@ public class SerializedEvent {
             return MemoryReversibleFieldEvent.createRemoveEvent(actor, target, oldValue, modelRev,
                     objectRev, fieldRev, inTransaction, implied);
         } else {
-            throw new ParsingError(element, "Attribute " + SerializingUtils.TYPE_ATTRIBUTE
+            throw new ParsingException(element, "Attribute " + SerializingUtils.TYPE_ATTRIBUTE
                     + " does not contain a valid type for field events, but '" + type + "'");
         }
     }
@@ -294,12 +294,12 @@ public class SerializedEvent {
         XAddress address = SerializingUtils.getAddress(element, context);
         
         if(address.getModel() == null) {
-            throw new ParsingError(element, "Missing attribute "
+            throw new ParsingException(element, "Missing attribute "
                     + SerializingUtils.MODELID_ATTRIBUTE);
         }
         
         if(address.getObject() == null) {
-            throw new ParsingError(element, "Missing attribute "
+            throw new ParsingException(element, "Missing attribute "
                     + SerializingUtils.OBJECTID_ATTRIBUTE);
         }
         
@@ -324,7 +324,7 @@ public class SerializedEvent {
             return MemoryModelEvent.createRemoveEvent(actor, target, objectId, modelRev, objectRev,
                     inTransaction, implied);
         } else {
-            throw new ParsingError(element, "Attribute " + SerializingUtils.TYPE_ATTRIBUTE
+            throw new ParsingException(element, "Attribute " + SerializingUtils.TYPE_ATTRIBUTE
                     + " does not contain a valid type for model events, but '" + type + "'");
         }
     }
@@ -339,12 +339,12 @@ public class SerializedEvent {
         XAddress address = SerializingUtils.getAddress(element, context);
         
         if(address.getObject() == null) {
-            throw new ParsingError(element, "Missing attribute "
+            throw new ParsingException(element, "Missing attribute "
                     + SerializingUtils.OBJECTID_ATTRIBUTE);
         }
         
         if(address.getField() == null) {
-            throw new ParsingError(element, "Missing attribute "
+            throw new ParsingException(element, "Missing attribute "
                     + SerializingUtils.FIELDID_ATTRIBUTE);
         }
         
@@ -370,7 +370,7 @@ public class SerializedEvent {
             return MemoryObjectEvent.createRemoveEvent(actor, target, fieldId, modelRev, objectRev,
                     fieldRev, inTransaction, implied);
         } else {
-            throw new ParsingError(element, "Attribute " + SerializingUtils.TYPE_ATTRIBUTE
+            throw new ParsingException(element, "Attribute " + SerializingUtils.TYPE_ATTRIBUTE
                     + " does not contain a valid type for object events, but '" + type + "'");
         }
     }
@@ -385,12 +385,12 @@ public class SerializedEvent {
         XAddress address = SerializingUtils.getAddress(element, context);
         
         if(address.getRepository() == null) {
-            throw new ParsingError(element, "Missing attribute "
+            throw new ParsingException(element, "Missing attribute "
                     + SerializingUtils.REPOSITORYID_ATTRIBUTE + " is missing");
         }
         
         if(address.getModel() == null) {
-            throw new ParsingError(element, "Missing attribute "
+            throw new ParsingException(element, "Missing attribute "
                     + SerializingUtils.MODELID_ATTRIBUTE + " is missing");
         }
         
@@ -413,7 +413,7 @@ public class SerializedEvent {
             return MemoryRepositoryEvent.createRemoveEvent(actor, target, modelId, modelRev,
                     inTransaction);
         } else {
-            throw new ParsingError(element, "Atribute " + SerializingUtils.TYPE_ATTRIBUTE
+            throw new ParsingException(element, "Atribute " + SerializingUtils.TYPE_ATTRIBUTE
                     + " does not contain a valid type for repository events, but '" + type + "'");
         }
     }
@@ -435,7 +435,7 @@ public class SerializedEvent {
         XAddress target = SerializingUtils.getAddress(element, context);
         
         if(target.getField() != null || (target.getModel() == null && target.getObject() == null)) {
-            throw new ParsingError(element, "Missing model or object target.");
+            throw new ParsingException(element, "Missing model or object target.");
         }
         
         long objectRev = getRevision(element, OBJECTREVISION_ATTRIBUTE, target.getObject() != null);

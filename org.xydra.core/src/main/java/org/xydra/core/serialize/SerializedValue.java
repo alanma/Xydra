@@ -122,7 +122,7 @@ public class SerializedValue {
         
         String data = SerializingUtils.toString(element.getContent(NAME_DATA));
         if(data == null) {
-            throw new ParsingError(element, "Content must not be null.");
+            throw new ParsingException(element, "Content must not be null.");
         }
         
         return data;
@@ -171,7 +171,7 @@ public class SerializedValue {
         try {
             return XX.toId(data);
         } catch(Exception e) {
-            throw new ParsingError(element, "Expected a valid XId, got " + data, e);
+            throw new ParsingException(element, "Expected a valid XId, got " + data, e);
         }
         
     }
@@ -261,7 +261,7 @@ public class SerializedValue {
         } else if(elementName.equals(XADDRESSSORTEDSET_ELEMENT)) {
             return XV.toAddressSortedSetValue(getAddressListContents(element));
         }
-        throw new ParsingError(element, "Unexpected element for an XValue.");
+        throw new ParsingException(element, "Unexpected element for an XValue.");
     }
     
     private static XValue toIdSortedSetValue(XydraElement element) {

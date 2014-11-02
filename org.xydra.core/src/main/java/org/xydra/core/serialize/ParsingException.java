@@ -9,11 +9,11 @@ import org.xydra.annotations.RunsInGWT;
 @RunsInGWT(true)
 @RunsInAppEngine(true)
 @RequiresAppEngine(false)
-public class ParsingError extends IllegalArgumentException {
+public class ParsingException extends IllegalArgumentException {
 	
 	private static final long serialVersionUID = -3598672499003466804L;
 	
-	public ParsingError(XydraElement element, String message, Throwable cause) {
+	public ParsingException(XydraElement element, String message, Throwable cause) {
 		super("@<" + (element.getType() == null ? "xnull" : element.getType()) + ">: " + message,
 		        cause);
 	}
@@ -22,7 +22,7 @@ public class ParsingError extends IllegalArgumentException {
 	 * @param element
 	 * @param message
 	 */
-	public ParsingError(@NeverNull XydraElement element, String message) {
+	public ParsingException(@NeverNull XydraElement element, String message) {
 		this(element, message, null);
 	}
 	

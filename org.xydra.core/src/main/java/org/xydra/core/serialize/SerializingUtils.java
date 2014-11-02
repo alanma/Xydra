@@ -32,7 +32,7 @@ public class SerializingUtils {
     
     public static void checkElementType(@NeverNull XydraElement element, String expectedName) {
         if(element == null || !element.getType().equals(expectedName)) {
-            throw new ParsingError(element, "Expected <" + expectedName + "> element.");
+            throw new ParsingException(element, "Expected <" + expectedName + "> element.");
         }
     }
     
@@ -40,7 +40,7 @@ public class SerializingUtils {
         Object typeString = getRequiredAttribute(element, TYPE_ATTRIBUTE);
         ChangeType type = ChangeType.fromString(toString(typeString));
         if(type == null) {
-            throw new ParsingError(element, "Attribute '" + TYPE_ATTRIBUTE
+            throw new ParsingException(element, "Attribute '" + TYPE_ATTRIBUTE
                     + "' does not contain a valid type, but '" + typeString + "'");
         }
         return type;
@@ -57,7 +57,7 @@ public class SerializingUtils {
     public static Object getRequiredAttribute(XydraElement element, String attribute) {
         Object value = element.getAttribute(attribute);
         if(value == null) {
-            throw new ParsingError(element, "Missing attribute '" + attribute + "'.");
+            throw new ParsingException(element, "Missing attribute '" + attribute + "'.");
         }
         return value;
     }
