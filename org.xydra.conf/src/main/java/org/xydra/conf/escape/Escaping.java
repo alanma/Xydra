@@ -7,9 +7,8 @@ public class Escaping {
 
 	/**
 	 * @param b
-	 *            @NeverNull
-	 * @param codepoint
-	 *            must be below xD800 (55296 as int)
+	 * @NeverNull
+	 * @param codepoint must be below xD800 (55296 as int)
 	 */
 	public static void appendAsUnicodeEscapeSequence(StringBuilder b, int codepoint) {
 		/*
@@ -44,10 +43,8 @@ public class Escaping {
 	 * backslash-escaping) [\\n\t\r:= ]
 	 * 
 	 * @param raw
-	 * @param escapeColonSpaceEquals
-	 *            TODO
-	 * @param escapeQuotes
-	 *            TODO
+	 * @param escapeColonSpaceEquals TODO
+	 * @param escapeQuotes TODO
 	 * @return ...
 	 */
 	public static String escape(String raw, boolean escapeColonSpaceEquals, boolean escapeQuotes) {
@@ -124,14 +121,12 @@ public class Escaping {
 	 * @param escaped
 	 * @param i
 	 * @param unescaped
-	 * @param swallowBackslashNewline
-	 *            if true, do what Java Property File reading mandates: when
-	 *            reading [backslash][newline] just emit nothing instead. This
-	 *            allows long lines to broken in the syntax and still get a
-	 *            single line-break free string
-	 * @param escapeColonSpaceEqual
-	 *            if true, colon, space and equal sign are escaped: [:] =
-	 *            [\\][:], [ ] = [\\][ ], [=] = [\\][=].
+	 * @param swallowBackslashNewline if true, do what Java Property File
+	 *            reading mandates: when reading [backslash][newline] just emit
+	 *            nothing instead. This allows long lines to broken in the
+	 *            syntax and still get a single line-break free string
+	 * @param escapeColonSpaceEqual if true, colon, space and equal sign are
+	 *            escaped: [:] = [\\][:], [ ] = [\\][ ], [=] = [\\][=].
 	 * @return number of interpreted characters
 	 */
 	private static int materializeBackslashEscapes(String escaped, int i, StringBuilder unescaped,
@@ -183,17 +178,14 @@ public class Escaping {
 	}
 
 	/**
-	 * @param escaped
-	 *            a string which may contain '\\', '\n', '\t', '\ r', or Unicode
-	 *            '\ uXXXX' where XXXX is hex. The space is not there.
-	 * @param swallowBackslashNewline
-	 *            if true, do what Java Property File reading mandates: when
-	 *            reading [backslash][newline] just emit nothing instead. This
-	 *            allows long lines to broken in the syntax and still get a
-	 *            single line-break free string
-	 * @param escapeColonSpaceEqual
-	 *            if true, colon, space and equal sign are escaped: [:] =
-	 *            [\\][:], [ ] = [\\][ ], [=] = [\\][=].
+	 * @param escaped a string which may contain '\\', '\n', '\t', '\ r', or
+	 *            Unicode '\ uXXXX' where XXXX is hex. The space is not there.
+	 * @param swallowBackslashNewline if true, do what Java Property File
+	 *            reading mandates: when reading [backslash][newline] just emit
+	 *            nothing instead. This allows long lines to broken in the
+	 *            syntax and still get a single line-break free string
+	 * @param escapeColonSpaceEqual if true, colon, space and equal sign are
+	 *            escaped: [:] = [\\][:], [ ] = [\\][ ], [=] = [\\][=].
 	 * @return a string in which java and unicode escapes have been replaced
 	 *         with the correct unicode codepoint
 	 */
@@ -225,12 +217,40 @@ public class Escaping {
 		return unescaped.toString();
 	}
 
+	public static String materializeUnicode(String escaped) {
+		StringBuilder unescaped = new StringBuilder();
+		int i = 0;
+		while (i < escaped.length()) {
+			int c = escaped.codePointAt(i);
+			i += Character.charCount(c);
+			switch (c) {
+			case '\\':
+				if (i < escaped.length()) {
+					// process
+					int j = materializeUnicode(escaped, i + 1, unescaped);
+					if (j > 0) {
+						i += j + 1;
+					} else {
+						// false alarm
+						unescaped.appendCodePoint(c);
+					}
+				} else {
+					// we're at the end
+					unescaped.appendCodePoint(c);
+				}
+				break;
+			default:
+				unescaped.appendCodePoint(c);
+			}
+		}
+		return unescaped.toString();
+	}
+
 	/**
 	 * Surrogate pairs not supported.
 	 * 
 	 * @param escapedSource
-	 * @param i
-	 *            position of hex chars after the '\ u'
+	 * @param i position of hex chars after the '\ u'
 	 * @param unescaped
 	 * @return how many chars used
 	 */
@@ -281,7 +301,9 @@ public class Escaping {
 		System.out.println(b);
 		System.out.println(materializeUnicode("0298", 0, b));
 		System.out.println("'" + b + "'");
-		System.out.println(escapeUnicode("Völkel"));
+		String enc = escapeUnicode("Völkel");
+		System.out.println(enc);
+		System.out.println(materializeUnicode(enc));
 	}
 
 }
