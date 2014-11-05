@@ -15,11 +15,7 @@ class Cell implements ICell {
 		this.value = string;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.csv.impl.memory.ICell#appendString(java.lang.String, int)
-	 */
+	
 	@Override
 	public void appendString(String s, int maximalFieldLength) {
 		int sLen = this.value == null ? 0 : this.value.length();
@@ -34,41 +30,25 @@ class Cell implements ICell {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.csv.impl.memory.ICell#getValue()
-	 */
+	
 	@Override
 	public String getValue() {
 		return this.value;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.csv.impl.memory.ICell#getValueAsDouble()
-	 */
+	
 	@Override
 	public double getValueAsDouble() throws WrongDatatypeException {
 		return TypeHandler.asDouble(this.value);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.csv.impl.memory.ICell#getValueAsLong()
-	 */
+	
 	@Override
 	public long getValueAsLong() throws WrongDatatypeException {
 		return TypeHandler.asLong(this.value);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.csv.impl.memory.ICell#incrementValue(int)
-	 */
+	
 	@Override
 	public void incrementValue(int increment) throws WrongDatatypeException {
 		long l = getValueAsLong();
@@ -76,11 +56,7 @@ class Cell implements ICell {
 		this.value = "" + l;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.csv.impl.memory.ICell#setValue(java.lang.String, boolean)
-	 */
+	
 	@Override
 	public void setValue(String value, boolean initial) {
 		if (initial && this.value != null) {

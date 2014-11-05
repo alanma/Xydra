@@ -34,13 +34,7 @@ public class Row extends AbstractRow implements IRow {
 		this.table = table;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.xydra.csv.impl.memory.IRow#aggregate(org.xydra.csv.impl.memory.IRow,
-	 * java.lang.String[])
-	 */
+	
 	@Override
 	public void aggregate(IReadableRow row, String[] keyColumnNames) {
 		assert row != null;
@@ -94,11 +88,7 @@ public class Row extends AbstractRow implements IRow {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.csv.impl.memory.IRow#entrySet()
-	 */
+	
 	@Override
 	public Set<Entry<String, ICell>> entrySet() {
 		return this.map.entrySet();
@@ -112,11 +102,7 @@ public class Row extends AbstractRow implements IRow {
 	// setValue(ROW_KEY, rowKey);
 	// }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.csv.impl.memory.IRow#getColumnNames()
-	 */
+	
 	@Override
 	public Collection<String> getColumnNames() {
 		return this.map.keySet();
@@ -140,22 +126,14 @@ public class Row extends AbstractRow implements IRow {
 		return c;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.csv.impl.memory.IRow#getValue(java.lang.String)
-	 */
+	
 	@Override
 	public String getValue(String columnName) {
 		ICell cell = getOrCreateCell(columnName, false);
 		return cell == null ? "null" : cell.getValue();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.csv.impl.memory.IRow#iterator()
-	 */
+	
 	@Override
 	public Iterator<ICell> iterator() {
 		return this.map.values().iterator();

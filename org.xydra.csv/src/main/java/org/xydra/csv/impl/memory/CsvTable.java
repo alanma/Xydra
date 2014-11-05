@@ -68,11 +68,7 @@ public class CsvTable extends CsvCoreTable implements ICsvTable, ICsvTableFactor
 		toLaTeX(osw);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.csv.ICsvTable#readFrom(java.io.File)
-	 */
+	
 	@Override
 	public void readFrom(File f) throws IOException {
 		readFrom(f, this.defaultEncoding);
@@ -91,11 +87,7 @@ public class CsvTable extends CsvCoreTable implements ICsvTable, ICsvTableFactor
 		this.columnNames.remove("ROW");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.csv.ICsvTable#readFrom(java.io.Reader)
-	 */
+	
 	@Override
 	public void readFrom(Reader r, boolean create) throws IOException {
 		CsvReader csvReader = new CsvReader(r, this.readMaxRows);
@@ -110,11 +102,7 @@ public class CsvTable extends CsvCoreTable implements ICsvTable, ICsvTableFactor
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.csv.ICsvTable#toLaTeX(java.io.Writer)
-	 */
+	
 	@Override
 	public void toLaTeX(Writer w) throws IOException {
 		// determine padding
@@ -172,11 +160,7 @@ public class CsvTable extends CsvCoreTable implements ICsvTable, ICsvTableFactor
 		w.flush();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.csv.ICsvTable#writeTo(java.io.File)
-	 */
+	
 	@Override
 	public void writeTo(File f) throws FileNotFoundException {
 		writeTo(f, false);
@@ -241,11 +225,7 @@ public class CsvTable extends CsvCoreTable implements ICsvTable, ICsvTableFactor
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.csv.ICsvTable#writeTo(java.io.Writer)
-	 */
+	
 	@Override
 	public void writeTo(Writer w) throws IOException {
 		log.info("Writing " + this.rowCount() + " rows with " + this.columnNames.size()
@@ -255,11 +235,7 @@ public class CsvTable extends CsvCoreTable implements ICsvTable, ICsvTableFactor
 
 	private boolean oversizeWarning = false;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.csv.ICsvTable#writeTo(java.io.Writer, int, int)
-	 */
+	
 	@Override
 	public void writeTo(Writer w, int startRow, int endRow) throws IOException, ExcelLimitException {
 		if (!this.oversizeWarning && endRow - startRow > EXCEL_MAX_ROWS) {

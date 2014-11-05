@@ -41,13 +41,7 @@ public class GaeModelPersistence3 implements IGaeModelPersistence {
 				this.changesService, this.snapshotService);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.xydra.store.impl.gae.IGaeModelPersistence#executeCommand(org.xydra
-	 * .base.change.XCommand, org.xydra.base.XId)
-	 */
+	
 	@Override
 	public long executeCommand(XCommand command, XId actorId) {
 		// absolutely required
@@ -55,13 +49,7 @@ public class GaeModelPersistence3 implements IGaeModelPersistence {
 		return this.executionService.executeCommand(command, actorId);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.xydra.store.impl.gae.IGaeModelPersistence#getEventsBetween(org.xydra
-	 * .base.XAddress, long, long)
-	 */
+	
 	@Override
 	public List<XEvent> getEventsBetween(XAddress address, long beginRevision, long endRevision) {
 		calculateModelRevAndCacheInInstance(true);
@@ -79,11 +67,7 @@ public class GaeModelPersistence3 implements IGaeModelPersistence {
 				.setCurrentGaeModelRevIfRevisionIsHigher(gaeModelRev);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.store.impl.gae.IGaeModelPersistence#getSnapshot(boolean)
-	 */
+	
 	@Override
 	synchronized public XWritableModel getSnapshot(boolean includeTentative) {
 		calculateModelRevAndCacheInInstance(false);
@@ -98,13 +82,7 @@ public class GaeModelPersistence3 implements IGaeModelPersistence {
 		return snapshot;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.xydra.store.impl.gae.IGaeModelPersistence#getObjectSnapshot(org.xydra
-	 * .base.XId, boolean)
-	 */
+	
 	@Override
 	public XWritableObject getObjectSnapshot(XId objectId, boolean includeTentative) {
 		calculateModelRevAndCacheInInstance(false);
@@ -118,12 +96,7 @@ public class GaeModelPersistence3 implements IGaeModelPersistence {
 		return this.snapshotService.getObjectSnapshot(currentRevNr, true, objectId);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.xydra.store.impl.gae.IGaeModelPersistence#getModelRevision(boolean)
-	 */
+	
 	@Override
 	public ModelRevision getModelRevision(boolean includeTentative) {
 		calculateModelRevAndCacheInInstance(includeTentative);
@@ -144,13 +117,7 @@ public class GaeModelPersistence3 implements IGaeModelPersistence {
 
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.xydra.store.impl.gae.IGaeModelPersistence#modelHasBeenManaged(org
-	 * .xydra.base.XId)
-	 */
+	
 	@Override
 	public boolean modelHasBeenManaged() {
 		return this.changesService.modelHasBeenManaged();

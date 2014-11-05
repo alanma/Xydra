@@ -82,13 +82,7 @@ public class ObjectIndex extends AbstractObjectIndex implements IObjectIndex {
 		indexField.setValue(indexedIds);
 	}
 	
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.xydra.core.ext.index.IObjectIndex#lookup(org.xydra.core.model.XModel,
-	 * org.xydra.core.value.XValue)
-	 */
+	
 	@Override
     public Set<XWritableObject> lookup(XWritableModel model, XValue indexKey) {
 		Set<XId> ids = lookupIDs(indexKey);

@@ -12,12 +12,7 @@ public abstract class AbstractRow extends AbstractReadableRow implements IRow {
 		super(key);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.xydra.csv.impl.memory.IRow#addAll(org.xydra.csv.impl.memory.IRow)
-	 */
+	
 	@Override
 	public void addAll(IReadableRow otherRow) {
 		for (String colName : otherRow.getColumnNames()) {
@@ -27,12 +22,7 @@ public abstract class AbstractRow extends AbstractReadableRow implements IRow {
 
 	protected abstract void removeValue(String colName);
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.csv.impl.memory.IRow#appendValue(java.lang.String,
-	 * java.lang.String, int)
-	 */
+	
 	@Override
 	public void appendValue(String columnName, String value, int maximalFieldLength) {
 		if (value == null || value.equals("")) {
@@ -48,11 +38,7 @@ public abstract class AbstractRow extends AbstractReadableRow implements IRow {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.csv.impl.memory.IRow#incrementValue(java.lang.String, int)
-	 */
+	
 	@Override
 	public void incrementValue(String columnName, int increment) {
 		if (increment == 0) {
@@ -68,12 +54,7 @@ public abstract class AbstractRow extends AbstractReadableRow implements IRow {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.csv.impl.memory.IRow#setValue(java.lang.String, long,
-	 * boolean)
-	 */
+	
 	@Override
 	public void setValue(String columnName, long value, boolean initial) {
 		if (value == 0) {
@@ -88,12 +69,7 @@ public abstract class AbstractRow extends AbstractReadableRow implements IRow {
 		c.setValue(value, false);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.csv.impl.memory.IRow#setValue(java.lang.String,
-	 * java.lang.String, boolean)
-	 */
+	
 	@Override
 	public void setValue(String columnName, String value, boolean initial) {
 		if (value == null) {

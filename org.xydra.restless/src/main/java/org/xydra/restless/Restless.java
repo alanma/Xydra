@@ -318,15 +318,7 @@ public class Restless extends HttpServlet {
 		}
 	}
 
-	/*
-	 * Called from servlet environment.
-	 * 
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * javax.servlet.http.HttpServlet#doPut(javax.servlet.http.HttpServletRequest
-	 * , javax.servlet.http.HttpServletResponse)
-	 */
+	
 	/**
 	 * @param req
 	 * @NeverNull
@@ -341,15 +333,7 @@ public class Restless extends HttpServlet {
 		restlessService(req, res);
 	}
 
-	/*
-	 * Called from servlet environment.
-	 * 
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest
-	 * , javax.servlet.http.HttpServletResponse)
-	 */
+	
 	/**
 	 * @param req
 	 * @NeverNull
@@ -370,15 +354,7 @@ public class Restless extends HttpServlet {
 		}
 	}
 
-	/*
-	 * Called from servlet environment.
-	 * 
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * javax.servlet.http.HttpServlet#doPut(javax.servlet.http.HttpServletRequest
-	 * , javax.servlet.http.HttpServletResponse)
-	 */
+	
 	/**
 	 * @param req
 	 * @NeverNull
@@ -488,15 +464,7 @@ public class Restless extends HttpServlet {
 		}
 	}
 
-	/*
-	 * Called from servlet environment.
-	 * 
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * javax.servlet.http.HttpServlet#doPut(javax.servlet.http.HttpServletRequest
-	 * , javax.servlet.http.HttpServletResponse)
-	 */
+	
 	/**
 	 * @param req
 	 * @NeverNull
@@ -511,15 +479,7 @@ public class Restless extends HttpServlet {
 		restlessService(req, res);
 	}
 
-	/*
-	 * Called from servlet environment.
-	 * 
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * javax.servlet.http.HttpServlet#doPut(javax.servlet.http.HttpServletRequest
-	 * , javax.servlet.http.HttpServletResponse)
-	 */
+	
 	/**
 	 * @param req
 	 * @NeverNull

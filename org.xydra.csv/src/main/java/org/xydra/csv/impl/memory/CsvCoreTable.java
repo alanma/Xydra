@@ -57,20 +57,12 @@ public class CsvCoreTable extends SparseTable implements Iterable<Row> {
 		super(maintainColumnInsertionOrder);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.csv.ICsvTable#setParamReadMaxRows(int)
-	 */
+	
 	public void setParamReadMaxRows(int readMaxRows) {
 		this.readMaxRows = readMaxRows;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.csv.ICsvTable#setParamSplitWhenWritingLargeFiles(boolean)
-	 */
+	
 	public void setParamSplitWhenWritingLargeFiles(boolean b) {
 		this.splitWhenWritingLargeFiles = b;
 	}

@@ -72,12 +72,6 @@ public class RepoBranchWidget extends Composite implements IRepoBranchWidget {
 		this.presenter.openAddElementDialog("enter Element name");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.webadmin.gwt.client.widgets.selectiontree.repobranches.
-	 * IRepoBranchWidget2#init()
-	 */
 	@Override
 	public void init() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -90,24 +84,12 @@ public class RepoBranchWidget extends Composite implements IRepoBranchWidget {
 				.setCellHorizontalAlignment(this.branches, HasHorizontalAlignment.ALIGN_RIGHT);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.webadmin.gwt.client.widgets.selectiontree.repobranches.
-	 * IRepoBranchWidget2#setExpandButtonText(java.lang.String)
-	 */
 	@Override
 	public void setExpandButtonText(String string) {
 		RepoBranchWidget.this.expandButton.setText(string);
 
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.webadmin.gwt.client.widgets.selectiontree.repobranches.
-	 * IRepoBranchWidget2#clearBranches()
-	 */
 	@Override
 	public void clearBranches() {
 		RepoBranchWidget.this.branches.clear();

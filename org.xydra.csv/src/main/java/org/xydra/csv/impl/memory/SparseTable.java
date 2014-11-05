@@ -98,11 +98,6 @@ public class SparseTable implements ISparseTable {
 		return this.rowNames.subList(startRow, endRow).iterator();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.csv.ICsvTable#iterator()
-	 */
 	@Override
 	public Iterator<Row> iterator() {
 		return new ReadOnlyIterator<Row>(this.table.values().iterator());
@@ -131,9 +126,9 @@ public class SparseTable implements ISparseTable {
 	}
 
 	/**
-	 * @param maintainColumnInsertionOrder
-	 *            if true, the insertion order of columns is maintained. If
-	 *            false, the default automatic alphabetic sorting is on.
+	 * @param maintainColumnInsertionOrder if true, the insertion order of
+	 *            columns is maintained. If false, the default automatic
+	 *            alphabetic sorting is on.
 	 */
 	public SparseTable(boolean maintainColumnInsertionOrder) {
 		if (maintainColumnInsertionOrder) {
@@ -146,8 +141,7 @@ public class SparseTable implements ISparseTable {
 	/**
 	 * Add all values from the other table into this table
 	 * 
-	 * @param other
-	 *            never null
+	 * @param other never null
 	 */
 	public void addAll(SparseTable other) {
 		for (Entry<String, Row> entry : other.table.entrySet()) {
@@ -179,11 +173,6 @@ public class SparseTable implements ISparseTable {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.csv.ICsvTable#aggregate(java.lang.String[])
-	 */
 	@Override
 	public void aggregate(String[] keyColumnNames) {
 		// temporary index of occurring keys and their row
@@ -241,11 +230,6 @@ public class SparseTable implements ISparseTable {
 		c.appendString(s, maximalFieldLength);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.csv.ICsvTable#clear()
-	 */
 	@Override
 	public void clear() {
 		this.rowNames.clear();
@@ -256,11 +240,6 @@ public class SparseTable implements ISparseTable {
 		return this.columnNames.size();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.csv.ICsvTable#drop(java.lang.String, java.lang.String)
-	 */
 	@Override
 	public ISparseTable dropColumn(String columnName, String value) {
 		ISparseTable target = new SparseTable();
@@ -277,11 +256,6 @@ public class SparseTable implements ISparseTable {
 		return target;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.csv.ICsvTable#filter(java.lang.String, java.lang.String)
-	 */
 	@Override
 	public ISparseTable filter(String key, String value) {
 		ISparseTable target = new SparseTable();
@@ -303,11 +277,6 @@ public class SparseTable implements ISparseTable {
 		return this.columnNames;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.csv.ICsvTable#getOrCreateRow(java.lang.String, boolean)
-	 */
 	@Override
 	public Row getOrCreateRow(String rowName, boolean create) {
 		Row row = this.table.get(rowName);
@@ -331,11 +300,6 @@ public class SparseTable implements ISparseTable {
 		return this.restrictToExcelSize;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.csv.ICsvTable#getValue(java.lang.String, java.lang.String)
-	 */
 	@Override
 	public String getValue(String row, String column) {
 		Row r = getOrCreateRow(row, false);
@@ -349,12 +313,6 @@ public class SparseTable implements ISparseTable {
 		return c.getValue();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.csv.ICsvTable#incrementValue(java.lang.String,
-	 * java.lang.String, int)
-	 */
 	@Override
 	public void incrementValue(String row, String column, int increment)
 			throws WrongDatatypeException {
@@ -363,11 +321,6 @@ public class SparseTable implements ISparseTable {
 		c.incrementValue(increment);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.csv.ICsvTable#removeRowsMatching(org.xydra.csv.RowFilter)
-	 */
 	@Override
 	public void removeRowsMatching(RowFilter rowFilter) {
 		Iterator<Entry<String, Row>> it = this.table.entrySet().iterator();
@@ -381,31 +334,16 @@ public class SparseTable implements ISparseTable {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.csv.ICsvTable#rowCount()
-	 */
 	@Override
 	public int rowCount() {
 		return this.table.size();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.csv.ICsvTable#setParamAggregateStrings(boolean)
-	 */
 	@Override
 	public void setParamAggregateStrings(boolean aggregateStrings) {
 		this.aggregateStrings = aggregateStrings;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.csv.ICsvTable#setParamRestrictToExcelSize(boolean)
-	 */
 	@Override
 	public void setParamRestrictToExcelSize(boolean b) {
 		this.restrictToExcelSize = b;
@@ -416,8 +354,7 @@ public class SparseTable implements ISparseTable {
 	 * row insertion (either during read or create).
 	 * 
 	 * @see IRowInsertionHandler
-	 * @param rowInsertionHandler
-	 *            never null
+	 * @param rowInsertionHandler never null
 	 */
 	public void setRowInsertionHandler(IRowInsertionHandler rowInsertionHandler) {
 		this.rowInsertionHandler = rowInsertionHandler;
@@ -437,11 +374,6 @@ public class SparseTable implements ISparseTable {
 		row.setValue(columnName, value, true);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.csv.ICsvTable#split(java.lang.String)
-	 */
 	@Override
 	public Map<String, SparseTable> split(String colName) {
 		Map<String, SparseTable> map = new HashMap<String, SparseTable>();
@@ -463,11 +395,6 @@ public class SparseTable implements ISparseTable {
 		return map;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.csv.ICsvTable#visitRows(org.xydra.csv.IRowVisitor)
-	 */
 	@Override
 	public void visitRows(IRowVisitor rowVisitor) {
 		for (IRow row : this) {

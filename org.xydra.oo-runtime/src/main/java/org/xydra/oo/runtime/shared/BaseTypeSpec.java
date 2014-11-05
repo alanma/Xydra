@@ -78,31 +78,19 @@ public class BaseTypeSpec implements Comparable<BaseTypeSpec>, IBaseType {
 		return false;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.oo.runtime.shared.IBaseType#getCanonicalName()
-	 */
+	
 	@Override
 	public String getCanonicalName() {
 		return (this.packageName == null ? "" : this.packageName + ".") + this.simpleName;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.oo.runtime.shared.IBaseType#getPackageName()
-	 */
+	
 	@Override
 	public String getPackageName() {
 		return this.packageName;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.oo.runtime.shared.IBaseType#getSimpleName()
-	 */
+	
 	@Override
 	public String getSimpleName() {
 		return this.simpleName;
@@ -119,21 +107,13 @@ public class BaseTypeSpec implements Comparable<BaseTypeSpec>, IBaseType {
 		return this.getCanonicalName();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.oo.runtime.shared.IBaseType#isArray()
-	 */
+	
 	@Override
 	public boolean isArray() {
 		return this.equals(ARRAY);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xydra.oo.runtime.shared.IBaseType#getRequiredImport()
-	 */
+	
 	@Override
 	public String getRequiredImport() {
 		if (getSimpleName().contains(".")) {
