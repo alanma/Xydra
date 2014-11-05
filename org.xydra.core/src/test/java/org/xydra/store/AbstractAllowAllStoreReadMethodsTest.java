@@ -11,7 +11,7 @@ import org.xydra.store.impl.delegate.DelegatingAllowAllStore;
  * instantiations of {@link DelegatingAllowAllStore}.
  * 
  * 
- * @author Kaidel
+ * @author kaidel
  */
 public abstract class AbstractAllowAllStoreReadMethodsTest extends AbstractStoreReadMethodsTest {
     

@@ -14,8 +14,8 @@ import org.xydra.index.XI;
 /**
  * An implementation of {@link XIdListValue}
  * 
- * @author Kaidel
- * @author voelkel
+ * @author kaidel
+ * @author xamde
  * 
  */
 public class MemoryAddressListValue extends MemoryListValue<XAddress> implements XAddressListValue,

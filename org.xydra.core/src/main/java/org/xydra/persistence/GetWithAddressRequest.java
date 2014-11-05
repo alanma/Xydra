@@ -7,7 +7,7 @@ import org.xydra.base.XAddress;
  * Helper class for batch operations to group an {@link XAddress} and a boolean
  * flag.
  * 
- * @author voelkel
+ * @author xamde
  */
 public class GetWithAddressRequest {
 	

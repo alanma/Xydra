@@ -16,7 +16,7 @@ import org.xydra.core.model.XRepository;
  * adhering to this guidelines might result in failing tests, even though the
  * code which is to be tested might be correct.
  * 
- * @author Kaidel
+ * @author kaidel
  * 
  */
 

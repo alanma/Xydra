@@ -39,7 +39,7 @@ import org.xydra.restless.utils.Delay;
  * 
  * <p>If only static files have been modified, no call is necessary as this Jetty is configured to load the directly from src/main/webapp.
  * 
- * @author voelkel
+ * @author xamde
  * 
  */
 public class Jetty extends EmbeddedJetty {

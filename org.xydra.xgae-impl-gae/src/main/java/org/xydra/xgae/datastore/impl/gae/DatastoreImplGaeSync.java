@@ -37,7 +37,7 @@ import com.google.appengine.api.datastore.TransactionOptions;
 /**
  * Utility to use synchronous datastore
  * 
- * @author voelkel
+ * @author xamde
  */
 public class DatastoreImplGaeSync extends DatastoreImplGaeBase implements IDatastoreSync {
 

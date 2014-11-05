@@ -17,7 +17,7 @@ import org.xydra.store.access.XAuthenticationDatabase;
  * An in-memory implementation of {@link XAuthenticationDatabase}. An second,
  * optional {@link XAuthenticationDatabase} can act as a persistence layer.
  * 
- * @author voelkel
+ * @author xamde
  */
 @RunsInAppEngine(true)
 @RunsInGWT(true)

@@ -121,7 +121,7 @@ import org.xydra.core.model.XSynchronizesChanges;
  * 
  * 
  * 
- * @author voelkel
+ * @author xamde
  * 
  */
 public class ArchitectureOverview {

@@ -18,7 +18,7 @@ import org.xydra.base.value.XValue;
  * serialisable. This allows to restore previous versions of a local model in
  * cases where some local commands failed and need to be rolled back.
  * 
- * @author voelkel
+ * @author xamde
  * @author kaidel
  */
 @RunsInGWT(true)

@@ -16,7 +16,7 @@ import org.xydra.testgae.shared.Operations;
  * Benchmark test for a remote server
  * 
  * @author xamde
- * @author Kaidel
+ * @author kaidel
  * 
  */
 

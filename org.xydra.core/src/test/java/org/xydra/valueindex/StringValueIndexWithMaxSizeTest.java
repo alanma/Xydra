@@ -7,7 +7,7 @@ package org.xydra.valueindex;
  * {@link StringValueIndex} with the "maxSize" variable set to 1 (= no value
  * will be stored, only the field address).
  * 
- * @author Kaidel
+ * @author kaidel
  * 
  */
 

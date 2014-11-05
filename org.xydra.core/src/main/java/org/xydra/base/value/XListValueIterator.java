@@ -7,7 +7,7 @@ import java.util.NoSuchElementException;
 /**
  * An iterator for {@link XListValue XListValues}.
  * 
- * @author Kaidel
+ * @author kaidel
  * 
  * @param <E> Content Type of the underlying {@link XListValue} type.
  */

@@ -6,7 +6,7 @@ import org.xydra.annotations.RunsInGWT;
 
 
 /**
- * @author voelkel
+ * @author xamde
  * 
  *         Use toString() to obtain the produced String.
  */

@@ -25,7 +25,7 @@ import org.xydra.testgae.shared.Operations;
  * ./src/main/data/Performance/ with the file name "Evaluation" +
  * System.currentTimeMillis() + ".html".
  * 
- * @author Kaidel
+ * @author kaidel
  */
 public class PerformanceDataAnalyzer {
 

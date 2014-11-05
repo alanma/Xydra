@@ -35,7 +35,7 @@ import org.xydra.index.query.Pair;
  * An abstract test for testing {@link XFieldLevelIndex}. The phonebook model
  * from {@link DemoModelUtil} is used as the basic source of data.
  * 
- * @author Kaidel
+ * @author kaidel
  * 
  */
 

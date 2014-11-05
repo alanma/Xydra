@@ -71,8 +71,8 @@ import org.xydra.sharedutils.XyAssert;
  * State reads are handled by (a); change operations are checked on (a),
  * executed on (b) and finally materialised again in (a).
  * 
- * @author voelkel
- * @author Kaidel
+ * @author xamde
+ * @author kaidel
  */
 public class MemoryModel extends AbstractMOFEntity implements IMemoryModel, XModel,
 

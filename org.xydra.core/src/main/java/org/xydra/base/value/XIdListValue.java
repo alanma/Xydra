@@ -6,7 +6,7 @@ import org.xydra.base.XId;
 /**
  * An {@link XValue} for storing a list of {@link XId XIds}.
  * 
- * @author Kaidel
+ * @author kaidel
  * 
  */
 public interface XIdListValue extends XListValue<XId> {

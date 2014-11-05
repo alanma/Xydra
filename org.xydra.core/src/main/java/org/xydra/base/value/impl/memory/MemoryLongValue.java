@@ -9,7 +9,7 @@ import org.xydra.base.value.XLongValue;
 /**
  * An implementation of {@link XLongValue}
  * 
- * @author Kaidel
+ * @author kaidel
  * 
  */
 public class MemoryLongValue implements XLongValue, Serializable {

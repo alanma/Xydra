@@ -11,7 +11,7 @@ import org.xydra.core.model.XObject;
  * Entries used in {@link ValueIndex} to store an {@link XValue} together with
  * the {@link XAddress} of the {@link XReadableField} holding the value.
  * 
- * @author Kaidel
+ * @author kaidel
  * 
  */
 

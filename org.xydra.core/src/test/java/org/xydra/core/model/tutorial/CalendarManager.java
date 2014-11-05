@@ -32,7 +32,7 @@ import org.xydra.store.access.impl.memory.MemoryGroupDatabase;
  * Since this is an introduction the functions will only be rudimentary and we
  * won't bother with complex exception handling and things like that.
  * 
- * @author Kaidel
+ * @author kaidel
  * 
  */
 public class CalendarManager {

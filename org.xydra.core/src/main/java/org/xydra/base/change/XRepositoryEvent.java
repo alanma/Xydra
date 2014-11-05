@@ -6,7 +6,7 @@ import org.xydra.base.XId;
 /**
  * An {@link XEvent} representing changes of repositories.
  * 
- * @author voelkel
+ * @author xamde
  */
 public interface XRepositoryEvent extends XAtomicEvent {
     

@@ -37,7 +37,7 @@ import org.xydra.sharedutils.XyAssert;
  * someone/something else operates on the same {@link XydraStore} at the same
  * time, even though the {@link XydraStore} is working correctly.
  * 
- * @author Kaidel
+ * @author kaidel
  */
 public abstract class AbstractStoreReadMethodsTest extends AbstractStoreTest {
     

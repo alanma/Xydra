@@ -12,7 +12,7 @@ import org.xydra.index.XI;
 /**
  * An implementation of {@link XBooleanListValue}
  * 
- * @author Kaidel
+ * @author kaidel
  * @author dscharrer
  * 
  */

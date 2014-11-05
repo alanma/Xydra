@@ -2,7 +2,7 @@
  * global Widgets
  */
 /**
- * @author Andi
+ * @author kahmann
  * 
  */
 package org.xydra.webadmin.gwt.client.widgets;

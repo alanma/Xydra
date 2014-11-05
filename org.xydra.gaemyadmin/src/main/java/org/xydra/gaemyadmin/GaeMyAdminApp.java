@@ -16,7 +16,7 @@ import org.xydra.restless.utils.HtmlUtils;
  * Goal: A web application that offers admin capabilities beyond the ones
  * already provided by Google.
  * 
- * @author voelkel
+ * @author xamde
  */
 public class GaeMyAdminApp {
 

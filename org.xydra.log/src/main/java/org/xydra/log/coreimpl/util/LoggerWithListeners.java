@@ -11,7 +11,7 @@ import org.xydra.log.api.Logger;
 /**
  * Log to logger and delegate to {@link ILogListener}.
  * 
- * @author voelkel
+ * @author xamde
  */
 @org.xydra.annotations.NotThreadSafe
 public class LoggerWithListeners implements Logger {

@@ -3,7 +3,7 @@ package org.xydra.base.value;
 /**
  * An {@link XValue} for storing a single Java Boolean value.
  * 
- * @author Kaidel
+ * @author kaidel
  * 
  */
 public interface XBooleanValue extends XSingleValue<Boolean> {

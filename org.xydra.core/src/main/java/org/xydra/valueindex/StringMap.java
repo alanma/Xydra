@@ -3,7 +3,7 @@ package org.xydra.valueindex;
 /**
  * Simple Map-interface for Strings for use with GWT.
  * 
- * @author Kaidel
+ * @author kaidel
  * 
  */
 

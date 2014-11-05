@@ -15,7 +15,7 @@ import org.xydra.base.value.XValue;
  * field is defined at index construction time. The value of these fields must
  * be unique.
  * 
- * @author voelkel
+ * @author xamde
  */
 @RunsInAppEngine(true)
 @RunsInGWT(true)

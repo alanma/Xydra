@@ -7,7 +7,7 @@ import org.xydra.base.XId;
  * An {@link XEvent} representing changes of objects
  * 
  * 
- * @author voelkel
+ * @author xamde
  */
 public interface XObjectEvent extends XAtomicEvent {
     

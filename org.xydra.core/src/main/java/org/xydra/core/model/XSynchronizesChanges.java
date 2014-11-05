@@ -12,7 +12,7 @@ import org.xydra.core.model.impl.memory.sync.Root;
  * An interface that indicates that this entity is able to execute
  * {@link XTransaction XTransactions} and synchronize remote changes.
  * 
- * @author Kaidel
+ * @author kaidel
  * @author dscharrer
  * 
  */

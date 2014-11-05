@@ -25,7 +25,7 @@ import org.xydra.sharedutils.XyAssert;
  * 
  * Minimal memory footprint, can be used as data transfer object.
  * 
- * @author voelkel
+ * @author xamde
  */
 public class SimpleModel extends SimpleEntity implements XRevWritableModel, XSessionModel,
         XExistsRevWritableModel {

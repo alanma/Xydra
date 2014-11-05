@@ -8,7 +8,7 @@ import org.xydra.base.XId;
 /**
  * An XObject allowing simple changes, but not to the revision number.
  * 
- * @author voelkel
+ * @author xamde
  */
 public interface XWritableObject extends XReadableObject, XStateWritableObject {
 	

@@ -3,7 +3,7 @@ package org.xydra.base.value;
 /**
  * An {@link XValue} for storing a list of Java String values.
  * 
- * @author Kaidel
+ * @author kaidel
  * 
  */
 public interface XStringListValue extends XListValue<String> {

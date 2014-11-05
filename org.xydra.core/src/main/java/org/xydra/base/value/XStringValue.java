@@ -3,7 +3,7 @@ package org.xydra.base.value;
 /**
  * An {@link XValue} for storing a single Java String.
  * 
- * @author Kaidel
+ * @author kaidel
  * 
  */
 public interface XStringValue extends XSingleValue<String> {

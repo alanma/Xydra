@@ -3,7 +3,7 @@ package org.xydra.base.value;
 /**
  * An {@link XValue} for storing a list of values.
  * 
- * @author Kaidel
+ * @author kaidel
  * 
  * @param <E> The type of value which is to be stored.
  */

@@ -24,7 +24,7 @@ import org.xydra.store.XydraStore;
  * 
  * TODO {@link WaitingCallback} doesn't work with GWT
  * 
- * @author voelkel
+ * @author xamde
  */
 @RunsInGWT(false)
 public class ReadableModelOnStore implements XReadableModel, Serializable {

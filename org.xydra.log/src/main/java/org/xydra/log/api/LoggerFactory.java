@@ -24,7 +24,7 @@ import org.xydra.log.spi.ILoggerFactorySPI;
  * the calls that cause the log system to fall-back to auto-config.
  * 
  * 
- * @author voelkel
+ * @author xamde
  */
 @ThreadSafe
 public class LoggerFactory {

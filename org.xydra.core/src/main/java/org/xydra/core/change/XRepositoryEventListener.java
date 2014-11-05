@@ -8,7 +8,7 @@ import org.xydra.base.change.XRepositoryEvent;
  * registered on classes implementing the {@link XSendsRepositoryEvents}
  * interface.
  * 
- * @author Kaidel
+ * @author kaidel
  */
 
 public interface XRepositoryEventListener extends XChangeEventListener {

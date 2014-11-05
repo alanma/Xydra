@@ -12,7 +12,7 @@ import org.xydra.base.change.XRepositoryEvent;
 /**
  * An implementation of {@link XRepositoryEvent}
  * 
- * @author Kaidel
+ * @author kaidel
  * 
  */
 @RunsInGWT(true)

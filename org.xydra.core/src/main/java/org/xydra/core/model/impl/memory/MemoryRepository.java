@@ -44,8 +44,8 @@ import org.xydra.sharedutils.XyAssert;
  * in GWT RPC. Although it might work. Instead, serialise the smaller
  * {@link SimpleRepository} or {@link XRevWritableRepository} instances.
  * 
- * @author voelkel
- * @author Kaidel
+ * @author xamde
+ * @author kaidel
  */
 public class MemoryRepository extends AbstractEntity implements IMemoryRepository, XRepository,
         Serializable {

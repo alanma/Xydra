@@ -12,7 +12,7 @@ import org.xydra.index.XI;
 /**
  * An implementation of {@link XStringListValue}
  * 
- * @author Kaidel
+ * @author kaidel
  * 
  */
 public class MemoryStringListValue extends MemoryListValue<String> implements XStringListValue,

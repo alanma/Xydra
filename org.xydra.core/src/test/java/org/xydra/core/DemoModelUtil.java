@@ -37,7 +37,7 @@ import org.xydra.core.serialize.xml.XmlOut;
  * This demo model is supposed to contain each XModel data-type and construct at
  * least once.
  * 
- * @author voelkel
+ * @author xamde
  * 
  */
 public class DemoModelUtil {

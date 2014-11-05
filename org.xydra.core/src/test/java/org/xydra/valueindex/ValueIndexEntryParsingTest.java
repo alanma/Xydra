@@ -24,7 +24,7 @@ import org.xydra.core.model.XRepository;
  * not. The phonebook model from {@link DemoModelUtil} is used as the basic
  * source of data.
  * 
- * @author Kaidel
+ * @author kaidel
  * 
  */
 

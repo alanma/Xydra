@@ -20,7 +20,7 @@ import org.xydra.store.XydraStore;
  * At creation time the {@link XydraStore} is consulted once to fetch a fresh
  * snapshot.
  * 
- * @author voelkel
+ * @author xamde
  */
 public class ReadableObjectOnStore implements XReadableObject, Serializable {
 	

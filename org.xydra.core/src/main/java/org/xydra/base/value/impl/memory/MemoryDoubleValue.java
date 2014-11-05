@@ -9,7 +9,7 @@ import org.xydra.base.value.XDoubleValue;
 /**
  * An implementation of {@link XDoubleValue}
  * 
- * @author Kaidel
+ * @author kaidel
  * 
  */
 public class MemoryDoubleValue implements XDoubleValue, Serializable {

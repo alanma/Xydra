@@ -20,7 +20,7 @@ import org.xydra.store.XydraStore;
 /**
  * Add a demo data (phonebook) to the repository
  * 
- * @author voelkel
+ * @author xamde
  */
 public class AddDemoDataResource {
 

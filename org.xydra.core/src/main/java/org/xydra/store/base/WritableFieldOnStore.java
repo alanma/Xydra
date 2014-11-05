@@ -20,7 +20,7 @@ import org.xydra.store.XydraStore;
  * This class is mostly useful for testing purposes. For production use it has
  * not been tested enough and performance is expected to be rather bad.
  * 
- * @author voelkel
+ * @author xamde
  */
 @RunsInGWT(false)
 public class WritableFieldOnStore extends ReadableFieldOnStore implements XWritableField,

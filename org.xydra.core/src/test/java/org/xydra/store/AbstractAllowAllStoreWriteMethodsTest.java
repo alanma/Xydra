@@ -13,7 +13,7 @@ import org.xydra.store.impl.delegate.DelegatingAllowAllStore;
  * (at the moment this is basically the same as
  * {@link AbstractAllowAllStoreReadMethodsTest}, but may change in the future)
  * 
- * @author Kaidel
+ * @author kaidel
  * 
  */
 

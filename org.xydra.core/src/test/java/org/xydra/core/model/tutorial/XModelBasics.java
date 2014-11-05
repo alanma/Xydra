@@ -76,7 +76,7 @@ import org.xydra.store.access.impl.memory.MemoryGroupDatabase;
  * actual string of the name-field of a person in an address book application.</dd>
  * </dl>
  * 
- * @author Kaidel
+ * @author kaidel
  */
 public class XModelBasics {
     

@@ -29,7 +29,7 @@ import org.xydra.index.query.Pair;
  * nature on a work-in-progress towards a new synchronizer. It needs tests and
  * work when dealing with Transactions.
  * 
- * @author Thomas
+ * @author alpha
  * 
  */
 public class EventSequenceMapper {

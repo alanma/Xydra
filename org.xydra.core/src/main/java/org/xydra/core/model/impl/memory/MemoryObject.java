@@ -54,8 +54,8 @@ import org.xydra.sharedutils.XyAssert;
 /**
  * An implementation of {@link XObject}.
  * 
- * @author voelkel
- * @author Kaidel
+ * @author xamde
+ * @author kaidel
  * 
  */
 public class MemoryObject extends AbstractMOFEntity implements IMemoryObject, XObject,

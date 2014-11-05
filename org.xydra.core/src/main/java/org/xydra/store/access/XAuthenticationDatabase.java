@@ -11,7 +11,7 @@ import org.xydra.base.XId;
  * There are no internal indexes, all read access can directly got to the data
  * store.
  * 
- * @author voelkel
+ * @author xamde
  * 
  */
 public interface XAuthenticationDatabase {

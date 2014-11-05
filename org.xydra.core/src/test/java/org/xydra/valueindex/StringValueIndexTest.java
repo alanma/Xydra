@@ -6,7 +6,7 @@ package org.xydra.valueindex;
  * Implementation of {@link XFieldLevelIndexTest} for testing
  * {@link StringValueIndex}.
  * 
- * @author Kaidel
+ * @author kaidel
  * 
  */
 

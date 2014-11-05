@@ -31,7 +31,7 @@ import org.xydra.log.api.LoggerFactory;
  * 
  * Insertion order is preserved.
  * 
- * @author voelkel
+ * @author xamde
  */
 public class SparseTable implements ISparseTable {
 
@@ -184,7 +184,8 @@ public class SparseTable implements ISparseTable {
 		while (rowIt.hasNext()) {
 			Row row = rowIt.next();
 
-			// calculate compound key FIXME takes 50% of performance
+			// calculate compound key
+			// IMPROVE performance takes 50% of performance
 			StringBuffer compoundKeyBuffer = new StringBuffer(100);
 			for (String keyColumnName : keyColumnNames) {
 				String value = row.getValue(keyColumnName);

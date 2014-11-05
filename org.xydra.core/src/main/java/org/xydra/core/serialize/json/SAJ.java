@@ -3,7 +3,7 @@ package org.xydra.core.serialize.json;
 /**
  * _S_AX-like _A_PI for _J_SON.
  * 
- * @author voelkel
+ * @author xamde
  * 
  */
 public interface SAJ {

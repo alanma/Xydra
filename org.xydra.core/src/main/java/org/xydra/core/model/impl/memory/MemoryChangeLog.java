@@ -13,7 +13,7 @@ import org.xydra.sharedutils.XyAssert;
  * Implementation of {@link XChangeLog} for use with {@link MemoryModel},
  * {@link MemoryObject} and {@link MemoryField}.
  * 
- * @author Kaidel
+ * @author kaidel
  * @author xamde
  */
 public class MemoryChangeLog extends AbstractChangeLog implements XWritableChangeLog {

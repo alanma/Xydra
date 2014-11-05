@@ -13,8 +13,8 @@ import org.xydra.index.XI;
 /**
  * An implementation of {@link XIdListValue}
  * 
- * @author Kaidel
- * @author voelkel
+ * @author kaidel
+ * @author xamde
  * 
  */
 public class MemoryIdListValue extends MemoryListValue<XId> implements XIdListValue, Serializable {

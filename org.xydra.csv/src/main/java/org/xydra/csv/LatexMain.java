@@ -8,7 +8,7 @@ import org.xydra.csv.impl.memory.CsvTable;
 /**
  * Takes a CSV file and dumps it in LaTeX syntax to System.out
  * 
- * @author voelkel
+ * @author xamde
  */
 public class LatexMain {
 

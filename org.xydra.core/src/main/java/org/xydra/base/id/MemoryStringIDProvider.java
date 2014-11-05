@@ -9,8 +9,8 @@ import org.xydra.base.XIdProvider;
 /**
  * An implementation of {@link XIdProvider}
  * 
- * @author voelkel
- * @author Kaidel
+ * @author xamde
+ * @author kaidel
  */
 
 @RunsInGWT(true)

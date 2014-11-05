@@ -53,7 +53,7 @@ import org.xydra.base.minio.MiniWriter;
  * corresponding {@link XydraParser} implementation.
  * </p>
  * 
- * @author voelkel
+ * @author xamde
  * @author dscharrer
  */
 public interface XydraOut {

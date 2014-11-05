@@ -13,7 +13,7 @@ import org.xydra.base.change.impl.memory.RevisionConstants;
  * represented by this event), the revision number of the entity when this
  * change happened etc.
  * 
- * @author voelkel
+ * @author xamde
  */
 public interface XEvent extends Serializable {
     

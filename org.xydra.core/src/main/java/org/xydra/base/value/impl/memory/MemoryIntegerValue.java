@@ -9,7 +9,7 @@ import org.xydra.base.value.XIntegerValue;
 /**
  * An implementation of {@link XIntegerValue}
  * 
- * @author Kaidel
+ * @author kaidel
  * 
  */
 public class MemoryIntegerValue implements XIntegerValue, Serializable {

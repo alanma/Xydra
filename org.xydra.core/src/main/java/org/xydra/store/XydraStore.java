@@ -88,7 +88,7 @@ import org.xydra.persistence.ModelRevision;
  * 
  * For anonymous users over HTTP, the IP-Address could be used as an actorId.
  * 
- * @author voelkel
+ * @author xamde
  * @author dscharrer
  */
 public interface XydraStore {

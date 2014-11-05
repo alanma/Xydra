@@ -10,7 +10,7 @@ import org.xydra.base.value.XValue;
 /**
  * Indexes any number of objects by a XValue.
  * 
- * @author voelkel
+ * @author xamde
  */
 @RunsInAppEngine(true)
 @RunsInGWT(true)

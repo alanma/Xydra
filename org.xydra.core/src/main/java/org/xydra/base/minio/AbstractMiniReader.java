@@ -3,7 +3,7 @@ package org.xydra.base.minio;
 /**
  * Common super-class for all kinds of Mini-Readers. Copied from JDK.
  * 
- * @author voelkel
+ * @author xamde
  * 
  */
 public class AbstractMiniReader {

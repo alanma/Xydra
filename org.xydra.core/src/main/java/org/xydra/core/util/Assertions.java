@@ -6,7 +6,7 @@ import org.xydra.sharedutils.XyAssert;
 /**
  * Small helper to determine if java assertions are enabled.
  * 
- * @author voelkel
+ * @author xamde
  * 
  */
 public class Assertions {

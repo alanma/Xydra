@@ -3,7 +3,7 @@ package org.xydra.csv;
 /**
  * Used to indicate a limit in Excel, i.e. 65535 maximal rows.
  * 
- * @author voelkel
+ * @author xamde
  * 
  */
 public class ExcelLimitException extends RuntimeException {

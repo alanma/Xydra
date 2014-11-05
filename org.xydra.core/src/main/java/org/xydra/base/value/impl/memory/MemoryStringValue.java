@@ -10,7 +10,7 @@ import org.xydra.index.XI;
 /**
  * An implementation of {@link XStringValue}
  * 
- * @author voelkel
+ * @author xamde
  * 
  */
 public class MemoryStringValue implements XStringValue, Serializable {

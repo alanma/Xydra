@@ -30,7 +30,7 @@ import org.xydra.index.query.Pair;
  * contain the same {@link XValue}, it is possible that there are multiple
  * entries for the same value in the index.
  * 
- * @author Kaidel
+ * @author kaidel
  * 
  */
 

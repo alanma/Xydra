@@ -7,7 +7,7 @@ import org.xydra.base.value.XValue;
 /**
  * An {@link XEvent} representing changes of fields
  * 
- * @author Kaidel
+ * @author kaidel
  */
 public interface XFieldEvent extends XAtomicEvent {
     

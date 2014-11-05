@@ -27,7 +27,7 @@ public class TableCoreTools {
 	 * 
 	 * The order of keys implies a sorting order.
 	 * 
-	 * @author voelkel
+	 * @author xamde
 	 */
 	private static class CompoundKey implements Iterable<String>, Comparable<CompoundKey> {
 		final List<String> keyParts;
@@ -118,7 +118,7 @@ public class TableCoreTools {
 	/**
 	 * Represents a compound key consisting of two columns.
 	 * 
-	 * @author voelkel
+	 * @author xamde
 	 * 
 	 */
 	private static class TwoKey {
@@ -143,12 +143,10 @@ public class TableCoreTools {
 	}
 
 	/**
-	 * TODO generalize into n keys
+	 * IMPROVE generalize into n keys
 	 * 
-	 * @param keyColumnName1
-	 *            never null
-	 * @param keyColumnName2
-	 *            never null
+	 * @param keyColumnName1 never null
+	 * @param keyColumnName2 never null
 	 * @return an {@link IRowInsertionHandler} that aggregates all rows into one
 	 *         where the values of the key column names are equal between rows.
 	 *         If the key column names are "a" and "b", two rows with (a=3, b=5,
@@ -225,10 +223,8 @@ public class TableCoreTools {
 	 * There are as many resulting tables as there are different combinations of
 	 * A-B pairs.
 	 * 
-	 * @param sourceTable
-	 *            which table to process
-	 * @param keyList
-	 *            create groups of rows where columns have same values
+	 * @param sourceTable which table to process
+	 * @param keyList create groups of rows where columns have same values
 	 * @return a Map with the resulting tables. The resulting tables have the
 	 *         columns listed in keyList merged into the {@link CompoundKey} and
 	 *         have been removed from the sub-tables.
@@ -272,19 +268,13 @@ public class TableCoreTools {
 	 * Only columns listed in sum, average, or range list are present in
 	 * resulting table.
 	 * 
-	 * @param sourceTable
-	 *            which table to process
-	 * @param keyList
-	 *            create groups of rows where columns have same values
-	 * @param sumList
-	 *            sum these columns up, for each group
-	 * @param averageList
-	 *            calculate the average of these columns, for each group
-	 * @param rangeList
-	 *            counts entries, for each group
-	 * @param targetTable
-	 *            to which to write the result (which is a much smaller table,
-	 *            with one row for each used combination of keys)
+	 * @param sourceTable which table to process
+	 * @param keyList create groups of rows where columns have same values
+	 * @param sumList sum these columns up, for each group
+	 * @param averageList calculate the average of these columns, for each group
+	 * @param rangeList counts entries, for each group
+	 * @param targetTable to which to write the result (which is a much smaller
+	 *            table, with one row for each used combination of keys)
 	 */
 	public static void groupBy(ICsvTable sourceTable, List<String> keyList, List<String> sumList,
 			List<String> averageList, List<String> rangeList, ICsvTable targetTable) {

@@ -62,7 +62,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
  * <li>the model is removed
  * </ul>
  * 
- * @author Andi_Ka
+ * @author kahmann
  * 
  */
 public class EditorPanelPresenter extends Presenter {

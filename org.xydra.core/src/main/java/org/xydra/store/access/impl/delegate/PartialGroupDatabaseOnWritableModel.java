@@ -41,7 +41,7 @@ import org.xydra.store.access.XGroupListener;
  * groupId  | "hasMember" | {@link XIdSetValue} actors
  * </pre>
  * 
- * @author voelkel
+ * @author xamde
  */
 @RunsInAppEngine(true)
 @RunsInGWT(true)

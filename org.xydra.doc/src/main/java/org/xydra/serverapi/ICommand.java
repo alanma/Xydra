@@ -9,7 +9,7 @@ import java.io.Serializable;
  * 
  * Immutable.
  * 
- * @author voelkel
+ * @author xamde
  * 
  */
 public interface ICommand extends Serializable {

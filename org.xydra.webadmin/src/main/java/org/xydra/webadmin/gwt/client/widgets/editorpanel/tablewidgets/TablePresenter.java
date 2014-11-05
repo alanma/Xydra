@@ -51,7 +51,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
  * <li>a model is extended by an object: A new row gets added
  * </ul>
  * 
- * @author Andi_Ka
+ * @author kahmann
  * 
  */
 public class TablePresenter {

@@ -16,7 +16,7 @@ import org.xydra.base.value.XValue;
  * field is defined at index construction time. Several objects can have the
  * same value.
  * 
- * @author voelkel
+ * @author xamde
  */
 @RunsInAppEngine(true)
 @RunsInGWT(true)

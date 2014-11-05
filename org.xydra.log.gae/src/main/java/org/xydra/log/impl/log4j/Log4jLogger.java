@@ -19,7 +19,7 @@ import org.xydra.log.api.Logger;
  * ALL
  * </pre>
  * 
- * @author voelkel
+ * @author xamde
  */
 @ThreadSafe
 public class Log4jLogger implements Logger {

@@ -6,7 +6,7 @@ import org.xydra.annotations.ReadOperation;
 /**
  * Objects of classes that implement this interface have an {@link XId}.
  * 
- * @author voelkel
+ * @author xamde
  */
 public interface IHasXId {
 	

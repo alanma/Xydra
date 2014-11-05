@@ -9,7 +9,7 @@ import org.xydra.core.model.XModel;
 /**
  * A factory for creating various instances of {@link XFieldLevelIndex}.
  * 
- * @author Kaidel
+ * @author kaidel
  */
 
 public class XFieldLevelIndexFactory {

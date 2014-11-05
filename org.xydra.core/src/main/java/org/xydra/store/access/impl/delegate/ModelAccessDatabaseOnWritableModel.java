@@ -34,7 +34,7 @@ import org.xydra.store.access.impl.memory.MemoryAccessDefinition;
  * mapping from internal data structures to Xydras repository/model/object/field
  * layout.
  * 
- * @author voelkel
+ * @author xamde
  */
 @RunsInAppEngine(true)
 @RunsInGWT(true)

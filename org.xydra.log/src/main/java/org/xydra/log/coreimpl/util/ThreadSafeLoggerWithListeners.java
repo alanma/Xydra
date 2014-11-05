@@ -10,7 +10,7 @@ import org.xydra.log.api.Logger;
  * Log to logger and delegate to {@link ILogListener}. Thread-safe version of
  * {@link LoggerWithListeners}.
  * 
- * @author Kaidel
+ * @author kaidel
  */
 @ThreadSafe
 public class ThreadSafeLoggerWithListeners extends LoggerWithListeners {

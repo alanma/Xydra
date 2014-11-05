@@ -8,8 +8,8 @@ import org.xydra.base.change.XTransactionEvent;
  * {@link XTransactionEventListener XTransactionEventListeners} to listen for
  * {@link XTransactionEvent XTransactionEvents}.
  * 
- * @author voelkel
- * @author Kaidel
+ * @author xamde
+ * @author kaidel
  */
 public interface XSendsTransactionEvents {
 	

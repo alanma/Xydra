@@ -3,7 +3,7 @@ package org.xydra.csv;
 /**
  * A Row is a sparse representation of a table row.
  * 
- * @author voelkel
+ * @author xamde
  */
 public interface IRow extends IReadableRow {
 

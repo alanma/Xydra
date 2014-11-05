@@ -3,7 +3,7 @@ package org.xydra.base.value;
 /**
  * An {@link XValue} for storing a list of Java Boolean values.
  * 
- * @author Kaidel
+ * @author kaidel
  * 
  */
 public interface XBooleanListValue extends XListValue<Boolean> {

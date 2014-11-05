@@ -11,7 +11,7 @@ import org.xydra.base.change.XFieldEvent;
  * that make changes to this field? (same question for
  * {@link XObjectEventListener})
  * 
- * @author Kaidel
+ * @author kaidel
  */
 
 public interface XFieldEventListener extends XChangeEventListener {

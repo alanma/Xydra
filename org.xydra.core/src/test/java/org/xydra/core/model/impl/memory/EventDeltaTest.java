@@ -46,7 +46,7 @@ import org.xydra.store.sync.NewSyncer;
 /**
  * Test for {@link EventDelta}
  * 
- * @author Andi K.
+ * @author kahmann
  */
 public class EventDeltaTest {
     

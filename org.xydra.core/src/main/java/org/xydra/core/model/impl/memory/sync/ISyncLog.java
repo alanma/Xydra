@@ -10,7 +10,7 @@ import org.xydra.base.change.XEvent;
  * A log that is used to retrieve information about the properties of the change
  * of entities
  * 
- * @author Andi K.
+ * @author kahmann
  * @author xamde
  */
 public interface ISyncLog extends XWritableChangeLog, IBrowsableSyncLog {

@@ -7,7 +7,7 @@ import org.xydra.core.XX;
  * Thrown by safe... methods of {@link XX} if the expected models, objects,
  * fields or values are not present.
  * 
- * @author voelkel
+ * @author xamde
  * 
  */
 public class MissingPieceException extends RuntimeException {

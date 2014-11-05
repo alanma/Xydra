@@ -11,7 +11,7 @@ import org.xydra.base.XType;
  * All implementations should have correct {@link #hashCode()} and
  * {@link #equals(Object)} methods.
  * 
- * @author Kaidel
+ * @author kaidel
  * 
  */
 

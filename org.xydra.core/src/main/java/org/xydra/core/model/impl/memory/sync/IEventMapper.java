@@ -23,7 +23,7 @@ public interface IEventMapper {
     /**
      * Contains the results of the mapping.
      * 
-     * @author Andi_Ka
+     * @author kahmann
      * 
      */
     public static interface IMappingResult {

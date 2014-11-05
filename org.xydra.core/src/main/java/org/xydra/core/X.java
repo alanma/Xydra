@@ -9,7 +9,7 @@ import org.xydra.core.model.impl.memory.MemoryRepository;
 /**
  * A utility class that provides helpful methods concerning the set-up of Xydra.
  * 
- * @author voelkel
+ * @author xamde
  * @author kaidel
  * 
  */

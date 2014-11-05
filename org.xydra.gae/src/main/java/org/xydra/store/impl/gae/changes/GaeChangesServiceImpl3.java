@@ -87,7 +87,7 @@ import org.xydra.xgae.datastore.api.STransaction;
  * Locks are managed by {@link GaeLocks}.
  * 
  * @author dscharrer
- * @author voelkel
+ * @author xamde
  */
 public class GaeChangesServiceImpl3 implements IGaeChangesService {
 

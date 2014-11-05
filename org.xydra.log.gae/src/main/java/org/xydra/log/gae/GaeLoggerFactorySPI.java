@@ -16,7 +16,7 @@ import com.google.appengine.api.utils.SystemProperty;
 /**
  * In development mode log4j is used. In production, j.u.l. is used.
  * 
- * @author voelkel
+ * @author xamde
  * @deprecated use {@link UniversalLogger}
  */
 @ThreadSafe

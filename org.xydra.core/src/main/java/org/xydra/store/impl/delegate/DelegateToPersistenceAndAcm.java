@@ -52,7 +52,7 @@ import org.xydra.store.impl.memory.AllowAllAccessControlManager;
  * 
  * TODO GWT doesn't have Thread
  * 
- * @author voelkel
+ * @author xamde
  */
 @RunsInGWT(false)
 public class DelegateToPersistenceAndAcm implements XydraBlockingStore, XydraStoreAdmin {

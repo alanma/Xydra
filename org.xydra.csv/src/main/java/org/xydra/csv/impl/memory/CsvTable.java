@@ -29,7 +29,7 @@ import org.xydra.log.api.LoggerFactory;
  * 
  * Insertion order is preserved.
  * 
- * @author voelkel
+ * @author xamde
  */
 public class CsvTable extends CsvCoreTable implements ICsvTable, ICsvTableFactory {
 

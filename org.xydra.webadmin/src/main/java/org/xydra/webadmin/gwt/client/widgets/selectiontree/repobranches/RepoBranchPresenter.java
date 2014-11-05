@@ -42,7 +42,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
  * <li>when a new model is created
  * </ul>
  * 
- * @author Andi_Ka
+ * @author kahmann
  * 
  */
 public class RepoBranchPresenter extends SelectionTreePresenter {

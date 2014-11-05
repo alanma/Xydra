@@ -14,7 +14,7 @@ import org.xydra.restless.utils.NanoClock;
  * {@link RestlessMethod#execute(RestlessMethodExecutionParameters, Restless, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)}
  * .
  * 
- * @author Kaidel
+ * @author kaidel
  * 
  */
 @NotThreadSafe

@@ -41,7 +41,7 @@ import org.xydra.sharedutils.XyAssert;
 /**
  * Abstract test for the write methods of {@link XydraStore}.
  * 
- * @author Kaidel
+ * @author kaidel
  */
 
 /*

@@ -16,7 +16,7 @@ import org.xydra.base.value.XValue;
  * A factory class providing helpful methods for creating various types of
  * {@link XCommand XCommands}.
  * 
- * @author Kaidel
+ * @author kaidel
  * 
  */
 

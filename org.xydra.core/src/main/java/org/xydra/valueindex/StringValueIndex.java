@@ -23,7 +23,7 @@ import org.xydra.sharedutils.XyAssert;
  * 
  * 
  * 
- * @author Kaidel
+ * @author kaidel
  * 
  */
 

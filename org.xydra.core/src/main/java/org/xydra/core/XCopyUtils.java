@@ -33,7 +33,7 @@ import org.xydra.sharedutils.XyAssert;
  * A helper class containing methods for copying different kinds of Xydra
  * entities.
  * 
- * @author Kaidel
+ * @author kaidel
  * @author dscharrer
  * 
  */

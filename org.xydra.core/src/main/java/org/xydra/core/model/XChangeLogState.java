@@ -48,7 +48,7 @@ import org.xydra.base.rmof.XRevWritableModel;
  * (model state, last rev = 0)
  * </pre>
  * 
- * @author voelkel
+ * @author xamde
  */
 public interface XChangeLogState extends Serializable {
     

@@ -8,8 +8,8 @@ import org.xydra.base.change.XModelEvent;
  * {@link XModelEventListener XModelEventListeners} to listen for
  * {@link XModelEvent XModelEvents}.
  * 
- * @author voelkel
- * @author Kaidel
+ * @author xamde
+ * @author kaidel
  */
 public interface XSendsModelEvents {
 	

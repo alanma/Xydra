@@ -31,7 +31,7 @@ import org.xydra.annotations.ThreadSafe;
  * <dd>Closing curly brace missing</dd>
  * </dl>
  * 
- * @author voelkel
+ * @author xamde
  * 
  */
 @ThreadSafe

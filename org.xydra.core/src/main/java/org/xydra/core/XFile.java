@@ -25,7 +25,7 @@ import org.xydra.core.serialize.xml.XmlParser;
  * A utility class which provides simple methods for serializing XModels and
  * XRepositories into XML files.
  * 
- * @author Kaidel
+ * @author kaidel
  * 
  */
 @RunsInGWT(false)

@@ -7,7 +7,7 @@ import org.xydra.base.XId;
 /**
  * An {@link XValue} for storing a set of {@link XAddress XAddresss}.
  * 
- * @author voelkel, dscharrer
+ * @author xamde, dscharrer
  * 
  */
 public interface XAddressSetValue extends XSetValue<XAddress> {

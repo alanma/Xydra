@@ -16,7 +16,7 @@ import org.xydra.xgae.gaeutils.GaeTestfixer;
  * webapp, loading static files directly from src/main/webapp. This class is not
  * required to run the webapp.
  * 
- * @author voelkel
+ * @author xamde
  */
 public class RunXmasJetty {
 

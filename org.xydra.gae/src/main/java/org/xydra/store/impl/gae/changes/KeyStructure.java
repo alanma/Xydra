@@ -13,7 +13,7 @@ import org.xydra.xgae.datastore.api.SKey;
  * Changes are persisted as {@link #KIND_XCHANGE} and {@link #KIND_XVALUE}
  * types.
  * 
- * @author scharrer
+ * @author dscharrer
  * 
  */
 public class KeyStructure {

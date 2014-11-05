@@ -30,7 +30,7 @@ import org.xydra.xgae.gaeutils.GaeTestfixer;
  * IMPROVE Add ability to load from servletcontext via
  * {@link XydraRestServer#SERVLET_CONTEXT_ATTRIBUTE_XYDRA_PERSISTENCE}
  * 
- * @author voelkel
+ * @author xamde
  */
 @RunsInAppEngine(true)
 @RequiresAppEngine(false)

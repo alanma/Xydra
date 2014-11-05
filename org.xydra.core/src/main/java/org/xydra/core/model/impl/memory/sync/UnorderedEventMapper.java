@@ -19,7 +19,7 @@ import org.xydra.index.query.Pair;
  * <b>Looks for events without regarding the safe/forced-attributes of the
  * underlying commands</b>; unpacks transactions to only compare atomic events.
  * 
- * @author Andi_Ka
+ * @author kahmann
  * 
  */
 public class UnorderedEventMapper implements IEventMapper {
@@ -27,7 +27,7 @@ public class UnorderedEventMapper implements IEventMapper {
     /**
      * Contains the results of the mapping.
      * 
-     * @author Andi_Ka
+     * @author kahmann
      * 
      */
     private class MappingResult implements IMappingResult {

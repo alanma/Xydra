@@ -25,7 +25,7 @@ import org.xydra.base.value.XValue;
  * and representing the inner state of the XField to allow maximum persistence
  * management flexibility.
  * 
- * @author voelkel
+ * @author xamde
  * @author kaidel
  */
 public interface XField extends XLoggedField, XWritableField, Serializable {

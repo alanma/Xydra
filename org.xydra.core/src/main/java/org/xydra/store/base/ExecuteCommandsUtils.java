@@ -11,7 +11,7 @@ import org.xydra.store.XydraStore;
 /**
  * Utility for executing commands synchronously.
  * 
- * @author voelkel
+ * @author xamde
  * 
  */
 public class ExecuteCommandsUtils {

@@ -8,8 +8,8 @@ import org.xydra.base.change.XFieldEvent;
  * {@link XFieldEventListener XFieldEventListeners} to listen for
  * {@link XFieldEvent XFieldEvents}.
  * 
- * @author voelkel
- * @author Kaidel
+ * @author xamde
+ * @author kaidel
  */
 public interface XSendsFieldEvents {
 	

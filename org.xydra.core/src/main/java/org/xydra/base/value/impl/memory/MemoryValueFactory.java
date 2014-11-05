@@ -29,8 +29,8 @@ import org.xydra.base.value.XValueFactory;
 /**
  * An implementation of {@link XValueFactory}
  * 
- * @author voelkel
- * @author Kaidel
+ * @author xamde
+ * @author kaidel
  * @author dscharrer
  * 
  */

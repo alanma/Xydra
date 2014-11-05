@@ -10,8 +10,8 @@ import java.io.Serializable;
  * An XValue may be used for a lot of different things, for example for storing
  * the name of a person.
  * 
- * @author voelkel
- * @author Kaidel
+ * @author xamde
+ * @author kaidel
  */
 public interface XValue extends Serializable {
 

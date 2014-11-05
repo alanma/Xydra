@@ -5,7 +5,7 @@ import java.io.Reader;
 /**
  * BufferedReader from Java copied and adapted to Mini-Framework.
  * 
- * @author voelkel
+ * @author xamde
  * 
  */
 public class MiniBufferedReader extends AbstractMiniReader implements MiniReader {

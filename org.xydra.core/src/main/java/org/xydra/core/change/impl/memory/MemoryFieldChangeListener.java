@@ -10,7 +10,7 @@ import org.xydra.log.api.LoggerFactory;
 /**
  * An implementation of {@link XFieldEventListener}
  * 
- * @author voelkel
+ * @author xamde
  * 
  */
 @RequiresAppEngine(false)

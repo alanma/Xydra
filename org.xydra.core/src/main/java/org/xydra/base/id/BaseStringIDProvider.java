@@ -14,8 +14,8 @@ import org.xydra.log.api.LoggerFactory;
 /**
  * An implementation of {@link XIdProvider}
  * 
- * @author voelkel
- * @author Kaidel
+ * @author xamde
+ * @author kaidel
  */
 
 @RunsInGWT(true)

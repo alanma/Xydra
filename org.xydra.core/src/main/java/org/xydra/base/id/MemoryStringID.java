@@ -12,7 +12,7 @@ import org.xydra.base.value.ValueType;
  * An implementation of {@link XId} where an ID is represented by a String
  * value.
  * 
- * @author voelkel
+ * @author xamde
  */
 
 @RunsInGWT(true)

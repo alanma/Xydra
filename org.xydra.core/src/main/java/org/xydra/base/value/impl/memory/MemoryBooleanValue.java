@@ -9,7 +9,7 @@ import org.xydra.base.value.XBooleanValue;
 /**
  * An implementation of {@link XBooleanValue}
  * 
- * @author Kaidel
+ * @author kaidel
  * 
  */
 public class MemoryBooleanValue implements XBooleanValue, Serializable {

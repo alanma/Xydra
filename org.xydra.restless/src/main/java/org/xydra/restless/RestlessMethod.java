@@ -43,7 +43,7 @@ import org.xydra.restless.utils.ServletUtils;
  * Restless can inject {@link HttpServletRequest}, {@link HttpServletResponse},
  * and {@link Restless} (which gives access to servlet context etc).
  * 
- * @author voelkel
+ * @author xamde
  */
 
 @ThreadSafe

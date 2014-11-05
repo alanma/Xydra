@@ -16,7 +16,7 @@ import com.google.gwt.user.client.ui.Widget;
 /**
  * For column heads in the table
  * 
- * @author Andi
+ * @author kahmann
  * 
  */
 public class ColumnHeaderWidget extends Composite {

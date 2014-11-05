@@ -17,7 +17,7 @@ import org.xydra.log.api.LoggerFactory;
  * If only static files have been modified, no call is neccesary as this Jetty
  * is configured to load resources directly from src/test/resources
  * 
- * @author voelkel
+ * @author xamde
  * 
  */
 public class RunTestJetty {

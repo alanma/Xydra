@@ -28,8 +28,8 @@ import org.xydra.base.rmof.XWritableModel;
  * and representing the inner state of the XModel to allow maximum persistence
  * management flexibility.
  * 
- * @author voelkel
- * @author Kaidel
+ * @author xamde
+ * @author kaidel
  * 
  */
 public interface XModel extends XLoggedModel, XWritableModel, Serializable, XSynchronizesChanges {

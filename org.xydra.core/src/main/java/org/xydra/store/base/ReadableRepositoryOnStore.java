@@ -25,7 +25,7 @@ import org.xydra.store.XydraStore;
  * 
  * TODO GWT doesn't have a Thread class
  * 
- * @author voelkel
+ * @author xamde
  */
 @RunsInGWT(false)
 public class ReadableRepositoryOnStore implements XReadableRepository, Serializable {

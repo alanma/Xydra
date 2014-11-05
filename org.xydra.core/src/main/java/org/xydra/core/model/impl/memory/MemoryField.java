@@ -29,8 +29,8 @@ import org.xydra.sharedutils.XyAssert;
 /**
  * An implementation of {@link XField}.
  * 
- * @author voelkel
- * @author Kaidel
+ * @author xamde
+ * @author kaidel
  */
 public class MemoryField extends AbstractMOFEntity implements XField, IMemoryField, Serializable,
         Synchronizable {

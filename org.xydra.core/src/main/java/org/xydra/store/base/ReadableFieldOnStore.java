@@ -28,7 +28,7 @@ import org.xydra.store.XydraStore;
  * SynchronousStore wrapper / helper class? Same applies for
  * {@link ReadableObjectOnStore} and {@link ReadableModelOnStore}
  * 
- * @author voelkel
+ * @author xamde
  */
 public class ReadableFieldOnStore implements XReadableField, Serializable {
 	

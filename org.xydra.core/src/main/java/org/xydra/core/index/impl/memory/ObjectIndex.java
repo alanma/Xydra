@@ -26,7 +26,7 @@ import org.xydra.sharedutils.XyAssert;
  * converted to an internal XId key which is used as the field-ID in another
  * {@link XObject}.
  * 
- * @author voelkel
+ * @author xamde
  */
 @RunsInAppEngine(true)
 @RunsInGWT(true)

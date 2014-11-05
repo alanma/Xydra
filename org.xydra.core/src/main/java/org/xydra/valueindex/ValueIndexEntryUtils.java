@@ -15,7 +15,7 @@ import org.xydra.sharedutils.XyAssert;
  * Strings and for deserializing Strings to {@link ValueIndexEntry
  * ValueIndexEntries}.
  * 
- * @author Kaidel
+ * @author kaidel
  * 
  */
 

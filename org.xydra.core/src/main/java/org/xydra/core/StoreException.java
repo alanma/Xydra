@@ -3,7 +3,7 @@ package org.xydra.core;
 /**
  * Common super-class for Xydra Store exceptions.
  * 
- * @author voelkel
+ * @author xamde
  */
 public class StoreException extends RuntimeException {
     

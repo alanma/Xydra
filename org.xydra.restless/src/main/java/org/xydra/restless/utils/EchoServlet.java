@@ -16,7 +16,7 @@ import org.xydra.annotations.ThreadSafe;
 /**
  * Loops back the complete incoming request
  * 
- * @author voelkel
+ * @author xamde
  * 
  */
 

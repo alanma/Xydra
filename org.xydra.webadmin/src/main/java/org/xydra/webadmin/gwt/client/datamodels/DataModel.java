@@ -23,7 +23,7 @@ import org.xydra.webadmin.gwt.client.widgets.dialogs.WarningDialog;
  * <font color=RED> Performs all add- and remove-requests (does some checks
  * first and fires the appropriate events) </font>
  * 
- * @author Andi_Ka
+ * @author kahmann
  * 
  */
 public class DataModel {

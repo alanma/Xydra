@@ -13,7 +13,7 @@ import org.xydra.index.XI;
 /**
  * An implementation of {@link XFieldEvent}.
  * 
- * @author voelkel
+ * @author xamde
  * @author kaidel
  */
 public class MemoryFieldEvent extends MemoryAtomicEvent implements XFieldEvent {

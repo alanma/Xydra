@@ -18,7 +18,7 @@ import org.xydra.restless.Restless;
  * webapp, loading static files directly from src/main/webapp. This class is not
  * required to run the webapp. Its great for testing.
  * 
- * @author voelkel
+ * @author xamde
  * 
  */
 public class RunGaeMyAdminJetty {

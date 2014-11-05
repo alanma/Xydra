@@ -21,7 +21,7 @@ import org.xydra.log.api.LoggerFactory;
  * A helper class containing methods for comparing Xydra entities in different
  * ways.
  * 
- * @author Kaidel
+ * @author kaidel
  * 
  */
 public class XCompareUtils {

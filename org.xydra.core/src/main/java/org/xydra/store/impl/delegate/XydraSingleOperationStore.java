@@ -99,7 +99,7 @@ import org.xydra.store.XydraStoreAdmin;
  * <h3>Implementation guidelines</h3> For anonymous users over HTTP, the
  * IP-Address could be used as an actorId.
  * 
- * @author voelkel
+ * @author xamde
  * @author dscharrer
  */
 

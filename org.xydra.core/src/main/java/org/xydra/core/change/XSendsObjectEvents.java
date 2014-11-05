@@ -8,8 +8,8 @@ import org.xydra.base.change.XObjectEvent;
  * {@link XObjectEventListener XObjectEventListeners} to listen for
  * {@link XObjectEvent XObjectEvents}.
  * 
- * @author voelkel
- * @author Kaidel
+ * @author xamde
+ * @author kaidel
  */
 public interface XSendsObjectEvents {
 	

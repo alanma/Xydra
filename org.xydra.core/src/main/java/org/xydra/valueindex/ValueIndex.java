@@ -13,7 +13,7 @@ import org.xydra.index.query.EqualsConstraint;
  * A data structure used for indexing the contents of an {@link XModel}, i.e.
  * the {@link XValue XValues} contained in its {@link XField XFields}.
  * 
- * @author Kaidel
+ * @author kaidel
  * 
  */
 public interface ValueIndex {

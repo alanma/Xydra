@@ -24,7 +24,7 @@ import org.xydra.annotations.ThreadSafe;
  * java.util.logging.ConsoleHandler.formatter=org.xydra.log.gae.ClickbableLinksInEclipseLogFormatter
  * </pre>
  * 
- * @author voelkel
+ * @author xamde
  */
 @ThreadSafe
 public class ClickbableLinksInEclipseLogFormatter extends java.util.logging.Formatter {

@@ -9,7 +9,7 @@ import com.google.appengine.api.datastore.Query.FilterOperator;
 /**
  * Utility to use synchronous datastore
  * 
- * @author voelkel
+ * @author xamde
  */
 public abstract class DatastoreImplGaeBase {
 

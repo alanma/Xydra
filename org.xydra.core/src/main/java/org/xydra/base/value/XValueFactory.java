@@ -12,7 +12,7 @@ import org.xydra.base.XId;
  * Convenience functions for creating {@link XValue XValues} can be found in
  * {@link XV}.
  * 
- * @author Kaidel
+ * @author kaidel
  * @author xamde
  */
 public interface XValueFactory {

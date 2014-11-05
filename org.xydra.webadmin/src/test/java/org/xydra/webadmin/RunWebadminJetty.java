@@ -32,7 +32,7 @@ import org.xydra.xgae.gaeutils.GaeTestfixer;
  * 
  * <p>If only static files have been modified, no call is neccesary as this Jetty is configured to load the directly from src/main/webapp.
  * 
- * @author voelkel
+ * @author xamde
  * 
  */
 public class RunWebadminJetty {

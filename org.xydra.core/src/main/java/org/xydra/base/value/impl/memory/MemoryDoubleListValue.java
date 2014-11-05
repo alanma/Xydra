@@ -12,7 +12,7 @@ import org.xydra.index.XI;
 /**
  * An implementation of {@link XDoubleListValue}
  * 
- * @author Kaidel
+ * @author kaidel
  * @author dscharrer
  * 
  */

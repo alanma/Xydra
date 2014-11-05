@@ -16,7 +16,7 @@ import org.xydra.store.rmof.impl.delegate.WritableRepositoryOnPersistence;
  * Abstract test class for testing a remote Xydra store over the REST API,
  * especially the aspects consistency and concurrency
  * 
- * @author voelkel
+ * @author xamde
  */
 public abstract class AbstractRemoteStoreConcurrencyConsistencyTest extends AbstractStoreTest {
 	

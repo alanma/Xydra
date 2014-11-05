@@ -42,7 +42,7 @@ import com.google.gwt.user.client.ui.Widget;
  * 
  * 
  * 
- * @author Andi_Ka
+ * @author kahmann
  * 
  */
 public class XyAdmin extends Composite {

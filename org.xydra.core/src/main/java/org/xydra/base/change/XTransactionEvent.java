@@ -11,7 +11,7 @@ import org.xydra.annotations.NeverNull;
  * It is always true that this.{@link #getChangeType()} ==
  * {@link ChangeType#TRANSACTION},
  * 
- * @author Kaidel
+ * @author kaidel
  */
 public interface XTransactionEvent extends XEvent, Iterable<XAtomicEvent> {
     

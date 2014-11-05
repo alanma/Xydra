@@ -22,8 +22,8 @@ import org.xydra.base.rmof.XWritableObject;
  * storing and representing the inner state of the XObject to allow maximum
  * persistence management flexibility.
  * 
- * @author voelkel
- * @author Kaidel
+ * @author xamde
+ * @author kaidel
  * 
  */
 public interface XObject extends XLoggedObject, XWritableObject, XSynchronizesChanges {

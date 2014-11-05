@@ -12,7 +12,7 @@ package org.xydra.testgae.shared;
  * It's for example being used in
  * {@link org.xydra.testgae.client.RemoteBenchmark}.
  * 
- * @author Kaidel
+ * @author kaidel
  * 
  */
 

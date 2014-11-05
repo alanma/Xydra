@@ -11,7 +11,7 @@ import org.xydra.sharedutils.XyAssert;
  * 
  * Contains either a result or the exception.
  * 
- * @author voelkel
+ * @author xamde
  * 
  * @param <K> type of result
  */

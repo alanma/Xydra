@@ -40,7 +40,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
  * then)
  * </ul>
  * 
- * @author Andi_Ka
+ * @author kahmann
  * 
  */
 public class ModelBranchPresenter extends SelectionTreePresenter {

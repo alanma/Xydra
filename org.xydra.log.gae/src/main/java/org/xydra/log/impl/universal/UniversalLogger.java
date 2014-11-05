@@ -22,7 +22,7 @@ import org.xydra.log.spi.ILoggerFactorySPI;
  * The zero-args constructor can be used to use {@link UniversalLogger} as a
  * delegating proxy.
  * 
- * @author voelkel
+ * @author xamde
  */
 @ThreadSafe
 public class UniversalLogger implements ILoggerFactorySPI {

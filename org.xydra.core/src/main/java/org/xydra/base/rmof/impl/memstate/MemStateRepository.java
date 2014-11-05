@@ -20,7 +20,7 @@ import org.xydra.sharedutils.XyAssert;
  * 
  * Minimal memory footprint, can be used as data transfer object.
  * 
- * @author voelkel
+ * @author xamde
  */
 public class MemStateRepository extends MemStateEntity implements XStateWritableRepository {
     

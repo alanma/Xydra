@@ -14,7 +14,7 @@ import org.xydra.annotations.RunsInGWT;
 /**
  * Delegates to a standard java Writer.
  * 
- * @author voelkel
+ * @author xamde
  * 
  */
 @RunsInGWT(false)

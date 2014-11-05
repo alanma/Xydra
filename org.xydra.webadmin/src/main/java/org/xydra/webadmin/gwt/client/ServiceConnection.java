@@ -23,7 +23,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 /**
  * The only class that talks to the server
  * 
- * @author andi
+ * @author kahmann
  */
 public class ServiceConnection {
 

@@ -4,7 +4,7 @@ package org.xydra.testgae.client;
  * Benchmark test for a remote server
  * 
  * @author xamde
- * @author Kaidel
+ * @author kaidel
  * 
  */
 public class RemoteBenchmarkOnAppEngine extends RemoteBenchmark {

@@ -3,7 +3,7 @@ package org.xydra.base.value;
 /**
  * An {@link XValue} for storing a list of Java Number values.
  * 
- * @author Kaidel
+ * @author kaidel
  * @param <T>
  * 
  */

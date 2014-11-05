@@ -12,7 +12,7 @@ import org.xydra.index.XI;
 /**
  * An implementation of {@link XLongListValue}
  * 
- * @author Kaidel
+ * @author kaidel
  * 
  */
 public class MemoryLongListValue extends MemoryListValue<Long> implements XLongListValue,

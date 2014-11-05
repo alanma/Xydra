@@ -17,7 +17,7 @@ import org.xydra.base.rmof.XEntity;
  * All entities have an {@link XType}, an {@link XAddress}, an {@link XId} and a
  * revision number (see {@link #getRevisionNumber()}).
  * 
- * @author Kaidel
+ * @author kaidel
  */
 public abstract class AbstractEntity implements XEntity, IMemoryEntity {
     

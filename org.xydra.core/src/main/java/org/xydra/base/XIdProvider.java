@@ -6,8 +6,8 @@ import org.xydra.annotations.NeverNull;
 /**
  * A provider of {@link XId} objects.
  * 
- * @author voelkel
- * @author Kaidel
+ * @author xamde
+ * @author kaidel
  */
 public interface XIdProvider {
     

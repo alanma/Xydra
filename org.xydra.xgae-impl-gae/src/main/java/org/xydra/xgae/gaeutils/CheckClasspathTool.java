@@ -9,7 +9,7 @@ import org.xydra.log.api.LoggerFactory;
  * 
  * There were some issues in former times with that.
  * 
- * @author voelkel
+ * @author xamde
  */
 public class CheckClasspathTool {
 

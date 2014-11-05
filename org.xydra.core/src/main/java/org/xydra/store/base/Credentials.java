@@ -6,7 +6,7 @@ import org.xydra.base.XId;
 /**
  * Internal class that simply stores an actorId and a passwordHash.
  * 
- * @author voelkel
+ * @author xamde
  */
 public class Credentials {
 	

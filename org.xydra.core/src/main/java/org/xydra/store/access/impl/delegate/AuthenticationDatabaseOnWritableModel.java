@@ -34,7 +34,7 @@ import org.xydra.store.access.XAuthenticationDatabase;
  * actorId  | "hasFailedLoginAttempts" | if present: number of failed login attempts
  * </pre>
  * 
- * @author voelkel
+ * @author xamde
  */
 @RunsInAppEngine(true)
 @RunsInGWT(true)

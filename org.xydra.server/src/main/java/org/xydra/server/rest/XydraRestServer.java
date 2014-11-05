@@ -25,7 +25,7 @@ import org.xydra.store.XydraStore;
 /**
  * A REST-server exposing a {@link XydraStore} over HTTP.
  * 
- * @author voelkel
+ * @author xamde
  * @author dscharrer
  */
 @RunsInAppEngine(true)

@@ -13,7 +13,7 @@ import org.xydra.base.value.XValue;
  * their {@link XObject XObjects}, their {@link XField XFields} and their
  * {@link XValue XValues}.
  * 
- * @author Kaidel
+ * @author kaidel
  * @author xamde
  */
 public interface XChangeLog extends Serializable {

@@ -7,7 +7,7 @@ import org.xydra.annotations.ThreadSafe;
 /**
  * A parameter that can be used in a method exposed via Restless to the web.
  * 
- * @author voelkel
+ * @author xamde
  */
 
 @ThreadSafe

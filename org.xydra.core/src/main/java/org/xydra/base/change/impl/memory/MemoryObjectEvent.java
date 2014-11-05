@@ -13,7 +13,7 @@ import org.xydra.base.change.XTransaction;
 /**
  * An implementation of {@link XObjectEvent}
  * 
- * @author Kaidel
+ * @author kaidel
  * 
  */
 @RunsInGWT(true)

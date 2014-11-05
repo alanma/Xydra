@@ -9,7 +9,7 @@
  * <h3>Design Guideline</h3> As much as possible, each package can be
  * implemented individually, without requiring other packages.
  * 
- * @author voelkel
+ * @author xamde
  */
 package org.xydra.core;
 

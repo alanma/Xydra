@@ -51,7 +51,7 @@ import org.xydra.base.XAddress;
  * {d,e,a,b,c} (and not {d,e,T1}) This still leaves the Transaction structure
  * and behaviour ("all or nothing") intact.
  * 
- * @author Kaidel
+ * @author kaidel
  */
 public interface XTransaction extends XCommand, Iterable<XAtomicCommand> {
     

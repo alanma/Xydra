@@ -27,7 +27,7 @@ import org.xydra.store.RequestException;
  * Tentative methods fall back to standard methods as there are no race
  * conditions of any kind.
  * 
- * @author voelkel
+ * @author xamde
  * @author dscharrer
  */
 

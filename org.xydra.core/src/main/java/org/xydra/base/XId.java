@@ -13,7 +13,7 @@ import org.xydra.base.value.XSingleValue;
  * <em>Important:</em> Implementations of XId must implement <tt>equals()</tt>
  * and <tt>hashCode</tt> correctly.
  * 
- * @author voelkel
+ * @author xamde
  */
 public interface XId extends XSingleValue<XId>, Serializable, Comparable<XId>, IHasXId {
     

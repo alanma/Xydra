@@ -15,7 +15,7 @@ import com.google.apphosting.api.ApiProxy;
  * 
  * TODO expose os.environ['INSTANCE_ID']
  * 
- * @author voelkel
+ * @author xamde
  */
 public class AboutAppEngine {
 

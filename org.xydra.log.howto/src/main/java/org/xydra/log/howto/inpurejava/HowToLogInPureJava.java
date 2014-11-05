@@ -8,7 +8,7 @@ import org.xydra.log.api.LoggerFactory;
  * 
  * TODO explain how to configure log levels
  * 
- * @author voelkel
+ * @author xamde
  * 
  */
 public class HowToLogInPureJava {

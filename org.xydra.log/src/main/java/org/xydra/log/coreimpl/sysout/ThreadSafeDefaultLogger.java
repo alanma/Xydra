@@ -5,7 +5,7 @@ import org.xydra.annotations.ThreadSafe;
 /**
  * A thread-safe version of {@link DefaultLogger}.
  * 
- * @author Kaidel
+ * @author kaidel
  */
 @ThreadSafe
 public class ThreadSafeDefaultLogger extends DefaultLogger {

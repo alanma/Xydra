@@ -17,7 +17,7 @@ import org.xydra.store.impl.gae.changes.GaeEvents.AsyncValue;
  * asynchronously from the GAE datastore without blocking before
  * {@link #getNewValue()} is called.
  * 
- * @author voelkel
+ * @author xamde
  * @author kaidel
  */
 @RunsInGWT(false)

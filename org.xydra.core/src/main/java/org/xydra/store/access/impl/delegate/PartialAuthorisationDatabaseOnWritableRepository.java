@@ -52,7 +52,7 @@ import org.xydra.store.access.XAuthorisationEvent;
  * 
  * Non-existing field: right not defined.
  * 
- * @author voelkel
+ * @author xamde
  */
 @RunsInAppEngine(true)
 @RunsInGWT(true)

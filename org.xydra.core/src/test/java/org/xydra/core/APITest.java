@@ -36,7 +36,7 @@ import org.xydra.core.serialize.xml.XmlParser;
 
 
 /**
- * @author voelkel
+ * @author xamde
  */
 public class APITest {
     

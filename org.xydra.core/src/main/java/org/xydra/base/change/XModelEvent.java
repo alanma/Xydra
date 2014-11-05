@@ -6,7 +6,7 @@ import org.xydra.base.XId;
 /**
  * An {@link XEvent} representing changes of models.
  * 
- * @author Kaidel
+ * @author kaidel
  * 
  */
 public interface XModelEvent extends XAtomicEvent {

@@ -10,7 +10,7 @@ import org.xydra.index.iterator.AbstractTransformingIterator;
  * Implementation of {@link ISyncLog} methods that don't vary between
  * implementations.
  * 
- * @author Andi K
+ * @author kahmann
  */
 abstract public class AbstractSyncLog implements ISyncLog {
 	

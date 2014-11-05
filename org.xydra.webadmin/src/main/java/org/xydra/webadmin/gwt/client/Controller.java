@@ -21,7 +21,7 @@ import com.google.gwt.user.client.ui.RootPanel;
  * Unit that holds some regularly needed objects and has the ability to start /
  * stop processes.
  * 
- * @author Andi_Ka
+ * @author kahmann
  * 
  */
 public class Controller {

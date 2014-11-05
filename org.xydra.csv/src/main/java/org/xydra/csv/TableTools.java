@@ -13,7 +13,7 @@ import org.xydra.log.api.LoggerFactory;
 /**
  * A set of tools for {@link CsvTable}.
  * 
- * @author voelkel
+ * @author xamde
  * 
  */
 public class TableTools extends TableCoreTools {
@@ -21,7 +21,7 @@ public class TableTools extends TableCoreTools {
 	/**
 	 * Processes a file and writes results to a shared {@link CsvTable}.
 	 * 
-	 * @author voelkel
+	 * @author xamde
 	 */
 	public interface IFileProcessor {
 		/**

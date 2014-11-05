@@ -24,7 +24,7 @@ import org.xydra.log.api.Logger;
  * SEVERE  = error()
  * </pre>
  * 
- * @author voelkel
+ * @author xamde
  */
 @ThreadSafe
 public class JulLogger extends JulLogger_GwtEmul {

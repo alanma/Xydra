@@ -9,7 +9,7 @@ import org.xydra.index.query.Pair;
  * A minimal abstraction API to access XML/JSON elements created with
  * {@link XydraOut}.
  * 
- * @author voelkel
+ * @author xamde
  * @author dscharrer
  */
 public interface XydraElement {

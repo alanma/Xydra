@@ -9,7 +9,7 @@ import java.util.HashSet;
  * String will be returned as one index string and all non-character symbols
  * will be removed).
  * 
- * @author Kaidel
+ * @author kaidel
  * 
  */
 

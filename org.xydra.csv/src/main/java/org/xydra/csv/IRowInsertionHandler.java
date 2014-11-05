@@ -7,7 +7,7 @@ import org.xydra.csv.impl.memory.Row;
  * rows from being inserted by returning false in the
  * {@link #beforeRowInsertion(Row)} method.
  * 
- * @author voelkel
+ * @author xamde
  */
 public interface IRowInsertionHandler {
 	void afterRowInsertion(IRow row);

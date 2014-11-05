@@ -25,7 +25,7 @@ import com.google.gwt.user.client.ui.HasHorizontalAlignment;
  * Performs logic for the building {@link RepoBranchWidget}s and adding new
  * repositories. Also holds a presenter to for each {@link RepoBranchWidget}
  * 
- * @author Andi_Ka
+ * @author kahmann
  * 
  */
 public class SelectionTreePresenter extends Presenter {

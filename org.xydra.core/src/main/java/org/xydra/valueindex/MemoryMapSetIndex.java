@@ -17,7 +17,7 @@ import org.xydra.sharedutils.XyAssert;
  * 
  * Warning: Some methods are not supported.
  * 
- * @author Kaidel
+ * @author kaidel
  * 
  */
 

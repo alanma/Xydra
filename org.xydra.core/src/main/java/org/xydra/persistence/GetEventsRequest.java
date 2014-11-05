@@ -16,7 +16,7 @@ import org.xydra.sharedutils.XyAssert;
  * This is a request to fetch all {@link XEvent XEvents} that occurred after
  * (and including) beginRevision and before (but not including) endRevision.
  * 
- * @author voelkel
+ * @author xamde
  */
 public class GetEventsRequest {
     

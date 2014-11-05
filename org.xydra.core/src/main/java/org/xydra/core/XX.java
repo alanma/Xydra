@@ -15,8 +15,8 @@ import org.xydra.core.model.impl.memory.MemoryObject;
 /**
  * A utility class for using {@link XId} and {@link XAddress}.
  * 
- * @author voelkel
- * @author Kaidel
+ * @author xamde
+ * @author kaidel
  * @author dscharrer
  */
 public class XX extends Base {

@@ -89,7 +89,7 @@ import org.xydra.restless.utils.XmlUtils;
  * 4) The configuration can always be accessed at the URL "/admin/restless"
  * </p>
  * 
- * @author voelkel
+ * @author xamde
  * 
  */
 

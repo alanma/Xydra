@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  * Velocity) templates. Rename and change them with care. They might also be
  * used for auto-generated documentation for templates.
  * 
- * @author voelkel
+ * @author xamde
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Documented

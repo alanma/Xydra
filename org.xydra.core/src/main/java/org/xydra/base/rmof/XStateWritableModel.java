@@ -10,7 +10,7 @@ import org.xydra.base.XId;
  * An {@link XStateReadableModel} which allows just to read and write the state.
  * No support for revision numbers at all.
  * 
- * @author voelkel
+ * @author xamde
  */
 public interface XStateWritableModel extends XStateReadableModel {
     

@@ -66,11 +66,11 @@ import org.xydra.store.rmof.impl.delegate.WritableRepositoryOnPersistence;
  * commands that can be executed by persistence.
  */
 /**
- * @author Andi_Ka
+ * @author kahmann
  * 
  */
 /**
- * @author Andi_Ka
+ * @author kahmann
  * 
  */
 public abstract class AbstractPersistenceTestForAtomicCommandsAndMiscellaneous {

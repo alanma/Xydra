@@ -9,7 +9,7 @@ import org.xydra.base.XId;
  * methods. Only {@link XValueIndexer#getStringIndexStrings(String)} needs to be
  * implemented.
  * 
- * @author Kaidel
+ * @author kaidel
  * 
  */
 

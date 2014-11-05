@@ -23,7 +23,7 @@ import com.google.gwt.user.client.ui.Widget;
 /**
  * For table fields with existing content
  * 
- * @author Andi
+ * @author kahmann
  * 
  */
 public class FieldWidget extends Composite implements TableFieldWidget {

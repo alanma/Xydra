@@ -46,7 +46,7 @@ import com.google.gwt.user.client.ui.Widget;
  * <li>an object is changed (field removed / value changed)
  * </ul>
  * 
- * @author Andi_Ka
+ * @author kahmann
  * 
  */
 public class RowPresenter extends Presenter {

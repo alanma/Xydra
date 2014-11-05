@@ -31,7 +31,7 @@ import org.xydra.base.value.XValue;
  * Abstract class which determines the Strings which are used to index
  * {@link XValue XValues} in an {@link ValueIndex}.
  * 
- * @author Kaidel
+ * @author kaidel
  * 
  */
 

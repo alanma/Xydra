@@ -10,7 +10,7 @@ import java.security.NoSuchAlgorithmException;
  * 
  * TODO create similar implementation that works in GWT
  * 
- * @author voelkel
+ * @author xamde
  */
 public class HashUtils {
 	

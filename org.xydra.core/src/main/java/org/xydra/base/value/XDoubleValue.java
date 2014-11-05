@@ -3,7 +3,7 @@ package org.xydra.base.value;
 /**
  * An {@link XValue} for storing a single Java Double value.
  * 
- * @author Kaidel
+ * @author kaidel
  * 
  */
 public interface XDoubleValue extends XNumberValue, XSingleValue<Double> {

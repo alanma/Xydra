@@ -22,7 +22,7 @@ import org.xydra.store.NamingUtils;
  * Java overhead of factor 2, we can save only 32K XIds in 1 MB.
  * 
  * @author dscharrer
- * @author voelkel
+ * @author xamde
  */
 
 public interface XGroupDatabase {

@@ -7,7 +7,7 @@ import org.xydra.base.change.XModelEvent;
  * A listener interested in {@link XModelEvent XModelEvents}. Can be registered
  * on classes implementing the {@link XSendsModelEvents} interface.
  * 
- * @author Kaidel
+ * @author kaidel
  */
 
 public interface XModelEventListener extends XChangeEventListener {

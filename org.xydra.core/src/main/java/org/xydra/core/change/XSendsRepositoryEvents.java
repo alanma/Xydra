@@ -8,8 +8,8 @@ import org.xydra.base.change.XRepositoryEvent;
  * {@link XRepositoryEvent XRepositoryEventListeners} to listen for
  * {@link XRepositoryEvent XRepositoryEvents}.
  * 
- * @author voelkel
- * @author Kaidel
+ * @author xamde
+ * @author kaidel
  */
 public interface XSendsRepositoryEvents {
 	

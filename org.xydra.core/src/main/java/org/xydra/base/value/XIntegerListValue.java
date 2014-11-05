@@ -3,7 +3,7 @@ package org.xydra.base.value;
 /**
  * An {@link XValue} for storing a list of Java Integer values.
  * 
- * @author Kaidel
+ * @author kaidel
  * 
  */
 public interface XIntegerListValue extends XNumberListValue<Integer> {

@@ -12,7 +12,7 @@ import org.xydra.index.XI;
 /**
  * An implementation of {@link XIntegerListValue}
  * 
- * @author Kaidel
+ * @author kaidel
  * 
  */
 public class MemoryIntegerListValue extends MemoryListValue<Integer> implements XIntegerListValue,

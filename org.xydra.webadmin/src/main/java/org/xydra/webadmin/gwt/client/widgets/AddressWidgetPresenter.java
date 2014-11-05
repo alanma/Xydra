@@ -21,7 +21,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
  * 
  * handles callbacks and listens to {@link ViewBuiltEvent}s to proceed requests.
  * 
- * @author Andi_Ka
+ * @author kahmann
  * 
  */
 public class AddressWidgetPresenter extends Presenter {

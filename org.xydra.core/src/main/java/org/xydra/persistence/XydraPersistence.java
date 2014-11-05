@@ -38,7 +38,7 @@ import org.xydra.core.model.XObject;
  * <li>No access control</li>
  * </ol>
  * 
- * @author voelkel
+ * @author xamde
  */
 @RunsInGWT(true)
 public interface XydraPersistence {

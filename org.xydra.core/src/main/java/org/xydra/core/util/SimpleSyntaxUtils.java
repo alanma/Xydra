@@ -65,7 +65,7 @@ import org.xydra.sharedutils.XyAssert;
  * 
  * TODO define behaviour for line-breaks in values
  * 
- * @author voelkel
+ * @author xamde
  */
 @RequiresAppEngine(false)
 @RunsInAppEngine(true)
@@ -76,7 +76,7 @@ public class SimpleSyntaxUtils {
 	 * Like a java.io.BufferedReader but based completely on Strings. GWT
 	 * compatible.
 	 * 
-	 * @author voelkel
+	 * @author xamde
 	 * 
 	 */
 	public static class PseudoBufferedReader {

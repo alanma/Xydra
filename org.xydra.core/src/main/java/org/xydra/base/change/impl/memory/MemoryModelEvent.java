@@ -13,7 +13,7 @@ import org.xydra.base.change.XTransaction;
 /**
  * An implementation of {@link XModelEvent}.
  * 
- * @author Kaidel
+ * @author kaidel
  */
 @RunsInGWT(true)
 public class MemoryModelEvent extends MemoryAtomicEvent implements XModelEvent {

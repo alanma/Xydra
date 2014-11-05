@@ -6,7 +6,7 @@ import org.xydra.annotations.ThreadSafe;
  * Interface for Xydra loggers. Named 'Logger' to be compatible to java util
  * logging or Log4j, you only need to change the imports.
  * 
- * @author voelkel
+ * @author xamde
  */
 @ThreadSafe
 /*
@@ -20,7 +20,7 @@ public interface Logger {
 	 * The classic set of warning levels. Generalised from log4j, slf4j, and
 	 * java util logging.
 	 * 
-	 * @author voelkel
+	 * @author xamde
 	 */
 	public static enum Level {
 

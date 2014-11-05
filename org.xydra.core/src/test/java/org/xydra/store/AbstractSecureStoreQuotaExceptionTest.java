@@ -6,7 +6,7 @@ import org.xydra.store.access.HashUtils;
 
 
 /**
- * @author Kaidel
+ * @author kaidel
  * 
  */
 

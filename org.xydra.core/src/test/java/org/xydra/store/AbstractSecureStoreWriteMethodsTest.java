@@ -20,7 +20,7 @@ import org.xydra.store.access.XGroupDatabase;
  * {@link AbstractAllowAllStoreWriteMethodsTest}, but may change in the future)
  * 
  * @author xamde
- * @author Kaidel
+ * @author kaidel
  */
 abstract public class AbstractSecureStoreWriteMethodsTest extends AbstractStoreWriteMethodsTest {
 	

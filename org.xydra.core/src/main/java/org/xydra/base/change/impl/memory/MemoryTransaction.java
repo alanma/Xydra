@@ -16,7 +16,7 @@ import org.xydra.base.change.XTransaction;
 /**
  * Implementation of the {@XTransaction} interface.
  * 
- * @author Kaidel
+ * @author kaidel
  * @author dscharrer
  */
 @RunsInGWT(true)

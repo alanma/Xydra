@@ -6,7 +6,7 @@ import com.google.gwt.core.client.EntryPoint;
 /**
  * Allows compiling the GWT module
  * 
- * @author Max
+ * @author xamde
  */
 public class DummyEntryPoint implements EntryPoint {
 	

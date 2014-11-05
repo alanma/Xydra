@@ -11,7 +11,7 @@ import org.xydra.base.value.XValue;
  * 
  * TODO API Specify the exception cases, i.e. if a wrong address is given.
  * 
- * @author Kaidel
+ * @author kaidel
  * 
  *         FIXME API max: method signatures in this class are inconsistent. E.g.
  *         removeField takes a fieldAddress, addField takes an objectAddress and

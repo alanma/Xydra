@@ -23,7 +23,7 @@ import org.xydra.core.change.XSendsTransactionEvents;
  * for storing and representing the inner state of the XRepository to allow
  * maximum persistence management flexibility.
  * 
- * @author voelkel
+ * @author xamde
  * 
  */
 public interface XRepository extends XWritableRepository, XSendsRepositoryEvents,

@@ -25,7 +25,7 @@ import com.google.gwt.user.client.ui.Widget;
 /**
  * For empty fields in the table
  * 
- * @author Andi
+ * @author kahmann
  * 
  */
 public class EmptyFieldWidget extends Composite {

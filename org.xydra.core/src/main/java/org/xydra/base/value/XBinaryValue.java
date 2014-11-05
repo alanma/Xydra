@@ -3,7 +3,7 @@ package org.xydra.base.value;
 /**
  * An {@link XValue} for storing a Java byte array.
  * 
- * @author Kaidel
+ * @author kaidel
  * 
  */
 public interface XBinaryValue extends XValue {

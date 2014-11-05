@@ -7,7 +7,7 @@ import org.xydra.core.StoreException;
  * conditions can vary between implementations and may depend on payment or just
  * prevent brute-force password attacks.
  * 
- * @author voelkel
+ * @author xamde
  */
 public class QuotaException extends StoreException {
 	

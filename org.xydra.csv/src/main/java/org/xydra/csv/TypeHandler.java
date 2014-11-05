@@ -5,8 +5,7 @@ package org.xydra.csv;
  * 
  * TODO handle boolean, floating point, string
  * 
- * @author voelkel
- * 
+ * @author xamde
  */
 public class TypeHandler {
 
