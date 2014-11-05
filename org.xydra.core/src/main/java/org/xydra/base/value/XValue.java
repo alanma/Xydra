@@ -14,15 +14,15 @@ import java.io.Serializable;
  * @author Kaidel
  */
 public interface XValue extends Serializable {
-    
-    /**
-     * This method allows to have an abstract, defined way to denote the single
-     * type of a value without having to know which of the implemented
-     * interfaces are relevant. Mostly useful for writing import/export
-     * routines.
-     * 
-     * @return the type of this value
-     */
-    ValueType getType();
-    
+
+	/**
+	 * This method allows to have an abstract, defined way to denote the single
+	 * type of a value without having to know which of the implemented
+	 * interfaces are relevant. Mostly useful for writing import/export
+	 * routines.
+	 * 
+	 * @return the type of this value
+	 */
+	ValueType getType();
+
 }
