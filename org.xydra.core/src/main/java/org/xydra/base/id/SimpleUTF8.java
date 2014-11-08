@@ -92,4 +92,25 @@ public class SimpleUTF8 {
 		return new String(toUtf8Chars(bytes));
 	}
 
+	/**
+	 * @param bytes
+	 * @return true if essentially the bytes contain a valid XML 1.0 name in
+	 *         us-ascii
+	 */
+	public static boolean isSimpleUtf8CompatibleBytes(byte[] bytes) {
+		for (int i = 0; i < bytes.length; i++) {
+			byte b = bytes[i];
+			if (i == 0) {
+				if (!isXmlNameStartChar((char) b)) {
+					return false;
+				}
+			} else {
+				if (!isXmlNameChar((char) b)) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
 }
