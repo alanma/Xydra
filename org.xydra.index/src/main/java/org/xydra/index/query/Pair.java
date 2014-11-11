@@ -1,28 +1,32 @@
 package org.xydra.index.query;
 
+import org.xydra.index.IPair;
+
 /**
  * A tuple storing two objects.
  * 
  * @author dscharrer
- * @param <K>
- * @param <L>
+ * @param <A>
+ * @param <B>
  */
-public class Pair<K, L> {
+public class Pair<A, B> implements IPair<A, B> {
 
-	private final K first;
+	private final A first;
 
-	private final L second;
+	private final B second;
 
-	public Pair(K first, L second) {
+	public Pair(A first, B second) {
 		this.first = first;
 		this.second = second;
 	}
 
-	public K getFirst() {
+	@Override
+	public A getFirst() {
 		return this.first;
 	}
 
-	public L getSecond() {
+	@Override
+	public B getSecond() {
 		return this.second;
 	}
 
@@ -46,8 +50,8 @@ public class Pair<K, L> {
 				+ (this.second == null ? 0 : this.second.hashCode());
 	}
 
-	public Pair<L, K> inverse() {
-		return new Pair<L, K>(this.second, this.first);
+	public Pair<B, A> inverse() {
+		return new Pair<B, A>(this.second, this.first);
 	}
 
 }
