@@ -2,7 +2,6 @@ package org.xydra.base.value;
 
 import java.io.Serializable;
 
-
 /**
  * A class for storing actual values in fields. All values in Xydra are
  * immutable.
@@ -20,6 +19,9 @@ public interface XValue extends Serializable {
 	 * type of a value without having to know which of the implemented
 	 * interfaces are relevant. Mostly useful for writing import/export
 	 * routines.
+	 * 
+	 * On the downside, this implies no class can implement more than one
+	 * {@link XValue} interface
 	 * 
 	 * @return the type of this value
 	 */

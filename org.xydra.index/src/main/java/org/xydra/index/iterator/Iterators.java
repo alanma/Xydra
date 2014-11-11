@@ -56,8 +56,7 @@ public class Iterators {
 	 * 
 	 * Lazy evaluated
 	 * 
-	 * @param base
-	 *            elements must have valid implementation of
+	 * @param base elements must have valid implementation of
 	 *            {@link Object#hashCode()} and {@link Object#equals(Object)}
 	 * @NeverNull
 	 * @return unique elements
@@ -104,13 +103,10 @@ public class Iterators {
 	 * iterator. The returned iterator supports {@code remove()} if the original
 	 * iterator does.
 	 * 
-	 * @param iterator
-	 *            the iterator to limit
-	 * @param max
-	 *            the maximum number of elements in the returned iterator
+	 * @param iterator the iterator to limit
+	 * @param max the maximum number of elements in the returned iterator
 	 * @return ...
-	 * @throws IllegalArgumentException
-	 *             if {@code limitSize} is negative
+	 * @throws IllegalArgumentException if {@code limitSize} is negative
 	 * @since 3.0
 	 */
 	@LicenseApache(copyright = "Copyright (C) 2007 The Guava Authors", project = "Guava")
@@ -157,8 +153,7 @@ public class Iterators {
 
 	/**
 	 * @param iterator
-	 * @param max
-	 *            use -1 for no limit
+	 * @param max use -1 for no limit
 	 * @return a potentially limited iterator, depending on max
 	 */
 	public static <T> Iterator<T> maybeLimit(final Iterator<T> iterator, final int max) {
@@ -190,8 +185,7 @@ public class Iterators {
 	 * 
 	 * @param base
 	 * @NeverNull
-	 * @param transformer
-	 *            returns null for unwanted elements @NeverNull
+	 * @param transformer returns null for unwanted elements @NeverNull
 	 * @return an iterator returning entries of another type as the input type @NeverNull
 	 */
 	@SuppressWarnings("unchecked")
@@ -221,11 +215,10 @@ public class Iterators {
 	}
 
 	/**
-	 * @param iterators
-	 *            must be of generic type <E>
+	 * @param iterators must be of generic type <E>
 	 * @return a single, continuous iterator; might contain duplicates
 	 */
-	@SuppressWarnings({ "unchecked" })
+	@SafeVarargs
 	public static <E> Iterator<E> concat(final Iterator<E>... iterators) {
 		return new BagUnionIterator<E>(iterators);
 	}
@@ -321,14 +314,10 @@ public class Iterators {
 	}
 
 	/**
-	 * @param <T>
-	 *            type of both
-	 * @param <C>
-	 *            a collection type of T
-	 * @param it
-	 *            never null
-	 * @param collection
-	 *            to which elements are added
+	 * @param <T> type of both
+	 * @param <C> a collection type of T
+	 * @param it never null
+	 * @param collection to which elements are added
 	 * @return as a convenience, the supplied collection
 	 */
 	public static <C extends Collection<T>, T> C addAll(Iterator<? extends T> it, C collection) {
@@ -426,8 +415,7 @@ public class Iterators {
 	 * @param it
 	 * @NeverNull
 	 * @return the single value, if present. Or null, otherwise.
-	 * @throws IllegalStateException
-	 *             if iterator has more than one result
+	 * @throws IllegalStateException if iterator has more than one result
 	 */
 	public static <X> X getSingleValue(Iterator<X> it) {
 		assert it != null;
