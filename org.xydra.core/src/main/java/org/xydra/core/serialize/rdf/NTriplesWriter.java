@@ -102,7 +102,7 @@ public class NTriplesWriter {
         case Address:
         case Boolean:
         case Binary:
-            String base64 = Base64.encode(((XBinaryValue)v).contents(), true);
+            String base64 = Base64.encode(((XBinaryValue)v).getValue(), true);
             return "\"" + base64 + "\"" + "^^<http://www.w3.org/2001/XMLSchema#base64Binary>";
         case Double:
         case Id:

@@ -270,7 +270,7 @@ public class GwtHasAllType extends GwtXydraMapped implements
 		if (x == null)
 			// byte[]
 			return null;
-		return x.contents();
+		return x.getValue();
 	}
 
 	/**

@@ -75,7 +75,7 @@ public class SharedTypeMapping {
 
 		@Override
 		public byte[] toJava(XBinaryValue x) {
-			return (byte[]) ((XBinaryValue) x).contents();
+			return (byte[]) ((XBinaryValue) x).getValue();
 		}
 
 		@Override

@@ -45,7 +45,7 @@ abstract public class XValueUtils {
 			return "";
 		}
 		if (value instanceof XBinaryValue) {
-			return byteArrayToString(((XBinaryValue) value).contents());
+			return byteArrayToString(((XBinaryValue) value).getValue());
 		} else if (value instanceof XListValue<?>) {
 			return listGetFirst((XListValue<?>) value).toString();
 		} else {
@@ -70,7 +70,7 @@ abstract public class XValueUtils {
 			return ((XStringSetValue) value).iterator();
 		} else if (value instanceof XBinaryValue) {
 			return new SingleValueIterator<String>(
-					byteArrayToString(((XBinaryValue) value).contents()));
+					byteArrayToString(((XBinaryValue) value).getValue()));
 		} else if (value instanceof XListValue<?>) {
 			return transform((XListValue<?>) value);
 		} else {
@@ -472,7 +472,7 @@ abstract public class XValueUtils {
 		}
 
 		if (value instanceof XBinaryValue) {
-			return ((XBinaryValue) value).contents();
+			return ((XBinaryValue) value).getValue();
 		} else {
 			char[] chars = value.toString().toCharArray();
 			byte[] bytes = new byte[chars.length];

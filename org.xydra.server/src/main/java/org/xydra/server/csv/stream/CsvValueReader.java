@@ -336,7 +336,7 @@ public class CsvValueReader {
 		case Id:
 			return value.toString();
 		case Binary: {
-			byte[] bytes = ((XBinaryValue) value).contents();
+			byte[] bytes = ((XBinaryValue) value).getValue();
 			try {
 				String s = new String(bytes, "utf-8");
 				return s;

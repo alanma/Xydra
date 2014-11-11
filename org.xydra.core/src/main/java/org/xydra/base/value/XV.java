@@ -127,7 +127,7 @@ public class XV {
     
     public static byte[] toBinary(XValue value) {
         if(value.getType() == ValueType.Double) {
-            return ((XBinaryValue)value).contents();
+            return ((XBinaryValue)value).getValue();
         } else {
             throw new IllegalArgumentException();
         }

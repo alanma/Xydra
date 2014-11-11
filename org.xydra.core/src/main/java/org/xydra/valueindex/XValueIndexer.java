@@ -97,7 +97,7 @@ public abstract class XValueIndexer {
 				indexBooleanArray(fieldAddress, value, ((XBooleanListValue) value).contents());
 				break;
 			case Binary:
-				indexByteArray(fieldAddress, value, ((XBinaryValue) value).contents());
+				indexByteArray(fieldAddress, value, ((XBinaryValue) value).getValue());
 				break;
 			case Double:
 				indexDouble(fieldAddress, value, ((XDoubleValue) value).contents());
@@ -197,7 +197,7 @@ public abstract class XValueIndexer {
 			break;
 
 		case Binary:
-			for (Byte b : ((XBinaryValue) value).contents()) {
+			for (Byte b : ((XBinaryValue) value).getValue()) {
 				list.add(getByteIndexString(b));
 			}
 			break;
@@ -323,7 +323,7 @@ public abstract class XValueIndexer {
 				deIndexBooleanArray(fieldAddress, value, ((XBooleanListValue) value).contents());
 				break;
 			case Binary:
-				deIndexByteArray(fieldAddress, value, ((XBinaryValue) value).contents());
+				deIndexByteArray(fieldAddress, value, ((XBinaryValue) value).getValue());
 				break;
 			case Double:
 				deIndexDouble(fieldAddress, value, ((XDoubleValue) value).contents());

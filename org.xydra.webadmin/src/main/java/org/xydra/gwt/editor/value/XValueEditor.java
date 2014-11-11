@@ -56,7 +56,7 @@ public abstract class XValueEditor extends Composite {
 				} else if (value instanceof XIntegerListValue) {
 					return new XIntegerListEditor(((XIntegerListValue) value).iterator(), listener);
 				} else if (value instanceof XBinaryValue) {
-					return new XBinaryValueEditor(((XBinaryValue) value).contents(), listener);
+					return new XBinaryValueEditor(((XBinaryValue) value).getValue(), listener);
 				}
 				throw new RuntimeException("Unexpected XListValue type: " + value.getType()
 						+ " for value " + value);
@@ -80,7 +80,7 @@ public abstract class XValueEditor extends Composite {
 		} else if (value instanceof XAddress) {
 			return new XAddressEditor(((XAddress) value), listener);
 		} else if (value instanceof XBinaryValue) {
-			return new XBinaryValueEditor(((XBinaryValue) value).contents(), listener);
+			return new XBinaryValueEditor(((XBinaryValue) value).getValue(), listener);
 		} else if (value instanceof XBooleanValue) {
 			return new XBooleanEditor(((XBooleanValue) value).contents(), listener);
 		} else if (value instanceof XDoubleValue) {

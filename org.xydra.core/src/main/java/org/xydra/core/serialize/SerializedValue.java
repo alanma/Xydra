@@ -348,7 +348,7 @@ public class SerializedValue {
 	}
 
 	private static void serialize(XBinaryValue xvalue, XydraOut out) {
-		out.element(XBINARY_ELEMENT, NAME_DATA, serializeBinaryContent(xvalue.contents()));
+		out.element(XBINARY_ELEMENT, NAME_DATA, serializeBinaryContent(xvalue.getValue()));
 	}
 
 	public static String serializeBinaryContent(byte[] content) {

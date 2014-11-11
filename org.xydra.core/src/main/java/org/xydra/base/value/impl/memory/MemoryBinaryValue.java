@@ -38,7 +38,7 @@ public class MemoryBinaryValue implements XBinaryValue, Serializable {
 	}
 
 	@Override
-	public byte[] contents() {
+	public byte[] getValue() {
 		byte[] array = new byte[this.content.length];
 		System.arraycopy(this.content, 0, array, 0, this.content.length);
 		return array;
@@ -47,7 +47,7 @@ public class MemoryBinaryValue implements XBinaryValue, Serializable {
 	@Override
 	public boolean equals(Object other) {
 		return other instanceof XBinaryValue
-				&& Arrays.equals(this.contents(), ((XBinaryValue) other).contents());
+				&& Arrays.equals(this.getValue(), ((XBinaryValue) other).getValue());
 	}
 
 	public Byte get(int index) {
@@ -67,11 +67,6 @@ public class MemoryBinaryValue implements XBinaryValue, Serializable {
 	@Override
 	public String toString() {
 		return Arrays.toString(this.content);
-	}
-
-	@Override
-	public byte[] getValue() {
-		return contents();
 	}
 
 }

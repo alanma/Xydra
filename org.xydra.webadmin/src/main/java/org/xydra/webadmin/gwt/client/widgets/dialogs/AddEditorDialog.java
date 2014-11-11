@@ -212,7 +212,7 @@ public class AddEditorDialog extends DialogBox {
 			bytes.add(new Byte("1"));
 			XBinaryValue binaryValue = XV.toBinaryValue(bytes);
 
-			editor = new XBinaryValueEditor(binaryValue.contents(), editListener);
+			editor = new XBinaryValueEditor(binaryValue.getValue(), editListener);
 			break;
 		case Boolean:
 

@@ -30,7 +30,7 @@ public class ValueDeSerializer {
         String typeStr = value.getType().name();
         String valueStr;
         if(value.getType() == ValueType.Binary) {
-            valueStr = SerializedValue.serializeBinaryContent(((XBinaryValue)value).contents());
+            valueStr = SerializedValue.serializeBinaryContent(((XBinaryValue)value).getValue());
         } else {
             valueStr = value.toString();
         }
