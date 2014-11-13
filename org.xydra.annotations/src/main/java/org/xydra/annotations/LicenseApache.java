@@ -19,7 +19,9 @@ import java.lang.annotation.Target;
  * @author xamde
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.METHOD, ElementType.TYPE, ElementType.PACKAGE })
+@Target({ ElementType.METHOD, ElementType.TYPE, ElementType.PACKAGE,
+// TODO parse license annotations also for fields
+		ElementType.FIELD })
 @LicenseAnnotation(id = "Apache2_0", label = "Apache 2.0 License")
 public @interface LicenseApache {
 
