@@ -1503,4 +1503,42 @@ public class XValueJavaUtils {
 			return null;
 		}
 	}
+
+	// manual code:
+
+	/**
+	 * @param value should not be an empty collection
+	 * @return
+	 * @throws IllegalArgumentException if Java type does not map to a Xydra
+	 *             type
+	 */
+	public static XValue toValue(Object object) throws IllegalArgumentException {
+		if (object instanceof XValue) {
+			return (XValue) object;
+		} else if (object instanceof List<?>) {
+			List<?> list = (List<?>) object;
+			if (list.isEmpty()) {
+				// no type information for empty list
+				throw new IllegalArgumentException("Cannot handle empty collections");
+			}
+			@SuppressWarnings("unused")
+			Object first = list.get(0);
+			// TODO map to xydra type, convert all elements
+			throw new IllegalStateException("too lazy too implement this");
+		} else if (object instanceof Long) {
+			return toLong((Long) object);
+		} else if (object instanceof Double) {
+			return toDouble((Double) object);
+		} else if (object instanceof Integer) {
+			return toInteger((Integer) object);
+		} else if (object instanceof String) {
+			return toString((String) object);
+		} else if (object instanceof Boolean) {
+			return toBoolean((Boolean) object);
+		} else if (object instanceof XId) {
+			return toId((XId) object);
+		}
+		throw new IllegalStateException("too lazy too implement this for type "
+				+ object.getClass().getName());
+	}
 }
