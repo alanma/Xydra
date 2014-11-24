@@ -259,6 +259,10 @@ public class MapSetIndex<K, E> implements IMapSetIndex<K, E> {
 		}
 	}
 
+	/**
+	 * @param key
+	 * @return roughly the equivalent of {@link #lookup(Object)}.iterator
+	 */
 	public Iterator<E> valueIterator(K key) {
 		IEntrySet<E> index0 = this.map.get(key);
 		return index0 == null ? NoneIterator.<E> create() : index0.iterator();

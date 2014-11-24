@@ -2,6 +2,14 @@ package org.xydra.index.query;
 
 import org.xydra.index.impl.DebugUtils;
 
+/**
+ * A generic triple
+ * 
+ * @author xamde
+ * @param <K>
+ * @param <L>
+ * @param <E>
+ */
 public class KeyKeyEntryTuple<K, L, E> implements ITriple<K, L, E>, HasEntry<E> {
 
 	private E entry;
