@@ -14,19 +14,14 @@ public class UniformTripleIndex<K> extends FastContainsTripleIndex<K, K, K> impl
 	private static final long serialVersionUID = 7121877986612175167L;
 
 	/**
-	 * @param c1
-	 *            constraint for component 1 of triple (subject)
-	 * @param c2
-	 *            constraint for component 2 of triple (property)
-	 * @param c3
-	 *            constraint for component 3 of triple (object)
-	 * @param projectedConstraint
-	 *            (1,2, or 3)
+	 * @param c1 constraint for component 1 of triple (subject)
+	 * @param c2 constraint for component 2 of triple (property)
+	 * @param c3 constraint for component 3 of triple (object)
+	 * @param projectedConstraint (1,2, or 3)
 	 * @return an {@link Iterator} that contains all triples matching the given
 	 *         constraints, projected to a single component (first, second, or
 	 *         third)
 	 */
-
 	@Override
 	public Iterator<K> getMatchingAndProject(Constraint<K> c1, Constraint<K> c2, Constraint<K> c3,
 			int projectedConstraint) {

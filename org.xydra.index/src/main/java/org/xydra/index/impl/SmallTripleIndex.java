@@ -7,7 +7,6 @@ import org.xydra.index.ITripleIndex;
 import org.xydra.index.query.Constraint;
 import org.xydra.index.query.EqualsConstraint;
 import org.xydra.index.query.ITriple;
-import org.xydra.index.query.KeyKeyEntryTuple;
 import org.xydra.index.query.Wildcard;
 
 /**
@@ -15,12 +14,9 @@ import org.xydra.index.query.Wildcard;
  * 
  * @author voelkel
  * 
- * @param <K>
- *            key type 1
- * @param <L>
- *            key type 2
- * @param <M>
- *            key type 3
+ * @param <K> key type 1
+ * @param <L> key type 2
+ * @param <M> key type 3
  */
 public class SmallTripleIndex<K, L, M> implements ITripleIndex<K, L, M> {
 
@@ -47,11 +43,11 @@ public class SmallTripleIndex<K, L, M> implements ITripleIndex<K, L, M> {
 
 	/**
 	 * @param key1
-	 *            @NeverNull
+	 * @NeverNull
 	 * @param key2
-	 *            @NeverNull
+	 * @NeverNull
 	 * @param key3
-	 *            @NeverNull
+	 * @NeverNull
 	 * @return true if triple index contains the given triple
 	 */
 	@Override
@@ -78,16 +74,6 @@ public class SmallTripleIndex<K, L, M> implements ITripleIndex<K, L, M> {
 		}
 	}
 
-	/**
-	 * @param c1
-	 *            constraint for component 1 of triple (subject)
-	 * @param c2
-	 *            constraint for component 2 of triple (property)
-	 * @param c3
-	 *            constraint for component 3 of triple (object)
-	 * @return an {@link Iterator} over all {@link KeyKeyEntryTuple} that match
-	 *         the given constraints
-	 */
 	@Override
 	public Iterator<ITriple<K, L, M>> getTriples(Constraint<K> c1, Constraint<L> c2,
 			Constraint<M> c3) {
@@ -99,6 +85,14 @@ public class SmallTripleIndex<K, L, M> implements ITripleIndex<K, L, M> {
 			throw new IllegalArgumentException("c3 was null");
 		Iterator<ITriple<K, L, M>> tupleIterator = this.index_s_p_o.tupleIterator(c1, c2, c3);
 		return tupleIterator;
+	}
+
+	@Override
+	public Iterator<ITriple<K, L, M>> getTriples(K s, L p, M o) {
+		Constraint<K> c1 = s == null ? new Wildcard<K>() : new EqualsConstraint<K>(s);
+		Constraint<L> c2 = p == null ? new Wildcard<L>() : new EqualsConstraint<L>(p);
+		Constraint<M> c3 = o == null ? new Wildcard<M>() : new EqualsConstraint<M>(o);
+		return getTriples(c1, c2, c3);
 	}
 
 	@Override

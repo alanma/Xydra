@@ -6,6 +6,7 @@ import org.xydra.index.IEntrySet;
 import org.xydra.index.IMapSetIndex;
 import org.xydra.index.ITripleIndex;
 import org.xydra.index.iterator.ITransformer;
+import org.xydra.index.iterator.Iterators;
 import org.xydra.index.iterator.NoneIterator;
 import org.xydra.index.iterator.TransformingIterator;
 import org.xydra.index.query.Constraint;
@@ -24,12 +25,9 @@ import org.xydra.index.query.Wildcard;
  * 
  * @author voelkel
  * 
- * @param <K>
- *            key type 1 (s)
- * @param <L>
- *            key type 2 (p)
- * @param <M>
- *            key type 3 (o)
+ * @param <K> key type 1 (s)
+ * @param <L> key type 2 (p)
+ * @param <M> key type 3 (o)
  */
 public class FastTripleIndex<K, L, M> extends SmallTripleIndex<K, L, M> implements
 		ITripleIndex<K, L, M> {
@@ -117,11 +115,11 @@ public class FastTripleIndex<K, L, M> extends SmallTripleIndex<K, L, M> implemen
 
 	/**
 	 * @param c1
-	 *            @CanBeNull to denote wildcard
+	 * @CanBeNull to denote wildcard
 	 * @param c2
-	 *            @CanBeNull to denote wildcard
+	 * @CanBeNull to denote wildcard
 	 * @param c3
-	 *            @CanBeNull to denote wildcard
+	 * @CanBeNull to denote wildcard
 	 */
 	@Override
 	public boolean contains(K c1, L c2, M c3) {
@@ -163,13 +161,14 @@ public class FastTripleIndex<K, L, M> extends SmallTripleIndex<K, L, M> implemen
 
 	/**
 	 * @param c1
-	 *            @CanBeNull to denote wildcard
+	 * @CanBeNull to denote wildcard
 	 * @param c2
-	 *            @CanBeNull to denote wildcard
+	 * @CanBeNull to denote wildcard
 	 * @param c3
-	 *            @CanBeNull to denote wildcard
+	 * @CanBeNull to denote wildcard
 	 * @return an iterator over all matching triples
 	 */
+	@Override
 	public Iterator<ITriple<K, L, M>> getTriples(K c1, L c2, M c3) {
 		/* avoid creating Constraint and Wildcard objects */
 
@@ -213,10 +212,8 @@ public class FastTripleIndex<K, L, M> extends SmallTripleIndex<K, L, M> implemen
 	}
 
 	/**
-	 * @param s
-	 *            @NeverNull
-	 * @param p
-	 *            @NeverNull
+	 * @param s @NeverNull
+	 * @param p @NeverNull
 	 * @return an iterator over all objects matching (s,p,*)
 	 */
 	public Iterator<M> getObjects_SPX(K s, L p) {
@@ -232,8 +229,7 @@ public class FastTripleIndex<K, L, M> extends SmallTripleIndex<K, L, M> implemen
 	}
 
 	/**
-	 * @param s
-	 *            @NeverNull
+	 * @param s @NeverNull
 	 * @return an iterator over (p,o)-tuples for the given s @NeverNull
 	 */
 	public Iterator<KeyEntryTuple<L, M>> getTupels_SXX(K s) {
@@ -245,10 +241,8 @@ public class FastTripleIndex<K, L, M> extends SmallTripleIndex<K, L, M> implemen
 	}
 
 	/**
-	 * @param p
-	 *            @NeverNull
-	 * @param o
-	 *            @NeverNull
+	 * @param p @NeverNull
+	 * @param o @NeverNull
 	 * @return an iterator over all subjects matching (*,p,o) @NeverNull
 	 */
 	public Iterator<K> getSubjects_XPO(L p, M o) {
@@ -264,11 +258,9 @@ public class FastTripleIndex<K, L, M> extends SmallTripleIndex<K, L, M> implemen
 	}
 
 	/**
-	 * @param s
-	 *            @NeverNull
-	 * @param o
-	 *            @NeverNull
-	 * @return an iterator over all predicates occuring in triples (s,*,o) @NeverNull
+	 * @param s @NeverNull
+	 * @param o @NeverNull
+	 * @return an iterator over all predicates occurring in triples (s,*,o) @NeverNull
 	 */
 	public Iterator<L> getPredicates_SXO(K s, M o) {
 		assert s != null;
@@ -283,8 +275,41 @@ public class FastTripleIndex<K, L, M> extends SmallTripleIndex<K, L, M> implemen
 	}
 
 	/**
-	 * @param o
-	 *            @NeverNull
+	 * @param s @NeverNull
+	 * @return a distinct iterator over all predicates occurring in triples
+	 *         (s,*,*) @NeverNull
+	 */
+	public Iterator<L> getPredicates_SX(K s) {
+		assert s != null;
+		IMapSetIndex<L, M> index_s_Px_Ox = this.index_s_p_o.getMapEntry(s);
+		if (index_s_Px_Ox == null)
+			return Iterators.none();
+		return index_s_Px_Ox.keyIterator();
+	}
+
+	/**
+	 * @return a distinct iterator over all used predicates
+	 */
+	public Iterator<L> getPredicates() {
+		return this.index_p_o_s.key1Iterator();
+	}
+
+	/**
+	 * @return a distinct iterator over all subjects
+	 */
+	public Iterator<K> getSubjects() {
+		return this.index_s_p_o.key1Iterator();
+	}
+
+	/**
+	 * @return a distinct iterator over all objects
+	 */
+	public Iterator<M> getObjects() {
+		return this.index_o_s_p.key1Iterator();
+	}
+
+	/**
+	 * @param o @NeverNull
 	 * @return an iterator over (s,p)-tuples for the given o
 	 */
 	public Iterator<KeyEntryTuple<K, L>> getTupels_XXO(M o) {
@@ -296,8 +321,7 @@ public class FastTripleIndex<K, L, M> extends SmallTripleIndex<K, L, M> implemen
 	}
 
 	/**
-	 * @param p
-	 *            @NeverNull
+	 * @param p @NeverNull
 	 * @return an iterator over (s,o)-tuples for the given p
 	 */
 	public Iterator<KeyEntryTuple<M, K>> getTupels_XPX(L p) {
@@ -336,9 +360,10 @@ public class FastTripleIndex<K, L, M> extends SmallTripleIndex<K, L, M> implemen
 	 * This method should be called after deserialisation to rebuild the
 	 * transient indexes. Deserialisation in GWT and plain Java is quite
 	 * different and incompatible, so this is not called automatically. For
-	 * plain Java see
-	 * http://java.sun.com/developer/technicalArticles/Programming
-	 * /serialization/
+	 * plain Java see <a href=
+	 * "http://java.sun.com/developer/technicalArticles/Programming/serialization/"
+	 * >http://java.sun.com/developer/technicalArticles/Programming/
+	 * serialization/</a>
 	 */
 	public void rebuildAfterDeserialize() {
 		Iterator<ITriple<K, L, M>> it = this.index_s_p_o.tupleIterator(new Wildcard<K>(),
@@ -356,4 +381,5 @@ public class FastTripleIndex<K, L, M> extends SmallTripleIndex<K, L, M> implemen
 	public Iterator<M> entryIterator() {
 		return this.index_o_s_p.keyIterator();
 	}
+
 }

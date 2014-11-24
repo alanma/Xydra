@@ -1,10 +1,6 @@
 package org.xydra.index;
 
-import java.util.Iterator;
-
 import org.xydra.index.IMapMapSetIndex.IMapMapSetDiff;
-import org.xydra.index.query.Constraint;
-import org.xydra.index.query.ITriple;
 
 /**
  * An index for triples of keys that supports queries on all three keys. Indexes
@@ -13,34 +9,11 @@ import org.xydra.index.query.ITriple;
  * The same concept for two-tuples instead of three-tuples is called
  * {@link IPairIndex}.
  * 
- * @param <K>
- *            key type
- * @param <L>
- *            key type
- * @param <M>
- *            key type
+ * @param <K> key type
+ * @param <L> key type
+ * @param <M> key type
  */
-public interface ITripleIndex<K, L, M> extends IIndex, ITripleSink<K, L, M> {
-
-	/**
-	 * @param c1
-	 * @param c2
-	 * @param c3
-	 * @return true if there is a triple in the index where s matches c1, p
-	 *         matches c2 and o matches c3
-	 */
-	boolean contains(Constraint<K> c1, Constraint<L> c2, Constraint<M> c3);
-
-	/**
-	 * @param s
-	 *            @NeverNull
-	 * @param p
-	 *            @NeverNull
-	 * @param o
-	 *            @NeverNull
-	 * @return true iff
-	 */
-	boolean contains(K s, L p, M o);
+public interface ITripleIndex<K, L, M> extends IIndex, ITripleSink<K, L, M>, ITripleSource<K, L, M> {
 
 	/**
 	 * Remove the given triple from the index, if it was present
@@ -52,11 +25,6 @@ public interface ITripleIndex<K, L, M> extends IIndex, ITripleSink<K, L, M> {
 	void deIndex(K s, L p, M o);
 
 	/**
-	 * Dump the contents to Xydra Logging as log.info(...)
-	 */
-	void dump();
-
-	/**
 	 * Add the given triple to the index
 	 * 
 	 * @param s
@@ -65,17 +33,6 @@ public interface ITripleIndex<K, L, M> extends IIndex, ITripleSink<K, L, M> {
 	 */
 	@Override
 	void index(K s, L p, M o);
-
-	/**
-	 * @param c1
-	 *            @NotNull
-	 * @param c2
-	 *            @NotNull
-	 * @param c3
-	 *            @NotNull
-	 * @return an iterator with all triples matching the given constraints
-	 */
-	Iterator<ITriple<K, L, M>> getTriples(Constraint<K> c1, Constraint<L> c2, Constraint<M> c3);
 
 	/**
 	 * @param other
