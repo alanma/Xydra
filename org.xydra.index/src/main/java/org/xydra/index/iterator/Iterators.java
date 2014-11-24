@@ -5,6 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -14,6 +15,7 @@ import java.util.Set;
 
 import org.xydra.annotations.LicenseApache;
 import org.xydra.annotations.RunsInGWT;
+import org.xydra.index.query.Constraint;
 
 /**
  * @author xamde
@@ -452,6 +454,39 @@ public class Iterators {
 				return true;
 		}
 		return false;
+	}
+
+	/**
+	 * Makes constraints (a very narrow concept) compatible with filters (a very
+	 * generic concept)
+	 * 
+	 * @param base
+	 * @param constraint
+	 * @return an iterator which returns only those elements of base that match
+	 *         the constraint
+	 */
+	public static <E> Iterator<E> filterWithConstraint(Iterator<E> base,
+			final Constraint<E> constraint) {
+		return Iterators.filter(base, new IFilter<E>() {
+
+			@Override
+			public boolean matches(E entry) {
+				return constraint.matches(entry);
+			}
+		});
+	}
+
+	/**
+	 * Applies the natural sorting via an internal list. Don't do this on huge
+	 * iterators :-)
+	 * 
+	 * @param it
+	 * @return
+	 */
+	public static <E extends Comparable<E>> Iterator<E> sort(Iterator<E> it) {
+		List<E> list = Iterators.toArrayList(it);
+		Collections.sort(list);
+		return list.iterator();
 	}
 
 }
