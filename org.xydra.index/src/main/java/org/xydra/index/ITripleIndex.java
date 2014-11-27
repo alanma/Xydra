@@ -13,26 +13,8 @@ import org.xydra.index.IMapMapSetIndex.IMapMapSetDiff;
  * @param <L> key type
  * @param <M> key type
  */
-public interface ITripleIndex<K, L, M> extends IIndex, ITripleSink<K, L, M>, ITripleSource<K, L, M> {
-
-	/**
-	 * Remove the given triple from the index, if it was present
-	 * 
-	 * @param s
-	 * @param p
-	 * @param o
-	 */
-	void deIndex(K s, L p, M o);
-
-	/**
-	 * Add the given triple to the index
-	 * 
-	 * @param s
-	 * @param p
-	 * @param o
-	 */
-	@Override
-	void index(K s, L p, M o);
+public interface ITripleIndex<K, L, M> extends IIndex, IRemovableTripleSink<K, L, M>,
+		ITripleSource<K, L, M> {
 
 	/**
 	 * @param other
