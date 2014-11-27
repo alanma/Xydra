@@ -311,6 +311,39 @@ public class Iterators {
 		return result.iterator();
 	}
 
+	/**
+	 * Lazily evaluated union
+	 * 
+	 * @param partIterators smallest iterators should come first, each iterator
+	 *            must be duplicate-free
+	 * @return an iterator representing the set-union of the set implied by the
+	 *         partial iterators
+	 */
+	public static <E> Iterator<E> setUnion(Iterator<E> smallIterator, Iterator<E> largeIterator) {
+		// none
+		if (!smallIterator.hasNext())
+			return largeIterator;
+
+		if (!largeIterator.hasNext())
+			return NoneIterator.create();
+
+		final Set<E> smallSet = new HashSet<E>();
+		return Iterators.concat(Iterators.filter(smallSet.iterator(), new IFilter<E>() {
+
+			@Override
+			public boolean matches(E entry) {
+				smallSet.add(entry);
+				return true;
+			}
+		}), Iterators.filter(largeIterator, new IFilter<E>() {
+
+			@Override
+			public boolean matches(E entry) {
+				return !smallSet.contains(entry);
+			}
+		}));
+	}
+
 	public static <E> Iterator<E> none() {
 		return NoneIterator.create();
 	}
