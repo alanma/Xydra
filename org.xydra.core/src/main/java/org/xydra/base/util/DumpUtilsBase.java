@@ -204,11 +204,24 @@ public class DumpUtilsBase {
 
 	}
 
-	public static void dump(Map<?, ?> referenceValueMap) {
+	public static void dump(Map<?, ?> map) {
 		// IMPROVE sort, if possible
-		for (Entry<?, ?> e : referenceValueMap.entrySet()) {
+		for (Entry<?, ?> e : map.entrySet()) {
 			log.info("Key '" + e.getKey() + "' = Value '" + e.getValue() + "'");
 		}
+	}
+
+	public static StringBuilder toStringBuilder(Map<?, ?> map) {
+		StringBuilder b = new StringBuilder();
+		// IMPROVE sort, if possible
+		for (Entry<?, ?> e : map.entrySet()) {
+			b.append("Key '");
+			b.append(e.getKey());
+			b.append("' = Value '");
+			b.append(e.getValue());
+			b.append("'\n");
+		}
+		return b;
 	}
 
 }

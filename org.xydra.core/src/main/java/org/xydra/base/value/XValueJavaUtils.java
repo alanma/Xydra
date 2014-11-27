@@ -1507,13 +1507,15 @@ public class XValueJavaUtils {
 	// manual code:
 
 	/**
-	 * @param value should not be an empty collection
+	 * @param value should not be an empty collection @CanBeNull
 	 * @return
 	 * @throws IllegalArgumentException if Java type does not map to a Xydra
 	 *             type
 	 */
 	public static XValue toValue(Object object) throws IllegalArgumentException {
-		if (object instanceof XValue) {
+		if (object == null) {
+			return null;
+		} else if (object instanceof XValue) {
 			return (XValue) object;
 		} else if (object instanceof List<?>) {
 			List<?> list = (List<?>) object;
