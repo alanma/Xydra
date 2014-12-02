@@ -1,6 +1,26 @@
 package org.xydra.base.id;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+
 public class SimpleUTF8 {
+
+	/**
+	 * @param anyString @NeverNull
+	 * @return utf-8 encoding
+	 */
+	public static byte[] toUtf8Bytes_fromAnyString(String anyString) {
+		if (isSimpleUtf8CompatibleString(anyString)) {
+			return toUtf8Bytes_fromSimpleString(anyString);
+		} else {
+			try {
+				return anyString.getBytes("UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				throw new RuntimeException("Error", e);
+			}
+		}
+	}
 
 	/**
 	 * @param simpleString @NeverNull
@@ -8,12 +28,13 @@ public class SimpleUTF8 {
 	 *         starts with a-zA-Z --> can be converted to UTF-8 by just taking
 	 *         the bytes
 	 */
-	public static byte[] toUtf8Bytes(String simpleString) {
+	public static byte[] toUtf8Bytes_fromSimpleString(String simpleString) {
 		byte[] bytes = new byte[simpleString.length()];
 		for (int i = 0; i < bytes.length; i++) {
 			char c = simpleString.charAt(i);
-			assert isXmlNameChar(c);
-			assert i > 0 || isXmlNameStartChar(c);
+			assert isXmlNameCharAndWithinAscii(c) : "Non-xmlnamechar '" + c + "' in '"
+					+ simpleString + "'";
+			assert i > 0 || isXmlNameStartCharAndWithinAscii(c);
 			bytes[i] = (byte) c;
 		}
 		return bytes;
@@ -34,11 +55,11 @@ public class SimpleUTF8 {
 			int c = s.codePointAt(i);
 			i += Character.charCount(c);
 			if (i == 0) {
-				if (!isXmlNameStartChar((char) c)) {
+				if (!isXmlNameStartCharAndWithinAscii((char) c)) {
 					return false;
 				}
 			} else {
-				if (!isXmlNameChar((char) c)) {
+				if (!isXmlNameCharAndWithinAscii((char) c)) {
 					return false;
 				}
 			}
@@ -52,8 +73,8 @@ public class SimpleUTF8 {
 	 * @param c
 	 * @return true for valid XML 1.0 NAME_CHAR (excluding ':' colon)
 	 */
-	public static boolean isXmlNameChar(int c) {
-		return isXmlNameStartChar(c)// .
+	public static boolean isXmlNameCharAndWithinAscii(int c) {
+		return isXmlNameStartCharAndWithinAscii(c)// .
 				|| ('0' <= c && c <= '9')// .
 				|| (c == '-')// .
 				|| (c == '.')// .
@@ -66,19 +87,30 @@ public class SimpleUTF8 {
 	 * @param c
 	 * @return true for valid XML 1.0 NAMESTART_CHAR (excluding ':' colon)
 	 */
-	public static boolean isXmlNameStartChar(int c) {
+	public static boolean isXmlNameStartCharAndWithinAscii(int c) {
 		return ('a' <= c && c <= 'z') // .
 				|| ('A' <= c && c <= 'Z')// .
 				|| (c == '_')// .
 		;
 	}
 
-	public static char[] toUtf8Chars(byte[] bytes) {
+	public static char[] toUtf8Chars_fromAnyBytes(byte[] bytes) {
+
+		if (isSimpleUtf8CompatibleBytes(bytes)) {
+			return toUtf8Chars_fromSimpleBytes(bytes);
+		} else {
+
+			ByteBuffer buf = ByteBuffer.wrap(bytes);
+			return Charset.forName("UTF-8").decode(buf).array();
+		}
+	}
+
+	public static char[] toUtf8Chars_fromSimpleBytes(byte[] bytes) {
 		char[] chars = new char[bytes.length];
 		for (int i = 0; i < chars.length; i++) {
 			char c = (char) bytes[i];
-			assert isXmlNameChar(c) : "Otherwise simple UTF8 does not work for sure";
-			assert i > 0 || isXmlNameStartChar(c);
+			assert isXmlNameCharAndWithinAscii(c) : "Otherwise simple UTF8 does not work for sure";
+			assert i > 0 || isXmlNameStartCharAndWithinAscii(c);
 			chars[i] = c;
 		}
 		return chars;
@@ -89,7 +121,7 @@ public class SimpleUTF8 {
 	 * @return
 	 */
 	public static String toUtf8String(byte[] bytes) {
-		return new String(toUtf8Chars(bytes));
+		return new String(toUtf8Chars_fromAnyBytes(bytes));
 	}
 
 	/**
@@ -101,11 +133,11 @@ public class SimpleUTF8 {
 		for (int i = 0; i < bytes.length; i++) {
 			byte b = bytes[i];
 			if (i == 0) {
-				if (!isXmlNameStartChar((char) b)) {
+				if (!isXmlNameStartCharAndWithinAscii((char) b)) {
 					return false;
 				}
 			} else {
-				if (!isXmlNameChar((char) b)) {
+				if (!isXmlNameCharAndWithinAscii((char) b)) {
 					return false;
 				}
 			}

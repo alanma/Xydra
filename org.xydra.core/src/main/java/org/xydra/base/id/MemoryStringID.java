@@ -81,6 +81,6 @@ public class MemoryStringID implements XId, Serializable {
 
 	@Override
 	public byte[] toBytes() {
-		return SimpleUTF8.toUtf8Bytes(this.string);
+		return SimpleUTF8.toUtf8Bytes_fromAnyString(this.string);
 	}
 }
