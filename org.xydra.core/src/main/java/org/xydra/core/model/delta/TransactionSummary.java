@@ -116,7 +116,7 @@ public class TransactionSummary {
 	}
 
 	public class SummaryModel extends SummaryEntity {
-		public Map<XId, SummaryObject> map = new HashMap<>();
+		public Map<XId, SummaryObject> map = new HashMap<XId, SummaryObject>();
 		private XAddress modelAddress;
 
 		public SummaryModel(XAddress modelAddress) {
@@ -156,7 +156,7 @@ public class TransactionSummary {
 	}
 
 	public class SummaryObject extends SummaryEntity {
-		public Map<XId, SummaryField> map = new HashMap<>();
+		public Map<XId, SummaryField> map = new HashMap<XId, SummaryField>();
 
 		public SummaryField createOrGet(XId field) {
 			SummaryField sf = this.map.get(field);
