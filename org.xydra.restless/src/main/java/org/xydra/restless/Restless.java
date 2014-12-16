@@ -208,8 +208,7 @@ public class Restless extends HttpServlet {
 	 * Register a handler that will receive exceptions thrown by the executed
 	 * REST methods.
 	 * 
-	 * @param handler
-	 *            a non-null {@link RestlessExceptionHandler} @NeverNull
+	 * @param handler a non-null {@link RestlessExceptionHandler} @NeverNull
 	 */
 	public void addExceptionHandler(@NeverNull RestlessExceptionHandler handler) {
 		synchronized (this.exceptionHandlers) {
@@ -220,12 +219,9 @@ public class Restless extends HttpServlet {
 	/**
 	 * Shortcut for adding addMethod( method = 'GET', admin-only = 'false' )
 	 * 
-	 * @param pathTemplate
-	 *            see {@link PathTemplate} for syntax @NeverNull
-	 * @param instanceOrClass
-	 *            a Java instance or class @NeverNull
-	 * @param javaMethodName
-	 *            a method name like 'getName', see
+	 * @param pathTemplate see {@link PathTemplate} for syntax @NeverNull
+	 * @param instanceOrClass a Java instance or class @NeverNull
+	 * @param javaMethodName a method name like 'getName', see
 	 *            {@link #addMethod(String, String, Object, String, boolean, RestlessParameter...)}
 	 *            for handling of this parameter @NeverNull
 	 * @param parameter
@@ -242,24 +238,19 @@ public class Restless extends HttpServlet {
 	 * if any. Otherwise the method return value is converted toString() and
 	 * returned as text/plain.
 	 * 
-	 * @param pathTemplate
-	 *            see {@link PathTemplate} for syntax @NeverNull
-	 * @param httpMethod
-	 *            one of 'GET', 'PUT', 'POST', or 'DELETE' @NeverNull
-	 * @param instanceOrClass
-	 *            Java instance to be called or Java class to be instantiated.
-	 *            If a class is given, the instance is created on first access
-	 *            and cached in memory from there on. @NeverNull
-	 * @param javaMethodName
-	 *            to be called on the Java instance. This method may not have
-	 *            several signatures. @NeverNull
+	 * @param pathTemplate see {@link PathTemplate} for syntax @NeverNull
+	 * @param httpMethod one of 'GET', 'PUT', 'POST', or 'DELETE' @NeverNull
+	 * @param instanceOrClass Java instance to be called or Java class to be
+	 *            instantiated. If a class is given, the instance is created on
+	 *            first access and cached in memory from there on. @NeverNull
+	 * @param javaMethodName to be called on the Java instance. This method may
+	 *            not have several signatures. @NeverNull
 	 * @param adminOnly
-	 * @param parameter
-	 *            in the order in which they are used in the Java method. The
-	 *            Java method may additionally use {@link HttpServletRequest}
-	 *            and {@link HttpServletResponse} at any position in the Java
-	 *            method. {@link HttpServletResponse} should be used to send a
-	 *            response. @NeverNull
+	 * @param parameter in the order in which they are used in the Java method.
+	 *            The Java method may additionally use
+	 *            {@link HttpServletRequest} and {@link HttpServletResponse} at
+	 *            any position in the Java method. {@link HttpServletResponse}
+	 *            should be used to send a response. @NeverNull
 	 */
 	public void addMethod(@NeverNull String pathTemplate, @NeverNull String httpMethod,
 			@NeverNull Object instanceOrClass, @NeverNull String javaMethodName, boolean adminOnly,
@@ -273,7 +264,7 @@ public class Restless extends HttpServlet {
 			log.debug("Add method " + restlessMethod);
 		}
 		assert RestlessStatic.methodByName(instanceOrClass, javaMethodName) != null : "method '"
-				+ javaMethodName + "' not found";
+				+ javaMethodName + "' not found in " + instanceOrClass;
 	}
 
 	public void addRequestListener(IRequestListener requestListener) {
@@ -318,7 +309,6 @@ public class Restless extends HttpServlet {
 		}
 	}
 
-	
 	/**
 	 * @param req
 	 * @NeverNull
@@ -333,7 +323,6 @@ public class Restless extends HttpServlet {
 		restlessService(req, res);
 	}
 
-	
 	/**
 	 * @param req
 	 * @NeverNull
@@ -354,7 +343,6 @@ public class Restless extends HttpServlet {
 		}
 	}
 
-	
 	/**
 	 * @param req
 	 * @NeverNull
@@ -464,7 +452,6 @@ public class Restless extends HttpServlet {
 		}
 	}
 
-	
 	/**
 	 * @param req
 	 * @NeverNull
@@ -479,7 +466,6 @@ public class Restless extends HttpServlet {
 		restlessService(req, res);
 	}
 
-	
 	/**
 	 * @param req
 	 * @NeverNull
@@ -530,8 +516,7 @@ public class Restless extends HttpServlet {
 	/**
 	 * Helper method to make writing JUnit tests easier.
 	 * 
-	 * @param key
-	 *            attribute name @CanBeNull
+	 * @param key attribute name @CanBeNull
 	 * @return when run in a servlet container, this method is simply a
 	 *         short-cut for getServletContext().getAttribute(key,value).
 	 *         Otherwise a local hash-map is used that can be set via
@@ -729,11 +714,9 @@ public class Restless extends HttpServlet {
 	/**
 	 * IMPROVE make this faster
 	 * 
-	 * @param appClassName
-	 *            fully qualified java class name
+	 * @param appClassName fully qualified java class name
 	 * @return a String with statistics
-	 * @throws RuntimeException
-	 *             for many reflection-related issues
+	 * @throws RuntimeException for many reflection-related issues
 	 */
 	private String instatiateAndInit(String appClassName) throws RuntimeException {
 		NanoClock clock = new NanoClock();
@@ -981,10 +964,8 @@ public class Restless extends HttpServlet {
 	 * getServletContext().setAttribute(key,value). Otherwise a local hash-map
 	 * is used.
 	 * 
-	 * @param key
-	 *            attribute name @NeverNull
-	 * @param value
-	 *            attribute value @NeverNull
+	 * @param key attribute name @NeverNull
+	 * @param value attribute value @NeverNull
 	 */
 
 	public void setServletContextAttribute(@NeverNull String key, @NeverNull Object value) {
