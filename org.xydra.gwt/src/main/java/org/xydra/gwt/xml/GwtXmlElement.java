@@ -3,15 +3,19 @@ package org.xydra.gwt.xml;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.xydra.annotations.RunsInGWT;
 import org.xydra.core.serialize.XydraElement;
 import org.xydra.core.serialize.xml.AbstractXmlElement;
 import org.xydra.core.serialize.xml.XmlEncoder;
+import org.xydra.index.iterator.ITransformer;
+import org.xydra.index.iterator.Iterators;
 import org.xydra.index.query.Pair;
 
 import com.google.gwt.xml.client.CharacterData;
 import com.google.gwt.xml.client.Element;
+import com.google.gwt.xml.client.NamedNodeMap;
 import com.google.gwt.xml.client.Node;
 import com.google.gwt.xml.client.NodeList;
 
@@ -19,15 +23,25 @@ import com.google.gwt.xml.client.NodeList;
  * {@link XydraElement} implementation that wraps an
  * {@link com.google.gwt.xml.client.Element}.
  * 
- * This is an exact character-for-character copy of XmlElement, but it uses XML
- * classes from the com.google.gw.xml.client package instead of the standard
- * java XML classes, which are not available in GWT.
+ * This is an exact character-for-character copy of XmlElement, with different
+ * import statements. It uses XML classes from the com.google.gwt.xml.client
+ * package instead of the standard java XML classes, which are not available in
+ * GWT.
  * 
  * @author dscharrer
  * 
  */
 @RunsInGWT(true)
 public class GwtXmlElement extends AbstractXmlElement {
+
+	private static final ITransformer<Node, String> NODE2NODENAME = new ITransformer<Node, String>() {
+
+		@Override
+		public String transform(Node in) {
+			return in.getNodeName();
+		}
+
+	};
 
 	private final Element element;
 
@@ -42,6 +56,45 @@ public class GwtXmlElement extends AbstractXmlElement {
 		} else {
 			return null;
 		}
+	}
+
+	@Override
+	public Iterator<String> getAttributes() {
+		Iterator<Node> nodeIt = new NamedNodeMap2NodeIterator(this.element.getAttributes());
+		return Iterators.transform(nodeIt, NODE2NODENAME);
+	}
+
+	static class NamedNodeMap2NodeIterator implements Iterator<Node> {
+
+		private NamedNodeMap namedNodeMap;
+
+		public NamedNodeMap2NodeIterator(NamedNodeMap namedNodeMap) {
+			this.namedNodeMap = namedNodeMap;
+		}
+
+		int nextPos = 0;
+
+		@Override
+		public boolean hasNext() {
+			return this.nextPos < this.namedNodeMap.getLength();
+		}
+
+		@Override
+		public Node next() {
+			if (!hasNext()) {
+				throw new NoSuchElementException();
+			}
+
+			Node node = this.namedNodeMap.item(this.nextPos);
+			this.nextPos++;
+			return node;
+		}
+
+		@Override
+		public void remove() {
+			throw new UnsupportedOperationException();
+		}
+
 	}
 
 	private static Iterator<XydraElement> nodeListToIterator(NodeList nodes) {
