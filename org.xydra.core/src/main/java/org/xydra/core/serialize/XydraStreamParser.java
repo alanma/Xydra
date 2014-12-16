@@ -1,6 +1,7 @@
 package org.xydra.core.serialize;
 
 import org.xydra.base.minio.MiniReader;
+import org.xydra.core.serialize.xml.XmlOut;
 
 /**
  * A minimal XML/JSON parser for documents generated with {@link XydraOut}.
@@ -8,20 +9,19 @@ import org.xydra.base.minio.MiniReader;
  * @author dscharrer
  * 
  */
-public interface XydraParser {
+public interface XydraStreamParser {
 
 	/**
-	 * Parse the given String as a document and return the root element.
+	 * Parse the given String as an event stream
 	 * 
-	 * @param data
-	 * @return the parsed result or throws an Exception
+	 * @param miniReader
+	 * @param xmlOut where to send the events to
+	 * @return true if all went well
 	 * 
 	 * @throws IllegalArgumentException if the given string is not a valid
 	 *             document.
 	 */
-	XydraElement parse(String data) throws IllegalArgumentException;
-
-	XydraElement parse(MiniReader miniReader) throws IllegalArgumentException;
+	boolean parse(MiniReader miniReader, XmlOut xmlOut) throws IllegalArgumentException;
 
 	/**
 	 * @return The MIME content type accepted by this parser.

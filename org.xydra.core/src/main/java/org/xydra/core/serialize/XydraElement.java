@@ -9,6 +9,8 @@ import org.xydra.index.query.Pair;
  * A minimal abstraction API to access XML/JSON elements created with
  * {@link XydraOut}.
  * 
+ * Concepts: attribute, child, content, element, entry, type, value
+ * 
  * @author xamde
  * @author dscharrer
  */
@@ -28,6 +30,11 @@ public interface XydraElement {
 	 *         writing via {@link XydraOut#attribute(String, Object)}
 	 */
 	public Object getAttribute(String name);
+
+	/**
+	 * @return iterator over attribute names @NeverNull
+	 */
+	public Iterator<String> getAttributes();
 
 	/**
 	 * Get this element's text content.
@@ -188,6 +195,8 @@ public interface XydraElement {
 	 * @return The type of this element.
 	 * 
 	 *         Sample values: null, xarray, ...
+	 * 
+	 *         In XML: the tag name
 	 */
 	public @NeverNull String getType();
 

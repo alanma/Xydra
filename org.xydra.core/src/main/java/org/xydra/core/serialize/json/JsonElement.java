@@ -29,6 +29,7 @@ public class JsonElement extends AbstractJsonElement {
 	}
 
 	private final Map<String, Object> data;
+
 	private final String type;
 
 	public JsonElement(Map<String, Object> data, String type) {
@@ -46,6 +47,11 @@ public class JsonElement extends AbstractJsonElement {
 	@Override
 	public Object getAttribute(String name) {
 		return this.data.get(name);
+	}
+
+	@Override
+	public Iterator<String> getAttributes() {
+		return this.data.keySet().iterator();
 	}
 
 	@Override
