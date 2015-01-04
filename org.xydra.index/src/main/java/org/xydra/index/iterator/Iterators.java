@@ -414,6 +414,10 @@ public class Iterators {
 		return list;
 	}
 
+	/**
+	 * @param value
+	 * @return the collections as a string, elements separated by ','
+	 */
 	public static <T> String toText(Collection<T> value) {
 		StringBuffer buf = new StringBuffer();
 		for (T s : value) {
