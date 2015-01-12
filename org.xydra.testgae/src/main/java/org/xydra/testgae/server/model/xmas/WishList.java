@@ -11,11 +11,11 @@ import org.xydra.base.rmof.XWritableField;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.value.XV;
+import org.xydra.common.NanoClock;
 import org.xydra.core.X;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.restless.utils.HtmlUtils;
-import org.xydra.restless.utils.NanoClock;
 
 /**
  * One wish list can have many, many wishes. One wish list is persisted as one

@@ -20,27 +20,27 @@ public class XydraLogTest {
 		if (log.isTraceEnabled()) {
 			log.trace("trace");
 		}
-		log.trace("trace", new RuntimeException("e"));
+		log.trace("trace", new RuntimeException("test exception at trace level"));
 
 		if (log.isDebugEnabled()) {
 			log.debug("debug");
 		}
-		log.debug("debug", new RuntimeException("e"));
+		log.debug("debug", new RuntimeException("test exception at debug level"));
 
 		if (log.isInfoEnabled()) {
 			log.info("info");
 		}
-		log.info("info", new RuntimeException("e"));
+		log.info("info", new RuntimeException("test exception at info level"));
 
 		if (log.isWarnEnabled()) {
 			log.warn("warn");
 		}
-		log.warn("warn", new RuntimeException("e"));
+		log.warn("warn", new RuntimeException("test exception at warn level"));
 
 		if (log.isErrorEnabled()) {
 			log.error("error");
 		}
-		log.error("error", new RuntimeException("e"));
+		log.error("error", new RuntimeException("test exception at error level"));
 	}
 
 	public static void main(String[] args) {

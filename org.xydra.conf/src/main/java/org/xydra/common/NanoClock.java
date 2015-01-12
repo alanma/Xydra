@@ -1,4 +1,4 @@
-package org.xydra.restless.utils;
+package org.xydra.common;
 
 import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.NotThreadSafe;

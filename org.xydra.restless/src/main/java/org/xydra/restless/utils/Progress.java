@@ -1,6 +1,7 @@
 package org.xydra.restless.utils;
 
 import org.xydra.annotations.RunsInGWT;
+import org.xydra.common.NanoClock;
 
 /**
  * Count for a given operation the throughput per time unit.
@@ -24,8 +25,7 @@ public class Progress {
 	}
 
 	/**
-	 * @param howMuch
-	 *            number of operations done since last call
+	 * @param howMuch number of operations done since last call
 	 */
 	public void makeProgress(long howMuch) {
 		this.count += howMuch;

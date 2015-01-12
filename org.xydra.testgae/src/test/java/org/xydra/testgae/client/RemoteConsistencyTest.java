@@ -1,8 +1,8 @@
 package org.xydra.testgae.client;
 
+import org.xydra.common.NanoClock;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
-import org.xydra.restless.utils.NanoClock;
 
 @SuppressWarnings("unused")
 public class RemoteConsistencyTest {

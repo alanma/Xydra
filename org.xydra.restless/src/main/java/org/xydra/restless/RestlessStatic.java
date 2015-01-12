@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.xydra.annotations.CanBeNull;
 import org.xydra.annotations.NeverNull;
-import org.xydra.restless.utils.NanoClock;
+import org.xydra.common.NanoClock;
 
 class RestlessStatic {
 

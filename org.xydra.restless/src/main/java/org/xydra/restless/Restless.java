@@ -25,11 +25,11 @@ import javax.servlet.http.HttpServletResponse;
 import org.xydra.annotations.CanBeNull;
 import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.ThreadSafe;
+import org.xydra.common.NanoClock;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.log.spi.ILoggerFactorySPI;
 import org.xydra.restless.utils.HtmlUtils;
-import org.xydra.restless.utils.NanoClock;
 import org.xydra.restless.utils.ServletUtils;
 import org.xydra.restless.utils.XmlUtils;
 

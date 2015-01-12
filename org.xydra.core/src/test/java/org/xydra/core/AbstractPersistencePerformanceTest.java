@@ -13,11 +13,11 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XRepositoryCommand;
 import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
+import org.xydra.common.NanoClock;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.persistence.GetWithAddressRequest;
 import org.xydra.persistence.XydraPersistence;
-import org.xydra.restless.utils.NanoClock;
 import org.xydra.sharedutils.XyAssert;
 import org.xydra.store.XydraRuntime;
 

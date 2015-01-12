@@ -10,9 +10,9 @@ import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.XWritableObject;
 import org.xydra.base.rmof.XWritableRepository;
 import org.xydra.base.value.XV;
+import org.xydra.common.NanoClock;
 import org.xydra.core.XX;
 import org.xydra.persistence.XydraPersistence;
-import org.xydra.restless.utils.NanoClock;
 import org.xydra.store.impl.gae.GaePersistence;
 import org.xydra.store.rmof.impl.delegate.WritableRepositoryOnPersistence;
 

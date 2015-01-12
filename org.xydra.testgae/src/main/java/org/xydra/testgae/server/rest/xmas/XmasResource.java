@@ -8,12 +8,12 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.xydra.base.XId;
 import org.xydra.base.rmof.XWritableRepository;
+import org.xydra.common.NanoClock;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
 import org.xydra.restless.utils.HtmlUtils;
-import org.xydra.restless.utils.NanoClock;
 import org.xydra.restless.utils.ServletUtils;
 import org.xydra.restless.utils.SharedHtmlUtils.METHOD;
 import org.xydra.testgae.server.model.xmas.Xmas;

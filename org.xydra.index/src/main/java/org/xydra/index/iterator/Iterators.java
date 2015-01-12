@@ -415,13 +415,25 @@ public class Iterators {
 	}
 
 	/**
-	 * @param value
+	 * @param collection
 	 * @return the collections as a string, elements separated by ','
 	 */
-	public static <T> String toText(Collection<T> value) {
+	public static <T> String toText(Collection<T> collection) {
 		StringBuffer buf = new StringBuffer();
-		for (T s : value) {
+		for (T s : collection) {
 			buf.append(s).append(",");
+		}
+		return buf.toString();
+	}
+
+	public static <T> String toText(Iterator<T> it) {
+		StringBuffer buf = new StringBuffer();
+		while (it.hasNext()) {
+			T t = it.next();
+			buf.append(t);
+			if (it.hasNext()) {
+				buf.append(",");
+			}
 		}
 		return buf.toString();
 	}
@@ -524,6 +536,18 @@ public class Iterators {
 		List<E> list = Iterators.toArrayList(it);
 		Collections.sort(list);
 		return list.iterator();
+	}
+
+	/**
+	 * Converts a collection of Strings into an array of String
+	 * 
+	 * @param collection of strings
+	 * @return @NeverNull
+	 */
+	public static String[] toArray(Collection<String> collection) {
+		if (collection == null)
+			return new String[0];
+		return new ArrayList<String>(collection).toArray(new String[collection.size()]);
 	}
 
 }

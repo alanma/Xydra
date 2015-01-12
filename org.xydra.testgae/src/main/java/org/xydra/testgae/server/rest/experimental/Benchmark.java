@@ -9,10 +9,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.xydra.base.XId;
 import org.xydra.base.rmof.XWritableModel;
+import org.xydra.common.NanoClock;
 import org.xydra.core.XX;
 import org.xydra.restless.Restless;
 import org.xydra.restless.RestlessParameter;
-import org.xydra.restless.utils.NanoClock;
 import org.xydra.restless.utils.ServletUtils;
 import org.xydra.testgae.server.model.xmas.WishList;
 import org.xydra.testgae.server.model.xmas.Xmas;

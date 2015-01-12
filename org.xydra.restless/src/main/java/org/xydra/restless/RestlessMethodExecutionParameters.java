@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.NotThreadSafe;
-import org.xydra.restless.utils.NanoClock;
+import org.xydra.common.NanoClock;
 
 /**
  * A simple wrapper class which holds all parameters calculated by
