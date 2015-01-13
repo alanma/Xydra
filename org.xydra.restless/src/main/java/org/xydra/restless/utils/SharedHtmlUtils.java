@@ -38,8 +38,7 @@ public class SharedHtmlUtils {
 	}
 
 	/**
-	 * @param url
-	 *            href target and link label @NeverNull
+	 * @param url href target and link label @NeverNull
 	 * @return a HTML 'a' element using url both as label and as link target
 	 */
 	public static String link(@NeverNull String url) {
@@ -130,10 +129,8 @@ public class SharedHtmlUtils {
 		private int size;
 
 		/**
-		 * @param name
-		 *            .. @NeverNull
-		 * @param size
-		 *            of file name field @NeverNull
+		 * @param name .. @NeverNull
+		 * @param size of file name field @NeverNull
 		 */
 		public FileInput(@NeverNull String name, int size) {
 			super(name, "");
@@ -348,10 +345,8 @@ public class SharedHtmlUtils {
 		}
 
 		/**
-		 * @param name
-		 *            input name @NeverNull
-		 * @param value
-		 *            predefined form value @NeverNull
+		 * @param name input name @NeverNull
+		 * @param value predefined form value @NeverNull
 		 * @return the {@link Form} for a fluent API
 		 */
 		public Form withInputText(@NeverNull String name, @NeverNull String value) {
@@ -360,10 +355,8 @@ public class SharedHtmlUtils {
 		}
 
 		/**
-		 * @param name
-		 *            input name @NeverNull
-		 * @param value
-		 *            predefined form value @NeverNull
+		 * @param name input name @NeverNull
+		 * @param value predefined form value @NeverNull
 		 * @return the {@link Form} for a fluent API
 		 */
 		public Form withHiddenInputText(@NeverNull String name, @NeverNull String value) {
@@ -372,12 +365,9 @@ public class SharedHtmlUtils {
 		}
 
 		/**
-		 * @param name
-		 *            input name @NeverNull
-		 * @param value
-		 *            predefined form value @NeverNull
-		 * @param size
-		 *            of text field @NeverNull
+		 * @param name input name @NeverNull
+		 * @param value predefined form value @NeverNull
+		 * @param size of text field @NeverNull
 		 * @return the {@link Form} for a fluent API
 		 */
 		public Form withInputText(@NeverNull String name, @NeverNull String value, int size) {
@@ -386,8 +376,7 @@ public class SharedHtmlUtils {
 		}
 
 		/**
-		 * @param name
-		 *            input name @NeverNull
+		 * @param name input name @NeverNull
 		 * @return the {@link Form} for a fluent API
 		 */
 		public Form withInputFile(@NeverNull String name) {
@@ -397,14 +386,10 @@ public class SharedHtmlUtils {
 		}
 
 		/**
-		 * @param name
-		 *            form name @NeverNull
-		 * @param value
-		 *            predefined form value @NeverNull
-		 * @param cols
-		 *            number of columns @NeverNull
-		 * @param rows
-		 *            number of rows @NeverNull
+		 * @param name form name @NeverNull
+		 * @param value predefined form value @NeverNull
+		 * @param cols number of columns @NeverNull
+		 * @param rows number of rows @NeverNull
 		 * @return the {@link Form} for a fluent API
 		 */
 		public Form withInputTextArea(@NeverNull String name, @NeverNull String value, int cols,
@@ -451,8 +436,7 @@ public class SharedHtmlUtils {
 		/**
 		 * @param href
 		 * @NeverNull
-		 * @param rel
-		 *            can be null @CanBeNull
+		 * @param rel can be null @CanBeNull
 		 * @param type
 		 * @NeverNull
 		 */
@@ -541,9 +525,8 @@ public class SharedHtmlUtils {
 	/**
 	 * Utility functions to turn a Map to HTML definition list
 	 * 
-	 * @param mapEntries
-	 *            input, not null. Entries are NOT HTML-encoded or escaped in
-	 *            any way. Used valid HTML inside! @NeverNull
+	 * @param mapEntries input, not null. Entries are NOT HTML-encoded or
+	 *            escaped in any way. Used valid HTML inside! @NeverNull
 	 * @return a string containing the resulting HTML
 	 */
 	public static String toDefinitionList(@NeverNull Map<String, ? extends Object> mapEntries) {
@@ -559,8 +542,7 @@ public class SharedHtmlUtils {
 	/**
 	 * Utility functions to turn a Collection of Strings to HTML ordered list
 	 * 
-	 * @param listEntries
-	 *            input, not null @NeverNull
+	 * @param listEntries input, not null @NeverNull
 	 * @return a string containing the resulting HTML
 	 */
 	public static String toOrderedList(@NeverNull Collection<String> listEntries) {
@@ -596,9 +578,24 @@ public class SharedHtmlUtils {
 		return htmlEncode(s);
 	}
 
+	public static Set<String> sanitize(@CanBeNull Set<String> unsafe) {
+		if (unsafe == null)
+			return null;
+		Set<String> safe = new HashSet<String>();
+		for (String u : unsafe) {
+			safe.add(sanitize(u));
+		}
+		return safe;
+	}
+
+	private static final String MALICIOUS_INPUT_SAMPLE = "Dirk<script>alert('test');</script>";
+
+	public static void main(String[] args) {
+		System.out.println(sanitize(MALICIOUS_INPUT_SAMPLE));
+	}
+
 	/**
-	 * @param raw
-	 *            unencoded string @NeverNull
+	 * @param raw unencoded string @NeverNull
 	 * @return the input string with HTML escaping
 	 */
 	public static final String htmlEncode(@NeverNull String raw) {
@@ -621,22 +618,6 @@ public class SharedHtmlUtils {
 		safe = safe.replace("\"", "&quot;");
 
 		return safe;
-	}
-
-	public static Set<String> sanitize(@CanBeNull Set<String> unsafe) {
-		if (unsafe == null)
-			return null;
-		Set<String> safe = new HashSet<String>();
-		for (String u : unsafe) {
-			safe.add(sanitize(u));
-		}
-		return safe;
-	}
-
-	private static final String MALICIOUS_INPUT_SAMPLE = "Dirk<script>alert('test');</script>";
-
-	public static void main(String[] args) {
-		System.out.println(sanitize(MALICIOUS_INPUT_SAMPLE));
 	}
 
 }
