@@ -158,10 +158,9 @@ public class MapMapSetIndex<K, L, E> implements IMapMapSetIndex<K, L, E> {
 	private Factory<IEntrySet<E>> entrySetFactory;
 
 	/**
-	 * @param entrySetFactory
-	 *            Theis factory configures the trade-off between time and space.
-	 *            Existing factories you can use are {@link FastEntrySetFactory}
-	 *            and {@link SmallEntrySetFactory}.
+	 * @param entrySetFactory Theis factory configures the trade-off between
+	 *            time and space. Existing factories you can use are
+	 *            {@link FastEntrySetFactory} and {@link SmallEntrySetFactory}.
 	 */
 	public MapMapSetIndex(Factory<IEntrySet<E>> entrySetFactory) {
 		super();
@@ -217,9 +216,9 @@ public class MapMapSetIndex<K, L, E> implements IMapMapSetIndex<K, L, E> {
 
 	/**
 	 * @param key1
-	 *            @NeverNull
+	 * @NeverNull
 	 * @param key2
-	 *            @NeverNull
+	 * @NeverNull
 	 * @return @CanBeNull
 	 */
 	public IEntrySet<E> lookup(K key1, L key2) {
@@ -410,6 +409,14 @@ public class MapMapSetIndex<K, L, E> implements IMapMapSetIndex<K, L, E> {
 			ITriple<K, L, E> e = it.next();
 			System.out.println("(" + e.getKey1() + ", " + e.getKey2() + ", " + e.getEntry() + ")");
 		}
+	}
+
+	public static <K, L, E> MapMapSetIndex<K, L, E> createWithSmallSets() {
+		return new MapMapSetIndex<K, L, E>(new SmallEntrySetFactory<E>());
+	}
+
+	public static <K, L, E> MapMapSetIndex<K, L, E> createWithFastSets() {
+		return new MapMapSetIndex<K, L, E>(new FastEntrySetFactory<E>());
 	}
 
 }
