@@ -463,8 +463,7 @@ public class Iterators {
 	}
 
 	/**
-	 * @param it
-	 * @NeverNull
+	 * @param it @NeverNull
 	 * @return the single value, if present. Or null, otherwise.
 	 * @throws IllegalStateException if iterator has more than one result
 	 */
@@ -479,6 +478,16 @@ public class Iterators {
 		} else {
 			return null;
 		}
+	}
+
+	/**
+	 * @param coll @NeverNull
+	 * @return the single value, if present. Or null, otherwise.
+	 * @throws IllegalStateException if iterator has more than one result
+	 */
+	public static <X> X getSingleValue(Collection<X> coll) {
+		assert coll != null;
+		return getSingleValue(coll.iterator());
 	}
 
 	/**
