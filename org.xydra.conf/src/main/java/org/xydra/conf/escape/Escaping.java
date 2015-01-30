@@ -21,20 +21,45 @@ public class Escaping {
 		 * + ENCODING_CHAR + 6 hex
 		 */
 
-		b.append("\\u");
-
 		if (codepoint >= UNICODE_RESERVED_START && codepoint <= UNICODE_RESERVED_END) {
 			throw new IllegalArgumentException("Codepoints in range xD800-xDFFF are reserved.");
 		}
 
 		if (codepoint < UNICODE_RESERVED_START) {
 			// hack to get padding with leading zeroes
+			b.append("\\u");
 			b.append(Integer.toHexString(0x10000 | codepoint).substring(1).toUpperCase());
 		} else {
-			throw new UnsupportedOperationException(
-					"surrogate pairs not yet implemented, could not encode codePoint " + codepoint);
-			// wrong b.append(Integer.toHexString(0x1000000 |
-			// codepoint).substring(1));
+			/*
+			 * Wikipedia: A codepoint between 0x10000 and 0x10FFFF above the BMP
+			 * is encoded as follows. 0x10000 is subtracted from the codepoint,
+			 * leaving a value between 0 and 0xFFFFF (220−1). This is split into
+			 * two 10-bit halves. The high-order half is added to 0xD800 (giving
+			 * an encoding unit in the range 0xD800..0xDBFF), and the low-order
+			 * half is added to 0xDC00 (for an encoding unit in the range
+			 * 0xDC00..0xDFFF). The first encoding unit is the high surrogate,
+			 * or leading surrogate; the second the low surrogate or trailing
+			 * surrogate. The high surrogate followed by the low surrogate is
+			 * the UTF-16 encoding of the codepoint.
+			 */
+
+			int x = codepoint - Integer.parseInt("10000", 16);
+			assert x <= Integer.parseInt("FFFFF", 16);
+
+			int high = x >> 10;
+			int low = x - (high << 10);
+
+			int surrogateHigh = high + Integer.parseInt("D800", 16);
+			assert surrogateHigh >= Integer.parseInt("D800", 16);
+			assert surrogateHigh <= Integer.parseInt("DBFF", 16);
+			int surrogateLow = low + Integer.parseInt("DC00", 16);
+			assert surrogateLow >= Integer.parseInt("DC00", 16);
+			assert surrogateLow <= Integer.parseInt("DFFF", 16);
+
+			b.append("\\u");
+			b.append(Integer.toHexString(0x10000 | surrogateHigh).substring(1).toUpperCase());
+			b.append("\\u");
+			b.append(Integer.toHexString(0x10000 | surrogateLow).substring(1).toUpperCase());
 		}
 	}
 
