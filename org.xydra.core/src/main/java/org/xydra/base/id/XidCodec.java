@@ -74,7 +74,8 @@ public class XidCodec {
 	 * Decode a potentially XidEncoded string. XidEncoding uses '_hh' where h is
 	 * a hex character. Or '__hhhh' or '___hhhhhh'. The string might also
 	 * contain '_' for other reasons. So if this method is invoked on a
-	 * non-encoded string, the original string should be returned.
+	 * non-encoded string containing '_'s, the original string should be
+	 * returned.
 	 * 
 	 * @param encId @NeverNull
 	 * @return a decoded idString
