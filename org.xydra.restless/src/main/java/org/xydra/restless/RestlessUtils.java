@@ -39,4 +39,15 @@ public class RestlessUtils {
 		return urlParameter;
 	}
 
+	public static String getFullRequestUri(HttpServletRequest req) {
+		String uri = req.getScheme()
+				+ "://"
+				+ req.getServerName()
+				+ ("http".equals(req.getScheme()) && req.getServerPort() == 80
+						|| "https".equals(req.getScheme()) && req.getServerPort() == 443 ? "" : ":"
+						+ req.getServerPort()) + req.getRequestURI()
+				+ (req.getQueryString() != null ? "?" + req.getQueryString() : "");
+		return uri;
+	}
+
 }
