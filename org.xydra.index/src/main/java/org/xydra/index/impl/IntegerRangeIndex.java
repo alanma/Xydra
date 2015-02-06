@@ -14,6 +14,8 @@ import org.xydra.log.api.LoggerFactory;
 /**
  * Uses internally a sorted map. Fast; memory-efficient;
  * 
+ * TODO improve performance and keep GWT compatibility
+ * 
  * @author xamde
  * 
  */
@@ -225,9 +227,9 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
 	}
 
 	/**
-	 * @param maxValueInclusive
-	 *            inclusive; used only at then end of the integerRange to append
-	 *            a final span. Typically use length() - 1.
+	 * @param maxValueInclusive inclusive; used only at then end of the
+	 *            integerRange to append a final span. Typically use length() -
+	 *            1.
 	 * @return all spans until maxValue; each span has a boolean flag to
 	 *         indicate, if the span is within an integer range or between two
 	 *         of them.
@@ -486,7 +488,7 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
 	/**
 	 * @param validIntervals
 	 * @param s
-	 *            @NeverNull
+	 * @NeverNull
 	 * @return true if all Unicode codepoints of s are in an indexed range of
 	 *         the given index; true for the empty string.
 	 */
@@ -511,7 +513,7 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
 	/**
 	 * @param tabooIntervals
 	 * @param s
-	 *            @NeverNull
+	 * @NeverNull
 	 * @return true if any codepoint in s is indexed in the tabooIntervals;
 	 *         false for the empty string
 	 */

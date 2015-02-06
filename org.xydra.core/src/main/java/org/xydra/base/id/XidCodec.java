@@ -176,7 +176,7 @@ public class XidCodec {
 			i += Character.charCount(nthCodepoint);
 		}
 
-		// drastic
+		// drastic: truncate to max length
 		if (enc.length() > maxLen) {
 			enc.setLength(maxLen);
 		}
