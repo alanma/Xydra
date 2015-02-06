@@ -27,6 +27,8 @@ import com.google.common.base.Function;
  * 
  * IMPROVE rewrite algorithms into non-recursive form
  * 
+ * IMPROVE work on byte arrays in utf8 encoding?
+ * 
  * @author xamde
  * 
  * @param <E>
@@ -244,6 +246,114 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 		}
 
 		/**
+		 * @param key
+		 * @return true iff set K did not contain key yet
+		 */
+		public boolean indexKey(String insertKey) {
+			assert insertKey != null;
+			// recursion base case
+			if (insertKey.length() == 0) {
+				// the trie always contains the empty key?
+				return false;
+			}
+
+			assert insertKey.length() > 0;
+			String conflictKey = this.children.lookupFirstPrefix(insertKey.substring(0, 1));
+			if (conflictKey == null) {
+				// there is no conflict, just index here
+				this.children.index(insertKey, new Node());
+				return true;
+			}
+
+			Node conflictingNode = this.children.lookup(conflictKey);
+			// find common prefix to extract
+			int commonPrefixLen = getSharedPrefixLength(insertKey, conflictKey);
+			assert commonPrefixLen > 0 : "commonPrefixLen==0? insertKey=" + insertKey
+					+ " conflictKey=" + conflictKey;
+			if (conflictKey.equals(insertKey)) {
+				// the conflicting node is our node
+				return false;
+			} else if (commonPrefixLen >= conflictKey.length()) {
+				/*
+				 * the conflicting key ('ba') is part of the insertion key
+				 * ('baz')
+				 */
+				// RECURSION: just index ('z') in subnode
+				String insertKeyPostfix = insertKey.substring(conflictKey.length());
+				return conflictingNode.indexKey(insertKeyPostfix);
+			} else {
+				/*
+				 * the insertion key ('foo') or ('foobaz') is part of the
+				 * conflicting key ('foo' in 'foobar') or they share a common
+				 * prefix ('foo' from 'foobaz'+'foobar'): insert a new node
+				 * ('foo') & update children
+				 */
+				this.children.deIndex(conflictKey);
+				Node commonNode = new Node();
+				String commonPrefix = insertKey.substring(0, commonPrefixLen);
+				this.children.index(commonPrefix, commonNode);
+				String conflictKeyPostfix = conflictKey.substring(commonPrefixLen);
+				commonNode.children.index(conflictKeyPostfix, conflictingNode);
+				String insertKeyPostfix = insertKey.substring(commonPrefixLen);
+				commonNode.indexKey(insertKeyPostfix);
+				return true;
+			}
+		}
+
+		/**
+		 * @param searchKey
+		 * @return the {@link KeyFramgents} for searchKey
+		 */
+		public KeyFramgents getKeyFragmentsFor(String searchKey) {
+			assert searchKey != null;
+			// recursion base case
+			if (searchKey.length() == 0) {
+				return new KeyFramgents(new ArrayList<String>(), "");
+			}
+
+			assert searchKey.length() > 0;
+			String conflictKey = this.children.lookupFirstPrefix(searchKey.substring(0, 1));
+			if (conflictKey == null) {
+				// there is no conflict, just index here
+				return new KeyFramgents(new ArrayList<String>(), searchKey);
+			}
+
+			Node conflictingNode = this.children.lookup(conflictKey);
+			// find common prefix to extract
+			int commonPrefixLen = getSharedPrefixLength(searchKey, conflictKey);
+			assert commonPrefixLen > 0 : "commonPrefixLen==0? insertKey=" + searchKey
+					+ " conflictKey=" + conflictKey;
+			if (conflictKey.equals(searchKey)) {
+				// the conflicting node is our node
+				List<String> matched = new ArrayList<String>();
+				matched.add(conflictKey);
+				return new KeyFramgents(matched, "");
+			} else if (commonPrefixLen >= conflictKey.length()) {
+				/*
+				 * the conflicting key ('ba') is part of the search key ('baz')
+				 */
+				// RECURSION: just index ('z') in subnode
+				String searchKeyPostfix = searchKey.substring(conflictKey.length());
+				KeyFramgents subFragments = conflictingNode.getKeyFragmentsFor(searchKeyPostfix);
+				subFragments.matched.add(0, conflictKey);
+				return subFragments;
+			} else {
+				/*
+				 * the search key ('foo') or ('foobaz') is part of the
+				 * conflicting key ('foo' in 'foobar') or they share a common
+				 * prefix ('foo' from 'foobaz'+'foobar'): insert a new node
+				 * ('foo') & update children
+				 */
+				String commonPrefix = searchKey.substring(0, commonPrefixLen);
+				String insertKeyPostfix = searchKey.substring(commonPrefixLen);
+				List<String> matched = new ArrayList<String>();
+				matched.add(commonPrefix);
+				KeyFramgents fragments = new KeyFramgents(matched, insertKeyPostfix);
+				return fragments;
+			}
+		}
+
+		/**
 		 * @param insertKey
 		 * @param value
 		 * @return true if entry was not yet in this node
@@ -312,7 +422,7 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 		/**
 		 * @param combinedKey
 		 * @param keyConstraint
-		 *            @NeverNull
+		 * @NeverNull
 		 * @return an iterator over all nodes with entries; breadth-first
 		 */
 		public Iterator<KeyEntryTuple<String, Node>> keyAndNodeIterator(final String combinedKey,
@@ -371,7 +481,7 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 		/**
 		 * @param combinedKey
 		 * @param keyConstraint
-		 *            @NeverNull
+		 * @NeverNull
 		 * @return an iterator over all nodes with entries; breadth-first
 		 */
 		public Iterator<Node> nodeIterator(final String combinedKey,
@@ -479,13 +589,13 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 			String matched = this.children.lookupFirstPrefix(prefixCharacter);
 			if (matched == null)
 				return null;
-			int commonPrefix = getSharedPrefixLength(key, matched);
-			Node next = this.children.lookup(key.substring(0, commonPrefix));
+			int commonPrefixLength = getSharedPrefixLength(key, matched);
+			Node next = this.children.lookup(key.substring(0, commonPrefixLength));
 			if (next == null)
 				return null;
 			assert next != null : "matched = " + matched;
 			// recursion
-			return next.lookup(key.substring(commonPrefix));
+			return next.lookup(key.substring(commonPrefixLength));
 		}
 
 		/**
@@ -594,7 +704,7 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 		 * @param combinedKey
 		 * @param keyConstraint
 		 * @param optionalEntryFilter
-		 *            @CanBeNull
+		 * @CanBeNull
 		 * @return all matching keys X their matching entries
 		 */
 		public Iterator<E> valueIterator(String combinedKey, Constraint<String> keyConstraint,
@@ -679,8 +789,7 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 
 	/**
 	 * @param combinedKey
-	 * @param c1
-	 *            expected constraint
+	 * @param c1 expected constraint
 	 * @return true if further descending a prefix tree with current key
 	 *         'combinedKey' has a chance of statisfying the constraint
 	 */
@@ -723,6 +832,7 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 		&& master.codePointAt(i) == copy.codePointAt(i))
 
 		{
+			// TODO make unicode safe
 			i++;
 		}
 		return i;
@@ -753,6 +863,25 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 
 		st.deIndex("Hello");
 		st.deIndex("Hell");
+
+		// next test
+		SmallStringSetTrie<Void> st2 = new SmallStringSetTrie<Void>(
+				new SmallEntrySetFactory<Void>());
+		st2.indexKey("aaabbccc");
+		st2.indexKey("aaaddeee");
+		st2.indexKey("aaabbcff");
+		System.out.println("-----");
+		st2.dump();
+		KeyFramgents ky = st2.getKeyFragmentsFor("aaabbcg");
+		assert ky.matched.size() == 2;
+		assert ky.matched.get(0).equals("aaa");
+		assert ky.matched.get(1).equals("bbc");
+		assert ky.remainder.matches("g");
+		ky = st2.getKeyFragmentsFor("aaabb");
+		assert ky.matched.size() == 2;
+		assert ky.matched.get(0).equals("aaa");
+		assert ky.matched.get(1).equals("bb");
+		assert ky.remainder.matches("");
 	}
 
 	private transient Factory<IEntrySet<E>> entrySetFactory;
@@ -945,4 +1074,47 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 	public Iterator<IEntrySet<E>> valueAsEntrySetIterator(Constraint<String> keyConstraint) {
 		return this.root.valueAsEntrySetIterator("", keyConstraint);
 	}
+
+	/**
+	 * If you indexed 'aaabbccc' and 'aaaddeee' and 'aaabbcff' the trie looks
+	 * like this:
+	 * 
+	 * <pre>
+	 * 'aaa'
+	 *    'bbc'
+	 *       'cc'
+	 *       'ff'  
+	 *    'ddeee'
+	 * </pre>
+	 * 
+	 * and the key fragments for 'aaabbcg' would be ['aaa','bbc'] with remainder
+	 * 'g'.
+	 * 
+	 * @param key must not be part of the trie
+	 * @return the string key split into fragments as they appear in the trie
+	 */
+	public KeyFramgents getKeyFragmentsFor(String key) {
+		return this.root.getKeyFragmentsFor(key);
+	}
+
+	public static class KeyFramgents {
+		public KeyFramgents(List<String> matched, String remainder) {
+			this.matched = matched;
+			this.remainder = remainder;
+		}
+
+		public List<String> matched;
+		/* the empty string, if nothing remains */
+		public String remainder;
+
+	}
+
+	/**
+	 * @param key
+	 * @return true iff set K did not contain key yet
+	 */
+	public boolean indexKey(String insertKey) {
+		return this.root.indexKey(insertKey);
+	}
+
 }
