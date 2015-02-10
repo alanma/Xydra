@@ -50,4 +50,17 @@ public class RestlessUtils {
 		return uri;
 	}
 
+	public static boolean isUrlParameterSet(String value) {
+		return value != null && value.length() > 0;
+	}
+
+	public static int getUrlParameterAsInt(String urlParamString) {
+		try {
+			return Integer.parseInt(urlParamString);
+		} catch (NumberFormatException e) {
+			throw new IllegalArgumentException("Could not convert '" + urlParamString
+					+ "' into integer");
+		}
+	}
+
 }
