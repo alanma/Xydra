@@ -3,6 +3,7 @@ package org.xydra.core;
 import org.xydra.base.Base;
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
+import org.xydra.base.id.XidCodec;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.rmof.XRevWritableObject;
@@ -25,10 +26,8 @@ public class XX extends Base {
 	 * Use {@link XCopyUtils#copyObject(XId, String, XReadableObject)} if the
 	 * resulting object should not be backed by the XReadableObject.
 	 * 
-	 * @param actor
-	 *            The session actor to use for the returned object.
-	 * @param password
-	 *            The password corresponding to the given actor.
+	 * @param actor The session actor to use for the returned object.
+	 * @param password The password corresponding to the given actor.
 	 * @param objectSnapshot
 	 * @return an object with the same initial state as the given object
 	 *         snapshot. The returned object may be backed by the provided
@@ -47,10 +46,8 @@ public class XX extends Base {
 	 * Use {@link XCopyUtils#copyModel(XId, String, XReadableModel)} if the
 	 * resulting model should not be backed by the XReadableModel.
 	 * 
-	 * @param actor
-	 *            The session actor to use for the returned model.
-	 * @param password
-	 *            The password corresponding to the given actor.
+	 * @param actor The session actor to use for the returned model.
+	 * @param password The password corresponding to the given actor.
 	 * @param modelSnapshot
 	 * @return a model with the same initial state as the given model snapshot.
 	 *         The returned model may be backed by the provided XReadableModel
@@ -128,10 +125,11 @@ public class XX extends Base {
 	}
 
 	/**
+	 * TODO merge with {@link XidCodec#encode(String, int)}
+	 * 
 	 * @param anyString
 	 * @return a valid XId, if possible
-	 * @throws IllegalArgumentException
-	 *             if given string is null or too long
+	 * @throws IllegalArgumentException if given string is null or too long
 	 */
 	public static XId encode(String anyString) throws IllegalArgumentException {
 		if (anyString == null) {
