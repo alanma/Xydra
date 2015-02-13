@@ -119,6 +119,10 @@ public class XidCodec {
 						// not really encoded? copy verbatim.
 						// was not really a xid-encoded id
 						return encId;
+					} catch (IllegalArgumentException e) {
+						// not really encoded? copy verbatim.
+						// was not really a xid-encoded id
+						return encId;
 					}
 				} else {
 					// cannot be a proper hex encoding, roll-back
