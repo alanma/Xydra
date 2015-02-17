@@ -3,6 +3,7 @@ package org.xydra.restless;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import org.xydra.annotations.CanBeNull;
 import org.xydra.annotations.NeverNull;
 import org.xydra.annotations.NotThreadSafe;
 import org.xydra.common.NanoClock;
@@ -25,27 +26,29 @@ class RestlessMethodExecutionParameters {
 	private boolean hasHttpServletResponseParameter;
 	private String uniqueRequestId;
 	private NanoClock clock;
+	private boolean isMultipartFormDataHandler;
+	private String progressToken;
 
 	/**
 	 * 
-	 * @param method
-	 * @NeverNull
-	 * @param restlessContext
-	 * @NeverNull
-	 * @param javaMethodArgs
-	 * @NeverNull
-	 * @param hasHttpServletResponseParameter
-	 * @NeverNull
-	 * @param uniqueRequestId
-	 * @NeverNull
-	 * @param clock
-	 * @NeverNull
+	 * @param method @NeverNull
+	 * @param isMultipartFormDataHandler
+	 * @param progressToken @CanBeNull to retrieve progress information while
+	 *            uploading
+	 * @param restlessContext @NeverNull
+	 * @param javaMethodArgs @NeverNull
+	 * @param hasHttpServletResponseParameter @NeverNull
+	 * @param uniqueRequestId @NeverNull
+	 * @param clock @NeverNull
 	 */
 	public RestlessMethodExecutionParameters(@NeverNull Method method,
+			boolean isMultipartFormDataHandler, @CanBeNull String progressToken,
 			@NeverNull IRestlessContext restlessContext, @NeverNull List<Object> javaMethodArgs,
 			boolean hasHttpServletResponseParameter, @NeverNull String uniqueRequestId,
 			@NeverNull NanoClock clock) {
 		this.method = method;
+		this.isMultipartFormDataHandler = isMultipartFormDataHandler;
+		this.progressToken = progressToken;
 		this.restlessContext = restlessContext;
 		this.javaMethodArgs = javaMethodArgs;
 		this.hasHttpServletResponseParameter = hasHttpServletResponseParameter;
@@ -75,6 +78,14 @@ class RestlessMethodExecutionParameters {
 
 	public NanoClock getClock() {
 		return this.clock;
+	}
+
+	public boolean isMultipartFormDataHandler() {
+		return this.isMultipartFormDataHandler;
+	}
+
+	public String getProgressToken() {
+		return this.progressToken;
 	}
 
 }

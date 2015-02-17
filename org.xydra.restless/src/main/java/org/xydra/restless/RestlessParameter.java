@@ -72,7 +72,7 @@ public class RestlessParameter {
 		this(name, DEFAULT_VALUE_NONE_BUT_REQUIRED);
 	}
 
-	public boolean mustBeDefinedExplicitly() {
+	public boolean isRequired() {
 		return this.defaultValue == DEFAULT_VALUE_NONE_BUT_REQUIRED;
 	}
 

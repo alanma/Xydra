@@ -161,6 +161,7 @@ public class Restless extends HttpServlet {
 	/** Only effective on localhost for security reasons. Helps testing */
 	public static final String X_HOST_Override = "X-HTTP-Host-Override";
 
+	/** Only effective for realMethod=GET */
 	public static final String X_HTTP_Method_Override = "X-HTTP-Method-Override";
 
 	public static final String XHTML_DOCTYPE = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\" \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">";
@@ -262,6 +263,38 @@ public class Restless extends HttpServlet {
 					javaMethodName, pt, adminOnly, parameter);
 			this.methods.add(restlessMethod);
 			log.debug("Add method " + restlessMethod);
+		}
+		assert RestlessStatic.methodByName(instanceOrClass, javaMethodName) != null : "method '"
+				+ javaMethodName + "' not found in " + instanceOrClass;
+	}
+
+	/**
+	 * EXPERIMENTAL
+	 * 
+	 * TODO promote to safe for use
+	 * 
+	 * See
+	 * {@link #addMethod(String, String, Object, String, boolean, RestlessParameter...)}
+	 * 
+	 * @param pathTemplate
+	 * @param httpMethod
+	 * @param instanceOrClass
+	 * @param javaMethodName
+	 * @param adminOnly
+	 * @param parameter must all be URL-parameters
+	 */
+	public void addPostMultipart(@NeverNull String pathTemplate, @NeverNull Object instanceOrClass,
+			@NeverNull String javaMethodName, boolean adminOnly,
+			@NeverNull RestlessParameter... parameter) {
+		PathTemplate pt = new PathTemplate(pathTemplate);
+
+		synchronized (this.methods) {
+			// TODO verify all parameters are URL parameters (inspect
+			// pathTemplate)
+			RestlessMethod restlessMethod = new RestlessMethod(instanceOrClass, "POST",
+					javaMethodName, pt, adminOnly, parameter);
+			this.methods.add(restlessMethod);
+			log.debug("Add post/multipart method " + restlessMethod);
 		}
 		assert RestlessStatic.methodByName(instanceOrClass, javaMethodName) != null : "method '"
 				+ javaMethodName + "' not found in " + instanceOrClass;
@@ -644,6 +677,11 @@ public class Restless extends HttpServlet {
 			}
 		}
 
+		log.info("Restless: Adding built-in services ...");
+		clock.start();
+		ProgressManager.restless(this);
+		clock.stop("add-built-in-services");
+
 		if (log.isDebugEnabled()) {
 			for (RestlessMethod rm : this.methods) {
 				log.debug("Mapping " + rm.getHttpMethod() + " " + rm.getPathTemplate().getRegex()
@@ -845,7 +883,8 @@ public class Restless extends HttpServlet {
 		// look in HTTP header
 		String httpMethod = reqHandedDown.getHeader(X_HTTP_Method_Override);
 		// look in query/post param
-		if (httpMethod == null) {
+		if (httpMethod == null && reqHandedDown.getMethod().equals("GET")) {
+			// don't get the param on a POST, as this destroys multipart-uploads
 			httpMethod = reqHandedDown.getParameter(X_HTTP_Method_Override);
 		}
 		// use given HTTP method
@@ -858,9 +897,9 @@ public class Restless extends HttpServlet {
 		final boolean reqViaAdminUrl = RestlessStatic.requestIsViaAdminUrl(reqHandedDown);
 
 		/*
-		 * Searching and executing the correct method is split up in two blocks
-		 * so that the list of methods is only blocked during the
-		 * search-process.
+		 * Searching and executing the correct method is split up in two
+		 * different synchronized blocks so that the list of methods is only
+		 * blocked during the search-process.
 		 * 
 		 * Find the correct method, get the necessary parameters...
 		 */

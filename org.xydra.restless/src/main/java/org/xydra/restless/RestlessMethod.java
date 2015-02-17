@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -22,6 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.fileupload.FileItemHeaders;
 import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;
 import org.apache.commons.fileupload.FileUploadException;
@@ -34,6 +36,8 @@ import org.xydra.annotations.ThreadSafe;
 import org.xydra.common.NanoClock;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
+import org.xydra.restless.IMultipartFormDataHandler.IPartProgress;
+import org.xydra.restless.utils.QueryStringUtils;
 import org.xydra.restless.utils.ServletUtils;
 
 /**
@@ -108,14 +112,11 @@ class RestlessMethod {
 	private final PathTemplate pathTemplate;
 
 	/**
-	 * @param object
-	 *            instance to be called when web method is used - or class to be
-	 *            instantiated @NeverNull
-	 * @param httpMethod
-	 *            'GET', 'PUT', 'POST', or' DELETE' @NeverNull
-	 * @param methodName
-	 *            instance method to be called. This method may not have several
-	 *            signatures with the same name.
+	 * @param object instance to be called when web method is used - or class to
+	 *            be instantiated @NeverNull
+	 * @param httpMethod 'GET', 'PUT', 'POST', or' DELETE' @NeverNull
+	 * @param methodName instance method to be called. This method may not have
+	 *            several signatures with the same name.
 	 * 
 	 *            The method signature can use {@link HttpServletRequest} and
 	 *            {@link HttpServletResponse} in any position. It is set with
@@ -125,13 +126,10 @@ class RestlessMethod {
 	 *            type of text/plain is used and the method return type is
 	 *            expected to be of type String. This facility is designer to
 	 *            return status information at development time. @NeverNull
-	 * @param pathTemplate
-	 *            see {@link PathTemplate} for syntax @NeverNull
-	 * @param adminOnly
-	 *            if true, this method can only be executed it the request URL
-	 *            starts with '/admin'.
-	 * @param parameter
-	 *            in order of variables in 'method'. See
+	 * @param pathTemplate see {@link PathTemplate} for syntax @NeverNull
+	 * @param adminOnly if true, this method can only be executed it the request
+	 *            URL starts with '/admin'.
+	 * @param parameter in order of variables in 'method'. See
 	 *            {@link RestlessParameter}. @NeverNull TODO is this correct?
 	 */
 	protected RestlessMethod(@NeverNull Object object, @NeverNull String httpMethod,
@@ -197,55 +195,62 @@ class RestlessMethod {
 			return null;
 		} else {
 			// try to prepare parameters for execution of the method
-
 			List<Object> javaMethodArgs = new ArrayList<Object>();
-			// build up parameters
 
+			/** build up parameters */
 			// extract values from path
 			/*
 			 * PathTemplate is thread-safe, so no synchronization is necessary
 			 * here
 			 */
-			Map<String, String> urlParameter = RestlessUtils.getUrlParametersAsMap(req,
+			Map<String, String> urlPathParameterMap = RestlessUtils.getUrlParametersAsMap(req,
 					this.pathTemplate);
 
 			// extract Cookie values
 			Map<String, String> cookieMap = ServletUtils.getCookiesAsMap(req);
 
-			// extract multi-part-upload
-			Map<String, Object> multipartMap = getMultiPartPostAsMap(req);
+			final String uniqueRequestId = reuseOrCreateUniqueRequestIdentifier(
+					urlPathParameterMap, cookieMap);
 
-			int boundNamedParameterNumber = 0;
-			boolean hasHttpServletResponseParameter = false;
-			final String uniqueRequestId = reuseOrCreateUniqueRequestIdentifier(urlParameter,
-					cookieMap);
 			// define context
 			IRestlessContext restlessContext = new RestlessContextImpl(restless, req, res,
 					uniqueRequestId);
 
+			Flag hasHttpServletResponseParameter = new Flag(false);
+			/*
+			 * now we need to decide who parses the request body: default
+			 * servlet methods or a specialist streaming multi-part handler?
+			 */
+			boolean isMultiPartStreamHandlerMethod = isMultiPartFormEncoded_HandlerMethod(method);
+
+			boolean mayReadRequestBody = req.getMethod().equals("GET")
+					|| !isMultiPartStreamHandlerMethod;
+
+			Map<String, Object> multipartMap = null;
+			Map<String, List<String>> queryMap = null;
+			if (mayReadRequestBody) {
+				// extract multi-part-upload
+				multipartMap = getMultiPartPostAsMap(req);
+			} else {
+				// look in query params only
+				queryMap = QueryStringUtils.parse(req.getQueryString());
+			}
+
+			assert !mayReadRequestBody || multipartMap != null;
+			assert mayReadRequestBody || queryMap != null;
+
+			int boundNamedParameterNumber = 0;
+
+			// try to fill each parameter
 			for (Class<?> requiredParamType : method.getParameterTypes()) {
-
-				// try to fill each parameter
-
 				// fill the built-in predefined types
-				if (requiredParamType.equals(HttpServletResponse.class)) {
-					javaMethodArgs.add(res);
-					hasHttpServletResponseParameter = true;
-				} else if (requiredParamType.equals(HttpServletRequest.class)) {
-					javaMethodArgs.add(req);
-				} else if (requiredParamType.equals(Restless.class)) {
-					javaMethodArgs.add(restless);
-				} else if (requiredParamType.equals(IRestlessContext.class)) {
-					javaMethodArgs.add(restlessContext);
-					hasHttpServletResponseParameter = true;
-				} else if (requiredParamType.equals(NanoClock.class)) {
-					javaMethodArgs.add(requestClock);
-				} else {
+				boolean filled = fillBuiltInInjectedParameter(requiredParamType, javaMethodArgs,
+						hasHttpServletResponseParameter, restlessContext, requestClock);
+				if (!filled) {
 					/*
 					 * Method might require a non-trivial parameter type for a
 					 * named parameter (usually: String)
 					 */
-
 					if (this.requiredNamedParameters.length == 0) {
 						/*
 						 * Java method tries to fill a non-built-in parameter
@@ -274,79 +279,15 @@ class RestlessMethod {
 										+ Arrays.toString(this.requiredNamedParameters)
 										+ ". I.e. your Java method wants more parameters than defined in your restless() method.");
 					}
-					RestlessParameter param = this.requiredNamedParameters[boundNamedParameterNumber];
-					Object value = null;
+					RestlessParameter requiredParam = this.requiredNamedParameters[boundNamedParameterNumber];
 
-					/* 1) look in urlParameters (not query params) */
-					if (!param.isArray()) {
-						value = urlParameter.get(param.getName());
-					}
+					Object value = getNamedParameter(requiredParam.isArray(),
+							requiredParam.getName(), requiredParam.getDefaultValue(),
+							requiredParam.isRequired(),
 
-					/* 2) look in POST params and query params */
-					if (notSet(value)) {
-						String[] values = req.getParameterValues(param.getName());
-						if (values != null) {
-							// handle POST and query param values
-							if (param.isArray()) {
-								value = values;
-							} else if (values.length > 1) {
-								// remove redundant
-								Set<String> uniqueValues = new HashSet<String>();
-								for (String s : values) {
-									uniqueValues.add(s);
-								}
-								if (uniqueValues.size() > 1) {
-									StringBuffer buf = new StringBuffer();
-									for (int j = 0; j < values.length; j++) {
-										buf.append(values[j]);
-										buf.append(", ");
-									}
+							mayReadRequestBody, req, urlPathParameterMap, cookieMap, queryMap,
+							multipartMap);
 
-									if (param.mustBeDefinedExplicitly()) {
-										throw new IllegalArgumentException(
-												"Parameter '"
-														+ param.getName()
-														+ "' required but not explicitly defined. Found multiple values.");
-									} else {
-										log.warn("Multiple values for parameter '"
-												+ param.getName()
-												+ "' (values="
-												+ buf.toString()
-												+ ") from queryString and POST params, using default ("
-												+ param.getDefaultValue() + ")");
-										value = param.getDefaultValue();
-									}
-
-								} else {
-									value = uniqueValues.iterator().next();
-								}
-
-							} else {
-								value = values[0];
-							}
-						}
-					}
-
-					/* 3) look in cookies */
-					if (notSet(value) && !param.isArray()) {
-						value = cookieMap.get(param.getName());
-					}
-
-					/* 4) look in multipart-upload */
-					if (notSet(value) && !param.isArray()) {
-						value = multipartMap.get(param.getName());
-					}
-
-					/* 5) use default values, if defined */
-					if (notSet(value)) {
-						if (param.mustBeDefinedExplicitly()) {
-							log.debug("Parameter '" + param.getName()
-									+ "' required but no explicitly defined. Found no value.");
-							return null;
-						} else {
-							value = param.getDefaultValue();
-						}
-					}
 					javaMethodArgs.add(value);
 					boundNamedParameterNumber++;
 					if (boundNamedParameterNumber > this.requiredNamedParameters.length) {
@@ -356,10 +297,172 @@ class RestlessMethod {
 				}
 			}
 
-			return new RestlessMethodExecutionParameters(method, restlessContext, javaMethodArgs,
-					hasHttpServletResponseParameter, uniqueRequestId, requestClock);
+			String progressToken = (String) getNamedParameter(false, "_progressToken_", null,
+					false, mayReadRequestBody, req, urlPathParameterMap, cookieMap, queryMap,
+					multipartMap);
+
+			return new RestlessMethodExecutionParameters(method, isMultiPartStreamHandlerMethod,
+					progressToken, restlessContext, javaMethodArgs,
+					hasHttpServletResponseParameter.getValue(), uniqueRequestId, requestClock);
 		}
 
+	}
+
+	private static Object getNamedParameter(boolean parameterIsArray, String parameterName,
+			Object defaultValue, boolean isRequired, boolean mayReadRequestBody,
+			HttpServletRequest req, Map<String, String> urlPathParameterMap,
+			Map<String, String> cookieMap, Map<String, List<String>> queryMap,
+			Map<String, Object> multipartMap) {
+		Object value = null;
+
+		/*
+		 * 1) look in urlParameters (path params, not query params)
+		 */
+		if (!parameterIsArray) {
+			value = urlPathParameterMap.get(parameterName);
+		}
+
+		/* 2) look in POST params and query params */
+		if (notSet(value)) {
+			if (mayReadRequestBody) {
+				String[] values = req.getParameterValues(parameterName);
+				if (values != null) {
+					// handle POST and query param values
+					if (parameterIsArray) {
+						value = values;
+					} else if (values.length > 1) {
+						// remove redundant
+						Set<String> uniqueValues = new HashSet<String>();
+						for (String s : values) {
+							uniqueValues.add(s);
+						}
+						if (uniqueValues.size() > 1) {
+							StringBuffer buf = new StringBuffer();
+							for (int j = 0; j < values.length; j++) {
+								buf.append(values[j]);
+								buf.append(", ");
+							}
+
+							if (isRequired) {
+								throw new IllegalArgumentException(
+										"Parameter '"
+												+ parameterName
+												+ "' required but not explicitly defined. Found multiple values.");
+							} else {
+								log.warn("Multiple values for parameter '" + parameterName
+										+ "' (values=" + buf.toString()
+										+ ") from queryString and POST params, using default ("
+										+ defaultValue + ")");
+								value = defaultValue;
+							}
+
+						} else {
+							value = uniqueValues.iterator().next();
+						}
+
+					} else {
+						value = values[0];
+					}
+				}
+			} else {
+				assert queryMap != null;
+				List<String> values = queryMap.get(parameterName);
+				if (values != null) {
+					// handle query param values
+					if (parameterIsArray) {
+						value = values.toArray();
+					} else if (values.size() > 1) {
+						// remove redundant
+						Set<String> uniqueValues = new HashSet<String>();
+						for (String s : values) {
+							uniqueValues.add(s);
+						}
+						if (uniqueValues.size() > 1) {
+							StringBuffer buf = new StringBuffer();
+							for (int j = 0; j < values.size(); j++) {
+								buf.append(values.get(j));
+								buf.append(", ");
+							}
+
+							if (isRequired) {
+								throw new IllegalArgumentException(
+										"Parameter '"
+												+ parameterName
+												+ "' required but not explicitly defined. Found multiple values.");
+							} else {
+								log.warn("Multiple values for parameter '" + parameterName
+										+ "' (values=" + buf.toString()
+										+ ") from queryString and POST params, using default ("
+										+ defaultValue + ")");
+								value = defaultValue;
+							}
+
+						} else {
+							value = uniqueValues.iterator().next();
+						}
+
+					} else {
+						value = values.get(0);
+					}
+				}
+			}
+		}
+
+		/* 3) look in cookies */
+		if (notSet(value) && !parameterIsArray) {
+			value = cookieMap.get(parameterName);
+		}
+
+		/* 4) look in multipart-upload */
+		if (mayReadRequestBody && notSet(value) && !parameterIsArray) {
+			assert multipartMap != null;
+			value = multipartMap.get(parameterName);
+		}
+
+		/* 5) use default values, if defined */
+		if (notSet(value)) {
+			if (isRequired) {
+				log.debug("Parameter '" + parameterName
+						+ "' required but no explicitly defined. Found no value.");
+				return null;
+			} else {
+				value = defaultValue;
+			}
+		}
+
+		return value;
+	}
+
+	/**
+	 * @param requiredParamType
+	 * @param javaMethodArgs
+	 * @param hasHttpServletResponseParameter
+	 * @param restlessContext
+	 * @param requestClock
+	 * @return
+	 */
+	private static boolean fillBuiltInInjectedParameter(Class<?> requiredParamType,
+			List<Object> javaMethodArgs, Flag hasHttpServletResponseParameter,
+			IRestlessContext restlessContext, NanoClock requestClock) {
+		if (requiredParamType.equals(HttpServletResponse.class)) {
+			javaMethodArgs.add(restlessContext.getResponse());
+			hasHttpServletResponseParameter.setTrue();
+			return true;
+		} else if (requiredParamType.equals(HttpServletRequest.class)) {
+			javaMethodArgs.add(restlessContext.getRequest());
+			return true;
+		} else if (requiredParamType.equals(Restless.class)) {
+			javaMethodArgs.add(restlessContext.getRestless());
+			return true;
+		} else if (requiredParamType.equals(IRestlessContext.class)) {
+			javaMethodArgs.add(restlessContext);
+			hasHttpServletResponseParameter.setTrue();
+			return true;
+		} else if (requiredParamType.equals(NanoClock.class)) {
+			javaMethodArgs.add(requestClock);
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -385,6 +488,19 @@ class RestlessMethod {
 	 */
 
 	/**
+	 * Checks if the given required parameter types of a Java method look like
+	 * the method is a pure stream handler or an ordinary Restless parameter
+	 * handler
+	 * 
+	 * @param method
+	 * @return true if method handles 100% of request body in a streaming
+	 *         fashion
+	 */
+	private static boolean isMultiPartFormEncoded_HandlerMethod(Method method) {
+		return method.getReturnType().equals(IMultipartFormDataHandler.class);
+	}
+
+	/**
 	 * Executes the method on the mapped instance.
 	 * 
 	 * Precedence of variable extraction: urlPath (before questionmark) >
@@ -393,18 +509,13 @@ class RestlessMethod {
 	 * IMPROVE distinguish query params from POST params to define a clearer
 	 * precedence
 	 * 
-	 * @param params
-	 * @NeverNull
-	 * @param restless
-	 * @NeverNull
-	 * @param req
-	 * @NeverNull
-	 * @param res
-	 * @NeverNull
+	 * @param params @NeverNull
+	 * @param restless @NeverNull
+	 * @param req @NeverNull
+	 * @param res @NeverNull
 	 * 
 	 * @return true if method launched successfully, i.e. parameters matched
-	 * @throws IOException
-	 *             if result writing fails
+	 * @throws IOException if result writing fails
 	 */
 	public boolean execute(@NeverNull RestlessMethodExecutionParameters params,
 			@NeverNull final Restless restless, @NeverNull final HttpServletRequest req,
@@ -422,17 +533,24 @@ class RestlessMethod {
 			// onBefore-run-event
 			restless.fireRequestStarted(restlessContext);
 			// run
-
 			Object result = invokeMethod(method, this.instanceOrClass, javaMethodArgs);
-
 			requestClock.stopAndStart("invoke " + methodReference(this.instanceOrClass, method));
 
+			// stream
+			if (params.isMultipartFormDataHandler()) {
+				String progressToken = params.getProgressToken();
+				IMultipartFormDataHandler multipartFormDataHandler = (IMultipartFormDataHandler) result;
+				handleStreaming(restlessContext, multipartFormDataHandler, progressToken);
+				requestClock
+						.stopAndStart("stream " + methodReference(this.instanceOrClass, method));
+			}
+
 			if (!hasHttpServletResponseParameter) {
+				// we need to send back something standard ourselves
 				res.setContentType(Restless.MIME_TEXT_PLAIN + "; charset="
 						+ Restless.CONTENT_TYPE_CHARSET_UTF8);
 				res.setStatus(200);
 				Writer w = res.getWriter();
-				// we need to send back something standard ourselves
 				w.write("Executed " + methodReference(this.instanceOrClass, method) + "\n");
 				if (result != null && result instanceof String) {
 					w.write("Result: " + result);
@@ -500,6 +618,77 @@ class RestlessMethod {
 		return true;
 	}
 
+	/**
+	 * @param req
+	 * @param multipartFormDataHandler
+	 * @param progressToken @CanBeNull
+	 * @param res
+	 * @throws IOException
+	 * @throws FileUploadException
+	 */
+	private static void handleStreaming(IRestlessContext ctx,
+			IMultipartFormDataHandler multipartFormDataHandler, final String progressToken)
+			throws IOException {
+		// Check that we have a file upload request
+		boolean isMultipart = ServletFileUpload.isMultipartContent(ctx.getRequest());
+		assert isMultipart;
+
+		IPartProgress partProgress = null;
+		if (progressToken != null) {
+			partProgress = new IPartProgress() {
+
+				@Override
+				public void reportProgress(String progressMessage) {
+					ProgressManager.PROGRESS_BROKER.putProgress(progressToken, progressMessage);
+				}
+			};
+		}
+
+		// Create a new file upload handler = really the parser
+		ServletFileUpload upload = new ServletFileUpload();
+
+		// Parse the request
+		try {
+			FileItemIterator it = upload.getItemIterator(ctx.getRequest());
+			while (it.hasNext()) {
+				FileItemStream item = it.next();
+
+				String fieldName = item.getFieldName();
+				String contentType = item.getContentType();
+				String contentName = item.getName();
+				Map<String, String> headerMap = new HashMap<String, String>();
+				FileItemHeaders headers = item.getHeaders();
+				Iterator<String> headerNameIt = headers.getHeaderNames();
+				while (headerNameIt.hasNext()) {
+					String headerName = headerNameIt.next();
+					String headerValue = headers.getHeader(headerName);
+					headerMap.put(headerName, headerValue);
+				}
+				InputStream is = item.openStream();
+
+				if (item.isFormField()) {
+					String value = Streams.asString(is, "UTF-8");
+					multipartFormDataHandler.onContentPartString(fieldName, contentName, headerMap,
+							contentType, value, partProgress);
+				} else {
+					multipartFormDataHandler.onContentPartStream(fieldName, contentName, headerMap,
+							contentType, is, partProgress);
+				}
+			}
+			multipartFormDataHandler.onEndOfRequest(ctx, partProgress);
+		} catch (FileUploadException e) {
+			// TODO good idea?
+			if (partProgress != null)
+				partProgress.reportProgress("ERROR");
+			throw new IOException("while uploading", e);
+		}
+
+	}
+
+	/**
+	 * @param req
+	 * @return @NeverNull an empty map if not a multi-part content
+	 */
 	private static Map<String, Object> getMultiPartPostAsMap(HttpServletRequest req) {
 		Map<String, Object> map = new HashMap<String, Object>();
 		if (!ServletFileUpload.isMultipartContent(req)) {
@@ -523,7 +712,7 @@ class RestlessMethod {
 					if (fieldName.equals(UPLOAD_PARAM)) {
 						map.put(UPLOAD_PARAM, bytes);
 					} else {
-						// do the same, maybe do something smarter
+						// do the same, IMPROVE do something smarter
 						map.put(fieldName, bytes);
 						map.put(UPLOAD_PARAM, bytes);
 					}
