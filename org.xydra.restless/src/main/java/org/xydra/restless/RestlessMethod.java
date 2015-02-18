@@ -543,9 +543,7 @@ class RestlessMethod {
 				handleStreaming(restlessContext, multipartFormDataHandler, progressToken);
 				requestClock
 						.stopAndStart("stream " + methodReference(this.instanceOrClass, method));
-			}
-
-			if (!hasHttpServletResponseParameter) {
+			} else if (!hasHttpServletResponseParameter) {
 				// we need to send back something standard ourselves
 				res.setContentType(Restless.MIME_TEXT_PLAIN + "; charset="
 						+ Restless.CONTENT_TYPE_CHARSET_UTF8);
