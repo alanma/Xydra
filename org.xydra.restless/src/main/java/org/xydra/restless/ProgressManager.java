@@ -7,6 +7,9 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
+
 /**
  * Handles distribution of progress information while uploads are in progress.
  * 
@@ -37,6 +40,8 @@ public class ProgressManager {
 	/** Cloud users should use some distributed progress broker here */
 	public static IProgressBroker PROGRESS_BROKER = new SingleMachineProgressBroker();
 
+	private static final Logger log = LoggerFactory.getLogger(ProgressManager.class);
+
 	public static final class SingleMachineProgressBroker implements IProgressBroker {
 
 		private Map<String, String> map = new HashMap<String, String>();
@@ -44,6 +49,9 @@ public class ProgressManager {
 		@Override
 		public void putProgress(String progessToken, String progressMessage) {
 			this.map.put(progessToken, progressMessage);
+			if (log.isDebugEnabled()) {
+				log.debug("PROGRESS(" + progessToken + "): " + progressMessage);
+			}
 		}
 
 		@Override
