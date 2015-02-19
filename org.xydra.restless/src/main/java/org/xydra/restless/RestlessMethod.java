@@ -36,7 +36,7 @@ import org.xydra.annotations.ThreadSafe;
 import org.xydra.common.NanoClock;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
-import org.xydra.restless.IMultipartFormDataHandler.IPartProgress;
+import org.xydra.restless.IMultipartFormDataHandler.IProgressReporter;
 import org.xydra.restless.utils.QueryStringUtils;
 import org.xydra.restless.utils.ServletUtils;
 
@@ -297,9 +297,9 @@ class RestlessMethod {
 				}
 			}
 
-			String progressToken = (String) getNamedParameter(false, "_progressToken_", null,
-					false, mayReadRequestBody, req, urlPathParameterMap, cookieMap, queryMap,
-					multipartMap);
+			String progressToken = (String) getNamedParameter(false,
+					IMultipartFormDataHandler.PARAM_PROGRESS_TOKEN, null, false,
+					mayReadRequestBody, req, urlPathParameterMap, cookieMap, queryMap, multipartMap);
 
 			return new RestlessMethodExecutionParameters(method, isMultiPartStreamHandlerMethod,
 					progressToken, restlessContext, javaMethodArgs,
@@ -631,9 +631,10 @@ class RestlessMethod {
 		boolean isMultipart = ServletFileUpload.isMultipartContent(ctx.getRequest());
 		assert isMultipart;
 
-		IPartProgress partProgress = null;
+		@CanBeNull
+		IProgressReporter progressReporter = null;
 		if (progressToken != null) {
-			partProgress = new IPartProgress() {
+			progressReporter = new IProgressReporter() {
 
 				@Override
 				public void reportProgress(String progressMessage) {
@@ -647,9 +648,9 @@ class RestlessMethod {
 
 		// Parse the request
 		try {
-			FileItemIterator it = upload.getItemIterator(ctx.getRequest());
-			while (it.hasNext()) {
-				FileItemStream item = it.next();
+			FileItemIterator itemStreamIt = upload.getItemIterator(ctx.getRequest());
+			while (itemStreamIt.hasNext()) {
+				FileItemStream item = itemStreamIt.next();
 
 				String fieldName = item.getFieldName();
 				String contentType = item.getContentType();
@@ -667,17 +668,19 @@ class RestlessMethod {
 				if (item.isFormField()) {
 					String value = Streams.asString(is, "UTF-8");
 					multipartFormDataHandler.onContentPartString(fieldName, contentName, headerMap,
-							contentType, value, partProgress);
+							contentType, value, progressReporter);
 				} else {
 					multipartFormDataHandler.onContentPartStream(fieldName, contentName, headerMap,
-							contentType, is, partProgress);
+							contentType, is, progressReporter);
 				}
+
+				is.close();
 			}
-			multipartFormDataHandler.onEndOfRequest(ctx, partProgress);
+			multipartFormDataHandler.onEndOfRequest(ctx, progressReporter);
 		} catch (FileUploadException e) {
 			// TODO good idea?
-			if (partProgress != null)
-				partProgress.reportProgress("ERROR");
+			if (progressReporter != null)
+				progressReporter.reportProgress("ERROR");
 			throw new IOException("while uploading", e);
 		}
 

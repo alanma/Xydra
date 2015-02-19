@@ -16,10 +16,11 @@ import org.xydra.common.NanoClock;
  * .
  * 
  * @author kaidel
- * 
+ * @author xamde
  */
 @NotThreadSafe
 class RestlessMethodExecutionParameters {
+
 	private Method method;
 	private IRestlessContext restlessContext;
 	private List<Object> javaMethodArgs;
@@ -80,10 +81,23 @@ class RestlessMethodExecutionParameters {
 		return this.clock;
 	}
 
+	/**
+	 * @return true if the method exposed to Restless is a special handler for a
+	 *         multi-part form upload which should be processed in a streaming
+	 *         fashion. Non-streaming uploads can simply be handled by accessing
+	 *         the named parameters in normal Restless fashion.
+	 */
 	public boolean isMultipartFormDataHandler() {
 		return this.isMultipartFormDataHandler;
 	}
 
+	/**
+	 * @return a token which is supplied during a multi-part form upload (makes
+	 *         only sense if {@link #isMultipartFormDataHandler()} is true).
+	 *         This token allows to retrieve status updates
+	 *         <em>while the upload runs</em> via another, built-in servlet. See
+	 *         {@link ProgressManager}.
+	 */
 	public String getProgressToken() {
 		return this.progressToken;
 	}
