@@ -69,8 +69,12 @@ public class ProgressManager {
 		);
 	}
 
+	public static final String NO_MESSAGE = "NO_MESSAGE";
+
 	/**
-	 * REST-exposed via Restless
+	 * REST-exposed via Restless.
+	 * 
+	 * Sends "NO_MESSAGE" if there is no message.
 	 * 
 	 * @param progressToken
 	 * @throws IOException
@@ -78,6 +82,16 @@ public class ProgressManager {
 	public static void getProgress(HttpServletResponse res, String progressToken)
 			throws IOException {
 		String progressMessage = PROGRESS_BROKER.getProgress(progressToken);
+
+		if (progressMessage == null) {
+			progressMessage = NO_MESSAGE;
+			try {
+				Thread.sleep(2000);
+			} catch (InterruptedException e) {
+				throw new RuntimeException("Error", e);
+			}
+		}
+
 		res.setContentType("text/plain; charset=utf8");
 		Writer w = res.getWriter();
 		w.write("" + progressMessage);
