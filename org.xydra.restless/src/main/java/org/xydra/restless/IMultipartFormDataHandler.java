@@ -20,9 +20,12 @@ public interface IMultipartFormDataHandler {
 	 * 
 	 * @author xamde
 	 */
-	static interface IProgressReporter {
+	public static interface IProgressReporter {
 
-		void reportProgress(String bytesProcessedSoFar);
+		/**
+		 * @param progressMessage
+		 */
+		void reportProgress(String progressMessage);
 
 	}
 
