@@ -638,7 +638,7 @@ class RestlessMethod {
 
 				@Override
 				public void reportProgress(String progressMessage) {
-					ProgressManager.PROGRESS_BROKER.putProgress(progressToken, progressMessage);
+					ProgressManager.DEFAULT_PROGRESS_BROKER.appendProgress(progressToken, progressMessage);
 				}
 			};
 		}
