@@ -17,16 +17,11 @@ import org.xydra.index.query.EqualsConstraint;
  * 
  * @author voelkel
  * 
- * @param <E>
- *            entity type
+ * @param <E> entity type
  */
 public class SmallSetIndex<E> extends LinkedList<E> implements IEntrySet<E> {
 
 	private static final long serialVersionUID = 1067549369843962009L;
-
-	// public void clear() {
-	// this.clear();
-	// }
 
 	@Override
 	public boolean deIndex(E entry) {
