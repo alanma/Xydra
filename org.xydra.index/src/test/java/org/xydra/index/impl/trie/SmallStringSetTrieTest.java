@@ -137,4 +137,15 @@ public class SmallStringSetTrieTest extends AbstractMapSetIndexTest<String, Inte
 				+ " ns each");
 	}
 
+	@Test
+	public void testLongestMatch() {
+		trie().index("helloworld", 2);
+		trie().index("helloyou", 3);
+		trie().index("hello", 3);
+		trie().index("hello", 2);
+
+		int l = trie().getLongestMatch("And then hellover, what next", 9);
+		assertEquals(5, l);
+	}
+
 }

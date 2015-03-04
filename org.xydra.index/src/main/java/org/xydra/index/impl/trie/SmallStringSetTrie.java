@@ -771,6 +771,25 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 			return nonEmptyEntrySetIt;
 		}
 
+		public int getLongestMatch(String s, int start) {
+
+			int len = 1;
+
+			while (start + len < s.length()) {
+				String key = s.substring(start, start + len);
+				boolean b = this.children.containsKeysStartingWith(key);
+				if (b) {
+					// great, maybe even with a longer key
+					len++;
+				} else {
+					// we went one len too far
+					return len - 1;
+				}
+			}
+			// we match the whole s-remainder
+			return len;
+		}
+
 	}
 
 	private final IFilter<IEntrySet<E>> FILTER_NON_EMPTY_ENTRYSET = new IFilter<IEntrySet<E>>() {
@@ -1115,6 +1134,16 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 	 */
 	public boolean indexKey(String insertKey) {
 		return this.root.indexKey(insertKey);
+	}
+
+	/**
+	 * @param s
+	 * @param start within s
+	 * @return the number of charactes, starting from start, are the longest
+	 *         match so that at least one result is returned
+	 */
+	public int getLongestMatch(String s, int start) {
+		return this.root.getLongestMatch(s, start);
 	}
 
 }
