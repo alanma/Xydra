@@ -15,6 +15,7 @@ import org.xydra.index.IEntrySet;
 import org.xydra.index.IEntrySet.IEntrySetDiff;
 import org.xydra.index.IMapSetIndex;
 import org.xydra.index.iterator.AbstractCascadedIterator;
+import org.xydra.index.iterator.ITransformer;
 import org.xydra.index.iterator.Iterators;
 import org.xydra.index.iterator.NoneIterator;
 import org.xydra.index.query.Constraint;
@@ -399,6 +400,18 @@ public class MapSetIndex<K, E> implements IMapSetIndex<K, E> {
 
 	public Set<K> keySet() {
 		return this.map.keySet();
+	}
+
+	public Iterator<E> values() {
+		Iterator<Entry<K, IEntrySet<E>>> it = this.map.entrySet().iterator();
+		return Iterators.cascade(it, new ITransformer<Entry<K, IEntrySet<E>>, Iterator<E>>() {
+
+			@Override
+			public Iterator<E> transform(Entry<K, IEntrySet<E>> in) {
+				return in.getValue().iterator();
+			}
+
+		});
 	}
 
 	@Override
