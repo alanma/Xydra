@@ -34,7 +34,8 @@ public class ChangeExecutor {
 
 		XWritableObject object = changedModel.getObject(objectCommand.getObjectId());
 		if (object == null) {
-			log.warn("XObjectCommand is invalid: " + objectCommand);
+			log.warn("XObjectCommand is invalid (found no object with id '"
+					+ objectCommand.getObjectId() + "'): " + objectCommand);
 			return false;
 		}
 
