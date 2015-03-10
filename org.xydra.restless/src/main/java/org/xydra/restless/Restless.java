@@ -692,11 +692,10 @@ public class Restless extends HttpServlet {
 			}
 
 		}
-		log.info(">>> Done Restless init at context path '"
+		log.info("Done Restless init at context path '"
 				+ this.initParams.get("context:contextPath") + "'. Admin interface at '"
-				+ this.initParams.get("context:contextPath") + "/admin/restless'. "
-
-				+ "Init performance " + clock.getStats());
+				+ this.initParams.get("context:contextPath") + "/admin/restless'. ");
+		log.debug("Init performance " + clock.getStats());
 	}
 
 	private void initLoggerFactory() {
@@ -993,7 +992,10 @@ public class Restless extends HttpServlet {
 		}
 
 		long requestTime = requestClock.stop("done").getDurationSinceStart();
-		log.info("Request time: " + requestTime + " causes: " + requestClock.getStats());
+		log.info("Took " + String.format("%5d", requestTime) + "ms for request to '"
+				+ req.getRequestURI() + "'");
+		log.debug("Timing stats for request to '" + req.getRequestURI() + "': "
+				+ requestClock.getStats());
 	}
 
 	/**
