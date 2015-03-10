@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
@@ -18,8 +19,6 @@ import org.xydra.core.XX;
 import org.xydra.core.model.XChangeLog;
 import org.xydra.core.model.XObject;
 import org.xydra.core.util.DumpUtils;
-import org.xydra.index.iterator.IFilter;
-import org.xydra.index.iterator.Iterators;
 
 /**
  * Transform an {@link XTransactionEvent} back into what actually changed
@@ -28,16 +27,47 @@ import org.xydra.index.iterator.Iterators;
  */
 public class TransactionSummary {
 
+	public enum AtomicChangeType {
+		Add, Change, Remove;
+
+		@Override
+		public String toString() {
+			switch (this) {
+			case Add:
+				return "+";
+			case Remove:
+				return "-";
+			case Change:
+				return "~";
+			default:
+				throw new AssertionError();
+			}
+		}
+	}
+
 	public class Change {
 		/** range -1, 0, 1 */
-		public int state = 0;
+		private int state = 0;
 
-		public void add() {
+		private void add() {
 			assert this.state <= 0;
 			this.state++;
 		}
 
-		public void remove() {
+		public AtomicChangeType getAtomicChangeType() {
+			switch (this.state) {
+			case -1:
+				return AtomicChangeType.Remove;
+			case 0:
+				return AtomicChangeType.Change;
+			case 1:
+				return AtomicChangeType.Add;
+			default:
+				throw new AssertionError();
+			}
+		}
+
+		private void remove() {
 			assert this.state >= 0;
 			this.state--;
 		}
@@ -54,7 +84,7 @@ public class TransactionSummary {
 			return this.state == 0;
 		}
 
-		public void apply(ChangeType changeType) {
+		private void apply(ChangeType changeType) {
 			switch (changeType) {
 			case ADD:
 				add();
@@ -83,7 +113,7 @@ public class TransactionSummary {
 	}
 
 	abstract class SummaryEntity {
-		public Change change = new Change();
+		protected Change change = new Change();
 
 		public void apply(XAtomicEvent ae) {
 			this.change.apply(ae.getChangeType());
@@ -91,32 +121,8 @@ public class TransactionSummary {
 
 	}
 
-	public static <E extends SummaryEntity> Iterator<Map.Entry<XId, E>> filterAdded(
-			Iterator<Map.Entry<XId, E>> it) {
-		Iterator<Map.Entry<XId, E>> result = Iterators.filter(it, new IFilter<Map.Entry<XId, E>>() {
-
-			@Override
-			public boolean matches(Map.Entry<XId, E> entry) {
-				return ((SummaryEntity) entry.getValue()).change.isAdded();
-			}
-		});
-		return result;
-	}
-
-	public static <E extends SummaryEntity> Iterator<Map.Entry<XId, E>> filterRemoved(
-			Iterator<Map.Entry<XId, E>> it) {
-		Iterator<Map.Entry<XId, E>> result = Iterators.filter(it, new IFilter<Map.Entry<XId, E>>() {
-
-			@Override
-			public boolean matches(Map.Entry<XId, E> entry) {
-				return ((SummaryEntity) entry.getValue()).change.isRemoved();
-			}
-		});
-		return result;
-	}
-
 	public class SummaryModel extends SummaryEntity {
-		public Map<XId, SummaryObject> map = new HashMap<XId, SummaryObject>();
+		private Map<XId, SummaryObject> map = new HashMap<XId, SummaryObject>();
 		private XAddress modelAddress;
 
 		public SummaryModel(XAddress modelAddress) {
@@ -132,14 +138,10 @@ public class TransactionSummary {
 			return so;
 		}
 
-		public Iterator<Entry<XId, SummaryObject>> getAdded() {
-			return filterAdded(getChildren());
-		}
-
-		public Iterator<Entry<XId, SummaryObject>> getRemoved() {
-			return filterRemoved(getChildren());
-		}
-
+		/**
+		 * @return all summaryObjects, including those that have only been
+		 *         changed (i.e. have children that changed)
+		 */
 		public Iterator<Entry<XId, SummaryObject>> getChildren() {
 			return this.map.entrySet().iterator();
 		}
@@ -150,33 +152,25 @@ public class TransactionSummary {
 
 		@Override
 		public String toString() {
-			return "M " + this.change + "\n" + DumpUtils.toStringBuilder(this.map);
+			return "M-" + this.change + "\n" + DumpUtils.toStringBuilder(this.map);
 		}
 
 	}
 
 	public class SummaryObject extends SummaryEntity {
-		public Map<XId, SummaryField> map = new HashMap<XId, SummaryField>();
+		private Map<XId, SummaryField> id2summaryField = new HashMap<XId, SummaryField>();
 
 		public SummaryField createOrGet(XId field) {
-			SummaryField sf = this.map.get(field);
+			SummaryField sf = this.id2summaryField.get(field);
 			if (sf == null) {
 				sf = new SummaryField();
-				this.map.put(field, sf);
+				this.id2summaryField.put(field, sf);
 			}
 			return sf;
 		}
 
-		public Iterator<Entry<XId, SummaryField>> getAdded() {
-			return filterAdded(getChildren());
-		}
-
-		public Iterator<Entry<XId, SummaryField>> getRemoved() {
-			return filterRemoved(getChildren());
-		}
-
 		Iterator<Entry<XId, SummaryField>> getChildren() {
-			return this.map.entrySet().iterator();
+			return this.id2summaryField.entrySet().iterator();
 		}
 
 		/**
@@ -186,7 +180,7 @@ public class TransactionSummary {
 		 * @return
 		 */
 		public XValue getFieldValue(XObject xo, XId fieldId, boolean remove) {
-			SummaryField f = this.map.get(fieldId);
+			SummaryField f = this.id2summaryField.get(fieldId);
 			if (f != null && f.summaryValue != null) {
 				return remove ? f.summaryValue.oldValue : f.summaryValue.newValue;
 			}
@@ -196,42 +190,21 @@ public class TransactionSummary {
 			return null;
 		}
 
-		// public SimpleObject toSimpleObject(SummaryModel sm, XId objectId) {
-		// SimpleObject so = new SimpleObject(XX.resolveObject(sm.modelAddress,
-		// objectId));
-		//
-		// if (this.change.isAdded()) {
-		//
-		// for (Entry<XId, SummaryField> entry : this.map.entrySet()) {
-		// assert !entry.getValue().change.isRemoved();
-		// XRevWritableField field = so.createField(entry.getKey());
-		// SummaryField sf = entry.getValue();
-		// field.setValue(sf.summaryValue.newValue);
-		// }
-		//
-		// Iterator<Entry<XId, SummaryField>> addIt = getAdded();
-		// while (addIt.hasNext()) {
-		// Map.Entry<XId, SummaryField> entry = addIt.next();
-		// XRevWritableField field = so.createField(entry.getKey());
-		// SummaryField sf = entry.getValue();
-		// field.setValue(sf.summaryValue.newValue);
-		// }
-		// } else if (this.change.isRemoved()) {
-		// Iterator<Entry<XId, SummaryField>> addIt = getRemoved();
-		// while (addIt.hasNext()) {
-		// Map.Entry<XId, SummaryField> entry = addIt.next();
-		// XRevWritableField field = so.createField(entry.getKey());
-		// SummaryField sf = entry.getValue();
-		// field.setValue(sf.summaryValue.oldValue);
-		// }
-		// }
-		//
-		// return so;
-		// }
-
 		@Override
 		public String toString() {
-			return "O " + this.change + "\n" + DumpUtils.toStringBuilder(this.map);
+			return "O-" + this.change + "\n" + DumpUtils.toStringBuilder(this.id2summaryField);
+		}
+
+		public AtomicChangeType getAtomichChangeType() {
+			return this.change.getAtomicChangeType();
+		}
+
+		public SummaryField getSummaryField(XId fieldId) {
+			return this.id2summaryField.get(fieldId);
+		}
+
+		public Set<Entry<XId, SummaryField>> getSummaryFields() {
+			return this.id2summaryField.entrySet();
 		}
 
 	}
@@ -248,7 +221,7 @@ public class TransactionSummary {
 
 		@Override
 		public String toString() {
-			return "F " + this.change + "\n" + this.summaryValue.toString();
+			return "F-" + this.change + "\n" + this.summaryValue.toString();
 		}
 
 	}
@@ -327,16 +300,21 @@ public class TransactionSummary {
 
 	private SummaryModel sm;
 
+	/**
+	 * Use the txn event and the change log to reconstruct what changed.
+	 * 
+	 * Result is in {@link #getSummaryModel()}.
+	 * 
+	 * @param txnEvent
+	 * @param changeLog
+	 */
 	public TransactionSummary(XTransactionEvent txnEvent, XChangeLog changeLog) {
 		XAddress modelAddress = XX.resolveModel(txnEvent.getChangedEntity());
 		this.sm = new SummaryModel(modelAddress);
 		for (XAtomicEvent ae : txnEvent) {
 			switch (ae.getTarget().getAddressedType()) {
-			case XFIELD: {
-				SummaryObject so = this.sm.createOrGet(ae.getChangedEntity().getObject());
-				SummaryField sf = so.createOrGet(ae.getChangedEntity().getField());
-				SummaryValue sv = sf.createOrGet();
-				sv.apply(ae, changeLog);
+			case XREPOSITORY: {
+				this.sm.apply(ae);
 			}
 				break;
 			case XMODEL: {
@@ -350,49 +328,19 @@ public class TransactionSummary {
 				sf.apply(ae);
 			}
 				break;
-			case XREPOSITORY:
-				this.sm.apply(ae);
+			case XFIELD: {
+				SummaryObject so = this.sm.createOrGet(ae.getChangedEntity().getObject());
+				SummaryField sf = so.createOrGet(ae.getChangedEntity().getField());
+				SummaryValue sv = sf.createOrGet();
+				sv.apply(ae, changeLog);
+			}
 				break;
 			default:
 				break;
 
 			}
 		}
-		// postProcess();
 	}
-
-	// /**
-	// * If a neutral object has only added fields, the object is considered
-	// * added. Vice versa for removed.
-	// *
-	// */
-	// private void postProcess() {
-	// for (Entry<XId, SummaryObject> oEntry : this.sm.map.entrySet()) {
-	// SummaryObject so = oEntry.getValue();
-	// if (so.change.isNeutral()) {
-	// boolean addedField = false;
-	// boolean removedField = false;
-	// for (Entry<XId, SummaryField> fEntry : so.map.entrySet()) {
-	// SummaryField sf = fEntry.getValue();
-	// // update from children
-	// if (sf.change.isNeutral()) {
-	// SummaryField sv = fEntry.getValue();
-	// sf.change.state = sv.change.state;
-	// }
-	// // process change
-	// addedField |= sf.change.isAdded();
-	// removedField |= sf.change.isRemoved();
-	// }
-	// // process change
-	// if (addedField && !removedField) {
-	// so.change.state = 1;
-	// }
-	// if (removedField && !addedField) {
-	// so.change.state = -1;
-	// }
-	// }
-	// }
-	// }
 
 	public SummaryModel getSummaryModel() {
 		return this.sm;
