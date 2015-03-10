@@ -54,8 +54,7 @@ public class LoggerFactory {
 	 * All log messages are also sent to the registered {@link ILogListener}.
 	 * This is only effective for Logger instances, created after this setting.
 	 * 
-	 * @param logListener
-	 *            a listener to receive all log messages
+	 * @param logListener a listener to receive all log messages
 	 */
 	public static synchronized void addLogListener(ILogListener logListener) {
 		ensureLoggerFactoryDefined();
@@ -94,8 +93,7 @@ public class LoggerFactory {
 	}
 
 	/**
-	 * @param clazz
-	 *            used as a name for the logger
+	 * @param clazz used as a name for the logger
 	 * @return a logger, using the sub-system configured by
 	 */
 	public static synchronized Logger getLogger(Class<?> clazz) {
@@ -106,8 +104,7 @@ public class LoggerFactory {
 	 * Note {@link #getLogger(Class)} is preferred. It survives refactorings
 	 * better.
 	 * 
-	 * @param name
-	 *            for the logger
+	 * @param name for the logger
 	 * @return a logger, using the sub-system configured by
 	 */
 	public static synchronized Logger getLogger(String name) {
@@ -206,8 +203,7 @@ public class LoggerFactory {
 	 * Stop adding the given {@link ILogListener} to newly created loggers.
 	 * Rarely used in practice.
 	 * 
-	 * @param logListener
-	 *            the listener to be removed from the set of listeners.
+	 * @param logListener the listener to be removed from the set of listeners.
 	 */
 	public static synchronized void removeLogListener(ILogListener logListener) {
 		ensureLoggerFactoryDefined();
@@ -216,11 +212,9 @@ public class LoggerFactory {
 	}
 
 	/**
-	 * @param spi
-	 *            an {@link ILoggerFactorySPI} instance
+	 * @param spi an {@link ILoggerFactorySPI} instance
 	 * @param configSource
-	 *            @CanBeNull an optional String indicating where this can be
-	 *            configured
+	 * @CanBeNull an optional String indicating where this can be configured
 	 */
 	public static synchronized void setLoggerFactorySPI(ILoggerFactorySPI spi, String configSource) {
 		ILoggerFactorySPI lastLoggerFactorySPI = loggerFactorySPI;
@@ -243,7 +237,7 @@ public class LoggerFactory {
 		// force creating a new SELF-LOGGER
 		SELF_LOGGER = null;
 		getSelfLogger().info(
-				"---- Logging: Configured XydraLog with " + spi.getClass().getName() + ". "
+				"Logging: Configured XydraLog with " + spi.getClass().getName() + ". "
 						+ (configSource == null ? "" : "Config source: '" + configSource + "'")
 						+ " See " + LoggerFactory.class.getName()
 						+ " documentation to solve config problems.");

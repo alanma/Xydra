@@ -109,10 +109,8 @@ public class UniversalLogger implements ILoggerFactorySPI {
 	 * 
 	 * Sets config values into Env.{@link IConfig}.
 	 * 
-	 * @param inGWT
-	 *            if running as compiled JavaScript
-	 * @param onGAE
-	 *            if running on App Engine
+	 * @param inGWT if running as compiled JavaScript
+	 * @param onGAE if running on App Engine
 	 */
 	public static synchronized void activate(boolean inGWT, boolean onGAE) {
 		if (activated)
@@ -144,7 +142,7 @@ public class UniversalLogger implements ILoggerFactorySPI {
 
 		// init
 		configure(spi, "UniversalLoggerFactorySPI.activate");
-		LoggerFactory.getSelfLogger().info("LoggerFactorySPI configured from " + source);
+		LoggerFactory.getSelfLogger().info("Logging: LoggerFactorySPI configured from " + source);
 		activated = true;
 	}
 }
