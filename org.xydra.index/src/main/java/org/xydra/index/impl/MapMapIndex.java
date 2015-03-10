@@ -25,12 +25,9 @@ import org.xydra.index.query.Wildcard;
  * 
  * @author dscharrer
  * 
- * @param <K>
- *            key1 type
- * @param <L>
- *            key2 type
- * @param <E>
- *            entity type
+ * @param <K> key1 type
+ * @param <L> key2 type
+ * @param <E> entity type
  */
 public class MapMapIndex<K, L, E> implements IMapMapIndex<K, L, E> {
 
