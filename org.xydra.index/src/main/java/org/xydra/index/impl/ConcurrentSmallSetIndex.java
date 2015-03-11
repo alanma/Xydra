@@ -12,8 +12,7 @@ import org.xydra.index.IEntrySet;
  * 
  * @author voelkel
  * 
- * @param <E>
- *            entity type
+ * @param <E> entity type
  */
 public class ConcurrentSmallSetIndex<E> extends SmallSetIndex<E> implements IEntrySet<E> {
 

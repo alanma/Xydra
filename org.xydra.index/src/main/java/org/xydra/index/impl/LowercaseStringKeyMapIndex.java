@@ -6,6 +6,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.xydra.annotations.RunsInGWT;
 import org.xydra.index.IMapIndex;
 import org.xydra.index.iterator.AbstractTransformingIterator;
 import org.xydra.index.iterator.NoneIterator;
@@ -20,9 +21,9 @@ import org.xydra.log.api.LoggerFactory;
  * 
  * @author voelkel
  * 
- * @param <E>
- *            entity type
+ * @param <E> entity type
  */
+@RunsInGWT(false)
 public class LowercaseStringKeyMapIndex<E> implements IMapIndex<String, E> {
 
 	private static final long serialVersionUID = -5149093549283026560L;

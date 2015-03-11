@@ -9,8 +9,7 @@ import org.xydra.index.query.Constraint;
  * A set in Xydra Index API shape.
  * 
  * @author voelkel
- * @param <E>
- *            entity type
+ * @param <E> entity type
  */
 public interface IEntrySet<E> extends IIndex, Iterable<E> {
 
