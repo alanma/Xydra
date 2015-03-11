@@ -15,6 +15,8 @@ import org.xydra.index.IEntrySet;
 import org.xydra.index.IEntrySet.IEntrySetDiff;
 import org.xydra.index.IMapSetIndex;
 import org.xydra.index.iterator.AbstractCascadedIterator;
+import org.xydra.index.iterator.ClosableIterator;
+import org.xydra.index.iterator.ClosableIteratorAdapter;
 import org.xydra.index.iterator.ITransformer;
 import org.xydra.index.iterator.Iterators;
 import org.xydra.index.iterator.NoneIterator;
@@ -248,7 +250,7 @@ public class MapSetIndex<K, E> implements IMapSetIndex<K, E> {
 	}
 
 	@Override
-	public Iterator<E> constraintIterator(Constraint<K> c1) {
+	public ClosableIterator<E> constraintIterator(Constraint<K> c1) {
 		if (c1.isStar()) {
 			return new CascadingEntrySetIterator(this.map.values().iterator());
 		} else if (c1 instanceof EqualsConstraint<?>) {
@@ -264,9 +266,10 @@ public class MapSetIndex<K, E> implements IMapSetIndex<K, E> {
 	 * @param key
 	 * @return roughly the equivalent of {@link #lookup(Object)}.iterator
 	 */
-	public Iterator<E> valueIterator(K key) {
+	public ClosableIterator<E> valueIterator(K key) {
 		IEntrySet<E> index0 = this.map.get(key);
-		return index0 == null ? NoneIterator.<E> create() : index0.iterator();
+		return index0 == null ? NoneIterator.<E> create() : new ClosableIteratorAdapter<E>(
+				index0.iterator());
 	}
 
 	@Override

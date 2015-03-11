@@ -31,10 +31,10 @@ public class Iterators {
 	 * @return an iterator returning fewer elements, namely only those matching
 	 *         the filter
 	 */
-	public static <E> Iterator<E> filter(Iterator<E> base, IFilter<E> filter) {
+	public static <E> ClosableIterator<E> filter(Iterator<E> base, IFilter<E> filter) {
 		assert base != null;
 		if (base == NoneIterator.INSTANCE)
-			return base;
+			return (ClosableIterator<E>) base;
 
 		return new FilteringIterator<E>(base, filter);
 	}
@@ -63,10 +63,10 @@ public class Iterators {
 	 * @NeverNull
 	 * @return unique elements
 	 */
-	public static <E> Iterator<E> distinct(Iterator<E> base) {
+	public static <E> ClosableIterator<E> distinct(Iterator<E> base) {
 		assert base != null;
 		if (base == NoneIterator.INSTANCE)
-			return base;
+			return (ClosableIterator<E>) base;
 
 		return Iterators.filter(base, new IFilter<E>() {
 
@@ -112,14 +112,14 @@ public class Iterators {
 	 * @since 3.0
 	 */
 	@LicenseApache(copyright = "Copyright (C) 2007 The Guava Authors", project = "Guava")
-	public static <T> Iterator<T> limit(final Iterator<T> iterator, final int max) {
+	public static <T> ClosableIterator<T> limit(final Iterator<T> iterator, final int max) {
 		checkNotNull(iterator);
 		checkArgument(max >= 0, "limit is negative");
 		return new LimitingIterator<T>(max, iterator);
 	}
 
 	@LicenseApache(copyright = "Copyright (C) 2007 The Guava Authors", project = "Guava")
-	private static class LimitingIterator<T> implements Iterator<T> {
+	private static class LimitingIterator<T> implements ClosableIterator<T> {
 
 		private int count = 0;
 
@@ -151,6 +151,14 @@ public class Iterators {
 			this.limited.remove();
 		}
 
+		@SuppressWarnings("rawtypes")
+		@Override
+		public void close() {
+			if (this.limited instanceof ClosableIterator) {
+				((ClosableIterator) this.limited).close();
+			}
+		}
+
 	}
 
 	/**
@@ -171,12 +179,12 @@ public class Iterators {
 	 * @return an iterator returning entries of another type as the input type
 	 */
 	@SuppressWarnings("unchecked")
-	public static <I, O> Iterator<O> transform(Iterator<? extends I> base,
+	public static <I, O> ClosableIterator<O> transform(Iterator<? extends I> base,
 			ITransformer<I, O> transformer) {
 		assert base != null;
 
 		if (base == NoneIterator.INSTANCE)
-			return (Iterator<O>) base;
+			return (ClosableIterator<O>) base;
 
 		return new TransformingIterator<I, O>(base, transformer);
 	}
@@ -209,7 +217,8 @@ public class Iterators {
 	 * @NeverNull
 	 * @return a single, continuous iterator; might contain duplicates
 	 */
-	public static <E> Iterator<E> concat(Iterator<? extends E> it1, Iterator<? extends E> it2) {
+	public static <E> ClosableIterator<E> concat(Iterator<? extends E> it1,
+			Iterator<? extends E> it2) {
 		assert it1 != null;
 		assert it2 != null;
 
@@ -344,14 +353,14 @@ public class Iterators {
 		}));
 	}
 
-	public static <E> Iterator<E> none() {
+	public static <E> ClosableIterator<E> none() {
 		return NoneIterator.create();
 	}
 
 	/**
 	 * @param <T> type of both
 	 * @param <C> a collection type of T
-	 * @param it never null
+	 * @param it @NeverNull, is closed if instance of {@link ClosableIterator}
 	 * @param collection to which elements are added
 	 * @return as a convenience, the supplied collection
 	 */
@@ -383,12 +392,16 @@ public class Iterators {
 	}
 
 	/**
-	 * @param it
+	 * @param it will be closed if instance of ClosableIterator
 	 * @return a LinkedList
 	 */
+	@SuppressWarnings("rawtypes")
 	public static <T> List<T> toList(Iterator<? extends T> it) {
 		LinkedList<T> list = new LinkedList<T>();
 		addAll(it, list);
+		if (it instanceof ClosableIterator) {
+			((ClosableIterator) it).close();
+		}
 		return list;
 	}
 
@@ -438,11 +451,19 @@ public class Iterators {
 		return buf.toString();
 	}
 
+	/**
+	 * @param it is closed if instance of {@link ClosableIterator}
+	 * @return
+	 */
+	@SuppressWarnings("rawtypes")
 	public static int count(Iterator<?> it) {
 		int i = 0;
 		while (it.hasNext()) {
 			i++;
 			it.next();
+		}
+		if (it instanceof ClosableIterator) {
+			((ClosableIterator) it).close();
 		}
 		return i;
 	}

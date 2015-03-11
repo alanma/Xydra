@@ -8,10 +8,9 @@ import java.util.Iterator;
  * 
  * @author voelkel
  * 
- * @param <E>
- *            Type of objects returned by this iterator.
+ * @param <E> Type of objects returned by this iterator.
  */
-public class FilteringIterator<E> implements Iterator<E> {
+public class FilteringIterator<E> implements ClosableIterator<E> {
 
 	private Iterator<E> base;
 
@@ -61,5 +60,13 @@ public class FilteringIterator<E> implements Iterator<E> {
 		}
 
 		// we reached the end and never matched
+	}
+
+	@SuppressWarnings("rawtypes")
+	@Override
+	public void close() {
+		if (this.base instanceof ClosableIterator) {
+			((ClosableIterator) this.base).close();
+		}
 	}
 }

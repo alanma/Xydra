@@ -8,12 +8,10 @@ import java.util.Iterator;
  * 
  * @author voelkel
  * 
- * @param <B>
- *            Type of objects returned by the encapsulated iterator.
- * @param <E>
- *            Type of objects to be returned by this iterator.
+ * @param <B> Type of objects returned by the encapsulated iterator.
+ * @param <E> Type of objects to be returned by this iterator.
  */
-public abstract class AbstractCascadedIterator<B, E> implements Iterator<E> {
+public abstract class AbstractCascadedIterator<B, E> implements ClosableIterator<E> {
 
 	private Iterator<B> base;
 
@@ -30,6 +28,22 @@ public abstract class AbstractCascadedIterator<B, E> implements Iterator<E> {
 	public boolean hasNext() {
 		this.lookAhead();
 		return this.nextEntry != null;
+	}
+
+	@SuppressWarnings("rawtypes")
+	@Override
+	public void close() {
+		if (this.currentIterator != null && this.currentIterator instanceof ClosableIterator) {
+			((ClosableIterator) this.currentIterator).close();
+		}
+
+		while (this.base.hasNext()) {
+			B baseElement = this.base.next();
+			Iterator<? extends E> baseIt = this.toIterator(baseElement);
+			if (baseIt instanceof ClosableIterator) {
+				((ClosableIterator) baseIt).close();
+			}
+		}
 	}
 
 	@Override

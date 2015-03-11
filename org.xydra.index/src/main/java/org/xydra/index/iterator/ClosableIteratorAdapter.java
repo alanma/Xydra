@@ -6,10 +6,13 @@ import java.util.Iterator;
  * An iterator adaptor that turns any iterator into a closable iterator over
  * objects of a supertype of those returned by the wrapped iterator.
  * 
+ * Iterator is auto-closed if {@link #hasNext()} returns false;
+ * 
+ * Can be closed many times, will only close the underlying iterator once.
+ * 
  * @author voelkel
  * 
- * @param <T>
- *            entity type
+ * @param <T> entity type
  */
 public class ClosableIteratorAdapter<T> implements ClosableIterator<T> {
 
@@ -28,7 +31,11 @@ public class ClosableIteratorAdapter<T> implements ClosableIterator<T> {
 
 	@Override
 	public boolean hasNext() {
-		return this.iterator.hasNext();
+		boolean b = this.iterator.hasNext();
+		if (!b) {
+			close();
+		}
+		return b;
 	}
 
 	@Override
