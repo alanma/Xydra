@@ -15,6 +15,8 @@ import org.xydra.log.util.SharedExceptionUtils;
  * A drop-in replacement of {@link ReentrantReadWriteLock} which provides more
  * debug information.
  * 
+ * Configurable via log#isDebugEnabled
+ * 
  * It can be closed by a thread multiple times (even when it is already closed)
  * without causing any errors.
  * 
@@ -129,19 +131,28 @@ public class DebugReentrantReadWriteLock extends ReentrantReadWriteLock implemen
 
 	MapSetIndex<Long, String> openWrites = MapSetIndex.createWithFastEntrySets();
 
-	private transient DebugReadLock debugReadLock;
+	private transient Lock debugReadLock;
 
-	private transient DebugWriteLock debugWriteLock;
+	private transient Lock debugWriteLock;
 
 	private long maxWaitForWriteLockMillis = 10 * 1000;
 
+	/**
+	 * Behavior depends on setting of log. If isDebugEnabled, debug support is
+	 * on.
+	 */
 	public DebugReentrantReadWriteLock() {
-		this.debugReadLock = new DebugReadLock();
-		this.debugWriteLock = new DebugWriteLock();
+		if (log.isDebugEnabled()) {
+			this.debugReadLock = new DebugReadLock();
+			this.debugWriteLock = new DebugWriteLock();
+		} else {
+			this.debugReadLock = super.readLock();
+			this.debugWriteLock = super.writeLock();
+		}
 	}
 
 	@Override
-	public DebugReadLock readLock() {
+	public Lock readLock() {
 		return this.debugReadLock;
 	}
 
@@ -182,7 +193,7 @@ public class DebugReentrantReadWriteLock extends ReentrantReadWriteLock implemen
 	}
 
 	@Override
-	public DebugWriteLock writeLock() {
+	public Lock writeLock() {
 		return this.debugWriteLock;
 	}
 
