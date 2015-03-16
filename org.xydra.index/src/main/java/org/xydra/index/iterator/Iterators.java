@@ -246,17 +246,17 @@ public class Iterators {
 	 *         a part of the resulting sequence
 	 */
 	@SuppressWarnings("unchecked")
-	public static <B, E> Iterator<E> cascade(Iterator<B> base,
+	public static <B, E> ClosableIterator<E> cascade(Iterator<B> base,
 			final ITransformer<B, Iterator<E>> transformer) {
 		assert base != null;
 		if (base == NoneIterator.INSTANCE)
-			return (Iterator<E>) base;
+			return (ClosableIterator<E>) base;
 
 		return new CascadedIterator<B, E>(base, transformer);
 	}
 
 	private static class CascadedIterator<B, E> extends AbstractCascadedIterator<B, E> implements
-			Iterator<E> {
+			ClosableIterator<E> {
 
 		private ITransformer<B, Iterator<E>> transformer;
 
