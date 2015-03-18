@@ -217,7 +217,7 @@ public abstract class SortedMapTest {
 		this.map.put("a", 1);
 		this.map.put("b", 2);
 		this.map.put("c", 3);
-		assertTrue(this.map.firstKey().equals("a"));
+		assertEquals("a", this.map.firstKey());
 	}
 
 	@Test
@@ -225,7 +225,7 @@ public abstract class SortedMapTest {
 		this.map.put("a", 1);
 		this.map.put("b", 2);
 		this.map.put("c", 3);
-		assertTrue(this.map.lastKey().equals("c"));
+		assertEquals("c", this.map.lastKey());
 	}
 
 	@Test

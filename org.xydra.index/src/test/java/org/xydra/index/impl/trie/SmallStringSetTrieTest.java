@@ -1,8 +1,10 @@
 package org.xydra.index.impl.trie;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -12,8 +14,10 @@ import org.xydra.index.AbstractMapSetIndexTest;
 import org.xydra.index.IEntrySet;
 import org.xydra.index.impl.SmallEntrySetFactory;
 import org.xydra.index.impl.TestDataGenerator;
+import org.xydra.index.impl.trie.SmallStringSetTrie.KeyFramgents;
 import org.xydra.index.iterator.Iterators;
 import org.xydra.index.query.KeyEntryTuple;
+import org.xydra.index.query.Wildcard;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 
@@ -102,8 +106,9 @@ public class SmallStringSetTrieTest extends AbstractMapSetIndexTest<String, Inte
 	 */
 	@Test
 	public void testPerformance() {
+		final int dataSize = 1000000;
 		log.info("Preparing random datasets");
-		int ITEMS = 1000000;
+		int ITEMS = dataSize;
 		String[] names = new String[ITEMS];
 		Set<String> uniqueNames = new HashSet<String>();
 		for (int i = 0; i < ITEMS; i++) {
@@ -125,14 +130,14 @@ public class SmallStringSetTrieTest extends AbstractMapSetIndexTest<String, Inte
 		}
 		long insert = System.nanoTime();
 		// query
-		int QUERY = 1000000;
+		int QUERY = dataSize;
 		for (int i = 0; i < QUERY; i++) {
 			String name = TestDataGenerator.randomFromList(names);
 			IEntrySet<Integer> set = this.mapSetIndex.lookup(name);
 			assert !set.isEmpty();
 		}
 		long query = System.nanoTime();
-		System.out.println("Total = " + (query - start) / 10000000 + "ms; insert= "
+		System.out.println("Total = " + (query - start) / (1000 * 1000) + "ms; insert= "
 				+ (insert - start) / ITEMS + " ns each; query= " + (query - insert) / QUERY
 				+ " ns each");
 	}
@@ -144,8 +149,59 @@ public class SmallStringSetTrieTest extends AbstractMapSetIndexTest<String, Inte
 		trie().index("hello", 3);
 		trie().index("hello", 2);
 
-		int l = trie().getLongestMatch("And then hellover, what next", 9);
+		int l = trie().getLongestMatch("And then hellover, what next", 9).getFirst();
 		assertEquals(5, l);
+
+		assertNull(trie().getLongestMatch("And then he llover, what next", 9));
+	}
+
+	@Test
+	public void test1() {
+		int sharedLen = SmallStringSetTrie.getSharedPrefixLength("Hello World",
+				"Hell a lot of work");
+		assertEquals(4, sharedLen);
+
+		SmallStringSetTrie<Integer> st = new SmallStringSetTrie<Integer>(
+				new SmallEntrySetFactory<Integer>());
+		st.index("Hello World", 13);
+		st.index("Hell", 11);
+		st.index("Hell a lot of work", 666);
+
+		st.dump();
+
+		List<Integer> ints = new ArrayList<Integer>();
+		Iterators.addAll(st.iterator(), ints);
+		System.out.println(ints);
+
+		List<String> keys = new ArrayList<String>();
+		Iterators.addAll(st.keyIterator(), keys);
+		System.out.println(keys);
+
+		List<KeyEntryTuple<String, Integer>> tuples = new ArrayList<KeyEntryTuple<String, Integer>>();
+		Iterators.addAll(st.tupleIterator(new Wildcard<String>(), new Wildcard<Integer>()), tuples);
+		System.out.println(tuples);
+
+		st.deIndex("Hello");
+		st.deIndex("Hell");
+
+		// next test
+		SmallStringSetTrie<Void> st2 = new SmallStringSetTrie<Void>(
+				new SmallEntrySetFactory<Void>());
+		st2.indexKey("aaabbccc");
+		st2.indexKey("aaaddeee");
+		st2.indexKey("aaabbcff");
+		System.out.println("-----");
+		st2.dump();
+		KeyFramgents ky = st2.getKeyFragmentsFor("aaabbcg");
+		assert ky.matched.size() == 2;
+		assert ky.matched.get(0).equals("aaa");
+		assert ky.matched.get(1).equals("bbc");
+		assert ky.remainder.matches("g");
+		ky = st2.getKeyFragmentsFor("aaabb");
+		assert ky.matched.size() == 2;
+		assert ky.matched.get(0).equals("aaa");
+		assert ky.matched.get(1).equals("bb");
+		assert ky.remainder.matches("");
 	}
 
 }
