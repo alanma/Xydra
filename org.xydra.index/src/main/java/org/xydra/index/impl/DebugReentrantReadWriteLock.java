@@ -7,6 +7,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.xydra.annotations.RunsInGWT;
+import org.xydra.annotations.Setting;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.log.util.SharedExceptionUtils;
@@ -137,12 +138,16 @@ public class DebugReentrantReadWriteLock extends ReentrantReadWriteLock implemen
 
 	private long maxWaitForWriteLockMillis = 10 * 1000;
 
+	@Setting("Collection of stack-traces of threads that acquire read-locks")
+	private static final boolean ALWAYS_ON = true;
+
 	/**
 	 * Behavior depends on setting of log. If isDebugEnabled, debug support is
 	 * on.
 	 */
+	@SuppressWarnings("unused")
 	public DebugReentrantReadWriteLock() {
-		if (log.isDebugEnabled()) {
+		if (ALWAYS_ON || log.isDebugEnabled()) {
 			this.debugReadLock = new DebugReadLock();
 			this.debugWriteLock = new DebugWriteLock();
 		} else {
