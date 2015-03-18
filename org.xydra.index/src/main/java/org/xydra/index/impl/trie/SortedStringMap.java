@@ -1,5 +1,6 @@
 package org.xydra.index.impl.trie;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -30,8 +31,6 @@ public class SortedStringMap<E> implements IMapIndex<String, E> {
 	 * java.util.TreeMap = 19-20 seconds
 	 */
 	SortedArrayMap<String, E> map = new SortedArrayMap<String, E>();
-
-	// new TreeMap<String,E>();
 
 	@Override
 	public void index(final String key, final E value) {
@@ -135,8 +134,7 @@ public class SortedStringMap<E> implements IMapIndex<String, E> {
 	 *         given keyPrefix
 	 */
 	public boolean containsKeysStartingWith(final String keyPrefix) {
-		SortedMap<String, E> subMap = this.map.subMap(keyPrefix, keyPrefix + LAST_UNICODE_CHAR);
-		return !subMap.isEmpty();
+		return lookupFirstPrefix(keyPrefix) != null;
 	}
 
 	/**
@@ -159,8 +157,7 @@ public class SortedStringMap<E> implements IMapIndex<String, E> {
 	public String lookupFirstPrefix(final String keyPrefix) {
 		// fast path hack
 		if (this.map instanceof SortedArrayMap) {
-			return ((SortedArrayMap<String, E>) this.map).tailMapFirstKey(keyPrefix, keyPrefix
-					+ LAST_UNICODE_CHAR);
+			return this.map.tailMapFirstKey(keyPrefix, keyPrefix + LAST_UNICODE_CHAR);
 		}
 
 		SortedMap<String, E> subMap = this.map.subMap(keyPrefix, keyPrefix + LAST_UNICODE_CHAR);
@@ -170,8 +167,7 @@ public class SortedStringMap<E> implements IMapIndex<String, E> {
 	public E lookupFirstValue(final String keyPrefix) {
 		// fast path hack
 		if (this.map instanceof SortedArrayMap) {
-			return ((SortedArrayMap<String, E>) this.map).tailMapFirstEntry(keyPrefix, keyPrefix
-					+ LAST_UNICODE_CHAR);
+			return this.map.tailMapFirstEntry(keyPrefix, keyPrefix + LAST_UNICODE_CHAR);
 		}
 
 		SortedMap<String, E> subMap = this.map.subMap(keyPrefix, keyPrefix + LAST_UNICODE_CHAR);
@@ -197,7 +193,7 @@ public class SortedStringMap<E> implements IMapIndex<String, E> {
 	public Pair<E, Boolean> findWithPrefix(final String keyPrefix) {
 		// fast path hack
 		if (this.map instanceof SortedArrayMap) {
-			SortedArrayMap<String, E> sortedArrayMap = (SortedArrayMap<String, E>) this.map;
+			SortedArrayMap<String, E> sortedArrayMap = this.map;
 			return sortedArrayMap.findWithPrefix(keyPrefix);
 		}
 
@@ -212,6 +208,10 @@ public class SortedStringMap<E> implements IMapIndex<String, E> {
 		} else {
 			return new Pair<E, Boolean>(e, false);
 		}
+	}
+
+	public Collection<E> values() {
+		return this.map.values();
 	}
 
 }

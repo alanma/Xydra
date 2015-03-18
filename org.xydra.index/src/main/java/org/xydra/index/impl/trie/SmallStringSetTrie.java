@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.xydra.annotations.ModificationOperation;
@@ -13,7 +14,6 @@ import org.xydra.index.Factory;
 import org.xydra.index.IEntrySet;
 import org.xydra.index.IMapSetIndex;
 import org.xydra.index.impl.DebugReentrantReadWriteLock;
-import org.xydra.index.impl.SmallEntrySetFactory;
 import org.xydra.index.iterator.ClosableIterator;
 import org.xydra.index.iterator.ClosableIteratorAdapter;
 import org.xydra.index.iterator.IFilter;
@@ -22,6 +22,7 @@ import org.xydra.index.iterator.Iterators;
 import org.xydra.index.iterator.NoneIterator;
 import org.xydra.index.query.Constraint;
 import org.xydra.index.query.KeyEntryTuple;
+import org.xydra.index.query.Pair;
 import org.xydra.index.query.Wildcard;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
@@ -216,7 +217,7 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 		}
 
 		public void dump(String indent, String combinedKey) {
-			System.out.println(toString(indent, combinedKey));
+			System.out.println();
 		}
 
 		/**
@@ -280,23 +281,47 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 			}
 		}
 
-		public int getLongestMatch(String s, int start) {
+		/**
+		 * IMPROVE more recursive version of this algorithm
+		 * 
+		 * @param s
+		 * @param start
+		 * @return @CanBeNull or a pair (match position, entry set of matching
+		 *         values). If not null, the integer is > 0.
+		 */
+		public Pair<Integer, Set<E>> getLongestMatch(String s, int start) {
 
 			int len = 1;
 
 			while (start + len < s.length()) {
 				String key = s.substring(start, start + len);
-				boolean b = this.children.containsKeysStartingWith(key);
+				boolean b = this.containsEntriesWithPrefix(key);
 				if (b) {
 					// great, maybe even with a longer key
 					len++;
 				} else {
-					// we went one len too far
-					return len - 1;
+					// we went one len too far, get last key
+					return toLongestMatchResult(s, start, len - 1);
 				}
 			}
 			// we match the whole s-remainder
-			return len;
+			return toLongestMatchResult(s, start, len);
+		}
+
+		private Pair<Integer, Set<E>> toLongestMatchResult(String s, int start, int len) {
+			if (len == 0)
+				return null;
+
+			String key = s.substring(start, start + len);
+
+			IEntrySet<E> es = SmallStringSetTrie.this.lookup(key);
+			if (es != null && !es.isEmpty()) {
+				// we have a real match
+				return new Pair<Integer, Set<E>>(len, es.toSet());
+			} else {
+				// no real match
+				return null;
+			}
 		}
 
 		/**
@@ -621,12 +646,63 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 
 		/**
 		 * @param keyPrefix
-		 * @return ...
+		 * @return
+		 * @deprecated seems buggy & untested
 		 */
+		@Deprecated
 		public Iterator<E> quick_searchPrefix(final String keyPrefix) {
 			ConstraintKeyPrefix constraintKeyPrefix = new ConstraintKeyPrefix(keyPrefix);
 			Iterator<Node> it = this.children.entryIterator(constraintKeyPrefix);
 			return Iterators.cascade(it, SmallStringSetTrie.this.TRANSFORMER_NODE2ENTRIES);
+		}
+
+		public boolean containsEntries() {
+			if (!this.entrySet.isEmpty())
+				return true;
+
+			for (SmallStringSetTrie<E>.Node childNode : this.children.values()) {
+				if (childNode.containsEntries())
+					return true;
+			}
+
+			return false;
+		}
+
+		/**
+		 * @param searchKeyPrefix
+		 * @return true if at least one entry is indexed at a key which starts
+		 *         with or is equal to keyPrefix
+		 */
+		public boolean containsEntriesWithPrefix(final String searchKeyPrefix) {
+			assert searchKeyPrefix != null;
+			// recursion base case
+			if (searchKeyPrefix.length() == 0) {
+				return containsEntries();
+			}
+
+			assert searchKeyPrefix.length() > 0;
+			String indexedKey = this.children.lookupFirstPrefix(searchKeyPrefix.substring(0, 1));
+			if (indexedKey == null) {
+				// there is none
+				return false;
+			}
+
+			// find common prefix to extract
+			int commonPrefixLen = getSharedPrefixLength(searchKeyPrefix, indexedKey);
+			assert commonPrefixLen > 0 : "commonPrefixLen==0? insertKey=" + searchKeyPrefix
+					+ " conflictKey=" + indexedKey;
+			if (indexedKey.equals(searchKeyPrefix)) {
+				// the conflicting node is our node
+				Node indexedNode = this.children.lookup(indexedKey);
+				return indexedNode.containsEntries();
+			} else if (commonPrefixLen <= searchKeyPrefix.length()) {
+				// continue searching there
+				String searchKeyPrefixRemainder = searchKeyPrefix.substring(commonPrefixLen);
+				Node indexedNode = this.children.lookup(indexedKey);
+				return indexedNode.containsEntriesWithPrefix(searchKeyPrefixRemainder);
+			} else {
+				return false;
+			}
 		}
 
 		/**
@@ -634,7 +710,9 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 		 * 
 		 * @param keyPrefix
 		 * @return ...
+		 * @deprecated seems buggy & untested
 		 */
+		@Deprecated
 		public Iterator<E> searchPrefix(final String keyPrefix) {
 			ConstraintKeyPrefix constraintKeyPrefix = new ConstraintKeyPrefix(keyPrefix);
 			Iterator<KeyEntryTuple<String, Node>> it = this.children
@@ -841,63 +919,16 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 		assert master != null;
 		assert copy != null;
 		int i = 0;
-		while (
-
-		i < Math.min(master.length(), copy.length())
-
-		&& master.codePointAt(i) == copy.codePointAt(i))
-
-		{
-			// TODO make unicode safe
-			i++;
+		while (i < Math.min(master.length(), copy.length())) {
+			int m = master.codePointAt(i);
+			int c = copy.codePointAt(i);
+			if (m == c) {
+				i += Character.charCount(m);
+			} else {
+				break;
+			}
 		}
 		return i;
-	}
-
-	public static void main(String[] args) {
-		System.out.println(getSharedPrefixLength("Hello World", "Hell a lot of work"));
-
-		SmallStringSetTrie<Integer> st = new SmallStringSetTrie<Integer>(
-				new SmallEntrySetFactory<Integer>());
-		st.index("Hello World", 13);
-		st.index("Hell", 11);
-		st.index("Hell a lot of work", 666);
-
-		st.dump();
-
-		List<Integer> ints = new ArrayList<Integer>();
-		Iterators.addAll(st.iterator(), ints);
-		System.out.println(ints);
-
-		List<String> keys = new ArrayList<String>();
-		Iterators.addAll(st.keyIterator(), keys);
-		System.out.println(keys);
-
-		List<KeyEntryTuple<String, Integer>> tuples = new ArrayList<KeyEntryTuple<String, Integer>>();
-		Iterators.addAll(st.tupleIterator(new Wildcard<String>(), new Wildcard<Integer>()), tuples);
-		System.out.println(tuples);
-
-		st.deIndex("Hello");
-		st.deIndex("Hell");
-
-		// next test
-		SmallStringSetTrie<Void> st2 = new SmallStringSetTrie<Void>(
-				new SmallEntrySetFactory<Void>());
-		st2.indexKey("aaabbccc");
-		st2.indexKey("aaaddeee");
-		st2.indexKey("aaabbcff");
-		System.out.println("-----");
-		st2.dump();
-		KeyFramgents ky = st2.getKeyFragmentsFor("aaabbcg");
-		assert ky.matched.size() == 2;
-		assert ky.matched.get(0).equals("aaa");
-		assert ky.matched.get(1).equals("bbc");
-		assert ky.remainder.matches("g");
-		ky = st2.getKeyFragmentsFor("aaabb");
-		assert ky.matched.size() == 2;
-		assert ky.matched.get(0).equals("aaa");
-		assert ky.matched.get(1).equals("bb");
-		assert ky.remainder.matches("");
 	}
 
 	private transient Factory<IEntrySet<E>> entrySetFactory;
@@ -1038,6 +1069,10 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 		this.root.dump("", "");
 	}
 
+	public String toDebugString() {
+		return this.root.toString();
+	}
+
 	@ReadOperation
 	public void dumpStats() {
 		readOperationStart();
@@ -1093,13 +1128,14 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 	/**
 	 * @param s
 	 * @param start within s
-	 * @return the number of charactes, starting from start, are the longest
-	 *         match so that at least one result is returned
+	 * @return a pair: 1) the number of characters, starting from start, are the
+	 *         longest match so that at least one result is returned; 2) the
+	 *         entry set of result values
 	 */
 	@ReadOperation
-	public int getLongestMatch(String s, int start) {
+	public Pair<Integer, Set<E>> getLongestMatch(String s, int start) {
 		readOperationStart();
-		int result = this.root.getLongestMatch(s, start);
+		Pair<Integer, Set<E>> result = this.root.getLongestMatch(s, start);
 		readOperationEnd();
 		return result;
 	}
@@ -1199,7 +1235,13 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 		return unlockIteratorOnClose(it);
 	}
 
+	/**
+	 * @deprecated looks buggy & untested
+	 * @param keyPrefix
+	 * @return
+	 */
 	@ReadOperation
+	@Deprecated
 	public ClosableIterator<E> searchPrefix(String keyPrefix) {
 		readOperationStart();
 		Iterator<E> it = this.root.searchPrefix(keyPrefix);

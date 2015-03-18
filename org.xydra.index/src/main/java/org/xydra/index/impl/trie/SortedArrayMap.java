@@ -39,10 +39,8 @@ import org.xydra.log.api.LoggerFactory;
  * Arrays resizing is decoupled from insert/remove, as long as capacity allows
  * it.
  * 
- * @param <K>
- *            the key type
- * @param <V>
- *            the value type
+ * @param <K> the key type
+ * @param <V> the value type
  */
 @LicenseApache(copyright = "Copyright 2009 Google Inc.")
 public class SortedArrayMap<K, V> implements SortedMap<K, V>, Serializable {
@@ -404,10 +402,8 @@ public class SortedArrayMap<K, V> implements SortedMap<K, V>, Serializable {
 	/**
 	 * @param keys
 	 * @param values
-	 * @param min
-	 *            inclusive
-	 * @param max
-	 *            exclusive
+	 * @param min inclusive
+	 * @param max exclusive
 	 */
 	private SortedArrayMap(Object[] keys, Object[] values, int min, int max) {
 		this.keys = keys;
@@ -718,7 +714,7 @@ public class SortedArrayMap<K, V> implements SortedMap<K, V>, Serializable {
 		int low = this.min;
 		int high = max() - 1;
 
-		while (low <= high) {
+		while (true) {
 			int mid = (low + high) >>> 1;
 
 			if (log.isTraceEnabled())
@@ -728,17 +724,33 @@ public class SortedArrayMap<K, V> implements SortedMap<K, V>, Serializable {
 			@SuppressWarnings("rawtypes")
 			Comparable midVal = (Comparable) this.keys[mid];
 			@SuppressWarnings("unchecked")
+			// [ cmp > 0 ] [ cmp == 0 ] [ cmp < 0 ]
 			int cmp = midVal.compareTo(key);
+
+			if (cmp == 0)
+				return mid; // key found
+
+			if (low >= high) {
+				assert mid == low;
+				assert mid == high;
+
+				// insertion point depends on cmp
+
+				if (cmp < 0)
+					// insert at low + 1 (+1 offset for disambiguation from 0)
+					return -(low + 1 + 1); // key not found
+				else {
+					assert cmp > 0;
+					// insert at low (+1 offset for disambiguation from 0)
+					return -(low + 1); // key not found
+				}
+			}
 
 			if (cmp < 0)
 				low = mid + 1;
-			else if (cmp > 0)
-				high = mid - 1;
 			else
-				return mid; // key found
+				high = mid;
 		}
-		assert low > high;
-		return -(low + 1); // key not found
 	}
 
 	public void dump() {
@@ -855,12 +867,14 @@ public class SortedArrayMap<K, V> implements SortedMap<K, V>, Serializable {
 			// perfect match
 			return new Pair<V, Boolean>((V) this.vals[i], true);
 		} else {
+			assert i < -1;
 			/*
 			 * the found key is longer than the keyPrefix and since keys stored
 			 * here are prefix-free among each other, the found key is the only
 			 * one which contains nodes with the searched prefix
 			 */
-			return new Pair<V, Boolean>((V) this.vals[-(i + 1)], false);
+			int insertionPoint = -(i + 1);
+			return new Pair<V, Boolean>((V) this.vals[insertionPoint - 1], false);
 		}
 	}
 
