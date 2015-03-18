@@ -173,6 +173,17 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
 		this.sortedmap.put(mergedStart, mergedEnd);
 	}
 
+	/**
+	 * Index the trivial range [i,i]
+	 * 
+	 * @param i
+	 * @return this
+	 */
+	public IntegerRangeIndex index(int i) {
+		index(i, i);
+		return this;
+	}
+
 	@Override
 	public void dump() {
 		Iterator<Entry<Integer, Integer>> it = rangesIterator();
@@ -492,7 +503,7 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
 	 * @return true if all Unicode codepoints of s are in an indexed range of
 	 *         the given index; true for the empty string.
 	 */
-	public static boolean isAllCharactersInIntervals(IntegerRangeIndex validIntervals, String s) {
+	public static boolean isAllCharactersInIntervals(IIntegerRangeIndex validIntervals, String s) {
 		if (s == null)
 			throw new IllegalArgumentException("s is null");
 		if (s.length() == 0)
@@ -517,7 +528,7 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
 	 * @return true if any codepoint in s is indexed in the tabooIntervals;
 	 *         false for the empty string
 	 */
-	public static boolean isAnyCharacterInIntervals(IntegerRangeIndex tabooIntervals, String s) {
+	public static boolean isAnyCharacterInIntervals(IIntegerRangeIndex tabooIntervals, String s) {
 		if (s == null)
 			throw new IllegalArgumentException("s is null");
 		if (s.length() == 0)
@@ -543,4 +554,159 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
 	// IntegerRangeIndex inverted = new IntegerRangeIndex();
 	//
 	// }
+
+	public static interface ISplitHandler {
+
+		void onToken(int startInclusive, int endExclusive);
+
+		void onSeparator(int startInclusive, int endExclusive);
+
+	}
+
+	/**
+	 * @param s @CanBeNull
+	 * @param startInclusive in s
+	 * @param endExclusive in s
+	 * @param separators
+	 * @param iSplitHandler
+	 */
+	public static void split(String s, int startInclusive, int endExclusive,
+			IIntegerRangeIndex separators, ISplitHandler splitHandler) {
+		if (s == null || s.length() == 0)
+			return;
+
+		int i = startInclusive;
+		int spanStart = i;
+		/* as opposed to 'inSeparator' */
+		boolean inToken = true;
+		while (i < endExclusive) {
+			int c = s.codePointAt(i);
+
+			if (separators.isInInterval(c)) {
+				if (inToken) {
+					// token ends
+					if (i > 0) {
+						splitHandler.onToken(spanStart, i);
+					}
+					spanStart = i;
+					inToken = false;
+				}
+			} else {
+				// it's a token char
+				if (!inToken) {
+					// separator ends
+					if (i > 0) {
+						splitHandler.onSeparator(spanStart, i);
+					}
+					spanStart = i;
+					inToken = true;
+				}
+			}
+
+			i += Character.charCount(c);
+		}
+		// last span
+		if (inToken) {
+			splitHandler.onToken(spanStart, i);
+		} else {
+			splitHandler.onSeparator(spanStart, i);
+		}
+	}
+
+	/**
+	 * Split a string simultaneously in two kinds of tokens, in a single pass
+	 * 
+	 * @param s @CanBeNull
+	 * @param separatorsA
+	 * @param separatorsB
+	 * @param splitHandlerA
+	 * @param splitHandlerB
+	 */
+	/**
+	 * @param s @CanBeNull
+	 * @param startInclusive index in s
+	 * @param endExclusive index in s
+	 * @param separatorsA
+	 * @param separatorsB
+	 * @param splitHandlerA
+	 * @param splitHandlerB
+	 */
+	public static void split2(String s, int startInclusive, int endExclusive,
+			IIntegerRangeIndex separatorsA, IIntegerRangeIndex separatorsB,
+			ISplitHandler splitHandlerA, ISplitHandler splitHandlerB) {
+		if (s == null)
+			return;
+		int length = endExclusive - startInclusive;
+		if (length == 0)
+			return;
+
+		int i = startInclusive;
+		int spanStartA = i;
+		int spanStartB = i;
+		/* as opposed to 'inSeparator' */
+		boolean inTokenA = true;
+		boolean inTokenB = true;
+		while (i < endExclusive) {
+			int c = s.codePointAt(i);
+
+			// ==== A
+			if (separatorsA.isInInterval(c)) {
+				if (inTokenA) {
+					// token ends
+					if (i > 0) {
+						splitHandlerA.onToken(spanStartA, i);
+					}
+					spanStartA = i;
+					inTokenA = false;
+				}
+			} else {
+				// it's a token char
+				if (!inTokenA) {
+					// separator ends
+					if (i > 0) {
+						splitHandlerA.onSeparator(spanStartA, i);
+					}
+					spanStartA = i;
+					inTokenA = true;
+				}
+			}
+
+			// ==== B
+			if (separatorsB.isInInterval(c)) {
+				if (inTokenB) {
+					// token ends
+					if (i > 0) {
+						splitHandlerB.onToken(spanStartB, i);
+					}
+					spanStartB = i;
+					inTokenB = false;
+				}
+			} else {
+				// it's a token char
+				if (!inTokenB) {
+					// separator ends
+					if (i > 0) {
+						splitHandlerB.onSeparator(spanStartB, i);
+					}
+					spanStartB = i;
+					inTokenB = true;
+				}
+			}
+
+			i += Character.charCount(c);
+		}
+		// last span A
+		if (inTokenA) {
+			splitHandlerA.onToken(spanStartA, i);
+		} else {
+			splitHandlerA.onSeparator(spanStartA, i);
+		}
+		// last span B
+		if (inTokenB) {
+			splitHandlerB.onToken(spanStartB, i);
+		} else {
+			splitHandlerB.onSeparator(spanStartB, i);
+		}
+	}
+
 }
