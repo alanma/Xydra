@@ -1,0 +1,1 @@
+make the graphics 800px wide (resize)
