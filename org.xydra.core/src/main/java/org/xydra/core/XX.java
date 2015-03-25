@@ -216,4 +216,30 @@ public class XX extends Base {
 		System.out.println(encode("01234567890"));
 	}
 
+	/**
+	 * @param addr @NeverNull
+	 * @param repositoryId @CanBeNull
+	 * @param modelId @CanBeNull
+	 * @param objectId @CanBeNull
+	 * @param fieldId @CanBeNull
+	 * @return
+	 */
+	public static boolean isSameAddress(XAddress addr, XId repositoryId, XId modelId, XId objectId,
+			XId fieldId) {
+
+		if (repositoryId != null && !repositoryId.equals(addr.getRepository()))
+			return false;
+
+		if (modelId != null && !modelId.equals(addr.getModel()))
+			return false;
+
+		if (objectId != null && !objectId.equals(addr.getObject()))
+			return false;
+
+		if (fieldId != null && !fieldId.equals(addr.getField()))
+			return false;
+
+		return true;
+	}
+
 }
