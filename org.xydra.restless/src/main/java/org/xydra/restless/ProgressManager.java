@@ -180,4 +180,13 @@ public class ProgressManager {
 		reportProgress(progressReporter, success ? ProgressManager.SUCCESS : ProgressManager.ERROR);
 	}
 
+	public static void reportException(IProgressReporter pr, Throwable e) {
+		if (pr == null)
+			return;
+
+		e.fillInStackTrace();
+		pr.reportProgress("Exception " + e);
+		reportProgressDone(pr, false);
+	}
+
 }
