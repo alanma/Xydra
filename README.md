@@ -4,7 +4,7 @@
   * on **Google AppEngine** (GAE/J), and also via
   * **Google Web Toolkit** (GWT) as JavaScript in a browser.
 
-![http://xydra.googlecode.com/svn/trunk/org.xydra.doc/src/test/resources/Xydra-Logo-80h.png](https://github.com/xamde/Xydra/blob/master/org.xydra.doc/src/test/resources/Xydra-Logo-80h.png?raw=true)
+![http://xydra.googlecode.com/svn/trunk/org.xydra.doc/src/test/resources/Xydra-Logo-80h.png](https://github.com/xamde/Xydra/blob/master/org.xydra.doc/docs/Xydra-Logo-80h.png?raw=true)
 ### Xydra Features ###
   * Persistence (currently: in-memory, in GAE data store)
   * Events (for all added, removed, or changed entites)
