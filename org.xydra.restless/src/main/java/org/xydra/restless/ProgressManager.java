@@ -184,8 +184,10 @@ public class ProgressManager {
 		if (pr == null)
 			return;
 
-		e.fillInStackTrace();
 		pr.reportProgress("Exception " + e);
+
+		log.warn("Exception: ", e);
+
 		reportProgressDone(pr, false);
 	}
 
