@@ -787,6 +787,8 @@ public class SortedArrayMap<K, V> implements SortedMap<K, V>, Serializable {
 		System.arraycopy(this.keys, index + 1, this.keys, index, this.keys.length - index - 1);
 		System.arraycopy(this.vals, index + 1, this.vals, index, this.vals.length - index - 1);
 
+		// TODO implement shrinking
+
 		if (log.isTraceEnabled())
 			log.trace("Removed at " + index + " keys=" + Arrays.toString(this.keys) + " size="
 					+ this.size);
