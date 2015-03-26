@@ -177,6 +177,13 @@ public class MapSetIndex<K, E> implements IMapSetIndex<K, E> {
 		return new MapSetIndex<K, E>(new SmallEntrySetFactory<E>());
 	}
 
+	/**
+	 * @return an impl that uses less memory and is slower
+	 */
+	public static <K, E> MapSetIndex<K, E> createWithFastWeakEntrySets() {
+		return new MapSetIndex<K, E>(new FastWeakEntrySetFactory<E>());
+	}
+
 	private Factory<IEntrySet<E>> entrySetFactory;
 
 	private Map<K, IEntrySet<E>> map;
