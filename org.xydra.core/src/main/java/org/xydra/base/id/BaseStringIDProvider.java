@@ -173,7 +173,7 @@ public abstract class BaseStringIDProvider implements XIdProvider {
 
 	// FIXME experimental
 	private transient MapSetIndex<Integer, XAddress> addressIndex = MapSetIndex
-			.createWithFastEntrySets();
+			.createWithFastWeakEntrySets();
 
 	@Override
 	public XAddress fromComponents(XId repositoryId, XId modelId, XId objectId, XId fieldId) {
