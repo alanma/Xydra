@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.SortedMap;
 
 import org.xydra.annotations.LicenseApache;
+import org.xydra.annotations.ModificationOperation;
 import org.xydra.index.query.Pair;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
@@ -384,8 +385,10 @@ public class SortedArrayMap<K, V> implements SortedMap<K, V>, Serializable {
 		return this.max != -1;
 	}
 
+	/** used for sub-maps, default is 0 */
 	int min;
 
+	/** used for sub-maps. -1 == unbounded, use size() */
 	int max;
 
 	public SortedArrayMap() {
@@ -400,17 +403,25 @@ public class SortedArrayMap<K, V> implements SortedMap<K, V>, Serializable {
 	}
 
 	/**
+	 * To create sub-maps
+	 * 
 	 * @param keys
 	 * @param values
 	 * @param min inclusive
 	 * @param max exclusive
 	 */
 	private SortedArrayMap(Object[] keys, Object[] values, int min, int max) {
+		assert values.length == keys.length;
+		assert keys.length >= max : "requesting a sub-map with a max (" + max
+				+ ") greater than available lenght (" + keys.length + ")";
+
 		this.keys = keys;
 		this.vals = values;
 		this.min = min;
 		this.max = max;
 		this.size = max - min;
+
+		assert this.size == 0 || this.keys[this.size - 1] != null;
 	}
 
 	public SortedArrayMap(Map<? extends K, ? extends V> m) {
@@ -428,6 +439,7 @@ public class SortedArrayMap<K, V> implements SortedMap<K, V>, Serializable {
 	}
 
 	@Override
+	@ModificationOperation
 	public void clear() {
 		// TODO fix for submap case
 		if (isSubMap())
@@ -509,8 +521,11 @@ public class SortedArrayMap<K, V> implements SortedMap<K, V>, Serializable {
 
 	@Override
 	@SuppressWarnings("unchecked")
+	@ModificationOperation
 	public V put(K key, V value) {
 		assert key != null;
+		assert this.keys.length >= this.size;
+		assert this.size == 0 || this.keys[this.size - 1] != null;
 
 		if (log.isTraceEnabled())
 			log.trace("Put '" + key + "' into " + Arrays.toString(this.keys) + " "
@@ -525,6 +540,7 @@ public class SortedArrayMap<K, V> implements SortedMap<K, V>, Serializable {
 			}
 			Object previousValue = this.vals[index];
 			this.vals[index] = value;
+			assert this.size == 0 || this.keys[this.size - 1] != null;
 			return (V) previousValue;
 		} else {
 			// insert new value
@@ -568,20 +584,24 @@ public class SortedArrayMap<K, V> implements SortedMap<K, V>, Serializable {
 			if (log.isTraceEnabled())
 				log.trace("Done " + key + " into " + Arrays.toString(this.keys));
 
+			assert this.size == 0 || this.keys[this.size - 1] != null;
 			return null;
 		}
 	}
 
 	@Override
+	@ModificationOperation
 	public void putAll(Map<? extends K, ? extends V> m) {
 		resizeForJoin(m.size());
 		for (Entry<? extends K, ? extends V> entry : m.entrySet()) {
 			put(entry.getKey(), entry.getValue());
 		}
+		assert this.size == 0 || this.keys[this.size - 1] != null;
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
+	@ModificationOperation
 	public V remove(Object key) {
 		int index = findKey(key);
 		if (index < 0) {
@@ -707,6 +727,7 @@ public class SortedArrayMap<K, V> implements SortedMap<K, V>, Serializable {
 	 *         point. The +1 disambiguates the 0.
 	 */
 	private int binarySearch(Object key) {
+		assert key != null;
 		if (size() == 0)
 			return -1;
 
@@ -779,6 +800,9 @@ public class SortedArrayMap<K, V> implements SortedMap<K, V>, Serializable {
 	void internalRemove(int index) {
 		assert index >= this.min;
 		assert index < this.max();
+		assert this.keys.length >= this.size : "keys.len=" + this.keys.length + " vs. size="
+				+ this.size;
+		assert this.keys[this.size - 1] != null;
 
 		this.keys[index] = null;
 		this.vals[index] = null;
@@ -792,6 +816,8 @@ public class SortedArrayMap<K, V> implements SortedMap<K, V>, Serializable {
 		if (log.isTraceEnabled())
 			log.trace("Removed at " + index + " keys=" + Arrays.toString(this.keys) + " size="
 					+ this.size);
+
+		assert this.size == 0 || this.keys[this.size - 1] != null;
 	}
 
 	/**
@@ -826,8 +852,10 @@ public class SortedArrayMap<K, V> implements SortedMap<K, V>, Serializable {
 	}
 
 	@Override
+	/** FIXME sub-map write are not always reflected back to original map */
 	public SortedMap<K, V> subMap(K fromKey, K toKey) {
 		if (isEmpty())
+			// FIXME double-check this
 			return new SortedArrayMap<K, V>(this.keys, this.vals, 0, 0);
 
 		int fromIndex = binarySearch(fromKey);
@@ -849,6 +877,7 @@ public class SortedArrayMap<K, V> implements SortedMap<K, V>, Serializable {
 		assert toIndex >= 0 && toIndex <= size() : "toKey=" + toKey + " toIndex=" + toIndex
 				+ " size()=" + size();
 
+		// FIXME double-check this
 		return new SortedArrayMap<K, V>(this.keys, this.vals, fromIndex, toIndex);
 	}
 
@@ -927,8 +956,10 @@ public class SortedArrayMap<K, V> implements SortedMap<K, V>, Serializable {
 	}
 
 	@Override
+	/** FIXME sub-map write are not always reflected back to original map */
 	public SortedMap<K, V> headMap(K toKey) {
 		if (isEmpty())
+			// FIXME double-check this
 			return new SortedArrayMap<K, V>(this.keys, this.vals, 0, 0);
 
 		int toIndex = binarySearch(toKey);
@@ -940,12 +971,15 @@ public class SortedArrayMap<K, V> implements SortedMap<K, V>, Serializable {
 		}
 		assert toIndex >= 0 && toIndex <= size() : "toKey=" + toKey + " toIndex=" + toIndex
 				+ " size()=" + size();
+		// FIXME double-check this
 		return new SortedArrayMap<K, V>(this.keys, this.vals, 0, toIndex);
 	}
 
 	@Override
+	/** FIXME sub-map write are not always reflected back to original map */
 	public SortedMap<K, V> tailMap(K fromKey) {
 		if (isEmpty())
+			// FIXME double-check this
 			return new SortedArrayMap<K, V>(this.keys, this.vals, 0, 0);
 
 		int fromIndex = binarySearch(fromKey);
@@ -956,6 +990,7 @@ public class SortedArrayMap<K, V> implements SortedMap<K, V>, Serializable {
 
 		assert fromIndex >= 0 && fromIndex <= size() - 1 : "fromKey=" + fromKey + " fromIndex="
 				+ fromIndex;
+		// FIXME double-check this
 		return new SortedArrayMap<K, V>(this.keys, this.vals, fromIndex, this.size);
 	}
 
@@ -972,9 +1007,17 @@ public class SortedArrayMap<K, V> implements SortedMap<K, V>, Serializable {
 	public K lastKey() {
 		if (isEmpty())
 			return null;
-		return (K) this.keys[max() - 1];
+
+		assert this.keys[this.size - 1] != null;
+
+		K lastKey = (K) this.keys[max() - 1];
+		assert lastKey != null;
+		return lastKey;
 	}
 
+	/**
+	 * @return
+	 */
 	int max() {
 		if (this.max == -1)
 			return this.size;
