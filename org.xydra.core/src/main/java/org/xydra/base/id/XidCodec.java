@@ -102,6 +102,7 @@ public class XidCodec {
 					markers++;
 				} while (codePoint == ENCODING_CHAR);
 				// we moved past the markers
+
 				if (markers > 3) {
 					throw new IllegalArgumentException("String has too many '" + ENCODING_CHAR
 							+ "', we allow at most 3 for the hex-encoding. String is '" + encId
@@ -109,7 +110,7 @@ public class XidCodec {
 				}
 				int expectHex = 2 * markers;
 				// hex chars are code point count = char count
-				if (i + expectHex < encId.length()) {
+				if (i - Character.charCount(codePoint) + expectHex < encId.length()) {
 					String hex = encId.substring(i, i + expectHex);
 					i += expectHex;
 					try {
