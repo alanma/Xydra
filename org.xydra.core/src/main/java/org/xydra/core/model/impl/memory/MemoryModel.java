@@ -59,7 +59,6 @@ import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.sharedutils.XyAssert;
 
-
 /**
  * The core state information is represented in two ways, which must be kept in
  * sync: (a) a {@link XRevWritableModel} representing the current snapshot, and

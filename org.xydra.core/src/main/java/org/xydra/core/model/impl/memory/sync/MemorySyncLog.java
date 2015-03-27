@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.xydra.annotations.ModificationOperation;
 import org.xydra.base.XAddress;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
@@ -47,6 +48,7 @@ public class MemorySyncLog extends AbstractSyncLog implements ISyncLog {
 	}
 
 	@Override
+	@ModificationOperation
 	public synchronized void appendSyncLogEntry(ISyncLogEntry syncLogEntry) {
 		this.state.appendSyncLogEntry(syncLogEntry);
 	}
@@ -80,6 +82,7 @@ public class MemorySyncLog extends AbstractSyncLog implements ISyncLog {
 	}
 
 	@Override
+	@ModificationOperation
 	public synchronized boolean truncateToRevision(long revisionNumber) {
 		return this.state.truncateToRevision(revisionNumber);
 	}
@@ -125,17 +128,20 @@ public class MemorySyncLog extends AbstractSyncLog implements ISyncLog {
 	}
 
 	@Override
+	@ModificationOperation
 	public void appendSyncLogEntry(XCommand command, XEvent event) {
 		ISyncLogEntry syncLogEntry = new MemorySyncLogEntry(command, event);
 		appendSyncLogEntry(syncLogEntry);
 	}
 
 	@Override
+	@ModificationOperation
 	public void setSynchronizedRevision(long syncronizedRevision) {
 		this.state.setSyncRevisionNumber(syncronizedRevision);
 	}
 
 	@Override
+	@ModificationOperation
 	public void appendEvent(XEvent event) {
 		this.state.appendEvent(event);
 	}
@@ -159,6 +165,7 @@ public class MemorySyncLog extends AbstractSyncLog implements ISyncLog {
 	}
 
 	@Override
+	@ModificationOperation
 	public void clearLocalChanges() {
 		List<Long> toRemove = new LinkedList<Long>();
 		Iterator<ISyncLogEntry> it = getLocalChanges();

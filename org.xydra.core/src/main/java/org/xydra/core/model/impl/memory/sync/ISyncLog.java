@@ -5,7 +5,6 @@ import java.util.Iterator;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 
-
 /**
  * A log that is used to retrieve information about the properties of the change
  * of entities

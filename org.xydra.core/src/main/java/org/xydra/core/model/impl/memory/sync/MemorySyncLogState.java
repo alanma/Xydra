@@ -198,6 +198,7 @@ public class MemorySyncLogState implements ISyncLogState {
 		SortedMap<Long, ISyncLogEntry> toBeDeleted = this.eventMap.tailMap(revisionNumber + 1);
 		while (toBeDeleted.size() > 0) {
 			Long key = toBeDeleted.lastKey();
+			assert key != null;
 			this.eventMap.remove(key);
 		}
 

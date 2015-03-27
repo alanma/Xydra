@@ -22,7 +22,6 @@ import org.xydra.core.model.impl.memory.MemoryChangeLogState;
 import org.xydra.core.model.impl.memory.MemoryEventBus;
 import org.xydra.core.model.impl.memory.MemoryEventBus.EventType;
 
-
 /**
  * A xydra data tree can have one of these forms: R-M-O-F, M-O-F, O-F, or F. Of
  * course, R-M-O-F can also be just R, i.e. a {@link XRepository} is not
