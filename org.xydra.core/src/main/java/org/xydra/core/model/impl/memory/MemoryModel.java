@@ -35,6 +35,7 @@ import org.xydra.base.rmof.XRevWritableObject;
 import org.xydra.base.rmof.impl.XExistsRevWritableModel;
 import org.xydra.base.rmof.impl.XExistsRevWritableRepository;
 import org.xydra.base.rmof.impl.memory.SimpleModel;
+import org.xydra.base.rmof.impl.memory.SimpleObject;
 import org.xydra.core.XCopyUtils;
 import org.xydra.core.XX;
 import org.xydra.core.change.XFieldEventListener;
@@ -553,7 +554,12 @@ Serializable {
 			}
 
 			object = new MemoryObject(this, objectState);
-			this.loadedObjects.put(objectId, object);
+
+			if (object instanceof SimpleObject) {
+				// dont cache, its very quick to load these
+			} else {
+				this.loadedObjects.put(objectId, object);
+			}
 
 			return object;
 		}
