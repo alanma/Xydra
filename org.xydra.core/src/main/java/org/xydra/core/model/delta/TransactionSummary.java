@@ -14,6 +14,9 @@ import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XFieldEvent;
 import org.xydra.base.change.XReversibleFieldEvent;
 import org.xydra.base.change.XTransactionEvent;
+import org.xydra.base.rmof.XReadableField;
+import org.xydra.base.rmof.XReadableModel;
+import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.value.XValue;
 import org.xydra.core.XX;
 import org.xydra.core.model.XChangeLog;
@@ -230,7 +233,12 @@ public class TransactionSummary {
 		public XValue oldValue = null;
 		public XValue newValue = null;
 
-		public void apply(XAtomicEvent ae, XChangeLog changeLog) {
+		/**
+		 * @param ae
+		 * @param changeLog
+		 * @param baseSnapshotModel @CanBeNull
+		 */
+		public void apply(XAtomicEvent ae, XChangeLog changeLog, XReadableModel baseSnapshotModel) {
 			this.change.apply(ae.getChangeType());
 			XFieldEvent xfe = (XFieldEvent) ae;
 			switch (ae.getChangeType()) {
@@ -239,11 +247,11 @@ public class TransactionSummary {
 				this.newValue = xfe.getNewValue();
 				break;
 			case CHANGE:
-				this.oldValue = getOldValue(xfe, changeLog);
+				this.oldValue = getOldValue(xfe, changeLog, baseSnapshotModel);
 				this.newValue = xfe.getNewValue();
 				break;
 			case REMOVE:
-				this.oldValue = getOldValue(xfe, changeLog);
+				this.oldValue = getOldValue(xfe, changeLog, baseSnapshotModel);
 				break;
 			case TRANSACTION:
 			default:
@@ -266,9 +274,11 @@ public class TransactionSummary {
 	/**
 	 * @param fieldEvent
 	 * @param changeLog
+	 * @param baseSnapshotModel @CanBeNull
 	 * @return
 	 */
-	public static XValue getOldValue(XFieldEvent fieldEvent, XChangeLog changeLog) {
+	public static XValue getOldValue(XFieldEvent fieldEvent, XChangeLog changeLog,
+			XReadableModel baseSnapshotModel) {
 
 		if (fieldEvent instanceof XReversibleFieldEvent) {
 			XReversibleFieldEvent rfe = (XReversibleFieldEvent) fieldEvent;
@@ -277,7 +287,22 @@ public class TransactionSummary {
 		} else {
 			long revisionNumber = fieldEvent.getOldFieldRevision();
 			XEvent oldEvent = changeLog.getEventAt(revisionNumber);
-			if (oldEvent instanceof XFieldEvent) {
+			if (oldEvent == null) {
+				// read from last known snapshot
+
+				if (baseSnapshotModel == null) {
+					return null;
+				}
+				XReadableObject baseSnapshotObject = baseSnapshotModel.getObject(fieldEvent
+						.getObjectId());
+				if (baseSnapshotObject == null)
+					return null;
+				XReadableField baseSnapshotField = baseSnapshotObject.getField(fieldEvent
+						.getFieldId());
+				if (baseSnapshotField == null)
+					return null;
+				return baseSnapshotField.getValue();
+			} else if (oldEvent instanceof XFieldEvent) {
 				XFieldEvent oldFieldEvent = (XFieldEvent) oldEvent;
 				return oldFieldEvent.getNewValue();
 			} else if (oldEvent instanceof XTransactionEvent) {
@@ -307,8 +332,10 @@ public class TransactionSummary {
 	 * 
 	 * @param txnEvent
 	 * @param changeLog
+	 * @param baseSnapshotModel @CanBeNull
 	 */
-	public TransactionSummary(XTransactionEvent txnEvent, XChangeLog changeLog) {
+	public TransactionSummary(XTransactionEvent txnEvent, XChangeLog changeLog,
+			XReadableModel baseSnapshotModel) {
 		XAddress modelAddress = XX.resolveModel(txnEvent.getChangedEntity());
 		this.sm = new SummaryModel(modelAddress);
 		for (XAtomicEvent ae : txnEvent) {
@@ -332,7 +359,7 @@ public class TransactionSummary {
 				SummaryObject so = this.sm.createOrGet(ae.getChangedEntity().getObject());
 				SummaryField sf = so.createOrGet(ae.getChangedEntity().getField());
 				SummaryValue sv = sf.createOrGet();
-				sv.apply(ae, changeLog);
+				sv.apply(ae, changeLog, baseSnapshotModel);
 			}
 				break;
 			default:
