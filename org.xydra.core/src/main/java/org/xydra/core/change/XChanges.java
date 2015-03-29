@@ -37,7 +37,6 @@ import org.xydra.index.XI;
 import org.xydra.index.iterator.SingleValueIterator;
 import org.xydra.sharedutils.XyAssert;
 
-
 /**
  * Various helper methods for working with {@link XEvent XEvents} and
  * {@link XCommand XCommands}.
@@ -46,7 +45,7 @@ import org.xydra.sharedutils.XyAssert;
  * 
  */
 public class XChanges {
-	
+
 	/**
 	 * Create a forced {@link XAtomicCommand} that undoes the given
 	 * {@link XAtomicEvent}.
@@ -60,19 +59,19 @@ public class XChanges {
 	 *         basically result in an undo operation
 	 */
 	static public XAtomicCommand createForcedUndoCommand(XAtomicEvent event) {
-		
-		if(event instanceof XFieldEvent)
-			return createForcedUndoCommand((XReversibleFieldEvent)event);
-		if(event instanceof XObjectEvent)
-			return createForcedUndoCommand((XObjectEvent)event);
-		if(event instanceof XModelEvent)
-			return createForcedUndoCommand((XModelEvent)event);
-		if(event instanceof XRepositoryEvent)
-			return createForcedUndoCommand((XRepositoryEvent)event);
-		
+
+		if (event instanceof XFieldEvent)
+			return createForcedUndoCommand((XReversibleFieldEvent) event);
+		if (event instanceof XObjectEvent)
+			return createForcedUndoCommand((XObjectEvent) event);
+		if (event instanceof XModelEvent)
+			return createForcedUndoCommand((XModelEvent) event);
+		if (event instanceof XRepositoryEvent)
+			return createForcedUndoCommand((XRepositoryEvent) event);
+
 		throw new IllegalArgumentException("unknown command class: " + event);
 	}
-	
+
 	/**
 	 * Create a forced {@link XCommand} that undoes the given {@link XEvent}.
 	 * 
@@ -85,15 +84,15 @@ public class XChanges {
 	 *         basically result in an undo operation
 	 */
 	static public XCommand createForcedUndoCommand(XEvent event) {
-		
-		if(event instanceof XAtomicEvent)
-			return createForcedUndoCommand((XAtomicEvent)event);
-		if(event instanceof XTransactionEvent)
-			return createForcedUndoCommand((XTransactionEvent)event);
-		
+
+		if (event instanceof XAtomicEvent)
+			return createForcedUndoCommand((XAtomicEvent) event);
+		if (event instanceof XTransactionEvent)
+			return createForcedUndoCommand((XTransactionEvent) event);
+
 		throw new IllegalArgumentException("unknown command class: " + event);
 	}
-	
+
 	/**
 	 * Create a forced {@link XFieldCommand} that undoes the given
 	 * {@link XFieldEvent}.
@@ -107,27 +106,27 @@ public class XChanges {
 	 *         basically result in an undo operation
 	 */
 	static public XFieldCommand createForcedUndoCommand(XReversibleFieldEvent event) {
-		
-		switch(event.getChangeType()) {
-		
+
+		switch (event.getChangeType()) {
+
 		case REMOVE:
 			return MemoryFieldCommand.createAddCommand(event.getTarget(), XCommand.FORCED,
-			        event.getOldValue());
-			
+					event.getOldValue());
+
 		case CHANGE:
 			return MemoryFieldCommand.createChangeCommand(event.getTarget(), XCommand.FORCED,
-			        event.getOldValue());
-			
+					event.getOldValue());
+
 		case ADD:
 			return MemoryFieldCommand.createRemoveCommand(event.getTarget(), XCommand.FORCED);
-			
+
 		default:
 			throw new AssertionError("unexpected type for field events: " + event.getChangeType());
-			
+
 		}
-		
+
 	}
-	
+
 	/**
 	 * Create a forced {@link XModelCommand} that undoes the given
 	 * {@link XModelEvent}.
@@ -141,24 +140,24 @@ public class XChanges {
 	 *         basically result in an undo operation
 	 */
 	static public XModelCommand createForcedUndoCommand(XModelEvent event) {
-		
-		if(event.getChangeType() == ChangeType.REMOVE) {
-			
+
+		if (event.getChangeType() == ChangeType.REMOVE) {
+
 			return MemoryModelCommand.createAddCommand(event.getTarget(), XCommand.FORCED,
-			        event.getObjectId());
-			
+					event.getObjectId());
+
 		} else {
-			
+
 			assert event.getChangeType() == ChangeType.ADD : "unexpected change type for model events: "
-			        + event.getChangeType();
-			
+					+ event.getChangeType();
+
 			return MemoryModelCommand.createRemoveCommand(event.getTarget(), XCommand.FORCED,
-			        event.getObjectId());
-			
+					event.getObjectId());
+
 		}
-		
+
 	}
-	
+
 	/**
 	 * Create a forced {@link XObjectCommand} that undoes the given
 	 * {@link XObjectEvent}.
@@ -172,24 +171,24 @@ public class XChanges {
 	 *         basically result in an undo operation
 	 */
 	static public XObjectCommand createForcedUndoCommand(XObjectEvent event) {
-		
-		if(event.getChangeType() == ChangeType.REMOVE) {
-			
+
+		if (event.getChangeType() == ChangeType.REMOVE) {
+
 			return MemoryObjectCommand.createAddCommand(event.getTarget(), XCommand.FORCED,
-			        event.getFieldId());
-			
+					event.getFieldId());
+
 		} else {
-			
+
 			assert event.getChangeType() == ChangeType.ADD : "unexpected change type for object events: "
-			        + event.getChangeType();
-			
+					+ event.getChangeType();
+
 			return MemoryObjectCommand.createRemoveCommand(event.getTarget(), XCommand.FORCED,
-			        event.getFieldId());
-			
+					event.getFieldId());
+
 		}
-		
+
 	}
-	
+
 	/**
 	 * Create a forced {@link XRepositoryCommand} that undoes the given
 	 * {@link XRepositoryEvent}.
@@ -200,24 +199,24 @@ public class XChanges {
 	 *         will basically result in an undo operation
 	 */
 	static public XRepositoryCommand createForcedUndoCommand(XRepositoryEvent event) {
-		
-		if(event.getChangeType() == ChangeType.REMOVE) {
-			
+
+		if (event.getChangeType() == ChangeType.REMOVE) {
+
 			return MemoryRepositoryCommand.createAddCommand(event.getTarget(), XCommand.FORCED,
-			        event.getModelId());
-			
+					event.getModelId());
+
 		} else {
-			
+
 			assert event.getChangeType() == ChangeType.ADD : "unexpected change type for repository events: "
-			        + event.getChangeType();
-			
+					+ event.getChangeType();
+
 			return MemoryRepositoryCommand.createRemoveCommand(event.getTarget(), XCommand.FORCED,
-			        event.getRepositoryId());
-			
+					event.getRepositoryId());
+
 		}
-		
+
 	}
-	
+
 	/**
 	 * Create a forced {@link XTransaction} that undoes the given
 	 * {@link XTransactionEvent}.
@@ -232,16 +231,16 @@ public class XChanges {
 	 *         basically result in an undo operation
 	 */
 	static public XTransaction createForcedUndoCommand(XTransactionEvent transaction) {
-		
+
 		XAtomicCommand[] result = new XAtomicCommand[transaction.size()];
-		
-		for(int i = 0, j = transaction.size() - 1; j >= 0; i++, j--) {
+
+		for (int i = 0, j = transaction.size() - 1; j >= 0; i++, j--) {
 			result[i] = createForcedUndoCommand(transaction.getEvent(j));
 		}
-		
+
 		return MemoryTransaction.createTransaction(transaction.getTarget(), result);
 	}
-	
+
 	/**
 	 * Create a {@link XAtomicCommand} that undoes the given
 	 * {@link XAtomicEvent} but will fail if there have been any conflicting
@@ -257,19 +256,19 @@ public class XChanges {
 	 *         executing it will basically result in an undo operation
 	 */
 	static public XAtomicCommand createImmediateUndoCommand(XAtomicEvent event) {
-		
-		if(event instanceof XFieldEvent)
-			return createImmediateUndoCommand((XReversibleFieldEvent)event);
-		if(event instanceof XObjectEvent)
-			return createImmediateUndoCommand((XObjectEvent)event);
-		if(event instanceof XModelEvent)
-			return createImmediateUndoCommand((XModelEvent)event);
-		if(event instanceof XRepositoryEvent)
-			return createImmediateUndoCommand((XRepositoryEvent)event);
-		
+
+		if (event instanceof XFieldEvent)
+			return createImmediateUndoCommand((XReversibleFieldEvent) event);
+		if (event instanceof XObjectEvent)
+			return createImmediateUndoCommand((XObjectEvent) event);
+		if (event instanceof XModelEvent)
+			return createImmediateUndoCommand((XModelEvent) event);
+		if (event instanceof XRepositoryEvent)
+			return createImmediateUndoCommand((XRepositoryEvent) event);
+
 		throw new IllegalArgumentException("unknown command class: " + event);
 	}
-	
+
 	/**
 	 * Create a {@link XFieldCommand} that undoes the given {@link XFieldEvent}
 	 * but will fail if there have been any conflicting changes since then, even
@@ -284,29 +283,29 @@ public class XChanges {
 	 *         executing it will basically result in an undo operation
 	 */
 	static public XFieldCommand createImmediateUndoCommand(XReversibleFieldEvent event) {
-		
+
 		long newRev = event.getOldModelRevision() + 1;
-		
-		switch(event.getChangeType()) {
-		
+
+		switch (event.getChangeType()) {
+
 		case REMOVE:
 			return MemoryFieldCommand.createAddCommand(event.getTarget(), newRev,
-			        event.getOldValue());
-			
+					event.getOldValue());
+
 		case CHANGE:
 			return MemoryFieldCommand.createChangeCommand(event.getTarget(), newRev,
-			        event.getOldValue());
-			
+					event.getOldValue());
+
 		case ADD:
 			return MemoryFieldCommand.createRemoveCommand(event.getTarget(), newRev);
-			
+
 		default:
 			throw new AssertionError("unexpected type for field events: " + event.getChangeType());
-			
+
 		}
-		
+
 	}
-	
+
 	/**
 	 * Create a {@link XModelCommand} that undoes the given {@link XModelEvent}
 	 * but will fail if there have been any conflicting changes since then, even
@@ -321,26 +320,26 @@ public class XChanges {
 	 *         executing it will basically result in an undo operation
 	 */
 	static public XModelCommand createImmediateUndoCommand(XModelEvent event) {
-		
-		if(event.getChangeType() == ChangeType.REMOVE) {
-			
-			return MemoryModelCommand.createAddCommand(event.getTarget(), XCommand.SAFE_STATE_BOUND,
-			        event.getObjectId());
-			
+
+		if (event.getChangeType() == ChangeType.REMOVE) {
+
+			return MemoryModelCommand.createAddCommand(event.getTarget(),
+					XCommand.SAFE_STATE_BOUND, event.getObjectId());
+
 		} else {
-			
+
 			assert event.getChangeType() == ChangeType.ADD : "unexpected change type for model events: "
-			        + event.getChangeType();
-			
+					+ event.getChangeType();
+
 			long newRev = event.getOldModelRevision() + 1;
-			
+
 			return MemoryModelCommand.createRemoveCommand(event.getTarget(), newRev,
-			        event.getObjectId());
-			
+					event.getObjectId());
+
 		}
-		
+
 	}
-	
+
 	/**
 	 * Create a {@link XObjectCommand} that undoes the given
 	 * {@link XObjectEvent} but will fail if there have been any conflicting
@@ -356,26 +355,26 @@ public class XChanges {
 	 *         executing it will basically result in an undo operation.
 	 */
 	static public XObjectCommand createImmediateUndoCommand(XObjectEvent event) {
-		
-		if(event.getChangeType() == ChangeType.REMOVE) {
-			
-			return MemoryObjectCommand.createAddCommand(event.getTarget(), XCommand.SAFE_STATE_BOUND,
-			        event.getFieldId());
-			
+
+		if (event.getChangeType() == ChangeType.REMOVE) {
+
+			return MemoryObjectCommand.createAddCommand(event.getTarget(),
+					XCommand.SAFE_STATE_BOUND, event.getFieldId());
+
 		} else {
-			
+
 			assert event.getChangeType() == ChangeType.ADD : "unexpected change type for object events: "
-			        + event.getChangeType();
-			
+					+ event.getChangeType();
+
 			long newRev = event.getOldModelRevision() + 1;
-			
+
 			return MemoryObjectCommand.createRemoveCommand(event.getTarget(), newRev,
-			        event.getFieldId());
-			
+					event.getFieldId());
+
 		}
-		
+
 	}
-	
+
 	/**
 	 * Create a {@link XRepositoryCommand} that undoes the given
 	 * {@link XRepositoryEvent} but will fail if there have been any conflicting
@@ -391,209 +390,228 @@ public class XChanges {
 	 *         executing it will basically result in an undo operation
 	 */
 	static public XRepositoryCommand createImmediateUndoCommand(XRepositoryEvent event) {
-		
-		if(event.getChangeType() == ChangeType.REMOVE) {
-			
-			return MemoryRepositoryCommand.createAddCommand(event.getTarget(), XCommand.SAFE_STATE_BOUND,
-			        event.getModelId());
-			
+
+		if (event.getChangeType() == ChangeType.REMOVE) {
+
+			return MemoryRepositoryCommand.createAddCommand(event.getTarget(),
+					XCommand.SAFE_STATE_BOUND, event.getModelId());
+
 		} else {
-			
+
 			assert event.getChangeType() == ChangeType.ADD : "unexpected change type for repository events: "
-			        + event.getChangeType();
-			
+					+ event.getChangeType();
+
 			return MemoryRepositoryCommand.createRemoveCommand(event.getTarget(), 0,
-			        event.getRepositoryId());
-			
+					event.getRepositoryId());
+
 		}
-		
+
 	}
-	
+
 	/**
 	 * Create a {@link XAtomicCommand} that would have caused the given
 	 * {@link XAtomicEvent}
 	 * 
 	 * @param event The {@link XAtomicEvent} for which a corresponding
 	 *            {@link XAtomicCommand} is to be created
+	 * @param safe if safe, creates ADD: {@link XCommand#SAFE_STATE_BOUND}
+	 *            command, else {@link XCommand#FORCED}; REMOVE: revision-bound,
+	 *            else {@link XCommand#FORCED}
 	 * @return an {@link XAtomicCommand} which execution would've created the
 	 *         given {@link XAtomicEvent}
 	 */
-	static public XAtomicCommand createReplayCommand(XAtomicEvent event) {
-		
-		if(event instanceof XFieldEvent)
-			return createReplayCommand((XFieldEvent)event);
-		if(event instanceof XObjectEvent)
-			return createReplayCommand((XObjectEvent)event);
-		if(event instanceof XModelEvent)
-			return createReplayCommand((XModelEvent)event);
-		if(event instanceof XRepositoryEvent)
-			return createReplayCommand((XRepositoryEvent)event);
-		
+	static public XAtomicCommand createReplayCommand(XAtomicEvent event, boolean safe) {
+
+		if (event instanceof XFieldEvent)
+			return createReplayCommand((XFieldEvent) event, safe);
+		if (event instanceof XObjectEvent)
+			return createReplayCommand((XObjectEvent) event, safe);
+		if (event instanceof XModelEvent)
+			return createReplayCommand((XModelEvent) event, safe);
+		if (event instanceof XRepositoryEvent)
+			return createReplayCommand((XRepositoryEvent) event, safe);
+
 		throw new IllegalArgumentException("unknown command class: " + event);
 	}
-	
+
 	/**
 	 * Create a {@link XCommand} that would have caused the given {@link XEvent}
 	 * 
 	 * @param event The {@link XEvent} for which a corresponding
 	 *            {@link XCommand} is to be created
+	 * @param safe if safe, creates ADD: {@link XCommand#SAFE_STATE_BOUND}
+	 *            command, else {@link XCommand#FORCED}; REMOVE: revision-bound,
+	 *            else {@link XCommand#FORCED}
 	 * @return an {@link XCommand} which execution would've created the given
 	 *         {@link XEvent}
 	 */
-	static public XCommand createReplayCommand(XEvent event) {
-		
-		if(event instanceof XAtomicEvent)
-			return createReplayCommand((XAtomicEvent)event);
-		if(event instanceof XTransactionEvent)
-			return createReplayCommand((XTransactionEvent)event);
-		
+	static public XCommand createReplayCommand(XEvent event, boolean safe) {
+
+		if (event instanceof XAtomicEvent)
+			return createReplayCommand((XAtomicEvent) event, safe);
+		if (event instanceof XTransactionEvent)
+			return createReplayCommand((XTransactionEvent) event, safe);
+
 		throw new IllegalArgumentException("unknown command class: " + event);
 	}
-	
+
 	/**
 	 * Create a {@link XFieldCommand} that would have caused the given
 	 * {@link XFieldEvent}
 	 * 
 	 * @param event The {@link XFieldEvent} for which a corresponding
 	 *            {@link XFieldCommand} is to be created
+	 * @param safe if safe, creates ADD: {@link XCommand#SAFE_STATE_BOUND}
+	 *            command, else {@link XCommand#FORCED}; REMOVE: revision-bound,
+	 *            else {@link XCommand#FORCED}
 	 * @return an {@link XFieldCommand} which execution would've created the
 	 *         given {@link XFieldEvent}
 	 */
-	static public XFieldCommand createReplayCommand(XFieldEvent event) {
-		
-		switch(event.getChangeType()) {
-		
+	static public XFieldCommand createReplayCommand(XFieldEvent event, boolean safe) {
+
+		switch (event.getChangeType()) {
+
 		case ADD:
 			return MemoryFieldCommand.createAddCommand(event.getTarget(),
-			        event.getOldFieldRevision(), event.getNewValue());
-			
+					safe ? event.getOldFieldRevision() : XCommand.FORCED, event.getNewValue());
+
 		case CHANGE:
 			return MemoryFieldCommand.createChangeCommand(event.getTarget(),
-			        event.getOldFieldRevision(), event.getNewValue());
-			
+					safe ? event.getOldFieldRevision() : XCommand.FORCED, event.getNewValue());
+
 		case REMOVE:
 			return MemoryFieldCommand.createRemoveCommand(event.getTarget(),
-			        event.getOldFieldRevision());
-			
+					safe ? event.getOldFieldRevision() : XCommand.FORCED);
+
 		default:
 			throw new AssertionError("unexpected type for field events: " + event.getChangeType());
-			
+
 		}
-		
+
 	}
-	
+
 	/**
 	 * Create a {@link XModelCommand} that would have caused the given
 	 * {@link XModelEvent}
 	 * 
 	 * @param event The {@link XModelEvent} for which a corresponding
 	 *            {@link XModelCommand} is to be created
+	 * @param safe if safe, creates ADD: {@link XCommand#SAFE_STATE_BOUND}
+	 *            command, else {@link XCommand#FORCED}; REMOVE: revision-bound,
+	 *            else {@link XCommand#FORCED}
 	 * @return an {@link XModelCommand} which execution would've created the
 	 *         given {@link XModelEvent}
 	 */
-	static public XModelCommand createReplayCommand(XModelEvent event) {
-		
-		if(event.getChangeType() == ChangeType.ADD) {
-			
-			return MemoryModelCommand.createAddCommand(event.getTarget(), XCommand.SAFE_STATE_BOUND,
-			        event.getObjectId());
-			
+	static public XModelCommand createReplayCommand(XModelEvent event, boolean safe) {
+
+		if (event.getChangeType() == ChangeType.ADD) {
+
+			return MemoryModelCommand.createAddCommand(event.getTarget(),
+					safe ? XCommand.SAFE_STATE_BOUND : XCommand.FORCED, event.getObjectId());
+
 		} else {
-			
+
 			assert event.getChangeType() == ChangeType.REMOVE : "unexpected change type for model events: "
-			        + event.getChangeType();
-			
+					+ event.getChangeType();
+
 			return MemoryModelCommand.createRemoveCommand(event.getTarget(),
-			        event.getOldObjectRevision(), event.getObjectId());
-			
+					safe ? event.getOldObjectRevision() : XCommand.FORCED, event.getObjectId());
+
 		}
-		
+
 	}
-	
+
 	/**
 	 * Create a {@link XObjectCommand} that would have caused the given
 	 * {@link XObjectEvent}
 	 * 
 	 * @param event The {@link XObjectEvent} for which a corresponding
 	 *            {@link XObjectCommand} is to be created
+	 * @param safe if safe, creates ADD: {@link XCommand#SAFE_STATE_BOUND}
+	 *            command, else {@link XCommand#FORCED}; REMOVE: revision-bound,
+	 *            else {@link XCommand#FORCED}
 	 * @return an {@link XObjectCommand} which execution would've created the
 	 *         given {@link XObjectEvent}
 	 */
-	static public XObjectCommand createReplayCommand(XObjectEvent event) {
-		
-		if(event.getChangeType() == ChangeType.ADD) {
-			
-			return MemoryObjectCommand.createAddCommand(event.getTarget(), XCommand.SAFE_STATE_BOUND,
-			        event.getFieldId());
-			
+	static public XObjectCommand createReplayCommand(XObjectEvent event, boolean safe) {
+
+		if (event.getChangeType() == ChangeType.ADD) {
+			return MemoryObjectCommand.createAddCommand(event.getTarget(),
+					safe ? XCommand.SAFE_STATE_BOUND : XCommand.FORCED, event.getFieldId());
 		} else {
-			
+
 			assert event.getChangeType() == ChangeType.REMOVE : "unexpected change type for object events: "
-			        + event.getChangeType();
-			
+					+ event.getChangeType();
+
 			return MemoryObjectCommand.createRemoveCommand(event.getTarget(),
-			        event.getOldFieldRevision(), event.getFieldId());
-			
+					safe ? event.getOldFieldRevision() : XCommand.FORCED, event.getFieldId());
+
 		}
-		
+
 	}
-	
+
 	/**
 	 * Create a {@link XRepositoryCommand} that would have caused the given
 	 * {@link XRepositoryEvent}
 	 * 
 	 * @param event The {@link XRepositoryEvent} for which a corresponding
 	 *            {@link XRepositoryCommand} is to be created
+	 * @param safe if safe, creates ADD: {@link XCommand#SAFE_STATE_BOUND}
+	 *            command, else {@link XCommand#FORCED}; REMOVE: revision-bound,
+	 *            else {@link XCommand#FORCED}
 	 * @return an {@link XRepositoryCommand} which execution would've created
 	 *         the given {@link XRepositoryEvent}
 	 */
-	static public XRepositoryCommand createReplayCommand(XRepositoryEvent event) {
-		
-		if(event.getChangeType() == ChangeType.ADD) {
-			
-			return MemoryRepositoryCommand.createAddCommand(event.getTarget(), XCommand.SAFE_STATE_BOUND,
-			        event.getModelId());
-			
+	static public XRepositoryCommand createReplayCommand(XRepositoryEvent event, boolean safe) {
+
+		if (event.getChangeType() == ChangeType.ADD) {
+
+			return MemoryRepositoryCommand.createAddCommand(event.getTarget(),
+					safe ? XCommand.SAFE_STATE_BOUND : XCommand.FORCED, event.getModelId());
+
 		} else {
-			
+
 			assert event.getChangeType() == ChangeType.REMOVE : "unexpected change type for repository events: "
-			        + event.getChangeType();
-			
+					+ event.getChangeType();
+
 			return MemoryRepositoryCommand.createRemoveCommand(event.getTarget(),
-			        event.getOldModelRevision(), event.getModelId());
-			
+					safe ? event.getOldModelRevision() : XCommand.FORCED, event.getModelId());
+
 		}
-		
+
 	}
-	
+
 	/**
 	 * Create a {@link XTransaction} that would have caused the given
 	 * {@link XTransactionEvent}
 	 * 
 	 * @param trans The {@link XTransactionEvent} for which a corresponding
 	 *            {@link XTransaction} is to be created
+	 * @param safe if safe, creates ADD: {@link XCommand#SAFE_STATE_BOUND}
+	 *            command, else {@link XCommand#FORCED}; REMOVE: revision-bound,
+	 *            else {@link XCommand#FORCED}
 	 * @return an {@link XTransaction} or {@link XCommand} (if sufficient) which
 	 *         execution would've created the given {@link XTransactionEvent}
 	 */
-	static public XCommand createReplayCommand(XTransactionEvent trans) {
-		
+	static public XCommand createReplayCommand(XTransactionEvent trans, boolean safe) {
+
 		List<XAtomicCommand> result = new ArrayList<XAtomicCommand>();
-		
-		for(XAtomicEvent event : trans) {
-			if(!event.isImplied()) {
-				result.add(createReplayCommand(event));
+
+		for (XAtomicEvent event : trans) {
+			if (!event.isImplied()) {
+				result.add(createReplayCommand(event, safe));
 			}
 		}
-		
+
 		XyAssert.xyAssert(result.size() > 0);
-		
-		if(result.size() == 1) {
+
+		if (result.size() == 1) {
 			return result.get(0);
 		}
-		
+
 		return MemoryTransaction.createTransaction(trans.getTarget(), result);
 	}
-	
+
 	/**
 	 * Create a {@link XCommand} that undoes the given {@link XEvent}s in the
 	 * order provided by the iterator but will fail if there have been any
@@ -621,25 +639,25 @@ public class XChanges {
 	 *             events is a {@link XRepositoryEvent}
 	 */
 	public static XCommand createUndoCommand(XReadableModel base, Iterator<XEvent> events) {
-		
+
 		ChangedModel model = new ChangedModel(base);
-		
-		while(events.hasNext()) {
+
+		while (events.hasNext()) {
 			undoChanges(model, events.next());
 		}
-		
+
 		XTransactionBuilder builder = new XTransactionBuilder(base.getAddress());
-		
+
 		builder.applyChanges(model);
-		
-		if(builder.isEmpty()) {
+
+		if (builder.isEmpty()) {
 			// no changes needed
 			return null;
 		}
-		
+
 		return builder.buildCommand();
 	}
-	
+
 	/**
 	 * Create a {@link XCommand} that undoes the given {@link XEvent} but will
 	 * fail if there have been any conflicting changes since then that have not
@@ -665,7 +683,7 @@ public class XChanges {
 	public static XCommand createUndoCommand(XReadableModel base, XEvent event) {
 		return createUndoCommand(base, new SingleValueIterator<XEvent>(event));
 	}
-	
+
 	/**
 	 * Create a {@link XRepositoryCommand} that undoes the given
 	 * {@link XRepositoryEvent} but will fail if there have been any conflicting
@@ -688,45 +706,46 @@ public class XChanges {
 	 *             contain the target of the event
 	 */
 	static public XRepositoryCommand createUndoCommand(XRepository repo, XRepositoryEvent event) {
-		
-		if(!repo.getAddress().equals(event.getTarget()))
+
+		if (!repo.getAddress().equals(event.getTarget()))
 			throw new IllegalArgumentException("repository and event don't match");
-		
+
 		XId modelId = event.getTarget().getModel();
-		
-		XyAssert.xyAssert(modelId != null); assert modelId != null;
-		
+
+		XyAssert.xyAssert(modelId != null);
+		assert modelId != null;
+
 		XModel model = repo.getModel(modelId);
-		
-		if(event.getChangeType() == ChangeType.REMOVE) {
-			
-			if(model != null) {
+
+		if (event.getChangeType() == ChangeType.REMOVE) {
+
+			if (model != null) {
 				throw new IllegalStateException("model already exists, cannot undo " + event);
 			}
-			
-			return MemoryRepositoryCommand.createAddCommand(event.getTarget(), XCommand.SAFE_STATE_BOUND,
-			        event.getModelId());
-			
+
+			return MemoryRepositoryCommand.createAddCommand(event.getTarget(),
+					XCommand.SAFE_STATE_BOUND, event.getModelId());
+
 		} else {
-			
+
 			assert event.getChangeType() == ChangeType.ADD : "unexpected change type for repository events: "
-			        + event.getChangeType();
-			
-			if(model == null) {
+					+ event.getChangeType();
+
+			if (model == null) {
 				throw new IllegalStateException("model no longer exists, cannot undo " + event);
 			}
-			
-			if(!model.isEmpty()) {
+
+			if (!model.isEmpty()) {
 				throw new IllegalStateException("model should be empty, cannot undo " + event);
 			}
-			
+
 			return MemoryRepositoryCommand.createRemoveCommand(event.getTarget(),
-			        event.getOldModelRevision(), event.getRepositoryId());
-			
+					event.getOldModelRevision(), event.getRepositoryId());
+
 		}
-		
+
 	}
-	
+
 	/**
 	 * Undo the changes represented by the given {@link XAtomicEvent} on the
 	 * given {@link XWritableModel}.
@@ -742,23 +761,23 @@ public class XChanges {
 	 *             {@link XRepositoryEvent}
 	 */
 	public static void undoChanges(XWritableModel model, XAtomicEvent event) {
-		if(event instanceof XModelEvent) {
-			undoChanges(model, (XModelEvent)event);
+		if (event instanceof XModelEvent) {
+			undoChanges(model, (XModelEvent) event);
 			return;
-		} else if(event instanceof XObjectEvent) {
-			undoChanges(model, (XObjectEvent)event);
+		} else if (event instanceof XObjectEvent) {
+			undoChanges(model, (XObjectEvent) event);
 			return;
-		} else if(event instanceof XReversibleFieldEvent) {
-			undoChanges(model, (XReversibleFieldEvent)event);
+		} else if (event instanceof XReversibleFieldEvent) {
+			undoChanges(model, (XReversibleFieldEvent) event);
 			return;
-		} else if(event instanceof XRepositoryEvent) {
+		} else if (event instanceof XRepositoryEvent) {
 			throw new IllegalArgumentException("need repository to undo repository changes");
-		} else if(event instanceof XFieldEvent) {
+		} else if (event instanceof XFieldEvent) {
 			throw new IllegalArgumentException("the given fieldEvent is not reversible");
 		}
 		throw new AssertionError("unknown event class: " + event);
 	}
-	
+
 	/**
 	 * Undo the changes represented by the given {@link XTransactionEvent} on
 	 * the given {@link XWritableModel}.
@@ -773,15 +792,15 @@ public class XChanges {
 	 *             contain the target of any of the events
 	 */
 	public static void undoChanges(XWritableModel model, XEvent event) {
-		if(event instanceof XTransactionEvent) {
-			undoChanges(model, (XTransactionEvent)event);
-		} else if(event instanceof XAtomicEvent) {
-			undoChanges(model, (XAtomicEvent)event);
+		if (event instanceof XTransactionEvent) {
+			undoChanges(model, (XTransactionEvent) event);
+		} else if (event instanceof XAtomicEvent) {
+			undoChanges(model, (XAtomicEvent) event);
 		} else {
 			assert false : "events are either transactions or atomic";
 		}
 	}
-	
+
 	/**
 	 * Undo the changes represented by the given {@link XFieldEvent} on the
 	 * given {@link XWritableModel}.
@@ -796,30 +815,30 @@ public class XChanges {
 	 *             contain the target of the event
 	 */
 	public static void undoChanges(XWritableModel model, XReversibleFieldEvent event) {
-		
-		if(!model.getAddress().contains(event.getTarget())) {
+
+		if (!model.getAddress().contains(event.getTarget())) {
 			throw new IllegalArgumentException();
 		}
-		
+
 		XId objectId = event.getObjectId();
 		XWritableObject object = model.getObject(objectId);
-		if(object == null) {
+		if (object == null) {
 			throw new IllegalStateException();
 		}
-		
+
 		XId fieldId = event.getFieldId();
 		XWritableField field = object.getField(fieldId);
-		if(field == null) {
+		if (field == null) {
 			throw new IllegalStateException();
 		}
-		
-		if(!XI.equals(field.getValue(), event.getNewValue())) {
+
+		if (!XI.equals(field.getValue(), event.getNewValue())) {
 			throw new IllegalStateException();
 		}
-		
+
 		field.setValue(event.getOldValue());
 	}
-	
+
 	/**
 	 * Undo the changes represented by the given {@link XModelEvent} on the
 	 * given {@link XWritableModel}.
@@ -834,35 +853,35 @@ public class XChanges {
 	 *             contain the target of the event
 	 */
 	public static void undoChanges(XWritableModel model, XModelEvent event) {
-		
-		if(!XI.equals(model.getAddress(), event.getTarget())) {
+
+		if (!XI.equals(model.getAddress(), event.getTarget())) {
 			throw new IllegalArgumentException();
 		}
-		
+
 		XId objectId = event.getObjectId();
-		
-		switch(event.getChangeType()) {
-		
+
+		switch (event.getChangeType()) {
+
 		case ADD:
-			if(!model.hasObject(objectId)) {
+			if (!model.hasObject(objectId)) {
 				throw new IllegalStateException();
 			}
 			model.removeObject(objectId);
 			break;
-		
+
 		case REMOVE:
-			if(model.hasObject(objectId)) {
+			if (model.hasObject(objectId)) {
 				throw new IllegalStateException();
 			}
 			model.createObject(objectId);
 			break;
-		
+
 		default:
 			throw new AssertionError("impossible type for model commands");
 		}
-		
+
 	}
-	
+
 	/**
 	 * Undo the changes represented by the given {@link XObjectEvent} on the
 	 * given {@link XWritableModel}.
@@ -877,41 +896,41 @@ public class XChanges {
 	 *             contain the target of the event
 	 */
 	public static void undoChanges(XWritableModel model, XObjectEvent event) {
-		
-		if(!model.getAddress().contains(event.getTarget())) {
+
+		if (!model.getAddress().contains(event.getTarget())) {
 			throw new IllegalArgumentException();
 		}
-		
+
 		XId objectId = event.getObjectId();
 		XWritableObject object = model.getObject(objectId);
-		if(object == null) {
+		if (object == null) {
 			throw new IllegalStateException();
 		}
-		
+
 		XId fieldId = event.getFieldId();
-		
-		switch(event.getChangeType()) {
-		
+
+		switch (event.getChangeType()) {
+
 		case ADD:
-			if(!object.hasField(fieldId)) {
+			if (!object.hasField(fieldId)) {
 				throw new IllegalStateException();
 			}
 			object.removeField(fieldId);
 			break;
-		
+
 		case REMOVE:
-			if(object.hasField(fieldId)) {
+			if (object.hasField(fieldId)) {
 				throw new IllegalStateException();
 			}
 			object.createField(fieldId);
 			break;
-		
+
 		default:
 			throw new AssertionError("impossible type for object commands");
 		}
-		
+
 	}
-	
+
 	/**
 	 * Undo the changes represented by the given {@link XTransactionEvent} on
 	 * the given {@link XWritableModel}.
@@ -926,9 +945,9 @@ public class XChanges {
 	 *             contain the target of any of the events
 	 */
 	public static void undoChanges(XWritableModel model, XTransactionEvent event) {
-		for(int i = event.size(); i >= 0; i--) {
+		for (int i = event.size(); i >= 0; i--) {
 			undoChanges(model, event.getEvent(i));
 		}
 	}
-	
+
 }
