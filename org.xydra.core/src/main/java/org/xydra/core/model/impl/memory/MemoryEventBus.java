@@ -59,11 +59,11 @@ public class MemoryEventBus {
 
 	/**
 	 * @param eventType
-	 *            @NeverNull
+	 * @NeverNull
 	 * @param event
-	 *            @NeverNull
+	 * @NeverNull
 	 * @param listener
-	 *            @NeverNull
+	 * @NeverNull
 	 */
 	private static void fireEventToListener(EventType eventType, Object event, Object listener) {
 		switch (eventType) {
@@ -119,12 +119,11 @@ public class MemoryEventBus {
 	 * events of type EventType happening on source-entities.
 	 * 
 	 * @param eventType
-	 *            @NeverNull
+	 * @NeverNull
 	 * @param source
-	 *            @NeverNull
-	 * @param event
-	 *            The, e.g., {@link XFieldEvent} which will be propagated to the
-	 *            registered listeners.
+	 * @NeverNull
+	 * @param event The, e.g., {@link XFieldEvent} which will be propagated to
+	 *            the registered listeners.
 	 */
 	public void fireEvent(EventType eventType, XAddress source, Object event) {
 		assert eventType != null;
@@ -182,6 +181,19 @@ public class MemoryEventBus {
 		} else {
 			return this.map.deIndex(eventType, sourceAddress, listener);
 		}
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder b = new StringBuilder();
+		Iterator<ITriple<EventType, XAddress, Object>> tupleIt = this.map.tupleIterator(
+				(EventType) null, null, null);
+		while (tupleIt.hasNext()) {
+			ITriple<MemoryEventBus.EventType, XAddress, Object> tuple = tupleIt.next();
+			b.append("EventType=" + tuple.getKey1() + ".Address=" + tuple.getKey2() + " => "
+					+ tuple.getEntry().getClass() + "\n");
+		}
+		return b.toString();
 	}
 
 }
