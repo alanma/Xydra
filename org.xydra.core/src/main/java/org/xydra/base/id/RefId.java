@@ -1,6 +1,9 @@
 package org.xydra.base.id;
 
+import java.io.ObjectStreamException;
+
 import org.xydra.base.XId;
+import org.xydra.core.X;
 
 public class RefId extends MemoryStringID {
 
@@ -27,6 +30,11 @@ public class RefId extends MemoryStringID {
 	@Override
 	public int hashCode() {
 		return this.hash;
+	}
+
+	private Object readResolve() throws ObjectStreamException {
+		XId id = X.getIDProvider().fromString(this.string);
+		return id;
 	}
 
 }
