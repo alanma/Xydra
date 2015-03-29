@@ -13,11 +13,11 @@ import org.xydra.base.change.XEvent;
  * @author xamde
  */
 public interface ISyncLog extends XWritableChangeLog, IBrowsableSyncLog {
-	
+
 	// from XWritableChangeLog
 	@Override
 	void appendEvent(XEvent event);
-	
+
 	/**
 	 * Appends an {@link XEvent} to the end of this MemoryChangeLog
 	 * 
@@ -25,39 +25,39 @@ public interface ISyncLog extends XWritableChangeLog, IBrowsableSyncLog {
 	 *            during play-back when synchronising
 	 */
 	void appendSyncLogEntry(ISyncLogEntry syncLogEntry);
-	
+
 	/**
 	 * @param command
 	 * @param event
 	 */
 	void appendSyncLogEntry(XCommand command, XEvent event);
-	
+
 	/**
 	 * remove all local commands from syncLog
 	 */
 	void clearLocalChanges();
-	
+
 	/**
 	 * @return number of locally executed changes that are not yet stored on the
 	 *         server
 	 */
 	int countUnappliedLocalChanges();
-	
+
 	/**
 	 * Convenience method
 	 * 
 	 * @return all {@link ISyncLogEntry} >= syncRevision
 	 */
 	Iterator<ISyncLogEntry> getLocalChanges();
-	
+
 	/**
 	 * @return the revision number up until which all changes have been
 	 *         synchronized successfully with the server
 	 */
 	long getSynchronizedRevision();
-	
+
 	void setSynchronizedRevision(long synchronizedRevision);
-	
+
 	/**
 	 * Removes all {@link ISyncLogEntry} that occurred after the given revision
 	 * number from this sync log, excluding the {@link ISyncLogEntry} that has
@@ -70,12 +70,35 @@ public interface ISyncLog extends XWritableChangeLog, IBrowsableSyncLog {
 	 */
 	@Override
 	boolean truncateToRevision(long revisionNumber);
-	
+
 	/**
 	 * Internal use
 	 * 
 	 * @return number of sync log entries managed
 	 */
 	long getSize();
-	
+
+	public static enum ChangeRecordMode {
+		/** normal recording: every change event is logged */
+		Normal,
+		/**
+		 * during snapshot load, it does not make sense to record the change
+		 * events (as they are already in the snapshot, with the same time
+		 * resolution).
+		 * 
+		 * Instead, inspect each event and just increment internal counters
+		 * (revision numbers) to match the state after loading this event from
+		 * the snapshot. Log each incoming event as if it belongs to the base
+		 * snapshot.
+		 */
+		SnapshotLoading
+	}
+
+	/**
+	 * See doc of {@link ChangeRecordMode}.
+	 * 
+	 * @param changeRecordMode
+	 */
+	void setChangeRecordMode(ChangeRecordMode changeRecordMode);
+
 }

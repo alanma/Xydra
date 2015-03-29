@@ -25,7 +25,7 @@ public class MemorySyncLog extends AbstractSyncLog implements ISyncLog {
 
 	/**
 	 * @param state
-	 *            @NeverNull
+	 * @NeverNull
 	 */
 	public MemorySyncLog(ISyncLogState state) {
 		if (state == null)
@@ -50,6 +50,7 @@ public class MemorySyncLog extends AbstractSyncLog implements ISyncLog {
 	@Override
 	@ModificationOperation
 	public synchronized void appendSyncLogEntry(ISyncLogEntry syncLogEntry) {
+		assert this.changeRecordMode == ChangeRecordMode.Normal;
 		this.state.appendSyncLogEntry(syncLogEntry);
 	}
 
@@ -127,11 +128,33 @@ public class MemorySyncLog extends AbstractSyncLog implements ISyncLog {
 		return count;
 	}
 
+	/**
+	 * If not recordFull (default), then recordPartial. Log each incoming event
+	 * as if it belongs to the base snapshot.
+	 */
+	private ChangeRecordMode changeRecordMode = ChangeRecordMode.Normal;
+
+	@Override
+	public void setChangeRecordMode(ChangeRecordMode changeRecordMode) {
+		this.changeRecordMode = changeRecordMode;
+	}
+
 	@Override
 	@ModificationOperation
 	public void appendSyncLogEntry(XCommand command, XEvent event) {
-		ISyncLogEntry syncLogEntry = new MemorySyncLogEntry(command, event);
-		appendSyncLogEntry(syncLogEntry);
+		switch (this.changeRecordMode) {
+		case Normal:
+			ISyncLogEntry syncLogEntry = new MemorySyncLogEntry(command, event);
+			appendSyncLogEntry(syncLogEntry);
+			break;
+		case SnapshotLoading:
+			long rev = event.getRevisionNumber();
+			this.state.setBaseRevisionNumber(rev);
+			if (getSynchronizedRevision() < rev) {
+				setSynchronizedRevision(rev);
+			}
+			break;
+		}
 	}
 
 	@Override
