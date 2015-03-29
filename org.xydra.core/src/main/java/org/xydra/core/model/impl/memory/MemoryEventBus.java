@@ -48,7 +48,7 @@ import org.xydra.index.query.Wildcard;
  * 
  * @author xamde
  */
-@LicenseApache(copyright = "Copyright 2011 Google Inc.")
+@LicenseApache(copyright = "Copyright 2011 Google Inc.", modified = true)
 public class MemoryEventBus {
 
 	public static enum EventType {
