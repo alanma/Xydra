@@ -29,6 +29,7 @@ public interface IMultipartFormDataHandler {
 
 	}
 
+	/** used for REST apis */
 	String PARAM_PROGRESS_TOKEN = "_progressToken_";
 
 	/**
@@ -36,12 +37,12 @@ public interface IMultipartFormDataHandler {
 	 * 
 	 * @param contentName
 	 * @param fieldName
-	 * @param headers
+	 * @param headerMap request headers of this one item of the multi-part request
 	 * @param contentType
 	 * @param in
 	 * @param progress
 	 */
-	void onContentPartStream(String fieldName, String contentName, Map<String, String> headers,
+	void onContentPartStream(String fieldName, String contentName, Map<String, String> headerMap,
 			String contentType, InputStream in, IProgressReporter progress) throws IOException;
 
 	/**
@@ -49,7 +50,8 @@ public interface IMultipartFormDataHandler {
 	 * 
 	 * @param fieldName
 	 * @param contentName
-	 * @param headerMap
+	 * @param headerMap request headers of this one item of the multi-part
+	 *            request
 	 * @param contentType
 	 * @param value
 	 * @param progress

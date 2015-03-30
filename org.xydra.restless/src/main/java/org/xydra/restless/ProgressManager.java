@@ -180,6 +180,12 @@ public class ProgressManager {
 		reportProgress(progressReporter, success ? ProgressManager.SUCCESS : ProgressManager.ERROR);
 	}
 
+	/**
+	 * Includes reporting progressDone=FALSE
+	 * 
+	 * @param pr
+	 * @param e
+	 */
 	public static void reportException(IProgressReporter pr, Throwable e) {
 		if (pr == null)
 			return;

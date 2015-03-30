@@ -655,22 +655,22 @@ class RestlessMethod {
 				String fieldName = item.getFieldName();
 				String contentType = item.getContentType();
 				String contentName = item.getName();
-				Map<String, String> headerMap = new HashMap<String, String>();
+				Map<String, String> requestHeaderMapOfOneItem = new HashMap<String, String>();
 				FileItemHeaders headers = item.getHeaders();
 				Iterator<String> headerNameIt = headers.getHeaderNames();
 				while (headerNameIt.hasNext()) {
 					String headerName = headerNameIt.next();
 					String headerValue = headers.getHeader(headerName);
-					headerMap.put(headerName, headerValue);
+					requestHeaderMapOfOneItem.put(headerName, headerValue);
 				}
 				InputStream is = item.openStream();
 
 				if (item.isFormField()) {
 					String value = Streams.asString(is, "UTF-8");
-					multipartFormDataHandler.onContentPartString(fieldName, contentName, headerMap,
+					multipartFormDataHandler.onContentPartString(fieldName, contentName, requestHeaderMapOfOneItem,
 							contentType, value, progressReporter);
 				} else {
-					multipartFormDataHandler.onContentPartStream(fieldName, contentName, headerMap,
+					multipartFormDataHandler.onContentPartStream(fieldName, contentName, requestHeaderMapOfOneItem,
 							contentType, is, progressReporter);
 				}
 
