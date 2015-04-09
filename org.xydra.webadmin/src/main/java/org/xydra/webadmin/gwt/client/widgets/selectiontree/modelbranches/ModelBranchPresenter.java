@@ -18,7 +18,7 @@ import org.xydra.webadmin.gwt.client.widgets.selectiontree.repobranches.RepoBran
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.web.bindery.event.shared.HandlerRegistration;
 
 /**
  * Performs all the logic for {@link ModelBranchWidget}s. So it:

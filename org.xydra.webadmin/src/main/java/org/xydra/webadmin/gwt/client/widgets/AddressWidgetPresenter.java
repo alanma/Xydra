@@ -14,7 +14,7 @@ import org.xydra.webadmin.gwt.client.events.ViewBuiltEvent.IViewBuiltHandler;
 import org.xydra.webadmin.gwt.client.util.Presenter;
 import org.xydra.webadmin.gwt.client.widgets.dialogs.WarningDialog;
 
-import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.web.bindery.event.shared.HandlerRegistration;
 
 /**
  * Processes requests via the {@link AddressWidget}

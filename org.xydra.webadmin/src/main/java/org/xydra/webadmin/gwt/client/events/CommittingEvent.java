@@ -3,15 +3,14 @@ package org.xydra.webadmin.gwt.client.events;
 import org.xydra.base.XAddress;
 import org.xydra.webadmin.gwt.client.events.CommittingEvent.ICommitEventHandler;
 
-import com.google.gwt.event.shared.EventHandler;
-import com.google.gwt.event.shared.GwtEvent;
+import com.google.web.bindery.event.shared.Event;
 
 /**
  * Model has been committed
  * 
  * @author Andreas
  */
-public class CommittingEvent extends GwtEvent<ICommitEventHandler> {
+public class CommittingEvent extends Event<ICommitEventHandler> {
 
 	public enum CommitStatus {
 		SUCCESS, SUCCESSANDPROCEED, FAILED;
@@ -25,7 +24,7 @@ public class CommittingEvent extends GwtEvent<ICommitEventHandler> {
 
 	public static final Type<ICommitEventHandler> TYPE = new Type<ICommitEventHandler>();
 
-	public interface ICommitEventHandler extends EventHandler {
+	public interface ICommitEventHandler {
 		void onCommit(CommittingEvent event);
 	}
 
@@ -45,7 +44,7 @@ public class CommittingEvent extends GwtEvent<ICommitEventHandler> {
 	}
 
 	@Override
-	public GwtEvent.Type<ICommitEventHandler> getAssociatedType() {
+	public Event.Type<ICommitEventHandler> getAssociatedType() {
 		return TYPE;
 	}
 

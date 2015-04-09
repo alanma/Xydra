@@ -4,15 +4,14 @@ import org.xydra.base.XAddress;
 import org.xydra.webadmin.gwt.client.datamodels.RepoDataModel;
 import org.xydra.webadmin.gwt.client.events.RepoChangedEvent.IRepoChangedEventHandler;
 
-import com.google.gwt.event.shared.EventHandler;
-import com.google.gwt.event.shared.GwtEvent;
+import com.google.web.bindery.event.shared.Event;
 
 /**
  * repo has changes; only used after having registered / added models
  * 
  * @author xamde
  */
-public class RepoChangedEvent extends GwtEvent<IRepoChangedEventHandler> {
+public class RepoChangedEvent extends Event<IRepoChangedEventHandler> {
 
 	private XAddress repoAddress;
 
@@ -22,7 +21,7 @@ public class RepoChangedEvent extends GwtEvent<IRepoChangedEventHandler> {
 
 	public static final Type<IRepoChangedEventHandler> TYPE = new Type<IRepoChangedEventHandler>();
 
-	public interface IRepoChangedEventHandler extends EventHandler {
+	public interface IRepoChangedEventHandler {
 		void onRepoChange(RepoChangedEvent event);
 	}
 
@@ -42,7 +41,7 @@ public class RepoChangedEvent extends GwtEvent<IRepoChangedEventHandler> {
 	}
 
 	@Override
-	public GwtEvent.Type<IRepoChangedEventHandler> getAssociatedType() {
+	public Event.Type<IRepoChangedEventHandler> getAssociatedType() {
 		return TYPE;
 	}
 

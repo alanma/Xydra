@@ -17,8 +17,8 @@ import org.xydra.webadmin.gwt.client.events.ViewBuiltEvent;
 import org.xydra.webadmin.gwt.client.events.ViewBuiltEvent.IViewBuiltHandler;
 import org.xydra.webadmin.gwt.client.widgets.XyAdmin;
 
-import com.google.gwt.event.shared.EventBus;
-import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.web.bindery.event.shared.EventBus;
+import com.google.web.bindery.event.shared.HandlerRegistration;
 
 public class EventHelper {
 

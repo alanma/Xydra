@@ -37,13 +37,13 @@ import org.xydra.webadmin.gwt.client.widgets.dialogs.ObjectChangesPanel;
 import org.xydra.webadmin.gwt.client.widgets.dialogs.WarningDialog;
 import org.xydra.webadmin.gwt.client.widgets.editorpanel.tablewidgets.TablePresenter;
 
-import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.web.bindery.event.shared.HandlerRegistration;
 
 /**
  * Performs logic for {@link EditorPanel}s. So it:

@@ -21,7 +21,7 @@ import org.xydra.webadmin.gwt.client.widgets.selectiontree.modelbranches.ModelBr
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
-import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.web.bindery.event.shared.HandlerRegistration;
 
 /**
  * Performs all the logic for {@link RepoBranchWidget}s.

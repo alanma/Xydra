@@ -4,15 +4,14 @@ import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.webadmin.gwt.client.events.ObjectChangedEvent.IObjectChangedEventHandler;
 
-import com.google.gwt.event.shared.EventHandler;
-import com.google.gwt.event.shared.GwtEvent;
+import com.google.web.bindery.event.shared.Event;
 
 /**
  * Object has been added or removed or just changed
  * 
  * @author xamde
  */
-public class ObjectChangedEvent extends GwtEvent<IObjectChangedEventHandler> {
+public class ObjectChangedEvent extends Event<IObjectChangedEventHandler> {
 
 	private XAddress objectAddress;
 
@@ -22,7 +21,7 @@ public class ObjectChangedEvent extends GwtEvent<IObjectChangedEventHandler> {
 
 	public static final Type<IObjectChangedEventHandler> TYPE = new Type<IObjectChangedEventHandler>();
 
-	public interface IObjectChangedEventHandler extends EventHandler {
+	public interface IObjectChangedEventHandler {
 		void onObjectChange(ObjectChangedEvent event);
 	}
 
@@ -42,7 +41,7 @@ public class ObjectChangedEvent extends GwtEvent<IObjectChangedEventHandler> {
 	}
 
 	@Override
-	public GwtEvent.Type<IObjectChangedEventHandler> getAssociatedType() {
+	public Event.Type<IObjectChangedEventHandler> getAssociatedType() {
 		return TYPE;
 	}
 

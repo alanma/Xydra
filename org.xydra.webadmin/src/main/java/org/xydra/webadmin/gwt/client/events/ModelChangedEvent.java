@@ -4,15 +4,14 @@ import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.webadmin.gwt.client.events.ModelChangedEvent.IModelChangedEventHandler;
 
-import com.google.gwt.event.shared.EventHandler;
-import com.google.gwt.event.shared.GwtEvent;
+import com.google.web.bindery.event.shared.Event;
 
 /**
  * Model has been added or removed
  * 
  * @author xamde
  */
-public class ModelChangedEvent extends GwtEvent<IModelChangedEventHandler> {
+public class ModelChangedEvent extends Event<IModelChangedEventHandler> {
 
 	private XAddress modelAddress;
 
@@ -22,7 +21,7 @@ public class ModelChangedEvent extends GwtEvent<IModelChangedEventHandler> {
 
 	public static final Type<IModelChangedEventHandler> TYPE = new Type<IModelChangedEventHandler>();
 
-	public interface IModelChangedEventHandler extends EventHandler {
+	public interface IModelChangedEventHandler {
 		void onModelChange(ModelChangedEvent event);
 	}
 
@@ -42,7 +41,7 @@ public class ModelChangedEvent extends GwtEvent<IModelChangedEventHandler> {
 	}
 
 	@Override
-	public GwtEvent.Type<IModelChangedEventHandler> getAssociatedType() {
+	public Event.Type<IModelChangedEventHandler> getAssociatedType() {
 		return TYPE;
 	}
 

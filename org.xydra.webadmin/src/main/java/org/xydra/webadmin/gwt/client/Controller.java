@@ -14,8 +14,8 @@ import org.xydra.webadmin.gwt.client.widgets.editorpanel.EditorPanelPresenter;
 import org.xydra.webadmin.gwt.client.widgets.selectiontree.SelectionTreePresenter;
 import org.xydra.webadmin.gwt.shared.XyAdminServiceAsync;
 
-import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.web.bindery.event.shared.HandlerRegistration;
 
 /**
  * Unit that holds some regularly needed objects and has the ability to start /

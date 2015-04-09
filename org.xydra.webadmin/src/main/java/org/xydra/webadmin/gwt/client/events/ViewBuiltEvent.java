@@ -3,21 +3,20 @@ package org.xydra.webadmin.gwt.client.events;
 import org.xydra.base.XAddress;
 import org.xydra.webadmin.gwt.client.events.ViewBuiltEvent.IViewBuiltHandler;
 
-import com.google.gwt.event.shared.EventHandler;
-import com.google.gwt.event.shared.GwtEvent;
+import com.google.web.bindery.event.shared.Event;
 
 /**
  * Model has been committed
  * 
  * @author Andreas
  */
-public class ViewBuiltEvent extends GwtEvent<IViewBuiltHandler> {
+public class ViewBuiltEvent extends Event<IViewBuiltHandler> {
 
 	private XAddress viewAddress;
 
 	public static final Type<IViewBuiltHandler> TYPE = new Type<IViewBuiltHandler>();
 
-	public interface IViewBuiltHandler extends EventHandler {
+	public interface IViewBuiltHandler {
 		void onViewBuilt(ViewBuiltEvent event);
 	}
 
@@ -35,7 +34,7 @@ public class ViewBuiltEvent extends GwtEvent<IViewBuiltHandler> {
 	}
 
 	@Override
-	public GwtEvent.Type<IViewBuiltHandler> getAssociatedType() {
+	public Event.Type<IViewBuiltHandler> getAssociatedType() {
 		return TYPE;
 	}
 
