@@ -347,7 +347,8 @@ Serializable {
 	@Override
 	public boolean addListenerForFieldEvents(XFieldEventListener changeListener) {
 		synchronized (getRoot()) {
-			return getRoot().addListenerForFieldEvents(getAddress(), changeListener);
+			boolean b = getRoot().addListenerForFieldEvents(getAddress(), changeListener);
+			return b;
 		}
 	}
 

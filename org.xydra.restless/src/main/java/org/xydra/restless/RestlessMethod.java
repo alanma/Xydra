@@ -638,7 +638,8 @@ class RestlessMethod {
 
 				@Override
 				public void reportProgress(String progressMessage) {
-					ProgressManager.DEFAULT_PROGRESS_BROKER.appendProgress(progressToken, progressMessage);
+					ProgressManager.DEFAULT_PROGRESS_BROKER.appendProgress(progressToken,
+							progressMessage);
 				}
 			};
 		}
@@ -667,18 +668,18 @@ class RestlessMethod {
 
 				if (item.isFormField()) {
 					String value = Streams.asString(is, "UTF-8");
-					multipartFormDataHandler.onContentPartString(fieldName, contentName, requestHeaderMapOfOneItem,
-							contentType, value, progressReporter);
+					multipartFormDataHandler.onContentPartString(fieldName, contentName,
+							requestHeaderMapOfOneItem, contentType, value, progressReporter);
 				} else {
-					multipartFormDataHandler.onContentPartStream(fieldName, contentName, requestHeaderMapOfOneItem,
-							contentType, is, progressReporter);
+					multipartFormDataHandler.onContentPartStream(fieldName, contentName,
+							requestHeaderMapOfOneItem, contentType, is, progressReporter);
 				}
 
 				is.close();
 			}
 			multipartFormDataHandler.onEndOfRequest(ctx, progressReporter);
 		} catch (FileUploadException e) {
-			// TODO good idea?
+			// IMPROVE good idea?
 			if (progressReporter != null)
 				progressReporter.reportProgress("ERROR");
 			throw new IOException("while uploading", e);

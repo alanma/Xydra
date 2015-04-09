@@ -89,6 +89,7 @@ public class MemorySyncLog extends AbstractSyncLog implements ISyncLog {
 	}
 
 	public static ISyncLog create(XAddress baseAddress, long syncRevision) {
+		assert baseAddress != null;
 		assert baseAddress.getRepository() != null;
 		MemorySyncLogState syncLogState = new MemorySyncLogState(baseAddress);
 		syncLogState.setSyncRevisionNumber(syncRevision);

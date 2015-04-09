@@ -32,6 +32,12 @@ public class RefId extends MemoryStringID {
 		return this.hash;
 	}
 
+	/**
+	 * This is a "magic" method from the Java Object Serialization framework.
+	 * 
+	 * @return
+	 * @throws ObjectStreamException
+	 */
 	private Object readResolve() throws ObjectStreamException {
 		XId id = X.getIDProvider().fromString(this.string);
 		return id;

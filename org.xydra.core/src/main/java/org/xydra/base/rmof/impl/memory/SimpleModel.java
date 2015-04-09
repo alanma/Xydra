@@ -19,161 +19,160 @@ import org.xydra.base.rmof.XWritableModel;
 import org.xydra.base.rmof.impl.XExistsRevWritableModel;
 import org.xydra.sharedutils.XyAssert;
 
-
 /**
- * A simple data container for {@link XWritableModel}.
+ * A simple data container for {@link XWritableModel}/XRevWritableModel.
  * 
  * Minimal memory footprint, can be used as data transfer object.
  * 
  * @author xamde
  */
 public class SimpleModel extends SimpleEntity implements XRevWritableModel, XSessionModel,
-        XExistsRevWritableModel {
-    
-    private static final long serialVersionUID = 5593443685935758227L;
-    
-    // not final for GWT serialisation
-    private XAddress address;
-    
-    // not final for GWT serialisation
-    private Map<XId,XRevWritableObject> objects;
-    
-    private long revisionNumber;
-    
-    /* Just for GWT */
-    protected SimpleModel() {
-    }
-    
-    public SimpleModel(XAddress address) {
-        this(address, XCommand.NEW);
-    }
-    
-    public SimpleModel(XAddress address, long revisionNumber) {
-        assert address != null;
-        assert address.getAddressedType() == XType.XMODEL : address;
-        this.address = address;
-        this.revisionNumber = revisionNumber;
-        this.objects = new HashMap<XId,XRevWritableObject>(2);
-    }
-    
-    public SimpleModel(XAddress address, long revisionNumber, Map<XId,XRevWritableObject> objects) {
-        super();
-        this.address = address;
-        this.revisionNumber = revisionNumber;
-        this.objects = objects;
-    }
-    
-    @Override
-    public void addObject(@NeverNull XRevWritableObject object) {
-        XyAssert.xyAssert(object != null);
-        assert object != null;
-        this.objects.put(object.getId(), object);
-    }
-    
-    @Override
-    public XRevWritableObject createObject(@NeverNull XId objectId) {
-        XRevWritableObject object = this.objects.get(objectId);
-        if(object != null) {
-            return object;
-        }
-        XRevWritableObject newObject = new SimpleObject(Base.resolveObject(this.address, objectId));
-        this.objects.put(objectId, newObject);
-        return newObject;
-    }
-    
-    @Override
-    public XAddress getAddress() {
-        return this.address;
-    }
-    
-    @Override
-    public XId getId() {
-        return this.address.getModel();
-    }
-    
-    @Override
-    public XRevWritableObject getObject(@NeverNull XId objectId) {
-        return this.objects.get(objectId);
-    }
-    
-    @Override
-    public long getRevisionNumber() {
-        return this.revisionNumber;
-    }
-    
-    @Override
-    public boolean hasObject(@NeverNull XId objectId) {
-        return this.objects.containsKey(objectId);
-    }
-    
-    @Override
-    public boolean isEmpty() {
-        return this.objects.isEmpty();
-    }
-    
-    @Override
-    public Iterator<XId> iterator() {
-        return this.objects.keySet().iterator();
-    }
-    
-    @Override
-    public boolean removeObject(@NeverNull XId objectId) {
-        XRevWritableObject oldObject = this.objects.remove(objectId);
-        return oldObject != null;
-    }
-    
-    @Override
-    public void setRevisionNumber(long rev) {
-        this.revisionNumber = rev;
-    }
-    
-    @Override
-    public XType getType() {
-        return XType.XMODEL;
-    }
-    
-    @Override
-    public String toString() {
-        return this.address + " [" + this.revisionNumber + "], " + this.objects.size() + " objects";
-    }
-    
-    /**
-     * @param model A model to copy.
-     * @return A copy of the model. Both model share the same objects and fields
-     *         but not the same object list or revision number.
-     */
-    public static XRevWritableModel shallowCopy(XRevWritableModel model) {
-        if(model == null) {
-            return null;
-        }
-        
-        SimpleModel result = new SimpleModel(model.getAddress());
-        if(model instanceof SimpleModel) {
-            result.objects.putAll(((SimpleModel)model).objects);
-        } else {
-            for(XId xid : model) {
-                result.addObject(model.getObject(xid));
-            }
-        }
-        return result;
-    }
-    
-    @Override
-    public XSessionModel loadObject(XId objectId) {
-        /* A simpleModel neither can not needs to load anything after creation */
-        return this;
-    }
-    
-    @Override
-    public XSessionModel loadAllObjects() {
-        /* A SimpleModel neither can nor needs to load anything after creation */
-        return this;
-    }
-    
-    @Override
-    public boolean equals(Object other) {
-        return other instanceof XReadableModel
-                && XCompareUtils.equalState(this, (XReadableModel)other);
-    }
-    
+		XExistsRevWritableModel {
+
+	private static final long serialVersionUID = 5593443685935758227L;
+
+	// not final for GWT serialisation
+	private XAddress address;
+
+	// not final for GWT serialisation
+	private Map<XId, XRevWritableObject> objects;
+
+	private long revisionNumber;
+
+	/* Just for GWT */
+	protected SimpleModel() {
+	}
+
+	public SimpleModel(XAddress address) {
+		this(address, XCommand.NEW);
+	}
+
+	public SimpleModel(XAddress address, long revisionNumber) {
+		assert address != null;
+		assert address.getAddressedType() == XType.XMODEL : address;
+		this.address = address;
+		this.revisionNumber = revisionNumber;
+		this.objects = new HashMap<XId, XRevWritableObject>(2);
+	}
+
+	public SimpleModel(XAddress address, long revisionNumber, Map<XId, XRevWritableObject> objects) {
+		super();
+		this.address = address;
+		this.revisionNumber = revisionNumber;
+		this.objects = objects;
+	}
+
+	@Override
+	public void addObject(@NeverNull XRevWritableObject object) {
+		XyAssert.xyAssert(object != null);
+		assert object != null;
+		this.objects.put(object.getId(), object);
+	}
+
+	@Override
+	public XRevWritableObject createObject(@NeverNull XId objectId) {
+		XRevWritableObject object = this.objects.get(objectId);
+		if (object != null) {
+			return object;
+		}
+		XRevWritableObject newObject = new SimpleObject(Base.resolveObject(this.address, objectId));
+		this.objects.put(objectId, newObject);
+		return newObject;
+	}
+
+	@Override
+	public XAddress getAddress() {
+		return this.address;
+	}
+
+	@Override
+	public XId getId() {
+		return this.address.getModel();
+	}
+
+	@Override
+	public XRevWritableObject getObject(@NeverNull XId objectId) {
+		return this.objects.get(objectId);
+	}
+
+	@Override
+	public long getRevisionNumber() {
+		return this.revisionNumber;
+	}
+
+	@Override
+	public boolean hasObject(@NeverNull XId objectId) {
+		return this.objects.containsKey(objectId);
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return this.objects.isEmpty();
+	}
+
+	@Override
+	public Iterator<XId> iterator() {
+		return this.objects.keySet().iterator();
+	}
+
+	@Override
+	public boolean removeObject(@NeverNull XId objectId) {
+		XRevWritableObject oldObject = this.objects.remove(objectId);
+		return oldObject != null;
+	}
+
+	@Override
+	public void setRevisionNumber(long rev) {
+		this.revisionNumber = rev;
+	}
+
+	@Override
+	public XType getType() {
+		return XType.XMODEL;
+	}
+
+	@Override
+	public String toString() {
+		return this.address + " [" + this.revisionNumber + "], " + this.objects.size() + " objects";
+	}
+
+	/**
+	 * @param model A model to copy.
+	 * @return A copy of the model. Both model share the same objects and fields
+	 *         but not the same object list or revision number.
+	 */
+	public static XRevWritableModel shallowCopy(XRevWritableModel model) {
+		if (model == null) {
+			return null;
+		}
+
+		SimpleModel result = new SimpleModel(model.getAddress());
+		if (model instanceof SimpleModel) {
+			result.objects.putAll(((SimpleModel) model).objects);
+		} else {
+			for (XId xid : model) {
+				result.addObject(model.getObject(xid));
+			}
+		}
+		return result;
+	}
+
+	@Override
+	public XSessionModel loadObject(XId objectId) {
+		/* A simpleModel neither can not needs to load anything after creation */
+		return this;
+	}
+
+	@Override
+	public XSessionModel loadAllObjects() {
+		/* A SimpleModel neither can nor needs to load anything after creation */
+		return this;
+	}
+
+	@Override
+	public boolean equals(Object other) {
+		return other instanceof XReadableModel
+				&& XCompareUtils.equalState(this, (XReadableModel) other);
+	}
+
 }

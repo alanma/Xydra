@@ -293,15 +293,16 @@ public class TransactionSummary {
 				if (baseSnapshotModel == null) {
 					return null;
 				}
-				XReadableObject baseSnapshotObject = baseSnapshotModel.getObject(fieldEvent
-						.getObjectId());
+				XId objectId = fieldEvent.getObjectId();
+				XReadableObject baseSnapshotObject = baseSnapshotModel.getObject(objectId);
 				if (baseSnapshotObject == null)
 					return null;
 				XReadableField baseSnapshotField = baseSnapshotObject.getField(fieldEvent
 						.getFieldId());
 				if (baseSnapshotField == null)
 					return null;
-				return baseSnapshotField.getValue();
+				XValue value = baseSnapshotField.getValue();
+				return value;
 			} else if (oldEvent instanceof XFieldEvent) {
 				XFieldEvent oldFieldEvent = (XFieldEvent) oldEvent;
 				return oldFieldEvent.getNewValue();
