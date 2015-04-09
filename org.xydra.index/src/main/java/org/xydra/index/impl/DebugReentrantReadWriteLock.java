@@ -18,36 +18,45 @@ import org.xydra.log.util.SharedExceptionUtils;
  * 
  * Configurable via log#isDebugEnabled
  * 
- * It can be closed by a thread multiple times (even when it is already closed)
+ * The lock count is not used. The first call to lock() locks, thr first call to
+ * unlock() unlocks. Redundant calls of lock() and unlock() are silently
+ * ignored.
+ * 
+ * I.e. It can be locked by a thread multiple times (even when already locked)
  * without causing any errors.
+ * 
+ * I.e. It can be unlocked by a thread multiple times (even when it is already
+ * unlocked) without causing any errors.
  * 
  * @author xamde
  */
 @RunsInGWT(false)
-public class DebugReentrantReadWriteLock extends ReentrantReadWriteLock implements ReadWriteLock {
+public class DebugReentrantReadWriteLock implements ReadWriteLock {
+
+	private ReentrantReadWriteLock reentrant = new ReentrantReadWriteLock();
 
 	class DebugReadLock implements Lock {
 
 		@Override
 		public void lock() {
 			readOperationStart();
-			DebugReentrantReadWriteLock.super.readLock().lock();
+			DebugReentrantReadWriteLock.this.reentrant.readLock().lock();
 		}
 
 		@Override
 		public void lockInterruptibly() throws InterruptedException {
 			readOperationStart();
-			DebugReentrantReadWriteLock.super.readLock().lockInterruptibly();
+			DebugReentrantReadWriteLock.this.reentrant.readLock().lockInterruptibly();
 		}
 
 		@Override
 		public Condition newCondition() {
-			return DebugReentrantReadWriteLock.super.readLock().newCondition();
+			return DebugReentrantReadWriteLock.this.reentrant.readLock().newCondition();
 		}
 
 		@Override
 		public boolean tryLock() {
-			boolean b = DebugReentrantReadWriteLock.super.readLock().tryLock();
+			boolean b = DebugReentrantReadWriteLock.this.reentrant.readLock().tryLock();
 			if (b) {
 				readOperationStart();
 			}
@@ -56,7 +65,7 @@ public class DebugReentrantReadWriteLock extends ReentrantReadWriteLock implemen
 
 		@Override
 		public boolean tryLock(long time, TimeUnit unit) throws InterruptedException {
-			boolean b = DebugReentrantReadWriteLock.super.readLock().tryLock(time, unit);
+			boolean b = DebugReentrantReadWriteLock.this.reentrant.readLock().tryLock(time, unit);
 			if (b) {
 				readOperationStart();
 			}
@@ -65,7 +74,7 @@ public class DebugReentrantReadWriteLock extends ReentrantReadWriteLock implemen
 
 		@Override
 		public void unlock() {
-			DebugReentrantReadWriteLock.super.readLock().unlock();
+			DebugReentrantReadWriteLock.this.reentrant.readLock().unlock();
 			readOperationEnd();
 		}
 
@@ -76,23 +85,23 @@ public class DebugReentrantReadWriteLock extends ReentrantReadWriteLock implemen
 		@Override
 		public void lock() {
 			writeOperationStart();
-			DebugReentrantReadWriteLock.super.writeLock().lock();
+			DebugReentrantReadWriteLock.this.reentrant.writeLock().lock();
 		}
 
 		@Override
 		public void lockInterruptibly() throws InterruptedException {
 			writeOperationStart();
-			DebugReentrantReadWriteLock.super.writeLock().lockInterruptibly();
+			DebugReentrantReadWriteLock.this.reentrant.writeLock().lockInterruptibly();
 		}
 
 		@Override
 		public Condition newCondition() {
-			return DebugReentrantReadWriteLock.super.writeLock().newCondition();
+			return DebugReentrantReadWriteLock.this.reentrant.writeLock().newCondition();
 		}
 
 		@Override
 		public boolean tryLock() {
-			boolean b = DebugReentrantReadWriteLock.super.writeLock().tryLock();
+			boolean b = DebugReentrantReadWriteLock.this.reentrant.writeLock().tryLock();
 			if (b) {
 				writeOperationStart();
 			}
@@ -101,7 +110,7 @@ public class DebugReentrantReadWriteLock extends ReentrantReadWriteLock implemen
 
 		@Override
 		public boolean tryLock(long time, TimeUnit unit) throws InterruptedException {
-			boolean b = DebugReentrantReadWriteLock.super.writeLock().tryLock(time, unit);
+			boolean b = DebugReentrantReadWriteLock.this.reentrant.writeLock().tryLock(time, unit);
 			if (b) {
 				writeOperationStart();
 			}
@@ -110,7 +119,7 @@ public class DebugReentrantReadWriteLock extends ReentrantReadWriteLock implemen
 
 		@Override
 		public void unlock() {
-			DebugReentrantReadWriteLock.super.writeLock().unlock();
+			DebugReentrantReadWriteLock.this.reentrant.writeLock().unlock();
 			writeOperationEnd();
 		}
 
@@ -151,8 +160,8 @@ public class DebugReentrantReadWriteLock extends ReentrantReadWriteLock implemen
 			this.debugReadLock = new DebugReadLock();
 			this.debugWriteLock = new DebugWriteLock();
 		} else {
-			this.debugReadLock = super.readLock();
-			this.debugWriteLock = super.writeLock();
+			this.debugReadLock = this.reentrant.readLock();
+			this.debugWriteLock = this.reentrant.writeLock();
 		}
 	}
 
@@ -167,7 +176,7 @@ public class DebugReentrantReadWriteLock extends ReentrantReadWriteLock implemen
 	private void readOperationEnd() {
 		this.openReadCount--;
 
-		if (super.getReadHoldCount() == 0) {
+		if (this.reentrant.getReadHoldCount() == 0) {
 			long id = Thread.currentThread().getId();
 			this.openReads.deIndex(id);
 
@@ -193,8 +202,9 @@ public class DebugReentrantReadWriteLock extends ReentrantReadWriteLock implemen
 
 	private void stats() {
 		if (log.isDebugEnabled())
-			log.debug("openReads=" + super.getReadHoldCount() + "/" + this.openReadCount
-					+ " openWrites=" + super.getWriteHoldCount() + "/" + this.openWriteCount);
+			log.debug("this thread openReads=" + this.reentrant.getReadHoldCount() + "/"
+					+ this.openReadCount + " openWrites=" + this.reentrant.getWriteHoldCount()
+					+ "/" + this.openWriteCount);
 	}
 
 	@Override
@@ -203,12 +213,12 @@ public class DebugReentrantReadWriteLock extends ReentrantReadWriteLock implemen
 	}
 
 	/**
-	 * Write operation just ended, we released the lock alwritey
+	 * Write operation just ended, we released the lock already
 	 */
 	private void writeOperationEnd() {
 		this.openWriteCount--;
 
-		if (super.getWriteHoldCount() == 0) {
+		if (this.reentrant.getWriteHoldCount() == 0) {
 			long id = Thread.currentThread().getId();
 			this.openWrites.deIndex(id);
 
@@ -235,9 +245,9 @@ public class DebugReentrantReadWriteLock extends ReentrantReadWriteLock implemen
 		boolean canLock = false;
 		long start = System.nanoTime();
 		while (!canLock) {
-			canLock = super.writeLock().tryLock();
+			canLock = this.reentrant.writeLock().tryLock();
 			if (canLock)
-				super.writeLock().unlock();
+				this.reentrant.writeLock().unlock();
 			else {
 				long now = System.nanoTime();
 				long duration = now - start;

@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.ReadWriteLock;
 
 import org.xydra.annotations.ModificationOperation;
 import org.xydra.annotations.NotThreadSafe;
@@ -951,7 +951,7 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 		}
 	};
 
-	private ReentrantReadWriteLock readWriteLock = new DebugReentrantReadWriteLock();
+	private ReadWriteLock readWriteLock = new DebugReentrantReadWriteLock();
 
 	private Node root;
 

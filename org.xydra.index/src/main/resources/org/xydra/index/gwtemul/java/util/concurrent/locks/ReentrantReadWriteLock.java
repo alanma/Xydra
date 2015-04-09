@@ -16,6 +16,10 @@ public class ReentrantReadWriteLock implements ReadWriteLock {
 	 *
 	 * @return the lock used for reading.
 	 */
+	public class ReadLock {
+
+	}
+
 	@Override
 	public Lock readLock() {
 		return new DoNothingLock();
