@@ -315,6 +315,39 @@ public class SerializedModel {
 	}
 
 	/**
+	 * Encode the given {@link XChangeLogState} as an XML/JSON element.
+	 * 
+	 * @param logState an {@link XChangeLogState}
+	 * @param out the {@link XydraOut} that a partial XML/JSON document is
+	 *            written to.
+	 */
+	public static void serialize(XChangeLogState logState, XydraOut out) {
+		long rev = logState.getBaseRevisionNumber();
+
+		out.open(XCHANGELOG_ELEMENT);
+		if (rev != 0) {
+			out.attribute(STARTREVISION_ATTRIBUTE, rev);
+		}
+
+		out.child(NAME_EVENTS);
+		out.beginArray();
+
+		XEvent last = logState.getLastEvent();
+		if (last != null) {
+			for (long i = rev + 1; i <= last.getRevisionNumber(); i++) {
+				XEvent event = logState.getEvent(i);
+				// there can be gaps in rev numbers
+				if (event != null) {
+					SerializedEvent.serialize(event, out, logState.getBaseAddress());
+				}
+			}
+		}
+
+		out.endArray();
+		out.close(XCHANGELOG_ELEMENT);
+	}
+
+	/**
 	 * Encode the given {@link XReadableField} as an XML/JSON element, including
 	 * revision numbers.
 	 * 
