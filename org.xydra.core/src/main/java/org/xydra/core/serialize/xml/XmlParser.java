@@ -33,7 +33,12 @@ public class XmlParser implements XydraParser {
 
 	private synchronized static DocumentBuilder getParser() throws ParserConfigurationException {
 		if (parser == null) {
-			parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+			DocumentBuilderFactory fac = DocumentBuilderFactory.newInstance();
+			fac.setIgnoringComments(true);
+			fac.setNamespaceAware(false);
+			fac.setValidating(false);
+			fac.setFeature("http://apache.org/xml/features/dom/defer-node-expansion", false);
+			parser = fac.newDocumentBuilder();
 		}
 		return parser;
 	}
