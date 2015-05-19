@@ -153,7 +153,12 @@ Serializable {
 	/**
 	 * Current state as a snapshot in augmented form.
 	 */
-	private final transient Map<XId, IMemoryObject> loadedObjects = new HashMap<XId, IMemoryObject>();
+	private transient Map<XId, IMemoryObject> loadedObjects = new HashMap<XId, IMemoryObject>();
+
+	private Object readResolve() {
+		this.loadedObjects = new HashMap<XId, IMemoryObject>();
+		return this;
+	}
 
 	/**
 	 * Represents the current state as a snapshot.
