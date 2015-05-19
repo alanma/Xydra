@@ -50,9 +50,9 @@ public class Root implements XRoot, Serializable {
 	}
 
 	/** for registering listeners and firing events */
-	private final MemoryEventBus eventBus;
+	private transient MemoryEventBus eventBus;
 
-	private MemoryEventBus repositoryEventBus;
+	private transient MemoryEventBus repositoryEventBus;
 
 	private XId sessionActor;
 
@@ -289,6 +289,11 @@ public class Root implements XRoot, Serializable {
 		new MemorySyncLog(usedChangeLogState),
 
 		actorId);
+	}
+
+	private Object readResolve() {
+		this.eventBus = new MemoryEventBus();
+		return this;
 	}
 
 	@Override
