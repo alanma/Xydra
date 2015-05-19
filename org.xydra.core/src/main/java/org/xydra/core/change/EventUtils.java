@@ -110,7 +110,8 @@ public class EventUtils {
 			applyRepositoryEvent(model, (XRepositoryEvent) atomicEvent);
 			return;
 		}
-		XyAssert.xyAssert(model.getRevisionNumber() >= 0, model.getRevisionNumber());
+		XyAssert.xyAssert(model.getRevisionNumber() >= 0, "Should be >= 0 but is %s",
+				model.getRevisionNumber());
 		if (atomicEvent instanceof XModelEvent) {
 			XyAssert.xyAssert(atomicEvent.getTarget().equals(model.getAddress()));
 			applyModelEvent(model, (XModelEvent) atomicEvent);

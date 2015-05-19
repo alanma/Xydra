@@ -83,7 +83,7 @@ public class MemorySyncLogState implements XSyncLogState {
 			XyAssert.xyAssert(event.getRevisionNumber() > getCurrentRevisionNumber(),
 					"eventRev=%s, currentRev=%s event=%s", +event.getRevisionNumber(),
 					getCurrentRevisionNumber(), event);
-			XyAssert.xyAssert(!event.inTransaction(), "event=%s", event);
+			XyAssert.xyAssert(!event.inTransaction(), "event not in txn? %s", event);
 			assert !this.eventMap.containsKey(event.getRevisionNumber());
 			addEntry(syncLogEntry);
 		}

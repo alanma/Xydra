@@ -215,6 +215,7 @@ public class SerializedModel {
 		state.setSyncRevisionNumber(getSyncRevisionAttribute(element));
 
 		XydraElement eventListElement = element.getChild(NAME_EVENTLIST, NAME_EVENTS);
+		assert eventListElement != null;
 		Iterator<XydraElement> iterator = eventListElement.getChildrenByName(NAME_EVENTS);
 		List<XEvent> eventList = new ArrayList<XEvent>();
 		while (iterator.hasNext()) {
@@ -242,6 +243,9 @@ public class SerializedModel {
 	 * @param syncLog the non-empty sync log
 	 * @param out the {@link XydraOut} that a partial XML/JSON document is
 	 *            written to.
+	 * @param context The part of this event's target address that doesn't need
+	 *            to be encoded in the element. Usually this is the model
+	 *            address.
 	 */
 	public static void serialize(ISyncLog syncLog, XydraOut out, XAddress context) {
 		List<XCommand> commandList = new ArrayList<XCommand>();

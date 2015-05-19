@@ -55,7 +55,7 @@ public class MemoryChangeLogState implements XChangeLogState {
 					+ this.baseAddr + " does not contain " + event.getChangedEntity());
 			long eventRevisionNumber = event.getRevisionNumber();
 			XyAssert.xyAssert(eventRevisionNumber > getCurrentRevisionNumber(),
-					"eventRev=%s must be > currentRev=%s", eventRevisionNumber,
+					"event.rev=%s must be > changelog.currentRev=%s", eventRevisionNumber,
 					getCurrentRevisionNumber());
 			XyAssert.xyAssert(!event.inTransaction());
 			this.eventMap.put(event.getRevisionNumber(), event);
