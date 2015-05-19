@@ -1,5 +1,7 @@
 package org.xydra.core.model.impl.memory.sync;
 
+import java.io.Serializable;
+
 import org.xydra.base.XAddress;
 import org.xydra.base.XId;
 import org.xydra.base.XType;
@@ -33,7 +35,7 @@ import org.xydra.core.model.impl.memory.sync.ISyncLog.ChangeRecordMode;
  * 
  * @author xamde
  */
-public class Root implements XRoot {
+public class Root implements XRoot, Serializable {
 
 	/**
 	 * @param eventBus

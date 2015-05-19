@@ -1,9 +1,11 @@
 package org.xydra.core.model.impl.memory.sync;
 
+import java.io.Serializable;
+
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 
-public class MemorySyncLogEntry implements ISyncLogEntry {
+public class MemorySyncLogEntry implements ISyncLogEntry, Serializable {
 
 	XCommand command;
 
