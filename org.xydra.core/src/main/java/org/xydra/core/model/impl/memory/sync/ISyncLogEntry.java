@@ -5,7 +5,7 @@ import org.xydra.base.change.XEvent;
 
 
 /**
- * An entry in an {@link ISyncLog}/{@link ISyncLogState}
+ * An entry in an {@link ISyncLog}/{@link XSyncLogState}
  * 
  * @author xamde
  * @author andreask

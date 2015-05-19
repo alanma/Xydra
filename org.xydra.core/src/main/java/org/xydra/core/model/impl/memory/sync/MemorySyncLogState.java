@@ -13,7 +13,7 @@ import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.sharedutils.XyAssert;
 
-public class MemorySyncLogState implements ISyncLogState {
+public class MemorySyncLogState implements XSyncLogState {
 
 	private static final Logger log = LoggerFactory.getLogger(MemorySyncLogState.class);
 

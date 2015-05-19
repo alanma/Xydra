@@ -54,7 +54,7 @@ import org.xydra.core.model.XModel;
 import org.xydra.core.model.XRepository;
 import org.xydra.core.model.XSynchronizesChanges;
 import org.xydra.core.model.impl.memory.sync.ISyncLog;
-import org.xydra.core.model.impl.memory.sync.ISyncLogState;
+import org.xydra.core.model.impl.memory.sync.XSyncLogState;
 import org.xydra.core.model.impl.memory.sync.Root;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
@@ -339,7 +339,7 @@ Serializable {
 	 * @param syncLogState @CanBeNull
 	 */
 	public MemoryModel(XId actorId, String passwordHash, XExistsRevWritableModel modelState,
-			ISyncLogState syncLogState) {
+			XSyncLogState syncLogState) {
 		this(Root.createWithActorAndChangeLogState(actorId, modelState.getAddress(), syncLogState),
 				null, actorId, passwordHash, modelState.getAddress(), modelState, false);
 	}

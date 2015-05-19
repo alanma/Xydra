@@ -6,7 +6,7 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 
 
-public interface IBrowsableSyncLog {
+public interface IReadableSyncLog {
 	
 	/**
 	 * Returns an iterator over all {@link ISyncLogEntry} that were logged after

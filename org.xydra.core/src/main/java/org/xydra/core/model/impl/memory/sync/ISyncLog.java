@@ -12,7 +12,7 @@ import org.xydra.base.change.XEvent;
  * @author kahmann
  * @author xamde
  */
-public interface ISyncLog extends XWritableChangeLog, IBrowsableSyncLog {
+public interface ISyncLog extends XWritableChangeLog, IReadableSyncLog {
 
 	// from XWritableChangeLog
 	@Override
@@ -100,5 +100,10 @@ public interface ISyncLog extends XWritableChangeLog, IBrowsableSyncLog {
 	 * @param changeRecordMode
 	 */
 	void setChangeRecordMode(ChangeRecordMode changeRecordMode);
+
+	/**
+	 * @return the internal, serializable state holder object
+	 */
+	XSyncLogState getSyncLogState();
 
 }

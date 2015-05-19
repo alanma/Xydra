@@ -9,7 +9,7 @@ import org.xydra.core.model.XChangeLogState;
  * @author xamde
  * @author andreask
  */
-public interface ISyncLogState extends XChangeLogState, IBrowsableSyncLog {
+public interface XSyncLogState extends XChangeLogState, IReadableSyncLog {
     
     /**
      * @param syncLogEntry The {@link ISyncLogEntry} which is to be logged

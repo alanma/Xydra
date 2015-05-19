@@ -43,9 +43,9 @@ import org.xydra.core.model.impl.memory.MemoryObject;
 import org.xydra.core.model.impl.memory.MemoryRepository;
 import org.xydra.core.model.impl.memory.sync.ISyncLog;
 import org.xydra.core.model.impl.memory.sync.ISyncLogEntry;
-import org.xydra.core.model.impl.memory.sync.ISyncLogState;
 import org.xydra.core.model.impl.memory.sync.MemorySyncLogEntry;
 import org.xydra.core.model.impl.memory.sync.MemorySyncLogState;
+import org.xydra.core.model.impl.memory.sync.XSyncLogState;
 import org.xydra.index.query.Pair;
 import org.xydra.sharedutils.XyAssert;
 
@@ -120,7 +120,7 @@ public class SerializedModel {
 	public static XChangeLogState loadChangeLogState(XydraElement element, XAddress baseAddr) {
 		XydraElement logElement = element.getChild(SYNCLOG_NAME, SYNCLOG_ELEMENT);
 		if (logElement != null) {
-			ISyncLogState log = new MemorySyncLogState(baseAddr);
+			XSyncLogState log = new MemorySyncLogState(baseAddr);
 			loadSyncLogState(logElement, log);
 			return log;
 		}
@@ -205,7 +205,7 @@ public class SerializedModel {
 	 * 
 	 * @param state The change log state to load into.
 	 */
-	public static void loadSyncLogState(XydraElement element, ISyncLogState state) {
+	public static void loadSyncLogState(XydraElement element, XSyncLogState state) {
 
 		// FIXME is 'xmap' not 'synclog'
 		// SerializingUtils.checkElementType(element, SYNCLOG_ELEMENT);
@@ -243,7 +243,7 @@ public class SerializedModel {
 	 * @param out the {@link XydraOut} that a partial XML/JSON document is
 	 *            written to.
 	 */
-	private static void serialize(ISyncLog syncLog, XydraOut out, XAddress context) {
+	public static void serialize(ISyncLog syncLog, XydraOut out, XAddress context) {
 		List<XCommand> commandList = new ArrayList<XCommand>();
 		Iterator<XCommand> commands;
 
@@ -724,7 +724,7 @@ public class SerializedModel {
 		} else {
 
 			assert state.getRevisionNumber() == log.getCurrentRevisionNumber();
-			return new MemoryModel(actorId, passwordHash, state, (ISyncLogState) log);
+			return new MemoryModel(actorId, passwordHash, state, (XSyncLogState) log);
 		}
 	}
 

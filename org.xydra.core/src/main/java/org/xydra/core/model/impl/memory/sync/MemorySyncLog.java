@@ -12,7 +12,7 @@ import org.xydra.core.model.XChangeLogState;
 import org.xydra.index.iterator.AbstractFilteringIterator;
 
 /**
- * Implements the algorithms on top of an {@link ISyncLogState}
+ * Implements the algorithms on top of an {@link XSyncLogState}
  * 
  * @author xamde
  */
@@ -21,13 +21,13 @@ public class MemorySyncLog extends AbstractSyncLog implements ISyncLog {
 	private static final long serialVersionUID = -7008700708157729184L;
 
 	/** serialisable state */
-	private ISyncLogState state;
+	private XSyncLogState state;
 
 	/**
 	 * @param state
 	 * @NeverNull
 	 */
-	public MemorySyncLog(ISyncLogState state) {
+	public MemorySyncLog(XSyncLogState state) {
 		if (state == null)
 			throw new IllegalArgumentException("state may not be null");
 		this.state = state;
@@ -276,7 +276,8 @@ public class MemorySyncLog extends AbstractSyncLog implements ISyncLog {
 		return this.state.getSize();
 	}
 
-	public ISyncLogState getSyncLogState() {
+	@Override
+	public XSyncLogState getSyncLogState() {
 		return this.state;
 	}
 
