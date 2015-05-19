@@ -208,7 +208,7 @@ public class SerializedModel {
 	public static void loadSyncLogState(XydraElement element, XSyncLogState state) {
 
 		// FIXME is 'xmap' not 'synclog'
-		// SerializingUtils.checkElementType(element, SYNCLOG_ELEMENT);
+		SerializingUtils.checkElementType(element, SYNCLOG_ELEMENT);
 
 		state.setBaseRevisionNumber(getBaseRevisionAttribute(element));
 
@@ -284,7 +284,10 @@ public class SerializedModel {
 		out.child(NAME_COMMANDS);
 		out.beginArray();
 		while (commands.hasNext()) {
-			SerializedCommand.serialize(commands.next(), out, context);
+			XCommand command = commands.next();
+			if (command != null) {
+				SerializedCommand.serialize(command, out, context);
+			}
 		}
 		out.endArray();
 		out.close(NAME_COMMANDS);
