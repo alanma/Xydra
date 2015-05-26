@@ -8,6 +8,7 @@ import org.xydra.base.XAddress;
 import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.core.model.XChangeLogState;
+import org.xydra.index.iterator.Iterators;
 import org.xydra.index.iterator.NoneIterator;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
@@ -294,6 +295,9 @@ public class MemorySyncLogState implements XSyncLogState {
 
 		long begin = beginRevision < firstRev ? firstRev : beginRevision;
 		long end = endRevision > curRev ? curRev + 1 : endRevision;
+
+		if (begin > end)
+			return Iterators.none();
 
 		return this.eventMap.subMap(begin, end).values().iterator();
 	}
