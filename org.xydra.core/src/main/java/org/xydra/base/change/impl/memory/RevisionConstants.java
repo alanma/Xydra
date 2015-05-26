@@ -33,7 +33,7 @@ public class RevisionConstants {
 	 * 
 	 * Used by XEvent.
 	 */
-	public static long REVISION_NOT_AVAILABLE = -20;
+	public static final long REVISION_NOT_AVAILABLE = -20;
 
 	/**
 	 * A revision number has not been set for this entity. E.g. if this XEvent
@@ -41,7 +41,7 @@ public class RevisionConstants {
 	 * 
 	 * Used by XEvent.
 	 */
-	public static long REVISION_OF_ENTITY_NOT_SET = -21;
+	public static final long REVISION_OF_ENTITY_NOT_SET = -21;
 
 	/**
 	 * Revision number returned by parser if no revision number was found.
