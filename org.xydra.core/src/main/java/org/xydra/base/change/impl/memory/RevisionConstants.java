@@ -59,4 +59,22 @@ public class RevisionConstants {
 	 * context.
 	 */
 	public static final long LATEST = -30;
+
+	public static String getName(long revConstant) {
+		if (revConstant == COMMAND_FAILED)
+			return "command failed";
+		if (revConstant == JUST_CREATED_ENTITY)
+			return "entity just created";
+		if (revConstant == LATEST)
+			return "latest";
+		if (revConstant == NO_REVISION)
+			return "no revision found";
+		if (revConstant == NOT_EXISTING)
+			return "entity does not exist";
+		if (revConstant == REVISION_NOT_AVAILABLE)
+			return "revision not available, maybe later";
+		if (revConstant == REVISION_OF_ENTITY_NOT_SET)
+			return "revision has not been set";
+		return "unknown " + revConstant;
+	}
 }
