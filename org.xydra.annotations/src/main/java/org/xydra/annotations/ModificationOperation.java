@@ -12,6 +12,8 @@ import java.lang.annotation.Target;
  * Methods tagged with this annotation change the state. In REST, they are
  * mapped to PUT, POST or DELETE.
  * 
+ * Opposite annotation for writing/changing: {@link ReadOperation}
+ * 
  * @author xamde
  * 
  */

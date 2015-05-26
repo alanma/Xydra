@@ -2,8 +2,6 @@ package org.xydra.base.change.impl.memory;
 
 import org.xydra.base.change.XCommand;
 
-
-
 public class RevisionConstants {
 
 	/**

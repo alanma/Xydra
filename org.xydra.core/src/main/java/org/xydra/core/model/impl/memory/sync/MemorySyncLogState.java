@@ -266,6 +266,7 @@ public class MemorySyncLogState implements XSyncLogState {
 		if (firstEvent != null) {
 			firstRev = getFirstEvent().getRevisionNumber();
 		} else {
+			// empty syncLog
 			firstRev = -1;
 		}
 		long curRev = getCurrentRevisionNumber();

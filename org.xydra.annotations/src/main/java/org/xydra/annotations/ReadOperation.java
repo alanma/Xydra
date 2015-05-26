@@ -12,6 +12,8 @@ import java.lang.annotation.Target;
  * Methods tagged with this annotation are side-effect free read operations. In
  * REST, methods like this are mapped to GET.
  * 
+ * Opposite annotation for writing/changing: {@link ModificationOperation}
+ * 
  * @author xamde
  * 
  */
