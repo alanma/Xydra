@@ -40,8 +40,7 @@ public class NanoClock {
 	}
 
 	/**
-	 * @param name
-	 *            for the statistics @NeverNull
+	 * @param name for the statistics @NeverNull
 	 * @return this instance for API chaining
 	 */
 	public synchronized NanoClock stop(@NeverNull String name) {
@@ -50,8 +49,7 @@ public class NanoClock {
 	}
 
 	/**
-	 * @param name
-	 *            for last clock entry @NeverNull
+	 * @param name for last clock entry @NeverNull
 	 * @return duration since last start in milliseconds
 	 */
 	public synchronized long stopAndGetDuration(@NeverNull String name) {
@@ -78,8 +76,7 @@ public class NanoClock {
 	}
 
 	/**
-	 * @param name
-	 *            for last clock entry @NeverNull
+	 * @param name for last clock entry @NeverNull
 	 * @return duration since last start in milliseconds
 	 */
 	public synchronized long stopStartAndGetLastDuration(@NeverNull String name) {
@@ -93,7 +90,7 @@ public class NanoClock {
 	 *         and stopped several times
 	 */
 	public synchronized String getStats() {
-		return this.stats.toString() + " total=" + getDurationSinceStart();
+		return this.stats.toString() + " total=" + getDurationSinceStart() + "ms";
 	}
 
 	public static void main(String[] args) {
@@ -119,7 +116,7 @@ public class NanoClock {
 	 *         was not started ever.
 	 */
 	public synchronized long getDurationSinceStart() {
-		return (long) ((double) ((now() - this.firstStart)) / 1000000d);
+		return (long) (((now() - this.firstStart)) / 1000000d);
 	}
 
 	private static long now() {
