@@ -178,6 +178,8 @@ public class Restless extends HttpServlet {
 
 	final List<RestlessExceptionHandler> exceptionHandlers = new LinkedList<RestlessExceptionHandler>();
 
+	final List<RestlessUnloadHandler> unloadHandlers = new LinkedList<RestlessUnloadHandler>();
+
 	/** Filled from web.xml */
 	private final Map<String, String> initParams = new HashMap<String, String>();
 
@@ -196,7 +198,9 @@ public class Restless extends HttpServlet {
 	private ServletContext servletContext;
 
 	private Object serviceLock = new Object();
+
 	private int serviceCounter = 0;
+
 	private boolean shuttingDown = false;
 
 	private String error404resourceClassname = null;
@@ -214,6 +218,18 @@ public class Restless extends HttpServlet {
 	public void addExceptionHandler(@NeverNull RestlessExceptionHandler handler) {
 		synchronized (this.exceptionHandlers) {
 			this.exceptionHandlers.add(handler);
+		}
+	}
+
+	/**
+	 * Register a handler that will get called just before the Restless-servlet
+	 * is unloaded (e.g. on shut-down of the server).
+	 * 
+	 * @param handler a non-null {@link RestlessUnloadHandler} @NeverNull
+	 */
+	public void addUnloadHandler(@NeverNull RestlessUnloadHandler handler) {
+		synchronized (this.unloadHandlers) {
+			this.unloadHandlers.add(handler);
 		}
 	}
 
@@ -830,9 +846,7 @@ public class Restless extends HttpServlet {
 		 * Check to see whether there are still service methods running, and if
 		 * there are, tell them to stop.
 		 */
-		if (numServices() > 0) {
-			setShuttingDown();
-		}
+		setShuttingDown();
 
 		/* Wait for the service methods to stop. */
 		try {
@@ -842,12 +856,20 @@ public class Restless extends HttpServlet {
 				} catch (InterruptedException e) {
 				}
 			}
+
 		} finally {
 			/*
 			 * Custom destroy code (if necessary) goes here
 			 */
 
-			super.destroy();
+			/* call unloadHandlers */
+			try {
+				for (RestlessUnloadHandler ruh : this.unloadHandlers) {
+					ruh.onBeforeUnload();
+				}
+			} finally {
+				super.destroy();
+			}
 		}
 	}
 
