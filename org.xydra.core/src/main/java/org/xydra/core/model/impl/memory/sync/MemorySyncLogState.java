@@ -9,7 +9,6 @@ import org.xydra.base.change.XCommand;
 import org.xydra.base.change.XEvent;
 import org.xydra.core.model.XChangeLogState;
 import org.xydra.index.iterator.Iterators;
-import org.xydra.index.iterator.NoneIterator;
 import org.xydra.log.api.Logger;
 import org.xydra.log.api.LoggerFactory;
 import org.xydra.sharedutils.XyAssert;
@@ -258,6 +257,17 @@ public class MemorySyncLogState implements XSyncLogState {
 	@Override
 	public synchronized Iterator<ISyncLogEntry> getSyncLogEntriesBetween(long beginRevision,
 			long endRevision) {
+		SortedMap<Long, ISyncLogEntry> subMap = getSyncLogEntriesBetween_asMap(beginRevision,
+				endRevision);
+		if (subMap == null) {
+			return Iterators.none();
+		} else {
+			return subMap.values().iterator();
+		}
+	}
+
+	private SortedMap<Long, ISyncLogEntry> getSyncLogEntriesBetween_asMap(long beginRevision,
+			long endRevision) {
 		/*
 		 * firstRev: the revision number the logged XModel had at the time when
 		 * the first event was recorded by the change log
@@ -283,23 +293,23 @@ public class MemorySyncLogState implements XSyncLogState {
 		}
 
 		if (beginRevision > endRevision) {
-			return NoneIterator.create();
+			return null;
 			// throw new IllegalArgumentException("beginRevision (" +
 			// beginRevision
 			// + ") may not be greater than endRevision (" + endRevision + ")");
 		}
 
 		if (beginRevision >= endRevision || endRevision <= firstRev) {
-			return NoneIterator.create();
+			return null;
 		}
 
 		long begin = beginRevision < firstRev ? firstRev : beginRevision;
 		long end = endRevision > curRev ? curRev + 1 : endRevision;
 
 		if (begin > end)
-			return Iterators.none();
+			return null;
 
-		return this.eventMap.subMap(begin, end).values().iterator();
+		return this.eventMap.subMap(begin, end);
 	}
 
 	private XEvent getFirstEvent() {
