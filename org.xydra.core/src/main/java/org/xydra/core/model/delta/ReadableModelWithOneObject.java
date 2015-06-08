@@ -51,6 +51,11 @@ public class ReadableModelWithOneObject implements XReadableModel {
     }
     
     @Override
+    public XType getType() {
+        return XType.XOBJECT;
+    }
+    
+    @Override
     public boolean hasObject(@NeverNull XId objectId) {
         return this.object.getId().equals(objectId);
     }
@@ -63,11 +68,6 @@ public class ReadableModelWithOneObject implements XReadableModel {
     @Override
     public Iterator<XId> iterator() {
         return new SingleValueIterator<XId>(this.object.getId());
-    }
-    
-    @Override
-    public XType getType() {
-        return XType.XOBJECT;
     }
     
 }

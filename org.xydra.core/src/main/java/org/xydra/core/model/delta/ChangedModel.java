@@ -61,6 +61,36 @@ public class ChangedModel implements XWritableModel, IModelDiff, XExistsWritable
     private static final Logger log = LoggerFactory.getLogger(ChangedModel.class);
     
     /**
+     * Apply the changes encoded in changedModel to the given model. Both should
+     * have the same Id.
+     * 
+     * @param changedModel
+     * @param model never null, should be a writable version of the baseModel
+     *            used to created the changedModel
+     */
+    public static void commitTo(@NeverNull ChangedModel changedModel, XWritableModel model) {
+        for(SimpleObject changedObject : changedModel.getNewObjects()) {
+            XWritableObject baseObject = model.createObject(changedObject.getId());
+            XCopyUtils.copyData(changedObject, baseObject);
+        }
+        for(ChangedObject changedObject : changedModel.getChangedObjects()) {
+            if(changedObject.isChanged()) {
+                XWritableObject baseObject = model.getObject(changedObject.getId());
+                ChangedObject.commitTo(changedObject, baseObject);
+            }
+        }
+        for(XId removed : changedModel.getRemovedObjects()) {
+            model.removeObject(removed);
+        }
+    }
+    
+    private static <T> boolean containsAllDifferentElements(Collection<T> c) {
+        Set<T> set = new HashSet<T>(4);
+        set.addAll(c);
+        return set.size() == c.size();
+    }
+    
+    /**
      * Get the number of {@link XCommand XCommands} needed to create this
      * object.
      */
@@ -88,11 +118,11 @@ public class ChangedModel implements XWritableModel, IModelDiff, XExistsWritable
     // Contains no XIds that are in added or removed.
     private final Map<XId,ChangedObject> changed = new HashMap<XId,ChangedObject>(2);
     
+    private boolean modelExists;
+    
     // Fields that are in base but have been removed.
     // Contains no XIds that are in added or changed.
     private final Set<XId> removed = new HashSet<XId>(2);
-    
-    private boolean modelExists;
     
     /**
      * Wrap an {@link XReadableModel} to record a set of changes made. Multiple
@@ -208,13 +238,6 @@ public class ChangedModel implements XWritableModel, IModelDiff, XExistsWritable
             }
         }
         return n;
-    }
-    
-    /**
-     * @return true there are changes compared to the initially supplied model
-     */
-    public boolean hasChanges() {
-        return !this.added.isEmpty() || !this.removed.isEmpty() || countCommandsNeeded(1) > 0;
     }
     
     /**
@@ -349,10 +372,6 @@ public class ChangedModel implements XWritableModel, IModelDiff, XExistsWritable
         return ChangeExecutor.executeFieldCommand(command, this);
     }
     
-    public boolean executeCommand(XRepositoryCommand command) {
-        return ChangeExecutor.executeRepositoryCommand(command, this);
-    }
-    
     /**
      * Checks if the given {@link XModelCommand} is valid and can be
      * successfully executed on this ChangedModel or if the attempt to execute
@@ -382,6 +401,10 @@ public class ChangedModel implements XWritableModel, IModelDiff, XExistsWritable
         return ChangeExecutor.executeObjectCommand(command, this);
     }
     
+    public boolean executeCommand(XRepositoryCommand command) {
+        return ChangeExecutor.executeRepositoryCommand(command, this);
+    }
+    
     /**
      * Apply the {@link XCommand XCommands} contained in the given
      * {@link XTransaction} and return true, if all {@link XCommand XCommands}
@@ -399,6 +422,16 @@ public class ChangedModel implements XWritableModel, IModelDiff, XExistsWritable
      */
     public boolean executeCommand(XTransaction transaction) {
         return ChangeExecutor.executeTransaction(transaction, this);
+    }
+    
+    @Override
+    public boolean exists() {
+        return this.modelExists;
+    }
+    
+    @Override
+    public Collection<? extends XReadableObject> getAdded() {
+        return this.added.values();
     }
     
     @Override
@@ -428,12 +461,6 @@ public class ChangedModel implements XWritableModel, IModelDiff, XExistsWritable
     public Iterable<SimpleObject> getNewObjects() {
         assert containsAllDifferentElements(this.added.values()) : "duplicates found";
         return this.added.values();
-    }
-    
-    private static <T> boolean containsAllDifferentElements(Collection<T> c) {
-        Set<T> set = new HashSet<T>(4);
-        set.addAll(c);
-        return set.size() == c.size();
     }
     
     @Override
@@ -476,6 +503,16 @@ public class ChangedModel implements XWritableModel, IModelDiff, XExistsWritable
         return this.base.getObject(objectId);
     }
     
+    @Override
+    public Collection<? extends IObjectDiff> getPotentiallyChanged() {
+        return this.changed.values();
+    }
+    
+    @Override
+    public Collection<XId> getRemoved() {
+        return this.removed;
+    }
+    
     /**
      * @return the {@link XId XIds} of objects that existed in the original
      *         model but have been removed from this ChangedModel
@@ -494,6 +531,18 @@ public class ChangedModel implements XWritableModel, IModelDiff, XExistsWritable
     @Override
     public long getRevisionNumber() {
         return this.base.getRevisionNumber();
+    }
+    
+    @Override
+    public XType getType() {
+        return XType.XMODEL;
+    }
+    
+    /**
+     * @return true there are changes compared to the initially supplied model
+     */
+    public boolean hasChanges() {
+        return !this.added.isEmpty() || !this.removed.isEmpty() || countCommandsNeeded(1) > 0;
     }
     
     @Override
@@ -543,6 +592,18 @@ public class ChangedModel implements XWritableModel, IModelDiff, XExistsWritable
         return new BagUnionIterator<XId>(filtered, this.added.keySet().iterator());
     }
     
+    public boolean modelWasCreated() {
+        return this.base instanceof XExistsReadable
+        
+        && !((XExistsReadable)this.base).exists() && exists();
+    }
+    
+    public boolean modelWasRemoved() {
+        return this.base instanceof XExistsReadable
+        
+        && ((XExistsReadable)this.base).exists() && !exists();
+    }
+    
     @Override
     public boolean removeObject(XId objectId) {
         if(this.added.containsKey(objectId)) {
@@ -565,50 +626,6 @@ public class ChangedModel implements XWritableModel, IModelDiff, XExistsWritable
         return false;
     }
     
-    @Override
-    public XType getType() {
-        return XType.XMODEL;
-    }
-    
-    /**
-     * Apply the changes encoded in changedModel to the given model. Both should
-     * have the same Id.
-     * 
-     * @param changedModel
-     * @param model never null, should be a writable version of the baseModel
-     *            used to created the changedModel
-     */
-    public static void commitTo(@NeverNull ChangedModel changedModel, XWritableModel model) {
-        for(SimpleObject changedObject : changedModel.getNewObjects()) {
-            XWritableObject baseObject = model.createObject(changedObject.getId());
-            XCopyUtils.copyData(changedObject, baseObject);
-        }
-        for(ChangedObject changedObject : changedModel.getChangedObjects()) {
-            if(changedObject.isChanged()) {
-                XWritableObject baseObject = model.getObject(changedObject.getId());
-                ChangedObject.commitTo(changedObject, baseObject);
-            }
-        }
-        for(XId removed : changedModel.getRemovedObjects()) {
-            model.removeObject(removed);
-        }
-    }
-    
-    @Override
-    public Collection<? extends XReadableObject> getAdded() {
-        return this.added.values();
-    }
-    
-    @Override
-    public Collection<? extends IObjectDiff> getPotentiallyChanged() {
-        return this.changed.values();
-    }
-    
-    @Override
-    public Collection<XId> getRemoved() {
-        return this.removed;
-    }
-    
     /**
      * Forget all changes and reset to initial state, does not change anything
      * in the base model
@@ -622,11 +639,6 @@ public class ChangedModel implements XWritableModel, IModelDiff, XExistsWritable
     }
     
     @Override
-    public boolean exists() {
-        return this.modelExists;
-    }
-    
-    @Override
     public void setExists(boolean modelExists) {
         this.modelExists = modelExists;
         if(!modelExists) {
@@ -636,17 +648,5 @@ public class ChangedModel implements XWritableModel, IModelDiff, XExistsWritable
                 removeObject(objectId);
             }
         }
-    }
-    
-    public boolean modelWasCreated() {
-        return this.base instanceof XExistsReadable
-        
-        && !((XExistsReadable)this.base).exists() && exists();
-    }
-    
-    public boolean modelWasRemoved() {
-        return this.base instanceof XExistsReadable
-        
-        && ((XExistsReadable)this.base).exists() && !exists();
     }
 }

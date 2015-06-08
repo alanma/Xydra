@@ -49,6 +49,10 @@ public class ChangedField implements XWritableField, IFieldDiff {
         this.base = base;
     }
     
+    public boolean executeCommand(XFieldCommand fieldCommand) {
+        return ChangeExecutor.executeFieldCommand(fieldCommand, this);
+    }
+    
     @Override
     public XAddress getAddress() {
         return this.base.getAddress();
@@ -57,6 +61,11 @@ public class ChangedField implements XWritableField, IFieldDiff {
     @Override
     public XId getId() {
         return this.base.getId();
+    }
+    
+    @Override
+    public XValue getInitialValue() {
+        return this.getOldValue();
     }
     
     /**
@@ -77,6 +86,11 @@ public class ChangedField implements XWritableField, IFieldDiff {
     @Override
     public long getRevisionNumber() {
         return this.base.getRevisionNumber();
+    }
+    
+    @Override
+    public XType getType() {
+        return XType.XFIELD;
     }
     
     @Override
@@ -105,20 +119,6 @@ public class ChangedField implements XWritableField, IFieldDiff {
         this.changed = !XI.equals(value, this.base.getValue());
         this.value = value;
         return changes;
-    }
-    
-    @Override
-    public XType getType() {
-        return XType.XFIELD;
-    }
-    
-    @Override
-    public XValue getInitialValue() {
-        return this.getOldValue();
-    }
-    
-    public boolean executeCommand(XFieldCommand fieldCommand) {
-        return ChangeExecutor.executeFieldCommand(fieldCommand, this);
     }
     
 }

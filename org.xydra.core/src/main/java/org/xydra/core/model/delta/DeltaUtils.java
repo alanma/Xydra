@@ -37,8 +37,6 @@ import org.xydra.sharedutils.XyAssert;
  */
 public abstract class DeltaUtils {
 
-	private static final Logger log = LoggerFactory.getLogger(DeltaUtils.class);
-
 	/**
 	 * A description of what happened to the model itself.
 	 * 
@@ -48,6 +46,48 @@ public abstract class DeltaUtils {
 	@Deprecated
 	public enum ModelChange {
 		CREATED, NOCHANGE, REMOVED
+	}
+
+	private static final Logger log = LoggerFactory.getLogger(DeltaUtils.class);
+
+	/**
+	 * Apply the given changes to a {@link XRevWritableModel}.
+	 * 
+	 * @param modelAddr
+	 *            The address of the model to change. This is used if the model
+	 *            needs to be created first (modelToChange is null).
+	 * @param modelToChange
+	 *            The model to change. This may be null if the model currently
+	 *            exists.
+	 * @param changedModel
+	 *            The changes to apply as returned by
+	 *            {@link #executeCommand(XExistsReadableModel, XCommand)}. @NeverNull
+	 * @param rev
+	 *            The revision number of the change.
+	 * @return a model with the changes applied or null if model has been
+	 *         removed by the changes.
+	 */
+	public static XRevWritableModel applyChanges(XAddress modelAddr,
+			XRevWritableModel modelToChange, @NeverNull ChangedModel changedModel, long rev) {
+
+		XRevWritableModel model = modelToChange;
+
+		if (changedModel.modelWasRemoved()) {
+			return null;
+		} else if (changedModel.modelWasCreated()) {
+			assert model != null;
+			assert !model.exists();
+			model.setRevisionNumber(rev);
+			if (model instanceof XExistsWritableModel) {
+				((XExistsWritableModel) model).setExists(true);
+			}
+		}
+
+		XyAssert.xyAssert(model != null);
+		assert model != null;
+		applyChanges(model, changedModel, rev);
+
+		return model;
 	}
 
 	private static void applyChanges(XRevWritableModel model, ChangedModel changedModel, long rev) {
@@ -105,46 +145,6 @@ public abstract class DeltaUtils {
 
 		model.setRevisionNumber(rev);
 
-	}
-
-	/**
-	 * Apply the given changes to a {@link XRevWritableModel}.
-	 * 
-	 * @param modelAddr
-	 *            The address of the model to change. This is used if the model
-	 *            needs to be created first (modelToChange is null).
-	 * @param modelToChange
-	 *            The model to change. This may be null if the model currently
-	 *            exists.
-	 * @param changedModel
-	 *            The changes to apply as returned by
-	 *            {@link #executeCommand(XExistsReadableModel, XCommand)}. @NeverNull
-	 * @param rev
-	 *            The revision number of the change.
-	 * @return a model with the changes applied or null if model has been
-	 *         removed by the changes.
-	 */
-	public static XRevWritableModel applyChanges(XAddress modelAddr,
-			XRevWritableModel modelToChange, @NeverNull ChangedModel changedModel, long rev) {
-
-		XRevWritableModel model = modelToChange;
-
-		if (changedModel.modelWasRemoved()) {
-			return null;
-		} else if (changedModel.modelWasCreated()) {
-			assert model != null;
-			assert !model.exists();
-			model.setRevisionNumber(rev);
-			if (model instanceof XExistsWritableModel) {
-				((XExistsWritableModel) model).setExists(true);
-			}
-		}
-
-		XyAssert.xyAssert(model != null);
-		assert model != null;
-		applyChanges(model, changedModel, rev);
-
-		return model;
 	}
 
 	private static void applyChanges(XRevWritableObject object, XReadableField field, long rev) {
@@ -207,6 +207,29 @@ public abstract class DeltaUtils {
 				+ nChanges + " events=" + events.size();
 
 		return events;
+	}
+
+	public static void createEventsForChangedField(List<XAtomicEvent> events, long currentModelRev,
+			XId actorId, long currentObjectRev, ChangedField field, boolean inTransaction) {
+		if (field.isChanged()) {
+			// IMPROVE we only need to know if the old value exists
+			XValue oldValue = field.getOldValue();
+			XValue newValue = field.getValue();
+			XAddress target = field.getAddress();
+			long currentFieldRev = field.getRevisionNumber();
+			if (newValue == null) {
+				XyAssert.xyAssert(oldValue != null);
+				assert oldValue != null;
+				events.add(MemoryFieldEvent.createRemoveEvent(actorId, target, currentModelRev,
+						currentObjectRev, currentFieldRev, inTransaction, false));
+			} else if (oldValue == null) {
+				events.add(MemoryFieldEvent.createAddEvent(actorId, target, newValue,
+						currentModelRev, currentObjectRev, currentFieldRev, inTransaction));
+			} else {
+				events.add(MemoryFieldEvent.createChangeEvent(actorId, target, newValue,
+						currentModelRev, currentObjectRev, currentFieldRev, inTransaction));
+			}
+		}
 	}
 
 	/**
@@ -287,29 +310,6 @@ public abstract class DeltaUtils {
 			long objectRev = object.getRevisionNumber();
 			DeltaUtils.createEventsForChangedField(events, currentModelRev, actorId, objectRev,
 					field, inTransaction);
-		}
-	}
-
-	public static void createEventsForChangedField(List<XAtomicEvent> events, long currentModelRev,
-			XId actorId, long currentObjectRev, ChangedField field, boolean inTransaction) {
-		if (field.isChanged()) {
-			// IMPROVE we only need to know if the old value exists
-			XValue oldValue = field.getOldValue();
-			XValue newValue = field.getValue();
-			XAddress target = field.getAddress();
-			long currentFieldRev = field.getRevisionNumber();
-			if (newValue == null) {
-				XyAssert.xyAssert(oldValue != null);
-				assert oldValue != null;
-				events.add(MemoryFieldEvent.createRemoveEvent(actorId, target, currentModelRev,
-						currentObjectRev, currentFieldRev, inTransaction, false));
-			} else if (oldValue == null) {
-				events.add(MemoryFieldEvent.createAddEvent(actorId, target, newValue,
-						currentModelRev, currentObjectRev, currentFieldRev, inTransaction));
-			} else {
-				events.add(MemoryFieldEvent.createChangeEvent(actorId, target, newValue,
-						currentModelRev, currentObjectRev, currentFieldRev, inTransaction));
-			}
 		}
 	}
 

@@ -42,6 +42,36 @@ import org.xydra.sharedutils.XyAssert;
  */
 public class ChangedObject implements XWritableObject, IObjectDiff, XExistsWritableObject {
     
+    /**
+     * Apply the changes represented by the changedObject to the given
+     * baseObject.
+     * 
+     * @param changedObject of which the changes are applied to the given
+     *            baseObject
+     * @param baseObject should be a writable version of the object used to
+     *            create the changedObject
+     */
+    public static void commitTo(ChangedObject changedObject, XWritableObject baseObject) {
+        XyAssert.xyAssert(changedObject != null);
+        assert changedObject != null;
+        XyAssert.xyAssert(baseObject != null);
+        assert baseObject != null;
+        XyAssert.xyAssert(changedObject.getId().equals(baseObject.getId()));
+        for(SimpleField field : changedObject.getNewFields()) {
+            XWritableField baseField = baseObject.createField(field.getId());
+            baseField.setValue(field.getValue());
+        }
+        for(ChangedField field : changedObject.getChangedFields()) {
+            if(field.isChanged()) {
+                XWritableField baseField = baseObject.createField(field.getId());
+                baseField.setValue(field.getValue());
+            }
+        }
+        for(XId removed : changedObject.getRemovedFields()) {
+            baseObject.removeField(removed);
+        }
+    }
+    
     // Fields that are not in base and have been added.
     // Contains no XIds that are in removed or changed.
     private final Map<XId,SimpleField> added = new HashMap<XId,SimpleField>(2);
@@ -53,11 +83,11 @@ public class ChangedObject implements XWritableObject, IObjectDiff, XExistsWrita
     // Contains no XIds that are in added or removed.
     private final Map<XId,ChangedField> changed = new HashMap<XId,ChangedField>(2);
     
+    private boolean objectExists = true;
+    
     // Fields that are in base but have been removed.
     // Contains no XIds that are in added or changed.
     private final Set<XId> removed = new HashSet<XId>(2);
-    
-    private boolean objectExists = true;
     
     /**
      * Wrap an {@link XReadableObject} to record a set of changes made. Multiple
@@ -247,6 +277,20 @@ public class ChangedObject implements XWritableObject, IObjectDiff, XExistsWrita
         
     }
     
+    public boolean executeCommand(XCommand command) {
+        return ChangeExecutor.executeAnyCommand(command, this);
+    }
+    
+    @Override
+    public boolean exists() {
+        return this.objectExists;
+    }
+    
+    @Override
+    public Collection<? extends XReadableField> getAdded() {
+        return this.added.values();
+    }
+    
     @Override
     public XAddress getAddress() {
         return this.base.getAddress();
@@ -321,6 +365,16 @@ public class ChangedObject implements XWritableObject, IObjectDiff, XExistsWrita
         return this.base.getField(fieldId);
     }
     
+    @Override
+    public Collection<? extends IFieldDiff> getPotentiallyChanged() {
+        return this.changed.values();
+    }
+    
+    @Override
+    public Collection<XId> getRemoved() {
+        return this.removed;
+    }
+    
     /**
      * @return the {@link XId XIds} of the {@link XReadableField XBaseFields}
      *         that existed in the original {@link XReadableObject} but have
@@ -343,9 +397,31 @@ public class ChangedObject implements XWritableObject, IObjectDiff, XExistsWrita
     }
     
     @Override
+    public XType getType() {
+        return XType.XOBJECT;
+    }
+    
+    /**
+     * @return false if there are no changes. True if there are changes.
+     */
+    @Override
+    public boolean hasChanges() {
+        return !this.added.isEmpty() || !this.removed.isEmpty() || this.countCommandsNeeded(1) > 0;
+    }
+    
+    @Override
     public boolean hasField(XId fieldId) {
         return this.added.containsKey(fieldId)
                 || (!this.removed.contains(fieldId) && this.base.hasField(fieldId));
+    }
+    
+    public boolean isChanged() {
+        boolean changed = !this.added.isEmpty();
+        changed |= !this.removed.isEmpty();
+        for(ChangedField cf : this.changed.values()) {
+            changed |= cf.isChanged();
+        }
+        return changed;
     }
     
     @Override
@@ -417,85 +493,9 @@ public class ChangedObject implements XWritableObject, IObjectDiff, XExistsWrita
         return false;
     }
     
-    public boolean isChanged() {
-        boolean changed = !this.added.isEmpty();
-        changed |= !this.removed.isEmpty();
-        for(ChangedField cf : this.changed.values()) {
-            changed |= cf.isChanged();
-        }
-        return changed;
-    }
-    
-    @Override
-    public XType getType() {
-        return XType.XOBJECT;
-    }
-    
-    /**
-     * @return false if there are no changes. True if there are changes.
-     */
-    @Override
-    public boolean hasChanges() {
-        return !this.added.isEmpty() || !this.removed.isEmpty() || this.countCommandsNeeded(1) > 0;
-    }
-    
-    /**
-     * Apply the changes represented by the changedObject to the given
-     * baseObject.
-     * 
-     * @param changedObject of which the changes are applied to the given
-     *            baseObject
-     * @param baseObject should be a writable version of the object used to
-     *            create the changedObject
-     */
-    public static void commitTo(ChangedObject changedObject, XWritableObject baseObject) {
-        XyAssert.xyAssert(changedObject != null);
-        assert changedObject != null;
-        XyAssert.xyAssert(baseObject != null);
-        assert baseObject != null;
-        XyAssert.xyAssert(changedObject.getId().equals(baseObject.getId()));
-        for(SimpleField field : changedObject.getNewFields()) {
-            XWritableField baseField = baseObject.createField(field.getId());
-            baseField.setValue(field.getValue());
-        }
-        for(ChangedField field : changedObject.getChangedFields()) {
-            if(field.isChanged()) {
-                XWritableField baseField = baseObject.createField(field.getId());
-                baseField.setValue(field.getValue());
-            }
-        }
-        for(XId removed : changedObject.getRemovedFields()) {
-            baseObject.removeField(removed);
-        }
-    }
-    
-    @Override
-    public Collection<? extends XReadableField> getAdded() {
-        return this.added.values();
-    }
-    
-    @Override
-    public Collection<? extends IFieldDiff> getPotentiallyChanged() {
-        return this.changed.values();
-    }
-    
-    @Override
-    public Collection<XId> getRemoved() {
-        return this.removed;
-    }
-    
-    @Override
-    public boolean exists() {
-        return this.objectExists;
-    }
-    
     @Override
     public void setExists(boolean entityExists) {
         this.objectExists = entityExists;
-    }
-    
-    public boolean executeCommand(XCommand command) {
-        return ChangeExecutor.executeAnyCommand(command, this);
     }
     
 }

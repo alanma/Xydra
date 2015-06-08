@@ -13,12 +13,12 @@ public interface IObjectDiff extends IHasXId {
 
 	Collection<? extends XReadableField> getAdded();
 
+	@Override
+	XId getId();
+
 	Collection<? extends IFieldDiff> getPotentiallyChanged();
 
 	Collection<XId> getRemoved();
 
 	boolean hasChanges();
-
-	@Override
-	XId getId();
 }
