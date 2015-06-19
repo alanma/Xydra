@@ -343,17 +343,19 @@ public class FastTripleIndex<K, L, M> extends SmallTripleIndex<K, L, M> implemen
 	}
 
 	@Override
-	public void index(K s, L p, M o) {
+	public boolean index(K s, L p, M o) {
 		assert s != null;
 		assert p != null;
 		assert o != null;
-		super.index(s, p, o);
-		transientIndex(s, p, o);
+		boolean changes = super.index(s, p, o);
+		changes |= transientIndex(s, p, o);
+		return changes;
 	}
 
-	private void transientIndex(K s, L p, M o) {
-		this.index_o_s_p.index(o, s, p);
-		this.index_p_o_s.index(p, o, s);
+	private boolean transientIndex(K s, L p, M o) {
+		boolean changes = this.index_o_s_p.index(o, s, p);
+		changes |= this.index_p_o_s.index(p, o, s);
+		return changes;
 	}
 
 	/**

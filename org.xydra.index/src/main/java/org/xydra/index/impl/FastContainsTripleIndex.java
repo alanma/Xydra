@@ -18,12 +18,9 @@ import org.xydra.index.query.Wildcard;
  * 
  * @author voelkel
  * 
- * @param <K>
- *            key type 1
- * @param <L>
- *            key type 2
- * @param <M>
- *            key type 3
+ * @param <K> key type 1
+ * @param <L> key type 2
+ * @param <M> key type 3
  */
 public class FastContainsTripleIndex<K, L, M> extends SmallTripleIndex<K, L, M> implements
 		ITripleIndex<K, L, M> {
@@ -105,14 +102,16 @@ public class FastContainsTripleIndex<K, L, M> extends SmallTripleIndex<K, L, M> 
 	}
 
 	@Override
-	public void index(K s, L p, M o) {
-		super.index(s, p, o);
-		transientIndex(s, p, o);
+	public boolean index(K s, L p, M o) {
+		boolean changes = super.index(s, p, o);
+		changes |= transientIndex(s, p, o);
+		return changes;
 	}
 
-	private void transientIndex(K s, L p, M o) {
-		this.index_o_s.index(o, s);
-		this.index_p_o.index(p, o);
+	private boolean transientIndex(K s, L p, M o) {
+		boolean changes = this.index_o_s.index(o, s);
+		changes |= this.index_p_o.index(p, o);
+		return changes;
 	}
 
 	/**

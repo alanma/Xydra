@@ -96,8 +96,8 @@ public class SmallTripleIndex<K, L, M> implements ITripleIndex<K, L, M> {
 	}
 
 	@Override
-	public void index(K s, L p, M o) {
-		this.index_s_p_o.index(s, p, o);
+	public boolean index(K s, L p, M o) {
+		return this.index_s_p_o.index(s, p, o);
 	}
 
 	@Override

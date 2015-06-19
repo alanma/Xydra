@@ -5,12 +5,9 @@ package org.xydra.index;
  * 
  * RDF nomenclature.
  * 
- * @param <K>
- *            s (subject) type
- * @param <L>
- *            p (predicate) type
- * @param <M>
- *            o (object) type
+ * @param <K> s (subject) type
+ * @param <L> p (predicate) type
+ * @param <M> o (object) type
  */
 public interface ITripleSink<K, L, M> {
 
@@ -20,7 +17,10 @@ public interface ITripleSink<K, L, M> {
 	 * @param s
 	 * @param p
 	 * @param o
+	 * 
+	 * @return true if something changed, i.e. if triple was not contained
+	 *         before
 	 */
-	void index(K s, L p, M o);
+	boolean index(K s, L p, M o);
 
 }
