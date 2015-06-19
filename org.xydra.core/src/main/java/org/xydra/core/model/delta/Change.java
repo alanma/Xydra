@@ -1,53 +1,48 @@
 package org.xydra.core.model.delta;
 
 import org.xydra.base.change.ChangeType;
+import org.xydra.log.api.Logger;
+import org.xydra.log.api.LoggerFactory;
 
+/**
+ * State: added, changed, removed
+ * 
+ * @author xamde
+ */
 public class Change {
+
+	private static final Logger log = LoggerFactory.getLogger(Change.class);
+
 	/** range -1, 0, 1 */
-	private int state = 0;
+	private AtomicChangeType state = AtomicChangeType.Change;
 
-	private void add() {
-		assert this.state <= 0;
-		this.state++;
-	}
-
-	public AtomicChangeType getAtomicChangeType() {
-		switch (this.state) {
-		case -1:
-			return AtomicChangeType.Remove;
-		case 0:
-			return AtomicChangeType.Change;
-		case 1:
-			return AtomicChangeType.Add;
-		default:
-			throw new AssertionError();
-		}
-	}
-
-	private void remove() {
-		assert this.state >= 0;
-		this.state--;
-	}
-
-	public boolean isAdded() {
-		return this.state > 0;
-	}
-
-	public boolean isRemoved() {
-		return this.state < 0;
-	}
-
-	public boolean isNeutral() {
-		return this.state == 0;
-	}
+	public long lastRev;
 
 	void apply(ChangeType changeType) {
 		switch (changeType) {
 		case ADD:
-			add();
+			switch (this.state) {
+			case Add:
+				throw new AssertionError();
+			case Change:
+				this.state = AtomicChangeType.Add;
+				break;
+			case Remove:
+				this.state = AtomicChangeType.Remove;
+				break;
+			}
 			break;
 		case REMOVE:
-			remove();
+			switch (this.state) {
+			case Add:
+				this.state = AtomicChangeType.Remove;
+				break;
+			case Change:
+				this.state = AtomicChangeType.Remove;
+				break;
+			case Remove:
+				throw new AssertionError();
+			}
 			break;
 		case TRANSACTION:
 		case CHANGE:
@@ -55,15 +50,35 @@ public class Change {
 		}
 	}
 
+	public AtomicChangeType getAtomicChangeType() {
+		return this.state;
+	}
+
+	public boolean isAdded() {
+		return getAtomicChangeType() == AtomicChangeType.Add;
+	}
+
+	/**
+	 * @return true if neither added nor removed. If it really changed, depends
+	 *         on the children.
+	 */
+	public boolean isChanged() {
+		return getAtomicChangeType() == AtomicChangeType.Change;
+	}
+
+	public boolean isRemoved() {
+		return getAtomicChangeType() == AtomicChangeType.Remove;
+	}
+
 	@Override
 	public String toString() {
 		switch (this.state) {
-		case -1:
-			return "REM";
-		case 0:
-			return "NOP";
-		case 1:
-			return "ADD";
+		case Remove:
+			return "Removed";
+		case Change:
+			return "Changed";
+		case Add:
+			return "Added";
 		}
 		throw new AssertionError();
 	}

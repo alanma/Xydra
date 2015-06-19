@@ -1,7 +1,7 @@
 package org.xydra.core.model.delta;
 
-import org.xydra.base.XAddress;
 import org.xydra.base.XId;
+import org.xydra.base.change.ChangeType;
 import org.xydra.base.change.XAtomicEvent;
 import org.xydra.base.change.XEvent;
 import org.xydra.base.change.XFieldEvent;
@@ -11,24 +11,23 @@ import org.xydra.base.rmof.XReadableField;
 import org.xydra.base.rmof.XReadableModel;
 import org.xydra.base.rmof.XReadableObject;
 import org.xydra.base.value.XValue;
-import org.xydra.core.XX;
 import org.xydra.core.model.XChangeLog;
 
-/**
- * Transform an {@link XTransactionEvent} back into what actually changed
- * 
- * @author xamde
- */
-public class TransactionSummary {
+public class OldValues {
 
 	/**
+	 * Returns the old value of a remove-event or change-event.
+	 * 
 	 * @param fieldEvent
 	 * @param changeLog
-	 * @param baseSnapshotModel @CanBeNull
-	 * @return
+	 * @param baseSnapshotModel @CanBeNull is used if the changeLog does not
+	 *            start at revision 0
+	 * @return @CanBeNull
 	 */
 	public static XValue getOldValue(XFieldEvent fieldEvent, XChangeLog changeLog,
 			XReadableModel baseSnapshotModel) {
+		assert fieldEvent.getChangeType() == ChangeType.REMOVE
+				|| fieldEvent.getChangeType() == ChangeType.CHANGE;
 
 		if (fieldEvent instanceof XReversibleFieldEvent) {
 			XReversibleFieldEvent rfe = (XReversibleFieldEvent) fieldEvent;
@@ -39,7 +38,6 @@ public class TransactionSummary {
 			XEvent oldEvent = changeLog.getEventAt(revisionNumber);
 			if (oldEvent == null) {
 				// read from last known snapshot
-
 				if (baseSnapshotModel == null) {
 					return null;
 				}
@@ -72,56 +70,6 @@ public class TransactionSummary {
 				return null;
 			}
 		}
-	}
-
-	private SummaryModel sm;
-
-	/**
-	 * Use the txn event and the change log to reconstruct what changed.
-	 * 
-	 * Result is in {@link #getSummaryModel()}.
-	 * 
-	 * @param txnEvent
-	 * @param changeLog
-	 * @param baseSnapshotModel @CanBeNull
-	 */
-	public TransactionSummary(XTransactionEvent txnEvent, XChangeLog changeLog,
-			XReadableModel baseSnapshotModel) {
-		XAddress modelAddress = XX.resolveModel(txnEvent.getChangedEntity());
-		this.sm = new SummaryModel(modelAddress);
-		for (XAtomicEvent ae : txnEvent) {
-			switch (ae.getTarget().getAddressedType()) {
-			case XREPOSITORY: {
-				this.sm.apply(ae);
-			}
-				break;
-			case XMODEL: {
-				SummaryObject so = this.sm.createOrGet(ae.getChangedEntity().getObject());
-				so.apply(ae);
-			}
-				break;
-			case XOBJECT: {
-				SummaryObject so = this.sm.createOrGet(ae.getChangedEntity().getObject());
-				SummaryField sf = so.createOrGet(ae.getChangedEntity().getField());
-				sf.apply(ae);
-			}
-				break;
-			case XFIELD: {
-				SummaryObject so = this.sm.createOrGet(ae.getChangedEntity().getObject());
-				SummaryField sf = so.createOrGet(ae.getChangedEntity().getField());
-				SummaryValue sv = sf.createOrGet();
-				sv.apply(ae, changeLog, baseSnapshotModel);
-			}
-				break;
-			default:
-				break;
-
-			}
-		}
-	}
-
-	public SummaryModel getSummaryModel() {
-		return this.sm;
 	}
 
 }
