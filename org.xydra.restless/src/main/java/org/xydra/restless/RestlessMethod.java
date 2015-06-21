@@ -801,7 +801,6 @@ class RestlessMethod {
 		boolean isStatic = Modifier.isStatic(method.getModifiers());
 		Object result;
 		if (isStatic) {
-
 			result = method.invoke(null, javaMethodArgs.toArray(new Object[0]));
 		} else {
 			Object instance = toInstance(instanceOrClass);
