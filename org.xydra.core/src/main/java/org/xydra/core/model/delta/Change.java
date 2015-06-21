@@ -1,8 +1,6 @@
 package org.xydra.core.model.delta;
 
 import org.xydra.base.change.ChangeType;
-import org.xydra.log.api.Logger;
-import org.xydra.log.api.LoggerFactory;
 
 /**
  * State: added, changed, removed
@@ -10,8 +8,6 @@ import org.xydra.log.api.LoggerFactory;
  * @author xamde
  */
 public class Change {
-
-	private static final Logger log = LoggerFactory.getLogger(Change.class);
 
 	/** range -1, 0, 1 */
 	private AtomicChangeType state = AtomicChangeType.Change;
