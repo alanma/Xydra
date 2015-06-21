@@ -54,4 +54,8 @@ public class Pair<A, B> implements IPair<A, B> {
 		return new Pair<B, A>(this.second, this.first);
 	}
 
+	public static <A, B> Pair<A, B> create(A a, B b) {
+		return new Pair<A, B>(a, b);
+	}
+
 }
