@@ -14,6 +14,8 @@ public class Change {
 
 	public long lastRev;
 
+	private int changeEvents = 0;
+
 	void apply(ChangeType changeType) {
 		switch (changeType) {
 		case ADD:
@@ -42,6 +44,7 @@ public class Change {
 			break;
 		case TRANSACTION:
 		case CHANGE:
+			this.changeEvents++;
 			break;
 		}
 	}
@@ -60,6 +63,10 @@ public class Change {
 	 */
 	public boolean isChanged() {
 		return getAtomicChangeType() == AtomicChangeType.Change;
+	}
+
+	public int getChangeEvents() {
+		return this.changeEvents;
 	}
 
 	public boolean isRemoved() {
