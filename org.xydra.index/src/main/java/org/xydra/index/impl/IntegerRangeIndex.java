@@ -27,6 +27,8 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
 
 		void onToken(int startInclusive, int endExclusive);
 
+		void onDone();
+
 	}
 
 	/**
@@ -58,9 +60,11 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
 		public int getStartInclusive() {
 			return this.startInclusive;
 		}
+
 		public boolean isInRange() {
 			return this.isInRange;
 		}
+
 		@Override
 		public String toString() {
 			return "Span [startInclusive=" + this.startInclusive + ", endInclusive="
@@ -268,42 +272,43 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
 		if (s == null || s.length() == 0)
 			return;
 
-		int i = startInclusive;
-		int spanStart = i;
+		int index = startInclusive;
+		int spanStart = index;
 		/* as opposed to 'inSeparator' */
 		boolean inToken = true;
-		while (i < endExclusive) {
-			int c = s.codePointAt(i);
+		while (index < endExclusive) {
+
+			int c = s.codePointAt(index);
 
 			if (separators.isInInterval(c)) {
 				if (inToken) {
 					// token ends
-					if (i > 0) {
-						splitHandler.onToken(spanStart, i);
+					if (index > 0) {
+						splitHandler.onToken(spanStart, index);
 					}
-					spanStart = i;
+					spanStart = index;
 					inToken = false;
 				}
 			} else {
 				// it's a token char
 				if (!inToken) {
 					// separator ends
-					if (i > 0) {
-						splitHandler.onSeparator(spanStart, i);
+					if (index > 0) {
+						splitHandler.onSeparator(spanStart, index);
 					}
-					spanStart = i;
+					spanStart = index;
 					inToken = true;
 				}
 			}
 
-			i += Character.charCount(c);
+			index += Character.charCount(c);
 		}
-		// last span
 		if (inToken) {
-			splitHandler.onToken(spanStart, i);
+			splitHandler.onToken(spanStart, index);
 		} else {
-			splitHandler.onSeparator(spanStart, i);
+			splitHandler.onSeparator(spanStart, index);
 		}
+		splitHandler.onDone();
 	}
 
 	/**
