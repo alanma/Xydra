@@ -54,12 +54,21 @@ public class RestlessUtils {
 		return value != null && value.length() > 0;
 	}
 
-	public static int getUrlParameterAsInt(String urlParamString) {
+	public static int getUrlParameterAsInt(String urlParamString) throws IllegalArgumentException {
 		try {
 			return Integer.parseInt(urlParamString);
 		} catch (NumberFormatException e) {
 			throw new IllegalArgumentException("Could not convert '" + urlParamString
 					+ "' into integer");
+		}
+	}
+
+	public static long getUrlParameterAsLong(String urlParamString) throws IllegalArgumentException {
+		try {
+			return Long.parseLong(urlParamString);
+		} catch (NumberFormatException e) {
+			throw new IllegalArgumentException("Could not convert '" + urlParamString
+					+ "' into long");
 		}
 	}
 
