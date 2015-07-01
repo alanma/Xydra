@@ -13,11 +13,11 @@ import org.xydra.log.api.LoggerFactory;
 
 /**
  * Uses internally a sorted map. Fast; memory-efficient;
- * 
+ *
  * TODO improve performance and keep GWT compatibility
- * 
+ *
  * @author xamde
- * 
+ *
  */
 public class IntegerRangeIndex implements IIntegerRangeIndex {
 
@@ -44,7 +44,7 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
 
 		int startInclusive;
 
-		public Span(int startInclusive, int endInclusive, boolean isInRange) {
+		public Span(final int startInclusive, final int endInclusive, final boolean isInRange) {
 			super();
 			assert startInclusive <= endInclusive : "start=" + startInclusive + " end="
 					+ endInclusive;
@@ -72,28 +72,28 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
 		}
 	}
 
-	class SpanIterator extends AbstractLookAheadIterator<Span> implements Iterator<Span> {
+	class SpanIterator extends AbstractLookAheadIterator<Span>implements Iterator<Span> {
 
-		private Iterator<Entry<Integer, Integer>> baseIt = IntegerRangeIndex.this.sortedmap
+		private final Iterator<Entry<Integer, Integer>> baseIt = IntegerRangeIndex.this.sortedmap
 				.entrySet().iterator();
 
 		private Span lastSpan = null;
 
-		private int maxValue;
+		private final int maxValue;
 
 		private Entry<Integer, Integer> prefetchedEntry = null;
 
-		public SpanIterator(int maxValue) {
+		public SpanIterator(final int maxValue) {
 			this.maxValue = maxValue;
 		}
 
 		@Override
 		protected boolean baseHasNext() {
-			if (this.lastSpan == null) {
+			if (this.lastSpan == null)
 				return true;
-			} else if (this.lastSpan.endInclusive < this.maxValue) {
+			else if (this.lastSpan.endInclusive < this.maxValue)
 				return true;
-			} else
+			else
 				return false;
 		}
 
@@ -205,7 +205,7 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
 
 	private static final long serialVersionUID = -6793029187873016827L;
 
-	private static int end(Entry<Integer, Integer> entry) {
+	private static int end(final Entry<Integer, Integer> entry) {
 		assert entry != null;
 		return entry.getValue();
 	}
@@ -217,7 +217,8 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
 	 * @return true if all Unicode codepoints of s are in an indexed range of
 	 *         the given index; true for the empty string.
 	 */
-	public static boolean isAllCharactersInIntervals(IIntegerRangeIndex validIntervals, String s) {
+	public static boolean isAllCharactersInIntervals(final IIntegerRangeIndex validIntervals,
+			final String s) {
 		if (s == null)
 			throw new IllegalArgumentException("s is null");
 		if (s.length() == 0)
@@ -225,7 +226,7 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
 
 		int i = 0;
 		do {
-			int codepoint = s.codePointAt(i);
+			final int codepoint = s.codePointAt(i);
 			if (!validIntervals.isInInterval(codepoint)) {
 				log.trace("Invalid character at " + i + " in " + s);
 				return false;
@@ -242,7 +243,8 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
 	 * @return true if any codepoint in s is indexed in the tabooIntervals;
 	 *         false for the empty string
 	 */
-	public static boolean isAnyCharacterInIntervals(IIntegerRangeIndex tabooIntervals, String s) {
+	public static boolean isAnyCharacterInIntervals(final IIntegerRangeIndex tabooIntervals,
+			final String s) {
 		if (s == null)
 			throw new IllegalArgumentException("s is null");
 		if (s.length() == 0)
@@ -250,7 +252,7 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
 
 		int i = 0;
 		do {
-			int codepoint = s.codePointAt(i);
+			final int codepoint = s.codePointAt(i);
 			if (tabooIntervals.isInInterval(codepoint)) {
 				log.trace("Taboo character at " + i + " in " + s);
 				return true;
@@ -267,8 +269,8 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
 	 * @param separators
 	 * @param iSplitHandler
 	 */
-	public static void split(String s, int startInclusive, int endExclusive,
-			IIntegerRangeIndex separators, ISplitHandler splitHandler) {
+	public static void split(final String s, final int startInclusive, final int endExclusive,
+			final IIntegerRangeIndex separators, final ISplitHandler splitHandler) {
 		if (s == null || s.length() == 0)
 			return;
 
@@ -278,7 +280,7 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
 		boolean inToken = true;
 		while (index < endExclusive) {
 
-			int c = s.codePointAt(index);
+			final int c = s.codePointAt(index);
 
 			if (separators.isInInterval(c)) {
 				if (inToken) {
@@ -313,7 +315,7 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
 
 	/**
 	 * Split a string simultaneously in two kinds of tokens, in a single pass
-	 * 
+	 *
 	 * @param s @CanBeNull
 	 * @param separatorsA
 	 * @param separatorsB
@@ -329,12 +331,12 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
 	 * @param splitHandlerA
 	 * @param splitHandlerB
 	 */
-	public static void split2(String s, int startInclusive, int endExclusive,
-			IIntegerRangeIndex separatorsA, IIntegerRangeIndex separatorsB,
-			ISplitHandler splitHandlerA, ISplitHandler splitHandlerB) {
+	public static void split2(final String s, final int startInclusive, final int endExclusive,
+			final IIntegerRangeIndex separatorsA, final IIntegerRangeIndex separatorsB,
+			final ISplitHandler splitHandlerA, final ISplitHandler splitHandlerB) {
 		if (s == null)
 			return;
-		int length = endExclusive - startInclusive;
+		final int length = endExclusive - startInclusive;
 		if (length == 0)
 			return;
 
@@ -345,7 +347,7 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
 		boolean inTokenA = true;
 		boolean inTokenB = true;
 		while (i < endExclusive) {
-			int c = s.codePointAt(i);
+			final int c = s.codePointAt(i);
 
 			// ==== A
 			if (separatorsA.isInInterval(c)) {
@@ -407,17 +409,17 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
 		}
 	}
 
-	private static int start(Entry<Integer, Integer> entry) {
+	private static int start(final Entry<Integer, Integer> entry) {
 		assert entry != null;
 		return entry.getKey();
 	}
 
-	private TreeMap<Integer, Integer> sortedmap = new TreeMap<Integer, Integer>();
+	private final TreeMap<Integer, Integer> sortedmap = new TreeMap<Integer, Integer>();
 
-	public void addAll(IIntegerRangeIndex other) {
-		Iterator<Entry<Integer, Integer>> it = other.rangesIterator();
+	public void addAll(final IIntegerRangeIndex other) {
+		final Iterator<Entry<Integer, Integer>> it = other.rangesIterator();
 		while (it.hasNext()) {
-			Map.Entry<Integer, Integer> entry = it.next();
+			final Map.Entry<Integer, Integer> entry = it.next();
 			index(entry.getKey(), entry.getValue());
 		}
 	}
@@ -427,18 +429,24 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
 		this.sortedmap.clear();
 	}
 
-	public void deIndex(int codePoint) {
+	public void deIndex(final int codePoint) {
 		deIndex(codePoint, codePoint);
 	}
 
 	@Override
-	public void deIndex(int start, int end) {
+	public void deIndex(final int start, final int end) {
 		assert start <= end;
 		log.debug("De-index " + start + "," + end);
 
-		/*
-		 * Cases: 1) split existing range, 2) adapt 1 range at start + adapt 1
-		 * range at end + delete ranges in the middle, 3) nothing changes
+		/**
+		 * Cases:
+		 *
+		 * 1) split existing range,
+		 *
+		 * 2) adapt 1 range at start + adapt 1 range at end + delete ranges in
+		 * the middle,
+		 *
+		 * 3) nothing changes
 		 */
 
 		/*
@@ -446,12 +454,12 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
 		 * such key
 		 */
 
-		SortedMap<Integer, Integer> prevHeadMap = this.sortedmap.headMap(start);
+		final SortedMap<Integer, Integer> prevHeadMap = this.sortedmap.headMap(start+1);
 		if (!prevHeadMap.isEmpty()) {
-			Integer prev_start = prevHeadMap.lastKey();
+			final Integer prev_start = prevHeadMap.lastKey();
 			assert prev_start != null;
-			assert prev_start < start : "start(prev)=" + prev_start + " start=" + start;
-			Integer prev_end = prevHeadMap.get(prev_start);
+			assert prev_start <= start : "start(prev)=" + prev_start + " start=" + start;
+			final Integer prev_end = prevHeadMap.get(prev_start);
 			if (start <= prev_end) {
 				// prev needs to be trimmed/split
 
@@ -518,13 +526,13 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
 		 * next = entry with the greatest key <= end, or null if there is no
 		 * such key
 		 */
-		SortedMap<Integer, Integer> nextHeadMap = this.sortedmap.headMap(end - 1);
+		final SortedMap<Integer, Integer> nextHeadMap = this.sortedmap.headMap(end - 1);
 		// assert prev was null || prev was trimmed
 		if (!nextHeadMap.isEmpty()) {
-			Integer next_start = nextHeadMap.lastKey();
+			final Integer next_start = nextHeadMap.lastKey();
 			assert next_start != null;
 			assert next_start <= end;
-			Integer next_end = nextHeadMap.get(next_start);
+			final Integer next_end = nextHeadMap.get(next_start);
 			if (end < next_end) {
 				// trim start of next
 				this.sortedmap.remove(next_start);
@@ -561,82 +569,88 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
 
 	@Override
 	public void dump() {
-		Iterator<Entry<Integer, Integer>> it = rangesIterator();
+		final Iterator<Entry<Integer, Integer>> it = rangesIterator();
 		while (it.hasNext()) {
-			Map.Entry<Integer, Integer> entry = it.next();
+			final Map.Entry<Integer, Integer> entry = it.next();
 			log.info("[" + start(entry) + ", " + end(entry) + "]");
 		}
 	}
 
 	/**
 	 * Index the trivial range [i,i]
-	 * 
+	 *
 	 * @param i
 	 * @return this
 	 */
-	public IntegerRangeIndex index(int i) {
+	public IntegerRangeIndex index(final int i) {
 		index(i, i);
 		return this;
 	}
 
 	/*
 	 * Runtime: O(1) + O(1) + O(contained intervals).
-	 * 
+	 *
 	 * @see org.xydra.index.IIntegerRangeIndex#index(int, int)
 	 */
 	@Override
-	public void index(int start, int end) {
+	public void index(final int start, final int end) {
 		assert start <= end : "start=" + start + " end=" + end;
-		if (log.isTraceEnabled())
+		if (log.isTraceEnabled()) {
 			log.trace("Index " + start + "," + end);
+		}
 
 		int mergedStart = start;
 		int mergedEnd = end;
-		if (log.isTraceEnabled())
+		if (log.isTraceEnabled()) {
 			log.trace("Current: " + mergedStart + "," + mergedEnd);
+		}
 
 		/* merge with previous? */
-		SortedMap<Integer, Integer> prevHeadMap = this.sortedmap.headMap(start);
+		final SortedMap<Integer, Integer> prevHeadMap = this.sortedmap.headMap(start);
 		if (!prevHeadMap.isEmpty()) {
-			Integer prev_start = prevHeadMap.lastKey();
+			final Integer prev_start = prevHeadMap.lastKey();
 			assert prev_start != null;
 			assert prev_start <= start - 1;
-			Integer prev_end = this.sortedmap.get(prev_start);
+			final Integer prev_end = this.sortedmap.get(prev_start);
 			assert prev_end != null;
 			// [1,5] & [3,9]
 			if (start - 1 <= prev_end) {
-				if (log.isTraceEnabled())
+				if (log.isTraceEnabled()) {
 					log.trace("Merge with prev: [" + prev_start + "," + prev_end + "]");
+				}
 				mergedStart = prev_start;
 				mergedEnd = Math.max(prev_end, end);
 				this.sortedmap.remove(prev_start);
-				if (log.isTraceEnabled())
+				if (log.isTraceEnabled()) {
 					log.trace("Current: [" + mergedStart + "," + mergedEnd + "]");
+				}
 			}
 		}
 
 		/* merge with next? */
 
-		SortedMap<Integer, Integer> nextHeadMap = this.sortedmap.headMap(mergedEnd + 2);
+		final SortedMap<Integer, Integer> nextHeadMap = this.sortedmap.headMap(mergedEnd + 2);
 		if (!nextHeadMap.isEmpty()) {
-			Integer next_start = nextHeadMap.lastKey();
+			final Integer next_start = nextHeadMap.lastKey();
 			assert next_start != null;
 			assert next_start <= end + 1;
 			if (next_start >= mergedStart && mergedEnd + 1 >= next_start) {
-				Integer next_end = this.sortedmap.get(next_start);
+				final Integer next_end = this.sortedmap.get(next_start);
 				assert next_end != null;
-				if (log.isTraceEnabled())
+				if (log.isTraceEnabled()) {
 					log.trace("Merge with next: [" + next_start + "," + next_end + "]");
+				}
 				mergedEnd = Math.max(mergedEnd, next_end);
 				this.sortedmap.remove(next_start);
-				if (log.isTraceEnabled())
+				if (log.isTraceEnabled()) {
 					log.trace("Current: " + mergedStart + "," + mergedEnd);
+				}
 			}
 		}
 
 		/* prune contained intervals? */
-		int pruneStart = mergedStart + 1;
-		int pruneEnd = mergedEnd - 1;
+		final int pruneStart = mergedStart + 1;
+		final int pruneEnd = mergedEnd - 1;
 		if (pruneEnd - pruneStart > 1) {
 			pruneRanges(pruneStart, pruneEnd);
 		}
@@ -650,19 +664,19 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
 	}
 
 	@Override
-	public boolean isInInterval(int i) {
+	public boolean isInInterval(final int i) {
 
-		SortedMap<Integer, Integer> headMap = this.sortedmap.headMap(i + 1);
+		final SortedMap<Integer, Integer> headMap = this.sortedmap.headMap(i + 1);
 		if (headMap.isEmpty())
 			return false;
 
-		Integer prev_start = headMap.lastKey();
+		final Integer prev_start = headMap.lastKey();
 		assert prev_start != null;
 
 		if (prev_start > i)
 			return false;
 
-		Integer prev_end = headMap.get(prev_start);
+		final Integer prev_end = headMap.get(prev_start);
 		return i <= prev_end;
 
 		//
@@ -681,15 +695,17 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
 	//
 	// }
 
-	private void pruneRanges(int start, int end) {
-		if (log.isTraceEnabled())
-			log.trace("pruning in range [" + (start) + "," + (end) + "]");
-		SortedMap<Integer, Integer> sub = this.sortedmap.subMap(start, end + 1);
-		Iterator<Entry<Integer, Integer>> it = sub.entrySet().iterator();
+	private void pruneRanges(final int start, final int end) {
+		if (log.isTraceEnabled()) {
+			log.trace("pruning in range [" + start + "," + end + "]");
+		}
+		final SortedMap<Integer, Integer> sub = this.sortedmap.subMap(start, end + 1);
+		final Iterator<Entry<Integer, Integer>> it = sub.entrySet().iterator();
 		while (it.hasNext()) {
-			Entry<Integer, Integer> e = it.next();
-			if (log.isTraceEnabled())
-				log.trace("pruning entry [" + (start(e)) + "," + (end(e)) + "]");
+			final Entry<Integer, Integer> e = it.next();
+			if (log.isTraceEnabled()) {
+				log.trace("pruning entry [" + start(e) + "," + end(e) + "]");
+			}
 			it.remove();
 		}
 	}
@@ -714,7 +730,7 @@ public class IntegerRangeIndex implements IIntegerRangeIndex {
 	 *         indicate, if the span is within an integer range or between two
 	 *         of them.
 	 */
-	public Iterator<Span> spanIterator(int maxValueInclusive) {
+	public Iterator<Span> spanIterator(final int maxValueInclusive) {
 		return new SpanIterator(maxValueInclusive);
 	}
 

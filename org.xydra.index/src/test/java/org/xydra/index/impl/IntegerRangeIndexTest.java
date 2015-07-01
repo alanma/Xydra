@@ -24,7 +24,7 @@ public class IntegerRangeIndexTest {
 	public void testIndex() {
 		List<Entry<Integer, Integer>> list;
 
-		IIntegerRangeIndex iri = new IntegerRangeIndex();
+		final IIntegerRangeIndex iri = new IntegerRangeIndex();
 		assertTrue(iri.isEmpty());
 		list = Iterators.toList(iri.rangesIterator());
 		assertEquals(0, list.size());
@@ -50,7 +50,7 @@ public class IntegerRangeIndexTest {
 	@Test
 	public void testIndex2() {
 		List<Entry<Integer, Integer>> list;
-		IIntegerRangeIndex iri = new IntegerRangeIndex();
+		final IIntegerRangeIndex iri = new IntegerRangeIndex();
 
 		iri.index(10, 20);
 		iri.index(5, 20);
@@ -64,7 +64,7 @@ public class IntegerRangeIndexTest {
 	public void testDeindex() {
 		List<Entry<Integer, Integer>> list;
 
-		IIntegerRangeIndex iii = new IntegerRangeIndex();
+		final IIntegerRangeIndex iii = new IntegerRangeIndex();
 		iii.index(10, 180);
 		iii.deIndex(20, 30);
 
@@ -78,7 +78,7 @@ public class IntegerRangeIndexTest {
 	public void testDeindex2() {
 		List<Entry<Integer, Integer>> list;
 
-		IIntegerRangeIndex iii = new IntegerRangeIndex();
+		final IIntegerRangeIndex iii = new IntegerRangeIndex();
 		iii.index(10, 180);
 		iii.deIndex(20, 200);
 
@@ -91,7 +91,7 @@ public class IntegerRangeIndexTest {
 	public void testDeindex3() {
 		List<Entry<Integer, Integer>> list;
 
-		IIntegerRangeIndex iii = new IntegerRangeIndex();
+		final IIntegerRangeIndex iii = new IntegerRangeIndex();
 		iii.index(10, 180);
 		iii.deIndex(5, 20);
 
@@ -100,19 +100,58 @@ public class IntegerRangeIndexTest {
 		assertInterval(21, 180, list.get(0));
 	}
 
-	private static void assertInterval(int s, int e, Entry<Integer, Integer> entry) {
+	@Test
+	public void testDeindex4() {
+		final IIntegerRangeIndex iii = new IntegerRangeIndex();
+		iii.index(65, 90);
+		iii.index(95, 95);
+		iii.index(97, 122);
+		iii.index(192, 214);
+		iii.index(216, 246);
+		iii.index(248, 767);
+		iii.index(880, 893);
+
+
+		assertTrue( iii.isInInterval(95) );
+
+		iii.deIndex(95,95);
+
+		assertFalse( iii.isInInterval(95) );
+	}
+
+	@Test
+	public void testDeindex5() {
+		final IIntegerRangeIndex iii = new IntegerRangeIndex();
+		iii.index(65, 90);
+		iii.index(92, 94);
+		iii.index(95, 95);
+		iii.index(97, 122);
+		iii.index(192, 214);
+		iii.index(216, 246);
+		iii.index(248, 767);
+		iii.index(880, 893);
+
+
+		assertTrue( iii.isInInterval(95) );
+
+		iii.deIndex(95,95);
+
+		assertFalse( iii.isInInterval(95) );
+	}
+
+	private static void assertInterval(final int s, final int e, final Entry<Integer, Integer> entry) {
 		assertEquals(s, (int) entry.getKey());
 		assertEquals(e, (int) entry.getValue());
 	}
 
 	@Test
 	public void testSpanIterator1() {
-		IntegerRangeIndex iri = new IntegerRangeIndex();
+		final IntegerRangeIndex iri = new IntegerRangeIndex();
 		iri.index(10, 20);
 		iri.index(30, 40);
 
-		Iterator<Span> spanIt = iri.spanIterator(100);
-		List<Span> list = Iterators.toList(spanIt);
+		final Iterator<Span> spanIt = iri.spanIterator(100);
+		final List<Span> list = Iterators.toList(spanIt);
 		// for(Span span : list) {
 		// System.out.println(span);
 		// }
@@ -128,7 +167,7 @@ public class IntegerRangeIndexTest {
 	@Test
 	public void testCase() {
 		// {7=13, 14=16, 21=27, 28=30}
-		IIntegerRangeIndex iii = new IntegerRangeIndex();
+		final IIntegerRangeIndex iii = new IntegerRangeIndex();
 		iii.index(28, 30);
 		iii.index(7, 13);
 		iii.index(21, 27);
@@ -136,16 +175,16 @@ public class IntegerRangeIndexTest {
 
 		iii.dump();
 
-		List<Entry<Integer, Integer>> ranges = Iterators.toList(iii.rangesIterator());
-		Entry<Integer, Integer> range = ranges.get(0);
+		final List<Entry<Integer, Integer>> ranges = Iterators.toList(iii.rangesIterator());
+		final Entry<Integer, Integer> range = ranges.get(0);
 		assertEquals(7, (int) range.getKey());
 		assertEquals(16, (int) range.getValue());
-		Entry<Integer, Integer> range2 = ranges.get(1);
+		final Entry<Integer, Integer> range2 = ranges.get(1);
 		assertEquals(21, (int) range2.getKey());
 		assertEquals(30, (int) range2.getValue());
 	}
 
-	private static void assertSpan(int s, int e, boolean inRange, Span span) {
+	private static void assertSpan(final int s, final int e, final boolean inRange, final Span span) {
 		assertEquals(s, span.startInclusive);
 		assertEquals(e, span.endInclusive);
 		assertEquals(inRange, span.isInRange);
