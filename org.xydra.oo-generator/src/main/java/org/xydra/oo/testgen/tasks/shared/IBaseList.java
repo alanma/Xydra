@@ -43,7 +43,7 @@ public interface IBaseList extends IHasXId {
     IUser getOwner();
 
     /**  [generated from: 'org.xydra.oo.testspecs.TasksSpec.BaseList'] */
-    String icon;
+    String icon = null;
 
     /** 
      * For GWT-internal use only [generated from: 'toClassSpec 1'] 
@@ -77,13 +77,13 @@ public interface IBaseList extends IHasXId {
     Set<IUser> members();
 
     /**  [generated from: 'org.xydra.oo.testspecs.TasksSpec.BaseList'] */
-    Set<IUser> members;
+    Set<IUser> members = null;
 
     /**  [generated from: 'org.xydra.oo.testspecs.TasksSpec.BaseList'] */
-    String name;
+    String name = null;
 
     /**  [generated from: 'org.xydra.oo.testspecs.TasksSpec.BaseList'] */
-    IUser owner;
+    IUser owner = null;
 
     /** 
      * Set a value, silently overwriting existing values, if any. [generated from:  
