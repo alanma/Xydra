@@ -412,6 +412,7 @@ public class Iterators {
 	}
 
 	/**
+	 * Does not close the iterator
 	 * @param it
 	 * @return a HashSet
 	 */
