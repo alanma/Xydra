@@ -49,7 +49,8 @@ public class XidCodec {
 	 * @param maxLen 1.. {@link XIdProvider#MAX_LENGTH}
 	 * @throws IllegalStateException if maxLen would not be respected
 	 */
-	public static void appendEncoded(final StringBuilder b, final int codepoint, final int maxLen) throws IllegalStateException {
+	public static void appendEncoded(final StringBuilder b, final int codepoint, final int maxLen)
+			throws IllegalStateException {
 		/*
 		 * let's be clever here: encoding in range 0..255 is represented as
 		 * ENCODING_CHAR + 2 hex;
@@ -192,7 +193,7 @@ public class XidCodec {
 		// nth chars are a bit more liberal
 		int i = Character.charCount(firstCodepoint);
 		while (i < s.length() && enc.length() < maxLen) {
-			if(enc.length() == maxLen) {
+			if (enc.length() == maxLen) {
 				break;
 			}
 
@@ -218,7 +219,9 @@ public class XidCodec {
 	}
 
 	/**
-	 * Encodes only those characters that need it.
+	 * Encodes only those characters that need it. However, once you have an
+	 * underscore ('_'), it get re-encoded over and over again. So only encode
+	 * strings that need it.
 	 *
 	 * @param s @NeverNull
 	 * @param maxLen use a number longer than {@link XIdProvider#MAX_LENGTH} to
