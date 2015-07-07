@@ -27,12 +27,23 @@ public class CountingMap<T> implements IIndex {
 		this.map.clear();
 	}
 
+	/**
+	 * @param key
+	 */
 	public void index(final T key) {
+		index(key,1);
+	}
+
+	/**
+	 * @param key
+	 * @param increment
+	 */
+	public void index(final T key, final int increment) {
 		final Integer i = this.map.get(key);
 		if (i == null) {
-			this.map.put(key, 1);
+			this.map.put(key, increment);
 		} else {
-			this.map.put(key, i + 1);
+			this.map.put(key, i + increment);
 		}
 	}
 
@@ -58,10 +69,16 @@ public class CountingMap<T> implements IIndex {
 		}
 	}
 
+	/**
+	 * @return all indexed keys. Keys that have a count == 0 are not included.
+	 */
 	public Set<T> keySet() {
 		return this.map.keySet();
 	}
 
+	/**
+	 * @return the maps entry set
+	 */
 	public Set<Entry<T, Integer>> entrySet() {
 		return this.map.entrySet();
 	}
@@ -126,4 +143,5 @@ public class CountingMap<T> implements IIndex {
 		}
 		return result;
 	}
+
 }
