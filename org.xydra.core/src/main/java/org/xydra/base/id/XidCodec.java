@@ -18,7 +18,7 @@ import org.xydra.index.impl.IntegerRangeIndex;
 public class XidCodec {
 
 	/** May not be one of the lower-case hex characters! */
-	private static final int ENCODING_CHAR = '_';
+	static final int ENCODING_CHAR = '_';
 
 	/** just here as documentation */
 	@SuppressWarnings("unused")
@@ -44,12 +44,20 @@ public class XidCodec {
 	}
 
 	/**
+	 * Unicode escaping. Via an escaping char, the following pattern is used to create escape sequences:
+	 * <pre>
+	 * codepoint <= 255             : escapingChar hex hex
+	 * codepoint <= 255*255         : escapingChar escapingChar hex hex hex hex
+	 * codepoint <= 255*255*255     : escapingChar escapingChar escapingChar hex hex hex hex hex hex
+	 * </pre>
+	 *
 	 * @param b
+	 * @param escapingChar TODO
 	 * @param codepoint
 	 * @param maxLen 1.. {@link XIdProvider#MAX_LENGTH}
 	 * @throws IllegalStateException if maxLen would not be respected
 	 */
-	public static void appendEncoded(final StringBuilder b, final int codepoint, final int maxLen)
+	public static void appendEncoded(final StringBuilder b, final int escapingChar, final int codepoint, final int maxLen)
 			throws IllegalStateException {
 		/*
 		 * let's be clever here: encoding in range 0..255 is represented as
@@ -62,31 +70,33 @@ public class XidCodec {
 		 */
 
 		if (codepoint <= 255) {
-			if (b.length() + 3 > maxLen)
+			if (b.length() + 3 > maxLen) {
 				throw new IllegalStateException(
 						"maxLen(" + maxLen + ") does not allow adding 3 more characters");
-			b.appendCodePoint(ENCODING_CHAR);
+			}
+			b.appendCodePoint(escapingChar);
 			// hack to get padding with leading zeroes
 			b.append(Integer.toHexString(0x100 | codepoint).substring(1));
 
 		} else if (codepoint <= 65535) {
-			if (b.length() + 6 > maxLen)
+			if (b.length() + 6 > maxLen) {
 				throw new IllegalStateException(
 						"maxLen(" + maxLen + ") does not allow adding 6 more characters");
-			b.appendCodePoint(ENCODING_CHAR);
-			b.appendCodePoint(ENCODING_CHAR);
+			}
+			b.appendCodePoint(escapingChar);
+			b.appendCodePoint(escapingChar);
 			// hack to get padding with leading zeroes
 			b.append(Integer.toHexString(0x10000 | codepoint).substring(1));
 		} else {
-			if (b.length() + 9 > maxLen)
+			if (b.length() + 9 > maxLen) {
 				throw new IllegalStateException(
 						"maxLen(" + maxLen + ") does not allow adding 9 more characters");
-			b.appendCodePoint(ENCODING_CHAR);
-			b.appendCodePoint(ENCODING_CHAR);
-			b.appendCodePoint(ENCODING_CHAR);
+			}
+			b.appendCodePoint(escapingChar);
+			b.appendCodePoint(escapingChar);
+			b.appendCodePoint(escapingChar);
 			b.append(Integer.toHexString(0x1000000 | codepoint).substring(1));
 		}
-
 	}
 
 	/**
@@ -100,6 +110,20 @@ public class XidCodec {
 	 * @return a decoded idString
 	 */
 	public static String decode(final String encId) {
+		return decode(encId, ENCODING_CHAR);
+	}
+
+	/**
+	 * Decode a hex encoded string. Encoding: 'ehh' where e is an encoding characters and h is
+	 * a hex character. Or 'eehhhh' or 'eeehhhhhh'. The string might also
+	 * contain 'e' for other reasons. So if this method is invoked on a
+	 * non-encoded string containing 'e's, the original string should be
+	 * returned.
+	 *
+	 * @param encId @NeverNull
+	 * @return a decoded idString
+	 */
+	public static String decode(final String encId, final int encodingChar) {
 		assert encId != null && encId.length() > 0;
 
 		final StringBuilder b = new StringBuilder();
@@ -108,23 +132,25 @@ public class XidCodec {
 		while (i < encId.length()) {
 			int codePoint = encId.codePointAt(i);
 
-			if (codePoint == ENCODING_CHAR) {
+			if (codePoint == encodingChar) {
 				/* find out how many hex chars to expect */
 				int markers = 0;
 				do {
 					i += Character.charCount(codePoint);
-					if (i >= encId.length())
+					if (i >= encId.length()) {
 						// was not really a xid-encoded id
 						return encId;
+					}
 					codePoint = encId.codePointAt(i);
 					markers++;
-				} while (codePoint == ENCODING_CHAR);
+				} while (codePoint == encodingChar);
 				// we moved past the markers
 
-				if (markers > 3)
-					throw new IllegalArgumentException("String has too many '" + ENCODING_CHAR
+				if (markers > 3) {
+					throw new IllegalArgumentException("String has too many '" + encodingChar
 							+ "', we allow at most 3 for the hex-encoding. String is '" + encId
 							+ "'");
+				}
 				final int expectHex = 2 * markers;
 				// hex chars are code point count = char count
 				if (i - Character.charCount(codePoint) + expectHex < encId.length()) {
@@ -142,10 +168,11 @@ public class XidCodec {
 						// was not really a xid-encoded id
 						return encId;
 					}
-				} else
+				} else {
 					// cannot be a proper hex encoding, roll-back
 					// was not really a xid-encoded id
 					return encId;
+				}
 			} else {
 				// copy over
 				b.appendCodePoint(codePoint);
@@ -164,8 +191,9 @@ public class XidCodec {
 	public static String decodeFromXId(final XId xid) {
 		final String s = xid.toString();
 
-		if (s == null || s.length() == 0)
+		if (s == null || s.length() == 0) {
 			throw new IllegalArgumentException("Cannot decode null or empty");
+		}
 
 		return decode(s);
 	}
@@ -187,7 +215,7 @@ public class XidCodec {
 			enc.appendCodePoint(firstCodepoint);
 		} else {
 			// needs encoding
-			appendEncoded(enc, firstCodepoint, maxLen);
+			appendEncoded(enc, ENCODING_CHAR, firstCodepoint, maxLen);
 		}
 
 		// nth chars are a bit more liberal
@@ -204,7 +232,7 @@ public class XidCodec {
 			} else {
 				// needs encoding
 				try {
-					appendEncoded(enc, nthCodepoint, maxLen);
+					appendEncoded(enc, ENCODING_CHAR, nthCodepoint, maxLen);
 				} catch (final IllegalStateException e) {
 					break;
 				}
@@ -232,10 +260,12 @@ public class XidCodec {
 	 */
 	public static XId encodeAsXId(final String s, final int maxLen)
 			throws IllegalArgumentException {
-		if (s == null)
+		if (s == null) {
 			throw new IllegalArgumentException("Given string is null");
-		if (s.length() == 0)
+		}
+		if (s.length() == 0) {
 			throw new IllegalArgumentException("Given string is empty");
+		}
 
 		final String encString = encode(s, maxLen);
 		// IMPROVE do without checks

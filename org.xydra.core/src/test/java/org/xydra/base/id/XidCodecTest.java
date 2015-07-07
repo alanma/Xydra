@@ -102,11 +102,11 @@ public class XidCodecTest {
 		System.out.println("159 = '" + (char) 159 + "'");
 
 		final StringBuilder b = new StringBuilder();
-		XidCodec.appendEncoded(b, 1, 100);
+		XidCodec.appendEncoded(b, XidCodec.ENCODING_CHAR, 1, 100);
 		b.append(" | ");
-		XidCodec.appendEncoded(b, 1042, 100);
+		XidCodec.appendEncoded(b, XidCodec.ENCODING_CHAR, 1042, 100);
 		b.append(" | ");
-		XidCodec.appendEncoded(b, 65699, 100);
+		XidCodec.appendEncoded(b, XidCodec.ENCODING_CHAR, 65699, 100);
 		System.out.println(b);
 
 		System.out.println(XidCodec.encodeAsXId("40", XIdProvider.MAX_LENGTH));
@@ -166,8 +166,9 @@ public class XidCodecTest {
 	// GWT version
 	public static boolean gwt_matchesXydraId(final String uriString) {
 		final MatchResult m = p.exec(uriString);
-		if (m == null)
+		if (m == null) {
 			return false;
+		}
 		final String match = m.getGroup(0);
 		return match != null && match.length() == uriString.length();
 	}
