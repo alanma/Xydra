@@ -14,7 +14,7 @@ import org.xydra.index.AbstractMapSetIndexTest;
 import org.xydra.index.IEntrySet;
 import org.xydra.index.impl.SmallEntrySetFactory;
 import org.xydra.index.impl.TestDataGenerator;
-import org.xydra.index.impl.trie.SmallStringSetTrie.KeyFramgents;
+import org.xydra.index.impl.trie.SmallStringSetTrie.KeyFragments;
 import org.xydra.index.iterator.Iterators;
 import org.xydra.index.query.KeyEntryTuple;
 import org.xydra.index.query.Wildcard;
@@ -192,7 +192,7 @@ public class SmallStringSetTrieTest extends AbstractMapSetIndexTest<String, Inte
 		st2.indexKey("aaabbcff");
 		System.out.println("-----");
 		st2.dump();
-		KeyFramgents ky = st2.getKeyFragmentsFor("aaabbcg");
+		KeyFragments ky = st2.getKeyFragmentsFor("aaabbcg");
 		assert ky.matched.size() == 2;
 		assert ky.matched.get(0).equals("aaa");
 		assert ky.matched.get(1).equals("bbc");

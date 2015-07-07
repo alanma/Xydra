@@ -38,14 +38,19 @@ import com.google.common.base.Function;
  * 
  * @author xamde
  * 
- *         This classes uses {@link ClosableIterator} and internal read/write
- *         locks for thread management. Always close your iterators or we will
- *         starve. Or call {@link #readOperationEnd()} to close the read lock.
+ *         This classes uses {@link ClosableIterator} and internal read/write locks for thread management. Always close
+ *         your iterators or we will starve.
  * 
  * @param <E>
  */
 @NotThreadSafe
 public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializable {
+
+	/**
+	 * Implementation note:
+	 * 
+	 * Call {@link #readOperationEnd()} to close the read lock.
+	 */
 
 	private static class ConstraintKeyPrefix implements Constraint<String> {
 
@@ -80,21 +85,20 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 		}
 	}
 
-	public static class KeyFramgents {
+	public static class KeyFragments {
 		public List<String> matched;
 
 		/* the empty string, if nothing remains */
 		public String remainder;
 
-		public KeyFramgents(List<String> matched, String remainder) {
+		public KeyFragments(List<String> matched, String remainder) {
 			this.matched = matched;
 			this.remainder = remainder;
 		}
 	}
 
 	/**
-	 * public only for debug; non-static to avoid generics-overkill and have
-	 * access to entrySetFactory
+	 * public only for debug; non-static to avoid generics-overkill and have access to entrySetFactory
 	 * 
 	 * 
 	 */
@@ -105,13 +109,14 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 		/**
 		 * A map from string (local part of key) to children (other nodes).
 		 * 
-		 * Invariant: Strings are prefix-free, i.e. no two strings in the map
-		 * start with the same prefix, not even a single character. Different
-		 * from normal tries, strings might be longer than 1 character
+		 * Invariant: Strings are prefix-free, i.e. no two strings in the map start with the same prefix, not even a
+		 * single character. Different from normal tries, strings might be longer than 1 character
 		 */
 		private SortedStringMap<Node> children;
 
-		/** @NeverNull */
+		/**
+		 * @NeverNull
+		 */
 		private IEntrySet<E> entrySet;
 
 		public Node() {
@@ -162,8 +167,7 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 			});
 		}
 
-		private boolean deIndex(Node parent, String parentKey, String removeKey,
-				Function<Node, Boolean> action) {
+		private boolean deIndex(Node parent, String parentKey, String removeKey, Function<Node, Boolean> action) {
 			assert removeKey != null;
 			assert action != null;
 
@@ -202,8 +206,7 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 
 			if (matchingKey.length() <= removeKey.length()) {
 				int commonPrefixLen = getSharedPrefixLength(removeKey, matchingKey);
-				assert commonPrefixLen > 0 : "at least 1 char in common: '"
-						+ removeKey.substring(0, 1) + "'";
+				assert commonPrefixLen > 0 : "at least 1 char in common: '" + removeKey.substring(0, 1) + "'";
 				if (commonPrefixLen == matchingKey.length()) {
 					// recurse
 					Node matchingNode = this.children.lookup(matchingKey);
@@ -224,59 +227,51 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 		 * @return recursively all entries
 		 */
 		public Iterator<E> entriesIterator() {
-			return Iterators.cascade(nodeIterator(),
-					SmallStringSetTrie.this.TRANSFORMER_NODE2ENTRIES);
+			return Iterators.cascade(nodeIterator(), SmallStringSetTrie.this.TRANSFORMER_NODE2ENTRIES);
 		}
 
 		/**
 		 * @param searchKey
-		 * @return the {@link KeyFramgents} for searchKey
+		 * @return the {@link KeyFragments} for searchKey
 		 */
-		public KeyFramgents getKeyFragmentsFor(String searchKey) {
+		public KeyFragments getKeyFragmentsFor(String searchKey) {
 			assert searchKey != null;
 			// recursion base case
 			if (searchKey.length() == 0) {
-				return new KeyFramgents(new ArrayList<String>(), "");
+				return new KeyFragments(new ArrayList<String>(), "");
 			}
 
 			assert searchKey.length() > 0;
 			String conflictKey = this.children.lookupFirstPrefix(searchKey.substring(0, 1));
 			if (conflictKey == null) {
 				// there is no conflict, just index here
-				return new KeyFramgents(new ArrayList<String>(), searchKey);
+				return new KeyFragments(new ArrayList<String>(), searchKey);
 			}
 
 			Node conflictingNode = this.children.lookup(conflictKey);
 			// find common prefix to extract
 			int commonPrefixLen = getSharedPrefixLength(searchKey, conflictKey);
-			assert commonPrefixLen > 0 : "commonPrefixLen==0? insertKey=" + searchKey
-					+ " conflictKey=" + conflictKey;
+			assert commonPrefixLen > 0 : "commonPrefixLen==0? insertKey=" + searchKey + " conflictKey=" + conflictKey;
 			if (conflictKey.equals(searchKey)) {
 				// the conflicting node is our node
 				List<String> matched = new ArrayList<String>();
 				matched.add(conflictKey);
-				return new KeyFramgents(matched, "");
+				return new KeyFragments(matched, "");
 			} else if (commonPrefixLen >= conflictKey.length()) {
-				/*
-				 * the conflicting key ('ba') is part of the search key ('baz')
-				 */
+				/* the conflicting key ('ba') is part of the search key ('baz') */
 				// RECURSION: just index ('z') in subnode
 				String searchKeyPostfix = searchKey.substring(conflictKey.length());
-				KeyFramgents subFragments = conflictingNode.getKeyFragmentsFor(searchKeyPostfix);
+				KeyFragments subFragments = conflictingNode.getKeyFragmentsFor(searchKeyPostfix);
 				subFragments.matched.add(0, conflictKey);
 				return subFragments;
 			} else {
-				/*
-				 * the search key ('foo') or ('foobaz') is part of the
-				 * conflicting key ('foo' in 'foobar') or they share a common
-				 * prefix ('foo' from 'foobaz'+'foobar'): insert a new node
-				 * ('foo') & update children
-				 */
+				/* the search key ('foo') or ('foobaz') is part of the conflicting key ('foo' in 'foobar') or they share
+				 * a common prefix ('foo' from 'foobaz'+'foobar'): insert a new node ('foo') & update children */
 				String commonPrefix = searchKey.substring(0, commonPrefixLen);
 				String insertKeyPostfix = searchKey.substring(commonPrefixLen);
 				List<String> matched = new ArrayList<String>();
 				matched.add(commonPrefix);
-				KeyFramgents fragments = new KeyFramgents(matched, insertKeyPostfix);
+				KeyFragments fragments = new KeyFragments(matched, insertKeyPostfix);
 				return fragments;
 			}
 		}
@@ -286,8 +281,7 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 		 * 
 		 * @param s
 		 * @param start
-		 * @return @CanBeNull or a pair (match position, entry set of matching
-		 *         values). If not null, the integer is > 0.
+		 * @return @CanBeNull or a pair (match position, entry set of matching values). If not null, the integer is > 0.
 		 */
 		public Pair<Integer, Set<E>> getLongestMatch(String s, int start) {
 
@@ -348,26 +342,18 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 			Node conflictingNode = this.children.lookup(conflictKey);
 			// find common prefix to extract
 			int commonPrefixLen = getSharedPrefixLength(insertKey, conflictKey);
-			assert commonPrefixLen > 0 : "commonPrefixLen==0? insertKey=" + insertKey
-					+ " conflictKey=" + conflictKey;
+			assert commonPrefixLen > 0 : "commonPrefixLen==0? insertKey=" + insertKey + " conflictKey=" + conflictKey;
 			if (conflictKey.equals(insertKey)) {
 				// the conflicting node is our node
 				return conflictingNode.entrySet.index(value);
 			} else if (commonPrefixLen >= conflictKey.length()) {
-				/*
-				 * the conflicting key ('ba') is part of the insertion key
-				 * ('baz')
-				 */
+				/* the conflicting key ('ba') is part of the insertion key ('baz') */
 				// RECURSION: just index ('z') in subnode
 				String insertKeyPostfix = insertKey.substring(conflictKey.length());
 				return conflictingNode.index(insertKeyPostfix, value);
 			} else {
-				/*
-				 * the insertion key ('foo') or ('foobaz') is part of the
-				 * conflicting key ('foo' in 'foobar') or they share a common
-				 * prefix ('foo' from 'foobaz'+'foobar'): insert a new node
-				 * ('foo') & update children
-				 */
+				/* the insertion key ('foo') or ('foobaz') is part of the conflicting key ('foo' in 'foobar') or they
+				 * share a common prefix ('foo' from 'foobaz'+'foobar'): insert a new node ('foo') & update children */
 				this.children.deIndex(conflictKey);
 				Node commonNode = new Node();
 				String commonPrefix = insertKey.substring(0, commonPrefixLen);
@@ -403,26 +389,18 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 			Node conflictingNode = this.children.lookup(conflictKey);
 			// find common prefix to extract
 			int commonPrefixLen = getSharedPrefixLength(insertKey, conflictKey);
-			assert commonPrefixLen > 0 : "commonPrefixLen==0? insertKey=" + insertKey
-					+ " conflictKey=" + conflictKey;
+			assert commonPrefixLen > 0 : "commonPrefixLen==0? insertKey=" + insertKey + " conflictKey=" + conflictKey;
 			if (conflictKey.equals(insertKey)) {
 				// the conflicting node is our node
 				return false;
 			} else if (commonPrefixLen >= conflictKey.length()) {
-				/*
-				 * the conflicting key ('ba') is part of the insertion key
-				 * ('baz')
-				 */
+				/* the conflicting key ('ba') is part of the insertion key ('baz') */
 				// RECURSION: just index ('z') in subnode
 				String insertKeyPostfix = insertKey.substring(conflictKey.length());
 				return conflictingNode.indexKey(insertKeyPostfix);
 			} else {
-				/*
-				 * the insertion key ('foo') or ('foobaz') is part of the
-				 * conflicting key ('foo' in 'foobar') or they share a common
-				 * prefix ('foo' from 'foobaz'+'foobar'): insert a new node
-				 * ('foo') & update children
-				 */
+				/* the insertion key ('foo') or ('foobaz') is part of the conflicting key ('foo' in 'foobar') or they
+				 * share a common prefix ('foo' from 'foobaz'+'foobar'): insert a new node ('foo') & update children */
 				this.children.deIndex(conflictKey);
 				Node commonNode = new Node();
 				String commonPrefix = insertKey.substring(0, commonPrefixLen);
@@ -471,8 +449,7 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 			new ITransformer<KeyEntryTuple<String, Node>, Iterator<KeyEntryTuple<String, Node>>>() {
 
 				@Override
-				public Iterator<KeyEntryTuple<String, Node>> transform(
-						KeyEntryTuple<String, Node> tuple) {
+				public Iterator<KeyEntryTuple<String, Node>> transform(KeyEntryTuple<String, Node> tuple) {
 					/* does it make sense to recurse here? */
 					String currentKey = combinedKey + tuple.getKey();
 					if (canMatch(currentKey, keyConstraint)) {
@@ -506,8 +483,7 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 
 		/**
 		 * @param combinedKey
-		 * @return an iterator over all keys for which at least one entry has
-		 *         been indexed
+		 * @return an iterator over all keys for which at least one entry has been indexed
 		 */
 		public Iterator<String> keyIterator(final String combinedKey) {
 			Iterator<String> fromChildren = Iterators.cascade(
@@ -592,8 +568,7 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 		 * @NeverNull
 		 * @return an iterator over all nodes with entries; breadth-first
 		 */
-		public Iterator<Node> nodeIterator(final String combinedKey,
-				final Constraint<String> keyConstraint) {
+		public Iterator<Node> nodeIterator(final String combinedKey, final Constraint<String> keyConstraint) {
 
 			Iterator<Node> thisNodeIt = null;
 			if (keyConstraint.matches(combinedKey)) {
@@ -670,8 +645,7 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 
 		/**
 		 * @param searchKeyPrefix
-		 * @return true if at least one entry is indexed at a key which starts
-		 *         with or is equal to keyPrefix
+		 * @return true if at least one entry is indexed at a key which starts with or is equal to keyPrefix
 		 */
 		public boolean containsEntriesWithPrefix(final String searchKeyPrefix) {
 			assert searchKeyPrefix != null;
@@ -689,8 +663,8 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 
 			// find common prefix to extract
 			int commonPrefixLen = getSharedPrefixLength(searchKeyPrefix, indexedKey);
-			assert commonPrefixLen > 0 : "commonPrefixLen==0? insertKey=" + searchKeyPrefix
-					+ " conflictKey=" + indexedKey;
+			assert commonPrefixLen > 0 : "commonPrefixLen==0? insertKey=" + searchKeyPrefix + " conflictKey="
+					+ indexedKey;
 			if (indexedKey.equals(searchKeyPrefix)) {
 				// the conflicting node is our node
 				Node indexedNode = this.children.lookup(indexedKey);
@@ -715,8 +689,7 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 		@Deprecated
 		public Iterator<E> searchPrefix(final String keyPrefix) {
 			ConstraintKeyPrefix constraintKeyPrefix = new ConstraintKeyPrefix(keyPrefix);
-			Iterator<KeyEntryTuple<String, Node>> it = this.children
-					.tupleIterator(constraintKeyPrefix);
+			Iterator<KeyEntryTuple<String, Node>> it = this.children.tupleIterator(constraintKeyPrefix);
 			return Iterators.cascade(it, SmallStringSetTrie.this.TRANSFORMER_KET2EntrySet);
 		}
 
@@ -727,8 +700,7 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 
 		private StringBuilder toString(String indent, String combinedKey) {
 			StringBuilder b = new StringBuilder();
-			b.append(indent + "Node id " + this.hashCode() + " representing " + "'" + combinedKey
-					+ "'\n");
+			b.append(indent + "Node id " + this.hashCode() + " representing " + "'" + combinedKey + "'\n");
 			b.append(indent + "Value = '" + this.entrySet + "'\n");
 
 			Iterator<String> it = this.children.keyIterator();
@@ -746,84 +718,60 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 		 * @param entryConstraint
 		 * @return all matching keys X their matching entries
 		 */
-		public Iterator<KeyEntryTuple<String, E>> tupleIterator(String combinedKey,
-				Constraint<String> keyConstraint, final Constraint<E> entryConstraint) {
+		public Iterator<KeyEntryTuple<String, E>> tupleIterator(String combinedKey, Constraint<String> keyConstraint,
+				final Constraint<E> entryConstraint) {
 
-			/*
-			 * get all c1-matching (combinedKey,Node) pairs, recursion happens
-			 * only here
-			 */
-			Iterator<KeyEntryTuple<String, Node>> keyNodeIt = keyAndNodeIterator(combinedKey,
-					keyConstraint);
+			/* get all c1-matching (combinedKey,Node) pairs, recursion happens only here */
+			Iterator<KeyEntryTuple<String, Node>> keyNodeIt = keyAndNodeIterator(combinedKey, keyConstraint);
 
-			Iterator<KeyEntryTuple<String, E>> keyEntriesIt = Iterators
-					.cascade(
-							keyNodeIt,
-							new ITransformer<KeyEntryTuple<String, Node>, Iterator<KeyEntryTuple<String, E>>>() {
+			Iterator<KeyEntryTuple<String, E>> keyEntriesIt = Iterators.cascade(keyNodeIt,
+					new ITransformer<KeyEntryTuple<String, Node>, Iterator<KeyEntryTuple<String, E>>>() {
+
+						@Override
+						public Iterator<KeyEntryTuple<String, E>> transform(
+								final KeyEntryTuple<String, Node> ketCombinedKeyNode) {
+							/* for each matching (combinedKey-Node)-pair: look in the node and take all
+							 * entryConstraint-matching entries and ... */
+							Iterator<E> entryIt = ketCombinedKeyNode.getEntry().entrySet.iterator();
+
+							Iterator<E> filteredEntryIt;
+							if (entryConstraint.isStar()) {
+								filteredEntryIt = entryIt;
+							} else {
+								// apply constraint
+								filteredEntryIt = Iterators.filter(entryIt, entryConstraint);
+							}
+							/* ... wrap them back into the final KeyEntry tuples */
+							return Iterators.transform(filteredEntryIt,
+									new ITransformer<E, KeyEntryTuple<String, E>>() {
 
 								@Override
-								public Iterator<KeyEntryTuple<String, E>> transform(
-										final KeyEntryTuple<String, Node> ketCombinedKeyNode) {
-									/*
-									 * for each matching
-									 * (combinedKey-Node)-pair: look in the node
-									 * and take all entryConstraint-matching
-									 * entries and ...
-									 */
-									Iterator<E> entryIt = ketCombinedKeyNode.getEntry().entrySet
-											.iterator();
+								public KeyEntryTuple<String, E> transform(E entry) {
+									assert entry != null;
 
-									Iterator<E> filteredEntryIt;
-									if (entryConstraint.isStar()) {
-										filteredEntryIt = entryIt;
-									} else {
-										// apply constraint
-										filteredEntryIt = Iterators
-												.filter(entryIt, entryConstraint);
-									}
-									/*
-									 * ... wrap them back into the final
-									 * KeyEntry tuples
-									 */
-									return Iterators.transform(filteredEntryIt,
-											new ITransformer<E, KeyEntryTuple<String, E>>() {
-
-												@Override
-												public KeyEntryTuple<String, E> transform(E entry) {
-													assert entry != null;
-
-													return new KeyEntryTuple<String, E>(
-															ketCombinedKeyNode.getKey(), entry);
-												}
-											});
+									return new KeyEntryTuple<String, E>(ketCombinedKeyNode.getKey(), entry);
 								}
 							});
+						}
+					});
 
 			return keyEntriesIt;
 		}
 
-		public Iterator<IEntrySet<E>> valueAsEntrySetIterator(String combinedKey,
-				Constraint<String> keyConstraint) {
-			/*
-			 * get all c1-matching (combinedKey,Node) pairs, recursion happens
-			 * only here
-			 */
+		public Iterator<IEntrySet<E>> valueAsEntrySetIterator(String combinedKey, Constraint<String> keyConstraint) {
+			/* get all c1-matching (combinedKey,Node) pairs, recursion happens only here */
 			Iterator<Node> keyNodeIt = nodeIterator(combinedKey, keyConstraint);
 
-			Iterator<IEntrySet<E>> entrySetIt = Iterators.transform(keyNodeIt,
-					new ITransformer<Node, IEntrySet<E>>() {
+			Iterator<IEntrySet<E>> entrySetIt = Iterators.transform(keyNodeIt, new ITransformer<Node, IEntrySet<E>>() {
 
-						@Override
-						public IEntrySet<E> transform(final Node ketCombinedKeyNode) {
-							/*
-							 * for each matching (combinedKey-Node)-pair: look
-							 * in the node and take all entryConstraint-matching
-							 * entries and ...
-							 */
-							IEntrySet<E> set = ketCombinedKeyNode.entrySet;
-							return set;
-						}
-					});
+				@Override
+				public IEntrySet<E> transform(final Node ketCombinedKeyNode) {
+					/* for each matching (combinedKey-Node)-pair: look in the node and take all entryConstraint-matching
+					 * entries and ... */
+					IEntrySet<E> set = ketCombinedKeyNode.entrySet;
+					return set;
+				}
+			});
 
 			Iterator<IEntrySet<E>> nonEmptyEntrySetIt = Iterators.filter(entrySetIt,
 					SmallStringSetTrie.this.FILTER_NON_EMPTY_ENTRYSET);
@@ -841,34 +789,27 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 		public Iterator<E> valueIterator(String combinedKey, Constraint<String> keyConstraint,
 				final IFilter<E> optionalEntryFilter) {
 
-			/*
-			 * get all c1-matching (combinedKey,Node) pairs, recursion happens
-			 * only here
-			 */
+			/* get all c1-matching (combinedKey,Node) pairs, recursion happens only here */
 			Iterator<Node> keyNodeIt = nodeIterator(combinedKey, keyConstraint);
 
-			Iterator<E> keyEntriesIt = Iterators.cascade(keyNodeIt,
-					new ITransformer<Node, Iterator<E>>() {
+			Iterator<E> keyEntriesIt = Iterators.cascade(keyNodeIt, new ITransformer<Node, Iterator<E>>() {
 
-						@Override
-						public Iterator<E> transform(final Node ketCombinedKeyNode) {
-							/*
-							 * for each matching (combinedKey-Node)-pair: look
-							 * in the node and take all entryConstraint-matching
-							 * entries and ...
-							 */
-							Iterator<E> entryIt = ketCombinedKeyNode.entrySet.iterator();
+				@Override
+				public Iterator<E> transform(final Node ketCombinedKeyNode) {
+					/* for each matching (combinedKey-Node)-pair: look in the node and take all entryConstraint-matching
+					 * entries and ... */
+					Iterator<E> entryIt = ketCombinedKeyNode.entrySet.iterator();
 
-							Iterator<E> filteredEntryIt;
-							if (optionalEntryFilter == null) {
-								return entryIt;
-							} else {
-								// apply constraint
-								filteredEntryIt = Iterators.filter(entryIt, optionalEntryFilter);
-								return filteredEntryIt;
-							}
-						}
-					});
+					Iterator<E> filteredEntryIt;
+					if (optionalEntryFilter == null) {
+						return entryIt;
+					} else {
+						// apply constraint
+						filteredEntryIt = Iterators.filter(entryIt, optionalEntryFilter);
+						return filteredEntryIt;
+					}
+				}
+			});
 
 			return keyEntriesIt;
 		}
@@ -884,8 +825,8 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 	/**
 	 * @param combinedKey
 	 * @param c1 expected constraint
-	 * @return true if further descending a prefix tree with current key
-	 *         'combinedKey' has a chance of statisfying the constraint
+	 * @return true if further descending a prefix tree with current key 'combinedKey' has a chance of statisfying the
+	 *         constraint
 	 */
 	private static boolean canMatch(String combinedKey, Constraint<String> c1) {
 
@@ -899,10 +840,7 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 			if (combinedKey.length() > c1.getExpected().length())
 				return false;
 
-			/*
-			 * the current combinedKey needs to be a prefix of what we are
-			 * looking for
-			 */
+			/* the current combinedKey needs to be a prefix of what we are looking for */
 			if (!c1.getExpected().startsWith(combinedKey))
 				return false;
 		}
@@ -995,8 +933,7 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 
 	@Override
 	@ReadOperation
-	public org.xydra.index.IMapSetIndex.IMapSetDiff<String, E> computeDiff(
-			IMapSetIndex<String, E> otherFuture) {
+	public org.xydra.index.IMapSetIndex.IMapSetDiff<String, E> computeDiff(IMapSetIndex<String, E> otherFuture) {
 
 		// IMPROVE implement diff function
 		throw new UnsupportedOperationException("not impl yet");
@@ -1100,8 +1037,7 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 	}
 
 	/**
-	 * If you indexed 'aaabbccc' and 'aaaddeee' and 'aaabbcff' the trie looks
-	 * like this:
+	 * If you indexed 'aaabbccc' and 'aaaddeee' and 'aaabbcff' the trie looks like this:
 	 * 
 	 * <pre>
 	 * 'aaa'
@@ -1111,16 +1047,15 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 	 *    'ddeee'
 	 * </pre>
 	 * 
-	 * and the key fragments for 'aaabbcg' would be ['aaa','bbc'] with remainder
-	 * 'g'.
+	 * and the key fragments for 'aaabbcg' would be ['aaa','bbc'] with remainder 'g'.
 	 * 
 	 * @param key must not be part of the trie
 	 * @return the string key split into fragments as they appear in the trie
 	 */
 	@ReadOperation
-	public KeyFramgents getKeyFragmentsFor(String key) {
+	public KeyFragments getKeyFragmentsFor(String key) {
 		readOperationStart();
-		KeyFramgents result = this.root.getKeyFragmentsFor(key);
+		KeyFragments result = this.root.getKeyFragmentsFor(key);
 		readOperationEnd();
 		return result;
 	}
@@ -1128,9 +1063,8 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 	/**
 	 * @param s
 	 * @param start within s
-	 * @return a pair: 1) the number of characters, starting from start, are the
-	 *         longest match so that at least one result is returned; 2) the
-	 *         entry set of result values
+	 * @return a pair: 1) the number of characters, starting from start, are the longest match so that at least one
+	 *         result is returned; 2) the entry set of result values
 	 */
 	@ReadOperation
 	public Pair<Integer, Set<E>> getLongestMatch(String s, int start) {
@@ -1183,8 +1117,7 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 	@ReadOperation
 	public ClosableIterator<KeyEntryTuple<String, Node>> keyAndNodeIterator(Constraint<String> c1) {
 		readOperationStart();
-		Iterator<KeyEntryTuple<String, SmallStringSetTrie<E>.Node>> it = this.root
-				.keyAndNodeIterator("", c1);
+		Iterator<KeyEntryTuple<String, SmallStringSetTrie<E>.Node>> it = this.root.keyAndNodeIterator("", c1);
 		return unlockIteratorOnClose(it);
 	}
 
@@ -1214,24 +1147,21 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 	}
 
 	/**
-	 * IMPROVE performance: create and use a direct prefix search returning just
-	 * V's, without creating intermediate KeyEntryTuple
+	 * IMPROVE performance: create and use a direct prefix search returning just V's, without creating intermediate
+	 * KeyEntryTuple
 	 * 
-	 * Contains dupes, e.g. if the term "HelloWorld" has been indexed, it was
-	 * also indexed as "Hello" and "World". Hence the query "hell" returns both
-	 * "hello" and "helloworld", both with the same V.
+	 * Contains dupes, e.g. if the term "HelloWorld" has been indexed, it was also indexed as "Hello" and "World". Hence
+	 * the query "hell" returns both "hello" and "helloworld", both with the same V.
 	 * 
 	 * @param keyPrefix
-	 * @return all tuples matching the keyPrefix, sorted in lexicographical
-	 *         order of the keys. Shorter keys before longer keys. No order in
-	 *         values for the same keys.
+	 * @return all tuples matching the keyPrefix, sorted in lexicographical order of the keys. Shorter keys before
+	 *         longer keys. No order in values for the same keys.
 	 */
 	@ReadOperation
 	public ClosableIterator<KeyEntryTuple<String, E>> search(final String keyPrefix) {
 		readOperationStart();
 		ConstraintKeyPrefix constraintKeyPrefix = new ConstraintKeyPrefix(keyPrefix);
-		ClosableIterator<KeyEntryTuple<String, E>> it = tupleIterator(constraintKeyPrefix,
-				new Wildcard<E>());
+		ClosableIterator<KeyEntryTuple<String, E>> it = tupleIterator(constraintKeyPrefix, new Wildcard<E>());
 		return unlockIteratorOnClose(it);
 	}
 
@@ -1264,11 +1194,10 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 
 	@Override
 	@ReadOperation
-	public ClosableIterator<KeyEntryTuple<String, E>> tupleIterator(
-			Constraint<String> keyConstraint, Constraint<E> entryConstraint) {
+	public ClosableIterator<KeyEntryTuple<String, E>> tupleIterator(Constraint<String> keyConstraint,
+			Constraint<E> entryConstraint) {
 		readOperationStart();
-		Iterator<KeyEntryTuple<String, E>> it = this.root.tupleIterator("", keyConstraint,
-				entryConstraint);
+		Iterator<KeyEntryTuple<String, E>> it = this.root.tupleIterator("", keyConstraint, entryConstraint);
 		return unlockIteratorOnClose(it);
 	}
 
@@ -1295,8 +1224,7 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializa
 	}
 
 	@ReadOperation
-	public ClosableIterator<E> valueIterator(Constraint<String> keyConstraint,
-			IFilter<E> optionalEntryFilter) {
+	public ClosableIterator<E> valueIterator(Constraint<String> keyConstraint, IFilter<E> optionalEntryFilter) {
 		readOperationStart();
 		Iterator<E> it = this.root.valueIterator("", keyConstraint, optionalEntryFilter);
 		return unlockIteratorOnClose(it);

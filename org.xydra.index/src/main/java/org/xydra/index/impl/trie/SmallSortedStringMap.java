@@ -17,9 +17,9 @@ import org.xydra.index.query.KeyEntryTuple;
 
 /**
  * A {@link TreeMap} put under an {@link IMapIndex}<String,E> interface.
- * 
+ *
  * @author xamde
- * 
+ *
  * @param <E>
  */
 public class SmallSortedStringMap<E> implements IMapIndex<String, E> {
@@ -28,31 +28,32 @@ public class SmallSortedStringMap<E> implements IMapIndex<String, E> {
 
 	private static final Charset UTF8 = Charset.forName("utf-8");
 
-	private TreeMap<byte[], E> map = new TreeMap<byte[], E>(new Comparator<byte[]>() {
+	private final TreeMap<byte[], E> map = new TreeMap<byte[], E>(new Comparator<byte[]>() {
 
 		@Override
-		public int compare(byte[] a, byte[] b) {
+		public int compare(final byte[] a, final byte[] b) {
 			for (int i = 0; i < Math.min(a.length, b.length); i++) {
-				int c = (int) b[i] - a[i];
-				if (c != 0)
+				final int c = b[i] - a[i];
+				if (c != 0) {
 					return c;
+				}
 			}
 
-			int c = a.length - b.length;
+			final int c = a.length - b.length;
 			return c;
 		}
 	});
 
 	@Override
-	public void index(String key, E value) {
+	public void index(final String key, final E value) {
 		this.map.put(toBytes(key), value);
 	}
 
-	private static byte[] toBytes(String string) {
+	private static byte[] toBytes(final String string) {
 		return string.getBytes(UTF8);
 	}
 
-	private static String toString(byte[] bytes) {
+	private static String toString(final byte[] bytes) {
 		return new String(bytes, UTF8);
 	}
 
@@ -67,12 +68,12 @@ public class SmallSortedStringMap<E> implements IMapIndex<String, E> {
 	}
 
 	@Override
-	public boolean containsKey(String key) {
+	public boolean containsKey(final String key) {
 		return this.map.containsKey(toBytes(key));
 	}
 
 	@Override
-	public void deIndex(String key) {
+	public void deIndex(final String key) {
 		this.map.remove(toBytes(key));
 	}
 
@@ -82,12 +83,12 @@ public class SmallSortedStringMap<E> implements IMapIndex<String, E> {
 	}
 
 	@Override
-	public E lookup(String key) {
+	public E lookup(final String key) {
 		return this.map.get(toBytes(key));
 	}
 
 	@Override
-	public boolean containsKey(Constraint<String> c1) {
+	public boolean containsKey(final Constraint<String> c1) {
 		if (c1.isStar()) {
 			return !this.map.isEmpty();
 		} else {
@@ -101,25 +102,25 @@ public class SmallSortedStringMap<E> implements IMapIndex<String, E> {
 		mapentryIt = Iterators.filter(mapentryIt, new IFilter<Entry<byte[], E>>() {
 
 			@Override
-			public boolean matches(Entry<byte[], E> mapentry) {
+			public boolean matches(final Entry<byte[], E> mapentry) {
 				return keyConstraint.matches(SmallSortedStringMap.toString(mapentry.getKey()));
 			}
 		});
 		return Iterators.transform(mapentryIt,
 				new ITransformer<Map.Entry<byte[], E>, KeyEntryTuple<String, E>>() {
 
-					@Override
-					public KeyEntryTuple<String, E> transform(Entry<byte[], E> mapentry) {
-						return new KeyEntryTuple<String, E>(SmallSortedStringMap.toString(mapentry
-								.getKey()), mapentry.getValue());
-					}
-				});
+			@Override
+			public KeyEntryTuple<String, E> transform(final Entry<byte[], E> mapentry) {
+				return new KeyEntryTuple<String, E>(SmallSortedStringMap.toString(mapentry
+						.getKey()), mapentry.getValue());
+			}
+		});
 	}
 
 	private static ITransformer<byte[], String> BYTE2STRING = new ITransformer<byte[], String>() {
 
 		@Override
-		public String transform(byte[] in) {
+		public String transform(final byte[] in) {
 			return SmallSortedStringMap.toString(in);
 		}
 	};
@@ -131,20 +132,20 @@ public class SmallSortedStringMap<E> implements IMapIndex<String, E> {
 
 	/**
 	 * Handy for constructing range-queries
-	 * 
+	 *
 	 * IMPROVE deal with unicode outside of BMP
 	 */
 	public static final String LAST_UNICODE_CHAR = "\uFFFF";
 
 	/**
 	 * Special function of Sorted...
-	 * 
+	 *
 	 * @param keyPrefix
 	 * @return true iff at least one key has been indexed which starts with the
 	 *         given keyPrefix
 	 */
-	public boolean containsKeysStartingWith(String keyPrefix) {
-		SortedMap<byte[], E> subMap = this.map.subMap(toBytes(keyPrefix), toBytes(keyPrefix
+	public boolean containsKeysStartingWith(final String keyPrefix) {
+		final SortedMap<byte[], E> subMap = this.map.subMap(toBytes(keyPrefix), toBytes(keyPrefix
 				+ LAST_UNICODE_CHAR));
 		return !subMap.isEmpty();
 	}
@@ -154,25 +155,28 @@ public class SmallSortedStringMap<E> implements IMapIndex<String, E> {
 	 * @return all entries which have been indexed at a key starting with the
 	 *         given prefix. Collects the results of potentially many such keys.
 	 */
-	public Iterator<E> lookupStartingWith(String keyPrefix) {
-		SortedMap<byte[], E> subMap = this.map.subMap(toBytes(keyPrefix), toBytes(keyPrefix
+	public Iterator<E> lookupStartingWith(final String keyPrefix) {
+		final SortedMap<byte[], E> subMap = this.map.subMap(toBytes(keyPrefix), toBytes(keyPrefix
 				+ LAST_UNICODE_CHAR));
 		return subMap.values().iterator();
 	}
 
 	/**
 	 * This method is required for a trie, such as {@link SmallStringSetTrie}
-	 * 
+	 *
 	 * @param keyPrefix
 	 * @return the first (lowest) complete key starting with the given prefix @CanBeNull
 	 *         if no such key exists.
 	 */
-	public String lookupFirstPrefix(String keyPrefix) {
-		SortedMap<byte[], E> subMap = this.map.subMap(toBytes(keyPrefix), toBytes(keyPrefix
+	public String lookupFirstPrefix(final String keyPrefix) {
+		final SortedMap<byte[], E> subMap = this.map.subMap(toBytes(keyPrefix), toBytes(keyPrefix
 				+ LAST_UNICODE_CHAR));
 		return subMap.isEmpty() ? null : toString(subMap.firstKey());
 	}
 
+	/**
+	 * @return number of key-value mappings
+	 */
 	public int size() {
 		return this.map.size();
 	}

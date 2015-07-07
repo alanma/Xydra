@@ -1,12 +1,16 @@
 package org.xydra.index.iterator;
 
+/**
+ * Static methods for working with {@link IFilter}
+ *
+ * @author xamde
+ */
 public class Filters {
 
 	/**
 	 * Combine filters
-	 * 
-	 * @param filters
-	 *            null values represent match-all filters
+	 *
+	 * @param filters null values represent match-all filters
 	 * @return a filter representing the logical AND
 	 */
 	@SafeVarargs
@@ -23,11 +27,12 @@ public class Filters {
 		return new IFilter<E>() {
 
 			@Override
-			public boolean matches(E entry) {
-				for (IFilter<E> filter : filters) {
+			public boolean matches(final E entry) {
+				for (final IFilter<E> filter : filters) {
 					if (filter != null) {
-						if (!filter.matches(entry))
+						if (!filter.matches(entry)) {
 							return false;
+						}
 					}
 				}
 
@@ -36,6 +41,9 @@ public class Filters {
 		};
 	}
 
+	/**
+	 * @return an {@link IFilter} which matches every element
+	 */
 	@SuppressWarnings("unchecked")
 	public static <E> IFilter<E> matchAll() {
 		return (IFilter<E>) MATCH_ALL;
@@ -44,12 +52,15 @@ public class Filters {
 	private static IFilter<Object> MATCH_ALL = new IFilter<Object>() {
 
 		@Override
-		public boolean matches(Object entry) {
+		public boolean matches(final Object entry) {
 			return true;
 		}
 
 	};
 
+	/**
+	 * @return an {@link IFilter} matching nothing
+	 */
 	@SuppressWarnings("unchecked")
 	public static <E> IFilter<E> matchNone() {
 		return (IFilter<E>) MATCH_NONE;
@@ -58,7 +69,7 @@ public class Filters {
 	private static IFilter<Object> MATCH_NONE = new IFilter<Object>() {
 
 		@Override
-		public boolean matches(Object entry) {
+		public boolean matches(final Object entry) {
 			return false;
 		}
 
