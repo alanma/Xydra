@@ -44,7 +44,7 @@ import com.google.common.base.Function;
  * @param <E>
  */
 @NotThreadSafe
-public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializable {
+public class SmallStringSetTrie<E> implements IMapSetIndex<String, E> {
 
 	/**
 	 * Implementation note:
