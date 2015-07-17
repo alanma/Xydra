@@ -13,34 +13,40 @@ import org.xydra.restless.IMultipartFormDataHandler.IProgressReporter;
 
 /**
  * Handles distribution of progress information while uploads are in progress.
- * 
- * ProgressTokens should be unique and unguessable. There is a public REST
- * end-point to retrieve progress messages.
- * 
+ *
+ * ProgressTokens should be unique and unguessable. There is a public REST end-point to retrieve progress messages.
+ *
  * See also {@link IProgressReporter}
- * 
+ *
  * @author xamde
  */
 public class ProgressManager {
 
+	private static final IProgressReporter LOG_PROGRESS_REPORTER = new IProgressReporter() {
+
+		@Override
+		public void reportProgress(final String progressMessage) {
+			log.debug("PROGRESS: " + progressMessage);
+		}
+	};
+
 	/**
-	 * Create an {@link IProgressReporter} which sends progress to the
-	 * {@link ProgressManager#DEFAULT_PROGRESS_BROKER}
-	 * 
-	 * @param progressToken @CanBeNull and results in return null
-	 * @return a new {@link IProgressReporter} @CanBeNull if progressToken is
-	 *         null
+	 * Create an {@link IProgressReporter} which sends progress to the {@link ProgressManager#DEFAULT_PROGRESS_BROKER}
+	 *
+	 * @param progressToken @CanBeNull and results in a default progress reporter on the log of {@link ProgressManager}
+	 *        at debug level
+	 * @return a new {@link IProgressReporter} @CanBeNull if progressToken is null
 	 */
 	public static IProgressReporter createDefaultProgressReporter(final String progressToken) {
-		if (progressToken == null)
-			return null;
+		if (progressToken == null) {
+			return LOG_PROGRESS_REPORTER;
+		}
 
 		return new IProgressReporter() {
 
 			@Override
-			public void reportProgress(String progressMessage) {
-				ProgressManager.DEFAULT_PROGRESS_BROKER.appendProgress(progressToken,
-						progressMessage);
+			public void reportProgress(final String progressMessage) {
+				ProgressManager.DEFAULT_PROGRESS_BROKER.appendProgress(progressToken, progressMessage);
 			}
 		};
 	}
@@ -49,7 +55,7 @@ public class ProgressManager {
 
 		/**
 		 * Append new message, keep existing log, separated by CR-LF
-		 * 
+		 *
 		 * @param progessToken
 		 * @param progressMessage
 		 */
@@ -57,7 +63,7 @@ public class ProgressManager {
 
 		/**
 		 * Replace existing message
-		 * 
+		 *
 		 * @param progressToken
 		 * @param progressMessage
 		 */
@@ -65,8 +71,7 @@ public class ProgressManager {
 
 		/**
 		 * @param progessToken
-		 * @return @CanBeNull if progressToken is wrong or no progress message
-		 *         has been set yet
+		 * @return @CanBeNull if progressToken is wrong or no progress message has been set yet
 		 */
 		String getProgress(String progessToken);
 
@@ -74,7 +79,7 @@ public class ProgressManager {
 
 	/**
 	 * Cloud users should use some distributed progress broker here
-	 * 
+	 *
 	 * FIXME implement auto-purge after some time-out
 	 */
 	public static IProgressBroker DEFAULT_PROGRESS_BROKER = new SingleMachineProgressBroker();
@@ -83,25 +88,25 @@ public class ProgressManager {
 
 	public static final class SingleMachineProgressBroker implements IProgressBroker {
 
-		private Map<String, String> map = new HashMap<String, String>();
+		private final Map<String, String> map = new HashMap<String, String>();
 
 		@Override
-		public void appendProgress(String progressToken, String progressMessage) {
+		public void appendProgress(final String progressToken, final String progressMessage) {
 			if (log.isDebugEnabled()) {
 				log.debug("PROGRESS(" + progressToken + "): " + progressMessage);
 			}
 
-			String recordedProgress = this.map.get(progressToken);
+			final String recordedProgress = this.map.get(progressToken);
 			if (recordedProgress == null) {
 				this.map.put(progressToken, progressMessage);
 			} else {
-				String combinedProgress = recordedProgress + "\n\r" + progressMessage;
+				final String combinedProgress = recordedProgress + "\n\r" + progressMessage;
 				this.map.put(progressToken, combinedProgress);
 			}
 		}
 
 		@Override
-		public void setProgress(String progressToken, String progressMessage) {
+		public void setProgress(final String progressToken, final String progressMessage) {
 			if (log.isDebugEnabled()) {
 				log.debug("PROGRESS(" + progressToken + "): " + progressMessage);
 			}
@@ -110,18 +115,18 @@ public class ProgressManager {
 		}
 
 		@Override
-		public String getProgress(String progessToken) {
+		public String getProgress(final String progessToken) {
 			return this.map.get(progessToken);
 		}
 
 	}
 
-	public static synchronized void restless(Restless restless) {
+	public static synchronized void restless(final Restless restless) {
 		restless.addMethod("/_uploadProgress", "GET", ProgressManager.class, "getProgress", false,
 
-		new RestlessParameter("progressToken")
+				new RestlessParameter("progressToken")
 
-		);
+				);
 	}
 
 	public static final String NO_MESSAGE = "NO_MESSAGE";
@@ -132,63 +137,62 @@ public class ProgressManager {
 
 	/**
 	 * REST-exposed via Restless.
-	 * 
+	 *
 	 * Sends "NO_MESSAGE" if there is no message.
-	 * 
+	 *
 	 * @param progressToken
 	 * @throws IOException
 	 */
-	public static void getProgress(HttpServletResponse res, String progressToken)
-			throws IOException {
+	public static void getProgress(final HttpServletResponse res, final String progressToken) throws IOException {
 		String progressMessage = DEFAULT_PROGRESS_BROKER.getProgress(progressToken);
 
 		if (progressMessage == null) {
 			progressMessage = NO_MESSAGE;
 			try {
 				Thread.sleep(500);
-			} catch (InterruptedException e) {
+			} catch (final InterruptedException e) {
 				throw new RuntimeException("Error", e);
 			}
 		}
 
 		res.setContentType("text/plain; charset=utf8");
-		Writer w = res.getWriter();
+		final Writer w = res.getWriter();
 		w.write("" + progressMessage);
 		w.close();
 	}
 
 	/**
 	 * Utility method
-	 * 
-	 * @param progressReporter @CanBeNull in which case no progress is reported
-	 *            anywhere
+	 *
+	 * @param progressReporter @CanBeNull in which case no progress is reported anywhere
 	 * @param string
 	 */
-	public static void reportProgress(IProgressReporter progressReporter, String progressMessage) {
-		if (progressReporter != null)
+	public static void reportProgress(final IProgressReporter progressReporter, final String progressMessage) {
+		if (progressReporter != null) {
 			progressReporter.reportProgress(progressMessage);
+		}
 	}
 
 	/**
 	 * Utility method
-	 * 
-	 * @param progressReporter @CanBeNull in which case no progress is reported
-	 *            anywhere
+	 *
+	 * @param progressReporter @CanBeNull in which case no progress is reported anywhere
 	 * @param success iff true, reports {@link #SUCCESS} else {@link #ERROR}
 	 */
-	public static void reportProgressDone(IProgressReporter progressReporter, boolean success) {
+	public static void reportProgressDone(final IProgressReporter progressReporter, final boolean success) {
 		reportProgress(progressReporter, success ? ProgressManager.SUCCESS : ProgressManager.ERROR);
 	}
 
 	/**
 	 * Includes reporting progressDone=FALSE
-	 * 
+	 *
 	 * @param pr
 	 * @param e
 	 */
-	public static void reportException(IProgressReporter pr, Throwable e) {
-		if (pr == null)
+	public static void reportException(final IProgressReporter pr, final Throwable e) {
+		if (pr == null) {
 			return;
+		}
 
 		pr.reportProgress("Exception " + e);
 
