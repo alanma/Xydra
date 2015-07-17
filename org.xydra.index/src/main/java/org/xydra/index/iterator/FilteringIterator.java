@@ -3,24 +3,29 @@ package org.xydra.index.iterator;
 import java.util.Iterator;
 
 /**
- * Encapsulates an iterator, returning only those elements matching a filter.
- * Uses a pre-fetch strategy, so does not support remove().
- * 
+ * Encapsulates an iterator, returning only those elements matching a filter. Uses a pre-fetch strategy, so does not
+ * support remove().
+ *
  * @author voelkel
- * 
+ *
  * @param <E> Type of objects returned by this iterator.
  */
 public class FilteringIterator<E> implements ClosableIterator<E> {
 
-	private Iterator<E> base;
+	private final Iterator<E> base;
 
 	private boolean hasNext;
 
 	private E nextItem = null;
 
-	private IFilter<E> filter;
+	private final IFilter<E> filter;
 
-	public FilteringIterator(Iterator<E> base, IFilter<E> filter) {
+	/**
+	 * @param base
+	 * @param filter @NeverNull
+	 */
+	public FilteringIterator(final Iterator<E> base, final IFilter<E> filter) {
+		assert filter != null;
 		this.base = base;
 		this.filter = filter;
 	}
@@ -35,7 +40,7 @@ public class FilteringIterator<E> implements ClosableIterator<E> {
 	public E next() {
 		// might be the first call ever and we are lazy
 		this.lookAhead();
-		E result = this.nextItem;
+		final E result = this.nextItem;
 		this.hasNext = false;
 		this.lookAhead();
 		return result;
@@ -47,8 +52,9 @@ public class FilteringIterator<E> implements ClosableIterator<E> {
 	}
 
 	private void lookAhead() {
-		if (this.hasNext)
+		if (this.hasNext) {
 			return;
+		}
 
 		// advance until we find a match
 		while (this.base.hasNext()) {

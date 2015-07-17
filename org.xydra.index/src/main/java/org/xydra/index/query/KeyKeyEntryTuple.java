@@ -4,7 +4,7 @@ import org.xydra.index.impl.DebugUtils;
 
 /**
  * A generic triple
- * 
+ *
  * @author xamde
  * @param <K>
  * @param <L>
@@ -12,11 +12,13 @@ import org.xydra.index.impl.DebugUtils;
  */
 public class KeyKeyEntryTuple<K, L, E> implements ITriple<K, L, E>, HasEntry<E> {
 
-	private E entry;
-	private K key1;
-	private L key2;
+	private final E entry;
 
-	public KeyKeyEntryTuple(K key1, L key2, E entry) {
+	private final K key1;
+
+	private final L key2;
+
+	public KeyKeyEntryTuple(final K key1, final L key2, final E entry) {
 		this.key1 = key1;
 		this.key2 = key2;
 		this.entry = entry;
@@ -56,7 +58,7 @@ public class KeyKeyEntryTuple<K, L, E> implements ITriple<K, L, E>, HasEntry<E> 
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(final Object other) {
 		return other instanceof ITriple<?, ?, ?>
 
 		&& this.key1.equals(((ITriple<?, ?, ?>) other).getKey1())

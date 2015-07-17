@@ -1,5 +1,6 @@
 package org.xydra.index;
 
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -7,11 +8,13 @@ import org.xydra.index.query.Constraint;
 
 /**
  * A set in Xydra Index API shape.
- * 
+ *
+ * All implementations must be {@link Serializable}.
+ *
  * @author voelkel
  * @param <E> entity type
  */
-public interface IEntrySet<E> extends IIndex, Iterable<E> {
+public interface IEntrySet<E> extends IIndex, Iterable<E>, Serializable {
 
 	@Override
 	public Iterator<E> iterator();
@@ -36,7 +39,7 @@ public interface IEntrySet<E> extends IIndex, Iterable<E> {
 
 	/**
 	 * @author xamde
-	 * 
+	 *
 	 * @param <E>
 	 */
 	static interface IEntrySetDiff<E> {

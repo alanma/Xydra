@@ -1,5 +1,6 @@
 package org.xydra.index.impl.trie;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -44,7 +45,7 @@ import com.google.common.base.Function;
  * @param <E>
  */
 @NotThreadSafe
-public class SmallStringSetTrie<E> implements IMapSetIndex<String, E> {
+public class SmallStringSetTrie<E> implements IMapSetIndex<String, E>, Serializable {
 
 	/**
 	 * Implementation note:
@@ -121,6 +122,7 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E> {
 		private IEntrySet<E> entrySet;
 
 		public Node() {
+			assert SmallStringSetTrie.this.entrySetFactory != null;
 			this.entrySet = SmallStringSetTrie.this.entrySetFactory.createInstance();
 			this.children = new SortedStringMap<Node>();
 		}
@@ -626,18 +628,6 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E> {
 			}
 		}
 
-		/**
-		 * @param keyPrefix
-		 * @return
-		 * @deprecated seems buggy & untested
-		 */
-		@Deprecated
-		public Iterator<E> quick_searchPrefix(final String keyPrefix) {
-			final ConstraintKeyPrefix constraintKeyPrefix = new ConstraintKeyPrefix(keyPrefix);
-			final Iterator<Node> it = this.children.entryIterator(constraintKeyPrefix);
-			return Iterators.cascade(it, SmallStringSetTrie.this.TRANSFORMER_NODE2ENTRIES);
-		}
-
 		public boolean containsEntries() {
 			if (!this.entrySet.isEmpty()) {
 				return true;
@@ -686,20 +676,6 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E> {
 			} else {
 				return false;
 			}
-		}
-
-		/**
-		 * Search via internal tuples
-		 *
-		 * @param keyPrefix
-		 * @return ...
-		 * @deprecated seems buggy & untested
-		 */
-		@Deprecated
-		public Iterator<E> searchPrefix(final String keyPrefix) {
-			final ConstraintKeyPrefix constraintKeyPrefix = new ConstraintKeyPrefix(keyPrefix);
-			final Iterator<KeyEntryTuple<String, Node>> it = this.children.tupleIterator(constraintKeyPrefix);
-			return Iterators.cascade(it, SmallStringSetTrie.this.TRANSFORMER_KET2EntrySet);
 		}
 
 		@Override
@@ -831,8 +807,6 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E> {
 
 	private static final Logger log = LoggerFactory.getLogger(SmallStringSetTrie.class);
 
-	private static final long serialVersionUID = 1L;
-
 	/**
 	 * @param combinedKey
 	 * @param c1 expected constraint
@@ -883,25 +857,30 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E> {
 		return i;
 	}
 
-	private transient Factory<IEntrySet<E>> entrySetFactory;
+	private final Factory<IEntrySet<E>> entrySetFactory;
 
-	private transient final IFilter<IEntrySet<E>> FILTER_NON_EMPTY_ENTRYSET = new IFilter<IEntrySet<E>>() {
+	private transient IFilter<IEntrySet<E>> FILTER_NON_EMPTY_ENTRYSET;
 
+	/* this class works around the fact that Java generics + Serialization + anonymous inner class does not work */
+	private static class FILTER_NON_EMPTY_ENTRYSET<E> implements IFilter<IEntrySet<E>> {
 		@Override
 		public boolean matches(final IEntrySet<E> entry) {
 			return !entry.isEmpty();
 		}
-	};
+	}
 
-	private transient final Function<Node, Boolean> FUNCTION_clear = new Function<Node, Boolean>() {
+	private transient Function<Node, Boolean> FUNCTION_clear;
+
+	/* this class works around the fact that Java generics + Serialization + anonymous inner class does not work */
+	private static class FUNCTION_clear<E> implements Function<SmallStringSetTrie<E>.Node, Boolean> {
 
 		@Override
-		public Boolean apply(final Node node) {
+		public Boolean apply(final SmallStringSetTrie<E>.Node node) {
 			node.entrySet.clear();
 			node.children.clear();
 			return true;
 		}
-	};
+	}
 
 	private final transient ReadWriteLock readWriteLock = new DebugReentrantReadWriteLock();
 
@@ -909,6 +888,7 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E> {
 	private Node root;
 
 	public void setRootNote(final Node root) {
+		assert root != null;
 		this.root = root;
 	}
 
@@ -916,35 +896,60 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E> {
 		return this.root;
 	}
 
-	private final transient ITransformer<KeyEntryTuple<String, Node>, Iterator<E>> TRANSFORMER_KET2EntrySet = new ITransformer<KeyEntryTuple<String, Node>, Iterator<E>>() {
+	private transient ITransformer<KeyEntryTuple<String, Node>, Iterator<E>> TRANSFORMER_KET2EntrySet;
 
-		@Override
-		public Iterator<E> transform(final KeyEntryTuple<String, Node> ket) {
-			return ket.getSecond().entrySet.iterator();
-		}
-	};
-
-	private final transient ITransformer<Node, Iterator<E>> TRANSFORMER_NODE2ENTRIES = new ITransformer<Node, Iterator<E>>() {
-
-		@Override
-		public Iterator<E> transform(final Node node) {
-			return node.entrySet.iterator();
-		}
-	};
+	private transient ITransformer<Node, Iterator<E>> TRANSFORMER_NODE2ENTRIES;
 
 	@SuppressWarnings("unused")
-	private final transient ITransformer<Node, IEntrySet<E>> TRANSFORMER_NODE2ENTRYSET = new ITransformer<Node, IEntrySet<E>>() {
+	private transient ITransformer<Node, IEntrySet<E>> TRANSFORMER_NODE2ENTRYSET;
+
+	/* this class works around the fact that Java generics + Serialization + anonymous inner class does not work */
+	private static class TRANSFORMER_KET2EntrySet<E>
+	implements ITransformer<KeyEntryTuple<String, SmallStringSetTrie<E>.Node>, Iterator<E>> {
 
 		@Override
-		public IEntrySet<E> transform(final Node node) {
+		public Iterator<E> transform(final KeyEntryTuple<String, SmallStringSetTrie<E>.Node> ket) {
+			return ket.getSecond().entrySet.iterator();
+		}
+	}
+
+	/* this class works around the fact that Java generics + Serialization + anonymous inner class does not work */
+	private static class TRANSFORMER_NODE2ENTRIES<E> implements ITransformer<SmallStringSetTrie<E>.Node, Iterator<E>> {
+
+		@Override
+		public Iterator<E> transform(final SmallStringSetTrie<E>.Node node) {
+			return node.entrySet.iterator();
+		}
+	}
+
+	/* this class works around the fact that Java generics + Serialization + anonymous inner class does not work */
+	private static class TRANSFORMER_NODE2ENTRYSET<E>
+	implements ITransformer<SmallStringSetTrie<E>.Node, IEntrySet<E>> {
+
+		@Override
+		public IEntrySet<E> transform(final SmallStringSetTrie<E>.Node node) {
 			return node.entrySet;
 		}
-	};
+	}
 
 	public SmallStringSetTrie(final Factory<IEntrySet<E>> entrySetFactory) {
 		assert entrySetFactory != null;
 		this.entrySetFactory = entrySetFactory;
 		this.root = new Node();
+		initTransients();
+	}
+
+	private void readObject(final java.io.ObjectInputStream stream) throws IOException, ClassNotFoundException {
+		stream.defaultReadObject();
+		initTransients();
+	}
+
+	private void initTransients() {
+		this.FILTER_NON_EMPTY_ENTRYSET = new FILTER_NON_EMPTY_ENTRYSET<E>();
+		this.FUNCTION_clear = new FUNCTION_clear<E>();
+		this.TRANSFORMER_KET2EntrySet = new TRANSFORMER_KET2EntrySet<E>();
+		this.TRANSFORMER_NODE2ENTRIES = new TRANSFORMER_NODE2ENTRIES<E>();
+		this.TRANSFORMER_NODE2ENTRYSET = new TRANSFORMER_NODE2ENTRYSET<E>();
 	}
 
 	@Override
@@ -1188,19 +1193,6 @@ public class SmallStringSetTrie<E> implements IMapSetIndex<String, E> {
 		readOperationStart();
 		final ConstraintKeyPrefix constraintKeyPrefix = new ConstraintKeyPrefix(keyPrefix);
 		final ClosableIterator<KeyEntryTuple<String, E>> it = tupleIterator(constraintKeyPrefix, new Wildcard<E>());
-		return unlockIteratorOnClose(it);
-	}
-
-	/**
-	 * @deprecated looks buggy & untested
-	 * @param keyPrefix
-	 * @return
-	 */
-	@ReadOperation
-	@Deprecated
-	public ClosableIterator<E> searchPrefix(final String keyPrefix) {
-		readOperationStart();
-		final Iterator<E> it = this.root.searchPrefix(keyPrefix);
 		return unlockIteratorOnClose(it);
 	}
 

@@ -7,9 +7,9 @@ import org.xydra.index.query.KeyKeyKeyEntryTuple;
 
 /**
  * A map with triple keys.
- * 
+ *
  * Exactly one entry can be indexed for a certain key-combination.
- * 
+ *
  * @param <K>
  *            key type
  * @param <L>
@@ -31,7 +31,7 @@ public interface IMapMapMapIndex<K, L, M, E> extends IIndex {
 	/**
 	 * Indexes a entry for a key tuple. If there already is an entry for that
 	 * key tuple it will be replace.
-	 * 
+	 *
 	 * @param key1
 	 * @param key2
 	 * @param key3

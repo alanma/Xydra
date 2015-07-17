@@ -1,5 +1,6 @@
 package org.xydra.index.impl;
 
+import java.io.Serializable;
 import java.util.Iterator;
 
 import org.xydra.index.IEntrySet;
@@ -16,23 +17,19 @@ import org.xydra.index.query.KeyKeyEntryTuple;
 import org.xydra.index.query.Wildcard;
 
 /**
- * An implementation that uses several indexes internally and chooses among
- * them.
- * 
- * Fast implementation for {@link #contains(Constraint, Constraint, Constraint)}
- * and fast implementation for
+ * An implementation that uses several indexes internally and chooses among them.
+ *
+ * Fast implementation for {@link #contains(Constraint, Constraint, Constraint)} and fast implementation for
  * {@link #getTriples(Constraint, Constraint, Constraint)}.
- * 
+ *
  * @author voelkel
- * 
+ *
  * @param <K> key type 1 (s)
  * @param <L> key type 2 (p)
  * @param <M> key type 3 (o)
  */
-public class FastTripleIndex<K, L, M> extends SmallTripleIndex<K, L, M> implements
-		ITripleIndex<K, L, M> {
-
-	private static final long serialVersionUID = 4825573034123083085L;
+public class FastTripleIndex<K extends Serializable, L extends Serializable, M extends Serializable>
+extends SmallTripleIndex<K, L, M>implements ITripleIndex<K, L, M>, Serializable {
 
 	private final Constraint<K> STAR_S = new Wildcard<K>();
 	private final Constraint<L> STAR_P = new Wildcard<L>();
@@ -41,33 +38,33 @@ public class FastTripleIndex<K, L, M> extends SmallTripleIndex<K, L, M> implemen
 	/**
 	 * o -> s -> p
 	 */
-	private transient MapMapSetIndex<M, K, L> index_o_s_p;
+	private transient SerializableMapMapSetIndex<M, K, L> index_o_s_p;
 
 	/**
 	 * p -> o -> s
 	 */
-	private transient MapMapSetIndex<L, M, K> index_p_o_s;
+	private transient SerializableMapMapSetIndex<L, M, K> index_p_o_s;
 
-	private ITransformer<ITriple<L, M, K>, ITriple<K, L, M>> transformerPOS = new ITransformer<ITriple<L, M, K>, ITriple<K, L, M>>() {
+	private final ITransformer<ITriple<L, M, K>, ITriple<K, L, M>> transformerPOS = new ITransformer<ITriple<L, M, K>, ITriple<K, L, M>>() {
 
 		@Override
-		public ITriple<K, L, M> transform(ITriple<L, M, K> in) {
+		public ITriple<K, L, M> transform(final ITriple<L, M, K> in) {
 			return new KeyKeyEntryTuple<K, L, M>(in.getEntry(), in.getKey1(), in.getKey2());
 		}
 	};
 
-	private ITransformer<ITriple<M, K, L>, ITriple<K, L, M>> transformerOSP = new ITransformer<ITriple<M, K, L>, ITriple<K, L, M>>() {
+	private final ITransformer<ITriple<M, K, L>, ITriple<K, L, M>> transformerOSP = new ITransformer<ITriple<M, K, L>, ITriple<K, L, M>>() {
 
 		@Override
-		public ITriple<K, L, M> transform(ITriple<M, K, L> in) {
+		public ITriple<K, L, M> transform(final ITriple<M, K, L> in) {
 			return new KeyKeyEntryTuple<K, L, M>(in.getKey2(), in.getEntry(), in.getKey1());
 		}
 	};
 
 	public FastTripleIndex() {
 		super();
-		this.index_o_s_p = new MapMapSetIndex<M, K, L>(new FastEntrySetFactory<L>());
-		this.index_p_o_s = new MapMapSetIndex<L, M, K>(new FastEntrySetFactory<K>());
+		this.index_o_s_p = new SerializableMapMapSetIndex<M, K, L>(new FastEntrySetFactory<L>());
+		this.index_p_o_s = new SerializableMapMapSetIndex<L, M, K>(new FastEntrySetFactory<K>());
 	}
 
 	@Override
@@ -78,35 +75,35 @@ public class FastTripleIndex<K, L, M> extends SmallTripleIndex<K, L, M> implemen
 	}
 
 	@Override
-	public boolean contains(Constraint<K> c1, Constraint<L> c2, Constraint<M> c3) {
+	public boolean contains(final Constraint<K> c1, final Constraint<L> c2, final Constraint<M> c3) {
 		// deal with the eight patterns
 		if (
-		// spo -> s_p_o
-		(!c1.isStar() && !c2.isStar() && !c3.isStar()) ||
-		// sp* -> s_p_o
-				(!c1.isStar() && !c2.isStar() && c3.isStar()) ||
+				// spo -> s_p_o
+				!c1.isStar() && !c2.isStar() && !c3.isStar() ||
+				// sp* -> s_p_o
+				!c1.isStar() && !c2.isStar() && c3.isStar() ||
 				// s** -> s_p_o
-				(!c1.isStar() && c2.isStar() && c3.isStar()) ||
+				!c1.isStar() && c2.isStar() && c3.isStar() ||
 				// *** -> s_p_o
-				(c1.isStar() && c2.isStar() && c3.isStar())
+				c1.isStar() && c2.isStar() && c3.isStar()
 
-		) {
+				) {
 			return this.index_s_p_o.contains(c1, c2, c3);
 		} else if (
-		// *po -> p_o
-		(c1.isStar() && !c2.isStar() && !c3.isStar()) ||
-		// *p* -> p_o
-				(c1.isStar() && !c2.isStar() && c3.isStar())
+				// *po -> p_o
+				c1.isStar() && !c2.isStar() && !c3.isStar() ||
+				// *p* -> p_o
+				c1.isStar() && !c2.isStar() && c3.isStar()
 
-		) {
+				) {
 			return this.index_p_o_s.contains(c2, c3, this.STAR_S);
 		} else if (
-		// s*o -> o_s
-		(!c1.isStar() && c2.isStar() && !c3.isStar()) ||
-		// **o -> o_s
-				(c1.isStar() && c2.isStar() && !c3.isStar())
+				// s*o -> o_s
+				!c1.isStar() && c2.isStar() && !c3.isStar() ||
+				// **o -> o_s
+				c1.isStar() && c2.isStar() && !c3.isStar()
 
-		) {
+				) {
 			return this.index_o_s_p.contains(c3, c1, this.STAR_P);
 		}
 
@@ -122,37 +119,37 @@ public class FastTripleIndex<K, L, M> extends SmallTripleIndex<K, L, M> implemen
 	 * @CanBeNull to denote wildcard
 	 */
 	@Override
-	public boolean contains(K c1, L c2, M c3) {
+	public boolean contains(final K c1, final L c2, final M c3) {
 		/* avoid creating Constraint and Wildcard objects */
 
 		// deal with the eight patterns
 		if (
-		// spo -> s_p_o
-		(c1 != null && c2 != null && c3 != null) ||
-		// sp* -> s_p_o
-				(c1 != null && c2 != null && c3 == null) ||
+				// spo -> s_p_o
+				c1 != null && c2 != null && c3 != null ||
+				// sp* -> s_p_o
+				c1 != null && c2 != null && c3 == null ||
 				// s** -> s_p_o
-				(c1 != null && c2 == null && c3 == null) ||
+				c1 != null && c2 == null && c3 == null ||
 				// *** -> s_p_o
-				(c1 == null && c2 == null && c3 == null)
+				c1 == null && c2 == null && c3 == null
 
-		) {
+				) {
 			return this.index_s_p_o.contains(c1, c2, c3);
 		} else if (
-		// *po -> p_o
-		(c1 == null && c2 != null && c3 != null) ||
-		// *p* -> p_o
-				(c1 == null && c2 != null && c3 == null)
+				// *po -> p_o
+				c1 == null && c2 != null && c3 != null ||
+				// *p* -> p_o
+				c1 == null && c2 != null && c3 == null
 
-		) {
+				) {
 			return this.index_p_o_s.contains(c2, c3, null);
 		} else if (
-		// s*o -> o_s
-		(c1 != null && c2 == null && c3 != null) ||
-		// **o -> o_s
-				(c1 == null && c2 == null && c3 != null)
+				// s*o -> o_s
+				c1 != null && c2 == null && c3 != null ||
+				// **o -> o_s
+				c1 == null && c2 == null && c3 != null
 
-		) {
+				) {
 			return this.index_o_s_p.contains(c3, c1, null);
 		}
 
@@ -169,43 +166,41 @@ public class FastTripleIndex<K, L, M> extends SmallTripleIndex<K, L, M> implemen
 	 * @return an iterator over all matching triples
 	 */
 	@Override
-	public Iterator<ITriple<K, L, M>> getTriples(K c1, L c2, M c3) {
+	public Iterator<ITriple<K, L, M>> getTriples(final K c1, final L c2, final M c3) {
 		/* avoid creating Constraint and Wildcard objects */
 
 		// deal with the eight patterns
 		if (
-		// spo -> s_p_o
-		(c1 != null && c2 != null && c3 != null) ||
-		// sp* -> s_p_o
-				(c1 != null && c2 != null && c3 == null) ||
+				// spo -> s_p_o
+				c1 != null && c2 != null && c3 != null ||
+				// sp* -> s_p_o
+				c1 != null && c2 != null && c3 == null ||
 				// s** -> s_p_o
-				(c1 != null && c2 == null && c3 == null) ||
+				c1 != null && c2 == null && c3 == null ||
 				// *** -> s_p_o
-				(c1 == null && c2 == null && c3 == null)
+				c1 == null && c2 == null && c3 == null
 
-		) {
+				) {
 			return this.index_s_p_o.tupleIterator(c1, c2, c3);
 		} else if (
-		// *po -> p_o
-		(c1 == null && c2 != null && c3 != null) ||
-		// *p* -> p_o
-				(c1 == null && c2 != null && c3 == null)
+				// *po -> p_o
+				c1 == null && c2 != null && c3 != null ||
+				// *p* -> p_o
+				c1 == null && c2 != null && c3 == null
 
-		) {
-			Iterator<ITriple<L, M, K>> baseIt = this.index_p_o_s.tupleIterator(c2, c3, null);
-			return new TransformingIterator<ITriple<L, M, K>, ITriple<K, L, M>>(baseIt,
-					this.transformerPOS);
+				) {
+			final Iterator<ITriple<L, M, K>> baseIt = this.index_p_o_s.tupleIterator(c2, c3, null);
+			return new TransformingIterator<ITriple<L, M, K>, ITriple<K, L, M>>(baseIt, this.transformerPOS);
 
 		} else if (
-		// s*o -> o_s
-		(c1 != null && c2 == null && c3 != null) ||
-		// **o -> o_s
-				(c1 == null && c2 == null && c3 != null)
+				// s*o -> o_s
+				c1 != null && c2 == null && c3 != null ||
+				// **o -> o_s
+				c1 == null && c2 == null && c3 != null
 
-		) {
-			Iterator<ITriple<M, K, L>> baseIt = this.index_o_s_p.tupleIterator(c3, c1, null);
-			return new TransformingIterator<ITriple<M, K, L>, ITriple<K, L, M>>(baseIt,
-					this.transformerOSP);
+				) {
+			final Iterator<ITriple<M, K, L>> baseIt = this.index_o_s_p.tupleIterator(c3, c1, null);
+			return new TransformingIterator<ITriple<M, K, L>, ITriple<K, L, M>>(baseIt, this.transformerOSP);
 		}
 
 		throw new AssertionError("one of the patterns should have matched");
@@ -216,15 +211,17 @@ public class FastTripleIndex<K, L, M> extends SmallTripleIndex<K, L, M> implemen
 	 * @param p @NeverNull
 	 * @return an iterator over all objects matching (s,p,*)
 	 */
-	public Iterator<M> getObjects_SPX(K s, L p) {
+	public Iterator<M> getObjects_SPX(final K s, final L p) {
 		assert s != null;
 		assert p != null;
-		IMapSetIndex<L, M> index_s_Px_Ox = this.index_s_p_o.getMapEntry(s);
-		if (index_s_Px_Ox == null)
+		final IMapSetIndex<L, M> index_s_Px_Ox = this.index_s_p_o.getMapEntry(s);
+		if (index_s_Px_Ox == null) {
 			return NoneIterator.<M> create();
-		IEntrySet<M> index_s_p_Ox = index_s_Px_Ox.lookup(p);
-		if (index_s_p_Ox == null)
+		}
+		final IEntrySet<M> index_s_p_Ox = index_s_Px_Ox.lookup(p);
+		if (index_s_p_Ox == null) {
 			return NoneIterator.<M> create();
+		}
 		return index_s_p_Ox.iterator();
 	}
 
@@ -232,11 +229,12 @@ public class FastTripleIndex<K, L, M> extends SmallTripleIndex<K, L, M> implemen
 	 * @param s @NeverNull
 	 * @return an iterator over (p,o)-tuples for the given s @NeverNull
 	 */
-	public Iterator<KeyEntryTuple<L, M>> getTupels_SXX(K s) {
+	public Iterator<KeyEntryTuple<L, M>> getTupels_SXX(final K s) {
 		assert s != null;
-		IMapSetIndex<L, M> index_s_Px_Ox = this.index_s_p_o.getMapEntry(s);
-		if (index_s_Px_Ox == null)
+		final IMapSetIndex<L, M> index_s_Px_Ox = this.index_s_p_o.getMapEntry(s);
+		if (index_s_Px_Ox == null) {
 			return NoneIterator.<KeyEntryTuple<L, M>> create();
+		}
 		return index_s_Px_Ox.tupleIterator(this.STAR_P, this.STAR_O);
 	}
 
@@ -245,15 +243,17 @@ public class FastTripleIndex<K, L, M> extends SmallTripleIndex<K, L, M> implemen
 	 * @param o @NeverNull
 	 * @return an iterator over all subjects matching (*,p,o) @NeverNull
 	 */
-	public Iterator<K> getSubjects_XPO(L p, M o) {
+	public Iterator<K> getSubjects_XPO(final L p, final M o) {
 		assert p != null;
 		assert o != null;
-		IMapSetIndex<M, K> index_p_Ox_Sx = this.index_p_o_s.getMapEntry(p);
-		if (index_p_Ox_Sx == null)
+		final IMapSetIndex<M, K> index_p_Ox_Sx = this.index_p_o_s.getMapEntry(p);
+		if (index_p_Ox_Sx == null) {
 			return NoneIterator.<K> create();
-		IEntrySet<K> index_p_o_Sx = index_p_Ox_Sx.lookup(o);
-		if (index_p_o_Sx == null)
+		}
+		final IEntrySet<K> index_p_o_Sx = index_p_Ox_Sx.lookup(o);
+		if (index_p_o_Sx == null) {
 			return NoneIterator.<K> create();
+		}
 		return index_p_o_Sx.iterator();
 	}
 
@@ -262,28 +262,30 @@ public class FastTripleIndex<K, L, M> extends SmallTripleIndex<K, L, M> implemen
 	 * @param o @NeverNull
 	 * @return an iterator over all predicates occurring in triples (s,*,o) @NeverNull
 	 */
-	public Iterator<L> getPredicates_SXO(K s, M o) {
+	public Iterator<L> getPredicates_SXO(final K s, final M o) {
 		assert s != null;
 		assert o != null;
-		IMapSetIndex<K, L> index_o_Sx_Px = this.index_o_s_p.getMapEntry(o);
-		if (index_o_Sx_Px == null)
+		final IMapSetIndex<K, L> index_o_Sx_Px = this.index_o_s_p.getMapEntry(o);
+		if (index_o_Sx_Px == null) {
 			return NoneIterator.<L> create();
-		IEntrySet<L> index_o_s_Px = index_o_Sx_Px.lookup(s);
-		if (index_o_s_Px == null)
+		}
+		final IEntrySet<L> index_o_s_Px = index_o_Sx_Px.lookup(s);
+		if (index_o_s_Px == null) {
 			return NoneIterator.<L> create();
+		}
 		return index_o_s_Px.iterator();
 	}
 
 	/**
 	 * @param s @NeverNull
-	 * @return a distinct iterator over all predicates occurring in triples
-	 *         (s,*,*) @NeverNull
+	 * @return a distinct iterator over all predicates occurring in triples (s,*,*) @NeverNull
 	 */
-	public Iterator<L> getPredicates_SX(K s) {
+	public Iterator<L> getPredicates_SX(final K s) {
 		assert s != null;
-		IMapSetIndex<L, M> index_s_Px_Ox = this.index_s_p_o.getMapEntry(s);
-		if (index_s_Px_Ox == null)
+		final IMapSetIndex<L, M> index_s_Px_Ox = this.index_s_p_o.getMapEntry(s);
+		if (index_s_Px_Ox == null) {
 			return Iterators.none();
+		}
 		return index_s_Px_Ox.keyIterator();
 	}
 
@@ -312,11 +314,12 @@ public class FastTripleIndex<K, L, M> extends SmallTripleIndex<K, L, M> implemen
 	 * @param o @NeverNull
 	 * @return an iterator over (s,p)-tuples for the given o
 	 */
-	public Iterator<KeyEntryTuple<K, L>> getTupels_XXO(M o) {
+	public Iterator<KeyEntryTuple<K, L>> getTupels_XXO(final M o) {
 		assert o != null;
-		IMapSetIndex<K, L> index_o_Sx_Px = this.index_o_s_p.getMapEntry(o);
-		if (index_o_Sx_Px == null)
+		final IMapSetIndex<K, L> index_o_Sx_Px = this.index_o_s_p.getMapEntry(o);
+		if (index_o_Sx_Px == null) {
 			return NoneIterator.<KeyEntryTuple<K, L>> create();
+		}
 		return index_o_Sx_Px.tupleIterator(this.STAR_S, this.STAR_P);
 	}
 
@@ -324,16 +327,17 @@ public class FastTripleIndex<K, L, M> extends SmallTripleIndex<K, L, M> implemen
 	 * @param p @NeverNull
 	 * @return an iterator over (s,o)-tuples for the given p
 	 */
-	public Iterator<KeyEntryTuple<M, K>> getTupels_XPX(L p) {
+	public Iterator<KeyEntryTuple<M, K>> getTupels_XPX(final L p) {
 		assert p != null;
-		IMapSetIndex<M, K> index_p_Ox_Sx = this.index_p_o_s.getMapEntry(p);
-		if (index_p_Ox_Sx == null)
+		final IMapSetIndex<M, K> index_p_Ox_Sx = this.index_p_o_s.getMapEntry(p);
+		if (index_p_Ox_Sx == null) {
 			return NoneIterator.<KeyEntryTuple<M, K>> create();
+		}
 		return index_p_Ox_Sx.tupleIterator(this.STAR_O, this.STAR_S);
 	}
 
 	@Override
-	public void deIndex(K s, L p, M o) {
+	public void deIndex(final K s, final L p, final M o) {
 		assert s != null;
 		assert p != null;
 		assert o != null;
@@ -343,7 +347,7 @@ public class FastTripleIndex<K, L, M> extends SmallTripleIndex<K, L, M> implemen
 	}
 
 	@Override
-	public boolean index(K s, L p, M o) {
+	public boolean index(final K s, final L p, final M o) {
 		assert s != null;
 		assert p != null;
 		assert o != null;
@@ -352,26 +356,23 @@ public class FastTripleIndex<K, L, M> extends SmallTripleIndex<K, L, M> implemen
 		return changes;
 	}
 
-	private boolean transientIndex(K s, L p, M o) {
+	private boolean transientIndex(final K s, final L p, final M o) {
 		boolean changes = this.index_o_s_p.index(o, s, p);
 		changes |= this.index_p_o_s.index(p, o, s);
 		return changes;
 	}
 
 	/**
-	 * This method should be called after deserialisation to rebuild the
-	 * transient indexes. Deserialisation in GWT and plain Java is quite
-	 * different and incompatible, so this is not called automatically. For
-	 * plain Java see <a href=
-	 * "http://java.sun.com/developer/technicalArticles/Programming/serialization/"
-	 * >http://java.sun.com/developer/technicalArticles/Programming/
-	 * serialization/</a>
+	 * This method should be called after deserialisation to rebuild the transient indexes. Deserialisation in GWT and
+	 * plain Java is quite different and incompatible, so this is not called automatically. For plain Java see
+	 * <a href= "http://java.sun.com/developer/technicalArticles/Programming/serialization/" >http://java.sun.com/
+	 * developer/technicalArticles/Programming/ serialization/</a>
 	 */
 	public void rebuildAfterDeserialize() {
-		Iterator<ITriple<K, L, M>> it = this.index_s_p_o.tupleIterator(new Wildcard<K>(),
-				new Wildcard<L>(), new Wildcard<M>());
+		final Iterator<ITriple<K, L, M>> it = this.index_s_p_o.tupleIterator(new Wildcard<K>(), new Wildcard<L>(),
+				new Wildcard<M>());
 		while (it.hasNext()) {
-			ITriple<K, L, M> t = it.next();
+			final ITriple<K, L, M> t = it.next();
 			transientIndex(t.getKey1(), t.getKey2(), t.getEntry());
 		}
 	}

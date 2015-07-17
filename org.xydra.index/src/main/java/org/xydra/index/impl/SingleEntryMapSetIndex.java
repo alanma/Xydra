@@ -1,5 +1,6 @@
 package org.xydra.index.impl;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -24,7 +25,7 @@ import org.xydra.index.query.KeyEntryTuple;
  * @param <E>
  *            entry type
  */
-public class SingleEntryMapSetIndex<K, E> extends KeyEntryTuple<K, E> implements IMapSetIndex<K, E> {
+public class SingleEntryMapSetIndex<K, E> extends KeyEntryTuple<K, E> implements IMapSetIndex<K, E>, Serializable {
 
 	private static final long serialVersionUID = 3040641314902060159L;
 
@@ -194,7 +195,7 @@ public class SingleEntryMapSetIndex<K, E> extends KeyEntryTuple<K, E> implements
 		}
 	}
 
-	class EntrySet implements IEntrySet<E> {
+	class EntrySet implements IEntrySet<E>, Serializable{
 
 		private static final long serialVersionUID = 1L;
 

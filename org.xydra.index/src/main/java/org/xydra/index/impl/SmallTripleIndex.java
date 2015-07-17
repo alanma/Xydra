@@ -1,5 +1,6 @@
 package org.xydra.index.impl;
 
+import java.io.Serializable;
 import java.util.Iterator;
 
 import org.xydra.index.IMapMapSetIndex.IMapMapSetDiff;
@@ -11,24 +12,22 @@ import org.xydra.index.query.Wildcard;
 
 /**
  * An implementation that uses no indexes. Slow, but small memory footprint.
- * 
+ *
  * @author voelkel
- * 
+ *
  * @param <K> key type 1
  * @param <L> key type 2
  * @param <M> key type 3
  */
-public class SmallTripleIndex<K, L, M> implements ITripleIndex<K, L, M> {
-
-	private static final long serialVersionUID = 4825573034123083085L;
+public class SmallTripleIndex<K extends Serializable, L extends Serializable, M extends Serializable> implements ITripleIndex<K, L, M>, Serializable {
 
 	/**
 	 * s > p > o
 	 */
-	protected MapMapSetIndex<K, L, M> index_s_p_o;
+	protected SerializableMapMapSetIndex<K, L, M> index_s_p_o;
 
 	public SmallTripleIndex() {
-		this.index_s_p_o = new MapMapSetIndex<K, L, M>(new FastEntrySetFactory<M>());
+		this.index_s_p_o = new SerializableMapMapSetIndex<K, L, M>(new FastEntrySetFactory<M>());
 	}
 
 	@Override
@@ -37,7 +36,7 @@ public class SmallTripleIndex<K, L, M> implements ITripleIndex<K, L, M> {
 	}
 
 	@Override
-	public boolean contains(Constraint<K> c1, Constraint<L> c2, Constraint<M> c3) {
+	public boolean contains(final Constraint<K> c1, final Constraint<L> c2, final Constraint<M> c3) {
 		return getTriples(c1, c2, c3).hasNext();
 	}
 
@@ -51,59 +50,62 @@ public class SmallTripleIndex<K, L, M> implements ITripleIndex<K, L, M> {
 	 * @return true if triple index contains the given triple
 	 */
 	@Override
-	public boolean contains(K key1, L key2, M key3) {
-		Constraint<K> c1 = new EqualsConstraint<K>(key1);
-		Constraint<L> c2 = new EqualsConstraint<L>(key2);
-		Constraint<M> c3 = new EqualsConstraint<M>(key3);
+	public boolean contains(final K key1, final L key2, final M key3) {
+		final Constraint<K> c1 = new EqualsConstraint<K>(key1);
+		final Constraint<L> c2 = new EqualsConstraint<L>(key2);
+		final Constraint<M> c3 = new EqualsConstraint<M>(key3);
 		return this.contains(c1, c2, c3);
 	}
 
 	@Override
-	public void deIndex(K s, L p, M o) {
+	public void deIndex(final K s, final L p, final M o) {
 		this.index_s_p_o.deIndex(s, p, o);
 	}
 
 	@Override
 	public void dump() {
 		System.out.println("Dumping s-p-o-index (there are others)");
-		Iterator<ITriple<K, L, M>> it = this.index_s_p_o.tupleIterator(new Wildcard<K>(),
+		final Iterator<ITriple<K, L, M>> it = this.index_s_p_o.tupleIterator(new Wildcard<K>(),
 				new Wildcard<L>(), new Wildcard<M>());
 		while (it.hasNext()) {
-			ITriple<K, L, M> t = it.next();
+			final ITriple<K, L, M> t = it.next();
 			System.out.println(t.getKey1() + " - " + t.getKey2() + " - " + t.getEntry());
 		}
 	}
 
 	@Override
-	public Iterator<ITriple<K, L, M>> getTriples(Constraint<K> c1, Constraint<L> c2,
-			Constraint<M> c3) {
-		if (c1 == null)
+	public Iterator<ITriple<K, L, M>> getTriples(final Constraint<K> c1, final Constraint<L> c2,
+			final Constraint<M> c3) {
+		if (c1 == null) {
 			throw new IllegalArgumentException("c1 was null");
-		if (c2 == null)
+		}
+		if (c2 == null) {
 			throw new IllegalArgumentException("c2 was null");
-		if (c3 == null)
+		}
+		if (c3 == null) {
 			throw new IllegalArgumentException("c3 was null");
-		Iterator<ITriple<K, L, M>> tupleIterator = this.index_s_p_o.tupleIterator(c1, c2, c3);
+		}
+		final Iterator<ITriple<K, L, M>> tupleIterator = this.index_s_p_o.tupleIterator(c1, c2, c3);
 		return tupleIterator;
 	}
 
 	@Override
-	public Iterator<ITriple<K, L, M>> getTriples(K s, L p, M o) {
-		Constraint<K> c1 = s == null ? new Wildcard<K>() : new EqualsConstraint<K>(s);
-		Constraint<L> c2 = p == null ? new Wildcard<L>() : new EqualsConstraint<L>(p);
-		Constraint<M> c3 = o == null ? new Wildcard<M>() : new EqualsConstraint<M>(o);
+	public Iterator<ITriple<K, L, M>> getTriples(final K s, final L p, final M o) {
+		final Constraint<K> c1 = s == null ? new Wildcard<K>() : new EqualsConstraint<K>(s);
+		final Constraint<L> c2 = p == null ? new Wildcard<L>() : new EqualsConstraint<L>(p);
+		final Constraint<M> c3 = o == null ? new Wildcard<M>() : new EqualsConstraint<M>(o);
 		return getTriples(c1, c2, c3);
 	}
 
 	@Override
-	public boolean index(K s, L p, M o) {
+	public boolean index(final K s, final L p, final M o) {
 		return this.index_s_p_o.index(s, p, o);
 	}
 
 	@Override
-	public IMapMapSetDiff<K, L, M> computeDiff(ITripleIndex<K, L, M> other) {
-		SmallTripleIndex<K, L, M> otherIndex = (SmallTripleIndex<K, L, M>) other;
-		IMapMapSetDiff<K, L, M> spoDiff = this.index_s_p_o.computeDiff(otherIndex.index_s_p_o);
+	public IMapMapSetDiff<K, L, M> computeDiff(final ITripleIndex<K, L, M> other) {
+		final SmallTripleIndex<K, L, M> otherIndex = (SmallTripleIndex<K, L, M>) other;
+		final IMapMapSetDiff<K, L, M> spoDiff = this.index_s_p_o.computeDiff(otherIndex.index_s_p_o);
 		return spoDiff;
 	}
 

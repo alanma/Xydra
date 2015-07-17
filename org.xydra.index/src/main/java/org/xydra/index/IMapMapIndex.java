@@ -1,5 +1,6 @@
 package org.xydra.index;
 
+import java.io.Serializable;
 import java.util.Iterator;
 
 import org.xydra.index.iterator.Iterators;
@@ -8,19 +9,19 @@ import org.xydra.index.query.KeyKeyEntryTuple;
 
 /**
  * A map with double keys.
- * 
+ *
  * Exactly one entry can be indexed for a certain key-combination.
- * 
+ *
  * @param <K>
  *            key type
  * @param <L>
  *            key2 type
  * @param <E>
  *            entity type
- * 
+ *
  * @author dscharrer
  */
-public interface IMapMapIndex<K, L, E> extends IIndex {
+public interface IMapMapIndex<K extends Serializable, L extends Serializable, E extends Serializable> extends IIndex {
 
 	/**
 	 * @param key1
@@ -69,7 +70,7 @@ public interface IMapMapIndex<K, L, E> extends IIndex {
 	/**
 	 * @return an iterator over all keys in the second position of the tuples
 	 *         (can contain duplicates)
-	 * 
+	 *
 	 *         Use {@link Iterators#distinct(Iterator)} for distinct values.
 	 */
 	Iterator<L> key2Iterator();

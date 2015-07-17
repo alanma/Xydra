@@ -1,12 +1,12 @@
 /*
  * Copyright 2011 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -42,10 +42,10 @@ import org.xydra.index.query.Wildcard;
 
 /**
  * Can register listeners and send events for all kinds of Xydra events.
- * 
+ *
  * Supports de-/registering old/new listeners while event sending is running
  * with an internal command queue.
- * 
+ *
  * @author xamde
  */
 @LicenseApache(copyright = "Copyright 2011 Google Inc.", modified = true)
@@ -65,7 +65,7 @@ public class MemoryEventBus {
 	 * @param listener
 	 * @NeverNull
 	 */
-	private static void fireEventToListener(EventType eventType, Object event, Object listener) {
+	private static void fireEventToListener(final EventType eventType, final Object event, final Object listener) {
 		switch (eventType) {
 		case FieldChange:
 			((XFieldEventListener) listener).onChangeEvent((XFieldEvent) event);
@@ -90,13 +90,19 @@ public class MemoryEventBus {
 	/**
 	 * Add and remove operations received during dispatch.
 	 */
-	private List<Runnable> deferredDeltas = new LinkedList<Runnable>();
+	private final List<Runnable> deferredDeltas = new LinkedList<Runnable>();
 
 	private int fireCalls = 0;
 
 	IMapMapSetIndex<EventType, XAddress, Object> map = new MapMapSetIndex<EventType, XAddress, Object>(
 			new SmallEntrySetFactory<Object>());
 
+	/**
+	 * @param eventType
+	 * @param sourceAddress
+	 * @param listener
+	 * @return
+	 */
 	public boolean addListener(final EventType eventType, final XAddress sourceAddress,
 			final Object listener) {
 		if (this.fireCalls > 0) {
@@ -117,7 +123,7 @@ public class MemoryEventBus {
 	/**
 	 * Notifies all listeners that have registered interest for notification on
 	 * events of type EventType happening on source-entities.
-	 * 
+	 *
 	 * @param eventType
 	 * @NeverNull
 	 * @param source
@@ -125,7 +131,7 @@ public class MemoryEventBus {
 	 * @param event The, e.g., {@link XFieldEvent} which will be propagated to
 	 *            the registered listeners.
 	 */
-	public void fireEvent(EventType eventType, XAddress source, Object event) {
+	public void fireEvent(final EventType eventType, final XAddress source, final Object event) {
 		assert eventType != null;
 		if (event == null) {
 			throw new NullPointerException("Cannot fire null event");
@@ -134,17 +140,17 @@ public class MemoryEventBus {
 		synchronized (this.map) {
 			this.fireCalls++;
 			try {
-				Iterator<ITriple<EventType, XAddress, Object>> it = this.map.tupleIterator(
+				final Iterator<ITriple<EventType, XAddress, Object>> it = this.map.tupleIterator(
 
-				new EqualsConstraint<MemoryEventBus.EventType>(eventType),
+						new EqualsConstraint<MemoryEventBus.EventType>(eventType),
 
-				source == null ? new Wildcard<XAddress>() : new EqualsConstraint<XAddress>(source),
+						source == null ? new Wildcard<XAddress>() : new EqualsConstraint<XAddress>(source),
 
-				new Wildcard<Object>()
+								new Wildcard<Object>()
 
-				);
+						);
 				while (it.hasNext()) {
-					Object o = it.next().getEntry();
+					final Object o = it.next().getEntry();
 					fireEventToListener(eventType, event, o);
 				}
 			} finally {
@@ -158,7 +164,7 @@ public class MemoryEventBus {
 
 	private void handleQueuedAddsAndRemoves() {
 		try {
-			for (Runnable r : this.deferredDeltas) {
+			for (final Runnable r : this.deferredDeltas) {
 				r.run();
 			}
 		} finally {
@@ -185,11 +191,11 @@ public class MemoryEventBus {
 
 	@Override
 	public String toString() {
-		StringBuilder b = new StringBuilder();
-		Iterator<ITriple<EventType, XAddress, Object>> tupleIt = this.map.tupleIterator(
+		final StringBuilder b = new StringBuilder();
+		final Iterator<ITriple<EventType, XAddress, Object>> tupleIt = this.map.tupleIterator(
 				(EventType) null, null, null);
 		while (tupleIt.hasNext()) {
-			ITriple<MemoryEventBus.EventType, XAddress, Object> tuple = tupleIt.next();
+			final ITriple<MemoryEventBus.EventType, XAddress, Object> tuple = tupleIt.next();
 			b.append("EventType=" + tuple.getKey1() + ".Address=" + tuple.getKey2() + " => "
 					+ tuple.getEntry().getClass() + "\n");
 		}

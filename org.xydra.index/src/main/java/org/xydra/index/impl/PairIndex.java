@@ -13,14 +13,12 @@ import org.xydra.index.query.Wildcard;
 /**
  * An implementation of IPairIndex that uses two separate indices to allow
  * efficient queries on both keys.
- * 
+ *
  * @author dscharrer
  * @param <K>
  * @param <L>
  */
 public class PairIndex<K, L> implements IPairIndex<K, L> {
-
-	private static final long serialVersionUID = 1027758476161499843L;
 
 	/**
 	 * key1 -> set of key2
@@ -44,26 +42,26 @@ public class PairIndex<K, L> implements IPairIndex<K, L> {
 	}
 
 	@Override
-	public void index(K k1, L k2) {
+	public void index(final K k1, final L k2) {
 		this.index_k1_k2.index(k1, k2);
 		this.index_k2_k1.index(k2, k1);
 	}
 
 	@Override
-	public void deIndex(K k1, L k2) {
+	public void deIndex(final K k1, final L k2) {
 		this.index_k1_k2.deIndex(k1, k2);
 		this.index_k2_k1.deIndex(k2, k1);
 	}
 
 	@Override
-	public Iterator<Pair<K, L>> constraintIterator(Constraint<K> c1, Constraint<L> c2) {
+	public Iterator<Pair<K, L>> constraintIterator(final Constraint<K> c1, final Constraint<L> c2) {
 
 		if (!c1.isStar() || c2.isStar()) {
 			return new AbstractTransformingIterator<KeyEntryTuple<K, L>, Pair<K, L>>(
 					this.index_k1_k2.tupleIterator(c1, c2)) {
 
 				@Override
-				public Pair<K, L> transform(KeyEntryTuple<K, L> in) {
+				public Pair<K, L> transform(final KeyEntryTuple<K, L> in) {
 					return in;
 				}
 
@@ -74,7 +72,7 @@ public class PairIndex<K, L> implements IPairIndex<K, L> {
 				this.index_k2_k1.tupleIterator(c2, c1)) {
 
 			@Override
-			public Pair<K, L> transform(KeyEntryTuple<L, K> in) {
+			public Pair<K, L> transform(final KeyEntryTuple<L, K> in) {
 				return in.inverse();
 			}
 		};
@@ -82,10 +80,11 @@ public class PairIndex<K, L> implements IPairIndex<K, L> {
 	}
 
 	@Override
-	public boolean contains(Constraint<K> c1, Constraint<L> c2) {
+	public boolean contains(final Constraint<K> c1, final Constraint<L> c2) {
 
-		if (!c1.isStar())
+		if (!c1.isStar()) {
 			return this.index_k1_k2.contains(c1, c2);
+		}
 
 		return this.index_k2_k1.contains(c2, c1);
 
@@ -102,10 +101,10 @@ public class PairIndex<K, L> implements IPairIndex<K, L> {
 	private Object readResolve() {
 		if (this.index_k2_k1 == null) {
 			this.index_k2_k1 = new MapSetIndex<L, K>(new FastEntrySetFactory<K>());
-			Iterator<KeyEntryTuple<K, L>> it = this.index_k1_k2.tupleIterator(new Wildcard<K>(),
+			final Iterator<KeyEntryTuple<K, L>> it = this.index_k1_k2.tupleIterator(new Wildcard<K>(),
 					new Wildcard<L>());
 			while (it.hasNext()) {
-				KeyEntryTuple<K, L> tuple = it.next();
+				final KeyEntryTuple<K, L> tuple = it.next();
 				this.index_k2_k1.index(tuple.getEntry(), tuple.getKey());
 			}
 		}

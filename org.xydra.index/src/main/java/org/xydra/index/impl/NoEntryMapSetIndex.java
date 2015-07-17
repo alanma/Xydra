@@ -1,5 +1,6 @@
 package org.xydra.index.impl;
 
+import java.io.Serializable;
 import java.util.Iterator;
 
 import org.xydra.index.IEntrySet;
@@ -10,19 +11,19 @@ import org.xydra.index.query.KeyEntryTuple;
 
 /**
  * An empty, read-only {@link IMapSetIndex}.
- * 
+ *
  * @author voelkel
  * @param <K>
- * 
+ *
  * @param <E>
  *            entity type
  */
-public class NoEntryMapSetIndex<K, E> implements IMapSetIndex<K, E> {
+public class NoEntryMapSetIndex<K, E> implements IMapSetIndex<K, E>, Serializable {
 
 	private static final long serialVersionUID = -4800590888115736374L;
 
 	@Override
-	public org.xydra.index.IMapSetIndex.IMapSetDiff<K, E> computeDiff(IMapSetIndex<K, E> otherFuture) {
+	public org.xydra.index.IMapSetIndex.IMapSetDiff<K, E> computeDiff(final IMapSetIndex<K, E> otherFuture) {
 
 		// comparing this to other: all content has been added, nothing has been
 		// removed
@@ -31,9 +32,9 @@ public class NoEntryMapSetIndex<K, E> implements IMapSetIndex<K, E> {
 
 	class EmptyMapSetDiff implements IMapSetDiff<K, E> {
 
-		private IMapSetIndex<K, E> added;
+		private final IMapSetIndex<K, E> added;
 
-		public EmptyMapSetDiff(IMapSetIndex<K, E> other) {
+		public EmptyMapSetDiff(final IMapSetIndex<K, E> other) {
 			this.added = other;
 		}
 
@@ -50,38 +51,38 @@ public class NoEntryMapSetIndex<K, E> implements IMapSetIndex<K, E> {
 	}
 
 	@Override
-	public Iterator<E> constraintIterator(Constraint<K> c1) {
+	public Iterator<E> constraintIterator(final Constraint<K> c1) {
 		return NoneIterator.<E> create();
 	}
 
 	@Override
-	public boolean contains(Constraint<K> c1, Constraint<E> entryConstraint) {
+	public boolean contains(final Constraint<K> c1, final Constraint<E> entryConstraint) {
 		return false;
 	}
 
 	@Override
-	public boolean containsKey(K key) {
+	public boolean containsKey(final K key) {
 		return false;
 	}
 
 	@Override
-	public boolean deIndex(K key1, E entry) {
+	public boolean deIndex(final K key1, final E entry) {
 		throw new RuntimeException("this index is not meant to write");
 	}
 
 	@Override
-	public void deIndex(K key1) {
+	public void deIndex(final K key1) {
 		throw new RuntimeException("this index is not meant to write");
 	}
 
 	@Override
-	public boolean index(K key1, E entry) {
+	public boolean index(final K key1, final E entry) {
 		throw new RuntimeException("this index is not meant to write");
 	}
 
 	@Override
-	public Iterator<KeyEntryTuple<K, E>> tupleIterator(Constraint<K> c1,
-			Constraint<E> entryConstraint) {
+	public Iterator<KeyEntryTuple<K, E>> tupleIterator(final Constraint<K> c1,
+			final Constraint<E> entryConstraint) {
 		return NoneIterator.<KeyEntryTuple<K, E>> create();
 	}
 
@@ -101,12 +102,12 @@ public class NoEntryMapSetIndex<K, E> implements IMapSetIndex<K, E> {
 	}
 
 	@Override
-	public IEntrySet<E> lookup(K key) {
+	public IEntrySet<E> lookup(final K key) {
 		return null;
 	}
 
 	@Override
-	public boolean contains(K k, E e) {
+	public boolean contains(final K k, final E e) {
 		return false;
 	}
 

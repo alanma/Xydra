@@ -10,9 +10,9 @@ import org.xydra.index.query.Wildcard;
 
 /**
  * @author voelkel
- * 
+ *
  *         Multiple entries can be indexed for a certain key-combination.
- * 
+ *
  * @param <K>
  *            key type
  * @param <L>

@@ -1,5 +1,6 @@
 package org.xydra.index.impl;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
@@ -18,17 +19,17 @@ import org.xydra.log.api.LoggerFactory;
 
 /**
  * Allows only one entry per key. Keys are normalized to lowercase.
- * 
+ *
  * @author voelkel
- * 
+ *
  * @param <E> entity type
  */
 @RunsInGWT(false)
-public class LowercaseStringKeyMapIndex<E> implements IMapIndex<String, E> {
+public class LowercaseStringKeyMapIndex<E> implements IMapIndex<String, E>, Serializable {
 
 	private static final long serialVersionUID = -5149093549283026560L;
 
-	private Map<String, E> map = new HashMap<String, E>();
+	private final Map<String, E> map = new HashMap<String, E>();
 
 	static {
 		LoggerFactory.getLogger(LowercaseStringKeyMapIndex.class).info(
@@ -43,17 +44,17 @@ public class LowercaseStringKeyMapIndex<E> implements IMapIndex<String, E> {
 	}
 
 	@Override
-	public boolean containsKey(String key) {
+	public boolean containsKey(final String key) {
 		return this.map.containsKey(LowercaseStringKeyMapIndex.normalise(key));
 	}
 
 	@Override
-	public void deIndex(String key) {
+	public void deIndex(final String key) {
 		this.map.remove(LowercaseStringKeyMapIndex.normalise(key));
 	}
 
 	@Override
-	public void index(String key, E entry) {
+	public void index(final String key, final E entry) {
 		this.map.put(LowercaseStringKeyMapIndex.normalise(key), entry);
 	}
 
@@ -68,43 +69,44 @@ public class LowercaseStringKeyMapIndex<E> implements IMapIndex<String, E> {
 	}
 
 	@Override
-	public E lookup(String key) {
+	public E lookup(final String key) {
 		return this.map.get(LowercaseStringKeyMapIndex.normalise(key));
 	}
 
-	private static String normalise(String key) {
+	private static String normalise(final String key) {
 		return key.toLowerCase(Locale.GERMAN);
 	}
 
 	@Override
-	public boolean containsKey(Constraint<String> c1) {
-		if (c1.isStar())
+	public boolean containsKey(final Constraint<String> c1) {
+		if (c1.isStar()) {
 			return isEmpty();
-		else {
-			String key = ((EqualsConstraint<String>) c1).getKey();
+		} else {
+			final String key = ((EqualsConstraint<String>) c1).getKey();
 			return this.map.containsKey(key);
 		}
 	}
 
 	@Override
-	public Iterator<KeyEntryTuple<String, E>> tupleIterator(Constraint<String> c1) {
+	public Iterator<KeyEntryTuple<String, E>> tupleIterator(final Constraint<String> c1) {
 		if (c1.isStar()) {
 			return new AbstractTransformingIterator<Map.Entry<String, E>, KeyEntryTuple<String, E>>(
 					this.map.entrySet().iterator()) {
 
 				@Override
-				public KeyEntryTuple<String, E> transform(Entry<String, E> in) {
+				public KeyEntryTuple<String, E> transform(final Entry<String, E> in) {
 					return new KeyEntryTuple<String, E>(in.getKey(), in.getValue());
 				}
 
 			};
 		}
-		String key = ((EqualsConstraint<String>) c1).getKey();
-		if (this.map.containsKey(key))
+		final String key = ((EqualsConstraint<String>) c1).getKey();
+		if (this.map.containsKey(key)) {
 			return new SingleValueIterator<KeyEntryTuple<String, E>>(new KeyEntryTuple<String, E>(
 					key, this.map.get(key)));
-		else
+		} else {
 			return NoneIterator.<KeyEntryTuple<String, E>> create();
+		}
 
 	}
 

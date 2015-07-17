@@ -36,7 +36,7 @@ import org.xydra.core.model.impl.memory.sync.ISyncLog;
 import org.xydra.core.model.impl.memory.sync.Root;
 import org.xydra.index.IMapMapSetIndex;
 import org.xydra.index.impl.FastEntrySetFactory;
-import org.xydra.index.impl.MapMapSetIndex;
+import org.xydra.index.impl.SerializableMapMapSetIndex;
 import org.xydra.index.query.EqualsConstraint;
 import org.xydra.index.query.ITriple;
 import org.xydra.index.query.KeyKeyEntryTuple;
@@ -64,11 +64,11 @@ public class EventDelta {
     private Map<XId,XModelEvent> modelEvents = new HashMap<XId,XModelEvent>();
     
     /** Map: objectId -> (fieldId -> {events}) */
-    private IMapMapSetIndex<XId,XId,XObjectEvent> objectEvents = new MapMapSetIndex<XId,XId,XObjectEvent>(
+    private IMapMapSetIndex<XId,XId,XObjectEvent> objectEvents = new SerializableMapMapSetIndex<XId,XId,XObjectEvent>(
             new FastEntrySetFactory<XObjectEvent>());
     
     /** Map: objectId -> (fieldId -> {events}) */
-    private IMapMapSetIndex<XId,XId,XFieldEvent> fieldEvents = new MapMapSetIndex<XId,XId,XFieldEvent>(
+    private IMapMapSetIndex<XId,XId,XFieldEvent> fieldEvents = new SerializableMapMapSetIndex<XId,XId,XFieldEvent>(
             new FastEntrySetFactory<XFieldEvent>());
     
     /**

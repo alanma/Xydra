@@ -1,5 +1,6 @@
 package org.xydra.index;
 
+import java.io.Serializable;
 import java.util.Iterator;
 
 import org.xydra.index.iterator.ClosableIterator;
@@ -9,15 +10,17 @@ import org.xydra.index.query.KeyEntryTuple;
 /**
  * Some implementations might used {@link ClosableIterator} as return types to
  * handle concurrency. Remember to close them to release read-locks.
- * 
+ *
+ * Note: All implementations need to be {@link Serializable}.
+ *
  * @author voelkel
- * 
+ *
  *         Multiple entries can be indexed for a certain key-combination.
- * 
+ *
  * @param <K> key type
  * @param <E> entity type
  */
-public interface IMapSetIndex<K, E> extends IIndex {
+public interface IMapSetIndex<K, E> extends IIndex, Serializable {
 
 	/**
 	 * @param c1
@@ -52,7 +55,7 @@ public interface IMapSetIndex<K, E> extends IIndex {
 
 	/**
 	 * Removed a tuple from the index.
-	 * 
+	 *
 	 * @param key1
 	 * @NeverNull
 	 * @param entry
@@ -63,7 +66,7 @@ public interface IMapSetIndex<K, E> extends IIndex {
 
 	/**
 	 * De-index all current entries with (key1, *).
-	 * 
+	 *
 	 * @param key1
 	 * @NeverNull
 	 */
@@ -71,7 +74,7 @@ public interface IMapSetIndex<K, E> extends IIndex {
 
 	/**
 	 * Add a tuple to the index
-	 * 
+	 *
 	 * @param key1
 	 * @NeverNull
 	 * @param entry
@@ -102,7 +105,7 @@ public interface IMapSetIndex<K, E> extends IIndex {
 
 	/**
 	 * A diff of two tuple indexes
-	 * 
+	 *
 	 * @param <K>
 	 * @param <E>
 	 */

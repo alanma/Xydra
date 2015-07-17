@@ -34,149 +34,151 @@ import org.xydra.store.access.impl.AbstractAuthorisationManager;
 
 /**
  * Implementation of {@link XAuthorisationManager}.
- * 
+ *
  * IMPROVE using standard java monitor for now, reader-writer lock may be more
  * appropriate
- * 
+ *
  * @author dscharrer
  */
 @RunsInAppEngine(true)
 @RunsInGWT(true)
 @RequiresAppEngine(false)
 public class MemoryAuthorisationManager extends AbstractAuthorisationManager implements
-        XAuthorisationManager, XAuthorisationDatabaseWitListeners {
-	
+XAuthorisationManager, XAuthorisationDatabaseWitListeners {
+
 	private final XGroupDatabaseWithListeners groups;
 	private final Set<XAccessListener> listeners;
 	// map of access -> resource -> actor
 	private final IMapMapMapIndex<XId,XAddress,XId,Boolean> rights;
-	
-	public MemoryAuthorisationManager(XGroupDatabaseWithListeners groups) {
+
+	public MemoryAuthorisationManager(final XGroupDatabaseWithListeners groups) {
 		this.groups = groups;
 		this.rights = new FastTripleMap<XId,XAddress,XId,Boolean>();
 		this.listeners = new HashSet<XAccessListener>();
 	}
-	
+
 	/**
 	 * FIXME should be private and called from constructor?
-	 * 
+	 *
 	 * @param administratorGroupId usually
 	 *            {@link XGroupDatabase#ADMINISTRATOR_GROUP_ID}
 	 * @param repositoryId for which to allow everything
 	 */
-	public void grantGroupAllAccessToRepository(XId administratorGroupId, XId repositoryId) {
+	public void grantGroupAllAccessToRepository(final XId administratorGroupId, final XId repositoryId) {
 		// add built-in access rights
-		this.getAuthorisationDatabase().setAccess(administratorGroupId,
-		        XX.toAddress(repositoryId, null, null, null), XA.ACCESS_WRITE, true);
-		this.getAuthorisationDatabase().setAccess(administratorGroupId,
-		        XX.toAddress(repositoryId, null, null, null), XA.ACCESS_READ, true);
-		this.getAuthorisationDatabase().setAccess(administratorGroupId,
-		        XX.toAddress(repositoryId, null, null, null), XA.ACCESS_DENY, true);
-		this.getAuthorisationDatabase().setAccess(administratorGroupId,
-		        XX.toAddress(repositoryId, null, null, null), XA.ACCESS_ALLOW, true);
+		getAuthorisationDatabase().setAccess(administratorGroupId,
+				XX.toAddress(repositoryId, null, null, null), XA.ACCESS_WRITE, true);
+		getAuthorisationDatabase().setAccess(administratorGroupId,
+				XX.toAddress(repositoryId, null, null, null), XA.ACCESS_READ, true);
+		getAuthorisationDatabase().setAccess(administratorGroupId,
+				XX.toAddress(repositoryId, null, null, null), XA.ACCESS_DENY, true);
+		getAuthorisationDatabase().setAccess(administratorGroupId,
+				XX.toAddress(repositoryId, null, null, null), XA.ACCESS_ALLOW, true);
 	}
-	
+
 	/**
 	 * Get the access defined for the actor on this resource or the access
 	 * allowed for any of the actor's groups.
 	 */
-	private XAccessRightValue accessForResource(XId actor, XAddress resource, XId access) {
-		
+	private XAccessRightValue accessForResource(final XId actor, final XAddress resource, final XId access) {
+
 		// check if access is specifically granted or denied for this actor
-		XAccessRightValue def = getAccessDefinition(actor, resource, access);
+		final XAccessRightValue def = getAccessDefinition(actor, resource, access);
 		if(def.isDefined()) {
 			return def;
 		}
-		
+
 		// check if access is granted for any of the actor's groups
-		Iterator<KeyKeyKeyEntryTuple<XId,XAddress,XId,Boolean>> it = this.rights.tupleIterator(
-		        new EqualsConstraint<XId>(access), new EqualsConstraint<XAddress>(resource),
-		        new Wildcard<XId>());
+		final Iterator<KeyKeyKeyEntryTuple<XId,XAddress,XId,Boolean>> it = this.rights.tupleIterator(
+				new EqualsConstraint<XId>(access), new EqualsConstraint<XAddress>(resource),
+				new Wildcard<XId>());
 		while(it.hasNext()) {
-			KeyKeyKeyEntryTuple<XId,XAddress,XId,Boolean> tuple = it.next();
-			
+			final KeyKeyKeyEntryTuple<XId,XAddress,XId,Boolean> tuple = it.next();
+
 			assert tuple.getEntry() != null : "got null entry";
 			assert XI.equals(access, tuple.getKey1()) : "got wrong access id from query";
 			assert XI.equals(resource, tuple.getKey2()) : "got wrong resource from query";
-			
-			boolean allowed = tuple.getEntry();
-			XId group = tuple.getKey3();
-			
+
+			final boolean allowed = tuple.getEntry();
+			final XId group = tuple.getKey3();
+
 			if(allowed && this.groups.hasGroup(actor, group)) {
 				return XAccessRightValue.ALLOWED;
 			}
 		}
-		
+
 		// nothing defined
 		return XAccessRightValue.UNDEFINED;
-		
+
 	}
-	
+
 	@Override
-	synchronized public void addListener(XAccessListener listener) {
+	synchronized public void addListener(final XAccessListener listener) {
 		this.listeners.add(listener);
 	}
-	
-	private void dispatchEvent(XAuthorisationEvent event) {
-		for(XAccessListener listener : this.listeners) {
+
+	private void dispatchEvent(final XAuthorisationEvent event) {
+		for(final XAccessListener listener : this.listeners) {
 			listener.onAccessEvent(event);
 		}
 	}
-	
+
 	@Override
-	synchronized public XAccessRightValue getAccessDefinition(XId actor, XAddress resource,
-	        XId access) throws IllegalArgumentException {
-		Boolean b = this.rights.lookup(access, resource, actor);
+	synchronized public XAccessRightValue getAccessDefinition(final XId actor, final XAddress resource,
+			final XId access) throws IllegalArgumentException {
+		final Boolean b = this.rights.lookup(access, resource, actor);
 		return toAccessValue(b);
 	}
-	
+
 	@Override
-	synchronized public Pair<Set<XId>,Set<XId>> getActorsWithPermission(XAddress resource,
-	        XId access) {
-		
-		Set<XId> allowed = new HashSet<XId>();
-		Set<XId> denied = new HashSet<XId>();
-		
-		Iterator<KeyKeyKeyEntryTuple<XId,XAddress,XId,Boolean>> it = this.rights.tupleIterator(
-		        new EqualsConstraint<XId>(access), new EqualsConstraint<XAddress>(resource),
-		        new Wildcard<XId>());
+	synchronized public Pair<Set<XId>,Set<XId>> getActorsWithPermission(final XAddress resource,
+			final XId access) {
+
+		final Set<XId> allowed = new HashSet<XId>();
+		final Set<XId> denied = new HashSet<XId>();
+
+		final Iterator<KeyKeyKeyEntryTuple<XId,XAddress,XId,Boolean>> it = this.rights.tupleIterator(
+				new EqualsConstraint<XId>(access), new EqualsConstraint<XAddress>(resource),
+				new Wildcard<XId>());
 		while(it.hasNext()) {
-			KeyKeyKeyEntryTuple<XId,XAddress,XId,Boolean> tuple = it.next();
-			
+			final KeyKeyKeyEntryTuple<XId,XAddress,XId,Boolean> tuple = it.next();
+
 			assert tuple.getEntry() != null : "got null entry";
 			assert XI.equals(access, tuple.getKey1()) : "got wrong access type from query";
 			assert XI.equals(resource, tuple.getKey2()) : "got wrong actor from query";
-			
-			XId actor = tuple.getKey3();
-			if(tuple.getEntry().booleanValue())
+
+			final XId actor = tuple.getKey3();
+			if(tuple.getEntry().booleanValue()) {
 				allowed.add(actor);
-			else if(!XI.equals(actor, XA.GROUP_ALL))
+			} else if(!XI.equals(actor, XA.GROUP_ALL)) {
 				denied.add(actor);
+			}
 		}
-		
+
 		if(!isAccessDefined(XA.GROUP_ALL, resource, access)) {
-			
-			XAddress parent = resource.getParent();
+
+			final XAddress parent = resource.getParent();
 			if(parent != null) {
-				Pair<Set<XId>,Set<XId>> pair = getActorsWithPermission(parent, access);
-				
+				final Pair<Set<XId>,Set<XId>> pair = getActorsWithPermission(parent, access);
+
 				/*
 				 * all actors that are denied access to the parent and are not
 				 * explicitly allowed access to this resource will be denied
 				 */
-				for(XId deny : pair.getSecond()) {
+				for(final XId deny : pair.getSecond()) {
 					boolean overwritten = false;
-					for(XId g : allowed) {
+					for(final XId g : allowed) {
 						if((deny == null ? g == null : deny.equals(g))
-						        || this.groups.hasGroup(deny, g)) {
+								|| this.groups.hasGroup(deny, g)) {
 							overwritten = true;
 							break;
 						}
 					}
-					if(!overwritten)
+					if(!overwritten) {
 						denied.add(deny);
+					}
 				}
-				
+
 				/*
 				 * add all actors/groups that are allowed access to the parent,
 				 * even if they are explicitly denied access to this resource as
@@ -184,55 +186,55 @@ public class MemoryAuthorisationManager extends AbstractAuthorisationManager imp
 				 * differentiate between groups and actors here
 				 */
 				allowed.addAll(pair.getFirst());
-				
+
 			}
-			
+
 		}
-		
+
 		return new Pair<Set<XId>,Set<XId>>(allowed, denied);
 	}
-	
+
 	@Override
 	public XAuthorisationDatabaseWitListeners getAuthorisationDatabase() {
 		return this;
 	}
-	
+
 	@Override
 	synchronized public Set<XAccessRightDefinition> getDefinitions() {
-		AbstractTransformingIterator<KeyKeyKeyEntryTuple<XId,XAddress,XId,Boolean>,XAccessRightDefinition> it = new AbstractTransformingIterator<KeyKeyKeyEntryTuple<XId,XAddress,XId,Boolean>,XAccessRightDefinition>(
-		        this.rights.tupleIterator(new Wildcard<XId>(), new Wildcard<XAddress>(),
-		                new Wildcard<XId>())) {
-			
+		final AbstractTransformingIterator<KeyKeyKeyEntryTuple<XId,XAddress,XId,Boolean>,XAccessRightDefinition> it = new AbstractTransformingIterator<KeyKeyKeyEntryTuple<XId,XAddress,XId,Boolean>,XAccessRightDefinition>(
+				this.rights.tupleIterator(new Wildcard<XId>(), new Wildcard<XAddress>(),
+						new Wildcard<XId>())) {
+
 			@Override
-			public XAccessRightDefinition transform(KeyKeyKeyEntryTuple<XId,XAddress,XId,Boolean> in) {
+			public XAccessRightDefinition transform(final KeyKeyKeyEntryTuple<XId,XAddress,XId,Boolean> in) {
 				return new MemoryAccessDefinition(in.getKey1(), in.getKey2(), in.getKey3(),
-				        in.getEntry());
+						in.getEntry());
 			}
-			
+
 		};
-		Set<XAccessRightDefinition> result = new HashSet<XAccessRightDefinition>();
+		final Set<XAccessRightDefinition> result = new HashSet<XAccessRightDefinition>();
 		while(it.hasNext()) {
 			result.add(it.next());
 		}
 		return result;
 	}
-	
+
 	@Override
 	public XGroupDatabaseWithListeners getGroupDatabase() {
 		return this.groups;
 	}
-	
+
 	@Override
-	synchronized public Pair<Set<XId>,Set<XId>> getPermissions(XId actor, XAddress resource) {
-		
-		Set<XId> allowed = new HashSet<XId>();
-		Set<XId> denied = new HashSet<XId>();
-		
+	synchronized public Pair<Set<XId>,Set<XId>> getPermissions(final XId actor, final XAddress resource) {
+
+		final Set<XId> allowed = new HashSet<XId>();
+		final Set<XId> denied = new HashSet<XId>();
+
 		// iterator over defined access types
-		Iterator<XId> it = this.rights.key1Iterator();
+		final Iterator<XId> it = this.rights.key1Iterator();
 		while(it.hasNext()) {
-			XId access = it.next();
-			XAccessRightValue v = hasAccess(actor, resource, access);
+			final XId access = it.next();
+			final XAccessRightValue v = hasAccess(actor, resource, access);
 			if(v.isAllowed()) {
 				allowed.add(access);
 			} else if(v.isDenied()) {
@@ -240,174 +242,174 @@ public class MemoryAuthorisationManager extends AbstractAuthorisationManager imp
 			}
 		}
 		// IMPROVE can this be done more efficiently?
-		
+
 		return new Pair<Set<XId>,Set<XId>>(allowed, denied);
 	}
-	
+
 	@Override
-	synchronized public XAccessRightValue hasAccess(XId actor, XAddress resource, XId access) {
+	synchronized public XAccessRightValue hasAccess(final XId actor, final XAddress resource, final XId access) {
 		// check if access is defined for this resource
-		XAccessRightValue def = accessForResource(actor, resource, access);
+		final XAccessRightValue def = accessForResource(actor, resource, access);
 		if(def.isDefined()) {
 			return def;
 		}
-		
+
 		// check if access is reset for this group
-		XAccessRightValue reset = getAccessDefinition(XA.GROUP_ALL, resource, access);
+		final XAccessRightValue reset = getAccessDefinition(XA.GROUP_ALL, resource, access);
 		if(reset.isDenied()) {
 			return reset;
 		}
-		
+
 		// check the parent resource
-		XAddress parent = resource.getParent();
+		final XAddress parent = resource.getParent();
 		XyAssert.xyAssert(parent != resource && !resource.equals(parent));
 		if(parent != null) {
 			return hasAccess(actor, parent, access);
 		}
-		
+
 		return XAccessRightValue.UNDEFINED;
 	}
-	
+
 	@Override
-	public XAccessRightValue hasAccessToSubresource(XId actor, XAddress rootResource, XId access) {
-		
+	public XAccessRightValue hasAccessToSubresource(final XId actor, final XAddress rootResource, final XId access) {
+
 		// check if the actor has access to the root resource
-		XAccessRightValue def = hasAccess(actor, rootResource, access);
+		final XAccessRightValue def = hasAccess(actor, rootResource, access);
 		if(def.isAllowed()) {
 			return def;
 		}
-		
+
 		// check if access is granted for any subresource
-		Iterator<KeyKeyKeyEntryTuple<XId,XAddress,XId,Boolean>> it = this.rights.tupleIterator(
-		        new EqualsConstraint<XId>(access), new Wildcard<XAddress>(), new Wildcard<XId>());
+		final Iterator<KeyKeyKeyEntryTuple<XId,XAddress,XId,Boolean>> it = this.rights.tupleIterator(
+				new EqualsConstraint<XId>(access), new Wildcard<XAddress>(), new Wildcard<XId>());
 		while(it.hasNext()) {
-			
-			KeyKeyKeyEntryTuple<XId,XAddress,XId,Boolean> tuple = it.next();
-			
+
+			final KeyKeyKeyEntryTuple<XId,XAddress,XId,Boolean> tuple = it.next();
+
 			assert tuple.getEntry() != null : "got null entry";
 			assert XI.equals(access, tuple.getKey1()) : "got wrong access type from query";
-			
-			boolean allowed = tuple.getEntry();
+
+			final boolean allowed = tuple.getEntry();
 			if(!allowed) {
 				continue;
 			}
-			
-			XAddress resource = tuple.getKey2();
+
+			final XAddress resource = tuple.getKey2();
 			if(!rootResource.contains(resource)) {
 				continue;
 			}
-			
+
 			// check that the actor is not denied access here
 			if(getAccessDefinition(actor, resource, access).isDenied()) {
 				continue;
 			}
-			
-			XId group = tuple.getKey3();
+
+			final XId group = tuple.getKey3();
 			if(XI.equals(actor, group) || this.groups.hasGroup(actor, group)) {
 				return XAccessRightValue.ALLOWED;
 			}
-			
+
 		}
-		
+
 		return def;
 	}
-	
+
 	@Override
-	synchronized public XAccessRightValue hasAccessToSubtree(XId actor, XAddress rootResource,
-	        XId access) {
-		
+	synchronized public XAccessRightValue hasAccessToSubtree(final XId actor, final XAddress rootResource,
+			final XId access) {
+
 		// check if the actor has access to the root resource
-		XAccessRightValue def = hasAccess(actor, rootResource, access);
+		final XAccessRightValue def = hasAccess(actor, rootResource, access);
 		if(def.isDenied()) {
 			return def;
 		}
-		
+
 		// check if access is denied for any resource
 		Iterator<KeyKeyKeyEntryTuple<XId,XAddress,XId,Boolean>> it = this.rights.tupleIterator(
-		        new EqualsConstraint<XId>(access), new Wildcard<XAddress>(),
-		        new EqualsConstraint<XId>(actor));
+				new EqualsConstraint<XId>(access), new Wildcard<XAddress>(),
+				new EqualsConstraint<XId>(actor));
 		while(it.hasNext()) {
-			
-			KeyKeyKeyEntryTuple<XId,XAddress,XId,Boolean> tuple = it.next();
-			
+
+			final KeyKeyKeyEntryTuple<XId,XAddress,XId,Boolean> tuple = it.next();
+
 			assert tuple.getEntry() != null : "got null entry";
 			assert XI.equals(access, tuple.getKey1()) : "got wrong access type from query";
 			assert XI.equals(actor, tuple.getKey3()) : "got wrong actor from query";
-			
-			boolean allowed = tuple.getEntry();
-			
+
+			final boolean allowed = tuple.getEntry();
+
 			if(!allowed) {
-				
-				XAddress resource = tuple.getKey2();
+
+				final XAddress resource = tuple.getKey2();
 				if(rootResource.equalsOrContains(resource)) {
 					// denied for at least one resource
 					return XAccessRightValue.DENIED;
 				}
-				
+
 			}
-			
+
 		}
-		
+
 		// check if access has been reset for a resource and not granted again
 		it = this.rights.tupleIterator(new EqualsConstraint<XId>(access), new Wildcard<XAddress>(),
-		        new EqualsConstraint<XId>(XA.GROUP_ALL));
+				new EqualsConstraint<XId>(XA.GROUP_ALL));
 		while(it.hasNext()) {
-			
-			KeyKeyKeyEntryTuple<XId,XAddress,XId,Boolean> tuple = it.next();
-			
+
+			final KeyKeyKeyEntryTuple<XId,XAddress,XId,Boolean> tuple = it.next();
+
 			assert tuple.getEntry() != null : "got null entry";
 			assert XI.equals(access, tuple.getKey1()) : "got wrong access type from query";
 			assert XI.equals(XA.GROUP_ALL, tuple.getKey3()) : "got wrong actor from query";
-			
-			boolean allowed = tuple.getEntry();
+
+			final boolean allowed = tuple.getEntry();
 			if(allowed) {
 				continue;
 			}
-			
-			XAddress resource = tuple.getKey2();
+
+			final XAddress resource = tuple.getKey2();
 			if(!rootResource.contains(resource)) {
 				continue;
 			}
-			
+
 			// access reset for this resource
-			XAccessRightValue localAccess = accessForResource(actor, resource, access);
+			final XAccessRightValue localAccess = accessForResource(actor, resource, access);
 			if(!localAccess.isAllowed()) {
 				// access reset and not granted again for at least one resource
 				return XAccessRightValue.DENIED;
 			}
-			
+
 		}
-		
+
 		return def;
 	}
-	
+
 	@Override
-	synchronized public boolean isAccessDefined(XId actor, XAddress resource, XId access) {
+	synchronized public boolean isAccessDefined(final XId actor, final XAddress resource, final XId access) {
 		return this.rights.containsKey(new EqualsConstraint<XId>(access),
-		        new EqualsConstraint<XAddress>(resource), new EqualsConstraint<XId>(actor));
+				new EqualsConstraint<XAddress>(resource), new EqualsConstraint<XId>(actor));
 	}
-	
+
 	@Override
-	synchronized public void removeListener(XAccessListener listener) {
+	synchronized public void removeListener(final XAccessListener listener) {
 		this.listeners.remove(listener);
 	}
-	
+
 	@Override
-	synchronized public void resetAccess(XId actor, XAddress resource, XId access) {
-		XAccessRightValue old = getAccessDefinition(actor, resource, access);
+	synchronized public void resetAccess(final XId actor, final XAddress resource, final XId access) {
+		final XAccessRightValue old = getAccessDefinition(actor, resource, access);
 		if(!old.isDefined()) {
 			// no right defined => nothing to remove
 			return;
 		}
 		this.rights.deIndex(access, resource, actor);
 		dispatchEvent(new MemoryAccessEvent(ChangeType.REMOVE, actor, resource, access, old,
-		        XAccessRightValue.UNDEFINED));
+				XAccessRightValue.UNDEFINED));
 	}
-	
+
 	@Override
-	synchronized public void setAccess(XId actor, XAddress resource, XId access, boolean allowed) {
-		XAccessRightValue old = getAccessDefinition(actor, resource, access);
-		XAccessRightValue na = toAccessValue(allowed);
+	synchronized public void setAccess(final XId actor, final XAddress resource, final XId access, final boolean allowed) {
+		final XAccessRightValue old = getAccessDefinition(actor, resource, access);
+		final XAccessRightValue na = toAccessValue(allowed);
 		if(old == na) {
 			// right already defined => nothing to change
 			return;
@@ -419,8 +421,8 @@ public class MemoryAuthorisationManager extends AbstractAuthorisationManager imp
 			dispatchEvent(new MemoryAccessEvent(ChangeType.CHANGE, actor, resource, access, old, na));
 		}
 	}
-	
-	private static XAccessRightValue toAccessValue(Boolean b) {
+
+	private static XAccessRightValue toAccessValue(final Boolean b) {
 		if(b == null) {
 			return XAccessRightValue.UNDEFINED;
 		} else if(b) {
@@ -429,10 +431,10 @@ public class MemoryAuthorisationManager extends AbstractAuthorisationManager imp
 			return XAccessRightValue.DENIED;
 		}
 	}
-	
+
 	@Override
 	synchronized public String toString() {
 		return this.rights.toString();
 	}
-	
+
 }

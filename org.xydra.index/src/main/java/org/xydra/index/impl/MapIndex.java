@@ -1,5 +1,6 @@
 package org.xydra.index.impl;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -18,15 +19,15 @@ import org.xydra.log.api.LoggerFactory;
 
 /**
  * An implementation of {@link IMapIndex} using a HashMap.
- * 
+ *
  * @author dscharrer
- * 
+ *
  * @param <K>
  *            key type
  * @param <E>
  *            entity type
  */
-public class MapIndex<K, E> implements IMapIndex<K, E> {
+public class MapIndex<K, E> implements IMapIndex<K, E>, Serializable {
 
 	private static final long serialVersionUID = -156688788520337376L;
 
@@ -40,7 +41,7 @@ public class MapIndex<K, E> implements IMapIndex<K, E> {
 	 * @param concurrent
 	 *            iff true, a concurrent data structure is used internally
 	 */
-	public MapIndex(boolean concurrent) {
+	public MapIndex(final boolean concurrent) {
 		if (concurrent) {
 			this.index = new ConcurrentHashMap<K, E>();
 		} else {
@@ -49,17 +50,17 @@ public class MapIndex<K, E> implements IMapIndex<K, E> {
 	}
 
 	@Override
-	public boolean containsKey(K key) {
+	public boolean containsKey(final K key) {
 		return this.index.containsKey(key);
 	}
 
 	@Override
-	public void deIndex(K key1) {
+	public void deIndex(final K key1) {
 		this.index.remove(key1);
 	}
 
 	@Override
-	public void index(K key1, E entry) {
+	public void index(final K key1, final E entry) {
 		this.index.put(key1, entry);
 	}
 
@@ -69,28 +70,28 @@ public class MapIndex<K, E> implements IMapIndex<K, E> {
 	}
 
 	@Override
-	public E lookup(K key) {
+	public E lookup(final K key) {
 		return this.index.get(key);
 	}
 
 	@Override
-	public boolean containsKey(Constraint<K> c1) {
-		if (c1.isStar())
+	public boolean containsKey(final Constraint<K> c1) {
+		if (c1.isStar()) {
 			return !isEmpty();
-		else {
-			K key = ((EqualsConstraint<K>) c1).getKey();
+		} else {
+			final K key = ((EqualsConstraint<K>) c1).getKey();
 			return this.index.containsKey(key);
 		}
 	}
 
 	@Override
-	public Iterator<KeyEntryTuple<K, E>> tupleIterator(Constraint<K> c1) {
+	public Iterator<KeyEntryTuple<K, E>> tupleIterator(final Constraint<K> c1) {
 		if (c1.isStar()) {
 			return new AbstractTransformingIterator<Map.Entry<K, E>, KeyEntryTuple<K, E>>(
 					this.index.entrySet().iterator()) {
 
 				@Override
-				public KeyEntryTuple<K, E> transform(Entry<K, E> in) {
+				public KeyEntryTuple<K, E> transform(final Entry<K, E> in) {
 					return new KeyEntryTuple<K, E>(in.getKey(), in.getValue());
 				}
 
@@ -105,8 +106,9 @@ public class MapIndex<K, E> implements IMapIndex<K, E> {
 					MapIndex.this.deIndex(key);
 				}
 			};
-		} else
+		} else {
 			return NoneIterator.<KeyEntryTuple<K, E>> create();
+		}
 
 	}
 
@@ -133,7 +135,7 @@ public class MapIndex<K, E> implements IMapIndex<K, E> {
 	private static final Logger log = LoggerFactory.getLogger(MapIndex.class);
 
 	public void dump() {
-		for (Entry<K, E> e : this.index.entrySet()) {
+		for (final Entry<K, E> e : this.index.entrySet()) {
 			log.info("'" + e.getKey() + "' = '" + e.getValue() + "'");
 		}
 	}

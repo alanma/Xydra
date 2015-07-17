@@ -60,13 +60,13 @@ public class TestIndexes extends TestCase {
 	@Test
 	public void testMapMapSetIndex() {
 		Factory<IEntrySet<String>> entrySetFactory = new FastEntrySetFactory<String>();
-		MapMapSetIndex<String, String, String> mapMapSetIndex1 = new MapMapSetIndex<String, String, String>(
+		SerializableMapMapSetIndex<String, String, String> mapMapSetIndex1 = new SerializableMapMapSetIndex<String, String, String>(
 				entrySetFactory);
 		mapMapSetIndex1.index("-1", "1", "1"); // = removed
 		mapMapSetIndex1.index("=2", "2", "2"); // = same
 		mapMapSetIndex1.index("-3", "4", "4"); // removed
 
-		MapMapSetIndex<String, String, String> mapMapSetIndex2 = new MapMapSetIndex<String, String, String>(
+		SerializableMapMapSetIndex<String, String, String> mapMapSetIndex2 = new SerializableMapMapSetIndex<String, String, String>(
 				entrySetFactory);
 
 		mapMapSetIndex2.index("=2", "2", "2"); // = same

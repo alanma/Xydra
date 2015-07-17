@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.io.Serializable;
 import java.util.Iterator;
 
 import org.junit.Before;
@@ -15,7 +16,7 @@ import org.xydra.index.query.ITriple;
 import org.xydra.index.query.KeyKeyEntryTuple;
 import org.xydra.index.query.Wildcard;
 
-public abstract class AbstractTripleIndexTest<K, L, M> {
+public abstract class AbstractTripleIndexTest<K extends Serializable, L extends Serializable, M extends Serializable> {
 
 	final K s1 = createS("s1");
 	final K s2 = createS("s2");
@@ -49,7 +50,7 @@ public abstract class AbstractTripleIndexTest<K, L, M> {
 
 	@Test
 	public void testIndexAndDeindexWithContainsAndQuery() {
-		KeyKeyEntryTuple<K, L, M> s1p1o1 = new KeyKeyEntryTuple<K, L, M>(this.s1, this.p1, this.o1);
+		final KeyKeyEntryTuple<K, L, M> s1p1o1 = new KeyKeyEntryTuple<K, L, M>(this.s1, this.p1, this.o1);
 		assertFalse(contains(this.s1, this.p1, this.o1));
 		assertFalse(Iterators.toList(query(this.s1, this.p1, this.o1)).contains(s1p1o1));
 		assertFalse(contains(this.s1, this.p1, null));
@@ -110,27 +111,28 @@ public abstract class AbstractTripleIndexTest<K, L, M> {
 		}
 	}
 
-	public boolean contains(K s, L p, M o) {
-		Constraint<K> cS = toConstraint(s);
-		Constraint<L> cP = toConstraint(p);
-		Constraint<M> cO = toConstraint(o);
-		boolean b = this.ti.contains(cS, cP, cO);
+	public boolean contains(final K s, final L p, final M o) {
+		final Constraint<K> cS = toConstraint(s);
+		final Constraint<L> cP = toConstraint(p);
+		final Constraint<M> cO = toConstraint(o);
+		final boolean b = this.ti.contains(cS, cP, cO);
 		assert b == this.ti.getTriples(cS, cP, cO).hasNext();
 		return b;
 	}
 
-	public Iterator<? extends ITriple<K, L, M>> query(K s, L p, M o) {
-		Constraint<K> cS = toConstraint(s);
-		Constraint<L> cP = toConstraint(p);
-		Constraint<M> cO = toConstraint(o);
+	public Iterator<? extends ITriple<K, L, M>> query(final K s, final L p, final M o) {
+		final Constraint<K> cS = toConstraint(s);
+		final Constraint<L> cP = toConstraint(p);
+		final Constraint<M> cO = toConstraint(o);
 		return this.ti.getTriples(cS, cP, cO);
 	}
 
-	public static <E> Constraint<E> toConstraint(E expect) {
-		if (expect == null)
+	public static <E> Constraint<E> toConstraint(final E expect) {
+		if (expect == null) {
 			return new Wildcard<E>();
-		else
+		} else {
 			return new EqualsConstraint<E>(expect);
+		}
 	}
 
 }

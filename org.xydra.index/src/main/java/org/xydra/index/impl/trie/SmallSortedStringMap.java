@@ -1,5 +1,6 @@
 package org.xydra.index.impl.trie;
 
+import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -22,7 +23,7 @@ import org.xydra.index.query.KeyEntryTuple;
  *
  * @param <E>
  */
-public class SmallSortedStringMap<E> implements IMapIndex<String, E> {
+public class SmallSortedStringMap<E> implements IMapIndex<String, E>, Serializable {
 
 	private static final long serialVersionUID = 1L;
 

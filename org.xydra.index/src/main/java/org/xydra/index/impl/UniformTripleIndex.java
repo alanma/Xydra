@@ -1,5 +1,6 @@
 package org.xydra.index.impl;
 
+import java.io.Serializable;
 import java.util.Iterator;
 
 import org.xydra.index.IUniformTripleIndex;
@@ -8,10 +9,8 @@ import org.xydra.index.iterator.TransformingIterator;
 import org.xydra.index.query.Constraint;
 import org.xydra.index.query.ITriple;
 
-public class UniformTripleIndex<K> extends FastContainsTripleIndex<K, K, K> implements
-		IUniformTripleIndex<K> {
-
-	private static final long serialVersionUID = 7121877986612175167L;
+public class UniformTripleIndex<K extends Serializable> extends FastContainsTripleIndex<K, K, K> implements
+IUniformTripleIndex<K> {
 
 	/**
 	 * @param c1 constraint for component 1 of triple (subject)
@@ -23,15 +22,15 @@ public class UniformTripleIndex<K> extends FastContainsTripleIndex<K, K, K> impl
 	 *         third)
 	 */
 	@Override
-	public Iterator<K> getMatchingAndProject(Constraint<K> c1, Constraint<K> c2, Constraint<K> c3,
-			int projectedConstraint) {
-		Iterator<ITriple<K, K, K>> tupleIterator = this.index_s_p_o.tupleIterator(c1, c2, c3);
+	public Iterator<K> getMatchingAndProject(final Constraint<K> c1, final Constraint<K> c2, final Constraint<K> c3,
+			final int projectedConstraint) {
+		final Iterator<ITriple<K, K, K>> tupleIterator = this.index_s_p_o.tupleIterator(c1, c2, c3);
 		ITransformer<ITriple<K, K, K>, K> transformer;
 		switch (projectedConstraint) {
 		case 1:
 			transformer = new ITransformer<ITriple<K, K, K>, K>() {
 				@Override
-				public K transform(ITriple<K, K, K> in) {
+				public K transform(final ITriple<K, K, K> in) {
 					return in.getKey1();
 				}
 			};
@@ -39,7 +38,7 @@ public class UniformTripleIndex<K> extends FastContainsTripleIndex<K, K, K> impl
 		case 2:
 			transformer = new ITransformer<ITriple<K, K, K>, K>() {
 				@Override
-				public K transform(ITriple<K, K, K> in) {
+				public K transform(final ITriple<K, K, K> in) {
 					return in.getKey2();
 				}
 			};
@@ -47,7 +46,7 @@ public class UniformTripleIndex<K> extends FastContainsTripleIndex<K, K, K> impl
 		case 3:
 			transformer = new ITransformer<ITriple<K, K, K>, K>() {
 				@Override
-				public K transform(ITriple<K, K, K> in) {
+				public K transform(final ITriple<K, K, K> in) {
 					return in.getEntry();
 				}
 			};

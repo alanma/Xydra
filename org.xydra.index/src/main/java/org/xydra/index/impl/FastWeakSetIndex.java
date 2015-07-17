@@ -1,5 +1,6 @@
 package org.xydra.index.impl;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
@@ -13,7 +14,7 @@ import org.xydra.index.query.EqualsConstraint;
 
 import com.google.common.collect.Sets;
 
-public class FastWeakSetIndex<E> implements IEntrySet<E> {
+public class FastWeakSetIndex<E> implements IEntrySet<E>, Serializable {
 
 	private Set<E> set;
 
@@ -23,7 +24,7 @@ public class FastWeakSetIndex<E> implements IEntrySet<E> {
 		this(false);
 	}
 
-	public FastWeakSetIndex(boolean concurrent) {
+	public FastWeakSetIndex(final boolean concurrent) {
 		this.set = Collections.newSetFromMap(new WeakHashMap<E, Boolean>(4));
 		this.concurrent = concurrent;
 	}
@@ -36,28 +37,28 @@ public class FastWeakSetIndex<E> implements IEntrySet<E> {
 	}
 
 	@Override
-	public boolean deIndex(E entry) {
+	public boolean deIndex(final E entry) {
 		return this.set.remove(entry);
 	}
 
 	@Override
-	public boolean index(E entry) {
+	public boolean index(final E entry) {
 		return this.set.add(entry);
 	}
 
 	/* we cannot call contains() on other, so we need this */
 	@Override
-	public IEntrySetDiff<E> computeDiff(IEntrySet<E> other) {
-		FastSetDiff<E> diff = new FastSetDiff<E>();
+	public IEntrySetDiff<E> computeDiff(final IEntrySet<E> other) {
+		final FastSetDiff<E> diff = new FastSetDiff<E>();
 		diff.added = new FastWeakSetIndex<E>();
 		diff.removed = new FastWeakSetIndex<E>();
 
 		// consider everything as removed
-		for (E thisEntry : this) {
+		for (final E thisEntry : this) {
 			diff.removed.index(thisEntry);
 		}
 
-		for (E otherEntry : other) {
+		for (final E otherEntry : other) {
 			if (this.contains(otherEntry)) {
 				// if it is still there, it has NOT been removed
 				diff.removed.deIndex(otherEntry);
@@ -87,7 +88,7 @@ public class FastWeakSetIndex<E> implements IEntrySet<E> {
 	}
 
 	@Override
-	public Iterator<E> constraintIterator(Constraint<E> entryConstraint) {
+	public Iterator<E> constraintIterator(final Constraint<E> entryConstraint) {
 		if (entryConstraint.isStar()) {
 			if (this.concurrent) {
 				return toSet().iterator();
@@ -95,11 +96,12 @@ public class FastWeakSetIndex<E> implements IEntrySet<E> {
 			return iterator();
 		} else {
 			// this additional check is making things faster?
-			if (isEmpty())
+			if (isEmpty()) {
 				return NoneIterator.create();
+			}
 
 			assert entryConstraint instanceof EqualsConstraint<?>;
-			E entry = ((EqualsConstraint<E>) entryConstraint).getKey();
+			final E entry = ((EqualsConstraint<E>) entryConstraint).getKey();
 			if (contains(entry)) {
 				return new SingleValueIterator<E>(entry);
 			} else {
@@ -128,7 +130,7 @@ public class FastWeakSetIndex<E> implements IEntrySet<E> {
 	}
 
 	@Override
-	public boolean contains(E entry) {
+	public boolean contains(final E entry) {
 		return this.set.contains(entry);
 	}
 

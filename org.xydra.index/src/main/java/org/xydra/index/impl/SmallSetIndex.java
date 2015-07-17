@@ -1,5 +1,6 @@
 package org.xydra.index.impl;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -14,23 +15,23 @@ import org.xydra.index.query.EqualsConstraint;
 /**
  * Based on a simple linked list - much more memory efficient than based on a
  * HashSet - and much slower, too.
- * 
+ *
  * @author voelkel
- * 
+ *
  * @param <E> entity type
  */
-public class SmallSetIndex<E> extends LinkedList<E> implements IEntrySet<E> {
+public class SmallSetIndex<E> extends LinkedList<E> implements IEntrySet<E>, Serializable {
 
 	private static final long serialVersionUID = 1067549369843962009L;
 
 	@Override
-	public boolean deIndex(E entry) {
+	public boolean deIndex(final E entry) {
 		return this.remove(entry);
 	}
 
 	@Override
-	public boolean index(E entry) {
-		boolean contains = this.contains(entry);
+	public boolean index(final E entry) {
+		final boolean contains = contains(entry);
 		if (!contains) {
 			this.add(entry);
 		}
@@ -38,16 +39,16 @@ public class SmallSetIndex<E> extends LinkedList<E> implements IEntrySet<E> {
 	}
 
 	@Override
-	public IEntrySetDiff<E> computeDiff(IEntrySet<E> other) {
+	public IEntrySetDiff<E> computeDiff(final IEntrySet<E> other) {
 		// assume other is also short
-		SmallEntrySetDiff<E> diff = new SmallEntrySetDiff<E>();
-		SmallSetIndex<E> added = new SmallSetIndex<E>();
-		SmallSetIndex<E> removed = new SmallSetIndex<E>();
+		final SmallEntrySetDiff<E> diff = new SmallEntrySetDiff<E>();
+		final SmallSetIndex<E> added = new SmallSetIndex<E>();
+		final SmallSetIndex<E> removed = new SmallSetIndex<E>();
 
 		// assume the worst
 		removed.addAll(this);
 		// ..and then compensate
-		for (E otherEntry : other) {
+		for (final E otherEntry : other) {
 			if (removed.contains(otherEntry)) {
 				// compensate
 				removed.remove(otherEntry);
@@ -80,12 +81,12 @@ public class SmallSetIndex<E> extends LinkedList<E> implements IEntrySet<E> {
 	}
 
 	@Override
-	public Iterator<E> constraintIterator(Constraint<E> entryConstraint) {
+	public Iterator<E> constraintIterator(final Constraint<E> entryConstraint) {
 		if (entryConstraint.isStar()) {
 			return iterator();
 		} else {
 			assert entryConstraint instanceof EqualsConstraint<?>;
-			E entry = ((EqualsConstraint<E>) entryConstraint).getKey();
+			final E entry = ((EqualsConstraint<E>) entryConstraint).getKey();
 			if (contains(entry)) {
 				return new SingleValueIterator<E>(entry);
 			} else {
@@ -96,7 +97,7 @@ public class SmallSetIndex<E> extends LinkedList<E> implements IEntrySet<E> {
 
 	@Override
 	public Set<E> toSet() {
-		Set<E> set = new HashSet<E>();
+		final Set<E> set = new HashSet<E>();
 		set.addAll(this);
 		return set;
 	}

@@ -13,19 +13,17 @@ import org.xydra.index.query.Wildcard;
 /**
  * An implementation of IPairIndex that uses a map to allow efficient queries on
  * the first key.
- * 
+ *
  * @author dscharrer
  * @param <K>
  * @param <L>
  */
 public class MapPairIndex<K, L> implements IPairIndex<K, L> {
 
-	private static final long serialVersionUID = 1806686664089019135L;
-
 	/**
 	 * key1 -> set of key2
 	 */
-	private IMapSetIndex<K, L> index;
+	private final IMapSetIndex<K, L> index;
 
 	public MapPairIndex() {
 		this.index = new MapSetIndex<K, L>(new FastEntrySetFactory<L>());
@@ -37,23 +35,23 @@ public class MapPairIndex<K, L> implements IPairIndex<K, L> {
 	}
 
 	@Override
-	public void index(K k1, L k2) {
+	public void index(final K k1, final L k2) {
 		this.index.index(k1, k2);
 	}
 
 	@Override
-	public void deIndex(K k1, L k2) {
+	public void deIndex(final K k1, final L k2) {
 		this.index.deIndex(k1, k2);
 	}
 
 	@Override
-	public Iterator<Pair<K, L>> constraintIterator(Constraint<K> c1, Constraint<L> c2) {
+	public Iterator<Pair<K, L>> constraintIterator(final Constraint<K> c1, final Constraint<L> c2) {
 
 		return new AbstractTransformingIterator<KeyEntryTuple<K, L>, Pair<K, L>>(
 				this.index.tupleIterator(c1, c2)) {
 
 			@Override
-			public Pair<K, L> transform(KeyEntryTuple<K, L> in) {
+			public Pair<K, L> transform(final KeyEntryTuple<K, L> in) {
 				return in;
 			}
 
@@ -62,7 +60,7 @@ public class MapPairIndex<K, L> implements IPairIndex<K, L> {
 	}
 
 	@Override
-	public boolean contains(Constraint<K> c1, Constraint<L> c2) {
+	public boolean contains(final Constraint<K> c1, final Constraint<L> c2) {
 		return this.index.contains(c1, c2);
 	}
 
@@ -91,7 +89,7 @@ public class MapPairIndex<K, L> implements IPairIndex<K, L> {
 		return new AbstractTransformingIterator<Pair<K, L>, L>(iterator()) {
 
 			@Override
-			public L transform(Pair<K, L> in) {
+			public L transform(final Pair<K, L> in) {
 				return in.getSecond();
 			}
 
