@@ -144,4 +144,16 @@ public class CountingMap<T> implements IIndex {
 		return result;
 	}
 
+	/**
+	 * @param countingMap
+	 * @return
+	 */
+	public static <T> Map<T, Integer> toHashMap(final CountingMap<T> countingMap) {
+		final Map<T, Integer> map = new HashMap<>();
+		for( final Entry<T, Integer> e :countingMap.entrySet()) {
+			map.put(e.getKey(), e.getValue());
+		}
+		return map;
+	}
+
 }
