@@ -288,8 +288,8 @@ public class IntegerRangeIndex implements IIntegerRangeIndex, Serializable {
 
 			if (separators.isInInterval(c)) {
 				if (inToken) {
-					// token ends
-					if (index > 0) {
+					// token ends FIXME can be "the empty token" when spanStart == index
+					if (index > startInclusive) {
 						splitHandler.onToken(spanStart, index);
 					}
 					spanStart = index;

@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -19,35 +20,36 @@ import org.xydra.index.iterator.Iterators;
 
 /**
  * Support for reading/writing {@link IConfig}
- * 
+ *
  * IMPROVE augment generated comments with info found in ConfParam.. annotations
- * 
+ *
  * @author xamde
  */
 public class ConfigFiles {
 
-	public static void write(IConfig conf, File file) throws IOException {
+	private static final Charset UTF8 = Charset.forName("utf-8");
 
-		FileOutputStream fos = new FileOutputStream(file);
-		Writer w = new OutputStreamWriter(fos, "utf-8");
-		PropertyFileWriter pfw = new PropertyFileWriter(w);
+	public static void write(final IConfig conf, final File file) throws IOException {
+
+		final FileOutputStream fos = new FileOutputStream(file);
+		final Writer w = new OutputStreamWriter(fos, UTF8);
+		final PropertyFileWriter pfw = new PropertyFileWriter(w);
 
 		pfw.comment("=== Written on " + new Date() + " ===");
 
-		Set<String> explicitly = new HashSet<String>();
+		final Set<String> explicitly = new HashSet<String>();
 		Iterators.addAll(conf.getExplicitlyDefinedKeys().iterator(), explicitly);
 
 		// one alphabetically sorted list
-		List<String> listOfDefinedKeys = Iterators.toList(conf.getDefinedKeys().iterator());
-		for (String key : listOfDefinedKeys) {
+		final List<String> listOfDefinedKeys = Iterators.toList(conf.getDefinedKeys().iterator());
+		for (final String key : listOfDefinedKeys) {
 			String typeComment = "";
-			Object o = conf.get(key);
+			final Object o = conf.get(key);
 			String value;
 			if (o instanceof String) {
 				value = (String) o;
 			} else if (o instanceof Enum<?>) {
-				typeComment += "type = Enum "
-						+ ((Enum<?>) o).getDeclaringClass().getCanonicalName();
+				typeComment += "type = Enum " + ((Enum<?>) o).getDeclaringClass().getCanonicalName();
 				value = ((Enum<?>) o).name();
 			} else if (o instanceof Boolean) {
 				typeComment += "type = boolean";
@@ -59,8 +61,7 @@ public class ConfigFiles {
 				typeComment += "type = long";
 				value = "" + o;
 			} else {
-				pfw.comment("type of '" + key + "' = unknown. Class is '"
-						+ o.getClass().getCanonicalName() + "'");
+				pfw.comment("type of '" + key + "' = unknown. Class is '" + o.getClass().getCanonicalName() + "'");
 				pfw.comment("  Value serialized as '" + o.toString() + "'");
 				continue;
 			}
@@ -68,7 +69,7 @@ public class ConfigFiles {
 			if (typeComment.length() > 0) {
 				pfw.comment(typeComment);
 			}
-			String doc = conf.getDocumentation(key);
+			final String doc = conf.getDocumentation(key);
 			if (doc != null) {
 				pfw.comment("** " + doc + " **#");
 			}
@@ -84,24 +85,24 @@ public class ConfigFiles {
 
 	/**
 	 * Drop all comments from file;
-	 * 
+	 *
 	 * Overwrite settings in <code>conf</code> with definitions from file
-	 * 
+	 *
 	 * @param file
 	 * @param conf
 	 * @throws IOException
 	 */
-	public static void read(File file, IConfig conf) throws IOException {
-		FileInputStream fin = new FileInputStream(file);
+	public static void read(final File file, final IConfig conf) throws IOException {
+		final FileInputStream fin = new FileInputStream(file);
 		// accepts these line ends: \n, \r or \r\n (windows)
-		Reader r = new InputStreamReader(fin, "utf-8");
+		final Reader r = new InputStreamReader(fin, UTF8);
 
-		Properties props = new Properties();
+		final Properties props = new Properties();
 		props.load(r);
 
 		// copy props to config
-		for (Object o : props.keySet()) {
-			String key = (String) o;
+		for (final Object o : props.keySet()) {
+			final String key = (String) o;
 			conf.set(key, props.get(key));
 		}
 		r.close();
