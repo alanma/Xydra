@@ -73,6 +73,21 @@ public class IntegerRangeIndex implements IIntegerRangeIndex, Serializable {
 			return "Span [startInclusive=" + this.startInclusive + ", endInclusive=" + this.endInclusive
 					+ ", isInRange=" + this.isInRange + "]";
 		}
+
+		@Override
+		public int hashCode() {
+			return this.startInclusive + 1024 * this.endInclusive;
+		}
+
+		@Override
+		public boolean equals(final Object other) {
+			if (other instanceof Span) {
+				final Span o = (Span) other;
+				return this.startInclusive == o.startInclusive && this.endInclusive == o.endInclusive
+						&& this.isInRange == o.isInRange;
+			}
+			return false;
+		}
 	}
 
 	private static class SpanIterator extends AbstractLookAheadIterator<Span>implements Iterator<Span> {
