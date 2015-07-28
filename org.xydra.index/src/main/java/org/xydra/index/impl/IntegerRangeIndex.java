@@ -18,7 +18,6 @@ import org.xydra.log.api.LoggerFactory;
  * TODO improve performance and keep GWT compatibility
  *
  * @author xamde
- *
  */
 public class IntegerRangeIndex implements IIntegerRangeIndex, Serializable {
 
@@ -27,11 +26,11 @@ public class IntegerRangeIndex implements IIntegerRangeIndex, Serializable {
 	 */
 	public static interface ISplitHandler {
 
+		void onDone();
+
 		void onSeparator(int startInclusive, int endExclusive);
 
 		void onToken(int startInclusive, int endExclusive);
-
-		void onDone();
 
 	}
 
@@ -42,11 +41,11 @@ public class IntegerRangeIndex implements IIntegerRangeIndex, Serializable {
 	 */
 	public static class Span {
 
-		int endInclusive;
+		final int endInclusive;
 
-		boolean isInRange;
+		final boolean isInRange;
 
-		int startInclusive;
+		final int startInclusive;
 
 		public Span(final int startInclusive, final int endInclusive, final boolean isInRange) {
 			super();
@@ -54,29 +53,6 @@ public class IntegerRangeIndex implements IIntegerRangeIndex, Serializable {
 			this.startInclusive = startInclusive;
 			this.endInclusive = endInclusive;
 			this.isInRange = isInRange;
-		}
-
-		public int getEndInclusive() {
-			return this.endInclusive;
-		}
-
-		public int getStartInclusive() {
-			return this.startInclusive;
-		}
-
-		public boolean isInRange() {
-			return this.isInRange;
-		}
-
-		@Override
-		public String toString() {
-			return "Span [startInclusive=" + this.startInclusive + ", endInclusive=" + this.endInclusive
-					+ ", isInRange=" + this.isInRange + "]";
-		}
-
-		@Override
-		public int hashCode() {
-			return this.startInclusive + 1024 * this.endInclusive;
 		}
 
 		@Override
@@ -88,28 +64,85 @@ public class IntegerRangeIndex implements IIntegerRangeIndex, Serializable {
 			}
 			return false;
 		}
+
+		public int getEndInclusive() {
+			return this.endInclusive;
+		}
+
+		public int getStartInclusive() {
+			return this.startInclusive;
+		}
+
+		@Override
+		public int hashCode() {
+			return this.startInclusive + 1024 * this.endInclusive;
+		}
+
+		public boolean isInRange() {
+			return this.isInRange;
+		}
+
+		@Override
+		public String toString() {
+			return "Span [startInclusive=" + this.startInclusive + ", endInclusive=" + this.endInclusive
+					+ ", isInRange=" + this.isInRange + "]";
+		}
 	}
 
 	private static class SpanIterator extends AbstractLookAheadIterator<Span>implements Iterator<Span> {
 
+		/**
+		 * @param baseIt
+		 * @param minValue
+		 * @return @CanBeNull or the first pre-fetched value which is entry.value >= minValue
+		 */
+		private static Entry<Integer, Integer> skipValueLessThan(final Iterator<Entry<Integer, Integer>> baseIt,
+				final int minValue) {
+			Entry<Integer, Integer> prefetchedEntry = null;
+			if (baseIt.hasNext()) {
+				prefetchedEntry = baseIt.next();
+				while (baseIt.hasNext() && prefetchedEntry.getValue() < minValue) {
+					prefetchedEntry = baseIt.next();
+					assert prefetchedEntry != null;
+				}
+				if (prefetchedEntry.getValue() < minValue) {
+					prefetchedEntry = null;
+				}
+			}
+			return prefetchedEntry;
+		}
+
 		private final Iterator<Entry<Integer, Integer>> baseIt;
 
-		private Span lastSpan = null;
+		private Span lastSentSpan = null;
 
 		private final int maxValue;
 
+		private final int minValue;
+
 		private Entry<Integer, Integer> prefetchedEntry = null;
 
-		public SpanIterator(final Iterator<Entry<Integer, Integer>> baseIterator, final int maxValue) {
+		/**
+		 * @param baseIterator
+		 * @param minValueInclusive if higher than some spans, those spans are skipped
+		 * @param maxValueInclusive
+		 */
+		public SpanIterator(final Iterator<Entry<Integer, Integer>> baseIterator, final int minValueInclusive,
+				final int maxValueInclusive) {
 			this.baseIt = baseIterator;
-			this.maxValue = maxValue;
+			this.minValue = minValueInclusive;
+			this.maxValue = maxValueInclusive;
+			if (this.minValue > this.maxValue) {
+				throw new IllegalArgumentException(
+						"min must be <= max, was " + minValueInclusive + " vs. " + maxValueInclusive);
+			}
 		}
 
 		@Override
 		protected boolean baseHasNext() {
-			if (this.lastSpan == null) {
+			if (this.lastSentSpan == null) {
 				return true;
-			} else if (this.lastSpan.endInclusive < this.maxValue) {
+			} else if (this.lastSentSpan.endInclusive < this.maxValue) {
 				return true;
 			} else {
 				return false;
@@ -118,107 +151,63 @@ public class IntegerRangeIndex implements IIntegerRangeIndex, Serializable {
 
 		@Override
 		protected Span baseNext() {
-			if (this.lastSpan == null) {
-				if (!this.baseIt.hasNext()) {
-					// completely empty, return the only span
-					this.lastSpan = new Span(0, this.maxValue, false);
-					return this.lastSpan;
+			int start;
+			int end;
+			boolean inRange;
+			if (this.lastSentSpan == null) {
+				this.prefetchedEntry = skipValueLessThan(this.baseIt, this.minValue);
+				if (this.prefetchedEntry == null) {
+					// completely empty, return the only possible span
+					this.lastSentSpan = new Span(this.minValue, this.maxValue, false);
+					return this.lastSentSpan;
 				}
 
-				this.prefetchedEntry = this.baseIt.next();
-				if (this.prefetchedEntry.getKey() > 0) {
-					// first span is not an integer range
-					this.lastSpan = new Span(0, this.prefetchedEntry.getKey() - 1, false);
+				start = this.minValue;
+				assert this.prefetchedEntry != null;
+
+				if (this.prefetchedEntry.getKey() > this.minValue) {
+					// first span is not an integer range (its between two integer ranges)
+					inRange = false;
+					end = this.prefetchedEntry.getKey() - 1;
 				} else {
-					// coincidentially the first span starts just at 0
-					assert this.prefetchedEntry.getKey() == 0;
-					this.lastSpan = new Span(0, this.prefetchedEntry.getValue(), true);
+					inRange = true;
+					end = this.prefetchedEntry.getValue();
+					// consume
 					this.prefetchedEntry = null;
 				}
-				return this.lastSpan;
 			} else {
 				// we are in the middle of sending spans
-				if (this.lastSpan.isInRange) {
+				start = this.lastSentSpan.endInclusive + 1;
+				if (this.lastSentSpan.isInRange) {
 					// next span is out of range
+					inRange = false;
 					assert this.prefetchedEntry == null : "was just consumed";
 					if (this.baseIt.hasNext()) {
 						this.prefetchedEntry = this.baseIt.next();
-						this.lastSpan = new Span(this.lastSpan.endInclusive + 1, this.prefetchedEntry.getKey() - 1,
-								false);
+						end = this.prefetchedEntry.getKey() - 1;
 					} else {
-						this.lastSpan = new Span(this.lastSpan.endInclusive + 1, this.maxValue, false);
+						end = this.maxValue;
 					}
 				} else {
-					// next span is in range
 					assert this.prefetchedEntry != null : "prefetched";
-					this.lastSpan = new Span(this.lastSpan.endInclusive + 1, this.prefetchedEntry.getValue(), true);
+					// next span is in range
+					inRange = true;
+					end = this.prefetchedEntry.getValue();
+					// consume
 					this.prefetchedEntry = null;
 				}
-				return this.lastSpan;
 			}
+			if (end > this.maxValue) {
+				end = this.maxValue;
+			}
+			this.lastSentSpan = new Span(start, end, inRange);
+
+			return this.lastSentSpan;
 		}
 
 	}
 
 	private static final Logger log = LoggerFactory.getLogger(IntegerRangeIndex.class);
-
-	// /*
-	// * Runtime: O(1) + O(1) + O(contained intervals).
-	// *
-	// * @see org.xydra.index.IIntegerRangeIndex#index(int, int)
-	// */
-	// @Override
-	// public void index_OLD(int start, int end) {
-	// assert start <= end : "start=" + start + " end=" + end;
-	// if(log.isTraceEnabled())
-	// log.trace("Index " + start + "," + end);
-	//
-	// int mergedStart = start;
-	// int mergedEnd = end;
-	// if(log.isTraceEnabled())
-	// log.trace("Current: " + mergedStart + "," + mergedEnd);
-	//
-	// /* merge with previous? */
-	//
-	// // Integer prev_start = this.sortedmap.headMap(start).lastKey();
-	// // Integer prev_end = this.sortedmap.get(prev_start);
-	//
-	// Entry<Integer,Integer> prev = this.sortedmap.floorEntry(start - 1);
-	//
-	// assert prev == null || start(prev) <= start - 1;
-	// // [1,5] & [3,9]
-	// if(prev != null && start - 1 <= end(prev)) {
-	// if(log.isTraceEnabled())
-	// log.trace("Merge with prev: " + prev);
-	// mergedStart = start(prev);
-	// mergedEnd = Math.max(end(prev), end);
-	// this.sortedmap.remove(start(prev));
-	// if(log.isTraceEnabled())
-	// log.trace("Current: " + mergedStart + "," + mergedEnd);
-	// }
-	//
-	// /* merge with next? */
-	// Entry<Integer,Integer> next = this.sortedmap.floorEntry(end + 1);
-	// assert next == null || start(next) <= end + 1;
-	// if(next != null && start(next) >= mergedStart && mergedEnd + 1 >=
-	// start(next)) {
-	// if(log.isTraceEnabled())
-	// log.trace("Merge with next: " + next);
-	// mergedEnd = Math.max(mergedEnd, end(next));
-	// this.sortedmap.remove(start(next));
-	// if(log.isTraceEnabled())
-	// log.trace("Current: " + mergedStart + "," + mergedEnd);
-	// }
-	//
-	// /* prune contained intervals? */
-	// int pruneStart = mergedStart + 1;
-	// int pruneEnd = mergedEnd - 1;
-	// if(pruneEnd - pruneStart > 1) {
-	// pruneRanges(pruneStart, pruneEnd);
-	// }
-	//
-	// this.sortedmap.put(mergedStart, mergedEnd);
-	// }
 
 	private static final long serialVersionUID = -6793029187873016827L;
 
@@ -294,7 +283,7 @@ public class IntegerRangeIndex implements IIntegerRangeIndex, Serializable {
 		}
 
 		int index = startInclusive;
-		int spanStart = index;
+		int spanStart = startInclusive;
 		/* as opposed to 'inSeparator' */
 		boolean inToken = true;
 		while (index < endExclusive) {
@@ -303,8 +292,9 @@ public class IntegerRangeIndex implements IIntegerRangeIndex, Serializable {
 
 			if (separators.isInInterval(c)) {
 				if (inToken) {
-					// token ends FIXME can be "the empty token" when spanStart == index
+					// token ends
 					if (index > startInclusive) {
+						assert spanStart < index;
 						splitHandler.onToken(spanStart, index);
 					}
 					spanStart = index;
@@ -315,6 +305,7 @@ public class IntegerRangeIndex implements IIntegerRangeIndex, Serializable {
 				if (!inToken) {
 					// separator ends
 					if (index > 0) {
+						assert spanStart < index;
 						splitHandler.onSeparator(spanStart, index);
 					}
 					spanStart = index;
@@ -335,13 +326,6 @@ public class IntegerRangeIndex implements IIntegerRangeIndex, Serializable {
 	/**
 	 * Split a string simultaneously in two kinds of tokens, in a single pass
 	 *
-	 * @param s @CanBeNull
-	 * @param separatorsA
-	 * @param separatorsB
-	 * @param splitHandlerA
-	 * @param splitHandlerB
-	 */
-	/**
 	 * @param s @CanBeNull
 	 * @param startInclusive index in s
 	 * @param endExclusive index in s
@@ -501,44 +485,6 @@ public class IntegerRangeIndex implements IIntegerRangeIndex, Serializable {
 			}
 		}
 
-		// Entry<Integer,Integer> prev = this.sortedmap.floorEntry(start - 1);
-		// if(prev != null) {
-		// assert start(prev) < start : "start(prev)=" + start(prev) + " start="
-		// + start;
-		//
-		// if(start <= end(prev)) {
-		// // prev needs to be trimmed/split
-		//
-		// if(end == end(prev)) {
-		// // corner case: trim & done
-		//
-		// int oldStart = prev.getKey();
-		// this.sortedmap.remove(prev.getKey());
-		// this.sortedmap.put(oldStart, start - 1);
-		//
-		// return;
-		// } else if(end < end(prev)) {
-		// // split & done
-		// int oldEnd = end(prev);
-		//
-		// assert end < oldEnd;
-		// assert start(prev) <= start - 1;
-		//
-		// int oldStart = start(prev);
-		// this.sortedmap.remove(prev.getKey());
-		// this.sortedmap.put(oldStart, start - 1);
-		//
-		// this.sortedmap.put(end + 1, oldEnd);
-		// return;
-		// } else {
-		// // trim & not done
-		// int oldStart = start(prev);
-		// this.sortedmap.remove(prev.getKey());
-		// this.sortedmap.put(oldStart, start - 1);
-		// }
-		// }
-		// }
-
 		/* next = entry with the greatest key <= end, or null if there is no such key */
 		final SortedMap<Integer, Integer> nextHeadMap = this.sortedmap.headMap(end - 1);
 		// assert prev was null || prev was trimmed
@@ -556,22 +502,6 @@ public class IntegerRangeIndex implements IIntegerRangeIndex, Serializable {
 				// delete next, will happen in next loop anyway
 			}
 		}
-
-		// // assert prev was null || prev was trimmed
-		// Entry<Integer,Integer> next = this.sortedmap.floorEntry(end);
-		// if(next != null) {
-		// assert start(next) <= end;
-		//
-		// if(end < end(next)) {
-		// // trim start of next
-		// int oldEnd = end(next);
-		// this.sortedmap.remove(next.getKey());
-		// this.sortedmap.put(end + 1, oldEnd);
-		// } else {
-		// assert end >= end(next);
-		// // delete next, will happen in next loop anyway
-		// }
-		// }
 
 		/* delete inner ranges */
 
@@ -692,22 +622,7 @@ public class IntegerRangeIndex implements IIntegerRangeIndex, Serializable {
 
 		final Integer prev_end = headMap.get(prev_start);
 		return i <= prev_end;
-
-		//
-		// Entry<Integer,Integer> prev = this.sortedmap.floorEntry(i);
-		// if(prev == null)
-		// return false;
-		// return start(prev) <= i && i <= end(prev);
 	}
-
-	// /**
-	// * @return a new {@link IntegerRangeIndex} in which every span NOT indexed
-	// in this index, IS indexed and vice versa.
-	// */
-	// public IntegerRangeIndex invert(int maxInclusive) {
-	// IntegerRangeIndex inverted = new IntegerRangeIndex();
-	//
-	// }
 
 	private void pruneRanges(final int start, final int end) {
 		if (log.isTraceEnabled()) {
@@ -743,7 +658,18 @@ public class IntegerRangeIndex implements IIntegerRangeIndex, Serializable {
 	 *         range or between two of them.
 	 */
 	public Iterator<Span> spanIterator(final int maxValueInclusive) {
-		return new SpanIterator(this.sortedmap.entrySet().iterator(), maxValueInclusive);
+		return new SpanIterator(this.sortedmap.entrySet().iterator(), 0, maxValueInclusive);
 	}
 
+	/**
+	 * @param minValueInclusive inclusive; used only at then start of the integerRange to append a final span. Typically
+	 *        use length() - 1.
+	 * @param maxValueInclusive inclusive; used only at then end of the integerRange to append a final span. Typically
+	 *        use length() - 1.
+	 * @return all spans until maxValue; each span has a boolean flag to indicate, if the span is within an integer
+	 *         range or between two of them.
+	 */
+	public Iterator<Span> spanIterator(final int minValueInclusive, final int maxValueInclusive) {
+		return new SpanIterator(this.sortedmap.entrySet().iterator(), minValueInclusive, maxValueInclusive);
+	}
 }
