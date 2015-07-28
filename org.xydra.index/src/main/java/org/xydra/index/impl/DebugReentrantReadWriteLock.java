@@ -74,7 +74,11 @@ public class DebugReentrantReadWriteLock implements ReadWriteLock {
 
 		@Override
 		public void unlock() {
+			try {
 			DebugReentrantReadWriteLock.this.reentrant.readLock().unlock();
+			} catch (final IllegalMonitorStateException e) {
+				log.warn("Lock issue, ignored",e);
+			}
 			readOperationEnd();
 		}
 
