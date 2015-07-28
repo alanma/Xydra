@@ -111,12 +111,11 @@ public class IntegerRangeIndexTest {
 		iii.index(248, 767);
 		iii.index(880, 893);
 
+		assertTrue(iii.isInInterval(95));
 
-		assertTrue( iii.isInInterval(95) );
+		iii.deIndex(95, 95);
 
-		iii.deIndex(95,95);
-
-		assertFalse( iii.isInInterval(95) );
+		assertFalse(iii.isInInterval(95));
 	}
 
 	@Test
@@ -131,12 +130,11 @@ public class IntegerRangeIndexTest {
 		iii.index(248, 767);
 		iii.index(880, 893);
 
+		assertTrue(iii.isInInterval(95));
 
-		assertTrue( iii.isInInterval(95) );
+		iii.deIndex(95, 95);
 
-		iii.deIndex(95,95);
-
-		assertFalse( iii.isInInterval(95) );
+		assertFalse(iii.isInInterval(95));
 	}
 
 	private static void assertInterval(final int s, final int e, final Entry<Integer, Integer> entry) {
@@ -152,16 +150,123 @@ public class IntegerRangeIndexTest {
 
 		final Iterator<Span> spanIt = iri.spanIterator(100);
 		final List<Span> list = Iterators.toList(spanIt);
-		// for(Span span : list) {
-		// System.out.println(span);
-		// }
+		for (final Span span : list) {
+			log.debug("" + span);
+		}
 		assertEquals(5, list.size());
 		assertSpan(0, 9, false, list.get(0));
 		assertSpan(10, 20, true, list.get(1));
 		assertSpan(21, 29, false, list.get(2));
 		assertSpan(30, 40, true, list.get(3));
 		assertSpan(41, 100, false, list.get(4));
+	}
 
+	@Test
+	public void testSpanIterator2() {
+		final IntegerRangeIndex iri = new IntegerRangeIndex();
+		iri.index(-3, -2);
+		iri.index(10, 20);
+		iri.index(30, 40);
+
+		final Iterator<Span> spanIt = iri.spanIterator(-5, 100);
+		final List<Span> list = Iterators.toList(spanIt);
+		for (final Span span : list) {
+			log.debug("" + span);
+		}
+		assertEquals(7, list.size());
+		assertSpan(-5, -4, false, list.get(0));
+		assertSpan(-3, -2, true, list.get(1));
+		assertSpan(-1, 9, false, list.get(2));
+		assertSpan(10, 20, true, list.get(3));
+		assertSpan(21, 29, false, list.get(4));
+		assertSpan(30, 40, true, list.get(5));
+		assertSpan(41, 100, false, list.get(6));
+	}
+
+	@Test
+	public void testSpanIterator3() {
+		final IntegerRangeIndex iri = new IntegerRangeIndex();
+		iri.index(10, 20);
+		iri.index(30, 40);
+
+		final Iterator<Span> spanIt = iri.spanIterator(25, 100);
+		final List<Span> list = Iterators.toList(spanIt);
+		for (final Span span : list) {
+			log.debug("" + span);
+		}
+		assertEquals(3, list.size());
+		assertSpan(25, 29, false, list.get(0));
+		assertSpan(30, 40, true, list.get(1));
+		assertSpan(41, 100, false, list.get(2));
+	}
+
+	@Test
+	public void testSpanIterator4() {
+		final IntegerRangeIndex iri = new IntegerRangeIndex();
+		iri.index(10, 20);
+		iri.index(30, 40);
+
+		final Iterator<Span> spanIt = iri.spanIterator(0, 35);
+		final List<Span> list = Iterators.toList(spanIt);
+		for (final Span span : list) {
+			log.debug("" + span);
+		}
+		assertEquals(4, list.size());
+		assertSpan(0, 9, false, list.get(0));
+		assertSpan(10, 20, true, list.get(1));
+		assertSpan(21, 29, false, list.get(2));
+		assertSpan(30, 35, true, list.get(3));
+	}
+
+	@Test
+	public void testSpanIterator5() {
+		final IntegerRangeIndex iri = new IntegerRangeIndex();
+		iri.index(10, 20);
+		iri.index(30, 40);
+
+		final Iterator<Span> spanIt = iri.spanIterator(15, 35);
+		final List<Span> list = Iterators.toList(spanIt);
+		for (final Span span : list) {
+			log.debug("" + span);
+		}
+		assertEquals(3, list.size());
+		assertSpan(15, 20, true, list.get(0));
+		assertSpan(21, 29, false, list.get(1));
+		assertSpan(30, 35, true, list.get(2));
+	}
+
+	@Test
+	public void testSpanIterator6() {
+		final IntegerRangeIndex iri = new IntegerRangeIndex();
+		iri.index(10, 20);
+		iri.index(30, 40);
+
+		final Iterator<Span> spanIt = iri.spanIterator(10, 35);
+		final List<Span> list = Iterators.toList(spanIt);
+		for (final Span span : list) {
+			log.debug("" + span);
+		}
+		assertEquals(3, list.size());
+		assertSpan(10, 20, true, list.get(0));
+		assertSpan(21, 29, false, list.get(1));
+		assertSpan(30, 35, true, list.get(2));
+	}
+
+	@Test
+	public void testSpanIterator7() {
+		final IntegerRangeIndex iri = new IntegerRangeIndex();
+		iri.index(10, 20);
+		iri.index(30, 40);
+
+		final Iterator<Span> spanIt = iri.spanIterator(20, 35);
+		final List<Span> list = Iterators.toList(spanIt);
+		for (final Span span : list) {
+			log.debug("" + span);
+		}
+		assertEquals(3, list.size());
+		assertSpan(20, 20, true, list.get(0));
+		assertSpan(21, 29, false, list.get(1));
+		assertSpan(30, 35, true, list.get(2));
 	}
 
 	@Test
@@ -189,4 +294,5 @@ public class IntegerRangeIndexTest {
 		assertEquals(e, span.endInclusive);
 		assertEquals(inRange, span.isInRange);
 	}
+
 }
