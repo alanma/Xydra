@@ -292,4 +292,14 @@ public class RegExUtil {
 
 		return false;
 	}
+
+	/** enable Unicode flag */
+	public static String unicode() {
+		return "(?U)";
+	}
+
+	/** match only at start of word (word boundary), REGEX, end of word (word boundary) */
+	public static String inWordBoundary(final String regex) {
+		return "\\b" + regex + "\\b";
+	}
 }
