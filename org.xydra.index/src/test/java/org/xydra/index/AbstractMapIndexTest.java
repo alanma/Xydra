@@ -32,7 +32,7 @@ public abstract class AbstractMapIndexTest<K, E> {
 
 	protected IMapIndex<K, E> mapIndex;
 
-	public AbstractMapIndexTest(IMapIndex<K, E> mapIndex) {
+	public AbstractMapIndexTest(final IMapIndex<K, E> mapIndex) {
 		super();
 		this.mapIndex = mapIndex;
 	}
@@ -65,9 +65,9 @@ public abstract class AbstractMapIndexTest<K, E> {
 
 	@Test
 	public void testDeIndex() {
-		K key1 = createKey();
-		E entry1 = createEntry();
-		E entry2 = createEntry();
+		final K key1 = createKey();
+		final E entry1 = createEntry();
+		final E entry2 = createEntry();
 
 		this.mapIndex.index(key1, entry1);
 		this.mapIndex.deIndex(key1);
@@ -108,8 +108,8 @@ public abstract class AbstractMapIndexTest<K, E> {
 		this.mapIndex.index(this.key2, this.entry2);
 		this.mapIndex.index(this.key1, this.entry3);
 
-		Iterator<K> it = this.mapIndex.keyIterator();
-		List<K> list = Iterators.toList(it);
+		final Iterator<K> it = this.mapIndex.keyIterator();
+		final List<K> list = Iterators.toList(it);
 
 		assertEquals(2, list.size());
 		assertTrue(list.contains(this.key1));

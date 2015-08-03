@@ -80,11 +80,8 @@ extends SmallTripleIndex<K, L, M>implements ITripleIndex<K, L, M>, Serializable 
 		if (
 				// spo -> s_p_o
 				!c1.isStar() && !c2.isStar() && !c3.isStar() ||
-				// sp* -> s_p_o
 				!c1.isStar() && !c2.isStar() && c3.isStar() ||
-				// s** -> s_p_o
 				!c1.isStar() && c2.isStar() && c3.isStar() ||
-				// *** -> s_p_o
 				c1.isStar() && c2.isStar() && c3.isStar()
 
 				) {
@@ -92,7 +89,6 @@ extends SmallTripleIndex<K, L, M>implements ITripleIndex<K, L, M>, Serializable 
 		} else if (
 				// *po -> p_o
 				c1.isStar() && !c2.isStar() && !c3.isStar() ||
-				// *p* -> p_o
 				c1.isStar() && !c2.isStar() && c3.isStar()
 
 				) {
@@ -100,7 +96,6 @@ extends SmallTripleIndex<K, L, M>implements ITripleIndex<K, L, M>, Serializable 
 		} else if (
 				// s*o -> o_s
 				!c1.isStar() && c2.isStar() && !c3.isStar() ||
-				// **o -> o_s
 				c1.isStar() && c2.isStar() && !c3.isStar()
 
 				) {
@@ -126,11 +121,8 @@ extends SmallTripleIndex<K, L, M>implements ITripleIndex<K, L, M>, Serializable 
 		if (
 				// spo -> s_p_o
 				c1 != null && c2 != null && c3 != null ||
-				// sp* -> s_p_o
 				c1 != null && c2 != null && c3 == null ||
-				// s** -> s_p_o
 				c1 != null && c2 == null && c3 == null ||
-				// *** -> s_p_o
 				c1 == null && c2 == null && c3 == null
 
 				) {
@@ -138,7 +130,6 @@ extends SmallTripleIndex<K, L, M>implements ITripleIndex<K, L, M>, Serializable 
 		} else if (
 				// *po -> p_o
 				c1 == null && c2 != null && c3 != null ||
-				// *p* -> p_o
 				c1 == null && c2 != null && c3 == null
 
 				) {
@@ -146,7 +137,6 @@ extends SmallTripleIndex<K, L, M>implements ITripleIndex<K, L, M>, Serializable 
 		} else if (
 				// s*o -> o_s
 				c1 != null && c2 == null && c3 != null ||
-				// **o -> o_s
 				c1 == null && c2 == null && c3 != null
 
 				) {
@@ -173,11 +163,8 @@ extends SmallTripleIndex<K, L, M>implements ITripleIndex<K, L, M>, Serializable 
 		if (
 				// spo -> s_p_o
 				c1 != null && c2 != null && c3 != null ||
-				// sp* -> s_p_o
 				c1 != null && c2 != null && c3 == null ||
-				// s** -> s_p_o
 				c1 != null && c2 == null && c3 == null ||
-				// *** -> s_p_o
 				c1 == null && c2 == null && c3 == null
 
 				) {
@@ -185,7 +172,6 @@ extends SmallTripleIndex<K, L, M>implements ITripleIndex<K, L, M>, Serializable 
 		} else if (
 				// *po -> p_o
 				c1 == null && c2 != null && c3 != null ||
-				// *p* -> p_o
 				c1 == null && c2 != null && c3 == null
 
 				) {
@@ -195,7 +181,6 @@ extends SmallTripleIndex<K, L, M>implements ITripleIndex<K, L, M>, Serializable 
 		} else if (
 				// s*o -> o_s
 				c1 != null && c2 == null && c3 != null ||
-				// **o -> o_s
 				c1 == null && c2 == null && c3 != null
 
 				) {

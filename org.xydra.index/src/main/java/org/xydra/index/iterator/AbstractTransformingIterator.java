@@ -5,7 +5,7 @@ import java.util.NoSuchElementException;
 
 /**
  * Adapts an Iterator to transform the iterated objects.
- * 
+ *
  * @param <I>
  *            Type of objects returned by the wrapped iterator.
  * @param <O>
@@ -19,7 +19,7 @@ public abstract class AbstractTransformingIterator<I, O> implements ClosableIter
 	 * @param base
 	 *            @NeverNull
 	 */
-	public AbstractTransformingIterator(Iterator<? extends I> base) {
+	public AbstractTransformingIterator(final Iterator<? extends I> base) {
 		assert base != null;
 		this.base = base;
 	}
@@ -35,8 +35,8 @@ public abstract class AbstractTransformingIterator<I, O> implements ClosableIter
 			throw new NoSuchElementException();
 			// return null;
 		}
-		I in = this.base.next();
-		O out = this.transform(in);
+		final I in = this.base.next();
+		final O out = this.transform(in);
 		return out;
 	}
 

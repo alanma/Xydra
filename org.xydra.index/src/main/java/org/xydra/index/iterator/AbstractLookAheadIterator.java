@@ -20,7 +20,7 @@ public abstract class AbstractLookAheadIterator<E> implements Iterator<E> {
 	public E next() {
 		// might be the first call ever and we are lazy
 		this.lookAhead();
-		E result = this.nextItem;
+		final E result = this.nextItem;
 		this.hasNext = false;
 		this.lookAhead();
 		return result;
@@ -32,8 +32,9 @@ public abstract class AbstractLookAheadIterator<E> implements Iterator<E> {
 	}
 
 	private void lookAhead() {
-		if (this.hasNext)
+		if (this.hasNext) {
 			return;
+		}
 
 		// advance until we find a match
 		while (this.baseHasNext()) {

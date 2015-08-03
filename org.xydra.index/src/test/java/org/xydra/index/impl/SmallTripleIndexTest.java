@@ -6,23 +6,23 @@ import org.xydra.index.ITripleIndex;
 public class SmallTripleIndexTest extends AbstractTripleIndexTest<String, String, String> {
 
 	@Override
-	public String createS(String label) {
+	public String createS(final String label) {
 		return label;
 	}
 
 	@Override
-	public String createP(String label) {
+	public String createP(final String label) {
 		return label;
 	}
 
 	@Override
-	public String createO(String label) {
+	public String createO(final String label) {
 		return label;
 	}
 
 	@Override
 	public ITripleIndex<String, String, String> create() {
-		ITripleIndex<String, String, String> ti = new SmallTripleIndex<String, String, String>();
+		final ITripleIndex<String, String, String> ti = new SmallTripleIndex<String, String, String>();
 		return ti;
 	}
 }

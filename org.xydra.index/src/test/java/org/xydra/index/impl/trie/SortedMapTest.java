@@ -21,7 +21,7 @@ import org.junit.Test;
 
 /**
  * Tests a {@link java.util.SortedMap}
- * 
+ *
  * @author xamde
  */
 public abstract class SortedMapTest {
@@ -66,7 +66,7 @@ public abstract class SortedMapTest {
 
 	@Test
 	public void testEntrySet() {
-		for (Entry<String, Integer> e : this.map.entrySet()) {
+		for (final Entry<String, Integer> e : this.map.entrySet()) {
 			System.out.println(e.toString());
 		}
 	}
@@ -97,7 +97,7 @@ public abstract class SortedMapTest {
 	public void testKeySet() {
 		this.map.put("a", 1);
 		this.map.put("b", 2);
-		Set<String> keyset = this.map.keySet();
+		final Set<String> keyset = this.map.keySet();
 		assertTrue(keyset.contains("a"));
 		assertTrue(keyset.contains("b"));
 		assertFalse(keyset.contains("c"));
@@ -114,10 +114,10 @@ public abstract class SortedMapTest {
 	@SuppressWarnings("unused")
 	@Test
 	public void testPutInBetween() {
-		Integer a = this.map.put("a", 1);
-		Integer c = this.map.put("c", 3);
-		Integer b = this.map.put("b", 2);
-		List<Integer> values = new ArrayList<>();
+		final Integer a = this.map.put("a", 1);
+		final Integer c = this.map.put("c", 3);
+		final Integer b = this.map.put("b", 2);
+		final List<Integer> values = new ArrayList<>();
 		values.addAll(this.map.values());
 		assertEquals(3, values.size());
 		assertEquals((Integer) 1, values.get(0));
@@ -162,7 +162,7 @@ public abstract class SortedMapTest {
 	public void testValues() {
 		this.map.put("a", 1);
 		this.map.put("b", 2);
-		Collection<Integer> values = this.map.values();
+		final Collection<Integer> values = this.map.values();
 		assertTrue(values.contains(1));
 		assertTrue(values.contains(2));
 		assertFalse(values.contains(3));
@@ -176,13 +176,13 @@ public abstract class SortedMapTest {
 		this.map.put("d", 4);
 		this.map.put("e", 5);
 
-		SortedMap<String, Integer> submap = this.map.subMap("b", "d");
+		final SortedMap<String, Integer> submap = this.map.subMap("b", "d");
 		dump(submap);
 		assertEquals(2, submap.size());
 	}
 
 	@SuppressWarnings("rawtypes")
-	private static void dump(SortedMap<String, Integer> map) {
+	private static void dump(final SortedMap<String, Integer> map) {
 		if (map instanceof SortedArrayMap) {
 			((SortedArrayMap) map).dump();
 		}
@@ -196,7 +196,7 @@ public abstract class SortedMapTest {
 		this.map.put("d", 4);
 		this.map.put("e", 5);
 
-		SortedMap<String, Integer> submap = this.map.headMap("d");
+		final SortedMap<String, Integer> submap = this.map.headMap("d");
 		assertEquals(3, submap.size());
 	}
 
@@ -208,7 +208,7 @@ public abstract class SortedMapTest {
 		this.map.put("d", 4);
 		this.map.put("e", 5);
 
-		SortedMap<String, Integer> submap = this.map.tailMap("b");
+		final SortedMap<String, Integer> submap = this.map.tailMap("b");
 		assertEquals(4, submap.size());
 	}
 
@@ -252,9 +252,9 @@ public abstract class SortedMapTest {
 		this.map.put("d", 4);
 		this.map.put("e", 5);
 
-		SortedMap<String, Integer> submap = this.map.subMap("c", "z");
-		Collection<Integer> values = submap.values();
-		Set<Integer> vs = new HashSet<>();
+		final SortedMap<String, Integer> submap = this.map.subMap("c", "z");
+		final Collection<Integer> values = submap.values();
+		final Set<Integer> vs = new HashSet<>();
 		vs.addAll(values);
 		System.out.println(values);
 		assertEquals(3, vs.size());
@@ -271,7 +271,7 @@ public abstract class SortedMapTest {
 		this.map.put("d", 4);
 		this.map.put("e", 5);
 
-		SortedMap<String, Integer> submap = this.map.subMap("c", "z");
+		final SortedMap<String, Integer> submap = this.map.subMap("c", "z");
 		assertEquals("c", submap.firstKey());
 	}
 

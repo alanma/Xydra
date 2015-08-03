@@ -93,11 +93,8 @@ implements TripleSetIndex<K, L, M, E>, Serializable {
 		if (
 				// spo -> s_p_o
 				!c1.isStar() && !c2.isStar() && !c2.isStar() ||
-				// sp* -> s_p_o
 				!c1.isStar() && !c2.isStar() && c3.isStar() ||
-				// s** -> s_p_o
 				!c1.isStar() && c2.isStar() && c3.isStar() ||
-				// *** -> s_p_o
 				c1.isStar() && c2.isStar() && c3.isStar()
 
 				) {
@@ -107,7 +104,6 @@ implements TripleSetIndex<K, L, M, E>, Serializable {
 		if (
 				// *po -> p_o
 				c1.isStar() && !c2.isStar() && !c3.isStar() ||
-				// *p* -> p_o
 				c1.isStar() && !c2.isStar() && c3.isStar()
 
 				) {
@@ -117,7 +113,6 @@ implements TripleSetIndex<K, L, M, E>, Serializable {
 		if (
 				// s*o -> o_s
 				!c1.isStar() && c2.isStar() && !c3.isStar() ||
-				// **o -> o_s
 				c1.isStar() && c2.isStar() && !c3.isStar()
 
 				) {

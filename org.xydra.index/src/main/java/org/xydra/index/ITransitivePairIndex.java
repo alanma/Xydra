@@ -11,7 +11,7 @@ import org.xydra.index.query.Pair;
  * supported. True cycles of pairs (eg. pairs (k1,k2) and (k2,k1) at the same
  * time) not allowed, however there can be multiple paths between to keys (eg.
  * pairs (s,e), (s,k) and (k,e)).
- * 
+ *
  * @author dscharrer
  * @param <K>
  *            type for both parts of the pair
@@ -36,11 +36,11 @@ public interface ITransitivePairIndex<K> extends IPairIndex<K, K> {
 	/**
 	 * Iterate over all implied pairs where the keys match the given
 	 * constraints.
-	 * 
+	 *
 	 * Each pair will be returned only once.
-	 * 
+	 *
 	 * Indexing new pairs or deIndexing pairs invalidates the iterator.
-	 * 
+	 *
 	 * @param c1
 	 *            The constraint for the first key.
 	 * @param c2
@@ -52,7 +52,7 @@ public interface ITransitivePairIndex<K> extends IPairIndex<K, K> {
 	/**
 	 * Add a new pair (k1,k2) to the index. If the pair was already in the
 	 * index, nothing is changed.
-	 * 
+	 *
 	 * @throws CycleException
 	 *             if adding the pair would close a cycle
 	 */
@@ -61,7 +61,7 @@ public interface ITransitivePairIndex<K> extends IPairIndex<K, K> {
 
 	/**
 	 * This iterates over the defined pairs, not the implied ones.
-	 * 
+	 *
 	 * @return an Iterator.
 	 */
 	@Override

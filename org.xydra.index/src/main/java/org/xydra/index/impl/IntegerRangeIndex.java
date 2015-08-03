@@ -281,6 +281,9 @@ public class IntegerRangeIndex implements IIntegerRangeIndex, Serializable {
 		if (s == null || s.length() == 0) {
 			return;
 		}
+		assert startInclusive >= 0 && startInclusive < s.length();
+		assert endExclusive > 0 && endExclusive <= s.length() : "endExclusive=" + endExclusive + " for s.len="
+				+ s.length();
 
 		int index = startInclusive;
 		int spanStart = startInclusive;

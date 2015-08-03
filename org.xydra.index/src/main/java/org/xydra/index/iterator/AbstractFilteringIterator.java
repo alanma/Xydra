@@ -5,9 +5,9 @@ import java.util.Iterator;
 /**
  * Encapsulates an iterator, returning only those elements matching a filter.
  * Uses a pre-fetch strategy.
- * 
+ *
  * @author voelkel
- * 
+ *
  * @param <E>
  *            Type of objects returned by this iterator.
  */
@@ -18,7 +18,7 @@ public abstract class AbstractFilteringIterator<E> implements Iterator<E> {
 	boolean hasNext;
 	private E nextItem = null;
 
-	public AbstractFilteringIterator(Iterator<E> base) {
+	public AbstractFilteringIterator(final Iterator<E> base) {
 		this.base = base;
 	}
 
@@ -32,7 +32,7 @@ public abstract class AbstractFilteringIterator<E> implements Iterator<E> {
 	public E next() {
 		// might be the first call ever and we are lazy
 		this.lookAhead();
-		E result = this.nextItem;
+		final E result = this.nextItem;
 		this.hasNext = false;
 		this.lookAhead();
 		return result;
@@ -50,8 +50,9 @@ public abstract class AbstractFilteringIterator<E> implements Iterator<E> {
 	protected abstract boolean matchesFilter(E entry);
 
 	private void lookAhead() {
-		if (this.hasNext)
+		if (this.hasNext) {
 			return;
+		}
 
 		// advance until we find a match
 		while (this.base.hasNext()) {

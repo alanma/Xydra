@@ -28,8 +28,8 @@ public abstract class AbstractPairIndexTest extends TestCase {
 	@Test
 	public void testEmptyIndex() {
 
-		Constraint<Integer> e = new EqualsConstraint<Integer>(0);
-		Constraint<Integer> w = new Wildcard<Integer>();
+		final Constraint<Integer> e = new EqualsConstraint<Integer>(0);
+		final Constraint<Integer> w = new Wildcard<Integer>();
 
 		assertFalse(this.index.contains(w, w));
 		assertFalse(this.index.contains(w, e));
@@ -51,9 +51,9 @@ public abstract class AbstractPairIndexTest extends TestCase {
 
 		this.index.index(0, 1);
 
-		Constraint<Integer> e0 = new EqualsConstraint<Integer>(0);
-		Constraint<Integer> e1 = new EqualsConstraint<Integer>(1);
-		Constraint<Integer> w = new Wildcard<Integer>();
+		final Constraint<Integer> e0 = new EqualsConstraint<Integer>(0);
+		final Constraint<Integer> e1 = new EqualsConstraint<Integer>(1);
+		final Constraint<Integer> w = new Wildcard<Integer>();
 
 		assertTrue(this.index.contains(w, w));
 		assertTrue(this.index.contains(w, e1));
@@ -73,9 +73,9 @@ public abstract class AbstractPairIndexTest extends TestCase {
 		this.index.index(0, 1);
 		this.index.deIndex(0, 1);
 
-		Constraint<Integer> e0 = new EqualsConstraint<Integer>(0);
-		Constraint<Integer> e1 = new EqualsConstraint<Integer>(1);
-		Constraint<Integer> w = new Wildcard<Integer>();
+		final Constraint<Integer> e0 = new EqualsConstraint<Integer>(0);
+		final Constraint<Integer> e1 = new EqualsConstraint<Integer>(1);
+		final Constraint<Integer> w = new Wildcard<Integer>();
 
 		assertFalse(this.index.contains(w, w));
 		assertFalse(this.index.contains(w, e1));
@@ -88,20 +88,20 @@ public abstract class AbstractPairIndexTest extends TestCase {
 	public void testRandomOperations() {
 
 		// number of actors/groups
-		int nKeys = 50;
+		final int nKeys = 50;
 		// number of operations
-		int nOperations = 150;
+		final int nOperations = 150;
 		// proportion of operations to be add operations
-		double pAdd = 0.7;
+		final double pAdd = 0.7;
 		// check interval
-		int nCheck = 20;
+		final int nCheck = 20;
 
-		long seed = (long) (Math.random() * Long.MAX_VALUE) + System.nanoTime();
-		Random rnd = new Random(seed);
+		final long seed = (long) (Math.random() * Long.MAX_VALUE) + System.nanoTime();
+		final Random rnd = new Random(seed);
 		System.out.println("testRandomOperations(): seed is " + seed);
 
 		// list to store groups for verification
-		List<Pair<Integer, Integer>> pairs = new ArrayList<Pair<Integer, Integer>>();
+		final List<Pair<Integer, Integer>> pairs = new ArrayList<Pair<Integer, Integer>>();
 
 		// perform some operations
 		int chk = nCheck;
@@ -110,12 +110,13 @@ public abstract class AbstractPairIndexTest extends TestCase {
 			// add
 			if (pairs.isEmpty() || rnd.nextDouble() < pAdd) {
 
-				Pair<Integer, Integer> pair = makePair(rnd, nKeys);
+				final Pair<Integer, Integer> pair = makePair(rnd, nKeys);
 
 				// adding a group twice only counts as one
 				if (!this.index.contains(new EqualsConstraint<Integer>(pair.getFirst()),
-						new EqualsConstraint<Integer>(pair.getSecond())))
+						new EqualsConstraint<Integer>(pair.getSecond()))) {
 					pairs.add(pair);
+				}
 
 				this.index.index(pair.getFirst(), pair.getSecond());
 
@@ -124,8 +125,8 @@ public abstract class AbstractPairIndexTest extends TestCase {
 			// remove
 			else {
 
-				int j = rnd.nextInt(pairs.size());
-				Pair<Integer, Integer> pair = pairs.get(j);
+				final int j = rnd.nextInt(pairs.size());
+				final Pair<Integer, Integer> pair = pairs.get(j);
 
 				pairs.remove(j);
 
@@ -139,34 +140,37 @@ public abstract class AbstractPairIndexTest extends TestCase {
 			}
 		}
 
-		if (chk != nCheck)
+		if (chk != nCheck) {
 			checkPairs(nKeys, pairs);
+		}
 
 	}
 
 	@SuppressWarnings({ "boxing" })
-	protected Pair<Integer, Integer> makePair(Random rnd, int nKeys) {
-		int na = rnd.nextInt(nKeys);
-		int nb = rnd.nextInt(nKeys);
+	protected Pair<Integer, Integer> makePair(final Random rnd, final int nKeys) {
+		final int na = rnd.nextInt(nKeys);
+		final int nb = rnd.nextInt(nKeys);
 		return new Pair<Integer, Integer>(na, nb);
 	}
 
-	protected void checkPairs(int nActors, List<Pair<Integer, Integer>> pairs) {
+	protected void checkPairs(final int nActors, final List<Pair<Integer, Integer>> pairs) {
 
-		Set<Pair<Integer, Integer>> t0 = new HashSet<Pair<Integer, Integer>>(pairs);
+		final Set<Pair<Integer, Integer>> t0 = new HashSet<Pair<Integer, Integer>>(pairs);
 
 		// check that all created maps are there
-		for (Pair<Integer, Integer> pair : pairs)
+		for (final Pair<Integer, Integer> pair : pairs) {
 			assertTrue(this.index.contains(new EqualsConstraint<Integer>(pair.getFirst()),
 					new EqualsConstraint<Integer>(pair.getSecond())));
+		}
 
 		// check direct group memberships
-		Set<Pair<Integer, Integer>> t1 = new HashSet<Pair<Integer, Integer>>();
+		final Set<Pair<Integer, Integer>> t1 = new HashSet<Pair<Integer, Integer>>();
 
-		Iterator<Pair<Integer, Integer>> it = this.index.constraintIterator(
+		final Iterator<Pair<Integer, Integer>> it = this.index.constraintIterator(
 				new Wildcard<Integer>(), new Wildcard<Integer>());
-		while (it.hasNext())
+		while (it.hasNext()) {
 			t1.add(it.next());
+		}
 
 		assertEquals(t0, t1);
 
@@ -176,8 +180,8 @@ public abstract class AbstractPairIndexTest extends TestCase {
 	@Test
 	public void testNullEntries() {
 
-		Constraint<Integer> e = new EqualsConstraint<Integer>(null);
-		Constraint<Integer> w = new Wildcard<Integer>();
+		final Constraint<Integer> e = new EqualsConstraint<Integer>(null);
+		final Constraint<Integer> w = new Wildcard<Integer>();
 
 		assertTrue(this.index.isEmpty());
 

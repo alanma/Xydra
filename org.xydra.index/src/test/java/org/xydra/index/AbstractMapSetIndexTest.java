@@ -32,7 +32,7 @@ public abstract class AbstractMapSetIndexTest<K, E> {
 
 	protected IMapSetIndex<K, E> mapSetIndex;
 
-	public AbstractMapSetIndexTest(IMapSetIndex<K, E> mapSetIndex) {
+	public AbstractMapSetIndexTest(final IMapSetIndex<K, E> mapSetIndex) {
 		super();
 		this.mapSetIndex = mapSetIndex;
 	}
@@ -109,9 +109,9 @@ public abstract class AbstractMapSetIndexTest<K, E> {
 
 	@Test
 	public void testDeIndex() {
-		K key1 = createKey();
-		E entry1 = createEntry();
-		E entry2 = createEntry();
+		final K key1 = createKey();
+		final E entry1 = createEntry();
+		final E entry2 = createEntry();
 
 		this.mapSetIndex.index(key1, entry1);
 		this.mapSetIndex.deIndex(key1, entry1);
@@ -156,8 +156,8 @@ public abstract class AbstractMapSetIndexTest<K, E> {
 		this.mapSetIndex.index(this.key2, this.entry2);
 		this.mapSetIndex.index(this.key1, this.entry3);
 
-		Iterator<K> it = this.mapSetIndex.keyIterator();
-		List<K> list = Iterators.toList(it);
+		final Iterator<K> it = this.mapSetIndex.keyIterator();
+		final List<K> list = Iterators.toList(it);
 
 		assertEquals(2, list.size());
 		assertTrue(list.contains(this.key1));

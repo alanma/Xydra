@@ -6,26 +6,26 @@ import java.util.Iterator;
 
 /**
  * Wrap a fast list into a Set to avoid using hashes
- * 
+ *
  * @author xamde
- * 
+ *
  * @param <E>
  */
 public class SmallFastListBasedSet<E> extends AbstractSet<E> {
 
-	private ArrayList<E> elements;
+	private final ArrayList<E> elements;
 
-	public SmallFastListBasedSet(int size) {
+	public SmallFastListBasedSet(final int size) {
 		this.elements = new ArrayList<E>(size);
 	}
 
 	/**
 	 * No checks regarding set semantics are done
-	 * 
+	 *
 	 * @param element
 	 */
 	@Override
-	public boolean add(E element) {
+	public boolean add(final E element) {
 		return this.elements.add(element);
 	}
 

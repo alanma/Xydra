@@ -21,8 +21,8 @@ abstract public class AbstractTransitivePairIndexTest extends AbstractPairIndexT
 	@Test
 	public void testEmptyIndexImplied() {
 
-		Constraint<Integer> e = new EqualsConstraint<Integer>(0);
-		Constraint<Integer> w = new Wildcard<Integer>();
+		final Constraint<Integer> e = new EqualsConstraint<Integer>(0);
+		final Constraint<Integer> w = new Wildcard<Integer>();
 
 		assertFalse(this.idx.implies(w, w));
 		assertFalse(this.idx.implies(w, e));
@@ -45,10 +45,10 @@ abstract public class AbstractTransitivePairIndexTest extends AbstractPairIndexT
 		this.idx.index(0, 1);
 		this.idx.index(1, 2);
 
-		Constraint<Integer> e0 = new EqualsConstraint<Integer>(0);
-		Constraint<Integer> e1 = new EqualsConstraint<Integer>(1);
-		Constraint<Integer> e2 = new EqualsConstraint<Integer>(2);
-		Constraint<Integer> w = new Wildcard<Integer>();
+		final Constraint<Integer> e0 = new EqualsConstraint<Integer>(0);
+		final Constraint<Integer> e1 = new EqualsConstraint<Integer>(1);
+		final Constraint<Integer> e2 = new EqualsConstraint<Integer>(2);
+		final Constraint<Integer> w = new Wildcard<Integer>();
 
 		assertTrue(this.idx.implies(w, w));
 		assertTrue(this.idx.implies(w, e1));
@@ -72,10 +72,10 @@ abstract public class AbstractTransitivePairIndexTest extends AbstractPairIndexT
 		this.idx.index(1, 2);
 		this.idx.deIndex(1, 2);
 
-		Constraint<Integer> e0 = new EqualsConstraint<Integer>(0);
-		Constraint<Integer> e1 = new EqualsConstraint<Integer>(1);
-		Constraint<Integer> e2 = new EqualsConstraint<Integer>(2);
-		Constraint<Integer> w = new Wildcard<Integer>();
+		final Constraint<Integer> e0 = new EqualsConstraint<Integer>(0);
+		final Constraint<Integer> e1 = new EqualsConstraint<Integer>(1);
+		final Constraint<Integer> e2 = new EqualsConstraint<Integer>(2);
+		final Constraint<Integer> w = new Wildcard<Integer>();
 
 		assertTrue(this.idx.implies(w, w));
 		assertTrue(this.idx.implies(w, e1));
@@ -95,16 +95,16 @@ abstract public class AbstractTransitivePairIndexTest extends AbstractPairIndexT
 	@Test
 	public void testCycles() {
 
-		Constraint<Integer> e0 = new EqualsConstraint<Integer>(0);
-		Constraint<Integer> e1 = new EqualsConstraint<Integer>(1);
-		Constraint<Integer> e2 = new EqualsConstraint<Integer>(2);
+		final Constraint<Integer> e0 = new EqualsConstraint<Integer>(0);
+		final Constraint<Integer> e1 = new EqualsConstraint<Integer>(1);
+		final Constraint<Integer> e2 = new EqualsConstraint<Integer>(2);
 
 		boolean detected;
 
 		detected = false;
 		try {
 			this.idx.index(0, 0);
-		} catch (CycleException c) {
+		} catch (final CycleException c) {
 			detected = true;
 		}
 		assertTrue(detected);
@@ -115,7 +115,7 @@ abstract public class AbstractTransitivePairIndexTest extends AbstractPairIndexT
 		try {
 			this.idx.index(0, 1);
 			this.idx.index(1, 0);
-		} catch (CycleException c) {
+		} catch (final CycleException c) {
 			detected = true;
 		}
 		assertTrue(detected);
@@ -129,7 +129,7 @@ abstract public class AbstractTransitivePairIndexTest extends AbstractPairIndexT
 			this.idx.index(0, 1);
 			this.idx.index(1, 2);
 			this.idx.index(2, 0);
-		} catch (CycleException c) {
+		} catch (final CycleException c) {
 			detected = true;
 		}
 		assertTrue(detected);
@@ -144,17 +144,18 @@ abstract public class AbstractTransitivePairIndexTest extends AbstractPairIndexT
 
 	@Override
 	@SuppressWarnings("boxing")
-	protected Pair<Integer, Integer> makePair(Random rnd, int nKeys) {
+	protected Pair<Integer, Integer> makePair(final Random rnd, final int nKeys) {
 
 		int na = rnd.nextInt(nKeys);
 		int nb = rnd.nextInt(nKeys - 1);
 
-		if (nb >= na)
+		if (nb >= na) {
 			nb++;
+		}
 
 		// no cycles allowed
 		if (this.idx.implies(new EqualsConstraint<Integer>(nb), new EqualsConstraint<Integer>(na))) {
-			int nc = na;
+			final int nc = na;
 			na = nb;
 			nb = nc;
 		}
@@ -164,45 +165,49 @@ abstract public class AbstractTransitivePairIndexTest extends AbstractPairIndexT
 
 	@SuppressWarnings("boxing")
 	@Override
-	protected void checkPairs(int nActors, List<Pair<Integer, Integer>> grouplist) {
+	protected void checkPairs(final int nActors, final List<Pair<Integer, Integer>> grouplist) {
 
 		super.checkPairs(nActors, grouplist);
 
-		Set<Pair<Integer, Integer>> t0 = new HashSet<Pair<Integer, Integer>>();
+		final Set<Pair<Integer, Integer>> t0 = new HashSet<Pair<Integer, Integer>>();
 		// System.out.println("t0 = " + t0);
 
-		for (int i = 0; i < nActors; ++i)
+		for (int i = 0; i < nActors; ++i) {
 			buildTransitivePairs(i, i, t0);
+		}
 
 		// check that all created maps are there
-		for (Pair<Integer, Integer> pair : t0)
+		for (final Pair<Integer, Integer> pair : t0) {
 			assertTrue(this.idx.implies(new EqualsConstraint<Integer>(pair.getFirst()),
 					new EqualsConstraint<Integer>(pair.getSecond())));
+		}
 
 		// check direct group memberships
-		Set<Pair<Integer, Integer>> t1 = new HashSet<Pair<Integer, Integer>>();
+		final Set<Pair<Integer, Integer>> t1 = new HashSet<Pair<Integer, Integer>>();
 
-		Iterator<Pair<Integer, Integer>> it = this.idx.transitiveIterator(new Wildcard<Integer>(),
+		final Iterator<Pair<Integer, Integer>> it = this.idx.transitiveIterator(new Wildcard<Integer>(),
 				new Wildcard<Integer>());
-		while (it.hasNext())
+		while (it.hasNext()) {
 			t1.add(it.next());
+		}
 
 		assertEquals(t0, t1);
 
 	}
 
-	private void buildTransitivePairs(Integer start, Integer key, Set<Pair<Integer, Integer>> tz) {
+	private void buildTransitivePairs(final Integer start, final Integer key, final Set<Pair<Integer, Integer>> tz) {
 
-		Iterator<Pair<Integer, Integer>> it = this.idx.constraintIterator(
+		final Iterator<Pair<Integer, Integer>> it = this.idx.constraintIterator(
 				new EqualsConstraint<Integer>(key), new Wildcard<Integer>());
 		while (it.hasNext()) {
 
-			Integer k = it.next().getSecond();
+			final Integer k = it.next().getSecond();
 
-			Pair<Integer, Integer> pair = new Pair<Integer, Integer>(start, k);
+			final Pair<Integer, Integer> pair = new Pair<Integer, Integer>(start, k);
 
-			if (tz.contains(pair))
+			if (tz.contains(pair)) {
 				continue;
+			}
 
 			tz.add(pair);
 

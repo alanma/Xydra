@@ -3,7 +3,7 @@ package org.xydra.index.iterator;
 import java.util.Iterator;
 
 public class RememberLastIterator<T> implements Iterator<T> {
-	private Iterator<T> base;
+	private final Iterator<T> base;
 	private T last = null;
 
 	/**
@@ -13,7 +13,7 @@ public class RememberLastIterator<T> implements Iterator<T> {
 		return this.last;
 	}
 
-	public RememberLastIterator(Iterator<T> base) {
+	public RememberLastIterator(final Iterator<T> base) {
 		super();
 		this.base = base;
 	}

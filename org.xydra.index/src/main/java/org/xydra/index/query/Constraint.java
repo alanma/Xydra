@@ -4,9 +4,9 @@ import org.xydra.index.iterator.IFilter;
 
 /**
  * A constraint can either be an {@link EqualsConstraint} or a {@link Wildcard}.
- * 
+ *
  * @author voelkel
- * 
+ *
  * @param <E>
  *            entity type
  */
@@ -14,7 +14,7 @@ public interface Constraint<E> extends IFilter<E> {
 
 	/**
 	 * This information is used for optimisations.
-	 * 
+	 *
 	 * @return false if this constraint is bound in any way, i.e. it's not a
 	 *         wild-card
 	 */
@@ -27,7 +27,7 @@ public interface Constraint<E> extends IFilter<E> {
 
 	/**
 	 * Inherited from {@link IFilter}.
-	 * 
+	 *
 	 * @param element
 	 *            @CanBeNull
 	 * @return true if the constraint matches the element, i.e. if the element

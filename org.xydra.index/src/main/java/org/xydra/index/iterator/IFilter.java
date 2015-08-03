@@ -2,7 +2,7 @@ package org.xydra.index.iterator;
 
 /**
  * A filter for iterators
- * 
+ *
  * @author xamde
  * @param <E>
  */

@@ -4,25 +4,25 @@ import java.util.Iterator;
 
 /**
  * Returns only as many elements as indicated in "limit".
- * 
+ *
  * Using a pre-fetch strategy.
- * 
+ *
  * @author voelkel
- * 
+ *
  * @param <E>
  *            entity type
  */
 public class LimitIterator<E> implements ClosableIterator<E> {
 
-	private Iterator<E> base;
+	private final Iterator<E> base;
 
 	private long count;
 
-	private long limit;
+	private final long limit;
 
 	private E nextItem = null;
 
-	public LimitIterator(Iterator<E> base, long limit) {
+	public LimitIterator(final Iterator<E> base, final long limit) {
 		this.base = base;
 		this.limit = limit;
 		this.count = 0;
@@ -42,7 +42,7 @@ public class LimitIterator<E> implements ClosableIterator<E> {
 		if (this.count == this.limit) {
 			return null;
 		}
-		E result = this.nextItem;
+		final E result = this.nextItem;
 		this.nextItem = null;
 		this.lookAhead();
 		this.count++;
@@ -55,8 +55,9 @@ public class LimitIterator<E> implements ClosableIterator<E> {
 	}
 
 	private void lookAhead() {
-		if (this.nextItem != null)
+		if (this.nextItem != null) {
 			return;
+		}
 
 		// else: advance one step
 		if (this.base.hasNext()) {

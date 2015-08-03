@@ -7,8 +7,8 @@ import org.xydra.index.query.KeyEntryTuple;
 
 /**
  * Multiple entries can be indexed for a certain key-combination.
- * 
- * 
+ *
+ *
  * @author voelkel
  * @param <K>
  *            key type

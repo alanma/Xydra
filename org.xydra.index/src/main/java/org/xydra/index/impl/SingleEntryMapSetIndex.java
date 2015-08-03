@@ -17,9 +17,9 @@ import org.xydra.index.query.KeyEntryTuple;
 
 /**
  * An {@link IMapSetIndex} that can store exactly one key-entry mapping. Small.
- * 
+ *
  * @author voelkel
- * 
+ *
  * @param <K>
  *            key type
  * @param <E>
@@ -31,7 +31,7 @@ public class SingleEntryMapSetIndex<K, E> extends KeyEntryTuple<K, E> implements
 
 	boolean empty = false;
 
-	public SingleEntryMapSetIndex(K key, E value) {
+	public SingleEntryMapSetIndex(final K key, final E value) {
 		super(key, value);
 	}
 
@@ -41,19 +41,20 @@ public class SingleEntryMapSetIndex<K, E> extends KeyEntryTuple<K, E> implements
 	}
 
 	@Override
-	public boolean containsKey(K key) {
+	public boolean containsKey(final K key) {
 		return !this.empty && XI.equals(key, getKey());
 	}
 
-	public boolean containsValue(E value) {
+	public boolean containsValue(final E value) {
 		return !this.empty && XI.equals(value, getEntry());
 	}
 
-	public E get(K key) {
+	public E get(final K key) {
 		if (containsKey(key)) {
 			return getEntry();
-		} else
+		} else {
 			return null;
+		}
 	}
 
 	@Override
@@ -66,7 +67,7 @@ public class SingleEntryMapSetIndex<K, E> extends KeyEntryTuple<K, E> implements
 	}
 
 	@Override
-	public Iterator<E> constraintIterator(Constraint<K> c1) {
+	public Iterator<E> constraintIterator(final Constraint<K> c1) {
 		if (!isEmpty() && c1.matches(getKey())) {
 			return new SingleValueIterator<E>(getEntry());
 		} else {
@@ -75,7 +76,7 @@ public class SingleEntryMapSetIndex<K, E> extends KeyEntryTuple<K, E> implements
 	}
 
 	@Override
-	public boolean contains(Constraint<K> c1, Constraint<E> entryConstraint) {
+	public boolean contains(final Constraint<K> c1, final Constraint<E> entryConstraint) {
 
 		if (isEmpty()) {
 			return false;
@@ -91,7 +92,7 @@ public class SingleEntryMapSetIndex<K, E> extends KeyEntryTuple<K, E> implements
 	}
 
 	@Override
-	public boolean contains(K key, E entry) {
+	public boolean contains(final K key, final E entry) {
 		if (isEmpty()) {
 			return false;
 		}
@@ -99,14 +100,14 @@ public class SingleEntryMapSetIndex<K, E> extends KeyEntryTuple<K, E> implements
 	}
 
 	@Override
-	public boolean deIndex(K key1, E entry) {
-		boolean contains = this.getKey() == key1 && this.getEntry() == entry;
+	public boolean deIndex(final K key1, final E entry) {
+		final boolean contains = getKey() == key1 && getEntry() == entry;
 		this.clear();
 		return contains;
 	}
 
 	@Override
-	public void deIndex(K key1) {
+	public void deIndex(final K key1) {
 		/*
 		 * This implementation can at most store a single entry, so clear is
 		 * correct
@@ -115,13 +116,13 @@ public class SingleEntryMapSetIndex<K, E> extends KeyEntryTuple<K, E> implements
 	}
 
 	@Override
-	public boolean index(K key1, E entry) {
+	public boolean index(final K key1, final E entry) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public Iterator<KeyEntryTuple<K, E>> tupleIterator(Constraint<K> c1,
-			Constraint<E> entryConstraint) {
+	public Iterator<KeyEntryTuple<K, E>> tupleIterator(final Constraint<K> c1,
+			final Constraint<E> entryConstraint) {
 		if (contains(c1, entryConstraint)) {
 			return new SingleValueIterator<KeyEntryTuple<K, E>>(this);
 		} else {
@@ -130,10 +131,10 @@ public class SingleEntryMapSetIndex<K, E> extends KeyEntryTuple<K, E> implements
 	}
 
 	@Override
-	public IMapSetDiff<K, E> computeDiff(IMapSetIndex<K, E> otherFuture) {
-		SingleEntryMapSetDiff<K, E> diff = new SingleEntryMapSetDiff<K, E>();
+	public IMapSetDiff<K, E> computeDiff(final IMapSetIndex<K, E> otherFuture) {
+		final SingleEntryMapSetDiff<K, E> diff = new SingleEntryMapSetDiff<K, E>();
 
-		if (this.getKey() == null) {
+		if (getKey() == null) {
 			diff.added = otherFuture;
 			diff.removed = new NoEntryMapSetIndex<K, E>();
 		} else {
@@ -181,13 +182,13 @@ public class SingleEntryMapSetIndex<K, E> extends KeyEntryTuple<K, E> implements
 	}
 
 	@Override
-	public IEntrySet<E> lookup(K key) {
+	public IEntrySet<E> lookup(final K key) {
 		if (isEmpty()) {
 			return null;
 		}
 
 		if (getKey().equals(key)) {
-			SmallSetIndex<E> set = new SmallSetIndex<E>();
+			final SmallSetIndex<E> set = new SmallSetIndex<E>();
 			set.add(getEntry());
 			return set;
 		} else {
@@ -212,22 +213,22 @@ public class SingleEntryMapSetIndex<K, E> extends KeyEntryTuple<K, E> implements
 		@Override
 		public Iterator<E> iterator() {
 			return isEmpty() ? NoneIterator.<E> create() : new SingleValueIterator<E>(
-					SingleEntryMapSetIndex.this.getEntry());
+					getEntry());
 		}
 
 		@Override
-		public boolean deIndex(E entry) {
+		public boolean deIndex(final E entry) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public boolean index(E entry) {
+		public boolean index(final E entry) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public org.xydra.index.IEntrySet.IEntrySetDiff<E> computeDiff(IEntrySet<E> other) {
-			SmallEntrySetDiff<E> diff = new SmallSetIndex.SmallEntrySetDiff<E>();
+		public org.xydra.index.IEntrySet.IEntrySetDiff<E> computeDiff(final IEntrySet<E> other) {
+			final SmallEntrySetDiff<E> diff = new SmallSetIndex.SmallEntrySetDiff<E>();
 			// this entryset can contain only 0 or 1 entry
 			if (isEmpty()) {
 				diff.added = other;
@@ -250,12 +251,12 @@ public class SingleEntryMapSetIndex<K, E> extends KeyEntryTuple<K, E> implements
 		}
 
 		@Override
-		public boolean contains(E entry) {
-			return !isEmpty() && SingleEntryMapSetIndex.this.getEntry().equals(entry);
+		public boolean contains(final E entry) {
+			return !isEmpty() && getEntry().equals(entry);
 		}
 
 		@Override
-		public Iterator<E> constraintIterator(Constraint<E> entryConstraint) {
+		public Iterator<E> constraintIterator(final Constraint<E> entryConstraint) {
 			if (isEmpty()) {
 				return NoneIterator.<E> create();
 			} else {
@@ -270,9 +271,10 @@ public class SingleEntryMapSetIndex<K, E> extends KeyEntryTuple<K, E> implements
 
 		@Override
 		public Set<E> toSet() {
-			Set<E> set = new HashSet<E>();
-			if (!isEmpty())
+			final Set<E> set = new HashSet<E>();
+			if (!isEmpty()) {
 				set.add(getEntry());
+			}
 			return set;
 		}
 

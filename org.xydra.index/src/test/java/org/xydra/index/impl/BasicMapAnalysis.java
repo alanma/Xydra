@@ -6,14 +6,14 @@ import java.util.TreeMap;
 
 public class BasicMapAnalysis {
 
-	public static void main(String[] args) {
+	public static void main(final String[] args) {
 		/* How does a normal map handle null keys? It depends. */
 
 		testNullHandling(new HashMap<String, String>());
 		testNullHandling(new TreeMap<String, String>());
 	}
 
-	public static void testNullHandling(Map<String, String> map) {
+	public static void testNullHandling(final Map<String, String> map) {
 		map.put(null, "test");
 		assert map.keySet() != null;
 		assert map.keySet().contains(null);

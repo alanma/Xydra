@@ -2,9 +2,9 @@ package org.xydra.index.iterator;
 
 /**
  * A standard transformer to be used in transforming iterators etc.
- * 
+ *
  * @author xamde
- * 
+ *
  * @param <I>
  *            input type
  * @param <O>

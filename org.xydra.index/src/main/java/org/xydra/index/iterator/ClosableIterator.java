@@ -1,6 +1,6 @@
 /**
  * LICENSE INFORMATION
- * 
+ *
  * Copyright 2005-2008 by FZI (http://www.fzi.de). Licensed under a BSD license
  * (http://www.opensource.org/licenses/bsd-license.php) <OWNER> = Max Völkel
  * <ORGANIZATION> = FZI Forschungszentrum Informatik Karlsruhe, Karlsruhe,
@@ -14,7 +14,7 @@ import java.util.Iterator;
 /**
  * An <b>closable</b> iterator over a collection. Iterator takes the place of
  * Enumeration in the Java collections framework.
- * 
+ *
  * @author Max Voelkel
  * @param <E>
  *            entry type

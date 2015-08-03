@@ -2,7 +2,7 @@ package org.xydra.index.query;
 
 /**
  * A Constraint that matches objects that are equal to a given object.
- * 
+ *
  * @param <E>
  *            entity type
  */
@@ -14,7 +14,7 @@ public class EqualsConstraint<E> implements Constraint<E> {
 	 * @param expect
 	 *            @CanBeNull if you search for nulls
 	 */
-	public EqualsConstraint(E expect) {
+	public EqualsConstraint(final E expect) {
 		super();
 		this.expect = expect;
 	}
@@ -32,8 +32,8 @@ public class EqualsConstraint<E> implements Constraint<E> {
 	}
 
 	@Override
-	public boolean matches(E element) {
-		return this.expect == element || (this.expect != null && this.expect.equals(element));
+	public boolean matches(final E element) {
+		return this.expect == element || this.expect != null && this.expect.equals(element);
 	}
 
 	@Override
@@ -42,7 +42,7 @@ public class EqualsConstraint<E> implements Constraint<E> {
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(final Object other) {
 		return other instanceof EqualsConstraint
 				&& ((EqualsConstraint<?>) other).expect.equals(this.expect);
 	}

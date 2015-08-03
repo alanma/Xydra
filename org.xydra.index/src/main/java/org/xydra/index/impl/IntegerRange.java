@@ -5,12 +5,12 @@ import org.xydra.index.IRange;
 /**
  * In most cases using this class is not performant. Using two primitive
  * integers should almost always be faster.
- * 
+ *
  * @author xamde
  */
 public class IntegerRange implements IRange<Integer> {
 
-	public IntegerRange(int start, int end) {
+	public IntegerRange(final int start, final int end) {
 		super();
 		this.start = start;
 		this.end = end;
@@ -30,12 +30,12 @@ public class IntegerRange implements IRange<Integer> {
 		return this.end;
 	}
 
-	public void setStart(int start) {
+	public void setStart(final int start) {
 		this.start = start;
 		assertValid();
 	}
 
-	public void setEnd(int end) {
+	public void setEnd(final int end) {
 		this.end = end;
 		assertValid();
 	}
@@ -49,7 +49,7 @@ public class IntegerRange implements IRange<Integer> {
 		return "[" + this.start + "," + this.end + "]";
 	}
 
-	public void expandToInclude(int value) {
+	public void expandToInclude(final int value) {
 		if (value < this.start) {
 			this.start = value;
 		} else if (value > this.end) {

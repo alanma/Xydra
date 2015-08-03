@@ -2,12 +2,12 @@ package org.xydra.index.query;
 
 public class KeyKeyKeyEntryTuple<K, L, M, E> implements HasEntry<E> {
 
-	private E entry;
-	private K key1;
-	private L key2;
-	private M key3;
+	private final E entry;
+	private final K key1;
+	private final L key2;
+	private final M key3;
 
-	public KeyKeyKeyEntryTuple(K key1, L key2, M key3, E entry) {
+	public KeyKeyKeyEntryTuple(final K key1, final L key2, final M key3, final E entry) {
 		this.key1 = key1;
 		this.key2 = key2;
 		this.key3 = key3;

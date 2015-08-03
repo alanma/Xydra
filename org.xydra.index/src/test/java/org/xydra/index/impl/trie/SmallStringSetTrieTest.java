@@ -55,7 +55,7 @@ public class SmallStringSetTrieTest extends AbstractMapSetIndexTest<String, Inte
 		trie().index("abg", 2);
 		trie().index("abu", 4);
 
-		List<KeyEntryTuple<String, Integer>> list = Iterators.toList(trie().search("ab"));
+		final List<KeyEntryTuple<String, Integer>> list = Iterators.toList(trie().search("ab"));
 		// for(KeyEntryTuple<String,Integer> a : list) {
 		// System.out.println(a);
 		// }
@@ -73,7 +73,7 @@ public class SmallStringSetTrieTest extends AbstractMapSetIndexTest<String, Inte
 		trie().index("someother", 2);
 		trie().index("some", 3);
 
-		IEntrySet<Integer> set = trie().lookup("some");
+		final IEntrySet<Integer> set = trie().lookup("some");
 		assertTrue(set.contains(3));
 		assertEquals(1, set.size());
 	}
@@ -85,7 +85,7 @@ public class SmallStringSetTrieTest extends AbstractMapSetIndexTest<String, Inte
 		trie().index("hello", 3);
 		trie().index("hello", 2);
 
-		List<KeyEntryTuple<String, Integer>> list = Iterators.toList(trie().search("hell"));
+		final List<KeyEntryTuple<String, Integer>> list = Iterators.toList(trie().search("hell"));
 		// for(KeyEntryTuple<String,Integer> a : list) {
 		// System.out.println(a);
 		// }
@@ -101,16 +101,16 @@ public class SmallStringSetTrieTest extends AbstractMapSetIndexTest<String, Inte
 
 	/**
 	 * TreeMap: Total = 1320ms; insert= 7675 ns each; query= 5526 ns each
-	 * 
+	 *
 	 * SortedArrayMap: Total = 1107ms; insert= 6356 ns each; query= 4721 ns each
 	 */
 	@Test
 	public void testPerformance() {
 		final int dataSize = 1000000;
 		log.info("Preparing random datasets");
-		int ITEMS = dataSize;
-		String[] names = new String[ITEMS];
-		Set<String> uniqueNames = new HashSet<String>();
+		final int ITEMS = dataSize;
+		final String[] names = new String[ITEMS];
+		final Set<String> uniqueNames = new HashSet<String>();
 		for (int i = 0; i < ITEMS; i++) {
 			String name = TestDataGenerator.generateRandomKatakanaString(1, 10);
 			while (uniqueNames.contains(name)) {
@@ -121,22 +121,22 @@ public class SmallStringSetTrieTest extends AbstractMapSetIndexTest<String, Inte
 		}
 
 		log.info("test performance now");
-		long start = System.nanoTime();
+		final long start = System.nanoTime();
 		for (int i = 0; i < ITEMS; i++) {
-			Integer id = i % (ITEMS / 10);
-			String name = names[i];
+			final Integer id = i % (ITEMS / 10);
+			final String name = names[i];
 
 			this.mapSetIndex.index(name, id);
 		}
-		long insert = System.nanoTime();
+		final long insert = System.nanoTime();
 		// query
-		int QUERY = dataSize;
+		final int QUERY = dataSize;
 		for (int i = 0; i < QUERY; i++) {
-			String name = TestDataGenerator.randomFromList(names);
-			IEntrySet<Integer> set = this.mapSetIndex.lookup(name);
+			final String name = TestDataGenerator.randomFromList(names);
+			final IEntrySet<Integer> set = this.mapSetIndex.lookup(name);
 			assert !set.isEmpty();
 		}
-		long query = System.nanoTime();
+		final long query = System.nanoTime();
 		System.out.println("Total = " + (query - start) / (1000 * 1000) + "ms; insert= "
 				+ (insert - start) / ITEMS + " ns each; query= " + (query - insert) / QUERY
 				+ " ns each");
@@ -149,7 +149,7 @@ public class SmallStringSetTrieTest extends AbstractMapSetIndexTest<String, Inte
 		trie().index("hello", 3);
 		trie().index("hello", 2);
 
-		int l = trie().getLongestMatch("And then hellover, what next", 9).getFirst();
+		final int l = trie().getLongestMatch("And then hellover, what next", 9).getFirst();
 		assertEquals(5, l);
 
 		assertNull(trie().getLongestMatch("And then he llover, what next", 9));
@@ -157,11 +157,11 @@ public class SmallStringSetTrieTest extends AbstractMapSetIndexTest<String, Inte
 
 	@Test
 	public void test1() {
-		int sharedLen = SmallStringSetTrie.getSharedPrefixLength("Hello World",
+		final int sharedLen = SmallStringSetTrie.getSharedPrefixLength("Hello World",
 				"Hell a lot of work");
 		assertEquals(4, sharedLen);
 
-		SmallStringSetTrie<Integer> st = new SmallStringSetTrie<Integer>(
+		final SmallStringSetTrie<Integer> st = new SmallStringSetTrie<Integer>(
 				new SmallEntrySetFactory<Integer>());
 		st.index("Hello World", 13);
 		st.index("Hell", 11);
@@ -169,15 +169,15 @@ public class SmallStringSetTrieTest extends AbstractMapSetIndexTest<String, Inte
 
 		st.dump();
 
-		List<Integer> ints = new ArrayList<Integer>();
+		final List<Integer> ints = new ArrayList<Integer>();
 		Iterators.addAll(st.iterator(), ints);
 		System.out.println(ints);
 
-		List<String> keys = new ArrayList<String>();
+		final List<String> keys = new ArrayList<String>();
 		Iterators.addAll(st.keyIterator(), keys);
 		System.out.println(keys);
 
-		List<KeyEntryTuple<String, Integer>> tuples = new ArrayList<KeyEntryTuple<String, Integer>>();
+		final List<KeyEntryTuple<String, Integer>> tuples = new ArrayList<KeyEntryTuple<String, Integer>>();
 		Iterators.addAll(st.tupleIterator(new Wildcard<String>(), new Wildcard<Integer>()), tuples);
 		System.out.println(tuples);
 
@@ -185,7 +185,7 @@ public class SmallStringSetTrieTest extends AbstractMapSetIndexTest<String, Inte
 		st.deIndex("Hell");
 
 		// next test
-		SmallStringSetTrie<Void> st2 = new SmallStringSetTrie<Void>(
+		final SmallStringSetTrie<Void> st2 = new SmallStringSetTrie<Void>(
 				new SmallEntrySetFactory<Void>());
 		st2.indexKey("aaabbccc");
 		st2.indexKey("aaaddeee");

@@ -5,21 +5,21 @@ import java.util.Iterator;
 /**
  * Adapts an Iterator of Iterators so that it seems to be a single, continuous
  * Iterator
- * 
+ *
  * @author voelkel
- * 
+ *
  * @param <B> Type of objects returned by the encapsulated iterator.
  * @param <E> Type of objects to be returned by this iterator.
  */
 public abstract class AbstractCascadedIterator<B, E> implements ClosableIterator<E> {
 
-	private Iterator<B> base;
+	private final Iterator<B> base;
 
 	private Iterator<? extends E> currentIterator;
 
 	private E nextEntry;
 
-	public AbstractCascadedIterator(Iterator<B> base) {
+	public AbstractCascadedIterator(final Iterator<B> base) {
 		assert base != null;
 		this.base = base;
 	}
@@ -38,8 +38,8 @@ public abstract class AbstractCascadedIterator<B, E> implements ClosableIterator
 		}
 
 		while (this.base.hasNext()) {
-			B baseElement = this.base.next();
-			Iterator<? extends E> baseIt = this.toIterator(baseElement);
+			final B baseElement = this.base.next();
+			final Iterator<? extends E> baseIt = this.toIterator(baseElement);
 			if (baseIt instanceof ClosableIterator) {
 				((ClosableIterator) baseIt).close();
 			}
@@ -49,7 +49,7 @@ public abstract class AbstractCascadedIterator<B, E> implements ClosableIterator
 	@Override
 	public E next() {
 		this.lookAhead();
-		E result = this.nextEntry;
+		final E result = this.nextEntry;
 		this.nextEntry = null;
 		return result;
 	}
@@ -83,7 +83,7 @@ public abstract class AbstractCascadedIterator<B, E> implements ClosableIterator
 				this.nextEntry = this.currentIterator.next();
 			} else {
 				while (this.base.hasNext() && !this.currentIterator.hasNext()) {
-					B baseNext = this.base.next();
+					final B baseNext = this.base.next();
 					this.currentIterator = this.toIterator(baseNext);
 				}
 				if (this.currentIterator.hasNext()) {

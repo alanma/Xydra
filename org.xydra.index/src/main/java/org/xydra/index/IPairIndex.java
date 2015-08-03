@@ -7,10 +7,10 @@ import org.xydra.index.query.Pair;
 
 /**
  * An index for pairs of keys that supports queries on both keys.
- * 
+ *
  * The same concept extended from two-tuples to three-tuples is called
  * {@link ITripleIndex}.
- * 
+ *
  * @author dscharrer
  * @param <K>
  * @param <L>
@@ -29,7 +29,7 @@ public interface IPairIndex<K, L> extends IIndex, Iterable<Pair<K, L>> {
 	/**
 	 * Add a new pair (k1,k2) to the index. If the pair was already in the
 	 * index, nothing is changed.
-	 * 
+	 *
 	 * @param k1
 	 * @param k2
 	 */
@@ -37,7 +37,7 @@ public interface IPairIndex<K, L> extends IIndex, Iterable<Pair<K, L>> {
 
 	/**
 	 * Remove the pair (k1,k2) from the index.
-	 * 
+	 *
 	 * @param k1
 	 * @param k2
 	 */
@@ -45,11 +45,11 @@ public interface IPairIndex<K, L> extends IIndex, Iterable<Pair<K, L>> {
 
 	/**
 	 * Iterate over all pairs where the keys match the given constraints.
-	 * 
+	 *
 	 * Each pair will be returned only once.
-	 * 
+	 *
 	 * Indexing new pairs or deIndexing pairs invalidates the iterator.
-	 * 
+	 *
 	 * @param c1
 	 *            The constraint for the first key.
 	 * @param c2

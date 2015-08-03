@@ -2,12 +2,12 @@ package org.xydra.index.iterator;
 
 /**
  * Iterator modelling zero results.
- * 
+ *
  * @author voelkel
- * 
+ *
  *         Ideally this would be a singleton , but that seems impossible with
  *         Generics.
- * 
+ *
  * @param <E>
  *            entity type
  */

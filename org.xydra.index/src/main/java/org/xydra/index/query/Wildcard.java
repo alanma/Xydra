@@ -2,7 +2,7 @@ package org.xydra.index.query;
 
 /**
  * A constraint that matches any object.
- * 
+ *
  * @param <K>
  *            key type
  */
@@ -14,7 +14,7 @@ public class Wildcard<K> implements Constraint<K> {
 	}
 
 	@Override
-	public boolean matches(K element) {
+	public boolean matches(final K element) {
 		return true;
 	}
 
@@ -24,7 +24,7 @@ public class Wildcard<K> implements Constraint<K> {
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(final Object other) {
 		return other instanceof Wildcard;
 	}
 

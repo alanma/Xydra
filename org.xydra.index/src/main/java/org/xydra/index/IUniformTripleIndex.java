@@ -7,7 +7,7 @@ import org.xydra.index.query.Constraint;
 /**
  * An {@link ITripleIndex} with a uniform key structure -- all keys have the
  * same type.
- * 
+ *
  * @param <K>
  *            key type
  */

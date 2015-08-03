@@ -7,9 +7,9 @@ import java.util.List;
 /**
  * Turns two iterators (one probably smaller than the other one) into a single
  * iterator, which can contain duplicates.
- * 
+ *
  * @author voelkel
- * 
+ *
  * @param <E>
  *            entity type
  */
@@ -19,7 +19,7 @@ public class BagUnionIterator<E> extends AbstractCascadedIterator<Iterator<? ext
 	private Iterator<? extends E> smallIt;
 	private Iterator<? extends E> largeIt;
 
-	public BagUnionIterator(Iterator<? extends E> smallIt, Iterator<? extends E> largeIt) {
+	public BagUnionIterator(final Iterator<? extends E> smallIt, final Iterator<? extends E> largeIt) {
 		super(Arrays.asList(smallIt, largeIt).iterator());
 		this.smallIt = smallIt;
 		this.largeIt = largeIt;
@@ -38,12 +38,12 @@ public class BagUnionIterator<E> extends AbstractCascadedIterator<Iterator<? ext
 	 * @param iterators
 	 *            none of them is closed
 	 */
-	public BagUnionIterator(List<Iterator<? extends E>> iterators) {
+	public BagUnionIterator(final List<Iterator<? extends E>> iterators) {
 		super(iterators.iterator());
 	}
 
 	@Override
-	protected Iterator<? extends E> toIterator(Iterator<? extends E> element) {
+	protected Iterator<? extends E> toIterator(final Iterator<? extends E> element) {
 		return element;
 	}
 

@@ -7,9 +7,9 @@ import org.xydra.index.iterator.AbstractFilteringIterator;
 /**
  * A filtering iterator that returns all elements of a base iterator matching a
  * given criteria, expressed as a function.
- * 
+ *
  * @author voelkel
- * 
+ *
  * @param <T>
  *            tuple type
  * @param <E>
@@ -18,16 +18,16 @@ import org.xydra.index.iterator.AbstractFilteringIterator;
 public class GenericKeyEntryTupleConstraintFilteringIterator<T extends HasEntry<E>, E> extends
 		AbstractFilteringIterator<T> {
 
-	private Constraint<E> entryConstraint;
+	private final Constraint<E> entryConstraint;
 
-	public GenericKeyEntryTupleConstraintFilteringIterator(Iterator<T> base,
-			Constraint<E> entryConstraint) {
+	public GenericKeyEntryTupleConstraintFilteringIterator(final Iterator<T> base,
+			final Constraint<E> entryConstraint) {
 		super(base);
 		this.entryConstraint = entryConstraint;
 	}
 
 	@Override
-	protected boolean matchesFilter(T tuple) {
+	protected boolean matchesFilter(final T tuple) {
 		return this.entryConstraint.matches(tuple.getEntry());
 	}
 

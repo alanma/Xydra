@@ -6,7 +6,7 @@ import org.xydra.annotations.RunsInGWT;
 
 /**
  * Does not implement {@link #newCondition()}.
- * 
+ *
  * @author xamde
  */
 @RunsInGWT(true)
@@ -26,7 +26,7 @@ public class DoNothingLock implements Lock {
 	}
 
 	@Override
-	public boolean tryLock(long time, TimeUnit unit) throws InterruptedException {
+	public boolean tryLock(final long time, final TimeUnit unit) throws InterruptedException {
 		return true;
 	}
 

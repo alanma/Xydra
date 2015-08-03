@@ -5,9 +5,9 @@ import java.util.Iterator;
 /**
  * An AbstractTransformingIterator that simply delegates the transformation to
  * an extra helper object, a {@link Transformer}
- * 
+ *
  * @author voelkel
- * 
+ *
  * @param <I>
  *            input type
  * @param <O>
@@ -30,15 +30,15 @@ public class TransformingIterator<I, O> extends AbstractTransformingIterator<I, 
 
 	}
 
-	private ITransformer<I, O> transformer;
+	private final ITransformer<I, O> transformer;
 
-	public TransformingIterator(Iterator<? extends I> base, ITransformer<I, O> transformer) {
+	public TransformingIterator(final Iterator<? extends I> base, final ITransformer<I, O> transformer) {
 		super(base);
 		this.transformer = transformer;
 	}
 
 	@Override
-	public O transform(I in) {
+	public O transform(final I in) {
 		return this.transformer.transform(in);
 	}
 

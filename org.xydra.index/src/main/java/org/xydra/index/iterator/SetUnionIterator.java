@@ -7,13 +7,13 @@ import java.util.Set;
 /**
  * Turns two iterators (one probably smaller than the other one) into a single
  * iterator, which cannot duplicates.
- * 
+ *
  * The smaller of the two iterators is materialised into a HashSet and than the
  * resulting iterator is done as a filter, that checks every time into the temp
  * index to assert unique entries only.
- * 
+ *
  * @author voelkel
- * 
+ *
  * @param <E>
  *            entity type
  */
@@ -23,16 +23,16 @@ public class SetUnionIterator<E> implements ClosableIterator<E> {
 	private Iterator<? extends E> largeIt;
 	private BagUnionIterator<E> combinedIt;
 
-	public SetUnionIterator(Iterator<? extends E> smallIt, Iterator<E> largeIt) {
+	public SetUnionIterator(final Iterator<? extends E> smallIt, final Iterator<E> largeIt) {
 		this.smallSet = new HashSet<E>();
 		Iterators.addAll(smallIt, this.smallSet);
 		if (smallIt instanceof ClosableIterator<?>) {
 			((ClosableIterator<? extends E>) smallIt).close();
 		}
-		Iterator<E> largeUniqueIt = new AbstractFilteringIterator<E>(largeIt) {
+		final Iterator<E> largeUniqueIt = new AbstractFilteringIterator<E>(largeIt) {
 
 			@Override
-			protected boolean matchesFilter(E entry) {
+			protected boolean matchesFilter(final E entry) {
 				return !SetUnionIterator.this.smallSet.contains(entry);
 			}
 		};

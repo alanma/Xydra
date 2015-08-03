@@ -4,9 +4,9 @@ import java.util.Iterator;
 
 /**
  * Read only iterator wrapper that forbids {@link #remove()}.
- * 
+ *
  * @author dscharrer
- * 
+ *
  * @param <T>
  *            The type being iterated.
  */
@@ -14,16 +14,16 @@ public class ReadOnlyIterator<T> implements Iterator<T> {
 
 	private final Iterator<T> base;
 
-	public ReadOnlyIterator(Iterator<T> base) {
+	public ReadOnlyIterator(final Iterator<T> base) {
 		this.base = base;
 	}
 
 	/**
 	 * Convenience constructor.
-	 * 
+	 *
 	 * @param base
 	 */
-	public ReadOnlyIterator(Iterable<T> base) {
+	public ReadOnlyIterator(final Iterable<T> base) {
 		this(base.iterator());
 	}
 

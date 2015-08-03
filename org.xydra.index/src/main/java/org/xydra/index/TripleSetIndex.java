@@ -7,7 +7,7 @@ import org.xydra.index.query.Constraint;
 /**
  * An implementation that uses several indexes internally and chooses among
  * them.
- * 
+ *
  * @author voelkel
  * @param <K>
  * @param <L>

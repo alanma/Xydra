@@ -28,15 +28,15 @@ public class TestDataGenerator {
 	 * @param minLen
 	 * @return random strings
 	 */
-	public static final String[] generateRandomStrings(int n, int minLen) {
-		List<String> list = new ArrayList<String>();
+	public static final String[] generateRandomStrings(final int n, final int minLen) {
+		final List<String> list = new ArrayList<String>();
 		for (int i = 0; i < n; i++) {
 			list.add(generateRandomString(minLen));
 		}
 		return list.toArray(new String[n]);
 	}
 
-	private static String generateRandomString(int minLen) {
+	private static String generateRandomString(final int minLen) {
 		String s = "";
 		while (s.length() < minLen) {
 			s += randomFromList(KATAKANA);
@@ -50,15 +50,15 @@ public class TestDataGenerator {
 	 *            max is 5*8=40
 	 * @return a random Katakana-style string
 	 */
-	public static String generateRandomKatakanaString(int minLen, int differentSyllabes) {
-		StringBuilder s = new StringBuilder();
+	public static String generateRandomKatakanaString(final int minLen, final int differentSyllabes) {
+		final StringBuilder s = new StringBuilder();
 		while (s.length() < minLen) {
 			s.append(randomFromList(KATAKANA));
 		}
 		return s.toString();
 	}
 
-	public static <T> T randomFromList(T[] array) {
+	public static <T> T randomFromList(final T[] array) {
 		return randomFromList(array, array.length);
 	}
 
@@ -68,10 +68,10 @@ public class TestDataGenerator {
 	 *            exclusive
 	 * @return ...
 	 */
-	public static <T> T randomFromList(T[] array, int maxIndex) {
+	public static <T> T randomFromList(final T[] array, final int maxIndex) {
 		assert array.length > 0;
 		assert maxIndex <= array.length;
-		int i = (int) (Math.random() * maxIndex);
+		final int i = (int) (Math.random() * maxIndex);
 		return array[i];
 	}
 

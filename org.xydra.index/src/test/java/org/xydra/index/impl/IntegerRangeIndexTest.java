@@ -17,7 +17,6 @@ import org.xydra.log.api.LoggerFactory;
 
 public class IntegerRangeIndexTest {
 
-	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(IntegerRangeIndexTest.class);
 
 	@Test

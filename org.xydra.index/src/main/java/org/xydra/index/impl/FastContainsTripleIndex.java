@@ -54,11 +54,8 @@ extends SmallTripleIndex<K, L, M>implements ITripleIndex<K, L, M> {
 		if (
 				// spo -> s_p_o
 				!c1.isStar() && !c2.isStar() && !c3.isStar() ||
-				// sp* -> s_p_o
 				!c1.isStar() && !c2.isStar() && c3.isStar() ||
-				// s** -> s_p_o
 				!c1.isStar() && c2.isStar() && c3.isStar() ||
-				// *** -> s_p_o
 				c1.isStar() && c2.isStar() && c3.isStar()
 
 				) {
@@ -66,7 +63,6 @@ extends SmallTripleIndex<K, L, M>implements ITripleIndex<K, L, M> {
 		} else if (
 				// *po -> p_o
 				c1.isStar() && !c2.isStar() && !c3.isStar() ||
-				// *p* -> p_o
 				c1.isStar() && !c2.isStar() && c3.isStar()
 
 				) {
@@ -74,7 +70,6 @@ extends SmallTripleIndex<K, L, M>implements ITripleIndex<K, L, M> {
 		} else if (
 				// s*o -> o_s
 				!c1.isStar() && c2.isStar() && !c3.isStar() ||
-				// **o -> o_s
 				c1.isStar() && c2.isStar() && !c3.isStar()
 
 				) {
